@@ -57,8 +57,4 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Endpoints\Checksum\" />
-  </ItemGroup>
-
 </Project>

@@ -33,7 +33,7 @@ public class CalendarRecordEndpoint : ProfitSharingEndpoint<YearRequest, Calenda
                 }
             } };
         });
-        Group<LookupGroup>();
+    Group<LookupGroup>();
 
         if (!Env.IsTestEnvironment())
         {

@@ -32,12 +32,12 @@ public sealed class MissiveLookupEndpoint : ProfitSharingResponseEndpoint<List<M
             } };
         });
 
-        Group<LookupGroup>();
+    Group<LookupGroup>();
 
         if (!Env.IsTestEnvironment())
         {
             // Specify caching duration and store it in metadata
-            TimeSpan cacheDuration = TimeSpan.FromMinutes(5);
+            TimeSpan cacheDuration = TimeSpan.FromMinutes(15);
             Options(x => x.CacheOutput(p => p.Expire(cacheDuration)));
         }
     }

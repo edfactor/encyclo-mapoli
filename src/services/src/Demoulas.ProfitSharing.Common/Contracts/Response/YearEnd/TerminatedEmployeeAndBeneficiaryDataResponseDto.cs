@@ -21,7 +21,7 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto : IIsExecut
         }
     }
 
-    public List<TerminatedEmployeeAndBeneficiaryYearDetailDto> YearDetails { get; set; } = new();
+    public List<TerminatedEmployeeAndBeneficiaryYearDetailDto> YearDetails { get; set; } = [];
 
     public static TerminatedEmployeeAndBeneficiaryDataResponseDto ResponseExample()
     {
@@ -30,8 +30,8 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto : IIsExecut
             BadgeNumber = 777123,
             PsnSuffix = 100,
             Name = "Example, Joe F",
-            YearDetails = new List<TerminatedEmployeeAndBeneficiaryYearDetailDto>
-            {
+            YearDetails =
+            [
                 new TerminatedEmployeeAndBeneficiaryYearDetailDto
                 {
                     ProfitYear = 2024,
@@ -47,7 +47,7 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto : IIsExecut
                     Age = 44,
                     EnrollmentCode = 4,
                 }
-            }
+            ]
         };
     }
 }

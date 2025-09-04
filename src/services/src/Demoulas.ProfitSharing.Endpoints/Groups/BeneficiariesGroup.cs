@@ -22,7 +22,7 @@ public sealed class BeneficiariesGroup : GroupBase
                 .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>(StatusCodes.Status500InternalServerError)
                 .WithRequestTimeout(TimeSpan.FromMinutes(1))
                 .WithTags(RouteName));
-            ep.Policies(Policy.CanMaintainBeneficiaries);
+            ep.Policies(Policy.CanManageBeneficiaries);
         });
     }
 }

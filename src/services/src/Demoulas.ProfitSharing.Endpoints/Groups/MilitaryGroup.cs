@@ -1,4 +1,5 @@
 ﻿using Demoulas.Common.Api.Groups;
+using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -23,6 +24,8 @@ public sealed class MilitaryGroup : GroupBase
                 .ProducesProblemFE<ProblemDetails>(StatusCodes.Status500InternalServerError)
                 .WithRequestTimeout(TimeSpan.FromMinutes(1))
                 .WithTags(RouteName));
+            // Military reports/records are read-only views for finance and auditors under year-end visibility.
+            ep.Policies(Policy.CanViewYearEndReports);
         });
     }
 }

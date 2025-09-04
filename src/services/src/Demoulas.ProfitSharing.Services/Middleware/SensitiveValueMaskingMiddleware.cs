@@ -7,14 +7,18 @@ using Microsoft.AspNetCore.Http;
 namespace Demoulas.ProfitSharing.Services.Middleware;
 
 /// <summary>
-/// Masks sensitive values for IT Operations role.
-/// Rules:
-/// 1. All decimal numbers are masked by default, but CAN be unmasked when an UnmaskAttribute is applied on the property or containing class.
-/// 2. Any property/class with MaskSensitiveAttribute is masked (any type) unless also UnmaskAttribute.
-/// 3. UnmaskAttribute opts out of default masking (including decimals).
-/// 4. Numeric values masked become strings preserving non-digit chars; digits -> 'X'.
-/// 5. Masked strings: all alphanumerics are replaced with 'X' preserving original length (no characters left in clear).
-/// 6. Other primitive masked types similarly preserve length with all interior alphanumerics replaced (no first/last exemption).
+/// Role-aware response masking middleware.
+/// 
+/// Behavior:
+/// - Honors <see cref="MaskSensitiveAttribute"/> and <see cref="UnmaskAttribute"/> at class and property levels.
+/// - Attributes may specify role lists; if none are provided, the rule applies to all roles.
+/// - Executive rows (isExecutive=true) are obfuscated for everyone except <see cref="Role.EXECUTIVEADMIN"/>.
+/// - IT support roles continue to have decimals masked by default unless explicitly unmasked.
+/// - Masking preserves length and formatting characters (digits/letters replaced with 'X').
+/// 
+/// Notes:
+/// - This middleware rewrites successful JSON responses for users in IT roles; for others it passes through unless an attribute requires masking.
+/// - Combine with authorization policies to prevent data exposure, using masking only as an additional safeguard.
 /// </summary>
 public sealed class SensitiveValueMaskingMiddleware
 {
@@ -62,7 +66,13 @@ public sealed class SensitiveValueMaskingMiddleware
                     MemoryStream outStream = new();
                     await using (Utf8JsonWriter writer = new(outStream))
                     {
-                        MaskElement(doc.RootElement, writer, null, false, isInItDevops);
+                        var userRoles = context.User.Claims
+                            .Where(c => string.Equals(c.Type, System.Security.Claims.ClaimTypes.Role, StringComparison.OrdinalIgnoreCase) ||
+                                        string.Equals(c.Type, "roles", StringComparison.OrdinalIgnoreCase))
+                            .Select(c => c.Value)
+                            .Distinct(StringComparer.OrdinalIgnoreCase)
+                            .ToArray();
+                        MaskElement(doc.RootElement, writer, null, false, isInItDevops, userRoles);
                     }
                     outStream.Position = 0;
                     context.Response.ContentLength = outStream.Length;
@@ -85,7 +95,7 @@ public sealed class SensitiveValueMaskingMiddleware
         }
     }
 
-    private static void MaskElement(JsonElement element, Utf8JsonWriter writer, string? currentPropertyName, bool isExecutiveRow, bool isInItOps)
+    private static void MaskElement(JsonElement element, Utf8JsonWriter writer, string? currentPropertyName, bool isExecutiveRow, bool isInItOps, string[] userRoles)
     {
         switch (element.ValueKind)
         {
@@ -98,7 +108,7 @@ public sealed class SensitiveValueMaskingMiddleware
                 foreach (JsonProperty prop in element.EnumerateObject())
                 {
                     writer.WritePropertyName(prop.Name);
-                    MaskElement(prop.Value, writer, prop.Name, isExecutiveRow, isInItOps);
+                    MaskElement(prop.Value, writer, prop.Name, isExecutiveRow, isInItOps, userRoles);
                 }
                 writer.WriteEndObject();
                 break;
@@ -106,7 +116,7 @@ public sealed class SensitiveValueMaskingMiddleware
                 writer.WriteStartArray();
                 foreach (JsonElement item in element.EnumerateArray())
                 {
-                    MaskElement(item, writer, currentPropertyName, isExecutiveRow, isInItOps);
+                    MaskElement(item, writer, currentPropertyName, isExecutiveRow, isInItOps, userRoles);
                 }
                 writer.WriteEndArray();
                 break;
@@ -118,7 +128,7 @@ public sealed class SensitiveValueMaskingMiddleware
                 if (isDecimalTarget)
                 {
                     // Decimals masked by default unless explicitly unmasked.
-                    if (SensitiveMaskingRegistry.IsUnmasked(currentPropertyName))
+                    if (SensitiveMaskingRegistry.IsUnmaskedFor(currentPropertyName, userRoles))
                     {
                         element.WriteTo(writer);
                     }
@@ -135,7 +145,7 @@ public sealed class SensitiveValueMaskingMiddleware
                         }
                     }
                 }
-                else if (SensitiveMaskingRegistry.IsMasked(currentPropertyName) && !SensitiveMaskingRegistry.IsUnmasked(currentPropertyName))
+                else if (SensitiveMaskingRegistry.IsMaskedFor(currentPropertyName, userRoles) && !SensitiveMaskingRegistry.IsUnmaskedFor(currentPropertyName, userRoles))
                 {
                     if (isInItOps || isExecutiveRow)
                     {
@@ -153,7 +163,7 @@ public sealed class SensitiveValueMaskingMiddleware
                 }
                 break;
             case JsonValueKind.String:
-                if (SensitiveMaskingRegistry.IsMasked(currentPropertyName) && !SensitiveMaskingRegistry.IsUnmasked(currentPropertyName))
+                if (SensitiveMaskingRegistry.IsMaskedFor(currentPropertyName, userRoles) && !SensitiveMaskingRegistry.IsUnmaskedFor(currentPropertyName, userRoles))
                 {
                     string s = element.GetString() ?? string.Empty;
                     if (isInItOps || isExecutiveRow)
@@ -173,7 +183,7 @@ public sealed class SensitiveValueMaskingMiddleware
             case JsonValueKind.True:
             case JsonValueKind.False:
             case JsonValueKind.Null:
-                if (SensitiveMaskingRegistry.IsMasked(currentPropertyName) && !SensitiveMaskingRegistry.IsUnmasked(currentPropertyName))
+                if (SensitiveMaskingRegistry.IsMaskedFor(currentPropertyName, userRoles) && !SensitiveMaskingRegistry.IsUnmaskedFor(currentPropertyName, userRoles))
                 {
                     if (isInItOps || isExecutiveRow)
                     {
@@ -244,8 +254,8 @@ internal static class SensitiveMaskingRegistry
 {
     private static bool _initialized;
     private static readonly Lock _lock = new();
-    private static readonly HashSet<string> _maskedNames = new(StringComparer.OrdinalIgnoreCase);
-    private static readonly HashSet<string> _unmaskedNames = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly Dictionary<string, string[]?> _maskedNames = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly Dictionary<string, string[]?> _unmaskedNames = new(StringComparer.OrdinalIgnoreCase);
     private static readonly HashSet<string> _decimalPropertyNames = new(StringComparer.OrdinalIgnoreCase);
     private static readonly HashSet<string> _nonDecimalNumericPropertyNames = new(StringComparer.OrdinalIgnoreCase);
 
@@ -265,8 +275,10 @@ internal static class SensitiveMaskingRegistry
             {
                 foreach (Type t in asm.GetTypes())
                 {
-                    bool classMasked = t.GetCustomAttribute<MaskSensitiveAttribute>() != null;
-                    bool classUnmasked = t.GetCustomAttribute<UnmaskAttribute>() != null;
+                    var classMaskAttr = t.GetCustomAttribute<MaskSensitiveAttribute>();
+                    var classUnmaskAttr = t.GetCustomAttribute<UnmaskAttribute>();
+                    bool classMasked = classMaskAttr != null;
+                    bool classUnmasked = classUnmaskAttr != null;
                     foreach (PropertyInfo pi in t.GetProperties(BindingFlags.Public | BindingFlags.Instance))
                     {
                         string name = pi.Name;
@@ -283,19 +295,21 @@ internal static class SensitiveMaskingRegistry
                         }
                         if (classMasked)
                         {
-                            _maskedNames.Add(name);
+                            _maskedNames[name] = classMaskAttr!.Roles.Length == 0 ? null : classMaskAttr.Roles;
                         }
                         if (classUnmasked)
                         {
-                            _unmaskedNames.Add(name);
+                            _unmaskedNames[name] = classUnmaskAttr!.Roles.Length == 0 ? null : classUnmaskAttr.Roles;
                         }
-                        if (pi.GetCustomAttribute<MaskSensitiveAttribute>() != null)
+                        var propMask = pi.GetCustomAttribute<MaskSensitiveAttribute>();
+                        if (propMask != null)
                         {
-                            _maskedNames.Add(name);
+                            _maskedNames[name] = propMask.Roles.Length == 0 ? null : propMask.Roles;
                         }
-                        if (pi.GetCustomAttribute<UnmaskAttribute>() != null)
+                        var propUnmask = pi.GetCustomAttribute<UnmaskAttribute>();
+                        if (propUnmask != null)
                         {
-                            _unmaskedNames.Add(name);
+                            _unmaskedNames[name] = propUnmask.Roles.Length == 0 ? null : propUnmask.Roles;
                         }
                     }
                 }
@@ -304,8 +318,41 @@ internal static class SensitiveMaskingRegistry
         }
     }
 
-    public static bool IsMasked(string? propertyName) => propertyName != null && _maskedNames.Contains(propertyName);
-    public static bool IsUnmasked(string? propertyName) => propertyName != null && _unmaskedNames.Contains(propertyName);
+    public static bool IsMaskedFor(string? propertyName, string[] userRoles)
+    {
+        if (propertyName == null)
+        {
+            return false;
+        }
+        if (!_maskedNames.TryGetValue(propertyName, out var roles))
+        {
+            return false;
+        }
+        // Null/empty roles means mask for all roles
+        if (roles == null || roles.Length == 0)
+        {
+            return true;
+        }
+        return userRoles.Any(r => roles.Contains(r, StringComparer.OrdinalIgnoreCase));
+    }
+
+    public static bool IsUnmaskedFor(string? propertyName, string[] userRoles)
+    {
+        if (propertyName == null)
+        {
+            return false;
+        }
+        if (!_unmaskedNames.TryGetValue(propertyName, out var roles))
+        {
+            return false;
+        }
+        // Null/empty roles means unmask for all roles
+        if (roles == null || roles.Length == 0)
+        {
+            return true;
+        }
+        return userRoles.Any(r => roles.Contains(r, StringComparer.OrdinalIgnoreCase));
+    }
     public static bool IsDecimalProperty(string propertyName)
     {
         // Only treat as decimal when it's known decimal and not also present as a non-decimal numeric property (ambiguous -> don't mask by default)

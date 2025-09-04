@@ -26,7 +26,7 @@ public class BeneficiaryEndpoint : ProfitSharingEndpoint<BeneficiaryRequestDto, 
             m.Description = "Pass psn_suffix and badge number and get beneficiaries.";
             m.ResponseExamples = new Dictionary<int, object> { { 200, new BeneficiaryResponse() } };
         });
-        Group<BeneficiaryGroup>();
+        Group<BeneficiariesGroup>();
     }
 
     public override async Task<BeneficiaryResponse> ExecuteAsync(BeneficiaryRequestDto req, CancellationToken ct)

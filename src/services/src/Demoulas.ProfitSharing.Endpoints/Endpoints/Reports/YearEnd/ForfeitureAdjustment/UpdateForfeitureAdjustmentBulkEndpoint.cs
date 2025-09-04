@@ -40,4 +40,4 @@ public class UpdateForfeitureAdjustmentBulkEndpoint : ProfitSharingRequestEndpoi
         await _forfeitureAdjustmentService.UpdateForfeitureAdjustmentBulkAsync(req, ct);
         await Send.NoContentAsync(ct);
     }
-} 
+}
