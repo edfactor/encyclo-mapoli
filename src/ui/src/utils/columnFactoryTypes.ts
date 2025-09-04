@@ -102,6 +102,7 @@ export interface StateColumnOptions {
   alignment?: "left" | "center";
   sortable?: boolean;
   resizable?: boolean;
+  valueGetter?: (params: ValueGetterParams) => string;
   valueFormatter?: (params: ValueFormatterParams) => string;
 }
 

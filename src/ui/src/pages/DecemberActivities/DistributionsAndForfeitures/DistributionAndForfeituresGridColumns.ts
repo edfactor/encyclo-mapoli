@@ -6,7 +6,9 @@ import {
   createBadgeColumn,
   createCurrencyColumn,
   createDateColumn,
-  createSSNColumn
+  createNameColumn,
+  createSSNColumn,
+  createStateColumn
 } from "../../../utils/gridColumnFactory";
 
 export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
@@ -17,15 +19,10 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       alignment: "left",
       psnSuffix: true
     }),
-    {
-      headerName: "Name",
+    createNameColumn({
       field: "employeeName",
-      colId: "employeeName",
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+      minWidth: 150
+    }),
     createSSNColumn({ alignment: "left" }),
     createDateColumn({
       headerName: "Date",
@@ -43,15 +40,10 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       field: "stateTax",
       minWidth: 120
     }),
-    {
-      headerName: "State",
-      field: "state",
-      colId: "state",
+    createStateColumn({
       minWidth: 120,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+      alignment: "left"
+    }),
     createCurrencyColumn({
       headerName: "Federal Tax",
       field: "federalTax",

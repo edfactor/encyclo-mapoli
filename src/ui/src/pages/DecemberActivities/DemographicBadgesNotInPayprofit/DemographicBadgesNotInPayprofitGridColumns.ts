@@ -4,7 +4,8 @@ import {
   createBadgeColumn,
   createNameColumn,
   createSSNColumn,
-  createStatusColumn
+  createStatusColumn,
+  createStoreColumn
 } from "../../../utils/gridColumnFactory";
 export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
   return [
@@ -25,16 +26,9 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
       minWidth: 150,
       maxWidth: 300
     }),
-    {
-      headerName: "Store",
-      field: "store",
-      colId: "store",
-      minWidth: 50,
-      maxWidth: 170,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+    createStoreColumn({
+      field: "store"
+    }),
     createStatusColumn({
       minWidth: 80,
       maxWidth: 250,

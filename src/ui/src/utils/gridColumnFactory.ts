@@ -31,7 +31,8 @@ export const createStateColumn = (options: StateColumnOptions = {}): ColDef => {
     alignment = "left",
     sortable = true,
     resizable = true,
-    valueFormatter
+    valueFormatter,
+    valueGetter
   } = options;
 
   const alignmentClass = alignment === "center" ? "center-align" : "left-align";
@@ -50,6 +51,10 @@ export const createStateColumn = (options: StateColumnOptions = {}): ColDef => {
 
   if (valueFormatter) {
     column.valueFormatter = valueFormatter;
+  }
+
+  if (valueGetter) {
+    column.valueGetter = valueGetter;
   }
 
   if (maxWidth) {
