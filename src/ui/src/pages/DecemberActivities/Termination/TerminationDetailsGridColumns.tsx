@@ -28,7 +28,7 @@ export const GetDetailColumns = (
   selectedRowIds: number[],
   selectedProfitYear: number,
   onSave?: (request: ForfeitureAdjustmentUpdateRequest, name: string) => Promise<void>,
-  onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[]) => Promise<void>
+  onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[], names: string[]) => Promise<void>
 ): ColDef[] => {
   return [
     createYearColumn({

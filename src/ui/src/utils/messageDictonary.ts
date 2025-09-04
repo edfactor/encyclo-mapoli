@@ -16,7 +16,7 @@ export class Messages {
     }
   };
   static readonly TerminationBulkSaveSuccess: MessageUpdate = {
-    key: MessageKeys.TerminationBulkSave,
+    key: MessageKeys.TerminationSave,
     message: {
       type: "success",
       title: "All forfeiture adjustments saved successfully"
