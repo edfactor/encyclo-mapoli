@@ -1,5 +1,4 @@
-import { FormLabel, MenuItem, Select, TextField } from "@mui/material";
-import { Grid } from "@mui/material";
+import { FormLabel, Grid, MenuItem, Select, TextField } from "@mui/material";
 import { useEffect } from "react";
 
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -72,18 +71,14 @@ const CreateBeneficiary: React.FC<Props> = ({
 }) => {
   const [triggerAdd, { isFetching }] = useLazyCreateBeneficiariesQuery();
 
-  const [triggerCreateBeneficiaryContact, createBeneficiaryContactResponse] = useLazyCreateBeneficiaryContactQuery();
-  const [triggerUpdateBeneficiary, udpateResponse] = useLazyUpdateBeneficiaryQuery();
+  const [triggerCreateBeneficiaryContact] = useLazyCreateBeneficiaryContactQuery();
+  const [triggerUpdateBeneficiary] = useLazyUpdateBeneficiaryQuery();
 
   const {
     control,
-    register,
     formState: { errors, isValid },
-    setValue,
     handleSubmit,
-    reset,
-    setFocus,
-    watch
+    reset
   } = useForm<cb>({
     resolver: yupResolver(schema) as Resolver<cb>,
     defaultValues: selectedBeneficiary

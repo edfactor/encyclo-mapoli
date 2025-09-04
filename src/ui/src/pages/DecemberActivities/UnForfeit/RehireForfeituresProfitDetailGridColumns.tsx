@@ -1,17 +1,17 @@
 import { SaveOutlined } from "@mui/icons-material";
 import { Checkbox, CircularProgress, IconButton } from "@mui/material";
 import { ColDef, EditableCallbackParams, ICellRendererParams } from "ag-grid-community";
-import { SuggestedForfeitEditor, SuggestedForfeitCellRenderer } from "components/SuggestedForfeiture";
+import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "components/SuggestedForfeiture";
 import { numberToCurrency } from "smart-ui-library";
-import { ForfeitureAdjustmentUpdateRequest, ForfeitureDetail, RehireForfeituresSaveButtonCellParams } from "types";
+import { ForfeitureAdjustmentUpdateRequest, RehireForfeituresSaveButtonCellParams } from "types";
 import {
-  createYearColumn,
-  createCurrencyColumn,
   createCommentColumn,
-  createHoursColumn
+  createCurrencyColumn,
+  createHoursColumn,
+  createYearColumn
 } from "utils/gridColumnFactory";
-import { HeaderComponent } from "./RehireForfeituresHeaderComponent";
 import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
+import { HeaderComponent } from "./RehireForfeituresHeaderComponent";
 
 function isTransactionEditiabe(params) {
   return params.data.isDetail && params.data.suggestedUnforfeiture != null;
