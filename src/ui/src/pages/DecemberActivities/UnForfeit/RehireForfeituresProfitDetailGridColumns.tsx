@@ -21,8 +21,8 @@ export const GetProfitDetailColumns = (
   addRowToSelectedRows: (id: number) => void,
   removeRowFromSelectedRows: (id: number) => void,
   selectedProfitYear: number,
-  onSave?: (request: ForfeitureAdjustmentUpdateRequest) => Promise<void>,
-  onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[]) => Promise<void>
+  onSave?: (request: ForfeitureAdjustmentUpdateRequest, name: string) => Promise<void>,
+  onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[], names: string[]) => Promise<void>
 ): ColDef[] => {
   return [
     createYearColumn({
@@ -130,7 +130,8 @@ export const GetProfitDetailColumns = (
                     offsettingProfitDetailId: params.data.profitDetailId,
                     classAction: false
                   };
-                  await params.onSave(request);
+                  const employeeName = params.data.fullName || params.data.name || "Unknown Employee";
+                  await params.onSave(request, employeeName);
                 }
               }}
               disabled={(currentValue || 0) === 0 || isLoading}>

@@ -32,7 +32,7 @@ interface SelectableGridHeaderProps extends IHeaderParams {
       editedValues?: Record<string, { value?: number }>;
     }
   ) => ForfeitureAdjustmentUpdateRequest;
-  onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[]) => Promise<void>;
+  onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[], names: string[]) => Promise<void>;
   isBulkSaving?: () => boolean;
   loadingRowIds?: Set<number>;
 }
@@ -80,15 +80,19 @@ export const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props)
 
   const handleSave = async () => {
     const selectedNodes: ForfeitureAdjustmentUpdateRequest[] = [];
+    const employeeNames: string[] = [];
     props.api.forEachNode((node: IRowNode) => {
       if (node.isSelected() && props.isNodeEligible(node.data, props.context)) {
         const payload = props.createUpdatePayload(node.data, props.context);
         selectedNodes.push(payload);
+        // Gather employee names from the grid data
+        const employeeName = node.data.fullName || node.data.name || "Unknown Employee";
+        employeeNames.push(employeeName);
       }
     });
 
     if (props.onBulkSave && selectedNodes.length > 0) {
-      await props.onBulkSave(selectedNodes);
+      await props.onBulkSave(selectedNodes, employeeNames);
     }
   };
 

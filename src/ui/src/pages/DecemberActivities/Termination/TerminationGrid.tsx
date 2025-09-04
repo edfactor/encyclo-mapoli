@@ -12,7 +12,6 @@ import {
   DSMGrid,
   formatNumberWithComma,
   ISortParams,
-  MessageUpdate,
   numberToCurrency,
   Pagination,
   setMessage
@@ -20,23 +19,10 @@ import {
 import { ReportSummary } from "../../../components/ReportSummary";
 import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { Messages } from "../../../utils/messageDictonary";
 import { TerminationSearchRequest } from "./Termination";
 import { GetDetailColumns } from "./TerminationDetailsGridColumns";
 import { GetTerminationColumns } from "./TerminationGridColumns";
-
-enum MessageKeys {
-  TerminationSave = "TerminationSave"
-}
-
-export class Messages {
-  static readonly TerminationSaveSuccess: MessageUpdate = {
-    key: MessageKeys.TerminationSave,
-    message: {
-      type: "success",
-      title: "Forfeiture adjustment saved successfully"
-    }
-  };
-}
 
 interface TerminationGridSearchProps {
   initialSearchLoaded: boolean;
@@ -75,6 +61,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   const [editedValues, setEditedValues] = useState<Record<string, { value: number; hasError: boolean }>>({});
   const [loadingRowIds, setLoadingRowIds] = useState<Set<number>>(new Set());
   const [pendingSuccessMessage, setPendingSuccessMessage] = useState<string | null>(null);
+  const [isPendingBulkMessage, setIsPendingBulkMessage] = useState<boolean>(false);
   const selectedProfitYear = useDecemberFlowProfitYear();
   // fiscalData is now passed from parent to avoid timing issues on refresh
   const [updateForfeitureAdjustmentBulk, { isLoading: isBulkSaving }] = useUpdateForfeitureAdjustmentBulkMutation();
@@ -111,18 +98,22 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   // Effect to show success message after grid finishes loading
   useEffect(() => {
     if (!isFetching && pendingSuccessMessage) {
+      const messageTemplate = isPendingBulkMessage
+        ? Messages.TerminationBulkSaveSuccess
+        : Messages.TerminationSaveSuccess;
       dispatch(
         setMessage({
-          ...Messages.TerminationSaveSuccess,
+          ...messageTemplate,
           message: {
-            ...Messages.TerminationSaveSuccess.message,
+            ...messageTemplate.message,
             message: pendingSuccessMessage
           }
         })
       );
       setPendingSuccessMessage(null);
+      setIsPendingBulkMessage(false);
     }
-  }, [isFetching, pendingSuccessMessage, dispatch]);
+  }, [isFetching, pendingSuccessMessage, isPendingBulkMessage, dispatch]);
 
   const handleSave = useCallback(
     async (request: ForfeitureAdjustmentUpdateRequest, name: string) => {
@@ -356,7 +347,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   }, []);
 
   const handleBulkSave = useCallback(
-    async (requests: ForfeitureAdjustmentUpdateRequest[]) => {
+    async (requests: ForfeitureAdjustmentUpdateRequest[], names: string[]) => {
       // Add all affected badge numbers to loading state
       const badgeNumbers = requests.map((request) => request.badgeNumber);
       setLoadingRowIds((prev) => {
@@ -375,6 +366,11 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
         setEditedValues(updatedEditedValues);
         setSelectedRowIds([]);
         onUnsavedChanges(Object.keys(updatedEditedValues).length > 0);
+
+        // Prepare bulk success message
+        const employeeNames = names.map(name => name || "Unknown Employee");
+        const bulkSuccessMessage = `Members affected: ${employeeNames.join("; ")}`;
+
         if (searchParams) {
           const params = createRequest(
             pageNumber * pageSize,
@@ -385,6 +381,9 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
           if (params) {
             triggerSearch(params, false);
           }
+          // Set the pending success message to be shown after grid reload
+          setPendingSuccessMessage(bulkSuccessMessage);
+          setIsPendingBulkMessage(true);
         }
       } catch (error) {
         console.error("Failed to save forfeiture adjustments:", error);

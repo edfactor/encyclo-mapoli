@@ -2,10 +2,41 @@ import { MessageUpdate } from "smart-ui-library";
 
 export enum MessageKeys {
   ForfeituresAdjustment = "ForfeituresAdjustment",
-  ProfitShareEditUpdate = "ProfitShareEditUpdate"
+  ProfitShareEditUpdate = "ProfitShareEditUpdate",
+  TerminationSave = "TerminationSave",
+  TerminationBulkSave = "TerminationBulkSave",
+  UnforfeitSave = "UnforfeitSave"
 }
 
 export class Messages {
+  static readonly TerminationSaveSuccess: MessageUpdate = {
+    key: MessageKeys.TerminationSave,
+    message: {
+      type: "success",
+      title: "Forfeiture adjustment saved successfully"
+    }
+  };
+  static readonly TerminationBulkSaveSuccess: MessageUpdate = {
+    key: MessageKeys.TerminationSave,
+    message: {
+      type: "success",
+      title: "All forfeiture adjustments saved successfully"
+    }
+  };
+  static readonly UnforfeitSaveSuccess: MessageUpdate = {
+    key: MessageKeys.UnforfeitSave,
+    message: {
+      type: "success",
+      title: "Unforfeiture saved successfully"
+    }
+  };
+  static readonly UnforfeitBulkSaveSuccess: MessageUpdate = {
+    key: MessageKeys.UnforfeitSave,
+    message: {
+      type: "success",
+      title: "All unforfeitures saved successfully"
+    }
+  };
   static readonly ForfeituresSaveSuccess: MessageUpdate = {
     key: MessageKeys.ForfeituresAdjustment,
     message: {
