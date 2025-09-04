@@ -12,6 +12,7 @@ import {
   NameColumnOptions,
   PercentageColumnOptions,
   SSNColumnOptions,
+  StateColumnOptions,
   StatusColumnOptions,
   StoreColumnOptions,
   YearColumnOptions,
@@ -19,6 +20,44 @@ import {
   ZipColumnOptions
 } from "./columnFactoryTypes";
 import { viewBadgeLinkRenderer } from "./masterInquiryLink";
+
+export const createStateColumn = (options: StateColumnOptions = {}): ColDef => {
+  const {
+    headerName = "State",
+    field = "state",
+    colId = field,
+    minWidth = 100,
+    maxWidth,
+    alignment = "left",
+    sortable = true,
+    resizable = true,
+    valueFormatter
+  } = options;
+
+  const alignmentClass = alignment === "center" ? "center-align" : "left-align";
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    headerClass: alignmentClass,
+    cellClass: alignmentClass,
+    resizable,
+    sortable,
+    valueFormatter
+  };
+
+  if (valueFormatter) {
+    column.valueFormatter = valueFormatter;
+  }
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  return column;
+};
 
 export const createYesOrNoColumn = (options: YesOrNoColumnOptions): ColDef => {
   const {

@@ -1,11 +1,11 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
-import { GRID_COLUMN_WIDTHS } from "../../constants";
 import {
   createCurrencyColumn,
   createDateColumn,
   createNameColumn,
   createSSNColumn,
+  createStateColumn,
   createZipColumn
 } from "../../utils/gridColumnFactory";
 
@@ -57,22 +57,13 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
         return `${params.data.city}`;
       }
     },
-    {
-      headerName: "State",
-      field: "state",
-      colId: "state",
-      minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      valueFormatter: (params) => {
-        return `${params.data.state}`;
-      }
-    },
+    createStateColumn({}),
+    createZipColumn({
+      field: "postalCode"
+    }),
     createZipColumn({
       field: "postalCode",
-      headerName: "Postal Code",
-      minWidth: 120
+      headerName: "Postal Code"
     }),
     {
       headerName: "Country Iso",
@@ -89,9 +80,7 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
     },
     createNameColumn({
       field: "fullName",
-      minWidth: GRID_COLUMN_WIDTHS.FULL_NAME,
-      alignment: "center",
-      sortable: false,
+
       valueFormatter: (params) => {
         return `${params.data.lastName}, ${params.data.firstName}`;
       }

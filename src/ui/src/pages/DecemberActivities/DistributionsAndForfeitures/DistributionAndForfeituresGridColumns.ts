@@ -1,13 +1,12 @@
 import { ColDef } from "ag-grid-community";
-import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
 import {
+  createAgeColumn,
   createBadgeColumn,
   createCurrencyColumn,
-  createSSNColumn,
-  createAgeColumn,
-  createDateColumn
+  createDateColumn,
+  createSSNColumn
 } from "../../../utils/gridColumnFactory";
 
 export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
