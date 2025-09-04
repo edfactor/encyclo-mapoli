@@ -1,6 +1,7 @@
-using Demoulas.ProfitSharing.Api.Security;
+﻿using Demoulas.ProfitSharing.Api.Security;
 using Microsoft.AspNetCore.Authorization;
 using NSwag;
+using NSwag.Generation.AspNetCore;
 using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
 
@@ -18,15 +19,36 @@ public sealed class SwaggerAuthorizationDetails : IOperationProcessor
         var method = context.MethodInfo;
         var declaringType = method.DeclaringType;
         var authorizeData = new List<IAuthorizeData>();
-        if (declaringType is not null)
+
+        // 1) Preferred: pull from ASP.NET Core EndpointMetadata (covers Minimal APIs and FastEndpoints group-level auth)
+        if (context is AspNetCoreOperationProcessorContext aspCtx)
         {
-            authorizeData.AddRange(declaringType.GetCustomAttributes(inherit: true).OfType<IAuthorizeData>());
+            var endpointMetadata = aspCtx.ApiDescription?.ActionDescriptor?.EndpointMetadata;
+            if (endpointMetadata is not null)
+            {
+                // If AllowAnonymous is present, treat as no auth
+                if (endpointMetadata.OfType<IAllowAnonymous>().Any() || endpointMetadata.OfType<AllowAnonymousAttribute>().Any())
+                {
+                    return true;
+                }
+
+                authorizeData.AddRange(endpointMetadata.OfType<IAuthorizeData>());
+            }
         }
-        authorizeData.AddRange(method.GetCustomAttributes(inherit: true).OfType<IAuthorizeData>());
+
+        // 2) Fallback: legacy MVC reflection on controller/method
+        if (authorizeData.Count == 0)
+        {
+            if (declaringType is not null)
+            {
+                authorizeData.AddRange(declaringType.GetCustomAttributes(inherit: true).OfType<IAuthorizeData>());
+            }
+            authorizeData.AddRange(method.GetCustomAttributes(inherit: true).OfType<IAuthorizeData>());
+        }
 
         if (authorizeData.Count == 0)
         {
-            // No authorization metadata (likely AllowAnonymous). Nothing to add.
+            // No authorization metadata (either anonymous or auth-only without explicit policy/roles metadata surfaced here).
             return true;
         }
 
@@ -46,15 +68,7 @@ public sealed class SwaggerAuthorizationDetails : IOperationProcessor
                 rolesByPolicy[policyName!] = PolicyRoleMap.GetRoles(policyName!);
             }
         }
-        else
-        {
-            // No specific policy. If roles were specified directly, capture them; otherwise leave empty (auth-only)
-            var roles = authorizeData
-                .SelectMany(d => (d.Roles ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToArray();
-            rolesByPolicy["[none]"] = roles;
-        }
+       
 
         var op = context.OperationDescription.Operation;
 
@@ -65,35 +79,6 @@ public sealed class SwaggerAuthorizationDetails : IOperationProcessor
             authenticationRequired = true,
             policies = rolesByPolicy
         };
-
-        // Add policy tags for UI visibility (keeps existing route tags)
-        if (policies.Count > 0)
-        {
-            op.Tags ??= new List<string>();
-            foreach (var policy in policies)
-            {
-                var tag = $"policy:{policy}";
-                if (!op.Tags.Contains(tag, StringComparer.OrdinalIgnoreCase))
-                {
-                    op.Tags.Add(tag);
-                }
-            }
-        }
-
-        // Add role tags for UI visibility derived from rolesByPolicy
-        if (rolesByPolicy.Count > 0)
-        {
-            op.Tags ??= new List<string>();
-            var allRoles = rolesByPolicy.Values.SelectMany(r => r).Distinct(StringComparer.OrdinalIgnoreCase);
-            foreach (var role in allRoles)
-            {
-                var tag = $"role:{role}";
-                if (!op.Tags.Contains(tag, StringComparer.OrdinalIgnoreCase))
-                {
-                    op.Tags.Add(tag);
-                }
-            }
-        }
 
         // Append a short, human-readable note to the description
         var lines = new List<string>();
@@ -110,7 +95,7 @@ public sealed class SwaggerAuthorizationDetails : IOperationProcessor
         }
         else
         {
-            foreach (var kvp in rolesByPolicy)
+            foreach (var kvp in rolesByPolicy.Where(p=> p.Value.Any()))
             {
                 var roles = kvp.Value;
                 var rolesText = roles.Length > 0 ? string.Join(", ", roles) : "none";
