@@ -5,6 +5,7 @@ DECLARE
     this_year NUMBER := 2025; -- <-------- ORACLE HCM loads data in this year.
     last_year NUMBER := 2024; -- <-------- active year end year for the scramble.   Scramble is frozen in 2024. 
     last_last_year NUMBER := 2023; -- <--- last year for the scramble data
+    demographic_cutoff TIMESTAMP; -- <-- Timestamp to use if we import DEMO_PROFSHARE
 BEGIN
 
  -- First disable all foreign key constraints
@@ -793,8 +794,69 @@ BEGIN
             DBMS_OUTPUT.PUT_LINE('Validation completed successfully.');
         END;
     END;
+/*  IMPORT OF DEMO_PROFSHARE       */
+--Commented out now as we don't have a source for this table
+/*    --Determine probable cutoff date
+SELECT TO_TIMESTAMP(TO_CHAR(MAX(ACC_WKEND2_N) + 1),'yyyymmdd') - INTERVAL '1' DAY
+INTO demographic_cutoff
+FROM CALDAR_RECORD WHERE ACC_WKEND2_N >= LAST_YEAR * 10000 AND ACC_WKEND2_N <= (LAST_YEAR + 1) * 10000;
 
 
+UPDATE DEMOGRAPHIC_HISTORY dh
+   SET dh.VALID_FROM = demographic_cutoff
+ WHERE EXISTS (SELECT 1 FROM {SOURCE_PROFITSHARE_SCHEMA}.DEMO_PROFSHARE dp
+                        WHERE dh.BADGE_NUMBER = dp.DEM_BADGE AND (
+                    				dh.STORE_NUMBER != dp.PY_STOR OR
+                        			dh.PAY_CLASSIFICATION_ID != dp.PY_CLA OR
+                        			TO_NUMBER(TO_CHAR(dh.DATE_OF_BIRTH,'yyyymmdd')) != dp.PY_DOB OR
+                        			TO_NUMBER(TO_CHAR(dh.HIRE_DATE,'yyyymmdd')) != dp.PY_HIRE_DT OR
+                        			--Rehire Date comparisons
+	                        			(dh.REHIRE_DATE  IS NULL AND dp.PY_REHIRE_DT IS NOT NULL) OR
+	                        			(dh.REHIRE_DATE IS NOT NULL AND dp.PY_REHIRE_DT IS NULL) OR
+	                        			(dh.REHIRE_DATE IS NOT NULL AND dp.PY_REHIRE_DT IS NOT NULL AND TO_NUMBER(TO_CHAR(dh.REHIRE_DATE,'yyyymmdd')) != dp.PY_REHIRE_DT) OR
+	                        		--Termination Date comparisons
+	                        			(dh.TERMINATION_DATE  IS NULL AND dp.PY_TERM_DT IS NOT NULL) OR
+	                        			(dh.TERMINATION_DATE IS NOT NULL AND dp.PY_TERM_DT IS NULL) OR
+	                        			(dh.TERMINATION_DATE IS NOT NULL AND dp.PY_TERM_DT IS NOT NULL AND TO_NUMBER(TO_CHAR(dh.TERMINATION_DATE,'yyyymmdd')) != dp.PY_TERM_DT) OR
+	                        			
+                        			dh.DEPARTMENT != dp.PY_DP OR
+                        			dh.EMPLOYMENT_TYPE_ID != TRIM(dp.PY_FUL) OR
+                        			dh.PAY_FREQUENCY_ID != dp.PY_FREQ OR
+                        			--Termination Code Id comparisons
+                        				(dh.TERMINATION_CODE_ID  IS NULL AND dp.PY_TERM IS NOT NULL) OR
+	                        			(dh.TERMINATION_CODE_ID IS NOT NULL AND dp.PY_TERM IS NULL) OR
+	                        			(dh.TERMINATION_CODE_ID IS NOT NULL AND dp.PY_TERM IS NOT NULL AND dh.TERMINATION_CODE_ID != dp.PY_TERM) OR
+                        			dh.EMPLOYMENT_STATUS_ID != dp.PY_SCOD
+                        			
+						));
+						
+INSERT INTO DEMOGRAPHIC_HISTORY
+	  (DEMOGRAPHIC_ID, VALID_FROM,                         VALID_TO,           ORACLE_HCM_ID,   BADGE_NUMBER, STORE_NUMBER, PAY_CLASSIFICATION_ID, DATE_OF_BIRTH,                         HIRE_DATE,                                  REHIRE_DATE,                                                                                       TERMINATION_DATE,                                                                                          DEPARTMENT, EMPLOYMENT_TYPE_ID, PAY_FREQUENCY_ID, TERMINATION_CODE_ID, EMPLOYMENT_STATUS_ID, CREATED_DATETIME)
+SELECT d.ID,           TO_DATE('1900-01-01','yyyy-mm-dd'), demographic_cutoff AS VALID_TO, d.ORACLE_HCM_ID, dp.DEM_BADGE, dp.PY_STOR,   dp.PY_CLA,             TO_DATE(TO_CHAR(dp.PY_DOB),'yyyymmdd'),TO_DATE(TO_CHAR(dp.PY_HIRE_DT),'yyyymmdd'), CASE WHEN dp.PY_REHIRE_DT IS NULL THEN NULL ELSE TO_DATE(TO_CHAR(dp.PY_REHIRE_DT),'yyyymmdd') END, CASE WHEN dp.PY_TERM_DT IS NULL THEN NULL ELSE TO_DATE(TO_CHAR(dp.PY_TERM_DT),'yyyymmdd') END, dp.PY_DP,   TRIM(dp.PY_FUL),    dp.PY_FREQ,       dp.PY_TERM,          dp.PY_SCOD,           SYSTIMESTAMP AT TIME ZONE 'UTC'
+  FROM DEMOGRAPHIC d
+  JOIN {SOURCE_PROFITSHARE_SCHEMA}.DEMO_PROFSHARE dp ON d.BADGE_NUMBER = dp.DEM_BADGE
+ WHERE  d.STORE_NUMBER != dp.PY_STOR OR
+		d.PAY_CLASSIFICATION_ID != dp.PY_CLA OR
+		TO_NUMBER(TO_CHAR(d.DATE_OF_BIRTH,'yyyymmdd')) != dp.PY_DOB OR
+		TO_NUMBER(TO_CHAR(d.HIRE_DATE,'yyyymmdd')) != dp.PY_HIRE_DT OR
+		--Rehire Date comparisons
+			(d.REHIRE_DATE  IS NULL AND dp.PY_REHIRE_DT IS NOT NULL) OR
+			(d.REHIRE_DATE IS NOT NULL AND dp.PY_REHIRE_DT IS NULL) OR
+			(d.REHIRE_DATE IS NOT NULL AND dp.PY_REHIRE_DT IS NOT NULL AND TO_NUMBER(TO_CHAR(d.REHIRE_DATE,'yyyymmdd')) != dp.PY_REHIRE_DT) OR
+		--Termination Date comparisons
+			(d.TERMINATION_DATE  IS NULL AND dp.PY_TERM_DT IS NOT NULL) OR
+			(d.TERMINATION_DATE IS NOT NULL AND dp.PY_TERM_DT IS NULL) OR
+			(d.TERMINATION_DATE IS NOT NULL AND dp.PY_TERM_DT IS NOT NULL AND TO_NUMBER(TO_CHAR(d.TERMINATION_DATE,'yyyymmdd')) != dp.PY_TERM_DT) OR
+			
+		d.DEPARTMENT != dp.PY_DP OR
+		d.EMPLOYMENT_TYPE_ID != TRIM(dp.PY_FUL) OR
+		d.PAY_FREQUENCY_ID != dp.PY_FREQ OR
+		--Termination Code Id comparisons
+			(d.TERMINATION_CODE_ID  IS NULL AND dp.PY_TERM IS NOT NULL) OR
+			(d.TERMINATION_CODE_ID IS NOT NULL AND dp.PY_TERM IS NULL) OR
+			(d.TERMINATION_CODE_ID IS NOT NULL AND dp.PY_TERM IS NOT NULL AND d.TERMINATION_CODE_ID != dp.PY_TERM) OR
+		d.EMPLOYMENT_STATUS_ID != dp.PY_SCOD;	*/
+/*  END OF IMPORT OF DEMO_PROFSHARE       */
 
 
     --Update Comment types
