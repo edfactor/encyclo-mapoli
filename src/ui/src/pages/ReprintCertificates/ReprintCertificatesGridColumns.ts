@@ -14,11 +14,10 @@ export interface ReprintCertificateEmployee {
   isSelected?: boolean;
 }
 
-export const GetReprintCertificatesGridColumns = (
-  selectedRowIds: number[],
-  addRowToSelectedRows: (id: number) => void,
-  removeRowFromSelectedRows: (id: number) => void
-): ColDef[] => {
+export const GetReprintCertificatesGridColumns = () //selectedRowIds: number[],
+//addRowToSelectedRows: (id: number) => void,
+//removeRowFromSelectedRows: (id: number) => void
+: ColDef[] => {
   return [
     {
       headerName: "",

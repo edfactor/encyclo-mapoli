@@ -1,4 +1,4 @@
-import type { SortedPaginationRequestDto, ProfitYearRequest, PagedReportResponse } from "../common/api";
+import type { PagedReportResponse, ProfitYearRequest, SortedPaginationRequestDto } from "../common/api";
 
 export interface BreakdownByStoreRequest extends ProfitYearRequest {
   storeNumber?: number;
@@ -87,7 +87,7 @@ export interface Under21BreakdownByStoreEmployee {
   age: number;
   enrollmentId: number;
 }
-
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface Under21BreakdownByStoreResponse extends PagedReportResponse<Under21BreakdownByStoreEmployee> {
   // Under21BreakdownByStoreResponse extends PagedReportResponse
 }
@@ -107,7 +107,7 @@ export interface Under21InactiveEmployee {
   age: number;
   enrollmentId: number;
 }
-
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface Under21InactiveResponse extends PagedReportResponse<Under21InactiveEmployee> {
   // Under21InactiveResponse extends PagedReportResponse
 }
