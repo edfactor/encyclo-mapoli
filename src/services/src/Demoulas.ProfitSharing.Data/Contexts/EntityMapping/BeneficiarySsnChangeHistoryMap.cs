@@ -12,16 +12,16 @@ internal sealed class BeneficiarySsnChangeHistoryMap : ModifiedBaseMap<Beneficia
         _ = builder.ToTable("BENEFICIARY_SSN_CHANGE_HISTORY");
         _ = builder.HasKey(x => x.Id);
 
-        _ = builder.HasIndex(x => x.BeneficiaryId, "IX_BENEFICIARY");
+        _ = builder.HasIndex(x => x.BeneficiaryContactId, "IX_BENEFICIARY");
 
         _ = builder.Property(x => x.Id)
             .HasPrecision(18)
             .ValueGeneratedOnAdd()
             .HasColumnName("ID");
 
-        _ = builder.Property(x => x.BeneficiaryId)
+        _ = builder.Property(x => x.BeneficiaryContactId)
             .HasPrecision(9)
-            .HasColumnName("BENEFICIARY_ID")
+            .HasColumnName("BENEFICIARY_CONTACT_ID")
             .IsRequired();
 
         _ = builder.Property(x => x.OldSsn)

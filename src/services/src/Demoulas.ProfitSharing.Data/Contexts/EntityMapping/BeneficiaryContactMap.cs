@@ -84,7 +84,7 @@ internal sealed class BeneficiaryContactMap : ModifiedBaseMap<BeneficiaryContact
 
         _ = builder.HasMany(d => d.BeneficiarySsnChangeHistories)
             .WithOne(p => p.BeneficiaryContact)
-            .HasForeignKey(d => d.BeneficiaryId)
+            .HasForeignKey(d => d.BeneficiaryContactId)
             .OnDelete(DeleteBehavior.NoAction);
     }
 }
