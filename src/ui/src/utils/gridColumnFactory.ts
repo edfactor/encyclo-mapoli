@@ -2,25 +2,23 @@ import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { formatNumberWithComma, numberToCurrency, yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../constants";
 import {
-  AgeColumnOptions,
+  AlignableColumnOptions,
   BadgeColumnOptions,
+  BaseColumnOptions,
   CityColumnOptions,
   CommentColumnOptions,
-  CountColumnOptions,
   CurrencyColumnOptions,
   DateColumnOptions,
+  FormattableColumnOptions,
   HoursColumnOptions,
   NameColumnOptions,
   PercentageColumnOptions,
   PointsColumnOptions,
+  PSNColumnOptions,
   SSNColumnOptions,
   StateColumnOptions,
-  StatusColumnOptions,
-  StoreColumnOptions,
   TaxCodeColumnOptions,
-  YearColumnOptions,
-  YesOrNoColumnOptions,
-  ZipColumnOptions
+  YesOrNoColumnOptions
 } from "./columnFactoryTypes";
 import { viewBadgeLinkRenderer } from "./masterInquiryLink";
 
@@ -266,7 +264,7 @@ export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => 
   return column;
 };
 
-export const createAgeColumn = (options: AgeColumnOptions = {}): ColDef => {
+export const createAgeColumn = (options: BaseColumnOptions = {}): ColDef => {
   const {
     headerName = "Age",
     field = "age",
@@ -328,7 +326,7 @@ export const createDateColumn = (options: DateColumnOptions): ColDef => {
   return column;
 };
 
-export const createStoreColumn = (options: StoreColumnOptions = {}): ColDef => {
+export const createStoreColumn = (options: AlignableColumnOptions = {}): ColDef => {
   const {
     headerName = "Store",
     field = "storeNumber",
@@ -502,7 +500,7 @@ export const createHoursColumn = (options: HoursColumnOptions = {}): ColDef => {
   return column;
 };
 
-export const createStatusColumn = (options: StatusColumnOptions = {}): ColDef => {
+export const createStatusColumn = (options: FormattableColumnOptions = {}): ColDef => {
   const {
     headerName = "Status",
     field = "status",
@@ -543,7 +541,7 @@ export const createStatusColumn = (options: StatusColumnOptions = {}): ColDef =>
   return column;
 };
 
-export const createCountColumn = (options: CountColumnOptions = {}): ColDef => {
+export const createCountColumn = (options: AlignableColumnOptions = {}): ColDef => {
   const {
     headerName = "Count",
     field = "employeeCount",
@@ -579,7 +577,7 @@ export const createCountColumn = (options: CountColumnOptions = {}): ColDef => {
   return column;
 };
 
-export const createYearColumn = (options: YearColumnOptions = {}): ColDef => {
+export const createYearColumn = (options: FormattableColumnOptions = {}): ColDef => {
   const {
     headerName = "Year",
     field = "year",
@@ -620,7 +618,7 @@ export const createYearColumn = (options: YearColumnOptions = {}): ColDef => {
   return column;
 };
 
-export const createZipColumn = (options: ZipColumnOptions = {}): ColDef => {
+export const createZipColumn = (options: FormattableColumnOptions = {}): ColDef => {
   const {
     headerName = "Zip Code",
     field = "zipCode",
@@ -747,7 +745,7 @@ export const createCityColumn = (options: CityColumnOptions = {}): ColDef => {
     column.valueGetter = valueGetter;
   } else if (nestedPath) {
     column.valueGetter = (params) => {
-      const pathParts = nestedPath.split('.');
+      const pathParts = nestedPath.split(".");
       let value = params.data;
       for (const part of pathParts) {
         value = value?.[part];
@@ -804,17 +802,110 @@ export const createTaxCodeColumn = (options: TaxCodeColumnOptions = {}): ColDef 
     column.valueFormatter = (params) => {
       const id = params.data?.[idField];
       const name = params.data?.[nameField];
-      
+
       if (hideZeroValues && (id == 0 || id == null)) {
         return "";
       }
-      
+
       if (showBrackets) {
         return `[${id}] ${name || ""}`;
       } else {
         return `${id} - ${name || ""}`;
       }
     };
+  }
+
+  return column;
+};
+
+export const createPhoneColumn = (options: FormattableColumnOptions = {}): ColDef => {
+  const {
+    headerName = "Phone Number",
+    field = "phoneNumber",
+    colId = field,
+    minWidth = 130,
+    maxWidth,
+    alignment = "center",
+    sortable = true,
+    resizable = true,
+
+    valueFormatter
+  } = options;
+
+  const alignmentClass = alignment === "center" ? "center-align" : alignment === "right" ? "right-align" : "left-align";
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    headerClass: alignmentClass,
+    cellClass: alignmentClass,
+    resizable,
+    sortable
+  };
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  if (valueFormatter) {
+    column.valueFormatter = valueFormatter;
+  } else {
+    column.valueFormatter = (params) => params.data[field] || "";
+  }
+
+  return column;
+};
+
+export const createPSNColumn = (options: PSNColumnOptions = {}): ColDef => {
+  const {
+    headerName = "PSN",
+    field = "psn",
+    colId = field,
+    minWidth = 120,
+    maxWidth,
+    alignment = "center",
+    sortable = true,
+    resizable = true,
+    enableLinking = false,
+    navigateFunction,
+    linkingStyle = "simple",
+    valueFormatter
+  } = options;
+
+  const alignmentClass = alignment === "center" ? "center-align" : alignment === "right" ? "right-align" : "left-align";
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    headerClass: alignmentClass,
+    cellClass: alignmentClass,
+    resizable,
+    sortable
+  };
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  if (enableLinking && navigateFunction) {
+    column.cellRenderer = (params: ICellRendererParams) => {
+      if (linkingStyle === "badge-psn") {
+        // For complex badge-psn linking (like in PayBenReport)
+        return viewBadgeLinkRenderer(params.data.badgeNumber, parseInt(params.data[field].slice(-4)));
+      } else if (field === "psnSuffix") {
+        // For psnSuffix fields (like in BeneficiaryInquiry)
+        return viewBadgeLinkRenderer(params.data.badgeNumber, params.data.psnSuffix);
+      } else {
+        // Simple PSN linking
+        return viewBadgeLinkRenderer(params.data[field]);
+      }
+    };
+  } else if (valueFormatter) {
+    column.valueFormatter = valueFormatter;
   }
 
   return column;

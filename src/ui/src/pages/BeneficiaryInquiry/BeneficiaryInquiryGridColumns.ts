@@ -1,10 +1,11 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
+import { ColDef } from "ag-grid-community";
 import {
   createCityColumn,
   createCurrencyColumn,
   createDateColumn,
   createNameColumn,
+  createPhoneColumn,
+  createPSNColumn,
   createSSNColumn,
   createStateColumn,
   createZipColumn
@@ -12,19 +13,13 @@ import {
 
 export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
   return [
-    {
+    createPSNColumn({
       headerName: "Psn",
       field: "psnSuffix",
-      colId: "psnSuffix",
-      minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      sortable: true,
-      unSortIcon: true,
-      cellRenderer: (params: ICellRendererParams) =>
-        viewBadgeLinkRenderer(params.data.badgeNumber, params.data.psnSuffix)
-    },
+
+      enableLinking: true,
+      linkingStyle: "simple"
+    }),
     createCurrencyColumn({
       headerName: "Current Balance",
       field: "currentBalance"
@@ -79,30 +74,14 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
         return `${params.data.lastName}, ${params.data.firstName}`;
       }
     }),
-    {
+    createPhoneColumn({
       headerName: "Phone Number",
-      field: "phoneNumber",
-      colId: "phoneNumber",
-      minWidth: 130,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      valueFormatter: (params) => {
-        return `${params.data.phoneNumber ?? ""}`;
-      }
-    },
-    {
+      field: "phoneNumber"
+    }),
+    createPhoneColumn({
       headerName: "Mobile Number",
-      field: "mobileNumber",
-      colId: "mobileNumber",
-      minWidth: 130,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      valueFormatter: (params) => {
-        return `${params.data.mobileNumber ?? ""}`;
-      }
-    },
+      field: "mobileNumber"
+    }),
     {
       headerName: "Email Address",
       field: "emailAddress",

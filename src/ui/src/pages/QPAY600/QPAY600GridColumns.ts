@@ -1,7 +1,7 @@
 import { ColDef } from "ag-grid-community";
 import { createCountColumn, createCurrencyColumn } from "../../utils/gridColumnFactory";
 
-export const GetQPAY600GridColumns = (navFunction: (destination: string) => void): ColDef[] => {
+export const GetQPAY600GridColumns = (): ColDef[] => {
   return [
     {
       headerName: "Years of Service",

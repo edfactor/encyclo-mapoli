@@ -4,6 +4,7 @@ import {
   createCountColumn,
   createCurrencyColumn,
   createNameColumn,
+  createPSNColumn,
   createStatusColumn
 } from "../../utils/gridColumnFactory";
 
@@ -15,14 +16,7 @@ export const ProfitShareEditUpdateGridColumns = (): ColDef[] => {
       headerName: "Code",
       field: "code"
     }),
-    {
-      headerName: "PSN",
-      field: "psn",
-      colId: "psn",
-      minWidth: 100,
-      type: "rightAligned",
-      resizable: true
-    },
+    createPSNColumn({}),
     createCurrencyColumn({
       headerName: "Contributions",
       field: "contributionAmount"

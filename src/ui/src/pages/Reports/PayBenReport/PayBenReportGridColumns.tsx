@@ -1,6 +1,5 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
-import { createSSNColumn, createBadgeColumn } from "../../../utils/gridColumnFactory";
+import { ColDef } from "ag-grid-community";
+import { createBadgeColumn, createPSNColumn, createSSNColumn } from "../../../utils/gridColumnFactory";
 
 export const PayBenReportGridColumn = (): ColDef[] => {
   return [
@@ -13,17 +12,10 @@ export const PayBenReportGridColumn = (): ColDef[] => {
       cellClass: "center-align",
       resizable: true
     },
-    {
-      headerName: "PSN",
-      field: "psn",
-      colId: "psn",
-      minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      cellRenderer: (params: ICellRendererParams) =>
-        viewBadgeLinkRenderer(params.data.badgeNumber, parseInt(params.data.psn.slice(-4)))
-    },
+    createPSNColumn({
+      enableLinking: true,
+      linkingStyle: "badge-psn"
+    }),
     createBadgeColumn({ minWidth: 120 }),
     {
       headerName: "Beneficiary of",
