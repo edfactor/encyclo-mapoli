@@ -744,7 +744,7 @@ export const createCityColumn = (options: CityColumnOptions = {}): ColDef => {
     column.valueGetter = valueGetter;
   } else if (nestedPath) {
     column.valueGetter = (params) => {
-      const pathParts = nestedPath.split('.');
+      const pathParts = nestedPath.split(".");
       let value = params.data;
       for (const part of pathParts) {
         value = value?.[part];
@@ -801,17 +801,57 @@ export const createTaxCodeColumn = (options: TaxCodeColumnOptions = {}): ColDef 
     column.valueFormatter = (params) => {
       const id = params.data?.[idField];
       const name = params.data?.[nameField];
-      
+
       if (hideZeroValues && (id == 0 || id == null)) {
         return "";
       }
-      
+
       if (showBrackets) {
         return `[${id}] ${name || ""}`;
       } else {
         return `${id} - ${name || ""}`;
       }
     };
+  }
+
+  return column;
+};
+
+export const createPhoneColumn = (options: FormattableColumnOptions = {}): ColDef => {
+  const {
+    headerName = "Phone Number",
+    field = "phoneNumber",
+    colId = field,
+    minWidth = 130,
+    maxWidth,
+    alignment = "center",
+    sortable = true,
+    resizable = true,
+
+    valueFormatter
+  } = options;
+
+  const alignmentClass = alignment === "center" ? "center-align" : alignment === "right" ? "right-align" : "left-align";
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    headerClass: alignmentClass,
+    cellClass: alignmentClass,
+    resizable,
+    sortable
+  };
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  if (valueFormatter) {
+    column.valueFormatter = valueFormatter;
+  } else {
+    column.valueFormatter = (params) => params.data[field] || "";
   }
 
   return column;
