@@ -176,6 +176,7 @@ export interface YearColumnOptions {
   alignment?: "left" | "center" | "right";
   sortable?: boolean;
   resizable?: boolean;
+  valueFormatter?: (params: ValueFormatterParams) => string;
 }
 
 export interface ZipColumnOptions {

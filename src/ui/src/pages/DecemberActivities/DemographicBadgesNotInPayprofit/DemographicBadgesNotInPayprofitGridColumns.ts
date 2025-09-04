@@ -1,5 +1,4 @@
 import { ColDef } from "ag-grid-community";
-import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import {
   createBadgeColumn,
   createNameColumn,
@@ -11,27 +10,17 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
   return [
     createBadgeColumn({
       headerName: "Badge",
-      minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      maxWidth: 200,
-      alignment: "left",
+
       renderAsLink: false
     }),
-    createSSNColumn({
-      headerName: "SSN",
-      alignment: "left",
-      maxWidth: 250
-    }),
+    createSSNColumn({}),
     createNameColumn({
-      field: "employeeName",
-      minWidth: 150,
-      maxWidth: 300
+      field: "employeeName"
     }),
     createStoreColumn({
       field: "store"
     }),
     createStatusColumn({
-      minWidth: 80,
-      maxWidth: 250,
       alignment: "right",
       valueFormatter: (params) => {
         const status = params.data.status; // assuming 'status' is in the row data

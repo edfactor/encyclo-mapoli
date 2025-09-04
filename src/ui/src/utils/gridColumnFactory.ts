@@ -585,7 +585,8 @@ export const createYearColumn = (options: YearColumnOptions = {}): ColDef => {
     maxWidth,
     alignment = "right",
     sortable = true,
-    resizable = true
+    resizable = true,
+    valueFormatter
   } = options;
 
   const column: ColDef = {
@@ -607,6 +608,10 @@ export const createYearColumn = (options: YearColumnOptions = {}): ColDef => {
 
   if (maxWidth) {
     column.maxWidth = maxWidth;
+  }
+
+  if (valueFormatter) {
+    column.valueFormatter = valueFormatter;
   }
 
   return column;

@@ -1,23 +1,20 @@
 import { ColDef } from "ag-grid-community";
-import { createCurrencyColumn, createHoursColumn, createStatusColumn } from "../../utils/gridColumnFactory";
+import { createCurrencyColumn, createHoursColumn, createStatusColumn, createStateColumn, createYearColumn, createYesOrNoColumn } from "../../utils/gridColumnFactory";
 
 export const GetMasterInquiryGridColumns = (): ColDef[] => {
   return [
-    {
+    createYearColumn({
       headerName: "Profit Year",
       field: "profitYear",
-      colId: "profitYear",
       minWidth: 100,
-      type: "rightAligned",
-      resizable: true,
+      alignment: "right",
       sortable: true,
-      unSortIcon: true,
       valueFormatter: (params) => {
-        const year = params.data.profitYear; // assuming 'status' is in the row data
-        const iter = params.data.profitYearIteration; // assuming 'statusName' is in the row data
+        const year = params.data.profitYear;
+        const iter = params.data.profitYearIteration;
         return `${year}.${iter}`;
       }
-    },
+    }),
     {
       headerName: "Profit Code",
       field: "profitCodeId",
@@ -137,30 +134,17 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       resizable: true,
       sortable: false
     },
-    {
-      headerName: "State",
+    createStateColumn({
       field: "commentRelatedState",
-      colId: "commentRelatedState",
       minWidth: 60,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
-    {
+      alignment: "left"
+    }),
+    createYesOrNoColumn({
       headerName: "Partial Transaction",
       field: "commentIsPartialTransaction",
-      colId: "commentIsPartialTransaction",
       minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      cellRenderer: "agAnimateShowChangeCellRenderer", // Use text renderer instead of checkbox
-      valueFormatter: (params) => {
-        // Return "Yes" only if the value is explicitly true
-        // Return "No" for false, null, undefined, or any other falsy value
-        return params.value === true ? "Yes" : "No";
-      }
-    },
+      useWords: true
+    }),
     createStatusColumn({
       field: "employmentStatus",
       minWidth: 60,

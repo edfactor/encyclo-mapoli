@@ -10,7 +10,8 @@ import {
   createNameColumn,
   createSSNColumn,
   createStatusColumn,
-  createStoreColumn
+  createStoreColumn,
+  createYesOrNoColumn
 } from "../../../utils/gridColumnFactory";
 
 export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
@@ -56,16 +57,12 @@ export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) =
       resizable: true,
       valueFormatter: (params) => formatNumberWithComma(params.value)
     },
-    {
+    createYesOrNoColumn({
       headerName: "New",
       field: "isNew",
-      colId: "isNew",
       minWidth: 80,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
       valueFormatter: (params) => (params.value ? "(<21)" : "")
-    },
+    }),
     createDateColumn({
       headerName: "Term Date",
       field: "terminationDate"
