@@ -1,8 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Typography, Box, CircularProgress } from "@mui/material";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { useNavigate, Path } from "react-router-dom";
+import { Box, CircularProgress, Typography } from "@mui/material";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
+import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { RootState } from "../../reduxstore/store";
 import { QPAY600FilterParams } from "./QPAY600FilterSection";
 import { GetQPAY600GridColumns } from "./QPAY600GridColumns";
@@ -14,12 +13,10 @@ interface QPAY600GridProps {
 }
 
 const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, employeeStatus, onLoadingChange }) => {
-  const navigate = useNavigate();
-
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
 
-  const [sortParams, setSortParams] = useState<ISortParams>({
+  const [_sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "employeeName",
     isSortDescending: false
   });
@@ -99,18 +96,11 @@ const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, employeeStatus,
     }
   }, [hasToken, filterParams]);
 
-  const handleNavigationForButton = useCallback(
-    (destination: string | Partial<Path>) => {
-      navigate(destination);
-    },
-    [navigate]
-  );
-
   const sortEventHandler = (update: ISortParams) => {
     setSortParams(update);
   };
 
-  const columnDefs = useMemo(() => GetQPAY600GridColumns(handleNavigationForButton), [handleNavigationForButton]);
+  const columnDefs = useMemo(() => GetQPAY600GridColumns(), []);
 
   const data = employeeStatus === "Full time" ? mockData.fullTime : mockData.partTime;
 

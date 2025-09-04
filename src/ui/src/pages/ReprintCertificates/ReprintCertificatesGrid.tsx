@@ -90,16 +90,15 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
   }, [certificates]);
 
   const columnDefs = useMemo(
-    () =>
-      GetReprintCertificatesGridColumns(
-        selectedRowIds,
-        () => {},
-        () => {}
-      ),
-    [selectedRowIds]
+    () => GetReprintCertificatesGridColumns(),
+    //selectedRowIds,
+    //() => {},
+    //() => {}
+    []
   );
 
   const onSelectionChanged = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (event: any) => {
       const selectedNodes = event.api.getSelectedNodes();
       const selectedIds = selectedNodes.map((node: any) => node.data.badge);

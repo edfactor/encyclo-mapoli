@@ -1,5 +1,5 @@
 import { Paged } from "smart-ui-library";
-import type { SortedPaginationRequestDto, ProfitYearRequest, PagedReportResponse } from "../common/api";
+import type { PagedReportResponse, ProfitYearRequest, SortedPaginationRequestDto } from "../common/api";
 import type { AddressDto, ContactInfoDto } from "../common/shared";
 
 export interface BeneficiaryContactDto {
@@ -240,7 +240,7 @@ export interface PayBenReport {
   demographicFullName: string;
   percentage: number;
 }
-
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface PayBenReportResponse extends Paged<PayBenReport> {
   // PayBenReportResponse extends Paged interface
 }

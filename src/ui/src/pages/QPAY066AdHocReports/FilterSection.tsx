@@ -48,7 +48,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     watch,
     formState: { errors, isValid }
   } = useForm<FilterFormData>({
-    resolver: yupResolver(schema) as any,
+    resolver: yupResolver(schema),
     defaultValues: {
       storeNumber: "",
       startDate: null,
@@ -76,7 +76,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     reset();
     onReset();
   };
-
+  /*
   const vestedPercentageOptions = [
     { value: "", label: "All" },
     { value: "<20", label: "< 20%" },
@@ -85,7 +85,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     { value: ">80", label: "> 80%" },
     { value: "100", label: "100%" }
   ];
-
+  
   const ageOptions = [
     { value: "", label: "All" },
     { value: "<18", label: "< 18" },
@@ -101,7 +101,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     { value: "inactive", label: "Inactive" },
     { value: "terminated", label: "Terminated" }
   ];
-
+*/
   return (
     <form onSubmit={handleSubmit(handleFilter)}>
       <Grid

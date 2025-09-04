@@ -12,7 +12,7 @@ export const getHealthStatusDescription = (health: Health): string | undefined =
   }
 
   // Look through all entries for a matching status
-  for (const [key, entry] of Object.entries(health.entries)) {
+  for (const [_key, entry] of Object.entries(health.entries)) {
     if (entry.status === health.status && entry.description) {
       return entry.description;
     }
