@@ -1,8 +1,9 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, Grid } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
-import { format } from "date-fns";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import { useLazyGetAccountingRangeToCurrent } from "hooks/useFiscalCalendarYear";
+import { useEffect } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetRecentlyTerminatedReportQuery } from "reduxstore/api/YearsEndApi";
@@ -13,17 +14,14 @@ import {
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
+import { mmDDYYFormat, tryddmmyyyyToDate } from "utils/dateUtils";
 import * as yup from "yup";
 
-const formatDateOnly = (date: Date | null): string | undefined => {
-  if (!date) return undefined;
-  return format(date, "yyyy-MM-dd");
-};
 
 interface RecentlyTerminatedSearch {
   profitYear: number;
-  startDate: Date | null;
-  endDate: Date | null;
+  beginningDate: string;
+  endingDate: string;
 }
 
 const schema = yup.object().shape({
@@ -34,19 +32,8 @@ const schema = yup.object().shape({
     .min(2020, "Year must be 2020 or later")
     .max(2100, "Year must be 2100 or earlier")
     .required("Year is required"),
-  startDate: yup.date().nullable(),
-  endDate: yup
-    .date()
-    .nullable()
-    .test("is-after-start", "End Date must be after Start Date", function (value) {
-      const { startDate } = this.parent;
-      if (!startDate || !value) return true;
-      return value > startDate;
-    })
-    .test("is-too-early", "Insuffient data for dates before 2024", function (value) {
-      if (!value) return true;
-      return value > new Date(2024, 1, 1);
-    })
+  beginningDate: yup.string().required("Begin Date is required"),
+  endingDate: yup.string().required("End Date is required")
 });
 
 interface RecentlyTerminatedSearchFilterProps {
@@ -56,6 +43,7 @@ interface RecentlyTerminatedSearchFilterProps {
 const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterProps> = ({ setInitialSearchLoaded }) => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [triggerSearch, { isFetching }] = useLazyGetRecentlyTerminatedReportQuery();
+  const [fetchAccountingRange, { data: fiscalData }] = useLazyGetAccountingRangeToCurrent(6);
   const dispatch = useDispatch();
   const { recentlyTerminatedQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const profitYear = useDecemberFlowProfitYear();
@@ -69,30 +57,22 @@ const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterPro
     resolver: yupResolver(schema) as Resolver<RecentlyTerminatedSearch>,
     defaultValues: {
       profitYear: profitYear || recentlyTerminatedQueryParams?.profitYear || undefined,
-      startDate: null,
-      endDate: null
+      beginningDate: recentlyTerminatedQueryParams?.beginningDate || (fiscalData ? fiscalData.fiscalBeginDate : "") || "",
+      endingDate: recentlyTerminatedQueryParams?.endingDate || (fiscalData ? fiscalData.fiscalEndDate : "") || ""
     }
   });
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid && hasToken) {
-      triggerSearch(
-        {
-          profitYear: data.profitYear,
-          beginningDate: formatDateOnly(data.startDate) ?? "",
-          endingDate: formatDateOnly(data.endDate) ?? "",
-          pagination: { skip: 0, take: 25, sortBy: "fullName, terminationDate", isSortDescending: false }
-        },
-        false
-      ).unwrap();
       dispatch(
         setRecentlyTerminatedQueryParams({
           profitYear: data.profitYear,
-          beginningDate: formatDateOnly(data.startDate) ?? "",
-          endingDate: formatDateOnly(data.endDate) ?? "",
+          beginningDate: data.beginningDate,
+          endingDate: data.endingDate,
           pagination: { skip: 0, take: 25, sortBy: "fullName, terminationDate", isSortDescending: false }
         })
       );
+      setInitialSearchLoaded(true);
     }
   });
 
@@ -102,14 +82,29 @@ const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterPro
     // Clear the form fields
     reset({
       profitYear: profitYear || undefined,
-      startDate: null,
-      endDate: null
+      beginningDate: fiscalData ? fiscalData.fiscalBeginDate : "",
+      endingDate: fiscalData ? fiscalData.fiscalEndDate : ""
     });
 
     // Clear the data in Redux store
     dispatch(clearRecentlyTerminated());
     dispatch(clearRecentlyTerminatedQueryParams());
+    trigger();
   };
+
+  useEffect(() => {
+    fetchAccountingRange();
+  }, [fetchAccountingRange]);
+
+  useEffect(() => {
+    if (fiscalData && fiscalData.fiscalBeginDate && fiscalData.fiscalEndDate) {
+      reset({
+        profitYear: profitYear || recentlyTerminatedQueryParams?.profitYear || undefined,
+        beginningDate: recentlyTerminatedQueryParams?.beginningDate || fiscalData.fiscalBeginDate,
+        endingDate: recentlyTerminatedQueryParams?.endingDate || fiscalData.fiscalEndDate
+      });
+    }
+  }, [fiscalData, profitYear, recentlyTerminatedQueryParams, reset]);
 
   return (
     <form onSubmit={validateAndSearch}>
@@ -139,45 +134,49 @@ const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterPro
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
-            name="startDate"
+            name="beginningDate"
             control={control}
             render={({ field }) => (
               <DsmDatePicker
-                id="startDate"
+                id="beginningDate"
                 onChange={(value: Date | null) => {
-                  field.onChange(value);
-                  trigger("endDate");
+                  field.onChange(value ? mmDDYYFormat(value) : undefined);
+                  trigger("beginningDate");
                 }}
-                value={field.value}
+                value={field.value ? tryddmmyyyyToDate(field.value) : null}
                 required={false}
-                label="Start Date"
+                label="Begin Date"
                 disableFuture
-                error={errors.startDate?.message}
+                error={errors.beginningDate?.message}
+                minDate={tryddmmyyyyToDate(fiscalData?.fiscalBeginDate) || undefined}
+                maxDate={tryddmmyyyyToDate(fiscalData?.fiscalEndDate) || undefined}
               />
             )}
           />
-          {errors.startDate && <FormHelperText error>{errors.startDate.message}</FormHelperText>}
+          {errors.beginningDate && <FormHelperText error>{errors.beginningDate.message}</FormHelperText>}
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
-            name="endDate"
+            name="endingDate"
             control={control}
             render={({ field }) => (
               <DsmDatePicker
-                id="endDate"
+                id="endingDate"
                 onChange={(value: Date | null) => {
-                  field.onChange(value);
-                  trigger("endDate");
+                  field.onChange(value ? mmDDYYFormat(value) : undefined);
+                  trigger("endingDate");
                 }}
-                value={field.value}
+                value={field.value ? tryddmmyyyyToDate(field.value) : null}
                 required={false}
                 label="End Date"
                 disableFuture
-                error={errors.endDate?.message}
+                error={errors.endingDate?.message}
+                minDate={tryddmmyyyyToDate(fiscalData?.fiscalBeginDate) || undefined}
+                maxDate={tryddmmyyyyToDate(fiscalData?.fiscalEndDate) || undefined}
               />
             )}
           />
-          {errors.endDate && <FormHelperText error>{errors.endDate.message}</FormHelperText>}
+          {errors.endingDate && <FormHelperText error>{errors.endingDate.message}</FormHelperText>}
         </Grid>
       </Grid>
       <Grid
