@@ -27,6 +27,15 @@ test.describe("Terminations: ", () => {
         await expect(response.status()).toBe(200);
     });
 
+    test('changing dates and click on search', async({page})=>{
+        await page.locator('#beginningDate').fill('12/31/2018');
+        await page.locator('#endingDate').fill('12/01/2024');
+        await page.getByTestId('searchButton').click();
+        const [response] = await Promise.all([page.waitForResponse((resp) =>
+            resp.url().includes('yearend/terminated-employees'))]);
+        await expect(response.status()).toBe(200);
+    });
+
     
     test('Pagination',async ({page})=>{
         await page.getByTestId('searchButton').click();
@@ -59,7 +68,7 @@ test.describe("Terminations: ", () => {
         await expect(response.status()).toBe(200);
         const suggestedUnforfeit = await page.locator('[col-id="suggestedForfeit"]');
         const count = await suggestedUnforfeit.count();
-        for(var i = 0; i < count; i++){
+        for(let i = 0; i < count; i++){
             const innerText = await suggestedUnforfeit.nth(i).innerText();
             const numericValue = Number(innerText.replace(/[^0-9.]/g, ""));
             if(innerText.length>0 && !isNaN(numericValue) && numericValue>0){
@@ -80,7 +89,7 @@ test.describe("Terminations: ", () => {
         await expect(response.status()).toBe(200);
         const saveButtons = await page.locator('[col-id="saveButton"] button');
         const count = await saveButtons.count();
-        for(var i = 0; i < count; i++){
+        for(let i = 0; i < count; i++){
             const isButtonEnabled = await saveButtons.nth(i).isEnabled();
             if(isButtonEnabled){
                 await saveButtons.nth(i).click();
