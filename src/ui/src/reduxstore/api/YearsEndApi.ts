@@ -47,6 +47,7 @@ import {
   setProfitSharingLabels,
   setProfitSharingUpdate,
   setProfitSharingUpdateAdjustmentSummary,
+  setRecentlyTerminated,
   setRehireForfeituresDetails,
   setTermination,
   setUnder21BreakdownByStore,
@@ -114,6 +115,7 @@ import {
   ProfitYearRequest,
   QPAY066BTerminatedWithVestedBalanceRequest,
   QPAY066BTerminatedWithVestedBalanceResponse,
+  RecentlyTerminatedResponse,
   RehireForfeiture,
   StartAndEndDateRequest,
   SuggestedForfeitResponse,
@@ -680,7 +682,6 @@ export const YearsEndApi = createApi({
     }),
     getTerminationReport: builder.query<TerminationResponse, TerminationRequestWithArchive>({
       query: (params) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const body: any = {
           beginningDate: params.beginningDate,
           endingDate: params.endingDate,
@@ -700,10 +701,37 @@ export const YearsEndApi = createApi({
           body
         };
       },
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setTermination(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+    getRecentlyTerminatedReport: builder.query<RecentlyTerminatedResponse, StartAndEndDateRequest>({
+      query: (params) => {
+        console.log("getRecentlyTerminatedReport params:", params);
+        return {
+          url: "yearend/adhoc-terminated-employees-report",
+          method: "GET",
+          params: {
+            profitYear: params.profitYear,
+            beginningDate: params.beginningDate,
+            endingDate: params.endingDate,
+            excludeZeroBalance: params.excludeZeroBalance,
+            take: params.pagination.take,
+            skip: params.pagination.skip,
+            sortBy: params.pagination.sortBy,
+            isSortDescending: params.pagination.isSortDescending
+          }
+        };
+      },
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setRecentlyTerminated(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -1331,5 +1359,6 @@ export const {
   useFinalizeReportMutation,
   useLazyAdhocBeneficiariesReportQuery,
   useLazyPayBenReportQuery,
-  useLazyGetQPAY066BTerminatedWithVestedBalanceQuery
+  useLazyGetQPAY066BTerminatedWithVestedBalanceQuery,
+  useLazyGetRecentlyTerminatedReportQuery
 } = YearsEndApi;

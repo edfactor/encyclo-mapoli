@@ -26,14 +26,14 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
         _calendarService = calendarService;
     }
 
-    public async Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetTerminatedEmployees(FrozenProfitYearRequest req, CancellationToken cancellationToken)
+    public async Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetTerminatedEmployees(StartAndEndDateRequest req, CancellationToken cancellationToken)
     {
-        var startDate = DateOnly.MinValue;
-        var endDate = DateOnly.MaxValue;
+        var startDate = req.BeginningDate;
+        var endDate = req.EndingDate;
 
         var rslt = await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var demographic = await _demographicReaderService.BuildDemographicQuery(ctx, req.UseFrozenData);
+            var demographic = await _demographicReaderService.BuildDemographicQuery(ctx, false);
             var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear);
             var query = (from d in demographic
                          where d.TerminationDate != null

@@ -34,6 +34,7 @@ export * from "./reports/certificates";
 export * from "./reports/frozen";
 export * from "./reports/profit-sharing";
 export * from "./reports/qpay";
+export * from "./reports/recent-termination";
 
 // UI types
 export * from "./ui/components";

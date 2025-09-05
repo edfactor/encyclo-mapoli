@@ -41,6 +41,7 @@ import {
   ProfitSharingDistributionsByAge,
   ProfitSharingLabel,
   ProfitYearRequest,
+  RecentlyTerminatedResponse,
   RehireForfeiture,
   ReportsByAgeParams,
   StartAndEndDateRequest,
@@ -128,6 +129,8 @@ export interface YearsEndState {
   profitSharingRevert: ProfitShareMasterResponse | null;
   profitSharingUpdateAdjustmentSummary: ProfitShareAdjustmentSummary | null;
   termination: TerminationResponse | null;
+  recentlyTerminated: RecentlyTerminatedResponse | null;
+  recentlyTerminatedQueryParams: StartAndEndDateRequest | null;
   terminationQueryParams: ProfitYearRequest | null;
   vestedAmountsByAge: VestedAmountsByAge | null;
   vestedAmountsByAgeQueryParams: ProfitYearRequest | null;
@@ -210,6 +213,8 @@ const initialState: YearsEndState = {
   rehire: null,
   rehireQueryParams: null,
   militaryEntryAndModification: null,
+  recentlyTerminated: null,
+  recentlyTerminatedQueryParams: null,
   rehireForfeitures: null,
   rehireForfeituresQueryParams: null,
   rehireProfitSummaryQueryParams: null,
@@ -876,11 +881,17 @@ export const yearsEndSlice = createSlice({
     clearTermination: (state) => {
       state.termination = null;
     },
-    setTerminationQueryParams: (state, action: PayloadAction<number>) => {
-      state.terminationQueryParams = { profitYear: action.payload };
+    setRecentlyTerminated: (state, action: PayloadAction<RecentlyTerminatedResponse>) => {
+      state.recentlyTerminated = action.payload;
     },
-    clearTerminationQueryParams: (state) => {
-      state.terminationQueryParams = null;
+    clearRecentlyTerminated: (state) => {
+      state.recentlyTerminated = null;
+    },
+    setRecentlyTerminatedQueryParams: (state, action: PayloadAction<StartAndEndDateRequest>) => {
+      state.recentlyTerminatedQueryParams = action.payload;
+    },
+    clearRecentlyTerminatedQueryParams: (state) => {
+      state.recentlyTerminatedQueryParams = null;
     },
     setProfitSharingUpdate: (state, action: PayloadAction<ProfitShareUpdateResponse>) => {
       state.profitSharingUpdate = action.payload;
@@ -1146,6 +1157,10 @@ export const {
   setTotalForfeituresGreaterThanZero,
   setInvalidProfitShareEditYear,
   setControlSheet,
-  clearControlSheet
+  clearControlSheet,
+  setRecentlyTerminated,
+  clearRecentlyTerminated,
+  setRecentlyTerminatedQueryParams,
+  clearRecentlyTerminatedQueryParams
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
