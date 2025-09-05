@@ -9,12 +9,13 @@ using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc.TerminatedEmployeesReportEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
-public sealed class TerminatedEmployeesReportEndpoint :EndpointWithCsvBase<StartAndEndDateRequest, AdhocTerminatedEmployeeResponse, TerminatedEmployeesReportResponseMap>
+
+public sealed class TerminatedEmployeesReportEndpoint : EndpointWithCsvBase<StartAndEndDateRequest, AdhocTerminatedEmployeeResponse, TerminatedEmployeesReportResponseMap>
 {
     private readonly IAdhocTerminatedEmployeesService _adhocTerminatedEmployeesService;
 
     public TerminatedEmployeesReportEndpoint(IAdhocTerminatedEmployeesService adhocTerminatedEmployeesService)
-        : base(Navigation.Constants.QPAY066AdHocReports)
+        : base(Navigation.Constants.RecentlyTerminated)
     {
         _adhocTerminatedEmployeesService = adhocTerminatedEmployeesService;
     }

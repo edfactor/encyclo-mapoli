@@ -6,9 +6,9 @@ import { CircularProgress, Divider, Grid } from "@mui/material";
 
 import { CAPTIONS } from "../../../constants";
 import { useLazyGetAccountingRangeToCurrent } from "../../../hooks/useFiscalCalendarYear";
+import TerminationGrid from "../../../pages/DecemberActivities/Termination/TerminationGrid";
+import TerminationSearchFilter from "../../../pages/DecemberActivities/Termination/TerminationSearchFilter";
 import { StartAndEndDateRequest } from "../../../reduxstore/types";
-import TerminationGrid from "./TerminationGrid";
-import TerminationSearchFilter from "./TerminationSearchFilter";
 
 export interface TerminationSearchRequest extends StartAndEndDateRequest {
   forfeitureStatus: string;
