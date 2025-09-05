@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Security;
+﻿using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Api.Security;
 
@@ -10,22 +10,22 @@ public static class PolicyRoleMap
     public static readonly IReadOnlyDictionary<string, string[]> Map = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
     {
         // Reporting: finance reports are read-only. Allow Finance, Admin, and Auditor.
-        [Policy.CanViewYearEndReports] = new[] { Role.FINANCEMANAGER, Role.ADMINISTRATOR, Role.AUDITOR },
+        [Policy.CanViewYearEndReports] = new[] { Role.FINANCEMANAGER, Role.ADMINISTRATOR, Role.AUDITOR, Role.ITDEVOPS },
 
         // Read-only finance data views for pay/profit records.
-        [Policy.CanGetPayProfitRecords] = new[] { Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR, Role.AUDITOR },
+        [Policy.CanGetPayProfitRecords] = new[] { Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR, Role.AUDITOR, Role.ITDEVOPS },
 
         // Reference data views.
-        [Policy.CanViewPayClassificationTypes] = new[] { Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR, Role.AUDITOR },
+        [Policy.CanViewPayClassificationTypes] = new[] { Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR, Role.AUDITOR, Role.ITDEVOPS },
 
         // Balance views can be needed by Finance, Clerks, Admin, and HR (for participant context). Auditors are read-only.
-        [Policy.CanViewBalances] = new[] { Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR, Role.HARDSHIPADMINISTRATOR, Role.AUDITOR },
+        [Policy.CanViewBalances] = new[] { Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR, Role.HARDSHIPADMINISTRATOR, Role.AUDITOR, Role.ITDEVOPS },
 
         // Year-end processes are highly sensitive; restrict to Finance and Admin only.
         [Policy.CanRunYearEndProcesses] = new[] { Role.FINANCEMANAGER, Role.ADMINISTRATOR },
 
         // Master inquiry is broad read; allow Finance, Clerks, Admin and Auditor.
-        [Policy.CanRunMasterInquiry] = new[] { Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR, Role.AUDITOR },
+        [Policy.CanRunMasterInquiry] = new[] { Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR, Role.AUDITOR, Role.ITDEVOPS },
 
         // New, clearer name for beneficiary CRUD; keep mapping identical.
         [Policy.CanManageBeneficiaries] = new[] { Role.HARDSHIPADMINISTRATOR, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR },
