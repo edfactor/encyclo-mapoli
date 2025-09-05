@@ -20,7 +20,7 @@ const RecentlyTerminatedGrid: React.FC<RecentlyTerminatedGridSearchProps> = ({
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "employeeName, date",
+    sortBy: "fullName, terminationDate",
     isSortDescending: false
   });
 
@@ -72,7 +72,7 @@ const RecentlyTerminatedGrid: React.FC<RecentlyTerminatedGridSearchProps> = ({
   }, [recentlyTerminated]);
 
   useEffect(() => {
-    if (hasToken && (initialSearchLoaded || sortParams)) {
+    if (hasToken && initialSearchLoaded) {
       onSearch();
     }
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken, setInitialSearchLoaded]);

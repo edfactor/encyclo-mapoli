@@ -47,6 +47,7 @@ import {
   setProfitSharingLabels,
   setProfitSharingUpdate,
   setProfitSharingUpdateAdjustmentSummary,
+  setRecentlyTerminated,
   setRehireForfeituresDetails,
   setTermination,
   setUnder21BreakdownByStore,
@@ -680,25 +681,7 @@ export const YearsEndApi = createApi({
       }
     }),
     getTerminationReport: builder.query<TerminationResponse, TerminationRequestWithArchive>({
-      query: (params) => ({
-        url: "yearend/adchoc-terminated-employees-report",
-        method: "GET",
-        params: {
-          profitYear: params.profitYear
-        }
-      }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          dispatch(setBalanceByAge(data));
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
-    }),
-    getRecentlyTerminatedReport: builder.query<RecentlyTerminatedResponse, StartAndEndDateRequest>({
       query: (params) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const body: any = {
           beginningDate: params.beginningDate,
           endingDate: params.endingDate,
@@ -713,15 +696,42 @@ export const YearsEndApi = createApi({
         }
 
         return {
-          url: `yearend/adhoc-terminated-employees-report`,
-          method: "GET",
+          url: `yearend/terminated-employees${params.archive === true ? "?archive=true" : ""}`,
+          method: "POST",
           body
         };
       },
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setTermination(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+    getRecentlyTerminatedReport: builder.query<RecentlyTerminatedResponse, StartAndEndDateRequest>({
+      query: (params) => {
+        console.log("getRecentlyTerminatedReport params:", params);
+        return {
+          url: "yearend/adhoc-terminated-employees-report",
+          method: "GET",
+          params: {
+            profitYear: params.profitYear,
+            beginningDate: params.beginningDate,
+            endingDate: params.endingDate,
+            excludeZeroBalance: params.excludeZeroBalance,
+            take: params.pagination.take,
+            skip: params.pagination.skip,
+            sortBy: params.pagination.sortBy,
+            isSortDescending: params.pagination.isSortDescending
+          }
+        };
+      },
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setRecentlyTerminated(data));
         } catch (err) {
           console.log("Err: " + err);
         }

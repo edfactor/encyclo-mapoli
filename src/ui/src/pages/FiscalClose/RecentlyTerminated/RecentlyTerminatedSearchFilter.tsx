@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetRecentlyTerminatedQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetRecentlyTerminatedReportQuery } from "reduxstore/api/YearsEndApi";
 import {
   clearRecentlyTerminated,
   clearRecentlyTerminatedQueryParams,
@@ -55,9 +55,9 @@ interface RecentlyTerminatedSearchFilterProps {
 
 const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterProps> = ({ setInitialSearchLoaded }) => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-  const [triggerSearch, { isFetching }] = useLazyGetRecentlyTerminatedQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetRecentlyTerminatedReportQuery();
   const dispatch = useDispatch();
-  const { RecentlyTerminatedQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const { recentlyTerminatedQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const profitYear = useDecemberFlowProfitYear();
   const {
     control,
@@ -68,7 +68,7 @@ const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterPro
   } = useForm<RecentlyTerminatedSearch>({
     resolver: yupResolver(schema) as Resolver<RecentlyTerminatedSearch>,
     defaultValues: {
-      profitYear: profitYear || RecentlyTerminatedQueryParams?.profitYear || undefined,
+      profitYear: profitYear || recentlyTerminatedQueryParams?.profitYear || undefined,
       startDate: null,
       endDate: null
     }
@@ -79,17 +79,18 @@ const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterPro
       triggerSearch(
         {
           profitYear: data.profitYear,
-          ...(data.startDate && { startDate: formatDateOnly(data.startDate) }),
-          ...(data.endDate && { endDate: formatDateOnly(data.endDate) }),
-          pagination: { skip: 0, take: 25, sortBy: "employeeName, date", isSortDescending: false }
+          beginningDate: formatDateOnly(data.startDate) ?? "",
+          endingDate: formatDateOnly(data.endDate) ?? "",
+          pagination: { skip: 0, take: 25, sortBy: "fullName, terminationDate", isSortDescending: false }
         },
         false
       ).unwrap();
       dispatch(
         setRecentlyTerminatedQueryParams({
           profitYear: data.profitYear,
-          startDate: formatDateOnly(data.startDate),
-          endDate: formatDateOnly(data.endDate)
+          beginningDate: formatDateOnly(data.startDate) ?? "",
+          endingDate: formatDateOnly(data.endDate) ?? "",
+          pagination: { skip: 0, take: 25, sortBy: "fullName, terminationDate", isSortDescending: false }
         })
       );
     }
