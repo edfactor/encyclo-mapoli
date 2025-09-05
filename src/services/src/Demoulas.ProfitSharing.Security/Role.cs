@@ -11,6 +11,11 @@ public static class Role
     public const string ADMINISTRATOR = "System-Administrator";
 
     /// <summary>
+    /// Represents the role name for a beneficiary administrator.
+    /// </summary>
+    public const string BENEFICIARY_ADMINISTRATOR = "Beneficiary-Administrator";
+
+    /// <summary>
     /// Finance owners who can run profit sharing operations (e.g., year-end) and view finance data.
     /// </summary>
     public const string FINANCEMANAGER = "Finance-Manager";
