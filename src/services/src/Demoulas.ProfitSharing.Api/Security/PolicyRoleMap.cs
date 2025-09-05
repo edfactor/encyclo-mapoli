@@ -22,10 +22,10 @@ public static class PolicyRoleMap
         [Policy.CanRunMasterInquiry] = [Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR, Role.AUDITOR, Role.ITDEVOPS, Role.HARDSHIPADMINISTRATOR],
 
         // New, clearer name for beneficiary CRUD; keep mapping identical.
-        [Policy.CanManageBeneficiaries] = [Role.HARDSHIPADMINISTRATOR, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR],
+        [Policy.CanManageBeneficiaries] = [Role.HARDSHIPADMINISTRATOR, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR, Role.BENEFICIARY_ADMINISTRATOR],
 
         // IT roles can freeze and add demographics to support data integrity and operational needs.
-        [Policy.CanFreezeDemographics] = [Role.ITDEVOPS, Role.ITOPERATIONS, Role.HARDSHIPADMINISTRATOR, Role.ADMINISTRATOR, Role.FINANCEMANAGER],
+        [Policy.CanFreezeDemographics] = [Role.ITDEVOPS, Role.ITOPERATIONS],
     };
 
     public static string[] GetRoles(string policyName) => Map.TryGetValue(policyName, out var roles) ? roles : [];

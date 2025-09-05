@@ -82,6 +82,43 @@ const RouterSubAssembly: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Allow setting an impersonation role via query string in Dev/QA only.
+  // Expected query param: ?impersonationRole={roleName}
+  useEffect(() => {
+    if (!hasImpersonationRole) return;
+
+    const params = new URLSearchParams(location.search);
+    const roleParam = params.get("impersonationRole");
+
+    if (!roleParam) return;
+
+    // If impersonating already set, don't override
+    if (impersonating && impersonating.length > 0) return;
+
+    const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+    // Try to match against enum keys or values (case/format tolerant)
+    const matched = Object.values(ImpersonationRoles).find((r) => {
+      const keyForValue = Object.keys(ImpersonationRoles).find((k) => (ImpersonationRoles as any)[k] === r) || "";
+      return normalize(r) === normalize(roleParam) || normalize(keyForValue) === normalize(roleParam);
+    });
+
+    if (matched) {
+      const roles = [matched as ImpersonationRoles];
+      try {
+        localStorage.setItem("impersonatingRoles", JSON.stringify(roles));
+      } catch (e) {
+        // ignore storage errors
+      }
+      dispatch(setImpersonating(roles));
+
+      // Remove the impersonationRole param from the URL so it isn't reapplied on refresh
+      params.delete("impersonationRole");
+      const newSearch = params.toString();
+      navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ""}`, { replace: true });
+    }
+  }, [location.search, hasImpersonationRole, impersonating, dispatch, navigate, location.pathname]);
+
   const renderMenu = () => {
     return isSuccess && data ? (
       <>

@@ -3,6 +3,7 @@ using System;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    partial class ProfitSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250905202154_payBenNavigation")]
+    partial class payBenNavigation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -29722,18 +29725,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             SubTitle = "",
                             Title = "Pay Beneficiary Report",
                             Url = "payben-report"
-                        },
-                        new
-                        {
-                            Id = (short)68,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)18,
-                            ParentId = (short)14,
-                            StatusId = (byte)1,
-                            SubTitle = "",
-                            Title = "Adhoc Beneficiaries Report",
-                            Url = "adhoc-beneficiaries-report"
                         });
                 });
 

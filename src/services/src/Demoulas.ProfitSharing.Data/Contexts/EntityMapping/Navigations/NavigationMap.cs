@@ -683,6 +683,30 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 OrderNumber = 6,
                 Icon = "",
                 Disabled = false
+            },
+            new Navigation
+            {
+                Id = Navigation.Constants.PayBenReport,
+                ParentId = Navigation.Constants.DecemberActivities,
+                Title = "Pay Beneficiary Report",
+                SubTitle = "",
+                Url = "payben-report",
+                StatusId = 1,
+                OrderNumber = 10,
+                Icon = "",
+                Disabled = false
+            },
+            new Navigation
+            {
+                Id = Navigation.Constants.Adhocbeneficiariesreport,
+                ParentId = Navigation.Constants.FiscalClose,
+                Title = "Adhoc Beneficiaries Report",
+                SubTitle = "",
+                Url = "adhoc-beneficiaries-report",
+                StatusId = 1,
+                OrderNumber = 18,
+                Icon = "",
+                Disabled = false
             }
         );
     }

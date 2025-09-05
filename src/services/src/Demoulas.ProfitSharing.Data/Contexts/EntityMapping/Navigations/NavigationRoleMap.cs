@@ -17,6 +17,7 @@ internal sealed class NavigationRoleMap : IEntityTypeConfiguration<NavigationRol
 
         builder.HasData(
             new NavigationRole { Id = NavigationRole.Contants.Administrator, Name = Role.ADMINISTRATOR },
+            new NavigationRole { Id = NavigationRole.Contants.BeneficiaryAdministrator, Name = Role.BENEFICIARY_ADMINISTRATOR },
             new NavigationRole { Id = NavigationRole.Contants.FinanceManager, Name = Role.FINANCEMANAGER },
             new NavigationRole { Id = NavigationRole.Contants.DistributionClerk, Name = Role.DISTRIBUTIONSCLERK },
             new NavigationRole { Id = NavigationRole.Contants.HardshipAdministrator, Name = Role.HARDSHIPADMINISTRATOR },

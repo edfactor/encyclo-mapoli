@@ -22,7 +22,7 @@ const EmployeesOnMilitaryLeaveGrid: React.FC = () => {
         pagination: {
           skip: pageNumber * pageSize,
           take: pageSize,
-          sortBy: "Badge", // Default sortBy value
+          sortBy: "badgeNumber", // Default sortBy value
           isSortDescending: false // Default sort order
         }
       };

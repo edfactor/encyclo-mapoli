@@ -45,7 +45,7 @@ public class GetFrozenDemographicsEndpoint : ProfitSharingEndpoint<SortedPaginat
                 }
             };
         });
-        Group<ItDevOpsGroup>();
+        Group<ItDevOpsAllUsersGroup>();
     }
 
     public override Task<PaginatedResponseDto<FrozenStateResponse>> ExecuteAsync(SortedPaginationRequestDto req, CancellationToken ct)
