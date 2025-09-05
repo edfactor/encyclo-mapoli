@@ -11,16 +11,6 @@ public static class Policy
     public static readonly string CanViewYearEndReports = "CAN_VIEW_YEAR_END_REPORTS";
 
     /// <summary>
-    /// View pay classification types (reference data, read-only).
-    /// </summary>
-    public static readonly string CanViewPayClassificationTypes = "CAN_VIEW_PAY_CLASSIFICATION_TYPES";
-
-    /// <summary>
-    /// View pay/profit record information (read-only finance data views).
-    /// </summary>
-    public static readonly string CanGetPayProfitRecords = "CAN_GET_PAY_PROFIT_RECORDS";
-
-    /// <summary>
     /// View balances (participant or aggregated), read-only.
     /// </summary>
     public static readonly string CanViewBalances = "CAN_VIEW_BALANCES";
