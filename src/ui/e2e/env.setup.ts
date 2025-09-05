@@ -4,7 +4,7 @@ import { fileURLToPath } from "url";
 
 const playWrightEnv = "../.playwright.env";
 const localBaseUrl = "http://localhost:3100";
-const qaBaseUrl = "https://dg.qa.demoulas.net";
+const qaBaseUrl = "https://ps.qa.demoulas.net";
 
 // if no user name / password defined, loading them for .playwright.env file, which is in gitignore.
 // if you do not have the file (.playwright.env), please ask one developer.
