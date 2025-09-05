@@ -5,6 +5,7 @@ using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.YearEnd;
+
 public class YearEndProcessFinalRunEndpoint : ProfitSharingRequestEndpoint<YearRequestWithRebuild>
 {
     private readonly IYearEndService _yearEndService;
@@ -18,11 +19,8 @@ public class YearEndProcessFinalRunEndpoint : ProfitSharingRequestEndpoint<YearR
     public override void Configure()
     {
         Post("final");
-        Summary(s =>
-        {
-            s.Summary = "Updates data in prior to final run of the Profit Sharing report";
-        });
-    Group<YearEndGroup>();
+        Summary(s => { s.Summary = "Updates data in prior to final run of the Profit Sharing report"; });
+        Group<YearEndGroup>();
     }
 
     public override async Task HandleAsync(YearRequestWithRebuild req, CancellationToken ct)

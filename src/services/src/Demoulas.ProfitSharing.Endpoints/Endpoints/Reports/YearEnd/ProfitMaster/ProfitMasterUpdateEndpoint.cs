@@ -39,7 +39,9 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
             s.ExampleRequest = ProfitShareUpdateRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object> { { 200, ProfitMasterUpdateResponse.Example() } };
         });
+        
         Group<YearEndGroup>();
+        Policies(Security.Policy.CanViewYearEndReports, Security.Policy.CanRunYearEndProcesses);
     }
 
     public override async Task HandleAsync(ProfitShareUpdateRequest req, CancellationToken ct)
