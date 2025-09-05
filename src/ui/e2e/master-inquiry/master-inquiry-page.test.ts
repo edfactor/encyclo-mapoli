@@ -123,12 +123,12 @@ test.describe("Master Inqiry landing page: ", () => {
     await expect(response2.status()).toBe(200);
   });
 
-  test("If we change IMPERSONATE to IT-OPERATIONS, it should MASK values", async ({ page }) => {
+  test("If we change IMPERSONATE to IT-DevOps, it should MASK values", async ({ page }) => {
     await page.getByRole("combobox", { name: "roles" }).click();
     await page.getByRole("option", { name: "Finance-Manager" }).getByRole("checkbox").uncheck();
     await page.locator("body").click();
     await page.getByRole("combobox", { name: "roles" }).click();
-    await page.getByRole("option", { name: "IT-Operations" }).getByRole("checkbox").check();
+    await page.getByRole("option", { name: "IT-DevOps" }).getByRole("checkbox").check();
     await page.locator("body").click();
     await page.locator('input[name="badgeNumber"]').fill("706056");
     await page.getByRole("button", { name: "SEARCH" }).click();
