@@ -1349,5 +1349,6 @@ export const {
   useFinalizeReportMutation,
   useLazyAdhocBeneficiariesReportQuery,
   useLazyPayBenReportQuery,
-  useLazyGetQPAY066BTerminatedWithVestedBalanceQuery
+  useLazyGetQPAY066BTerminatedWithVestedBalanceQuery,
+  useLazyGetRecentlyTerminatedReportQuery
 } = YearsEndApi;
