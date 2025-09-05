@@ -25,7 +25,7 @@ public static class PolicyRoleMap
         [Policy.CanManageBeneficiaries] = [Role.HARDSHIPADMINISTRATOR, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR],
 
         // IT roles can freeze and add demographics to support data integrity and operational needs.
-        [Policy.CanFreezeDemographics] = [Role.ITDEVOPS, Role.ITOPERATIONS, Role.HARDSHIPADMINISTRATOR, Role.ADMINISTRATOR],
+        [Policy.CanFreezeDemographics] = [Role.ITDEVOPS, Role.ITOPERATIONS, Role.HARDSHIPADMINISTRATOR, Role.ADMINISTRATOR, Role.FINANCEMANAGER],
     };
 
     public static string[] GetRoles(string policyName) => Map.TryGetValue(policyName, out var roles) ? roles : [];
