@@ -37,7 +37,7 @@ public class GetTableMetadataEndpoint : ProfitSharingResponseEndpoint<List<RowCo
                 }
             };
         });
-        Group<ItDevOpsGroup>();
+        Group<ItDevOpsAllUsersGroup>();
     }
 
     public override Task<List<RowCountResult>> ExecuteAsync(CancellationToken ct)
