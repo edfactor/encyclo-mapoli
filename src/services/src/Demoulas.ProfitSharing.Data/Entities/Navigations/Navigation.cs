@@ -55,7 +55,8 @@ public sealed class Navigation
         public const short SaveProfPaymstr = 63;
         public const short ProfControlSheet = 64;
         public const short QPAY066AdHocReports = 65;
-        
+        public const short PayBenReport = 66;
+
         // Prof Share Report By Age sub-items
         public const short ContributionsByAge = 35;
         public const short DistributionsByAge = 36;

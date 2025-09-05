@@ -73,6 +73,7 @@
   </Folder>
   <Folder Name="/Database/ready import/Navigations/" Id="02ea681e-c7d8-13c7-8484-4ac65e1b71e8">
     <File Path="../database/ready_import/Navigations/add-navigation-data.sql" />
+    <File Path="../database/ready_import/Navigations/add-uat-navigation-data.sql" />
   </Folder>
   <Folder Name="/Database/SQL calculations view/">
     <File Path="../database/SQL calculations view/SQL READY Profit Sharing view creation for calculations includes bene and zeroc-check.sql" />

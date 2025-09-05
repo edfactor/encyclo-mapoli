@@ -14,7 +14,7 @@ public class PayBenReportEndpoint : ProfitSharingEndpoint<PayBenReportRequest,
     private readonly IPayBenReportService _reportService;
 
     public PayBenReportEndpoint(IPayBenReportService reportService)
-        : base(Navigation.Constants.Unknown)
+        : base(Navigation.Constants.PayBenReport)
     {
         _reportService = reportService;
     }
