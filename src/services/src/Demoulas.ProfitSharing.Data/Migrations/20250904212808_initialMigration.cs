@@ -20,35 +20,80 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 maxValue: 666999999L);
 
             migrationBuilder.CreateTable(
-                name: "AUDIT_CHANGE",
+                name: "_HEALTH_CHECK_STATUS_HISTORY",
                 columns: table => new
                 {
-                    ID = table.Column<long>(type: "NUMBER(19)", nullable: false)
+                    ID = table.Column<int>(type: "NUMBER(10)", nullable: false)
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
-                    COLUMN_NAME = table.Column<string>(type: "NVARCHAR2(50)", maxLength: 50, nullable: false),
-                    ORIGINAL_VALUE = table.Column<string>(type: "NVARCHAR2(512)", maxLength: 512, nullable: true),
-                    NEW_VALUE = table.Column<string>(type: "NVARCHAR2(512)", maxLength: 512, nullable: true),
-                    USER_NAME = table.Column<string>(type: "NVARCHAR2(24)", maxLength: 24, nullable: false, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
-                    CHANGE_DATE = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP")
+                    KEY = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: false),
+                    STATUS = table.Column<string>(type: "NVARCHAR2(24)", maxLength: 24, nullable: false),
+                    DESCRIPTION = table.Column<string>(type: "NVARCHAR2(2000)", nullable: true),
+                    EXCEPTION = table.Column<string>(type: "NVARCHAR2(2000)", nullable: true),
+                    DURATION = table.Column<TimeSpan>(type: "INTERVAL DAY(8) TO SECOND(7)", nullable: false),
+                    CREATED_AT = table.Column<DateTimeOffset>(type: "TIMESTAMP(7) WITH TIME ZONE", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AUDIT_CHANGE", x => x.ID);
+                    table.PrimaryKey("PK__HEALTH_CHECK_STATUS_HISTORY", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ANNUITY_RATE",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "NUMBER(10)", nullable: false)
+                        .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
+                    YEAR = table.Column<short>(type: "NUMBER(4)", precision: 4, nullable: false),
+                    AGE = table.Column<byte>(type: "NUMBER(3)", precision: 3, nullable: false),
+                    SINGLE_RATE = table.Column<decimal>(type: "DECIMAL(6,4)", precision: 6, scale: 4, nullable: false),
+                    JOINT_RATE = table.Column<decimal>(type: "DECIMAL(6,4)", precision: 6, scale: 4, nullable: false),
+                    CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
+                    USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ANNUITY_RATE", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
                 name: "AUDIT_EVENT",
                 columns: table => new
                 {
-                    ID = table.Column<long>(type: "NUMBER(19)", nullable: false)
+                    AUDIT_EVENT_ID = table.Column<long>(type: "NUMBER(19)", nullable: false)
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
-                    TABLE_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true),
-                    OPERATION = table.Column<string>(type: "NVARCHAR2(12)", maxLength: 12, nullable: false),
-                    PRIMARY_KEY = table.Column<string>(type: "NVARCHAR2(24)", maxLength: 24, nullable: true)
+                    TABLE_NAME = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: true),
+                    OPERATION = table.Column<string>(type: "NVARCHAR2(24)", maxLength: 24, nullable: false),
+                    PRIMARY_KEY = table.Column<string>(type: "NVARCHAR2(512)", maxLength: 512, nullable: true),
+                    USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: false, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
+                    CREATED_AT = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
+                    CHANGES_JSON = table.Column<string>(type: "CLOB", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AUDIT_EVENT", x => x.ID);
+                    table.PrimaryKey("PK_AUDIT_EVENT", x => x.AUDIT_EVENT_ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BENEFICIARY_ARCHIVE",
+                columns: table => new
+                {
+                    ARCHIVE_ID = table.Column<int>(type: "NUMBER(10)", nullable: false)
+                        .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
+                    ID = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
+                    BADGE_NUMBER = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
+                    PSN_SUFFIX = table.Column<short>(type: "NUMBER(5)", precision: 5, nullable: false),
+                    DEMOGRAPHIC_ID = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
+                    BENEFICIARY_CONTACT_ID = table.Column<int>(type: "NUMBER(10)", nullable: false),
+                    RELATIONSHIP = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: true),
+                    KIND_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: true),
+                    PERCENT = table.Column<decimal>(type: "numeric(3,0)", precision: 3, nullable: false),
+                    DELETE_DATE = table.Column<string>(type: "NVARCHAR2(10)", nullable: false),
+                    DELETED_BY = table.Column<string>(type: "NVARCHAR2(24)", maxLength: 24, nullable: false, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BENEFICIARY_ARCHIVE", x => x.ARCHIVE_ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -309,6 +354,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "EXCLUDED_ID_TYPE",
+                columns: table => new
+                {
+                    ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EXCLUDED_ID_TYPE", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "FAKE_SSNS",
                 columns: table => new
                 {
@@ -331,7 +388,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     IS_ACTIVE = table.Column<bool>(type: "NUMBER(1)", nullable: false),
                     FROZEN_BY = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false),
                     AS_OF_DATETIME = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false),
-                    CREATED_DATETIME = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSDATE")
+                    CREATED_DATETIME = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP")
                 },
                 constraints: table =>
                 {
@@ -392,7 +449,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 {
                     ID = table.Column<int>(type: "NUMBER(10)", nullable: false)
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
-                    MESSAGE = table.Column<string>(type: "NVARCHAR2(2000)", nullable: false)
+                    MESSAGE = table.Column<string>(type: "NVARCHAR2(60)", maxLength: 60, nullable: false),
+                    DESCRIPTION = table.Column<string>(type: "NVARCHAR2(250)", maxLength: 250, nullable: false),
+                    SEVERITY = table.Column<string>(type: "NVARCHAR2(16)", maxLength: 16, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -461,6 +520,26 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "REPORT_CHECKSUM",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "NUMBER(10)", nullable: false)
+                        .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
+                    REPORT_TYPE = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: false),
+                    PROFIT_YEAR = table.Column<short>(type: "NUMBER(4)", precision: 4, nullable: false),
+                    REQUEST_JSON = table.Column<string>(type: "CLOB", nullable: false),
+                    REPORT_JSON = table.Column<string>(type: "CLOB", nullable: false),
+                    KEYFIELDS_CHECKSUM_JSON = table.Column<string>(type: "CLOB", nullable: false),
+                    CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
+                    USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_REPORT_CHECKSUM", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "STATE_TAX",
                 columns: table => new
                 {
@@ -505,8 +584,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     ID = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false)
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     PROFIT_YEAR = table.Column<short>(type: "NUMBER(4)", precision: 4, nullable: false),
-                    UPDATED_DATE = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false),
-                    UPDATED_BY = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false),
                     BENEFICIARIES_EFFECTED = table.Column<int>(type: "NUMBER(6)", precision: 6, nullable: false),
                     EMPLOYEES_EFFECTED = table.Column<int>(type: "NUMBER(6)", precision: 6, nullable: false),
                     ETVAS_EFFECTED = table.Column<int>(type: "NUMBER(6)", precision: 6, nullable: false),
@@ -520,7 +597,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     ADJUST_CONTRIBUTION_AMOUNT = table.Column<decimal>(type: "DECIMAL(5,2)", precision: 5, scale: 2, nullable: false),
                     ADJUST_EARNINGS_AMOUNT = table.Column<decimal>(type: "DECIMAL(5,2)", precision: 5, scale: 2, nullable: false),
                     ADJUST_INCOMING_FORFEIT_AMOUNT = table.Column<decimal>(type: "DECIMAL(5,2)", precision: 5, scale: 2, nullable: false),
-                    ADJUST_EARNINGS_SECONDARY_AMOUNT = table.Column<decimal>(type: "DECIMAL(5,2)", precision: 5, scale: 2, nullable: false)
+                    ADJUST_EARNINGS_SECONDARY_AMOUNT = table.Column<decimal>(type: "DECIMAL(5,2)", precision: 5, scale: 2, nullable: false),
+                    CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
+                    USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP")
                 },
                 constraints: table =>
                 {
@@ -537,28 +617,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ZERO_CONTRIBUTION_REASON", x => x.ID);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AUDIT_CHANGE__AUDIT_EVENT",
-                columns: table => new
-                {
-                    AUDITEVENTID = table.Column<long>(type: "NUMBER(19)", nullable: false),
-                    CHANGESID = table.Column<long>(type: "NUMBER(19)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AUDIT_CHANGE__AUDIT_EVENT", x => new { x.AUDITEVENTID, x.CHANGESID });
-                    table.ForeignKey(
-                        name: "FK_AUDIT_CHANGE__AUDIT_EVENT_AUDITCHANGE_CHANGESID",
-                        column: x => x.CHANGESID,
-                        principalTable: "AUDIT_CHANGE",
-                        principalColumn: "ID");
-                    table.ForeignKey(
-                        name: "FK_AUDIT_CHANGE__AUDIT_EVENT_AUDIT_EVENT_AUDITEVENTID",
-                        column: x => x.AUDITEVENTID,
-                        principalTable: "AUDIT_EVENT",
-                        principalColumn: "ID");
                 });
 
             migrationBuilder.CreateTable(
@@ -584,13 +642,54 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     PHONE_NUMBER = table.Column<string>(type: "NVARCHAR2(16)", maxLength: 16, nullable: true),
                     MOBILE_NUMBER = table.Column<string>(type: "NVARCHAR2(16)", maxLength: 16, nullable: true),
                     EMAIL_ADDRESS = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: true),
-                    CREATED_DATE = table.Column<DateTime>(type: "DATE", nullable: false, defaultValueSql: "SYSDATE")
+                    CREATED_DATE = table.Column<DateTime>(type: "DATE", nullable: false, defaultValueSql: "SYSDATE"),
+                    CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
+                    USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_BENEFICIARY_CONTACT", x => x.ID);
                     table.ForeignKey(
                         name: "FK_BENEFICIARY_CONTACT_COUNTRY_COUNTRY_ISO",
+                        column: x => x.COUNTRY_ISO,
+                        principalTable: "COUNTRY",
+                        principalColumn: "ISO");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BENEFICIARY_CONTACT_ARCHIVE",
+                columns: table => new
+                {
+                    ARCHIVE_ID = table.Column<int>(type: "NUMBER(10)", nullable: false)
+                        .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
+                    ID = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
+                    SSN = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
+                    DATE_OF_BIRTH = table.Column<DateTime>(type: "DATE", nullable: false),
+                    STREET = table.Column<string>(type: "NVARCHAR2(56)", maxLength: 56, nullable: false, comment: "Street"),
+                    STREET2 = table.Column<string>(type: "NVARCHAR2(56)", maxLength: 56, nullable: true, comment: "Street2"),
+                    STREET3 = table.Column<string>(type: "NVARCHAR2(56)", maxLength: 56, nullable: true, comment: "Street3"),
+                    STREET4 = table.Column<string>(type: "NVARCHAR2(56)", maxLength: 56, nullable: true, comment: "Street4"),
+                    CITY = table.Column<string>(type: "NVARCHAR2(36)", maxLength: 36, nullable: false, comment: "City"),
+                    STATE = table.Column<string>(type: "NVARCHAR2(3)", maxLength: 3, nullable: false, comment: "State"),
+                    POSTAL_CODE = table.Column<string>(type: "NVARCHAR2(9)", maxLength: 9, nullable: false, comment: "Postal Code"),
+                    COUNTRY_ISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: true, defaultValue: "US"),
+                    FULL_NAME = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: false, comment: "FullName"),
+                    LAST_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "LastName"),
+                    FIRST_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "FirstName"),
+                    MIDDLE_NAME = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: true, comment: "MiddleName"),
+                    PHONE_NUMBER = table.Column<string>(type: "NVARCHAR2(16)", maxLength: 16, nullable: true),
+                    MOBILE_NUMBER = table.Column<string>(type: "NVARCHAR2(16)", maxLength: 16, nullable: true),
+                    EMAIL_ADDRESS = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: true),
+                    CREATED_DATE = table.Column<DateTime>(type: "DATE", nullable: false, defaultValueSql: "SYSDATE"),
+                    DELETE_DATE = table.Column<string>(type: "NVARCHAR2(10)", nullable: false),
+                    DELETED_BY = table.Column<string>(type: "NVARCHAR2(24)", maxLength: 24, nullable: false, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BENEFICIARY_CONTACT_ARCHIVE", x => x.ARCHIVE_ID);
+                    table.ForeignKey(
+                        name: "FK_BENEFICIARY_CONTACT_ARCHIVE_COUNTRY_COUNTRY_ISO",
                         column: x => x.COUNTRY_ISO,
                         principalTable: "COUNTRY",
                         principalColumn: "ISO");
@@ -654,6 +753,25 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "EXCLUDED_ID",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "NUMBER(10)", nullable: false)
+                        .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
+                    EXCLUDED_ID_TYPE_ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    EXCLUDED_ID_VALUE = table.Column<int>(type: "NUMBER(10)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EXCLUDED_ID", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_EXCLUDED_ID_EXCLUDEDIDTYPE_EXCLUDEDIDTYPEID",
+                        column: x => x.EXCLUDED_ID_TYPE_ID,
+                        principalTable: "EXCLUDED_ID_TYPE",
+                        principalColumn: "ID");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "JOB",
                 columns: table => new
                 {
@@ -690,9 +808,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "NAVIGATION",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "NUMBER(10)", nullable: false)
-                        .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
-                    PARENT_ID = table.Column<int>(type: "NUMBER(10)", nullable: true),
+                    ID = table.Column<short>(type: "NUMBER(5)", nullable: false),
+                    PARENT_ID = table.Column<short>(type: "NUMBER(5)", nullable: true),
                     TITLE = table.Column<string>(type: "NVARCHAR2(100)", maxLength: 100, nullable: false),
                     SUB_TITLE = table.Column<string>(type: "NVARCHAR2(70)", maxLength: 70, nullable: true),
                     URL = table.Column<string>(type: "NVARCHAR2(200)", maxLength: 200, nullable: true),
@@ -710,7 +827,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         principalTable: "NAVIGATION_STATUS",
                         principalColumn: "ID");
                     table.ForeignKey(
-                        name: "FK_NAVIGATION_NAVIGATION_PARENTID",
+                        name: "FK_NAVIGATION_NAVIGATION_PARENT_ID",
                         column: x => x.PARENT_ID,
                         principalTable: "NAVIGATION",
                         principalColumn: "ID");
@@ -724,7 +841,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     ORACLE_HCM_ID = table.Column<long>(type: "NUMBER(15)", precision: 15, nullable: false),
                     SSN = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
-                    BADGE_NUMBER = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
                     STORE_NUMBER = table.Column<short>(type: "NUMBER(4)", precision: 4, nullable: false, comment: "StoreNumber"),
                     PAY_CLASSIFICATION_ID = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false, comment: "PayClassification"),
                     FULL_NAME = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: false, comment: "FullName"),
@@ -753,7 +869,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     PAY_FREQUENCY_ID = table.Column<byte>(type: "NUMBER(3)", maxLength: 1, nullable: false, comment: "PayFrequency"),
                     TERMINATION_CODE_ID = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: true, comment: "TerminationCode"),
                     EMPLOYMENT_STATUS_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
-                    LAST_MODIFIED_DATE = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSDATE")
+                    CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
+                    USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP"),
+                    BADGE_NUMBER = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -828,7 +947,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     COMMENT_RELATED_PSN_SUFFIX = table.Column<short>(type: "NUMBER(5)", nullable: true),
                     COMMENT_IS_PARTIAL_TRANSACTION = table.Column<bool>(type: "NUMBER(1)", nullable: true),
                     YEARS_OF_SERVICE_CREDIT = table.Column<byte>(type: "NUMBER(3)", nullable: false, defaultValue: (byte)0),
-                    CREATED_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP")
+                    CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
+                    USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP")
                 },
                 constraints: table =>
                 {
@@ -852,6 +973,29 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         name: "FK_PROFIT_DETAIL_ZEROCONTRIBUTIONREASON_ZEROCONTRIBUTIONREASONID",
                         column: x => x.ZERO_CONTRIBUTION_REASON_ID,
                         principalTable: "ZERO_CONTRIBUTION_REASON",
+                        principalColumn: "ID");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BENEFICIARY_SSN_CHANGE_HISTORY",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "NUMBER(18)", precision: 18, nullable: false)
+                        .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
+                    BENEFICIARY_CONTACT_ID = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
+                    CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
+                    USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP"),
+                    OLD_SSN = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
+                    NEW_SSN = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BENEFICIARY_SSN_CHANGE_HISTORY", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_BENEFICIARY_SSN_CHANGE_HISTORY_BENEFICIARY_CONTACT_BENEFICIARYCONTACTID",
+                        column: x => x.BENEFICIARY_CONTACT_ID,
+                        principalTable: "BENEFICIARY_CONTACT",
                         principalColumn: "ID");
                 });
 
@@ -883,13 +1027,16 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     GENDER_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: true),
                     QDRO = table.Column<bool>(type: "NUMBER(1)", nullable: false, comment: "Qualified Domestic Relations Order"),
                     MEMO = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: true),
-                    ROTH_IRA = table.Column<bool>(type: "NUMBER(1)", nullable: false)
+                    ROTH_IRA = table.Column<bool>(type: "NUMBER(1)", nullable: false),
+                    CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
+                    USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_DISTRIBUTION", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_DISTRIBUTION_DISTRIBUTIONPAYEE_PAYEEID",
+                        name: "FK_DISTRIBUTION_DISTRIBUTIONPAYEES_PAYEEID",
                         column: x => x.PAYEE_ID,
                         principalTable: "DISTRIBUTION_PAYEE",
                         principalColumn: "ID");
@@ -924,7 +1071,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "NAVIGATION_ASSIGNED_ROLES",
                 columns: table => new
                 {
-                    NAVIGATIONID = table.Column<int>(type: "NUMBER(10)", nullable: false),
+                    NAVIGATIONID = table.Column<short>(type: "NUMBER(5)", nullable: false),
                     REQUIREDROLESID = table.Column<byte>(type: "NUMBER(3)", nullable: false)
                 },
                 constraints: table =>
@@ -943,12 +1090,34 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "NAVIGATION_PREREQUISITES",
+                columns: table => new
+                {
+                    NAVIGATION_ID = table.Column<short>(type: "NUMBER(5)", nullable: false),
+                    PREREQUISITE_ID = table.Column<short>(type: "NUMBER(5)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NAVIGATION_PREREQUISITES", x => new { x.NAVIGATION_ID, x.PREREQUISITE_ID });
+                    table.ForeignKey(
+                        name: "FK_NAV_PREREQ_DEPENDENT",
+                        column: x => x.NAVIGATION_ID,
+                        principalTable: "NAVIGATION",
+                        principalColumn: "ID");
+                    table.ForeignKey(
+                        name: "FK_NAV_PREREQ_PREREQUISITE",
+                        column: x => x.PREREQUISITE_ID,
+                        principalTable: "NAVIGATION",
+                        principalColumn: "ID");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "NAVIGATION_TRACKING",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "NUMBER(10)", nullable: false)
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
-                    NAVIGATION_ID = table.Column<int>(type: "NUMBER(10)", nullable: false),
+                    NAVIGATION_ID = table.Column<short>(type: "NUMBER(5)", nullable: false),
                     STATUS_ID = table.Column<byte>(type: "NUMBER(3)", nullable: true),
                     USERNAME = table.Column<string>(type: "NVARCHAR2(60)", maxLength: 60, nullable: true),
                     LAST_MODIFIED = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true)
@@ -975,12 +1144,15 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     ID = table.Column<int>(type: "NUMBER(10)", nullable: false)
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     PSN_SUFFIX = table.Column<short>(type: "NUMBER(5)", precision: 5, nullable: false),
-                    BADGE_NUMBER = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
                     DEMOGRAPHIC_ID = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
                     BENEFICIARY_CONTACT_ID = table.Column<int>(type: "NUMBER(10)", nullable: false),
                     RELATIONSHIP = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: true),
                     KIND_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: true),
-                    PERCENT = table.Column<decimal>(type: "numeric(3,0)", precision: 3, nullable: false)
+                    PERCENT = table.Column<decimal>(type: "numeric(3,0)", precision: 3, nullable: false),
+                    CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
+                    USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP"),
+                    BADGE_NUMBER = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1009,9 +1181,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     ID = table.Column<int>(type: "NUMBER(18)", precision: 18, nullable: false)
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     DEMOGRAPHIC_ID = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
+                    CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
+                    USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP"),
                     OLD_SSN = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
-                    NEW_SSN = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
-                    CREATED_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP")
+                    NEW_SSN = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1039,7 +1213,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     AMOUNT_AUTHORIZED = table.Column<decimal>(type: "DECIMAL(10,2)", precision: 10, scale: 2, nullable: true),
                     DATE_REQUESTED = table.Column<DateTime>(type: "Date", nullable: false),
                     DATE_DECIDED = table.Column<DateTime>(type: "Date", nullable: true),
-                    TAX_CODE_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false)
+                    TAX_CODE_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
+                    CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
+                    USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP")
                 },
                 constraints: table =>
                 {
@@ -1088,8 +1265,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     ZERO_CONTRIBUTION_REASON_ID = table.Column<byte>(type: "NUMBER(3)", nullable: true),
                     HOURS_EXECUTIVE = table.Column<decimal>(type: "DECIMAL(6,2)", precision: 6, scale: 2, nullable: false),
                     INCOME_EXECUTIVE = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    LAST_UPDATE = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    POINTS_EARNED = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: true)
+                    POINTS_EARNED = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: true),
+                    CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
+                    USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
+                    MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP")
                 },
                 constraints: table =>
                 {
@@ -1160,27 +1339,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         name: "FK_PROFIT_SHARE_CHECK_TAXCODES_TAXCODEID",
                         column: x => x.TAX_CODE_ID,
                         principalTable: "TAX_CODE",
-                        principalColumn: "ID");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "BENEFICIARY_SSN_CHANGE_HISTORY",
-                columns: table => new
-                {
-                    ID = table.Column<int>(type: "NUMBER(18)", precision: 18, nullable: false)
-                        .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
-                    BENEFICIARY_ID = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
-                    OLD_SSN = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
-                    NEW_SSN = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
-                    CREATED_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BENEFICIARY_SSN_CHANGE_HISTORY", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_BENEFICIARY_SSN_CHANGE_HISTORY_BENEFICIARY_BENEFICIARYID",
-                        column: x => x.BENEFICIARY_ID,
-                        principalTable: "BENEFICIARY",
                         principalColumn: "ID");
                 });
 
@@ -2645,7 +2803,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     { (byte)21, "Rev" },
                     { (byte)22, "Unrev" },
                     { (byte)23, "100% Earnings" },
-                    { (byte)24, ">64 & >5 100%" }
+                    { (byte)24, ">64 & >5 100%" },
+                    { (byte)25, "Forfeit Class Action" }
                 });
 
             migrationBuilder.InsertData(
@@ -2976,6 +3135,15 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "EXCLUDED_ID_TYPE",
+                columns: new[] { "ID", "NAME" },
+                values: new object[,]
+                {
+                    { (byte)1, "QPay066TA Exclusions" },
+                    { (byte)2, "QPay066I Exclusions" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "GENDER",
                 columns: new[] { "ID", "NAME" },
                 values: new object[,]
@@ -3018,11 +3186,16 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "MISSIVES",
-                columns: new[] { "ID", "MESSAGE" },
+                columns: new[] { "ID", "DESCRIPTION", "MESSAGE", "SEVERITY" },
                 values: new object[,]
                 {
-                    { 1, "** VESTING INCREASED ON   CURRENT BALANCE ( > 1000 HRS) **" },
-                    { 2, "VEST IS NOW 100%, 65+/5 YRS" }
+                    { 1, "The employee has between 2 and 7 years in Profit Sharing, has 1000+ plus hours towards Profit Sharing in the fiscal year, and has company contribution records under the new vesting schedule.", "** VESTING INCREASED ON   CURRENT BALANCE ( > 1000 HRS) **", "Information" },
+                    { 2, "The Employee's Zero Contribution Flag is set at 6", "VEST IS NOW 100%, 65+/5 YRS", "Information" },
+                    { 3, "Employee is a beneficiary of another employee", "Employee is also a Beneficiary", "Information" },
+                    { 4, "The PSN you have entered was not found.  Re-enter using a valid PSN", "Beneficiary not on file", "Error" },
+                    { 5, "The Employee Badge Number you have entered is not found.  Re-enter using a valid badge number", "Employee badge not on file", "Error" },
+                    { 6, "The Employee SSN you have entered is not on file or you don't have access.  Re-enter using a valid SSN", "Employee SSN not on file", "Error" },
+                    { 7, "The Employee's Zero Contribution Flag is set at 7", "*** EMPLOYEE MAY BE 100% - CHECK DATES ***", "Information" }
                 });
 
             migrationBuilder.InsertData(
@@ -3030,12 +3203,15 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 columns: new[] { "ID", "NAME" },
                 values: new object[,]
                 {
-                    { (byte)1, "Profit-Sharing-Administrator" },
+                    { (byte)1, "System-Administrator" },
                     { (byte)2, "Finance-Manager" },
                     { (byte)3, "Distributions-Clerk" },
                     { (byte)4, "Hardship-Administrator" },
                     { (byte)5, "Impersonation" },
-                    { (byte)6, "IT-Operations" }
+                    { (byte)6, "IT-DevOps" },
+                    { (byte)7, "IT-Operations" },
+                    { (byte)8, "Executive-Administrator" },
+                    { (byte)9, "Auditor" }
                 });
 
             migrationBuilder.InsertData(
@@ -3045,8 +3221,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 {
                     { (byte)1, "Not Started" },
                     { (byte)2, "In Progress" },
-                    { (byte)3, "Blocked" },
-                    { (byte)4, "Successful" }
+                    { (byte)3, "On Hold" },
+                    { (byte)4, "Complete" }
                 });
 
             migrationBuilder.InsertData(
@@ -3248,10 +3424,68 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     { (byte)8, "Unknown" }
                 });
 
+            migrationBuilder.InsertData(
+                table: "NAVIGATION",
+                columns: new[] { "ID", "DISABLED", "ICON", "ORDER_NUMBER", "PARENT_ID", "STATUS_ID", "SUB_TITLE", "TITLE", "URL" },
+                values: new object[,]
+                {
+                    { (short)50, false, "", (byte)1, null, (byte)1, "", "INQUIRIES", "" },
+                    { (short)52, true, "", (byte)2, null, (byte)1, "", "BENEFICIARIES", "" },
+                    { (short)53, true, "", (byte)3, null, (byte)1, "", "DISTRIBUTIONS", "" },
+                    { (short)54, true, "", (byte)4, null, (byte)1, "", "RECONCILIATION", "" },
+                    { (short)55, false, "", (byte)5, null, (byte)1, "", "YEAR END", "" },
+                    { (short)56, false, "", (byte)6, null, (byte)1, "", "IT DEVOPS", "" },
+                    { (short)32767, false, "", (byte)1, null, (byte)1, "", "Unknown", "" },
+                    { (short)1, false, "", (byte)1, (short)55, (byte)1, "", "December Activities", "december-process-accordion" },
+                    { (short)14, false, "", (byte)2, (short)55, (byte)1, "", "Fiscal Close", "fiscal-close" },
+                    { (short)51, false, "", (byte)1, (short)50, (byte)1, "", "MASTER INQUIRY", "master-inquiry" },
+                    { (short)57, false, "", (byte)1, (short)56, (byte)1, "", "Demographic Freeze", "demographic-freeze" },
+                    { (short)2, false, "", (byte)1, (short)1, (byte)1, "", "Clean up Reports", "" },
+                    { (short)7, false, "", (byte)3, (short)1, (byte)1, "008-13", "Military Contributions", "military-entry-and-modification" },
+                    { (short)8, false, "", (byte)2, (short)1, (byte)1, "QPREV-PROF", "Unforfeit", "unforfeitures" },
+                    { (short)9, false, "", (byte)4, (short)1, (byte)1, "QPAY066", "Terminations", "prof-term" },
+                    { (short)10, false, "", (byte)5, (short)1, (byte)1, "008-12", "Forfeitures", "forfeitures-adjustment" },
+                    { (short)11, false, "", (byte)6, (short)1, (byte)1, "QPAY129", "Distributions and Forfeitures", "distributions-and-forfeitures" },
+                    { (short)13, false, "", (byte)9, (short)1, (byte)1, "PAY426", "Profit Share Report", "profit-share-report" },
+                    { (short)15, false, "", (byte)1, (short)14, (byte)1, "PROF-DOLLAR-EXEC-EXTRACT, TPR008-09", "Manage Executive Hours", "manage-executive-hours-and-dollars" },
+                    { (short)16, false, "", (byte)2, (short)14, (byte)1, "PROF-DOLLAR-EXTRACT", "YTD Wages Extract", "ytd-wages-extract" },
+                    { (short)17, false, "", (byte)4, (short)14, (byte)1, "PAY426", "Profit Share Report (Final Run)", "profit-share-report" },
+                    { (short)18, false, "", (byte)3, (short)14, (byte)1, "PAY426", "Profit Share Report (Edit Run)", "pay426n" },
+                    { (short)30, false, "", (byte)5, (short)14, (byte)1, "GET-ELIGIBLE-EMPS", "Get Eligible Employees", "eligible-employees" },
+                    { (short)31, false, "", (byte)6, (short)14, (byte)1, "PAY443", "Profit Share Forfeit", "forfeit" },
+                    { (short)33, false, "", (byte)10, (short)14, (byte)1, "PAY450", "Prof PayMaster Update", "pay450-summary" },
+                    { (short)34, false, "", (byte)12, (short)14, (byte)1, "Prof130", "Prof Share Report By Age", "" },
+                    { (short)41, false, "", (byte)13, (short)14, (byte)1, "QPAY501", "Prof Share Gross Rpt", "profit-share-gross-report" },
+                    { (short)42, false, "", (byte)14, (short)14, (byte)1, "QPAY066TA", "Prof Share by Store", "" },
+                    { (short)49, false, "", (byte)15, (short)14, (byte)1, "PAYCERT", "Print Profit Certs", "print-profit-certs" },
+                    { (short)60, false, "", (byte)7, (short)14, (byte)1, "PAY444|PAY447", "Master Update", "profit-share-update" },
+                    { (short)62, true, "", (byte)8, (short)14, (byte)1, "PAY460, PROFTLD", "Profit Master Update", "profit-master-update" },
+                    { (short)63, false, "", (byte)16, (short)14, (byte)1, "", "Save Prof Paymstr", "save-prof-paymstr" },
+                    { (short)64, false, "", (byte)11, (short)14, (byte)1, "PROF-CNTRL-SHEET", "Prof Control Sheet", "prof-control-sheet" },
+                    { (short)65, false, "", (byte)17, (short)14, (byte)1, "QPAY066*", "QPAY066* Ad Hoc Reports", "qpay066-adhoc" },
+                    { (short)3, false, "", (byte)1, (short)2, (byte)1, "", "Demographic Badges Not In PayProfit", "demographic-badges-not-in-payprofit" },
+                    { (short)4, false, "", (byte)2, (short)2, (byte)1, "", "Duplicate SSNs in Demographics", "duplicate-ssns-demographics" },
+                    { (short)5, false, "", (byte)3, (short)2, (byte)1, "", "Negative ETVA", "negative-etva-for-ssns-on-payprofit" },
+                    { (short)6, false, "", (byte)4, (short)2, (byte)1, "", "Duplicate Names and Birthdays", "duplicate-names-and-birthdays" },
+                    { (short)35, false, "", (byte)2, (short)34, (byte)1, "PROF130", "CONTRIBUTIONS BY AGE", "contributions-by-age" },
+                    { (short)36, false, "", (byte)1, (short)34, (byte)1, "PROF130", "DISTRIBUTIONS BY AGE", "distributions-by-age" },
+                    { (short)37, false, "", (byte)3, (short)34, (byte)1, "PROF130", "FORFEITURES BY AGE", "forfeitures-by-age" },
+                    { (short)38, false, "", (byte)4, (short)34, (byte)1, "PROF130B", "BALANCE BY AGE", "balance-by-age" },
+                    { (short)39, false, "", (byte)5, (short)34, (byte)1, "PROF130V", "VESTED AMOUNTS BY AGE", "vested-amounts-by-age" },
+                    { (short)40, false, "", (byte)6, (short)34, (byte)1, "PROF130Y", "BALANCE BY YEARS", "balance-by-years" },
+                    { (short)43, false, "", (byte)1, (short)42, (byte)1, "", "QPAY066-UNDR21", "qpay066-under21" },
+                    { (short)44, false, "", (byte)2, (short)42, (byte)1, "", "QPAY066TA-UNDR21", "qpay066ta-under21" },
+                    { (short)45, false, "", (byte)3, (short)42, (byte)1, "", "QPAY066TA", "qpay066ta" },
+                    { (short)46, false, "", (byte)6, (short)42, (byte)1, "", "PROFALL", "profall" },
+                    { (short)47, false, "", (byte)4, (short)42, (byte)1, "", "QNEWPROFLBL", "new-ps-labels" },
+                    { (short)48, false, "", (byte)5, (short)42, (byte)1, "", "PROFNEW", "profnew" }
+                });
+
             migrationBuilder.CreateIndex(
-                name: "IX_AUDIT_CHANGE__AUDIT_EVENT_CHANGESID",
-                table: "AUDIT_CHANGE__AUDIT_EVENT",
-                column: "CHANGESID");
+                name: "IX_ANNUITY_RATE_YEAR_AGE",
+                table: "ANNUITY_RATE",
+                columns: new[] { "YEAR", "AGE" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AUDIT_EVENT_TABLENAME",
@@ -3294,9 +3528,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "SSN");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BENEFICIARY_SSN_CHANGE_HISTORY_BENEFICIARYID",
+                name: "IX_BENEFICIARY_CONTACT_ARCHIVE_COUNTRY_ISO",
+                table: "BENEFICIARY_CONTACT_ARCHIVE",
+                column: "COUNTRY_ISO");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BENEFICIARY_SSN_CHANGE_HISTORY_BENEFICIARYCONTACTID",
                 table: "BENEFICIARY_SSN_CHANGE_HISTORY",
-                column: "BENEFICIARY_ID");
+                column: "BENEFICIARY_CONTACT_ID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CALDAR_RECORD_WEEKNO_PERIOD",
@@ -3328,6 +3567,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "IX_DEMOGRAPHIC_EMPLOYMENTSTATUSID",
                 table: "DEMOGRAPHIC",
                 column: "EMPLOYMENT_STATUS_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DEMOGRAPHIC_EMPLOYMENTSTATUSID_TERMINATIONDATE",
+                table: "DEMOGRAPHIC",
+                columns: new[] { "EMPLOYMENT_STATUS_ID", "TERMINATION_DATE" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_DEMOGRAPHIC_EMPLOYMENTTYPEID",
@@ -3482,6 +3726,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "COUNTRY_ISO");
 
             migrationBuilder.CreateIndex(
+                name: "IX_EXCLUDED_ID_EXCLUDEDIDTYPEID",
+                table: "EXCLUDED_ID",
+                column: "EXCLUDED_ID_TYPE_ID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_FAKE_SSNS_SSN",
                 table: "FAKE_SSNS",
                 column: "SSN",
@@ -3503,7 +3752,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "STARTMETHODID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_NAVIGATION_PARENTID",
+                name: "IX_NAVIGATION_PARENT_ID",
                 table: "NAVIGATION",
                 column: "PARENT_ID");
 
@@ -3516,6 +3765,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "IX_NAVIGATION_ASSIGNED_ROLES_REQUIREDROLESID",
                 table: "NAVIGATION_ASSIGNED_ROLES",
                 column: "REQUIREDROLESID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_NAVIGATION_PREREQUISITES_PREREQUISITE_ID",
+                table: "NAVIGATION_PREREQUISITES",
+                column: "PREREQUISITE_ID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_NAVIGATION_TRACKING_NAVIGATIONID",
@@ -3546,6 +3800,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "IX_PAY_PROFIT_PROFITYEAR",
                 table: "PAY_PROFIT",
                 column: "PROFIT_YEAR");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PAY_PROFIT_PROFITYEAR_DEMOGRAPHICID",
+                table: "PAY_PROFIT",
+                columns: new[] { "PROFIT_YEAR", "DEMOGRAPHIC_ID" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_PAY_PROFIT_ZEROCONTRIBUTIONREASONID",
@@ -3634,7 +3893,22 @@ namespace Demoulas.ProfitSharing.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AUDIT_CHANGE__AUDIT_EVENT");
+                name: "_HEALTH_CHECK_STATUS_HISTORY");
+
+            migrationBuilder.DropTable(
+                name: "ANNUITY_RATE");
+
+            migrationBuilder.DropTable(
+                name: "AUDIT_EVENT");
+
+            migrationBuilder.DropTable(
+                name: "BENEFICIARY");
+
+            migrationBuilder.DropTable(
+                name: "BENEFICIARY_ARCHIVE");
+
+            migrationBuilder.DropTable(
+                name: "BENEFICIARY_CONTACT_ARCHIVE");
 
             migrationBuilder.DropTable(
                 name: "BENEFICIARY_SSN_CHANGE_HISTORY");
@@ -3661,6 +3935,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "DISTRIBUTION_REQUEST");
 
             migrationBuilder.DropTable(
+                name: "EXCLUDED_ID");
+
+            migrationBuilder.DropTable(
                 name: "FAKE_SSNS");
 
             migrationBuilder.DropTable(
@@ -3676,6 +3953,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "NAVIGATION_ASSIGNED_ROLES");
 
             migrationBuilder.DropTable(
+                name: "NAVIGATION_PREREQUISITES");
+
+            migrationBuilder.DropTable(
                 name: "NAVIGATION_TRACKING");
 
             migrationBuilder.DropTable(
@@ -3688,19 +3968,19 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "PROFIT_SHARE_CHECK");
 
             migrationBuilder.DropTable(
+                name: "REPORT_CHECKSUM");
+
+            migrationBuilder.DropTable(
                 name: "STATE_TAX");
 
             migrationBuilder.DropTable(
                 name: "YE_UPDATE_STATUS");
 
             migrationBuilder.DropTable(
-                name: "AUDIT_CHANGE");
+                name: "BENEFICIARY_KIND");
 
             migrationBuilder.DropTable(
-                name: "AUDIT_EVENT");
-
-            migrationBuilder.DropTable(
-                name: "BENEFICIARY");
+                name: "BENEFICIARY_CONTACT");
 
             migrationBuilder.DropTable(
                 name: "DISTRIBUTION_PAYEE");
@@ -3722,6 +4002,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "DISTRIBUTION_REQUEST_TYPE");
+
+            migrationBuilder.DropTable(
+                name: "EXCLUDED_ID_TYPE");
 
             migrationBuilder.DropTable(
                 name: "JOBSTARTMETHOD");
@@ -3757,16 +4040,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "ZERO_CONTRIBUTION_REASON");
 
             migrationBuilder.DropTable(
-                name: "TAX_CODE");
-
-            migrationBuilder.DropTable(
-                name: "BENEFICIARY_CONTACT");
-
-            migrationBuilder.DropTable(
-                name: "BENEFICIARY_KIND");
-
-            migrationBuilder.DropTable(
                 name: "DEMOGRAPHIC");
+
+            migrationBuilder.DropTable(
+                name: "TAX_CODE");
 
             migrationBuilder.DropTable(
                 name: "NAVIGATION_STATUS");

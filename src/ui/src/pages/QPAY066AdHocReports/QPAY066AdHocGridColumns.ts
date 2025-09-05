@@ -1,5 +1,12 @@
 import { ColDef } from "ag-grid-community";
-import { createBadgeColumn, createCurrencyColumn, createNameColumn } from "../../utils/gridColumnFactory";
+import {
+  createAgeColumn,
+  createBadgeColumn,
+  createCurrencyColumn,
+  createDateColumn,
+  createHoursColumn,
+  createNameColumn
+} from "../../utils/gridColumnFactory";
 
 export const GetQPAY066AdHocGridColumns = (): ColDef[] => [
   createBadgeColumn({}),
@@ -28,16 +35,16 @@ export const GetQPAY066AdHocGridColumns = (): ColDef[] => [
     headerName: "Vesting Balance",
     field: "vestingBalance"
   }),
-  {
+  createDateColumn({
     headerName: "Date Term",
     field: "dateTerm",
     minWidth: 100
-  },
-  {
+  }),
+  createHoursColumn({
     headerName: "YTD Hours",
     field: "ytdHours",
     minWidth: 90
-  },
+  }),
   {
     headerName: "Years",
     field: "years",
@@ -48,9 +55,5 @@ export const GetQPAY066AdHocGridColumns = (): ColDef[] => [
     field: "vested",
     minWidth: 80
   },
-  {
-    headerName: "Age",
-    field: "age",
-    minWidth: 70
-  }
+  createAgeColumn({})
 ];

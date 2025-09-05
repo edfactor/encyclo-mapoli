@@ -1,5 +1,5 @@
 import { PaginationParams } from "smart-ui-library";
-import type { ProfitYearRequest, SortedPaginationRequestDto, PagedReportResponse } from "../common/api";
+import type { PagedReportResponse, ProfitYearRequest, SortedPaginationRequestDto } from "../common/api";
 import type { FrozenReportsByAgeRequestType } from "../common/enums";
 
 export interface ReportsByAgeParams extends ProfitYearRequest {
@@ -118,11 +118,12 @@ export interface BalanceByBase<TDetail extends BalanceByDetailBase> extends Page
 export interface BalanceByAgeDetail extends BalanceByDetailBase {
   age: number;
 }
-
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> {
   // BalanceByAge extends BalanceByBase with BalanceByAgeDetail
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> {
   // BalanceByYears extends BalanceByBase with BalanceByAgeDetail
 }

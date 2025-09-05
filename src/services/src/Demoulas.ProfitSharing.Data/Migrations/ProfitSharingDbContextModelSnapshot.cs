@@ -25967,10 +25967,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BeneficiaryId")
+                    b.Property<int>("BeneficiaryContactId")
                         .HasPrecision(9)
                         .HasColumnType("NUMBER(9)")
-                        .HasColumnName("BENEFICIARY_ID");
+                        .HasColumnName("BENEFICIARY_CONTACT_ID");
 
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .ValueGeneratedOnAdd()
@@ -26004,8 +26004,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasKey("Id")
                         .HasName("PK_BENEFICIARY_SSN_CHANGE_HISTORY");
 
-                    b.HasIndex(new[] { "BeneficiaryId" }, "IX_BENEFICIARY")
-                        .HasDatabaseName("IX_BENEFICIARY_SSN_CHANGE_HISTORY_BENEFICIARYID");
+                    b.HasIndex(new[] { "BeneficiaryContactId" }, "IX_BENEFICIARY")
+                        .HasDatabaseName("IX_BENEFICIARY_SSN_CHANGE_HISTORY_BENEFICIARYCONTACTID");
 
                     b.ToTable("BENEFICIARY_SSN_CHANGE_HISTORY", (string)null);
                 });
@@ -32053,14 +32053,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiarySsnChangeHistory", b =>
                 {
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Beneficiary", "Beneficiary")
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.BeneficiaryContact", "BeneficiaryContact")
                         .WithMany("BeneficiarySsnChangeHistories")
-                        .HasForeignKey("BeneficiaryId")
+                        .HasForeignKey("BeneficiaryContactId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
-                        .HasConstraintName("FK_BENEFICIARY_SSN_CHANGE_HISTORY_BENEFICIARY_BENEFICIARYID");
+                        .HasConstraintName("FK_BENEFICIARY_SSN_CHANGE_HISTORY_BENEFICIARY_CONTACT_BENEFICIARYCONTACTID");
 
-                    b.Navigation("Beneficiary");
+                    b.Navigation("BeneficiaryContact");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Demographic", b =>
@@ -32746,14 +32746,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasConstraintName("FK_NAVIGATION_ASSIGNED_ROLES_NAVIGATIONROLES_REQUIREDROLESID");
                 });
 
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Beneficiary", b =>
-                {
-                    b.Navigation("BeneficiarySsnChangeHistories");
-                });
-
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryContact", b =>
                 {
                     b.Navigation("Beneficiaries");
+
+                    b.Navigation("BeneficiarySsnChangeHistories");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryKind", b =>

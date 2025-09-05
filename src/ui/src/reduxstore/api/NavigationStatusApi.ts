@@ -17,7 +17,7 @@ export const NavigationStatusApi = createApi({
   reducerPath: "navigationStatusApi",
   endpoints: (builder) => ({
     getNavigationStatus: builder.query<GetNavigationStatusResponseDto, GetNavigationStatusRequestDto>({
-      query: (request) => ({
+      query: (_request) => ({
         url: `/navigation/status`,
         method: "GET"
       }),

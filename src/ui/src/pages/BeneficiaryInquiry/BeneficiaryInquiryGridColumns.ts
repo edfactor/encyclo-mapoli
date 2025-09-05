@@ -1,29 +1,25 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
-import { GRID_COLUMN_WIDTHS } from "../../constants";
+import { ColDef } from "ag-grid-community";
 import {
+  createCityColumn,
   createCurrencyColumn,
   createDateColumn,
   createNameColumn,
+  createPhoneColumn,
+  createPSNColumn,
   createSSNColumn,
+  createStateColumn,
   createZipColumn
 } from "../../utils/gridColumnFactory";
 
 export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
   return [
-    {
+    createPSNColumn({
       headerName: "Psn",
       field: "psnSuffix",
-      colId: "psnSuffix",
-      minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      sortable: true,
-      unSortIcon: true,
-      cellRenderer: (params: ICellRendererParams) =>
-        viewBadgeLinkRenderer(params.data.badgeNumber, params.data.psnSuffix)
-    },
+
+      enableLinking: true,
+      linkingStyle: "simple"
+    }),
     createCurrencyColumn({
       headerName: "Current Balance",
       field: "currentBalance"
@@ -45,34 +41,18 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
         return `${params.data.street}`;
       }
     },
-    {
-      headerName: "City",
-      field: "city",
-      colId: "city",
-      minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
+    createCityColumn({
       valueFormatter: (params) => {
         return `${params.data.city}`;
       }
-    },
-    {
-      headerName: "State",
-      field: "state",
-      colId: "state",
-      minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      valueFormatter: (params) => {
-        return `${params.data.state}`;
-      }
-    },
+    }),
+    createStateColumn({}),
+    createZipColumn({
+      field: "postalCode"
+    }),
     createZipColumn({
       field: "postalCode",
-      headerName: "Postal Code",
-      minWidth: 120
+      headerName: "Postal Code"
     }),
     {
       headerName: "Country Iso",
@@ -89,37 +69,19 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
     },
     createNameColumn({
       field: "fullName",
-      minWidth: GRID_COLUMN_WIDTHS.FULL_NAME,
-      alignment: "center",
-      sortable: false,
+
       valueFormatter: (params) => {
         return `${params.data.lastName}, ${params.data.firstName}`;
       }
     }),
-    {
+    createPhoneColumn({
       headerName: "Phone Number",
-      field: "phoneNumber",
-      colId: "phoneNumber",
-      minWidth: 130,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      valueFormatter: (params) => {
-        return `${params.data.phoneNumber ?? ""}`;
-      }
-    },
-    {
+      field: "phoneNumber"
+    }),
+    createPhoneColumn({
       headerName: "Mobile Number",
-      field: "mobileNumber",
-      colId: "mobileNumber",
-      minWidth: 130,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      valueFormatter: (params) => {
-        return `${params.data.mobileNumber ?? ""}`;
-      }
-    },
+      field: "mobileNumber"
+    }),
     {
       headerName: "Email Address",
       field: "emailAddress",

@@ -63,6 +63,7 @@ interface ProfitSummaryProps {
 
 const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) => {
   const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingSummaryReportQuery();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedLineItem, setSelectedLineItem] = useState<string | null>(null);
   const [isStatusCompleted, setIsStatusCompleted] = useState(false);
 
@@ -73,6 +74,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) =
 
   // Get the current navigation object to check its status
   const getCurrentNavigationObject = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const findNavigationById = (navigationArray: any[], id: number): any => {
       for (const item of navigationArray) {
         if (item.id === id) {
@@ -100,6 +102,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) =
     if (currentNav) {
       setIsStatusCompleted(currentNav.statusName === "Complete");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigationList, currentNavigationId]);
 
   const getPresetForLineItem = (lineItemPrefix: string): FilterParams | null => {
@@ -194,7 +197,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) =
     ];
   }, [terminatedRowData]);
 
-  const shouldShowDetailGrid = selectedLineItem && getPresetForLineItem(selectedLineItem);
+  //const shouldShowDetailGrid = selectedLineItem && getPresetForLineItem(selectedLineItem);
 
   return (
     <>

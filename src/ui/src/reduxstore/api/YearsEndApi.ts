@@ -355,7 +355,7 @@ export const YearsEndApi = createApi({
       }),
       async onQueryStarted({ queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
+          await queryFulfilled;
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -396,9 +396,9 @@ export const YearsEndApi = createApi({
           isSortDescending: params.pagination.isSortDescending
         }
       }),
-      async onQueryStarted({ dispatch, queryFulfilled }) {
+      async onQueryStarted({ _dispatch, queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
+          await queryFulfilled;
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -680,6 +680,7 @@ export const YearsEndApi = createApi({
     }),
     getTerminationReport: builder.query<TerminationResponse, TerminationRequestWithArchive>({
       query: (params) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const body: any = {
           beginningDate: params.beginningDate,
           endingDate: params.endingDate,
@@ -699,7 +700,7 @@ export const YearsEndApi = createApi({
           body
         };
       },
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setTermination(data));
@@ -1126,17 +1127,28 @@ export const YearsEndApi = createApi({
         try {
           const { data } = await queryFulfilled;
           dispatch(setForfeitureAdjustmentData(data));
-        } catch (err: any) {
+        } catch (err: unknown) {
           // Always clear the data on any error
           dispatch(clearForfeitureAdjustmentData());
-          
+
           // Don't handle "Employee not found" errors here - let them bubble up to component
-          if (err?.error?.status === 500 && err?.error?.data?.title === "Employee not found.") {
+
+          if (
+            typeof err === "object" &&
+            err !== null &&
+            "error" in err &&
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            typeof (err as any).error === "object" &&
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (err as any).error?.status === 500 &&
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (err as any).error?.data?.title === "Employee not found."
+          ) {
             return; // Don't log or handle, just clear data and let component handle it
           }
-          
+
           // Handle other errors as before
-          console.log("Err: " + err);
+          console.log("Err: " + String(err));
         }
       }
     }),
@@ -1186,9 +1198,10 @@ export const YearsEndApi = createApi({
           isSortDescending: params.isSortDescending
         }
       }),
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
+          await queryFulfilled;
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -1206,9 +1219,10 @@ export const YearsEndApi = createApi({
           isSortDescending: params.isSortDescending
         }
       }),
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
+          await queryFulfilled;
         } catch (err) {
           console.log("Err: " + err);
         }

@@ -186,13 +186,14 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, storeNumber, onLoadingC
     return dummyData;
   }, [isQPAY066MReport, breakdownByStoreManagement]);
 
+  /*
   const recordCount = useMemo(() => {
     if (isQPAY066MReport && breakdownByStoreManagement?.response?.total) {
       return breakdownByStoreManagement.response.total;
     }
     return dummyData.length;
   }, [isQPAY066MReport, breakdownByStoreManagement]);
-
+*/
   return (
     <Grid
       container

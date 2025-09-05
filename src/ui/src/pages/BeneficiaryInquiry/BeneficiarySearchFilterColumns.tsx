@@ -1,6 +1,12 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { GRID_COLUMN_WIDTHS } from "../../constants";
-import { createSSNColumn, createNameColumn, createBadgeColumn, createZipColumn } from "../../utils/gridColumnFactory";
+import { ColDef } from "ag-grid-community";
+import {
+  createAgeColumn,
+  createBadgeColumn,
+  createNameColumn,
+  createSSNColumn,
+  createStateColumn,
+  createZipColumn
+} from "../../utils/gridColumnFactory";
 
 export const BeneficiarySearchFilterColumns = (): ColDef[] => {
   return [
@@ -18,16 +24,9 @@ export const BeneficiarySearchFilterColumns = (): ColDef[] => {
       }
     },
     createNameColumn({
-      field: "name",
-      minWidth: GRID_COLUMN_WIDTHS.FULL_NAME,
-      alignment: "center",
-      sortable: false
+      field: "name"
     }),
-    createSSNColumn({
-      valueFormatter: (params) => {
-        return `${params.data.ssn}`;
-      }
-    }),
+    createSSNColumn({}),
     {
       headerName: "City",
       field: "city",
@@ -40,27 +39,8 @@ export const BeneficiarySearchFilterColumns = (): ColDef[] => {
         return `${params.data.city}`;
       }
     },
-    {
-      headerName: "State",
-      field: "state",
-      colId: "state",
-      flex: 1,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      valueFormatter: (params) => {
-        return `${params.data.state}`;
-      }
-    },
+    createStateColumn({}),
     createZipColumn({ field: "zip", colId: "zip", headerName: "Zip" }),
-    {
-      headerName: "Age",
-      field: "age",
-      colId: "age",
-      flex: 1,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true
-    }
+    createAgeColumn({})
   ];
 };
