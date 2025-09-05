@@ -114,6 +114,7 @@ import {
   ProfitYearRequest,
   QPAY066BTerminatedWithVestedBalanceRequest,
   QPAY066BTerminatedWithVestedBalanceResponse,
+  RecentlyTerminatedResponse,
   RehireForfeiture,
   StartAndEndDateRequest,
   SuggestedForfeitResponse,
@@ -679,6 +680,23 @@ export const YearsEndApi = createApi({
       }
     }),
     getTerminationReport: builder.query<TerminationResponse, TerminationRequestWithArchive>({
+      query: (params) => ({
+        url: "yearend/adchoc-terminated-employees-report",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setBalanceByAge(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+    getRecentlyTerminatedReport: builder.query<RecentlyTerminatedResponse, StartAndEndDateRequest>({
       query: (params) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const body: any = {
@@ -695,8 +713,8 @@ export const YearsEndApi = createApi({
         }
 
         return {
-          url: `yearend/terminated-employees${params.archive === true ? "?archive=true" : ""}`,
-          method: "POST",
+          url: `yearend/adhoc-terminated-employees-report`,
+          method: "GET",
           body
         };
       },
