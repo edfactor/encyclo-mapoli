@@ -1,10 +1,11 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Entities.Navigations;
+
 public sealed class Navigation
 {
     public static class Constants
     {
         public const short Unknown = short.MaxValue;
-        
+
         // Main menu items
         public const short Inquiries = 50;
         public const short Beneficiaries = 52;
@@ -12,24 +13,24 @@ public sealed class Navigation
         public const short Reconciliation = 54;
         public const short YearEnd = 55;
         public const short ItDevOps = 56;
-        
+
         // Inquiries sub-items
         public const short MasterInquiry = 51;
-        
+
         // IT Operations sub-items
         public const short DemographicFreeze = 57;
-        
+
         // Year End sub-items
         public const short DecemberActivities = 1;
         public const short CleanupReports = 2;
         public const short FiscalClose = 14;
-        
+
         // Clean up Reports sub-items
         public const short DemographicBadgesNotInPayProfit = 3;
         public const short DuplicateSSNsInDemographics = 4;
         public const short NegativeETVA = 5;
         public const short DuplicateNamesAndBirthdays = 6;
-        
+
         // December Activities sub-items
         public const short MilitaryContributions = 7;
         public const short Unforfeit = 8;
@@ -37,7 +38,7 @@ public sealed class Navigation
         public const short Forfeitures = 10;
         public const short DistributionsAndForfeitures = 11;
         public const short ProfitShareReport = 13;
-        
+
         // Fiscal Close sub-items
         public const short ManageExecutiveHours = 15;
         public const short YTDWagesExtract = 16;
@@ -55,7 +56,9 @@ public sealed class Navigation
         public const short SaveProfPaymstr = 63;
         public const short ProfControlSheet = 64;
         public const short QPAY066AdHocReports = 65;
-        public const short PayBenReport = 66;
+        public const short RecentlyTerminated = 66;
+
+        public const short PayBenReport = 67;
 
         // Prof Share Report By Age sub-items
         public const short ContributionsByAge = 35;
@@ -64,7 +67,7 @@ public sealed class Navigation
         public const short BalanceByAge = 38;
         public const short VestedAmountsByAge = 39;
         public const short BalanceByYears = 40;
-        
+
         // Prof Share by Store sub-items
         public const short QPAY066Under21 = 43;
         public const short QPAY066TAUnder21 = 44;
@@ -86,7 +89,7 @@ public sealed class Navigation
 
     public List<NavigationRole>? RequiredRoles { get; set; } = [];
     public NavigationStatus? NavigationStatus { get; set; }
-    public List<Navigation>? Items { get; set; }    
+    public List<Navigation>? Items { get; set; }
     public Navigation? Parent { get; set; }
     public List<NavigationTracking>? NavigationTrackings { get; set; }
 

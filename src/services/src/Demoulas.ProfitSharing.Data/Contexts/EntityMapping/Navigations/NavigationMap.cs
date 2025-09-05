@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Navigations;
+
 internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
 {
     public void Configure(EntityTypeBuilder<Navigation> builder)
@@ -24,12 +25,12 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
             .HasForeignKey(x => x.StatusId);
 
         builder.HasOne(m => m.Parent)
-            .WithMany(x=>x.Items)
+            .WithMany(x => x.Items)
             .HasForeignKey(x => x.ParentId);
 
         builder.HasMany(x => x.RequiredRoles)
             .WithMany()
-            .UsingEntity(x=>x.ToTable(name:"NAVIGATION_ASSIGNED_ROLES"));
+            .UsingEntity(x => x.ToTable(name: "NAVIGATION_ASSIGNED_ROLES"));
 
         // Self-referencing many-to-many for prerequisites
         builder
@@ -520,6 +521,18 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 Url = "qpay066-adhoc",
                 StatusId = 1,
                 OrderNumber = 17,
+                Icon = "",
+                Disabled = false
+            },
+            new Navigation
+            {
+                Id = Navigation.Constants.RecentlyTerminated,
+                ParentId = Navigation.Constants.FiscalClose,
+                Title = "Recently Terminated",
+                SubTitle = "PROF-VESTED|PAY508",
+                Url = "recently-terminated",
+                StatusId = 1,
+                OrderNumber = 18,
                 Icon = "",
                 Disabled = false
             },

@@ -55,6 +55,7 @@ import { createUnauthorizedParams, isPathAllowedInNavigation } from "../../utils
 import ImpersonationMultiSelect from "components/MenuBar/ImpersonationMultiSelect";
 import { MenuBar } from "components/MenuBar/MenuBar";
 import BeneficiaryInquiry from "pages/BeneficiaryInquiry/BeneficiaryInquiry";
+import RecentlyTerminated from "pages/FiscalClose/RecentlyTerminated/RecentlyTerminated";
 import PAY426N from "pages/PAY426Reports/PAY426N/PAY426N";
 import ProfitSummary from "pages/PAY426Reports/ProfitSummary/ProfitSummary";
 import QPAY066AdHocReports from "pages/QPAY066AdHocReports/QPAY066AdHocReports";
@@ -366,6 +367,10 @@ const RouterSubAssembly: React.FC = () => {
                   path={ROUTES.PRINT_PROFIT_CERTS}
                   element={<ReprintCertificates />}
                 />
+                <Route
+                  path={ROUTES.RECENTLY_TERMINATED}
+                  element={<RecentlyTerminated />}
+                />
               </Routes>
             </Box>
           </Box>
@@ -382,7 +387,7 @@ const RouterSubAssembly: React.FC = () => {
       try {
         const roles = JSON.parse(storedRoles) as ImpersonationRoles[];
         dispatch(setImpersonating(roles));
-      } catch (e) {
+      } catch (_e) {
         // If there's an error parsing, clear the localStorage
         localStorage.removeItem("impersonatingRoles");
       }
