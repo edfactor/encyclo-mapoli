@@ -9,7 +9,7 @@ using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc.TerminatedEmployeesReportEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
-public sealed class TerminatedEmployeesReportEndpoint :EndpointWithCsvBase<FrozenProfitYearRequest, AdhocTerminatedEmployeeResponse, TerminatedEmployeesReportResponseMap>
+public sealed class TerminatedEmployeesReportEndpoint :EndpointWithCsvBase<StartAndEndDateRequest, AdhocTerminatedEmployeeResponse, TerminatedEmployeesReportResponseMap>
 {
     private readonly IAdhocTerminatedEmployeesService _adhocTerminatedEmployeesService;
 
@@ -26,14 +26,15 @@ public sealed class TerminatedEmployeesReportEndpoint :EndpointWithCsvBase<Froze
         {
             s.Summary = "Adhoc Terminated Employees Report";
             s.Description = "Returns a report of terminated employees within a specified profit year.";
-            s.ExampleRequest = new FrozenProfitYearRequest
+            s.ExampleRequest = new StartAndEndDateRequest
             {
                 ProfitYear = 2023,
-                UseFrozenData = true,
                 Skip = 0,
                 Take = 100,
                 SortBy = "TerminationDate",
-                IsSortDescending = false
+                IsSortDescending = false,
+                BeginningDate = new DateOnly(2023, 1, 1),
+                EndingDate = new DateOnly(2023, 12, 31)
             };
             s.ResponseExamples = new Dictionary<int, object>
             {
@@ -69,7 +70,7 @@ public sealed class TerminatedEmployeesReportEndpoint :EndpointWithCsvBase<Froze
     }
     public override string ReportFileName => "Adhoc Terminated Employees Report";
 
-    public override Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetResponse(FrozenProfitYearRequest req, CancellationToken ct)
+    public override Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetResponse(StartAndEndDateRequest req, CancellationToken ct)
     {
         return _adhocTerminatedEmployeesService.GetTerminatedEmployees(req, ct);
     }
