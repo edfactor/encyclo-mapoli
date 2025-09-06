@@ -186,11 +186,10 @@ BEGIN
     INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED)
     VALUES(46,42, 'PROFALL', '','profall', 1, 6, '', 0);
 
---Inserting value for IT Operation for role management
-    INSERT INTO NAVIGATION_ASSIGNED_ROLES(NAVIGATIONID, REQUIREDROLESID) VALUES (56,1 ); -- System-Administrator
-    INSERT INTO NAVIGATION_ASSIGNED_ROLES(NAVIGATIONID, REQUIREDROLESID) VALUES (56,4 ); -- Hardship-Administrator
+-- Inserting value for IT Operation for role management
+--  NOTE: IT-DevOps navigation should be accessible only to members of the IT-DevOps role (role id 6).
+--  Remove other role assignments so the IT menu is exclusive to IT-DevOps.
     INSERT INTO NAVIGATION_ASSIGNED_ROLES(NAVIGATIONID, REQUIREDROLESID) VALUES (56,6 ); -- IT-DevOps
-    INSERT INTO NAVIGATION_ASSIGNED_ROLES(NAVIGATIONID, REQUIREDROLESID) VALUES (56,7 ); -- IT-Operations
 
 -- Assign roles for INQUIRIES (Master Inquiry endpoints -> CanRunMasterInquiry)
     INSERT INTO NAVIGATION_ASSIGNED_ROLES(NAVIGATIONID, REQUIREDROLESID) VALUES (50,1 ); -- System-Administrator
@@ -204,7 +203,6 @@ BEGIN
     INSERT INTO NAVIGATION_ASSIGNED_ROLES(NAVIGATIONID, REQUIREDROLESID) VALUES (70,2 ); -- Finance-Manager
 
 -- Assign roles for BENEFICIARIES (BeneficiariesGroup -> CanMaintainBeneficiaries)
-        INSERT INTO NAVIGATION_ASSIGNED_ROLES(NAVIGATIONID, REQUIREDROLESID) VALUES (72,6 ); -- IT-DevOps
     INSERT INTO NAVIGATION_ASSIGNED_ROLES(NAVIGATIONID, REQUIREDROLESID) VALUES (52,3 ); -- Distributions-Clerk
     INSERT INTO NAVIGATION_ASSIGNED_ROLES(NAVIGATIONID, REQUIREDROLESID) VALUES (52,4 ); -- Hardship-Administrator
 
