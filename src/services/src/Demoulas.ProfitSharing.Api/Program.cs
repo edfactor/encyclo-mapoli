@@ -135,11 +135,15 @@ builder.Services.Configure<HealthCheckPublisherOptions>(options =>
 });
 
 builder.Services.AddSingleton<IHealthCheckPublisher, HealthCheckResultLogger>();
+builder.Host.UseDefaultServiceProvider(options =>
+{
+    options.ValidateOnBuild = true;
+});
 
 WebApplication app = builder.Build();
 
 app.UseCors();
-
+app.UseSecurityHeaders();
 app.UseDemographicHeaders();
 app.UseSensitiveValueMasking();
 app.UseDefaultEndpoints(OktaSettingsAction)

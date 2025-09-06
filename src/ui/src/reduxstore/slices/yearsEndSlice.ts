@@ -17,7 +17,6 @@ import {
   DuplicateSSNDetail,
   EligibleEmployeeResponseDto,
   EmployeeDetails,
-  EmployeesOnMilitaryLeaveResponse,
   EmployeeWagesForYear,
   ExecutiveHoursAndDollars,
   ExecutiveHoursAndDollarsGrid,
@@ -112,7 +111,6 @@ export interface YearsEndState {
   forfeituresByAgeTotal: ForfeituresByAge | null;
   grossWagesReport: GrossWagesReportResponse | null;
   grossWagesReportQueryParams: GrossWagesReportRequest | null;
-  rehire: PagedReportResponse<EmployeesOnMilitaryLeaveResponse> | null;
   militaryEntryAndModification: EmployeeDetails | null;
   rehireForfeitures: PagedReportResponse<RehireForfeiture> | null;
   rehireForfeituresQueryParams: StartAndEndDateRequest | null;
@@ -572,15 +570,6 @@ export const yearsEndSlice = createSlice({
     },
     setRehireProfitSummaryQueryParams: (state, action: PayloadAction<StartAndEndDateRequest>) => {
       state.rehireProfitSummaryQueryParams = action.payload;
-    },
-    setEmployeesOnMilitaryLeaveDetails: (
-      state,
-      action: PayloadAction<PagedReportResponse<EmployeesOnMilitaryLeaveResponse>>
-    ) => {
-      state.rehire = action.payload;
-    },
-    clearEmployeesOnMilitaryLeaveDetails: (state) => {
-      state.rehire = null;
     },
     setRehireForfeituresDetails: (state, action: PayloadAction<PagedReportResponse<RehireForfeiture>>) => {
       state.rehireForfeitures = action.payload;

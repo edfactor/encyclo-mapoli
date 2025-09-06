@@ -6,7 +6,6 @@ import DemographicBadgesNotInPayprofit from "pages/DecemberActivities/Demographi
 import DistributionsAndForfeitures from "pages/DecemberActivities/DistributionsAndForfeitures/DistributionAndForfeitures";
 import DuplicateNamesAndBirthdays from "pages/DecemberActivities/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdays";
 import DuplicateSSNsOnDemographics from "pages/DecemberActivities/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographics";
-import EmployeesOnMilitaryLeave from "pages/DecemberActivities/EmployeesOnMilitaryLeave/EmployeesOnMilitaryLeave";
 import NegativeEtvaForSSNsOnPayprofit from "pages/DecemberActivities/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofit";
 import Termination from "pages/DecemberActivities/Termination/Termination";
 import RehireForfeitures from "pages/DecemberActivities/UnForfeit/RehireForfeitures";
@@ -208,9 +207,6 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={ROUTES.DUPLICATE_NAMES}
                   element={<DuplicateNamesAndBirthdays />}></Route>
-                <Route
-                  path={ROUTES.MILITARY_LEAVE}
-                  element={<EmployeesOnMilitaryLeave />}></Route>
                 <Route
                   path={ROUTES.REHIRE_FORFEITURES}
                   element={<RehireForfeitures />}></Route>

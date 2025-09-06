@@ -30,18 +30,18 @@ definitions:
                 if ($sdk -match "^9\.(\d+)\.(\d+)") {
                   $minor = [int]$matches[1];
                   $patch = [int]$matches[2];
-                  if ($minor -gt 0 -or $patch -ge 300) {
+                  if ($minor -gt 0 -or $patch -ge 304) {
                     $isSdkValid = $true;
                     break;
                   }
                 }
               }
               if ($isSdkValid) {
-                Write-Output ".NET SDK 9.0.300 or higher is installed.";
+                Write-Output ".NET SDK 9.0.304 or higher is installed.";
               } else {
-                Write-Output ".NET SDK 9.0.300 or higher is NOT installed.";
-                Invoke-WebRequest -Uri "https://builds.dotnet.microsoft.com/dotnet/Sdk/9.0.300/dotnet-sdk-9.0.300-win-x64.exe" -OutFile "$env:TEMP\dotnet-sdk-9.0.300-win-x64.exe";
-                Start-Process -FilePath "$env:TEMP\dotnet-sdk-9.0.300-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait;
+                Write-Output ".NET SDK 9.0.304 or higher is NOT installed.";
+                Invoke-WebRequest -Uri "https://builds.dotnet.microsoft.com/dotnet/Sdk/9.0.304/dotnet-sdk-9.0.304-win-x64.exe" -OutFile "$env:TEMP\dotnet-sdk-9.0.304-win-x64.exe";
+                Start-Process -FilePath "$env:TEMP\dotnet-sdk-9.0.304-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait;
               }
             } else {
               Write-Output "No .NET 9.x SDK installed.";
@@ -393,11 +393,11 @@ definitions:
         - dotnet nuget list source
         - dotnet workload update --source https://api.nuget.org/v3/index.json
         - dotnet workload install aspire --source https://api.nuget.org/v3/index.json
-        - dotnet restore Demoulas.ProfitSharing.sln -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
+        - dotnet restore Demoulas.ProfitSharing.slnx -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
 
 
         - |
-          $output = dotnet list Demoulas.ProfitSharing.sln package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
+          $output = dotnet list Demoulas.ProfitSharing.slnx package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
           if ($output -match "has the following vulnerable packages") {
             Write-Host "Vulnerabilities found!"
             $output | Out-String | Write-Host

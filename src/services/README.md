@@ -49,6 +49,7 @@ Install 3rd Party Libraries:
 12. [Riok.Mapperly](https://mapperly.riok.app)
 13. [Serilog](https://serilog.net/)
 14. [.NET Feature Management](https://github.com/microsoft/FeatureManagement-Dotnet)
+15. [NetEscapades.AspNetCore.SecurityHeaders](https://github.com/andrewlock/NetEscapades.AspNetCore.SecurityHeaders)
 
 
 <hr/>
