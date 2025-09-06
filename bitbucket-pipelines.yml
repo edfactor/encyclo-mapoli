@@ -510,6 +510,63 @@ pipelines:
             - pwsh -File ./scripts/Check-Health.ps1 -Url $env:QA_BASE_URL -envServerName $env:API_SERVER_QA
 
       - step:
+          name: "Tag repository with application version"
+          runs-on:
+            - windows
+            - self.hosted
+          script:
+            - |
+              # Locate API artifact and extract version from .buildinfo.json (fallback to build number)
+              $apiZip = ".\dist\Demoulas.ProfitSharing.Api.zip"
+              $version = $null
+
+              if (Test-Path $apiZip) {
+                Write-Host "Found API artifact: $apiZip"
+                $temp = Join-Path $env:TEMP "api_extract_$($env:BITBUCKET_BUILD_NUMBER)"
+                if (Test-Path $temp) { Remove-Item -Recurse -Force $temp }
+                New-Item -ItemType Directory -Path $temp | Out-Null
+                Expand-Archive -Path $apiZip -DestinationPath $temp -Force
+                $buildInfoFile = Get-ChildItem -Path $temp -Filter ".buildinfo.json" -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 1
+                if ($buildInfoFile) { $buildInfoPath = $buildInfoFile.FullName } else { Write-Host "No .buildinfo.json inside artifact" }
+              } else {
+                Write-Host "API artifact not found at $apiZip - searching workspace for .buildinfo.json"
+                $found = Get-ChildItem -Path . -Filter ".buildinfo.json" -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 1
+                if ($found) { $buildInfoPath = $found.FullName }
+              }
+
+              if ($buildInfoPath) {
+                try {
+                  $json = Get-Content $buildInfoPath -Raw | ConvertFrom-Json
+                  $version = $json.version
+                  if (-not $version) { $version = $json.Version }
+                  if (-not $version) { $version = $json.buildVersion }
+                } catch {
+                  Write-Host "Failed to parse $buildInfoPath: $_"
+                }
+              }
+
+              if (-not $version) { $version = $env:BITBUCKET_BUILD_NUMBER; Write-Host "Using build number as version: $version" }
+
+              $tag = "v$version"
+              Write-Host "Preparing to create tag: $tag"
+
+              # Configure git identity for tagging
+              git config user.email "pipeline@local"
+              git config user.name "Bitbucket Pipeline"
+
+              # Check if tag already exists on remote
+              $exists = git ls-remote --tags origin $tag
+              if ($exists) { Write-Host "Tag $tag already exists on remote. Skipping tag creation."; exit 0 }
+
+              # Create annotated tag on the current commit (or BITBUCKET_COMMIT)
+              git tag -a $tag -m "Release $tag (build $env:BITBUCKET_BUILD_NUMBER)" $env:BITBUCKET_COMMIT
+
+              # Push tag to origin. Note: runner must have push permissions configured (SSH key / credentials)
+              git push origin refs/tags/$tag
+
+              Write-Host "Tag $tag created and pushed."
+
+      - step:
           name: "Gate: Promote to UAT"
           runs-on:
             - windows
