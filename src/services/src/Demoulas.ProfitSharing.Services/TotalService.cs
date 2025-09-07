@@ -21,7 +21,11 @@ namespace Demoulas.ProfitSharing.Services;
 /// participant totals, distributions, vesting balances, and other profit-sharing-related metrics.
 /// It relies on dependencies such as <see cref="IProfitSharingDataContextFactory"/> and <see cref="ICalendarService"/>
 /// to interact with the data context and calendar-related operations.
+///
+/// Design notes, executive summary and SQL snippets are documented in Confluence:
+/// <see href="https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/517898377/Totals+Service+Executive+Summary+and+SQL+snippets">Totals Service — Executive Summary and SQL snippets</see>
 /// </remarks>
+/// <seealso href="https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/517898377/Totals+Service+Executive+Summary+and+SQL+snippets">Confluence: Totals Service</seealso>
 public sealed class TotalService : ITotalService
 {
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
@@ -138,10 +142,10 @@ public sealed class TotalService : ITotalService
         int[] validProfitCodes =
             [ProfitCode.Constants.OutgoingForfeitures.Id, ProfitCode.Constants.Outgoing100PercentVestedPayment.Id];
         return (from pd in ctx.ProfitDetails
-            where pd.ProfitYear <= employeeYear
-            group pd by pd.Ssn
+                where pd.ProfitYear <= employeeYear
+                group pd by pd.Ssn
             into pd_g
-            select new ParticipantTotalDto() { Ssn = pd_g.Key, TotalAmount = pd_g.Where(x => validProfitCodes.Contains(x.ProfitCodeId)).Sum(x => x.Forfeiture) });
+                select new ParticipantTotalDto() { Ssn = pd_g.Key, TotalAmount = pd_g.Where(x => validProfitCodes.Contains(x.ProfitCodeId)).Sum(x => x.Forfeiture) });
     }
 
     /// <summary>
@@ -155,10 +159,10 @@ public sealed class TotalService : ITotalService
         int[] validProfitCodes =
             [ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id, ProfitCode.Constants.OutgoingDirectPayments.Id];
         return (from pd in ctx.ProfitDetails
-            where pd.ProfitYear <= employeeYear
-            group pd by pd.Ssn
+                where pd.ProfitYear <= employeeYear
+                group pd by pd.Ssn
             into pd_g
-            select new ParticipantTotalDto() { Ssn = pd_g.Key, TotalAmount = pd_g.Where(x => validProfitCodes.Contains(x.ProfitCodeId)).Sum(x => x.Forfeiture) });
+                select new ParticipantTotalDto() { Ssn = pd_g.Key, TotalAmount = pd_g.Where(x => validProfitCodes.Contains(x.ProfitCodeId)).Sum(x => x.Forfeiture) });
     }
 
     /// <summary>
@@ -278,19 +282,19 @@ public sealed class TotalService : ITotalService
                 {
                     var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
                     var rslt = await (from t in TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate)
-                        join d in demographics on t.Ssn equals d.Ssn
-                        where badgeNumberOrSsnCollection.Contains(d.BadgeNumber)
-                        select new BalanceEndpointResponse
-                        {
-                            Id = d.Ssn,
-                            Ssn = t.Ssn.MaskSsn(),
-                            CurrentBalance = (t.CurrentBalance ?? 0),
-                            VestedBalance = (t.VestedBalance ?? 0),
-                            VestingPercent = (t.VestingPercent ?? 0),
-                            YearsInPlan = (t.YearsInPlan ?? 0),
-                            AllocationsToBeneficiary = (t.AllocationsToBeneficiary ?? 0),
-                            AllocationsFromBeneficiary = (t.AllocationsFromBeneficiary ?? 0)
-                        }).ToListAsync(cancellationToken);
+                                      join d in demographics on t.Ssn equals d.Ssn
+                                      where badgeNumberOrSsnCollection.Contains(d.BadgeNumber)
+                                      select new BalanceEndpointResponse
+                                      {
+                                          Id = d.Ssn,
+                                          Ssn = t.Ssn.MaskSsn(),
+                                          CurrentBalance = (t.CurrentBalance ?? 0),
+                                          VestedBalance = (t.VestedBalance ?? 0),
+                                          VestingPercent = (t.VestingPercent ?? 0),
+                                          YearsInPlan = (t.YearsInPlan ?? 0),
+                                          AllocationsToBeneficiary = (t.AllocationsToBeneficiary ?? 0),
+                                          AllocationsFromBeneficiary = (t.AllocationsFromBeneficiary ?? 0)
+                                      }).ToListAsync(cancellationToken);
                     return rslt;
                 });
 
@@ -298,18 +302,18 @@ public sealed class TotalService : ITotalService
                 return await _profitSharingDataContextFactory.UseReadOnlyContext(ctx =>
                 {
                     var rslt = (from t in TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate)
-                        where badgeNumberOrSsnCollection.Contains(t.Ssn)
-                        select new BalanceEndpointResponse
-                        {
-                            Id = t.Ssn,
-                            Ssn = t.Ssn.MaskSsn(),
-                            CurrentBalance = (t.CurrentBalance ?? 0),
-                            VestedBalance = (t.VestedBalance ?? 0),
-                            VestingPercent = (t.VestingPercent ?? 0),
-                            YearsInPlan = (t.YearsInPlan ?? 0),
-                            AllocationsToBeneficiary = (t.AllocationsToBeneficiary ?? 0),
-                            AllocationsFromBeneficiary = (t.AllocationsFromBeneficiary ?? 0)
-                        }).ToListAsync(cancellationToken);
+                                where badgeNumberOrSsnCollection.Contains(t.Ssn)
+                                select new BalanceEndpointResponse
+                                {
+                                    Id = t.Ssn,
+                                    Ssn = t.Ssn.MaskSsn(),
+                                    CurrentBalance = (t.CurrentBalance ?? 0),
+                                    VestedBalance = (t.VestedBalance ?? 0),
+                                    VestingPercent = (t.VestingPercent ?? 0),
+                                    YearsInPlan = (t.YearsInPlan ?? 0),
+                                    AllocationsToBeneficiary = (t.AllocationsToBeneficiary ?? 0),
+                                    AllocationsFromBeneficiary = (t.AllocationsFromBeneficiary ?? 0)
+                                }).ToListAsync(cancellationToken);
                     return rslt;
                 });
         }
