@@ -2,7 +2,7 @@ import { Replay } from "@mui/icons-material";
 import { Alert, AlertTitle, Button, CircularProgress, Grid, Tooltip, Typography } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   useGetMasterApplyMutation,
@@ -30,7 +30,7 @@ import {
 } from "reduxstore/types";
 import { ApiMessageAlert, DSMAccordion, numberToCurrency, Page, setMessage, SmartModal } from "smart-ui-library";
 import { TotalsGrid } from "../../components/TotalsGrid";
-import { NAVIGATION_STATUS } from "../../constants";
+import usePrerequisiteNavigations from "../../hooks/usePrerequisiteNavigations";
 import { MessageKeys, Messages } from "../../utils/messageDictonary";
 import ChangesList from "./ChangesList";
 import ProfitShareEditConfirmation from "./ProfitShareEditConfirmation";
@@ -372,61 +372,10 @@ const ProfitShareEditUpdate = () => {
 
   const profitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
-  const navigationList = useSelector((state: RootState) => state.navigation.navigationData);
   const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
-  const [prerequisitesComplete, setPrerequisitesComplete] = useState<boolean>(true);
-
-  // Helper to locate current navigation and its prerequisites
-  const findNavigationById = (navigationArray: any[] | undefined, id: number): any | undefined => {
-    if (!navigationArray) return undefined;
-    for (const item of navigationArray) {
-      if (item.id === id) return item;
-      if (item.items && item.items.length > 0) {
-        const found = findNavigationById(item.items, id);
-        if (found) return found;
-      }
-    }
-    return undefined;
-  };
-
-  const lastIncompleteRef = useRef<string>("");
-
-  useEffect(() => {
-    const navObj = findNavigationById(navigationList?.navigation, currentNavigationId);
-    if (navObj && navObj.prerequisiteNavigations && navObj.prerequisiteNavigations.length > 0) {
-      const incomplete = navObj.prerequisiteNavigations.filter((p: any) => p.statusId !== NAVIGATION_STATUS.COMPLETE);
-      const allComplete = incomplete.length === 0;
-      setPrerequisitesComplete(allComplete);
-      if (!allComplete && incomplete.length > 0) {
-        // Use first incomplete to message (could aggregate if desired)
-        const first = incomplete[0];
-        const idsKey = incomplete
-          .map((i: any) => i.id)
-          .sort()
-          .join(",");
-        if (idsKey !== lastIncompleteRef.current) {
-          lastIncompleteRef.current = idsKey;
-          dispatch(
-            setMessage({
-              ...Messages.ProfitSharePrerequisiteIncomplete,
-              message: {
-                ...Messages.ProfitSharePrerequisiteIncomplete.message,
-                // Provide list of incomplete prerequisites
-                message:
-                  (incomplete.length === 1
-                    ? `${first.title} is '${first.statusName ?? "Not Complete"}' and must be 'Complete' before saving.`
-                    : `Prerequisites incomplete: ${incomplete
-                        .map((i: any) => `${i.title} (${i.statusName ?? "Not Complete"})`)
-                        .join(", ")}. Each must be 'Complete' before saving.`) + ""
-              }
-            })
-          );
-        }
-      }
-    } else {
-      setPrerequisitesComplete(true);
-    }
-  }, [navigationList, currentNavigationId, dispatch]);
+  const { prerequisitesComplete } = usePrerequisiteNavigations(currentNavigationId, {
+    messageTemplate: Messages.ProfitSharePrerequisiteIncomplete as any
+  });
 
   useEffect(() => {
     const currentYear = new Date().getFullYear();
