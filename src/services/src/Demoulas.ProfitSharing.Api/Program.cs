@@ -6,7 +6,6 @@ using Demoulas.Common.Logging.Extensions;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
-using Demoulas.ProfitSharing.Common.Metrics;
 using Demoulas.ProfitSharing.Common.LogMasking;
 using Demoulas.ProfitSharing.Data;
 using Demoulas.ProfitSharing.Data.Contexts;
@@ -120,7 +119,7 @@ void OktaDocumentSettings(AspNetCoreOpenApiDocumentGeneratorSettings settings)
     settings.OperationProcessors.Add(new SwaggerAuthorizationDetails());
 }
 
-builder.ConfigureDefaultEndpoints(meterNames: [GlobalMeter.Name],
+builder.ConfigureDefaultEndpoints(meterNames: [],
         activitySourceNames: [OracleHcmActivitySource.Instance.Name])
     .AddSwaggerOpenApi(oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings)
     .AddSwaggerOpenApi(version: 2, oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings);
@@ -143,15 +142,10 @@ builder.Host.UseDefaultServiceProvider(options =>
 
 WebApplication app = builder.Build();
 
-// Register observable gauges (job in-flight, etc.)
-GlobalMeter.RegisterObservableGauges();
-GlobalMeter.RecordDeploymentStartup();
-
 app.UseCors();
 app.UseSecurityHeaders();
 app.UseDemographicHeaders();
 app.UseSensitiveValueMasking();
-
 app.UseDefaultEndpoints(OktaSettingsAction)
     .UseReDoc(settings =>
     {
