@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.Metrics;
 using System.Threading;
+using Demoulas.Common.Contracts.Interfaces; // For IAppVersionInfo
 
 namespace Demoulas.ProfitSharing.Common.Metrics;
 
@@ -11,26 +12,28 @@ namespace Demoulas.ProfitSharing.Common.Metrics;
 public static class GlobalMeter
 {
     public const string Name = "demoulas.profitsharing";
-    public static readonly Meter Meter = new Meter(Name, "1.0.0");
+    private static Meter? _meter;
+    public static Meter Meter => _meter ?? throw new InvalidOperationException("GlobalMeter not initialized. Call InitializeFromServices first.");
 
-    // API
-    public static readonly Counter<long> ApiRequests = Meter.CreateCounter<long>("api.requests.total");
-    public static readonly Histogram<double> ApiRequestDurationMs = Meter.CreateHistogram<double>("api.request.duration.ms");
+    // API (initialized after meter creation)
+    public static Counter<long> ApiRequests { get; private set; } = null!;
+    public static Histogram<double> ApiRequestDurationMs { get; private set; } = null!;
 
     // Jobs / Background work
-    public static readonly Counter<long> JobRunCount = Meter.CreateCounter<long>("job.run.count");
-    public static readonly Histogram<double> JobRunDurationMs = Meter.CreateHistogram<double>("job.run.duration.ms");
-    public static readonly Counter<long> JobRunFailures = Meter.CreateCounter<long>("job.run.failures");
-    public static readonly Counter<long> JobProcessedRecords = Meter.CreateCounter<long>("job.processed_records.total");
+    public static Counter<long> JobRunCount { get; private set; } = null!;
+    public static Histogram<double> JobRunDurationMs { get; private set; } = null!;
+    public static Counter<long> JobRunFailures { get; private set; } = null!;
+    public static Counter<long> JobProcessedRecords { get; private set; } = null!;
 
     // Health / incident metrics
-    public static readonly Counter<long> IncidentsTotal = Meter.CreateCounter<long>("incidents.total");
-    public static readonly Counter<long> IncidentResolutionsTotal = Meter.CreateCounter<long>("incidents.resolved.total");
+    public static Counter<long> IncidentsTotal { get; private set; } = null!;
+    public static Counter<long> IncidentResolutionsTotal { get; private set; } = null!;
     private static int _healthStatus = 1; // 1 healthy, 0 unhealthy
     private static int _incidentOpen; // 0 closed, 1 open
+    private static IAppVersionInfo? _appVersionInfo;
 
     // Deployment / build metrics
-    public static readonly Counter<long> DeploymentsTotal = Meter.CreateCounter<long>("deployments.total");
+    public static Counter<long> DeploymentsTotal { get; private set; } = null!;
     private static bool _deploymentRecorded;
     private static bool _buildAgeRegistered;
     private static DateTimeOffset? _buildTimestamp;
@@ -56,6 +59,44 @@ public static class GlobalMeter
         }
 
         Meter.CreateObservableGauge("health.status", () => System.Threading.Volatile.Read(ref _healthStatus));
+    }
+
+    /// <summary>
+    /// Optionally supply the root service provider to allow resolving version info.
+    /// Call once during startup after building the app/host.
+    /// </summary>
+    private static bool _initialized;
+
+    public static void InitializeFromServices(IServiceProvider serviceProvider)
+    {
+        if (_initialized) {return;}
+        try
+        {
+            _appVersionInfo = serviceProvider.GetService(typeof(IAppVersionInfo)) as IAppVersionInfo;
+        }
+        catch
+        {
+            // ignore
+        }
+
+        string version = _appVersionInfo?.BuildNumber ?? "0.0.0"; // No env fallback per requirement
+
+        _meter = new Meter(Name, version);
+
+        // Create instruments
+        ApiRequests = Meter.CreateCounter<long>("api.requests.total");
+        ApiRequestDurationMs = Meter.CreateHistogram<double>("api.request.duration.ms");
+
+        JobRunCount = Meter.CreateCounter<long>("job.run.count");
+        JobRunDurationMs = Meter.CreateHistogram<double>("job.run.duration.ms");
+        JobRunFailures = Meter.CreateCounter<long>("job.run.failures");
+        JobProcessedRecords = Meter.CreateCounter<long>("job.processed_records.total");
+
+        IncidentsTotal = Meter.CreateCounter<long>("incidents.total");
+        IncidentResolutionsTotal = Meter.CreateCounter<long>("incidents.resolved.total");
+        DeploymentsTotal = Meter.CreateCounter<long>("deployments.total");
+
+        _initialized = true;
     }
 
     public static void UpdateHealthStatus(bool healthy)
@@ -94,7 +135,7 @@ public static class GlobalMeter
         string? commit = Environment.GetEnvironmentVariable("GIT_COMMIT") ?? Environment.GetEnvironmentVariable("SOURCE_VERSION") ?? "unknown";
         string? branch = Environment.GetEnvironmentVariable("GIT_BRANCH") ?? Environment.GetEnvironmentVariable("BUILD_SOURCEBRANCH") ?? "unknown";
         string? pipelineId = Environment.GetEnvironmentVariable("BUILD_PIPELINE_ID") ?? Environment.GetEnvironmentVariable("PIPELINE_ID") ?? "unknown";
-        string? buildVersion = Environment.GetEnvironmentVariable("BUILD_VERSION") ?? AppDomain.CurrentDomain.FriendlyName;
+        string buildVersion = _appVersionInfo?.BuildNumber ?? "0.0.0"; // No env fallback per requirement
         string? buildTsRaw = Environment.GetEnvironmentVariable("BUILD_TIMESTAMP");
         string? environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "unknown";
 

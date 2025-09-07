@@ -143,7 +143,8 @@ builder.Host.UseDefaultServiceProvider(options =>
 
 WebApplication app = builder.Build();
 
-// Register observable gauges (job in-flight, etc.)
+// Initialize metrics (resolve version) then register gauges
+GlobalMeter.InitializeFromServices(app.Services);
 GlobalMeter.RegisterObservableGauges();
 GlobalMeter.RecordDeploymentStartup();
 

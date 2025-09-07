@@ -33,8 +33,6 @@ builder.Services.AddOpenTelemetry().WithMetrics(m =>
 {
     m.AddMeter(GlobalMeter.Name);
 });
-GlobalMeter.RegisterObservableGauges();
-GlobalMeter.RecordDeploymentStartup();
 
 ElasticSearchConfig smartConfig = new ElasticSearchConfig();
 builder.Configuration.Bind("Logging:Smart", smartConfig);
@@ -66,4 +64,7 @@ else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
 }
 
 var host = builder.Build();
+GlobalMeter.InitializeFromServices(host.Services);
+GlobalMeter.RegisterObservableGauges();
+GlobalMeter.RecordDeploymentStartup();
 await host.RunAsync().ConfigureAwait(false);
