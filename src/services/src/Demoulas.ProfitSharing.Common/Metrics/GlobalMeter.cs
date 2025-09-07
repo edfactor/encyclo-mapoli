@@ -104,10 +104,10 @@ public static class GlobalMeter
 
     private static void EnsureInitializedLazy()
     {
-        if (_initialized) return;
+        if (_initialized) {return;}
         lock (_initLock)
         {
-            if (_initialized) return;
+            if (_initialized) {return;}
             InitializeCore("0.0.0");
         }
     }
@@ -115,7 +115,7 @@ public static class GlobalMeter
     private static void InitializeCore(string version)
     {
         _meter ??= new Meter(Name, version);
-        if (ApiRequests is not null!) return; // already created (race guard)
+
 
         ApiRequests = Meter.CreateCounter<long>("api.requests.total");
         ApiRequestDurationMs = Meter.CreateHistogram<double>("api.request.duration.ms");
