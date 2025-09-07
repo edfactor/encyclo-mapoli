@@ -110,7 +110,7 @@ public class MasterInquiryEmployeeDetailsTests : ApiTestBase<Api.Program>
     public async Task GetEmployeeDetailsWithSocialSecurity()
     {
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
-        var request = new MasterInquiryRequest { Ssn = 000000000, Skip = 0, Take = 25, ProfitYear = profitYear };
+        var request = new MasterInquiryRequest { Ssn = 100000000, Skip = 0, Take = 25, ProfitYear = profitYear };
         var response = await ApiClient.POSTAsync<MasterInquirySearchEndpoint, MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>(request);
         response.ShouldNotBeNull();
         response.Response.EnsureSuccessStatusCode();
