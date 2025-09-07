@@ -84,4 +84,12 @@ export class Messages {
       message: `Updated By: x | Date: x `
     }
   };
+  static readonly ProfitSharePrerequisiteIncomplete: MessageUpdate = {
+    key: MessageKeys.ProfitShareEditUpdate,
+    message: {
+      type: "error",
+      title: "Prerequisite Not Complete",
+      message: "" // dynamic message added at dispatch time
+    }
+  };
 }

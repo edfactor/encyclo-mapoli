@@ -2,7 +2,7 @@ import { Replay } from "@mui/icons-material";
 import { Alert, AlertTitle, Button, CircularProgress, Grid, Tooltip, Typography } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   useGetMasterApplyMutation,
@@ -30,6 +30,7 @@ import {
 } from "reduxstore/types";
 import { ApiMessageAlert, DSMAccordion, numberToCurrency, Page, setMessage, SmartModal } from "smart-ui-library";
 import { TotalsGrid } from "../../components/TotalsGrid";
+import { NAVIGATION_STATUS } from "../../constants";
 import { MessageKeys, Messages } from "../../utils/messageDictonary";
 import ChangesList from "./ChangesList";
 import ProfitShareEditConfirmation from "./ProfitShareEditConfirmation";
@@ -195,7 +196,8 @@ const RenderSaveButton = (
   isLoading: boolean,
   minimumFieldsEntered: boolean = false,
   adjustedBadgeOneValid: boolean = true,
-  adjustedBadgeTwoValid: boolean = true
+  adjustedBadgeTwoValid: boolean = true,
+  prerequisitesComplete: boolean = true
 ) => {
   // The incoming status field is about whether or not changes have already been applied
   const {
@@ -205,13 +207,20 @@ const RenderSaveButton = (
     totalForfeituresGreaterThanZero,
     invalidProfitShareEditYear
   } = useSelector((state: RootState) => state.yearsEnd);
+  const navigationList = useSelector((state: RootState) => state.navigation.navigationData);
+  const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
+  // Determine tooltip reason when disabled by prerequisites
+  const prereqTooltip = !prerequisitesComplete
+    ? "All prerequisite navigations must be complete before saving."
+    : undefined;
   const saveButton = (
     <Button
       disabled={
         (!profitEditUpdateChangesAvailable && status?.updatedTime !== null) ||
         isLoading ||
         totalForfeituresGreaterThanZero ||
-        invalidProfitShareEditYear
+        invalidProfitShareEditYear ||
+        !prerequisitesComplete
       }
       variant="outlined"
       color="primary"
@@ -222,7 +231,8 @@ const RenderSaveButton = (
           wasFormUsed(profitSharingEditQueryParams) &&
           adjustedBadgeOneValid &&
           adjustedBadgeTwoValid &&
-          minimumFieldsEntered
+          minimumFieldsEntered &&
+          prerequisitesComplete
         ) {
           setOpenSaveModal(true);
         } else {
@@ -243,7 +253,12 @@ const RenderSaveButton = (
     </Button>
   );
 
-  if (!profitEditUpdateChangesAvailable || invalidProfitShareEditYear || totalForfeituresGreaterThanZero) {
+  if (
+    !profitEditUpdateChangesAvailable ||
+    invalidProfitShareEditYear ||
+    totalForfeituresGreaterThanZero ||
+    !prerequisitesComplete
+  ) {
     return (
       <Tooltip
         placement="top"
@@ -252,7 +267,9 @@ const RenderSaveButton = (
             ? "Invalid year for saving changes"
             : totalForfeituresGreaterThanZero == true
               ? "Total forfeitures is greater than zero."
-              : "You must have previewed data before saving."
+              : !prerequisitesComplete
+                ? prereqTooltip
+                : "You must have previewed data before saving."
         }>
         <span>{saveButton}</span>
       </Tooltip>
@@ -355,6 +372,61 @@ const ProfitShareEditUpdate = () => {
 
   const profitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
+  const navigationList = useSelector((state: RootState) => state.navigation.navigationData);
+  const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
+  const [prerequisitesComplete, setPrerequisitesComplete] = useState<boolean>(true);
+
+  // Helper to locate current navigation and its prerequisites
+  const findNavigationById = (navigationArray: any[] | undefined, id: number): any | undefined => {
+    if (!navigationArray) return undefined;
+    for (const item of navigationArray) {
+      if (item.id === id) return item;
+      if (item.items && item.items.length > 0) {
+        const found = findNavigationById(item.items, id);
+        if (found) return found;
+      }
+    }
+    return undefined;
+  };
+
+  const lastIncompleteRef = useRef<string>("");
+
+  useEffect(() => {
+    const navObj = findNavigationById(navigationList?.navigation, currentNavigationId);
+    if (navObj && navObj.prerequisiteNavigations && navObj.prerequisiteNavigations.length > 0) {
+      const incomplete = navObj.prerequisiteNavigations.filter((p: any) => p.statusId !== NAVIGATION_STATUS.COMPLETE);
+      const allComplete = incomplete.length === 0;
+      setPrerequisitesComplete(allComplete);
+      if (!allComplete && incomplete.length > 0) {
+        // Use first incomplete to message (could aggregate if desired)
+        const first = incomplete[0];
+        const idsKey = incomplete
+          .map((i: any) => i.id)
+          .sort()
+          .join(",");
+        if (idsKey !== lastIncompleteRef.current) {
+          lastIncompleteRef.current = idsKey;
+          dispatch(
+            setMessage({
+              ...Messages.ProfitSharePrerequisiteIncomplete,
+              message: {
+                ...Messages.ProfitSharePrerequisiteIncomplete.message,
+                // Provide list of incomplete prerequisites
+                message:
+                  (incomplete.length === 1
+                    ? `${first.title} is '${first.statusName ?? "Not Complete"}' and must be 'Complete' before saving.`
+                    : `Prerequisites incomplete: ${incomplete
+                        .map((i: any) => `${i.title} (${i.statusName ?? "Not Complete"})`)
+                        .join(", ")}. Each must be 'Complete' before saving.`) + ""
+              }
+            })
+          );
+        }
+      }
+    } else {
+      setPrerequisitesComplete(true);
+    }
+  }, [navigationList, currentNavigationId, dispatch]);
 
   useEffect(() => {
     const currentYear = new Date().getFullYear();
@@ -441,7 +513,8 @@ const ProfitShareEditUpdate = () => {
             isLoading,
             minimumFieldsEntered,
             adjustedBadgeOneValid,
-            adjustedBadgeTwoValid
+            adjustedBadgeTwoValid,
+            prerequisitesComplete
           )}
           {renderActionNode()}
         </div>
@@ -571,19 +644,17 @@ const ProfitShareEditUpdate = () => {
               topRowHeaders={["Total Forfeitures", "Total Points", "For Employees Exceeding Max Contribution"]}
             />
             {totalForfeituresGreaterThanZero && (
-              <div
-                className="px-[24px]"
-                style={{ color: "red", marginTop: "-8px", fontSize: "0.875rem" }}>
+              <div className="-mt-2 px-[24px] text-sm text-red-600">
                 <em>
                   * Total Forfeitures value highlighted in red indicates an issue that must be resolved before saving.
                 </em>
               </div>
             )}
-            <div style={{ height: "20px" }}></div>
+            <div className="h-5" />
             <div className="px-[24px]">
               <h2 className="text-dsm-secondary">Summary (PAY447)</h2>
             </div>
-            <div style={{ display: "flex", gap: "8px" }}>
+            <div className="flex gap-2">
               <TotalsGrid
                 breakPoints={{ xs: 5, sm: 5, md: 5, lg: 5, xl: 5 }}
                 tablePadding="4px"

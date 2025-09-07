@@ -203,3 +203,11 @@ export const PAY426_REPORT_IDS = {
   TERMINATED_WITH_PRIOR_PS: 8,
   TERMINATED_UNDER_EIGHTEEN_NO_WAGES: 10
 } as const;
+
+// Mirror of server-side NavigationStatus.Constants for client logic
+export const NAVIGATION_STATUS = {
+  NOT_STARTED: 1,
+  IN_PROGRESS: 2,
+  ON_HOLD: 3,
+  COMPLETE: 4
+} as const;
