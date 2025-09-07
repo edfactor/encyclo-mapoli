@@ -13,7 +13,18 @@ public static class GlobalMeter
 {
     public const string Name = "demoulas.profitsharing";
     private static Meter? _meter;
-    public static Meter Meter => _meter ?? throw new InvalidOperationException("GlobalMeter not initialized. Call InitializeFromServices first.");
+    private static readonly object _initLock = new();
+    public static Meter Meter
+    {
+        get
+        {
+            if (_meter is null)
+            {
+                EnsureInitializedLazy();
+            }
+            return _meter!;
+        }
+    }
 
     // API (initialized after meter creation)
     public static Counter<long> ApiRequests { get; private set; } = null!;
@@ -49,6 +60,11 @@ public static class GlobalMeter
     /// </summary>
     public static void RegisterObservableGauges()
     {
+        if (!_initialized || _meter is null)
+        {
+            EnsureInitializedLazy();
+        }
+
         // Note: CreateObservableGauge overloads differ across framework versions.
         // This callback returns the current in-flight job count.
         Meter.CreateObservableGauge("job.runs.inflight", () => Volatile.Read(ref _jobRunsInflight));
@@ -69,33 +85,47 @@ public static class GlobalMeter
 
     public static void InitializeFromServices(IServiceProvider serviceProvider)
     {
-        if (_initialized) {return;}
-        try
+        if (_initialized) return;
+        lock (_initLock)
         {
-            _appVersionInfo = serviceProvider.GetService(typeof(IAppVersionInfo)) as IAppVersionInfo;
+            if (_initialized) return;
+            try
+            {
+                _appVersionInfo = serviceProvider.GetService(typeof(IAppVersionInfo)) as IAppVersionInfo;
+            }
+            catch
+            {
+                // ignore
+            }
+            string version = _appVersionInfo?.BuildNumber ?? "0.0.0";
+            InitializeCore(version);
         }
-        catch
+    }
+
+    private static void EnsureInitializedLazy()
+    {
+        if (_initialized) return;
+        lock (_initLock)
         {
-            // ignore
+            if (_initialized) return;
+            InitializeCore("0.0.0");
         }
+    }
 
-        string version = _appVersionInfo?.BuildNumber ?? "0.0.0"; // No env fallback per requirement
+    private static void InitializeCore(string version)
+    {
+        _meter ??= new Meter(Name, version);
+        if (ApiRequests is not null!) return; // already created (race guard)
 
-        _meter = new Meter(Name, version);
-
-        // Create instruments
         ApiRequests = Meter.CreateCounter<long>("api.requests.total");
         ApiRequestDurationMs = Meter.CreateHistogram<double>("api.request.duration.ms");
-
         JobRunCount = Meter.CreateCounter<long>("job.run.count");
         JobRunDurationMs = Meter.CreateHistogram<double>("job.run.duration.ms");
         JobRunFailures = Meter.CreateCounter<long>("job.run.failures");
         JobProcessedRecords = Meter.CreateCounter<long>("job.processed_records.total");
-
         IncidentsTotal = Meter.CreateCounter<long>("incidents.total");
         IncidentResolutionsTotal = Meter.CreateCounter<long>("incidents.resolved.total");
         DeploymentsTotal = Meter.CreateCounter<long>("deployments.total");
-
         _initialized = true;
     }
 
@@ -135,7 +165,7 @@ public static class GlobalMeter
         string? commit = Environment.GetEnvironmentVariable("GIT_COMMIT") ?? Environment.GetEnvironmentVariable("SOURCE_VERSION") ?? "unknown";
         string? branch = Environment.GetEnvironmentVariable("GIT_BRANCH") ?? Environment.GetEnvironmentVariable("BUILD_SOURCEBRANCH") ?? "unknown";
         string? pipelineId = Environment.GetEnvironmentVariable("BUILD_PIPELINE_ID") ?? Environment.GetEnvironmentVariable("PIPELINE_ID") ?? "unknown";
-        string buildVersion = _appVersionInfo?.BuildNumber ?? "0.0.0"; // No env fallback per requirement
+        string buildVersion = _appVersionInfo?.BuildNumber ?? "0.0.0"; // No env fallback
         string? buildTsRaw = Environment.GetEnvironmentVariable("BUILD_TIMESTAMP");
         string? environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "unknown";
 
