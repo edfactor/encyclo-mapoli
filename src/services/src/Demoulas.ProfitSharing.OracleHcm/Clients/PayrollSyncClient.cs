@@ -12,6 +12,7 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Demoulas.ProfitSharing.Common.Metrics;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Clients;
 
@@ -151,7 +152,10 @@ internal class PayrollSyncClient
             foreach (PayrollItem[] items in results!.Items.Chunk(15))
             {
                 MessageRequest<PayrollItem[]> message = new() { ApplicationName = nameof(PayrollSyncClient), Body = items, UserId = requestedBy };
-
+                if (items.Length > 0)
+                {
+                    GlobalMeter.JobProcessedRecords.Add(items.Length, new KeyValuePair<string, object?>("job.name", "PayrollSyncJob"));
+                }
                 await _payrollSyncBus.Writer.WriteAsync(message, cancellationToken).ConfigureAwait(false);
             }
 
@@ -191,7 +195,7 @@ internal class PayrollSyncClient
         foreach (long id in missingPersonIds)
         {
             OracleEmployee[] oracleHcmEmployees = await _oracleEmployeeDataSyncClient.GetEmployee(id, cancellationToken).ConfigureAwait(false);
-            await _employeeSyncService.QueueEmployee(Constants.SystemAccountName, oracleHcmEmployees, cancellationToken).ConfigureAwait(false);
+            await _employeeSyncService.QueueEmployee(Constants.SystemAccountName, oracleHcmEmployees, "PayrollSyncJob", cancellationToken).ConfigureAwait(false);
         }
     }
 

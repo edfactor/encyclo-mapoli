@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Metrics;
 using Demoulas.ProfitSharing.Data.Entities.Scheduling;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Clients;
@@ -61,22 +62,33 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
             return db.SaveChangesAsync(cancellationToken);
         }, cancellationToken).ConfigureAwait(false);
 
+        // Metrics: track job in-flight, duration, count and failures
+        GlobalMeter.IncrementJobInflight();
+        var sw = System.Diagnostics.Stopwatch.StartNew();
         bool success = true;
         try
         {
+            GlobalMeter.JobRunCount.Add(1, new KeyValuePair<string, object?>("job.name", nameof(ExecuteFullSyncAsync)));
+
             await _demographicsService.CleanAuditError(cancellationToken).ConfigureAwait(false);
-            await foreach (OracleEmployee[] oracleHcmEmployees in _oracleEmployeeDataSyncClient.GetAllEmployees(cancellationToken).ConfigureAwait(false) )
+            await foreach (OracleEmployee[] oracleHcmEmployees in _oracleEmployeeDataSyncClient.GetAllEmployees(cancellationToken).ConfigureAwait(false))
             {
-                await QueueEmployee(requestedBy, oracleHcmEmployees, cancellationToken).ConfigureAwait(false);
+                await QueueEmployee(requestedBy, oracleHcmEmployees!, nameof(ExecuteFullSyncAsync), cancellationToken).ConfigureAwait(false);
             }
         }
         catch (Exception ex)
         {
             success = false;
-            await _demographicsService.AuditError(0, 0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken).ConfigureAwait(false);
+            GlobalMeter.JobRunFailures.Add(1, new KeyValuePair<string, object?>("job.name", nameof(ExecuteFullSyncAsync)), new KeyValuePair<string, object?>("outcome", "failure"));
+            await _demographicsService.AuditError(0, 0, new[] { new ValidationFailure("Error", ex.Message) }, requestedBy, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
+            sw.Stop();
+            GlobalMeter.JobRunDurationMs.Record(sw.Elapsed.TotalMilliseconds, new KeyValuePair<string, object?>("job.name", nameof(ExecuteFullSyncAsync)),
+                new KeyValuePair<string, object?>("outcome", success ? "success" : "failure"));
+            GlobalMeter.DecrementJobInflight();
+
             await _profitSharingDataContextFactory.UseWritableContext(db =>
             {
                 return db.Jobs.Where(j => j.Id == job.Id).ExecuteUpdateAsync(s => s
@@ -95,7 +107,6 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
     public async Task ExecuteDeltaSyncAsync(string requestedBy = Constants.SystemAccountName, CancellationToken cancellationToken = default)
     {
         using Activity? activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ExecuteDeltaSyncAsync), ActivityKind.Internal);
-
         Job job = new Job
         {
             JobTypeId = JobType.Constants.EmployeeSyncDelta,
@@ -110,13 +121,19 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
             db.Jobs.Add(job);
             return db.SaveChangesAsync(cancellationToken);
         }, cancellationToken).ConfigureAwait(false);
+
+        GlobalMeter.IncrementJobInflight();
+        var sw = Stopwatch.StartNew();
         bool success = true;
         try
         {
+            GlobalMeter.JobRunCount.Add(1, new KeyValuePair<string, object?>("job.name", nameof(ExecuteDeltaSyncAsync)));
+
             DateTimeOffset maxDate = DateTimeOffset.UtcNow;
             DateTimeOffset minDate = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
             {
-                return c.Demographics.MinAsync(d => (d.ModifiedAtUtc == null ? d.CreatedAtUtc : d.ModifiedAtUtc.Value) - TimeSpan.FromDays(7), cancellationToken: cancellationToken);
+                return c.Demographics.MinAsync(d => (d.ModifiedAtUtc == null ? d.CreatedAtUtc : d.ModifiedAtUtc.Value) - TimeSpan.FromDays(7),
+                    cancellationToken: cancellationToken);
             }).ConfigureAwait(false);
 
             IAsyncEnumerable<NewHireContext> newHires = _atomFeedClient.GetFeedDataAsync<NewHireContext>("newhire", minDate, maxDate, cancellationToken);
@@ -131,15 +148,21 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
             }
 
             await TrySyncEmployeeFromOracleHcm(requestedBy, people, cancellationToken).ConfigureAwait(false);
-
         }
         catch (Exception ex)
         {
             success = false;
+            GlobalMeter.JobRunFailures.Add(1, new KeyValuePair<string, object?>("job.name", nameof(ExecuteDeltaSyncAsync)),
+                new KeyValuePair<string, object?>("outcome", "failure"));
             await _demographicsService.AuditError(0, 0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
+            sw.Stop();
+            GlobalMeter.JobRunDurationMs.Record(sw.Elapsed.TotalMilliseconds, new KeyValuePair<string, object?>("job.name", nameof(ExecuteDeltaSyncAsync)),
+                new KeyValuePair<string, object?>("outcome", success ? "success" : "failure"));
+            GlobalMeter.DecrementJobInflight();
+
             await _profitSharingDataContextFactory.UseWritableContext(db =>
             {
                 return db.Jobs.Where(j => j.Id == job.Id).ExecuteUpdateAsync(s => s
@@ -157,7 +180,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
             foreach (long oracleHcmId in people)
             {
                 OracleEmployee[] oracleHcmEmployees = await _oracleEmployeeDataSyncClient.GetEmployee(oracleHcmId, cancellationToken).ConfigureAwait(false);
-                await QueueEmployee(requestedBy, oracleHcmEmployees, cancellationToken).ConfigureAwait(false);
+                await QueueEmployee(requestedBy, oracleHcmEmployees!, nameof(ExecuteDeltaSyncAsync), cancellationToken).ConfigureAwait(false);
             }
         }
         catch (Exception ex)
@@ -166,15 +189,21 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         }
     }
 
-    public ValueTask QueueEmployee(string requestedBy, OracleEmployee[] employees, CancellationToken cancellationToken)
+    public ValueTask QueueEmployee(string requestedBy, OracleEmployee[] employees, string jobName, CancellationToken cancellationToken)
     {
-        MessageRequest<OracleEmployee[]> message = new MessageRequest<OracleEmployee[]>
-        {
-            ApplicationName = nameof(EmployeeSyncService), Body = employees, UserId = requestedBy
-        };
+        MessageRequest<OracleEmployee[]> message = new MessageRequest<OracleEmployee[]> { ApplicationName = nameof(EmployeeSyncService), Body = employees, UserId = requestedBy };
 
-       return _employeeChannel.Writer.WriteAsync(message, cancellationToken);
+        if (employees is { Length: > 0 })
+        {
+            GlobalMeter.JobProcessedRecords.Add(employees.Length, new KeyValuePair<string, object?>("job.name", jobName));
+        }
+
+        return _employeeChannel.Writer.WriteAsync(message, cancellationToken);
     }
+
+    // Backwards-compatible interface method without jobName (defaults to Full Sync tag)
+    public ValueTask QueueEmployee(string requestedBy, OracleEmployee[] employees, CancellationToken cancellationToken)
+        => QueueEmployee(requestedBy, employees, nameof(ExecuteFullSyncAsync), cancellationToken);
 
 
     /// <summary>
