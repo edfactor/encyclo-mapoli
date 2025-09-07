@@ -1,7 +1,6 @@
-﻿using System;
-using System.Diagnostics.Metrics;
-using System.Threading;
-using Demoulas.Common.Contracts.Interfaces; // For IAppVersionInfo
+﻿using System.Diagnostics.Metrics;
+using Demoulas.Common.Contracts.Interfaces;
+using Microsoft.Extensions.DependencyInjection; 
 
 namespace Demoulas.ProfitSharing.Common.Metrics;
 
@@ -45,10 +44,7 @@ public static class GlobalMeter
 
     // Deployment / build metrics
     public static Counter<long> DeploymentsTotal { get; private set; } = null!;
-    private static bool _deploymentRecorded;
-    private static bool _buildAgeRegistered;
-    private static DateTimeOffset? _buildTimestamp;
-
+    
     // in-flight gauge implemented via an observable gauge
     private static int _jobRunsInflight;
 
@@ -68,13 +64,7 @@ public static class GlobalMeter
         // Note: CreateObservableGauge overloads differ across framework versions.
         // This callback returns the current in-flight job count.
         Meter.CreateObservableGauge("job.runs.inflight", () => Volatile.Read(ref _jobRunsInflight));
-        if (!_buildAgeRegistered && _buildTimestamp.HasValue)
-        {
-            _buildAgeRegistered = true;
-            Meter.CreateObservableGauge("build.age.seconds", () => (DateTimeOffset.UtcNow - _buildTimestamp!.Value).TotalSeconds);
-        }
-
-        Meter.CreateObservableGauge("health.status", () => System.Threading.Volatile.Read(ref _healthStatus));
+        Meter.CreateObservableGauge("health.status", () => Volatile.Read(ref _healthStatus));
     }
 
     /// <summary>
@@ -85,13 +75,13 @@ public static class GlobalMeter
 
     public static void InitializeFromServices(IServiceProvider serviceProvider)
     {
-        if (_initialized) return;
+        if (_initialized) {return;}
         lock (_initLock)
         {
-            if (_initialized) return;
+            if (_initialized) {return;}
             try
             {
-                _appVersionInfo = serviceProvider.GetService(typeof(IAppVersionInfo)) as IAppVersionInfo;
+                _appVersionInfo = serviceProvider.GetService<IAppVersionInfo>();
             }
             catch
             {
@@ -131,12 +121,12 @@ public static class GlobalMeter
 
     public static void UpdateHealthStatus(bool healthy)
     {
-        System.Threading.Volatile.Write(ref _healthStatus, healthy ? 1 : 0);
+        Volatile.Write(ref _healthStatus, healthy ? 1 : 0);
     }
 
     public static void RegisterIncidentStartIfNeeded(string status)
     {
-        if (System.Threading.Interlocked.CompareExchange(ref _incidentOpen, 1, 0) == 0)
+        if (Interlocked.CompareExchange(ref _incidentOpen, 1, 0) == 0)
         {
             IncidentsTotal.Add(1, new KeyValuePair<string, object?>("status", status));
         }
@@ -144,7 +134,7 @@ public static class GlobalMeter
 
     public static void RegisterIncidentResolutionIfNeeded(string status)
     {
-        if (System.Threading.Interlocked.CompareExchange(ref _incidentOpen, 0, 1) == 1)
+        if (Interlocked.CompareExchange(ref _incidentOpen, 0, 1) == 1)
         {
             IncidentResolutionsTotal.Add(1, new KeyValuePair<string, object?>("status", status));
         }
@@ -155,35 +145,13 @@ public static class GlobalMeter
     /// </summary>
     public static void RecordDeploymentStartup()
     {
-        if (_deploymentRecorded)
-        {
-            return;
-        }
-
-        _deploymentRecorded = true;
-
-        string? commit = Environment.GetEnvironmentVariable("GIT_COMMIT") ?? Environment.GetEnvironmentVariable("SOURCE_VERSION") ?? "unknown";
-        string? branch = Environment.GetEnvironmentVariable("GIT_BRANCH") ?? Environment.GetEnvironmentVariable("BUILD_SOURCEBRANCH") ?? "unknown";
-        string? pipelineId = Environment.GetEnvironmentVariable("BUILD_PIPELINE_ID") ?? Environment.GetEnvironmentVariable("PIPELINE_ID") ?? "unknown";
         string buildVersion = _appVersionInfo?.BuildNumber ?? "0.0.0"; // No env fallback
-        string? buildTsRaw = Environment.GetEnvironmentVariable("BUILD_TIMESTAMP");
+        string? gitHash = _appVersionInfo?.GitHash ?? "unknown";
         string? environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "unknown";
 
-        if (buildTsRaw is not null)
-        {
-            // Accept common ISO formats
-            string[] formats = ["O", "o", "yyyy-MM-ddTHH:mm:ssZ", "yyyy-MM-ddTHH:mm:ss.fffZ"]; // extend as needed
-            if (DateTimeOffset.TryParseExact(buildTsRaw, formats, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeUniversal,
-                    out var ts))
-            {
-                _buildTimestamp = ts.ToUniversalTime();
-            }
-        }
-
+        
         DeploymentsTotal.Add(1,
-            new KeyValuePair<string, object?>("git.commit", commit),
-            new KeyValuePair<string, object?>("git.branch", branch),
-            new KeyValuePair<string, object?>("pipeline.id", pipelineId),
+            new KeyValuePair<string, object?>("git.commit", gitHash),
             new KeyValuePair<string, object?>("build.version", buildVersion),
             new KeyValuePair<string, object?>("environment", environment));
     }
