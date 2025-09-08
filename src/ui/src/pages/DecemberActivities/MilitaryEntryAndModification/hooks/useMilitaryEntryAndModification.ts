@@ -202,7 +202,8 @@ export const useMilitaryEntryAndModification = () => {
           pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false },
           ...(!!params.socialSecurity && { ssn: Number(params.socialSecurity) }),
           ...(!!params.badgeNumber && { badgeNumber: Number(params.badgeNumber) }),
-          profitYear: profitYear
+          profitYear: profitYear,
+          memberType: 1 // Active employees only
         };
 
         const response = await triggerSearch(searchParams).unwrap();
