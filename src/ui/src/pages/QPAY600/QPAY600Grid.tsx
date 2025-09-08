@@ -79,7 +79,7 @@ const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, employeeStatus,
         totalLastYearWages: 2175000.0
       }
     };
-  }, [filterParams]);
+  }, []);
 
   useEffect(() => {
     onLoadingChange?.(isFetching);

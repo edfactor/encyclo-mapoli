@@ -477,7 +477,10 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
           }) as ColDef
       );
 
-    return [expansionColumn, ...visibleColumns, ...detailOnlyColumns];
+    const finalColumns = [expansionColumn, ...visibleColumns, ...detailOnlyColumns];
+    
+    
+    return finalColumns;
   }, [mainColumns, detailColumns]);
 
   return (
