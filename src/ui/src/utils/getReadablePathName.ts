@@ -69,7 +69,8 @@ const pathToReadableName: Record<string, string> = {
   qpay600: "QPAY600",
   "reprint-certificates": "Reprint Certificates",
   "print-profit-certs": "Print Profit Certificates",
-  "recently-terminated": "Recently Terminated"
+  "recently-terminated": "Recently Terminated",
+  "it devops": "IT DevOps"
 };
 
 export const getReadablePathName = (path: string): string => {
