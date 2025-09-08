@@ -46,13 +46,14 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
     },
     createCityColumn({
       field: "address.city",
+      colId: "address.city",
       minWidth: 120,
       alignment: "left"
     }),
     {
       headerName: "State",
       field: "address.state",
-      colId: "state",
+      colId: "address.state",
       minWidth: 60,
       headerClass: "center-align",
       cellClass: "center-align",
