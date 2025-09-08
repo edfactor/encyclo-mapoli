@@ -1,11 +1,14 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
-public record ProfitShareUpdateMemberResponse
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+
+public record ProfitShareUpdateMemberResponse: IIsExecutive
 {
     public bool IsEmployee { get; init; }
     public long Badge { get; set; }
     public string? Psn { get; set; }
-    public string? Name { get; set; }
+    [MaskSensitive] public string? Name { get; set; }
     public decimal BeginningAmount { get; set; }
     public decimal Distributions { get; set; }
     public decimal Military { get; set; }
@@ -22,4 +25,5 @@ public record ProfitShareUpdateMemberResponse
     public decimal EtvaEarnings { get; set; } // PY-PROF-ETVA  (a portion of Earnings which applies to ETVA)
     public decimal SecondaryEtvaEarnings { get; set; } // PY_PROF_ETVA2 (portion of Secondary Earnings which applies to ETVA)
     public bool TreatAsBeneficiary { get; set; }
+    public bool IsExecutive { get; set; }
 }

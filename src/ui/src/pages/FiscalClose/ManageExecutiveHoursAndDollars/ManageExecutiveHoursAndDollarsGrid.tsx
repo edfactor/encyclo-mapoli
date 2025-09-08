@@ -1,25 +1,9 @@
 import { AddOutlined } from "@mui/icons-material";
 import { Button, Tooltip, Typography } from "@mui/material";
 import { CellValueChangedEvent, IRowNode, SelectionChangedEvent } from "ag-grid-community";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetExecutiveHoursAndDollarsQuery } from "reduxstore/api/YearsEndApi";
-import {
-  addExecutiveHoursAndDollarsGridRow,
-  clearAdditionalExecutivesGrid,
-  clearExecutiveRowsSelected,
-  removeExecutiveHoursAndDollarsGridRow,
-  setExecutiveRowsSelected,
-  updateExecutiveHoursAndDollarsGridRow
-} from "reduxstore/slices/yearsEndSlice";
-import { RootState } from "reduxstore/store";
-import {
-  ExecutiveHoursAndDollars,
-  ExecutiveHoursAndDollarsGrid,
-  ExecutiveHoursAndDollarsRow,
-  PagedReportResponse
-} from "reduxstore/types";
-import { DSMGrid, ISortParams, Pagination, SmartModal } from "smart-ui-library";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ExecutiveHoursAndDollars, PagedReportResponse } from "reduxstore/types";
+import { DSMGrid, Pagination, SmartModal } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { CAPTIONS } from "../../../constants";
 import { GetManageExecutiveHoursAndDollarsColumns } from "./ManageExecutiveHoursAndDollarsGridColumns";
@@ -27,17 +11,11 @@ import SearchAndAddExecutive from "./SearchAndAddExecutive";
 
 interface RenderAddExecutiveButtonProps {
   reportReponse: PagedReportResponse<ExecutiveHoursAndDollars> | null;
-  isModal: boolean | undefined;
-  setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
+  isModal?: boolean;
+  onOpenModal: () => void;
 }
 
-const RenderAddExecutiveButton: React.FC<RenderAddExecutiveButtonProps> = ({
-  reportReponse,
-  isModal,
-  setOpenModal
-}) => {
-  const dispatch = useDispatch();
-
+const RenderAddExecutiveButton: React.FC<RenderAddExecutiveButtonProps> = ({ reportReponse, isModal, onOpenModal }) => {
   // We cannot add an employee if there is no result set there
   const gridAvailable: boolean = reportReponse?.response != null && reportReponse?.response != undefined;
 
@@ -48,12 +26,7 @@ const RenderAddExecutiveButton: React.FC<RenderAddExecutiveButtonProps> = ({
       color="secondary"
       size="medium"
       startIcon={<AddOutlined color={gridAvailable ? "secondary" : "disabled"} />}
-      onClick={async () => {
-        // We need to clear out previous result rows in redux
-        //dispatch(clearExecutiveRowsSelected());
-        dispatch(clearAdditionalExecutivesGrid());
-        setOpenModal(true);
-      }}>
+      onClick={() => onOpenModal()}>
       Add Executive
     </Button>
   );
@@ -75,332 +48,239 @@ const RenderAddExecutiveButton: React.FC<RenderAddExecutiveButtonProps> = ({
 
 interface ManageExecutiveHoursAndDollarsGridSearchProps {
   isModal?: boolean;
-  initialSearchLoaded: boolean;
-  setInitialSearchLoaded: (loaded: boolean) => void;
-  pageNumberReset: boolean;
-  setPageNumberReset: (reset: boolean) => void;
+  // Props for main grid (not needed when isModal=true)
+  gridData?: PagedReportResponse<ExecutiveHoursAndDollars> | null;
+  isModalOpen?: boolean;
+  openModal?: () => void;
+  closeModal?: () => void;
+  updateExecutiveRow?: (badge: number, hours: number, dollars: number) => void;
+  isRowStagedToSave?: (badge: number) => boolean;
+  mainGridPagination?: any;
+  executeModalSearch?: (searchForm: any) => void;
+  modalSelectedExecutives?: any[];
+  addExecutivesToMainGrid?: () => void;
+  isModalSearching?: boolean;
+  // Props for modal grid (not needed when isModal=false)
+  modalResults?: PagedReportResponse<ExecutiveHoursAndDollars> | null;
+  modalGridPagination?: any;
+  // Shared props
+  isSearching: boolean;
+  selectExecutivesInModal?: (executives: ExecutiveHoursAndDollars[]) => void;
 }
 
 const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollarsGridSearchProps> = ({
-  isModal,
-  initialSearchLoaded,
-  setInitialSearchLoaded,
-  pageNumberReset,
-  setPageNumberReset
+  isModal = false,
+  gridData = null,
+  modalResults = null,
+  isSearching,
+  isModalOpen = false,
+  openModal = () => {},
+  closeModal = () => {},
+  selectExecutivesInModal = () => {},
+  updateExecutiveRow = () => {},
+  isRowStagedToSave = () => false,
+  mainGridPagination = null,
+  modalGridPagination = null,
+  // Modal-specific props
+  executeModalSearch = () => {},
+  modalSelectedExecutives = [],
+  addExecutivesToMainGrid = () => {},
+  isModalSearching = false
 }) => {
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
+  const currentData = isModal ? modalResults : gridData;
+  const currentPagination = isModal ? modalGridPagination : mainGridPagination;
+  const sortEventHandler = currentPagination?.handleSortChange;
+  const columnDefs = useMemo(() => GetManageExecutiveHoursAndDollarsColumns(isModal), [isModal]);
 
-  // These are for the modal window
-  const [pageAddNumber, setPageAddNumber] = useState(0);
-  const [pageAddSize, setPageAddSize] = useState(25);
+  const processEditedRow = useCallback(
+    (event: CellValueChangedEvent) => {
+      const rowInQuestion: IRowNode = event.node;
 
-  let properPageNumber = pageNumber;
-  let properPageSize = pageSize;
+      // Mark that we're editing to prevent data resets
+      isEditingRef.current = true;
 
-  let setProperPageNumber = setPageNumber;
-  let setProperPageSize = setPageSize;
-
-  if (isModal) {
-    properPageNumber = pageAddNumber;
-    properPageSize = pageAddSize;
-    setProperPageNumber = setPageAddNumber;
-    setProperPageSize = setPageAddSize;
-  }
-
-  const [openModal, setOpenModal] = useState<boolean>(false);
-  const dispatch = useDispatch();
-  const { executiveHoursAndDollarsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
-
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "storeNumber",
-    isSortDescending: false
-  });
-
-  const {
-    executiveHoursAndDollars,
-    additionalExecutivesChosen,
-    additionalExecutivesGrid,
-    executiveHoursAndDollarsGrid
-  } = useSelector((state: RootState) => state.yearsEnd);
-
-  const [triggerSearch, { isFetching }] = useLazyGetExecutiveHoursAndDollarsQuery();
-
-  const onSearch = useCallback(async () => {
-    if (!executiveHoursAndDollarsQueryParams) return;
-
-    const request = {
-      profitYear: executiveHoursAndDollarsQueryParams.profitYear ?? 0,
-      ...(executiveHoursAndDollarsQueryParams.badgeNumber && {
-        badgeNumber: executiveHoursAndDollarsQueryParams.badgeNumber
-      }),
-      ...(executiveHoursAndDollarsQueryParams.socialSecurity !== null &&
-        executiveHoursAndDollarsQueryParams.socialSecurity !== 0 && {
-          socialSecurity: executiveHoursAndDollarsQueryParams.socialSecurity
-        }),
-      ...(executiveHoursAndDollarsQueryParams.fullNameContains && {
-        fullNameContains: executiveHoursAndDollarsQueryParams.fullNameContains
-      }),
-      hasExecutiveHoursAndDollars: executiveHoursAndDollarsQueryParams.hasExecutiveHoursAndDollars ?? false,
-      isMonthlyPayroll: executiveHoursAndDollarsQueryParams.isMonthlyPayroll ?? false,
-      pagination: {
-        skip: properPageNumber * properPageSize,
-        take: properPageSize,
-        sortBy: sortParams.sortBy,
-        isSortDescending: sortParams.isSortDescending
-      }
-    };
-    await triggerSearch(request, false);
-  }, [executiveHoursAndDollarsQueryParams, properPageNumber, properPageSize, sortParams, triggerSearch]);
-
-  useEffect(() => {
-    if (initialSearchLoaded) {
-      onSearch();
-    }
-  }, [initialSearchLoaded, properPageNumber, properPageSize, sortParams, onSearch]);
-
-  // Need a useEffect on a change in executiveHoursAndDollars to reset the page number
-
-  useEffect(() => {
-    if (pageNumberReset) {
-      setPageNumber(0);
-      setPageNumberReset(false);
-    }
-  }, [pageNumberReset, setPageNumberReset]);
-
-  // This function checks to see if we have a change for this badge number already pending for a save
-  const isRowStagedToSave = (badge: number): boolean => {
-    const found = executiveHoursAndDollarsGrid?.executiveHoursAndDollars.find(
-      (obj: ExecutiveHoursAndDollarsRow) => obj.badgeNumber === badge
-    );
-    return found != undefined;
-  };
-
-  const isTheEditTheOriginalRow = (badge: number, hours: number, dollars: number): boolean => {
-    const found: ExecutiveHoursAndDollars | undefined = executiveHoursAndDollars?.response.results.find(
-      (obj) => obj.badgeNumber === badge
-    );
-
-    if (found) {
-      if (hours === found.hoursExecutive && dollars === found.incomeExecutive) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  const processEditedRow = function (event: CellValueChangedEvent): void {
-    const rowInQuestion: IRowNode = event.node;
-
-    // We need to make sure that the hours and dollars are not too large
-    // At this time, we are limiting hours to less than 4000 and dollars
-    // to be less than 20 million
-
-    if (rowInQuestion.data.hoursExecutive > 4000) {
-      // If the new value is invalid, we need to go through the executiveHoursAndDollars object,
-      // find the badgeNumber equal to rowInQuestion.data.badgeNumber, find the value of hoursExecutive
-      // in that object, and set it to the value of rowInQuestion.data.hoursExecutive
-      rowInQuestion.data.hoursExecutive = executiveHoursAndDollars?.response.results.find(
-        (obj) => obj.badgeNumber === rowInQuestion.data.badgeNumber
-      )?.hoursExecutive;
-      event.api.refreshCells({ force: true }); // Needed to refresh the grid cells to restore the old value
-      return;
-    }
-    if (rowInQuestion.data.incomeExecutive > 20000000) {
-      rowInQuestion.data.incomeExecutive = executiveHoursAndDollars?.response.results.find(
-        (obj) => obj.badgeNumber === rowInQuestion.data.badgeNumber
-      )?.incomeExecutive;
-      event.api.refreshCells({ force: true });
-      return;
-    }
-
-    const rowRecord: ExecutiveHoursAndDollarsGrid = {
-      executiveHoursAndDollars: [
-        {
-          badgeNumber: rowInQuestion.data.badgeNumber,
-          executiveHours: rowInQuestion.data.hoursExecutive,
-          executiveDollars: rowInQuestion.data.incomeExecutive
+      // Validate hours and dollars limits
+      if (rowInQuestion.data.hoursExecutive > 4000) {
+        // Find original value to restore
+        const originalRow = currentData?.response.results.find(
+          (obj) => obj.badgeNumber === rowInQuestion.data.badgeNumber
+        );
+        if (originalRow) {
+          rowInQuestion.data.hoursExecutive = originalRow.hoursExecutive;
+          event.api.refreshCells({ force: true });
+          isEditingRef.current = false;
+          return;
         }
-      ],
-      profitYear: executiveHoursAndDollarsGrid?.profitYear || null
-    };
+      }
 
-    if (isRowStagedToSave(rowInQuestion.data.badgeNumber)) {
-      // We have two situations if the row is in the pending batch already:
-      // 1. The changes are a reversion to what is already in the database
-      // 2. The changes are additional unsaved changes that do not match
-      //    what is in the database
-      if (
-        isTheEditTheOriginalRow(
+      if (rowInQuestion.data.incomeExecutive > 20000000) {
+        // Find original value to restore
+        const originalRow = currentData?.response.results.find(
+          (obj) => obj.badgeNumber === rowInQuestion.data.badgeNumber
+        );
+        if (originalRow) {
+          rowInQuestion.data.incomeExecutive = originalRow.incomeExecutive;
+          event.api.refreshCells({ force: true });
+          isEditingRef.current = false;
+          return;
+        }
+      }
+
+      // Update the local mutable row data to persist the change in the grid
+      setMutableRowData((prevData) =>
+        prevData.map((row) =>
+          row.badgeNumber === rowInQuestion.data.badgeNumber
+            ? {
+                ...row,
+                hoursExecutive: rowInQuestion.data.hoursExecutive,
+                incomeExecutive: rowInQuestion.data.incomeExecutive
+              }
+            : row
+        )
+      );
+
+      // Update row if not in modal - this tracks changes for saving
+      if (!isModal) {
+        updateExecutiveRow(
           rowInQuestion.data.badgeNumber,
           rowInQuestion.data.hoursExecutive,
           rowInQuestion.data.incomeExecutive
-        )
-      ) {
-        // We remove the pending row entirely as no changes are needed
-        dispatch(removeExecutiveHoursAndDollarsGridRow(rowRecord));
-      } else {
-        // So these are additional edits that need to be saved
-        dispatch(updateExecutiveHoursAndDollarsGridRow(rowRecord));
+        );
       }
-    } else {
-      dispatch(addExecutiveHoursAndDollarsGridRow(rowRecord));
-    }
 
-    // Now we need to update this changed row in the grid's underlying
-    // data or else it will be undone on the next re-render
-    if (mutableCopyOfGridData) {
-      for (const element of mutableCopyOfGridData.response.results) {
-        if (element.badgeNumber === rowInQuestion.data.badgeNumber) {
-          element.incomeExecutive = rowInQuestion.data.incomeExecutive;
-          element.hoursExecutive = rowInQuestion.data.hoursExecutive;
-        }
-      }
-    }
-  };
-
-  const sortEventHandler = (update: ISortParams) => setSortParams(update);
-  const columnDefs = useMemo(() => GetManageExecutiveHoursAndDollarsColumns(isModal), [isModal]);
-
-  const combineGridWithAddedExecs = (
-    mainList: PagedReportResponse<ExecutiveHoursAndDollars> | null,
-    additionalResults: ExecutiveHoursAndDollars[] | null
-  ): PagedReportResponse<ExecutiveHoursAndDollars> | null => {
-    const mainGridStructureCopy = structuredClone(mainList);
-    const additionalResultsCopy = structuredClone(additionalResults);
-
-    if (!mainGridStructureCopy || !mainGridStructureCopy.response || !mainGridStructureCopy.response.results) {
-      return null;
-    }
-
-    if (!additionalResultsCopy || additionalResultsCopy.length === 0) {
-      return mainGridStructureCopy;
-    }
-
-    // We should only add people to the main grid if they are not already there
-    const existingBadgeNumbers = new Set(mainGridStructureCopy.response.results.map((item) => item.badgeNumber));
-    const filteredAdditionalResults = additionalResultsCopy.filter(
-      (item) => !existingBadgeNumbers.has(item.badgeNumber)
-    );
-    // Now we can add the filtered additional results to the main grid structure
-    mainGridStructureCopy.response.results = mainGridStructureCopy.response.results.concat(filteredAdditionalResults);
-
-    return mainGridStructureCopy;
-  };
-
-  // We memoize this not just for performance, but also because we need to
-  // add in any execs chosen in the modal window, and also, because if we
-  // do not memoize it, editing a column value will cause the grid to re-render
-  // with the original values, even though the underlying data has changed
-
-  const mutableCopyOfGridData = useMemo(
-    () => combineGridWithAddedExecs(executiveHoursAndDollars, additionalExecutivesChosen),
-    [executiveHoursAndDollars, additionalExecutivesChosen]
+      // Reset editing flag after a small delay
+      setTimeout(() => {
+        isEditingRef.current = false;
+      }, 100);
+    },
+    [isModal, currentData, updateExecutiveRow]
   );
+  const hasData = Boolean(currentData?.response?.results && currentData.response.results.length > 0);
+  const isPaginationNeeded = hasData;
 
-  const isRowDataThere = (isModal: boolean | undefined): boolean => {
-    if (isModal) {
-      return additionalExecutivesGrid?.response != null;
-    } else {
-      return mutableCopyOfGridData?.response != null && executiveHoursAndDollars?.response?.results != null;
-    }
-  };
+  // Create a mutable copy of the row data for the grid to allow in-place editing
+  const [mutableRowData, setMutableRowData] = useState<any[]>([]);
+  const isEditingRef = useRef(false);
+  const dataInitializedRef = useRef(false);
 
-  // This function checks for the need to have pagination for modal and non modal grids
-  const isPaginationNeeded = (isModal: boolean | undefined): boolean => {
-    if (isModal) {
-      return !!additionalExecutivesGrid && additionalExecutivesGrid?.response?.results.length > 0;
-    } else {
-      return !!mutableCopyOfGridData && mutableCopyOfGridData.response.results.length > 0;
+  // Initialize mutable row data when we first get data or when we get new search results
+  useEffect(() => {
+    if (currentData?.response?.results && !dataInitializedRef.current && !isEditingRef.current) {
+      setMutableRowData(currentData.response.results.map((row) => ({ ...row })));
+      dataInitializedRef.current = true;
+    } else if (!currentData?.response?.results && !isEditingRef.current) {
+      setMutableRowData([]);
+      dataInitializedRef.current = false;
     }
-  };
+  }, [currentData]);
+
+  // Update mutable row data when combined data changes (e.g., when executives are added from modal)
+  const lastDataLengthRef = useRef<number>(0);
+  useEffect(() => {
+    if (currentData?.response?.results && dataInitializedRef.current && !isEditingRef.current) {
+      const currentLength = currentData.response.results.length;
+      if (currentLength !== lastDataLengthRef.current) {
+        setMutableRowData(currentData.response.results.map((row) => ({ ...row })));
+        lastDataLengthRef.current = currentLength;
+      }
+    } else if (currentData?.response?.results && dataInitializedRef.current) {
+      lastDataLengthRef.current = currentData.response.results.length;
+    }
+  }, [currentData?.response?.results]);
+
+  // Don't render anything if we don't have data (for modal)
+  // For main grid, the parent component controls visibility
+  if (isModal && !hasData) {
+    return null;
+  }
 
   return (
     <>
-      {isRowDataThere(isModal) && (
-        <>
-          {!isModal && (
-            <>
-              <div className="px-[24px]">
-                {mutableCopyOfGridData && <ReportSummary report={mutableCopyOfGridData} />}
-              </div>
-              <div style={{ gap: "36px", display: "flex", justifyContent: "end", marginRight: 28 }}>
-                <RenderAddExecutiveButton
-                  reportReponse={mutableCopyOfGridData}
-                  isModal={isModal}
-                  setOpenModal={setOpenModal}
-                />
-              </div>
-            </>
-          )}
-          {isModal && (
-            <>
-              <div className="px-[24px]">
-                <Typography
-                  variant="body1"
-                  sx={{ color: "#db1532" }}>
-                  {`Please select rows then click the add button up top`}
-                </Typography>
-              </div>
-            </>
-          )}
-          <DSMGrid
-            preferenceKey={CAPTIONS.MANAGE_EXECUTIVE_HOURS}
-            isLoading={isFetching}
-            handleSortChanged={sortEventHandler}
-            providedOptions={{
-              rowData: isModal ? additionalExecutivesGrid?.response.results : mutableCopyOfGridData?.response.results,
-              columnDefs: columnDefs,
-              suppressMultiSort: true,
-              rowSelection: isModal ? "multiple" : undefined,
-              onSelectionChanged: (event: SelectionChangedEvent) => {
-                if (isModal) {
-                  const selectedRows = event.api.getSelectedRows();
-                  dispatch(setExecutiveRowsSelected(selectedRows));
-                }
-              },
-              onCellValueChanged: (event: CellValueChangedEvent) => processEditedRow(event),
-              getRowStyle: (params) => {
-                // Rows with unsaved changes will have yellow color
-                if (isRowStagedToSave(params.node.data.badgeNumber)) {
-                  return { background: "lemonchiffon" };
-                } else {
-                  return { background: "white" };
-                }
+      <>
+        {!isModal && (
+          <>
+            <div
+              className="px-[24px]"
+              style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              {gridData && <ReportSummary report={gridData} />}
+              <RenderAddExecutiveButton
+                reportReponse={gridData}
+                isModal={isModal}
+                onOpenModal={openModal}
+              />
+            </div>
+          </>
+        )}
+        {isModal && (
+          <>
+            <div className="px-[24px]">
+              <Typography
+                variant="body1"
+                sx={{ color: "#db1532" }}>
+                {`Please select rows then click the add button up top`}
+              </Typography>
+            </div>
+          </>
+        )}
+        <DSMGrid
+          preferenceKey={CAPTIONS.MANAGE_EXECUTIVE_HOURS}
+          isLoading={isSearching}
+          handleSortChanged={sortEventHandler}
+          providedOptions={{
+            rowData: mutableRowData,
+            columnDefs: columnDefs,
+            suppressMultiSort: true,
+            rowSelection: isModal ? "multiple" : undefined,
+            onSelectionChanged: (event: SelectionChangedEvent) => {
+              if (isModal) {
+                const selectedRows = event.api.getSelectedRows();
+                selectExecutivesInModal(selectedRows);
               }
-            }}
-          />
-        </>
-      )}
-      {isPaginationNeeded(isModal) && (
+            },
+            onCellValueChanged: processEditedRow,
+            getRowStyle: (params) => {
+              // Rows with unsaved changes will have yellow color
+              if (!isModal && isRowStagedToSave(params.node.data.badgeNumber)) {
+                return { background: "lemonchiffon" };
+              } else {
+                return { background: "white" };
+              }
+            }
+          }}
+        />
+      </>
+      {isPaginationNeeded && currentPagination && (
         <Pagination
-          pageNumber={properPageNumber}
-          setPageNumber={(value: number) => {
-            setProperPageNumber(value - 1);
-            setInitialSearchLoaded(true);
-          }}
-          pageSize={properPageSize}
-          setPageSize={(value: number) => {
-            setProperPageSize(value);
-            setProperPageNumber(1);
-            setInitialSearchLoaded(true);
-          }}
-          recordCount={
-            isModal ? (additionalExecutivesGrid?.response.total ?? 0) : (mutableCopyOfGridData?.response.total ?? 0)
+          pageNumber={currentPagination.pageNumber}
+          setPageNumber={(value: number) =>
+            currentPagination.handlePaginationChange(
+              value - 1,
+              currentPagination.pageSize,
+              currentPagination.sortParams
+            )
           }
+          pageSize={currentPagination.pageSize}
+          setPageSize={(value: number) =>
+            currentPagination.handlePaginationChange(0, value, currentPagination.sortParams)
+          }
+          recordCount={currentData?.response.total ?? 0}
         />
       )}
-      <SmartModal
-        open={openModal}
-        onClose={() => setOpenModal(false)}>
-        <SearchAndAddExecutive
-          setOpenModal={setOpenModal}
-          initialSearchLoaded={initialSearchLoaded}
-          setInitialSearchLoaded={setInitialSearchLoaded}
-          pageNumberReset={pageNumberReset}
-          setPageNumberReset={setPageNumberReset}
-        />
-      </SmartModal>
+      {!isModal && (
+        <SmartModal
+          open={isModalOpen}
+          onClose={closeModal}>
+          <SearchAndAddExecutive
+            executeModalSearch={executeModalSearch}
+            modalSelectedExecutives={modalSelectedExecutives}
+            addExecutivesToMainGrid={addExecutivesToMainGrid}
+            isModalSearching={isModalSearching}
+            modalResults={modalResults}
+            selectExecutivesInModal={selectExecutivesInModal}
+            modalGridPagination={modalGridPagination}
+          />
+        </SmartModal>
+      )}
     </>
   );
 };

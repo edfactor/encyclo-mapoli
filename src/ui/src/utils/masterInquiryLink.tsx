@@ -16,7 +16,7 @@ export function viewBadgeLinkRenderer(
   param2?: number | ((path: string) => void),
   param3?: (path: string) => void
 ): JSX.Element | number {
-  if (!badgeNumber || badgeNumber > 999999) return badgeNumber;
+  if (!badgeNumber || badgeNumber > 99999999999) return badgeNumber;
 
   let psnSuffix = 0;
   let navigateFunction: ((path: string) => void) | undefined = undefined;
@@ -35,7 +35,7 @@ export function viewBadgeLinkRenderer(
   if (navigateFunction === undefined) {
     return (
       <Link
-        className="h-5 solid underline normal-case"
+        className="solid h-5 normal-case underline"
         href={`/master-inquiry/${safeValue}`}>
         {displayValue}
       </Link>

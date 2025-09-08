@@ -1,10 +1,14 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 /// <summary>
 /// This response describes an update applied to a profit year.   It says who did it and when.   It says how many members were effected, and what parameters were used.
 /// This gives the administrator context about the state of the YE contributions.  In particular lets us know if the admin can revert and if so what they are
 /// reverting.
 /// </summary>
+[YearEndArchiveProperty]
+[NoMemberDataExposed]
 public sealed record ProfitMasterUpdateResponse
 {
     public required DateTimeOffset UpdatedTime { get; set; }
@@ -32,7 +36,7 @@ public sealed record ProfitMasterUpdateResponse
     {
         return new ProfitMasterUpdateResponse
         {
-            UpdatedTime = DateTime.Now,
+            UpdatedTime = DateTimeOffset.UtcNow,
             UpdatedBy = "John Doe",
             BeneficiariesEffected = 4,
             EmployeesEffected = 721,

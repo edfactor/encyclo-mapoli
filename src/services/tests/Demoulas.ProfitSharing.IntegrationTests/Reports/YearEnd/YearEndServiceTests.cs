@@ -1,10 +1,10 @@
 ﻿using System.Data.Common;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.Util.Extensions;
-using Shouldly;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 
@@ -112,7 +112,7 @@ public class YearEndServiceTests : PristineBaseTest
             data.Add(ssn, pp);
         }
 
-        TestOutputHelper.WriteLine($"Smart data count {data.Count}");
+        TestOutputHelper.WriteLine($"SMART data count {data.Count}");
 
         return data;
     }

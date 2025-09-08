@@ -1,10 +1,14 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
-public sealed class UpdateSummaryReportDetail
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Interfaces;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+public sealed class UpdateSummaryReportDetail : IIsExecutive
 {
     public long BadgeNumber { get; set; }
     public short StoreNumber { get; set; }
-    public required string Name { get; set; }
+    [MaskSensitive] public required string Name { get; set; }
     public bool IsEmployee { get; set; }
+    public bool IsExecutive { get; set; }
     public required UpdateSummaryReportPointInTimeDetail Before { get; set; }
     public required UpdateSummaryReportPointInTimeDetail After { get; set; }
 

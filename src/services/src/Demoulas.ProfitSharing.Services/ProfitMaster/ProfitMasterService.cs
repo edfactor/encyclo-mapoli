@@ -58,8 +58,8 @@ public class ProfitMasterService : IProfitMasterService
                 BeneficiariesEffected = yearEndUpdateStatus.BeneficiariesEffected,
                 EmployeesEffected = yearEndUpdateStatus.EmployeesEffected,
                 EtvasEffected = yearEndUpdateStatus.EtvasEffected,
-                UpdatedTime = yearEndUpdateStatus.UpdatedTime,
-                UpdatedBy = yearEndUpdateStatus.UpdatedBy,
+                UpdatedTime = yearEndUpdateStatus.CreatedAtUtc,
+                UpdatedBy = yearEndUpdateStatus.UserName ?? "UnKnown",
                 ContributionPercent = yearEndUpdateStatus.ContributionPercent,
                 IncomingForfeitPercent = yearEndUpdateStatus.IncomingForfeitPercent,
                 EarningsPercent = yearEndUpdateStatus.EarningsPercent,
@@ -189,8 +189,8 @@ public class ProfitMasterService : IProfitMasterService
             ctx.YearEndUpdateStatuses.Add(new YearEndUpdateStatus
             {
                 ProfitYear = profitShareUpdateRequest.ProfitYear,
-                UpdatedTime = DateTime.Now,
-                UpdatedBy = _appUser.UserName ?? "Unknown",
+                ModifiedAtUtc = DateTimeOffset.UtcNow,
+                UserName = _appUser.UserName ?? "Unknown",
                 BeneficiariesEffected = beneficiariesEffected,
                 EmployeesEffected = employeesEffected,
                 EtvasEffected = etvasEffected,
@@ -353,7 +353,7 @@ public class ProfitMasterService : IProfitMasterService
         {
             "SSN", "PROFIT_YEAR", "PROFIT_YEAR_ITERATION", "DISTRIBUTION_SEQUENCE", "PROFIT_CODE_ID", "CONTRIBUTION", "EARNINGS", "FORFEITURE", "MONTH_TO_DATE", "YEAR_TO_DATE",
             "REMARK", "ZERO_CONTRIBUTION_REASON_ID", "FEDERAL_TAXES", "STATE_TAXES", "TAX_CODE_ID", "COMMENT_TYPE_ID", "COMMENT_RELATED_CHECK_NUMBER", "COMMENT_RELATED_STATE",
-            "COMMENT_RELATED_ORACLE_HCM_ID", "COMMENT_RELATED_PSN_SUFFIX", "COMMENT_IS_PARTIAL_TRANSACTION", "CREATED_UTC", "YEARS_OF_SERVICE_CREDIT"
+            "COMMENT_RELATED_ORACLE_HCM_ID", "COMMENT_RELATED_PSN_SUFFIX", "COMMENT_IS_PARTIAL_TRANSACTION", "CREATED_AT_UTC", "YEARS_OF_SERVICE_CREDIT"
         };
 
         // This seems nutty, to simply map the column names 1-1, but take this out and Oracle tries to add the parameters to the
@@ -385,7 +385,7 @@ public class ProfitMasterService : IProfitMasterService
         table.Columns.Add("COMMENT_RELATED_ORACLE_HCM_ID", typeof(long));
         table.Columns.Add("COMMENT_RELATED_PSN_SUFFIX", typeof(int));
         table.Columns.Add("COMMENT_IS_PARTIAL_TRANSACTION", typeof(int));
-        table.Columns.Add("CREATED_UTC", typeof(DateTimeOffset)); // Explicitly define type here
+        table.Columns.Add("CREATED_AT_UTC", typeof(DateTimeOffset)); // Explicitly define type here
         table.Columns.Add("YEARS_OF_SERVICE_CREDIT", typeof(int));
 
         foreach (var pd in details)
@@ -412,7 +412,7 @@ public class ProfitMasterService : IProfitMasterService
                 pd.CommentRelatedOracleHcmId,
                 pd.CommentRelatedPsnSuffix,
                 pd.CommentIsPartialTransaction,
-                pd.TransactionDate,
+                pd.CreatedAtUtc,
                 pd.YearsOfServiceCredit
             );
         }

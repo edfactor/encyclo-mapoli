@@ -19,7 +19,7 @@ const NewPSLabels = () => {
         <Grid width={"100%"}>
           <Divider />
         </Grid>
-        <div className="flex sticky top-0 z-10 bg-white">
+        <div className="sticky top-0 z-10 flex bg-white">
           <TotalsGrid
             displayData={[
               ["Under 21 100% Vested", "1"],

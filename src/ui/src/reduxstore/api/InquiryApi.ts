@@ -14,6 +14,7 @@ const baseQuery = createDataSourceAwareBaseQuery();
 export const InquiryApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "inquiryApi",
+  tagTypes: ["memberDetails"],
   endpoints: (builder) => ({
     // Master Inquiry API endpoints
     searchProfitMasterInquiry: builder.query<Paged<EmployeeDetails>, MasterInquiryRequest>({
@@ -21,8 +22,8 @@ export const InquiryApi = createApi({
         url: "master/master-inquiry/search",
         method: "POST",
         body: {
-          badgeNumber: Number(params.badgeNumber?.toString().substring(0, 6)),
-          psnSuffix: Number(params.badgeNumber?.toString().substring(6)),
+          badgeNumber: params.badgeNumber,
+          psnSuffix: params.psnSuffix,
           profitYear: params.profitYear,
           endProfitYear: params.endProfitYear,
           startProfitMonth: params.startProfitMonth,
@@ -39,7 +40,8 @@ export const InquiryApi = createApi({
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
+          isSortDescending: params.pagination.isSortDescending,
+          _timestamp: params._timestamp
         }
       })
     }),
@@ -48,7 +50,8 @@ export const InquiryApi = createApi({
         url: "master/master-inquiry/member",
         method: "POST",
         body: params
-      })
+      }),
+      providesTags: ["memberDetails"]
     }),
     getProfitMasterInquiryMemberDetails: builder.query<
       Paged<MasterInquiryResponseDto>,
@@ -100,9 +103,12 @@ export const InquiryApi = createApi({
       }
     >({
       query: ({ memberType, ...pagination }) => ({
-        url: `master/master-inquiry/member/${memberType}/details`,
-        method: "GET",
-        params: pagination
+        url: `master/master-inquiry/member/details`,
+        method: "POST",
+        body: {
+          memberType,
+          ...pagination
+        }
       })
     }),
     getProfitMasterInquiryGrouping: builder.query<Paged<GroupedProfitSummaryDto>, MasterInquiryRequest>({

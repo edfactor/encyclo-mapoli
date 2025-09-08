@@ -1,17 +1,18 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using FastEndpoints;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareReport;
-public sealed class YearEndProfitSharingSummaryReportEndpoint : Endpoint<BadgeNumberRequest, YearEndProfitSharingReportSummaryResponse>
+public sealed class YearEndProfitSharingSummaryReportEndpoint : ProfitSharingEndpoint<BadgeNumberRequest, YearEndProfitSharingReportSummaryResponse>
 {
     private readonly IProfitSharingSummaryReportService _cleanupReportService;
 
     public YearEndProfitSharingSummaryReportEndpoint(IProfitSharingSummaryReportService cleanupReportService)
+        : base(Navigation.Constants.ProfitShareReportFinalRun)
     {
         _cleanupReportService = cleanupReportService;
     }

@@ -368,3 +368,5 @@ FodyWeavers.xsd
 
 # The mac leaves this litter round
 .DS_Store
+/test-results/user.json
+test-results

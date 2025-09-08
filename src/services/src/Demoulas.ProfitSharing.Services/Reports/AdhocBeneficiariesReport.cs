@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -68,7 +67,7 @@ public class AdhocBeneficiariesReport : IAdhocBeneficiariesReport
                         pd.Contribution,
                         pd.Earnings,
                         pd.Forfeiture,
-                        DateOnly.FromDateTime(pd.TransactionDate.DateTime),
+                        DateOnly.FromDateTime(pd.CreatedAtUtc.DateTime),
                         pd.Remark)).ToList();
 
                 totalBalanceResult.TryGetValue(b.Contact!.Ssn, out var totalBalance);
@@ -79,11 +78,12 @@ public class AdhocBeneficiariesReport : IAdhocBeneficiariesReport
                     b.Contact?.ContactInfo?.FullName ?? string.Empty,
                     b.Contact != null ? b.Contact.Ssn.MaskSsn() : string.Empty,
                     b.Relationship,
-                    totalBalance?.Total ?? 0,
+                    totalBalance?.TotalAmount ?? 0,
                     b.BadgeNumber,
                     b.PsnSuffix,
                     profitDetailsForBeneficiary
-                );
+                )
+                { IsExecutive = b.Demographic != null ? b.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly : false };
             }).ToList();
 
             return new AdhocBeneficiariesReportResponse
@@ -97,7 +97,7 @@ public class AdhocBeneficiariesReport : IAdhocBeneficiariesReport
                     Results = filteredList!,
                     Total = pagedBeneficiaries.Total
                 },
-                TotalEndingBalance = totalBalanceResult.Values.Sum(x => x.Total ?? 0)
+                TotalEndingBalance = totalBalanceResult.Values.Sum(x => x.TotalAmount ?? 0)
             };
         });
     }

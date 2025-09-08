@@ -1,11 +1,10 @@
-﻿using Demoulas.Common.Contracts.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 namespace Demoulas.ProfitSharing.Common.Interfaces;
 
-public interface IUnForfeitService
+public interface IUnforfeitService
 {
     /// <summary>
     /// Finds rehires who may be entitled to forfeitures taken out in prior years.
@@ -13,6 +12,6 @@ public interface IUnForfeitService
     /// <param name="req">The request containing the criteria for finding rehires.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a report response with details of rehires and their potential entitlements.</returns>
-    Task<ReportResponseBase<RehireForfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(StartAndEndDateRequest req,
+    Task<ReportResponseBase<UnforfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(StartAndEndDateRequest req,
         CancellationToken cancellationToken);
 }

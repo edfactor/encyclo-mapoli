@@ -1,4 +1,6 @@
-namespace YEMatch;
+﻿using YEMatch.YEMatch.AssertActivities;
+
+namespace YEMatch.YEMatch.ArrangeActivites;
 
 // Overwirites the badges in both READY and SMART - to ensure we are using the frozen editions, not the live versions
 public class OverwriteBadges : BaseSqlActivity

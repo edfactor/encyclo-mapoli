@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
+﻿using Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 public class NavigationStatusFaker

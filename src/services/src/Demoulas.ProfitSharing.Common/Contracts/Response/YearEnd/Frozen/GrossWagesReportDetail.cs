@@ -1,5 +1,7 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
-public sealed class GrossWagesReportDetail
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+public sealed class GrossWagesReportDetail : IIsExecutive
 {
     public required int BadgeNumber { get; set; }
     public required string EmployeeName { get; set; }
@@ -10,6 +12,7 @@ public sealed class GrossWagesReportDetail
     public required decimal Loans { get; set; }
     public required decimal Forfeitures { get; set; }
     public int EnrollmentId { get; set; }
+    public required bool IsExecutive { get; set; }
 
     public static GrossWagesReportDetail ResponseExample()
     {
@@ -23,6 +26,7 @@ public sealed class GrossWagesReportDetail
             ProfitSharingAmount = 150023.55m,
             Loans = 0,
             Forfeitures = 5001m,
+            IsExecutive = false,
         };
     }
 }

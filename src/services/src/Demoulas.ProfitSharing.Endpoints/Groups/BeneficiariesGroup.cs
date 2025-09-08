@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.Common.Api.Groups;
+﻿using Demoulas.Common.Api.Groups;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 using Microsoft.AspNetCore.Builder;
@@ -27,7 +22,7 @@ public sealed class BeneficiariesGroup : GroupBase
                 .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>(StatusCodes.Status500InternalServerError)
                 .WithRequestTimeout(TimeSpan.FromMinutes(1))
                 .WithTags(RouteName));
-            ep.Policies(Policy.CanMaintainBeneficiaries);
+            ep.Policies(Policy.CanManageBeneficiaries);
         });
     }
 }

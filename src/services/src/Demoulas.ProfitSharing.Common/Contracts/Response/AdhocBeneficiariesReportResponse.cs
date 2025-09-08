@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
@@ -23,7 +21,10 @@ public record BeneficiaryReportDto(
     int BadgeNumber,
     short PsnSuffix,
     List<ProfitDetailDto>? ProfitDetails
-);
+) : IIsExecutive
+{
+    public required bool IsExecutive { get; set; }
+};
 
 public record AdhocBeneficiariesReportResponse : ReportResponseBase<BeneficiaryReportDto>
 {

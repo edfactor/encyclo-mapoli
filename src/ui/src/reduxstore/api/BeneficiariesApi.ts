@@ -2,10 +2,12 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 
 import { setBeneficiaryError } from "reduxstore/slices/beneficiarySlice";
 import {
-  BeneficiaryDto,
   BeneficiaryKindRequestDto,
   BeneficiaryKindResponseDto,
   BeneficiaryRequestDto,
+  BeneficiaryResponse,
+  BeneficiarySearchFilterRequest,
+  BeneficiarySearchFilterResponse,
   BeneficiaryTypesRequestDto,
   BeneficiaryTypesResponseDto,
   CreateBeneficiaryContactRequest,
@@ -24,7 +26,7 @@ export const BeneficiariesApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "beneficiariesApi",
   endpoints: (builder) => ({
-    getBeneficiaries: builder.query<Paged<BeneficiaryDto>, BeneficiaryRequestDto>({
+    getBeneficiaries: builder.query<BeneficiaryResponse, BeneficiaryRequestDto>({
       query: (request) => ({
         url: `/beneficiary`,
         method: "GET",
@@ -32,8 +34,23 @@ export const BeneficiariesApi = createApi({
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
+          await queryFulfilled;
           //dispatch(setBeneficiary(data));
+        } catch (err) {
+          console.error("Failed to fetch beneficiaries:", err);
+          dispatch(setBeneficiaryError("Failed to fetch beneficiaries"));
+        }
+      }
+    }),
+    beneficiarySearchFilter: builder.query<Paged<BeneficiarySearchFilterResponse>, BeneficiarySearchFilterRequest>({
+      query: (request) => ({
+        url: `/beneficiary/search`,
+        method: "GET",
+        params: request
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
         } catch (err) {
           console.error("Failed to fetch beneficiaries:", err);
           dispatch(setBeneficiaryError("Failed to fetch beneficiaries"));
@@ -48,8 +65,7 @@ export const BeneficiariesApi = createApi({
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
-          console.log(data);
+          await queryFulfilled;
         } catch (err) {
           console.error("Failed to fetch beneficiaries:", err);
           dispatch(setBeneficiaryError("Failed to fetch beneficiaries"));
@@ -64,7 +80,7 @@ export const BeneficiariesApi = createApi({
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
+          await queryFulfilled;
         } catch (err) {
           console.error("Failed to fetch beneficiaries:", err);
           dispatch(setBeneficiaryError("Failed to fetch beneficiaries"));
@@ -79,7 +95,7 @@ export const BeneficiariesApi = createApi({
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
+          await queryFulfilled;
         } catch (err) {
           console.error("Failed to create beneficiaries:", err);
           dispatch(setBeneficiaryError("Failed to create beneficiaries"));
@@ -94,7 +110,7 @@ export const BeneficiariesApi = createApi({
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
+          await queryFulfilled;
         } catch (err) {
           console.error("Failed to create beneficiary contact", err);
           dispatch(setBeneficiaryError("Failed to create beneficiary contact"));
@@ -109,22 +125,38 @@ export const BeneficiariesApi = createApi({
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
+          await queryFulfilled;
         } catch (err) {
           console.error("Failed to update beneficiary", err);
           dispatch(setBeneficiaryError("Failed to update beneficiary"));
         }
       }
     }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    getBeneficiaryDetail: builder.query<any, any>({
+      query: (request) => ({
+        url: `/beneficiary/detail`,
+        method: "GET",
+        params: request
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } catch (err) {
+          console.error("Failed to fetch beneficiaries:", err);
+          dispatch(setBeneficiaryError("Failed to fetch beneficiaries"));
+        }
+      }
+    }),
 
-    deleteBeneficiary: builder.query<any, DeleteBeneficiaryRequest>({
+    deleteBeneficiary: builder.query<{ success: boolean; message?: string }, DeleteBeneficiaryRequest>({
       query: (request) => ({
         url: `/beneficiaries/${request.id}`,
         method: "DELETE"
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
+          await queryFulfilled;
         } catch (err) {
           console.error("Failed to delete beneficiary", err);
           dispatch(setBeneficiaryError("Failed to delete beneficiary"));
@@ -135,6 +167,8 @@ export const BeneficiariesApi = createApi({
 });
 
 export const {
+  useLazyGetBeneficiaryDetailQuery,
+  useLazyBeneficiarySearchFilterQuery,
   useLazyDeleteBeneficiaryQuery,
   useLazyUpdateBeneficiaryQuery,
   useLazyGetBeneficiariesQuery,

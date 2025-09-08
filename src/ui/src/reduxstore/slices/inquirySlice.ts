@@ -4,7 +4,7 @@ import { EmployeeDetails, GroupedProfitSummaryDto, MasterInquiryDetail, MasterIn
 
 export interface InquiryState {
   masterInquiryData: EmployeeDetails | null;
-  masterInquiryEmployeeDetails: EmployeeDetails | null;
+  masterInquiryMemberDetails: EmployeeDetails | null;
   masterInquiryResults: MasterInquiryDetail[] | null;
   masterInquiryRequestParams: MasterInquirySearch | null;
   masterInquiryGroupingData: GroupedProfitSummaryDto[] | null;
@@ -12,7 +12,7 @@ export interface InquiryState {
 
 const initialState: InquiryState = {
   masterInquiryData: null,
-  masterInquiryEmployeeDetails: null,
+  masterInquiryMemberDetails: null,
   masterInquiryResults: null,
   masterInquiryRequestParams: null,
   masterInquiryGroupingData: null
@@ -33,14 +33,14 @@ export const inquirySlice = createSlice({
       state.masterInquiryData = action.payload;
 
       if (action.payload) {
-        state.masterInquiryEmployeeDetails = action.payload;
+        state.masterInquiryMemberDetails = action.payload;
       } else {
-        state.masterInquiryEmployeeDetails = null;
+        state.masterInquiryMemberDetails = null;
       }
     },
     clearMasterInquiryData: (state) => {
       state.masterInquiryData = null;
-      state.masterInquiryEmployeeDetails = null;
+      state.masterInquiryMemberDetails = null;
     },
     setMasterInquiryResults: (state, action: PayloadAction<MasterInquiryDetail[]>) => {
       state.masterInquiryResults = action.payload;

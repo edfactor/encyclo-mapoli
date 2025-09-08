@@ -1,6 +1,12 @@
 ﻿
+using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Contracts.Shared;
+using Demoulas.ProfitSharing.Common.Interfaces;
+
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-public sealed record  ExecutiveHoursAndDollarsResponse
+
+[YearEndArchiveProperty]
+public sealed record  ExecutiveHoursAndDollarsResponse : IFullNameProperty, IIsExecutive
 {
     public required int BadgeNumber { get; set; }
     public required string? FullName { get; set; }
@@ -14,6 +20,7 @@ public sealed record  ExecutiveHoursAndDollarsResponse
     public required char EmploymentStatusId { get; set; }
     public required string PayFrequencyName { get; set; }
     public required string EmploymentStatusName { get; set; }
+    public required bool IsExecutive { get; set; }
 
 
     public static  ExecutiveHoursAndDollarsResponse ResponseExample()
@@ -31,7 +38,8 @@ public sealed record  ExecutiveHoursAndDollarsResponse
             PayFrequencyId = 2,
             EmploymentStatusId = 'a',
             PayFrequencyName = "Monthly",
-            EmploymentStatusName = "Terminated"
+            EmploymentStatusName = "Terminated",
+            IsExecutive = true,
         };
     }
 }

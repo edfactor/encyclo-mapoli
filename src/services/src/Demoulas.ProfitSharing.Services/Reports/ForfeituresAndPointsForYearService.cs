@@ -1,4 +1,4 @@
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
@@ -9,9 +9,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
-using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
@@ -19,28 +17,19 @@ namespace Demoulas.ProfitSharing.Services.Reports;
 
 public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearService
 {
-    private readonly ICalendarService _calendarService;
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
-    private readonly IFrozenService _frozenService;
-    private readonly ILogger _logger;
     private readonly TotalService _totalService;
 
     public ForfeituresAndPointsForYearService(
         IProfitSharingDataContextFactory dataContextFactory,
-        ILoggerFactory loggerFactory,
         TotalService totalService,
-        ICalendarService calendarService,
-        IDemographicReaderService demographicReaderService,
-        IFrozenService frozenService
+        IDemographicReaderService demographicReaderService
     )
     {
         _dataContextFactory = dataContextFactory;
         _totalService = totalService;
-        _calendarService = calendarService;
         _demographicReaderService = demographicReaderService;
-        _frozenService = frozenService;
-        _logger = loggerFactory.CreateLogger<FrozenReportService>();
     }
 
 
@@ -73,7 +62,7 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
         decimal? lastYearTotal = await _totalService.TotalVestingBalance(ctx, lastYear, DateOnly.MaxValue).AsNoTracking()
             .SumAsync(ptvb => ptvb.CurrentBalance, cancellationToken);
 
-        List<InternalProfitDetailDto> transactionsInCurrentYear = await TotalService.GetTransactionsBySsnForProfitYearForOracle(ctx, currentYear).ToListAsync(cancellationToken);
+        var transactionsInCurrentYear = await _totalService.GetTransactionsBySsnForProfitYearForOracle(ctx, currentYear).ToListAsync(cancellationToken);
         decimal distributionsTotal = transactionsInCurrentYear.Sum(syd => syd.DistributionsTotal);
         decimal paidAllocationsTotal = transactionsInCurrentYear.Sum(syd => syd.PaidAllocationsTotal);
         decimal allocationsTotal = transactionsInCurrentYear.Sum(syd => syd.AllocationsTotal);
@@ -112,8 +101,8 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
             .ToDictionaryAsync(ptvb => ptvb.Ssn, ptvb => ptvb, cancellationToken);
 
         // Get this year's transactions for all members (some members could have no transactions)
-        Dictionary<int, InternalProfitDetailDto> transactionsInCurrentYearBySsn =
-            await TotalService.GetTransactionsBySsnForProfitYearForOracle(ctx, currentYear)
+        var transactionsInCurrentYearBySsn =
+            await _totalService.GetTransactionsBySsnForProfitYearForOracle(ctx, currentYear)
                 .AsNoTracking()
                 .ToDictionaryAsync(ptvb => ptvb.Ssn, ptvb => ptvb, cancellationToken);
 
@@ -149,12 +138,12 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
 
 
     private static ForfeituresAndPointsForYearResponse ToMemberDetails(Demographic d, ParticipantTotalVestingBalance? ptvb, PayProfit pp,
-        InternalProfitDetailDto? singleYearNumbers
+        ProfitDetailRollup? singleYearNumbers
     )
     {
         decimal balanceConsideredForEarnings = (ptvb?.CurrentBalance ?? 0) - (singleYearNumbers?.MilitaryTotal ?? 0) - (singleYearNumbers?.ClassActionFundTotal ?? 0);
         int earningsPoints = (int) Math.Round(balanceConsideredForEarnings / 100, MidpointRounding.AwayFromZero);
-        decimal forfeitures = singleYearNumbers == null ? 0 : -1 * singleYearNumbers.TotalForfeitures;
+        decimal forfeitures = singleYearNumbers == null ? 0.00m : -1 * singleYearNumbers.TotalForfeitures;
 
         return new ForfeituresAndPointsForYearResponse
         {
@@ -163,7 +152,8 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
             Ssn = d.Ssn.MaskSsn(),
             Forfeitures = forfeitures,
             ContForfeitPoints = (short)(pp.PointsEarned ?? 0), // Yea, PointsEarned is not EarningPoints
-            EarningPoints = earningsPoints
+            EarningPoints = earningsPoints,
+            IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
         };
     }
 
@@ -178,7 +168,8 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
             Forfeitures = 0.00m,
             ContForfeitPoints = 0,
             EarningPoints = earningsPoints,
-            BeneficiaryPsn = "0" + b.Psn
+            BeneficiaryPsn = "0" + b.Psn,
+            IsExecutive = false,
         };
     }
 }

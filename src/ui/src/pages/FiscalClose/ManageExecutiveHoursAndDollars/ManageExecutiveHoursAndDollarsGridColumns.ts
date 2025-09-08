@@ -3,9 +3,9 @@ import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import {
   createBadgeColumn,
   createCurrencyColumn,
-  createSSNColumn,
-  createNameColumn,
   createHoursColumn,
+  createNameColumn,
+  createSSNColumn,
   createStatusColumn,
   createStoreColumn
 } from "../../../utils/gridColumnFactory";
@@ -29,6 +29,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
     }),
 
     createSSNColumn({ alignment: "left" }),
+
     createHoursColumn({
       headerName: "Executive Hours",
       field: "hoursExecutive",
@@ -36,31 +37,21 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       alignment: "left",
       editable: !mini
     }),
-    {
-      ...createCurrencyColumn({
-        headerName: "Executive Dollars",
-        field: "incomeExecutive"
-      }),
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      editable: !mini
-    },
+    createCurrencyColumn({
+      headerName: "Executive Dollars",
+      field: "incomeExecutive"
+    }),
     createHoursColumn({
       headerName: "Oracle Hours",
       field: "currentHoursYear",
       minWidth: 150,
       alignment: "left"
     }),
-    {
-      ...createCurrencyColumn({
-        headerName: "Oracle Dollars",
-        field: "currentIncomeYear"
-      }),
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align"
-    },
+    createCurrencyColumn({
+      headerName: "Oracle Dollars",
+      field: "currentIncomeYear"
+    }),
+
     createStatusColumn({
       headerName: "Pay Frequency",
       field: "payFrequencyId",

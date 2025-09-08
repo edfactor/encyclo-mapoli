@@ -149,7 +149,7 @@ public sealed class YearEndService : IYearEndService
 
             Dictionary<int, decimal?> lastYearBalanceBySsn = await _totalService.GetTotalBalanceSet(ctx, (short)(profitYear - 1))
                 .Where(pp => employeeSsnSet.Contains(pp.Ssn!))
-                .ToDictionaryAsync(pt => pt.Ssn, pt => pt.Total, ct);
+                .ToDictionaryAsync(pt => pt.Ssn, pt => pt.TotalAmount, ct);
 
             Dictionary<int, short> firstContributionYearBySsn = await ctx.ProfitDetails
                 .Where(pd => employeeSsnSet.Contains(pd.Ssn) &&
@@ -166,10 +166,10 @@ public sealed class YearEndService : IYearEndService
             {
                 int ssn = employee.Demographic!.Ssn;
                 short age = employee.Demographic!.DateOfBirth.Age(fiscalEndDate.ToDateTime(TimeOnly.MinValue));
-                short? firstYearContribution = firstContributionYearBySsn.ContainsKey(ssn) ? firstContributionYearBySsn[ssn] : null;
-                decimal lastYearBalance = lastYearBalanceBySsn.ContainsKey(ssn) ? lastYearBalanceBySsn[ssn] ?? 0m : 0m;
+                short? firstYearContribution = firstContributionYearBySsn.TryGetValue(ssn, out short value) ? value : null;
+                decimal lastYearBalance = lastYearBalanceBySsn.TryGetValue(ssn, out decimal? value1) ? value1 ?? 0m : 0m;
 
-                YearEndChange change = ComputeChange(profitYear, rebuild, firstYearContribution, age, lastYearBalance, employee, fiscalEndDate);
+                YearEndChange change = ComputeChange(profitYear, firstYearContribution, age, lastYearBalance, employee, fiscalEndDate);
                 if (change.IsChanged(employee))
                 {
                     changes.Add(employee.Demographic.Id, change);
@@ -177,8 +177,8 @@ public sealed class YearEndService : IYearEndService
             }
 
             OracleConnection oracleConnection = (ctx.Database.GetDbConnection() as OracleConnection)!;
-            await EnsureTempPayProfitChangesTableExistsAsync(oracleConnection);
-            UpdatePayProfitChanges(oracleConnection, profitYear, changes, rebuild);
+            await EnsureTempPayProfitChangesTableExistsAsync(oracleConnection, ct);
+            await UpdatePayProfitChanges(oracleConnection, profitYear, changes, rebuild, ct);
         }, ct);
     }
 
@@ -190,7 +190,7 @@ public sealed class YearEndService : IYearEndService
 
     // Calculates the Year End Change for a single employee.
     //  Very closely follows PAY456.cbl, 405-calculate-points
-    private YearEndChange ComputeChange(short profitYear, bool rebuild, short? firstContributionYear, short age, decimal currentBalance, PayProfitDto employee, DateOnly fiscalEnd)
+    private YearEndChange ComputeChange(short profitYear, short? firstContributionYear, short age, decimal currentBalance, PayProfitDto employee, DateOnly fiscalEnd)
     {
         int newEmpl = 0;
         decimal points = 0;
@@ -278,9 +278,9 @@ public sealed class YearEndService : IYearEndService
      * 1) we bulk insert our changes into temp table
      * 2) merge in changes
      */
-    public static void UpdatePayProfitChanges(OracleConnection connection,
+    private static async Task UpdatePayProfitChanges(OracleConnection connection,
         int profitYear,
-        Dictionary<int, YearEndChange> changes, bool rebuild)
+        Dictionary<int, YearEndChange> changes, bool rebuild, CancellationToken cancellation)
     {
         DataTable table = new();
         table.Columns.Add("demographic_id", typeof(int));
@@ -306,7 +306,7 @@ public sealed class YearEndService : IYearEndService
 
         bulkCopy.WriteToServer(table);
 
-        using OracleCommand? cmd = connection.CreateCommand();
+        await using OracleCommand? cmd = connection.CreateCommand();
         cmd.CommandText = @"
             MERGE INTO pay_profit tgt
             USING temp_pay_profit_changes tmp
@@ -320,7 +320,7 @@ public sealed class YearEndService : IYearEndService
                 tgt.points_earned              = tmp.points_earned,
                 tgt.ps_certificate_issued_date = tmp.ps_certificate_issued_date";
 
-        cmd.ExecuteNonQuery();
+        await cmd.ExecuteNonQueryAsync(cancellation);
 
         if (!rebuild)
         {
@@ -337,7 +337,7 @@ public sealed class YearEndService : IYearEndService
             WHEN MATCHED THEN UPDATE SET
                 pp.zero_contribution_reason_id = ppp.zero_contribution_reason_id";
 
-            cmd.ExecuteNonQuery();
+            await cmd.ExecuteNonQueryAsync(cancellation);
         }
     }
 
@@ -347,14 +347,14 @@ public sealed class YearEndService : IYearEndService
      * The table is created on demand at first use.  If the schema of the table is to be altered, this
      * method would need to handle that.   This table's use is isolated to this service.
      */
-    public static async Task EnsureTempPayProfitChangesTableExistsAsync(OracleConnection conn)
+    private static async Task EnsureTempPayProfitChangesTableExistsAsync(OracleConnection conn, CancellationToken cancellation)
     {
         const string checkSql = @"
             SELECT COUNT(*) FROM all_tables 
             WHERE table_name = 'TEMP_PAY_PROFIT_CHANGES' AND owner = USER";
 
         await using OracleCommand checkCmd = new(checkSql, conn);
-        bool exists = Convert.ToInt32(await checkCmd.ExecuteScalarAsync()) > 0;
+        bool exists = Convert.ToInt32(await checkCmd.ExecuteScalarAsync(cancellation)) > 0;
 
         if (!exists)
         {
@@ -369,7 +369,7 @@ public sealed class YearEndService : IYearEndService
                 ) ON COMMIT DELETE ROWS";
 
             await using OracleCommand createCmd = new(createSql, conn);
-            await createCmd.ExecuteNonQueryAsync();
+            await createCmd.ExecuteNonQueryAsync(cancellation);
         }
     }
 }

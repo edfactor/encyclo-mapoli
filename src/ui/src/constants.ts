@@ -1,7 +1,7 @@
-export const HISTORY_KEY = "navigation_history" as const;
+export const MAX_EMPLOYEE_BADGE_LENGTH: number = 7;
 
-export const drawerOpenWidth = 330;
-export const drawerClosedWidth = 64;
+export const drawerOpenWidth: number = 330;
+export const drawerClosedWidth: number = 64;
 
 export const MENU_LABELS = {
   FISCAL_CLOSE: "Fiscal Close",
@@ -10,6 +10,7 @@ export const MENU_LABELS = {
   DISTRIBUTIONS: "Distributions",
   RECONCILIATION: "Reconciliation",
   INQUIRIES: "Inquiries",
+  IT_DEVOPS: "IT DEVOPS",
   IT_OPERATIONS: "IT OPERATIONS",
   GO_TO_PROFIT_SHARE_REPORT: "View Profit Share Report (PAY426) Details",
   YEAR_END: "Year End"
@@ -36,7 +37,6 @@ export const ROUTES = {
   NEGATIVE_ETVA: "negative-etva-for-ssns-on-payprofit",
   DUPLICATE_NAMES: "duplicate-names-and-birthdays",
   MISSING_COMMA: "missing-comma-in-py-name",
-  MILITARY_LEAVE: "employees-on-military-leave",
   REHIRE_FORFEITURES: "unforfeitures",
   PROFIT_SHARE_REPORT: "profit-share-report",
   PROFIT_SHARE_TOTALS: "profit-share-totals",
@@ -50,7 +50,7 @@ export const ROUTES = {
   BENEFICIARY_INQUIRY: "beneficiary",
   PAY_BE_NEXT: "adhoc-beneficiaries-report",
   FORFEITURES_ADJUSTMENT: "forfeitures-adjustment",
-  PAY_BEN_REPORT: 'payben-report',
+  PAY_BEN_REPORT: "payben-report",
 
   PAY426_ACTIVE_18_20: "pay426-1",
   PAY426_ACTIVE_21_PLUS: "pay426-2",
@@ -64,11 +64,15 @@ export const ROUTES = {
   PAY426_NON_EMPLOYEE: "pay426-10",
   PAY426N: "pay426n",
   QPAY066_ADHOC: "qpay066-adhoc",
+  QPAY066B: "qpay066b",
+  QPAY600: "qpay600",
+  REPRINT_CERTIFICATES: "reprint-certificates",
   FORFEIT: "forfeit",
   PAYMASTER_UPDATE: "paymaster-update",
   PROFIT_MASTER_UPDATE: "profit-master-update",
   PROFIT_SHARE_BY_STORE: "profit-share-by-store",
   PROFIT_SHARE_GROSS_REPORT: "profit-share-gross-report",
+  RECENTLY_TERMINATED: "recently-terminated",
   PAY450_SUMMARY: "pay450-summary",
   PROF_CTRLSHEET: "prof-control-sheet",
   PRINT_PROFIT_CERTS: "print-profit-certs",
@@ -87,7 +91,9 @@ export const ROUTES = {
 export const CAPTIONS = {
   PAY_BE_NEXT: "Pay Be Next",
   BENEFICIARY_INQUIRY: "Beneficiary Inquiry",
-    PAYBEN_REPORT: "Pay Beneficiary Report",
+  BENEFICIARY_OF: "Beneficiary Of",
+  BENEFICIARY_SEARCH_FILTER: "Beneficiaries",
+  PAYBEN_REPORT: "Pay Beneficiary Report",
   BALANCE_BY_AGE: "Get Balance by Age (PROF130B)",
   BALANCE_BY_YEARS: "Get Balance by Years (PROF130Y)",
   CONTRIBUTIONS_BY_AGE: "Get Contributions by Age (PROF130)",
@@ -128,6 +134,9 @@ export const CAPTIONS = {
   PAY426_TERMINATED_PRIOR: "Terminated employees 18 and older with prior profit sharing amounts and < 1000 hours",
   PAY426N: "Profit Sharing Report (PAY426N)",
   QPAY066_ADHOC: "QPAY066* Ad Hoc Reports",
+  QPAY066B: "QPAY066B",
+  QPAY600: "QPAY600",
+  REPRINT_CERTIFICATES: "Reprint Certificates",
   PAY450_SUMMARY: "Update Summary (PAY450)",
   PAY450: "PAY450",
   PAYMASTER_UPDATE: "Profit Master Update (PAY460)",
@@ -147,6 +156,7 @@ export const CAPTIONS = {
   QPAY066_UNDER21: "QPAY066-UNDR21",
   QPAY066TA_UNDER21: "QPAY066TA-UNDR21",
   QPAY066TA: "QPAY066TA",
+  RECENTLY_TERMINATED: "Recently Terminated (PROF-VESTED|PAY508)",
   REPORTS_BY_AGE: "Reports by Age",
   SUMMARY: "Summary",
   TERMINATIONS: "Terminations (QPAY066)",
@@ -160,6 +170,9 @@ export const CAPTIONS = {
 export const VIEW = "View";
 
 export const SMART_PS_QA_IMPERSONATION = "SMART-PS-QA-Impersonation";
+export const SMART_ROLE_PREFIX = "SMART";
+export const APP_NAME = "PS";
+export const IMPERSONATION_ROLE_SUFFIX = "Impersonation";
 
 export const GRID_COLUMN_WIDTHS = {
   BADGE_NUMBER: 100,
@@ -189,4 +202,12 @@ export const PAY426_REPORT_IDS = {
   TERMINATED_NO_PRIOR_PS: 7,
   TERMINATED_WITH_PRIOR_PS: 8,
   TERMINATED_UNDER_EIGHTEEN_NO_WAGES: 10
+} as const;
+
+// Mirror of server-side NavigationStatus.Constants for client logic
+export const NAVIGATION_STATUS = {
+  NOT_STARTED: 1,
+  IN_PROGRESS: 2,
+  ON_HOLD: 3,
+  COMPLETE: 4
 } as const;

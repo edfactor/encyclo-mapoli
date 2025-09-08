@@ -3,6 +3,7 @@ using System.CommandLine.Invocation;
 using System.Text;
 using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
 using Demoulas.ProfitSharing.Data.Cli.DiagramServices;
+using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -59,15 +60,7 @@ public sealed class Program
                     await context.SaveChangesAsync();
                 }
 
-                OracleConnectionStringBuilder sb = new OracleConnectionStringBuilder(context.Database.GetConnectionString());
-
-                string gatherStats = $@"BEGIN
-   DBMS_STATS.GATHER_SCHEMA_STATS('{sb.UserID}');
-    END;";
-
-                await context.Database.ExecuteSqlRawAsync(gatherStats);
-                Console.WriteLine("Gathered schema stats");
-
+                await GatherSchemaStatistics(context);
             });
         });
 
@@ -104,6 +97,8 @@ public sealed class Program
 
                 context.DataImportRecords.Add(new DataImportRecord { SourceSchema = sourceSchema });
                 await context.SaveChangesAsync();
+
+                await GatherSchemaStatistics(context);
             });
         });
 
@@ -210,7 +205,44 @@ public sealed class Program
         rootCommand.AddCommand(validateImportCommand);
         rootCommand.AddCommand(runSqlCommandForNavigation);
         
+        var runSqlCommandForUatNavigation = new Command("import-uat-navigation", "Run a custom SQL script to add UAT navigations");
+        commonOptions.ForEach(runSqlCommandForUatNavigation.AddOption);
+
+        runSqlCommandForUatNavigation.SetHandler(async () =>
+        {
+            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async context =>
+            {
+                var sqlFile = configuration["sql-file"];
+                var sourceSchema = configuration["source-schema"];
+                if (string.IsNullOrEmpty(sqlFile) || string.IsNullOrEmpty(sourceSchema))
+                {
+                    throw new ArgumentNullException("SQL file path and schema must be provided.");
+                }
+
+                string sqlCommand = await File.ReadAllTextAsync(sqlFile);
+                sqlCommand = sqlCommand.Replace("COMMIT ;", string.Empty)
+                    .Replace("{SOURCE_PROFITSHARE_SCHEMA}", sourceSchema).Trim();
+                await context.Database.ExecuteSqlRawAsync(sqlCommand);
+
+                context.DataImportRecords.Add(new DataImportRecord { SourceSchema = sourceSchema });
+                await context.SaveChangesAsync();
+            });
+        });
+
+        rootCommand.AddCommand(runSqlCommandForUatNavigation);
 
         return rootCommand.InvokeAsync(args);
+    }
+
+    private static async Task GatherSchemaStatistics(ProfitSharingDbContext context)
+    {
+        OracleConnectionStringBuilder sb = new OracleConnectionStringBuilder(context.Database.GetConnectionString());
+
+        string gatherStats = $@"BEGIN
+   DBMS_STATS.GATHER_SCHEMA_STATS('{sb.UserID}');
+    END;";
+
+        await context.Database.ExecuteSqlRawAsync(gatherStats);
+        Console.WriteLine("Gathered schema stats");
     }
 }

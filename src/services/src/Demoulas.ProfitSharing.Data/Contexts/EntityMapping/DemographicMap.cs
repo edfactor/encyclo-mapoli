@@ -15,16 +15,19 @@ internal sealed class DemographicMap : ModifiedBaseMap<Demographic>
         //https://demoulas.atlassian.net/wiki/spaces/~bherrmann/pages/39944312/Quick+Guide+to+Profit+Sharing+Tables
 
         base.Configure(builder);
-        
+
         _ = builder.ToTable("DEMOGRAPHIC");
         _ = builder.HasKey(e => e.Id);
 
         _ = builder.HasIndex(e => e.Ssn, "IX_SSN");
         _ = builder.HasIndex(e => e.DateOfBirth, "IX_DOB");
         _ = builder.HasIndex(e => e.TerminationDate, "IX_TERMINATION_DATE");
-        _ = builder.HasIndex(e => new {e.Ssn, e.OracleHcmId}, "IX_SSN_ORACLE_HCM_ID");
+        // Supports report filters on employment status and termination window
+        _ = builder.HasIndex(e => e.EmploymentStatusId, "IX_EMPLOYMENT_STATUS");
+        _ = builder.HasIndex(e => new { e.EmploymentStatusId, e.TerminationDate }, "IX_STATUS_TERMINATION_DATE");
+        _ = builder.HasIndex(e => new { e.Ssn, e.OracleHcmId }, "IX_SSN_ORACLE_HCM_ID");
         _ = builder.HasIndex(e => new { e.Ssn, e.BadgeNumber }, "IX_SSN_BADGE_NUMBER");
-        
+
         _ = builder.Property(e => e.Id)
             .HasPrecision(9)
             .ValueGeneratedOnAdd()
@@ -116,7 +119,6 @@ internal sealed class DemographicMap : ModifiedBaseMap<Demographic>
         _ = builder.Property(e => e.EmploymentStatusId)
             .HasColumnName("EMPLOYMENT_STATUS_ID");
 
-
         _ = builder.OwnsOne(e => e.Address, address =>
         {
             address.Property(a => a.Street).HasMaxLength(56).HasColumnName("STREET").HasComment("Street").IsRequired();
@@ -191,11 +193,11 @@ internal sealed class DemographicMap : ModifiedBaseMap<Demographic>
 
         builder.HasOne(d => d.EmploymentStatus)
             .WithMany(p => p.Demographics)
-            .HasForeignKey(d=> d.EmploymentStatusId);
+            .HasForeignKey(d => d.EmploymentStatusId);
 
         _ = builder.HasMany(d => d.Beneficiaries)
             .WithOne(p => p.Demographic)
-            .HasForeignKey(p=> p.DemographicId);
+            .HasForeignKey(p => p.DemographicId);
 
         _ = builder.HasMany(d => d.PayProfits)
             .WithOne(p => p.Demographic)
@@ -209,7 +211,7 @@ internal sealed class DemographicMap : ModifiedBaseMap<Demographic>
             .HasForeignKey(p => p.DemographicId);
 
         builder.HasMany(d => d.DemographicSsnChangeHistories)
-            .WithOne(d=> d.Demographic)
+            .WithOne(d => d.Demographic)
             .HasForeignKey(p => p.DemographicId);
     }
 }

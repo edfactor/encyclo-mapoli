@@ -1,9 +1,7 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Common;
+﻿using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
@@ -50,50 +48,39 @@ internal sealed class MissiveService : IMissiveService
             {
                 // Pre-fetch demographics for all SSNs
                 var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
-                var demoList = await demographics.Where(d => ssnSet.Contains(d.Ssn)).ToListAsync(cancellation);
-                var demoIds = demoList.Select(d => d.Id).ToList();
+                var employeeList = await demographics.Join(ctx.PayProfits, d=>d.Id, pp=>pp.DemographicId, (d,pp)=>new {d,pp})
+                    .Where(empl => ssnSet.Contains(empl.d.Ssn))
+                    .Where(emp=>emp.pp.ProfitYear == profitYear)
+                    .ToListAsync(cancellation);
+                var demoIds = employeeList.Select(empl => empl.d.Id).ToList();
 
                 // Pre-fetch balances for all SSNs
                 var balances = await _totalService.GetVestingBalanceForMembersAsync(Common.Contracts.Request.SearchBy.Ssn, ssnSet, profitYear, cancellation);
                 var balanceMap = balances.ToDictionary(b => b.Id, b => b);
-
-                // Pre-fetch PayProfits for all demographics in profitYear
-                var payProfits = await ctx.PayProfits.Where(pp => pp.ProfitYear == profitYear && demoIds.Contains(pp.DemographicId)).ToListAsync(cancellation);
-
+                
                 // Pre-fetch BeneficiaryContacts for all SSNs
                 var beneficiaryContacts = await ctx.BeneficiaryContacts.Where(bc => ssnSet.Contains(bc.Ssn)).Select(bc => bc.Ssn).Distinct().ToListAsync(cancellation);
 
-                // Pre-fetch for EmployeeMayBe100Percent
-                var zeroContributionReasonId = ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay;
-                var mayBe100Percent = await (from pp in ctx.PayProfits
-                    where pp.ProfitYear == profitYear && pp.ZeroContributionReasonId == zeroContributionReasonId && demoIds.Contains(pp.DemographicId)
-                    join d in demographics on pp.DemographicId equals d.Id
-                    select d.Ssn).Distinct().ToListAsync(cancellation);
+                var mayBe100Percent = employeeList
+                    .Where(empl=>empl.pp.ZeroContributionReasonId == /*7*/ ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay)
+                    .Select(empl=>empl.d.Ssn).ToHashSet();
 
-                // Pre-calculate 65th birthday cutoff
-                var sixtyFiveBirthDate = DateOnly.FromDateTime(DateTime.Today).AddYears(-65);
+                var vestingNow100 = employeeList
+                    .Where(empl=>empl.pp.ZeroContributionReasonId ==  /*6*/ ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested)
+                    .Select(empl=>empl.d.Ssn).ToHashSet();
 
-                // Pre-fetch for VestingIsNow100Percent
-                var vestingNow100 = demoList.Where(d =>
-                    d.DateOfBirth <= sixtyFiveBirthDate &&
-                    (!d.TerminationDate.HasValue || d.TerminationDate > calInfo.FiscalEndDate) &&
-                    d.TerminationCodeId != TerminationCode.Constants.Deceased
-                ).Select(d => d.Ssn).ToHashSet();
-
-                // Pre-fetch for HasNewVestingPlanHasContributions
                 var minHours = ReferenceData.MinimumHoursForContribution();
-                var newVestingPlanId = Enrollment.Constants.NewVestingPlanHasContributions;
                 var vestingIncreased = new HashSet<int>();
-                foreach (var d in demoList)
+                
+                foreach (var empl in employeeList)
                 {
-                    if (balanceMap.TryGetValue(d.Ssn, out var memberBalance) && memberBalance is { YearsInPlan: >= 2 and <= 7 })
+                    if (balanceMap.TryGetValue(empl.d.Ssn, out var memberBalance) && memberBalance is { YearsInPlan: >= 2 and <= 7 })
                     {
-                        var hasVesting = payProfits.Any(pp => pp.DemographicId == d.Id &&
-                                                              pp.CurrentHoursYear + pp.HoursExecutive > minHours &&
-                                                              pp.EnrollmentId == newVestingPlanId);
+                        var hasVesting =  empl.pp.CurrentHoursYear + empl.pp.HoursExecutive > minHours &&
+                                          empl.pp.EnrollmentId == /*2*/ Enrollment.Constants.NewVestingPlanHasContributions;
                         if (hasVesting)
                         {
-                            vestingIncreased.Add(d.Ssn);
+                            vestingIncreased.Add(empl.d.Ssn);
                         }
                     }
                 }
@@ -106,7 +93,7 @@ internal sealed class MissiveService : IMissiveService
                         missives.Add(Missive.Constants.VestingIncreasedOnCurrentBalance);
                     }
 
-                    if (vestingNow100.Contains(ssn))
+                    if (vestingNow100.Contains(ssn) && balanceMap.ContainsKey(ssn) && balanceMap[ssn].CurrentBalance > 0)
                     {
                         missives.Add(Missive.Constants.VestingIsNow100Percent);
                     }

@@ -1,7 +1,9 @@
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text;
+using YEMatch.YEMatch.AssertActivities;
+using YEMatch.YEMatch.SmartActivities;
 
-namespace YEMatch;
+namespace YEMatch.YEMatch.ArrangeActivites;
 
 /* Uses SMART to rebuild the 2023 ZeroContribution flag.  This flag is used in the vesting calculation, so we need to compute it for SMART to use */
 public class S24_Rebuild2023Enrollment : BaseSqlActivity
@@ -22,7 +24,7 @@ public class S24_Rebuild2023Enrollment : BaseSqlActivity
         ApiClient apiClient = SmartActivityFactory.Client!;
 
         HttpClient httpClient = new() { Timeout = TimeSpan.FromHours(2) };
-        TestToken.CreateAndAssignTokenForClient(httpClient, "IT-Operations");
+        TestToken.CreateAndAssignTokenForClient(httpClient, "Finance-Manager");
         HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/yearend/update-enrollment")
         {
             Content = new StringContent("{ \"profitYear\": 2023}", Encoding.UTF8, "application/json")

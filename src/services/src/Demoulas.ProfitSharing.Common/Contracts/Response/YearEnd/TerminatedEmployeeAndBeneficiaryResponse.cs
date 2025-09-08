@@ -1,5 +1,8 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
 
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+
+[YearEndArchiveProperty]
 public sealed record TerminatedEmployeeAndBeneficiaryResponse : ReportResponseBase<TerminatedEmployeeAndBeneficiaryDataResponseDto>
 {
     public required decimal TotalVested { get; set; }

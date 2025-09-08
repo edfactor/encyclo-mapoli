@@ -2,7 +2,7 @@ import { Typography } from "@mui/material";
 import { DSMGrid } from "smart-ui-library";
 import { Path, useNavigate } from "react-router";
 import { useCallback, useMemo } from "react";
-import { GetUnder21ReportColumns } from "./Under21ReportColumns";
+import { GetUnder21ReportColumns } from "./Under21ReportGridColumns";
 import { useLazyGetUnder21BreakdownByStoreQuery, useLazyGetUnder21TotalsQuery } from "reduxstore/api/YearsEndApi";
 
 const sampleData = [

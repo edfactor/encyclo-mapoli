@@ -1,28 +1,20 @@
 import { ColDef } from "ag-grid-community";
 import { mmDDYYYY_HHMMSS_Format } from "../../../utils/dateUtils";
+import { createDateColumn, createYearColumn } from "../../../utils/gridColumnFactory";
 
 export const GetFreezeColumns = (): ColDef[] => {
   return [
-    {
+    createYearColumn({
       headerName: "Profit Year",
-      field: "profitYear",
-      colId: "profitYear",
-      minWidth: 80,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sort: "asc"
-    },
-    {
+      field: "profitYear"
+    }),
+    createDateColumn({
       headerName: "Frozen Date/Time",
       field: "asOfDateTime",
-      colId: "asOfDateTime",
-      minWidth: 100,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
+      // API returns a full datetime with offset (e.g. 2024-12-29T00:00:00.0000000-05:00)
+      // Use the explicit datetime formatter that handles ISO strings with offsets.
       valueFormatter: (params) => (params.value ? mmDDYYYY_HHMMSS_Format(params.value) : "")
-    },
+    }),
     {
       headerName: "IsActive Freeze",
       field: "isActive",
@@ -41,15 +33,12 @@ export const GetFreezeColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true
     },
-    {
+    createDateColumn({
       headerName: "Created Date/Time",
       field: "createdDateTime",
-      colId: "createdDateTime",
       minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
+      alignment: "left",
       valueFormatter: (params) => (params.value ? mmDDYYYY_HHMMSS_Format(params.value) : "")
-    }
+    })
   ];
 };

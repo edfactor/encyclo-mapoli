@@ -1,19 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Beneficiaries;
-public class UpdateBeneficiaryContactEndpoint:Endpoint<UpdateBeneficiaryContactRequest, UpdateBeneficiaryContactResponse>
+public class UpdateBeneficiaryContactEndpoint:ProfitSharingEndpoint<UpdateBeneficiaryContactRequest, UpdateBeneficiaryContactResponse>
 {
     private readonly IBeneficiaryService _beneficiaryService;
-    public UpdateBeneficiaryContactEndpoint(IBeneficiaryService beneficiaryService)
+    public UpdateBeneficiaryContactEndpoint(IBeneficiaryService beneficiaryService) : base(Navigation.Constants.Beneficiaries)
     {
         _beneficiaryService = beneficiaryService;
     }

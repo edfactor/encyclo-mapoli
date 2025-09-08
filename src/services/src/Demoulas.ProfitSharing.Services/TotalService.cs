@@ -6,7 +6,6 @@ using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
@@ -22,7 +21,11 @@ namespace Demoulas.ProfitSharing.Services;
 /// participant totals, distributions, vesting balances, and other profit-sharing-related metrics.
 /// It relies on dependencies such as <see cref="IProfitSharingDataContextFactory"/> and <see cref="ICalendarService"/>
 /// to interact with the data context and calendar-related operations.
+///
+/// Design notes, executive summary and SQL snippets are documented in Confluence:
+/// <see href="https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/517898377/Totals+Service+Executive+Summary+and+SQL+snippets">Totals Service — Executive Summary and SQL snippets</see>
 /// </remarks>
+/// <seealso href="https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/517898377/Totals+Service+Executive+Summary+and+SQL+snippets">Confluence: Totals Service</seealso>
 public sealed class TotalService : ITotalService
 {
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
@@ -99,7 +102,7 @@ public sealed class TotalService : ITotalService
             select new ParticipantTotalDto
             {
                 Ssn = pd_g.Key,
-                Total = pd_g.Where(x => new[]
+                TotalAmount = pd_g.Where(x => new[]
                 {
                     /*1*/ ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
                     /*2*/ ProfitCode.Constants.OutgoingForfeitures.Id,
@@ -139,10 +142,10 @@ public sealed class TotalService : ITotalService
         int[] validProfitCodes =
             [ProfitCode.Constants.OutgoingForfeitures.Id, ProfitCode.Constants.Outgoing100PercentVestedPayment.Id];
         return (from pd in ctx.ProfitDetails
-            where pd.ProfitYear <= employeeYear
-            group pd by pd.Ssn
+                where pd.ProfitYear <= employeeYear
+                group pd by pd.Ssn
             into pd_g
-            select new ParticipantTotalDto() { Ssn = pd_g.Key, Total = pd_g.Where(x => validProfitCodes.Contains(x.ProfitCodeId)).Sum(x => x.Forfeiture) });
+                select new ParticipantTotalDto() { Ssn = pd_g.Key, TotalAmount = pd_g.Where(x => validProfitCodes.Contains(x.ProfitCodeId)).Sum(x => x.Forfeiture) });
     }
 
     /// <summary>
@@ -156,10 +159,10 @@ public sealed class TotalService : ITotalService
         int[] validProfitCodes =
             [ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id, ProfitCode.Constants.OutgoingDirectPayments.Id];
         return (from pd in ctx.ProfitDetails
-            where pd.ProfitYear <= employeeYear
-            group pd by pd.Ssn
+                where pd.ProfitYear <= employeeYear
+                group pd by pd.Ssn
             into pd_g
-            select new ParticipantTotalDto() { Ssn = pd_g.Key, Total = pd_g.Where(x => validProfitCodes.Contains(x.ProfitCodeId)).Sum(x => x.Forfeiture) });
+                select new ParticipantTotalDto() { Ssn = pd_g.Key, TotalAmount = pd_g.Where(x => validProfitCodes.Contains(x.ProfitCodeId)).Sum(x => x.Forfeiture) });
     }
 
     /// <summary>
@@ -246,6 +249,26 @@ public sealed class TotalService : ITotalService
         return list?.FirstOrDefault();
     }
 
+    /// <summary>
+    /// Retrieves the first contribution year for each participant based on their SSN and a specified profit year.
+    /// </summary>
+    /// <param name="ctx"></param>
+    /// <param name="profitYear"></param>
+    /// <returns></returns>
+    public static IQueryable<SsnAndFirstYear> GetFirstContributionYear(IProfitSharingDbContext ctx, short profitYear)
+    {
+        return from pd in ctx.ProfitDetails
+               where pd.ProfitYear < profitYear
+                  && pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
+                  && pd.Contribution != 0
+               group pd by pd.Ssn into g
+               select new SsnAndFirstYear()
+               {
+                   Ssn = g.Key,
+                   FirstContributionYear = g.Min(x => x.ProfitYear),
+               };
+    }
+
 
     public async Task<List<BalanceEndpointResponse>> GetVestingBalanceForMembersAsync(SearchBy searchBy,
         ISet<int> badgeNumberOrSsnCollection, short profitYear, CancellationToken cancellationToken)
@@ -259,19 +282,19 @@ public sealed class TotalService : ITotalService
                 {
                     var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
                     var rslt = await (from t in TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate)
-                        join d in demographics on t.Ssn equals d.Ssn
-                        where badgeNumberOrSsnCollection.Contains(d.BadgeNumber)
-                        select new BalanceEndpointResponse
-                        {
-                            Id = d.Ssn,
-                            Ssn = t.Ssn.MaskSsn(),
-                            CurrentBalance = (t.CurrentBalance ?? 0),
-                            VestedBalance = (t.VestedBalance ?? 0),
-                            VestingPercent = (t.VestingPercent ?? 0),
-                            YearsInPlan = (t.YearsInPlan ?? 0),
-                            AllocationsToBeneficiary = (t.AllocationsToBeneficiary ?? 0),
-                            AllocationsFromBeneficiary = (t.AllocationsFromBeneficiary ?? 0)
-                        }).ToListAsync(cancellationToken);
+                                      join d in demographics on t.Ssn equals d.Ssn
+                                      where badgeNumberOrSsnCollection.Contains(d.BadgeNumber)
+                                      select new BalanceEndpointResponse
+                                      {
+                                          Id = d.Ssn,
+                                          Ssn = t.Ssn.MaskSsn(),
+                                          CurrentBalance = (t.CurrentBalance ?? 0),
+                                          VestedBalance = (t.VestedBalance ?? 0),
+                                          VestingPercent = (t.VestingPercent ?? 0),
+                                          YearsInPlan = (t.YearsInPlan ?? 0),
+                                          AllocationsToBeneficiary = (t.AllocationsToBeneficiary ?? 0),
+                                          AllocationsFromBeneficiary = (t.AllocationsFromBeneficiary ?? 0)
+                                      }).ToListAsync(cancellationToken);
                     return rslt;
                 });
 
@@ -279,18 +302,18 @@ public sealed class TotalService : ITotalService
                 return await _profitSharingDataContextFactory.UseReadOnlyContext(ctx =>
                 {
                     var rslt = (from t in TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate)
-                        where badgeNumberOrSsnCollection.Contains(t.Ssn)
-                        select new BalanceEndpointResponse
-                        {
-                            Id = t.Ssn,
-                            Ssn = t.Ssn.MaskSsn(),
-                            CurrentBalance = (t.CurrentBalance ?? 0),
-                            VestedBalance = (t.VestedBalance ?? 0),
-                            VestingPercent = (t.VestingPercent ?? 0),
-                            YearsInPlan = (t.YearsInPlan ?? 0),
-                            AllocationsToBeneficiary = (t.AllocationsToBeneficiary ?? 0),
-                            AllocationsFromBeneficiary = (t.AllocationsFromBeneficiary ?? 0)
-                        }).ToListAsync(cancellationToken);
+                                where badgeNumberOrSsnCollection.Contains(t.Ssn)
+                                select new BalanceEndpointResponse
+                                {
+                                    Id = t.Ssn,
+                                    Ssn = t.Ssn.MaskSsn(),
+                                    CurrentBalance = (t.CurrentBalance ?? 0),
+                                    VestedBalance = (t.VestedBalance ?? 0),
+                                    VestingPercent = (t.VestingPercent ?? 0),
+                                    YearsInPlan = (t.YearsInPlan ?? 0),
+                                    AllocationsToBeneficiary = (t.AllocationsToBeneficiary ?? 0),
+                                    AllocationsFromBeneficiary = (t.AllocationsFromBeneficiary ?? 0)
+                                }).ToListAsync(cancellationToken);
                     return rslt;
                 });
         }
@@ -299,85 +322,9 @@ public sealed class TotalService : ITotalService
     /// <summary>
     ///  Retrieves the transactions by SSN for a specific profit year.   The ORACLE driver likes the long winded version of the query (not mixing in any C# methods)
     /// </summary>
-    public static IQueryable<InternalProfitDetailDto> GetTransactionsBySsnForProfitYearForOracle(IProfitSharingDbContext ctx, short profitYear)
+    public IQueryable<ProfitDetailRollup> GetTransactionsBySsnForProfitYearForOracle(IProfitSharingDbContext ctx, short profitYear)
     {
-        return ctx.ProfitDetails
-            .Where(pd => pd.ProfitYear == profitYear) // YIKES, BOB Changed to be exact!!! 
-            .GroupBy(details => details.Ssn)
-            .Select(g => new
-            {
-                Ssn = g.Key,
-                
-                
-                // These definitions arise from the Breakdown report
-                TotalContributions = g.Sum(x => x.Contribution),
-                TotalEarnings = g.Sum(x => x.Earnings),
-                TotalForfeitures = g.Sum(x =>
-                    x.ProfitCodeId == /*0*/ ProfitCode.Constants.IncomingContributions.Id
-                        ? x.Forfeiture
-                        : (x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id ? -x.Forfeiture : 0)),
-                TotalPayments = g.Sum(x => x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0),
-                Distribution = g.Sum(x =>
-                    (x.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id ||
-                     x.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments.Id ||
-                     x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id)
-                        ? -x.Forfeiture
-                        : 0),
-                BeneficiaryAllocation = g.Sum(x =>
-                    (x.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary.Id) ? -x.Forfeiture :
-                    (x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary.Id) ? x.Contribution : 0),
-                CurrentBalance = g.Sum(x =>
-                    x.Contribution + x.Earnings +
-                    (x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0) -
-                    (x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0)),
-                
-                // These definitions arise from usage in PAY443 
-                
-                MilitaryTotal = g.Where(pd => pd.ProfitYearIteration == ProfitDetail.Constants.ProfitYearIterationMilitary)
-                    .Sum(pd => pd.Contribution),
-                ClassActionFundTotal = g.Where(pd => pd.ProfitYearIteration == ProfitDetail.Constants.ProfitYearIterationClassActionFund)
-                    .Sum(pd => pd.Earnings),
-                
-                PaidAllocationsTotal = g.Where(pd =>
-                        (pd.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment &&
-                         (pd.CommentType == CommentType.Constants.TransferOut ||
-                          pd.CommentType == CommentType.Constants.QdroOut)) ||
-                        pd.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary)
-                    .Sum(pd => pd.Forfeiture),
-                
-                DistributionsTotal = g.Where(pd =>
-                        pd.ProfitCodeId == /*1*/ ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal ||
-                        pd.ProfitCodeId == /*3*/ ProfitCode.Constants.OutgoingDirectPayments ||
-                        (pd.ProfitCodeId == /*9*/ProfitCode.Constants.Outgoing100PercentVestedPayment &&
-                         !(pd.CommentType == CommentType.Constants.TransferOut ||
-                           pd.CommentType == CommentType.Constants.QdroOut)))
-                    .Sum(pd => pd.Forfeiture),
-                
-                AllocationsTotal = g.Where(pd => pd.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary)
-                    .Sum(pd => pd.Contribution),
-                ForfeitsTotal = g.Where(pd => pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id)
-                    .Sum(pd => pd.Forfeiture),
-                
-            })
-            .Select(r => new InternalProfitDetailDto
-            {
-                Ssn = r.Ssn,
-                TotalContributions = r.TotalContributions,
-                TotalEarnings = r.TotalEarnings,
-                TotalForfeitures = r.TotalForfeitures,
-                TotalPayments = r.TotalPayments,
-                CurrentAmount = r.CurrentBalance,
-                Distribution = r.Distribution,
-                BeneficiaryAllocation = r.BeneficiaryAllocation,
-
-                // These definitions arise from PAY443 
-                DistributionsTotal = r.DistributionsTotal,
-                ForfeitsTotal = r.ForfeitsTotal,
-                AllocationsTotal = r.AllocationsTotal ,
-                PaidAllocationsTotal = r.PaidAllocationsTotal ,
-                MilitaryTotal = r.MilitaryTotal,
-                ClassActionFundTotal = r.ClassActionFundTotal
-            });
+        return _embeddedSqlService.GetTransactionsBySsnForProfitYearForOracle(ctx, profitYear);
     }
 
 

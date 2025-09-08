@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.LogMasking;
+using Demoulas.ProfitSharing.Common.Metrics;
 using Demoulas.ProfitSharing.Data;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
@@ -22,7 +23,6 @@ using Demoulas.Util.Extensions;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using NSwag.Generation.AspNetCore;
 using Scalar.AspNetCore;
-using Serilog.Enrichers.Sensitive;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder();
 
@@ -50,26 +50,43 @@ builder.SetDefaultLoggerConfiguration(smartConfig, fileSystemLog);
 
 _ = builder.AddSecurityServices();
 
-var rolePermissionService = new RolePermissionService();
 if (!builder.Environment.IsTestEnvironment() && Environment.GetEnvironmentVariable("YEMATCH_USE_TEST_CERTS") == null)
 {
-    builder.Services.AddOktaSecurity(builder.Configuration, rolePermissionService);
+    builder.Services.AddOktaSecurity(builder.Configuration);
 }
 else
 {
-    builder.Services.AddTestingSecurity(builder.Configuration, rolePermissionService);
+    builder.Services.AddTestingSecurity(builder.Configuration);
 }
 
 builder.ConfigureSecurityPolicies();
+
+string[] allowedOrigins = [
+        "https://ps.qa.demoulas.net",
+        "https://ps.uat.demoulas.net",
+        "https://ps.demoulas.net"
+];
 
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(pol =>
     {
-        _ = pol.AllowAnyMethod() // Specify the allowed methods, e.g., GET, POST, etc.
-            .AllowAnyHeader()
-            .AllowAnyOrigin()
-            .WithExposedHeaders("Location", "x-demographic-data-source");
+        if (builder.Environment.IsDevelopment())
+        {
+            // Local development: permissive CORS to simplify local testing
+            _ = pol.AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowAnyOrigin()
+                .WithExposedHeaders("Location", "x-demographic-data-source");
+        }
+        else
+        {
+            // Non-dev: restrict to known UI origins only
+            _ = pol.WithOrigins(allowedOrigins)
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .WithExposedHeaders("Location", "x-demographic-data-source");
+        }
     });
 });
 
@@ -86,7 +103,7 @@ builder.AddDatabaseServices((services, factoryRequests) =>
             sp.GetRequiredService<AuditSaveChangesInterceptor>(),
             sp.GetRequiredService<BeneficiarySaveChangesInterceptor>(),
             sp.GetRequiredService<BeneficiaryContactSaveChangesInterceptor>()
-        ]));
+        ], denyCommitRoles: [Role.ITDEVOPS, Role.AUDITOR]));
     factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"));
     factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("ProfitSharing"));
 });
@@ -100,6 +117,7 @@ void OktaSettingsAction(OktaSwaggerConfiguration settings)
 void OktaDocumentSettings(AspNetCoreOpenApiDocumentGeneratorSettings settings)
 {
     settings.OperationProcessors.Add(new SwaggerImpersonationHeader());
+    settings.OperationProcessors.Add(new SwaggerAuthorizationDetails());
 }
 
 builder.ConfigureDefaultEndpoints(meterNames: [],
@@ -113,17 +131,27 @@ builder.Services.AddHealthChecks().AddCheck<EnvironmentHealthCheck>("Environment
 builder.Services.Configure<HealthCheckPublisherOptions>(options =>
 {
     options.Delay = TimeSpan.FromMinutes(1);       // Initial delay before the first run
-    options.Period = TimeSpan.FromMinutes(15);     // How often health checks are run
+    options.Period = TimeSpan.FromMinutes(10);     // How often health checks are run
     options.Predicate = _ => true;
 });
 
 builder.Services.AddSingleton<IHealthCheckPublisher, HealthCheckResultLogger>();
+builder.Host.UseDefaultServiceProvider(options =>
+{
+    options.ValidateOnBuild = true;
+});
 
 WebApplication app = builder.Build();
 
-app.UseCors();
+// Initialize metrics (resolve version) then register gauges
+GlobalMeter.InitializeFromServices(app.Services);
+GlobalMeter.RegisterObservableGauges();
+GlobalMeter.RecordDeploymentStartup();
 
+app.UseCors();
+app.UseSecurityHeaders();
 app.UseDemographicHeaders();
+app.UseSensitiveValueMasking();
 app.UseDefaultEndpoints(OktaSettingsAction)
     .UseReDoc(settings =>
     {

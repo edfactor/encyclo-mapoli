@@ -17,17 +17,11 @@ internal class PayrollSyncService
         public const long MbProfitSharingWeeks = 300000785152356; // MB Profit Sharing Weeks
     }
 
-    private readonly List<long> _balanceTypeIds =
-        [BalanceTypeIds.MbProfitSharingDollars, BalanceTypeIds.MbProfitSharingHours, BalanceTypeIds.MbProfitSharingWeeks];
 
     private readonly HttpClient _httpClient;
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly OracleHcmConfig _oracleHcmConfig;
     private readonly ILogger<PayrollSyncService> _logger;
-
-    // Constants for other parameters
-    private const string PLDGId = "300000005030436";
-    private const string PLC = "US";
 
     public PayrollSyncService(HttpClient httpClient,
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
@@ -65,61 +59,64 @@ internal class PayrollSyncService
     public async Task GetBalanceTypesForProcessResultsAsync(PayrollItem item,
         CancellationToken cancellationToken)
     {
-        // DimensionName should be set to Relationship No Calculation Breakdown Inception to Date. That will give you the correct value for current dollars, weeks, hours.
-        const string dimensionName = "Relationship No Calculation Breakdown Inception to Date";
-
-        // Initialize totals dictionary
         int year = DateTime.Today.Year;
 
-
-        Dictionary<long, decimal> balanceTypeTotals = new Dictionary<long, decimal>
+        // Initialize totals dictionary for the specific Profit Sharing balance types we care about
+        Dictionary<long, decimal> balanceTypeTotals = new()
         {
-            { BalanceTypeIds.MbProfitSharingDollars, 0 }, { BalanceTypeIds.MbProfitSharingHours, 0 }, { BalanceTypeIds.MbProfitSharingWeeks, 0 }
+            { BalanceTypeIds.MbProfitSharingDollars, 0 },
+            { BalanceTypeIds.MbProfitSharingHours, 0 },
+            { BalanceTypeIds.MbProfitSharingWeeks, 0 }
         };
-        foreach (long balanceTypeId in _balanceTypeIds)
+
+        // New single endpoint call already returns all relevant balance types
+        string url = $"{_oracleHcmConfig.PayrollUrl}/{item.ObjectActionId}/child/BalanceView/?onlyData=true&finder=findByBalVar;pBalGroupUsageId1=300007039791698";
+        try
         {
-            string url =
-                $"{_oracleHcmConfig.PayrollUrl}/{item.ObjectActionId}/child/BalanceView/?onlyData=true&fields=BalanceTypeId,TotalValue1,TotalValue2,DefbalId1,DimensionName&finder=findByBalVar;pBalGroupUsageId1=null,pBalGroupUsageId2=-1,pLDGId={PLDGId},pLC={PLC},pBalTypeId={balanceTypeId}";
-            try
+            using HttpResponseMessage response = await _httpClient.GetAsync(url, cancellationToken).ConfigureAwait(false);
+
+            if (Debugger.IsAttached)
             {
-                using HttpResponseMessage response = await _httpClient.GetAsync(url, cancellationToken).ConfigureAwait(false);
-
-                if (Debugger.IsAttached)
-                {
-                    _logger.LogInformation(url);
-                }
-
-                if (response.IsSuccessStatusCode)
-                {
-                    BalanceRoot? balanceResults = await response.Content.ReadFromJsonAsync<BalanceRoot>(cancellationToken).ConfigureAwait(false);
-
-                    decimal total = balanceResults!.Items.Where(i => string.CompareOrdinal(i.DimensionName, dimensionName) == 0)
-                        .Sum(b => b.TotalValue1);
-
-                    // Accumulate totals per balance type ID
-                    balanceTypeTotals[balanceTypeId] += total;
-
-                }
-                else
-                {
-                    _logger.LogError("Failed to get balance types for PersonId {PersonId}/ObjectActionId {ObjectActionId}: {ResponseReasonPhrase}",
-                        item.PersonId,
-                        item.ObjectActionId,
-                        SanitizeInput(response.ReasonPhrase));
-                    _logger.LogError("Failed to get balance types for PersonId {PersonId}/ObjectActionId {ObjectActionId}: {ResponseReasonPhrase}",
-                        item.PersonId, 
-                        item.ObjectActionId,
-                        response.ReasonPhrase);
-                }
+                _logger.LogInformation(url);
             }
-            catch (Exception ex)
+
+            if (!response.IsSuccessStatusCode)
             {
-                _logger.LogError(ex, "Error fetching balance types for PersonId {PersonId}/ObjectActionId {ObjectActionId}: {Message}", 
+                _logger.LogError("Failed to get balance types for PersonId {PersonId}/ObjectActionId {ObjectActionId}: {ResponseReasonPhrase}",
                     item.PersonId,
-                    item.ObjectActionId, 
-                    ex.Message);
+                    item.ObjectActionId,
+                    SanitizeInput(response.ReasonPhrase));
+                _logger.LogError("Failed to get balance types for PersonId {PersonId}/ObjectActionId {ObjectActionId}: {ResponseReasonPhrase}",
+                    item.PersonId,
+                    item.ObjectActionId,
+                    response.ReasonPhrase);
+            }
+            else
+            {
+                BalanceRoot? balanceResults = await response.Content.ReadFromJsonAsync<BalanceRoot>(cancellationToken).ConfigureAwait(false);
+                if ((balanceResults?.Items?.Any() ?? false))
+                {
+                    foreach (BalanceItem balanceItem in balanceResults.Items
+                                 .Where(b => balanceTypeTotals.ContainsKey(b.BalanceTypeId)))
+                    {
+                        balanceTypeTotals[balanceItem.BalanceTypeId] = balanceItem.TotalValue1;
+                    }
+                }
             }
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching balance types for PersonId {PersonId}/ObjectActionId {ObjectActionId}: {Message}",
+                item.PersonId,
+                item.ObjectActionId,
+                ex.Message);
+        }
+
+        if (balanceTypeTotals.Values.All(v => v == 0))
+        {
+            return;
+        }
+
         await CalculateAndUpdatePayProfitRecord(item.PersonId, year, balanceTypeTotals, cancellationToken).ConfigureAwait(false);
     }
 

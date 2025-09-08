@@ -7,7 +7,7 @@ using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities.MassTransit;
+using Demoulas.ProfitSharing.Data.Entities.Scheduling;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Microsoft.EntityFrameworkCore;
@@ -148,7 +148,7 @@ internal class PayrollSyncClient
 
             // Queue Here
             const string requestedBy = "System";
-            foreach (PayrollItem[] items in results!.Items.Chunk(10))
+            foreach (PayrollItem[] items in results!.Items.Chunk(15))
             {
                 MessageRequest<PayrollItem[]> message = new() { ApplicationName = nameof(PayrollSyncClient), Body = items, UserId = requestedBy };
 
@@ -216,7 +216,7 @@ internal class PayrollSyncClient
     private async Task<string> BuildUrl(int offset = 0, CancellationToken cancellationToken = default)
     {
         const int payrollActionId = 2003;
-        ushort limit = ushort.Min(75, _oracleHcmConfig.Limit);
+        ushort limit = ushort.Min(byte.MaxValue, _oracleHcmConfig.Limit);
         Dictionary<string, string> initialQuery = new Dictionary<string, string>()
         {
             { "limit", $"{limit}" },

@@ -1,8 +1,10 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
+using YEMatch.YEMatch.ArrangeActivites;
+using YEMatch.YEMatch.ReadyActivities;
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
-namespace YEMatch;
+namespace YEMatch.YEMatch.Runs;
 
 [SuppressMessage("AsyncUsage", "AsyncFixer01:Unnecessary async/await usage")]
 public class GoldenRun : Runnable
@@ -10,12 +12,27 @@ public class GoldenRun : Runnable
     public override async Task Exec()
     {
         GetGold.Purge();
-        
+
         // Generate the Golden files.  Run READY from Frozen to the YE Completed.
         await Run(Specify(
             "R0", // import obfuscated
-            "DropBadBenes",
-            "DropBadEmployee",
+            nameof(DropBadBenesReady),
+            nameof(FixFrozenReady),
+            // "R1",  - we cant run these (R1...R14) because the SHIFT has already been run on the Scramble
+            // "R2",
+            // "R3",
+            // "R4",
+            // "R5",
+            // "R6",
+            // "R7",
+            // "R8",
+            // "R9",
+            // "R10",
+            // "R11",
+            // "R12",
+            // "R13A",
+            // "R13B",
+            // "R14",
             "R15",
             "R16",
             "R17",
@@ -32,7 +49,6 @@ public class GoldenRun : Runnable
             "R27",
             "R28"
         ));
-        // Copy the golden files to the integration test Resources directory
-        GetGold.Fetch(DataDirectory, ReadyActivityFactory.SftpClient!);
+        
     }
 }

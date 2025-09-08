@@ -1,19 +1,10 @@
-import React from 'react';
-import { 
-  FormControl, 
-  Select,
-  MenuItem, 
-  SelectChangeEvent,
-  FormLabel,
-  TextField,
-} from '@mui/material';
-import Grid2 from '@mui/material/Grid2';
-import { useForm, Controller } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
-import DsmDatePicker from 'components/DsmDatePicker/DsmDatePicker';
-import SearchAndReset from 'components/SearchAndReset/SearchAndReset';
-import { ReportPreset } from 'reduxstore/types';
+import { yupResolver } from "@hookform/resolvers/yup";
+import { FormControl, FormLabel, Grid, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material";
+import SearchAndReset from "components/SearchAndReset/SearchAndReset";
+import React from "react";
+import { Controller, useForm } from "react-hook-form";
+import { ReportPreset } from "reduxstore/types";
+import * as yup from "yup";
 
 interface FilterSectionProps {
   presets: ReportPreset[];
@@ -34,7 +25,7 @@ interface FilterFormData {
 }
 
 const schema = yup.object().shape({
-  storeNumber: yup.string().required('Store Number is required'),
+  storeNumber: yup.string().required("Store Number is required"),
   startDate: yup.date().nullable().default(null),
   endDate: yup.date().nullable().default(null),
   vestedPercentage: yup.string().default(""),
@@ -57,9 +48,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     watch,
     formState: { errors, isValid }
   } = useForm<FilterFormData>({
-    resolver: yupResolver(schema) as any,
+    resolver: yupResolver(schema),
     defaultValues: {
-      storeNumber: '',
+      storeNumber: "",
       startDate: null,
       endDate: null,
       vestedPercentage: "",
@@ -68,7 +59,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     }
   });
 
-  const storeNumber = watch('storeNumber');
+  const storeNumber = watch("storeNumber");
 
   const handlePresetChange = (event: SelectChangeEvent<string>) => {
     const presetId = event.target.value;
@@ -85,7 +76,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     reset();
     onReset();
   };
-
+  /*
   const vestedPercentageOptions = [
     { value: "", label: "All" },
     { value: "<20", label: "< 20%" },
@@ -94,7 +85,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     { value: ">80", label: "> 80%" },
     { value: "100", label: "100%" }
   ];
-
+  
   const ageOptions = [
     { value: "", label: "All" },
     { value: "<18", label: "< 18" },
@@ -110,7 +101,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     { value: "inactive", label: "Inactive" },
     { value: "terminated", label: "Terminated" }
   ];
-
+*/
   return (
     <form onSubmit={handleSubmit(handleFilter)}>
       <Grid
@@ -126,19 +117,19 @@ const FilterSection: React.FC<FilterSectionProps> = ({
               control={control}
               render={({ field }) => (
                 <>
-                <FormLabel required>Store Number</FormLabel>
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  required
-                  error={!!errors.storeNumber}
-                  helperText={errors.storeNumber?.message}
-                  onChange={(e) => {
-                    field.onChange(e.target.value);
-                    onStoreNumberChange(e.target.value);
-                  }}
-                />
+                  <FormLabel required>Store Number</FormLabel>
+                  <TextField
+                    {...field}
+                    fullWidth
+                    size="small"
+                    required
+                    error={!!errors.storeNumber}
+                    helperText={errors.storeNumber?.message}
+                    onChange={(e) => {
+                      field.onChange(e.target.value);
+                      onStoreNumberChange(e.target.value);
+                    }}
+                  />
                 </>
               )}
             />
@@ -150,8 +141,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                 value={currentPreset?.id || ""}
                 onChange={handlePresetChange}
                 displayEmpty
-                disabled={!storeNumber.trim()}
-              >
+                disabled={!storeNumber.trim()}>
                 <MenuItem value="">Select a Report</MenuItem>
                 {presets.map((preset) => (
                   <MenuItem
@@ -164,9 +154,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             </FormControl>
           </Grid>
         </Grid>
-
-        
-        
       </Grid>
 
       <Grid

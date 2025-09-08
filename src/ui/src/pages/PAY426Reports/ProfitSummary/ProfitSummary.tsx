@@ -1,14 +1,14 @@
 import { Divider, Grid, Typography } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
-import { DSMGrid, Page } from "smart-ui-library";
-import { useLazyGetYearEndProfitSharingSummaryReportQuery } from "reduxstore/api/YearsEndApi";
-import { GetProfitSummaryGridColumns } from "./ProfitSummaryGridColumns";
-import { YearEndProfitSharingReportSummaryLineItem, FilterParams } from "reduxstore/types";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../reduxstore/store";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { useLazyGetYearEndProfitSharingSummaryReportQuery } from "reduxstore/api/YearsEndApi";
+import { FilterParams, YearEndProfitSharingReportSummaryLineItem } from "reduxstore/types";
+import { DSMGrid, Page } from "smart-ui-library";
+import { RootState } from "../../../reduxstore/store";
 import presets from "../PAY426N/presets";
+import { GetProfitSummaryGridColumns } from "./ProfitSummaryGridColumns";
 
 /**
  * Default rows for "Active and Inactive" section - these will display with zero values
@@ -63,6 +63,7 @@ interface ProfitSummaryProps {
 
 const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) => {
   const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingSummaryReportQuery();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedLineItem, setSelectedLineItem] = useState<string | null>(null);
   const [isStatusCompleted, setIsStatusCompleted] = useState(false);
 
@@ -73,6 +74,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) =
 
   // Get the current navigation object to check its status
   const getCurrentNavigationObject = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const findNavigationById = (navigationArray: any[], id: number): any => {
       for (const item of navigationArray) {
         if (item.id === id) {
@@ -100,20 +102,21 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) =
     if (currentNav) {
       setIsStatusCompleted(currentNav.statusName === "Complete");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigationList, currentNavigationId]);
 
   const getPresetForLineItem = (lineItemPrefix: string): FilterParams | null => {
     const presetMap: { [key: string]: string } = {
-      "1": "PAY426-1",
-      "2": "PAY426-2",
-      "3": "PAY426-3",
-      "4": "PAY426-4",
-      "5": "PAY426-5",
-      "6": "PAY426-6",
-      "7": "PAY426-7",
-      "8": "PAY426-8",
-      "9": "PAY426-3",
-      N: "PAY426-10"
+      "1": "1",
+      "2": "2",
+      "3": "3",
+      "4": "4",
+      "5": "5",
+      "6": "6",
+      "7": "7",
+      "8": "8",
+      "9": "9",
+      N: "10"
     };
 
     const presetId = presetMap[lineItemPrefix];
@@ -178,9 +181,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) =
     return [
       {
         lineItemTitle: "TOTAL",
-        numberOfMembers: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0),
-        totalWages: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.totalWages, 0),
-        totalBalance: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.totalBalance, 0)
+        numberOfMembers: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0)
       }
     ];
   }, [activeAndInactiveRowData]);
@@ -191,14 +192,12 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) =
     return [
       {
         lineItemTitle: "TOTAL",
-        numberOfMembers: terminatedRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0),
-        totalWages: terminatedRowData.reduce((acc, curr) => acc + curr.totalWages, 0),
-        totalBalance: terminatedRowData.reduce((acc, curr) => acc + curr.totalBalance, 0)
+        numberOfMembers: terminatedRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0)
       }
     ];
   }, [terminatedRowData]);
 
-  const shouldShowDetailGrid = selectedLineItem && getPresetForLineItem(selectedLineItem);
+  //const shouldShowDetailGrid = selectedLineItem && getPresetForLineItem(selectedLineItem);
 
   return (
     <>

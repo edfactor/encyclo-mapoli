@@ -1,15 +1,17 @@
 import { ColDef } from "ag-grid-community";
-import { formatNumberWithComma } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
-import { mmDDYYFormat } from "../../../utils/dateUtils";
 import {
+  createAgeColumn,
   createBadgeColumn,
   createCurrencyColumn,
-  createSSNColumn,
-  createAgeColumn,
-  createStoreColumn,
+  createDateColumn,
+  createHoursColumn,
   createNameColumn,
-  createHoursColumn
+  createPointsColumn,
+  createSSNColumn,
+  createStatusColumn,
+  createStoreColumn,
+  createYesOrNoColumn
 } from "../../../utils/gridColumnFactory";
 
 export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
@@ -28,25 +30,14 @@ export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) =
     createStoreColumn({
       minWidth: 80
     }),
-    {
+    createStatusColumn({
       headerName: "Type",
-      field: "employeeTypeCode",
-      colId: "employeeTypeCode",
-      minWidth: 80,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true
-    },
-    {
+      field: "employeeTypeCode"
+    }),
+    createDateColumn({
       headerName: "Date of Birth",
-      field: "dateOfBirth",
-      colId: "dateOfBirth",
-      minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      valueFormatter: (params) => mmDDYYFormat(params.value)
-    },
+      field: "dateOfBirth"
+    }),
     createAgeColumn({}),
     createSSNColumn(),
     createCurrencyColumn({
@@ -57,35 +48,20 @@ export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) =
     createHoursColumn({
       minWidth: 100
     }),
-    {
-      headerName: "Points",
-      field: "points",
-      colId: "points",
+    createPointsColumn({
       minWidth: 100,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: (params) => formatNumberWithComma(params.value)
-    },
-    {
+      includeCommaFormatting: true
+    }),
+    createYesOrNoColumn({
       headerName: "New",
       field: "isNew",
-      colId: "isNew",
       minWidth: 80,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
       valueFormatter: (params) => (params.value ? "(<21)" : "")
-    },
-    {
+    }),
+    createDateColumn({
       headerName: "Term Date",
-      field: "terminationDate",
-      colId: "terminationDate",
-      minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      valueFormatter: (params) => mmDDYYFormat(params.value)
-    },
+      field: "terminationDate"
+    }),
     createCurrencyColumn({
       headerName: "Current Balance",
       field: "balance",

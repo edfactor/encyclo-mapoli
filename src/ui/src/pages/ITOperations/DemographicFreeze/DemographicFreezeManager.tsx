@@ -55,7 +55,7 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
 }) => {
   const [freezeDemographics, { isLoading }] = useFreezeDemographicsMutation();
   const profitYear = useDecemberFlowProfitYear();
-  
+
   const currentYear = new Date().getFullYear();
   const previousYear = currentYear - 1;
 

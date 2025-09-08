@@ -1,25 +1,27 @@
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using FastEndpoints;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Master;
 
-public class MasterInquiryFilteredDetailsEndpoint : Endpoint<MasterInquiryMemberDetailsRequest, PaginatedResponseDto<MasterInquiryResponseDto>>
+public class MasterInquiryFilteredDetailsEndpoint : ProfitSharingEndpoint<MasterInquiryMemberDetailsRequest, PaginatedResponseDto<MasterInquiryResponseDto>>
 {
     private readonly IMasterInquiryService _masterInquiryService;
 
     public MasterInquiryFilteredDetailsEndpoint(IMasterInquiryService masterInquiryService)
+        : base(Navigation.Constants.MasterInquiry)
     {
         _masterInquiryService = masterInquiryService;
     }
 
     public override void Configure()
     {
-        Get("master-inquiry/member/{MemberType}/details");
+        Post("master-inquiry/member/details");
         Summary(s =>
         {
             s.Summary = "Get paginated profit details filtered by member type, year, and month.";

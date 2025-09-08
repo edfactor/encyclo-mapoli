@@ -1,6 +1,6 @@
-using Oracle.ManagedDataAccess.Client;
+﻿using Oracle.ManagedDataAccess.Client;
 
-namespace YEMatch;
+namespace YEMatch.YEMatch.AssertActivities;
 
 public class TestProfitDetailSelectedColumns : BaseSqlActivity
 {
@@ -43,7 +43,7 @@ public class TestProfitDetailSelectedColumns : BaseSqlActivity
                             AND profit_code_id IN ( 0, 8 )
                         """;
 
-        OracleCommand command = new(QueryDiff(queryA, queryB), connection);
+        OracleCommand command = new(QueryDiffCount(queryA, queryB), connection);
         OracleDataReader? reader = await command.ExecuteReaderAsync();
 
         int data = 0;

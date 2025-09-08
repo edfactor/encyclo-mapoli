@@ -13,14 +13,28 @@ export interface GeneralState {
   activeSubmenu?: string;
 }
 
+const getStoredDrawerState = (): { isDrawerOpen: boolean; activeSubmenu: string } => {
+  try {
+    const storedDrawerState = localStorage.getItem("drawerState");
+    if (storedDrawerState) {
+      return JSON.parse(storedDrawerState);
+    }
+  } catch (error) {
+    console.error("Error reading drawer state from localStorage:", error);
+  }
+  return { isDrawerOpen: false, activeSubmenu: "" };
+};
+
+const { isDrawerOpen, activeSubmenu } = getStoredDrawerState();
+
 const initialState: GeneralState = {
   appBanner: DEFAULT_BANNER,
   error: "",
   onDropdownBlur: { onBlur: false },
   onFlatDateBlur: { onBlur: false },
   loading: false,
-  isDrawerOpen: false,
-  activeSubmenu: ""
+  isDrawerOpen,
+  activeSubmenu
 };
 
 export const generalSlice = createSlice({
@@ -29,15 +43,59 @@ export const generalSlice = createSlice({
   reducers: {
     setActiveSubMenu: (state, action: PayloadAction<string>) => {
       state.activeSubmenu = action.payload;
+      try {
+        localStorage.setItem(
+          "drawerState",
+          JSON.stringify({
+            isDrawerOpen: state.isDrawerOpen,
+            activeSubmenu: action.payload
+          })
+        );
+      } catch (error) {
+        console.error("Error saving drawer state to localStorage:", error);
+      }
     },
     clearActiveSubMenu: (state) => {
       state.activeSubmenu = "";
+      try {
+        localStorage.setItem(
+          "drawerState",
+          JSON.stringify({
+            isDrawerOpen: state.isDrawerOpen,
+            activeSubmenu: ""
+          })
+        );
+      } catch (error) {
+        console.error("Error saving drawer state to localStorage:", error);
+      }
     },
     openDrawer: (state) => {
       state.isDrawerOpen = true;
+      try {
+        localStorage.setItem(
+          "drawerState",
+          JSON.stringify({
+            isDrawerOpen: true,
+            activeSubmenu: state.activeSubmenu
+          })
+        );
+      } catch (error) {
+        console.error("Error saving drawer state to localStorage:", error);
+      }
     },
     closeDrawer: (state) => {
       state.isDrawerOpen = false;
+      try {
+        localStorage.setItem(
+          "drawerState",
+          JSON.stringify({
+            isDrawerOpen: false,
+            activeSubmenu: state.activeSubmenu
+          })
+        );
+      } catch (error) {
+        console.error("Error saving drawer state to localStorage:", error);
+      }
     },
     setBanner: (state, action: PayloadAction<string>) => {
       state.appBanner = action.payload;

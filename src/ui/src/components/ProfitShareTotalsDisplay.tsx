@@ -1,13 +1,13 @@
 import { Box, Table, TableBody, TableCell, TableContainer, TableRow } from "@mui/material";
 import { numberToCurrency } from "smart-ui-library";
-import { YearEndProfitSharingReportResponse } from "reduxstore/types";
+import { YearEndProfitSharingReportTotalsResponse } from "reduxstore/types";
 
 interface ProfitShareTotalsDisplayProps {
-  data: YearEndProfitSharingReportResponse | null | undefined;
+  totalsData: YearEndProfitSharingReportTotalsResponse | null | undefined;
 }
 
-const ProfitShareTotalsDisplay = ({ data }: ProfitShareTotalsDisplayProps) => {
-  if (!data) return null;
+const ProfitShareTotalsDisplay = ({ totalsData }: ProfitShareTotalsDisplayProps) => {
+  if (!totalsData) return null;
 
   const tableStyles = { mb: 4.5 };
 
@@ -66,9 +66,9 @@ const ProfitShareTotalsDisplay = ({ data }: ProfitShareTotalsDisplayProps) => {
             </TableRow>
             <TableRow>
               <TableCell sx={labelCellStyles}>Section Total</TableCell>
-              <TableCell sx={dataCellStyles}>{numberToCurrency(data?.wagesTotal || 0)}</TableCell>
-              <TableCell sx={dataCellStyles}>{data?.hoursTotal?.toLocaleString() || "0"}</TableCell>
-              <TableCell sx={dataCellStyles}>{data?.pointsTotal?.toLocaleString() || "0"}</TableCell>
+              <TableCell sx={dataCellStyles}>{numberToCurrency(totalsData?.wagesTotal || 0)}</TableCell>
+              <TableCell sx={dataCellStyles}>{totalsData?.hoursTotal?.toLocaleString() || "0"}</TableCell>
+              <TableCell sx={dataCellStyles}>{totalsData?.pointsTotal?.toLocaleString() || "0"}</TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -104,10 +104,10 @@ const ProfitShareTotalsDisplay = ({ data }: ProfitShareTotalsDisplayProps) => {
             </TableRow>
             <TableRow>
               <TableCell sx={labelCellStyles}>Employee Totals</TableCell>
-              <TableCell sx={dataCellStyles}>{data?.numberOfEmployees?.toString() || "0"}</TableCell>
-              <TableCell sx={dataCellStyles}>{data?.numberOfNewEmployees?.toString() || "0"}</TableCell>
-              <TableCell sx={dataCellStyles}>{data?.numberOfEmployeesUnder21?.toString() || "0"}</TableCell>
-              <TableCell sx={dataCellStyles}>{data?.numberOfEmployeesInPlan?.toString() || "0"}</TableCell>
+              <TableCell sx={dataCellStyles}>{totalsData?.numberOfEmployees?.toString() || "0"}</TableCell>
+              <TableCell sx={dataCellStyles}>{totalsData?.numberOfNewEmployees?.toString() || "0"}</TableCell>
+              <TableCell sx={dataCellStyles}>{totalsData?.numberOfEmployeesUnder21?.toString() || "0"}</TableCell>
+              <TableCell sx={dataCellStyles}>{totalsData?.numberOfEmployeesInPlan?.toString() || "0"}</TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -138,9 +138,9 @@ const ProfitShareTotalsDisplay = ({ data }: ProfitShareTotalsDisplayProps) => {
             </TableRow>
             <TableRow>
               <TableCell sx={labelCellStyles}>Terminated Section Total</TableCell>
-              <TableCell sx={dataCellStyles}>{numberToCurrency(data?.terminatedWagesTotal || 0)}</TableCell>
-              <TableCell sx={dataCellStyles}>{data?.terminatedHoursTotal?.toLocaleString() || "0"}</TableCell>
-              <TableCell sx={dataCellStyles}>{data?.terminatedPointsTotal?.toLocaleString() || "0"}</TableCell>
+              <TableCell sx={dataCellStyles}>{numberToCurrency(totalsData?.terminatedWagesTotal || 0)}</TableCell>
+              <TableCell sx={dataCellStyles}>{totalsData?.terminatedHoursTotal?.toLocaleString() || "0"}</TableCell>
+              <TableCell sx={dataCellStyles}>{totalsData?.terminatedPointsTotal?.toLocaleString() || "0"}</TableCell>
             </TableRow>
           </TableBody>
         </Table>

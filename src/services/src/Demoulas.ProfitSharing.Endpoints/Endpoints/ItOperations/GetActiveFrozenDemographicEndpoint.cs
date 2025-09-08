@@ -1,15 +1,17 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
 
-public class GetActiveFrozenDemographicEndpoint : EndpointWithoutRequest<FrozenStateResponse>
+public class GetActiveFrozenDemographicEndpoint : ProfitSharingResponseEndpoint<FrozenStateResponse>
 {
     private readonly IFrozenService _frozenService;
 
-    public GetActiveFrozenDemographicEndpoint(IFrozenService frozenService)
+    public GetActiveFrozenDemographicEndpoint(IFrozenService frozenService) : base(Navigation.Constants.DemographicFreeze)
     {
         _frozenService = frozenService;
     }
@@ -28,7 +30,7 @@ public class GetActiveFrozenDemographicEndpoint : EndpointWithoutRequest<FrozenS
                 }
             };
         });
-        Group<ItOperationsGroup>();
+        Group<ItDevOpsAllUsersGroup>();
     }
 
     public override Task<FrozenStateResponse> ExecuteAsync(CancellationToken ct)

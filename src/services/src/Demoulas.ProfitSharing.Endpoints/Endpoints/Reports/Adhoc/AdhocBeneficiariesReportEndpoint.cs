@@ -1,11 +1,11 @@
 ﻿using CsvHelper.Configuration;
-using Demoulas.Common.Contracts.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
 
@@ -17,6 +17,7 @@ public class AdhocBeneficiariesReportEndpoint : EndpointWithCsvTotalsBase<AdhocB
     private readonly IAdhocBeneficiariesReport _reportService;
 
     public AdhocBeneficiariesReportEndpoint(IAdhocBeneficiariesReport reportService)
+        : base(Navigation.Constants.QPAY066AdHocReports)
     {
         _reportService = reportService;
     }

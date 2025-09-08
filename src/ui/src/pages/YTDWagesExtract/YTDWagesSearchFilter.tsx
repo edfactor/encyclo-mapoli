@@ -1,13 +1,12 @@
-import { Button, CircularProgress, FormLabel, MenuItem, Select } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Button, CircularProgress, FormLabel, Grid, MenuItem, Select } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi";
 import { setEmployeeWagesForYearQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { SortedPaginationRequestDto } from "../../reduxstore/types";
-import { useEffect } from "react";
 
 interface YTDWagesSearch {
   profitYear: number;
@@ -25,14 +24,14 @@ const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ setInitialS
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
 
-  const { handleSubmit, setValue } = useForm<YTDWagesSearch>({
+  const { handleSubmit } = useForm<YTDWagesSearch>({
     defaultValues: {
       profitYear: fiscalCloseProfitYear || employeeWagesForYearQueryParams?.profitYear || undefined,
       pagination: { skip: 0, take: 25, sortBy: "storeNumber", isSortDescending: false }
     }
   });
 
-  const doSearch = handleSubmit((data) => {
+  const doSearch = handleSubmit((_data) => {
     // Our one-select 'form' cannot be in an invalid state, so we can safely trigger the search
     setPageReset(true);
     triggerSearch(
@@ -72,7 +71,7 @@ const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ setInitialS
       <Grid
         width="100%"
         paddingX="24px">
-        <div className="search-buttons flex mt-5 justify-start">
+        <div className="search-buttons mt-5 flex justify-start">
           <Button
             variant="contained"
             disabled={isFetching}

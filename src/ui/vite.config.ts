@@ -2,6 +2,7 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig, loadEnv } from "vite";
 import compress from "vite-plugin-compression";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const isProd = mode === "production";
@@ -21,7 +22,7 @@ export default defineConfig(({ command, mode }) => {
     },
     server: {
       port: 3100,
-      strictPort: true, // Prevents Vite from trying other ports if 3100 is unavailable
+      strictPort: true // Prevents Vite from trying other ports if 3100 is unavailable
     },
     define: {
       //'process.env.YOUR_STRING_VARIABLE': JSON.stringify(env.YOUR_STRING_VARIABLE),
@@ -38,12 +39,12 @@ export default defineConfig(({ command, mode }) => {
       environment: "jsdom",
       include: ["**/*.test.tsx"],
       coverage: {
-        reporter: ["text", "html"],
+        reporter: ["text", "html"]
       },
       reporters: ["default", "junit"],
       outputFile: {
-        junit: "./FE_Tests/unit-test.xml",
-      },
+        junit: "./FE_Tests/unit-test.xml"
+      }
     },
     plugins: [
       react(),

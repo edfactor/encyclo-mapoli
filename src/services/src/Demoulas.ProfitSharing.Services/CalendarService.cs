@@ -16,7 +16,7 @@ public sealed class CalendarService : ICalendarService
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IAccountingPeriodsService _accountingPeriodsService;
     private readonly IDistributedCache _distributedCache;
-    private readonly TimeSpan _refreshInterval = TimeSpan.FromHours(4); // Every two hours refresh
+    private readonly TimeSpan _refreshInterval = TimeSpan.FromHours(4); // Every four hours refresh
     private const string YearDatesCacheKey = "CalendarService_YearDates";
 
     public CalendarService(IProfitSharingDataContextFactory dataContextFactory, IAccountingPeriodsService accountingPeriodsService, IDistributedCache distributedCache)
@@ -55,7 +55,7 @@ public sealed class CalendarService : ICalendarService
                             (r.WeekNo == 1 || r.WeekNo >= 52)).GroupBy(r => 1) // Group all records to fetch min and max in one query
                 .Select(g => new
                 {
-                    StartingDate = g.Min(r => r.WeekendingDate),
+                    StartingDate = g.Min(r => r.WeekendingDate).AddDays(-6),
                     EndingDate = g.Where(r => r.Period == 12)
                         .OrderByDescending(r => r.WeekNo)
                         .Select(r => r.WeekendingDate)

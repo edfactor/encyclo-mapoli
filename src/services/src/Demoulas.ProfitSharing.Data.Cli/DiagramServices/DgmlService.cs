@@ -1,7 +1,7 @@
 ﻿using System.Text;
-using Demoulas.ProfitSharing.Data.Cli.DiagramEntities;
-using System.Xml.Serialization;
 using System.Xml;
+using System.Xml.Serialization;
+using Demoulas.ProfitSharing.Data.Cli.DiagramEntities;
 
 namespace Demoulas.ProfitSharing.Data.Cli.DiagramServices;
 

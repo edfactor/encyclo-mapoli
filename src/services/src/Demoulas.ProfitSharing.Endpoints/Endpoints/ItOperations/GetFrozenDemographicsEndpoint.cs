@@ -2,16 +2,18 @@
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
 
-public class GetFrozenDemographicsEndpoint : Endpoint<SortedPaginationRequestDto, PaginatedResponseDto<FrozenStateResponse>>
+public class GetFrozenDemographicsEndpoint : ProfitSharingEndpoint<SortedPaginationRequestDto, PaginatedResponseDto<FrozenStateResponse>>
 {
     private readonly IFrozenService _frozenService;
 
-    public GetFrozenDemographicsEndpoint(IFrozenService frozenService)
+    public GetFrozenDemographicsEndpoint(IFrozenService frozenService) : base(Navigation.Constants.DemographicFreeze)
     {
         _frozenService = frozenService;
     }
@@ -43,7 +45,7 @@ public class GetFrozenDemographicsEndpoint : Endpoint<SortedPaginationRequestDto
                 }
             };
         });
-        Group<ItOperationsGroup>();
+        Group<ItDevOpsAllUsersGroup>();
     }
 
     public override Task<PaginatedResponseDto<FrozenStateResponse>> ExecuteAsync(SortedPaginationRequestDto req, CancellationToken ct)

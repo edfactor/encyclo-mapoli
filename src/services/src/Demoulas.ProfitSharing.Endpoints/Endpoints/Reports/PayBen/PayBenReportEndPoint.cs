@@ -1,23 +1,20 @@
-﻿using CsvHelper.Configuration;
-using Demoulas.Common.Contracts.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Groups;
-using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
-using FastEndpoints;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request.PayBen;
 using Demoulas.ProfitSharing.Common.Contracts.Response.PayBen;
+using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.PayBen;
 
-public class PayBenReportEndpoint : Endpoint<PayBenReportRequest,
+public class PayBenReportEndpoint : ProfitSharingEndpoint<PayBenReportRequest,
     PaginatedResponseDto<PayBenReportResponse>>
 {
     private readonly IPayBenReportService _reportService;
 
     public PayBenReportEndpoint(IPayBenReportService reportService)
+        : base(Navigation.Constants.PayBenReport)
     {
         _reportService = reportService;
     }

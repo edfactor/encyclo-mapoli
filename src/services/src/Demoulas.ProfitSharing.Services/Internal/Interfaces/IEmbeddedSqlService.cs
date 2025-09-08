@@ -18,4 +18,5 @@ public interface IEmbeddedSqlService
     IQueryable<ProfitShareTotal?> GetProfitShareTotals(IProfitSharingDbContext ctx, short profitYear,
         DateOnly fiscalEndDate,
         short min_hours, DateOnly birthdate_21, CancellationToken cancellationToken);
+    IQueryable<ProfitDetailRollup> GetTransactionsBySsnForProfitYearForOracle(IProfitSharingDbContext ctx, short profitYear);
 }

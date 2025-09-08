@@ -1,9 +1,12 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-public sealed record DistributionsAndForfeitureResponse
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Interfaces;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+public sealed record DistributionsAndForfeitureResponse : IIsExecutive
 {
     public required int BadgeNumber { get; set; }
     public required short PsnSuffix { get; set; }
-    public required string EmployeeName { get; set; }
+    [MaskSensitive] public required string EmployeeName { get; set; }
     public required string Ssn { get; set; }
     public DateOnly? Date { get; set; }
     public required decimal DistributionAmount { get; set; }
@@ -16,7 +19,8 @@ public sealed record DistributionsAndForfeitureResponse
     public string? OtherName { get; set; }
     public string? OtherSsn { get; set; }
     public required byte EnrolledId { get; set; }
-    
+    public bool IsExecutive { get; set; }
+
 
     public static DistributionsAndForfeitureResponse ResponseExample()
     {

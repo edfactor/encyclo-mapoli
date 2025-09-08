@@ -1,119 +1,101 @@
 import { Typography } from "@mui/material";
-import { useMemo, useEffect, useState, useRef } from "react";
-import { useLazyGetProfitMasterInquiryMemberDetailsQuery } from "reduxstore/api/InquiryApi";
-import { DSMGrid, Pagination, ISortParams } from "smart-ui-library";
-import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
+import { memo, useMemo } from "react";
+import { DSMGrid, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
+import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
 
-interface MasterInquiryGridProps {
-  initialSearchLoaded?: boolean;
-  setInitialSearchLoaded?: (loaded: boolean) => void;
-  memberType?: number;
-  id?: number;
+interface ProfitData {
+  results: any[];
+  total: number;
 }
 
-const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ memberType, id }) => {
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-  // Add sort state management
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "profitYear",
-    isSortDescending: true
-  });
-  const columnDefs = useMemo(() => GetMasterInquiryGridColumns(), []);
-
-  const [
-    triggerMemberDetails,
-    {
-      data: memberDetailsData,
-      isFetching: isFetchingMemberDetails,
-      isError: isErrorMemberDetails,
-      error: errorMemberDetails
-    }
-  ] = useLazyGetProfitMasterInquiryMemberDetailsQuery();
-
-  // Add sort event handler
-  const sortEventHandler = (update: ISortParams) => {
-    setSortParams(update);
-    setPageNumber(0); // Reset to first page when sorting
+interface MasterInquiryGridProps {
+  profitData?: ProfitData | null;
+  isLoading?: boolean;
+  profitGridPagination?: {
+    pageNumber: number;
+    pageSize: number;
+    sortParams: any;
   };
+  onPaginationChange?: (pageNumber: number, pageSize: number) => void;
+  onSortChange?: (sortParams: any) => void;
+}
 
-  useEffect(() => {
-    if (id === undefined || memberType === undefined) return;
-    triggerMemberDetails({
-      memberType,
-      id,
-      skip: pageNumber * pageSize,
-      take: pageSize,
-      sortBy: sortParams.sortBy,
-      isSortDescending: sortParams.isSortDescending
-    });
-  }, [memberType, id, pageNumber, pageSize, sortParams, triggerMemberDetails]);
+const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = memo(
+  ({ profitData, isLoading, profitGridPagination, onPaginationChange, onSortChange }) => {
+    const columnDefs = useMemo(() => GetMasterInquiryGridColumns(), []);
 
-  // Need a useEffect to reset the page number when memberDetailsData changes
-  const prevMemberDetailsData = useRef<any>(null);
-  useEffect(() => {
-    if (
-      memberDetailsData &&
-      (prevMemberDetailsData.current === undefined || memberDetailsData.total !== prevMemberDetailsData.current.total)
-    ) {
-      setPageNumber(0);
+    if (isLoading) {
+      return <Typography>Loading profit details...</Typography>;
     }
-    prevMemberDetailsData.current = memberDetailsData;
-  }, [memberDetailsData]);
 
-  if (isFetchingMemberDetails) {
-    return <Typography>Loading profit details...</Typography>;
-  }
+    if (!profitData) {
+      return <Typography>No profit details found.</Typography>;
+    }
 
-  if (isErrorMemberDetails) {
+    const handlePaginationChange = (pageNumber: number, pageSize: number) => {
+      if (onPaginationChange) {
+        onPaginationChange(pageNumber, pageSize);
+      }
+    };
+
+    const handleSortChange = (sortParams: any) => {
+      if (onSortChange) {
+        onSortChange(sortParams);
+      }
+    };
+
     return (
-      <Typography color="error">
-        Error loading member details: {errorMemberDetails && JSON.stringify(errorMemberDetails)}
-      </Typography>
+      <>
+        <div style={{ height: "400px", width: "100%" }}>
+          <div style={{ padding: "0 24px 0 24px" }}>
+            <Typography
+              variant="h2"
+              sx={{ color: "#0258A5" }}>
+              {`Profit Details (${profitData.total} ${profitData.total === 1 ? "Record" : "Records"})`}
+            </Typography>
+          </div>
+          <DSMGrid
+            preferenceKey={CAPTIONS.MASTER_INQUIRY}
+            handleSortChanged={handleSortChange}
+            isLoading={!!isLoading}
+            providedOptions={{
+              rowData: profitData.results,
+              columnDefs: columnDefs,
+              suppressMultiSort: true
+            }}
+          />
+          {profitGridPagination && onPaginationChange && (
+            <Pagination
+              pageNumber={profitGridPagination.pageNumber}
+              setPageNumber={(value: number) => {
+                handlePaginationChange(value - 1, profitGridPagination.pageSize);
+              }}
+              pageSize={profitGridPagination.pageSize}
+              setPageSize={(value: number) => {
+                handlePaginationChange(0, value);
+              }}
+              recordCount={profitData.total}
+            />
+          )}
+        </div>
+      </>
+    );
+  },
+  (prevProps, nextProps) => {
+    // Custom comparison function
+    // Only re-render if incoming props are different
+    return (
+      prevProps.profitData?.results === nextProps.profitData?.results &&
+      prevProps.profitData?.total === nextProps.profitData?.total &&
+      prevProps.isLoading === nextProps.isLoading &&
+      prevProps.profitGridPagination?.pageNumber === nextProps.profitGridPagination?.pageNumber &&
+      prevProps.profitGridPagination?.pageSize === nextProps.profitGridPagination?.pageSize &&
+      prevProps.profitGridPagination?.sortParams === nextProps.profitGridPagination?.sortParams &&
+      prevProps.onPaginationChange === nextProps.onPaginationChange &&
+      prevProps.onSortChange === nextProps.onSortChange
     );
   }
+);
 
-  return (
-    <>
-      <div style={{ height: "400px", width: "100%" }}>
-        {!!memberDetailsData && (
-          <>
-            <div style={{ padding: "0 24px 0 24px" }}>
-              <Typography
-                variant="h2"
-                sx={{ color: "#0258A5" }}>
-                {`Profit Details (${memberDetailsData?.total || 0} ${memberDetailsData?.total === 1 ? "Record" : "Records"})`}
-              </Typography>
-            </div>
-            <DSMGrid
-              preferenceKey={CAPTIONS.MASTER_INQUIRY}
-              isLoading={isFetchingMemberDetails}
-              handleSortChanged={sortEventHandler}
-              providedOptions={{
-                rowData: memberDetailsData?.results,
-                columnDefs: columnDefs,
-                suppressMultiSort: true
-              }}
-            />
-          </>
-        )}
-        {!!memberDetailsData && memberDetailsData.results.length > 0 && (
-          <Pagination
-            pageNumber={pageNumber}
-            setPageNumber={(value: number) => {
-              setPageNumber(value - 1);
-            }}
-            pageSize={pageSize}
-            setPageSize={(value: number) => {
-              setPageSize(value);
-              setPageNumber(0);
-            }}
-            recordCount={memberDetailsData.total}
-          />
-        )}
-      </div>
-    </>
-  );
-};
 export default MasterInquiryGrid;

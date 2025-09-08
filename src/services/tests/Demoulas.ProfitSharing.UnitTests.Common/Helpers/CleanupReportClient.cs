@@ -1,5 +1,4 @@
-﻿using System.Data.SqlTypes;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Text.Json;
 using System.Web;
 using Demoulas.Common.Contracts.Contracts.Request;

@@ -9,9 +9,8 @@ import { BeneficiaryDto, BeneficiaryRequestDto } from "reduxstore/types";
 import { DSMGrid, ISortParams, Paged, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import { BeneficiaryInquiryGridColumns } from "./BeneficiaryInquiryGridColumns";
+import { BeneficiaryOfGridColumns } from "./BeneficiaryOfGridColumn";
 interface BeneficiaryInquiryGridProps {
-  // initialSearchLoaded: boolean;
-  // setInitialSearchLoaded: (loaded: boolean) => void;
   selectedMember: any;
   count: number;
   createOrUpdateBeneficiary: (selectedMember: BeneficiaryDto) => any;
@@ -37,16 +36,10 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   // const { beneficiaryList, beneficiaryRequest } = useSelector((state: RootState) => state.beneficiaries);
   const [beneficiaryList, setBeneficiaryList] = useState<Paged<BeneficiaryDto> | undefined>();
+  const [beneficiaryOfList, setBeneficiaryOfList] = useState<Paged<BeneficiaryDto> | undefined>();
   const [triggerSearch, { isFetching }] = useLazyGetBeneficiariesQuery();
   const [triggerUpdate] = useLazyUpdateBeneficiaryQuery();
 
-  // const createBeneficiaryInquiryRequest = useCallback(
-  //   (skip: number, sortBy: string, isSortDescending: boolean, badgeNumber: number): BeneficiaryRequestDto | null => {
-  //     if (!beneficiaryRequest) return null;
-  //     return beneficiaryRequest;
-  //   },
-  //   [beneficiaryRequest, pageSize, _sortParams]
-  // );1
   const createBeneficiaryInquiryRequest = (
     skip: number,
     sortBy: string,
@@ -73,22 +66,6 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
     }
     setSortParams(update);
     setPageNumber(0);
-
-    // const request = createBeneficiaryInquiryRequest(
-    //   0,
-    //   update.sortBy,
-    //   update.isSortDescending,
-    //   25,
-    //   selectedMember?.badgeNumber,
-    //   selectedMember?.psnSuffix
-    // );
-    // if (!request) return;
-
-    // triggerSearch(request, false)
-    //   .unwrap()
-    //   .then((value) => {
-    //     setBeneficiaryList(value);
-    //   });
   };
   const actionButtons = (data: any): JSX.Element => {
     return (
@@ -149,6 +126,10 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
     );
   };
 
+  const beneficiaryOfColumnDefs = useMemo(() => {
+    return BeneficiaryOfGridColumns();
+  }, []);
+
   const columnDefs = useMemo(() => {
     const columns = BeneficiaryInquiryGridColumns();
     columns.splice(6, 0, {
@@ -182,19 +163,6 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
     ];
   }, [beneficiaryList]);
 
-  // const onSearch = useCallback(async () => {
-  //   const request = createBeneficiaryInquiryRequest(pageNumber * pageSize, _sortParams.sortBy, _sortParams.isSortDescending,badgeNumber);
-  //   if (!request) return;
-
-  //   await triggerSearch(request, false);
-  // }, [createBeneficiaryInquiryRequest, pageNumber, pageSize, _sortParams, triggerSearch]);
-
-  // useEffect(() => {
-  //   if (hasToken) {
-  //     onSearch();
-  //   }
-  // }, [pageNumber, pageSize, _sortParams, onSearch]);
-
   const onSearch = useCallback(() => {
     const request = createBeneficiaryInquiryRequest(
       pageNumber * pageSize,
@@ -208,8 +176,9 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
 
     triggerSearch(request, false)
       .unwrap()
-      .then((value) => {
-        setBeneficiaryList(value);
+      .then((res) => {
+        setBeneficiaryList(res.beneficiaries);
+        setBeneficiaryOfList(res.beneficiaryOf);
       });
   }, [selectedMember, _sortParams]);
 
@@ -221,6 +190,26 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
 
   return (
     <>
+      {beneficiaryOfList && beneficiaryOfList.results.length > 0 && (
+        <>
+          <div className="master-inquiry-header">
+            <Typography
+              variant="h2"
+              sx={{ color: "#0258A5" }}>
+              {`Beneficiary Of (${beneficiaryOfList?.total || 0} ${beneficiaryOfList?.total === 1 ? "Record" : "Records"})`}
+            </Typography>
+          </div>
+          <DSMGrid
+            preferenceKey={CAPTIONS.BENEFICIARY_OF}
+            isLoading={isFetching}
+            providedOptions={{
+              rowData: beneficiaryOfList?.results,
+              columnDefs: beneficiaryOfColumnDefs,
+              suppressMultiSort: true
+            }}
+          />
+        </>
+      )}
       {!!beneficiaryList && (
         <>
           {errorPercentage ? (

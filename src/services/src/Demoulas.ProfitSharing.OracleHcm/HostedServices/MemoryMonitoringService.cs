@@ -7,7 +7,7 @@ namespace Demoulas.ProfitSharing.OracleHcm.HostedServices;
 public class MemoryMonitoringService : BackgroundService
 {
     private readonly ILogger<MemoryMonitoringService> _logger;
-    private const long MemoryLimitBytes = 1L * 1024 * 1024 * 1024; // 1GB
+    private const long MemoryLimitBytes = 2L * 1024 * 1024 * 1024; // 2GB
 
     public MemoryMonitoringService(ILogger<MemoryMonitoringService> logger)
     {

@@ -1,14 +1,14 @@
-import { Divider } from "@mui/material";
-import { Grid } from "@mui/material";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "reduxstore/store";
-import { numberToCurrency, Page, TotalsGrid } from "smart-ui-library";
-import VestedAmountsByAgeTabs from "./VestedAmountsByAgeTabs";
-import { useState, useEffect } from "react";
+import { Divider, Grid } from "@mui/material";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import { TotalsGrid } from "components/TotalsGrid/TotalsGrid";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetVestingAmountByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { setVestedAmountsByAgeQueryParams } from "reduxstore/slices/yearsEndSlice";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import { RootState } from "reduxstore/store";
+import { numberToCurrency, Page } from "smart-ui-library";
+import VestedAmountsByAgeTabs from "./VestedAmountsByAgeTabs";
 
 const options: Intl.DateTimeFormatOptions = {
   month: "2-digit",
@@ -82,6 +82,13 @@ const VestedAmountsByAge = () => {
               </div>
 
               <TotalsGrid
+                breakpoints={{
+                  xs: 12,
+                  sm: 12,
+                  md: 12,
+                  lg: 12,
+                  xl: 12
+                }}
                 displayData={[
                   [
                     numberToCurrency(vestedAmountsByAge?.totalFullTime100PercentAmount ?? 0),

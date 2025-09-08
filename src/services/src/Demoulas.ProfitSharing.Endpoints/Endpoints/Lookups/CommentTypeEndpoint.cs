@@ -1,6 +1,8 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.Util.Extensions;
 using FastEndpoints;
@@ -9,11 +11,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 
-public class CommentTypeEndpoint : EndpointWithoutRequest<List<CommentTypeResponse>>
+public class CommentTypeEndpoint : ProfitSharingResponseEndpoint<List<CommentTypeResponse>>
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
 
-    public CommentTypeEndpoint(IProfitSharingDataContextFactory dataContextFactory)
+    public CommentTypeEndpoint(IProfitSharingDataContextFactory dataContextFactory) : base(Navigation.Constants.Inquiries)
     {
         _dataContextFactory = dataContextFactory;
     }
@@ -32,7 +34,7 @@ public class CommentTypeEndpoint : EndpointWithoutRequest<List<CommentTypeRespon
                 }
             } };
         });
-        Group<LookupGroup>();
+    Group<LookupGroup>();
 
         if (!Env.IsTestEnvironment())
         {

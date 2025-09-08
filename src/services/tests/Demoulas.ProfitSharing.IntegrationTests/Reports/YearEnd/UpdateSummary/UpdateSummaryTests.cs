@@ -4,7 +4,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
-using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.PAY443;
 using Demoulas.ProfitSharing.Services.Reports;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -13,6 +13,7 @@ using Shouldly;
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.UpdateSummary;
 
 [SuppressMessage("AsyncUsage", "AsyncFixer01:Unnecessary async/await usage")]
+[SuppressMessage("Major Code Smell", "S1144:Unused private types or members should be removed")]
 public class UpdateSummaryTests : PristineBaseTest
 {
     private readonly FrozenReportService _frozenReportService;
@@ -20,34 +21,9 @@ public class UpdateSummaryTests : PristineBaseTest
     public UpdateSummaryTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
         _frozenReportService = new FrozenReportService(DbFactory, new LoggerFactory(), TotalService, CalendarService,
-            DemographicReaderService, FrozenService);
+            DemographicReaderService);
     }
-
-
-    // This is for quickly looking into an employee to look at their Vesting balance
-    [Fact]
-    public async Task Tinker()
-    {
-        int badge = 0705815;
-        int ssn = 0;
-
-        await DbFactory.UseReadOnlyContext(async ctx =>
-        {
-            Demographic demo = await ctx.Demographics.Where(d => d.BadgeNumber == badge || d.Ssn == ssn).SingleAsync();
-
-            TestOutputHelper.WriteLine($"badge: {demo.BadgeNumber} ssn:{demo.Ssn}");
-
-            await tvb(ctx, 2024, demo.Ssn, demo.BadgeNumber);
-            TestOutputHelper.WriteLine("");
-            // await tvb(ctx, 2023, demo.Ssn, demo.BadgeNumber)
-
-            return 7;
-        });
-
-        "".ShouldBe("");
-    }
-
-
+    
     [Fact]
     public async Task ValidateReport2()
     {
@@ -243,8 +219,7 @@ public class UpdateSummaryTests : PristineBaseTest
 
     public static List<Pay450Record> GetReadyRecords()
     {
-        string expectedReport =
-            File.ReadAllText("/Users/robertherrmann/prj/smart-profit-sharing/src/services/tests/Demoulas.ProfitSharing.IntegrationTests/Resources/golden/30-PAY450");
+        string expectedReport = Pay443Tests.ReadEmbeddedResource("golden.R24-PAY450");
 
         List<string> lines = expectedReport.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries).Skip(1).ToList();
 

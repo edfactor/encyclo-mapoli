@@ -33,5 +33,7 @@ public static class ReferenceData
     }
 
     public static readonly DateOnly DsmMinValue = new DateOnly(1971, 01, 01);
+
+    public static readonly String CertificateSort = "CERTIFICATESORT";
 #pragma warning restore S3400
 }

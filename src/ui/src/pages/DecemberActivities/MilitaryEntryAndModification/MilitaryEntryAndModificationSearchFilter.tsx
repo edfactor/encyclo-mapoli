@@ -1,24 +1,15 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormLabel, TextField, Typography } from "@mui/material";
-import { Grid } from "@mui/material";
+import { FormLabel, Grid, TextField, Typography } from "@mui/material";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { useEffect, useState } from "react";
-import { useForm, Controller, Resolver } from "react-hook-form";
-import { useDispatch } from "react-redux";
-import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
-import { clearMasterInquiryData, setMasterInquiryData } from "reduxstore/slices/inquirySlice";
-import { clearMilitaryContributions } from "reduxstore/slices/militarySlice";
-import { MasterInquiryRequest } from "reduxstore/types";
+import { Controller, Resolver, useForm } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import useMilitaryEntryAndModification from "./hooks/useMilitaryEntryAndModification";
 
 interface SearchFormData {
   socialSecurity?: string;
   badgeNumber?: string;
-}
-
-interface SearchFilterProps {
-  setInitialSearchLoaded: (loaded: boolean) => void;
 }
 
 // Define schema with proper typing for our form
@@ -27,20 +18,34 @@ const validationSchema = yup
     socialSecurity: yup
       .string()
       .nullable()
+      .test("ssn-length", "SSN must be 7, 8, or 9 digits", function (value) {
+        if (value === undefined || value === null) return true;
+        return (
+          // 7 - 9 digits are valid
+          Number(value) >= 1000000 && Number(value) <= 999999999
+        );
+      })
       .transform((value) => value || undefined),
     badgeNumber: yup
       .string()
       .nullable()
+      .test("badge-length", "Badge must be 5, 6, or 7 digits", function (value) {
+        if (value === undefined || value === null) return true;
+        return (
+          // 5 - 7 digits are valid
+          Number(value) >= 10000 && Number(value) <= 9999999
+        );
+      })
       .transform((value) => value || undefined)
   })
   .test("at-least-one-required", "At least one field must be provided", (values) =>
     Boolean(values.socialSecurity || values.badgeNumber)
   );
 
-const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({ setInitialSearchLoaded }) => {
-  const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
+const MilitaryEntryAndModificationSearchFilter: React.FC = () => {
   const [activeField, setActiveField] = useState<"socialSecurity" | "badgeNumber" | null>(null);
   const defaultProfitYear = useDecemberFlowProfitYear();
+  const { isSearching, executeSearch, resetSearch } = useMilitaryEntryAndModification();
 
   const {
     control,
@@ -67,35 +72,14 @@ const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({
     }
   }, [socialSecurity, badgeNumber]);
 
-  const dispatch = useDispatch();
-
-  const onSubmit = (data: SearchFormData) => {
-    const searchParams: MasterInquiryRequest = {
-      pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false },
-
-      ...(!!data.socialSecurity && { ssn: Number(data.socialSecurity) }),
-      ...(!!data.badgeNumber && { badgeNumber: Number(data.badgeNumber) }),
-      profitYear: defaultProfitYear
-    };
-
-    triggerSearch(searchParams, false)
-      .unwrap()
-      .then((search_response) => {
-        if (search_response?.results) {
-          dispatch(setMasterInquiryData(search_response.results[0]));
-        }
-
-        setInitialSearchLoaded(
-          !!(search_response?.results && Array.isArray(search_response.results) && search_response.results.length > 0)
-        );
-      });
+  const onSubmit = async (data: SearchFormData) => {
+    await executeSearch(data, defaultProfitYear);
   };
 
   const handleReset = () => {
     reset();
     setActiveField(null);
-    dispatch(clearMasterInquiryData());
-    dispatch(clearMilitaryContributions());
+    resetSearch();
   };
 
   const requiredLabel = (
@@ -166,7 +150,7 @@ const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={handleSubmit(onSubmit)}
-          isFetching={isFetching}
+          isFetching={isSearching}
           disabled={!isValid || (!socialSecurity && !badgeNumber)}
         />
       </Grid>

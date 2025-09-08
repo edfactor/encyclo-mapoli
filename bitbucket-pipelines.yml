@@ -30,18 +30,18 @@ definitions:
                 if ($sdk -match "^9\.(\d+)\.(\d+)") {
                   $minor = [int]$matches[1];
                   $patch = [int]$matches[2];
-                  if ($minor -gt 0 -or $patch -ge 300) {
+                  if ($minor -gt 0 -or $patch -ge 304) {
                     $isSdkValid = $true;
                     break;
                   }
                 }
               }
               if ($isSdkValid) {
-                Write-Output ".NET SDK 9.0.300 or higher is installed.";
+                Write-Output ".NET SDK 9.0.304 or higher is installed.";
               } else {
-                Write-Output ".NET SDK 9.0.300 or higher is NOT installed.";
-                Invoke-WebRequest -Uri "https://builds.dotnet.microsoft.com/dotnet/Sdk/9.0.300/dotnet-sdk-9.0.300-win-x64.exe" -OutFile "$env:TEMP\dotnet-sdk-9.0.300-win-x64.exe";
-                Start-Process -FilePath "$env:TEMP\dotnet-sdk-9.0.300-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait;
+                Write-Output ".NET SDK 9.0.304 or higher is NOT installed.";
+                Invoke-WebRequest -Uri "https://builds.dotnet.microsoft.com/dotnet/Sdk/9.0.304/dotnet-sdk-9.0.304-win-x64.exe" -OutFile "$env:TEMP\dotnet-sdk-9.0.304-win-x64.exe";
+                Start-Process -FilePath "$env:TEMP\dotnet-sdk-9.0.304-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait;
               }
             } else {
               Write-Output "No .NET 9.x SDK installed.";
@@ -278,7 +278,14 @@ definitions:
           .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --output-file ".\dist\migration.sql" --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema $sourceSchema
           if ($LASTEXITCODE -ne 0) { Write-Error "Database upgrade failed. Exiting"; exit 1 }
 
-          .\output\Demoulas.ProfitSharing.Data.Cli import-from-navigation  --connection-name ProfitSharing --output-file ".\dist\navigations.sql" --sql-file ".\src\database\ready_import\Navigations\add-navigation-data.sql" --source-schema $sourceSchema
+          # Determine which navigation file to use based on action or environment
+          $navigationFile = ".\src\database\ready_import\Navigations\add-navigation-data.sql"
+          if ($action -eq "import-uat-navigation" -or $environment -eq "UAT") {
+            $navigationFile = ".\src\database\ready_import\Navigations\add-uat-navigation-data.sql"
+            Write-Host "Using UAT navigation data"
+          }
+
+          .\output\Demoulas.ProfitSharing.Data.Cli import-from-navigation  --connection-name ProfitSharing --output-file ".\dist\navigations.sql" --sql-file $navigationFile --source-schema $sourceSchema
           if ($LASTEXITCODE -ne 0) { Write-Error "Database upgrade failed. Exiting"; exit 1 }
 
           if ($action -eq "validate-import") {
@@ -286,6 +293,91 @@ definitions:
             if ($LASTEXITCODE -ne 0) { Write-Error "Database import validation failed. Exiting"; exit 1 }
           }
           
+
+    uat-drop-recreate-db: &uat-drop-recreate-db
+      name: UAT Drop & Recreate DB
+      runs-on:
+        - windows
+        - self.hosted
+      script:
+        - |
+          $env:Environment = "UAT"
+          $env:Action = "drop-recreate-db"
+          $env:SourceSchema = "PROFITSHARE_STAGING"
+          if ($env:Environment -eq "UAT") { $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT }
+          Write-Host "Dropping & recreating UAT database (schema: $env:SourceSchema)"
+          if (!(Test-Path .\dbcli\Demoulas.ProfitSharing.Data.Cli*)) { Write-Error "DB CLI artifact not found. Ensure 'Build DB CLI (artifact)' step ran."; exit 1 }
+          .\dbcli\Demoulas.ProfitSharing.Data.Cli $env:Action --connection-name ProfitSharing --source-schema $env:SourceSchema
+          if ($LASTEXITCODE -ne 0) { Write-Error "Drop/Recreate failed."; exit 1 }
+          Write-Host "Drop & recreate completed."
+
+    uat-import-from-ready: &uat-import-from-ready
+      name: UAT Import From READY
+      runs-on:
+        - windows
+        - self.hosted
+      script:
+        - |
+          $env:Environment = "UAT"
+          $env:Action = "import-from-ready"
+          $env:SourceSchema = "PROFITSHARE_STAGING"
+          if ($env:Environment -eq "UAT") { $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT }
+          Write-Host "Importing data from READY into UAT schema: $env:SourceSchema"
+          if (!(Test-Path .\dbcli\Demoulas.ProfitSharing.Data.Cli*)) { Write-Error "DB CLI artifact not found. Ensure 'Build DB CLI (artifact)' step ran."; exit 1 }
+          .\dbcli\Demoulas.ProfitSharing.Data.Cli $env:Action --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema $env:SourceSchema
+          if ($LASTEXITCODE -ne 0) { Write-Error "Import from READY failed."; exit 1 }
+          Write-Host "Import from READY completed."
+
+    uat-import-uat-navigation: &uat-import-uat-navigation
+      name: UAT Import Navigation Data
+      runs-on:
+        - windows
+        - self.hosted
+      script:
+        - |
+          $env:Environment = "UAT"
+          $env:SourceSchema = "PROFITSHARE_STAGING"
+          if ($env:Environment -eq "UAT") { $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT }
+          $navigationFile = ".\src\database\ready_import\Navigations\add-uat-navigation-data.sql"
+          Write-Host "Importing UAT navigation data using $navigationFile"
+          if (!(Test-Path .\dbcli\Demoulas.ProfitSharing.Data.Cli*)) { Write-Error "DB CLI artifact not found. Ensure 'Build DB CLI (artifact)' step ran."; exit 1 }
+          .\dbcli\Demoulas.ProfitSharing.Data.Cli import-from-navigation --connection-name ProfitSharing --sql-file $navigationFile --source-schema $env:SourceSchema
+          if ($LASTEXITCODE -ne 0) { Write-Error "Navigation import failed."; exit 1 }
+          Write-Host "Navigation import completed."
+
+    uat-validate-import: &uat-validate-import
+      name: UAT Validate Import
+      runs-on:
+        - windows
+        - self.hosted
+      script:
+        - |
+          $env:Environment = "UAT"
+          $env:SourceSchema = "PROFITSHARE_STAGING"
+          $currentYear = (Get-Date).Year
+
+          dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -o .\output
+          if ($LASTEXITCODE -ne 0) { Write-Error "Database project build failed. Exiting."; exit 1 }
+
+          if ($env:Environment -eq "UAT") { $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT }
+
+          Write-Host "Validating UAT import for schema $env:SourceSchema and year $currentYear"
+          .\output\Demoulas.ProfitSharing.Data.Cli validate-import --connection-name ProfitSharing --sql-file ".\src\database\ready_import\Import Validations.sql" --source-schema $env:SourceSchema --current-year $currentYear
+          if ($LASTEXITCODE -ne 0) { Write-Error "Import validation failed."; exit 1 }
+          Write-Host "Import validation completed."
+
+    db-cli-build-artifact: &db-cli-build-artifact
+      name: Build DB CLI (artifact)
+      runs-on:
+        - windows
+        - self.hosted
+      artifacts:
+        - dbcli/**
+      script:
+        - |
+          dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -o .\dbcli
+          if ($LASTEXITCODE -ne 0) { Write-Error "Database CLI build failed. Exiting."; exit 1 }
+          Write-Host "DB CLI built to .\\dbcli"
 
     audit-backend: &audit-backend
       name: "Check Backend API for vulnerabilities"
@@ -301,11 +393,11 @@ definitions:
         - dotnet nuget list source
         - dotnet workload update --source https://api.nuget.org/v3/index.json
         - dotnet workload install aspire --source https://api.nuget.org/v3/index.json
-        - dotnet restore Demoulas.ProfitSharing.sln -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
+        - dotnet restore Demoulas.ProfitSharing.slnx -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
 
 
         - |
-          $output = dotnet list Demoulas.ProfitSharing.sln package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
+          $output = dotnet list Demoulas.ProfitSharing.slnx package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
           if ($output -match "has the following vulnerable packages") {
             Write-Host "Vulnerabilities found!"
             $output | Out-String | Write-Host
@@ -328,6 +420,24 @@ definitions:
         - echo "Checking npm vulnerabilities"
         - cd $env:ReactDir
         - npm audit --audit-level=moderate --production
+    
+    secret-scan: &secret-scan
+      name: "Secret scan (Gitleaks)"
+      image: zricethezav/gitleaks:latest
+      artifacts:
+        - reports/**
+      script:
+        - mkdir -p reports
+        - gitleaks detect --source . --config gitleaks.toml --redact --no-banner --report-format json --report-path reports/gitleaks.json --exit-code 0
+              - echo "Gitleaks findings (redacted JSON):"
+              - head -c 200000 reports/gitleaks.json || true
+              - |
+                if [ -s reports/gitleaks.json ] && [ "$(wc -c < reports/gitleaks.json)" -gt 2 ]; then
+                  echo "Leaks found. Failing the build.";
+                  exit 1;
+                else
+                  echo "No leaks found.";
+                fi
           
 
 pipelines:
@@ -341,6 +451,7 @@ pipelines:
           - step: *create-api-artifacts
           - step: *create-service-artifacts
           - step: *create-frontend-artifact-qa
+          - step: *db-cli-build-artifact
       - step:
           name: "Application Deployment"
           runs-on:
@@ -398,61 +509,155 @@ pipelines:
             - $env:API_SERVER_QA = "appt23d"
             - pwsh -File ./scripts/Check-Health.ps1 -Url $env:QA_BASE_URL -envServerName $env:API_SERVER_QA
 
-      - step: *create-frontend-artifact-uat
       - step:
-          name: "Application Deployment"
+          name: "Tag repository with application version"
           runs-on:
             - windows
             - self.hosted
-          deployment: UAT
+          script:
+            - |
+              # Locate API artifact and extract version from .buildinfo.json (fallback to build number)
+              $apiZip = ".\dist\Demoulas.ProfitSharing.Api.zip"
+              $version = $null
+
+              if (Test-Path $apiZip) {
+                Write-Host "Found API artifact: $apiZip"
+                $temp = Join-Path $env:TEMP "api_extract_$($env:BITBUCKET_BUILD_NUMBER)"
+                if (Test-Path $temp) { Remove-Item -Recurse -Force $temp }
+                New-Item -ItemType Directory -Path $temp | Out-Null
+                Expand-Archive -Path $apiZip -DestinationPath $temp -Force
+                $buildInfoFile = Get-ChildItem -Path $temp -Filter ".buildinfo.json" -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 1
+                if ($buildInfoFile) { $buildInfoPath = $buildInfoFile.FullName } else { Write-Host "No .buildinfo.json inside artifact" }
+              } else {
+                Write-Host "API artifact not found at $apiZip - searching workspace for .buildinfo.json"
+                $found = Get-ChildItem -Path . -Filter ".buildinfo.json" -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 1
+                if ($found) { $buildInfoPath = $found.FullName }
+              }
+
+              if ($buildInfoPath) {
+                try {
+                  $json = Get-Content $buildInfoPath -Raw | ConvertFrom-Json
+                  $version = $json.version
+                  if (-not $version) { $version = $json.Version }
+                  if (-not $version) { $version = $json.buildVersion }
+                } catch {
+                  Write-Host "Failed to parse $buildInfoPath: $_"
+                }
+              }
+
+              if (-not $version) { $version = $env:BITBUCKET_BUILD_NUMBER; Write-Host "Using build number as version: $version" }
+
+              $tag = "v$version"
+              Write-Host "Preparing to create tag: $tag"
+
+              # Configure git identity for tagging
+              git config user.email "pipeline@local"
+              git config user.name "Bitbucket Pipeline"
+
+              # Check if tag already exists on remote
+              $exists = git ls-remote --tags origin $tag
+              if ($exists) { Write-Host "Tag $tag already exists on remote. Skipping tag creation."; exit 0 }
+
+              # Create annotated tag on the current commit (or BITBUCKET_COMMIT)
+              git tag -a $tag -m "Release $tag (build $env:BITBUCKET_BUILD_NUMBER)" $env:BITBUCKET_COMMIT
+
+              # Push tag to origin. Note: runner must have push permissions configured (SSH key / credentials)
+              git push origin refs/tags/$tag
+
+              Write-Host "Tag $tag created and pushed."
+
+      - step:
+          name: "Gate: Promote to UAT"
+          runs-on:
+            - windows
+            - self.hosted
           trigger: "manual"
           script:
-            - echo "Deploying application..."
-            - $env:API_SERVER_UAT = "appt24d"
-            - ${env:ENV} = "UAT"            
+            - echo "Manual approval granted. Continuing to UAT deployment & data operations."
+            - |
+              Write-Host "Release context:"
+              Write-Host ("  Build: " + $env:BITBUCKET_BUILD_NUMBER)
+              Write-Host ("  Branch: " + $env:BITBUCKET_BRANCH)
+              Write-Host ("  Commit: " + $env:BITBUCKET_COMMIT)
+              Write-Host ("  QA API: " + $env:QA_BASE_URL)
+              Write-Host "Artifacts in ./dist:"
+              if (Test-Path .\dist) {
+                Get-ChildItem -Recurse -File .\dist | ForEach-Object {
+                  "{0,10} bytes  {1}" -f $_.Length, $_.FullName
+                }
+              } else {
+                Write-Host "  (no dist folder found)"
+              }
+              Write-Host "Planned UAT sequence:"
+              Write-Host "  1) Build DB CLI artifact"
+              Write-Host "  2) Parallel: Drop & Recreate DB + Frontend build (UAT)"
+              Write-Host "  3) Parallel: App deploy + Import from READY"
+              Write-Host "  4) Import UAT navigation"
+              Write-Host "  5) Parallel: Validate import + UAT API health check"
 
-            - pwsh -File ./scripts/credsettings.ps1 `
-              -Environment ${env:ENV} `
-              -FilePath './src/services/configuration/credsettings.json' `
-              -OutputPath './src/services/configuration/credsettings.uat.json' `
-              -RemoteServer $env:API_SERVER_UAT `
-              -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
+      - step: *db-cli-build-artifact
+      - parallel:
+          - step: *uat-drop-recreate-db
+          - step: *create-frontend-artifact-uat
+      - parallel:
+          - step:
+              name: "Application Deployment UAT"
+              runs-on:
+                - windows
+                - self.hosted
+              deployment: UAT
+              script:
+                - echo "Deploying application..."
+                - $env:API_SERVER_UAT = "appt24d"
+                - ${env:ENV} = "UAT"            
 
-            - pwsh -File ./scripts/credsettings.ps1 `
-              -Environment ${env:ENV} `
-              -FilePath './src/services/configuration/credsettings.json' `
-              -OutputPath './src/services/configuration/credsettings.uat.json' `
-              -RemoteServer $env:API_SERVER_UAT `
-              -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
+                - pwsh -File ./scripts/credsettings.ps1 `
+                  -Environment ${env:ENV} `
+                  -FilePath './src/services/configuration/credsettings.json' `
+                  -OutputPath './src/services/configuration/credsettings.uat.json' `
+                  -RemoteServer $env:API_SERVER_UAT `
+                  -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
 
-            - pwsh -File ./scripts/credsettings.ps1 `
-              -Environment ${env:ENV} `
-              -FilePath './src/services/configuration/credsettings.json' `
-              -OutputPath './src/services/configuration/credsettings.uat.json' `
-              -RemoteServer $env:API_SERVER_UAT `
-              -RemotePath 'C:/NextGenApplications/ps/Payroll'
+                - pwsh -File ./scripts/credsettings.ps1 `
+                  -Environment ${env:ENV} `
+                  -FilePath './src/services/configuration/credsettings.json' `
+                  -OutputPath './src/services/configuration/credsettings.uat.json' `
+                  -RemoteServer $env:API_SERVER_UAT `
+                  -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
 
-            - pwsh -File ./scripts/credsettings.ps1 `
-              -Environment ${env:ENV} `
-              -FilePath './src/services/configuration/credsettings.json' `
-              -OutputPath './src/services/configuration/credsettings.uat.json' `
-              -RemoteServer $env:API_SERVER_UAT `
-              -RemotePath 'C:/inetpub/wwwroot/api'
+                - pwsh -File ./scripts/credsettings.ps1 `
+                  -Environment ${env:ENV} `
+                  -FilePath './src/services/configuration/credsettings.json' `
+                  -OutputPath './src/services/configuration/credsettings.uat.json' `
+                  -RemoteServer $env:API_SERVER_UAT `
+                  -RemotePath 'C:/NextGenApplications/ps/Payroll'
 
-            - echo "Deploying web application..."
-            - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
-            - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.UAT.zip"
-            - pwsh .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_UAT $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
+                - pwsh -File ./scripts/credsettings.ps1 `
+                  -Environment ${env:ENV} `
+                  -FilePath './src/services/configuration/credsettings.json' `
+                  -OutputPath './src/services/configuration/credsettings.uat.json' `
+                  -RemoteServer $env:API_SERVER_UAT `
+                  -RemotePath 'C:/inetpub/wwwroot/api'
 
-            - echo "Deploying background service..."            
-            - pwsh .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_UAT
-      - step:
-          name: "Checking API Health"
-          runs-on:
-            - windows
-            - self.hosted
-          script:
-            - pwsh -File ./scripts/Check-Health.ps1 -Url $env:UAT_BASE_URL -envServerName $env:API_SERVER_UAT
+                - echo "Deploying web application..."
+                - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
+                - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.UAT.zip"
+                - pwsh .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_UAT $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
+
+                - echo "Deploying background service..."            
+                - pwsh .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_UAT
+          - step: *uat-import-from-ready
+      - step: *uat-import-uat-navigation
+      - parallel:
+          - step: *uat-validate-import
+          - step:
+              name: "Checking API Health (UAT)"
+              runs-on:
+                - windows
+                - self.hosted
+              script:
+                - $env:API_SERVER_UAT = "appt24d"
+                - pwsh -File ./scripts/Check-Health.ps1 -Url $env:UAT_BASE_URL -envServerName $env:API_SERVER_UAT
 
 
     develop:
@@ -468,6 +673,7 @@ pipelines:
           - step: *build-and-test-backend
           - step: *audit-frontend
           - step: *audit-backend
+          - step: *secret-scan
   
   custom:
     profitsharing_database:
@@ -483,6 +689,7 @@ pipelines:
               - upgrade-db
               - drop-recreate-db
               - import-from-ready
+              - import-uat-navigation
               - generate-upgrade-script
               - validate-import
           - name: SourceSchema

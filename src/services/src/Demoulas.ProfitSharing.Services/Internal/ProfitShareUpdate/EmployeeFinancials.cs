@@ -21,6 +21,7 @@ internal sealed record EmployeeFinancials
     public decimal SecondaryEarnings { get; set; }
     public decimal EarningsOnSecondaryEtva { get; set; }
     public byte? ZeroContributionReasonId { get; set; }
+    public byte PayFrequencyId { get; set; }
     
     // Transactions for this year. 
     public decimal? DistributionsTotal { get; set; }

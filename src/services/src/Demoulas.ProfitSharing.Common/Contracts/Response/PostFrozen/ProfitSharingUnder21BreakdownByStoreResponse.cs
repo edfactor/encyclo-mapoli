@@ -1,10 +1,13 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
-public sealed record ProfitSharingUnder21BreakdownByStoreResponse
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
+
+public sealed record ProfitSharingUnder21BreakdownByStoreResponse : IIsExecutive
 {
     public short StoreNumber { get; set; }
     public int BadgeNumber { get; set; }
-    public required string FullName { get; set; }
+    [MaskSensitive] public required string FullName { get; set; }
     public decimal? BeginningBalance { get; set; } = 0;
     public decimal? Earnings { get; set; } = 0;
     public decimal? Contributions { get; set; } = 0;
@@ -16,6 +19,7 @@ public sealed record ProfitSharingUnder21BreakdownByStoreResponse
     public DateOnly DateOfBirth { get; set; }
     public byte Age { get; set; }
     public byte EnrollmentId { get; set; }
+    public bool IsExecutive { get; set; }
 
     public static readonly string REPORT_NAME = "Under 21 Breakdown";
     public static ProfitSharingUnder21BreakdownByStoreResponse ResponseExample()

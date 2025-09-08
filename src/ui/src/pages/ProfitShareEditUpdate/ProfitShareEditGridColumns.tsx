@@ -1,66 +1,35 @@
-import { agGridNumberToCurrency } from "smart-ui-library";
 import { ColDef } from "ag-grid-community";
-import { createBadgeColumn } from "../../utils/gridColumnFactory";
+import {
+  createBadgeColumn,
+  createCountColumn,
+  createCurrencyColumn,
+  createNameColumn,
+  createPSNColumn,
+  createStatusColumn
+} from "../../utils/gridColumnFactory";
 
 export const ProfitShareEditUpdateGridColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({ 
-      headerName: "Badge",
-      minWidth: 100,
-      renderAsLink: false
-    }),
-    {
-      headerName: "Name",
-      field: "name",
-      colId: "name",
-      minWidth: 120,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
-    {
+    createBadgeColumn({}),
+    createNameColumn({ field: "name" }),
+    createCountColumn({
       headerName: "Code",
-      field: "code",
-      colId: "code",
-      minWidth: 100,
-      type: "rightAligned",
-      resizable: true
-    },
-    {
-      headerName: "PSN",
-      field: "psn",
-      colId: "psn",
-      minWidth: 100,
-      type: "rightAligned",
-      resizable: true
-    },
-    {
+      field: "code"
+    }),
+    createPSNColumn({}),
+    createCurrencyColumn({
       headerName: "Contributions",
-      field: "contributionAmount",
-      colId: "contributionAmount",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      field: "contributionAmount"
+    }),
+    createCurrencyColumn({
       headerName: "Earnings",
-      field: "earningsAmount",
-      colId: "earningsAmount",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      field: "earningsAmount"
+    }),
+    createCurrencyColumn({
       headerName: "Forfeiture",
-      field: "forfeitureAmount",
-      colId: "forfeitureAmount",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
+      field: "forfeitureAmount"
+    }),
+
     {
       headerName: "Remark",
       field: "remark",
@@ -69,41 +38,27 @@ export const ProfitShareEditUpdateGridColumns = (): ColDef[] => {
       type: "rightAligned",
       resizable: true
     },
-    {
+    createCountColumn({
       headerName: "Comment Code",
-      field: "commentTypeId",
-      colId: "commentTypeId",
-      minWidth: 80,
-      type: "rightAligned",
-      resizable: true
-    },
+      field: "commentTypeId"
+    }),
+
     {
       headerName: "Record Change Summary",
       field: "recordChangeSummary",
       colId: "recordChangeSummary",
-
       minWidth: 80,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true
     },
-    {
+    createStatusColumn({
       headerName: "Zero Contribution Status",
-      field: "zeroContStatus",
-      colId: "zeroContStatus",
-      minWidth: 80,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
-    {
+      field: "zeroContStatus"
+    }),
+    createCountColumn({
       headerName: "Year Extension",
-      field: "yearExtension",
-      colId: "yearExtension",
-      minWidth: 80,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    }
+      field: "yearExtension"
+    })
   ];
 };

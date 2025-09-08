@@ -1,4 +1,4 @@
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Master;
@@ -20,9 +20,9 @@ public class MasterInquiryFilteredDetailsTests : ApiTestBase<Api.Program>
     [Fact(DisplayName = "Master Inquiry Filtered Details - Basic Employee Request")]
     public async Task GetFilteredDetailsForEmployees()
     {
-        ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
+        ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR, Role.EXECUTIVEADMIN);
         var request = new MasterInquiryMemberDetailsRequest { MemberType = 1, Skip = 0, Take = 25 };
-        var response = await ApiClient.GETAsync<MasterInquiryFilteredDetailsEndpoint, MasterInquiryMemberDetailsRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
+    var response = await ApiClient.POSTAsync<MasterInquiryFilteredDetailsEndpoint, MasterInquiryMemberDetailsRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
         response.ShouldNotBeNull();
         response.Response.EnsureSuccessStatusCode();
     }
@@ -30,9 +30,9 @@ public class MasterInquiryFilteredDetailsTests : ApiTestBase<Api.Program>
     [Fact(DisplayName = "Master Inquiry Filtered Details - Filtered By Year And Month")]
     public async Task GetFilteredDetailsByYearAndMonth()
     {
-        ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
+        ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR, Role.EXECUTIVEADMIN);
         var request = new MasterInquiryMemberDetailsRequest { MemberType = 1, ProfitYear = 2024, MonthToDate = 3, Skip = 0, Take = 25 };
-        var response = await ApiClient.GETAsync<MasterInquiryFilteredDetailsEndpoint, MasterInquiryMemberDetailsRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
+    var response = await ApiClient.POSTAsync<MasterInquiryFilteredDetailsEndpoint, MasterInquiryMemberDetailsRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
         response.ShouldNotBeNull();
         response.Response.EnsureSuccessStatusCode();
     }

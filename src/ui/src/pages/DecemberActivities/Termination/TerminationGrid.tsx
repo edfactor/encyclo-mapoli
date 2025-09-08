@@ -1,24 +1,39 @@
-import { ICellRendererParams, CellClickedEvent, ColDef } from "ag-grid-community";
-import { useEffect, useMemo, useState, useCallback, useRef } from "react";
-import { useSelector } from "react-redux";
+import { CellClickedEvent, ColDef, ICellRendererParams } from "ag-grid-community";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  useLazyGetTerminationReportQuery,
+  useUpdateForfeitureAdjustmentBulkMutation,
+  useUpdateForfeitureAdjustmentMutation
+} from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, numberToCurrency, Pagination } from "smart-ui-library";
-import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
+import { CalendarResponseDto, ForfeitureAdjustmentUpdateRequest, StartAndEndDateRequest } from "reduxstore/types";
+import {
+  DSMGrid,
+  formatNumberWithComma,
+  ISortParams,
+  numberToCurrency,
+  Pagination,
+  setMessage
+} from "smart-ui-library";
 import { ReportSummary } from "../../../components/ReportSummary";
-import { StartAndEndDateRequest } from "reduxstore/types";
-import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
-import { GetDetailColumns, GetTerminationColumns } from "./TerminationGridColumns";
+import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
-import { ForfeitureAdjustmentUpdateRequest } from "reduxstore/types";
-import { useUpdateForfeitureAdjustmentMutation, useUpdateForfeitureAdjustmentBulkMutation } from "reduxstore/api/YearsEndApi";
+import { Messages } from "../../../utils/messageDictonary";
+import { TerminationSearchRequest } from "./Termination";
+import { GetDetailColumns } from "./TerminationDetailsGridColumns";
+import { GetTerminationColumns } from "./TerminationGridColumns";
 
 interface TerminationGridSearchProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
-  searchParams: StartAndEndDateRequest | null;
+  searchParams: TerminationSearchRequest | null;
   resetPageFlag: boolean;
   onUnsavedChanges: (hasChanges: boolean) => void;
   hasUnsavedChanges: boolean;
+  fiscalData: CalendarResponseDto | null;
+  shouldArchive?: boolean;
+  onArchiveHandled?: () => void;
 }
 
 const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
@@ -27,61 +42,146 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   searchParams,
   resetPageFlag,
   onUnsavedChanges,
-  hasUnsavedChanges
+  hasUnsavedChanges,
+  fiscalData,
+  shouldArchive,
+  onArchiveHandled
 }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "badgeNumber",
-    isSortDescending: false
+    isSortDescending: true
   });
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
-  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
+  const dispatch = useDispatch();
   const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
   const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
   const [editedValues, setEditedValues] = useState<Record<string, { value: number; hasError: boolean }>>({});
   const [loadingRowIds, setLoadingRowIds] = useState<Set<number>>(new Set());
+  const [pendingSuccessMessage, setPendingSuccessMessage] = useState<string | null>(null);
+  const [isPendingBulkMessage, setIsPendingBulkMessage] = useState<boolean>(false);
   const selectedProfitYear = useDecemberFlowProfitYear();
+  // fiscalData is now passed from parent to avoid timing issues on refresh
   const [updateForfeitureAdjustmentBulk, { isLoading: isBulkSaving }] = useUpdateForfeitureAdjustmentBulkMutation();
   const [updateForfeitureAdjustment] = useUpdateForfeitureAdjustmentMutation();
+  const lastRequestKeyRef = useRef<string | null>(null);
 
-  const handleSave = useCallback(async (request: ForfeitureAdjustmentUpdateRequest) => {
-    const rowId = request.badgeNumber; // Use badgeNumber as unique identifier
-    setLoadingRowIds(prev => new Set(Array.from(prev).concat(rowId)));
-    
-    try {
-      await updateForfeitureAdjustment(request);
-      const rowKey = `${request.badgeNumber}-${request.profitYear}`;
-      setEditedValues(prev => {
-        const updated = { ...prev };
-        delete updated[rowKey];
-        return updated;
-      });
-      onUnsavedChanges(Object.keys(editedValues).length > 1);
-      if (searchParams) {
-        const params = {
-          ...searchParams,
-          pagination: {
-            skip: pageNumber * pageSize,
-            take: pageSize,
-            sortBy: sortParams.sortBy,
-            isSortDescending: sortParams.isSortDescending
+  const createRequest = useCallback(
+    (
+      skip: number,
+      sortBy: string,
+      isSortDescending: boolean,
+      profitYear: number
+    ): (StartAndEndDateRequest & { archive?: boolean }) | null => {
+      const base: StartAndEndDateRequest = searchParams
+        ? {
+            ...searchParams,
+            profitYear,
+            pagination: { skip, take: pageSize, sortBy, isSortDescending }
           }
-        };
-        triggerSearch(params, false);
-      }
-    } catch (error) {
-      console.error('Failed to save forfeiture adjustment:', error);
-      alert('Failed to save. Please try again.');
-    } finally {
-      setLoadingRowIds(prev => {
-        const newSet = new Set(Array.from(prev));
-        newSet.delete(rowId);
-        return newSet;
-      });
+        : {
+            beginningDate: fiscalData?.fiscalBeginDate || "",
+            endingDate: fiscalData?.fiscalEndDate || "",
+            profitYear,
+            pagination: { skip, take: pageSize, sortBy, isSortDescending }
+          };
+
+      if (!base.beginningDate || !base.endingDate) return null;
+
+      return shouldArchive ? { ...base, archive: true } : base;
+    },
+    [searchParams, pageSize, fiscalData?.fiscalBeginDate, fiscalData?.fiscalEndDate, shouldArchive]
+  );
+
+  // Effect to show success message after grid finishes loading
+  useEffect(() => {
+    if (!isFetching && pendingSuccessMessage) {
+      const messageTemplate = isPendingBulkMessage
+        ? Messages.TerminationBulkSaveSuccess
+        : Messages.TerminationSaveSuccess;
+      dispatch(
+        setMessage({
+          ...messageTemplate,
+          message: {
+            ...messageTemplate.message,
+            message: pendingSuccessMessage
+          }
+        })
+      );
+      setPendingSuccessMessage(null);
+      setIsPendingBulkMessage(false);
     }
-  }, [updateForfeitureAdjustment, editedValues, onUnsavedChanges, searchParams, pageNumber, pageSize, sortParams, triggerSearch]);
+  }, [isFetching, pendingSuccessMessage, isPendingBulkMessage, dispatch]);
+
+  const handleSave = useCallback(
+    async (request: ForfeitureAdjustmentUpdateRequest, name: string) => {
+      const rowId = request.badgeNumber; // Use badgeNumber as unique identifier
+      setLoadingRowIds((prev) => new Set(Array.from(prev).concat(rowId)));
+
+      try {
+        await updateForfeitureAdjustment(request);
+        const rowKey = `${request.badgeNumber}-${request.profitYear}`;
+        setEditedValues((prev) => {
+          const updated = { ...prev };
+          delete updated[rowKey];
+          return updated;
+        });
+        onUnsavedChanges(Object.keys(editedValues).length > 1);
+
+        // Prepare success message
+        const employeeName = name || "the selected employee";
+        const successMessage = `The forfeiture adjustment of amount $${formatNumberWithComma(request.forfeitureAmount)} for ${employeeName} saved successfully`;
+
+        if (searchParams) {
+          const params = createRequest(
+            pageNumber * pageSize,
+            sortParams.sortBy,
+            sortParams.isSortDescending,
+            selectedProfitYear
+          );
+          if (params) {
+            // Set pending message and trigger search
+            setPendingSuccessMessage(successMessage);
+            triggerSearch(params, false);
+          }
+        } else {
+          // If no search params, show message immediately
+          dispatch(
+            setMessage({
+              ...Messages.TerminationSaveSuccess,
+              message: {
+                ...Messages.TerminationSaveSuccess.message,
+                message: successMessage
+              }
+            })
+          );
+        }
+      } catch (error) {
+        console.error("Failed to save forfeiture adjustment:", error);
+        alert("Failed to save. Please try again.");
+      } finally {
+        setLoadingRowIds((prev) => {
+          const newSet = new Set(Array.from(prev));
+          newSet.delete(rowId);
+          return newSet;
+        });
+      }
+    },
+    [
+      updateForfeitureAdjustment,
+      editedValues,
+      onUnsavedChanges,
+      searchParams,
+      pageNumber,
+      pageSize,
+      sortParams,
+      triggerSearch,
+      createRequest,
+      selectedProfitYear
+    ]
+  );
 
   // Reset page number to 0 when resetPageFlag changes
   useEffect(() => {
@@ -93,12 +193,12 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     const hasChanges = selectedRowIds.length > 0;
     onUnsavedChanges(hasChanges);
   }, [selectedRowIds, onUnsavedChanges]);
-  
+
   // Refresh the grid when loading state changes
   const gridRef = useRef<any>(null);
   useEffect(() => {
     if (gridRef.current?.api) {
-      gridRef.current.api.refreshCells({ 
+      gridRef.current.api.refreshCells({
         force: true,
         suppressFlash: false
       });
@@ -124,21 +224,105 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     }
   }, [termination?.response?.results]);
 
-  // Fetch data when pagination, sort, or searchParams change
+  // Helper to build a unique key for current request inputs
+  const buildRequestKey = useCallback(
+    (
+      skip: number,
+      sortBy: string,
+      isSortDescending: boolean,
+      profitYear: number,
+      beginningDate?: string,
+      endingDate?: string,
+      archive?: boolean
+    ) =>
+      `${skip}|${pageSize}|${sortBy}|${isSortDescending}|${profitYear}|${beginningDate ?? ""}|${endingDate ?? ""}|${archive ? "1" : "0"}`,
+    [pageSize]
+  );
+
+  // Fetch data when pagination, sort, or searchParams change (only if initial search has been performed)
   useEffect(() => {
-    if (searchParams) {
-      const params = {
-        ...searchParams,
-        pagination: {
-          skip: pageNumber * pageSize,
-          take: pageSize,
-          sortBy: sortParams.sortBy,
-          isSortDescending: sortParams.isSortDescending
-        }
-      };
+    if (!initialSearchLoaded || !searchParams) return; // Don't load data until search button is clicked
+
+    const params = createRequest(
+      pageNumber * pageSize,
+      sortParams.sortBy,
+      sortParams.isSortDescending,
+      selectedProfitYear
+    );
+    if (params) {
+      const key = buildRequestKey(
+        pageNumber * pageSize,
+        sortParams.sortBy,
+        sortParams.isSortDescending,
+        selectedProfitYear,
+        (params as any).beginningDate,
+        (params as any).endingDate,
+        (params as any).archive
+      );
+      if (lastRequestKeyRef.current === key) return;
+      lastRequestKeyRef.current = key;
       triggerSearch(params, false);
     }
-  }, [searchParams, pageNumber, pageSize, sortParams, triggerSearch]);
+  }, [
+    searchParams,
+    pageNumber,
+    pageSize,
+    sortParams,
+    selectedProfitYear,
+    triggerSearch,
+    createRequest,
+    initialSearchLoaded,
+    buildRequestKey
+  ]);
+
+  // Archive trigger: when shouldArchive flips true, attempt search and clear flag when done; retry when data becomes available
+  useEffect(() => {
+    if (!shouldArchive) return;
+    let cancelled = false;
+    const run = async () => {
+      const params = createRequest(
+        pageNumber * pageSize,
+        sortParams.sortBy,
+        sortParams.isSortDescending,
+        selectedProfitYear
+      );
+      if (params) {
+        const key = buildRequestKey(
+          pageNumber * pageSize,
+          sortParams.sortBy,
+          sortParams.isSortDescending,
+          selectedProfitYear,
+          (params as any).beginningDate,
+          (params as any).endingDate,
+          (params as any).archive
+        );
+        if (lastRequestKeyRef.current === key) {
+          if (!cancelled) onArchiveHandled?.();
+          return;
+        }
+        lastRequestKeyRef.current = key;
+        await triggerSearch(params, false);
+        if (!cancelled) onArchiveHandled?.();
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    shouldArchive,
+    searchParams,
+    pageNumber,
+    pageSize,
+    sortParams,
+    selectedProfitYear,
+    triggerSearch,
+    createRequest,
+    onArchiveHandled,
+    fiscalData?.fiscalBeginDate,
+    fiscalData?.fiscalEndDate,
+    buildRequestKey
+  ]);
 
   const handleRowExpansion = (badgeNumber: string) => {
     setExpandedRows((prev) => ({
@@ -162,60 +346,83 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     }));
   }, []);
 
-  const handleBulkSave = useCallback(async (requests: ForfeitureAdjustmentUpdateRequest[]) => {
-    // Add all affected badge numbers to loading state
-    const badgeNumbers = requests.map(request => request.badgeNumber);
-    setLoadingRowIds(prev => {
-      const newSet = new Set(Array.from(prev));
-      badgeNumbers.forEach(badgeNumber => newSet.add(badgeNumber));
-      return newSet;
-    });
-    
-    try {
-      await updateForfeitureAdjustmentBulk(requests);
-      const updatedEditedValues = { ...editedValues };
-      requests.forEach(request => {
-        const rowKey = `${request.badgeNumber}-${request.profitYear}`;
-        delete updatedEditedValues[rowKey];
-      });
-      setEditedValues(updatedEditedValues);
-      setSelectedRowIds([]);
-      onUnsavedChanges(Object.keys(updatedEditedValues).length > 0);
-      if (searchParams) {
-        const params = {
-          ...searchParams,
-          pagination: {
-            skip: pageNumber * pageSize,
-            take: pageSize,
-            sortBy: sortParams.sortBy,
-            isSortDescending: sortParams.isSortDescending
-          }
-        };
-        triggerSearch(params, false);
-      }
-    } catch (error) {
-      console.error('Failed to save forfeiture adjustments:', error);
-      alert('Failed to save one or more adjustments. Please try again.');
-    } finally {
-      // Remove all affected badge numbers from loading state
-      setLoadingRowIds(prev => {
+  const handleBulkSave = useCallback(
+    async (requests: ForfeitureAdjustmentUpdateRequest[], names: string[]) => {
+      // Add all affected badge numbers to loading state
+      const badgeNumbers = requests.map((request) => request.badgeNumber);
+      setLoadingRowIds((prev) => {
         const newSet = new Set(Array.from(prev));
-        badgeNumbers.forEach(badgeNumber => newSet.delete(badgeNumber));
+        badgeNumbers.forEach((badgeNumber) => newSet.add(badgeNumber));
         return newSet;
       });
-    }
-  }, [updateForfeitureAdjustmentBulk, editedValues, onUnsavedChanges, searchParams, pageNumber, pageSize, sortParams, triggerSearch]);
+
+      try {
+        await updateForfeitureAdjustmentBulk(requests);
+        const updatedEditedValues = { ...editedValues };
+        requests.forEach((request) => {
+          const rowKey = `${request.badgeNumber}-${request.profitYear}`;
+          delete updatedEditedValues[rowKey];
+        });
+        setEditedValues(updatedEditedValues);
+        setSelectedRowIds([]);
+        onUnsavedChanges(Object.keys(updatedEditedValues).length > 0);
+
+        // Prepare bulk success message
+        const employeeNames = names.map(name => name || "Unknown Employee");
+        const bulkSuccessMessage = `Members affected: ${employeeNames.join("; ")}`;
+
+        if (searchParams) {
+          const params = createRequest(
+            pageNumber * pageSize,
+            sortParams.sortBy,
+            sortParams.isSortDescending,
+            selectedProfitYear
+          );
+          if (params) {
+            triggerSearch(params, false);
+          }
+          // Set the pending success message to be shown after grid reload
+          setPendingSuccessMessage(bulkSuccessMessage);
+          setIsPendingBulkMessage(true);
+        }
+      } catch (error) {
+        console.error("Failed to save forfeiture adjustments:", error);
+        alert("Failed to save one or more adjustments. Please try again.");
+      } finally {
+        // Remove all affected badge numbers from loading state
+        setLoadingRowIds((prev) => {
+          const newSet = new Set(Array.from(prev));
+          badgeNumbers.forEach((badgeNumber) => newSet.delete(badgeNumber));
+          return newSet;
+        });
+      }
+    },
+    [
+      updateForfeitureAdjustmentBulk,
+      editedValues,
+      onUnsavedChanges,
+      searchParams,
+      pageNumber,
+      pageSize,
+      sortParams,
+      triggerSearch
+    ]
+  );
 
   // Get main and detail columns
   const mainColumns = useMemo(() => GetTerminationColumns(), []);
-  const detailColumns = useMemo(() => GetDetailColumns(
-    addRowToSelectedRows, 
-    removeRowFromSelectedRows, 
-    selectedRowIds, 
-    selectedProfitYear, 
-    handleSave, 
-    handleBulkSave
-  ), [selectedRowIds, selectedProfitYear, handleSave, handleBulkSave]);
+  const detailColumns = useMemo(
+    () =>
+      GetDetailColumns(
+        addRowToSelectedRows,
+        removeRowFromSelectedRows,
+        selectedRowIds,
+        selectedProfitYear,
+        handleSave,
+        handleBulkSave
+      ),
+    [addRowToSelectedRows, removeRowFromSelectedRows, selectedRowIds, selectedProfitYear, handleSave, handleBulkSave]
+  );
 
   // Build grid data with expandable rows
   const gridData = useMemo(() => {
@@ -338,8 +545,13 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   };
 
   const sortEventHandler = (update: ISortParams) => {
-    setSortParams(update);
-    setPageNumber(0);
+    setSortParams((prev) => {
+      if (prev.sortBy === update.sortBy && prev.isSortDescending === update.isSortDescending) {
+        return prev; // no change
+      }
+      return update;
+    });
+    setPageNumber((prev) => (prev === 0 ? prev : 0));
   };
 
   return (
@@ -383,7 +595,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
         <>
           <ReportSummary report={termination} />
 
-          <div className="flex sticky top-0 z-10 bg-white">
+          <div className="sticky top-0 z-10 flex bg-white">
             <TotalsGrid
               displayData={[[numberToCurrency(termination.totalEndingBalance || 0)]]}
               leftColumnHeaders={["Amount in Profit Sharing"]}
@@ -405,7 +617,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
           <DSMGrid
             preferenceKey={"QPREV-PROF"}
             handleSortChanged={sortEventHandler}
-            maxHeight={800}
+            maxHeight={400}
             isLoading={isFetching}
             providedOptions={{
               onGridReady: (params) => {
@@ -447,7 +659,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
                   return;
                 }
                 setPageSize(value);
-                setPageNumber(0);
+                setPageNumber(1);
                 setInitialSearchLoaded(true);
               }}
               recordCount={termination.response.total || 0}

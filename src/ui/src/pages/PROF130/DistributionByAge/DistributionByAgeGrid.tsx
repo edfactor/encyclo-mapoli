@@ -1,12 +1,12 @@
+import { Grid } from "@mui/material";
+import { TotalsGrid } from "components/TotalsGrid/TotalsGrid";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetDistributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import {DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
-import { GetDistributionsByAgeColumns } from "./DistributionByAgeGridColumns";
-import { Grid } from "@mui/material";
+import { DSMGrid, ISortParams, numberToCurrency } from "smart-ui-library";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
-import { numberToCurrency } from "smart-ui-library";
+import { GetDistributionsByAgeColumns } from "./DistributionByAgeGridColumns";
 
 interface DistributionByAgeGridProps {
   initialSearchLoaded: boolean;
@@ -69,69 +69,33 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
     <>
       {distributionsByAgeTotal?.response && (
         <>
-          <div className="px-[24px]">
-            <h2 className="text-dsm-secondary">Summary</h2>
-          </div>
-          <div className="flex sticky top-0 z-10 bg-white">
-            <TotalsGrid
-              displayData={[
-                [
-                  distributionsByAgeTotal?.regularTotalEmployees || 0,
-                  numberToCurrency(distributionsByAgeTotal?.regularTotalAmount || 0)
-                ],
-                [
-                  distributionsByAgeTotal?.hardshipTotalEmployees || 0,
-                  numberToCurrency(distributionsByAgeTotal?.hardshipTotalAmount || 0)
-                ],
-                [
-                  distributionsByAgeTotal?.totalEmployees || 0,
-                  numberToCurrency(distributionsByAgeTotal?.distributionTotalAmount || 0)
-                ]
-              ]}
-              leftColumnHeaders={["Regular", "Hardship", "Dist Total"]}
-              topRowHeaders={["Total", "EMPS", "Amount"]}></TotalsGrid>
-            <TotalsGrid
-              displayData={[
-                [
-                  distributionsByAgeFullTime?.regularTotalEmployees || 0,
-                  numberToCurrency(distributionsByAgeFullTime?.regularTotalAmount || 0)
-                ],
-                [
-                  distributionsByAgeFullTime?.hardshipTotalEmployees || 0,
-                  numberToCurrency(distributionsByAgeFullTime?.hardshipTotalAmount || 0)
-                ],
-                [
-                  distributionsByAgeFullTime?.totalEmployees || 0,
-                  numberToCurrency(distributionsByAgeFullTime?.distributionTotalAmount || 0)
-                ]
-              ]}
-              leftColumnHeaders={["Regular", "Hardship", "Dist Total"]}
-              topRowHeaders={["FullTime", "EMPS", "Amount"]}></TotalsGrid>
-            <TotalsGrid
-              displayData={[
-                [
-                  distributionsByAgePartTime?.regularTotalEmployees || 0,
-                  numberToCurrency(distributionsByAgePartTime?.regularTotalAmount || 0)
-                ],
-                [
-                  distributionsByAgePartTime?.hardshipTotalEmployees || 0,
-                  numberToCurrency(distributionsByAgePartTime?.hardshipTotalAmount || 0)
-                ],
-                [
-                  distributionsByAgePartTime?.totalEmployees || 0,
-                  numberToCurrency(distributionsByAgePartTime?.distributionTotalAmount || 0)
-                ]
-              ]}
-              leftColumnHeaders={["Regular", "Hardship", "Dist Total"]}
-              topRowHeaders={["PartTime", "EMPS", "Amount"]}></TotalsGrid>
-          </div>
-
           <Grid
             size={{ xs: 12 }}
-            container>
+            container
+            rowSpacing={0}>
             <Grid size={{ xs: 4 }}>
+              <h2 className="px-[24px] text-dsm-secondary">Total</h2>
+              <TotalsGrid
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
+                tablePadding="0px"
+                displayData={[
+                  [
+                    distributionsByAgeTotal?.regularTotalEmployees || 0,
+                    numberToCurrency(distributionsByAgeTotal?.regularTotalAmount || 0)
+                  ],
+                  [
+                    distributionsByAgeTotal?.hardshipTotalEmployees || 0,
+                    numberToCurrency(distributionsByAgeTotal?.hardshipTotalAmount || 0)
+                  ],
+                  [
+                    distributionsByAgeTotal?.totalEmployees || 0,
+                    numberToCurrency(distributionsByAgeTotal?.distributionTotalAmount || 0)
+                  ]
+                ]}
+                leftColumnHeaders={["Regular", "Hardship", "Dist Total"]}
+                topRowHeaders={["Total", "EMPS", "Amount"]}></TotalsGrid>
               <DSMGrid
-                preferenceKey={"AGE_Total"}
+                preferenceKey={"DIST_AGE_Total"}
                 isLoading={isFetching}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
@@ -139,7 +103,71 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
                   columnDefs: columnDefsTotal ?? []
                 }}
               />
-            </Grid>           
+            </Grid>
+
+            <Grid size={{ xs: 4 }}>
+              <h2 className="text-dsm-secondary">Full-time</h2>
+              <TotalsGrid
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
+                tablePadding="0px"
+                displayData={[
+                  [
+                    distributionsByAgeFullTime?.regularTotalEmployees || 0,
+                    numberToCurrency(distributionsByAgeFullTime?.regularTotalAmount || 0)
+                  ],
+                  [
+                    distributionsByAgeFullTime?.hardshipTotalEmployees || 0,
+                    numberToCurrency(distributionsByAgeFullTime?.hardshipTotalAmount || 0)
+                  ],
+                  [
+                    distributionsByAgeFullTime?.totalEmployees || 0,
+                    numberToCurrency(distributionsByAgeFullTime?.distributionTotalAmount || 0)
+                  ]
+                ]}
+                leftColumnHeaders={["Regular", "Hardship", "Dist Total"]}
+                topRowHeaders={["FullTime", "EMPS", "Amount"]}></TotalsGrid>
+              <DSMGrid
+                preferenceKey={"DIST_AGE_FullTime"}
+                isLoading={isFetching}
+                handleSortChanged={sortEventHandler}
+                providedOptions={{
+                  rowData: distributionsByAgeFullTime?.response?.results ?? [],
+                  columnDefs: columnDefsTotal ?? []
+                }}
+              />
+            </Grid>
+
+            <Grid size={{ xs: 4 }}>
+              <h2 className="text-dsm-secondary">Part-time</h2>
+              <TotalsGrid
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
+                tablePadding="0px"
+                displayData={[
+                  [
+                    distributionsByAgePartTime?.regularTotalEmployees || 0,
+                    numberToCurrency(distributionsByAgePartTime?.regularTotalAmount || 0)
+                  ],
+                  [
+                    distributionsByAgePartTime?.hardshipTotalEmployees || 0,
+                    numberToCurrency(distributionsByAgePartTime?.hardshipTotalAmount || 0)
+                  ],
+                  [
+                    distributionsByAgePartTime?.totalEmployees || 0,
+                    numberToCurrency(distributionsByAgePartTime?.distributionTotalAmount || 0)
+                  ]
+                ]}
+                leftColumnHeaders={["Regular", "Hardship", "Dist Total"]}
+                topRowHeaders={["Total", "EMPS", "Amount"]}></TotalsGrid>
+              <DSMGrid
+                preferenceKey={"DIST_AGE_PartTime"}
+                isLoading={isFetching}
+                handleSortChanged={sortEventHandler}
+                providedOptions={{
+                  rowData: distributionsByAgePartTime?.response?.results ?? [],
+                  columnDefs: columnDefsTotal ?? []
+                }}
+              />
+            </Grid>
           </Grid>
         </>
       )}

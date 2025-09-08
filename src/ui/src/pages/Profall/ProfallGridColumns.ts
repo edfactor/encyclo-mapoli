@@ -1,6 +1,11 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { GRID_COLUMN_WIDTHS } from "../../constants";
-import { createBadgeColumn, createStoreColumn, createNameColumn } from "../../utils/gridColumnFactory";
+import { ColDef } from "ag-grid-community";
+import {
+  createBadgeColumn,
+  createNameColumn,
+  createStateColumn,
+  createStoreColumn,
+  createZipColumn
+} from "../../utils/gridColumnFactory";
 
 export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
@@ -10,8 +15,7 @@ export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void
     }),
     createBadgeColumn({
       headerName: "Badge",
-      minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      alignment: "center",
+
       navigateFunction: navFunction
     }),
     createNameColumn({
@@ -59,25 +63,15 @@ export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void
       resizable: true,
       sortable: true
     },
-    {
-      headerName: "State",
-      field: "state",
-      colId: "state",
+    createStateColumn({
       minWidth: 80,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
+      alignment: "center",
       sortable: true
-    },
-    {
-      headerName: "Zip Code",
+    }),
+    createZipColumn({
       field: "postalCode",
-      colId: "postalCode",
       minWidth: 100,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      sortable: true
-    }
+      alignment: "center"
+    })
   ];
 };

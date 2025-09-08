@@ -1,16 +1,16 @@
 import { ColDef } from "ag-grid-community";
-import { formatNumberWithComma } from "smart-ui-library";
-import { GRID_COLUMN_WIDTHS } from "../../../constants";
-import { mmDDYYFormat } from "../../../utils/dateUtils";
 import {
-  createBadgeColumn,
-  createCurrencyColumn,
-  createSSNColumn,
   createAgeColumn,
-  createStoreColumn,
-  createNameColumn,
+  createBadgeColumn,
+  createCountColumn,
+  createCurrencyColumn,
+  createDateColumn,
   createHoursColumn,
-  createStatusColumn
+  createNameColumn,
+  createPointsColumn,
+  createSSNColumn,
+  createStatusColumn,
+  createStoreColumn
 } from "../../../utils/gridColumnFactory";
 
 export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
@@ -19,18 +19,10 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
   return [
     createBadgeColumn({
       headerName: "Badge",
-      minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      alignment: "center",
       navigateFunction: navFunction
     }),
-    createNameColumn({
-      field: "employeeName",
-      minWidth: 180,
-      sortable: true
-    }),
-    createStoreColumn({
-      minWidth: 80
-    }),
+    createNameColumn({}),
+    createStoreColumn({}),
     {
       headerName: "Type",
       field: "employeeTypeCode",
@@ -40,35 +32,18 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       cellClass: "center-align",
       resizable: true
     },
-    {
+    createDateColumn({
       headerName: "Date of Birth",
-      field: "dateOfBirth",
-      colId: "dateOfBirth",
-      minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      valueFormatter: (params) => mmDDYYFormat(params.value)
-    },
+      field: "dateOfBirth"
+    }),
     createAgeColumn({}),
     createSSNColumn(),
     createCurrencyColumn({
       headerName: "Wages",
-      field: "wages",
-      minWidth: 120
+      field: "wages"
     }),
-    createHoursColumn({
-      minWidth: 100
-    }),
-    {
-      headerName: "Points",
-      field: "points",
-      colId: "points",
-      minWidth: 100,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: (params) => formatNumberWithComma(params.value)
-    },
+    createHoursColumn({}),
+    createPointsColumn({}),
     {
       headerName: "New",
       field: "isNew",
@@ -85,26 +60,15 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
     }),
     createCurrencyColumn({
       headerName: "Balance",
-      field: "balance",
-      minWidth: 140
+      field: "balance"
     }),
-    {
+    createCountColumn({
       headerName: "Years in Plan",
-      field: "yearsInPlan",
-      colId: "yearsInPlan",
-      minWidth: 80,
-      type: "rightAligned",
-      resizable: true
-    },
-    {
+      field: "yearsInPlan"
+    }),
+    createDateColumn({
       headerName: "Inactive date",
-      field: "terminationDate",
-      colId: "terminationDate",
-      minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      valueFormatter: (params) => mmDDYYFormat(params.value)
-    }
+      field: "terminationDate"
+    })
   ];
 };

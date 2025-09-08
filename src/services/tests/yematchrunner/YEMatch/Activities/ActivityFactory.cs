@@ -1,6 +1,10 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using YEMatch.YEMatch.AssertActivities;
+using YEMatch.YEMatch.ReadyActivities;
+using YEMatch.YEMatch.SmartActivities;
+using YEMatch.YEMatch.SmartIntegrationTests;
 
-namespace YEMatch;
+namespace YEMatch.YEMatch.Activities;
 
 public sealed class ActivityFactory
 {
@@ -12,6 +16,7 @@ public sealed class ActivityFactory
     private readonly List<IActivity> _readyActivities;
     private readonly List<IActivity> _smartActivities;
     private readonly List<IActivity> _testActivities;
+    private readonly List<IActivity> _integrationActivities;
 
     public ActivityFactory(string dataDirectory)
     {
@@ -39,6 +44,8 @@ public sealed class ActivityFactory
             _parallelActivities.Add(new ParallelActivity("P" + _readyActivities[i].Name().Substring(1),
                 _readyActivities[i], _smartActivities[i]));
         }
+
+        _integrationActivities = IntegrationTestFactory.CreateActivities(dataDirectory);
     }
 
     private static ActivityFactory inst => _instance ??
@@ -53,19 +60,14 @@ public sealed class ActivityFactory
 
         _instance = new ActivityFactory(dataDirectory);
     }
-
-
-    public static List<IActivity> AllActivties()
-    {
-        return inst._smartActivities.Concat(inst._readyActivities).Concat(inst._testActivities).ToList();
-    }
-
+    
     public static Dictionary<string, IActivity> AllActivtiesByName()
     {
         return inst._smartActivities
             .Concat(inst._readyActivities)
             .Concat(inst._testActivities)
             .Concat(inst._parallelActivities)
+            .Concat(inst._integrationActivities)
             .ToDictionary(s => s.Name(), a => a);
     }
 }

@@ -1,25 +1,23 @@
 import { ColDef } from "ag-grid-community";
-import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
-import { GRID_COLUMN_WIDTHS } from "../../../constants";
-import { createBadgeColumn, createSSNColumn, createDateColumn, createStoreColumn } from "../../../utils/gridColumnFactory";
+import {
+  createBadgeColumn,
+  createCityColumn,
+  createDateColumn,
+  createNameColumn,
+  createSSNColumn,
+  createStateColumn,
+  createStoreColumn
+} from "../../../utils/gridColumnFactory";
 
 export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
   return [
     createBadgeColumn({
-      headerName: "Badge",
-      minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      alignment: "left"
+      headerName: "Badge"
     }),
     createSSNColumn({ alignment: "left" }),
-    {
-      headerName: "Name",
-      field: "name",
-      colId: "name",
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+    createNameColumn({
+      field: "name"
+    }),
     {
       headerName: "Address",
       field: "address",
@@ -33,26 +31,12 @@ export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
         return addr ? `${addr.street}${addr.street2 ? ", " + addr.street2 : ""}` : "";
       }
     },
-    {
-      headerName: "City",
-      field: "city",
-      colId: "city",
-      minWidth: 120,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
+    createCityColumn({
       valueGetter: (params) => params.data.address?.city || ""
-    },
-    {
-      headerName: "State",
-      field: "state",
-      colId: "state",
-      minWidth: 60,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
+    }),
+    createStateColumn({
       valueGetter: (params) => params.data.address?.state || ""
-    },
+    }),
     createDateColumn({
       headerName: "Hire",
       field: "hireDate",

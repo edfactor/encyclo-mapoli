@@ -1,5 +1,4 @@
-import { FormControl, FormLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material";
-import { Grid } from "@mui/material";
+import { FormControl, FormLabel, Grid, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material";
 import React from "react";
 import { ReportPreset } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
@@ -34,58 +33,23 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   };
 
   const getAgeRangeDisplay = () => {
-    if (!currentPreset) return "";
-    const { minimumAgeInclusive, maximumAgeInclusive } = currentPreset.params;
-    if (minimumAgeInclusive && maximumAgeInclusive) {
-      return `${minimumAgeInclusive}-${maximumAgeInclusive}`;
-    } else if (minimumAgeInclusive) {
-      return `${minimumAgeInclusive}+`;
-    } else if (maximumAgeInclusive) {
-      return `0-${maximumAgeInclusive}`;
-    }
-    return "";
+    if (!currentPreset?.displayCriteria) return "";
+    return currentPreset.displayCriteria.ageRange || "";
   };
 
   const getHoursRangeDisplay = () => {
-    if (!currentPreset) return "";
-    const { minimumHoursInclusive, maximumHoursInclusive } = currentPreset.params;
-    if (minimumHoursInclusive && maximumHoursInclusive) {
-      return `${minimumHoursInclusive}-${maximumHoursInclusive}`;
-    } else if (minimumHoursInclusive) {
-      return `> ${minimumHoursInclusive}`;
-    } else if (maximumHoursInclusive) {
-      return `< ${maximumHoursInclusive}`;
-    }
-    return "";
+    if (!currentPreset?.displayCriteria) return "";
+    return currentPreset.displayCriteria.hoursRange || "";
   };
 
   const getEmployeeStatusDisplay = () => {
-    if (!currentPreset) return "";
-    const { includeActiveEmployees, includeInactiveEmployees } = currentPreset.params;
-
-    if (includeActiveEmployees && includeInactiveEmployees) {
-      return "Active/Inactive";
-    } else if (includeActiveEmployees) {
-      return "Active";
-    } else if (includeInactiveEmployees) {
-      return "Inactive";
-    }
-    return "";
+    if (!currentPreset?.displayCriteria) return "";
+    return currentPreset.displayCriteria.employeeStatus || "";
   };
 
   const getPriorProfitShareDisplay = () => {
-    if (!currentPreset) return "";
-    const { includeEmployeesWithPriorProfitSharingAmounts, includeEmployeesWithNoPriorProfitSharingAmounts } =
-      currentPreset.params;
-
-    if (includeEmployeesWithPriorProfitSharingAmounts && includeEmployeesWithNoPriorProfitSharingAmounts) {
-      return "All";
-    } else if (includeEmployeesWithPriorProfitSharingAmounts) {
-      return "With Prior Amounts";
-    } else if (includeEmployeesWithNoPriorProfitSharingAmounts) {
-      return "Without Prior Amounts";
-    }
-    return "";
+    if (!currentPreset?.displayCriteria) return "";
+    return currentPreset.displayCriteria.priorProfitShare || "";
   };
 
   return (

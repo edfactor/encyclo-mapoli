@@ -1,4 +1,6 @@
-namespace YEMatch;
+﻿using YEMatch.YEMatch.AssertActivities;
+
+namespace YEMatch.YEMatch.ArrangeActivites;
 
 /*
  * The profitshare dataset (aka the scramble data) does not have hours for 2023, yet our vesting algorithm (which uses the database) expects the hours to be available for the current year.

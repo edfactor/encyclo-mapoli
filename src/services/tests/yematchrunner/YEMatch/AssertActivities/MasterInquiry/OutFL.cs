@@ -1,6 +1,6 @@
-// OutFL.cs
+﻿// OutFL.cs
 
-namespace YEMatch;
+namespace YEMatch.YEMatch.AssertActivities.MasterInquiry;
 
 /* Slavishly follows the Cobol output format */
 public sealed record OutFL

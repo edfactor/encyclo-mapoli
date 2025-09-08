@@ -1,8 +1,8 @@
 ﻿using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Audit;
-using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.MassTransit;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Navigations;
+using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Scheduling;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Virtual;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +11,7 @@ internal static class ContextExtensions
 {
     public static ModelBuilder ApplyModelConfiguration(this ModelBuilder modelBuilder)
     {
+        modelBuilder.ApplyConfiguration(new AnnuityRateMap());
         modelBuilder.ApplyConfiguration(new AuditEventMap());
         modelBuilder.ApplyConfiguration(new FakeSsnMap());
         modelBuilder.ApplyConfiguration(new DataImportRecordMap());
@@ -56,6 +57,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new ParticipantTotalVestingBalanceMap());
         modelBuilder.ApplyConfiguration(new ProfitShareTotalsMap());
         modelBuilder.ApplyConfiguration(new ParticipantTotalYearMap());
+        modelBuilder.ApplyConfiguration(new ProfitDetailRollupMap());
         modelBuilder.ApplyConfiguration(new PayClassificationMap());
         modelBuilder.ApplyConfiguration(new PayFrequencyMap());
         modelBuilder.ApplyConfiguration(new PayProfitMap());

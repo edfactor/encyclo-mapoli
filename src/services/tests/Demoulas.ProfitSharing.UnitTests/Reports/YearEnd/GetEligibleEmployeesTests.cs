@@ -71,7 +71,8 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
                 BadgeNumber = _dh.BadgeNumber,
                 FullName = _d.ContactInfo!.FullName!,
                 DepartmentId = _dh.DepartmentId,
-                Department = "Dairy"
+                Department = "Dairy",
+                IsExecutive = false,
             };
             Assert.True(AreEquivalent(dto, expected));
 

@@ -9,7 +9,7 @@ public sealed record DistributionsByAgeDetail
     public required string EmploymentType { get; set; }
     public int RegularEmployeeCount { get; set; }
     public int HardshipEmployeeCount { get; set; }
-    public HashSet<int> BadgeNumbers { get; set; } = new HashSet<int>(0);
+    public HashSet<int> BadgeNumbers { get; set; } = [];
 
     public static DistributionsByAgeDetail ResponseExample()
     {

@@ -1,23 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
-public sealed class NewProfitSharingLabelsForMailMergeEndpoint : Endpoint<ProfitYearRequest, PaginatedResponseDto<NewProfitSharingLabelResponse>>
+public sealed class NewProfitSharingLabelsForMailMergeEndpoint : ProfitSharingEndpoint<ProfitYearRequest, PaginatedResponseDto<NewProfitSharingLabelResponse>>
 {
     private readonly IPostFrozenService _postFrozenService;
 
     public NewProfitSharingLabelsForMailMergeEndpoint(IPostFrozenService postFrozenService)
+        : base(Navigation.Constants.QNEWPROFLBL)
     {
         _postFrozenService = postFrozenService;
     }
@@ -42,24 +40,22 @@ public sealed class NewProfitSharingLabelsForMailMergeEndpoint : Endpoint<Profit
     {
         var response = await _postFrozenService.GetNewProfitSharingLabelsForMailMerge(req, ct);
         var memoryStream = new MemoryStream();
-        await using (var writer = new StreamWriter(memoryStream))
+        await using var writer = new StreamWriter(memoryStream);
+        foreach (var line in response)
         {
-            foreach (var line in response)
-            {
-                await writer.WriteLineAsync(line);
-            }
-            await writer.FlushAsync(ct);
-
-            memoryStream.Position = 0;
-
-            System.Net.Mime.ContentDisposition cd = new System.Net.Mime.ContentDisposition
-            {
-                FileName = "NEWPROFLBL.txt",
-                Inline = false
-            };
-            HttpContext.Response.Headers.Append("Content-Disposition", cd.ToString());
-
-            await Send.StreamAsync(memoryStream, "NEWPROFLBL.txt", contentType: "text/plain", cancellation: ct);
+            await writer.WriteLineAsync(line);
         }
+        await writer.FlushAsync(ct);
+
+        memoryStream.Position = 0;
+
+        System.Net.Mime.ContentDisposition cd = new System.Net.Mime.ContentDisposition
+        {
+            FileName = "NEWPROFLBL.txt",
+            Inline = false
+        };
+        HttpContext.Response.Headers.Append("Content-Disposition", cd.ToString());
+
+        await Send.StreamAsync(memoryStream, "NEWPROFLBL.txt", contentType: "text/plain", cancellation: ct);
     }
 }

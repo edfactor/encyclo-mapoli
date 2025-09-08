@@ -9,7 +9,9 @@ using Demoulas.ProfitSharing.Services.Audit;
 using Demoulas.ProfitSharing.Services.Beneficiaries;
 using Demoulas.ProfitSharing.Services.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
+using Demoulas.ProfitSharing.Services.Certificates;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.ItDevOps;
 using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.ProfitSharing.Services.Mappers;
 using Demoulas.ProfitSharing.Services.MasterInquiry;
@@ -33,22 +35,24 @@ public static class ServicesExtension
     public static IHostApplicationBuilder AddProjectServices(this IHostApplicationBuilder builder)
     {
         _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();
+        _ = builder.Services.AddScoped<ICertificateService, CertificateService>();
         _ = builder.Services.AddScoped<ICleanupReportService, CleanupReportService>();
         _ = builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
-        _ = builder.Services.AddScoped<IForfeituresAndPointsForYearService, ForfeituresAndPointsForYearService>(); 
+        _ = builder.Services.AddScoped<IForfeituresAndPointsForYearService, ForfeituresAndPointsForYearService>();
         _ = builder.Services.AddScoped<IFrozenReportService, FrozenReportService>();
         _ = builder.Services.AddScoped<IMasterInquiryService, MasterInquiryService>();
         _ = builder.Services.AddScoped<IForfeitureAdjustmentService, ForfeitureAdjustmentService>();
         _ = builder.Services.AddScoped<IExecutiveHoursAndDollarsService, ExecutiveHoursAndDollarsService>();
         _ = builder.Services.AddScoped<IGetEligibleEmployeesService, GetEligibleEmployeesService>();
         _ = builder.Services.AddScoped<IMissiveService, MissiveService>();
-        _ = builder.Services.AddScoped<ITerminationAndRehireService, TerminationAndRehireService>();
-        _ = builder.Services.AddScoped<IUnForfeitService, UnForfeitService>();
-        
+        _ = builder.Services.AddScoped<IUnforfeitService, UnforfeitService>();
+
         _ = builder.Services.AddScoped<ITotalService, TotalService>();
         _ = builder.Services.AddScoped<IWagesService, WagesService>();
         _ = builder.Services.AddScoped<IYearEndService, YearEndService>();
         _ = builder.Services.AddScoped<IMilitaryService, MilitaryService>();
+        _ = builder.Services.AddScoped<IEmployeeLookupService, Lookup.EmployeeLookupService>();
+
         _ = builder.Services.AddScoped<IPayrollDuplicateSsnReportService, PayrollDuplicateSsnReportService>();
         _ = builder.Services.AddScoped<INegativeEtvaReportService, NegativeEtvaReportService>();
         _ = builder.Services.AddScoped<IProfitSharingSummaryReportService, ProfitSharingSummaryReportService>();
@@ -58,14 +62,13 @@ public static class ServicesExtension
 
 
         _ = builder.Services.AddScoped<IAuditService, AuditService>();
-        _ = builder.Services.AddScoped<ContributionService>();
         _ = builder.Services.AddScoped<TotalService>();
 
-        _ = builder.Services.AddScoped<ITerminatedEmployeeAndBeneficiaryReportService, TerminatedEmployeeAndBeneficiaryReportService>();
+        _ = builder.Services.AddScoped<ITerminatedEmployeeService, TerminatedEmployeeService>();
 
         _ = builder.Services.AddScoped<IFrozenService, FrozenService>();
         _ = builder.Services.AddScoped<IStoreService, StoreService>();
-        
+
         _ = builder.Services.AddSingleton<IFakeSsnService, FakeSsnService>();
         _ = builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         _ = builder.Services.AddSingleton<ICalendarService, CalendarService>();
@@ -82,12 +85,15 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<INavigationService, NavigationService>();
         _ = builder.Services.AddScoped<IBeneficiaryInquiryService, BeneficiaryInquiryService>();
 
+        _ = builder.Services.AddScoped<INavigationPrerequisiteValidator, NavigationPrerequisiteValidator>();
+
 
         _ = builder.Services.AddScoped<ITableMetadataService, TableMetadataService>();
 
         _ = builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
         _ = builder.Services.AddScoped<IPayBenReportService, PayBenReportService>();
 
+        _ = builder.Services.AddScoped<IReportRunnerService, ReportRunnerService>();
 
         #region Mappers
 
@@ -98,7 +104,6 @@ public static class ServicesExtension
         #endregion
 
         builder.AddProjectCachingServices();
-
 
         return builder;
     }

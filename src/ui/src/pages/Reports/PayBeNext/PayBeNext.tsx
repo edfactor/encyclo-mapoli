@@ -1,8 +1,8 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Checkbox, Divider, FormLabel, MenuItem, Select, Typography } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Checkbox, Divider, FormLabel, Grid, MenuItem, Select, Typography } from "@mui/material";
+import { ICellRendererParams } from "ag-grid-community";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { useSelector } from "react-redux";
 import { useLazyAdhocBeneficiariesReportQuery } from "reduxstore/api/YearsEndApi";
@@ -28,7 +28,7 @@ interface bRequest {
 
 const PayBeNext = () => {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
-  const { token, appUser, username: stateUsername } = useSelector((state: RootState) => state.security);
+  const { token } = useSelector((state: RootState) => state.security);
   const profitYear = useFiscalCloseProfitYear();
   const [triggerReport, { isFetching, isSuccess }] = useLazyAdhocBeneficiariesReportQuery();
   const [adhocBeneficiariesReport, setAdhocBeneficiariesReport] = useState<adhocBeneficiariesReportResponse>();
@@ -41,7 +41,7 @@ const PayBeNext = () => {
   const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
 
   const addRowToSelectedRows = (id: number) => {
-    [...selectedRowIds, id];
+    setSelectedRowIds((prev) => [...prev, id]);
   };
 
   const removeRowFromSelectedRows = (id: number) => {
@@ -56,13 +56,11 @@ const PayBeNext = () => {
 
   const {
     control,
-    register,
-    formState: { errors, isValid },
-    setValue,
+
+    formState: { isValid },
+
     handleSubmit,
-    reset,
-    setFocus,
-    watch
+    reset
   } = useForm<bRequest>({
     resolver: yupResolver(schema) as Resolver<bRequest>,
     defaultValues: { isAlsoEmployee: true, profitYear: "2024" }
@@ -119,13 +117,13 @@ const PayBeNext = () => {
       headerName: "",
       field: "isExpandable",
       width: 50,
-      cellRenderer: (params: any) => {
+      cellRenderer: (params: ICellRendererParams) => {
         if (params.data && !params.data.isDetail && params.data.isExpandable) {
           return params.data.isExpanded ? "▼" : "►";
         }
         return "";
       },
-      onCellClicked: (event: any) => {
+      onCellClicked: (event: ICellRendererParams) => {
         if (event.data && !event.data.isDetail && event.data.isExpandable) {
           handleRowExpansion(event.data.badgeNumber.toString() + event.data.beneficiaryId.toString());
         }
@@ -158,11 +156,6 @@ const PayBeNext = () => {
     };
     return request;
   };
-
-  useEffect(() => {
-    if (token) {
-    }
-  }, [token]);
 
   const sortEventHandler = (update: ISortParams) => {
     if (update.sortBy === "") {

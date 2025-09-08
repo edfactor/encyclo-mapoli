@@ -58,13 +58,13 @@ const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
     }
   }, [hasToken, initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
 
-  // Need a useEffect on a change in eligibleEmployees to reset the page number
+  // Need a useEffect on a change in eligibleEmployees to reset the page number when total count changes (new search, not pagination)
   const prevEligibleEmployees = useRef<any>(null);
   useEffect(() => {
     if (
       eligibleEmployees !== prevEligibleEmployees.current &&
-      eligibleEmployees?.response?.results &&
-      eligibleEmployees.response.results.length !== prevEligibleEmployees.current?.response?.results?.length
+      eligibleEmployees?.response?.total !== undefined &&
+      eligibleEmployees.response.total !== prevEligibleEmployees.current?.response?.total
     ) {
       setPageNumber(0);
     }

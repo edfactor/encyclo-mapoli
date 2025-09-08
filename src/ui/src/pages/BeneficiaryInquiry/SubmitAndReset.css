@@ -2,7 +2,7 @@
   button {
     margin-right: 20px;
     border-radius: var(--borderRadius, 2px);
-    background: var(--action-green-default, #2E7D32);
+    background: var(--action-green-default, #2e7d32);
     border: none;
     display: flex;
     padding: 8px 22px;
@@ -22,25 +22,19 @@
     text-transform: uppercase;
   }
   .delete {
-    color: var(--action-green-default, #2E7D32);
+    color: var(--action-green-default, #2e7d32);
     background: none;
   }
   .reset {
-    color: var(--action-green-default, #2E7D32);
+    color: var(--action-green-default, #2e7d32);
     background: none;
     box-shadow: none;
     width: 69;
   }
   .reset:hover {
-    background-color: #D3D3D3;
+    background-color: #d3d3d3;
   }
   .spinner {
     min-width: 61px;
   }
 }
-
-
-
-
-
-

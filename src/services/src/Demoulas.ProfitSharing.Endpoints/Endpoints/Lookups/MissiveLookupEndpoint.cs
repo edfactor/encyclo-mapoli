@@ -1,22 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.Util.Extensions;
 using FastEndpoints;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
-public sealed class MissiveLookupEndpoint : EndpointWithoutRequest<List<MissiveResponse>>
+public sealed class MissiveLookupEndpoint : ProfitSharingResponseEndpoint<List<MissiveResponse>>
 {
     private readonly IMissiveService _missiveService;
 
-    public MissiveLookupEndpoint(IMissiveService missiveService)
+    public MissiveLookupEndpoint(IMissiveService missiveService) : base(Navigation.Constants.Inquiries)
     {
         _missiveService = missiveService;
     }
@@ -35,12 +32,12 @@ public sealed class MissiveLookupEndpoint : EndpointWithoutRequest<List<MissiveR
             } };
         });
 
-        Group<LookupGroup>();
+    Group<LookupGroup>();
 
         if (!Env.IsTestEnvironment())
         {
             // Specify caching duration and store it in metadata
-            TimeSpan cacheDuration = TimeSpan.FromMinutes(5);
+            TimeSpan cacheDuration = TimeSpan.FromMinutes(15);
             Options(x => x.CacheOutput(p => p.Expire(cacheDuration)));
         }
     }

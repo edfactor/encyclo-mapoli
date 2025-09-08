@@ -1,29 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Beneficiaries;
-public sealed record CreateBeneficiaryContactResponse
+using Shared;
+
+[NoMemberDataExposed] //If you created the beneficiary, you should be able to see it immediately afterwards.
+public sealed record CreateBeneficiaryContactResponse : INameParts, IEmailAddress, IPhoneNumber, ICity
 {
     public required int Id { get; set; }
     public required string Ssn { get; set; }
     public required DateOnly DateOfBirth { get; set; }
-    public required string Street { get; set; }
+    [MaskSensitive] public required string Street { get; set; }
     public string? Street2 { get; set; }
     public string? Street3 { get; set; }
     public string? Street4 { get; set; }
-    public required string City { get; set; }
+    [MaskSensitive] public string? City { get; init; }
     public required string State { get; set; }
     public required string PostalCode { get; set; }
     public string? CountryIso { get; set; }
-    public required string FirstName { get; set; }
-    public required string LastName { get; set; }
-    public string? MiddleName { get; set; }
+    [MaskSensitive] public required string FirstName { get; init; }
+    [MaskSensitive] public required string LastName { get; init; }
+    [MaskSensitive] public string? MiddleName { get; init; }
     public string? PhoneNumber { get; set; }
     public string? MobileNumber { get; set; }
-    public string? EmailAddress { get; set; }
+    [MaskSensitive] public string? EmailAddress { get; set; }
 
     public static CreateBeneficiaryContactResponse SampleResponse() => new CreateBeneficiaryContactResponse
     {

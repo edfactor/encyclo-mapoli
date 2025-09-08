@@ -1,109 +1,131 @@
-import { Divider } from "@mui/material";
-import { Grid } from "@mui/material";
-import { useState } from "react";
-import { MasterInquiryRequest } from "reduxstore/types";
+import { CircularProgress, Divider, Grid } from "@mui/material";
+import MissiveAlerts from "components/MissiveAlerts/MissiveAlerts";
+import { memo } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
+import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
+import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
+import useMasterInquiry from "./hooks/useMasterInquiry";
 import MasterInquiryGrid from "./MasterInquiryDetailsGrid";
-import MasterInquiryEmployeeDetails from "./MasterInquiryEmployeeDetails";
+import MasterInquiryMemberDetails from "./MasterInquiryMemberDetails";
 import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
-import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
 
-interface SelectedMember {
-  memberType: number;
-  id: number;
-  ssn: number;
-  badgeNumber: number;
-  psnSuffix: number;
-}
-
-const MasterInquiry = () => {
-  //const { } = useSelector((state: RootState) => state.inquiry);
-
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
-  const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
-  const [selectedMember, setSelectedMember] = useState<SelectedMember | null>(null);
-  const [noResults, setNoResults] = useState(false);
-
-  const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
-
-  const isSimpleSearch = (): boolean => {
-    const simpleFound: boolean =
-      !!masterInquiryRequestParams &&
-      (!!masterInquiryRequestParams.name ||
-        !!masterInquiryRequestParams.socialSecurity ||
-        !!masterInquiryRequestParams.badgeNumber) &&
-      !(
-        !!masterInquiryRequestParams.startProfitMonth ||
-        !!masterInquiryRequestParams.endProfitMonth ||
-        !!masterInquiryRequestParams.contribution ||
-        !!masterInquiryRequestParams.earnings ||
-        !!masterInquiryRequestParams.forfeiture ||
-        !!masterInquiryRequestParams.payment
-      );
-    return simpleFound;
-  };
+const MasterInquiryContent = memo(() => {
+  const { missiveAlerts } = useMissiveAlerts();
+  const {
+    searchParams,
+    searchResults,
+    isSearching,
+    isFetchingMembers,
+    selectedMember,
+    memberDetails,
+    memberProfitData,
+    isFetchingMemberDetails,
+    isFetchingProfitData,
+    showMemberGrid,
+    showMemberDetails,
+    showProfitDetails,
+    noResultsMessage,
+    memberGridPagination,
+    profitGridPagination,
+    executeSearch,
+    selectMember,
+    resetAll
+  } = useMasterInquiry();
 
   return (
-    <Page label="MASTER INQUIRY (008-10)">
+    <Grid container>
       <Grid
-        container
-        rowSpacing="24px">
-        <Grid
-          size={{ xs: 12 }}
-          width={"100%"}>
-          <Divider />
-        </Grid>
-        <Grid
-          size={{ xs: 12 }}
-          width={"100%"}>
-          <DSMAccordion title="Filter">
-            <MasterInquirySearchFilter
-              setInitialSearchLoaded={setInitialSearchLoaded}
-              onSearch={(params) => {
-                setSearchParams(params ?? null);
-                setSelectedMember(null);
-                // Only set noResults to true if params is undefined (not found)
-                // Don't reset noResults when params is undefined (clearing state)
-                if (params === undefined) {
-                  setNoResults(true);
-                } else if (params !== null) {
-                  setNoResults(false);
-                }
-                // Don't change noResults when params is null (form reset)
-              }}
-            />
-          </DSMAccordion>
-        </Grid>
-
-        {searchParams && (
-          <MasterInquiryMemberGrid
-            searchParams={searchParams}
-            onBadgeClick={(data) => setSelectedMember(data || null)}
-            isSimpleSearch={isSimpleSearch}
-          />
-        )}
-
-        {/* Render employee details if identifiers are present in selectedMember, or show missive if noResults */}
-        {(noResults || (selectedMember && selectedMember.memberType !== undefined && selectedMember.id)) && (
-          <MasterInquiryEmployeeDetails
-            memberType={selectedMember?.memberType ?? 0}
-            id={selectedMember?.id ?? 0}
-            profitYear={searchParams?.endProfitYear}
-            noResults={noResults}
-            isSimpleSearch={isSimpleSearch}
-          />
-        )}
-
-        {/* Render details for selected member if present */}
-        {!noResults && selectedMember && (
-          <MasterInquiryGrid
-            memberType={selectedMember.memberType}
-            id={selectedMember.id}
-          />
-        )}
+        size={{ xs: 12 }}
+        width={"100%"}>
+        <Divider />
       </Grid>
+      {missiveAlerts.length > 0 && <MissiveAlerts missiveAlerts={missiveAlerts} />}
+      <Grid
+        size={{ xs: 12 }}
+        width={"100%"}>
+        <DSMAccordion title="Filter">
+          <MasterInquirySearchFilter
+            onSearch={executeSearch}
+            onReset={resetAll}
+            isSearching={isSearching}
+          />
+        </DSMAccordion>
+      </Grid>
+
+      {showMemberGrid && searchResults && !isFetchingMembers && (
+        <MasterInquiryMemberGrid
+          key={searchParams?._timestamp || Date.now()}
+          searchResults={searchResults}
+          onMemberSelect={selectMember}
+          memberGridPagination={memberGridPagination}
+          onPaginationChange={memberGridPagination.handlePaginationChange}
+          onSortChange={memberGridPagination.handleSortChange}
+          isLoading={isFetchingMembers}
+        />
+      )}
+
+      {showMemberGrid && isFetchingMembers && (
+        <Grid
+          size={{ xs: 12 }}
+          sx={{ display: "flex", justifyContent: "center", padding: "24px" }}>
+          <CircularProgress />
+        </Grid>
+      )}
+
+      {showMemberDetails && selectedMember && !isFetchingMemberDetails && (
+        <MasterInquiryMemberDetails
+          memberType={selectedMember.memberType}
+          id={selectedMember.id}
+          profitYear={searchParams?.endProfitYear}
+          memberDetails={memberDetails}
+          isLoading={isFetchingMemberDetails}
+        />
+      )}
+
+      {showMemberDetails && selectedMember && isFetchingMemberDetails && (
+        <Grid
+          size={{ xs: 12 }}
+          sx={{ display: "flex", justifyContent: "center", padding: "24px" }}>
+          <CircularProgress />
+        </Grid>
+      )}
+
+      {showProfitDetails && selectedMember && !isFetchingProfitData && (
+        <MasterInquiryGrid
+          profitData={memberProfitData}
+          isLoading={isFetchingProfitData}
+          profitGridPagination={profitGridPagination}
+          onPaginationChange={profitGridPagination.handlePaginationChange}
+          onSortChange={profitGridPagination.handleSortChange}
+        />
+      )}
+
+      {showProfitDetails && selectedMember && isFetchingProfitData && (
+        <Grid
+          size={{ xs: 12 }}
+          sx={{ display: "flex", justifyContent: "center", padding: "24px" }}>
+          <CircularProgress />
+        </Grid>
+      )}
+
+      {noResultsMessage && !showMemberGrid && !showMemberDetails && (
+        <Grid
+          size={{ xs: 12 }}
+          sx={{ padding: "24px" }}>
+          <div>{noResultsMessage}</div>
+        </Grid>
+      )}
+    </Grid>
+  );
+});
+
+const MasterInquiry = () => {
+  return (
+    <Page label="MASTER INQUIRY (008-10)">
+      <MissiveAlertProvider>
+        <MasterInquiryContent />
+      </MissiveAlertProvider>
     </Page>
   );
 };

@@ -1,13 +1,12 @@
-﻿using CsvHelper.Configuration;
-using CsvHelper;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 public class ForfeituresAndPointsForYearEndpoint : EndpointWithCsvTotalsBase<FrozenProfitYearRequest, ForfeituresAndPointsForYearResponseWithTotals, ForfeituresAndPointsForYearResponse, ForfeituresAndPointsForYearEndpoint.ForfeituresAndPointsForYearEndpointMapper>
@@ -15,6 +14,7 @@ public class ForfeituresAndPointsForYearEndpoint : EndpointWithCsvTotalsBase<Fro
     private readonly IForfeituresAndPointsForYearService _forfeituresAndPointsForYearService;
 
     public ForfeituresAndPointsForYearEndpoint(IForfeituresAndPointsForYearService forfeituresAndPointsForYearService)
+        : base(Navigation.Constants.Forfeitures)
     {
         _forfeituresAndPointsForYearService = forfeituresAndPointsForYearService;
     }

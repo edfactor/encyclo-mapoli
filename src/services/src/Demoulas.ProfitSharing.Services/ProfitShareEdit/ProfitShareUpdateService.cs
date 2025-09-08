@@ -3,6 +3,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
@@ -33,10 +34,10 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
 
     public async Task<ProfitShareUpdateResponse> ProfitShareUpdate(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
-        (List<MemberFinancials> memberFinancials, AdjustmentsSummaryDto adjustmentReportData, ProfitShareUpdateTotals totalsDto, bool employeeExceededMaxContribution) =
+        ProfitShareUpdateOutcome result =
             await ProfitSharingUpdate(profitShareUpdateRequest, cancellationToken, false);
 
-        List<ProfitShareUpdateMemberResponse> members = memberFinancials.Select(m => new ProfitShareUpdateMemberResponse
+        List<ProfitShareUpdateMemberResponse> members = result.MemberFinancials.Select(m => new ProfitShareUpdateMemberResponse
         {
             IsEmployee = m.IsEmployee,
             Badge = m.BadgeNumber,
@@ -57,16 +58,17 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             SecondaryEtvaEarnings = m.SecondaryEtvaEarnings,
             EndingBalance = m.EndingBalance,
             ZeroContributionReasonId = m.ZeroContributionReasonId,
-            TreatAsBeneficiary = m.TreatAsBeneficiary
+            TreatAsBeneficiary = m.TreatAsBeneficiary,
+            IsExecutive = m.PayFrequencyId == PayFrequency.Constants.Monthly,
         }).ToList();
 
 
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(profitShareUpdateRequest.ProfitYear, cancellationToken);
         return new ProfitShareUpdateResponse
         {
-            HasExceededMaximumContributions = employeeExceededMaxContribution,
-            AdjustmentsSummary = adjustmentReportData,
-            ProfitShareUpdateTotals = totalsDto,
+            HasExceededMaximumContributions = result.RerunNeeded,
+            AdjustmentsSummary = result.AdjustmentsSummaryData,
+            ProfitShareUpdateTotals = result.ProfitShareUpdateTotals,
             ReportName = "Profit Sharing Update",
             ReportDate = DateTimeOffset.UtcNow,
             StartDate = calInfo.FiscalBeginDate,
@@ -83,8 +85,8 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
     /// </summary>
     public async Task<ProfitShareUpdateResult> ProfitShareUpdateInternal(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
-        (List<MemberFinancials> memberFinancials, _, _, bool employeeExceededMaxContribution) = await ProfitSharingUpdate(profitShareUpdateRequest, cancellationToken, true);
-        List<ProfitShareUpdateMember> members = memberFinancials.Select(m => new ProfitShareUpdateMember
+        var result = await ProfitSharingUpdate(profitShareUpdateRequest, cancellationToken, true);
+        List<ProfitShareUpdateMember> members = result.MemberFinancials.Select(m => new ProfitShareUpdateMember
         {
             IsEmployee = m.IsEmployee,
             Ssn = m.Ssn,
@@ -105,10 +107,11 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             EtvaEarnings = m.EarningsOnEtva,
             SecondaryEtvaEarnings = m.SecondaryEtvaEarnings,
             EndingBalance = m.EndingBalance,
-            ZeroContributionReasonId = m.ZeroContributionReasonId
+            ZeroContributionReasonId = m.ZeroContributionReasonId,
+            PayFrequencyId = m.PayFrequencyId,
         }).ToList();
 
-        return new ProfitShareUpdateResult { HasExceededMaximumContributions = employeeExceededMaxContribution, Members = members };
+        return new ProfitShareUpdateResult { HasExceededMaximumContributions = result.RerunNeeded, Members = members };
     }
 
     /// <summary>

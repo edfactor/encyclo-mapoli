@@ -13,5 +13,8 @@ public record NavigationDto : IdRequest
     public string? Icon { get; set; }
     public List<string>? RequiredRoles { get; set; }
     public bool? Disabled { get; set; }
+    // Prerequisite navigation elements that are currently in a Completed state.
+    // No business logic is applied here; this is populated upstream or remains empty for now.
+    public List<NavigationDto>? PrerequisiteNavigations { get; set; }
     public List<NavigationDto>? Items { get; set; }
 }

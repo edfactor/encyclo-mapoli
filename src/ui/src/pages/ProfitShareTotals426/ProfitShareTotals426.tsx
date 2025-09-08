@@ -1,21 +1,18 @@
-import { useState, useEffect } from "react";
-import { Button, Divider, Typography, Box, CircularProgress } from "@mui/material";
-import { Grid } from "@mui/material";
-import { Page } from "smart-ui-library";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { useNavigate } from "react-router";
-import { MENU_LABELS, CAPTIONS } from "../../constants";
-import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
-import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
-import { YearEndProfitSharingReportRequest } from "reduxstore/types";
-import { useDispatch } from "react-redux";
-import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/yearsEndSlice";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { Box, Button, CircularProgress, Divider, Grid, Typography } from "@mui/material";
 import ProfitShareTotalsDisplay from "components/ProfitShareTotalsDisplay";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router";
+import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
+import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
+import { Page } from "smart-ui-library";
+import { CAPTIONS, MENU_LABELS } from "../../constants";
 
 const ProfitShareTotals426 = () => {
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const [_initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [hasInitialSearchRun, setHasInitialSearchRun] = useState(false);
   const navigate = useNavigate();
   const hasToken = !!useSelector((state: RootState) => state.security.token);
@@ -28,7 +25,7 @@ const ProfitShareTotals426 = () => {
     if (hasToken && profitYear && !hasInitialSearchRun) {
       setHasInitialSearchRun(true);
 
-      const request: YearEndProfitSharingReportRequest = {
+      const request = {
         isYearEnd: false,
         minimumAgeInclusive: 18,
         maximumAgeInclusive: 98,
@@ -60,12 +57,12 @@ const ProfitShareTotals426 = () => {
 
   const renderActionNode = () => {
     return (
-      <div className="flex items-center gap-2 h-10">
+      <div className="flex h-10 items-center gap-2">
         <StatusDropdownActionNode />
         <Button
           onClick={() => navigate("/profit-share-report")}
           variant="outlined"
-          className="h-10 whitespace-nowrap min-w-fit">
+          className="h-10 min-w-fit whitespace-nowrap">
           {MENU_LABELS.GO_TO_PROFIT_SHARE_REPORT}
         </Button>
       </div>

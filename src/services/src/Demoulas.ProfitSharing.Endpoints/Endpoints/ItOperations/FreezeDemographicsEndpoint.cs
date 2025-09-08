@@ -2,17 +2,19 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
 
-public class FreezeDemographicsEndpoint : Endpoint<SetFrozenStateRequest, FrozenStateResponse>
+public class FreezeDemographicsEndpoint : ProfitSharingEndpoint<SetFrozenStateRequest, FrozenStateResponse>
 {
     private readonly IFrozenService _frozenService;
     private readonly IAppUser _appUser;
 
-    public FreezeDemographicsEndpoint(IFrozenService frozenService, IAppUser appUser)
+    public FreezeDemographicsEndpoint(IFrozenService frozenService, IAppUser appUser) : base(Navigation.Constants.DemographicFreeze)
     {
         _frozenService = frozenService;
         _appUser = appUser;
@@ -28,8 +30,7 @@ public class FreezeDemographicsEndpoint : Endpoint<SetFrozenStateRequest, Frozen
             s.ExampleRequest =
                 new SetFrozenStateRequest { AsOfDateTime = DateTime.Today, ProfitYear = (short)DateTime.Today.Year };
         });
-        Policies(Security.Policy.CanFreezeDemographics);
-        Group<ItOperationsGroup>();
+    Group<ItDevOpsGroup>();
     }
 
     public override Task<FrozenStateResponse> ExecuteAsync(SetFrozenStateRequest req, CancellationToken ct)

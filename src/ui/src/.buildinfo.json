@@ -1,1 +1,6 @@
-{"BuildNumber":"20241125","BuildId":702,"Branch":"Local Development","CommitHash":"7ef24445a766d283341ec1dec32690a846068ea0"}
+{
+  "BuildNumber": "20241125",
+  "BuildId": 702,
+  "Branch": "Local Development",
+  "CommitHash": "7ef24445a766d283341ec1dec32690a846068ea0"
+}

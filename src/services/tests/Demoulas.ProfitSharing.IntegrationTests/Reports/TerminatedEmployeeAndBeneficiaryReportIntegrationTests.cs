@@ -1,21 +1,19 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.IntegrationTests.Fixtures;
-using Demoulas.ProfitSharing.IntegrationTests.Helpers;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services;
-using Demoulas.ProfitSharing.Services.ItOperations;
+using Demoulas.ProfitSharing.Services.ItDevOps;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
-using Shouldly;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
+using Moq;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports;
 
@@ -39,14 +37,14 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory), new HttpContextAccessor()));
-        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory), new HttpContextAccessor());
-        TerminatedEmployeeAndBeneficiaryReportService mockService =
-            new TerminatedEmployeeAndBeneficiaryReportService(DbFactory, totalService, demographicReaderService);
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory,  new Mock<ICommitGuardOverride>().Object), new HttpContextAccessor());
+        TerminatedEmployeeService mockService =
+            new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService);
 
         Stopwatch stopwatch = Stopwatch.StartNew();
         stopwatch.Start();
-        var data = await mockService.GetReportAsync(new StartAndEndDateRequest{ BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue}, TestContext.Current.CancellationToken);
+        var data = await mockService.GetReportAsync(new StartAndEndDateRequest{ BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue}, CancellationToken.None);
 
         string actualText = CreateTextReport(effectiveDateOfTestData, startDate, endDate, profitSharingYear, data);
         stopwatch.Stop();

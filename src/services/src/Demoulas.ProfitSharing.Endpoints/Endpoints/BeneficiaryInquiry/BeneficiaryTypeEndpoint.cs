@@ -1,30 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
-using Demoulas.ProfitSharing.Common.Contracts.Request.Naviations;
 using Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
-using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
-using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Demoulas.Util.Extensions;
 using FastEndpoints;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.BeneficiaryInquiry;
-public class BeneficiaryTypeEndpoint : Endpoint<BeneficiaryTypesRequestDto, BeneficiaryTypesResponseDto>
+public class BeneficiaryTypeEndpoint : ProfitSharingEndpoint<BeneficiaryTypesRequestDto, BeneficiaryTypesResponseDto>
 {
 
     private readonly IBeneficiaryInquiryService _beneficiaryService;
 
-    public BeneficiaryTypeEndpoint(IBeneficiaryInquiryService beneficiaryService)
+    public BeneficiaryTypeEndpoint(IBeneficiaryInquiryService beneficiaryService) : base(Navigation.Constants.Beneficiaries)
     {
         _beneficiaryService = beneficiaryService;
     }

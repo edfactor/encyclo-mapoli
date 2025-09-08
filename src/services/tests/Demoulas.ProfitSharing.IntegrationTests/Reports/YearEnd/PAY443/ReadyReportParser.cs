@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Shouldly;
@@ -9,10 +8,8 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.PAY443;
 // Processes the PAY443 report from READY and returns it as a ForfeituresAndPointsForYearResponseWithTotals response.
 public static class ReadyReportParser
 {
-    public static ForfeituresAndPointsForYearResponseWithTotals ParseReport()
+    public static ForfeituresAndPointsForYearResponseWithTotals ParseReport(string expectedReport)
     {
-        string expectedReport =
-            ExecutiveHoursAndDollarsIntegrationTests.ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.51-R20-PAY443").Trim();
         const short currentYear = 2024;
 
         List<string> lines = expectedReport.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries).ToList();
@@ -107,7 +104,8 @@ public static class ReadyReportParser
             Forfeitures = decimal.TryParse(forfeiture.Replace(",", ""), out decimal f) ? f : null,
             EarningPoints = int.TryParse(earnPts, out int e) ? e : 0,
             ContForfeitPoints = short.TryParse(contPts, out short c) ? c : (short)0,
-            BeneficiaryPsn = benePsn
+            BeneficiaryPsn = benePsn,
+            IsExecutive = false,
         };
     }
 }

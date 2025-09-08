@@ -1,22 +1,27 @@
 ﻿using System.Net;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Services.Audit;
 using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Demoulas.Util.Extensions;
 using FastEndpoints;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
@@ -37,8 +42,11 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
     public ExecutiveHoursAndDollarsTests()
     {
         var calendarService = ServiceProvider!.GetRequiredService<ICalendarService>();
+        var appUser = ServiceProvider!.GetService<IAppUser>();
+        Mock<IHttpContextAccessor> mockHttpContextAccessor = new();
         ExecutiveHoursAndDollarsService mockService = new(MockDbContextFactory, calendarService);
-        _endpoint = new ExecutiveHoursAndDollarsEndpoint(mockService);
+        IAuditService mockAuditService = new AuditService(MockDbContextFactory, appUser, mockHttpContextAccessor.Object);
+        _endpoint = new ExecutiveHoursAndDollarsEndpoint(mockService, mockAuditService);
     }
 
 
@@ -70,7 +78,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             expectedResponse.Response.Results.First().IncomeExecutive = 0;
 
             // Act
-            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
             TestResult<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> response =
                 await ApiClient
                     .GETAsync<ExecutiveHoursAndDollarsEndpoint, ExecutiveHoursAndDollarsRequest,
@@ -116,7 +124,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             ReportResponseBase<ExecutiveHoursAndDollarsResponse> expectedResponse = StockResponse();
 
             // Act
-            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
             TestResult<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> response =
                 await ApiClient
                     .GETAsync<ExecutiveHoursAndDollarsEndpoint, ExecutiveHoursAndDollarsRequest,
@@ -194,7 +202,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
                 ProfitYear = ProfitShareTestYear, Skip = 0, Take = 10
             };
             ReportResponseBase<ExecutiveHoursAndDollarsResponse> expectedResponse = StockResponse();
-            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
 
             // Act
             TestResult<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> response =

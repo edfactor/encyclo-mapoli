@@ -1,6 +1,8 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
-public sealed record YearEndProfitSharingReportDetail
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+
+public sealed record YearEndProfitSharingReportDetail : IIsExecutive
 {
     public required int BadgeNumber { get; set; }
     public required short ProfitYear { get; set; }
@@ -22,6 +24,8 @@ public sealed record YearEndProfitSharingReportDetail
     public required decimal Balance { get; set; }
     public required short YearsInPlan { get; set; }
     public DateOnly? TerminationDate { get; set; }
+    public short? FirstContributionYear { get; set; }
+    public bool IsExecutive { get; set; }
 
     public static YearEndProfitSharingReportDetail ResponseExample()
     {

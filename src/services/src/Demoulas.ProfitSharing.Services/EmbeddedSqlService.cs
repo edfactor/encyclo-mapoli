@@ -55,26 +55,40 @@ public sealed class EmbeddedSqlService : IEmbeddedSqlService
 
         var query = $@"
 SELECT 
-       bal.Ssn, 
-         ((bal.total + pdWrap.FORFEITURES - (pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT)) * vr.RATIO) 
-            + ((pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT)-pdWrap.FORFEITURES) AS VESTEDBALANCE,
-          bal.TOTAL AS CURRENTBALANCE,
-          yip.YEARS,
-          vr.RATIO,
-          PROF_5_FORFEIT as ALLOCTOBENE,
-          PROF_6_CONTRIB as ALLOCFROMBENE
+    bal.Ssn, 
+    CASE 
+        WHEN vr.DEMOGRAPHIC_ID IS NULL 
+            THEN CASE WHEN vr.BENEFICIARY_CONTACT_ID IS NULL 
+                         THEN 0 
+                         ELSE vr.BENEFICIARY_CONTACT_ID 
+                  END
+        ELSE vr.DEMOGRAPHIC_ID 
+    END AS ID,
+    
+    CASE 
+        WHEN bal.TOTAL = 0 THEN 0
+        ELSE 
+            ((bal.total + pdWrap.FORFEITURES - (pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT)) * vr.RATIO) 
+            + ((pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT) - pdWrap.FORFEITURES) 
+    END AS VESTEDBALANCE,
+
+    bal.TOTAL AS CURRENTBALANCE,
+    yip.YEARS,
+    vr.RATIO,
+    PROF_5_FORFEIT as ALLOCTOBENE,
+    PROF_6_CONTRIB as ALLOCFROMBENE
 FROM (
-{totalBalanceQuery}
+    {totalBalanceQuery}
 ) bal
 LEFT JOIN (
-{vestingRatioQuery}	
+    {vestingRatioQuery}
 ) vr ON bal.SSN = vr.SSN
 LEFT JOIN (
-{yearsOfServiceQuery}
+    {yearsOfServiceQuery}
 ) yip ON bal.SSN  = yip.SSN
 LEFT JOIN (
     SELECT pd.SSN,
-           Sum(CASE WHEN pd.PROFIT_CODE_ID IN (1,2,3,5) THEN pd.FORFEITURE ELSE 0 END) AS FORFEITURES,
+           SUM(CASE WHEN pd.PROFIT_CODE_ID IN (1,2,3,5) THEN pd.FORFEITURE ELSE 0 END) AS FORFEITURES,
            SUM(CASE WHEN pd.PROFIT_CODE_ID = 5 THEN pd.FORFEITURE ELSE 0 END) AS PROF_5_FORFEIT,
            SUM(CASE WHEN pd.PROFIT_CODE_ID = 6 THEN pd.CONTRIBUTION ELSE 0 END) AS PROF_6_CONTRIB,
            SUM(CASE WHEN pd.PROFIT_CODE_ID = 8 THEN pd.EARNINGS ELSE 0 END) AS PROF_8_EARNINGS,
@@ -172,6 +186,37 @@ FROM   employees
         return ctx.ProfitShareTotals.FromSqlRaw(query);
     }
 
+    public IQueryable<ProfitDetailRollup> GetTransactionsBySsnForProfitYearForOracle(IProfitSharingDbContext ctx, short profitYear)
+    {
+        FormattableString query = @$"
+SELECT pd.SSN Ssn   ,  
+       Sum(pd.CONTRIBUTION) TOTAL_CONTRIBUTIONS,
+       Sum(pd.EARNINGS ) TOTAL_EARNINGS,
+       Sum(CASE pd.PROFIT_CODE_ID WHEN {ProfitCode.Constants.IncomingContributions.Id} THEN pd.FORFEITURE 
+                                  WHEN {ProfitCode.Constants.OutgoingForfeitures.Id} THEN -pd.FORFEITURE
+                                  ELSE 0
+           END) TOTAL_FORFEITURES,
+       Sum(CASE WHEN pd.PROFIT_CODE_ID  != {ProfitCode.Constants.IncomingContributions.Id} THEN pd.FORFEITURE ELSE 0 END) TOTAL_PAYMENTS,
+       Sum(CASE WHEN pd.PROFIT_CODE_ID IN ({ProfitCode.Constants.OutgoingForfeitures.Id}, {ProfitCode.Constants.OutgoingDirectPayments.Id}, {ProfitCode.Constants.Outgoing100PercentVestedPayment.Id}) THEN -pd.FORFEITURE ELSE 0 END) DISTRIBUTION,
+       Sum(CASE pd.PROFIT_CODE_ID WHEN {ProfitCode.Constants.OutgoingXferBeneficiary.Id} THEN -pd.FORFEITURE
+                                  WHEN {ProfitCode.Constants.IncomingQdroBeneficiary.Id} THEN pd.CONTRIBUTION 
+                                  ELSE 0 END) BENEFICIARY_ALLOCATION,
+       Sum(pd.CONTRIBUTION + pd.EARNINGS + CASE WHEN pd.PROFIT_CODE_ID = {ProfitCode.Constants.IncomingContributions.Id} THEN pd.FORFEITURE ELSE -pd.FORFEITURE END) CURRENT_BALANCE,
+       Sum(CASE WHEN pd.PROFIT_YEAR_ITERATION = {ProfitDetail.Constants.ProfitYearIterationMilitary} THEN pd.CONTRIBUTION ELSE 0 END) MILITARY_TOTAL,
+       Sum(CASE WHEN pd.PROFIT_YEAR_ITERATION = {ProfitDetail.Constants.ProfitYearIterationClassActionFund} THEN pd.EARNINGS ELSE 0 END) CLASS_ACTION_FUND_TOTAL,
+       Sum(CASE WHEN (pd.PROFIT_CODE_ID = {ProfitCode.Constants.Outgoing100PercentVestedPayment.Id} AND (pd.COMMENT_TYPE_ID IN ({CommentType.Constants.TransferOut.Id},{CommentType.Constants.QdroOut.Id})) 
+                  OR (pd.PROFIT_CODE_ID = {ProfitCode.Constants.OutgoingXferBeneficiary.Id})) THEN pd.FORFEITURE ELSE 0 END) PAID_ALLOCATIONS_TOTAL,
+       Sum(CASE WHEN pd.PROFIT_CODE_ID IN ({ProfitCode.Constants.OutgoingForfeitures.Id},{ProfitCode.Constants.OutgoingDirectPayments.Id}) 
+                  OR (pd.PROFIT_CODE_ID = {ProfitCode.Constants.Outgoing100PercentVestedPayment.Id} AND (pd.COMMENT_TYPE_ID IN ({CommentType.Constants.TransferOut.Id},{CommentType.Constants.QdroOut.Id}))) THEN pd.FORFEITURE ELSE 0 END) DISTRIBUTIONS_TOTAL,
+       Sum(CASE WHEN pd.PROFIT_CODE_ID = {ProfitCode.Constants.IncomingQdroBeneficiary.Id} THEN pd.CONTRIBUTION ELSE 0 END) ALLOCATIONS_TOTAL,
+       Sum(CASE WHEN pd.PROFIT_CODE_ID = {ProfitCode.Constants.OutgoingForfeitures.Id} THEN pd.FORFEITURE ELSE 0 END) FORFEITS_TOTAL
+FROM PROFIT_DETAIL pd
+WHERE pd.PROFIT_YEAR= {profitYear}
+GROUP BY pd.SSN";
+
+      return ctx.ProfitDetailRollups.FromSqlInterpolated(query);
+    }
+
     private static FormattableString GetTotalBalanceQuery(short profitYear)
     {
         FormattableString query = @$"
@@ -205,11 +250,13 @@ SELECT
         var initialContributionFiveYearsAgo = asOfDate.AddYears(-5).Year;
         var birthDate65 = asOfDate.AddYears(-65);
         // We get the year prior to the profit year, because this algorithm looks at the hours worked to decide if the protit year has enough hours create another year.
-        var priorYarsOfCreditQuery = GetYearsOfServiceQuery((short)(profitYear-1));
+        var priorYearsOfCreditQuery = GetYearsOfServiceQuery((short)(profitYear-1));
         var initialContributionYearQuery = GetInitialContributionYearQuery();
 
         var query = @$"
 SELECT m.SSN,
+       m.DEMOGRAPHIC_ID,
+       m.BENEFICIARY_CONTACT_ID,
   CASE WHEN m.IS_EMPLOYEE = 0 THEN 1 ELSE --Beneficiaries are always 100% vested
   CASE WHEN
         -- If employee is active and age > 65, then 100%
@@ -228,18 +275,17 @@ SELECT m.SSN,
   CASE WHEN m.YEARS_OF_SERVICE > 6 THEN 1 ELSE --Otherwise, If total years (including the present one) is more than 6, 100% Vested
   0 END END END END END END END END END END END AS RATIO
 FROM (
-    SELECT d.SSN, d.DATE_OF_BIRTH, 1 AS IS_EMPLOYEE, d.TERMINATION_DATE, pp.ENROLLMENT_ID, d.TERMINATION_CODE_ID, pp.ZERO_CONTRIBUTION_REASON_ID, INITIAL_CONTR_YEAR, yos.YEARS + CASE WHEN pp.ENROLLMENT_ID = 2 THEN 1 ELSE 0 END + CASE WHEN pp.CURRENT_HOURS_YEAR  + pp.HOURS_EXECUTIVE  >= 1000 THEN 1 ELSE 0 END AS YEARS_OF_SERVICE
+    SELECT d.ID AS DEMOGRAPHIC_ID, NULL AS BENEFICIARY_CONTACT_ID, d.SSN, d.DATE_OF_BIRTH, 1 AS IS_EMPLOYEE, d.TERMINATION_DATE, pp.ENROLLMENT_ID, d.TERMINATION_CODE_ID, pp.ZERO_CONTRIBUTION_REASON_ID, INITIAL_CONTR_YEAR, yos.YEARS + CASE WHEN pp.ENROLLMENT_ID = 2 THEN 1 ELSE 0 END + CASE WHEN pp.CURRENT_HOURS_YEAR  + pp.HOURS_EXECUTIVE  >= 1000 THEN 1 ELSE 0 END AS YEARS_OF_SERVICE
     FROM DEMOGRAPHIC d
     LEFT JOIN PAY_PROFIT pp ON d.ID = pp.DEMOGRAPHIC_ID AND pp.PROFIT_YEAR  = {profitYear}
     LEFT JOIN (
-        {priorYarsOfCreditQuery}
+        {priorYearsOfCreditQuery}
     ) yos ON d.SSN = yos.SSN
     LEFT JOIN (
         {initialContributionYearQuery}
     ) initcontrib on d.ssn = initcontrib.ssn 
     UNION ALL
-    
-    SELECT bc.SSN, bc.DATE_OF_BIRTH, 0 AS IS_EMPLOYEE, NULL AS TERMINATION_DATE, NULL AS ENROLLMENT_ID, NULL AS TERMINATION_CODE_ID, NULL AS ZERO_CONTRIBUTION_REASON_ID, 0 AS YEARS_OF_SERVICE, null as INITIAL_CONTR_YEAR
+    SELECT NULL AS DEMOGRAPHIC_ID, bc.ID AS BENEFICIARY_CONTACT_ID, bc.SSN, bc.DATE_OF_BIRTH, 0 AS IS_EMPLOYEE, NULL AS TERMINATION_DATE, NULL AS ENROLLMENT_ID, NULL AS TERMINATION_CODE_ID, NULL AS ZERO_CONTRIBUTION_REASON_ID, 0 AS YEARS_OF_SERVICE, null as INITIAL_CONTR_YEAR
     FROM BENEFICIARY_CONTACT bc
     WHERE bc.SSN NOT IN (SELECT SSN FROM DEMOGRAPHIC)
 ) m

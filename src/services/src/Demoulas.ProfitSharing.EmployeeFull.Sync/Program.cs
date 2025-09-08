@@ -4,6 +4,9 @@ using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.Common.Logging.Extensions;
 using Demoulas.ProfitSharing.Common.LogMasking;
+using Demoulas.ProfitSharing.Common.Metrics;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interceptors;
@@ -26,6 +29,10 @@ else
 }
 
 builder.AddServiceDefaults(null, null);
+builder.Services.AddOpenTelemetry().WithMetrics(m =>
+{
+    m.AddMeter(GlobalMeter.Name);
+});
 
 ElasticSearchConfig smartConfig = new ElasticSearchConfig();
 builder.Configuration.Bind("Logging:Smart", smartConfig);
@@ -57,4 +64,7 @@ else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
 }
 
 var host = builder.Build();
+GlobalMeter.InitializeFromServices(host.Services);
+GlobalMeter.RegisterObservableGauges();
+GlobalMeter.RecordDeploymentStartup();
 await host.RunAsync().ConfigureAwait(false);

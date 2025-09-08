@@ -2,6 +2,7 @@ import { ColDef } from "ag-grid-community";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import {
   createBadgeColumn,
+  createCityColumn,
   createCountColumn,
   createCurrencyColumn,
   createDateColumn,
@@ -43,19 +44,16 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
         return addr ? `${addr.street}${addr.street2 ? ", " + addr.street2 : ""}` : "";
       }
     },
-    {
-      headerName: "City",
+    createCityColumn({
       field: "address.city",
-      colId: "city",
+      colId: "address.city",
       minWidth: 120,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+      alignment: "left"
+    }),
     {
       headerName: "State",
       field: "address.state",
-      colId: "state",
+      colId: "address.state",
       minWidth: 60,
       headerClass: "center-align",
       cellClass: "center-align",

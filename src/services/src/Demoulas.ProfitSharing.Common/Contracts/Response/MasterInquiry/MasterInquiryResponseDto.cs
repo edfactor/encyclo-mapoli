@@ -1,8 +1,9 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 
-public sealed record MasterInquiryResponseDto : IdRequest
+public sealed record MasterInquiryResponseDto : IdRequest, IIsExecutive
 {
     public bool IsEmployee => PsnSuffix == 0;
     public string Ssn { get; set; } = string.Empty;
@@ -42,6 +43,7 @@ public sealed record MasterInquiryResponseDto : IdRequest
     public decimal CurrentHoursYear { get; set; }
     public char EmploymentStatusId { get; set; }
     public string? EmploymentStatus { get; set; }
+    public bool IsExecutive { get; set; }
 
     public static MasterInquiryResponseDto ResponseExample()
     {
@@ -74,7 +76,8 @@ public sealed record MasterInquiryResponseDto : IdRequest
             ZeroContributionReasonName = null,
             TaxCodeName = "Standard",
             CommentTypeName = "Information",
-            PsnSuffix = 1
+            PsnSuffix = 1,
+            IsExecutive = false
         };
     }
 }

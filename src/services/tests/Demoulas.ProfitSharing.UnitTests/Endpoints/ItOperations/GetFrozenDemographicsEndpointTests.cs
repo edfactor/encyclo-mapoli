@@ -18,7 +18,7 @@ public class GetFrozenDemographicsEndpointTests : ApiTestBase<Program>
     {
         List<FrozenState> frozenDemographics = await MockDbContextFactory.UseReadOnlyContext(c => c.FrozenStates.ToListAsync());
 
-        ApiClient.CreateAndAssignTokenForClient(Role.ITOPERATIONS);
+        ApiClient.CreateAndAssignTokenForClient(Role.ITDEVOPS);
         TestResult<PaginatedResponseDto<FrozenStateResponse>> response = await ApiClient.GETAsync<GetFrozenDemographicsEndpoint, PaginatedResponseDto<FrozenStateResponse>>();
         response.ShouldNotBeNull();
 

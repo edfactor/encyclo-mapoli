@@ -1,27 +1,42 @@
-import { Dialog, DialogContent, DialogTitle, Divider } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Dialog, DialogContent, DialogTitle, Grid } from "@mui/material";
+import MissiveAlerts from "components/MissiveAlerts/MissiveAlerts";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { useCallback, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMAccordion, Page } from "smart-ui-library";
+import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
-import { useLazyGetMilitaryContributionsQuery } from "../../../reduxstore/api/MilitaryApi";
+import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
+import { InquiryApi } from "../../../reduxstore/api/InquiryApi";
+import useMilitaryEntryAndModification from "./hooks/useMilitaryEntryAndModification";
 import MilitaryContributionForm from "./MilitaryContributionForm";
 import MilitaryContributionGrid from "./MilitaryContributionFormGrid";
 import MilitaryEntryAndModificationSearchFilter from "./MilitaryEntryAndModificationSearchFilter";
 
-const MilitaryEntryAndModification = () => {
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+const MilitaryEntryAndModificationContent = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [showContributions, setShowContributions] = useState(false);
-  const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
-  const [fetchContributions, { isFetching }] = useLazyGetMilitaryContributionsQuery();
+  const [currentStatus, setCurrentStatus] = useState<string | null>(null);
+  const { masterInquiryMemberDetails } = useSelector((state: RootState) => state.inquiry);
   const profitYear = useDecemberFlowProfitYear();
+  const dispatch = useDispatch();
+  const { missiveAlerts } = useMissiveAlerts();
+
+  const { contributionsData, isLoadingContributions, contributionsGridPagination, fetchMilitaryContributions } =
+    useMilitaryEntryAndModification();
+
+  const handleStatusChange = (newStatus: string, statusName?: string) => {
+    if (statusName === "Complete" && currentStatus !== "Complete") {
+      setCurrentStatus("Complete");
+      fetchMilitaryContributions();
+    } else {
+      setCurrentStatus(statusName || newStatus);
+    }
+  };
 
   const renderActionNode = () => {
-    return <StatusDropdownActionNode />;
+    return <StatusDropdownActionNode onStatusChange={handleStatusChange} />;
   };
 
   const handleOpenForm = () => {
@@ -30,66 +45,42 @@ const MilitaryEntryAndModification = () => {
 
   const handleCloseForm = () => {
     setIsDialogOpen(false);
-    handleFetchContributions();
-    setInitialSearchLoaded(true); // This will trigger the grid to refresh
+    fetchMilitaryContributions();
   };
 
-  const handleFetchContributions = useCallback(() => {
-    if (masterInquiryEmployeeDetails) {
-      fetchContributions({
-        badgeNumber: Number(masterInquiryEmployeeDetails.badgeNumber),
-        profitYear: profitYear,
-        contributionAmount: 0,
-        contributionDate: "",
-        pagination: {
-          skip: 0,
-          take: 25,
-          sortBy: "contributionDate",
-          isSortDescending: false
-        }
-      });
-      setShowContributions(true);
-    }
-  }, [fetchContributions, masterInquiryEmployeeDetails, profitYear]);
-
   useEffect(() => {
-    if (masterInquiryEmployeeDetails) {
-      handleFetchContributions();
+    if (masterInquiryMemberDetails) {
+      fetchMilitaryContributions();
     }
-  }, [handleFetchContributions, masterInquiryEmployeeDetails]);
+  }, [masterInquiryMemberDetails, fetchMilitaryContributions]);
 
   return (
-    <Page
-      label={CAPTIONS.MILITARY_CONTRIBUTIONS}
-      actionNode={renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid width={"100%"}>
-          <Divider />
-        </Grid>
-        <Grid width={"100%"}>
-          <DSMAccordion title="Filter">
-            <MilitaryEntryAndModificationSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
-          </DSMAccordion>
-        </Grid>
-
-        <Grid width="100%">
-          {masterInquiryEmployeeDetails ? (
-            <MilitaryContributionGrid
-              setInitialSearchLoaded={setInitialSearchLoaded}
-              initialSearchLoaded={initialSearchLoaded}
-              onAddContribution={handleOpenForm}
-            />
-          ) : (
-            <div className="military-contribution-message">
-              Please search for and select an employee to view military contributions.
-            </div>
-          )}
-        </Grid>
+    <Grid
+      container
+      rowSpacing="24px">
+      <Grid width={"100%"}>
+        <DSMAccordion title="Filter">
+          <MilitaryEntryAndModificationSearchFilter />
+        </DSMAccordion>
       </Grid>
 
-      {/* Military Contribution Form Dialog */}
+      {missiveAlerts.length > 0 && <MissiveAlerts missiveAlerts={missiveAlerts} />}
+
+      <Grid width="100%">
+        {masterInquiryMemberDetails ? (
+          <MilitaryContributionGrid
+            militaryContributionsData={contributionsData}
+            isLoadingContributions={isLoadingContributions}
+            contributionsGridPagination={contributionsGridPagination}
+            onAddContribution={handleOpenForm}
+          />
+        ) : (
+          <div className="military-contribution-message">
+            Please search for and select an employee to view military contributions.
+          </div>
+        )}
+      </Grid>
+
       <Dialog
         open={isDialogOpen}
         onClose={handleCloseForm}
@@ -100,14 +91,32 @@ const MilitaryEntryAndModification = () => {
           <MilitaryContributionForm
             onSubmit={(rows) => {
               handleCloseForm();
+              dispatch(InquiryApi.util.invalidateTags(["memberDetails"]));
             }}
             onCancel={handleCloseForm}
-            badgeNumber={Number(masterInquiryEmployeeDetails?.badgeNumber)}
+            badgeNumber={Number(masterInquiryMemberDetails?.badgeNumber)}
             profitYear={profitYear}
           />
         </DialogContent>
       </Dialog>
+    </Grid>
+  );
+};
+
+const MilitaryEntryAndModification = () => {
+  const renderActionNode = () => {
+    return <StatusDropdownActionNode />;
+  };
+
+  return (
+    <Page
+      label={CAPTIONS.MILITARY_CONTRIBUTIONS}
+      actionNode={renderActionNode()}>
+      <MissiveAlertProvider>
+        <MilitaryEntryAndModificationContent />
+      </MissiveAlertProvider>
     </Page>
   );
 };
+
 export default MilitaryEntryAndModification;

@@ -1,44 +1,28 @@
-import { Tooltip, Divider, Button } from "@mui/material";
-import { Grid } from "@mui/material";
-import { DSMAccordion, Page } from "smart-ui-library";
-import ManageExecutiveHoursAndDollarsSearchFilter from "./ManageExecutiveHoursAndDollarsSearchFilter";
-import ManageExecutiveHoursAndDollarsGrid from "./ManageExecutiveHoursAndDollarsGrid";
 import { AddOutlined } from "@mui/icons-material";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
-import { setAdditionalExecutivesChosen } from "reduxstore/slices/yearsEndSlice";
+import { Button, Divider, Grid, Tooltip } from "@mui/material";
+import { DSMAccordion, Page } from "smart-ui-library";
+import ManageExecutiveHoursAndDollarsGrid from "./ManageExecutiveHoursAndDollarsGrid";
+import ManageExecutiveHoursAndDollarsSearchFilter from "./ManageExecutiveHoursAndDollarsSearchFilter";
 
-interface RenderAddButtonProps {
-  setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
+interface RenderAddButtonInternalProps {
+  canAddExecutives: boolean;
+  onAddToMainGrid: () => void;
 }
 
-const RenderAddButton = ({ setOpenModal }: RenderAddButtonProps) => {
-  const dispatch = useDispatch();
-  const { executiveRowsSelected } = useSelector((state: RootState) => state.yearsEnd);
-
-  const addEnabled = executiveRowsSelected && executiveRowsSelected.length > 0;
-
+const RenderAddButton = ({ canAddExecutives, onAddToMainGrid }: RenderAddButtonInternalProps) => {
   const addButton = (
     <Button
-      disabled={!addEnabled}
+      disabled={!canAddExecutives}
       variant="outlined"
       color="primary"
       size="medium"
-      startIcon={<AddOutlined color={addEnabled ? "primary" : "disabled"} />}
-      onClick={async () => {
-        // So what we need to do here is to take the array of selected rows
-        // and add them to the additional executives and the main grid will
-        // pick them up upon re-render
-        if (executiveRowsSelected) {
-          dispatch(setAdditionalExecutivesChosen(executiveRowsSelected));
-          setOpenModal(false);
-        }
-      }}>
+      startIcon={<AddOutlined color={canAddExecutives ? "primary" : "disabled"} />}
+      onClick={onAddToMainGrid}>
       Add to Main Grid
     </Button>
   );
 
-  if (!addEnabled) {
+  if (!canAddExecutives) {
     return (
       <Tooltip
         placement="top"
@@ -50,25 +34,45 @@ const RenderAddButton = ({ setOpenModal }: RenderAddButtonProps) => {
     return addButton;
   }
 };
+
 interface SearchAndAddExecutiveProps {
-  initialSearchLoaded: boolean;
-  setInitialSearchLoaded: (loaded: boolean) => void;
-  setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
-  pageNumberReset: boolean;
-  setPageNumberReset: (reset: boolean) => void;
+  executeModalSearch: (searchForm: any) => void;
+  modalSelectedExecutives: any[];
+  addExecutivesToMainGrid: () => void;
+  isModalSearching: boolean;
+  // Additional props needed for the modal grid
+  modalResults: any;
+  selectExecutivesInModal: (executives: any[]) => void;
+  modalGridPagination: any;
 }
 
-const SearchAndAddExecutive = ({
-  initialSearchLoaded,
-  setInitialSearchLoaded,
-  setOpenModal,
-  pageNumberReset,
-  setPageNumberReset
+const SearchAndAddExecutive = ({ 
+  executeModalSearch,
+  modalSelectedExecutives,
+  addExecutivesToMainGrid,
+  isModalSearching,
+  modalResults,
+  selectExecutivesInModal,
+  modalGridPagination
 }: SearchAndAddExecutiveProps) => {
+
+  const canAddExecutives = modalSelectedExecutives.length > 0;
+
+  const handleReset = () => {
+    // Modal reset is handled by the hook
+  };
+
   return (
     <Page
       label="Add New Executive"
-      actionNode={<div className="flex mr-2 justify-end gap-24">{RenderAddButton({ setOpenModal })}</div>}>
+      actionNode={
+        <div className="mr-2 flex justify-end gap-24">
+          <RenderAddButton
+            canAddExecutives={canAddExecutives}
+            onAddToMainGrid={addExecutivesToMainGrid}
+          />
+        </div>
+      }>
       <Grid
         container
         rowSpacing="24px">
@@ -78,19 +82,20 @@ const SearchAndAddExecutive = ({
         <Grid width={"100%"}>
           <DSMAccordion title="Filter">
             <ManageExecutiveHoursAndDollarsSearchFilter
-              setInitialSearchLoaded={setInitialSearchLoaded}
+              onSearch={executeModalSearch}
+              onReset={handleReset}
+              isSearching={isModalSearching}
               isModal={true}
-              setPageNumberReset={setPageNumberReset}
             />
           </DSMAccordion>
         </Grid>
         <Grid width="100%">
-          <ManageExecutiveHoursAndDollarsGrid
-            setInitialSearchLoaded={setInitialSearchLoaded}
-            initialSearchLoaded={initialSearchLoaded}
+          <ManageExecutiveHoursAndDollarsGrid 
             isModal={true}
-            pageNumberReset={pageNumberReset}
-            setPageNumberReset={setPageNumberReset}
+            modalResults={modalResults}
+            isSearching={isModalSearching}
+            selectExecutivesInModal={selectExecutivesInModal}
+            modalGridPagination={modalGridPagination}
           />
         </Grid>
       </Grid>

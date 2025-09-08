@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
@@ -15,6 +16,7 @@ public class NegativeEtvaForSsNsOnPayProfitEndPoint : EndpointWithCsvBase<Profit
     private readonly INegativeEtvaReportService _reportService;
 
     public NegativeEtvaForSsNsOnPayProfitEndPoint(INegativeEtvaReportService reportService)
+        : base(Navigation.Constants.NegativeETVA)
     {
         _reportService = reportService;
     }

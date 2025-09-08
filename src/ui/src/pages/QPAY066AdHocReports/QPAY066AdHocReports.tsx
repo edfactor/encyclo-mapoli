@@ -14,7 +14,7 @@ import ReportGrid from "./ReportGrid";
 const QPAY066AdHocReports: React.FC = () => {
   const [currentPreset, setCurrentPreset] = useState<ReportPreset | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [storeNumber, setStoreNumber] = useState<string>('');
+  const [storeNumber, setStoreNumber] = useState<string>("");
   const dispatch = useDispatch();
 
   const handlePresetChange = (preset: ReportPreset | null) => {
@@ -63,8 +63,8 @@ const QPAY066AdHocReports: React.FC = () => {
 
         <Grid width="100%">
           {currentPreset && storeNumber.trim() && (
-            <ReportGrid 
-              params={currentPreset.params} 
+            <ReportGrid
+              params={currentPreset.params}
               storeNumber={parseInt(storeNumber)}
               onLoadingChange={handleLoadingChange}
             />

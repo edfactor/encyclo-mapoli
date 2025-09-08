@@ -1,17 +1,22 @@
-import { Divider } from "@mui/material";
-import { Grid } from "@mui/material";
-import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
-import { DSMAccordion, Page } from "smart-ui-library";
-import { CAPTIONS } from "../../constants";
-import ForfeituresAdjustmentGrid from "./ForfeituresAdjustmentGrid";
-import ForfeituresAdjustmentSearchParameters from "./ForfeituresAdjustmentSearchParameters";
+import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { RootState } from "reduxstore/store";
-import AddForfeitureModal from "./AddForfeitureModal";
+import StandaloneMemberDetails from "pages/MasterInquiry/StandaloneMemberDetails";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useLazyGetProfitMasterInquiryMemberQuery } from "reduxstore/api/InquiryApi";
 import { useLazyGetForfeitureAdjustmentsQuery } from "reduxstore/api/YearsEndApi";
-import MasterInquiryEmployeeDetails from "pages/MasterInquiry/MasterInquiryEmployeeDetails";
+import { RootState } from "reduxstore/store";
+import { ApiMessageAlert, DSMAccordion, formatNumberWithComma, Page, setMessage } from "smart-ui-library";
+import { MessageKeys, Messages } from "utils/messageDictonary";
+import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
+import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
+import { CAPTIONS } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
+import { InquiryApi } from "../../reduxstore/api/InquiryApi";
+import { clearForfeitureAdjustmentData } from "../../reduxstore/slices/forfeituresAdjustmentSlice";
+import AddForfeitureModal from "./AddForfeitureModal";
+import ForfeituresAdjustmentPanel from "./ForfeituresAdjustmentPanel";
+import ForfeituresAdjustmentSearchParameters from "./ForfeituresAdjustmentSearchParameters";
 
 const ForfeituresAdjustment = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
@@ -22,6 +27,8 @@ const ForfeituresAdjustment = () => {
   );
   const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch] = useLazyGetForfeitureAdjustmentsQuery();
+  const [triggerMemberDetails] = useLazyGetProfitMasterInquiryMemberQuery();
+  const dispatch = useDispatch();
 
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
@@ -39,13 +46,41 @@ const ForfeituresAdjustment = () => {
     setIsAddForfeitureModalOpen(false);
   };
 
-  const handleSaveForfeiture = () => {
-    // Refresh grid data after saving a new forfeiture
-    if (forfeitureAdjustmentQueryParams) {
+  const handleSaveForfeiture = (formData: { forfeitureAmount: number; classAction: boolean }) => {
+    if (forfeitureAdjustmentQueryParams && forfeitureAdjustmentData) {
+      // Store the demographic ID to fetch employee details
+      const demographicId = forfeitureAdjustmentData.demographicId;
+
+      dispatch(clearForfeitureAdjustmentData());
+
       triggerSearch(forfeitureAdjustmentQueryParams)
         .unwrap()
         .then(() => {
           setInitialSearchLoaded(true);
+          dispatch(InquiryApi.util.invalidateTags(["memberDetails"]));
+
+          // Fetch employee details to get the name for the success message
+          return triggerMemberDetails({
+            memberType: 1,
+            id: demographicId,
+            profitYear: profitYear
+          }).unwrap();
+        })
+        .then((memberDetails) => {
+          const employeeName =
+            memberDetails.firstName && memberDetails.lastName
+              ? `${memberDetails.firstName} ${memberDetails.lastName}`
+              : "the selected employee";
+
+          dispatch(
+            setMessage({
+              ...Messages.ForfeituresSaveSuccess,
+              message: {
+                ...Messages.ForfeituresSaveSuccess.message,
+                message: `The forfeiture of amount $${formatNumberWithComma(formData.forfeitureAmount)} for ${employeeName} saved successfully`
+              }
+            })
+          );
         })
         .catch((error: unknown) => {
           console.error("Error refreshing forfeiture adjustments:", error);
@@ -67,51 +102,56 @@ const ForfeituresAdjustment = () => {
   }, []);
 
   return (
-    <Page
-      label={CAPTIONS.FORFEITURES_ADJUSTMENT}
-      actionNode={renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid width={"100%"}>
-          <Divider />
-        </Grid>
-        <Grid width={"100%"}>
-          <DSMAccordion title="Filter">
-            <ForfeituresAdjustmentSearchParameters
-              setInitialSearchLoaded={handleSearchComplete}
-              setPageReset={setPageNumberReset}
+    <MissiveAlertProvider>
+      <Page
+        label={CAPTIONS.FORFEITURES_ADJUSTMENT}
+        actionNode={renderActionNode()}>
+        <div>
+          <ApiMessageAlert commonKey={MessageKeys.ForfeituresAdjustment} />
+        </div>
+        <Grid
+          container
+          rowSpacing="24px">
+          <Grid width={"100%"}>
+            <Divider />
+          </Grid>
+          <Grid width={"100%"}>
+            <DSMAccordion title="Filter">
+              <ForfeituresAdjustmentSearchParameters
+                setInitialSearchLoaded={handleSearchComplete}
+                setPageReset={setPageNumberReset}
+              />
+            </DSMAccordion>
+          </Grid>
+          <MissiveAlerts />
+
+          {forfeitureAdjustmentData && profitYear && (
+            <StandaloneMemberDetails
+              memberType={1}
+              id={forfeitureAdjustmentData.demographicId}
+              profitYear={profitYear}
             />
-          </DSMAccordion>
+          )}
+
+          {forfeitureAdjustmentData && profitYear && (
+            <Grid width="100%">
+              <ForfeituresAdjustmentPanel
+                initialSearchLoaded={initialSearchLoaded}
+                setInitialSearchLoaded={setInitialSearchLoaded}
+                onAddForfeiture={handleOpenAddForfeitureModal}
+              />
+            </Grid>
+          )}
         </Grid>
 
-        {/* Only show details if we have forfeitureAdjustmentData and a result */}
-        {forfeitureAdjustmentData?.response?.results?.[0] && profitYear && (
-          <MasterInquiryEmployeeDetails
-            memberType={1}
-            id={forfeitureAdjustmentData.response.results[0].demographicId}
-            profitYear={profitYear}
-          />
-        )}
-
-        <Grid width="100%">
-          <ForfeituresAdjustmentGrid
-            initialSearchLoaded={initialSearchLoaded}
-            setInitialSearchLoaded={setInitialSearchLoaded}
-            onAddForfeiture={handleOpenAddForfeitureModal}
-            pageNumberReset={pageNumberReset}
-            setPageNumberReset={setPageNumberReset}
-          />
-        </Grid>
-      </Grid>
-
-      <AddForfeitureModal
-        open={isAddForfeitureModalOpen}
-        onClose={handleCloseAddForfeitureModal}
-        onSave={handleSaveForfeiture}
-        employeeDetails={forfeitureAdjustmentData?.response?.results?.[0]}
-      />
-    </Page>
+        <AddForfeitureModal
+          open={isAddForfeitureModalOpen}
+          onClose={handleCloseAddForfeitureModal}
+          onSave={handleSaveForfeiture}
+          suggestedForfeitResponse={forfeitureAdjustmentData}
+        />
+      </Page>
+    </MissiveAlertProvider>
   );
 };
 

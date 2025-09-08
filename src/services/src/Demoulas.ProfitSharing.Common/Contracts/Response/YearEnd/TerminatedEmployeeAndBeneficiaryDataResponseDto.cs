@@ -1,10 +1,13 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
-public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+
+public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto : IIsExecutive
 {
     public required int BadgeNumber { get; set; }
     public required short PsnSuffix { get; set; }
     public required string? Name { get; set; }
+    public bool IsExecutive { get; set; }
 
     public string BadgePSn
     {
@@ -18,7 +21,7 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto
         }
     }
 
-    public List<TerminatedEmployeeAndBeneficiaryYearDetailDto> YearDetails { get; set; } = new();
+    public List<TerminatedEmployeeAndBeneficiaryYearDetailDto> YearDetails { get; set; } = [];
 
     public static TerminatedEmployeeAndBeneficiaryDataResponseDto ResponseExample()
     {
@@ -27,8 +30,8 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto
             BadgeNumber = 777123,
             PsnSuffix = 100,
             Name = "Example, Joe F",
-            YearDetails = new List<TerminatedEmployeeAndBeneficiaryYearDetailDto>
-            {
+            YearDetails =
+            [
                 new TerminatedEmployeeAndBeneficiaryYearDetailDto
                 {
                     ProfitYear = 2024,
@@ -44,12 +47,12 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto
                     Age = 44,
                     EnrollmentCode = 4,
                 }
-            }
+            ]
         };
     }
 }
 
-public sealed record TerminatedEmployeeAndBeneficiaryYearDetailDto
+public sealed record TerminatedEmployeeAndBeneficiaryYearDetailDto : IIsExecutive
 {
     public short ProfitYear { get; set; }
     public decimal BeginningBalance { get; set; }
@@ -64,4 +67,5 @@ public sealed record TerminatedEmployeeAndBeneficiaryYearDetailDto
     public int? Age { get; set; }
     public byte? EnrollmentCode { get; set; }
     public decimal? SuggestedForfeit { get; set; }
+    public bool IsExecutive { get; set; }
 }

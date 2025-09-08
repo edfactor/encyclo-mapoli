@@ -1,77 +1,57 @@
-import { ICellRendererParams, ValueFormatterParams } from "ag-grid-community";
-import { agGridNumberToCurrency } from "smart-ui-library";
-import { viewBadgeLinkRenderer } from "../../../../utils/masterInquiryLink";
+import {
+  createAgeColumn,
+  createBadgeColumn,
+  createCurrencyColumn,
+  createDateColumn,
+  createNameColumn,
+  createPercentageColumn
+} from "utils/gridColumnFactory";
 
 export const GetUnder21BreakdownColumnDefs = (navFunction?: (path: string) => void) => [
-  {
-    headerName: "Badge",
-    field: "badgeNumber",
-    width: 100,
-    cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
-  },
-  {
-    headerName: "Name",
-    field: "fullName",
-    width: 200
-  },
-  {
-    headerName: "Age",
-    field: "age",
-    width: 70
-  },
-  {
+  createBadgeColumn({
+    navigateFunction: navFunction,
+    renderAsLink: true
+  }),
+  createNameColumn({
+    field: "fullName"
+  }),
+  createAgeColumn({}),
+  createDateColumn({
     headerName: "Date of Birth",
-    field: "dateOfBirth",
-    width: 120
-  },
-  {
+    field: "dateOfBirth"
+  }),
+  createCurrencyColumn({
     headerName: "Beginning Balance",
-    field: "beginningBalance",
-    width: 150,
-    valueFormatter: agGridNumberToCurrency
-  },
-  {
+    field: "beginningBalance"
+  }),
+  createCurrencyColumn({
     headerName: "Earnings",
-    field: "earnings",
-    width: 120,
-    valueFormatter: agGridNumberToCurrency
-  },
-  {
+    field: "earnings"
+  }),
+  createCurrencyColumn({
     headerName: "Contributions",
-    field: "contributions",
-    width: 150,
-    valueFormatter: agGridNumberToCurrency
-  },
-  {
+    field: "contributions"
+  }),
+  createCurrencyColumn({
     headerName: "Forfeitures",
-    field: "forfeitures",
-    width: 120,
-    valueFormatter: agGridNumberToCurrency
-  },
-  {
+    field: "forfeitures"
+  }),
+  createCurrencyColumn({
     headerName: "Distributions",
-    field: "distributions",
-    width: 120,
-    valueFormatter: agGridNumberToCurrency
-  },
-  {
+    field: "distributions"
+  }),
+  createCurrencyColumn({
     headerName: "Ending Balance",
-    field: "endingBalance",
-    width: 150,
-    valueFormatter: agGridNumberToCurrency
-  },
-  {
+    field: "endingBalance"
+  }),
+  createCurrencyColumn({
     headerName: "Vested Amount",
-    field: "vestedAmount",
-    width: 150,
-    valueFormatter: agGridNumberToCurrency
-  },
-  {
+    field: "vestedAmount"
+  }),
+  createPercentageColumn({
     headerName: "Vesting %",
-    field: "vestingPercentage",
-    width: 100,
-    valueFormatter: (params: ValueFormatterParams) => `${params.value}%`
-  }
+    field: "vestingPercentage"
+  })
 ];
 
 /**
@@ -80,77 +60,53 @@ export const GetUnder21BreakdownColumnDefs = (navFunction?: (path: string) => vo
  * @returns Column definitions for the Under 21 Inactive grid
  */
 export const under21InactiveColumnDefs = (navFunction?: (path: string) => void) => [
-  {
-    headerName: "Badge",
+  createBadgeColumn({
     field: "badgeNumber",
-    width: 100,
-    cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
-  },
-  {
-    headerName: "Name",
-    field: "fullName",
-    width: 200
-  },
-  {
+    navigateFunction: navFunction,
+    renderAsLink: true
+  }),
+  createNameColumn({
+    field: "fullName"
+  }),
+  createDateColumn({
     headerName: "Date of Birth",
-    field: "birthDate",
-    width: 120
-  },
-  {
+    field: "birthDate"
+  }),
+  createDateColumn({
     headerName: "Hire Date",
-    field: "hireDate",
-    width: 120
-  },
-  {
+    field: "hireDate"
+  }),
+  createDateColumn({
     headerName: "Termination Date",
-    field: "terminationDate",
-    width: 150
-  },
-  {
-    headerName: "Age",
-    field: "age",
-    width: 70
-  },
-  {
+    field: "terminationDate"
+  }),
+  createAgeColumn({}),
+  createCurrencyColumn({
     headerName: "Beginning Balance",
-    field: "beginningBalance",
-    width: 150,
-    valueFormatter: agGridNumberToCurrency
-  },
-  {
+    field: "beginningBalance"
+  }),
+  createCurrencyColumn({
     headerName: "Earnings",
-    field: "earnings",
-    width: 120,
-    valueFormatter: agGridNumberToCurrency
-  },
-  {
+    field: "earnings"
+  }),
+  createCurrencyColumn({
     headerName: "Contributions",
-    field: "contributions",
-    width: 120,
-    valueFormatter: agGridNumberToCurrency
-  },
-  {
+    field: "contributions"
+  }),
+  createCurrencyColumn({
     headerName: "Forfeitures",
-    field: "forfeitures",
-    width: 120,
-    valueFormatter: agGridNumberToCurrency
-  },
-  {
+    field: "forfeitures"
+  }),
+  createCurrencyColumn({
     headerName: "Distributions",
-    field: "distributions",
-    width: 120,
-    valueFormatter: agGridNumberToCurrency
-  },
-  {
+    field: "distributions"
+  }),
+  createCurrencyColumn({
     headerName: "Ending Balance",
-    field: "endingBalance",
-    width: 150,
-    valueFormatter: agGridNumberToCurrency
-  },
-  {
+    field: "endingBalance"
+  }),
+  createCurrencyColumn({
     headerName: "Vested Amount",
-    field: "vestedAmount",
-    width: 150,
-    valueFormatter: agGridNumberToCurrency
-  }
+    field: "vestedAmount"
+  })
 ];

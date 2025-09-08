@@ -1,10 +1,11 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormControl, FormLabel, MenuItem, Select } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Button, Grid } from "@mui/material";
+import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
+import { clearTermination } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
-import { SearchAndReset } from "smart-ui-library";
+import { SearchAndReset, SmartModal } from "smart-ui-library";
 import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import { CalendarResponseDto } from "../../../reduxstore/types";
@@ -38,8 +39,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   onSearch,
   hasUnsavedChanges
 }) => {
-  if (!fiscalData) return null;
-
+  const [openErrorModal, setOpenErrorModal] = useState(!fiscalData === false);
   const dispatch = useDispatch();
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
   const {
@@ -51,8 +51,8 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   } = useForm<TerminationSearchRequest>({
     resolver: yupResolver(schema),
     defaultValues: {
-      beginningDate: termination?.startDate || fiscalData.fiscalBeginDate || "",
-      endingDate: termination?.endDate || fiscalData.fiscalEndDate || "",
+      beginningDate: termination?.startDate || (fiscalData ? fiscalData.fiscalBeginDate : "") || "",
+      endingDate: termination?.endDate || (fiscalData ? fiscalData.fiscalEndDate : "") || "",
       forfeitureStatus: "showAll",
       pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
     }
@@ -66,8 +66,10 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
 
     const params = {
       ...data,
-      beginningDate: data.beginningDate ? mmDDYYFormat(data.beginningDate) : mmDDYYFormat(fiscalData.fiscalBeginDate),
-      endingDate: data.endingDate ? mmDDYYFormat(data.endingDate) : mmDDYYFormat(fiscalData.fiscalEndDate)
+      beginningDate: data.beginningDate
+        ? mmDDYYFormat(data.beginningDate)
+        : mmDDYYFormat(fiscalData?.fiscalBeginDate || ""),
+      endingDate: data.endingDate ? mmDDYYFormat(data.endingDate) : mmDDYYFormat(fiscalData?.fiscalEndDate || "")
     };
     // Only update search params and initial loaded state; let the grid trigger the API
     onSearch(params);
@@ -79,13 +81,33 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   const handleReset = () => {
     setInitialSearchLoaded(false);
     reset({
-      beginningDate: fiscalData.fiscalBeginDate,
-      endingDate: fiscalData.fiscalEndDate,
+      beginningDate: fiscalData ? fiscalData.fiscalBeginDate : "",
+      endingDate: fiscalData ? fiscalData.fiscalEndDate : "",
       forfeitureStatus: "showAll",
       pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
     });
     trigger();
+    dispatch(clearTermination());
   };
+
+  if (!fiscalData) {
+    return (
+      <SmartModal
+        key={"fiscalDataErrorModal"}
+        open={openErrorModal}
+        maxWidth="sm"
+        title="Services Error"
+        onClose={() => setOpenErrorModal(false)}
+        message={`Fiscal date range not available. Please try again later.\n`}>
+        <Button
+          onClick={() => setOpenErrorModal(false)}
+          variant="outlined"
+          sx={{ mt: "15px" }}>
+          OK
+        </Button>
+      </SmartModal>
+    );
+  }
 
   return (
     <form onSubmit={validateAndSearch}>

@@ -1,5 +1,7 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
-public sealed record ForfeituresAndPointsForYearResponse
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+public sealed record ForfeituresAndPointsForYearResponse: IIsExecutive
 {
     public required int BadgeNumber { get; set; }
     public string? EmployeeName { get; set; }
@@ -8,6 +10,7 @@ public sealed record ForfeituresAndPointsForYearResponse
     public required short ContForfeitPoints { get; set; }
     public required int EarningPoints { get; set; }
     public string? BeneficiaryPsn { get; set; }
+    public required bool IsExecutive { get; set; }
 
     public static ForfeituresAndPointsForYearResponse ResponseExample()
     {
@@ -19,6 +22,7 @@ public sealed record ForfeituresAndPointsForYearResponse
             Forfeitures = 200.25m,
             ContForfeitPoints = 229,
             EarningPoints = 2048,
+            IsExecutive = false,
         };
     }
 }

@@ -1,8 +1,8 @@
 ﻿using Demoulas.ProfitSharing.AppHost;
 using Demoulas.ProfitSharing.AppHost.Helpers;
-using Projects;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Projects;
 
 
 var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger("AppHost");
@@ -52,7 +52,6 @@ var configuration = new ConfigurationBuilder()
     .Build();
 
 var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
-    .WithHttpHealthCheck("/health")
     .WithParentRelationship(database)
     .WithReference(database)
     .WithSwaggerUi()

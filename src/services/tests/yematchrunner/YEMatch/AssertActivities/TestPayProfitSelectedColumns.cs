@@ -1,7 +1,7 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using Oracle.ManagedDataAccess.Client;
 
-namespace YEMatch;
+namespace YEMatch.YEMatch.AssertActivities;
 
 [SuppressMessage("Minor Code Smell", "S1104:Fields should not have public accessibility")]
 public record YearEndChange

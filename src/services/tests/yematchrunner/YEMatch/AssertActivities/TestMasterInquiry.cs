@@ -2,12 +2,11 @@
 using System.Net.Http.Headers;
 using System.Text;
 using Newtonsoft.Json;
+using YEMatch.YEMatch.AssertActivities.MasterInquiry;
+using YEMatch.YEMatch.SmartActivities;
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-namespace YEMatch;
-
-using System;
-using System.IO;
+namespace YEMatch.YEMatch.AssertActivities;
 
 public sealed class TeeWriter(TextWriter one, TextWriter two) : TextWriter
 {
@@ -40,19 +39,20 @@ public class TestMasterInquiry : BaseSqlActivity
 
     public override async Task<Outcome> Execute()
     {
-        TestToken.CreateAndAssignTokenForClient(httpClient, "IT-Operations");
+        TestToken.CreateAndAssignTokenForClient(httpClient, "Finance-Manager");
         
-        string path = Path.Combine(AppContext.BaseDirectory, "OUTFL");
+        string path; //  = Path.Combine(AppContext.BaseDirectory, "OUTFL");
+        path = "/Users/robertherrmann/prj/yerunner/src/services/tests/yematchrunner/YEMatch/Resources/MTPR.OUTFL";
         string content = await File.ReadAllTextAsync(path);
         List<OutFL> outties = OutFLParser.ParseStringIntoRecords(content);
 
         await using var writer = new StreamWriter("compare.md") { AutoFlush = true };
         Console.SetOut(new TeeWriter(Console.Out, writer));
 
-        int profitYear = 2024;
-        int quantity = int.MaxValue;
+        int profitYear = 2025;
+        int quantity = 50; // int.MaxValue;
 
-        Console.WriteLine($"### Comparision of READY (mtpr) MasterInquiry vs SMART (profitYear={profitYear})");
+        Console.WriteLine($"### Comparison of READY (local) MasterInquiry vs SMART (profitYear={profitYear})");
         Console.WriteLine("");
         Console.WriteLine($"Showing the first {quantity} differences of {outties.Count} Master Inquiry screen dumps.");
         Console.WriteLine("");
@@ -215,14 +215,14 @@ public class TestMasterInquiry : BaseSqlActivity
         "take": 255
     }'
     */
-        int Id = memberDetails.Id;
+        int demographicsId = memberDetails.id;
         HttpRequestMessage request2 = new(HttpMethod.Post, apiClient.BaseUrl + "api/master/master-inquiry/member")
         {
             Content = new StringContent(
                 $$"""
                   {
                     "memberType": 1,
-                    "id": {{Id}},
+                    "id": {{demographicsId}},
                     "profitYear": {{profitYear}}
                   }
                   """,

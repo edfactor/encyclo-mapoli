@@ -1,12 +1,12 @@
 const pathToReadableName: Record<string, string> = {
-  "": "Home",
+  "": "",
   "demographic-badges-not-in-payprofit": "Demographic Badges Not In Payprofit",
   "duplicate-ssns-demographics": "Duplicate SSNs on Demographics",
   "negative-etva-for-ssns-on-payprofit": "Negative ETVA for SSNs on Payprofit",
   "duplicate-names-and-birthdays": "Duplicate Names and Birthdays",
   "missing-comma-in-py-name": "Missing Comma in PY Name",
   "military-and-rehire": "Military and Rehire",
-  "unforfeitures": "Rehire Forfeitures (PREVPROF)",
+  unforfeitures: "UnForfeit (PREVPROF)",
   "distributions-and-forfeitures": "Distributions and Forfeitures (QPAY129)",
   "manage-executive-hours-and-dollars": "Manage Executive Hours and Dollars",
   "eligible-employees": "Eligible Employees",
@@ -29,7 +29,6 @@ const pathToReadableName: Record<string, string> = {
   "forfeitures-adjustment": "Forfeiture Adjustments",
   "fiscal-close": "Year End Flow",
   "profit-share-update": "Profit Share Update (PAY444 PAY447)",
-  "employees-on-military-leave": "Military Leave",
   "profit-share-report-edit-run": "Profit Share Report Edit Run",
   "profit-share-report-final-run": "Profit Share Report Final Run",
   "paymaster-update": "Paymaster Update",
@@ -45,7 +44,7 @@ const pathToReadableName: Record<string, string> = {
   "pay426-8": "Pay 426 Terminated Prior",
   "pay426-9": "Pay 426 Summary",
   "pay426-10": "Pay 426 Non Employee",
-  "pay426n": "Profit Sharing Report (PAY426N)",
+  pay426n: "Profit Sharing Report (PAY426N)",
   "pay450-summary": "Pay 450 Summary",
   "prof-control-sheet": "Control Sheet",
   "under-21-report": "Under 21 Age Report",
@@ -57,10 +56,20 @@ const pathToReadableName: Record<string, string> = {
   "qpay066ta-under21": "QPAY066TA Under 21",
   "new-ps-labels-report": "New PS Labels Report",
   demographic: "Demographic Freeze",
+  "demographic-freeze": "Demographic Freeze",
   "ytd-wages-extract": "YTD Wages Extract",
   profall: "Profall",
   "pay426-final-run": "Pay 426 Final Run",
-  "dev-debug": "Dev Debug"
+  "dev-debug": "Dev Debug",
+  beneficiary: "Beneficiary Inquiry",
+  "adhoc-beneficiaries-report": "Pay Be Next",
+  "payben-report": "Pay Beneficiary Report",
+  "qpay066-adhoc": "QPAY066* Ad Hoc Reports",
+  qpay066b: "QPAY066B",
+  qpay600: "QPAY600",
+  "reprint-certificates": "Reprint Certificates",
+  "print-profit-certs": "Print Profit Certificates",
+  "recently-terminated": "Recently Terminated"
 };
 
 export const getReadablePathName = (path: string): string => {

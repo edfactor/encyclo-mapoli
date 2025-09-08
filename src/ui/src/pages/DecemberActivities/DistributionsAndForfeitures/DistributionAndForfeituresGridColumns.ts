@@ -1,8 +1,16 @@
 import { ColDef } from "ag-grid-community";
-import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
-import { createBadgeColumn, createCurrencyColumn, createSSNColumn, createAgeColumn, createDateColumn } from "../../../utils/gridColumnFactory";
+import {
+  createAgeColumn,
+  createBadgeColumn,
+  createCurrencyColumn,
+  createDateColumn,
+  createNameColumn,
+  createSSNColumn,
+  createStateColumn,
+  createTaxCodeColumn
+} from "../../../utils/gridColumnFactory";
 
 export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
   return [
@@ -12,15 +20,10 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       alignment: "left",
       psnSuffix: true
     }),
-    {
-      headerName: "Name",
+    createNameColumn({
       field: "employeeName",
-      colId: "employeeName",
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+      minWidth: 150
+    }),
     createSSNColumn({ alignment: "left" }),
     createDateColumn({
       headerName: "Date",
@@ -38,15 +41,10 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       field: "stateTax",
       minWidth: 120
     }),
-    {
-      headerName: "State",
-      field: "state",
-      colId: "state",
+    createStateColumn({
       minWidth: 120,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+      alignment: "left"
+    }),
     createCurrencyColumn({
       headerName: "Federal Tax",
       field: "federalTax",
@@ -58,14 +56,13 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       minWidth: 120
     }),
     createAgeColumn({}),
-    {
-      headerName: "Tax Code",
+    createTaxCodeColumn({
       field: "taxCode",
-      colId: "taxCode",
       minWidth: 80,
-      type: "rightAligned",
-      resizable: true
-    },
+      alignment: "right",
+      showBrackets: false,
+      hideZeroValues: false
+    }),
     {
       headerName: "Enrolled",
       field: "enrolledId",

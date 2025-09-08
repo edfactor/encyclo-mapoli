@@ -8,5 +8,5 @@ namespace Demoulas.ProfitSharing.Common.Interfaces;
 public interface IMilitaryService
 {
     Task<Result<MilitaryContributionResponse>> CreateMilitaryServiceRecordAsync(CreateMilitaryContributionRequest req, CancellationToken cancellationToken = default);
-    Task<Result<PaginatedResponseDto<MilitaryContributionResponse>>> GetMilitaryServiceRecordAsync(MilitaryContributionRequest req, CancellationToken cancellationToken = default);
+    Task<Result<PaginatedResponseDto<MilitaryContributionResponse>>> GetMilitaryServiceRecordAsync(MilitaryContributionRequest req, bool isArchiveRequest, CancellationToken cancellationToken = default);
 }

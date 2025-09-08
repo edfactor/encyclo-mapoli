@@ -6,7 +6,6 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
-using Demoulas.ProfitSharing.Services.ItOperations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.ProfitShareEdit;
@@ -28,9 +27,9 @@ internal static class EmployeeProcessorHelper
             var frozenDemographicQuery = await demographicReaderService.BuildDemographicQuery(ctx, true);
             var employees = ctx.PayProfits
                 .Join(ctx.PayProfits,
-                    ppYE => ppYE.DemographicId,
+                    ppYe => ppYe.DemographicId,
                     ppNow => ppNow.DemographicId,
-                    (ppYE, ppNow) => new { ppYE, ppNow })
+                    (ppYe, ppNow) => new { ppYE = ppYe, ppNow })
                 .Where(x => x.ppYE.ProfitYear == profitYear && x.ppNow.ProfitYear == profitYear + 1)
                 .Join(frozenDemographicQuery, pp => pp.ppNow.DemographicId, d => d.Id, (pp, frozenDemographics) => new { ppYE = pp.ppYE, ppNow = pp.ppNow, frozenDemographics })
                 .Select(x => new
@@ -42,10 +41,11 @@ internal static class EmployeeProcessorHelper
                     x.ppYE.EmployeeTypeId,
                     PointsEarned = (int)(x.ppYE.PointsEarned ?? 0),
                     x.ppYE.ZeroContributionReasonId,
-                    x.ppNow.Etva
+                    x.ppNow.Etva,
                     // We use the ppNow Etva here - For example, in the 2024 profit year, we use the ETVA on the 2025 row,
                     // as that is where the current ETVA is.  The 2024 row is meaningless (or will be) populated with "Last Years" ETVA
                     // when we complete the 2024 YE Run.
+                    x.ppYE.Demographic.PayFrequencyId,
                 });
 
             var employeeWithBalances =
@@ -67,6 +67,7 @@ internal static class EmployeeProcessorHelper
                     PointsEarned = et.PointsEarned,
                     Etva = et.Etva,
                     ZeroContributionReasonId = et.ZeroContributionReasonId,
+                    PayFrequencyId = et.PayFrequencyId,
 
                     // Transactions for this year. 
                     DistributionsTotal = txns.DistributionsTotal,
@@ -141,15 +142,15 @@ internal static class EmployeeProcessorHelper
         return (memberFinancials, employeeExceededMaxContribution);
     }
 
-    private static bool IsEmployeeExceedingMaxContribution(decimal MaxAllowedContributions, decimal MilitaryTotal, MemberTotals memberTotals, MemberFinancials memberFinancials)
+    private static bool IsEmployeeExceedingMaxContribution(decimal maxAllowedContributions, decimal militaryTotal, MemberTotals memberTotals, MemberFinancials memberFinancials)
     {
-        decimal memberTotalContribution = memberTotals.ContributionAmount + MilitaryTotal + memberFinancials.IncomingForfeitures;
-        if (memberTotalContribution <= MaxAllowedContributions)
+        decimal memberTotalContribution = memberTotals.ContributionAmount + militaryTotal + memberFinancials.IncomingForfeitures;
+        if (memberTotalContribution <= maxAllowedContributions)
         {
             return false;
         }
 
-        decimal overContribution = memberTotalContribution - MaxAllowedContributions;
+        decimal overContribution = memberTotalContribution - maxAllowedContributions;
         if (overContribution < memberTotals.IncomingForfeitureAmount)
         {
             memberFinancials.IncomingForfeitures -= overContribution;

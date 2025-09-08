@@ -29,6 +29,17 @@
             "ASPNETCORE_ENVIRONMENT": "Development"
         }
     },
+  "sqlSilent": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "launchUrl": "swagger",
+      "applicationUrl": "https://localhost:7141",
+      "environmentVariables": {
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "DISABLE_SQL_DEBUG_LOGGING": "true"
+      }
+  },
   "yematch": {
       "commandName": "Project",
       "dotnetRunMessages": true,
@@ -37,7 +48,8 @@
       "applicationUrl": "https://localhost:7141",
       "environmentVariables": {
           "ASPNETCORE_ENVIRONMENT": "Development",
-          "YEMATCH_USE_TEST_CERTS": "true"
+          "YEMATCH_USE_TEST_CERTS": "true",
+          "DISABLE_SQL_DEBUG_LOGGING": "true"
       }
   },
     "IIS Express": {

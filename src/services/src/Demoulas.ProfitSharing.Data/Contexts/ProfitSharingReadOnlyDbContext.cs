@@ -3,8 +3,8 @@ using Demoulas.Common.Data.Services.Entities.Entities;
 using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
-using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Data.Entities.Scheduling;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -26,6 +26,7 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
         ChangeTracker.LazyLoadingEnabled = false;
     }
 
+    public virtual DbSet<AnnuityRate> AnnuityRates { get; set; }
     public virtual DbSet<Demographic> Demographics { get; set; }
     public virtual DbSet<DemographicHistory> DemographicHistories { get; set; }
     public virtual DbSet<EmploymentType> EmploymentTypes { get; set; }
@@ -58,6 +59,7 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
     public virtual DbSet<ParticipantTotalRatio> ParticipantTotalRatios { get; set; }
     public virtual DbSet<ParticipantTotalYear> ParticipantTotalYears { get; set; }
     public virtual DbSet<ParticipantTotalVestingBalance> ParticipantTotalVestingBalances { get; set; }
+    public virtual DbSet<ProfitDetailRollup> ProfitDetailRollups { get; set; }
     public virtual DbSet<Navigation> Navigations { get; set; }
     public virtual DbSet<NavigationStatus> NavigationStatuses { get; set; }
     public virtual DbSet<NavigationTracking> NavigationTrackings { get; set; }
