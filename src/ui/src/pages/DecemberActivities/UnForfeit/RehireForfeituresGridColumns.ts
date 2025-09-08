@@ -39,6 +39,8 @@ export const GetRehireForfeituresGridColumns = (): ColDef[] => {
     }),
     {
       headerName: "Enrollment",
+      field: "enrollmentId",
+      colId: "enrollmentId",
       width: 120,
       headerClass: "left-align",
       cellClass: "left-align",
