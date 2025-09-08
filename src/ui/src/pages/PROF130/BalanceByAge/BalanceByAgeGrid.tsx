@@ -171,7 +171,7 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
               <DSMGrid
                 preferenceKey={"AGE_FullTime"}
                 isLoading={isFetching}
-                handleSortChanged={sortEventHandlerX}
+                handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: balanceByAgeFullTime?.response.results ?? [],
 
