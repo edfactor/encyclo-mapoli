@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.LogMasking;
+using Demoulas.ProfitSharing.Common.Metrics;
 using Demoulas.ProfitSharing.Data;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
@@ -141,6 +142,11 @@ builder.Host.UseDefaultServiceProvider(options =>
 });
 
 WebApplication app = builder.Build();
+
+// Initialize metrics (resolve version) then register gauges
+GlobalMeter.InitializeFromServices(app.Services);
+GlobalMeter.RegisterObservableGauges();
+GlobalMeter.RecordDeploymentStartup();
 
 app.UseCors();
 app.UseSecurityHeaders();

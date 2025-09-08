@@ -30,6 +30,7 @@ import {
 } from "reduxstore/types";
 import { ApiMessageAlert, DSMAccordion, numberToCurrency, Page, setMessage, SmartModal } from "smart-ui-library";
 import { TotalsGrid } from "../../components/TotalsGrid";
+import usePrerequisiteNavigations from "../../hooks/usePrerequisiteNavigations";
 import { MessageKeys, Messages } from "../../utils/messageDictonary";
 import ChangesList from "./ChangesList";
 import ProfitShareEditConfirmation from "./ProfitShareEditConfirmation";
@@ -195,7 +196,8 @@ const RenderSaveButton = (
   isLoading: boolean,
   minimumFieldsEntered: boolean = false,
   adjustedBadgeOneValid: boolean = true,
-  adjustedBadgeTwoValid: boolean = true
+  adjustedBadgeTwoValid: boolean = true,
+  prerequisitesComplete: boolean = true
 ) => {
   // The incoming status field is about whether or not changes have already been applied
   const {
@@ -205,13 +207,20 @@ const RenderSaveButton = (
     totalForfeituresGreaterThanZero,
     invalidProfitShareEditYear
   } = useSelector((state: RootState) => state.yearsEnd);
+  const navigationList = useSelector((state: RootState) => state.navigation.navigationData);
+  const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
+  // Determine tooltip reason when disabled by prerequisites
+  const prereqTooltip = !prerequisitesComplete
+    ? "All prerequisite navigations must be complete before saving."
+    : undefined;
   const saveButton = (
     <Button
       disabled={
         (!profitEditUpdateChangesAvailable && status?.updatedTime !== null) ||
         isLoading ||
         totalForfeituresGreaterThanZero ||
-        invalidProfitShareEditYear
+        invalidProfitShareEditYear ||
+        !prerequisitesComplete
       }
       variant="outlined"
       color="primary"
@@ -222,7 +231,8 @@ const RenderSaveButton = (
           wasFormUsed(profitSharingEditQueryParams) &&
           adjustedBadgeOneValid &&
           adjustedBadgeTwoValid &&
-          minimumFieldsEntered
+          minimumFieldsEntered &&
+          prerequisitesComplete
         ) {
           setOpenSaveModal(true);
         } else {
@@ -243,7 +253,12 @@ const RenderSaveButton = (
     </Button>
   );
 
-  if (!profitEditUpdateChangesAvailable || invalidProfitShareEditYear || totalForfeituresGreaterThanZero) {
+  if (
+    !profitEditUpdateChangesAvailable ||
+    invalidProfitShareEditYear ||
+    totalForfeituresGreaterThanZero ||
+    !prerequisitesComplete
+  ) {
     return (
       <Tooltip
         placement="top"
@@ -252,7 +267,9 @@ const RenderSaveButton = (
             ? "Invalid year for saving changes"
             : totalForfeituresGreaterThanZero == true
               ? "Total forfeitures is greater than zero."
-              : "You must have previewed data before saving."
+              : !prerequisitesComplete
+                ? prereqTooltip
+                : "You must have previewed data before saving."
         }>
         <span>{saveButton}</span>
       </Tooltip>
@@ -355,6 +372,10 @@ const ProfitShareEditUpdate = () => {
 
   const profitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
+  const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
+  const { prerequisitesComplete } = usePrerequisiteNavigations(currentNavigationId, {
+    messageTemplate: Messages.ProfitSharePrerequisiteIncomplete as any
+  });
 
   useEffect(() => {
     const currentYear = new Date().getFullYear();
@@ -441,7 +462,8 @@ const ProfitShareEditUpdate = () => {
             isLoading,
             minimumFieldsEntered,
             adjustedBadgeOneValid,
-            adjustedBadgeTwoValid
+            adjustedBadgeTwoValid,
+            prerequisitesComplete
           )}
           {renderActionNode()}
         </div>
@@ -571,19 +593,17 @@ const ProfitShareEditUpdate = () => {
               topRowHeaders={["Total Forfeitures", "Total Points", "For Employees Exceeding Max Contribution"]}
             />
             {totalForfeituresGreaterThanZero && (
-              <div
-                className="px-[24px]"
-                style={{ color: "red", marginTop: "-8px", fontSize: "0.875rem" }}>
+              <div className="-mt-2 px-[24px] text-sm text-red-600">
                 <em>
                   * Total Forfeitures value highlighted in red indicates an issue that must be resolved before saving.
                 </em>
               </div>
             )}
-            <div style={{ height: "20px" }}></div>
+            <div className="h-5" />
             <div className="px-[24px]">
               <h2 className="text-dsm-secondary">Summary (PAY447)</h2>
             </div>
-            <div style={{ display: "flex", gap: "8px" }}>
+            <div className="flex gap-2">
               <TotalsGrid
                 breakPoints={{ xs: 5, sm: 5, md: 5, lg: 5, xl: 5 }}
                 tablePadding="4px"
