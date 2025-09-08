@@ -1,11 +1,9 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities.Audit;
-using Demoulas.ProfitSharing.Common.Metrics;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Data;
-
 public class HealthCheckResultLogger : IHealthCheckPublisher
 {
     private readonly ILogger<HealthCheckResultLogger> _logger;
@@ -16,8 +14,6 @@ public class HealthCheckResultLogger : IHealthCheckPublisher
         _logger = logger;
         _dataContextFactory = dataContextFactory;
     }
-
-    private bool _previouslyUnhealthy;
 
     public Task PublishAsync(HealthReport report, CancellationToken cancellationToken)
     {
@@ -34,20 +30,6 @@ public class HealthCheckResultLogger : IHealthCheckPublisher
                 Exception = entry.Value.Exception?.Message,
                 Duration = entry.Value.Duration
             });
-        }
-
-        bool healthy = report.Status == HealthStatus.Healthy || report.Status == HealthStatus.Degraded;
-        GlobalMeter.UpdateHealthStatus(healthy);
-
-        if (report.Status == HealthStatus.Unhealthy && !_previouslyUnhealthy)
-        {
-            GlobalMeter.RegisterIncidentStartIfNeeded(report.Status.ToString());
-            _previouslyUnhealthy = true;
-        }
-        else if (report.Status != HealthStatus.Unhealthy && _previouslyUnhealthy)
-        {
-            GlobalMeter.RegisterIncidentResolutionIfNeeded(report.Status.ToString());
-            _previouslyUnhealthy = false;
         }
 
         return _dataContextFactory.UseWritableContext(ctx =>
