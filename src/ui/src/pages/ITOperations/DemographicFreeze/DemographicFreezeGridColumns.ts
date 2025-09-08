@@ -10,7 +10,10 @@ export const GetFreezeColumns = (): ColDef[] => {
     }),
     createDateColumn({
       headerName: "Frozen Date/Time",
-      field: "asOfDateTime"
+      field: "asOfDateTime",
+      // API returns a full datetime with offset (e.g. 2024-12-29T00:00:00.0000000-05:00)
+      // Use the explicit datetime formatter that handles ISO strings with offsets.
+      valueFormatter: (params) => (params.value ? mmDDYYYY_HHMMSS_Format(params.value) : "")
     }),
     {
       headerName: "IsActive Freeze",

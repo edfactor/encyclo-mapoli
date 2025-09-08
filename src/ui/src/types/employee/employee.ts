@@ -1,9 +1,9 @@
 import type {
-  ProfitYearRequest,
-  SortedPaginationRequestDto,
-  PagedReportResponse,
+  FilterParams,
   FrozenProfitYearRequest,
-  FilterParams
+  PagedReportResponse,
+  ProfitYearRequest,
+  SortedPaginationRequestDto
 } from "../common/api";
 
 export interface EmployeeDetails {
@@ -67,19 +67,6 @@ export interface EligibleEmployeeResponseDto extends PagedReportResponse<Eligibl
   numberReadOnFrozen: number;
   numberNotSelected: number;
   numberWritten: number;
-}
-
-export interface EmployeesOnMilitaryLeaveRequestDto {
-  pagination: SortedPaginationRequestDto;
-}
-
-export interface EmployeesOnMilitaryLeaveResponse {
-  departmentId: number;
-  badgeNumber: number;
-  ssn: string;
-  fullName: string;
-  dateOfBirth: string;
-  terminationDate: string;
 }
 
 export interface YearEndProfitSharingReportRequest extends FilterParams {

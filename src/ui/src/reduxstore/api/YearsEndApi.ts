@@ -32,7 +32,6 @@ import {
   setDuplicateNamesAndBirthdays,
   setDuplicateSSNsData,
   setEligibleEmployees,
-  setEmployeesOnMilitaryLeaveDetails,
   setEmployeeWagesForYear,
   setExecutiveHoursAndDollars,
   setForfeituresAndPoints,
@@ -83,8 +82,6 @@ import {
   DuplicateSSNsRequestDto,
   EligibleEmployeeResponseDto,
   EligibleEmployeesRequestDto,
-  EmployeesOnMilitaryLeaveRequestDto,
-  EmployeesOnMilitaryLeaveResponse,
   EmployeeWagesForYear,
   EmployeeWagesForYearRequestDto,
   ExecutiveHoursAndDollars,
@@ -262,29 +259,6 @@ export const YearsEndApi = createApi({
         try {
           const { data } = await queryFulfilled;
           dispatch(setDuplicateNamesAndBirthdays(data));
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
-    }),
-    getEmployeesOnMilitaryLeave: builder.query<
-      PagedReportResponse<EmployeesOnMilitaryLeaveResponse>,
-      EmployeesOnMilitaryLeaveRequestDto
-    >({
-      query: (params) => ({
-        url: "yearend/employees-on-military-leave",
-        method: "GET",
-        params: {
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
-        }
-      }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          dispatch(setEmployeesOnMilitaryLeaveDetails(data));
         } catch (err) {
           console.log("Err: " + err);
         }
