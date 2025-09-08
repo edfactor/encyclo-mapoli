@@ -149,9 +149,9 @@ GlobalMeter.RegisterObservableGauges();
 GlobalMeter.RecordDeploymentStartup();
 
 app.UseCors();
-app.UseSecurityHeaders();
 app.UseDemographicHeaders();
 app.UseSensitiveValueMasking();
+app.UseSecurityHeaders();
 app.UseDefaultEndpoints(OktaSettingsAction)
     .UseReDoc(settings =>
     {
