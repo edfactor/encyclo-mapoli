@@ -9,15 +9,11 @@ import {
 
 export const GetProfitShareForfeitColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({
-      headerName: "Badge"
-    }),
+    createBadgeColumn({}),
     createNameColumn({
       field: "employeeName"
     }),
-    createSSNColumn({
-      alignment: "left"
-    }),
+    createSSNColumn({}),
     createCurrencyColumn({
       headerName: "Forfeitures",
       field: "forfeitures"

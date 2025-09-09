@@ -20,6 +20,7 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
     sortBy: "badgeNumber",
     isSortDescending: false
   });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
 
   const { certificates } = useSelector((state: RootState) => state.yearsEnd);
@@ -65,6 +66,7 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
       const request = buildApiRequest();
       getCertificatesReport(request);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageNumber, pageSize, sortParams]);
 
   const sortEventHandler = (update: ISortParams) => {
@@ -101,6 +103,7 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (event: any) => {
       const selectedNodes = event.api.getSelectedNodes();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const selectedIds = selectedNodes.map((node: any) => node.data.badge);
       setSelectedRowIds(selectedIds);
       onSelectionChange?.(selectedIds);

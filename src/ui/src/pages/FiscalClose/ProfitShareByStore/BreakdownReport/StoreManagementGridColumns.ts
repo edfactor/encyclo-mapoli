@@ -4,8 +4,6 @@ import { createBadgeColumn, createCurrencyColumn, createNameColumn } from "../..
 export const GetStoreManagementGridColumns = (handleNavigation: (badgeNumber: string) => void): ColDef[] => {
   return [
     createBadgeColumn({
-      headerName: "Badge",
-      minWidth: 100,
       navigateFunction: handleNavigation
     }),
     createNameColumn({

@@ -10,7 +10,6 @@ import {
   createHoursColumn,
   createYearColumn
 } from "utils/gridColumnFactory";
-import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
 import { HeaderComponent } from "./RehireForfeituresHeaderComponent";
 
 function isTransactionEditiabe(params) {
@@ -102,7 +101,6 @@ export const GetProfitDetailColumns = (
         const rowKey = params.data.profitDetailId;
         const currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedUnforfeiture;
         const isLoading = params.context?.loadingRowIds?.has(params.data.badgeNumber);
-        const profitYear = useFiscalCloseProfitYear();
 
         return (
           <div>
@@ -126,7 +124,7 @@ export const GetProfitDetailColumns = (
                   const request: ForfeitureAdjustmentUpdateRequest = {
                     badgeNumber: params.data.badgeNumber,
                     forfeitureAmount: -(currentValue || 0),
-                    profitYear: profitYear,
+                    profitYear: selectedProfitYear,
                     offsettingProfitDetailId: params.data.profitDetailId,
                     classAction: false
                   };

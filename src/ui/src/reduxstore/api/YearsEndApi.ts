@@ -656,6 +656,7 @@ export const YearsEndApi = createApi({
     }),
     getTerminationReport: builder.query<TerminationResponse, TerminationRequestWithArchive>({
       query: (params) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const body: any = {
           beginningDate: params.beginningDate,
           endingDate: params.endingDate,
