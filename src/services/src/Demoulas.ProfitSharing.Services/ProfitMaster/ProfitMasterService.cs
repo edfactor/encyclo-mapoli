@@ -204,7 +204,8 @@ public class ProfitMasterService : IProfitMasterService
                 AdjustContributionAmount = profitShareUpdateRequest.AdjustContributionAmount,
                 AdjustEarningsAmount = profitShareUpdateRequest.AdjustEarningsAmount,
                 AdjustIncomingForfeitAmount = profitShareUpdateRequest.AdjustIncomingForfeitAmount,
-                AdjustEarningsSecondaryAmount = profitShareUpdateRequest.AdjustEarningsSecondaryAmount
+                AdjustEarningsSecondaryAmount = profitShareUpdateRequest.AdjustEarningsSecondaryAmount,
+                IsYearEndCompleted = false
             });
 
             await ctx.SaveChangesAsync(cancellationToken);

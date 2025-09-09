@@ -54,7 +54,6 @@ public class MasterInquiryMemberEndpoint : ProfitSharingEndpoint<MasterInquiryMe
                         YearToDateProfitSharingHours = 1200.5m,
                         YearsInPlan = 10,
                         PercentageVested = 100m,
-                        ContributionsLastYear = true,
                         EnrollmentId = 2,
                         Enrollment = "Active",
                         HireDate = new DateOnly(2010,
