@@ -1,6 +1,7 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -658,6 +659,16 @@ public sealed class MasterInquiryService : IMasterInquiryService
         short previousYear, 
         CancellationToken cancellationToken)
     {
+        // Here we recognize 2024 as the transition year to relying on the SMART YE Process
+        bool isPreviousYearEndComplete = (previousYear < ReferenceData.SmartTransitionYear) || await _dataContextFactory.UseReadOnlyContext(async ctx =>
+            await ctx.YearEndUpdateStatuses
+                .AsNoTracking()
+                .AnyAsync(x => x.ProfitYear == previousYear && x.IsYearEndCompleted, cancellationToken));
+        bool isProfitYearYearEndComplete = (currentYear < ReferenceData.SmartTransitionYear) || await _dataContextFactory.UseReadOnlyContext(async ctx =>
+            await ctx.YearEndUpdateStatuses
+                .AsNoTracking()
+                .AnyAsync(x => x.ProfitYear == currentYear && x.IsYearEndCompleted, cancellationToken));
+        bool isWallClockYear = currentYear == DateTime.Now.Year;
         
         var ssnCollection = memberDetailsMap.Keys.ToHashSet();
         List<BalanceEndpointResponse> currentBalance = [];
@@ -717,14 +728,15 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 Missives = memberData.Missives,
                 YearsInPlan = balance?.YearsInPlan ?? 0,
                 PercentageVested = balance?.VestingPercent ?? 0,
-                ContributionsLastYear = previousBalanceItem is { CurrentBalance: > 0 },
                 BadgeNumber = memberData.BadgeNumber,
                 PsnSuffix = memberData.PsnSuffix,
                 PayFrequencyId = 0,
-                BeginPSAmount = previousBalanceItem?.CurrentBalance ?? 0,
-                CurrentPSAmount = balance?.CurrentBalance ?? 0,
-                BeginVestedAmount = previousBalanceItem?.VestedBalance ?? 0,
-                CurrentVestedAmount = balance?.VestedBalance ?? 0,
+                BeginPSAmount = isPreviousYearEndComplete ? (previousBalanceItem?.CurrentBalance ?? 0) : null,
+                // "Current" is really "Now" or "At end of Year End"
+                CurrentPSAmount =  isWallClockYear || isProfitYearYearEndComplete ? (balance?.CurrentBalance ?? 0) : null,
+                BeginVestedAmount = isPreviousYearEndComplete ? (previousBalanceItem?.VestedBalance ?? 0) : null,
+                // "Current" is really "Now" or "At end of Year End"
+                CurrentVestedAmount = isWallClockYear || isProfitYearYearEndComplete ? (balance?.VestedBalance ?? 0) : null,
 
                 FullTimeDate = memberData.FullTimeDate,
                 Department = memberData.Department,
@@ -734,7 +746,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 
                 AllocationToAmount = balance?.AllocationsToBeneficiary ?? 0,
                 AllocationFromAmount = balance?.AllocationsFromBeneficiary ?? 0,
-                ReceivedContributionsLastYear = memberData.ReceivedContributionsLastYear
+                ReceivedContributionsLastYear = isPreviousYearEndComplete ? memberData.ReceivedContributionsLastYear : null
             });
         }
 

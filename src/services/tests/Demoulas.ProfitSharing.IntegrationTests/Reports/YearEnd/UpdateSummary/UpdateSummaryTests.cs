@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
@@ -23,7 +24,54 @@ public class UpdateSummaryTests : PristineBaseTest
         _frozenReportService = new FrozenReportService(DbFactory, new LoggerFactory(), TotalService, CalendarService,
             DemographicReaderService);
     }
+
+    [Fact]
+    public async Task CheckVesting()
+    {
+
+        short profitYear = 2023;
+        var calendarInfo = await CalendarService.GetYearStartAndEndAccountingDatesAsync(profitYear, CancellationToken.None);
+
+        await DbFactory.UseReadOnlyContext(async ctx =>
+        {
+            var employeeData = await (await DemographicReaderService.BuildDemographicQuery(ctx))
+                .Join(ctx.PayProfits, d => d.Id, pp => pp.DemographicId, (d, pp) => new { d, pp })
+                .Join(TotalService.GetYearsOfService(ctx, profitYear), b=>b.d.Ssn, yos=>yos.Ssn, (b, pty ) => new {b.d, b.pp,pty.Years})
+                .Where(b => b.pp.ProfitYear == profitYear && b.d.BadgeNumber == 700036)
+                .SingleAsync(CancellationToken.None);
+            
+            int age = calendarInfo.FiscalEndDate.Year - employeeData.d.DateOfBirth.Year;
+            if (calendarInfo.FiscalEndDate < employeeData.d.DateOfBirth)
+            {
+                age--;
+            }
+            TestOutputHelper.WriteLine($"Date Of Birth: {employeeData.d.DateOfBirth} Age: {age}");
+            TestOutputHelper.WriteLine($"Termination Date: {employeeData.d.TerminationDate}");
+            TestOutputHelper.WriteLine($"Termination Code Id: {employeeData.d.TerminationCodeId}");
+
+            TestOutputHelper.WriteLine($"Enrollment Id: {employeeData.pp.EnrollmentId}");
+            TestOutputHelper.WriteLine($"ZeroContributionReasonId: {employeeData.pp.ZeroContributionReasonId}");
+            TestOutputHelper.WriteLine($"Total Hours {employeeData.pp.CurrentHoursYear+employeeData.pp.HoursExecutive}");
+
+            TestOutputHelper.WriteLine($"YEARS = " + employeeData.Years);
+
+            var rslt =  await TotalService.TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate)
+                .Where(d => d.Ssn == employeeData.d.Ssn )
+                .FirstOrDefaultAsync();
+            TestOutputHelper.WriteLine($"Current Balance {rslt!.CurrentBalance}");
+            TestOutputHelper.WriteLine($"Vested  Balance {rslt.VestedBalance}");
+            
+            // When everything is correctly arranged... aka 2023 Enrollment and ZeroContribution Rebuilt.
+            rslt.CurrentBalance.ShouldBe(3817.03m);
+            rslt.VestedBalance.ShouldBe(763.406m);
+
+            return true;
+        });
+
+        "".ShouldBe("");
+    }
     
+
     [Fact]
     public async Task ValidateReport2()
     {
