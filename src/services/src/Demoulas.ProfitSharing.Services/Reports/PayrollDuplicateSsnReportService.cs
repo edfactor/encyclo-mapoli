@@ -41,29 +41,34 @@ namespace Demoulas.ProfitSharing.Services.Reports
                     .Select(g => g.Key)
                     .ToHashSetAsync(ct);
 
-                var rslts = await demographics
+                var sortTmp = req.SortBy?.ToLowerInvariant() switch 
+                {
+                    "address" => "street,city,state,postalcode",
+                    _ => req.SortBy,
+                };
+
+                var sortReq = req with { SortBy = sortTmp };
+
+                var data = await demographics
                     .Include(x => x.EmploymentStatus)
                     .Where(dem => dupSsns.Contains(dem.Ssn))
                     .OrderBy(d => d.Ssn)
-                    .Select(dem => new PayrollDuplicateSsnResponseDto
+                    .Select(dem => new
                     {
-                        BadgeNumber = dem.BadgeNumber,
-                        Ssn = dem.Ssn.MaskSsn(),
+                        dem.BadgeNumber,
+                        dem.Ssn,
                         Name = dem.ContactInfo.FullName,
-                        Address = new AddressResponseDto
-                        {
-                            Street = dem.Address.Street,
-                            City = dem.Address.City,
-                            State = dem.Address.State,
-                            PostalCode = dem.Address.PostalCode,
-                            CountryIso = Country.Constants.Us
-                        },
-                        HireDate = dem.HireDate,
-                        TerminationDate = dem.TerminationDate,
+                        dem.Address.Street,
+                        dem.Address.City,
+                        dem.Address.State,
+                        dem.Address.PostalCode,
+                        CountryIso = Country.Constants.Us,
+                        dem.HireDate,
+                        dem.TerminationDate,
                         RehireDate = dem.ReHireDate,
                         Status = dem.EmploymentStatusId,
                         EmploymentStatusName = dem.EmploymentStatus!.Name,
-                        StoreNumber = dem.StoreNumber,
+                        dem.StoreNumber,
                         IsExecutive = dem.PayFrequencyId == PayFrequency.Constants.Monthly,
                         ProfitSharingRecords = dem.PayProfits.Count(pp => pp.ProfitYear >= cutoffYear),
                         PayProfits = dem.PayProfits
@@ -80,12 +85,14 @@ namespace Demoulas.ProfitSharing.Services.Reports
                                 PointsEarned = pp.PointsEarned
                             }).ToList()
                     })
-                    .ToPaginationResultsAsync(req, ct);
+                    .ToPaginationResultsAsync(sortReq, ct);
+                                
+                
 
                 DateTimeOffset endDate = DateTimeOffset.UtcNow;
-                if (rslts.Results.Any())
+                if (data.Results.Any())
                 {
-                    endDate = rslts.Results.SelectMany(r => r.PayProfits.Select(p => p.LastUpdate)).Max();
+                    endDate = data.Results.SelectMany(r => r.PayProfits.Select(p => p.LastUpdate)).Max();
                 }
 
                 return new ReportResponseBase<PayrollDuplicateSsnResponseDto>
@@ -93,7 +100,33 @@ namespace Demoulas.ProfitSharing.Services.Reports
                     ReportName = "Duplicate SSNs on Demographics",
                     StartDate = cal.FiscalBeginDate,
                     EndDate = endDate.ToDateOnly(),
-                    Response = rslts,
+                    Response = new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<PayrollDuplicateSsnResponseDto>
+                    {
+                        Total = data.Total,
+                        Results = data.Results.Select(x => new PayrollDuplicateSsnResponseDto()
+                        {
+                            BadgeNumber = x.BadgeNumber,
+                            Ssn = x.Ssn.MaskSsn(),
+                            Name = x.Name,
+                            Address = new AddressResponseDto
+                            {
+                                Street = x.Street,
+                                City = x.City,
+                                State = x.State,
+                                PostalCode = x.PostalCode,
+                                CountryIso = x.CountryIso
+                            },
+                            HireDate = x.HireDate,
+                            TerminationDate = x.TerminationDate,
+                            RehireDate = x.RehireDate,
+                            Status = x.Status == EmploymentStatus.Constants.Active ? 'A' : 'T',
+                            EmploymentStatusName = x.EmploymentStatusName,
+                            StoreNumber = x.StoreNumber,
+                            ProfitSharingRecords = x.ProfitSharingRecords,
+                            PayProfits = x.PayProfits,
+                            IsExecutive = x.IsExecutive
+                        }).ToList()
+                    },
                 };
             });
         }
