@@ -1,5 +1,4 @@
 import { ColDef } from "ag-grid-community";
-import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import {
   createBadgeColumn,
   createCityColumn,
@@ -9,27 +8,21 @@ import {
   createHoursColumn,
   createNameColumn,
   createSSNColumn,
+  createStateColumn,
   createStatusColumn,
   createStoreColumn
 } from "../../../utils/gridColumnFactory";
 
 export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({
-      headerName: "Badge",
-      minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      alignment: "left"
-    }),
-    createSSNColumn({ alignment: "left" }),
+    createBadgeColumn({}),
+    createSSNColumn({}),
     createNameColumn({
-      field: "name",
-      minWidth: 150
+      field: "name"
     }),
     createDateColumn({
       headerName: "DOB",
-      field: "dateOfBirth",
-      minWidth: 100,
-      alignment: "left"
+      field: "dateOfBirth"
     }),
     {
       headerName: "Address",
@@ -46,58 +39,41 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
     },
     createCityColumn({
       field: "address.city",
-      colId: "address.city",
-      minWidth: 120,
-      alignment: "left"
+      colId: "address.city"
     }),
-    {
+    createStateColumn({
       headerName: "State",
-      field: "address.state",
-      colId: "address.state",
-      minWidth: 60,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true
-    },
+      field: "address.state"
+    }),
     createDateColumn({
       headerName: "Hire",
-      field: "hireDate",
-      minWidth: 100,
-      alignment: "left"
+      field: "hireDate"
     }),
     createDateColumn({
       headerName: "Termination",
-      field: "terminationDate",
-      minWidth: 100,
-      alignment: "left"
+      field: "terminationDate"
     }),
     createCountColumn({
       headerName: "Years",
-      field: "years",
-      minWidth: 60
+      field: "years"
     }),
     createStoreColumn({
-      headerName: "Store #",
-      minWidth: 60
+      headerName: "Store #"
     }),
     createHoursColumn({
-      field: "hoursCurrentYear",
-      minWidth: 60
+      field: "hoursCurrentYear"
     }),
     createCurrencyColumn({
       headerName: "Balance",
-      field: "netBalance",
-      minWidth: 60
+      field: "netBalance"
     }),
     createCurrencyColumn({
       headerName: "Income",
-      field: "incomeCurrentYear",
-      minWidth: 60
+      field: "incomeCurrentYear"
     }),
     createStatusColumn({
       headerName: "Employment Status",
       field: "employmentStatusName",
-      minWidth: 60,
       valueFormatter: (params) => {
         const id = params.data.status; // assuming 'status' is in the row data
         const name = params.data.employmentStatusName; // assuming 'statusName' is in the row data

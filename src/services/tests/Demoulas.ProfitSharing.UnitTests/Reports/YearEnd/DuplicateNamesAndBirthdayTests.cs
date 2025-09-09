@@ -23,7 +23,7 @@ public class DuplicateNamesAndBirthdayTests : ApiTestBase<Program>
     {
         _testOutputHelper = testOutputHelper;
         _cleanupReportClient = new CleanupReportClient(ApiClient, DownloadClient);
-        _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        _cleanupReportClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR, Role.EXECUTIVEADMIN);
     }
 
    

@@ -22,7 +22,7 @@ public sealed class ProfitSharingUnder21ReportTests: ApiTestBase<Program>
         response.ShouldNotBeNull();
         response.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
 
-        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR, Role.EXECUTIVEADMIN);
         response = await ApiClient.GETAsync<ProfitSharingUnder21ReportEndpoint, ProfitYearRequest, ProfitSharingUnder21ReportResponse>(request);
         response.ShouldNotBeNull();
         response.Response.StatusCode.ShouldBe(HttpStatusCode.OK);

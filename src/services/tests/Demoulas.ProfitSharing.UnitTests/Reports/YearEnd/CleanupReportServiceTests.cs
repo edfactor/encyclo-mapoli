@@ -194,7 +194,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     [Fact(DisplayName = "PS-145 : Negative ETVA for SSNs on PayProfit (JSON)")]
     public Task GetNegativeEtvaReportJson()
     {
-        _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        _cleanupReportClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR, Role.EXECUTIVEADMIN);
         byte negativeValues = 5;
         return MockDbContextFactory.UseWritableContext(async c =>
         {

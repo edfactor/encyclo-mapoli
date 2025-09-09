@@ -1,5 +1,4 @@
 import { ColDef } from "ag-grid-community";
-import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import {
   createBadgeColumn,
   createCurrencyColumn,
@@ -14,27 +13,18 @@ import {
 // badge, name, and ssn columns
 export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef[] => {
   const columns: ColDef[] = [
-    createBadgeColumn({
-      headerName: "Badge",
-      minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      alignment: mini ? "left" : "center"
-    }),
+    createBadgeColumn({}),
     createNameColumn({
-      field: "fullName",
-      minWidth: GRID_COLUMN_WIDTHS.FULL_NAME
+      field: "fullName"
     }),
-    createStoreColumn({
-      headerName: "Store",
-      minWidth: 60
-    }),
+    createStoreColumn({}),
 
-    createSSNColumn({ alignment: "left" }),
+    createSSNColumn({}),
 
     createHoursColumn({
       headerName: "Executive Hours",
       field: "hoursExecutive",
-      minWidth: 150,
-      alignment: "left",
+
       editable: !mini
     }),
     createCurrencyColumn({
@@ -43,9 +33,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
     }),
     createHoursColumn({
       headerName: "Oracle Hours",
-      field: "currentHoursYear",
-      minWidth: 150,
-      alignment: "left"
+      field: "currentHoursYear"
     }),
     createCurrencyColumn({
       headerName: "Oracle Dollars",
@@ -55,7 +43,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
     createStatusColumn({
       headerName: "Pay Frequency",
       field: "payFrequencyId",
-      minWidth: 150,
+
       valueFormatter: (params) => {
         const id = params.data?.payFrequencyId; // assuming 'status' is in the row data
         const name = params.data?.payFrequencyName; // assuming 'statusName' is in the row data
@@ -65,7 +53,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
     createStatusColumn({
       headerName: "Employment Status",
       field: "employmentStatusId",
-      minWidth: 150,
+
       valueFormatter: (params) => {
         const id = params.data?.employmentStatusId; // assuming 'status' is in the row data
         const name = params.data?.employmentStatusName; // assuming 'statusName' is in the row data

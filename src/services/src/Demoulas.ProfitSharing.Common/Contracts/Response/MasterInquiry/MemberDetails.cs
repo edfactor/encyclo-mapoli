@@ -1,10 +1,9 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Contracts.Shared;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
-
-using Demoulas.ProfitSharing.Common.Interfaces;
-using Shared;
 
 public record MemberDetails : IdRequest, INameParts, IFullNameProperty, IPhoneNumber, IIsExecutive
 {
