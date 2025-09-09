@@ -38,14 +38,6 @@ public sealed class SensitiveValueMaskingMiddleware
             return;
         }
 
-        var isInItDevops = context.User.IsInRole(Role.ITDEVOPS);
-
-        if (!isInItDevops)
-        {
-            await _next(context);
-            return;
-        }
-
         Stream originalBody = context.Response.Body;
         await using MemoryStream buffer = new();
         context.Response.Body = buffer;
@@ -66,6 +58,7 @@ public sealed class SensitiveValueMaskingMiddleware
                     MemoryStream outStream = new();
                     await using (Utf8JsonWriter writer = new(outStream))
                     {
+                        var isInItDevops = context.User.IsInRole(Role.ITDEVOPS);
                         var userRoles = context.User.Claims
                             .Where(c => string.Equals(c.Type, System.Security.Claims.ClaimTypes.Role, StringComparison.OrdinalIgnoreCase) ||
                                         string.Equals(c.Type, "roles", StringComparison.OrdinalIgnoreCase))
