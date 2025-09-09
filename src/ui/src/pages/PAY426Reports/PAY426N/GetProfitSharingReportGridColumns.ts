@@ -18,7 +18,6 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
 
   return [
     createBadgeColumn({
-      headerName: "Badge",
       navigateFunction: navFunction
     }),
     createNameColumn({}),
