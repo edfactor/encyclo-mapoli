@@ -114,15 +114,15 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
             .Where(pp => pp.pp.ProfitYear == currentYear).ToListAsync(cancellationToken);
 
         Dictionary<int, ForfeituresAndPointsForYearResponse> employeeMembersBySsn = employeesRaw
-            .ToDictionary(d => d.d.Ssn, v => ToMemberDetails(v.d, memberAmountsBySsn.ContainsKey(v.d.Ssn) ? memberAmountsBySsn[v.d.Ssn] : null, v.pp,
-                transactionsInCurrentYearBySsn.ContainsKey(v.d.Ssn) ? transactionsInCurrentYearBySsn[v.d.Ssn] : null));
+            .ToDictionary(d => d.d.Ssn, v => ToMemberDetails(v.d, memberAmountsBySsn.GetValueOrDefault(v.d.Ssn), v.pp,
+                transactionsInCurrentYearBySsn.GetValueOrDefault(v.d.Ssn)));
 
         // Gather Bene's
         Dictionary<int, ForfeituresAndPointsForYearResponse> beneMembers = await ctx.Beneficiaries
             .Include(b => b.Contact)
             .AsNoTracking()
             .Where(b => !employeeMembersBySsn.Keys.Contains(b.Contact!.Ssn)) // omit employees
-            .ToDictionaryAsync(b => b.Contact!.Ssn, v => ToMemberDetails(v, memberAmountsBySsn.ContainsKey(v.Contact!.Ssn) ? memberAmountsBySsn[v.Contact!.Ssn] : null),
+            .ToDictionaryAsync(b => b.Contact!.Ssn, v => ToMemberDetails(v, memberAmountsBySsn.GetValueOrDefault(v.Contact!.Ssn)),
                 cancellationToken);
 
         List<ForfeituresAndPointsForYearResponse> members = employeeMembersBySsn.Values.Concat(beneMembers.Values)
