@@ -97,20 +97,17 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
         // Get current balances for all members (some members could have no balance)
         Dictionary<int, ParticipantTotalVestingBalance> memberAmountsBySsn = await _totalService
             .TotalVestingBalance(ctx, currentYear, DateOnly.MaxValue)
-            .AsNoTracking()
             .ToDictionaryAsync(ptvb => ptvb.Ssn, ptvb => ptvb, cancellationToken);
 
         // Get this year's transactions for all members (some members could have no transactions)
         var transactionsInCurrentYearBySsn =
             await _totalService.GetTransactionsBySsnForProfitYearForOracle(ctx, currentYear)
-                .AsNoTracking()
                 .ToDictionaryAsync(ptvb => ptvb.Ssn, ptvb => ptvb, cancellationToken);
 
         // Gather all the employees
         IQueryable<Demographic> demographicExpression = await _demographicReaderService.BuildDemographicQuery(ctx, true);
         var employeesRaw = await demographicExpression
             .Join(ctx.PayProfits, d => d.Id, pp => pp.DemographicId, (d, pp) => new { d, pp })
-            .AsNoTracking()
             .Where(pp => pp.pp.ProfitYear == currentYear).ToListAsync(cancellationToken);
 
         Dictionary<int, ForfeituresAndPointsForYearResponse> employeeMembersBySsn = employeesRaw
@@ -120,7 +117,6 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
         // Gather Bene's
         Dictionary<int, ForfeituresAndPointsForYearResponse> beneMembers = await ctx.Beneficiaries
             .Include(b => b.Contact)
-            .AsNoTracking()
             .Where(b => !employeeMembersBySsn.Keys.Contains(b.Contact!.Ssn)) // omit employees
             .ToDictionaryAsync(b => b.Contact!.Ssn, v => ToMemberDetails(v, memberAmountsBySsn.GetValueOrDefault(v.Contact!.Ssn)),
                 cancellationToken);
