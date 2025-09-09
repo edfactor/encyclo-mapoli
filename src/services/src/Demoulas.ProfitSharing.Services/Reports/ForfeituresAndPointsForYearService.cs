@@ -71,33 +71,33 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
         int totalContForfeitPoints = (int)(await ctx.PayProfits.Where(p => p.ProfitYear == currentYear).SumAsync(p => p.PointsEarned, cancellationToken))!;
 
         return new ForfeituresAndPointsForYearResponseWithTotals
-            {
-                DistributionTotals = distributionsTotal,
-                AllocationsFromTotals = allocationsTotal,
-                AllocationToTotals = paidAllocationsTotal,
-                TotalForfeitures = forfeitsTotal,
-                TotalEarningPoints = 0,
-                TotalForfeitPoints = totalContForfeitPoints,
-                TotalProfitSharingBalance = lastYearTotal,
-                ReportDate = DateTimeOffset.UtcNow,
-                ReportName = $"PROFIT SHARING FORFEITURES AND POINTS FOR {currentYear}",
-                StartDate = new DateOnly(currentYear,
+        {
+            DistributionTotals = distributionsTotal,
+            AllocationsFromTotals = allocationsTotal,
+            AllocationToTotals = paidAllocationsTotal,
+            TotalForfeitures = forfeitsTotal,
+            TotalEarningPoints = 0,
+            TotalForfeitPoints = totalContForfeitPoints,
+            TotalProfitSharingBalance = lastYearTotal,
+            ReportDate = DateTimeOffset.UtcNow,
+            ReportName = $"PROFIT SHARING FORFEITURES AND POINTS FOR {currentYear}",
+            StartDate = new DateOnly(currentYear,
                     1,
                     1),
-                EndDate = new DateOnly(currentYear,
+            EndDate = new DateOnly(currentYear,
                     12,
                     31),
-                Response = new PaginatedResponseDto<ForfeituresAndPointsForYearResponse> { Total = 0, Results = [] }
-            }
+            Response = new PaginatedResponseDto<ForfeituresAndPointsForYearResponse> { Total = 0, Results = [] }
+        }
             ;
     }
 
     private async Task<IEnumerable<ForfeituresAndPointsForYearResponse>> GetMembers(ProfitSharingReadOnlyDbContext ctx, short currentYear, CancellationToken cancellationToken)
     {
         // Get current balances for all members (some members could have no balance)
-        Dictionary<int, ParticipantTotalVestingBalance> memberAmountsBySsn = await _totalService
+        Dictionary<(int Ssn, int Id), ParticipantTotalVestingBalance> memberAmountsBySsn = await _totalService
             .TotalVestingBalance(ctx, currentYear, DateOnly.MaxValue)
-            .ToDictionaryAsync(ptvb => ptvb.Ssn, ptvb => ptvb, cancellationToken);
+            .ToDictionaryAsync(ptvb => (ptvb.Ssn, ptvb.Id), ptvb => ptvb, cancellationToken);
 
         // Get this year's transactions for all members (some members could have no transactions)
         var transactionsInCurrentYearBySsn =
@@ -111,14 +111,14 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
             .Where(pp => pp.pp.ProfitYear == currentYear).ToListAsync(cancellationToken);
 
         Dictionary<int, ForfeituresAndPointsForYearResponse> employeeMembersBySsn = employeesRaw
-            .ToDictionary(d => d.d.Ssn, v => ToMemberDetails(v.d, memberAmountsBySsn.GetValueOrDefault(v.d.Ssn), v.pp,
+            .ToDictionary(d => d.d.Ssn, v => ToMemberDetails(v.d, memberAmountsBySsn.GetValueOrDefault((v.d.Ssn, v.d.Id)), v.pp,
                 transactionsInCurrentYearBySsn.GetValueOrDefault(v.d.Ssn)));
 
         // Gather Bene's
         Dictionary<int, ForfeituresAndPointsForYearResponse> beneMembers = await ctx.Beneficiaries
             .Include(b => b.Contact)
             .Where(b => !employeeMembersBySsn.Keys.Contains(b.Contact!.Ssn)) // omit employees
-            .ToDictionaryAsync(b => b.Contact!.Ssn, v => ToMemberDetails(v, memberAmountsBySsn.GetValueOrDefault(v.Contact!.Ssn)),
+            .ToDictionaryAsync(b => b.Contact!.Ssn, v => ToMemberDetails(v, memberAmountsBySsn.GetValueOrDefault((v.Contact!.Ssn, v.Contact!.Id))),
                 cancellationToken);
 
         List<ForfeituresAndPointsForYearResponse> members = employeeMembersBySsn.Values.Concat(beneMembers.Values)
@@ -138,7 +138,7 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
     )
     {
         decimal balanceConsideredForEarnings = (ptvb?.CurrentBalance ?? 0) - (singleYearNumbers?.MilitaryTotal ?? 0) - (singleYearNumbers?.ClassActionFundTotal ?? 0);
-        int earningsPoints = (int) Math.Round(balanceConsideredForEarnings / 100, MidpointRounding.AwayFromZero);
+        int earningsPoints = (int)Math.Round(balanceConsideredForEarnings / 100, MidpointRounding.AwayFromZero);
         decimal forfeitures = singleYearNumbers == null ? 0.00m : -1 * singleYearNumbers.TotalForfeitures;
 
         return new ForfeituresAndPointsForYearResponse
