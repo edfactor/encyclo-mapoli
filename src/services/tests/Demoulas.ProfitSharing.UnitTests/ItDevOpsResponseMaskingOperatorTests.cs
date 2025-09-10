@@ -1,18 +1,17 @@
 ﻿using System.Text.Json;
-using Demoulas.ProfitSharing.Services.Logging;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Services.Logging;
 using Demoulas.ProfitSharing.Services.Serialization;
 using Shouldly;
-using Xunit;
 
-namespace Demoulas.ProfitSharing.Contracts.Response.Testing;
+namespace Demoulas.ProfitSharing.UnitTests;
 
 public class ItDevOpsResponseMaskingOperatorTests
 {
     private sealed record SampleDto(
-        [property: Common.Attributes.MaskSensitive] string Secret,
+        [property: ProfitSharing.Common.Attributes.MaskSensitive] string Secret,
         decimal Amount,
-        [property: Common.Attributes.Unmask(Role.ITDEVOPS)] string VisibleToIt,
+        [property: ProfitSharing.Common.Attributes.Unmask(Role.ITDEVOPS)] string VisibleToIt,
         bool IsExecutive = false)
     {
         public SampleDto() : this("Alpha123", 123.45m, "DevOnly", false) { }

@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Services.Internal.Interfaces;
+﻿namespace Demoulas.ProfitSharing.Common;
 
 public interface IReportRunnerService
 {

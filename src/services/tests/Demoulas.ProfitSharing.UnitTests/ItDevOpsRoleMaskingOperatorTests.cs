@@ -3,18 +3,17 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Logging;
 using Demoulas.ProfitSharing.Services.Serialization;
 using Shouldly;
-using Xunit;
 
-namespace Demoulas.ProfitSharing.Contracts.Response.Testing;
+namespace Demoulas.ProfitSharing.UnitTests;
 
 public class SerilogItDevOpsMaskingOperatorObjectMaskTests
 {
     private sealed record SampleDto
     {
-        [Common.Attributes.MaskSensitive]
+        [ProfitSharing.Common.Attributes.MaskSensitive]
         public string Secret { get; init; } = "Alpha123";
         public decimal Amount { get; init; } = 123.45m;
-        [Common.Attributes.Unmask(Role.ITDEVOPS)]
+        [ProfitSharing.Common.Attributes.Unmask(Role.ITDEVOPS)]
         public string VisibleToIt { get; init; } = "DevOnly";
     }
 

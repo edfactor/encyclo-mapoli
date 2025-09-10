@@ -1,12 +1,11 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Serialization;
 using Shouldly;
-using Xunit;
 using Xunit.Abstractions;
 
-namespace Demoulas.ProfitSharing.Contracts.Response.Testing;
+namespace Demoulas.ProfitSharing.UnitTests;
 
 public record SampleDto
 {

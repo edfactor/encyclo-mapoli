@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Oracle.ManagedDataAccess.Client;
 
-namespace Demoulas.ProfitSharing.Services.ItOperations;
+namespace Demoulas.ProfitSharing.Services.ItDevOps;
 
 public sealed class TableMetadataService : ITableMetadataService
 {
