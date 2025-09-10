@@ -13,7 +13,7 @@ using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
-public sealed class TerminatedEmployeesNeedingFormLetterDownloadEndpoint : ProfitSharingEndpoint<StartAndEndDateRequest, string>
+public sealed class TerminatedEmployeesNeedingFormLetterDownloadEndpoint : ProfitSharingEndpoint<TerminatedLettersRequest, string>
 {
     private readonly IAdhocTerminatedEmployeesService _adhocTerminatedEmployeesService;
 
@@ -28,13 +28,13 @@ public sealed class TerminatedEmployeesNeedingFormLetterDownloadEndpoint : Profi
         Summary(s =>
         {
             s.Summary = "Returns a text file containing a form letter to be sent to terminated employees who aren't fully vested";
-            s.ExampleRequest = StartAndEndDateRequest.RequestExample();
+            s.ExampleRequest = TerminatedLettersRequest.RequestExample();
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();
     }
 
-    public override async Task HandleAsync(StartAndEndDateRequest req, CancellationToken ct)
+    public override async Task HandleAsync(TerminatedLettersRequest req, CancellationToken ct)
     {
         var response = await _adhocTerminatedEmployeesService.GetFormLetterForTerminatedEmployees(req, ct);
         var memoryStream = new MemoryStream();

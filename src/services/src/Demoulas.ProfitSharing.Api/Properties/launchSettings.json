@@ -37,7 +37,7 @@
       "applicationUrl": "https://localhost:7141",
       "environmentVariables": {
           "ASPNETCORE_ENVIRONMENT": "Development",
-          "DISABLE_SQL_DEBUG_LOGGING": "true"
+          "Serilog__MinimumLevel__Override__Microsoft.EntityFrameworkCore.Database.Command": "Fatal"
       }
   },
   "yematch": {
