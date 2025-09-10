@@ -6,7 +6,6 @@ using Demoulas.Common.Logging.Extensions;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
-using Demoulas.ProfitSharing.Common.LogMasking;
 using Demoulas.ProfitSharing.Common.Metrics;
 using Demoulas.ProfitSharing.Data;
 using Demoulas.ProfitSharing.Data.Contexts;
@@ -17,7 +16,9 @@ using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Security.Extensions;
+using Demoulas.ProfitSharing.Services.Serialization;
 using Demoulas.ProfitSharing.Services.Extensions;
+using Demoulas.ProfitSharing.Services.LogMasking; // retains AddProjectServices & other extension methods
 using Demoulas.Security.Extensions;
 using Demoulas.Util.Extensions;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -45,7 +46,10 @@ builder.Configuration.Bind("Logging:Smart", smartConfig);
 FileSystemLogConfig fileSystemLog = new FileSystemLogConfig();
 builder.Configuration.Bind("Logging:FileSystem", fileSystemLog);
 
-smartConfig.MaskingOperators = [new UnformattedSocialSecurityNumberMaskingOperator()];
+smartConfig.MaskingOperators = [
+    new UnformattedSocialSecurityNumberMaskingOperator(),
+    new SensitiveValueMaskingOperator()
+];
 builder.SetDefaultLoggerConfiguration(smartConfig, fileSystemLog);
 
 _ = builder.AddSecurityServices();
@@ -94,6 +98,13 @@ OracleHcmConfig oracleHcmConfig = builder.Configuration.GetSection("OracleHcm").
                                   ?? new OracleHcmConfig { BaseAddress = string.Empty, DemographicUrl = string.Empty };
 
 builder.AddOracleHcmSynchronization(oracleHcmConfig);
+
+// Register masking converter (must be first so it can wrap others)
+builder.Services.ConfigureHttpJsonOptions(o =>
+{
+    // Insert at index 0 to ensure highest precedence
+    o.SerializerOptions.Converters.Insert(0, new MaskingJsonConverterFactory());
+});
 
 builder.AddDatabaseServices((services, factoryRequests) =>
 {

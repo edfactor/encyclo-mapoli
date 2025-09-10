@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using Demoulas.Common.Api.Utilities;
 using Demoulas.Common.Contracts.Configuration;
-using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Common;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
