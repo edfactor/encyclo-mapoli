@@ -36,7 +36,7 @@ public class UpdateSummaryTests : PristineBaseTest
         {
             var employeeData = await (await DemographicReaderService.BuildDemographicQuery(ctx))
                 .Join(ctx.PayProfits, d => d.Id, pp => pp.DemographicId, (d, pp) => new { d, pp })
-                .Join(TotalService.GetYearsOfService(ctx, profitYear), b=>b.d.Ssn, yos=>yos.Ssn, (b, pty ) => new {b.d, b.pp,pty.Years})
+                .Join(TotalService.GetYearsOfService(ctx, profitYear, calendarInfo.FiscalEndDate), b=>b.d.Ssn, yos=>yos.Ssn, (b, pty ) => new {b.d, b.pp,pty.Years})
                 .Where(b => b.pp.ProfitYear == profitYear && b.d.BadgeNumber == 700036)
                 .SingleAsync(CancellationToken.None);
             
