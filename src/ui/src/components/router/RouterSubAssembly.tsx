@@ -22,7 +22,6 @@ import Forfeit from "pages/Forfeit/Forfeit";
 import FrozenSummary from "pages/FrozenSummary/FrozenSummary";
 import MasterInquiry from "pages/MasterInquiry/MasterInquiry";
 import Pay450Summary from "pages/PaymasterUpdate/Pay450Summary";
-import PaymasterUpdate from "pages/PaymasterUpdate/PaymasterUpdate";
 import ProfCtrlSheet from "pages/PaymasterUpdate/ProfCtrlSheet";
 import BalanceByYears from "pages/PROF130/BalanceByYears/BalanceByYears";
 import VestedAmountsByAge from "pages/PROF130/VestedAmountsByAge/VestedAmountsByAge";
@@ -286,9 +285,6 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={ROUTES.PROFIT_SHARE_GROSS_REPORT}
                   element={<ProfitShareGrossReport />}></Route>
-                <Route
-                  path={ROUTES.PAYMASTER_UPDATE}
-                  element={<PaymasterUpdate />}></Route>
                 <Route
                   path={ROUTES.PAY450_SUMMARY}
                   element={<Pay450Summary />}></Route>

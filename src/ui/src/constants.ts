@@ -68,7 +68,6 @@ export const ROUTES = {
   QPAY600: "qpay600",
   REPRINT_CERTIFICATES: "reprint-certificates",
   FORFEIT: "forfeit",
-  PAYMASTER_UPDATE: "paymaster-update",
   PROFIT_MASTER_UPDATE: "profit-master-update",
   PROFIT_SHARE_BY_STORE: "profit-share-by-store",
   PROFIT_SHARE_GROSS_REPORT: "profit-share-gross-report",
