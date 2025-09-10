@@ -13,22 +13,28 @@ internal sealed class ProfitShareTotalsMap : IEntityTypeConfiguration<ProfitShar
         builder.HasNoKey();
 
         builder.Property(x => x.WagesTotal)
-            .HasColumnName("WAGES_TOTAL");
+            .HasColumnName("WAGES_TOTAL")
+            .HasPrecision(18, 2);
 
         builder.Property(x => x.HoursTotal)
-            .HasColumnName("HOURS_TOTAL");
+            .HasColumnName("HOURS_TOTAL")
+            .HasPrecision(18, 2);
 
         builder.Property(x => x.PointsTotal)
-            .HasColumnName("POINTS_TOTAL");
+            .HasColumnName("POINTS_TOTAL")
+            .HasPrecision(18, 2);
 
         builder.Property(x => x.TerminatedWagesTotal)
-            .HasColumnName("TERMINATED_WAGES_TOTAL");
+            .HasColumnName("TERMINATED_WAGES_TOTAL")
+            .HasPrecision(18, 2);
 
         builder.Property(x => x.TerminatedHoursTotal)
-            .HasColumnName("TERMINATED_HOURS_TOTAL");
+            .HasColumnName("TERMINATED_HOURS_TOTAL")
+            .HasPrecision(18, 2);
 
         builder.Property(x => x.TerminatedPointsTotal)
-            .HasColumnName("TERMINATED_POINTS_TOTAL");
+            .HasColumnName("TERMINATED_POINTS_TOTAL")
+            .HasPrecision(18, 2);
         
 
         builder.Property(x => x.NumberOfEmployees)
@@ -39,5 +45,13 @@ internal sealed class ProfitShareTotalsMap : IEntityTypeConfiguration<ProfitShar
 
         builder.Property(x => x.NumberOfEmployeesUnder21)
             .HasColumnName("NUMBER_OF_EMPLOYEES_UNDER21");
+
+        builder.Property(x => x.BalanceTotal)
+            .HasColumnName("BALANCE_TOTAL")
+            .HasPrecision(18, 2);
+
+        builder.Property(x => x.TerminatedBalanceTotal)
+            .HasColumnName("TERMINATED_BALANCE_TOTAL")
+            .HasPrecision(18, 2);
     }
 }

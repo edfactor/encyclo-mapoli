@@ -47,6 +47,10 @@ public sealed class AuditEventMap : IEntityTypeConfiguration<AuditEvent>
             .HasConversion(
                 v => v == null ? null : JsonSerializer.Serialize(v, JsonSerializerOptions.Web),
                 v => v == null ? null : JsonSerializer.Deserialize<List<AuditChangeEntry>>(v, JsonSerializerOptions.Web)
-            );
+            )
+            .Metadata.SetValueComparer(new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<List<AuditChangeEntry>?>(
+                (c1, c2) => (c1 == null && c2 == null) || (c1 != null && c2 != null && c1.SequenceEqual(c2)),
+                c => c == null ? 0 : c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                c => c == null ? null : c.ToList()));
     }
 }
