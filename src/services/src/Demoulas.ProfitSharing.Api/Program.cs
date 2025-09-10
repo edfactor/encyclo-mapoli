@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.LogMasking;
+using Demoulas.ProfitSharing.Services.Logging;
 using Demoulas.ProfitSharing.Common.Metrics;
 using Demoulas.ProfitSharing.Data;
 using Demoulas.ProfitSharing.Data.Contexts;
@@ -46,7 +47,10 @@ builder.Configuration.Bind("Logging:Smart", smartConfig);
 FileSystemLogConfig fileSystemLog = new FileSystemLogConfig();
 builder.Configuration.Bind("Logging:FileSystem", fileSystemLog);
 
-smartConfig.MaskingOperators = [new UnformattedSocialSecurityNumberMaskingOperator()];
+smartConfig.MaskingOperators = [
+    new UnformattedSocialSecurityNumberMaskingOperator(),
+    new SerilogItDevOpsMaskingOperator()
+];
 builder.SetDefaultLoggerConfiguration(smartConfig, fileSystemLog);
 
 _ = builder.AddSecurityServices();
