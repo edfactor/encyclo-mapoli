@@ -1,10 +1,10 @@
 ﻿using System.Text.Json;
 using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.Services.Logging;
+using Demoulas.ProfitSharing.Services.LogMasking;
 using Demoulas.ProfitSharing.Services.Serialization;
 using Shouldly;
 
-namespace Demoulas.ProfitSharing.Contracts.Response.Testing;
+namespace Demoulas.ProfitSharing.UnitTests;
 
 public class ItDevOpsResponseMaskingOperatorTests
 {
@@ -30,7 +30,7 @@ public class ItDevOpsResponseMaskingOperatorTests
     public void Operator_Output_Equals_IT_Context_Output()
     {
         var dto = new SampleDto();
-        var op = new SerilogItDevOpsMaskingOperator();
+        var op = new SensitiveValueMaskingOperator();
         string expected = SerializeAsIt(dto);
         string actual = op.MaskObject(dto);
         actual.ShouldBe(expected);

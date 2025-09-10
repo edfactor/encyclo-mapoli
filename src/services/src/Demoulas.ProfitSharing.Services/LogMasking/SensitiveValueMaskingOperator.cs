@@ -1,9 +1,9 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Serialization;
 using Serilog.Enrichers.Sensitive;
 
-namespace Demoulas.ProfitSharing.Services.Logging;
+namespace Demoulas.ProfitSharing.Services.LogMasking;
 
 /// <summary>
 /// Serilog masking operator implementing <see cref="IMaskingOperator"/> so it can be registered in <c>smartConfig.MaskingOperators</c>.
@@ -12,11 +12,11 @@ namespace Demoulas.ProfitSharing.Services.Logging;
 /// The string-based <see cref="IMaskingOperator.Mask(string)"/> implementation is a no-op so existing regex / other operators still run first;
 /// callers wanting full object masking should invoke the object overload before logging.
 /// </summary>
-public sealed class SerilogItDevOpsMaskingOperator : RegexMaskingOperator
+public sealed class SensitiveValueMaskingOperator : RegexMaskingOperator
 {
     private readonly JsonSerializerOptions _options;
 
-    public SerilogItDevOpsMaskingOperator()
+    public SensitiveValueMaskingOperator()
         : base("(?!)") // regex that never matches (no-op for simple strings)
     {
         _options = new JsonSerializerOptions(JsonSerializerDefaults.Web);

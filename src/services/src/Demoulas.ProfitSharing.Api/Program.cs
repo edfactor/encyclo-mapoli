@@ -6,8 +6,6 @@ using Demoulas.Common.Logging.Extensions;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
-using Demoulas.ProfitSharing.Common.LogMasking;
-using Demoulas.ProfitSharing.Services.Logging;
 using Demoulas.ProfitSharing.Common.Metrics;
 using Demoulas.ProfitSharing.Data;
 using Demoulas.ProfitSharing.Data.Contexts;
@@ -19,7 +17,8 @@ using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Security.Extensions;
 using Demoulas.ProfitSharing.Services.Serialization;
-using Demoulas.ProfitSharing.Services.Extensions; // retains AddProjectServices & other extension methods
+using Demoulas.ProfitSharing.Services.Extensions;
+using Demoulas.ProfitSharing.Services.LogMasking; // retains AddProjectServices & other extension methods
 using Demoulas.Security.Extensions;
 using Demoulas.Util.Extensions;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -49,7 +48,7 @@ builder.Configuration.Bind("Logging:FileSystem", fileSystemLog);
 
 smartConfig.MaskingOperators = [
     new UnformattedSocialSecurityNumberMaskingOperator(),
-    new SerilogItDevOpsMaskingOperator()
+    new SensitiveValueMaskingOperator()
 ];
 builder.SetDefaultLoggerConfiguration(smartConfig, fileSystemLog);
 

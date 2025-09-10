@@ -1,10 +1,10 @@
 ﻿using System.Text.Json;
 using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.Services.Logging;
+using Demoulas.ProfitSharing.Services.LogMasking;
 using Demoulas.ProfitSharing.Services.Serialization;
 using Shouldly;
 
-namespace Demoulas.ProfitSharing.Contracts.Response.Testing;
+namespace Demoulas.ProfitSharing.UnitTests;
 
 public class SerilogItDevOpsMaskingOperatorObjectMaskTests
 {
@@ -31,7 +31,7 @@ public class SerilogItDevOpsMaskingOperatorObjectMaskTests
     {
         var dto = new SampleDto();
         string viaConverter = SerializeAsIt(dto);
-        var serilogOp = new SerilogItDevOpsMaskingOperator();
+        var serilogOp = new SensitiveValueMaskingOperator();
         string viaOperator = serilogOp.MaskObject(dto);
         viaOperator.ShouldBe(viaConverter);
         // Spot check essential expectations
