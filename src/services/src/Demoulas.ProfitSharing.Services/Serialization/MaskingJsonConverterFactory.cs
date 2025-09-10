@@ -31,7 +31,9 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
             return false;
         }
         string? ns = typeToConvert.Namespace;
-        if (ns is null || !ns.Contains(".Contracts.Response.", StringComparison.Ordinal))
+        if (ns is null || (
+            !ns.Contains(".Contracts.Response.", StringComparison.Ordinal) &&
+            !ns.EndsWith(".Contracts.Response", StringComparison.Ordinal)))
         {
             return false;
         }
