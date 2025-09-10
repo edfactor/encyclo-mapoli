@@ -9,6 +9,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
@@ -19,17 +20,20 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
+    private readonly IPayrollDuplicateSsnReportService _duplicateSsnReportService;
     private readonly TotalService _totalService;
 
     public ForfeituresAndPointsForYearService(
         IProfitSharingDataContextFactory dataContextFactory,
         TotalService totalService,
-        IDemographicReaderService demographicReaderService
+        IDemographicReaderService demographicReaderService,
+        IPayrollDuplicateSsnReportService duplicateSsnReportService
     )
     {
         _dataContextFactory = dataContextFactory;
         _totalService = totalService;
         _demographicReaderService = demographicReaderService;
+        _duplicateSsnReportService = duplicateSsnReportService;
     }
 
 
@@ -94,6 +98,11 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
 
     private async Task<IEnumerable<ForfeituresAndPointsForYearResponse>> GetMembers(ProfitSharingReadOnlyDbContext ctx, short currentYear, CancellationToken cancellationToken)
     {
+        if (await _duplicateSsnReportService.DuplicateSsnExistsAsync(cancellationToken))
+        {
+            throw new ValidationException("There are presently duplicate SSN's in the system, which will cause this process to fail.");
+        }
+
         // Get current balances for all members (some members could have no balance)
         Dictionary<(int Ssn, int Id), ParticipantTotalVestingBalance> memberAmountsBySsn = await _totalService
             .TotalVestingBalance(ctx, currentYear, DateOnly.MaxValue)

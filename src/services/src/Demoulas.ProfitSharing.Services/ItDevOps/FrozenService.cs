@@ -21,11 +21,15 @@ public class FrozenService: IFrozenService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ICommitGuardOverride _guardOverride;
+    private readonly IPayrollDuplicateSsnReportService _duplicateSsnReportService;
 
-    public FrozenService(IProfitSharingDataContextFactory dataContextFactory, ICommitGuardOverride guardOverride)
+    public FrozenService(IProfitSharingDataContextFactory dataContextFactory, 
+        ICommitGuardOverride guardOverride,
+        IPayrollDuplicateSsnReportService duplicateSsnReportService)
     {
         _dataContextFactory = dataContextFactory;
         _guardOverride = guardOverride;
+        _duplicateSsnReportService = duplicateSsnReportService;
     }
 
     /// <summary>
@@ -86,6 +90,11 @@ public class FrozenService: IFrozenService
         validator.RuleFor(r => r)
             .InclusiveBetween((short)(thisYear-1), (short)thisYear)
             .WithMessage($"ProfitYear must be between {thisYear - 1} and {thisYear}.");
+
+        if ( await _duplicateSsnReportService.DuplicateSsnExistsAsync(cancellationToken) )
+        {
+            throw new ValidationException("Cannot freeze demographics when duplicate SSNs exist.  Please resolve duplicate SSNs and try again.");
+        }
 
         await validator.ValidateAndThrowAsync(profitYear, cancellationToken);
         
