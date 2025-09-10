@@ -5,7 +5,7 @@ using Demoulas.ProfitSharing.Services.Serialization;
 using Shouldly;
 using Xunit.Abstractions;
 
-namespace Demoulas.ProfitSharing.UnitTests;
+namespace Demoulas.ProfitSharing.Contracts.Response.Testing;
 
 public record SampleDto
 {
