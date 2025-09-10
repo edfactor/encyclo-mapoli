@@ -53,7 +53,7 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
                 var enrollmentSummarizer = new EnrollmentSummarizer();
 
                 // Process in chunks to manage memory usage
-                const int chunkSize = 15000; // SSNs per chunk - adjust based on memory constraints
+                const int chunkSize = 3000; // SSNs per chunk - adjust based on memory constraints
                 var totalPayProfits = allPayProfits.Count;
                 var totalChunks = (int)Math.Ceiling((double)totalPayProfits / chunkSize);
                 var stopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -131,6 +131,14 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
                     "Enrollment Update completed in {Elapsed:mm\\:ss} for {TotalRecords} records",
                     stopwatch.Elapsed,
                     totalPayProfits);
+                
+                YearEndUpdateStatus? yeus = ctx.YearEndUpdateStatuses.FirstOrDefault(yeStatus => yeStatus.ProfitYear == profitYear);
+                if (yeus != null)
+                {
+                    yeus.IsYearEndCompleted = true;
+                }
+                await ctx.SaveChangesAsync(ct);
+
             }, ct);
         }
     }

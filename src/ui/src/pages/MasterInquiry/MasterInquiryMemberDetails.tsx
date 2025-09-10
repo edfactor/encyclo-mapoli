@@ -115,17 +115,28 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         receivedContributionsLastYear
       } = memberDetails;
 
+      var yearLabel = profitYear == new Date().getFullYear() ? "Current" : `End ${profitYear}`;
+
       return [
-        { label: "Begin Balance", value: numberToCurrency(beginPSAmount) },
-        { label: "Current Balance", value: numberToCurrency(currentPSAmount) },
-        { label: "Begin Vested Balance", value: numberToCurrency(beginVestedAmount) },
-        { label: "Current Vested Balance", value: numberToCurrency(currentVestedAmount) },
+        { label: "Begin Balance", value: beginPSAmount == null ? "N/A" : numberToCurrency(beginPSAmount) },
+        { label: `${yearLabel} Balance`, value: currentPSAmount == null ? "N/A" : numberToCurrency(currentPSAmount) },
+        {
+          label: "Begin Vested Balance",
+          value: beginVestedAmount == null ? "N/A" : numberToCurrency(beginVestedAmount)
+        },
+        {
+          label: `${yearLabel} Vested Balance`,
+          value: currentVestedAmount == null ? "N/A" : numberToCurrency(currentVestedAmount)
+        },
         ...(isEmployee
           ? [{ label: "Profit Sharing Hours", value: formatNumberWithComma(yearToDateProfitSharingHours) }]
           : []),
         ...(isEmployee ? [{ label: "Years In Plan", value: yearsInPlan }] : []),
         { label: "Vested Percent", value: formatPercentage(percentageVested) },
-        { label: "Contributions Last Year", value: receivedContributionsLastYear ? "Y" : "N" }
+        {
+          label: "Contributions in Last Year",
+          value: receivedContributionsLastYear == null ? "N/A" : receivedContributionsLastYear ? "Y" : "N"
+        }
       ];
     }, [memberDetails]);
 
