@@ -88,16 +88,16 @@ public class FrozenService: IFrozenService
 
         var thisYear = DateTime.Today.Year;
         validator.RuleFor(r => r)
-            .InclusiveBetween((short)(thisYear-1), (short)thisYear)
+            .InclusiveBetween((short)(thisYear - 1), (short)thisYear)
             .WithMessage($"ProfitYear must be between {thisYear - 1} and {thisYear}.");
 
-        if ( await _duplicateSsnReportService.DuplicateSsnExistsAsync(cancellationToken) )
-        {
-            throw new ValidationException("Cannot freeze demographics when duplicate SSNs exist.  Please resolve duplicate SSNs and try again.");
-        }
+        // Inline async rule to prevent freezing when duplicate SSNs exist.
+        validator.RuleFor(r => r)
+            .MustAsync(async (_, ct) => !await _duplicateSsnReportService.DuplicateSsnExistsAsync(ct))
+            .WithMessage("Cannot freeze demographics when duplicate SSNs exist.  Please resolve duplicate SSNs and try again.");
 
         await validator.ValidateAndThrowAsync(profitYear, cancellationToken);
-        
+
         using (_guardOverride.AllowFor(roles: Role.ITDEVOPS))
         {
             return await _dataContextFactory.UseWritableContext(async ctx =>
