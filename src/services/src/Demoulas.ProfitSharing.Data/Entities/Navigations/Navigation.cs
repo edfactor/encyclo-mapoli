@@ -59,6 +59,7 @@ public sealed class Navigation
         public const short RecentlyTerminated = 66;
         public const short PayBenReport = 67;
         public const short Adhocbeneficiariesreport = 68;
+        public const short TerminatedLetters = 69;
 
         // Prof Share Report By Age sub-items
         public const short ContributionsByAge = 35;

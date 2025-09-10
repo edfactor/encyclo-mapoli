@@ -536,6 +536,18 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 Icon = "",
                 Disabled = false
             },
+            new Navigation
+            {
+                Id = Navigation.Constants.TerminatedLetters,
+                ParentId = Navigation.Constants.FiscalClose,
+                Title = "Terminated Letters",
+                SubTitle = "QPROF003-1",
+                Url = "terminated-letters",
+                StatusId = 1,
+                OrderNumber = 19,
+                Icon = "",
+                Disabled = false
+            },
 
             // Prof Share Report By Age sub-menu items
             new Navigation

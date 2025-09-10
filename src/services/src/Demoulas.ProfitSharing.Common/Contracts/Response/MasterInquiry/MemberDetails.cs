@@ -40,7 +40,7 @@ public record MemberDetails : IdRequest, INameParts, IFullNameProperty, IPhoneNu
     [MaskSensitive] public string? Gender { get; set; }
     [MaskSensitive] public string? PhoneNumber { get; set; }
     public string? WorkLocation { get; set; }
-    public bool ReceivedContributionsLastYear { get; set; }
+    public bool? ReceivedContributionsLastYear { get; set; }
     public DateOnly? FullTimeDate { get; set; }
 
     [MaskSensitive] public string? TerminationReason { get; set; }
