@@ -130,10 +130,11 @@ public class FrozenService: IFrozenService
                 return new FrozenStateResponse
                 {
                     Id = frozenState.Id,
-                    ProfitYear = profitYear,
-                    FrozenBy = userName,
-                    AsOfDateTime = asOfDateTime,
-                    IsActive = true
+                    ProfitYear = frozenState.ProfitYear,
+                    FrozenBy = frozenState.FrozenBy,
+                    AsOfDateTime = frozenState.AsOfDateTime,
+                    IsActive = frozenState.IsActive,
+                    CreatedDateTime = frozenState.CreatedDateTime
                 };
             }, cancellationToken);
         }
