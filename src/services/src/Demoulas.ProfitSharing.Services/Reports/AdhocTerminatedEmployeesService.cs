@@ -9,6 +9,7 @@ using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
+
 public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
 {
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
@@ -87,11 +88,11 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
     {
         var beginningDate = req.BeginningDate ?? DateOnly.MinValue;
         var endingDate = req.EndingDate ?? DateOnly.MaxValue;
-        
+
         var rslt = await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var demographic = await _demographicReaderService.BuildDemographicQuery(ctx, false /*Want letter to be sent to the most current address*/);
-            var query = (from d in demographic.Include(x=>x.Address)
+            var query = (from d in demographic.Include(x => x.Address)
                          where d.TerminationDate != null
                             && d.TerminationDate.Value >= beginningDate && d.TerminationDate.Value <= endingDate
                             && d.EmploymentStatusId == EmploymentStatus.Constants.Terminated
@@ -154,7 +155,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
         var space_24 = new string(' ', 24);
         var space_25 = new string(' ', 25);
         var space_27 = new string(' ', 27);
-        
+
         foreach (var emp in report.Response.Results)
         {
             #region Beginning of letter
@@ -163,9 +164,9 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             #endregion
 
             #region Return address
-            letter.AppendLine($"{space_11}DEMOULAS PROFIT SHARING PLAN AND TRUST");
-            letter.AppendLine($"{space_27}875 EAST STREET");
-            letter.AppendLine($"{space_24}ANDOVER, MA 01810");
+            letter.AppendLine(" DEMOULAS PROFIT SHARING PLAN AND TRUST");
+            letter.AppendLine(" 875 EAST STREET");
+            letter.AppendLine(" ANDOVER, MA 01810");
             #endregion
 
             #region Spacing
@@ -280,7 +281,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             letter.Append("\f"); // Form feed to end the letter
             #endregion
         }
-        
+
         return letter.ToString();
     }
 }
