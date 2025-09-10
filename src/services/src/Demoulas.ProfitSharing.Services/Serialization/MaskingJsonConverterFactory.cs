@@ -1,11 +1,8 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Demoulas.ProfitSharing.Common.Attributes;
-using Demoulas.ProfitSharing.Security;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Services.Serialization;
 
@@ -305,63 +302,4 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
         string? JsonName);
 
     private sealed record TypeMetadata(Type Type, IReadOnlyList<PropertyMetadata> Properties, bool HasMaskableProperties);
-}
-
-/// <summary>
-/// Ambient role context for masking decisions (AsyncLocal per-request scope).
-/// </summary>
-public static class MaskingAmbientRoleContext
-{
-    private static readonly AsyncLocal<RoleContextSnapshot?> _current = new();
-    public static RoleContextSnapshot? Current
-    {
-        get => _current.Value;
-        set => _current.Value = value;
-    }
-    public static void Clear() => _current.Value = null;
-}
-
-/// <summary>
-/// Snapshot of caller roles used by masking converter.
-/// </summary>
-public sealed record RoleContextSnapshot(IReadOnlyList<string> Roles, bool IsItDevOps, bool IsExecutiveAdmin);
-
-/// <summary>
-/// Middleware that populates <see cref="MaskingAmbientRoleContext.Current"/> from the authenticated user.
-/// Placed early in the pipeline so serialization later can observe it.
-/// </summary>
-public sealed class RoleContextMiddleware
-{
-    private readonly RequestDelegate _next;
-    public RoleContextMiddleware(RequestDelegate next) => _next = next;
-
-    public async Task InvokeAsync(HttpContext context)
-    {
-        if (context.User?.Identity?.IsAuthenticated == true)
-        {
-            string[] roles = context.User.Claims
-                .Where(c => string.Equals(c.Type, System.Security.Claims.ClaimTypes.Role, StringComparison.OrdinalIgnoreCase) ||
-                            string.Equals(c.Type, "roles", StringComparison.OrdinalIgnoreCase))
-                .Select(c => c.Value)
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToArray();
-            bool isItDevOps = roles.Any(r => string.Equals(r, Role.ITDEVOPS, StringComparison.OrdinalIgnoreCase));
-            bool isExecAdmin = roles.Any(r => string.Equals(r, Role.EXECUTIVEADMIN, StringComparison.OrdinalIgnoreCase));
-            MaskingAmbientRoleContext.Current = new RoleContextSnapshot(roles, isItDevOps, isExecAdmin);
-        }
-        try
-        {
-            await _next(context);
-        }
-        finally
-        {
-            MaskingAmbientRoleContext.Clear();
-        }
-    }
-}
-
-public static class RoleContextApplicationBuilderExtensions
-{
-    public static IApplicationBuilder UseRoleContext(this IApplicationBuilder app)
-        => app.UseMiddleware<RoleContextMiddleware>();
 }

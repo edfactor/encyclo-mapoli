@@ -158,7 +158,7 @@ GlobalMeter.RecordDeploymentStartup();
 
 app.UseCors();
 app.UseDemographicHeaders();
-app.UseRoleContext();
+app.UseSensitiveValueMasking();
 app.UseSecurityHeaders();
 app.UseDefaultEndpoints(OktaSettingsAction)
     .UseReDoc(settings =>
