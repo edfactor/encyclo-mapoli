@@ -262,7 +262,7 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridSearchProps> = ({
         <DialogContent>
           <pre style={{ whiteSpace: "pre-wrap", fontFamily: "monospace", fontSize: "12px" }}>{printContent}</pre>
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ paddingRight: "25px" }}>
           <Button onClick={() => setIsPrintDialogOpen(false)}>Close</Button>
           <Button
             onClick={() => printTerminatedLetters(printContent)}
