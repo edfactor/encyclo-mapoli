@@ -70,6 +70,7 @@ const pathToReadableName: Record<string, string> = {
   "reprint-certificates": "Reprint Certificates",
   "print-profit-certs": "Print Profit Certificates",
   "recently-terminated": "Recently Terminated",
+  "terminated-letters": "Terminated Letters",
   "it devops": "IT DevOps"
 };
 
