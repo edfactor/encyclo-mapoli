@@ -13,7 +13,6 @@ using Demoulas.ProfitSharing.Services.Caching.Extensions;
 using Demoulas.ProfitSharing.Services.Certificates;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.ItDevOps;
-using Demoulas.ProfitSharing.Services.Mappers;
 using Demoulas.ProfitSharing.Services.MasterInquiry;
 using Demoulas.ProfitSharing.Services.Military;
 using Demoulas.ProfitSharing.Services.Navigations;
@@ -95,13 +94,6 @@ public static class ServicesExtension
 
         _ = builder.Services.AddScoped<IReportRunnerService, ReportRunnerService>();
 
-        #region Mappers
-
-
-        builder.Services.AddSingleton<BeneficiaryTypeMapper>();
-        builder.Services.AddSingleton<EmployeeTypeMapper>();
-
-        #endregion
 
         builder.AddProjectCachingServices();
 
