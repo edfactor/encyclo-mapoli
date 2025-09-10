@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 
 public record TerminatedLettersRequest : ProfitYearRequest
@@ -8,7 +6,6 @@ public record TerminatedLettersRequest : ProfitYearRequest
     public DateOnly? EndingDate { get; set; }
     public bool? ExcludeZeroBalance { get; set; }
 
-    [Range(10000, 9999999, ErrorMessage = "Badge numbers must be 5-7-digit positive numbers")]
     public List<int>? BadgeNumbers { get; set; }
 
     public static new TerminatedLettersRequest RequestExample()
