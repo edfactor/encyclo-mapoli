@@ -9,13 +9,15 @@ namespace Demoulas.ProfitSharing.Services;
 public sealed class PayProfitUpdateService : IPayProfitUpdateService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
+    private readonly ICalendarService _calendarService;
     private readonly ILogger _logger;
     private readonly TotalService _totalService;
 
 
-    public PayProfitUpdateService(IProfitSharingDataContextFactory dataContextFactory, ILoggerFactory loggerFactory, ITotalService totalService)
+    public PayProfitUpdateService(IProfitSharingDataContextFactory dataContextFactory, ILoggerFactory loggerFactory, ITotalService totalService, ICalendarService calendarService)
     {
         _dataContextFactory = dataContextFactory;
+        _calendarService = calendarService;
         _logger = loggerFactory.CreateLogger<PayProfitUpdateService>();
         _totalService = (TotalService)totalService;
     }
@@ -47,7 +49,8 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
                 }
 
                 // Load years of service once (read-only)
-                var yearsBySsn = await _totalService.GetYearsOfService(ctx, profitYear)
+                var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(profitYear, ct);
+                var yearsBySsn = await _totalService.GetYearsOfService(ctx, profitYear, calInfo.FiscalEndDate)
                     .ToDictionaryAsync(t => t.Ssn, t => t.Years, ct);
 
                 var enrollmentSummarizer = new EnrollmentSummarizer();

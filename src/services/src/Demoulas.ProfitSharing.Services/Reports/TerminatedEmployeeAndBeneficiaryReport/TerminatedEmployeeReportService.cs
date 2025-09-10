@@ -49,7 +49,7 @@ public sealed class TerminatedEmployeeReportService
         CancellationToken cancellationToken)
     {
         var terminatedEmployees = await GetTerminatedEmployees(ctx, request);
-        var terminatedWithContributions = GetEmployeesAsMembers(ctx, request, terminatedEmployees);
+        var terminatedWithContributions = GetEmployeesAsMembers(ctx, request, terminatedEmployees, request.EndingDate);
         var beneficiaries = GetBeneficiaries(ctx);
         return await CombineEmployeeAndBeneficiarySlices(terminatedWithContributions, beneficiaries, cancellationToken);
     }
@@ -71,11 +71,11 @@ public sealed class TerminatedEmployeeReportService
     }
 
     private IQueryable<MemberSlice> GetEmployeesAsMembers(IProfitSharingDbContext ctx, StartAndEndDateRequest request,
-        IQueryable<TerminatedEmployeeDto> terminatedEmployees)
+        IQueryable<TerminatedEmployeeDto> terminatedEmployees, DateOnly asOfDate)
     {
         var query = from employee in terminatedEmployees
             join payProfit in ctx.PayProfits on employee.Demographic.Id equals payProfit.DemographicId
-            join yipTbl in _totalService.GetYearsOfService(ctx, (short)request.EndingDate.Year) on payProfit.Demographic!.Ssn equals yipTbl.Ssn into yipTmp
+            join yipTbl in _totalService.GetYearsOfService(ctx, (short)request.EndingDate.Year, asOfDate) on payProfit.Demographic!.Ssn equals yipTbl.Ssn into yipTmp
             from yip in yipTmp.DefaultIfEmpty()
             where payProfit.ProfitYear >= request.BeginningDate.Year && payProfit.ProfitYear <= request.EndingDate.Year
             select new MemberSlice

@@ -37,7 +37,7 @@ public sealed class UnforfeitService : IUnforfeitService
 
         var rehiredEmployees = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
-            var yearsOfServiceQuery = _totalService.GetYearsOfService(context, req.ProfitYear);
+            var yearsOfServiceQuery = _totalService.GetYearsOfService(context, req.ProfitYear, req.EndingDate);
             var vestingServiceQuery = _totalService.TotalVestingBalance(context, req.ProfitYear, req.EndingDate);
             var demo = await _demographicReaderService.BuildDemographicQuery(context);
 
