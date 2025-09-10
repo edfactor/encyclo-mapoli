@@ -1,0 +1,31 @@
+/* Additional styling for TerminatedLetters grid if needed */
+.terminated-letters-grid {
+  /* Custom styles can be added here */
+}
+
+.terminated-letters-print-button {
+  margin-left: 16px;
+}
+
+/* Print styles for the dialog content */
+@media print {
+  .MuiDialog-root {
+    display: none !important;
+  }
+  
+  body * {
+    visibility: hidden;
+  }
+  
+  .print-content,
+  .print-content * {
+    visibility: visible;
+  }
+  
+  .print-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}

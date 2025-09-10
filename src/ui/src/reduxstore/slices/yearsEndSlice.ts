@@ -44,6 +44,8 @@ import {
   RehireForfeiture,
   ReportsByAgeParams,
   StartAndEndDateRequest,
+  TerminatedLettersRequest,
+  TerminatedLettersResponse,
   TerminationResponse,
   Under21BreakdownByStoreRequest,
   Under21BreakdownByStoreResponse,
@@ -129,6 +131,8 @@ export interface YearsEndState {
   termination: TerminationResponse | null;
   recentlyTerminated: RecentlyTerminatedResponse | null;
   recentlyTerminatedQueryParams: StartAndEndDateRequest | null;
+  terminatedLetters: TerminatedLettersResponse | null;
+  terminatedLettersQueryParams: TerminatedLettersRequest | null;
   terminationQueryParams: ProfitYearRequest | null;
   vestedAmountsByAge: VestedAmountsByAge | null;
   vestedAmountsByAgeQueryParams: ProfitYearRequest | null;
@@ -213,6 +217,8 @@ const initialState: YearsEndState = {
   militaryEntryAndModification: null,
   recentlyTerminated: null,
   recentlyTerminatedQueryParams: null,
+  terminatedLetters: null,
+  terminatedLettersQueryParams: null,
   rehireForfeitures: null,
   rehireForfeituresQueryParams: null,
   rehireProfitSummaryQueryParams: null,
@@ -882,6 +888,18 @@ export const yearsEndSlice = createSlice({
     clearRecentlyTerminatedQueryParams: (state) => {
       state.recentlyTerminatedQueryParams = null;
     },
+    setTerminatedLetters: (state, action: PayloadAction<TerminatedLettersResponse>) => {
+      state.terminatedLetters = action.payload;
+    },
+    clearTerminatedLetters: (state) => {
+      state.terminatedLetters = null;
+    },
+    setTerminatedLettersQueryParams: (state, action: PayloadAction<TerminatedLettersRequest>) => {
+      state.terminatedLettersQueryParams = action.payload;
+    },
+    clearTerminatedLettersQueryParams: (state) => {
+      state.terminatedLettersQueryParams = null;
+    },
     setProfitSharingUpdate: (state, action: PayloadAction<ProfitShareUpdateResponse>) => {
       state.profitSharingUpdate = action.payload;
     },
@@ -1150,6 +1168,10 @@ export const {
   setRecentlyTerminated,
   clearRecentlyTerminated,
   setRecentlyTerminatedQueryParams,
-  clearRecentlyTerminatedQueryParams
+  clearRecentlyTerminatedQueryParams,
+  setTerminatedLetters,
+  clearTerminatedLetters,
+  setTerminatedLettersQueryParams,
+  clearTerminatedLettersQueryParams
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
