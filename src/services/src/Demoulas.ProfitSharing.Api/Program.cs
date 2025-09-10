@@ -17,7 +17,8 @@ using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Security.Extensions;
-using Demoulas.ProfitSharing.Services.Extensions;
+using Demoulas.ProfitSharing.Services.Serialization;
+using Demoulas.ProfitSharing.Services.Extensions; // retains AddProjectServices & other extension methods
 using Demoulas.Security.Extensions;
 using Demoulas.Util.Extensions;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -95,6 +96,13 @@ OracleHcmConfig oracleHcmConfig = builder.Configuration.GetSection("OracleHcm").
 
 builder.AddOracleHcmSynchronization(oracleHcmConfig);
 
+// Register masking converter (must be first so it can wrap others)
+builder.Services.ConfigureHttpJsonOptions(o =>
+{
+    // Insert at index 0 to ensure highest precedence
+    o.SerializerOptions.Converters.Insert(0, new MaskingJsonConverterFactory());
+});
+
 builder.AddDatabaseServices((services, factoryRequests) =>
 {
     // Register contexts without immediately resolving the interceptor
@@ -150,7 +158,7 @@ GlobalMeter.RecordDeploymentStartup();
 
 app.UseCors();
 app.UseDemographicHeaders();
-app.UseSensitiveValueMasking();
+app.UseRoleContext();
 app.UseSecurityHeaders();
 app.UseDefaultEndpoints(OktaSettingsAction)
     .UseReDoc(settings =>
