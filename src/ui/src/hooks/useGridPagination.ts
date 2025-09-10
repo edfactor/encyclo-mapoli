@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export interface GridPaginationState {
   pageNumber: number;
@@ -37,6 +37,15 @@ export const useGridPagination = ({
   const [sortBy, setSortBy] = useState(initialSortBy);
   const [isSortDescending, setIsSortDescending] = useState(initialSortDescending);
 
+  // Store the callback in a ref to make it stable
+  const callbackRef = useRef(onPaginationChange);
+  useEffect(() => {
+    callbackRef.current = onPaginationChange;
+  }, [onPaginationChange]);
+
+  // Prevent duplicate calls
+  const isUpdatingRef = useRef(false);
+
   const sortParams = useMemo(
     () => ({
       sortBy,
@@ -56,14 +65,26 @@ export const useGridPagination = ({
 
   const handlePaginationChange = useCallback(
     (newPageNumber: number, newPageSize: number) => {
+      // Prevent re-entrant calls
+      if (isUpdatingRef.current) {
+        return;
+      }
+
+      isUpdatingRef.current = true;
       setPageNumber(newPageNumber);
       setPageSize(newPageSize);
 
-      if (onPaginationChange) {
-        onPaginationChange(newPageNumber, newPageSize, sortParams);
+      if (typeof callbackRef.current === "function") {
+        // Use setTimeout to defer callback and prevent immediate re-entry
+        setTimeout(() => {
+          callbackRef.current!(newPageNumber, newPageSize, { sortBy, isSortDescending });
+          isUpdatingRef.current = false;
+        }, 0);
+      } else {
+        isUpdatingRef.current = false;
       }
     },
-    [onPaginationChange, sortParams]
+    [sortBy, isSortDescending, pageSize]
   );
 
   const handleSortChange = useCallback(
@@ -71,11 +92,11 @@ export const useGridPagination = ({
       setSortBy(newSortParams.sortBy);
       setIsSortDescending(newSortParams.isSortDescending);
 
-      if (onPaginationChange) {
-        onPaginationChange(pageNumber, pageSize, newSortParams);
+      if (callbackRef.current) {
+        callbackRef.current(pageNumber, pageSize, newSortParams);
       }
     },
-    [onPaginationChange, pageNumber, pageSize]
+    [pageNumber, pageSize]
   );
 
   const resetPagination = useCallback(() => {

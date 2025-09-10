@@ -133,9 +133,9 @@ const useManageExecutiveHoursAndDollars = () => {
         isMonthlyPayroll: searchForm.isMonthlyPayroll ?? false,
         pagination: {
           skip: 0,
-          take: 25,
-          sortBy: "storeNumber",
-          isSortDescending: false
+          take: mainGridPagination.pageSize,
+          sortBy: mainGridPagination.sortParams.sortBy,
+          isSortDescending: mainGridPagination.sortParams.isSortDescending
         }
       };
 
@@ -147,10 +147,6 @@ const useManageExecutiveHoursAndDollars = () => {
 
         reduxDispatch(setExecutiveHoursAndDollarsGridYear(profitYear));
         dispatch({ type: "CLEAR_ADDITIONAL_EXECUTIVES" });
-
-        // Don't call resetPagination() here as it triggers the pagination change handler
-        // Just reset the page reset flag
-        // mainGridPagination.resetPagination();
       } catch (error) {
         dispatch({ type: "SEARCH_FAILURE", payload: { error: error?.toString() || "Search failed" } });
       }
@@ -169,9 +165,9 @@ const useManageExecutiveHoursAndDollars = () => {
         isMonthlyPayroll: searchForm.isMonthlyPayroll ?? false,
         pagination: {
           skip: 0,
-          take: 25,
-          sortBy: "storeNumber",
-          isSortDescending: false
+          take: modalGridPagination.pageSize,
+          sortBy: modalGridPagination.sortParams.sortBy,
+          isSortDescending: modalGridPagination.sortParams.isSortDescending
         }
       };
 
@@ -180,8 +176,6 @@ const useManageExecutiveHoursAndDollars = () => {
 
         const response = await triggerModalSearch(searchParams).unwrap();
         dispatch({ type: "MODAL_SEARCH_SUCCESS", payload: { results: response } });
-
-        modalGridPagination.resetPagination();
       } catch (error) {
         dispatch({ type: "MODAL_SEARCH_FAILURE", payload: { error: error?.toString() || "Modal search failed" } });
       }
