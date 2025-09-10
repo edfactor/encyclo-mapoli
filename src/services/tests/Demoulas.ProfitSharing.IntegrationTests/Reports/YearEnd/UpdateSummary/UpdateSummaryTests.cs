@@ -311,7 +311,7 @@ public class UpdateSummaryTests : PristineBaseTest
         {
             PayProfit pp = await ctx.PayProfits.Include(d => d.Demographic).Where(pp => pp.ProfitYear == profitYear && pp.Demographic!.BadgeNumber == badge)
                 .SingleAsync(CancellationToken.None);
-            ParticipantTotalYear? pty = await TotalService.GetYearsOfService(ctx, profitYear).Where(pty => pty.Ssn == pp.Demographic!.Ssn)
+            ParticipantTotalYear? pty = await TotalService.GetYearsOfService(ctx, profitYear, fromDateTime).Where(pty => pty.Ssn == pp.Demographic!.Ssn)
                 .SingleOrDefaultAsync(CancellationToken.None);
             byte years = pty?.Years ?? 0;
             int age = fromDateTime.Year - pp.Demographic!.DateOfBirth.Year;

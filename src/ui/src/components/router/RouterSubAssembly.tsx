@@ -54,6 +54,7 @@ import ImpersonationMultiSelect from "components/MenuBar/ImpersonationMultiSelec
 import { MenuBar } from "components/MenuBar/MenuBar";
 import BeneficiaryInquiry from "pages/BeneficiaryInquiry/BeneficiaryInquiry";
 import RecentlyTerminated from "pages/FiscalClose/RecentlyTerminated/RecentlyTerminated";
+import TerminatedLetters from "pages/FiscalClose/TerminatedLetters/TerminatedLetters";
 import PAY426N from "pages/PAY426Reports/PAY426N/PAY426N";
 import ProfitSummary from "pages/PAY426Reports/ProfitSummary/ProfitSummary";
 import QPAY066AdHocReports from "pages/QPAY066AdHocReports/QPAY066AdHocReports";
@@ -362,6 +363,10 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={ROUTES.RECENTLY_TERMINATED}
                   element={<RecentlyTerminated />}
+                />
+                <Route
+                  path={ROUTES.TERMINATED_LETTERS}
+                  element={<TerminatedLetters />}
                 />
               </Routes>
             </Box>

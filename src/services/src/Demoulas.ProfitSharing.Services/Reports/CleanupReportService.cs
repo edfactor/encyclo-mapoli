@@ -183,6 +183,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                     .ToHashSetAsync(cancellationToken);
 
                 var names = dupInfo.Select(x => x.FullName).ToHashSet();
+                var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
 
                 var query = from dem in demographics.Include(d => d.EmploymentStatus)
                         join ppLj in ctx.PayProfits on new { DemographicId = dem.Id, req.ProfitYear } equals new
@@ -193,7 +194,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                         from pp in tmpPayProfit.DefaultIfEmpty()
                         join b in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear) on dem.Ssn equals b.Ssn into tmpBalance
                         from bal in tmpBalance.DefaultIfEmpty()
-                        join yos in _totalService.GetYearsOfService(ctx, req.ProfitYear) on dem.Ssn equals yos.Ssn into tmpYos
+                        join yos in _totalService.GetYearsOfService(ctx, req.ProfitYear, calInfo.FiscalEndDate) on dem.Ssn equals yos.Ssn into tmpYos
                         from yos in tmpYos.DefaultIfEmpty()
                         where dem.ContactInfo.FullName != null && names.Contains(dem!.ContactInfo!.FullName!)
                         select new

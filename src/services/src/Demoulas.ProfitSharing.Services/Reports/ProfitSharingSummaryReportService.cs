@@ -403,7 +403,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     private async Task<IQueryable<EmployeeWithBalance>> BuildFilteredEmployeeSetAsync(
         ProfitSharingReadOnlyDbContext ctx,
         ProfitYearRequest req,
-        int? badgeNumber)
+        int? badgeNumber,
+        DateOnly asOfDate)
     {
         IQueryable<PayProfit> basePayProfits = ctx.PayProfits
             .Where(p => p.ProfitYear == req.ProfitYear)
@@ -415,7 +416,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         basePayProfits = basePayProfits
             .Join(demographicQuery, p => p.DemographicId, d => d.Id, (p, _) => p);
 
-        var yearsOfService = _totalService.GetYearsOfService(ctx, req.ProfitYear);
+        var yearsOfService = _totalService.GetYearsOfService(ctx, req.ProfitYear, asOfDate);
         var employeeQry =
             from pp in basePayProfits
             join et in ctx.EmploymentTypes on pp.Demographic!.EmploymentTypeId equals et.Id
@@ -482,7 +483,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     private async Task<IQueryable<YearEndProfitSharingReportDetail>> ActiveSummary(ProfitSharingReadOnlyDbContext ctx, ProfitYearRequest req, DateOnly ageAsOfDate,
         int? badgeNumber = null)
     {
-        var employees = await BuildFilteredEmployeeSetAsync(ctx, req, badgeNumber);
+        var employees = await BuildFilteredEmployeeSetAsync(ctx, req, badgeNumber, ageAsOfDate);
 
 
 
