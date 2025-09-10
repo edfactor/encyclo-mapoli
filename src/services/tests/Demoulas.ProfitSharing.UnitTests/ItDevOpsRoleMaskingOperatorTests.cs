@@ -13,7 +13,7 @@ public class SerilogItDevOpsMaskingOperatorObjectMaskTests
         [ProfitSharing.Common.Attributes.MaskSensitive]
         public string Secret { get; init; } = "Alpha123";
         public decimal Amount { get; init; } = 123.45m;
-        [ProfitSharing.Common.Attributes.Unmask(Role.ITDEVOPS)]
+        [ProfitSharing.Common.Attributes.UnmaskSensitive(Role.ITDEVOPS)]
         public string VisibleToIt { get; init; } = "DevOnly";
     }
 

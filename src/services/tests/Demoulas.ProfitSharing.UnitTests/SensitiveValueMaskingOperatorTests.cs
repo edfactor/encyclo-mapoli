@@ -11,7 +11,7 @@ public class SensitiveValueMaskingOperatorTests
     private sealed record SampleDto(
         [property: ProfitSharing.Common.Attributes.MaskSensitive] string Secret,
         decimal Amount,
-        [property: ProfitSharing.Common.Attributes.Unmask(Role.ITDEVOPS)] string VisibleToIt)
+        [property: ProfitSharing.Common.Attributes.UnmaskSensitive(Role.ITDEVOPS)] string VisibleToIt)
     {
         public SampleDto() : this("Alpha123", 123.45m, "DevOnly") { }
     }

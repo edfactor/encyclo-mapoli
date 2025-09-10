@@ -13,7 +13,7 @@ public record SampleDto
     public string Secret { get; init; } = "Alpha123";
     public decimal Amount { get; init; } = 123.45m;
     public bool IsExecutive { get; init; }
-    [Unmask(Role.ITDEVOPS)]
+    [UnmaskSensitive(Role.ITDEVOPS)]
     public string VisibleToIt { get; init; } = "DevOnly";
 }
 

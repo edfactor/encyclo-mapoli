@@ -13,7 +13,7 @@ namespace Demoulas.ProfitSharing.Services.Serialization;
 /// </summary>
 public sealed class MaskingJsonConverterFactory : JsonConverterFactory
 {
-    private static readonly Type StringType = typeof(string);
+    private static readonly Type _stringType = typeof(string);
     private static readonly ConcurrentDictionary<Type, TypeMetadata> _typeMetadataCache = new();
 
     public override bool CanConvert(Type typeToConvert)
@@ -22,7 +22,7 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
         {
             return false;
         }
-        if (typeToConvert.IsPrimitive || typeToConvert == StringType)
+        if (typeToConvert.IsPrimitive || typeToConvert == _stringType)
         {
             return false;
         }
@@ -56,7 +56,7 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
         bool hasMaskable = false;
 
         MaskSensitiveAttribute? classMask = t.GetCustomAttribute<MaskSensitiveAttribute>(inherit: true);
-        UnmaskAttribute? classUnmask = t.GetCustomAttribute<UnmaskAttribute>(inherit: true);
+        UnmaskSensitiveAttribute? classUnmask = t.GetCustomAttribute<UnmaskSensitiveAttribute>(inherit: true);
 
         foreach (PropertyInfo pi in t.GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
@@ -69,10 +69,10 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
             bool isOtherNumeric = underlying == typeof(int) || underlying == typeof(long) || underlying == typeof(short) ||
                                   underlying == typeof(uint) || underlying == typeof(ulong) || underlying == typeof(ushort) ||
                                   underlying == typeof(byte) || underlying == typeof(sbyte) || underlying == typeof(double) || underlying == typeof(float);
-            bool primitiveOrString = underlying.IsPrimitive || underlying == StringType || underlying.IsEnum || isDecimal || isOtherNumeric;
+            bool primitiveOrString = underlying.IsPrimitive || underlying == _stringType || underlying.IsEnum || isDecimal || isOtherNumeric;
 
             MaskSensitiveAttribute? maskAttr = pi.GetCustomAttribute<MaskSensitiveAttribute>(inherit: true) ?? classMask;
-            UnmaskAttribute? unmaskAttr = pi.GetCustomAttribute<UnmaskAttribute>(inherit: true) ?? classUnmask;
+            UnmaskSensitiveAttribute? unmaskAttr = pi.GetCustomAttribute<UnmaskSensitiveAttribute>(inherit: true) ?? classUnmask;
 
             bool maskAll = maskAttr != null && (maskAttr.Roles.Length == 0);
             HashSet<string>? maskRoles = (maskAttr != null && !maskAll && maskAttr.Roles.Length > 0) ? new HashSet<string>(maskAttr.Roles, StringComparer.OrdinalIgnoreCase) : null;

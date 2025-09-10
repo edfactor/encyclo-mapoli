@@ -2,7 +2,7 @@
 
 /// <summary>
 /// Apply to a DTO class or property (any data type) to indicate its values should be masked
-/// unless explicitly opted out with UnmaskAttribute.
+/// unless explicitly opted out with UnmaskSensitiveAttribute.
 /// Optionally restrict masking to specific roles; if none provided, mask for all roles.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
