@@ -690,7 +690,6 @@ export const YearsEndApi = createApi({
     }),
     getRecentlyTerminatedReport: builder.query<RecentlyTerminatedResponse, StartAndEndDateRequest>({
       query: (params) => {
-        console.log("getRecentlyTerminatedReport params:", params);
         return {
           url: "yearend/adhoc-terminated-employees-report",
           method: "GET",
