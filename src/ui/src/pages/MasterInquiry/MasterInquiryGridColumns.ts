@@ -42,23 +42,19 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
     },
     createCurrencyColumn({
       headerName: "Contribution",
-      field: "contribution",
-      minWidth: 120
+      field: "contribution"
     }),
     createCurrencyColumn({
       headerName: "Earnings",
-      field: "earnings",
-      minWidth: 120
+      field: "earnings"
     }),
     createCurrencyColumn({
       headerName: "Forfeiture",
-      field: "forfeiture",
-      minWidth: 120
+      field: "forfeiture"
     }),
     createCurrencyColumn({
       headerName: "Payment",
-      field: "payment",
-      minWidth: 120
+      field: "payment"
     }),
     {
       headerName: "Month/Year",
@@ -136,10 +132,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       useWords: true
     }),
     createStatusColumn({
-      field: "employmentStatus",
-      minWidth: 60,
-      alignment: "right",
-      sortable: false
+      field: "employmentStatus"
     })
   ];
 };

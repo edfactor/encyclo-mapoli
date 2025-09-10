@@ -1,7 +1,8 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Entities.Navigations;
-public class NavigationRole:ILookupTable<byte>
+
+public class NavigationRole : ILookupTable<byte>
 {
     public static class Contants
     {

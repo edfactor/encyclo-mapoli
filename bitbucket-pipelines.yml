@@ -516,55 +516,105 @@ pipelines:
             - self.hosted
           script:
             - |
-              # Locate API artifact and extract version from .buildinfo.json (fallback to build number)
+              # Robust tagging script: extracts version, creates/pushes tag idempotently.
+              Write-Host "=== Tagging Step Start ==="
+              Write-Host "Using existing runner credentials (no OAuth token logic)."
+
               $apiZip = ".\dist\Demoulas.ProfitSharing.Api.zip"
               $version = $null
+              $buildInfoPath = $null
 
               if (Test-Path $apiZip) {
-                Write-Host "Found API artifact: $apiZip"
+                Write-Host "API artifact found: $apiZip"
                 $temp = Join-Path $env:TEMP "api_extract_$($env:BITBUCKET_BUILD_NUMBER)"
                 if (Test-Path $temp) { Remove-Item -Recurse -Force $temp }
                 New-Item -ItemType Directory -Path $temp | Out-Null
-                Expand-Archive -Path $apiZip -DestinationPath $temp -Force
+                try {
+                  Expand-Archive -Path $apiZip -DestinationPath $temp -Force
+                } catch {
+                  Write-Host "Failed to expand API artifact: $($_.Exception.Message)"
+                }
                 $buildInfoFile = Get-ChildItem -Path $temp -Filter ".buildinfo.json" -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 1
-                if ($buildInfoFile) { $buildInfoPath = $buildInfoFile.FullName } else { Write-Host "No .buildinfo.json inside artifact" }
+                if ($buildInfoFile) { $buildInfoPath = $buildInfoFile.FullName } else { Write-Host "No .buildinfo.json inside artifact." }
               } else {
-                Write-Host "API artifact not found at $apiZip - searching workspace for .buildinfo.json"
+                Write-Host "API artifact not found at $apiZip. Searching workspace for .buildinfo.json"
                 $found = Get-ChildItem -Path . -Filter ".buildinfo.json" -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 1
                 if ($found) { $buildInfoPath = $found.FullName }
               }
 
               if ($buildInfoPath) {
+                Write-Host "Parsing build info: ${buildInfoPath}"
                 try {
                   $json = Get-Content $buildInfoPath -Raw | ConvertFrom-Json
-                  $version = $json.version
-                  if (-not $version) { $version = $json.Version }
-                  if (-not $version) { $version = $json.buildVersion }
+                  $buildNumber = $json.buildNumber
+                  $buildId = $json.buildId
+                  if ($buildNumber -and $buildId) {
+                    $version = "$buildNumber.$buildId"
+                    Write-Host "Derived version from buildNumber + buildId: $version"
+                  } else {
+                    Write-Host "buildNumber/buildId not both present; will fallback later."
+                  }
                 } catch {
-                  Write-Host "Failed to parse $buildInfoPath: $_"
+                  Write-Host "Failed to parse ${buildInfoPath}: $($_.Exception.Message)"
                 }
+              } else {
+                Write-Host "No build info file located."
               }
 
-              if (-not $version) { $version = $env:BITBUCKET_BUILD_NUMBER; Write-Host "Using build number as version: $version" }
+              if (-not $version) {
+                # Fallback strategy: use BITBUCKET_BUILD_NUMBER + buildId if available separately
+                if ($buildNumber -and $buildId) {
+                  $version = "$buildNumber.$buildId"
+                } elseif ($buildNumber) {
+                  $version = "$buildNumber"
+                } elseif ($buildId) {
+                  $version = "$buildId"
+                } else {
+                  $version = $env:BITBUCKET_BUILD_NUMBER
+                }
+                Write-Host "Fallback version value: $version"
+              }
 
-              $tag = "v$version"
-              Write-Host "Preparing to create tag: $tag"
+              $version = $version.Trim()
+              if (-not $version) { Write-Host "Empty version string after processing. Aborting."; exit 1 }
 
-              # Configure git identity for tagging
+              # Tag MUST be buildNumber.buildId (no 'v' prefix) per requirement if both present
+              $tag = $version
+              Write-Host "Proposed tag (buildNumber.buildId format): $tag (commit ${env:BITBUCKET_COMMIT})"
+
               git config user.email "pipeline@local"
               git config user.name "Bitbucket Pipeline"
 
-              # Check if tag already exists on remote
-              $exists = git ls-remote --tags origin $tag
-              if ($exists) { Write-Host "Tag $tag already exists on remote. Skipping tag creation."; exit 0 }
+              # Ensure we have latest tag refs
+              git fetch --tags --prune --quiet
 
-              # Create annotated tag on the current commit (or BITBUCKET_COMMIT)
-              git tag -a $tag -m "Release $tag (build $env:BITBUCKET_BUILD_NUMBER)" $env:BITBUCKET_COMMIT
+              # Remote existence check
+              $remoteExists = git ls-remote --tags origin "refs/tags/$tag"
+              if ($remoteExists) {
+                Write-Host "Remote already has $tag. Skipping tag creation."
+                Write-Host "=== Tagging Step End (no-op) ==="
+                exit 0
+              }
 
-              # Push tag to origin. Note: runner must have push permissions configured (SSH key / credentials)
-              git push origin refs/tags/$tag
+              # Local tag check
+              $localExists = git tag --list $tag
+              if ($localExists) {
+                Write-Host "Local tag $tag exists but not on remote; will push it."
+              } else {
+                git tag -a $tag -m "Release $tag (build ${env:BITBUCKET_BUILD_NUMBER})" ${env:BITBUCKET_COMMIT}
+                if ($LASTEXITCODE -ne 0) { Write-Host "Failed to create tag."; exit $LASTEXITCODE }
+              }
 
-              Write-Host "Tag $tag created and pushed."
+              Write-Host "Pushing tag $tag..."
+              $pushOutput = git push origin "refs/tags/$tag" 2>&1
+              if ($LASTEXITCODE -ne 0) {
+                Write-Host "Tag push failed:"
+                Write-Host $pushOutput
+                exit $LASTEXITCODE
+              }
+
+              Write-Host "Tag $tag pushed successfully."
+              Write-Host "=== Tagging Step Complete ==="
 
       - step:
           name: "Gate: Promote to UAT"

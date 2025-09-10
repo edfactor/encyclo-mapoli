@@ -170,7 +170,8 @@ public static class StockFactory
                 AdjustContributionAmount = 0,
                 AdjustEarningsAmount = 0,
                 AdjustIncomingForfeitAmount = 0,
-                AdjustEarningsSecondaryAmount = 0
+                AdjustEarningsSecondaryAmount = 0,
+                IsYearEndCompleted = false,
             }
         ];
     }

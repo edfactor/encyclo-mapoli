@@ -6,7 +6,7 @@ export const url = process.env.VITE_REACT_APP_PS_API as string;
 
 export const tagTypes = ["Get"];
 
-export const prepareHeaders = (headers: any, context: any) => {
+export const prepareHeaders = (headers: Headers, context: { getState: () => RootState }) => {
   const state = context.getState() as RootState;
   const token = state.security.token;
   const impersonating = state.security.impersonating;

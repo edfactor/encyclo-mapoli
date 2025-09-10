@@ -27,4 +27,8 @@ public class YearEndUpdateStatus : ModifiedBase
     public required decimal AdjustEarningsAmount { get; set; }
     public required decimal AdjustIncomingForfeitAmount { get; set; }
     public required decimal AdjustEarningsSecondaryAmount { get; set; }
+
+    // This answers the question, "Has the PAY450 UPDATE been executed (aka the final enrollment ids been set - that enables correct vesting calculations)?"
+    // This is the final step of the YE process.
+    public required bool IsYearEndCompleted { get; set; }
 }

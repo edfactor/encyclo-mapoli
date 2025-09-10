@@ -1,5 +1,4 @@
 import { ColDef } from "ag-grid-community";
-import { GRID_COLUMN_WIDTHS } from "../../constants";
 import {
   createAgeColumn,
   createBadgeColumn,
@@ -14,23 +13,16 @@ import {
 
 export const GetProfitShareReportColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({
-      headerName: "Badge",
-      minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      alignment: "left"
-    }),
+    createBadgeColumn({}),
     createNameColumn({
-      field: "employeeName",
-      minWidth: 120
+      field: "employeeName"
     }),
-    createStoreColumn({
-      minWidth: 60
-    }),
+    createStoreColumn({}),
     {
       headerName: "Employee Type",
       field: "employeeTypeCode",
       colId: "employeeTypeCode",
-      minWidth: 150,
+
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
@@ -42,28 +34,21 @@ export const GetProfitShareReportColumns = (): ColDef[] => {
     },
     createDateColumn({
       headerName: "Date of Birth",
-      field: "dateOfBirth",
-      minWidth: 150,
-      alignment: "left"
+      field: "dateOfBirth"
     }),
     createAgeColumn({}),
 
     createSSNColumn({ alignment: "left" }),
     createCurrencyColumn({
       headerName: "Wages",
-      field: "wages",
-      minWidth: 150
+      field: "wages"
     }),
-    createHoursColumn({
-      minWidth: 150
-    }),
-    createPointsColumn({
-      
-    }),
+    createHoursColumn({}),
+    createPointsColumn({}),
     {
       headerName: "",
       colId: "isNew",
-      minWidth: 150,
+
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,

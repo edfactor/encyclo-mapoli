@@ -1,21 +1,20 @@
+import { Box, CircularProgress, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Typography, Box, CircularProgress } from "@mui/material";
-import { DSMGrid, ISortParams, Pagination, numberToCurrency } from "smart-ui-library";
-import { useNavigate, Path } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { Path, useNavigate } from "react-router-dom";
+import { DSMGrid, ISortParams, Pagination, numberToCurrency } from "smart-ui-library";
+import { TotalsGrid } from "../../components/TotalsGrid/TotalsGrid";
+import { useLazyGetQPAY066BTerminatedWithVestedBalanceQuery } from "../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../reduxstore/store";
-import { QPAY066BTerminatedEmployee } from "../../reduxstore/types";
 import { QPAY066BFilterParams } from "./QPAY066BFilterSection";
 import { GetQPAY066BGridColumns } from "./QPAY066BGridColumns";
-import { useLazyGetQPAY066BTerminatedWithVestedBalanceQuery } from "../../reduxstore/api/YearsEndApi";
-import { TotalsGrid } from "../../components/TotalsGrid/TotalsGrid";
 
 interface QPAY066BGridProps {
   filterParams: QPAY066BFilterParams;
   onLoadingChange?: (isLoading: boolean) => void;
 }
 
-const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ filterParams, onLoadingChange }) => {
+const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ _filterParams, onLoadingChange }) => {
   const navigate = useNavigate();
 
   const [pageNumber, setPageNumber] = useState(0);
