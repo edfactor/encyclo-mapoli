@@ -1,8 +1,12 @@
 ﻿using System.CommandLine;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
+using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts;
+using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Factories;
+using Demoulas.ProfitSharing.Data.Interceptors;
+using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -127,12 +131,23 @@ internal static class GenerateScriptHelper
         }
 
         HostApplicationBuilder builder = CreateHostBuilder(args);
-        _ = builder.AddProjectServices();
+        builder.AddDatabaseServices((services, factoryRequests) =>
+        {
+            // Register contexts without immediately resolving the interceptor
+            factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingDbContext>("ProfitSharing",
+                interceptorFactory: sp =>
+                [
+                    sp.GetRequiredService<AuditSaveChangesInterceptor>(),
+                    sp.GetRequiredService<BeneficiarySaveChangesInterceptor>(),
+                    sp.GetRequiredService<BeneficiaryContactSaveChangesInterceptor>()
+                ]));
+            factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"));
+            factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("ProfitSharing"));
+        });
+        builder.AddProjectServices();
+
         _ = builder.Services.AddScoped<IAppUser, DummyUser>();
         _ = builder.Services.AddScoped<Demoulas.ProfitSharing.Services.RebuildEnrollmentAndZeroContService>();
-
-        var list = new List<ContextFactoryRequest> { ContextFactoryRequest.Initialize<ProfitSharingDbContext>(connectionName) };
-        _ = DataContextFactory.Initialize(builder, contextFactoryRequests: list);
 
         await using var sp = builder.Services.BuildServiceProvider();
         await using var scope = sp.CreateAsyncScope();
