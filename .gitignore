@@ -370,4 +370,3 @@ FodyWeavers.xsd
 .DS_Store
 /test-results/user.json
 test-results
-/src/services/src/Demoulas.ProfitSharing.Data.Cli/Properties/launchSettings.json
