@@ -1,5 +1,6 @@
 import { ColDef } from "ag-grid-community";
 import {
+  createAddressColumn,
   createBadgeColumn,
   createNameColumn,
   createSSNColumn,
@@ -15,20 +16,7 @@ export const GetTerminatedLettersColumns = (): ColDef[] => {
       minWidth: 200
     }),
     createSSNColumn({}),
-    {
-      headerName: "Address",
-      field: "address",
-      colId: "address",
-      minWidth: 200,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      valueGetter: (params) => {
-        const address1 = params.data.address || "";
-        const address2 = params.data.address2 || "";
-        return address2 && address2.trim() ? `${address1}, ${address2}` : address1;
-      }
-    },
+    createAddressColumn({}),
     {
       headerName: "City",
       field: "city",
