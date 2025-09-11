@@ -30,6 +30,7 @@ interface RehireForfeituresGridSearchProps {
   hasUnsavedChanges: boolean;
   shouldArchive: boolean;
   onArchiveHandled?: () => void;
+  setHasUnsavedChanges: (hasChanges: boolean) => void;
 }
 
 const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
@@ -39,7 +40,8 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
   onUnsavedChanges,
   hasUnsavedChanges,
   shouldArchive,
-  onArchiveHandled
+  onArchiveHandled,
+  setHasUnsavedChanges
 }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -182,6 +184,7 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
             // Set the pending success message to be shown after grid reload
             setPendingSuccessMessage(bulkSuccessMessage);
             setIsPendingBulkMessage(true);
+            setHasUnsavedChanges(false);
           }
         }
       } catch (error) {
@@ -228,6 +231,8 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
           // Prepare success message
           const employeeName = name || "the selected employee";
           const successMessage = `The unforfeiture amount of $${formatNumberWithComma(request.forfeitureAmount)} for ${employeeName} saved successfully`;
+
+          setHasUnsavedChanges(false);
 
           if (rehireForfeituresQueryParams) {
             const searchRequest = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);
@@ -478,8 +483,7 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
       );
 
     const finalColumns = [expansionColumn, ...visibleColumns, ...detailOnlyColumns];
-    
-    
+
     return finalColumns;
   }, [mainColumns, detailColumns]);
 
