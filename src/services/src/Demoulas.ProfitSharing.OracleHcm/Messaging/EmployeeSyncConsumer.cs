@@ -12,6 +12,7 @@ using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ValidationResult = FluentValidation.Results.ValidationResult;
 
@@ -29,14 +30,15 @@ internal class EmployeeSyncChannelConsumer : BackgroundService
     public EmployeeSyncChannelConsumer(
         Channel<MessageRequest<OracleEmployee[]>> channel,
         OracleEmployeeValidator employeeValidator,
-        IDemographicsServiceInternal demographicsServiceInternal,
         OracleHcmConfig oracleHcmConfig,
         IFakeSsnService fakeSsnService,
-        IProfitSharingDataContextFactory contextFactory)
+        IProfitSharingDataContextFactory contextFactory,
+        IServiceScopeFactory scopeFactory)
     {
         _reader = channel.Reader;
         _employeeValidator = employeeValidator;
-        _demographicsService = demographicsServiceInternal;
+        using var scope = scopeFactory.CreateScope();
+        _demographicsService = scope.ServiceProvider.GetRequiredService<IDemographicsServiceInternal>();
         _oracleHcmConfig = oracleHcmConfig;
         _fakeSsnService = fakeSsnService;
         _contextFactory = contextFactory;

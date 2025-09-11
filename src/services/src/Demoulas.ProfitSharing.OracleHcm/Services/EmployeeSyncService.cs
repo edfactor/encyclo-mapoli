@@ -12,6 +12,7 @@ using Demoulas.ProfitSharing.OracleHcm.Clients;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Job = Demoulas.ProfitSharing.Data.Entities.Scheduling.Job;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
@@ -30,12 +31,13 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
 
     public EmployeeSyncService(AtomFeedClient atomFeedClient,
         EmployeeFullSyncClient oracleEmployeeDataSyncClient,
-        IDemographicsServiceInternal demographicsService,
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
-        Channel<MessageRequest<OracleEmployee[]>> employeeChannel)
+        Channel<MessageRequest<OracleEmployee[]>> employeeChannel,
+        IServiceScopeFactory serviceScopeFactory)
     {
         _oracleEmployeeDataSyncClient = oracleEmployeeDataSyncClient;
-        _demographicsService = demographicsService;
+        var scope = serviceScopeFactory.CreateScope();
+        _demographicsService = scope.ServiceProvider.GetRequiredService<IDemographicsServiceInternal>();
         _atomFeedClient = atomFeedClient;
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
 
