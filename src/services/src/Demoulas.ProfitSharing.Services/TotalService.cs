@@ -286,7 +286,7 @@ public sealed class TotalService : ITotalService
                                       where badgeNumberOrSsnCollection.Contains(d.BadgeNumber)
                                       select new BalanceEndpointResponse
                                       {
-                                          Id = d.Ssn,
+                                          Id = t.Id,
                                           Ssn = t.Ssn.MaskSsn(),
                                           CurrentBalance = (t.CurrentBalance ?? 0),
                                           VestedBalance = (t.VestedBalance ?? 0),
@@ -305,7 +305,7 @@ public sealed class TotalService : ITotalService
                                 where badgeNumberOrSsnCollection.Contains(t.Ssn)
                                 select new BalanceEndpointResponse
                                 {
-                                    Id = t.Ssn,
+                                    Id = t.Id,
                                     Ssn = t.Ssn.MaskSsn(),
                                     CurrentBalance = (t.CurrentBalance ?? 0),
                                     VestedBalance = (t.VestedBalance ?? 0),

@@ -1,8 +1,14 @@
 ﻿using System.CommandLine;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
+using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts;
+using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Factories;
+using Demoulas.ProfitSharing.Data.Interceptors;
+using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.Services.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -31,13 +37,13 @@ internal static class GenerateScriptHelper
             // Use your existing helper method to retrieve a DbContext.
             // The ExecuteWithDbContext signature presumably looks something like:
             //   Task ExecuteWithDbContext(IConfiguration config, string[] args, Func<DbContext, Task> action)
-            await ExecuteWithDbContext(configuration, args, async dbContext =>
+            await ExecuteWithDbContext(configuration, args, async (_, dbContext) =>
             {
                 var migrator = dbContext.GetService<IMigrator>();
 
                 var appliedMigrations = await dbContext.Database.GetAppliedMigrationsAsync();
                 var currentMigration = appliedMigrations.LastOrDefault("0");
-                
+
                 Console.WriteLine($"Current DB version: {currentMigration}");
 
                 var hasPendingChanges = await dbContext.Database.GetPendingMigrationsAsync();
@@ -57,16 +63,9 @@ internal static class GenerateScriptHelper
 
                 if (!string.IsNullOrWhiteSpace(outputPath))
                 {
-                    // Validate the output path to prevent path traversal
+                    // Normalize and ensure directory exists; allow any absolute/relative path
                     var fullPath = Path.GetFullPath(outputPath);
-                    var basePath = Path.GetFullPath(AppContext.BaseDirectory);
-
-                    if (!fullPath.StartsWith(basePath, StringComparison.OrdinalIgnoreCase))
-                    {
-                        throw new InvalidOperationException("Invalid output path.");
-                    }
-
-                    var directory = Path.GetDirectoryName(outputPath);
+                    var directory = Path.GetDirectoryName(fullPath);
                     if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
                     {
                         Directory.CreateDirectory(directory);
@@ -88,7 +87,11 @@ internal static class GenerateScriptHelper
         return generateScriptCommand;
     }
 
-    internal static async Task ExecuteWithDbContext(IConfiguration configuration, string[] args, Func<ProfitSharingDbContext, Task> action)
+    // Overload that also exposes the IServiceProvider so callers can resolve additional services via DI
+    internal static async Task ExecuteWithDbContext(
+        IConfiguration configuration,
+        string[] args,
+        Func<IServiceProvider, ProfitSharingDbContext, Task> action)
     {
         string? connectionName = configuration["connection-name"];
         if (string.IsNullOrEmpty(connectionName))
@@ -99,13 +102,29 @@ internal static class GenerateScriptHelper
         }
 
         HostApplicationBuilder builder = CreateHostBuilder(args);
-        _ = builder.Services.AddScoped<IAppUser, DummyUser>();
-        var list = new List<ContextFactoryRequest> { ContextFactoryRequest.Initialize<ProfitSharingDbContext>(connectionName) };
-        _ = DataContextFactory.Initialize(builder, contextFactoryRequests: list);
+        builder.AddDatabaseServices((services, factoryRequests) =>
+        {
+            // Register contexts without immediately resolving the interceptor
+            factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingDbContext>("ProfitSharing",
+                interceptorFactory: sp =>
+                [
+                    sp.GetRequiredService<AuditSaveChangesInterceptor>(),
+                    sp.GetRequiredService<BeneficiarySaveChangesInterceptor>(),
+                    sp.GetRequiredService<BeneficiaryContactSaveChangesInterceptor>()
+                ]));
+            factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"));
+            factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("ProfitSharing"));
+        });
+        builder.AddProjectServices();
 
-        await using var context = builder.Services.BuildServiceProvider().GetRequiredService<ProfitSharingDbContext>();
-        await action(context);
-#pragma warning restore S3928
+        _ = builder.Services.AddScoped<IAppUser, DummyUser>();
+        _ = builder.Services.AddScoped<RebuildEnrollmentAndZeroContService>();
+
+        await using var sp = builder.Services.BuildServiceProvider();
+        await using var scope = sp.CreateAsyncScope();
+        var provider = scope.ServiceProvider;
+        var context = provider.GetRequiredService<ProfitSharingDbContext>();
+        await action(provider, context);
     }
 
 
