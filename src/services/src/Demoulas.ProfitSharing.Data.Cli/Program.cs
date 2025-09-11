@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.Data.Cli;
@@ -81,7 +82,7 @@ public sealed class Program
 
         runSqlCommand.SetHandler(async () =>
         {
-            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async context =>
+            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async (sp, context) =>
             {
                 var sqlFile = configuration["sql-file"];
                 var sourceSchema = configuration["source-schema"];
@@ -98,8 +99,10 @@ public sealed class Program
                 context.DataImportRecords.Add(new DataImportRecord { SourceSchema = sourceSchema });
                 await context.SaveChangesAsync();
 
-                
-                
+                // Resolve and run the rebuild service before gathering schema statistics
+                var rebuildService = sp.GetRequiredService<Demoulas.ProfitSharing.Services.RebuildEnrollmentAndZeroContService>();
+                await rebuildService.ExecuteAsync(CancellationToken.None);
+
                 await GatherSchemaStatistics(context);
             });
         });
@@ -189,7 +192,7 @@ public sealed class Program
                         .Replace("{CURRENT_YEAR}", configuration["current-year"]).Trim();
 
                     await context.Database.ExecuteSqlRawAsync(sqlCommand);
-                } 
+                }
                 catch (Exception e)
                 {
                     iCtx.Console.WriteLine(e.ToString());
@@ -206,7 +209,7 @@ public sealed class Program
         rootCommand.AddCommand(GenerateScriptHelper.CreateGenerateUpgradeScriptCommand(configuration, args, commonOptions));
         rootCommand.AddCommand(validateImportCommand);
         rootCommand.AddCommand(runSqlCommandForNavigation);
-        
+
         var runSqlCommandForUatNavigation = new Command("import-uat-navigation", "Run a custom SQL script to add UAT navigations");
         commonOptions.ForEach(runSqlCommandForUatNavigation.AddOption);
 

@@ -39,7 +39,7 @@ internal static class GenerateScriptHelper
 
                 var appliedMigrations = await dbContext.Database.GetAppliedMigrationsAsync();
                 var currentMigration = appliedMigrations.LastOrDefault("0");
-                
+
                 Console.WriteLine($"Current DB version: {currentMigration}");
 
                 var hasPendingChanges = await dbContext.Database.GetPendingMigrationsAsync();
@@ -103,14 +103,42 @@ internal static class GenerateScriptHelper
         HostApplicationBuilder builder = CreateHostBuilder(args);
         _ = builder.AddProjectServices();
         _ = builder.Services.AddScoped<IAppUser, DummyUser>();
-        _ = builder.Services.AddScoped<RebuildEnrollmentAndZeroContService>();
-        
+
         var list = new List<ContextFactoryRequest> { ContextFactoryRequest.Initialize<ProfitSharingDbContext>(connectionName) };
         _ = DataContextFactory.Initialize(builder, contextFactoryRequests: list);
 
         await using var context = builder.Services.BuildServiceProvider().GetRequiredService<ProfitSharingDbContext>();
         await action(context);
 #pragma warning restore S3928
+    }
+
+    // Overload that also exposes the IServiceProvider so callers can resolve additional services via DI
+    internal static async Task ExecuteWithDbContext(
+        IConfiguration configuration,
+        string[] args,
+        Func<IServiceProvider, ProfitSharingDbContext, Task> action)
+    {
+        string? connectionName = configuration["connection-name"];
+        if (string.IsNullOrEmpty(connectionName))
+        {
+#pragma warning disable S112
+            throw new NullReferenceException(nameof(connectionName));
+#pragma warning restore S112
+        }
+
+        HostApplicationBuilder builder = CreateHostBuilder(args);
+        _ = builder.AddProjectServices();
+        _ = builder.Services.AddScoped<IAppUser, DummyUser>();
+        _ = builder.Services.AddScoped<Demoulas.ProfitSharing.Services.RebuildEnrollmentAndZeroContService>();
+
+        var list = new List<ContextFactoryRequest> { ContextFactoryRequest.Initialize<ProfitSharingDbContext>(connectionName) };
+        _ = DataContextFactory.Initialize(builder, contextFactoryRequests: list);
+
+        await using var sp = builder.Services.BuildServiceProvider();
+        await using var scope = sp.CreateAsyncScope();
+        var provider = scope.ServiceProvider;
+        var context = provider.GetRequiredService<ProfitSharingDbContext>();
+        await action(provider, context);
     }
 
 
