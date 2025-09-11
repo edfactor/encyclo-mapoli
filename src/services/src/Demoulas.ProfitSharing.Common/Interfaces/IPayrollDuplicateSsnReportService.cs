@@ -6,6 +6,5 @@ namespace Demoulas.ProfitSharing.Common.Interfaces;
 
 public interface IPayrollDuplicateSsnReportService
 {
-    Task<bool> DuplicateSsnExistsAsync(CancellationToken ct);
     Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsnAsync(SortedPaginationRequestDto req, CancellationToken ct);
 }

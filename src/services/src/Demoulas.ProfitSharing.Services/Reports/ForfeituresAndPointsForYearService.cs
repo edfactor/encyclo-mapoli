@@ -20,14 +20,14 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
-    private readonly IPayrollDuplicateSsnReportService _duplicateSsnReportService;
+    private readonly IPayrollDuplicateSsnReportServiceInternal _duplicateSsnReportService;
     private readonly TotalService _totalService;
 
     public ForfeituresAndPointsForYearService(
         IProfitSharingDataContextFactory dataContextFactory,
         TotalService totalService,
         IDemographicReaderService demographicReaderService,
-        IPayrollDuplicateSsnReportService duplicateSsnReportService
+        IPayrollDuplicateSsnReportServiceInternal duplicateSsnReportService
     )
     {
         _dataContextFactory = dataContextFactory;
