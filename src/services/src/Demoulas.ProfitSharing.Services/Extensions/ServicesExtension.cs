@@ -98,13 +98,6 @@ public static class ServicesExtension
         // Data migration services
         _ = builder.Services.AddHostedService<RebuildEnrollmentAndZeroContService>();
 
-        #region Mappers
-
-
-        builder.Services.AddSingleton<BeneficiaryTypeMapper>();
-        builder.Services.AddSingleton<EmployeeTypeMapper>();
-
-        #endregion
 
         builder.AddProjectCachingServices();
 
