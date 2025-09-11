@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
@@ -16,9 +17,9 @@ public sealed class EmbeddedSqlService : IEmbeddedSqlService
         return ctx.ParticipantTotals.FromSqlInterpolated(query);
     }
 
-    public IQueryable<ParticipantTotalYear> GetYearsOfServiceAlt(IProfitSharingDbContext ctx, short profitYear)
+    public IQueryable<ParticipantTotalYear> GetYearsOfServiceAlt(IProfitSharingDbContext ctx, short profitYear, DateOnly asOfDate)
     {
-        var query = GetYearsOfServiceQuery(profitYear);
+        var query = GetYearsOfServiceQuery(profitYear, asOfDate);
         return ctx.ParticipantTotalYears.FromSqlInterpolated(query);
     }
 
@@ -51,7 +52,7 @@ public sealed class EmbeddedSqlService : IEmbeddedSqlService
     {
         var totalBalanceQuery = GetTotalBalanceQuery(profitYear);
         var vestingRatioQuery = GetVestingRatioQuery(profitYear, asOfDate);
-        var yearsOfServiceQuery = GetYearsOfServiceQuery(employeeYear);
+        var yearsOfServiceQuery = GetYearsOfServiceQuery(employeeYear, asOfDate);
 
         var query = $@"
 SELECT 
@@ -249,8 +250,7 @@ SELECT
     {
         var initialContributionFiveYearsAgo = asOfDate.AddYears(-5).Year;
         var birthDate65 = asOfDate.AddYears(-65);
-        // We get the year prior to the profit year, because this algorithm looks at the hours worked to decide if the protit year has enough hours create another year.
-        var priorYearsOfCreditQuery = GetYearsOfServiceQuery((short)(profitYear-1));
+        var yearsOfCreditQuery = GetYearsOfServiceQuery((short)profitYear, asOfDate);
         var initialContributionYearQuery = GetInitialContributionYearQuery();
 
         var query = @$"
@@ -275,11 +275,11 @@ SELECT m.SSN,
   CASE WHEN m.YEARS_OF_SERVICE > 6 THEN 1 ELSE --Otherwise, If total years (including the present one) is more than 6, 100% Vested
   0 END END END END END END END END END END END AS RATIO
 FROM (
-    SELECT d.ID AS DEMOGRAPHIC_ID, NULL AS BENEFICIARY_CONTACT_ID, d.SSN, d.DATE_OF_BIRTH, 1 AS IS_EMPLOYEE, d.TERMINATION_DATE, pp.ENROLLMENT_ID, d.TERMINATION_CODE_ID, pp.ZERO_CONTRIBUTION_REASON_ID, INITIAL_CONTR_YEAR, yos.YEARS + CASE WHEN pp.ENROLLMENT_ID = 2 THEN 1 ELSE 0 END + CASE WHEN pp.CURRENT_HOURS_YEAR  + pp.HOURS_EXECUTIVE  >= 1000 THEN 1 ELSE 0 END AS YEARS_OF_SERVICE
+    SELECT d.ID AS DEMOGRAPHIC_ID, NULL AS BENEFICIARY_CONTACT_ID, d.SSN, d.DATE_OF_BIRTH, 1 AS IS_EMPLOYEE, d.TERMINATION_DATE, pp.ENROLLMENT_ID, d.TERMINATION_CODE_ID, pp.ZERO_CONTRIBUTION_REASON_ID, INITIAL_CONTR_YEAR, yos.YEARS + CASE WHEN pp.ENROLLMENT_ID = 2 THEN 1 ELSE 0 END AS YEARS_OF_SERVICE
     FROM DEMOGRAPHIC d
     LEFT JOIN PAY_PROFIT pp ON d.ID = pp.DEMOGRAPHIC_ID AND pp.PROFIT_YEAR  = {profitYear}
     LEFT JOIN (
-        {priorYearsOfCreditQuery}
+        {yearsOfCreditQuery}
     ) yos ON d.SSN = yos.SSN
     LEFT JOIN (
         {initialContributionYearQuery}
@@ -293,14 +293,21 @@ FROM (
         return query;
     }
     
-    public static FormattableString GetYearsOfServiceQuery(short profitYear)
+    public static FormattableString GetYearsOfServiceQuery(short profitYear, DateOnly asOfDate)
     {
+        var aged18Date = asOfDate.AddYears(-18); 
         FormattableString query = @$"
-SELECT pd.SSN, SUM(pd.YEARS_OF_SERVICE_CREDIT) YEARS
-            FROM PROFIT_DETAIL pd 
-            WHERE pd.PROFIT_YEAR  <= {profitYear}
-            GROUP BY pd.SSN
-
+SELECT pd.SSN, SUM(pd.YEARS_OF_SERVICE_CREDIT)
+               + CASE WHEN NOT EXISTS (SELECT 1 FROM PROFIT_DETAIL pd0 WHERE pd0.PROFIT_YEAR = {profitYear} AND pd0.PROFIT_CODE_ID = {ProfitCode.Constants.IncomingContributions.Id} AND pd.SSN  = pd0.SSN AND pd0.PROFIT_YEAR_ITERATION = 0)
+                  AND ( pp.HOURS_EXECUTIVE  + pp.CURRENT_HOURS_YEAR >= {ReferenceData.MinimumHoursForContribution()} 
+                        AND d.DATE_OF_BIRTH <= TO_DATE('{aged18Date.ToString("yyyy-MM-dd")}', 'yyyy-mm-dd'))
+               THEN 1 ELSE 0 END
+                 AS YEARS
+            FROM PROFIT_DETAIL pd
+       LEFT JOIN DEMOGRAPHIC d ON pd.SSN = d.SSN
+       LEFT JOIN PAY_PROFIT pp ON pp.DEMOGRAPHIC_ID = d.ID AND pp.PROFIT_YEAR = {profitYear}
+           WHERE pd.PROFIT_YEAR <= {profitYear}
+        GROUP BY pd.SSN, pp.CURRENT_HOURS_YEAR, pp.HOURS_EXECUTIVE, d.DATE_OF_BIRTH
 ";
         return query;
     }

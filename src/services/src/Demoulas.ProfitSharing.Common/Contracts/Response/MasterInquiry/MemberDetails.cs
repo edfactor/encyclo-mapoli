@@ -28,12 +28,12 @@ public record MemberDetails : IdRequest, INameParts, IFullNameProperty, IPhoneNu
     public DateOnly? TerminationDate { get; init; } = null;
     public DateOnly? ReHireDate { get; init; } = null;
     public string? EmploymentStatus { get; set; }
-    [Unmask] public decimal YearToDateProfitSharingHours { get; init; }
+    [UnmaskSensitive] public decimal YearToDateProfitSharingHours { get; init; }
     public byte? EnrollmentId { get; init; }
     public string? Enrollment { get; init; }
     public short StoreNumber { get; set; }
-    [Unmask] public decimal CurrentEtva { get; set; }
-    [Unmask] public decimal PreviousEtva { get; set; }
+    [UnmaskSensitive] public decimal CurrentEtva { get; set; }
+    [UnmaskSensitive] public decimal PreviousEtva { get; set; }
 
     public string? Department { get; set; }
     public string? PayClassification { get; set; }

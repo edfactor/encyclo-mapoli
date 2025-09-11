@@ -1,5 +1,6 @@
 import { ColDef } from "ag-grid-community";
 import {
+  createAddressColumn,
   createBadgeColumn,
   createCityColumn,
   createCountColumn,
@@ -24,19 +25,7 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       headerName: "DOB",
       field: "dateOfBirth"
     }),
-    {
-      headerName: "Address",
-      field: "address",
-      colId: "address",
-      minWidth: 200,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      valueGetter: (params) => {
-        const addr = params.data.address;
-        return addr ? `${addr.street}${addr.street2 ? ", " + addr.street2 : ""}` : "";
-      }
-    },
+    createAddressColumn({}),
     createCityColumn({
       field: "address.city",
       colId: "address.city"

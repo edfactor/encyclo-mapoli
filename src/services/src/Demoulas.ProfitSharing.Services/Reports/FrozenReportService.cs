@@ -640,7 +640,7 @@ public class FrozenReportService : IFrozenReportService
         var detailList = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var query = _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalEndDate);
-            var yearsInPlanQuery = _totalService.GetYearsOfService(ctx, req.ProfitYear);
+            var yearsInPlanQuery = _totalService.GetYearsOfService(ctx, req.ProfitYear, startEnd.FiscalEndDate);
             var demo = await _demographicReaderService.BuildDemographicQuery(ctx);
             
             var joinedQuery = from q in query

@@ -1,16 +1,16 @@
 import { ColDef } from "ag-grid-community";
-import { GRID_COLUMN_WIDTHS } from "../../constants";
 import {
   createBadgeColumn,
   createCurrencyColumn,
   createDateColumn,
   createNameColumn,
-  createSSNColumn
+  createSSNColumn,
+  createStateColumn
 } from "../../utils/gridColumnFactory";
 
 export const BeneficiaryOfGridColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({ minWidth: 120 }),
+    createBadgeColumn({}),
     {
       headerName: "PSN_SUFFIX",
       field: "psnSuffix",
@@ -22,18 +22,11 @@ export const BeneficiaryOfGridColumns = (): ColDef[] => {
     },
     createNameColumn({
       field: "fullName",
-      minWidth: GRID_COLUMN_WIDTHS.FULL_NAME,
-      alignment: "center",
-      sortable: false,
       valueFormatter: (params) => {
         return `${params.data.lastName}, ${params.data.firstName}`;
       }
     }),
-    createSSNColumn({
-      valueFormatter: (params) => {
-        return `${params.data.ssn}`;
-      }
-    }),
+    createSSNColumn({}),
     createDateColumn({ headerName: "Date of Birth", field: "dateOfBirth", colId: "dateOfBirth" }),
     {
       headerName: "Address",
@@ -59,18 +52,7 @@ export const BeneficiaryOfGridColumns = (): ColDef[] => {
         return `${params.data.city}`;
       }
     },
-    {
-      headerName: "State",
-      field: "state",
-      colId: "state",
-      flex: 1,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      valueFormatter: (params) => {
-        return `${params.data.state}`;
-      }
-    },
+    createStateColumn({}),
     {
       headerName: "Percent",
       field: "percent",
@@ -78,10 +60,7 @@ export const BeneficiaryOfGridColumns = (): ColDef[] => {
       flex: 1,
       headerClass: "center-align",
       cellClass: "center-align",
-      resizable: true,
-      valueFormatter: (params) => {
-        return `${params.data.state}`;
-      }
+      resizable: true
     },
     createCurrencyColumn({ headerName: "Current", field: "currentBalance", colId: "currentBalance" })
   ];

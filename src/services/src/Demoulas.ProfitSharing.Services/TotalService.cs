@@ -126,9 +126,9 @@ public sealed class TotalService : ITotalService
     /// <returns>
     /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalYear"/> containing the SSN and total years of service for each participant.
     /// </returns>
-    internal IQueryable<ParticipantTotalYear> GetYearsOfService(IProfitSharingDbContext ctx, short profitYear)
+    internal IQueryable<ParticipantTotalYear> GetYearsOfService(IProfitSharingDbContext ctx, short profitYear, DateOnly asOfDate)
     {
-        return _embeddedSqlService.GetYearsOfServiceAlt(ctx, profitYear);
+        return _embeddedSqlService.GetYearsOfServiceAlt(ctx, profitYear, asOfDate);
     }
 
     /// <summary>

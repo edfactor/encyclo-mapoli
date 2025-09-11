@@ -16,6 +16,7 @@ internal sealed class ParticipantTotalMap : IEntityTypeConfiguration<Participant
             .IsRequired();
 
         builder.Property(x => x.TotalAmount)
-            .HasColumnName("TOTAL");
+            .HasColumnName("TOTAL")
+            .HasPrecision(18, 2);
     }
 }

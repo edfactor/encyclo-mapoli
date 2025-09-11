@@ -36,7 +36,7 @@ public class UpdateSummaryTests : PristineBaseTest
         {
             var employeeData = await (await DemographicReaderService.BuildDemographicQuery(ctx))
                 .Join(ctx.PayProfits, d => d.Id, pp => pp.DemographicId, (d, pp) => new { d, pp })
-                .Join(TotalService.GetYearsOfService(ctx, profitYear), b=>b.d.Ssn, yos=>yos.Ssn, (b, pty ) => new {b.d, b.pp,pty.Years})
+                .Join(TotalService.GetYearsOfService(ctx, profitYear, calendarInfo.FiscalEndDate), b=>b.d.Ssn, yos=>yos.Ssn, (b, pty ) => new {b.d, b.pp,pty.Years})
                 .Where(b => b.pp.ProfitYear == profitYear && b.d.BadgeNumber == 700036)
                 .SingleAsync(CancellationToken.None);
             
@@ -311,7 +311,7 @@ public class UpdateSummaryTests : PristineBaseTest
         {
             PayProfit pp = await ctx.PayProfits.Include(d => d.Demographic).Where(pp => pp.ProfitYear == profitYear && pp.Demographic!.BadgeNumber == badge)
                 .SingleAsync(CancellationToken.None);
-            ParticipantTotalYear? pty = await TotalService.GetYearsOfService(ctx, profitYear).Where(pty => pty.Ssn == pp.Demographic!.Ssn)
+            ParticipantTotalYear? pty = await TotalService.GetYearsOfService(ctx, profitYear, fromDateTime).Where(pty => pty.Ssn == pp.Demographic!.Ssn)
                 .SingleOrDefaultAsync(CancellationToken.None);
             byte years = pty?.Years ?? 0;
             int age = fromDateTime.Year - pp.Demographic!.DateOfBirth.Year;

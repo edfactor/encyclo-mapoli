@@ -26,8 +26,8 @@ public static class MockEmbeddedSqlService
             .Returns((IProfitSharingDbContext x, short y, DateOnly z, short a, DateOnly b, CancellationToken c) => Constants.ProfitShareTotals.Object);
 
         // Mock GetYearsOfServiceAlt to return the correct LINQ result using fake ProfitDetails
-        mock.Setup(m => m.GetYearsOfServiceAlt(It.IsAny<IProfitSharingDbContext>(), It.IsAny<short>()))
-            .Returns((IProfitSharingDbContext ctx, short profitYear) =>
+        mock.Setup(m => m.GetYearsOfServiceAlt(It.IsAny<IProfitSharingDbContext>(), It.IsAny<short>(), It.IsAny<DateOnly>()))
+            .Returns((IProfitSharingDbContext ctx, short profitYear, DateOnly asOfDate) =>
             {
                 // Use the fake data from Constants or ctx.ProfitDetails if available
                 var profitDetails = (ctx?.ProfitDetails?.AsQueryable() ?? new List<ProfitDetail>().AsQueryable());

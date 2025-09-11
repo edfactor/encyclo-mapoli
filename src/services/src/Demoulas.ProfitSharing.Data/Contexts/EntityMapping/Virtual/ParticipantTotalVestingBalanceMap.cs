@@ -21,18 +21,23 @@ internal sealed class ParticipantTotalVestingBalanceMap : IEntityTypeConfigurati
             .HasColumnName("ID");
 
         builder.Property(x => x.VestedBalance)
-            .HasColumnName("VESTEDBALANCE");
+            .HasColumnName("VESTEDBALANCE")
+            .HasPrecision(18, 2);
         builder.Property(x => x.CurrentBalance)
-            .HasColumnName("CURRENTBALANCE");
+            .HasColumnName("CURRENTBALANCE")
+            .HasPrecision(18, 2);
         builder.Property(x => x.VestingPercent)
-            .HasColumnName("RATIO");
+            .HasColumnName("RATIO")
+            .HasPrecision(18, 6);
 
         builder.Property(x => x.YearsInPlan)
             .HasColumnName("YEARS");
         
         builder.Property(x=>x.AllocationsToBeneficiary)
-            .HasColumnName("ALLOCTOBENE");
+            .HasColumnName("ALLOCTOBENE")
+            .HasPrecision(18, 2);
         builder.Property(x=>x.AllocationsFromBeneficiary)
-            .HasColumnName("ALLOCFROMBENE");
+            .HasColumnName("ALLOCFROMBENE")
+            .HasPrecision(18, 2);
     }
 }

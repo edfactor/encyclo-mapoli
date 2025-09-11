@@ -31,7 +31,6 @@ const pathToReadableName: Record<string, string> = {
   "profit-share-update": "Profit Share Update (PAY444 PAY447)",
   "profit-share-report-edit-run": "Profit Share Report Edit Run",
   "profit-share-report-final-run": "Profit Share Report Final Run",
-  "paymaster-update": "Paymaster Update",
   "profit-share-by-store": "Profit Share by Store",
   "profit-share-gross-report": "Profit Share Gross Report",
   "pay426-1": "Pay 426 Active 18-20",

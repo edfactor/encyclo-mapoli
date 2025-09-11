@@ -1,13 +1,11 @@
-using System.Diagnostics.CodeAnalysis;
-using YEMatch.YEMatch;
+﻿using System.Diagnostics.CodeAnalysis;
 using YEMatch.YEMatch.ArrangeActivites;
-using YEMatch.YEMatch.ReadyActivities;
-using YEMatch.YEMatch.Runs;
+using YEMatch.YEMatch.AssertActivities;
 using YEMatch.YEMatch.SmartIntegrationTests;
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
-namespace YEMatch;
+namespace YEMatch.YEMatch.Runs;
 
 /* A scratch pad for running different Activities on demand */
 

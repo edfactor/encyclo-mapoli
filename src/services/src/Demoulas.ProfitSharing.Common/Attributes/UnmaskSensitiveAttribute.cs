@@ -5,7 +5,7 @@
 /// Optionally restrict the unmasking to specific roles; if no roles provided, applies to all roles.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
-public sealed class UnmaskAttribute : Attribute
+public sealed class UnmaskSensitiveAttribute : Attribute
 {
 	/// <summary>
 	/// The roles for which unmasking applies; empty means all roles.
@@ -22,7 +22,7 @@ public sealed class UnmaskAttribute : Attribute
 	/// - <c>[Unmask(Role.FINANCEMANAGER, Role.ADMINISTRATOR)]</c> — only Finance and Admin see clear values.
 	/// - <c>[Unmask(Role.EXECUTIVEADMIN)]</c> — only Executive-Administrators see executive values in clear.
 	/// </remarks>
-	public UnmaskAttribute(params string[] roles)
+	public UnmaskSensitiveAttribute(params string[] roles)
 	{
 		Roles = roles ?? [];
 	}

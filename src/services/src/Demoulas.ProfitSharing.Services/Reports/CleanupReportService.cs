@@ -64,16 +64,16 @@ public class CleanupReportService : ICleanupReportService
     {
         using (_logger.BeginScope("Request BEGIN DEMOGRAPHIC BADGES NOT IN PAY PROFIT"))
         {
-            var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+            var data = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
                 var query = from dem in demographics
                         .Include(d => d.EmploymentStatus)
                     where !(from pp in ctx.PayProfits select pp.DemographicId).Contains(dem.Id)
-                    select new DemographicBadgesNotInPayProfitResponse
+                    select new 
                     {
-                        BadgeNumber = dem.BadgeNumber,
-                        Ssn = dem.Ssn.MaskSsn(),
+                        dem.BadgeNumber,
+                        dem.Ssn,
                         EmployeeName = dem.ContactInfo.FullName ?? "",
                         Status = dem.EmploymentStatusId,
                         StatusName = dem.EmploymentStatus!.Name,
@@ -82,6 +82,21 @@ public class CleanupReportService : ICleanupReportService
                     };
                 return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             });
+
+            var results = new PaginatedResponseDto<DemographicBadgesNotInPayProfitResponse>
+            {
+                Total = data.Total,
+                Results = data.Results.Select(x => new DemographicBadgesNotInPayProfitResponse
+                {
+                    BadgeNumber = x.BadgeNumber,
+                    EmployeeName = x.EmployeeName,
+                    Ssn = x.Ssn.MaskSsn(),
+                    Status = x.Status,
+                    StatusName = x.StatusName,
+                    Store = x.Store,
+                    IsExecutive = x.IsExecutive
+                }).ToList()
+            };  
 
             _logger.LogInformation("Returned {Results} records", results.Results.Count());
             return new ReportResponseBase<DemographicBadgesNotInPayProfitResponse>
@@ -183,6 +198,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                     .ToHashSetAsync(cancellationToken);
 
                 var names = dupInfo.Select(x => x.FullName).ToHashSet();
+                var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
 
                 var query = from dem in demographics.Include(d => d.EmploymentStatus)
                         join ppLj in ctx.PayProfits on new { DemographicId = dem.Id, req.ProfitYear } equals new
@@ -193,7 +209,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                         from pp in tmpPayProfit.DefaultIfEmpty()
                         join b in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear) on dem.Ssn equals b.Ssn into tmpBalance
                         from bal in tmpBalance.DefaultIfEmpty()
-                        join yos in _totalService.GetYearsOfService(ctx, req.ProfitYear) on dem.Ssn equals yos.Ssn into tmpYos
+                        join yos in _totalService.GetYearsOfService(ctx, req.ProfitYear, calInfo.FiscalEndDate) on dem.Ssn equals yos.Ssn into tmpYos
                         from yos in tmpYos.DefaultIfEmpty()
                         where dem.ContactInfo.FullName != null && names.Contains(dem!.ContactInfo!.FullName!)
                         select new

@@ -27,6 +27,7 @@
   <ItemGroup>
     <PackageReference Include="OpenTelemetry.Api" />
     <PackageReference Include="Riok.Mapperly" />
+  <PackageReference Include="Serilog.Enrichers.Sensitive" />
   </ItemGroup>
 
   <ItemGroup>

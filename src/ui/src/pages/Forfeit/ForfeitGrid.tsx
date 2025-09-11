@@ -64,14 +64,19 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
-  const totalForfeitures = forfeituresAndPoints?.totalForfeitures ?? 0;
-  const totalForfeitPoints = forfeituresAndPoints?.totalForfeitPoints ?? 0;
-  const totalEarningPoints = forfeituresAndPoints?.totalEarningPoints ?? 0;
+  // Some API responses may return numeric totals as strings; coerce safely before formatting.
+  const safeNumber = (val: unknown) => {
+    const n = typeof val === "number" ? val : parseFloat(val as string);
+    return Number.isFinite(n) ? n : 0;
+  };
+  const totalForfeituresRaw = safeNumber(forfeituresAndPoints?.totalForfeitures);
+  const totalForfeitPoints = safeNumber(forfeituresAndPoints?.totalForfeitPoints);
+  const totalEarningPoints = safeNumber(forfeituresAndPoints?.totalEarningPoints);
 
   const totalsRow = {
-    forfeitures: totalForfeitures.toFixed(2) ?? "0",
-    contForfeitPoints: totalForfeitPoints ?? 0,
-    earningPoints: totalEarningPoints ?? 0
+    forfeitures: totalForfeituresRaw.toFixed(2),
+    contForfeitPoints: totalForfeitPoints,
+    earningPoints: totalEarningPoints
   };
 
   return (

@@ -13,30 +13,43 @@ internal sealed class ProfitDetailRollupMap : IEntityTypeConfiguration<ProfitDet
             .HasColumnName("SSN")
             .IsRequired();
         builder.Property(x => x.TotalContributions)
-            .HasColumnName("TOTAL_CONTRIBUTIONS");
+            .HasColumnName("TOTAL_CONTRIBUTIONS")
+            .HasPrecision(18, 2);
         builder.Property(x => x.TotalEarnings)
-            .HasColumnName("TOTAL_EARNINGS");
+            .HasColumnName("TOTAL_EARNINGS")
+            .HasPrecision(18, 2);
         builder.Property(x => x.TotalForfeitures)
-            .HasColumnName("TOTAL_FORFEITURES");
+            .HasColumnName("TOTAL_FORFEITURES")
+            .HasPrecision(18, 2);
         builder.Property(x => x.TotalPayments)
-            .HasColumnName("TOTAL_PAYMENTS");
+            .HasColumnName("TOTAL_PAYMENTS")
+            .HasPrecision(18, 2);
         builder.Property(x => x.Distribution)
-            .HasColumnName("DISTRIBUTION");
+            .HasColumnName("DISTRIBUTION")
+            .HasPrecision(18, 2);
         builder.Property(x => x.BeneficiaryAllocation)
-            .HasColumnName("BENEFICIARY_ALLOCATION");
+            .HasColumnName("BENEFICIARY_ALLOCATION")
+            .HasPrecision(18, 2);
         builder.Property(x => x.CurrentBalance)
-            .HasColumnName("CURRENT_BALANCE");
+            .HasColumnName("CURRENT_BALANCE")
+            .HasPrecision(18, 2);
         builder.Property(x => x.MilitaryTotal)
-            .HasColumnName("MILITARY_TOTAL");
+            .HasColumnName("MILITARY_TOTAL")
+            .HasPrecision(18, 2);
         builder.Property(x => x.ClassActionFundTotal)
-            .HasColumnName("CLASS_ACTION_FUND_TOTAL");
+            .HasColumnName("CLASS_ACTION_FUND_TOTAL")
+            .HasPrecision(18, 2);
         builder.Property(x => x.PaidAllocationsTotal)
-            .HasColumnName("PAID_ALLOCATIONS_TOTAL");
+            .HasColumnName("PAID_ALLOCATIONS_TOTAL")
+            .HasPrecision(18, 2);
         builder.Property(x => x.DistributionsTotal)
-            .HasColumnName("DISTRIBUTIONS_TOTAL");
+            .HasColumnName("DISTRIBUTIONS_TOTAL")
+            .HasPrecision(18, 2);
         builder.Property(x => x.AllocationsTotal)
-            .HasColumnName("ALLOCATIONS_TOTAL");
+            .HasColumnName("ALLOCATIONS_TOTAL")
+            .HasPrecision(18, 2);
         builder.Property(x => x.ForfeitsTotal)
-            .HasColumnName("FORFEITS_TOTAL");
+            .HasColumnName("FORFEITS_TOTAL")
+            .HasPrecision(18, 2);
     }
 }

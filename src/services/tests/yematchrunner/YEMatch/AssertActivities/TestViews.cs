@@ -1,9 +1,7 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using Oracle.ManagedDataAccess.Client;
-using YEMatch.YEMatch;
-using YEMatch.YEMatch.AssertActivities;
 
-namespace YEMatch;
+namespace YEMatch.YEMatch.AssertActivities;
 
 [SuppressMessage("Major Code Smell", "S125:Sections of code should not be commented out")]
 [SuppressMessage("AsyncUsage", "AsyncFixer01:Unnecessary async/await usage")]
