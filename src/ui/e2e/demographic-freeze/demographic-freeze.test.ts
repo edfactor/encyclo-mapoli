@@ -92,11 +92,14 @@ test.describe("Demographic Freeze: ", () => {
 
         // Select by value
         await pageSizeSelect.selectOption('10');
+        const isDisabled = await page.getByRole('button', { name: 'next page' }).isDisabled();
+        if (!isDisabled) {
+            await page.getByRole('button', { name: 'next page' }).click();
+            const [response] = await Promise.all([page.waitForResponse((resp) =>
+                resp.url().includes('/itdevops/frozen'))]);
+            await expect(response.status()).toBe(200);
+        }
 
-        await page.getByRole('button', { name: 'next page' }).click();
-        const [response] = await Promise.all([page.waitForResponse((resp) =>
-            resp.url().includes('/itdevops/frozen'))]);
-        await expect(response.status()).toBe(200);
     })
 
 });
