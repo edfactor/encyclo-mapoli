@@ -3,6 +3,8 @@ using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Factories;
+using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.Services.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -99,7 +101,10 @@ internal static class GenerateScriptHelper
         }
 
         HostApplicationBuilder builder = CreateHostBuilder(args);
+        _ = builder.AddProjectServices();
         _ = builder.Services.AddScoped<IAppUser, DummyUser>();
+        _ = builder.Services.AddScoped<RebuildEnrollmentAndZeroContService>();
+        
         var list = new List<ContextFactoryRequest> { ContextFactoryRequest.Initialize<ProfitSharingDbContext>(connectionName) };
         _ = DataContextFactory.Initialize(builder, contextFactoryRequests: list);
 

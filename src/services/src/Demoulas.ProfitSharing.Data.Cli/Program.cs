@@ -98,6 +98,8 @@ public sealed class Program
                 context.DataImportRecords.Add(new DataImportRecord { SourceSchema = sourceSchema });
                 await context.SaveChangesAsync();
 
+                
+                
                 await GatherSchemaStatistics(context);
             });
         });
