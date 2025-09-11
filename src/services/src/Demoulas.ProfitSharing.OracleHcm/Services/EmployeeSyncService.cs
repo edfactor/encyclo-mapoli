@@ -24,10 +24,11 @@ namespace Demoulas.ProfitSharing.OracleHcm.Services;
 internal sealed class EmployeeSyncService : IEmployeeSyncService
 {
     private readonly EmployeeFullSyncClient _oracleEmployeeDataSyncClient;
-    private readonly IDemographicsServiceInternal _demographicsService;
+    private IDemographicsServiceInternal _demographicsService = null!;
     private readonly AtomFeedClient _atomFeedClient;
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly Channel<MessageRequest<OracleEmployee[]>> _employeeChannel;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
 
     public EmployeeSyncService(AtomFeedClient atomFeedClient,
         EmployeeFullSyncClient oracleEmployeeDataSyncClient,
@@ -36,17 +37,18 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         IServiceScopeFactory serviceScopeFactory)
     {
         _oracleEmployeeDataSyncClient = oracleEmployeeDataSyncClient;
-        var scope = serviceScopeFactory.CreateScope();
-        _demographicsService = scope.ServiceProvider.GetRequiredService<IDemographicsServiceInternal>();
         _atomFeedClient = atomFeedClient;
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
-
         _employeeChannel = employeeChannel;
+        _serviceScopeFactory = serviceScopeFactory;
     }
 
     public async Task ExecuteFullSyncAsync(string requestedBy = Constants.SystemAccountName, CancellationToken cancellationToken = default)
     {
         using Activity? activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ExecuteFullSyncAsync), ActivityKind.Internal);
+
+        using var scope = _serviceScopeFactory.CreateScope();
+        _demographicsService = scope.ServiceProvider.GetRequiredService<IDemographicsServiceInternal>();
 
         Job job = new Job
         {
@@ -97,6 +99,8 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
     public async Task ExecuteDeltaSyncAsync(string requestedBy = Constants.SystemAccountName, CancellationToken cancellationToken = default)
     {
         using Activity? activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ExecuteDeltaSyncAsync), ActivityKind.Internal);
+        using var scope = _serviceScopeFactory.CreateScope();
+        _demographicsService = scope.ServiceProvider.GetRequiredService<IDemographicsServiceInternal>();
 
         Job job = new Job
         {
@@ -164,6 +168,9 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         }
         catch (Exception ex)
         {
+            using var scope = _serviceScopeFactory.CreateScope();
+            _demographicsService = scope.ServiceProvider.GetRequiredService<IDemographicsServiceInternal>();
+
             await _demographicsService.AuditError(0, 0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken).ConfigureAwait(false);
         }
     }

@@ -22,10 +22,11 @@ internal class EmployeeSyncChannelConsumer : BackgroundService
 {
     private readonly ChannelReader<MessageRequest<OracleEmployee[]>> _reader;
     private readonly OracleEmployeeValidator _employeeValidator;
-    private readonly IDemographicsServiceInternal _demographicsService;
+    private IDemographicsServiceInternal _demographicsService = null!;
     private readonly OracleHcmConfig _oracleHcmConfig;
     private readonly IFakeSsnService _fakeSsnService;
     private readonly IProfitSharingDataContextFactory _contextFactory;
+    private readonly IServiceScopeFactory _scopeFactory;
 
     public EmployeeSyncChannelConsumer(
         Channel<MessageRequest<OracleEmployee[]>> channel,
@@ -37,15 +38,17 @@ internal class EmployeeSyncChannelConsumer : BackgroundService
     {
         _reader = channel.Reader;
         _employeeValidator = employeeValidator;
-        using var scope = scopeFactory.CreateScope();
-        _demographicsService = scope.ServiceProvider.GetRequiredService<IDemographicsServiceInternal>();
         _oracleHcmConfig = oracleHcmConfig;
         _fakeSsnService = fakeSsnService;
         _contextFactory = contextFactory;
+        _scopeFactory = scopeFactory;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        using var scope = _scopeFactory.CreateScope();
+        _demographicsService = scope.ServiceProvider.GetRequiredService<IDemographicsServiceInternal>();
+
         await foreach (var message in _reader.ReadAllAsync(stoppingToken).ConfigureAwait(false))
         {
             await ProcessMessage(message, stoppingToken).ConfigureAwait(false);
@@ -92,6 +95,9 @@ internal class EmployeeSyncChannelConsumer : BackgroundService
             ValidationResult? result = await _employeeValidator.ValidateAsync(employee!, cancellationToken).ConfigureAwait(false);
             if (!result.IsValid)
             {
+                using var scope = _scopeFactory.CreateScope();
+                _demographicsService = scope.ServiceProvider.GetRequiredService<IDemographicsServiceInternal>();
+
                 await _demographicsService.AuditError(badgeNumber, employee?.PersonId ?? 0, result.Errors, requestedBy, cancellationToken).ConfigureAwait(false);
                 continue;
             }
