@@ -48,7 +48,7 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
             ForfeituresAndPointsForYearResponseWithTotals response = await ComputeTotals(ctx, currentYear, lastYear, cancellationToken);
 
             // Employee details
-            IEnumerable<ForfeituresAndPointsForYearResponse> members = await GetMembers(ctx, currentYear, cancellationToken);
+            List<ForfeituresAndPointsForYearResponse> members = await GetMembers(ctx, currentYear, cancellationToken);
 
             // Each employee's value is independently rounded. 
             int earningPoints = members.Sum(r => r.EarningPoints);
@@ -63,8 +63,7 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
     private async Task<ForfeituresAndPointsForYearResponseWithTotals> ComputeTotals(ProfitSharingReadOnlyDbContext ctx, short currentYear, short lastYear,
         CancellationToken cancellationToken)
     {
-        decimal? lastYearTotal = await _totalService.TotalVestingBalance(ctx, lastYear, DateOnly.MaxValue).AsNoTracking()
-            .SumAsync(ptvb => ptvb.CurrentBalance, cancellationToken);
+        decimal? lastYearTotal = await _totalService.TotalVestingBalance(ctx, lastYear, DateOnly.MaxValue).SumAsync(ptvb => ptvb.CurrentBalance, cancellationToken);
 
         var transactionsInCurrentYear = await _totalService.GetTransactionsBySsnForProfitYearForOracle(ctx, currentYear).ToListAsync(cancellationToken);
         decimal distributionsTotal = transactionsInCurrentYear.Sum(syd => syd.DistributionsTotal);
@@ -96,12 +95,15 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
             ;
     }
 
-    private async Task<IEnumerable<ForfeituresAndPointsForYearResponse>> GetMembers(ProfitSharingReadOnlyDbContext ctx, short currentYear, CancellationToken cancellationToken)
+    private async Task<List<ForfeituresAndPointsForYearResponse>> GetMembers(ProfitSharingReadOnlyDbContext ctx, short currentYear, CancellationToken cancellationToken)
     {
-        if (await _duplicateSsnReportService.DuplicateSsnExistsAsync(cancellationToken))
-        {
-            throw new ValidationException("There are presently duplicate SSN's in the system, which will cause this process to fail.");
-        }
+        var validator = new InlineValidator<short>();
+        // Inline async rule to prevent running when duplicate SSNs exist.
+        validator.RuleFor(r => r)
+            .MustAsync(async (_, ct) => !await _duplicateSsnReportService.DuplicateSsnExistsAsync(ct))
+            .WithMessage("There are presently duplicate SSN's in the system, which will cause this process to fail.");
+
+        await validator.ValidateAndThrowAsync(currentYear, cancellationToken);
 
         // Get current balances for all members (some members could have no balance)
         Dictionary<(int Ssn, int Id), ParticipantTotalVestingBalance> memberAmountsBySsn = await _totalService
