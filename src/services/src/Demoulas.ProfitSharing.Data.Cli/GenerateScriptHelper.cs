@@ -37,7 +37,7 @@ internal static class GenerateScriptHelper
             // Use your existing helper method to retrieve a DbContext.
             // The ExecuteWithDbContext signature presumably looks something like:
             //   Task ExecuteWithDbContext(IConfiguration config, string[] args, Func<DbContext, Task> action)
-            await ExecuteWithDbContext(configuration, args, async dbContext =>
+            await ExecuteWithDbContext(configuration, args, async (_, dbContext) =>
             {
                 var migrator = dbContext.GetService<IMigrator>();
 
@@ -63,16 +63,9 @@ internal static class GenerateScriptHelper
 
                 if (!string.IsNullOrWhiteSpace(outputPath))
                 {
-                    // Validate the output path to prevent path traversal
+                    // Normalize and ensure directory exists; allow any absolute/relative path
                     var fullPath = Path.GetFullPath(outputPath);
-                    var basePath = Path.GetFullPath(AppContext.BaseDirectory);
-
-                    if (!fullPath.StartsWith(basePath, StringComparison.OrdinalIgnoreCase))
-                    {
-                        throw new InvalidOperationException("Invalid output path.");
-                    }
-
-                    var directory = Path.GetDirectoryName(outputPath);
+                    var directory = Path.GetDirectoryName(fullPath);
                     if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
                     {
                         Directory.CreateDirectory(directory);
@@ -92,28 +85,6 @@ internal static class GenerateScriptHelper
         });
 
         return generateScriptCommand;
-    }
-
-    internal static async Task ExecuteWithDbContext(IConfiguration configuration, string[] args, Func<ProfitSharingDbContext, Task> action)
-    {
-        string? connectionName = configuration["connection-name"];
-        if (string.IsNullOrEmpty(connectionName))
-        {
-#pragma warning disable S112
-            throw new NullReferenceException(nameof(connectionName));
-#pragma warning restore S112
-        }
-
-        HostApplicationBuilder builder = CreateHostBuilder(args);
-        _ = builder.AddProjectServices();
-        _ = builder.Services.AddScoped<IAppUser, DummyUser>();
-
-        var list = new List<ContextFactoryRequest> { ContextFactoryRequest.Initialize<ProfitSharingDbContext>(connectionName) };
-        _ = DataContextFactory.Initialize(builder, contextFactoryRequests: list);
-
-        await using var context = builder.Services.BuildServiceProvider().GetRequiredService<ProfitSharingDbContext>();
-        await action(context);
-#pragma warning restore S3928
     }
 
     // Overload that also exposes the IServiceProvider so callers can resolve additional services via DI
