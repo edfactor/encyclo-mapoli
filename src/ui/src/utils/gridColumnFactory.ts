@@ -22,6 +22,49 @@ import {
 } from "./columnFactoryTypes";
 import { viewBadgeLinkRenderer } from "./masterInquiryLink";
 
+export const createAddressColumn = (options: AddressColumnOptions = {}): ColDef => {
+  const {
+    headerName = "Address",
+    field = "address",
+    colId = field,
+    minWidth = 200,
+    maxWidth,
+    alignment = "left",
+    sortable = true,
+    resizable = true,
+    valueGetter
+  } = options;
+
+  const alignmentClass = alignment === "center" ? "center-align" : "left-align";
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    headerClass: alignmentClass,
+    cellClass: alignmentClass,
+    resizable,
+    sortable
+  };
+
+  if (valueGetter) {
+    column.valueGetter = valueGetter;
+  } else {
+    column.valueGetter = (params) => {
+      const address1 = params.data.address || "";
+      const address2 = params.data.address2 || "";
+      return address2 && address2.trim() ? `${address1}, ${address2}` : address1;
+    };
+  }
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  return column;
+};
+
 export const createStateColumn = (options: StateColumnOptions = {}): ColDef => {
   const {
     headerName = "State",
@@ -717,7 +760,7 @@ export const createCityColumn = (options: CityColumnOptions = {}): ColDef => {
     minWidth = 120,
     maxWidth,
     alignment = "left",
-    sortable = true,
+    sortable = false,
     resizable = true,
     nestedPath,
     valueGetter,

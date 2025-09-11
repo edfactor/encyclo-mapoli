@@ -1,5 +1,6 @@
 import { ColDef } from "ag-grid-community";
 import {
+  createAddressColumn,
   createBadgeColumn,
   createCityColumn,
   createDateColumn,
@@ -18,19 +19,7 @@ export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
     createNameColumn({
       field: "name"
     }),
-    {
-      headerName: "Address",
-      field: "address",
-      colId: "address",
-      minWidth: 200,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      valueGetter: (params) => {
-        const addr = params.data.address;
-        return addr ? `${addr.street}${addr.street2 ? ", " + addr.street2 : ""}` : "";
-      }
-    },
+    createAddressColumn({}),
     createCityColumn({
       valueGetter: (params) => params.data.address?.city || ""
     }),
@@ -38,16 +27,12 @@ export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
       valueGetter: (params) => params.data.address?.state || ""
     }),
     createDateColumn({
-      headerName: "Hire",
-      field: "hireDate",
-      minWidth: 100,
-      alignment: "left"
+      headerName: "Hired Date",
+      field: "hireDate"
     }),
     createDateColumn({
-      headerName: "Rehire",
-      field: "rehireDate",
-      minWidth: 100,
-      alignment: "left"
+      headerName: "Rehired Date",
+      field: "rehireDate"
     }),
     createStoreColumn({
       minWidth: 50
