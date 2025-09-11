@@ -1,5 +1,5 @@
 import { Button, Tooltip, Typography } from "@mui/material";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, Pagination } from "smart-ui-library";
@@ -14,13 +14,15 @@ interface MilitaryContributionGridProps {
   isLoadingContributions: boolean;
   contributionsGridPagination: any;
   onAddContribution: () => void;
+  refreshTrigger?: number;
 }
 
 const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
   militaryContributionsData,
   isLoadingContributions,
   contributionsGridPagination,
-  onAddContribution
+  onAddContribution,
+  refreshTrigger
 }) => {
   const profitYear = useDecemberFlowProfitYear();
   const { masterInquiryMemberDetails } = useSelector((state: RootState) => state.inquiry);
@@ -49,6 +51,7 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
             memberType={masterInquiryMemberDetails.isEmployee ? 1 : 2}
             id={masterInquiryMemberDetails.id}
             profitYear={profitYear}
+            refreshTrigger={refreshTrigger}
           />
         </MissiveAlertProvider>
       )}
