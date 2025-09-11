@@ -97,7 +97,7 @@ public sealed class Program
                 }, sourceSchema);
 
                 // Resolve and run the rebuild service before gathering schema statistics
-                var rebuildService = sp.GetRequiredService<Demoulas.ProfitSharing.Services.RebuildEnrollmentAndZeroContService>();
+                var rebuildService = sp.GetRequiredService<RebuildEnrollmentAndZeroContService>();
                 await rebuildService.ExecuteAsync(CancellationToken.None);
 
                 await GatherSchemaStatistics(context);

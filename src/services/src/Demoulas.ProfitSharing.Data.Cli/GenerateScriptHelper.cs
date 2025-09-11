@@ -118,7 +118,7 @@ internal static class GenerateScriptHelper
         builder.AddProjectServices();
 
         _ = builder.Services.AddScoped<IAppUser, DummyUser>();
-        _ = builder.Services.AddScoped<Demoulas.ProfitSharing.Services.RebuildEnrollmentAndZeroContService>();
+        _ = builder.Services.AddScoped<RebuildEnrollmentAndZeroContService>();
 
         await using var sp = builder.Services.BuildServiceProvider();
         await using var scope = sp.CreateAsyncScope();
