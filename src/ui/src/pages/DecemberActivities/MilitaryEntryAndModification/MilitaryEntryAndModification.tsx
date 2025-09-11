@@ -18,6 +18,7 @@ import MilitaryEntryAndModificationSearchFilter from "./MilitaryEntryAndModifica
 const MilitaryEntryAndModificationContent = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentStatus, setCurrentStatus] = useState<string | null>(null);
+  const [memberDetailsRefreshTrigger, setMemberDetailsRefreshTrigger] = useState(0);
   const { masterInquiryMemberDetails } = useSelector((state: RootState) => state.inquiry);
   const profitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
@@ -46,6 +47,7 @@ const MilitaryEntryAndModificationContent = () => {
   const handleCloseForm = () => {
     setIsDialogOpen(false);
     fetchMilitaryContributions();
+    setMemberDetailsRefreshTrigger(prev => prev + 1);
   };
 
   useEffect(() => {
@@ -64,7 +66,7 @@ const MilitaryEntryAndModificationContent = () => {
         </DSMAccordion>
       </Grid>
 
-      {missiveAlerts.length > 0 && <MissiveAlerts missiveAlerts={missiveAlerts} />}
+      {missiveAlerts.length > 0 && <MissiveAlerts />}
 
       <Grid width="100%">
         {masterInquiryMemberDetails ? (
@@ -73,6 +75,7 @@ const MilitaryEntryAndModificationContent = () => {
             isLoadingContributions={isLoadingContributions}
             contributionsGridPagination={contributionsGridPagination}
             onAddContribution={handleOpenForm}
+            refreshTrigger={memberDetailsRefreshTrigger}
           />
         ) : (
           <div className="military-contribution-message">
@@ -92,6 +95,7 @@ const MilitaryEntryAndModificationContent = () => {
             onSubmit={(rows) => {
               handleCloseForm();
               dispatch(InquiryApi.util.invalidateTags(["memberDetails"]));
+              // The handleCloseForm already triggers the member details refresh
             }}
             onCancel={handleCloseForm}
             badgeNumber={Number(masterInquiryMemberDetails?.badgeNumber)}
