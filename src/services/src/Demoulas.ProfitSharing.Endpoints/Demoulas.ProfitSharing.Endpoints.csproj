@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="CsvHelper" />
     <PackageReference Include="Demoulas.Common.Api" />
+    <PackageReference Include="Demoulas.Common.Logging" />
     <PackageReference Include="FastEndpoints.AspVersioning" />
     <PackageReference Include="FastEndpoints.Swagger" />
     <PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" />
