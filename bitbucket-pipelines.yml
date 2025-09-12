@@ -500,7 +500,6 @@ definitions:
           New-Item -ItemType Directory -Path test-results -Force | Out-Null
           $env:PLAYWRIGHT_JUNIT_OUTPUT = "test-results/junit.xml"
 
-          $env:Path = "C:\Program Files\nodejs\22.16.0;$env:Path"   # ensure `node` resolves to v22.16.0
           npx playwright test --reporter "list,junit" --config=playwright.config.ts --output=test-results --workers=4
 
           exit $LASTEXITCODE
