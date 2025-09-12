@@ -500,9 +500,14 @@ definitions:
 
           Write-Host "[5] Run tests" -ForegroundColor Cyan
           New-Item -ItemType Directory -Path test-results -Force | Out-Null
-          $env:PLAYWRIGHT_JUNIT_OUTPUT = "test-results/junit.xml"
 
-          npx playwright test --reporter "list,junit" --config=playwright.config.ts --output=test-results --workers=4
+          # Diagnostic: show any duplicate playwright test packages
+          Get-ChildItem -Path node_modules -Filter playwright -Recurse -Depth 3 -ErrorAction SilentlyContinue | Select-Object -First 5 | ForEach-Object { Write-Host "Found playwright path: $($_.FullName)" }
+          Get-ChildItem -Path node_modules -Filter "@playwright" -Recurse -Depth 5 -ErrorAction SilentlyContinue | Select-Object -First 5 | ForEach-Object { Write-Host "Found @playwright path: $($_.FullName)" }
+          # Use direct CLI to avoid potential global 'playwright' package ambiguity
+          $playwrightCli = Join-Path (Resolve-Path ./node_modules/@playwright/test).Path "cli.js"
+          if (-not (Test-Path $playwrightCli)) { Write-Error "Playwright CLI not found at $playwrightCli"; Get-ChildItem node_modules/@playwright/test -Recurse -Depth 2; exit 1 }
+          node $playwrightCli test --reporter "list,junit" --config=playwright.config.ts --output=test-results --workers=4
 
           exit $LASTEXITCODE
 
