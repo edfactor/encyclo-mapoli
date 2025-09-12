@@ -1,6 +1,5 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { formatNumberWithComma, numberToCurrency, yyyyMMDDToMMDDYYYY } from "smart-ui-library";
-import { GRID_COLUMN_WIDTHS } from "../constants";
 import {
   AlignableColumnOptions,
   BadgeColumnOptions,
@@ -70,7 +69,7 @@ export const createStateColumn = (options: StateColumnOptions = {}): ColDef => {
     headerName = "State",
     field = "state",
     colId = field,
-    minWidth = 100,
+    minWidth = 80,
     maxWidth,
     alignment = "left",
     sortable = true,
@@ -188,7 +187,7 @@ export const createPercentageColumn = (options: PercentageColumnOptions): ColDef
 export const createSSNColumn = (options: SSNColumnOptions = {}): ColDef => {
   const {
     headerName = "SSN",
-    minWidth = GRID_COLUMN_WIDTHS.SSN,
+    minWidth = 80,
     maxWidth,
     alignment = "center",
     sortable = true,
@@ -273,7 +272,7 @@ export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => 
     headerName,
     field,
     colId = field,
-    minWidth = 120,
+    minWidth = 80,
     maxWidth,
     sortable = true,
     resizable = true,
@@ -340,7 +339,7 @@ export const createDateColumn = (options: DateColumnOptions): ColDef => {
     headerName,
     field,
     colId = field,
-    minWidth = 120,
+    minWidth = 80,
     maxWidth,
     alignment = "center",
     sortable = true,
@@ -810,15 +809,15 @@ export const createTaxCodeColumn = (options: TaxCodeColumnOptions = {}): ColDef 
     headerName = "Tax Code",
     field = "taxCodeId",
     colId = field,
-    minWidth = 100,
+    minWidth = 60,
     maxWidth,
     alignment = "left",
     sortable = true,
     resizable = true,
     hideZeroValues = true,
     showBrackets = true,
-    idField = "taxCodeId",
-    nameField = "taxCodeName",
+    idField,
+    nameField,
     valueFormatter
   } = options;
 
@@ -838,24 +837,26 @@ export const createTaxCodeColumn = (options: TaxCodeColumnOptions = {}): ColDef 
   if (maxWidth) {
     column.maxWidth = maxWidth;
   }
+  // If we do not have these three, it's just a default render of the string
+  if ((idField && nameField) || valueFormatter) {
+    if (valueFormatter) {
+      column.valueFormatter = valueFormatter;
+    } else {
+      column.valueFormatter = (params) => {
+        const id = params.data?.["taxCodeId"];
+        const name = params.data?.["taxCodeName"];
 
-  if (valueFormatter) {
-    column.valueFormatter = valueFormatter;
-  } else {
-    column.valueFormatter = (params) => {
-      const id = params.data?.[idField];
-      const name = params.data?.[nameField];
+        if (hideZeroValues && (id == 0 || id == null)) {
+          return "";
+        }
 
-      if (hideZeroValues && (id == 0 || id == null)) {
-        return "";
-      }
-
-      if (showBrackets) {
-        return `[${id}] ${name || ""}`;
-      } else {
-        return `${id} - ${name || ""}`;
-      }
-    };
+        if (showBrackets) {
+          return `[${id}] ${name || ""}`;
+        } else {
+          return `${id} - ${name || ""}`;
+        }
+      };
+    }
   }
 
   return column;
@@ -866,7 +867,7 @@ export const createPhoneColumn = (options: FormattableColumnOptions = {}): ColDe
     headerName = "Phone Number",
     field = "phoneNumber",
     colId = field,
-    minWidth = 130,
+    minWidth = 80,
     maxWidth,
     alignment = "center",
     sortable = true,
@@ -906,7 +907,7 @@ export const createPSNColumn = (options: PSNColumnOptions = {}): ColDef => {
     headerName = "PSN",
     field = "psn",
     colId = field,
-    minWidth = 120,
+    minWidth = 80,
     maxWidth,
     alignment = "center",
     sortable = true,
