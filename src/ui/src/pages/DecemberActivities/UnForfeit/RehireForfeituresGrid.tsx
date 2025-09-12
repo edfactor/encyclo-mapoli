@@ -166,7 +166,6 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
         });
         setEditedValues(updatedEditedValues);
         setSelectedRowIds([]);
-        onUnsavedChanges(Object.keys(updatedEditedValues).length > 0);
 
         // Prepare bulk success message
         const employeeNames = names.map((name) => name || "Unknown Employee");
@@ -184,7 +183,6 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
             // Set the pending success message to be shown after grid reload
             setPendingSuccessMessage(bulkSuccessMessage);
             setIsPendingBulkMessage(true);
-            setHasUnsavedChanges(false);
           }
         }
       } catch (error) {
@@ -215,6 +213,19 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
   const handleSave = useCallback(
     async (request: ForfeitureAdjustmentUpdateRequest, name: string) => {
       const rowId = request.badgeNumber; // Use badgeNumber as unique identifier
+      
+      // Clear the selection immediately for the saved item
+      const currentGridApi = gridRef.current?.api || gridApi;
+      if (currentGridApi) {
+        currentGridApi.forEachNode((node) => {
+          if (node.data?.badgeNumber === request.badgeNumber && node.data?.isDetail && node.isSelected()) {
+            const nodeId = Number(node.id);
+            setSelectedRowIds(prevIds => prevIds.filter(id => id !== nodeId));
+            node.setSelected(false);
+          }
+        });
+      }
+      
       setLoadingRowIds((prev) => new Set(Array.from(prev).concat(rowId)));
 
       try {
@@ -226,13 +237,10 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
           const updatedEditedValues = { ...editedValues };
           delete updatedEditedValues[rowKey];
           setEditedValues(updatedEditedValues);
-          onUnsavedChanges(Object.keys(updatedEditedValues).length > 0);
 
           // Prepare success message
           const employeeName = name || "the selected employee";
           const successMessage = `The unforfeiture amount of $${formatNumberWithComma(request.forfeitureAmount)} for ${employeeName} saved successfully`;
-
-          setHasUnsavedChanges(false);
 
           if (rehireForfeituresQueryParams) {
             const searchRequest = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);
@@ -263,7 +271,8 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
       pageSize,
       sortParams,
       createRequest,
-      triggerSearch
+      triggerSearch,
+      selectedRowIds
     ]
   );
 
@@ -320,9 +329,10 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
   }, [resetPageFlag]);
 
   useEffect(() => {
-    const hasChanges = selectedRowIds.length > 0;
+    const hasChanges = selectedRowIds.length > 0 || Object.keys(editedValues).length > 0;
     onUnsavedChanges(hasChanges);
-  }, [selectedRowIds, onUnsavedChanges]);
+    setHasUnsavedChanges(hasChanges);
+  }, [selectedRowIds, editedValues, onUnsavedChanges, setHasUnsavedChanges]);
 
   // Initialize expandedRows when data is loaded
   useEffect(() => {
@@ -558,7 +568,7 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
                   return;
                 }
                 setPageSize(value);
-                setPageNumber(1);
+                setPageNumber(0);
                 setInitialSearchLoaded(true);
               }}
               recordCount={rehireForfeitures.response.total || 0}
