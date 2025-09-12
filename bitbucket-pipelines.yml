@@ -484,19 +484,22 @@ definitions:
           Write-Host "[3] Build .env from QA_Playwright variable" -ForegroundColor Cyan
           if (-not $env:QA_Playwright) { Write-Error "QA_Playwright variable not set"; exit 1 }
           $raw = $env:QA_Playwright
-          # Convert space separated KEY=VALUE tokens into separate lines (except first token)
-          $raw = $raw -replace '(?<!^)\s+(?=[A-Za-z_][A-Za-z0-9_]*=)','`n'
-          $allLines = ($raw -split "`r?`n") | Where-Object { $_ -and ($_ -notmatch '^\s*$') }
+          # Tokenize by whitespace; handle patterns like KEY=value and KEY= value
+          $parts = $raw -split '\s+' | Where-Object { $_ -and ($_ -notmatch '^\s*$') }
           $kv = @{}
-          foreach ($l in $allLines) {
-            if ($l -match '^\s*([A-Za-z_][A-Za-z0-9_]*)=(.*)$') {
+          for ($i = 0; $i -lt $parts.Length; $i++) {
+            $p = $parts[$i]
+            if ($p -match '^([A-Za-z_][A-Za-z0-9_]*)=(.*)$') {
               $k = $matches[1]
               $v = $matches[2]
-              $v = $v.Trim()
-              # Strip matching surrounding quotes if present
-              if ($v.Length -ge 2 -and ((($v.StartsWith('"')) -and ($v.EndsWith('"'))) -or (($v.StartsWith("'")) -and ($v.EndsWith("'"))))) {
-                $v = $v.Substring(1, $v.Length-2)
+              if ($v -eq '') {
+                # Value may be next token (e.g. USER_NAME= rharding)
+                if ($i + 1 -lt $parts.Length -and ($parts[$i+1] -notmatch '^[A-Za-z_][A-Za-z0-9_]*=')) {
+                  $v = $parts[$i+1]
+                  $i++
+                }
               }
+              $v = $v.Trim().Trim('"').Trim("'")
               if (-not $kv.ContainsKey($k)) { $kv[$k] = $v }
             }
           }
@@ -507,8 +510,7 @@ definitions:
           $ciVal = if ($kv.ContainsKey('CI')) { $kv['CI'] } else { '' }
           $qaVal = if ($kv.ContainsKey('QA')) { $kv['QA'] } else { '' }
           if (-not $userVal -or -not $passVal) {
-            Write-Host 'Parsed raw tokens:'
-            $kv.GetEnumerator() | ForEach-Object { Write-Host ("  " + $_.Key + "=(len:" + ($_.Value.Length) + ")") }
+            Write-Host 'Parsed keys (no secrets): ' + ($kv.Keys -join ', ')
             Write-Error 'Missing USER credential (USER_NAME/USERNAME/USER/LOGIN) and/or PASSWORD (PASSWORD/PASS/PWD) in QA_Playwright value.'; exit 1
           }
           $lines = @(
