@@ -1,5 +1,6 @@
 import { ColDef } from "ag-grid-community";
 import {
+  createAddressColumn,
   createBadgeColumn,
   createNameColumn,
   createStateColumn,
@@ -43,16 +44,7 @@ export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void
       resizable: true,
       sortable: true
     },
-    {
-      headerName: "Address",
-      field: "address1",
-      colId: "address1",
-      minWidth: 200,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true
-    },
+    createAddressColumn({}),
     {
       headerName: "City",
       field: "city",

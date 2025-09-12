@@ -69,7 +69,7 @@ public class NegativeEtvaReportService : INegativeEtvaReportService
                 Total = data.Total,
             };
 
-            _logger.LogWarning("Returned {Results} records", results.Results.Count());
+            _logger.LogInformation("Returned {Results} records", results.Results.Count());
 
             var cal = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
 

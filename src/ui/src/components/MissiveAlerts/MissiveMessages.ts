@@ -17,6 +17,13 @@ export const MASTER_INQUIRY_MESSAGES = {
     description: "The member you are searching for does not exist in the system."
   } as MissiveResponse,
 
+  BENEFICIARY_NOT_FOUND: {
+    id: 904,
+    severity: "Error" as const,
+    message: "Beneficiary not found",
+    description: "The beneficiary you are searching for does not exist in the system."
+  } as MissiveResponse,
+
   NO_RESULTS_FOUND: {
     id: 901,
     severity: "Error" as const,

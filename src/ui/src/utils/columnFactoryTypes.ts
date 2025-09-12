@@ -20,6 +20,10 @@ export interface LimitedAlignmentColumnOptions extends BaseColumnOptions {
   alignment?: "left" | "center";
 }
 
+export interface AddressColumnOptions extends AlignableColumnOptions {
+  valueGetter?: (params: ValueGetterParams) => string;
+}
+
 export interface FormattableColumnOptions extends AlignableColumnOptions {
   valueFormatter?: (params: ValueFormatterParams) => string;
 }

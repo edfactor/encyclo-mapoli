@@ -662,11 +662,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
         // Here we recognize 2024 as the transition year to relying on the SMART YE Process
         bool isPreviousYearEndComplete = (previousYear < ReferenceData.SmartTransitionYear) || await _dataContextFactory.UseReadOnlyContext(async ctx =>
             await ctx.YearEndUpdateStatuses
-                .AsNoTracking()
                 .AnyAsync(x => x.ProfitYear == previousYear && x.IsYearEndCompleted, cancellationToken));
         bool isProfitYearYearEndComplete = (currentYear < ReferenceData.SmartTransitionYear) || await _dataContextFactory.UseReadOnlyContext(async ctx =>
             await ctx.YearEndUpdateStatuses
-                .AsNoTracking()
                 .AnyAsync(x => x.ProfitYear == currentYear && x.IsYearEndCompleted, cancellationToken));
         bool isWallClockYear = currentYear == DateTime.Now.Year;
         

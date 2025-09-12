@@ -6,22 +6,22 @@ public sealed class DummyUser: IAppUser
 {
     public bool HasRole(string roleName)
     {
-        throw new NotImplementedException();
+        return false;
     }
 
     public bool HasPermission(string permissionName)
     {
-        throw new NotImplementedException();
+        return false;
     }
 
     public List<string> GetUserAllRoles(List<string>? customRoles = null)
     {
-        throw new NotImplementedException();
+        return [];
     }
 
     public List<string> GetUserAllPermissions(List<string>? customRoles = null)
     {
-        throw new NotImplementedException();
+        return [];
     }
 
     public Claim? GetCustomClaim(string? claimType)

@@ -1,5 +1,6 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.Diagnostics;
 using System.Text;
 using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
 using Demoulas.ProfitSharing.Data.Cli.DiagramServices;
@@ -7,6 +8,7 @@ using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.Data.Cli;
@@ -39,7 +41,7 @@ public sealed class Program
 
         upgradeDbCommand.SetHandler(async () =>
         {
-            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async context =>
+            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async (_, context) =>
             {
                 await context.Database.MigrateAsync();
 
@@ -69,7 +71,7 @@ public sealed class Program
 
         dropRecreateDbCommand.SetHandler(async () =>
         {
-            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async context =>
+            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async (_, context) =>
             {
                 await context.Database.EnsureDeletedAsync();
                 await context.Database.MigrateAsync();
@@ -81,22 +83,22 @@ public sealed class Program
 
         runSqlCommand.SetHandler(async () =>
         {
-            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async context =>
+            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async (sp, context) =>
             {
                 var sqlFile = configuration["sql-file"];
                 var sourceSchema = configuration["source-schema"];
-                if (string.IsNullOrEmpty(sqlFile) || string.IsNullOrEmpty(sourceSchema))
+                ValidateRequired(sqlFile, "--sql-file");
+                ValidateRequired(sourceSchema, "--source-schema");
+
+                var runner = new SqlScriptRunner(context);
+                await runner.ExecuteFileAsync(sqlFile!, new Dictionary<string, string?>
                 {
-                    throw new ArgumentNullException("SQL file path and schema must be provided.");
-                }
+                    ["{SOURCE_PROFITSHARE_SCHEMA}"] = sourceSchema
+                }, sourceSchema);
 
-                string sqlCommand = await File.ReadAllTextAsync(sqlFile);
-                sqlCommand = sqlCommand.Replace("COMMIT ;", string.Empty)
-                    .Replace("{SOURCE_PROFITSHARE_SCHEMA}", sourceSchema).Trim();
-                await context.Database.ExecuteSqlRawAsync(sqlCommand);
-
-                context.DataImportRecords.Add(new DataImportRecord { SourceSchema = sourceSchema });
-                await context.SaveChangesAsync();
+                // Resolve and run the rebuild service before gathering schema statistics
+                var rebuildService = sp.GetRequiredService<RebuildEnrollmentAndZeroContService>();
+                await rebuildService.ExecuteAsync(CancellationToken.None);
 
                 await GatherSchemaStatistics(context);
             });
@@ -107,22 +109,18 @@ public sealed class Program
 
         runSqlCommandForNavigation.SetHandler(async () =>
         {
-            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async context =>
+            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async (_, context) =>
             {
                 var sqlFile = configuration["sql-file"];
                 var sourceSchema = configuration["source-schema"];
-                if (string.IsNullOrEmpty(sqlFile) || string.IsNullOrEmpty(sourceSchema))
+                ValidateRequired(sqlFile, "--sql-file");
+                ValidateRequired(sourceSchema, "--source-schema");
+
+                var runner = new SqlScriptRunner(context);
+                await runner.ExecuteFileAsync(sqlFile!, new Dictionary<string, string?>
                 {
-                    throw new ArgumentNullException("SQL file path and schema must be provided.");
-                }
-
-                string sqlCommand = await File.ReadAllTextAsync(sqlFile);
-                sqlCommand = sqlCommand.Replace("COMMIT ;", string.Empty)
-                    .Replace("{SOURCE_PROFITSHARE_SCHEMA}", sourceSchema).Trim();
-                await context.Database.ExecuteSqlRawAsync(sqlCommand);
-
-                context.DataImportRecords.Add(new DataImportRecord { SourceSchema = sourceSchema });
-                await context.SaveChangesAsync();
+                    ["{SOURCE_PROFITSHARE_SCHEMA}"] = sourceSchema
+                }, sourceSchema);
             });
         });
 
@@ -131,7 +129,7 @@ public sealed class Program
 
         generateDgmlCommand.SetHandler(async () =>
         {
-            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async context =>
+            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async (_, context) =>
             {
                 var outputFile = configuration["output-file"];
                 if (string.IsNullOrEmpty(outputFile))
@@ -156,7 +154,7 @@ public sealed class Program
                 throw new ArgumentNullException(nameof(outputFile), "Output file path must be provided.");
             }
 
-            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async context =>
+            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async (_, context) =>
             {
                 var dgml = context.AsDgml();
                 await DgmlService.GenerateMarkdownFromDgml(dgml, outputFile);
@@ -168,9 +166,9 @@ public sealed class Program
         commonOptions.ForEach(validateImportCommand.AddOption);
         validateImportCommand.Add(new Option<string>("--current-year", "Current year of profit sharing"));
 
-        validateImportCommand.SetHandler(async (InvocationContext iCtx) =>
+        validateImportCommand.SetHandler(async iCtx =>
         {
-            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async context =>
+            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async (_, context) =>
             {
                 try
                 {
@@ -187,7 +185,7 @@ public sealed class Program
                         .Replace("{CURRENT_YEAR}", configuration["current-year"]).Trim();
 
                     await context.Database.ExecuteSqlRawAsync(sqlCommand);
-                } 
+                }
                 catch (Exception e)
                 {
                     iCtx.Console.WriteLine(e.ToString());
@@ -204,28 +202,24 @@ public sealed class Program
         rootCommand.AddCommand(GenerateScriptHelper.CreateGenerateUpgradeScriptCommand(configuration, args, commonOptions));
         rootCommand.AddCommand(validateImportCommand);
         rootCommand.AddCommand(runSqlCommandForNavigation);
-        
+
         var runSqlCommandForUatNavigation = new Command("import-uat-navigation", "Run a custom SQL script to add UAT navigations");
         commonOptions.ForEach(runSqlCommandForUatNavigation.AddOption);
 
         runSqlCommandForUatNavigation.SetHandler(async () =>
         {
-            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async context =>
+            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async (_, context) =>
             {
                 var sqlFile = configuration["sql-file"];
                 var sourceSchema = configuration["source-schema"];
-                if (string.IsNullOrEmpty(sqlFile) || string.IsNullOrEmpty(sourceSchema))
+                ValidateRequired(sqlFile, "--sql-file");
+                ValidateRequired(sourceSchema, "--source-schema");
+
+                var runner = new SqlScriptRunner(context);
+                await runner.ExecuteFileAsync(sqlFile!, new Dictionary<string, string?>
                 {
-                    throw new ArgumentNullException("SQL file path and schema must be provided.");
-                }
-
-                string sqlCommand = await File.ReadAllTextAsync(sqlFile);
-                sqlCommand = sqlCommand.Replace("COMMIT ;", string.Empty)
-                    .Replace("{SOURCE_PROFITSHARE_SCHEMA}", sourceSchema).Trim();
-                await context.Database.ExecuteSqlRawAsync(sqlCommand);
-
-                context.DataImportRecords.Add(new DataImportRecord { SourceSchema = sourceSchema });
-                await context.SaveChangesAsync();
+                    ["{SOURCE_PROFITSHARE_SCHEMA}"] = sourceSchema
+                }, sourceSchema);
             });
         });
 
@@ -244,5 +238,13 @@ public sealed class Program
 
         await context.Database.ExecuteSqlRawAsync(gatherStats);
         Console.WriteLine("Gathered schema stats");
+    }
+
+    private static void ValidateRequired(string? value, string optionName)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new ArgumentNullException(optionName, $"{optionName} must be provided.");
+        }
     }
 }

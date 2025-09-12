@@ -9,8 +9,10 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Services.ItDevOps;
 
@@ -21,11 +23,15 @@ public class FrozenService: IFrozenService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ICommitGuardOverride _guardOverride;
+    private readonly IServiceProvider _serviceProvider;
 
-    public FrozenService(IProfitSharingDataContextFactory dataContextFactory, ICommitGuardOverride guardOverride)
+    public FrozenService(IProfitSharingDataContextFactory dataContextFactory, 
+        ICommitGuardOverride guardOverride,
+        IServiceProvider serviceProvider)
     {
         _dataContextFactory = dataContextFactory;
         _guardOverride = guardOverride;
+        _serviceProvider = serviceProvider;
     }
 
     /// <summary>
@@ -84,11 +90,18 @@ public class FrozenService: IFrozenService
 
         var thisYear = DateTime.Today.Year;
         validator.RuleFor(r => r)
-            .InclusiveBetween((short)(thisYear-1), (short)thisYear)
+            .InclusiveBetween((short)(thisYear - 1), (short)thisYear)
             .WithMessage($"ProfitYear must be between {thisYear - 1} and {thisYear}.");
 
+
+        var duplicateSsnReportService = _serviceProvider.GetRequiredService<IPayrollDuplicateSsnReportServiceInternal>();
+        // Inline async rule to prevent freezing when duplicate SSNs exist.
+        validator.RuleFor(r => r)
+            .MustAsync(async (_, ct) => !await duplicateSsnReportService.DuplicateSsnExistsAsync(ct))
+            .WithMessage("Cannot freeze demographics when duplicate SSNs exist.  Please resolve duplicate SSNs and try again.");
+
         await validator.ValidateAndThrowAsync(profitYear, cancellationToken);
-        
+
         using (_guardOverride.AllowFor(roles: Role.ITDEVOPS))
         {
             return await _dataContextFactory.UseWritableContext(async ctx =>

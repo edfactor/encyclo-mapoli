@@ -48,6 +48,7 @@ public class MasterInquiryEmployeeDetailsTests : ApiTestBase<Api.Program>
         var request = new MasterInquiryRequest { EndProfitMonth = 12, Skip = 0, Take = 25, ProfitYear = profitYear };
         var response = await ApiClient.POSTAsync<MasterInquirySearchEndpoint, MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>(request);
         response.ShouldNotBeNull();
+        response.Response.IsSuccessStatusCode.ShouldBeTrue(response.Response.ReasonPhrase);
         response.Response.EnsureSuccessStatusCode();
     }
 
@@ -58,6 +59,7 @@ public class MasterInquiryEmployeeDetailsTests : ApiTestBase<Api.Program>
         var request = new MasterInquiryRequest { ProfitCode = 1, Skip = 0, Take = 25, ProfitYear = profitYear }; // Use a valid ProfitCode constant as needed
         var response = await ApiClient.POSTAsync<MasterInquirySearchEndpoint, MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>(request);
         response.ShouldNotBeNull();
+        response.Response.IsSuccessStatusCode.ShouldBeTrue(response.Response.ReasonPhrase);
         response.Response.EnsureSuccessStatusCode();
     }
 

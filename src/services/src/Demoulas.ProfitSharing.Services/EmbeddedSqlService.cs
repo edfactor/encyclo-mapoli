@@ -20,7 +20,7 @@ public sealed class EmbeddedSqlService : IEmbeddedSqlService
     public IQueryable<ParticipantTotalYear> GetYearsOfServiceAlt(IProfitSharingDbContext ctx, short profitYear, DateOnly asOfDate)
     {
         var query = GetYearsOfServiceQuery(profitYear, asOfDate);
-        return ctx.ParticipantTotalYears.FromSqlInterpolated(query);
+        return ctx.ParticipantTotalYears.FromSqlRaw(query);
     }
 
     public IQueryable<ParticipantTotalRatio> GetVestingRatioAlt(IProfitSharingDbContext ctx, short profitYear,
@@ -293,10 +293,10 @@ FROM (
         return query;
     }
     
-    public static FormattableString GetYearsOfServiceQuery(short profitYear, DateOnly asOfDate)
+    public static string GetYearsOfServiceQuery(short profitYear, DateOnly asOfDate)
     {
         var aged18Date = asOfDate.AddYears(-18); 
-        FormattableString query = @$"
+        string query = @$"
 SELECT pd.SSN, SUM(pd.YEARS_OF_SERVICE_CREDIT)
                + CASE WHEN NOT EXISTS (SELECT 1 FROM PROFIT_DETAIL pd0 WHERE pd0.PROFIT_YEAR = {profitYear} AND pd0.PROFIT_CODE_ID = {ProfitCode.Constants.IncomingContributions.Id} AND pd.SSN  = pd0.SSN AND pd0.PROFIT_YEAR_ITERATION = 0)
                   AND ( pp.HOURS_EXECUTIVE  + pp.CURRENT_HOURS_YEAR >= {ReferenceData.MinimumHoursForContribution()} 

@@ -294,17 +294,6 @@ public class UpdateSummaryTests : PristineBaseTest
         return await DbFactory.UseReadOnlyContext(async ctx => await VestDetailsBadge(ctx, badge, profitYear, fiscalEndDate));
     }
 
-    private async Task tvb(ProfitSharingReadOnlyDbContext ctx, short profitYear, int ssn, long badge)
-    {
-        DateOnly asOfDate = (await CalendarService.GetYearStartAndEndAccountingDatesAsync(profitYear)).FiscalBeginDate;
-
-        ParticipantTotalVestingBalance p = await TotalService.TotalVestingBalance(ctx, profitYear, asOfDate).AsNoTracking()
-            .Where(t => t.Ssn == ssn).SingleAsync(CancellationToken.None);
-
-        TestOutputHelper.WriteLine(
-            $"SSN: {p.Ssn,9} {profitYear}: Current Amount  {p.CurrentBalance,10:C} ,  Vested: {p.VestedBalance,10:C} | Percent: {p.VestingPercent,6:P0} | Years: {p.YearsInPlan,2}      {await VestDetailsBadge(ctx, badge, profitYear, asOfDate)}");
-    }
-
     private async Task<string> VestDetailsBadge(ProfitSharingReadOnlyDbContext ctx, long badge, short profitYear, DateOnly fromDateTime)
     {
         try
