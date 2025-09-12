@@ -6,11 +6,17 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { setBreakdownByStoreQueryParams } from "reduxstore/slices/yearsEndSlice";
+import { 
+  setBreakdownByStoreQueryParams,
+  clearBreakdownByStore,
+  clearBreakdownByStoreMangement,
+  clearBreakdownByStoreTotals,
+  clearBreakdownGrandTotals
+} from "reduxstore/slices/yearsEndSlice";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 
 interface BreakdownSearchParams {
-  store?: number;
+  store?: number | null;
   employeeStatus?: string;
   badgeId?: number | null;
   employeeName?: string;
@@ -34,10 +40,11 @@ const schema = yup.object().shape({
 
 interface QPAY066TABreakdownParametersProps {
   activeTab: "all" | "stores" | "summaries" | "totals";
-  onStoreChange?: (store: number) => void;
+  onStoreChange?: (store: number | null) => void;
+  onReset?: () => void;
 }
 
-const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> = ({ activeTab, onStoreChange }) => {
+const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> = ({ activeTab, onStoreChange, onReset }) => {
   const dispatch = useDispatch();
   const profitYear = useDecemberFlowProfitYear();
 
@@ -60,7 +67,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
   } = useForm<BreakdownSearchParams>({
     resolver: yupResolver(schema),
     defaultValues: {
-      store: 700,
+      store: null,
       employeeStatus: "",
       badgeId: null,
       employeeName: "",
@@ -109,13 +116,26 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
 
   const handleReset = () => {
     reset({
-      store: 700,
+      store: null,
       employeeStatus: "",
       badgeId: null,
       employeeName: "",
       sortBy: "badgeNumber",
       isSortDescending: true
     });
+    dispatch(clearBreakdownByStore());
+    dispatch(clearBreakdownByStoreMangement());
+    dispatch(clearBreakdownByStoreTotals());
+    dispatch(clearBreakdownGrandTotals());
+
+    if (onStoreChange) {
+      onStoreChange(null);
+    }
+    
+    // allow parent to clear grids
+    if (onReset) {
+      onReset();
+    }
   };
 
   const getGridSizes = () => {
@@ -192,7 +212,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                       size="small"
                       fullWidth>
                       <MenuItem value="">
-                        <em>All</em>
+                        <em>Clear Selection</em>
                       </MenuItem>
                       {employeeStatuses.map((status) => (
                         <MenuItem
