@@ -490,6 +490,8 @@ definitions:
           if ($env:QA_BASE_URL -and -not ($lines -match '^BASE_URL=')) { $lines += "BASE_URL=$env:QA_BASE_URL" }
           Set-Content ./.env -Value $lines
           Write-Host (".env keys: " + (($lines | ForEach-Object { ($_ -split '=',2)[0] }) -join ', '))
+          # Some configs expect a .playwright.env specifically; create it if not present
+          if (-not (Test-Path ./.playwright.env)) { Copy-Item ./.env ./.playwright.env }
 
           Write-Host "[4] Install dependencies & browsers" -ForegroundColor Cyan
           if (Test-Path node_modules) { Remove-Item -Recurse -Force node_modules }
