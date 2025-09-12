@@ -438,6 +438,36 @@ definitions:
                 else
                   echo "No leaks found.";
                 fi
+    run-playwright-tests: &run-playwright-tests
+      name: "Run Playwright E2E Tests (QA)"
+      runs-on:
+        - windows
+        - self.hosted
+        - volta
+      artifacts:
+        - ui/playwright-report/**
+        - ui/test-results/**
+      script:
+        # Navigate to UI test project (root-level 'ui' directory contains playwright config & tests)
+        - if (!(Test-Path -Path "./ui")) { Write-Error "UI (playwright) directory not found at ./ui"; exit 1 }
+        - cd ./ui
+        # Write QA environment variables from secured Bitbucket variable QA_Playwright into .env (multi-line expected)
+        - if (-not $env:QA_Playwright) { Write-Error "QA_Playwright variable not set in Bitbucket variables"; exit 1 }
+        - Set-Content -Path ./.env -Value "### Generated from Bitbucket variable QA_Playwright (QA) ###"
+        - $env:QA_Playwright | Out-File -FilePath ./.env -Append -Encoding UTF8
+        - Write-Host "Created .env file (preview):"; Get-Content ./.env | Select-Object -First 20 | ForEach-Object { Write-Host "  $_" }
+        # Install dependencies & browsers
+        - if (Test-Path -Path "node_modules") { Write-Host "Removing existing node_modules to ensure clean install"; Remove-Item -Recurse -Force node_modules }
+        - npm ci
+        - npx playwright install --with-deps || npx playwright install
+        # Run tests with junit + html reporters (adjust if package.json already configures reporters)
+        - mkdir -Force test-results | Out-Null
+        - npx playwright test --reporter="list,junit" --config=playwright.config.ts
+        # Summarize results
+        - if (Test-Path ./playwright-report) { Write-Host "Playwright HTML report generated in ./playwright-report" }
+        - if (Test-Path ./test-results) { Write-Host "JUnit results in ./test-results"; Get-ChildItem ./test-results | ForEach-Object { Write-Host $_.FullName } }
+        # Non-zero exit if any test failed (Playwright already sets exit code); we echo for clarity
+        - if ($LASTEXITCODE -ne 0) { Write-Error "Playwright tests failed."; exit 1 } else { Write-Host "Playwright tests passed." }
           
 
 pipelines:
@@ -682,6 +712,8 @@ pipelines:
                 echo "Validated: Environment=$Environment, SourceSchema=$SourceSchema"
               fi
       - step: *upgrade-database
+    playwright_e2e_qa:
+      - step: *run-playwright-tests
 
 
 
