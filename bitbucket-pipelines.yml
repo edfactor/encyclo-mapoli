@@ -451,53 +451,46 @@ definitions:
         - src/UI/test-results/**
         - playwright-artifacts/**
       script:
-        # Locate Playwright project directory (support both root 'ui' and 'src/UI')
         - |
+          # Locate Playwright project directory
           $candidateDirs = @('ui', 'src/UI', 'src/ui')
           $playwrightDir = $null
-          foreach ($d in $candidateDirs) {
-            if (Test-Path $d) { $playwrightDir = $d; break }
-          }
-          if (-not $playwrightDir) {
-            Write-Error "Could not locate Playwright project directory. Checked: $($candidateDirs -join ', ')"; exit 1
-          }
+            foreach ($d in $candidateDirs) { if (Test-Path $d) { $playwrightDir = $d; break } }
+          if (-not $playwrightDir) { Write-Error "Could not locate Playwright project directory. Checked: $($candidateDirs -join ', ')"; exit 1 }
           Write-Host "Using Playwright directory: $playwrightDir"
           Set-Location $playwrightDir
-        # Write QA environment variables from secured Bitbucket variable QA_Playwright into .env (multi-line expected)
         - if (-not $env:QA_Playwright) { Write-Error "QA_Playwright variable not set in Bitbucket variables"; exit 1 }
         - |
+          # Build .env from QA_Playwright variable
           $raw = $env:QA_Playwright
           if (-not $raw) { Write-Error "QA_Playwright variable empty"; exit 1 }
-          # Support escaped \n sequences if variable stored as single-line
           if ($raw -match '\\n') { $raw = ($raw -replace '\\r?\\n', [Environment]::NewLine) }
-          Set-Content -Path ./.env -Value $raw -NoNewline
-          $lines = Get-Content ./.env
-          Write-Host "Created .env with $($lines.Count) line(s). Showing keys only:"
-          foreach ($l in $lines) {
-            if ($l -match '^(\s*#|\s*$)') { continue }
-            $k = ($l -split '=',2)[0]
-            Write-Host "  $k"
-          }
-        # Install dependencies & browsers
-        - if (Test-Path -Path "node_modules") { Write-Host "Removing existing node_modules to ensure clean install"; Remove-Item -Recurse -Force node_modules }
+          $rawLines = ($raw -split "`r?`n") | Where-Object { $_ -and ($_ -notmatch '^\s*$') }
+          if (-not ($rawLines -match '^CI=')) { $rawLines += 'CI=1' }
+          if ($env:QA_BASE_URL -and -not ($rawLines -match '^BASE_URL=')) { $rawLines += "BASE_URL=$env:QA_BASE_URL" }
+          Set-Content -Path ./.env -Value $rawLines
+          Write-Host "Created .env with $($rawLines.Count) line(s). Keys:"
+          foreach ($l in $rawLines) { if ($l -match '^(\s*#|\s*$)') { continue }; ($l -split '=',2)[0] }
+        - if (Test-Path -Path "node_modules") { Remove-Item -Recurse -Force node_modules }
         - npm ci
-        - npx playwright install --with-deps || npx playwright install
-        # Run tests with junit + html reporters (adjust if package.json already configures reporters)
-        - mkdir -Force test-results | Out-Null
-        - npx playwright test --reporter="list,junit" --config=playwright.config.ts
-        # Copy artifacts to a stable root-level directory for collection regardless of working dir
         - |
-          $repoRoot = $env:BITBUCKET_CLONE_DIR
-          if (-not $repoRoot) { $repoRoot = (Resolve-Path '..').Path }
+          Write-Host "Installing Playwright browsers (attempt with --with-deps)";
+          npx playwright install --with-deps; if ($LASTEXITCODE -ne 0) { Write-Host "Retrying without --with-deps"; npx playwright install }
+        - mkdir -Force test-results | Out-Null
+        - $env:PLAYWRIGHT_JUNIT_OUTPUT = "test-results/junit.xml"
+        - npx playwright test --reporter "list,junit" --config=playwright.config.ts --output=test-results --workers=4
+        - $playwrightExit = $LASTEXITCODE
+        - |
+          # Collect artifacts
+          $repoRoot = $env:BITBUCKET_CLONE_DIR; if (-not $repoRoot) { $repoRoot = (Resolve-Path '..').Path }
           $artifactRoot = Join-Path $repoRoot 'playwright-artifacts'
           if (!(Test-Path $artifactRoot)) { New-Item -ItemType Directory -Path $artifactRoot | Out-Null }
           if (Test-Path 'playwright-report') { Copy-Item -Recurse -Force 'playwright-report' (Join-Path $artifactRoot 'playwright-report') }
           if (Test-Path 'test-results') { Copy-Item -Recurse -Force 'test-results' (Join-Path $artifactRoot 'test-results') }
-        # Summarize results
         - if (Test-Path ./playwright-report) { Write-Host "Playwright HTML report generated in ./playwright-report" }
-        - if (Test-Path ./test-results) { Write-Host "JUnit results in ./test-results"; Get-ChildItem ./test-results | ForEach-Object { Write-Host $_.FullName } }
-        # Exit with test status
-        - if ($LASTEXITCODE -ne 0) { Write-Error "Playwright tests failed."; exit 1 } else { Write-Host "Playwright tests passed." }
+        - if (Test-Path ./test-results) { Write-Host "Collected test results:"; Get-ChildItem -Recurse ./test-results | ForEach-Object { Write-Host $_.FullName } }
+        - if (Test-Path ./test-results/junit.xml) { Write-Host "JUnit XML present at ./test-results/junit.xml" }
+        - if ($playwrightExit -ne 0) { Write-Error "Playwright tests failed (exit code $playwrightExit)."; exit $playwrightExit } else { Write-Host "Playwright tests passed." }
           
 
 pipelines:
