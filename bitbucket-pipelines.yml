@@ -459,6 +459,17 @@ definitions:
           if (-not $playwrightDir) { Write-Error "Could not locate Playwright project directory. Checked: $($candidateDirs -join ', ')"; exit 1 }
           Write-Host "Using Playwright directory: $playwrightDir"
           Set-Location $playwrightDir
+        - |
+          # Ensure supported Node.js version (packages warn require ^18.18.0 || ^20.9.0 || >=21.1.0)
+          $targetNode = '20.11.1'
+          Write-Host "Current Node version (pre-adjust):"; node -v 2>$null
+          if (Get-Command volta -ErrorAction SilentlyContinue) {
+            Write-Host "Using Volta to install Node $targetNode"
+            volta install node@$targetNode
+            Write-Host "Node after Volta install:"; node -v
+          } else {
+            Write-Host "Volta not available; proceeding with existing Node version"; node -v
+          }
         - if (-not $env:QA_Playwright) { Write-Error "QA_Playwright variable not set in Bitbucket variables"; exit 1 }
         - |
           # Build .env from QA_Playwright variable
