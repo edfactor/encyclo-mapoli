@@ -40,7 +40,7 @@ const MasterInquiryContent = memo(() => {
         width={"100%"}>
         <Divider />
       </Grid>
-      {missiveAlerts.length > 0 && <MissiveAlerts missiveAlerts={missiveAlerts} />}
+      {missiveAlerts.length > 0 && <MissiveAlerts />}
       <Grid
         size={{ xs: 12 }}
         width={"100%"}>
