@@ -255,6 +255,7 @@ export const createBadgeColumn = (options: BadgeColumnOptions = {}): ColDef => {
       // We could get a PSN as a string
       const dataValue: number = field === "badgeNumber" ? params.data.badgeNumber : Number(params.data[field]);
       // If dataValue is NaN just return nothing
+
       if (isNaN(dataValue)) return;
       if (psnSuffix && params.data.psnSuffix) {
         return viewBadgeLinkRenderer(params.data.badgeNumber, params.data.psnSuffix, navigateFunction);

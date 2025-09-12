@@ -1349,7 +1349,7 @@ export const {
   useLazyGetDuplicateNamesAndBirthdaysQuery,
   useLazyGetDuplicateSSNsQuery,
   useLazyGetEligibleEmployeesQuery,
-  useLazyGetEmployeesOnMilitaryLeaveQuery,
+  //useLazyGetEmployeesOnMilitaryLeaveQuery,
   useLazyGetEmployeeWagesForYearQuery,
   useLazyGetExecutiveHoursAndDollarsQuery,
   useLazyGetForfeituresAndPointsQuery,

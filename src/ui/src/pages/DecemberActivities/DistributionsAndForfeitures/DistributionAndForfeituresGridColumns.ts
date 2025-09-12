@@ -13,11 +13,7 @@ import {
 
 export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({
-      headerName: "Badge",
-
-      psnSuffix: true
-    }),
+    createBadgeColumn({}),
     createNameColumn({
       field: "employeeName",
       minWidth: 150
