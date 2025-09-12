@@ -12,6 +12,7 @@ using Demoulas.ProfitSharing.UnitTests.Common.Common;
 using Demoulas.Util.Extensions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Helpers;
+
 public sealed class CleanupReportClient : ClientBase, ICleanupReportService
 {
     private const string BaseApiPath = "api/yearend";
@@ -24,7 +25,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         this(httpClientFactory.CreateClient(Constants.Http.ReportsHttpClient),
             httpClientFactory.CreateClient(Constants.Http.ReportsDownloadClient))
     {
-        
+
     }
     public CleanupReportClient(HttpClient? jsonClient, HttpClient? fileDownloadClient) : base(jsonClient, fileDownloadClient)
     {
@@ -40,7 +41,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         return CallReportEndpoint<PayrollDuplicateSsnResponseDto, SortedPaginationRequestDto>(req, "duplicate-ssns", ct);
     }
 
-    public Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfitAsync(SortedPaginationRequestDto req, CancellationToken cancellationToken = default)
+    public Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfitAsync(ProfitYearRequest req, CancellationToken cancellationToken = default)
     {
         return CallReportEndpoint<DemographicBadgesNotInPayProfitResponse, SortedPaginationRequestDto>(req, "demographic-badges-not-in-payprofit", cancellationToken);
     }
@@ -65,11 +66,11 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
 
     public Task<Stream> DownloadNegativeETVAForSSNsOnPayProfitResponse(short profitYear, CancellationToken cancellationToken = default)
     {
-        return DownloadCsvReport(profitYear,"negative-evta-ssn", cancellationToken);
+        return DownloadCsvReport(profitYear, "negative-evta-ssn", cancellationToken);
     }
 
     #endregion
-    
+
 
     public Task<ReportResponseBase<NamesMissingCommaResponse>> GetNamesMissingCommaAsync(SortedPaginationRequestDto req, CancellationToken cancellationToken = default)
     {
@@ -91,7 +92,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         return DownloadCsvReport(profitYear, "duplicate-names-and-birthdays", cancellationToken);
     }
 
-    private async Task<ReportResponseBase<TResponseDto>> CallReportEndpoint<TResponseDto, TPaginatedRequest>(TPaginatedRequest req, string endpointRoute, CancellationToken cancellationToken) where TResponseDto : class where TPaginatedRequest : SortedPaginationRequestDto 
+    private async Task<ReportResponseBase<TResponseDto>> CallReportEndpoint<TResponseDto, TPaginatedRequest>(TPaginatedRequest req, string endpointRoute, CancellationToken cancellationToken) where TResponseDto : class where TPaginatedRequest : SortedPaginationRequestDto
     {
         UriBuilder uriBuilder = BuildPaginatedUrl(req, endpointRoute);
         var response = await _httpClient.GetAsync(uriBuilder.Uri, cancellationToken);
@@ -109,11 +110,11 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
     }
     private Task<Stream> DownloadCsvReport(short profitYear, string endpointRoute, CancellationToken cancellationToken)
     {
-        UriBuilder uriBuilder = BuildPaginatedUrl(new ProfitYearRequest {ProfitYear = profitYear, Skip = 0, Take = int.MaxValue }, endpointRoute);
+        UriBuilder uriBuilder = BuildPaginatedUrl(new ProfitYearRequest { ProfitYear = profitYear, Skip = 0, Take = int.MaxValue }, endpointRoute);
         return _httpDownloadClient.GetStreamAsync(uriBuilder.Uri, cancellationToken);
     }
 
-    private UriBuilder BuildPaginatedUrl<TPaginatedRequest>(TPaginatedRequest req, string endpointRoute) where TPaginatedRequest : SortedPaginationRequestDto 
+    private UriBuilder BuildPaginatedUrl<TPaginatedRequest>(TPaginatedRequest req, string endpointRoute) where TPaginatedRequest : SortedPaginationRequestDto
     {
         var query = HttpUtility.ParseQueryString(string.Empty);
 
@@ -136,7 +137,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         {
             query[nameof(YearEndProfitSharingReportRequest.ReportId)] = yreq.ReportId.ToString();
             if (yreq.BadgeNumber.HasValue)
-            {query[nameof(YearEndProfitSharingReportRequest.BadgeNumber)] = yreq.BadgeNumber.Value.ToString();}
+            { query[nameof(YearEndProfitSharingReportRequest.BadgeNumber)] = yreq.BadgeNumber.Value.ToString(); }
         }
 
         if (req is DistributionsAndForfeituresRequest dafr)

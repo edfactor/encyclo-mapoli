@@ -42,7 +42,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         var response = await _cleanupReportClient.GetDuplicateSsnAsync(_paginationRequest, CancellationToken.None);
         response.ShouldNotBeNull();
-        response.Response.Results.Count().ShouldBe(0); 
+        response.Response.Results.Count().ShouldBe(0);
     }
 
     [Fact(DisplayName = "PS-147: Check Duplicate SSNs (CSV)")]
@@ -50,7 +50,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     {
         DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         var response = await DownloadClient
-            .GETAsync <GetDuplicateSsNsEndpoint, PaginationRequestDto, PayrollDuplicateSsnResponseDto>(_paginationRequest);
+            .GETAsync<GetDuplicateSsNsEndpoint, PaginationRequestDto, PayrollDuplicateSsnResponseDto>(_paginationRequest);
 
 
         string content = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
@@ -88,7 +88,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
 
             _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
 
-            var oneRecord = new SortedPaginationRequestDto { Skip = 0, Take = 1 };
+            var oneRecord = new ProfitYearRequest { Skip = 0, Take = 1 };
             response = await _cleanupReportClient.GetDemographicBadgesNotInPayProfitAsync(oneRecord, CancellationToken.None);
             response.ShouldNotBeNull();
             response.Response.Results.Count().ShouldBe(1);
@@ -240,7 +240,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     }
 
 
-   
+
     [Fact(DisplayName = "PS-61 : Year-end Profit Sharing Report (JSON)")]
     public async Task GetYearEndProfitSharingReport()
     {
@@ -252,7 +252,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             Take = byte.MaxValue,
             ProfitYear = profitYear,
             ReportId = YearEndProfitSharingReportId.Age21OrOlderWith1000Hours
-                 // Default to report 2 for active/inactive
+            // Default to report 2 for active/inactive
         };
         var testHours = 1001;
         await MockDbContextFactory.UseWritableContext(async ctx =>
@@ -568,7 +568,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     public async Task GetYearEndProfitSharingSummaryReportAsyncCheck()
     {
         var req = new FrozenProfitYearRequest() { ProfitYear = 2024, UseFrozenData = false };
-        var response  =
+        var response =
             await ApiClient
                 .POSTAsync<YearEndProfitSharingSummaryReportEndpoint,
                     FrozenProfitYearRequest, YearEndProfitSharingReportSummaryResponse>(req);

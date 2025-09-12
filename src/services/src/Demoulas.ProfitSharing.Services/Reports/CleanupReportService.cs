@@ -57,9 +57,9 @@ public class CleanupReportService : ICleanupReportService
         _logger = factory.CreateLogger<CleanupReportService>();
     }
 
-  
+
     public async Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>>
-        GetDemographicBadgesNotInPayProfitAsync(SortedPaginationRequestDto req,
+        GetDemographicBadgesNotInPayProfitAsync(ProfitYearRequest req,
             CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request BEGIN DEMOGRAPHIC BADGES NOT IN PAY PROFIT"))
@@ -69,17 +69,17 @@ public class CleanupReportService : ICleanupReportService
                 var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
                 var query = from dem in demographics
                         .Include(d => d.EmploymentStatus)
-                    where !(from pp in ctx.PayProfits select pp.DemographicId).Contains(dem.Id)
-                    select new 
-                    {
-                        dem.BadgeNumber,
-                        dem.Ssn,
-                        EmployeeName = dem.ContactInfo.FullName ?? "",
-                        Status = dem.EmploymentStatusId,
-                        StatusName = dem.EmploymentStatus!.Name,
-                        Store = dem.StoreNumber,
-                        IsExecutive = dem.PayFrequencyId == PayFrequency.Constants.Monthly,
-                    };
+                            where !(from pp in ctx.PayProfits select pp.DemographicId).Contains(dem.Id)
+                            select new
+                            {
+                                dem.BadgeNumber,
+                                dem.Ssn,
+                                EmployeeName = dem.ContactInfo.FullName ?? "",
+                                Status = dem.EmploymentStatusId,
+                                StatusName = dem.EmploymentStatus!.Name,
+                                Store = dem.StoreNumber,
+                                IsExecutive = dem.PayFrequencyId == PayFrequency.Constants.Monthly,
+                            };
                 return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             });
 
@@ -96,14 +96,15 @@ public class CleanupReportService : ICleanupReportService
                     Store = x.Store,
                     IsExecutive = x.IsExecutive
                 }).ToList()
-            };  
+            };
 
             _logger.LogInformation("Returned {Results} records", results.Results.Count());
+            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
             return new ReportResponseBase<DemographicBadgesNotInPayProfitResponse>
             {
                 ReportDate = DateTimeOffset.UtcNow,
-                StartDate = ReferenceData.DsmMinValue,
-                EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
+                StartDate = calInfo.FiscalBeginDate,
+                EndDate = calInfo.FiscalEndDate,
                 ReportName = "DEMOGRAPHICS BADGES NOT ON PAYPROFIT",
                 Response = results
             };
@@ -121,15 +122,15 @@ public class CleanupReportService : ICleanupReportService
                 var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
                 var query = from dem in demographics
 #pragma warning disable CA1847
-                    where dem.ContactInfo.FullName == null || !dem.ContactInfo.FullName.Contains(",")
+                            where dem.ContactInfo.FullName == null || !dem.ContactInfo.FullName.Contains(",")
 #pragma warning restore CA1847
-                    select new NamesMissingCommaResponse
-                    {
-                        BadgeNumber = dem.BadgeNumber,
-                        Ssn = dem.Ssn.MaskSsn(),
-                        EmployeeName = dem.ContactInfo.FullName ?? "",
-                        IsExecutive = dem.PayFrequencyId == PayFrequency.Constants.Monthly,
-                    };
+                            select new NamesMissingCommaResponse
+                            {
+                                BadgeNumber = dem.BadgeNumber,
+                                Ssn = dem.Ssn.MaskSsn(),
+                                EmployeeName = dem.ContactInfo.FullName ?? "",
+                                IsExecutive = dem.PayFrequencyId == PayFrequency.Constants.Monthly,
+                            };
                 return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             });
 
@@ -140,7 +141,8 @@ public class CleanupReportService : ICleanupReportService
                 ReportDate = DateTimeOffset.UtcNow,
                 StartDate = ReferenceData.DsmMinValue,
                 EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
-                ReportName = "MISSING COMMA IN PY_NAME", Response = results
+                ReportName = "MISSING COMMA IN PY_NAME",
+                Response = results
             };
         }
     }
@@ -201,39 +203,39 @@ FROM FILTERED_DEMOGRAPHIC p1
                 var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
 
                 var query = from dem in demographics.Include(d => d.EmploymentStatus)
-                        join ppLj in ctx.PayProfits on new { DemographicId = dem.Id, req.ProfitYear } equals new
-                        {
-                            ppLj.DemographicId,
-                            ppLj.ProfitYear
-                        } into tmpPayProfit
-                        from pp in tmpPayProfit.DefaultIfEmpty()
-                        join b in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear) on dem.Ssn equals b.Ssn into tmpBalance
-                        from bal in tmpBalance.DefaultIfEmpty()
-                        join yos in _totalService.GetYearsOfService(ctx, req.ProfitYear, calInfo.FiscalEndDate) on dem.Ssn equals yos.Ssn into tmpYos
-                        from yos in tmpYos.DefaultIfEmpty()
-                        where dem.ContactInfo.FullName != null && names.Contains(dem!.ContactInfo!.FullName!)
-                        select new
-                        {
-                            dem.BadgeNumber,
-                            dem.Ssn,
-                            Name = dem.ContactInfo.FullName,
-                            dem.DateOfBirth,
-                            Address = dem.Address.Street,
-                            dem.Address.City,
-                            dem.Address.State,
-                            dem.Address.PostalCode,
-                            dem.Address.CountryIso,
-                            dem.HireDate,
-                            dem.TerminationDate,
-                            dem.EmploymentStatusId,
-                            EmploymentStatusName = dem.EmploymentStatus!.Name,
-                            dem.StoreNumber,
-                            HoursCurrentYear = pp != null ? pp.CurrentHoursYear : 0,
-                            IncomeCurrentYear = pp != null ? pp.CurrentIncomeYear : 0,
-                            NetBalance = bal != null ? bal.TotalAmount : 0,
-                            Years = yos != null ? yos.Years : (byte)0,
-                            dem.PayFrequencyId,
-                        };
+                            join ppLj in ctx.PayProfits on new { DemographicId = dem.Id, req.ProfitYear } equals new
+                            {
+                                ppLj.DemographicId,
+                                ppLj.ProfitYear
+                            } into tmpPayProfit
+                            from pp in tmpPayProfit.DefaultIfEmpty()
+                            join b in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear) on dem.Ssn equals b.Ssn into tmpBalance
+                            from bal in tmpBalance.DefaultIfEmpty()
+                            join yos in _totalService.GetYearsOfService(ctx, req.ProfitYear, calInfo.FiscalEndDate) on dem.Ssn equals yos.Ssn into tmpYos
+                            from yos in tmpYos.DefaultIfEmpty()
+                            where dem.ContactInfo.FullName != null && names.Contains(dem!.ContactInfo!.FullName!)
+                            select new
+                            {
+                                dem.BadgeNumber,
+                                dem.Ssn,
+                                Name = dem.ContactInfo.FullName,
+                                dem.DateOfBirth,
+                                Address = dem.Address.Street,
+                                dem.Address.City,
+                                dem.Address.State,
+                                dem.Address.PostalCode,
+                                dem.Address.CountryIso,
+                                dem.HireDate,
+                                dem.TerminationDate,
+                                dem.EmploymentStatusId,
+                                EmploymentStatusName = dem.EmploymentStatus!.Name,
+                                dem.StoreNumber,
+                                HoursCurrentYear = pp != null ? pp.CurrentHoursYear : 0,
+                                IncomeCurrentYear = pp != null ? pp.CurrentIncomeYear : 0,
+                                NetBalance = bal != null ? bal.TotalAmount : 0,
+                                Years = yos != null ? yos.Years : (byte)0,
+                                dem.PayFrequencyId,
+                            };
 
                 var rslt = await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
 
@@ -273,15 +275,17 @@ FROM FILTERED_DEMOGRAPHIC p1
                 r.Count = dupInfo.Count(x => x.MatchedId == r.BadgeNumber);
             }
 
+            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
+
             return new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>()
             {
                 ReportDate = DateTimeOffset.UtcNow,
-                StartDate = ReferenceData.DsmMinValue,
-                EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
-                ReportName = "DUPLICATE NAMES AND BIRTHDAYS", 
-                Response = new PaginatedResponseDto<DuplicateNamesAndBirthdaysResponse>() 
-                { 
-                    Total = results.Total, 
+                StartDate = calInfo.FiscalBeginDate,
+                EndDate = calInfo.FiscalEndDate,
+                ReportName = "DUPLICATE NAMES AND BIRTHDAYS",
+                Response = new PaginatedResponseDto<DuplicateNamesAndBirthdaysResponse>()
+                {
+                    Total = results.Total,
                     Results = projectedResults
                 }
             };
@@ -344,37 +348,37 @@ FROM FILTERED_DEMOGRAPHIC p1
                 var endDate = (DateTimeOffset?)(!req.EndDate.HasValue ? null : req.EndDate.Value.ToDateTimeOffset());
 
                 var query = from pd in ctx.ProfitDetails
-                    join nameAndDob in nameAndDobQuery on pd.Ssn equals nameAndDob.Ssn
-                    where pd.ProfitYear == req.ProfitYear &&
-                          _validProfitCodes.Contains(pd.ProfitCodeId) &&
-                          (pd.ProfitCodeId != ProfitCode.Constants.Outgoing100PercentVestedPayment.Id ||
-                           (pd.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id &&
-                            (!pd.CommentTypeId.HasValue ||
-                             !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
-                            (!req.StartDate.HasValue || pd.CreatedAtUtc >= startDate) &&
-                            (!req.EndDate.HasValue || pd.CreatedAtUtc <= endDate) &&
-                            !(pd.ProfitCodeId == 9 && pd.CommentTypeId.HasValue && transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value))
+                            join nameAndDob in nameAndDobQuery on pd.Ssn equals nameAndDob.Ssn
+                            where pd.ProfitYear == req.ProfitYear &&
+                                  _validProfitCodes.Contains(pd.ProfitCodeId) &&
+                                  (pd.ProfitCodeId != ProfitCode.Constants.Outgoing100PercentVestedPayment.Id ||
+                                   (pd.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id &&
+                                    (!pd.CommentTypeId.HasValue ||
+                                     !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
+                                    (!req.StartDate.HasValue || pd.CreatedAtUtc >= startDate) &&
+                                    (!req.EndDate.HasValue || pd.CreatedAtUtc <= endDate) &&
+                                    !(pd.ProfitCodeId == 9 && pd.CommentTypeId.HasValue && transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value))
 
-                    select new
-                    {
-                        nameAndDob.BadgeNumber,
-                        nameAndDob.PsnSuffix,
-                        pd.Ssn,
-                        EmployeeName = nameAndDob.FullName,
-                        DistributionAmount = _distributionProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,
-                        TaxCode = pd.TaxCodeId,
-                        State = pd.CommentRelatedState,
-                        StateTax = pd.StateTaxes,
-                        FederalTax = pd.FederalTaxes,
-                        ForfeitAmount = pd.ProfitCodeId == 2 ? pd.Forfeiture : 0,
-                        pd.YearToDate,
-                        pd.MonthToDate,
-                        Date = pd.CreatedAtUtc,
-                        nameAndDob.DateOfBirth,
-                        nameAndDob.EnrolledId,
-                        nameAndDob.PayFrequencyId,
-                    };
-                
+                            select new
+                            {
+                                nameAndDob.BadgeNumber,
+                                nameAndDob.PsnSuffix,
+                                pd.Ssn,
+                                EmployeeName = nameAndDob.FullName,
+                                DistributionAmount = _distributionProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,
+                                TaxCode = pd.TaxCodeId,
+                                State = pd.CommentRelatedState,
+                                StateTax = pd.StateTaxes,
+                                FederalTax = pd.FederalTaxes,
+                                ForfeitAmount = pd.ProfitCodeId == 2 ? pd.Forfeiture : 0,
+                                pd.YearToDate,
+                                pd.MonthToDate,
+                                Date = pd.CreatedAtUtc,
+                                nameAndDob.DateOfBirth,
+                                nameAndDob.EnrolledId,
+                                nameAndDob.PayFrequencyId,
+                            };
+
 
                 var totals = await query.GroupBy(_ => true)
                     .Select(g => new
@@ -385,13 +389,16 @@ FROM FILTERED_DEMOGRAPHIC p1
                         ForfeitureTotal = g.Sum(x => x.ForfeitAmount)
                     })
                     .FirstOrDefaultAsync(cancellationToken: cancellationToken) ?? new
-                {
-                    DistributionTotal = 0m, StateTaxTotal = 0m, FederalTaxTotal = 0m, ForfeitureTotal = 0m
-                };
+                    {
+                        DistributionTotal = 0m,
+                        StateTaxTotal = 0m,
+                        FederalTaxTotal = 0m,
+                        ForfeitureTotal = 0m
+                    };
 
                 // Calculate state tax totals by state
                 var stateTaxTotals = await query
-                    .Where(s=> s.StateTax > 0)
+                    .Where(s => s.StateTax > 0)
                     .GroupBy(x => x.State)
                     .Select(g => new { State = g.Key, Total = g.Sum(x => x.StateTax) })
                     .ToDictionaryAsync(x => x.State ?? string.Empty, x => x.Total, cancellationToken);
@@ -432,8 +439,8 @@ FROM FILTERED_DEMOGRAPHIC p1
                 {
                     ReportName = "Distributions and Forfeitures",
                     ReportDate = DateTimeOffset.UtcNow,
-                    StartDate = calInfo.FiscalBeginDate,
-                    EndDate = calInfo.FiscalEndDate,
+                    StartDate = req.StartDate ?? calInfo.FiscalBeginDate,
+                    EndDate = req.EndDate ?? calInfo.FiscalEndDate,
                     DistributionTotal = totals.DistributionTotal,
                     StateTaxTotal = totals.StateTaxTotal,
                     FederalTaxTotal = totals.FederalTaxTotal,
@@ -441,11 +448,12 @@ FROM FILTERED_DEMOGRAPHIC p1
                     StateTaxTotals = stateTaxTotals,
                     Response = new PaginatedResponseDto<DistributionsAndForfeitureResponse>(req)
                     {
-                        Results = apiResponse.ToList(), Total = paginated.Total
+                        Results = apiResponse.ToList(),
+                        Total = paginated.Total
                     }
                 };
             });
-            
+
             return await results;
         }
     }
