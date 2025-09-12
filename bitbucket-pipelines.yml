@@ -432,13 +432,26 @@ definitions:
         - echo "Gitleaks findings (redacted JSON):"
         - head -c 200000 reports/gitleaks.json || true
         - |
-          # Robust leak evaluation: treat empty file or literal [] as no leaks
+          # Robust leak evaluation without python dependency
           if [ ! -s reports/gitleaks.json ]; then
             echo "No leaks found (empty report).";
           else
-            findings_count=$(python -c "import json,sys;\nimport pathlib; p=pathlib.Path('reports/gitleaks.json');\nraw=p.read_text(encoding='utf-8');\ntry: data=json.loads(raw);\nexcept Exception as e: print(0); sys.exit(0);\ncount = 0;\nif isinstance(data,list): count=len(data);\nelif isinstance(data,dict) and 'findings' in data and isinstance(data['findings'],list): count=len(data['findings']);\nprint(count)" )
+            if command -v jq >/dev/null 2>&1; then
+              findings_count=$(jq 'if type=="array" then length elif (.findings|type? == "array") then (.findings|length) else 0 end' reports/gitleaks.json 2>/dev/null || echo 0)
+            else
+              # Fallback: treat literal [] or [ ] as zero, anything else non-empty as 1
+              if grep -q '"Description"' reports/gitleaks.json; then
+                # Some formats include fields; attempt crude count of occurrences of "RuleID"
+                findings_count=$(grep -o '"RuleID"' reports/gitleaks.json | wc -l | tr -d ' ')
+              elif grep -Eq '^\s*\[\s*\]\s*$' reports/gitleaks.json; then
+                findings_count=0
+              else
+                # Non-empty & not literal empty array: assume at least 1
+                findings_count=1
+              fi
+            fi
             echo "Gitleaks findings count: $findings_count"
-            if [ "$findings_count" -gt 0 ]; then
+            if [ "${findings_count}" -gt 0 ]; then
               echo "Leaks found. Failing the build.";
               exit 1;
             else
