@@ -471,7 +471,7 @@ definitions:
           Write-Host "Using directory: $playwrightDir"
 
           Write-Host "[2] Ensure compatible Node.js version" -ForegroundColor Cyan
-          $targetNode = '20.4.0'
+          $targetNode = '22.16.0'
           try { $currentNode = (node -v) 2>$null } catch { $currentNode = 'unknown' }
           Write-Host "Current node: $currentNode"
           if (Get-Command volta -ErrorAction SilentlyContinue) {
@@ -500,7 +500,7 @@ definitions:
           New-Item -ItemType Directory -Path test-results -Force | Out-Null
           $env:PLAYWRIGHT_JUNIT_OUTPUT = "test-results/junit.xml"
 
-          $env:Path = "C:\Program Files\nodejs20.4.0;$env:Path"   # ensure `node` resolves to v20.4.0
+          $env:Path = "C:\Program Files\nodejs\22.16.0;$env:Path"   # ensure `node` resolves to v22.16.0
           npx playwright test --reporter "list,junit" --config=playwright.config.ts --output=test-results --workers=4
 
           exit $LASTEXITCODE
