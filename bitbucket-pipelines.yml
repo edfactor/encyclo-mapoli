@@ -539,18 +539,32 @@ definitions:
           $playwrightCli = Join-Path (Resolve-Path ./node_modules/@playwright/test).Path "cli.js"
           if (-not (Test-Path $playwrightCli)) { Write-Error "Playwright CLI not found at $playwrightCli"; Get-ChildItem node_modules/@playwright/test -Recurse -Depth 2; exit 1 }
           node $playwrightCli test --reporter "list,junit" --config=playwright.config.ts --output=test-results --workers=4
+          $pwExit = $LASTEXITCODE
 
-          exit $LASTEXITCODE
-
-
-          Write-Host "[6] Collect artifacts" -ForegroundColor Cyan
+          Write-Host "[6] Prepare Bitbucket test-reports ingestion" -ForegroundColor Cyan
           $repoRoot = $env:BITBUCKET_CLONE_DIR; if (-not $repoRoot) { $repoRoot = (Resolve-Path '..').Path }
-          $artifactRoot = Join-Path $repoRoot 'playwright-artifacts'
-          if (!(Test-Path $artifactRoot)) { New-Item -ItemType Directory -Path $artifactRoot | Out-Null }
-          foreach ($d in 'playwright-report','test-results') { if (Test-Path $d) { Copy-Item -Recurse -Force $d (Join-Path $artifactRoot $d) } }
-          if (Test-Path test-results/junit.xml) { Write-Host "JUnit XML: test-results/junit.xml" }
+          $bbTestRoot = Join-Path $repoRoot 'test-reports'
+          $bbPlaywrightDir = Join-Path $bbTestRoot 'playwright'
+          if (!(Test-Path $bbPlaywrightDir)) { New-Item -ItemType Directory -Path $bbPlaywrightDir -Force | Out-Null }
+          # Locate a junit xml (reporter names can vary). Prefer explicit junit.xml if present.
+          $junitCandidate = @(
+            Get-ChildItem -Path test-results -Recurse -Filter junit*.xml -ErrorAction SilentlyContinue,
+            Get-ChildItem -Path test-results -Recurse -Filter *.xml -ErrorAction SilentlyContinue | Where-Object { (Get-Content $_.FullName -TotalCount 5) -match '<testsuite' }
+          ) | Where-Object { $_ } | Select-Object -First 1
+          if ($junitCandidate) {
+            Copy-Item $junitCandidate.FullName (Join-Path $bbPlaywrightDir 'junit.xml') -Force
+            Write-Host "Copied JUnit report to test-reports/playwright/junit.xml"
+          } else {
+            Write-Host "No JUnit XML found to copy." -ForegroundColor Yellow
+          }
 
-          if ($exit -ne 0) { Write-Error "Playwright tests failed (exit $exit)"; exit $exit } else { Write-Host "Playwright tests passed." }
+          Write-Host "[7] Collect artifacts" -ForegroundColor Cyan
+          $artifactRoot = Join-Path $repoRoot 'playwright-artifacts'
+            if (!(Test-Path $artifactRoot)) { New-Item -ItemType Directory -Path $artifactRoot | Out-Null }
+          foreach ($d in 'playwright-report','test-results') { if (Test-Path $d) { Copy-Item -Recurse -Force $d (Join-Path $artifactRoot $d) } }
+
+          Write-Host "[8] Finalize with exit code $pwExit" -ForegroundColor Cyan
+          exit $pwExit
           
 
 pipelines:
