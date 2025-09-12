@@ -484,14 +484,21 @@ definitions:
           Write-Host "[3] Build .env from QA_Playwright variable" -ForegroundColor Cyan
           if (-not $env:QA_Playwright) { Write-Error "QA_Playwright variable not set"; exit 1 }
           $raw = $env:QA_Playwright
-          if ($raw -match '\n') { $raw = ($raw -replace '\r?\n', [Environment]::NewLine) }
+          # Normalize: convert space-separated KEY=VALUE tokens into separate lines.
+          # Example input (single line): CI=false QA=false USER_NAME= rharding PASSWORD= thisIsGonnaFail
+          # Regex replaces whitespace preceding another KEY= with a newline.
+          $raw = $raw -replace '(?<!^)\s+(?=[A-Za-z_][A-Za-z0-9_]*=)','`n'
+          # Split on newlines now.
           $allLines = ($raw -split "`r?`n") | Where-Object { $_ -and ($_ -notmatch '^\s*$') }
           # Build map of provided key/value pairs
           $kv = @{}
           foreach ($l in $allLines) {
-            if ($l -match '^[A-Za-z_][A-Za-z0-9_]*=') {
-              $k,$v = $l -split '=',2
-              if (-not $kv.ContainsKey($k)) { $kv[$k]=$v.Trim() }
+            if ($l -match '^([A-Za-z_][A-Za-z0-9_]*)=(.*)$') {
+              $k = $matches[1]
+              $v = $matches[2].Trim()
+              if ($v -match '^("|")') { $v = $v.Trim('"') }
+              if ($v -match "^('")") { $v = $v.Trim("'") }
+              if (-not $kv.ContainsKey($k)) { $kv[$k]=$v }
             }
           }
           # Normalize credential key aliases
