@@ -1,12 +1,11 @@
-import { Divider, CircularProgress } from "@mui/material";
-import { Grid } from "@mui/material";
+import { CircularProgress, Divider, Grid } from "@mui/material";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import { useEffect, useState } from "react";
 import { ApiMessageAlert, DSMAccordion, Page } from "smart-ui-library";
-import RehireForfeituresSearchFilter from "./RehireForfeituresSearchFilter";
-import RehireForfeituresGrid from "./RehireForfeituresGrid";
-import { useState, useEffect } from "react";
 import { CAPTIONS } from "../../../constants";
 import { useLazyGetAccountingRangeToCurrent } from "../../../hooks/useFiscalCalendarYear";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import RehireForfeituresGrid from "./RehireForfeituresGrid";
+import RehireForfeituresSearchFilter from "./RehireForfeituresSearchFilter";
 // removed Redux selector dependency for search state
 
 const RehireForfeitures = () => {
@@ -157,6 +156,7 @@ const RehireForfeitures = () => {
                 hasUnsavedChanges={hasUnsavedChanges}
                 shouldArchive={shouldArchive}
                 onArchiveHandled={handleArchiveHandled}
+                setHasUnsavedChanges={setHasUnsavedChanges}
               />
             </Grid>
           </>
