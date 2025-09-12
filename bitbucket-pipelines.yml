@@ -447,10 +447,22 @@ definitions:
       artifacts:
         - ui/playwright-report/**
         - ui/test-results/**
+        - src/UI/playwright-report/**
+        - src/UI/test-results/**
+        - playwright-artifacts/**
       script:
-        # Navigate to UI test project (root-level 'ui' directory contains playwright config & tests)
-        - if (!(Test-Path -Path "./ui")) { Write-Error "UI (playwright) directory not found at ./ui"; exit 1 }
-        - cd ./ui
+        # Locate Playwright project directory (support both root 'ui' and 'src/UI')
+        - |
+          $candidateDirs = @('ui', 'src/UI', 'src/ui')
+          $playwrightDir = $null
+          foreach ($d in $candidateDirs) {
+            if (Test-Path $d) { $playwrightDir = $d; break }
+          }
+          if (-not $playwrightDir) {
+            Write-Error "Could not locate Playwright project directory. Checked: $($candidateDirs -join ', ')"; exit 1
+          }
+          Write-Host "Using Playwright directory: $playwrightDir"
+          Set-Location $playwrightDir
         # Write QA environment variables from secured Bitbucket variable QA_Playwright into .env (multi-line expected)
         - if (-not $env:QA_Playwright) { Write-Error "QA_Playwright variable not set in Bitbucket variables"; exit 1 }
         - Set-Content -Path ./.env -Value "### Generated from Bitbucket variable QA_Playwright (QA) ###"
@@ -463,10 +475,17 @@ definitions:
         # Run tests with junit + html reporters (adjust if package.json already configures reporters)
         - mkdir -Force test-results | Out-Null
         - npx playwright test --reporter="list,junit" --config=playwright.config.ts
+        # Copy artifacts to a stable root-level directory for collection regardless of working dir
+        - |
+          $root = Resolve-Path '..'
+          $artifactRoot = Join-Path $root 'playwright-artifacts'
+          if (!(Test-Path $artifactRoot)) { New-Item -ItemType Directory -Path $artifactRoot | Out-Null }
+          if (Test-Path 'playwright-report') { Copy-Item -Recurse -Force 'playwright-report' (Join-Path $artifactRoot 'playwright-report') }
+          if (Test-Path 'test-results') { Copy-Item -Recurse -Force 'test-results' (Join-Path $artifactRoot 'test-results') }
         # Summarize results
         - if (Test-Path ./playwright-report) { Write-Host "Playwright HTML report generated in ./playwright-report" }
         - if (Test-Path ./test-results) { Write-Host "JUnit results in ./test-results"; Get-ChildItem ./test-results | ForEach-Object { Write-Host $_.FullName } }
-        # Non-zero exit if any test failed (Playwright already sets exit code); we echo for clarity
+        # Exit with test status
         - if ($LASTEXITCODE -ne 0) { Write-Error "Playwright tests failed."; exit 1 } else { Write-Host "Playwright tests passed." }
           
 
