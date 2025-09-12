@@ -484,35 +484,33 @@ definitions:
           Write-Host "[3] Build .env from QA_Playwright variable" -ForegroundColor Cyan
           if (-not $env:QA_Playwright) { Write-Error "QA_Playwright variable not set"; exit 1 }
           $raw = $env:QA_Playwright
-          # Normalize: convert space-separated KEY=VALUE tokens into separate lines.
-          # Example input (single line): CI=false QA=false USER_NAME= rharding PASSWORD= thisIsGonnaFail
-          # Regex replaces whitespace preceding another KEY= with a newline.
+          # Convert space separated KEY=VALUE tokens into separate lines (except first token)
           $raw = $raw -replace '(?<!^)\s+(?=[A-Za-z_][A-Za-z0-9_]*=)','`n'
-          # Split on newlines now.
           $allLines = ($raw -split "`r?`n") | Where-Object { $_ -and ($_ -notmatch '^\s*$') }
-          # Build map of provided key/value pairs
           $kv = @{}
           foreach ($l in $allLines) {
-            if ($l -match '^([A-Za-z_][A-Za-z0-9_]*)=(.*)$') {
+            if ($l -match '^\s*([A-Za-z_][A-Za-z0-9_]*)=(.*)$') {
               $k = $matches[1]
-              $v = $matches[2].Trim()
-              if ($v -match '^("|")') { $v = $v.Trim('"') }
-              if ($v -match "^('")") { $v = $v.Trim("'") }
-              if (-not $kv.ContainsKey($k)) { $kv[$k]=$v }
+              $v = $matches[2]
+              $v = $v.Trim()
+              # Strip matching surrounding quotes if present
+              if ($v.Length -ge 2 -and ((($v.StartsWith('"')) -and ($v.EndsWith('"'))) -or (($v.StartsWith("'")) -and ($v.EndsWith("'"))))) {
+                $v = $v.Substring(1, $v.Length-2)
+              }
+              if (-not $kv.ContainsKey($k)) { $kv[$k] = $v }
             }
           }
-          # Normalize credential key aliases
           $userKey = ($kv.Keys | Where-Object { $_ -in 'USER_NAME','USERNAME','USER','LOGIN' } | Select-Object -First 1)
           $passKey = ($kv.Keys | Where-Object { $_ -in 'PASSWORD','PASS','PWD' } | Select-Object -First 1)
           $userVal = if ($userKey) { $kv[$userKey] } else { '' }
           $passVal = if ($passKey) { $kv[$passKey] } else { '' }
-          # Accept CI / QA values if provided; else blank
           $ciVal = if ($kv.ContainsKey('CI')) { $kv['CI'] } else { '' }
           $qaVal = if ($kv.ContainsKey('QA')) { $kv['QA'] } else { '' }
           if (-not $userVal -or -not $passVal) {
-            Write-Error 'Missing USER_NAME/USERNAME/USER/LOGIN and/or PASSWORD/PASS/PWD values in QA_Playwright variable.'; exit 1
+            Write-Host 'Parsed raw tokens:'
+            $kv.GetEnumerator() | ForEach-Object { Write-Host ("  " + $_.Key + "=(len:" + ($_.Value.Length) + ")") }
+            Write-Error 'Missing USER credential (USER_NAME/USERNAME/USER/LOGIN) and/or PASSWORD (PASSWORD/PASS/PWD) in QA_Playwright value.'; exit 1
           }
-          # Assemble ONLY the four requested keys in stable order
           $lines = @(
             "CI=$ciVal",
             "QA=$qaVal",
@@ -520,7 +518,7 @@ definitions:
             "PASSWORD=$passVal"
           )
           Set-Content ./.env -Value $lines
-          Write-Host (".env keys: CI, QA, USER_NAME, PASSWORD")
+          Write-Host ".env keys emitted: CI, QA, USER_NAME, PASSWORD"
           # Some configs expect a .playwright.env specifically; create it if not present
           Copy-Item ./.env ./.playwright.env -Force
 
