@@ -9,7 +9,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../../reduxstore/store";
 
 interface TotalsContentProps {
-  store: number;
+  store: number | null;
 }
 
 const TotalsContent: React.FC<TotalsContentProps> = ({ store }) => {
@@ -20,7 +20,7 @@ const TotalsContent: React.FC<TotalsContentProps> = ({ store }) => {
   const [getBreakdownByStoreTotals] = useLazyGetBreakdownByStoreTotalsQuery();
 
   useEffect(() => {
-    if (hasToken) {
+    if (hasToken && store) {
       // Refetch when store changes
       getBreakdownByStoreTotals({
         profitYear: profitYear,
@@ -80,7 +80,7 @@ const TotalsContent: React.FC<TotalsContentProps> = ({ store }) => {
         <Typography
           variant="h2"
           sx={{ color: "#0258A5", marginBottom: "16px" }}>
-          {`Totals`}
+          {store ? `Totals for Store ${store}` : 'Totals'}
         </Typography>
       </Grid>
       <Grid
