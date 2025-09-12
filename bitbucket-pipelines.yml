@@ -499,8 +499,12 @@ definitions:
           Write-Host "[5] Run tests" -ForegroundColor Cyan
           New-Item -ItemType Directory -Path test-results -Force | Out-Null
           $env:PLAYWRIGHT_JUNIT_OUTPUT = "test-results/junit.xml"
+
+          $env:Path = "C:\Program Files\nodejs20.4.0;$env:Path"   # ensure `node` resolves to v20.4.0
           npx playwright test --reporter "list,junit" --config=playwright.config.ts --output=test-results --workers=4
-          $exit = $LASTEXITCODE
+
+          exit $LASTEXITCODE
+
 
           Write-Host "[6] Collect artifacts" -ForegroundColor Cyan
           $repoRoot = $env:BITBUCKET_CLONE_DIR; if (-not $repoRoot) { $repoRoot = (Resolve-Path '..').Path }
