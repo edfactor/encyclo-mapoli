@@ -471,7 +471,7 @@ definitions:
           Write-Host "Using directory: $playwrightDir"
 
           Write-Host "[2] Ensure compatible Node.js version" -ForegroundColor Cyan
-          $targetNode = '20.11.1'
+          $targetNode = '20.4.0'
           try { $currentNode = (node -v) 2>$null } catch { $currentNode = 'unknown' }
           Write-Host "Current node: $currentNode"
           if (Get-Command volta -ErrorAction SilentlyContinue) {
