@@ -465,9 +465,19 @@ definitions:
           Set-Location $playwrightDir
         # Write QA environment variables from secured Bitbucket variable QA_Playwright into .env (multi-line expected)
         - if (-not $env:QA_Playwright) { Write-Error "QA_Playwright variable not set in Bitbucket variables"; exit 1 }
-        - Set-Content -Path ./.env -Value "### Generated from Bitbucket variable QA_Playwright (QA) ###"
-        - $env:QA_Playwright | Out-File -FilePath ./.env -Append -Encoding UTF8
-        - Write-Host "Created .env file (preview):"; Get-Content ./.env | Select-Object -First 20 | ForEach-Object { Write-Host "  $_" }
+        - |
+          $raw = $env:QA_Playwright
+          if (-not $raw) { Write-Error "QA_Playwright variable empty"; exit 1 }
+          # Support escaped \n sequences if variable stored as single-line
+          if ($raw -match '\\n') { $raw = ($raw -replace '\\r?\\n', [Environment]::NewLine) }
+          Set-Content -Path ./.env -Value $raw -NoNewline
+          $lines = Get-Content ./.env
+          Write-Host "Created .env with $($lines.Count) line(s). Showing keys only:"
+          foreach ($l in $lines) {
+            if ($l -match '^(\s*#|\s*$)') { continue }
+            $k = ($l -split '=',2)[0]
+            Write-Host "  $k"
+          }
         # Install dependencies & browsers
         - if (Test-Path -Path "node_modules") { Write-Host "Removing existing node_modules to ensure clean install"; Remove-Item -Recurse -Force node_modules }
         - npm ci
@@ -477,8 +487,9 @@ definitions:
         - npx playwright test --reporter="list,junit" --config=playwright.config.ts
         # Copy artifacts to a stable root-level directory for collection regardless of working dir
         - |
-          $root = Resolve-Path '..'
-          $artifactRoot = Join-Path $root 'playwright-artifacts'
+          $repoRoot = $env:BITBUCKET_CLONE_DIR
+          if (-not $repoRoot) { $repoRoot = (Resolve-Path '..').Path }
+          $artifactRoot = Join-Path $repoRoot 'playwright-artifacts'
           if (!(Test-Path $artifactRoot)) { New-Item -ItemType Directory -Path $artifactRoot | Out-Null }
           if (Test-Path 'playwright-report') { Copy-Item -Recurse -Force 'playwright-report' (Join-Path $artifactRoot 'playwright-report') }
           if (Test-Path 'test-results') { Copy-Item -Recurse -Force 'test-results' (Join-Path $artifactRoot 'test-results') }
