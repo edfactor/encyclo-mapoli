@@ -429,15 +429,15 @@ definitions:
       script:
         - mkdir -p reports
         - gitleaks detect --source . --config gitleaks.toml --redact --no-banner --report-format json --report-path reports/gitleaks.json --exit-code 0
-              - echo "Gitleaks findings (redacted JSON):"
-              - head -c 200000 reports/gitleaks.json || true
-              - |
-                if [ -s reports/gitleaks.json ] && [ "$(wc -c < reports/gitleaks.json)" -gt 2 ]; then
-                  echo "Leaks found. Failing the build.";
-                  exit 1;
-                else
-                  echo "No leaks found.";
-                fi
+        - echo "Gitleaks findings (redacted JSON):"
+        - head -c 200000 reports/gitleaks.json || true
+        - |
+          if [ -s reports/gitleaks.json ] && [ "$(wc -c < reports/gitleaks.json)" -gt 2 ]; then
+            echo "Leaks found. Failing the build.";
+            exit 1;
+          else
+            echo "No leaks found.";
+          fi
     run-playwright-tests: &run-playwright-tests
       name: "Run Playwright E2E Tests (QA)"
       runs-on:
@@ -452,56 +452,64 @@ definitions:
         - playwright-artifacts/**
       script:
         - |
-          # Locate Playwright project directory
-          $candidateDirs = @('ui', 'src/UI', 'src/ui')
-          $playwrightDir = $null
-            foreach ($d in $candidateDirs) { if (Test-Path $d) { $playwrightDir = $d; break } }
-          if (-not $playwrightDir) { Write-Error "Could not locate Playwright project directory. Checked: $($candidateDirs -join ', ')"; exit 1 }
-          Write-Host "Using Playwright directory: $playwrightDir"
+          <#
+            Playwright E2E Runner (QA)
+            Sections:
+              1) Locate project dir
+              2) Ensure Node version (Volta)
+              3) Materialize .env from QA_Playwright variable
+              4) Install deps & browsers
+              5) Execute tests (JUnit + HTML)
+              6) Collect artifacts & set exit code
+          #>
+
+          Write-Host "[1] Locate Playwright project directory" -ForegroundColor Cyan
+          $candidateDirs = @('ui','src/UI','src/ui')
+          $playwrightDir = $candidateDirs | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $playwrightDir) { Write-Error "Playwright project directory not found. Checked: $($candidateDirs -join ', ')"; exit 1 }
           Set-Location $playwrightDir
-        - |
-          # Ensure supported Node.js version (packages warn require ^18.18.0 || ^20.9.0 || >=21.1.0)
+          Write-Host "Using directory: $playwrightDir"
+
+          Write-Host "[2] Ensure compatible Node.js version" -ForegroundColor Cyan
           $targetNode = '20.11.1'
-          Write-Host "Current Node version (pre-adjust):"; node -v 2>$null
+          try { $currentNode = (node -v) 2>$null } catch { $currentNode = 'unknown' }
+          Write-Host "Current node: $currentNode"
           if (Get-Command volta -ErrorAction SilentlyContinue) {
-            Write-Host "Using Volta to install Node $targetNode"
-            volta install node@$targetNode
-            Write-Host "Node after Volta install:"; node -v
+            volta install node@$targetNode | Out-Null
+            Write-Host "Node after install: $(node -v)"
           } else {
-            Write-Host "Volta not available; proceeding with existing Node version"; node -v
+            Write-Host "Volta unavailable; proceeding with existing Node version" -ForegroundColor Yellow
           }
-        - if (-not $env:QA_Playwright) { Write-Error "QA_Playwright variable not set in Bitbucket variables"; exit 1 }
-        - |
-          # Build .env from QA_Playwright variable
+
+          Write-Host "[3] Build .env from QA_Playwright variable" -ForegroundColor Cyan
+          if (-not $env:QA_Playwright) { Write-Error "QA_Playwright variable not set"; exit 1 }
           $raw = $env:QA_Playwright
-          if (-not $raw) { Write-Error "QA_Playwright variable empty"; exit 1 }
-          if ($raw -match '\\n') { $raw = ($raw -replace '\\r?\\n', [Environment]::NewLine) }
-          $rawLines = ($raw -split "`r?`n") | Where-Object { $_ -and ($_ -notmatch '^\s*$') }
-          if (-not ($rawLines -match '^CI=')) { $rawLines += 'CI=1' }
-          if ($env:QA_BASE_URL -and -not ($rawLines -match '^BASE_URL=')) { $rawLines += "BASE_URL=$env:QA_BASE_URL" }
-          Set-Content -Path ./.env -Value $rawLines
-          Write-Host "Created .env with $($rawLines.Count) line(s). Keys:"
-          foreach ($l in $rawLines) { if ($l -match '^(\s*#|\s*$)') { continue }; ($l -split '=',2)[0] }
-        - if (Test-Path -Path "node_modules") { Remove-Item -Recurse -Force node_modules }
-        - npm ci
-        - |
-          Write-Host "Installing Playwright browsers (attempt with --with-deps)";
-          npx playwright install --with-deps; if ($LASTEXITCODE -ne 0) { Write-Host "Retrying without --with-deps"; npx playwright install }
-        - mkdir -Force test-results | Out-Null
-        - $env:PLAYWRIGHT_JUNIT_OUTPUT = "test-results/junit.xml"
-        - npx playwright test --reporter "list,junit" --config=playwright.config.ts --output=test-results --workers=4
-        - $playwrightExit = $LASTEXITCODE
-        - |
-          # Collect artifacts
+          if ($raw -match '\n') { $raw = ($raw -replace '\r?\n', [Environment]::NewLine) }
+          $lines = ($raw -split "`r?`n") | Where-Object { $_ -and ($_ -notmatch '^\s*$') }
+          if (-not ($lines -match '^CI=')) { $lines += 'CI=1' }
+          if ($env:QA_BASE_URL -and -not ($lines -match '^BASE_URL=')) { $lines += "BASE_URL=$env:QA_BASE_URL" }
+          Set-Content ./.env -Value $lines
+          Write-Host (".env keys: " + (($lines | ForEach-Object { ($_ -split '=',2)[0] }) -join ', '))
+
+          Write-Host "[4] Install dependencies & browsers" -ForegroundColor Cyan
+          if (Test-Path node_modules) { Remove-Item -Recurse -Force node_modules }
+          npm ci
+          npx playwright install --with-deps; if ($LASTEXITCODE -ne 0) { npx playwright install }
+
+          Write-Host "[5] Run tests" -ForegroundColor Cyan
+          New-Item -ItemType Directory -Path test-results -Force | Out-Null
+          $env:PLAYWRIGHT_JUNIT_OUTPUT = "test-results/junit.xml"
+          npx playwright test --reporter "list,junit" --config=playwright.config.ts --output=test-results --workers=4
+          $exit = $LASTEXITCODE
+
+          Write-Host "[6] Collect artifacts" -ForegroundColor Cyan
           $repoRoot = $env:BITBUCKET_CLONE_DIR; if (-not $repoRoot) { $repoRoot = (Resolve-Path '..').Path }
           $artifactRoot = Join-Path $repoRoot 'playwright-artifacts'
           if (!(Test-Path $artifactRoot)) { New-Item -ItemType Directory -Path $artifactRoot | Out-Null }
-          if (Test-Path 'playwright-report') { Copy-Item -Recurse -Force 'playwright-report' (Join-Path $artifactRoot 'playwright-report') }
-          if (Test-Path 'test-results') { Copy-Item -Recurse -Force 'test-results' (Join-Path $artifactRoot 'test-results') }
-        - if (Test-Path ./playwright-report) { Write-Host "Playwright HTML report generated in ./playwright-report" }
-        - if (Test-Path ./test-results) { Write-Host "Collected test results:"; Get-ChildItem -Recurse ./test-results | ForEach-Object { Write-Host $_.FullName } }
-        - if (Test-Path ./test-results/junit.xml) { Write-Host "JUnit XML present at ./test-results/junit.xml" }
-        - if ($playwrightExit -ne 0) { Write-Error "Playwright tests failed (exit code $playwrightExit)."; exit $playwrightExit } else { Write-Host "Playwright tests passed." }
+          foreach ($d in 'playwright-report','test-results') { if (Test-Path $d) { Copy-Item -Recurse -Force $d (Join-Path $artifactRoot $d) } }
+          if (Test-Path test-results/junit.xml) { Write-Host "JUnit XML: test-results/junit.xml" }
+
+          if ($exit -ne 0) { Write-Error "Playwright tests failed (exit $exit)"; exit $exit } else { Write-Host "Playwright tests passed." }
           
 
 pipelines:
