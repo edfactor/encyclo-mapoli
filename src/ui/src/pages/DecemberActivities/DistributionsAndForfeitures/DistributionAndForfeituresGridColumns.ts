@@ -1,5 +1,5 @@
 import { ColDef } from "ag-grid-community";
-import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
+import { getEnrolledStatus, getForfeitedStatus } from "../../../utils/enrollmentUtil";
 import {
   createAgeColumn,
   createBadgeColumn,
@@ -40,7 +40,7 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       headerName: "Forfeit Amount",
       field: "forfeitAmount"
     }),
-    createAgeColumn({}),
+    createAgeColumn({ headerName: "Age @ Txn" }),
     createTaxCodeColumn({
       field: "taxCode",
 
@@ -49,7 +49,7 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       hideZeroValues: false
     }),
     {
-      headerName: "Enrolled",
+      headerName: "Forfeit",
       field: "enrolledId",
       colId: "enrolledId",
 
@@ -57,7 +57,7 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       cellClass: "center-align",
       resizable: true,
       valueFormatter: (params) => {
-        return getEnrolledStatus(params.value);
+        return getForfeitedStatus(params.value);
       }
     }
   ];
