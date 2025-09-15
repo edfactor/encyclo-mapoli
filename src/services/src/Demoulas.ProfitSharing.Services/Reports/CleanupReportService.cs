@@ -371,7 +371,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                         pd.MonthToDate,
                         Date = pd.CreatedAtUtc,
                         nameAndDob.DateOfBirth,
-                        nameAndDob.EnrolledId,
+                        HasForfeited = nameAndDob.EnrolledId == 3 || nameAndDob.EnrolledId == 4,
                         nameAndDob.PayFrequencyId,
                     };
                 
@@ -423,7 +423,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                             new DateOnly(pd.YearToDate, pd.MonthToDate, 1).ToDateTime(TimeOnly.MinValue))
                         : pd.DateOfBirth.Age(
                             calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Local))),
-                    EnrolledId = pd.EnrolledId,
+                    HasForfeited = pd.HasForfeited,
                     IsExecutive = pd.PayFrequencyId == PayFrequency.Constants.Monthly
                 });
 
