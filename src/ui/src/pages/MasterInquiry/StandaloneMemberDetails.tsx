@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetProfitMasterInquiryMemberQuery } from "reduxstore/api/InquiryApi";
 import { RootState } from "reduxstore/store";
@@ -11,6 +11,7 @@ interface StandaloneMemberDetailsProps {
   memberType: number;
   id: string | number;
   profitYear?: number | null | undefined;
+  refreshTrigger?: number; // Optional property to force refresh
 }
 
 /*
@@ -18,15 +19,21 @@ interface StandaloneMemberDetailsProps {
  * This is a wrapper around MasterInquiryMemberDetails that handles its own data fetching.
  * Used by components that need to display member details not using the master inquiry workflow.
  */
-const StandaloneMemberDetails: React.FC<StandaloneMemberDetailsProps> = ({ memberType, id, profitYear }) => {
+const StandaloneMemberDetails: React.FC<StandaloneMemberDetailsProps> = ({ 
+  memberType, 
+  id, 
+  profitYear, 
+  refreshTrigger 
+}) => {
   const [memberDetails, setMemberDetails] = useState<any>(null);
   const [triggerMemberDetails, { isFetching }] = useLazyGetProfitMasterInquiryMemberQuery();
+  const prevRefreshTrigger = useRef<number | undefined>(refreshTrigger);
 
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
   const missives = useSelector((state: RootState) => state.lookups.missives);
   const { addAlert, addAlerts } = useMissiveAlerts();
 
-  useEffect(() => {
+  const fetchMemberDetails = useRef(() => {
     if (memberType && id) {
       triggerMemberDetails({
         memberType,
@@ -56,6 +63,44 @@ const StandaloneMemberDetails: React.FC<StandaloneMemberDetailsProps> = ({ membe
           setMemberDetails(null);
         });
     }
+  });
+
+  // Update the ref when dependencies change
+  fetchMemberDetails.current = () => {
+    if (memberType && id) {
+      triggerMemberDetails({
+        memberType,
+        id: Number(id),
+        profitYear: profitYear ?? undefined
+      })
+        .unwrap()
+        .then((details) => {
+          setMemberDetails(details);
+
+          if (details.missives && missives) {
+            const localMissives: MissiveResponse[] = details.missives
+              .map((missiveId: number) => missives.find((m: MissiveResponse) => m.id === missiveId))
+              .filter(Boolean) as MissiveResponse[];
+
+            if (localMissives.length > 0) {
+              addAlerts(localMissives);
+            }
+          }
+
+          if (!details.isEmployee && masterInquiryRequestParams?.memberType === "all") {
+            addAlert(MASTER_INQUIRY_MESSAGES.BENEFICIARY_FOUND(details.ssn));
+          }
+        })
+        .catch((error) => {
+          console.error("Failed to fetch member details:", error);
+          setMemberDetails(null);
+        });
+    }
+  };
+
+  // Initial fetch and refetch when dependencies change
+  useEffect(() => {
+    fetchMemberDetails.current();
   }, [
     memberType,
     id,
@@ -66,6 +111,14 @@ const StandaloneMemberDetails: React.FC<StandaloneMemberDetailsProps> = ({ membe
     addAlert,
     addAlerts
   ]);
+
+  // Refetch when refreshTrigger changes
+  useEffect(() => {
+    if (refreshTrigger !== undefined && refreshTrigger !== prevRefreshTrigger.current) {
+      prevRefreshTrigger.current = refreshTrigger;
+      fetchMemberDetails.current();
+    }
+  }, [refreshTrigger]);
 
   return (
     <MasterInquiryMemberDetails

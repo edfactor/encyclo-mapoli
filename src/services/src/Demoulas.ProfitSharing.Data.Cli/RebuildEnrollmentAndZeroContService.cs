@@ -1,11 +1,11 @@
-using System.Diagnostics.CodeAnalysis;
-using Demoulas.ProfitSharing.Common.Interfaces;
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services;
+namespace Demoulas.ProfitSharing.Data.Cli;
 
 /**
  * This class rebuilds the min PAY_PROFIT year's enrollment and zerocontribution flags.
@@ -14,7 +14,7 @@ namespace Demoulas.ProfitSharing.Services;
  * if it is missing this data, it initiates a process to recreate the ZeroContribution and Enrollment data for the year.
  */
 
-public class RebuildEnrollmentAndZeroContService : BackgroundService
+internal sealed class RebuildEnrollmentAndZeroContService
 {
     private readonly ILogger<RebuildEnrollmentAndZeroContService> _logger;
     private readonly IPayProfitUpdateService _payProfitUpdateService;
@@ -34,7 +34,7 @@ public class RebuildEnrollmentAndZeroContService : BackgroundService
         _yearEndService = yearEndService;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    internal async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
         {
@@ -67,17 +67,17 @@ public class RebuildEnrollmentAndZeroContService : BackgroundService
         }
     }
     
-    private async Task<short> IsRebuildNeededAsync(CancellationToken cancellationToken)
+    private Task<short> IsRebuildNeededAsync(CancellationToken cancellationToken)
     {
-        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var enrollmentSum = await ctx.PayProfits
                 .Where(p => p.ProfitYear == ctx.PayProfits.Min(x => x.ProfitYear))
                 .SumAsync(p => p.EnrollmentId, cancellationToken);
 
             // Return the year if sum indicates rebuild needed, otherwise 0
-            return enrollmentSum == 0 ? ctx.PayProfits.Min(x => x.ProfitYear) : (short)0;
-        }).ConfigureAwait(false);
+            return enrollmentSum == 0 ? await ctx.PayProfits.MinAsync(x => x.ProfitYear, cancellationToken) : (short)0;
+        });
     }
 
 }
