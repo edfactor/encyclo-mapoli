@@ -96,11 +96,11 @@ public sealed class Program
                     ["{SOURCE_PROFITSHARE_SCHEMA}"] = sourceSchema
                 }, sourceSchema);
 
+                await GatherSchemaStatistics(context);
+
                 // Resolve and run the rebuild service before gathering schema statistics
                 var rebuildService = sp.GetRequiredService<RebuildEnrollmentAndZeroContService>();
                 await rebuildService.ExecuteAsync(CancellationToken.None);
-
-                await GatherSchemaStatistics(context);
             });
         });
 
