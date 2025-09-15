@@ -54,11 +54,6 @@ public class DemographicsService : IDemographicsServiceInternal
         _fakeSsnService = fakeSsnService;
     }
 
-    private static bool CheckMatchToIdOrSsnAndDob(Dictionary<long, Demographic> demographicOracleHcmIdLookup, int ssn, DateOnly dob, long oracleHcmId)
-    {
-        return demographicOracleHcmIdLookup.Any(l => l.Key == oracleHcmId || (l.Value.DateOfBirth == dob && l.Value.Ssn == ssn));
-    }
-
     /// <summary>
     /// Asynchronously processes a stream of demographic requests and batches them for upsert operations.
     /// </summary>
@@ -163,6 +158,9 @@ public class DemographicsService : IDemographicsServiceInternal
 
         }, cancellationToken);
     }
+
+    #region Private Methods
+
     /// <summary>
     /// checks for updates to existing demographics and updates them as needed...
     /// </summary>
@@ -481,4 +479,10 @@ public class DemographicsService : IDemographicsServiceInternal
             return c.DemographicSyncAudit.Where(t => t.Created < clearBackTo).ExecuteDeleteAsync(cancellationToken);
         }, cancellationToken);
     }
+    private static bool CheckMatchToIdOrSsnAndDob(Dictionary<long, Demographic> demographicOracleHcmIdLookup, int ssn, DateOnly dob, long oracleHcmId)
+    {
+        return demographicOracleHcmIdLookup.Any(l => l.Key == oracleHcmId || (l.Value.DateOfBirth == dob && l.Value.Ssn == ssn));
+    }
+#endregion
+
 }
