@@ -8,6 +8,14 @@ paths = [
   '''^src/ui/e2e/fixtures/''',
   '''^src/ui/build/''',
   '''^src/ui/dist/''',
+  # Actual top-level ui/ directory (the project uses both ui/ and src/ui/ historically)
+  '''^ui/playwright-report/''',
+  '''^ui/test-results/''',
+  '''^ui/e2e/fixtures/''',
+  '''^ui/build/''',
+  '''^ui/dist/''',
+  # Central aggregated artifact folder created by pipeline step
+  '''^playwright-artifacts/''',
   '''^test-results/''',
   '''^readme_images/''',
   '''^src/services/.*/obj/''',
