@@ -13,7 +13,6 @@ using Demoulas.ProfitSharing.Services.Caching.Extensions;
 using Demoulas.ProfitSharing.Services.Certificates;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.ItDevOps;
-using Demoulas.ProfitSharing.Services.Mappers;
 using Demoulas.ProfitSharing.Services.MasterInquiry;
 using Demoulas.ProfitSharing.Services.Military;
 using Demoulas.ProfitSharing.Services.Navigations;
@@ -54,6 +53,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IEmployeeLookupService, Lookup.EmployeeLookupService>();
 
         _ = builder.Services.AddScoped<IPayrollDuplicateSsnReportService, PayrollDuplicateSsnReportService>();
+        _ = builder.Services.AddScoped<IPayrollDuplicateSsnReportServiceInternal, PayrollDuplicateSsnReportService>();
         _ = builder.Services.AddScoped<INegativeEtvaReportService, NegativeEtvaReportService>();
         _ = builder.Services.AddScoped<IProfitSharingSummaryReportService, ProfitSharingSummaryReportService>();
         _ = builder.Services.AddScoped<IBeneficiaryService, BeneficiaryService>();
@@ -95,16 +95,6 @@ public static class ServicesExtension
 
         _ = builder.Services.AddScoped<IReportRunnerService, ReportRunnerService>();
 
-        // Data migration services
-        _ = builder.Services.AddHostedService<RebuildEnrollmentAndZeroContService>();
-
-        #region Mappers
-
-
-        builder.Services.AddSingleton<BeneficiaryTypeMapper>();
-        builder.Services.AddSingleton<EmployeeTypeMapper>();
-
-        #endregion
 
         builder.AddProjectCachingServices();
 

@@ -12,6 +12,7 @@ internal sealed class ParticipantTotalVestingBalanceFaker : Faker<ParticipantTot
         var ssnQueue = new Queue<int>(demoSsns.Union(beneSsns).Distinct());
         int junkSsn = int.MinValue;
 
+        RuleFor(x => x.Id, (faker => faker.IndexFaker));
         _ = RuleFor(x => x.Ssn, (f, o) =>
         {
             if (!ssnQueue.Any())

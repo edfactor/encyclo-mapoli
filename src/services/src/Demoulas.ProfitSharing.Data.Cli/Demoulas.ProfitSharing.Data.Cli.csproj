@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Demoulas.ProfitSharing.Data\Demoulas.ProfitSharing.Data.csproj" />
+    <ProjectReference Include="..\Demoulas.ProfitSharing.Services\Demoulas.ProfitSharing.Services.csproj" />
   </ItemGroup>
 
   <ItemGroup>

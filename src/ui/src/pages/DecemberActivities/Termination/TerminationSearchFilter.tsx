@@ -1,5 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Button, Grid } from "@mui/material";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
@@ -23,7 +24,8 @@ const schema = yup.object().shape({
       sortBy: yup.string().required(),
       isSortDescending: yup.boolean().required()
     })
-    .required()
+    .required(),
+  profitYear: yup.number().required("Profit year is required")
 });
 
 interface TerminationSearchFilterProps {
@@ -41,6 +43,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
 }) => {
   const [openErrorModal, setOpenErrorModal] = useState(!fiscalData === false);
   const dispatch = useDispatch();
+  const selectedProfitYear = useDecemberFlowProfitYear();
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
   const {
     control,
@@ -54,7 +57,8 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
       beginningDate: termination?.startDate || (fiscalData ? fiscalData.fiscalBeginDate : "") || "",
       endingDate: termination?.endDate || (fiscalData ? fiscalData.fiscalEndDate : "") || "",
       forfeitureStatus: "showAll",
-      pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
+      pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true },
+      profitYear: selectedProfitYear
     }
   });
 
@@ -66,6 +70,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
 
     const params = {
       ...data,
+      profitYear: selectedProfitYear,
       beginningDate: data.beginningDate
         ? mmDDYYFormat(data.beginningDate)
         : mmDDYYFormat(fiscalData?.fiscalBeginDate || ""),

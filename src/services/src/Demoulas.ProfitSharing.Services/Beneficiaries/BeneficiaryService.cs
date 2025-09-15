@@ -232,7 +232,7 @@ public class BeneficiaryService : IBeneficiaryService
 
     public Task<UpdateBeneficiaryContactResponse> UpdateBeneficiaryContact(UpdateBeneficiaryContactRequest req, CancellationToken cancellationToken)
     {
-        var response = _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
+        var response = _dataContextFactory.UseWritableContext(async (ctx) =>
         {
             var resp = new UpdateBeneficiaryContactResponse()
             {
@@ -246,14 +246,10 @@ public class BeneficiaryService : IBeneficiaryService
                 FirstName = string.Empty,
                 LastName = string.Empty,
                             };
-            BeneficiaryContact contact = await SetBeneficiaryContactColumns(req.Id, req, ctx, resp, cancellationToken);
+            _ = await SetBeneficiaryContactColumns(req.Id, req, ctx, resp, cancellationToken);
 
             await ctx.SaveChangesAsync(cancellationToken);
-            if (transaction != null)
-            {
-                await transaction.CommitAsync(cancellationToken);
-            }
-
+          
             return resp;
         }, cancellationToken);
         return response;
@@ -262,7 +258,7 @@ public class BeneficiaryService : IBeneficiaryService
     private static async Task<BeneficiaryContact> SetBeneficiaryContactColumns(int beneficiaryContactId, UpdateBeneficiaryContactRequest req, ProfitSharingDbContext ctx, UpdateBeneficiaryContactResponse response, CancellationToken cancellationToken)
     {
         var contact = await ctx.BeneficiaryContacts.Include(x => x.Address).Include(x => x.ContactInfo).SingleAsync(x => x.Id == beneficiaryContactId, cancellationToken);
-        if (req.ContactSsn.HasValue && req.ContactSsn.Value > 999999999)
+        if (req.ContactSsn is > 999999999)
         {
             throw new InvalidOperationException("Contact Ssn must be 9 digits");
         }
