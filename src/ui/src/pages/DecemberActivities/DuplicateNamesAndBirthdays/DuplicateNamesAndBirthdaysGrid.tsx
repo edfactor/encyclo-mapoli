@@ -1,13 +1,12 @@
-import { Typography } from "@mui/material";
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetDuplicateNamesAndBirthdaysQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { GetDuplicateNamesAndBirthdayColumns } from "./DuplicateNamesAndBirthdaysGridColumns";
-import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
-import { CAPTIONS } from "../../../constants";
 import ReportSummary from "../../../components/ReportSummary";
+import { CAPTIONS } from "../../../constants";
+import { GetDuplicateNamesAndBirthdayColumns } from "./DuplicateNamesAndBirthdaysGridColumns";
 
 interface DuplicateNamesAndBirthdaysGridSearchProps {
   initialSearchLoaded: boolean;
@@ -37,7 +36,8 @@ const DuplicateNamesAndBirthdaysGrid: React.FC<DuplicateNamesAndBirthdaysGridSea
         skip: pageNumber * pageSize,
         take: pageSize,
         sortBy: sortParams.sortBy,
-        isSortDescending: sortParams.isSortDescending
+        isSortDescending: sortParams.isSortDescending,
+        profitYear: profitYear
       }
     };
 

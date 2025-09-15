@@ -43,7 +43,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
 
     public Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfitAsync(ProfitYearRequest req, CancellationToken cancellationToken = default)
     {
-        return CallReportEndpoint<DemographicBadgesNotInPayProfitResponse, SortedPaginationRequestDto>(req, "demographic-badges-not-in-payprofit", cancellationToken);
+        return CallReportEndpoint<DemographicBadgesNotInPayProfitResponse, ProfitYearRequest>(req, "demographic-badges-not-in-payprofit", cancellationToken);
     }
 
     public Task<DistributionsAndForfeitureTotalsResponse> GetDistributionsAndForfeitureAsync(DistributionsAndForfeituresRequest req,
@@ -84,7 +84,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
 
     public Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdaysAsync(ProfitYearRequest req, CancellationToken cancellationToken = default)
     {
-        return CallReportEndpoint<DuplicateNamesAndBirthdaysResponse, SortedPaginationRequestDto>(req, "duplicate-names-and-birthdays", cancellationToken);
+        return CallReportEndpoint<DuplicateNamesAndBirthdaysResponse, ProfitYearRequest>(req, "duplicate-names-and-birthdays", cancellationToken);
     }
 
     public Task<Stream> DownloadDuplicateNamesAndBirthdays(short profitYear, CancellationToken cancellationToken = default)
@@ -106,7 +106,8 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
             StartDate = ReferenceData.DsmMinValue,
             EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             Response = new PaginatedResponseDto<TResponseDto>()
-        };
+        }
+       ;
     }
     private Task<Stream> DownloadCsvReport(short profitYear, string endpointRoute, CancellationToken cancellationToken)
     {

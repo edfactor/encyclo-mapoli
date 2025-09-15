@@ -88,7 +88,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
 
             _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
 
-            var oneRecord = new ProfitYearRequest { Skip = 0, Take = 1 };
+            var oneRecord = new ProfitYearRequest { Skip = 0, Take = 1, ProfitYear = _paginationRequest.ProfitYear };
             response = await _cleanupReportClient.GetDemographicBadgesNotInPayProfitAsync(oneRecord, CancellationToken.None);
             response.ShouldNotBeNull();
             response.Response.Results.Count().ShouldBe(1);
@@ -438,7 +438,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         decimal sampleforfeiture = 5150m;
 
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        var req = new DistributionsAndForfeituresRequest() { Skip = 0, Take = byte.MaxValue, ProfitYear = (short)(DateTime.Now.Year - 1) };
+        var req = new ProfitYearRequest() { Skip = 0, Take = byte.MaxValue, ProfitYear = (short)(DateTime.Now.Year - 1) };
         TestResult<DistributionsAndForfeitureTotalsResponse> response;
 
 
@@ -485,7 +485,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             });
 
             response = await ApiClient
-                    .GETAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(req);
+                    .GETAsync<DistributionsAndForfeitureEndpoint, ProfitYearRequest, DistributionsAndForfeitureTotalsResponse>(req);
 
 
             response.Result.ShouldNotBeNull();
@@ -506,7 +506,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         });
 
         response = await ApiClient
-            .GETAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
+            .GETAsync<DistributionsAndForfeitureEndpoint, ProfitYearRequest,
                 DistributionsAndForfeitureTotalsResponse>(req);
 
         response.Result.ShouldNotBeNull();
@@ -525,7 +525,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         });
 
         response = await ApiClient
-            .GETAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
+            .GETAsync<DistributionsAndForfeitureEndpoint, ProfitYearRequest,
                 DistributionsAndForfeitureTotalsResponse>(req);
 
         response.ShouldNotBeNull();
@@ -543,7 +543,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         });
 
         response = await ApiClient
-            .GETAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
+            .GETAsync<DistributionsAndForfeitureEndpoint, ProfitYearRequest,
                 DistributionsAndForfeitureTotalsResponse>(req);
 
         response.ShouldNotBeNull();

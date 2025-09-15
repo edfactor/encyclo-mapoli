@@ -10,9 +10,10 @@ using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup.DistributionsAndForfeitureEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
-public class DistributionsAndForfeitureEndpoint: EndpointWithCsvTotalsBase<DistributionsAndForfeituresRequest, 
-    DistributionsAndForfeitureTotalsResponse, 
-    DistributionsAndForfeitureResponse, 
+
+public class DistributionsAndForfeitureEndpoint : EndpointWithCsvTotalsBase<DistributionsAndForfeituresRequest,
+    DistributionsAndForfeitureTotalsResponse,
+    DistributionsAndForfeitureResponse,
     DistributionsAndForfeitureResponseMap>
 {
     private readonly ICleanupReportService _cleanupReportService;
@@ -60,7 +61,7 @@ public class DistributionsAndForfeitureEndpoint: EndpointWithCsvTotalsBase<Distr
         return _cleanupReportService.GetDistributionsAndForfeitureAsync(req, ct);
     }
 
-    public sealed class DistributionsAndForfeitureResponseMap: ClassMap<DistributionsAndForfeitureResponse>
+    public sealed class DistributionsAndForfeitureResponseMap : ClassMap<DistributionsAndForfeitureResponse>
     {
         public DistributionsAndForfeitureResponseMap()
         {

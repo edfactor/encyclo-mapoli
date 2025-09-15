@@ -1,3 +1,4 @@
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetDemographicBadgesNotInPayprofitQuery } from "reduxstore/api/YearsEndApi";
@@ -15,6 +16,7 @@ const DemographicBadgesNotInPayprofitGrid: React.FC = () => {
   });
   const { demographicBadges } = useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearch, { isFetching }] = useLazyGetDemographicBadgesNotInPayprofitQuery();
+  const profitYear = useDecemberFlowProfitYear();
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const onSearch = useCallback(async () => {
@@ -24,7 +26,8 @@ const DemographicBadgesNotInPayprofitGrid: React.FC = () => {
         take: pageSize,
         sortBy: _sortParams.sortBy,
         isSortDescending: _sortParams.isSortDescending
-      }
+      },
+      profitYear: profitYear
     };
 
     await triggerSearch(request, false);
@@ -42,7 +45,8 @@ const DemographicBadgesNotInPayprofitGrid: React.FC = () => {
         take: pageSize,
         sortBy: update.sortBy,
         isSortDescending: update.isSortDescending
-      }
+      },
+      profitYear: profitYear
     };
     setSortParams(update);
     setPageNumber(0);

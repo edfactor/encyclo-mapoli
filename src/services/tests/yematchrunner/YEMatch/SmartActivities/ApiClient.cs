@@ -25,19 +25,19 @@ namespace YEMatch
     using System = global::System;
 
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "14.5.0.0 (NJsonSchema v11.4.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class ApiClient 
+    public partial class ApiClient
     {
-        #pragma warning disable 8618
+#pragma warning disable 8618
         private string _baseUrl;
-        #pragma warning restore 8618
+#pragma warning restore 8618
 
         private System.Net.Http.HttpClient _httpClient;
         private static System.Lazy<Newtonsoft.Json.JsonSerializerSettings> _settings = new System.Lazy<Newtonsoft.Json.JsonSerializerSettings>(CreateSerializerSettings, true);
         private Newtonsoft.Json.JsonSerializerSettings _instanceSettings;
 
-    #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public ApiClient(System.Net.Http.HttpClient httpClient)
-    #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
             BaseUrl = "https://localhost:7141";
             _httpClient = httpClient;
@@ -154,7 +154,7 @@ namespace YEMatch
                         else
                         if (status_ == 401)
                         {
-                            string responseText_ = ( response_.Content == null ) ? string.Empty : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            string responseText_ = (response_.Content == null) ? string.Empty : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
                             throw new ApiException("Unauthorized", status_, responseText_, headers_, null);
                         }
                         else
@@ -476,11 +476,11 @@ namespace YEMatch
                     urlBuilder_.Append('?');
                     if (ssns != null)
                     {
-                            foreach (var item_ in ssns) { urlBuilder_.Append(System.Uri.EscapeDataString("ssns")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(item_, System.Globalization.CultureInfo.InvariantCulture))).Append('&'); }
+                        foreach (var item_ in ssns) { urlBuilder_.Append(System.Uri.EscapeDataString("ssns")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(item_, System.Globalization.CultureInfo.InvariantCulture))).Append('&'); }
                     }
                     if (badgeNumbers != null)
                     {
-                            foreach (var item_ in badgeNumbers) { urlBuilder_.Append(System.Uri.EscapeDataString("badgeNumbers")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(item_, System.Globalization.CultureInfo.InvariantCulture))).Append('&'); }
+                        foreach (var item_ in badgeNumbers) { urlBuilder_.Append(System.Uri.EscapeDataString("badgeNumbers")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(item_, System.Globalization.CultureInfo.InvariantCulture))).Append('&'); }
                     }
                     urlBuilder_.Append(System.Uri.EscapeDataString("profitYear")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(profitYear, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
                     if (sortBy != null)
@@ -2942,11 +2942,11 @@ namespace YEMatch
                     urlBuilder_.Append('?');
                     if (ssns != null)
                     {
-                            foreach (var item_ in ssns) { urlBuilder_.Append(System.Uri.EscapeDataString("ssns")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(item_, System.Globalization.CultureInfo.InvariantCulture))).Append('&'); }
+                        foreach (var item_ in ssns) { urlBuilder_.Append(System.Uri.EscapeDataString("ssns")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(item_, System.Globalization.CultureInfo.InvariantCulture))).Append('&'); }
                     }
                     if (badgeNumbers != null)
                     {
-                            foreach (var item_ in badgeNumbers) { urlBuilder_.Append(System.Uri.EscapeDataString("badgeNumbers")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(item_, System.Globalization.CultureInfo.InvariantCulture))).Append('&'); }
+                        foreach (var item_ in badgeNumbers) { urlBuilder_.Append(System.Uri.EscapeDataString("badgeNumbers")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(item_, System.Globalization.CultureInfo.InvariantCulture))).Append('&'); }
                     }
                     urlBuilder_.Append(System.Uri.EscapeDataString("profitYear")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(profitYear, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
                     if (sortBy != null)
@@ -13988,21 +13988,21 @@ namespace YEMatch
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         private static System.Threading.Tasks.Task<string> ReadAsStringAsync(System.Net.Http.HttpContent content, System.Threading.CancellationToken cancellationToken)
         {
-    #if NET5_0_OR_GREATER
+#if NET5_0_OR_GREATER
             return content.ReadAsStringAsync(cancellationToken);
-    #else
+#else
             return content.ReadAsStringAsync();
-    #endif
+#endif
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         private static System.Threading.Tasks.Task<System.IO.Stream> ReadAsStreamAsync(System.Net.Http.HttpContent content, System.Threading.CancellationToken cancellationToken)
         {
-    #if NET5_0_OR_GREATER
+#if NET5_0_OR_GREATER
             return content.ReadAsStreamAsync(cancellationToken);
-    #else
+#else
             return content.ReadAsStreamAsync();
-    #endif
+#endif
         }
 
         public bool ReadResponseAsString { get; set; }
@@ -14064,7 +14064,7 @@ namespace YEMatch
                     var field = System.Reflection.IntrospectionExtensions.GetTypeInfo(value.GetType()).GetDeclaredField(name);
                     if (field != null)
                     {
-                        var attribute = System.Reflection.CustomAttributeExtensions.GetCustomAttribute(field, typeof(System.Runtime.Serialization.EnumMemberAttribute)) 
+                        var attribute = System.Reflection.CustomAttributeExtensions.GetCustomAttribute(field, typeof(System.Runtime.Serialization.EnumMemberAttribute))
                             as System.Runtime.Serialization.EnumMemberAttribute;
                         if (attribute != null)
                         {
@@ -14076,13 +14076,13 @@ namespace YEMatch
                     return converted == null ? string.Empty : converted;
                 }
             }
-            else if (value is bool) 
+            else if (value is bool)
             {
                 return System.Convert.ToString((bool)value, cultureInfo).ToLowerInvariant();
             }
             else if (value is byte[])
             {
-                return System.Convert.ToBase64String((byte[]) value);
+                return System.Convert.ToBase64String((byte[])value);
             }
             else if (value is string[])
             {
@@ -18204,7 +18204,7 @@ namespace YEMatch
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.5.0.0 (NJsonSchema v11.4.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class DistributionsAndForfeituresRequest : ProfitYearRequest
+    public partial class ProfitYearPaginatedRequest : ProfitYearRequest
     {
 
     }

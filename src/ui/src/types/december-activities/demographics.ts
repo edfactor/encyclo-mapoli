@@ -1,4 +1,4 @@
-import type { SortedPaginationRequestDto, ProfitYearRequest, PagedReportResponse } from "../common/api";
+import type { PagedReportResponse, ProfitYearRequest, SortedPaginationRequestDto } from "../common/api";
 
 export type DemographicBadgesNotInPayprofitResponse = PagedReportResponse<DemographicBadgesNotInPayprofit>;
 
@@ -11,7 +11,7 @@ export interface DemographicBadgesNotInPayprofit {
   statusName: string;
 }
 
-export interface DemographicBadgesNotInPayprofitRequestDto {
+export interface DemographicBadgesNotInPayprofitRequestDto extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
 }
 
@@ -41,7 +41,7 @@ export interface DuplicateSSNDetail {
   incomeCurrentYear: number;
 }
 
-export interface DuplicateSSNsRequestDto {
+export interface DuplicateSSNsRequestDto extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
 }
 
