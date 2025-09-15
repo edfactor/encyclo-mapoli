@@ -65,9 +65,10 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
                 var allProfitDetails = new List<ProfitDetail>();
                 const int batchSize = 2000;
 
-                for (int i = 0; i < allSsns.Count; i += batchSize)
+                int batchNumber = 0;
+                foreach (var ssnBatch in allSsns.Chunk(batchSize))
                 {
-                    var ssnBatch = allSsns.Skip(i).Take(batchSize).ToList();
+                    batchNumber++;
                     var batchProfitDetails = await ctx.ProfitDetails
                         .Where(pd => pd.ProfitYear <= profitYear && ssnBatch.Contains(pd.Ssn))
                         .AsNoTracking()
@@ -75,7 +76,7 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
                     allProfitDetails.AddRange(batchProfitDetails);
 
                     _logger.LogDebug("Loaded batch {BatchNumber} ({BatchStart}-{BatchEnd}) with {BatchCount} ProfitDetails",
-                        (i / batchSize) + 1, i + 1, Math.Min(i + batchSize, allSsns.Count), batchProfitDetails.Count);
+                        batchNumber, (batchNumber - 1) * batchSize + 1, Math.Min(batchNumber * batchSize, allSsns.Count), batchProfitDetails.Count);
                 }
                 dbStopwatch.Stop();
 
