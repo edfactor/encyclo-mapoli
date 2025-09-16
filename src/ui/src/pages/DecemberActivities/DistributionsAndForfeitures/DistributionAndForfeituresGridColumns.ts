@@ -49,16 +49,13 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       hideZeroValues: false
     }),
     {
-      headerName: "Enrolled",
-      field: "enrolledId",
-      colId: "enrolledId",
+      headerName: "Forfeited",
+      field: "hasForfeited",
+      colId: "hasForfeited",
 
       headerClass: "center-align",
       cellClass: "center-align",
-      resizable: true,
-      valueFormatter: (params) => {
-        return getEnrolledStatus(params.value);
-      }
+      resizable: true
     }
   ];
 };

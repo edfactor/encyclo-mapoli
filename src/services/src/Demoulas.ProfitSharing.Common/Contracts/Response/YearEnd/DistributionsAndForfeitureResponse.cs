@@ -18,10 +18,9 @@ public sealed record DistributionsAndForfeitureResponse : IIsExecutive
     public required char? TaxCode { get; set; }
     public string? OtherName { get; set; }
     public string? OtherSsn { get; set; }
-    public required byte EnrolledId { get; set; }
+    public required bool HasForfeited { get; set; }
     public bool IsExecutive { get; set; }
-
-
+    
     public static DistributionsAndForfeitureResponse ResponseExample()
     {
         return new DistributionsAndForfeitureResponse() {
@@ -36,7 +35,7 @@ public sealed record DistributionsAndForfeitureResponse : IIsExecutive
             ForfeitAmount = 0m,
             Age = 33,
             TaxCode = '9',
-            EnrolledId = 1
+            HasForfeited = false
         };
     }
 }
