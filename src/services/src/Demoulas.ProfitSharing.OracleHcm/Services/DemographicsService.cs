@@ -39,19 +39,16 @@ public class DemographicsService : IDemographicsServiceInternal
     private readonly DemographicMapper _mapper;
     private readonly ILogger<DemographicsService> _logger;
     private readonly ITotalService _totalService;
-    private readonly IFakeSsnService _fakeSsnService;
 
     public DemographicsService(IProfitSharingDataContextFactory dataContextFactory,
         DemographicMapper mapper,
         ILogger<DemographicsService> logger,
-        ITotalService totalService,
-        IFakeSsnService fakeSsnService)
+        ITotalService totalService)
     {
         _dataContextFactory = dataContextFactory;
         _mapper = mapper;
         _logger = logger;
         _totalService = totalService;
-        _fakeSsnService = fakeSsnService;
     }
 
     /// <summary>
@@ -128,14 +125,13 @@ public class DemographicsService : IDemographicsServiceInternal
 
                         if (existingEmployeeMatchToProposedSsn == null)
                         {
-                            await ChangeSystemSsnAsync(demographicMarkedForSSNChange, proposedChangeKV.Value.Ssn, context);
                             await AddDemographicSyncAuditAsync(demographicMarkedForSSNChange, "SSN changed with no conflicts.", "SSN", context);
                         }
                         // use case - ssn change for employee and ssn exists already in the system
                         else
                         {
                             // match for proposed ssn exists logic 
-                            await HandleExistingEmployeeMatchToProposedSsnAsync(existingEmployeeMatchToProposedSsn, demographicMarkedForSSNChange, proposedChangeKV.Value.Ssn, context, cancellationToken);
+                            await HandleExistingEmployeeMatchToProposedSsnAsync(existingEmployeeMatchToProposedSsn, demographicMarkedForSSNChange, context, cancellationToken);
                         }
                     }
                 }
@@ -156,6 +152,70 @@ public class DemographicsService : IDemographicsServiceInternal
                 _logger.LogCritical(e, "Failed to save batch: {DemographicsRequests}", employees);
             }
 
+        }, cancellationToken);
+    }
+
+    /// <summary>
+    /// Audits demographic synchronization errors by logging them into the database.
+    /// </summary>
+    /// <param name="badgeNumber">
+    /// The badge number of the employee associated with the error.
+    /// </param>
+    /// <param name="oracleHcmId">
+    /// The Oracle HCM identifier of the employee.
+    /// </param>
+    /// <param name="errorMessages">
+    /// A collection of validation failures containing details about the errors.
+    /// </param>
+    /// <param name="requestedBy">
+    /// The username of the individual who initiated the request.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token to monitor for cancellation requests.
+    /// </param>
+    /// <param name="args">
+    /// Additional arguments providing context or metadata for the audit.
+    /// </param>
+    /// <returns>
+    /// A task that represents the asynchronous operation of auditing errors.
+    /// </returns>
+    /// <remarks>
+    /// This method processes validation errors and records them in the <see cref="DemographicSyncAudit"/> table.
+    /// It ensures that null values in the additional arguments are replaced with a default value.
+    /// </remarks>
+    public Task AuditError(int badgeNumber, long oracleHcmId, IEnumerable<ValidationFailure> errorMessages, string requestedBy, CancellationToken cancellationToken = default,
+        params object?[] args)
+    {
+        return _dataContextFactory.UseWritableContext(c =>
+        {
+            for (int i = 0; i < args?.Length; i++)
+            {
+                args[i] ??= "null"; // Replace null with a default value
+            }
+
+            IEnumerable<DemographicSyncAudit> auditRecords = errorMessages.Select(e =>
+                new DemographicSyncAudit
+                {
+                    BadgeNumber = badgeNumber,
+                    OracleHcmId = oracleHcmId,
+                    InvalidValue = e.AttemptedValue?.ToString() ?? e.CustomState?.ToString(),
+                    Message = e.ErrorMessage,
+                    UserName = requestedBy,
+                    PropertyName = e.PropertyName,
+                });
+            c.DemographicSyncAudit.AddRange(auditRecords);
+
+            return c.SaveChangesAsync(cancellationToken);
+        }, cancellationToken);
+    }
+
+    public Task CleanAuditError(CancellationToken cancellationToken)
+    {
+        return _dataContextFactory.UseWritableContext(c =>
+        {
+            DateTime clearBackTo = DateTime.Today.AddDays(-30);
+
+            return c.DemographicSyncAudit.Where(t => t.Created < clearBackTo).ExecuteDeleteAsync(cancellationToken);
         }, cancellationToken);
     }
 
@@ -296,11 +356,10 @@ public class DemographicsService : IDemographicsServiceInternal
     /// existing employee in the system that matches the proposed ssn change
     /// <param name="demographicMarkedForSSNChange"></param>
     /// existing employee that is changing their ssn (different from existingEmployeeMatchToProposedSsn)
-    /// <param name="proposedSsnChange"></param>
     /// <param name="context"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async Task HandleExistingEmployeeMatchToProposedSsnAsync(Demographic existingEmployeeMatchToProposedSsn, Demographic demographicMarkedForSSNChange, int proposedSsnChange, ProfitSharingDbContext context, CancellationToken cancellationToken)
+    private async Task HandleExistingEmployeeMatchToProposedSsnAsync(Demographic existingEmployeeMatchToProposedSsn, Demographic demographicMarkedForSSNChange, ProfitSharingDbContext context, CancellationToken cancellationToken)
     {
         // check if customer has money...
         var result = await _totalService.GetVestingBalanceForSingleMemberAsync(SearchBy.Ssn, demographicMarkedForSSNChange.Ssn, (short)DateTime.Now.Year, cancellationToken);
@@ -308,18 +367,12 @@ public class DemographicsService : IDemographicsServiceInternal
         // check if terminated employee with no money and change 
         if (existingEmployeeMatchToProposedSsn.EmploymentStatusId == 't' && result?.CurrentBalance == (decimal)0.0)
         {
-            var fakeSsnResult = await _fakeSsnService.GenerateFakeSsnAsync(cancellationToken);
-            // change terminated employees SSN to a fake and then change the SSN for the new user
-            existingEmployeeMatchToProposedSsn.Ssn = fakeSsnResult;
+            await AddDemographicSyncAuditAsync(demographicMarkedForSSNChange, "Duplicate SSN found for terminated user with zero balance.", "SSN", context);
         }
         else
         {
             await AddDemographicSyncAuditAsync(demographicMarkedForSSNChange, "Duplicate SSN added for user.", "SSN", context);
         }
-
-        // change the ssn and sort it with other manual process or semi automated process later...
-        await ChangeSystemSsnAsync(demographicMarkedForSSNChange, proposedSsnChange, context);
-        await AddDemographicSyncAuditAsync(demographicMarkedForSSNChange, "SSN changed with no conflicts.", "SSN", context);
     }
 
     /// <summary>
@@ -368,32 +421,6 @@ public class DemographicsService : IDemographicsServiceInternal
         await context.DemographicSyncAudit.AddAsync(audit);
     }
 
-    /// <summary>
-    /// changes the SSN for a demographic and updates related records in the system.
-    /// </summary>
-    /// <param name="demographicMarkedForSSNChange"></param>
-    /// <param name="newSsn"></param>
-    /// <param name="context"></param>
-    /// <returns></returns>
-    private static async Task ChangeSystemSsnAsync(Demographic demographicMarkedForSSNChange, int newSsn, ProfitSharingDbContext context)
-    {
-        // update any profit_details with the new ssn
-        var profitDetails = await context.ProfitDetails.Where(detail => detail.Ssn == demographicMarkedForSSNChange.Ssn).ToListAsync();
-        profitDetails.ForEach(detail =>
-        {
-            detail.Ssn = newSsn;
-        });
-
-        // check for beneficiaries in system with this ssn
-        var beneficiaryContacts = await context.BeneficiaryContacts.Where(contact => contact.Ssn == demographicMarkedForSSNChange.Ssn).ToListAsync();
-        beneficiaryContacts.ForEach(contact =>
-        {
-            contact.Ssn = newSsn;
-        });
-
-        demographicMarkedForSSNChange.Ssn = newSsn;
-    }
-
     // Helper method to update entity fields
     private static void UpdateEntityValues(Demographic existingEntity, Demographic incomingEntity, DateTimeOffset modificationDate)
     {
@@ -417,69 +444,6 @@ public class DemographicsService : IDemographicsServiceInternal
         existingEntity.ModifiedAtUtc = modificationDate;
     }
 
-    /// <summary>
-    /// Audits demographic synchronization errors by logging them into the database.
-    /// </summary>
-    /// <param name="badgeNumber">
-    /// The badge number of the employee associated with the error.
-    /// </param>
-    /// <param name="oracleHcmId">
-    /// The Oracle HCM identifier of the employee.
-    /// </param>
-    /// <param name="errorMessages">
-    /// A collection of validation failures containing details about the errors.
-    /// </param>
-    /// <param name="requestedBy">
-    /// The username of the individual who initiated the request.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token to monitor for cancellation requests.
-    /// </param>
-    /// <param name="args">
-    /// Additional arguments providing context or metadata for the audit.
-    /// </param>
-    /// <returns>
-    /// A task that represents the asynchronous operation of auditing errors.
-    /// </returns>
-    /// <remarks>
-    /// This method processes validation errors and records them in the <see cref="DemographicSyncAudit"/> table.
-    /// It ensures that null values in the additional arguments are replaced with a default value.
-    /// </remarks>
-    public Task AuditError(int badgeNumber, long oracleHcmId, IEnumerable<ValidationFailure> errorMessages, string requestedBy, CancellationToken cancellationToken = default,
-        params object?[] args)
-    {
-        return _dataContextFactory.UseWritableContext(c =>
-        {
-            for (int i = 0; i < args?.Length; i++)
-            {
-                args[i] ??= "null"; // Replace null with a default value
-            }
-
-            IEnumerable<DemographicSyncAudit> auditRecords = errorMessages.Select(e =>
-                new DemographicSyncAudit
-                {
-                    BadgeNumber = badgeNumber,
-                    OracleHcmId = oracleHcmId,
-                    InvalidValue = e.AttemptedValue?.ToString() ?? e.CustomState?.ToString(),
-                    Message = e.ErrorMessage,
-                    UserName = requestedBy,
-                    PropertyName = e.PropertyName,
-                });
-            c.DemographicSyncAudit.AddRange(auditRecords);
-
-            return c.SaveChangesAsync(cancellationToken);
-        }, cancellationToken);
-    }
-
-    public Task CleanAuditError(CancellationToken cancellationToken)
-    {
-        return _dataContextFactory.UseWritableContext(c =>
-        {
-            DateTime clearBackTo = DateTime.Today.AddDays(-30);
-
-            return c.DemographicSyncAudit.Where(t => t.Created < clearBackTo).ExecuteDeleteAsync(cancellationToken);
-        }, cancellationToken);
-    }
     private static bool CheckMatchToIdOrSsnAndDob(Dictionary<long, Demographic> demographicOracleHcmIdLookup, int ssn, DateOnly dob, long oracleHcmId)
     {
         return demographicOracleHcmIdLookup.Any(l => l.Key == oracleHcmId || (l.Value.DateOfBirth == dob && l.Value.Ssn == ssn));

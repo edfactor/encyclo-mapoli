@@ -65,15 +65,13 @@ public class DemographicsServiceTests
 
         var loggerMock = new Mock<ILogger<DemographicsService>>();
         var totalServiceMock = new Mock<ITotalService>();
-        var fakeSsnServiceMock = new Mock<IFakeSsnService>();
         var mapper = new DemographicMapper(new AddressMapper(), new ContactInfoMapper());
 
         var service = new DemographicsService(
             dataContextFactoryMock.Object,
             mapper,
             loggerMock.Object,
-            totalServiceMock.Object,
-            fakeSsnServiceMock.Object
+            totalServiceMock.Object
         );
 
         // Act
@@ -150,9 +148,8 @@ public class DemographicsServiceTests
             dataContextFactoryMock.Object,
             mapper,
             loggerMock.Object,
-            totalServiceMock.Object,
-            fakeSsnServiceMock.Object
-        );
+            totalServiceMock.Object
+            );
 
         // Act
         await service.CleanAuditError(CancellationToken.None);
@@ -223,8 +220,7 @@ public class DemographicsServiceTests
             dataContextFactoryMock.Object,
             mapper,
             loggerMock.Object,
-            totalServiceMock.Object,
-            fakeSsnServiceMock.Object
+            totalServiceMock.Object
         );
 
         // Act
@@ -379,8 +375,7 @@ public class DemographicsServiceTests
             dataContextFactoryMock.Object,
             mapper,
             loggerMock.Object,
-            totalServiceMock.Object,
-            fakeSsnServiceMock.Object
+            totalServiceMock.Object
         );
 
         // Act
@@ -487,8 +482,7 @@ public class DemographicsServiceTests
             dataContextFactoryMock.Object,
             mapper,
             loggerMock.Object,
-            totalServiceMock.Object,
-            fakeSsnServiceMock.Object
+            totalServiceMock.Object
         );
 
         // Act
@@ -613,8 +607,7 @@ public class DemographicsServiceTests
             dataContextFactoryMock.Object,
             mapper,
             loggerMock.Object,
-            totalServiceMock.Object,
-            fakeSsnServiceMock.Object
+            totalServiceMock.Object
         );
 
         // Act
@@ -624,9 +617,9 @@ public class DemographicsServiceTests
         var result = await dbContext.DemographicSyncAudit.CountAsync();
         Assert.True(result > 0, "Expected audit records for duplicate SSN handling.");
 
-        // verify SSN was changed for termed employee to fake SSN
+        // verify SSN was not changed for termed employee to fake SSN
         var termedEmployee = await dbContext.Demographics.FirstAsync(d => d.OracleHcmId == 3);
-        Assert.Equal(555555555, termedEmployee.Ssn);
+        Assert.Equal(44444444, termedEmployee.Ssn);
 
         // verify existing employee was updated with new SSN
         var existingEmployee = await dbContext.Demographics.FirstAsync(d => d.OracleHcmId == 1);
@@ -743,8 +736,7 @@ public class DemographicsServiceTests
             dataContextFactoryMock.Object,
             mapper,
             loggerMock.Object,
-            totalServiceMock.Object,
-            fakeSsnServiceMock.Object
+            totalServiceMock.Object
         );
 
         // Act
