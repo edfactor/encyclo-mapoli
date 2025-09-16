@@ -107,7 +107,7 @@ public class DemographicsService : IDemographicsServiceInternal
 
             if (duplicateSsnEntities.Any())
             {
-                AddDemographicSyncAuditsAsync(duplicateSsnEntities, "Duplicate SSNs found in the database.", "SSN", context);
+                 AddDemographicSyncAudits(duplicateSsnEntities, "Duplicate SSNs found in the database.", "SSN", context);
             }
             else
             {
@@ -125,7 +125,7 @@ public class DemographicsService : IDemographicsServiceInternal
 
                         if (existingEmployeeMatchToProposedSsn == null)
                         {
-                            await AddDemographicSyncAuditAsync(demographicMarkedForSSNChange, "SSN changed with no conflicts.", "SSN", context);
+                            await AddDemographicSyncAuditAsync(demographicMarkedForSSNChange, "SSN changed with no conflicts.", "SSN", context, cancellationToken);
                         }
                         // use case - ssn change for employee and ssn exists already in the system
                         else
@@ -365,13 +365,13 @@ public class DemographicsService : IDemographicsServiceInternal
         var result = await _totalService.GetVestingBalanceForSingleMemberAsync(SearchBy.Ssn, demographicMarkedForSSNChange.Ssn, (short)DateTime.Now.Year, cancellationToken);
 
         // check if terminated employee with no money and change 
-        if (existingEmployeeMatchToProposedSsn.EmploymentStatusId == 't' && result?.CurrentBalance == (decimal)0.0)
+        if (existingEmployeeMatchToProposedSsn.EmploymentStatusId == EmploymentStatus.Constants.Terminated && result?.CurrentBalance == (decimal)0.0)
         {
-            await AddDemographicSyncAuditAsync(demographicMarkedForSSNChange, "Duplicate SSN found for terminated user with zero balance.", "SSN", context);
+            await AddDemographicSyncAuditAsync(demographicMarkedForSSNChange, "Duplicate SSN found for terminated user with zero balance.", "SSN", context, cancellationToken);
         }
         else
         {
-            await AddDemographicSyncAuditAsync(demographicMarkedForSSNChange, "Duplicate SSN added for user.", "SSN", context);
+            await AddDemographicSyncAuditAsync(demographicMarkedForSSNChange, "Duplicate SSN added for user.", "SSN", context, cancellationToken);
         }
     }
 
@@ -382,7 +382,7 @@ public class DemographicsService : IDemographicsServiceInternal
     /// <param name="message"></param>
     /// <param name="property"></param>
     /// <param name="context"></param>
-    private void AddDemographicSyncAuditsAsync(List<Demographic> duplicateSsnEntities, string message, string property, ProfitSharingDbContext context)
+    private static void AddDemographicSyncAudits(List<Demographic> duplicateSsnEntities, string message, string property, ProfitSharingDbContext context)
     {
         // Log duplicate SSN entries to the audit table
         List<DemographicSyncAudit> audit = duplicateSsnEntities.Select(d => new DemographicSyncAudit
@@ -395,7 +395,7 @@ public class DemographicsService : IDemographicsServiceInternal
             PropertyName = property
         }).ToList();
 
-        context.DemographicSyncAudit.AddRange(audit);
+         context.DemographicSyncAudit.AddRange(audit);
     }
 
     /// <summary>
@@ -406,7 +406,7 @@ public class DemographicsService : IDemographicsServiceInternal
     /// <param name="property"></param>
     /// <param name="context"></param>
     /// <returns></returns>
-    private async Task AddDemographicSyncAuditAsync(Demographic demographic, string message, string property, ProfitSharingDbContext context)
+    private static async Task AddDemographicSyncAuditAsync(Demographic demographic, string message, string property, ProfitSharingDbContext context, CancellationToken cancellationToken)
     {
         var audit = new DemographicSyncAudit
         {
@@ -418,7 +418,7 @@ public class DemographicsService : IDemographicsServiceInternal
             PropertyName = property
         };
 
-        await context.DemographicSyncAudit.AddAsync(audit);
+        await context.DemographicSyncAudit.AddAsync(audit, cancellationToken);
     }
 
     // Helper method to update entity fields
@@ -446,7 +446,8 @@ public class DemographicsService : IDemographicsServiceInternal
 
     private static bool CheckMatchToIdOrSsnAndDob(Dictionary<long, Demographic> demographicOracleHcmIdLookup, int ssn, DateOnly dob, long oracleHcmId)
     {
-        return demographicOracleHcmIdLookup.Any(l => l.Key == oracleHcmId || (l.Value.DateOfBirth == dob && l.Value.Ssn == ssn));
+        TimeOnly timeOnly = new TimeOnly(0, 0);
+        return demographicOracleHcmIdLookup.Any(l => l.Key == oracleHcmId || (l.Value.DateOfBirth.ToDateTime(timeOnly) == dob.ToDateTime(timeOnly) && l.Value.Ssn == ssn));
     }
 #endregion
 

@@ -22,7 +22,6 @@ internal class EmployeeSyncChannelConsumer : BackgroundService
 {
     private readonly ChannelReader<MessageRequest<OracleEmployee[]>> _reader;
     private readonly OracleEmployeeValidator _employeeValidator;
-    private IDemographicsServiceInternal _demographicsService = null!;
     private readonly OracleHcmConfig _oracleHcmConfig;
     private readonly IFakeSsnService _fakeSsnService;
     private readonly IProfitSharingDataContextFactory _contextFactory;
@@ -47,19 +46,19 @@ internal class EmployeeSyncChannelConsumer : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using var scope = _scopeFactory.CreateScope();
-        _demographicsService = scope.ServiceProvider.GetRequiredService<IDemographicsServiceInternal>();
+        var demographicsService = scope.ServiceProvider.GetRequiredService<IDemographicsServiceInternal>();
 
         await foreach (var message in _reader.ReadAllAsync(stoppingToken).ConfigureAwait(false))
         {
-            await ProcessMessage(message, stoppingToken).ConfigureAwait(false);
+            await ProcessMessage(message, demographicsService, stoppingToken).ConfigureAwait(false);
         }
     }
 
-    private async Task ProcessMessage(MessageRequest<OracleEmployee[]> message, CancellationToken cancellationToken)
+    private async Task ProcessMessage(MessageRequest<OracleEmployee[]> message, IDemographicsServiceInternal demographicsService, CancellationToken cancellationToken)
     {
         OracleEmployee[] employees = message.Body;
         DemographicsRequest[] requestDtoEnumerable = await ConvertToRequestDto(employees, message.UserId, cancellationToken).ConfigureAwait(false);
-        await _demographicsService.AddDemographicsStreamAsync(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken).ConfigureAwait(false);
+        await demographicsService.AddDemographicsStreamAsync(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task<DemographicsRequest[]> ConvertToRequestDto(OracleEmployee[] employees,
@@ -96,9 +95,9 @@ internal class EmployeeSyncChannelConsumer : BackgroundService
             if (!result.IsValid)
             {
                 using var scope = _scopeFactory.CreateScope();
-                _demographicsService = scope.ServiceProvider.GetRequiredService<IDemographicsServiceInternal>();
+                var demographicsService = scope.ServiceProvider.GetRequiredService<IDemographicsServiceInternal>();
 
-                await _demographicsService.AuditError(badgeNumber, employee?.PersonId ?? 0, result.Errors, requestedBy, cancellationToken).ConfigureAwait(false);
+                await demographicsService.AuditError(badgeNumber, employee?.PersonId ?? 0, result.Errors, requestedBy, cancellationToken).ConfigureAwait(false);
                 continue;
             }
             var dr = new DemographicsRequest
