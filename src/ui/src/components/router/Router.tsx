@@ -1,7 +1,7 @@
 import { BrowserRouter, Route } from "react-router-dom";
+import EnvironmentUtils from "../../utils/environmentUtils";
 import RouterSubAssembly from "./RouterSubAssembly";
 import RouteSecurity from "./RouteSecurity";
-import EnvironmentUtils from "../../utils/environmentUtils";
 
 // We need a SubAssembly to let navigable items be put into
 // the drawer component. Otherwise, React thinks that the
@@ -10,11 +10,7 @@ const Router = () => {
   const oktaEnabled = EnvironmentUtils.isOktaEnabled;
 
   return (
-    <BrowserRouter
-      future={{
-        v7_startTransition: true,
-        v7_relativeSplatPath: true
-      }}>
+    <BrowserRouter>
       <RouteSecurity oktaEnabled={oktaEnabled}>
         <Route
           path="/*"

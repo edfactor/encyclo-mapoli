@@ -181,6 +181,40 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         Mock<DbSet<Department>> mockDepartments = departments.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.Departments).Returns(mockDepartments.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Departments).Returns(mockDepartments.Object);
+
+        var distributions = new DistributionFaker().Generate(500);
+        var mockDistributions = distributions.BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.Distributions).Returns(mockDistributions.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.Distributions).Returns(mockDistributions.Object);
+
+        var distributionFrequencies = new List<DistributionFrequency>()
+        {
+            new DistributionFrequency() {Id=DistributionFrequency.Constants.Hardship,Name=DistributionFrequency.Constants.Hardship.ToString() },
+            new DistributionFrequency() {Id=DistributionFrequency.Constants.PayDirect,Name=DistributionFrequency.Constants.PayDirect.ToString() },
+            new DistributionFrequency() {Id=DistributionFrequency.Constants.RolloverDirect,Name=DistributionFrequency.Constants.RolloverDirect.ToString() },
+            new DistributionFrequency() {Id=DistributionFrequency.Constants.Monthly,Name=DistributionFrequency.Constants.Monthly.ToString() },
+            new DistributionFrequency() {Id=DistributionFrequency.Constants.Quarterly,Name=DistributionFrequency.Constants.Quarterly.ToString() },
+            new DistributionFrequency() {Id=DistributionFrequency.Constants.Annually,Name=DistributionFrequency.Constants.Annually.ToString() }
+        };
+        var mockDistributionFrequencies = distributionFrequencies.BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.DistributionFrequencies).Returns(mockDistributionFrequencies.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.DistributionFrequencies).Returns(mockDistributionFrequencies.Object);
+
+        var distributionStatuses = new List<DistributionStatus>()
+        {
+            new DistributionStatus() {Id=DistributionStatus.Constants.ManualCheck,Name=DistributionStatus.Constants.ManualCheck.ToString() },
+            new DistributionStatus() {Id=DistributionStatus.Constants.PurgeRecord,Name=DistributionStatus.Constants.PurgeRecord.ToString() },
+            new DistributionStatus() {Id=DistributionStatus.Constants.RequestOnHold,Name=DistributionStatus.Constants.RequestOnHold.ToString() },
+            new DistributionStatus() {Id=DistributionStatus.Constants.Override,Name=DistributionStatus.Constants.Override.ToString() },
+            new DistributionStatus() {Id=DistributionStatus.Constants.PaymentMade,Name=DistributionStatus.Constants.PaymentMade.ToString() },
+            new DistributionStatus() {Id=DistributionStatus.Constants.OkayToPay,Name=DistributionStatus.Constants.OkayToPay.ToString() },
+            new DistributionStatus() {Id=DistributionStatus.Constants.PurgeAllRecordsForSsn,Name=DistributionStatus.Constants.PurgeAllRecordsForSsn.ToString() },
+            new DistributionStatus() {Id=DistributionStatus.Constants.PurgeAllRecordsForSsn2,Name=DistributionStatus.Constants.PurgeAllRecordsForSsn2.ToString() },
+        };
+        var mockDistributionStatuses = distributionStatuses.BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.DistributionStatuses).Returns(mockDistributionStatuses.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.DistributionStatuses).Returns(mockDistributionStatuses.Object);
+
     }
 
     public static IProfitSharingDataContextFactory InitializeForTesting()

@@ -28,9 +28,10 @@ import {
   ProfitShareMasterResponse,
   ProfitYearRequest
 } from "reduxstore/types";
-import { ApiMessageAlert, DSMAccordion, numberToCurrency, Page, setMessage, SmartModal } from "smart-ui-library";
+import { DSMAccordion, numberToCurrency, Page, setMessage, SmartModal } from "smart-ui-library";
 import { TotalsGrid } from "../../components/TotalsGrid";
-import usePrerequisiteNavigations from "../../hooks/usePrerequisiteNavigations";
+// usePrerequisiteNavigations now encapsulated by PrerequisiteGuard
+import PrerequisiteGuard from "../../components/PrerequisiteGuard";
 import { MessageKeys, Messages } from "../../utils/messageDictonary";
 import ChangesList from "./ChangesList";
 import ProfitShareEditConfirmation from "./ProfitShareEditConfirmation";
@@ -373,9 +374,6 @@ const ProfitShareEditUpdate = () => {
   const profitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
   const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
-  const { prerequisitesComplete } = usePrerequisiteNavigations(currentNavigationId, {
-    messageTemplate: Messages.ProfitSharePrerequisiteIncomplete as any
-  });
 
   useEffect(() => {
     const currentYear = new Date().getFullYear();
@@ -450,290 +448,298 @@ const ProfitShareEditUpdate = () => {
   }, [onStatusSearch, hasToken, updatedTime, updatedBy]);
 
   return (
-    <Page
-      label="Master Update (PAY444|PAY447)"
-      actionNode={
-        <div className="flex items-center justify-end gap-2">
-          {RenderRevertButton(setOpenRevertModal, isLoading)}
-          {RenderSaveButton(
-            setOpenSaveModal,
-            setOpenEmptyModal,
-            profitMasterStatus,
-            isLoading,
-            minimumFieldsEntered,
-            adjustedBadgeOneValid,
-            adjustedBadgeTwoValid,
-            prerequisitesComplete
-          )}
-          {renderActionNode()}
-        </div>
-      }>
-      <div>
-        <ApiMessageAlert commonKey={MessageKeys.ProfitShareEditUpdate} />
-      </div>
-      {
-        // We are using an AlertTitle directly and not a missive because we want this alert message
-        // to remain in place, not fade away
-        changesApplied && (
-          <div className="w-full py-3">
-            <Alert severity={Messages.ProfitShareMasterUpdated.message.type}>
-              <AlertTitle sx={{ fontWeight: "bold" }}>{Messages.ProfitShareMasterUpdated.message.title}</AlertTitle>
-              {`Updated By: ${updatedBy} | Date: ${updatedTime} `}
-            </Alert>
-          </div>
-        )
-      }
-      <Grid
-        container
-        rowSpacing="24px"
-        width={"100%"}>
-        <Grid
-          width={"100%"}
-          hidden={!profitShareEditUpdateShowSearch}>
-          <DSMAccordion title="Filter">
-            <ProfitShareEditUpdateSearchFilter
-              setInitialSearchLoaded={setInitialSearchLoaded}
-              setPageReset={setPageNumberReset}
-              setMinimumFieldsEntered={setMinimumFieldsEntered}
-              setAdjustedBadgeOneValid={setAdjustedBadgeOneValid}
-              setAdjustedBadgeTwoValid={setAdjustedBadgeTwoValid}
-            />
-          </DSMAccordion>
-        </Grid>
-        {profitEditUpdateRevertChangesAvailable && (
-          <>
-            <Grid
-              width="100%"
-              sx={{ marginLeft: "50px" }}>
-              <Typography
-                component="span"
-                variant="h6"
-                sx={{ fontWeight: "bold" }}>
-                These changes have already been applied:
-              </Typography>
-            </Grid>
-            <Grid
-              width="100%"
-              sx={{ marginLeft: "50px" }}>
-              <ChangesList params={profitSharingEditQueryParams || profitMasterStatus} />
-            </Grid>
-          </>
-        )}
-        {profitSharingUpdate && profitSharingUpdate.profitShareUpdateTotals && profitSharingEdit && (
-          <Grid width={"100%"}>
-            <div className="px-[24px]">
-              <h2 className="text-dsm-secondary">Summary (PAY444)</h2>
-              <Typography
-                fontWeight="bold"
-                variant="body2">
-                {`Employees: ${profitSharingUpdate.profitShareUpdateTotals.totalEmployees} | Beneficiaries: ${profitSharingUpdate.profitShareUpdateTotals.totalBeneficaries}`}
-              </Typography>
+    <PrerequisiteGuard
+      navigationId={currentNavigationId}
+      messageTemplate={Messages.ProfitSharePrerequisiteIncomplete as any}>
+      {({ prerequisitesComplete }) => (
+        <Page
+          label="Master Update (PAY444|PAY447)"
+          actionNode={
+            <div className="flex items-center justify-end gap-2">
+              {RenderRevertButton(setOpenRevertModal, isLoading)}
+              {RenderSaveButton(
+                setOpenSaveModal,
+                setOpenEmptyModal,
+                profitMasterStatus,
+                isLoading,
+                minimumFieldsEntered,
+                adjustedBadgeOneValid,
+                adjustedBadgeTwoValid,
+                prerequisitesComplete
+              )}
+              {renderActionNode()}
             </div>
-
-            <TotalsGrid
-              displayData={[
-                [
-                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.beginningBalance || 0),
-                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.totalContribution || 0),
-                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earnings || 0),
-                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earnings2 || 0),
-                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.forfeiture || 0),
-                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.distributions || 0),
-                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.military || 0),
-                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.endingBalance || 0)
-                ],
-                [
-                  "",
-                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.allocations || 0),
-                  "",
-                  "",
-                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.maxPointsTotal || 0),
-                  "",
-                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0),
-                  numberToCurrency(
-                    (profitSharingUpdate.profitShareUpdateTotals.allocations || 0) +
-                      (profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0)
-                  )
-                ],
-                [
-                  "",
-                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.contributionPoints || 0),
-                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earningPoints || 0),
-                  "",
-                  "",
-                  "",
-                  "",
-                  ""
-                ]
-              ]}
-              leftColumnHeaders={["Total", "Allocation", "Point"]}
-              topRowHeaders={[
-                "",
-                "Beginning Balance",
-                "Contributions",
-                "Earnings",
-                "Earnings2",
-                "Forfeitures",
-                "Distributions",
-                "Military/Paid Allocation",
-                "Ending Balance"
-              ]}
-              tablePadding="12px"
-            />
-            <TotalsGrid
-              tablePadding="12px"
-              displayData={[
-                [
-                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.maxOverTotal || 0),
-                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.maxPointsTotal || 0),
-                  numberToCurrency(profitSharingEditQueryParams?.maxAllowedContributions || 0)
-                ]
-              ]}
-              leftColumnHeaders={[]}
-              topRowHeaders={["Total Forfeitures", "Total Points", "For Employees Exceeding Max Contribution"]}
-            />
-            {totalForfeituresGreaterThanZero && (
-              <div className="-mt-2 px-[24px] text-sm text-red-600">
-                <em>
-                  * Total Forfeitures value highlighted in red indicates an issue that must be resolved before saving.
-                </em>
+          }>
+          {
+            // We are using an AlertTitle directly and not a missive because we want this alert message
+            // to remain in place, not fade away
+            changesApplied && (
+              <div className="w-full py-3">
+                <Alert severity={Messages.ProfitShareMasterUpdated.message.type}>
+                  <AlertTitle sx={{ fontWeight: "bold" }}>{Messages.ProfitShareMasterUpdated.message.title}</AlertTitle>
+                  {`Updated By: ${updatedBy} | Date: ${updatedTime} `}
+                </Alert>
               </div>
-            )}
-            <div className="h-5" />
-            <div className="px-[24px]">
-              <h2 className="text-dsm-secondary">Summary (PAY447)</h2>
-            </div>
-            <div className="flex gap-2">
-              <TotalsGrid
-                breakPoints={{ xs: 5, sm: 5, md: 5, lg: 5, xl: 5 }}
-                tablePadding="4px"
-                displayData={[
-                  [
-                    numberToCurrency(profitSharingEdit.beginningBalanceTotal || 0),
-                    numberToCurrency(profitSharingEdit.contributionGrandTotal || 0),
-                    numberToCurrency(profitSharingEdit.earningsGrandTotal || 0),
-                    numberToCurrency(profitSharingEdit.incomingForfeitureGrandTotal || 0)
-                  ]
-                ]}
-                leftColumnHeaders={["Grand Totals"]}
-                topRowHeaders={["", "Beginning Balance", "Contributions", "Earnings", "Forfeit"]}
-              />
-            </div>
-            <br />
-            {profitSharingUpdateAdjustmentSummary?.badgeNumber && (
+            )
+          }
+          <Grid
+            container
+            rowSpacing="24px"
+            width={"100%"}>
+            <Grid
+              width={"100%"}
+              hidden={!profitShareEditUpdateShowSearch}>
+              <DSMAccordion title="Filter">
+                <ProfitShareEditUpdateSearchFilter
+                  setInitialSearchLoaded={setInitialSearchLoaded}
+                  setPageReset={setPageNumberReset}
+                  setMinimumFieldsEntered={setMinimumFieldsEntered}
+                  setAdjustedBadgeOneValid={setAdjustedBadgeOneValid}
+                  setAdjustedBadgeTwoValid={setAdjustedBadgeTwoValid}
+                />
+              </DSMAccordion>
+            </Grid>
+            {profitEditUpdateRevertChangesAvailable && (
               <>
+                <Grid
+                  width="100%"
+                  sx={{ marginLeft: "50px" }}>
+                  <Typography
+                    component="span"
+                    variant="h6"
+                    sx={{ fontWeight: "bold" }}>
+                    These changes have already been applied:
+                  </Typography>
+                </Grid>
+                <Grid
+                  width="100%"
+                  sx={{ marginLeft: "50px" }}>
+                  <ChangesList params={profitSharingEditQueryParams || profitMasterStatus} />
+                </Grid>
+              </>
+            )}
+            {profitSharingUpdate && profitSharingUpdate.profitShareUpdateTotals && profitSharingEdit && (
+              <Grid width={"100%"}>
                 <div className="px-[24px]">
-                  <h2 className="text-dsm-secondary">Adjustments Entered</h2>
+                  <h2 className="text-dsm-secondary">Summary (PAY444)</h2>
+                  <Typography
+                    fontWeight="bold"
+                    variant="body2">
+                    {`Employees: ${profitSharingUpdate.profitShareUpdateTotals.totalEmployees} | Beneficiaries: ${profitSharingUpdate.profitShareUpdateTotals.totalBeneficaries}`}
+                  </Typography>
                 </div>
 
                 <TotalsGrid
                   displayData={[
                     [
-                      profitSharingUpdateAdjustmentSummary?.badgeNumber,
-                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.contributionAmountUnadjusted || 0),
-                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.earningsAmountUnadjusted || 0),
-                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.secondaryEarningsAmountUnadjusted || 0),
-                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.incomingForfeitureAmountUnadjusted || 0)
+                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.beginningBalance || 0),
+                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.totalContribution || 0),
+                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earnings || 0),
+                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earnings2 || 0),
+                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.forfeiture || 0),
+                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.distributions || 0),
+                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.military || 0),
+                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.endingBalance || 0)
                     ],
                     [
                       "",
-                      "", // need the requested contribution adjustment (from the request)
-                      "", // need the requested earnings adjustment amount
-                      "", // need the requested secondary earnings
-                      "" // need the requested incoming forfeiture adjustment
+                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.allocations || 0),
+                      "",
+                      "",
+                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.maxPointsTotal || 0),
+                      "",
+                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0),
+                      numberToCurrency(
+                        (profitSharingUpdate.profitShareUpdateTotals.allocations || 0) +
+                          (profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0)
+                      )
                     ],
                     [
                       "",
-                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.contributionAmountAdjusted || 0),
-                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.earningsAmountAdjusted || 0),
-                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.secondaryEarningsAmountAdjusted || 0),
-                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.incomingForfeitureAmountAdjusted || 0)
+                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.contributionPoints || 0),
+                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earningPoints || 0),
+                      "",
+                      "",
+                      "",
+                      "",
+                      ""
                     ]
                   ]}
-                  leftColumnHeaders={["Initial", "Adjustment", "Totals"]}
-                  topRowHeaders={["", "Badge", "Contributions", "Earnings", "Earnings2", "Forfeitures"]}
-                  headerCellStyle={{}}
+                  leftColumnHeaders={["Total", "Allocation", "Point"]}
+                  topRowHeaders={[
+                    "",
+                    "Beginning Balance",
+                    "Contributions",
+                    "Earnings",
+                    "Earnings2",
+                    "Forfeitures",
+                    "Distributions",
+                    "Military/Paid Allocation",
+                    "Ending Balance"
+                  ]}
+                  tablePadding="12px"
                 />
-              </>
-            )}
-            <Grid width="100%">
-              <ProfitShareEditUpdateTabs
-                initialSearchLoaded={initialSearchLoaded}
-                setInitialSearchLoaded={setInitialSearchLoaded}
-                pageNumberReset={pageNumberReset}
-                setPageNumberReset={setPageNumberReset}
-              />
-            </Grid>
-          </Grid>
-        )}
-      </Grid>
-      <SmartModal
-        key={"saveModal"}
-        maxWidth="sm"
-        open={openSaveModal}
-        onClose={() => setOpenSaveModal(false)}>
-        <ProfitShareEditConfirmation
-          key={"saveConfirmation"}
-          performLabel="YES, SAVE"
-          closeLabel="NO, CANCEL"
-          setOpenModal={setOpenSaveModal}
-          actionFunction={() => {
-            saveAction();
-            setOpenSaveModal(false);
-          }}
-          messageType="confirmation"
-          messageHeadline="You are about to apply the following changes:"
-          params={profitSharingEditQueryParams}
-          lastWarning="Ready to save? It may take a few minutes to process."
-        />
-      </SmartModal>
-      <SmartModal
-        key={"revertModal"}
-        maxWidth="sm"
-        open={openRevertModal}
-        onClose={() => setOpenRevertModal(false)}>
-        <ProfitShareEditConfirmation
-          key={"revertConfirmation"}
-          performLabel="YES, REVERT"
-          closeLabel="NO, CANCEL"
-          setOpenModal={setOpenRevertModal}
-          actionFunction={() => {
-            revertAction();
-            setOpenRevertModal(false);
-          }}
-          messageType="warning"
-          messageHeadline="Reverting to the last update will modify the following:"
-          params={profitSharingEditQueryParams || profitMasterStatus}
-          lastWarning="Do you still wish to revert?"
-        />
-      </SmartModal>
+                <TotalsGrid
+                  tablePadding="12px"
+                  displayData={[
+                    [
+                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.maxOverTotal || 0),
+                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.maxPointsTotal || 0),
+                      numberToCurrency(profitSharingEditQueryParams?.maxAllowedContributions || 0)
+                    ]
+                  ]}
+                  leftColumnHeaders={[]}
+                  topRowHeaders={["Total Forfeitures", "Total Points", "For Employees Exceeding Max Contribution"]}
+                />
+                {totalForfeituresGreaterThanZero && (
+                  <div className="-mt-2 px-[24px] text-sm text-red-600">
+                    <em>
+                      * Total Forfeitures value highlighted in red indicates an issue that must be resolved before
+                      saving.
+                    </em>
+                  </div>
+                )}
+                <div className="h-5" />
+                <div className="px-[24px]">
+                  <h2 className="text-dsm-secondary">Summary (PAY447)</h2>
+                </div>
+                <div className="flex gap-2">
+                  <TotalsGrid
+                    breakPoints={{ xs: 5, sm: 5, md: 5, lg: 5, xl: 5 }}
+                    tablePadding="4px"
+                    displayData={[
+                      [
+                        numberToCurrency(profitSharingEdit.beginningBalanceTotal || 0),
+                        numberToCurrency(profitSharingEdit.contributionGrandTotal || 0),
+                        numberToCurrency(profitSharingEdit.earningsGrandTotal || 0),
+                        numberToCurrency(profitSharingEdit.incomingForfeitureGrandTotal || 0)
+                      ]
+                    ]}
+                    leftColumnHeaders={["Grand Totals"]}
+                    topRowHeaders={["", "Beginning Balance", "Contributions", "Earnings", "Forfeit"]}
+                  />
+                </div>
+                <br />
+                {profitSharingUpdateAdjustmentSummary?.badgeNumber && (
+                  <>
+                    <div className="px-[24px]">
+                      <h2 className="text-dsm-secondary">Adjustments Entered</h2>
+                    </div>
 
-      <SmartModal
-        key={"emptyModal"}
-        open={openEmptyModal}
-        maxWidth="sm"
-        onClose={() => setOpenEmptyModal(false)}>
-        <ProfitShareEditConfirmation
-          key={"emptyConfirmation"}
-          performLabel="OK"
-          closeLabel=""
-          setOpenModal={setOpenEmptyModal}
-          actionFunction={() => {}}
-          messageType="info"
-          messageHeadline={
-            !minimumFieldsEntered
-              ? "You must enter at least contribution, earnings, and max allowed contributions."
-              : !adjustedBadgeOneValid
-                ? "If you adjust a badge, you must also enter the contribution, earnings, and incoming forfeiture."
-                : !adjustedBadgeTwoValid
-                  ? "If you adjust a secondary badge, you must also enter the earnings amount."
-                  : ""
-          }
-          params={profitSharingEditQueryParams}
-          lastWarning=""
-        />
-      </SmartModal>
-    </Page>
+                    <TotalsGrid
+                      displayData={[
+                        [
+                          profitSharingUpdateAdjustmentSummary?.badgeNumber,
+                          numberToCurrency(profitSharingUpdateAdjustmentSummary?.contributionAmountUnadjusted || 0),
+                          numberToCurrency(profitSharingUpdateAdjustmentSummary?.earningsAmountUnadjusted || 0),
+                          numberToCurrency(
+                            profitSharingUpdateAdjustmentSummary?.secondaryEarningsAmountUnadjusted || 0
+                          ),
+                          numberToCurrency(
+                            profitSharingUpdateAdjustmentSummary?.incomingForfeitureAmountUnadjusted || 0
+                          )
+                        ],
+                        [
+                          "",
+                          "", // need the requested contribution adjustment (from the request)
+                          "", // need the requested earnings adjustment amount
+                          "", // need the requested secondary earnings
+                          "" // need the requested incoming forfeiture adjustment
+                        ],
+                        [
+                          "",
+                          numberToCurrency(profitSharingUpdateAdjustmentSummary?.contributionAmountAdjusted || 0),
+                          numberToCurrency(profitSharingUpdateAdjustmentSummary?.earningsAmountAdjusted || 0),
+                          numberToCurrency(profitSharingUpdateAdjustmentSummary?.secondaryEarningsAmountAdjusted || 0),
+                          numberToCurrency(profitSharingUpdateAdjustmentSummary?.incomingForfeitureAmountAdjusted || 0)
+                        ]
+                      ]}
+                      leftColumnHeaders={["Initial", "Adjustment", "Totals"]}
+                      topRowHeaders={["", "Badge", "Contributions", "Earnings", "Earnings2", "Forfeitures"]}
+                      headerCellStyle={{}}
+                    />
+                  </>
+                )}
+                <Grid width="100%">
+                  <ProfitShareEditUpdateTabs
+                    initialSearchLoaded={initialSearchLoaded}
+                    setInitialSearchLoaded={setInitialSearchLoaded}
+                    pageNumberReset={pageNumberReset}
+                    setPageNumberReset={setPageNumberReset}
+                  />
+                </Grid>
+              </Grid>
+            )}
+          </Grid>
+          <SmartModal
+            key={"saveModal"}
+            maxWidth="sm"
+            open={openSaveModal}
+            onClose={() => setOpenSaveModal(false)}>
+            <ProfitShareEditConfirmation
+              key={"saveConfirmation"}
+              performLabel="YES, SAVE"
+              closeLabel="NO, CANCEL"
+              setOpenModal={setOpenSaveModal}
+              actionFunction={() => {
+                saveAction();
+                setOpenSaveModal(false);
+              }}
+              messageType="confirmation"
+              messageHeadline="You are about to apply the following changes:"
+              params={profitSharingEditQueryParams}
+              lastWarning="Ready to save? It may take a few minutes to process."
+            />
+          </SmartModal>
+          <SmartModal
+            key={"revertModal"}
+            maxWidth="sm"
+            open={openRevertModal}
+            onClose={() => setOpenRevertModal(false)}>
+            <ProfitShareEditConfirmation
+              key={"revertConfirmation"}
+              performLabel="YES, REVERT"
+              closeLabel="NO, CANCEL"
+              setOpenModal={setOpenRevertModal}
+              actionFunction={() => {
+                revertAction();
+                setOpenRevertModal(false);
+              }}
+              messageType="warning"
+              messageHeadline="Reverting to the last update will modify the following:"
+              params={profitSharingEditQueryParams || profitMasterStatus}
+              lastWarning="Do you still wish to revert?"
+            />
+          </SmartModal>
+
+          <SmartModal
+            key={"emptyModal"}
+            open={openEmptyModal}
+            maxWidth="sm"
+            onClose={() => setOpenEmptyModal(false)}>
+            <ProfitShareEditConfirmation
+              key={"emptyConfirmation"}
+              performLabel="OK"
+              closeLabel=""
+              setOpenModal={setOpenEmptyModal}
+              actionFunction={() => {}}
+              messageType="info"
+              messageHeadline={
+                !minimumFieldsEntered
+                  ? "You must enter at least contribution, earnings, and max allowed contributions."
+                  : !adjustedBadgeOneValid
+                    ? "If you adjust a badge, you must also enter the contribution, earnings, and incoming forfeiture."
+                    : !adjustedBadgeTwoValid
+                      ? "If you adjust a secondary badge, you must also enter the earnings amount."
+                      : ""
+              }
+              params={profitSharingEditQueryParams}
+              lastWarning=""
+            />
+          </SmartModal>
+        </Page>
+      )}
+    </PrerequisiteGuard>
   );
 };
 
