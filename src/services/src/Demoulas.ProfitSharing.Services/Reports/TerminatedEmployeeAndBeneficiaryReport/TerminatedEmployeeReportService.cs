@@ -293,7 +293,7 @@ public sealed class TerminatedEmployeeReportService
                 IsExecutive = member.IsExecutive,
                 VestedPercent = vestingPercent * 100,
                 Age = age,
-                EnrollmentCode = enrollmentId,
+                HasForfeited = enrollmentId == /*3*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords || enrollmentId == /*4*/ Enrollment.Constants.NewVestingPlanHasForfeitureRecords,
                 SuggestedForfeit = member.ProfitYear == req.ProfitYear ? member.EndingBalance - vestedBalance : null
             };
 
