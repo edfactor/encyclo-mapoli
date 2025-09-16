@@ -128,6 +128,7 @@ public sealed class DistributionService : IDistributionService
 
         var result = new PaginatedResponseDto<DistributionSearchResponse>(request)
         {
+            Total = data.Total,
             Results = data.Results.Select(d => new DistributionSearchResponse
             {
                 Ssn = d.Ssn.MaskSsn(),
