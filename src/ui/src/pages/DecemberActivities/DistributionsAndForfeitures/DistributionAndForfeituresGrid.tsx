@@ -86,7 +86,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   }, [distributionsAndForfeitures]);
 
   useEffect(() => {
-    if (hasToken && (initialSearchLoaded || sortParams)) {
+    if (hasToken && initialSearchLoaded) {
       onSearch();
     }
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken, setInitialSearchLoaded]);

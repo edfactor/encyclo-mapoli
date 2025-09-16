@@ -28,8 +28,8 @@ public class DistributionsAndForfeitureEndpoint: EndpointWithCsvTotalsBase<Distr
         Get("distributions-and-forfeitures");
         Summary(s =>
         {
-            s.Summary = "Lists distributions and forfeitures for a given year";
-            s.ExampleRequest = new DistributionsAndForfeituresRequest() { ProfitYear = 2025, Skip = SimpleExampleRequest.Skip, Take = SimpleExampleRequest.Take };
+            s.Summary = "Lists distributions and forfeitures for a date range";
+            s.ExampleRequest = new DistributionsAndForfeituresRequest() { Skip = SimpleExampleRequest.Skip, Take = SimpleExampleRequest.Take };
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {

@@ -37,8 +37,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object), new HttpContextAccessor()));
-        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory,  new Mock<ICommitGuardOverride>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory,  new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
         TerminatedEmployeeService mockService =
             new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService);
 
