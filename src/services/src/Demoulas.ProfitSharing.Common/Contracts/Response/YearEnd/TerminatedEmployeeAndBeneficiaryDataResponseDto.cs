@@ -45,7 +45,7 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto : IIsExecut
                     YtdPsHours = 980,
                     VestedPercent = 20,
                     Age = 44,
-                    EnrollmentCode = 4,
+                    HasForfeited = false
                 }
             ]
         };
@@ -65,7 +65,7 @@ public sealed record TerminatedEmployeeAndBeneficiaryYearDetailDto : IIsExecutiv
     public decimal YtdPsHours { get; set; }
     public decimal VestedPercent { get; set; }
     public int? Age { get; set; }
-    public byte? EnrollmentCode { get; set; }
+    public bool HasForfeited { get; set; }
     public decimal? SuggestedForfeit { get; set; }
     public bool IsExecutive { get; set; }
 }
