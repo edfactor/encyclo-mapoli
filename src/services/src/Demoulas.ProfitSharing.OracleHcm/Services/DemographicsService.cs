@@ -114,7 +114,7 @@ public class DemographicsService : IDemographicsServiceInternal
             }
             else
             {
-                // use case:  check if user is changing their social security number, there are no ssn duplicates, and a different dob
+                // use case:  check if user is changing their social security number, there are no ssn duplicates
                 foreach (var proposedChangeKV in demographicOracleHcmIdLookup.ToList())
                 {
                     // lookup for existing demographic by oracleHcmId and check if ssn is different than proposed change
@@ -144,7 +144,7 @@ public class DemographicsService : IDemographicsServiceInternal
             // checks for new ones and adds them as needed...
             await InsertNewDemographicsAsync(demographicsEntities, existingEntities, context, cancellationToken);
             // checks for updates to existing demographics and updates them as needed...
-            await UpdateExistingDemographicsAsyn(demographicOracleHcmIdLookup, demographicSsnLookup, existingEntities, currentModificationDate, context, cancellationToken);
+            await UpdateExistingDemographicsAsync(demographicOracleHcmIdLookup, demographicSsnLookup, existingEntities, currentModificationDate, context, cancellationToken);
 
             // Save all changes to the database
             try
@@ -171,7 +171,7 @@ public class DemographicsService : IDemographicsServiceInternal
     /// <param name="context"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async static Task UpdateExistingDemographicsAsyn(Dictionary<long, Demographic> demographicOracleHcmIdLookup, ILookup<(int Ssn, int BadgeNumber), Demographic> demographicSsnLookup, List<Demographic> existingEntities, DateTimeOffset currentModificationDate, ProfitSharingDbContext context, CancellationToken cancellationToken)
+    private async static Task UpdateExistingDemographicsAsync(Dictionary<long, Demographic> demographicOracleHcmIdLookup, ILookup<(int Ssn, int BadgeNumber), Demographic> demographicSsnLookup, List<Demographic> existingEntities, DateTimeOffset currentModificationDate, ProfitSharingDbContext context, CancellationToken cancellationToken)
     {
         // Update existing entities based on either OracleHcmId or SSN & BadgeNumber
         foreach (Demographic existingEntity in existingEntities)
@@ -367,6 +367,7 @@ public class DemographicsService : IDemographicsServiceInternal
 
         await context.DemographicSyncAudit.AddAsync(audit);
     }
+
     /// <summary>
     /// changes the SSN for a demographic and updates related records in the system.
     /// </summary>
