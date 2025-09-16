@@ -34,15 +34,19 @@ public class MilitaryContributionRequestValidator : Validator<CreateMilitaryCont
 
     private async Task<bool> ValidateContributionDate(CreateMilitaryContributionRequest req, CancellationToken token)
     {
+        if (req.IsSupplementalContribution)
+        {
+            return true;
+        }
+
         var ms = Resolve<IMilitaryService>();
         var results = await ms.GetMilitaryServiceRecordAsync(new MilitaryContributionRequest { ProfitYear = req.ProfitYear, BadgeNumber = req.BadgeNumber, Take = short.MaxValue },
             isArchiveRequest: false,
             cancellationToken: token);
 
-        
-        if (!results.IsSuccess) {return false;}
+        if (!results.IsSuccess) { return false; }
         var records = results.Value!.Results;
-        
-        return records.All(x => !x.IsSupplementalContribution && x.ContributionDate != new DateOnly(req.ContributionDate.Year, 12, 31));
+
+        return records.All(x => !x.IsSupplementalContribution && x.ContributionDate.Year != req.ContributionDate.Year);
     }
 }

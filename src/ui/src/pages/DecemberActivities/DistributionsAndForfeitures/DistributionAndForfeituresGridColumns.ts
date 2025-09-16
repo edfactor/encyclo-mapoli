@@ -1,5 +1,5 @@
 import { ColDef } from "ag-grid-community";
-import { getEnrolledStatus, getForfeitedStatus } from "../../../utils/enrollmentUtil";
+import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
 import {
   createAgeColumn,
   createBadgeColumn,
@@ -49,16 +49,13 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       hideZeroValues: false
     }),
     {
-      headerName: "Forfeit",
-      field: "enrolledId",
-      colId: "enrolledId",
+      headerName: "Forfeited",
+      field: "hasForfeited",
+      colId: "hasForfeited",
 
       headerClass: "center-align",
       cellClass: "center-align",
-      resizable: true,
-      valueFormatter: (params) => {
-        return getForfeitedStatus(params.value);
-      }
+      resizable: true
     }
   ];
 };

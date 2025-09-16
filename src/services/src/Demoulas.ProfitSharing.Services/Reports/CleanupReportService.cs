@@ -1,4 +1,4 @@
-using Demoulas.Common.Contracts.Contracts.Request;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
@@ -362,8 +362,8 @@ FROM FILTERED_DEMOGRAPHIC p1
                               // PROFIT_DETAIL.MonthToDate <--- is the month selector  See QPAY129.pco
                               (pd.ProfitYear > startDate.Year || (pd.ProfitYear == startDate.Year && pd.MonthToDate >= startDate.Month)) &&
                               (pd.ProfitYear < endDate.Year || (pd.ProfitYear == endDate.Year && pd.MonthToDate <= endDate.Month)) &&
-                              !(pd.ProfitCodeId == 9 && pd.CommentTypeId.HasValue && transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value))
-                          
+                              !(pd.ProfitCodeId == /*9*/ ProfitCode.Constants.Outgoing100PercentVestedPayment && pd.CommentTypeId.HasValue && transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value))
+
                     select new
                     {
                         nameAndDob.BadgeNumber,
@@ -375,12 +375,13 @@ FROM FILTERED_DEMOGRAPHIC p1
                         State = pd.CommentRelatedState,
                         StateTax = pd.StateTaxes,
                         FederalTax = pd.FederalTaxes,
-                        ForfeitAmount = pd.ProfitCodeId == 2 ? pd.Forfeiture : 0,
+                        ForfeitAmount = pd.ProfitCodeId == /*2*/ ProfitCode.Constants.OutgoingForfeitures.Id ? pd.Forfeiture : 0,
                         pd.YearToDate,
                         pd.MonthToDate,
                         Date = pd.CreatedAtUtc,
                         nameAndDob.DateOfBirth,
-                        nameAndDob.EnrolledId,
+                        HasForfeited = nameAndDob.EnrolledId == /*3*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords ||
+                                       nameAndDob.EnrolledId == /*4*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords,
                         nameAndDob.PayFrequencyId,
                     };
                 
@@ -425,7 +426,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                         ? pd.DateOfBirth.Age(
                             new DateOnly(pd.YearToDate, pd.MonthToDate, 1).ToDateTime(TimeOnly.MinValue))
                         : pd.DateOfBirth.Age( endDate.ToDateTime(TimeOnly.MinValue) ) ),
-                    EnrolledId = pd.EnrolledId,
+                    HasForfeited = pd.HasForfeited,
                     IsExecutive = pd.PayFrequencyId == PayFrequency.Constants.Monthly
                 });
 

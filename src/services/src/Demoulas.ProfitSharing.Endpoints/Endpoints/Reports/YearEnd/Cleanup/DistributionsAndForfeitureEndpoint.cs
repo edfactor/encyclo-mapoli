@@ -76,7 +76,7 @@ public class DistributionsAndForfeitureEndpoint: EndpointWithCsvTotalsBase<Distr
             Map(m => m.Age).Index(9).Name("AGE");
             Map(m => m.OtherName).Index(10).Name("OTHER NAME");
             Map(m => m.OtherSsn).Index(11).Name("OTHER SSN");
-            Map(m => m.EnrolledId).Index(12).Name("EC");
+            Map(m => m.HasForfeited).Index(12).Name("Forfeited");
         }
     }
 }

@@ -162,7 +162,13 @@ GlobalMeter.RecordDeploymentStartup();
 app.UseCors();
 app.UseDemographicHeaders();
 app.UseSensitiveValueMasking();
-app.UseSecurityHeaders();
+
+if (app.Environment.IsProduction())
+{
+    // Breaks swagger, but swagger isn't available in production/UAT anyway
+    app.UseSecurityHeaders();
+}
+
 app.UseDefaultEndpoints(OktaSettingsAction)
     .UseReDoc(settings =>
     {
