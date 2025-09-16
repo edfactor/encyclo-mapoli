@@ -4,14 +4,13 @@ import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "components/SuggestedForfeiture";
 import { numberToCurrency } from "smart-ui-library";
 import { ForfeitureAdjustmentUpdateRequest } from "types";
-import { getForfeitedStatus } from "utils/enrollmentUtil";
 import {
   createAgeColumn,
   createCurrencyColumn,
   createDateColumn,
   createHoursColumn,
-  createStatusColumn,
-  createYearColumn
+  createYearColumn,
+  createYesOrNoColumn
 } from "utils/gridColumnFactory";
 import { HeaderComponent } from "./TerminationHeaderComponent";
 
@@ -33,31 +32,38 @@ export const GetDetailColumns = (
   return [
     createYearColumn({
       headerName: "Profit Year",
-      field: "profitYear"
+      field: "profitYear",
+      sortable: false
     }),
     createCurrencyColumn({
       headerName: "Beginning Balance",
-      field: "beginningBalance"
+      field: "beginningBalance",
+      sortable: false
     }),
     createCurrencyColumn({
       headerName: "Beneficiary Allocation",
-      field: "beneficiaryAllocation"
+      field: "beneficiaryAllocation",
+      sortable: false
     }),
     createCurrencyColumn({
       headerName: "Distribution Amount",
-      field: "distributionAmount"
+      field: "distributionAmount",
+      sortable: false
     }),
     createCurrencyColumn({
       headerName: "Forfeit Amount",
-      field: "forfeit"
+      field: "forfeit",
+      sortable: false
     }),
     createCurrencyColumn({
       headerName: "Ending Balance",
-      field: "endingBalance"
+      field: "endingBalance",
+      sortable: false
     }),
     createCurrencyColumn({
       headerName: "Vested Balance",
-      field: "vestedBalance"
+      field: "vestedBalance",
+      sortable: false
     }),
     {
       headerName: "Vested %",
@@ -71,21 +77,23 @@ export const GetDetailColumns = (
     },
     createDateColumn({
       headerName: "Term Date",
-      field: "dateTerm"
+      field: "dateTerm",
+      sortable: false
     }),
     createHoursColumn({
       headerName: "YTD PS Hours",
-      field: "ytdPsHours"
+      field: "ytdPsHours",
+      sortable: false
     }),
     createAgeColumn({
       maxWidth: 70,
       sortable: false
     }),
-    createStatusColumn({
-      headerName: "Forfeit",
-      field: "enrollmentCode",
-      // Yes, the enrollmentCode is tied to the Forfeited status. See PS-1279
-      valueFormatter: (params) => getForfeitedStatus(params.value)
+    createYesOrNoColumn({
+      headerName: "Forfeited",
+      field: "hasForfeited",
+      colId: "hasForfeited",
+      sortable: false
     }),
     {
       headerName: "Suggested Forfeit",
@@ -164,7 +172,9 @@ export const GetDetailColumns = (
 
         return (
           <div>
-            <Tooltip title={isZeroValue ? "Forfeit cannot be zero." : ""} arrow>
+            <Tooltip
+              title={isZeroValue ? "Forfeit cannot be zero." : ""}
+              arrow>
               <span>
                 <Checkbox
                   checked={isSelected}

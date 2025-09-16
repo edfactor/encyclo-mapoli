@@ -225,7 +225,6 @@ export const YearsEndApi = createApi({
         url: `yearend/distributions-and-forfeitures`,
         method: "GET",
         params: {
-          profitYear: params.profitYear,
           startDate: params.startDate,
           endDate: params.endDate,
           take: params.pagination.take,

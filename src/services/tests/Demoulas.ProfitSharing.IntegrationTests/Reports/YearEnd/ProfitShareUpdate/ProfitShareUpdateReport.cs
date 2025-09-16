@@ -36,7 +36,7 @@ internal sealed class ProfitShareUpdateReport
 
     public async Task ProfitSharingUpdatePaginated(ProfitShareUpdateRequest profitShareUpdateRequest, IDemographicReaderService demographicReaderService)
     {
-        FrozenService frozenService = new FrozenService(_dbFactory,  new Mock<ICommitGuardOverride>().Object);
+        FrozenService frozenService = new FrozenService(_dbFactory,  new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object);
         TotalService totalService = new TotalService(_dbFactory, _calendarService, new EmbeddedSqlService(), demographicReaderService);
         ProfitShareUpdateService psu = new(_dbFactory, totalService, _calendarService, demographicReaderService);
         _profitYear = profitShareUpdateRequest.ProfitYear;
