@@ -353,7 +353,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                              !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
                             (!req.StartDate.HasValue || pd.CreatedAtUtc >= startDate) &&
                             (!req.EndDate.HasValue || pd.CreatedAtUtc <= endDate) &&
-                            !(pd.ProfitCodeId == 9 && pd.CommentTypeId.HasValue && transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value))
+                            !(pd.ProfitCodeId == /*9*/ ProfitCode.Constants.Outgoing100PercentVestedPayment && pd.CommentTypeId.HasValue && transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value))
 
                     select new
                     {
@@ -366,12 +366,13 @@ FROM FILTERED_DEMOGRAPHIC p1
                         State = pd.CommentRelatedState,
                         StateTax = pd.StateTaxes,
                         FederalTax = pd.FederalTaxes,
-                        ForfeitAmount = pd.ProfitCodeId == 2 ? pd.Forfeiture : 0,
+                        ForfeitAmount = pd.ProfitCodeId == /*2*/ ProfitCode.Constants.OutgoingForfeitures.Id ? pd.Forfeiture : 0,
                         pd.YearToDate,
                         pd.MonthToDate,
                         Date = pd.CreatedAtUtc,
                         nameAndDob.DateOfBirth,
-                        nameAndDob.EnrolledId,
+                        HasForfeited = nameAndDob.EnrolledId == /*3*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords ||
+                                       nameAndDob.EnrolledId == /*4*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords,
                         nameAndDob.PayFrequencyId,
                     };
                 
@@ -423,7 +424,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                             new DateOnly(pd.YearToDate, pd.MonthToDate, 1).ToDateTime(TimeOnly.MinValue))
                         : pd.DateOfBirth.Age(
                             calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Local))),
-                    EnrolledId = pd.EnrolledId,
+                    HasForfeited = pd.HasForfeited,
                     IsExecutive = pd.PayFrequencyId == PayFrequency.Constants.Monthly
                 });
 
