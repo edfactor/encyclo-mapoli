@@ -2,16 +2,24 @@ import { Middleware } from "@reduxjs/toolkit";
 import { url as baseUrl } from "../reduxstore/api/api";
 
 // For storing in-flight request information
-const requestTimings = new Map();
+type RequestTiming = {
+  startTime: number;
+  url: string | "pending";
+  method: string;
+  duration?: number;
+  status?: number;
+  completed?: boolean;
+};
+const requestTimings = new Map<string, RequestTiming>();
 
 // Intercept actual fetch requests to capture timing and URLs
-const originalFetch = window.fetch;
-window.fetch = function captureUrlFetch(input, init) {
+const originalFetch = window.fetch.bind(window);
+window.fetch = function captureUrlFetch(input: RequestInfo | URL, init?: RequestInit) {
   const startTime = performance.now();
-  const requestUrl = typeof input === "string" ? input : input.url;
+  const requestUrl = typeof input === "string" || input instanceof URL ? String(input) : (input as Request).url;
 
   // Save the URL for later correlation with RTK Query actions
-  const requestData = {
+  const requestData: RequestTiming = {
     url: requestUrl,
     method: init?.method || (input instanceof Request ? input.method : "GET"),
     startTime,
@@ -20,14 +28,14 @@ window.fetch = function captureUrlFetch(input, init) {
 
   // Actual fetch call
   return originalFetch
-    .apply(this, arguments)
+    .apply(this, [input as any, init as any])
     .then((response) => {
       const endTime = performance.now();
       requestData.duration = Math.round(endTime - startTime);
       requestData.status = response.status;
 
       // Check if this URL corresponds to a cached request ID
-      for (const [requestId, data] of requestTimings.entries()) {
+      requestTimings.forEach((data, requestId) => {
         if (data.url === "pending" && !data.completed) {
           // Update the request with actual data
           requestTimings.set(requestId, {
@@ -43,14 +51,13 @@ window.fetch = function captureUrlFetch(input, init) {
           updateSessionStorage(requestId, {
             url: requestUrl,
             method: requestData.method,
-            status: requestData.status,
-            duration: requestData.duration
+            status: requestData.status ?? 0,
+            duration: requestData.duration ?? 0
           });
 
           // Only update one request to avoid duplicates
-          break;
         }
-      }
+      });
 
       return response;
     })
@@ -60,7 +67,7 @@ window.fetch = function captureUrlFetch(input, init) {
       requestData.status = error.status || 500;
 
       // Check if this URL corresponds to a cached request ID
-      for (const [requestId, data] of requestTimings.entries()) {
+      requestTimings.forEach((data, requestId) => {
         if (data.url === "pending" && !data.completed) {
           // Update the request with actual data
           requestTimings.set(requestId, {
@@ -76,23 +83,25 @@ window.fetch = function captureUrlFetch(input, init) {
           updateSessionStorage(requestId, {
             url: requestUrl,
             method: requestData.method,
-            status: requestData.status,
-            duration: requestData.duration
+            status: requestData.status ?? 0,
+            duration: requestData.duration ?? 0
           });
 
           // Only update one request to avoid duplicates
-          break;
         }
-      }
+      });
 
       throw error;
     });
 };
 
 // Helper function to update session storage with actual request data
-function updateSessionStorage(requestId, data) {
+function updateSessionStorage(
+  requestId: string,
+  data: { url: string; method: string; status: number; duration: number }
+) {
   const history = JSON.parse(sessionStorage.getItem("api_request_history") || "[]");
-  const updatedHistory = history.map((entry) => {
+  const updatedHistory = history.map((entry: any) => {
     if (entry.requestId === requestId) {
       return {
         ...entry,
@@ -113,7 +122,7 @@ function updateSessionStorage(requestId, data) {
  * This middleware logs RTK Query API requests to session storage
  * by tracking pending/fulfilled action pairs and correlating them with fetch requests
  */
-export const apiLoggerMiddleware: Middleware = () => (next) => (action) => {
+export const apiLoggerMiddleware: Middleware = () => (next) => (action: any) => {
   // Handle RTK Query actions
   if (action.type && typeof action.type === "string") {
     // First check if it's an RTK Query action by looking for the pattern api/endpoint/status
