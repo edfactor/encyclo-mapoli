@@ -1,0 +1,152 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
+using Demoulas.ProfitSharing.Common.Extensions;
+using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace Demoulas.ProfitSharing.Services;
+public sealed class DistributionService : IDistributionService
+{
+    private readonly IProfitSharingDataContextFactory _dataContextFactory;
+    private readonly IDemographicReaderService _demographicReaderService;
+
+    public DistributionService(IProfitSharingDataContextFactory dataContextFactory, IDemographicReaderService demographicReaderService)
+    {
+        _dataContextFactory = dataContextFactory;
+        _demographicReaderService = demographicReaderService;
+    }
+
+    public async Task<PaginatedResponseDto<DistributionSearchResponse>> SearchAsync(DistributionSearchRequest request, CancellationToken cancellationToken)
+    {
+        var data = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var demographic = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+            var query = from dist in ctx.Distributions
+                        join freq in ctx.DistributionFrequencies on dist.FrequencyId equals freq.Id
+                        join status in ctx.DistributionStatuses on dist.StatusId equals status.Id
+                        join tax in ctx.TaxCodes on dist.TaxCodeId equals tax.Id
+                        join demLj in demographic on dist.Ssn equals demLj.Ssn into demGroup
+                        from dem in demGroup.DefaultIfEmpty()
+                        join benLj in ctx.Beneficiaries on dist.Ssn equals benLj.Contact!.Ssn into benGroup
+                        from ben in benGroup.DefaultIfEmpty()
+                        select new 
+                        { 
+                            dist.Ssn,
+                            BadgeNumber = dem != null ? (int?)dem.BadgeNumber : null,
+                            DemFullName = dem != null ? dem.ContactInfo.FullName : null,
+                            BeneFullName = ben != null ? ben.Contact!.ContactInfo.FullName : null,
+                            dist.FrequencyId,
+                            Frequency = freq,
+                            dist.StatusId,
+                            Status = status,
+                            dist.TaxCodeId,
+                            TaxCode = tax,
+                            dist.GrossAmount,
+                            dist.FederalTaxAmount,
+                            dist.StateTaxAmount,
+                            dist.CheckAmount,
+                            IsExecutive = dem != null && dem.PayFrequencyId == PayFrequency.Constants.Monthly
+                        };
+
+            int searchSsn;
+            if (!string.IsNullOrWhiteSpace(request.Ssn) && int.TryParse(request.Ssn, out searchSsn))
+            {
+                query = query.Where(d => d.Ssn == searchSsn);
+            }
+
+            if (request.BadgeNumber.HasValue)
+            {
+                if (request.PsnSuffix.HasValue)
+                {
+                    var ssn = await ctx.Beneficiaries.Where(x=>x.BadgeNumber == request.BadgeNumber.Value && x.PsnSuffix == request.PsnSuffix.Value).Select(x=>x.Contact!.Ssn).FirstOrDefaultAsync(cancellationToken);
+                    if (ssn == default)
+                    {
+                        throw new InvalidOperationException("Badge number and PSN suffix combination not found.");
+                    }
+                    query = query.Where(d => d.Ssn == ssn);
+                } 
+                else
+                {
+                    var ssn = await demographic.Where(x => x.BadgeNumber == request.BadgeNumber.Value).Select(x => x.Ssn).FirstOrDefaultAsync(cancellationToken);
+                    if (ssn == default)
+                    {
+                        throw new InvalidOperationException("Badge number not found.");
+                    }
+                    query = query.Where(d => d.Ssn == ssn);
+                }
+                
+            }
+
+            if (request.DistributionFrequencyId.HasValue)
+            {
+                query = query.Where(d => d.FrequencyId == request.DistributionFrequencyId.Value);
+            }
+
+            if (request.DistributionStatusId.HasValue)
+            {
+                query = query.Where(d => d.StatusId == request.DistributionStatusId.Value);
+            }
+
+            if (request.TaxCodeId.HasValue)
+            {
+                query = query.Where(d => d.TaxCodeId == request.TaxCodeId.Value);
+            }
+
+            if (request.MinGrossAmount.HasValue)
+            {
+                query = query.Where(d => d.GrossAmount >= request.MinGrossAmount.Value);
+            }
+
+            if (request.MaxGrossAmount.HasValue)
+            {
+                query = query.Where(d => d.GrossAmount <= request.MaxGrossAmount.Value);
+            }
+
+            if (request.MinCheckAmount.HasValue)
+            {
+                query = query.Where(d => d.CheckAmount >= request.MinCheckAmount.Value);
+            }
+
+            if (request.MaxCheckAmount.HasValue)
+            {
+                query = query.Where(d => d.CheckAmount <= request.MaxCheckAmount.Value);
+            }
+
+            return await query.ToPaginationResultsAsync(request, cancellationToken);
+        });
+
+        var result = new PaginatedResponseDto<DistributionSearchResponse>(request)
+        {
+            Results = data.Results.Select(d => new DistributionSearchResponse
+            {
+                Ssn = d.Ssn.MaskSsn(),
+                BadgeNumber = d.BadgeNumber,
+                FullName = d.DemFullName ?? d.BeneFullName,
+                FrequencyId = d.FrequencyId,
+                FrequencyName = d.Frequency!.Name,
+                StatusId = d.StatusId,
+                StatusName = d.Status!.Name,
+                TaxCodeId = d.TaxCodeId,
+                TaxCodeName = d.TaxCode!.Name,
+                GrossAmount = d.GrossAmount,
+                FederalTax = d.FederalTaxAmount,
+                StateTax = d.StateTaxAmount,
+                CheckAmount = d.CheckAmount,
+                IsExecutive = d.IsExecutive
+            }).ToList()
+        };
+
+        return result;
+    }
+}
