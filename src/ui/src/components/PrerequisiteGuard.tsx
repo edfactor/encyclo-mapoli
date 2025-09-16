@@ -54,7 +54,12 @@ const PrerequisiteGuard: React.FC<PrerequisiteGuardProps> = ({
 
   return (
     <>
-      {showAlert && <ApiMessageAlert commonKey={keyToUse} />}
+      {showAlert && (
+        <ApiMessageAlert
+          commonKey={keyToUse}
+          delay={30000}
+        />
+      )}
       {children({ prerequisitesComplete, incompletePrerequisites, currentNavigation })}
     </>
   );
