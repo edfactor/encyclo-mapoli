@@ -72,15 +72,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
     #endregion
 
 
-    public Task<ReportResponseBase<NamesMissingCommaResponse>> GetNamesMissingCommaAsync(SortedPaginationRequestDto req, CancellationToken cancellationToken = default)
-    {
-        return CallReportEndpoint<NamesMissingCommaResponse, SortedPaginationRequestDto>(req, "names-missing-commas", cancellationToken);
-    }
 
-    public Task<Stream> DownloadNamesMissingComma(CancellationToken cancellationToken = default)
-    {
-        return DownloadCsvReport(0, "names-missing-commas", cancellationToken);
-    }
 
     public Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdaysAsync(ProfitYearRequest req, CancellationToken cancellationToken = default)
     {

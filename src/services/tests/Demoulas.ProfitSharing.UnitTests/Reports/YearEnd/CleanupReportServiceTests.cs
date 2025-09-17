@@ -129,67 +129,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         });
     }
 
-    [Fact(DisplayName = "PS-153: Names without commas (JSON)")]
-    public Task GetNamesWithoutCommas()
-    {
-        _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        return MockDbContextFactory.UseWritableContext(async ctx =>
-        {
-            var request = new SortedPaginationRequestDto() { Skip = 0, Take = 1000 };
-            var response = await _cleanupReportClient.GetNamesMissingCommaAsync(request, CancellationToken.None);
-            response.ShouldNotBeNull();
-            response.Response.Results.Count().ShouldBe(0);
 
-            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
-
-            byte disruptedNameCount = 10;
-            foreach (var dem in ctx.Demographics.Take(disruptedNameCount))
-            {
-                dem.ContactInfo.FullName = dem.ContactInfo.FullName?.Replace(", ", " ");
-            }
-
-            await ctx.SaveChangesAsync(CancellationToken.None);
-
-            response = await _cleanupReportClient.GetNamesMissingCommaAsync(request, CancellationToken.None);
-            response.ShouldNotBeNull();
-            response.Response.Results.Count().ShouldBe(disruptedNameCount);
-
-            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
-
-            var oneRecord = new SortedPaginationRequestDto { Skip = 0, Take = 1 };
-            response = await _cleanupReportClient.GetNamesMissingCommaAsync(oneRecord, CancellationToken.None);
-            response.ShouldNotBeNull();
-            response.Response.Results.Count().ShouldBe(1);
-
-            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
-        });
-    }
-
-    [Fact(DisplayName = "PS-153: Names without commas (CSV)")]
-    public Task GetNamesWithoutCommasCsv()
-    {
-        _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        return MockDbContextFactory.UseWritableContext(async ctx =>
-        {
-            byte disruptedNameCount = 10;
-            await ctx.Demographics.Take(disruptedNameCount)
-                .ForEachAsync(dem => { dem.ContactInfo.FullName = dem.ContactInfo.FullName?.Replace(", ", " "); });
-
-            await ctx.SaveChangesAsync(CancellationToken.None);
-
-            var stream = await _cleanupReportClient.DownloadNamesMissingComma(CancellationToken.None);
-            stream.ShouldNotBeNull();
-
-            using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
-            string result = await reader.ReadToEndAsync(CancellationToken.None);
-            result.ShouldNotBeNullOrEmpty();
-
-            var lines = result.Split(Environment.NewLine);
-            lines.Count().ShouldBe(disruptedNameCount + 4);
-
-            _testOutputHelper.WriteLine(result);
-        });
-    }
 
     [Fact(DisplayName = "PS-145 : Negative ETVA for SSNs on PayProfit (JSON)")]
     public Task GetNegativeEtvaReportJson()
