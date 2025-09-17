@@ -100,27 +100,6 @@ public class DemographicsServiceTests
         Assert.Equal(requestedBy, audits[0].UserName);
     }
 
-    /// <summary>
-    /// this one is never tested since it fails...
-    /// Message: 
-    ///    System.InvalidOperationException : The methods 'ExecuteDelete' and 'ExecuteDeleteAsync' are not supported by the current database provider.Please contact the publisher of the database provider for more information. 
-    ///
-    /// Claude suggests  
-    /// 
-    ///     For tests using the InMemory provider, replace ExecuteDeleteAsync with code that manually removes entities and calls SaveChangesAsync.For example:
-    /// 
-    /// var oldAudits = dbContext.DemographicSyncAudit.Where(t => t.Created < clearBackTo).ToList();
-    /// dbContext.DemographicSyncAudit.RemoveRange(oldAudits);
-    /// await dbContext.SaveChangesAsync(cancellationToken);
-    /// </summary>
-    /// <returns></returns>
-    [Fact(Skip = "See comment")]
-    private Task CleanAuditError_DeletesOldAuditRecords()
-    {
-        // This test is skipped due to provider limitations on ExecuteDeleteAsync; keep minimal compilable body.
-        return Task.CompletedTask;
-    }
-
     [Fact]
     public async Task AddDemographicsStreamAsync_InsertsNewEntities()
     {
@@ -657,8 +636,5 @@ public class DemographicsServiceTests
         // verify existing employee was updated with new SSN
         var existingEmployee = demographics.First(d => d.OracleHcmId == 1);
         Assert.Equal(44444444, existingEmployee.Ssn);
-
-        // add beneficiaries and pay details
-
     }
 }

@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
+using System.Linq.Expressions;
 using System.Runtime.Intrinsics.X86;
 using System.Threading;
+using System.Threading.Tasks;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Extensions;
@@ -13,10 +15,12 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Mappers;
+using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.Util.Extensions;
 using EntityFramework.Exceptions.Common;
+using FastEndpoints;
 using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -90,14 +94,21 @@ public class DemographicsService : IDemographicsServiceInternal
         ILookup<(int Ssn, int BadgeNumber), Demographic> demographicSsnLookup = demographicsEntities.ToLookup(entity => (entity.Ssn, BadgeNumber: entity.BadgeNumber));
         HashSet<int> ssnCollection = demographicsEntities.Select(d => d.Ssn).ToHashSet();
         HashSet<DateOnly> dobCollection = demographicsEntities.Select(d => d.DateOfBirth).ToHashSet();
+        var ssnAndDobPairs = demographicsEntities.Select(d => (d.Ssn, d.DateOfBirth)).ToList();
+        var oracleHcmIds = demographicsEntities.Select(d => d.OracleHcmId).ToHashSet();
 
         // Use writable context for the upsert operation
         return _dataContextFactory.UseWritableContext(async context =>
         {
-            List<Demographic> existingEntities = await context.Demographics
-                .Where(dbEntity =>
-                    CheckMatchToIdOrSsnAndDob(demographicOracleHcmIdLookup, dbEntity.Ssn, dbEntity.DateOfBirth, dbEntity.OracleHcmId))
-                .ToListAsync(cancellationToken).ConfigureAwait(false);
+
+            // this call is going to be SLOW -should revisit if we can find a better way to do this
+            List < Demographic > existingEntities = context.Demographics
+                .AsEnumerable()
+                .Where(d =>
+                    oracleHcmIds.Contains(d.OracleHcmId) ||
+                    ssnAndDobPairs.Any(pair => pair.Ssn == d.Ssn && pair.DateOfBirth == d.DateOfBirth))
+                .ToList();
+
 
             // Handle potential duplicates in the existing database (SSN duplicates)
             List<Demographic> duplicateSsnEntities = existingEntities.GroupBy(e => e.Ssn)
@@ -331,8 +342,17 @@ public class DemographicsService : IDemographicsServiceInternal
     {
         // Update the rest of the entity's fields
         bool updateHistory = !Demographic.DemographicHistoryEqual(existingEntity, incomingEntity);
+        // if ssn change, will need to change any beneficiary and profitdetail records
+        if (existingEntity.Ssn != incomingEntity.Ssn)
+        {
+            var beneficiariesToUpdate = context.BeneficiaryContacts.Where(b => b.Ssn == existingEntity.Ssn);
+            await beneficiariesToUpdate.ForEachAsync(b => b.Ssn = incomingEntity.Ssn, cancellationToken).ConfigureAwait(false);
+            var profitDetailsToUpdate = context.ProfitDetails.Where(p => p.Ssn == existingEntity.Ssn);
+            await profitDetailsToUpdate.ForEachAsync(p => p.Ssn = incomingEntity.Ssn, cancellationToken).ConfigureAwait(false);
+        }
 
         UpdateEntityValues(existingEntity, incomingEntity, currentModificationDate);
+
         if (updateHistory)
         {
             DemographicHistory newHistoryRecord = DemographicHistory.FromDemographic(incomingEntity, existingEntity.Id);
@@ -444,11 +464,6 @@ public class DemographicsService : IDemographicsServiceInternal
         existingEntity.ModifiedAtUtc = modificationDate;
     }
 
-    private static bool CheckMatchToIdOrSsnAndDob(Dictionary<long, Demographic> demographicOracleHcmIdLookup, int ssn, DateOnly dob, long oracleHcmId)
-    {
-        TimeOnly timeOnly = new TimeOnly(0, 0);
-        return demographicOracleHcmIdLookup.Any(l => l.Key == oracleHcmId || (l.Value.DateOfBirth.ToDateTime(timeOnly) == dob.ToDateTime(timeOnly) && l.Value.Ssn == ssn));
-    }
 #endregion
 
 }
