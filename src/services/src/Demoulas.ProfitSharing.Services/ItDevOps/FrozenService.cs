@@ -94,7 +94,7 @@ public class FrozenService: IFrozenService
             .WithMessage($"ProfitYear must be between {thisYear - 1} and {thisYear}.");
 
 
-        var duplicateSsnReportService = _serviceProvider.GetRequiredService<IPayrollDuplicateSsnReportServiceInternal>();
+        var duplicateSsnReportService = _serviceProvider.GetRequiredService<IPayrollDuplicateSsnReportService>();
         // Inline async rule to prevent freezing when duplicate SSNs exist.
         validator.RuleFor(r => r)
             .MustAsync(async (_, ct) => !await duplicateSsnReportService.DuplicateSsnExistsAsync(ct))
