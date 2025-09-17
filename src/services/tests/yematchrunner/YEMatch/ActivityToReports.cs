@@ -2,12 +2,14 @@ namespace YEMatch.YEMatch;
 
 public static class ActivityToReports
 {
-
+    // This maps a Activty Name to a unix proccess id.   as orginally extracted from a YE Run.
     private static readonly Dictionary<string, string> _processIdByActivity = new()
     {
-        ["R3"] = "7777",
-        ["R2"] = "8888",
         ["R0"] = "12180",
+        ["R2"] = "8888",
+        ["R3"] = "7777",
+        ["R4"] = "7217",
+
         ["R15"] = "12228",
         ["R17"] = "12278",
         ["R18"] = "24515",
@@ -26,6 +28,10 @@ public static class ActivityToReports
     
     private static readonly List<string> _referenceLogfiles =
     [
+        // These are names of generated reports.  Then end with a unix process id.  This keeps the reports
+        // unique in a directory of reports.     We use this map to figure out for a given activity, like R22 which has
+        // a single specific unix id assigned at run time, what file or files to go grab on the remote server.
+        "QPAY129-7217",
         "PREVPROF-8888",
         "PREVPROF-8888.csv",
         "PROF-HOURS-DOLLARS-12228.CSV",

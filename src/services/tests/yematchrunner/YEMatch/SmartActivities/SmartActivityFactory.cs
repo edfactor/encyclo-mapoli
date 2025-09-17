@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -233,7 +233,7 @@ public static class SmartActivityFactory
         // The work around is to use the "curL" suggested by swagger, which does have the correct arguments in the post. 
         //     example from swagger
         //     curl -X 'POST' \
-        //     'https://ps.qa.demoulas.net:8443/api/itoperations/freeze' \
+        //     'https://ps.qa.demoulas.net:8443/api/itdevops/freeze' \
         //     -H 'accept: application/json' \
         //     -H 'Authorization: ...\
         //     -H 'Content-Type: application/json' \
@@ -411,7 +411,7 @@ public static class SmartActivityFactory
         // ProfitMasterUpdateResponse? r = await apiClient.ReportsYearEndProfitMasterProfitMasterUpdateEndpointAsync(null, req);
 
         HttpClient httpClient = new() { Timeout = TimeSpan.FromHours(2) };
-        TestToken.CreateAndAssignTokenForClient(httpClient, "Finance-Manager");
+        TestToken.CreateAndAssignTokenForClient(httpClient, "System-Administrator");
         HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/yearend/profit-master-update")
         {
             Content = new StringContent(postBody, Encoding.UTF8, "application/json")
@@ -419,10 +419,9 @@ public static class SmartActivityFactory
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
 
         using HttpResponseMessage response = await httpClient.SendAsync(request);
-        response.EnsureSuccessStatusCode();
-
         string responseBody = await response.Content.ReadAsStringAsync();
         Console.WriteLine(responseBody);
+        response.EnsureSuccessStatusCode();
 
         using var doc = JsonDocument.Parse(responseBody);
         var root = doc.RootElement;
