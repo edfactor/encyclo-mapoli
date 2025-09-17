@@ -12,7 +12,7 @@ import {
 } from "utils/gridColumnFactory";
 import { HeaderComponent } from "./RehireForfeituresHeaderComponent";
 
-function isTransactionEditable(params, profitYear?: number): boolean {
+function isTransactionEditable(params, profitYear: number): boolean {
   console.log("Params", params);
   if (profitYear && params.data.profitYear !== profitYear) {
     return false;
@@ -62,7 +62,7 @@ export const GetProfitDetailColumns = (
       pinned: "right",
       resizable: true,
       sortable: false,
-      editable: (params: EditableCallbackParams) => isTransactionEditable(params),
+      editable: (params: EditableCallbackParams) => isTransactionEditable(params, selectedProfitYear),
       cellEditor: SuggestedForfeitEditor,
       cellRenderer: (params: ICellRendererParams) => {
         return SuggestedForfeitCellRenderer({ ...params, selectedProfitYear }, false, true);
