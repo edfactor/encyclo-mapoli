@@ -1,15 +1,15 @@
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { Typography } from "@mui/material";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Popover, Typography } from "@mui/material";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { useSelector } from "react-redux";
 import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
-import "./DistributionAndForfeituresGrid.css";
 import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import { CAPTIONS } from "../../../constants";
+import "./DistributionAndForfeituresGrid.css";
 import { GetDistributionsAndForfeituresColumns } from "./DistributionAndForfeituresGridColumns";
 
 interface DistributionsAndForfeituresGridSearchProps {
@@ -27,14 +27,25 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     sortBy: "employeeName, date",
     isSortDescending: false
   });
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const handlePopoverOpen = (event: React.MouseEvent<SVGSVGElement>) => {
-    setAnchorEl(event.currentTarget as unknown as HTMLElement);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
+
+  const handlePopoverOpen = () => {
+    if (hoverTimeout) {
+      clearTimeout(hoverTimeout);
+      setHoverTimeout(null);
+    }
+    setShowTooltip(true);
   };
+
   const handlePopoverClose = () => {
-    setAnchorEl(null);
+    const timeout = setTimeout(() => {
+      setShowTooltip(false);
+    }, 100); // Small delay to prevent flickering
+    setHoverTimeout(timeout);
   };
-  const open = Boolean(anchorEl);
+
+  const open = showTooltip;
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { distributionsAndForfeitures, distributionsAndForfeituresQueryParams } = useSelector(
@@ -91,6 +102,15 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     }
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken, setInitialSearchLoaded]);
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
+      }
+    };
+  }, [hoverTimeout]);
+
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetDistributionsAndForfeituresColumns(), []);
   const stateTaxTotals = distributionsAndForfeitures?.stateTaxTotals || {};
@@ -108,47 +128,47 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
               <TotalsGrid
                 displayData={[[numberToCurrency(distributionsAndForfeitures.stateTaxTotal || 0)]]}
                 leftColumnHeaders={["State Taxes"]}
-                topRowHeaders={[]}
-              />
+                topRowHeaders={[]}></TotalsGrid>
               {distributionsAndForfeitures.stateTaxTotals &&
                 Object.keys(distributionsAndForfeitures.stateTaxTotals).length > 0 && (
                   <>
-                    <InfoOutlinedIcon
-                      className="state-tax-info-icon"
-                      fontSize="small"
-                      onClick={handlePopoverOpen}
-                      style={{ cursor: "pointer", marginLeft: 4 }}
-                    />
-                    <Popover
-                      open={open}
-                      anchorEl={anchorEl}
-                      onClose={handlePopoverClose}
-                      anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                      PaperProps={{ style: { maxHeight: 300, maxWidth: 350, overflow: "auto" } }}>
-                      <div className="state-tax-popover-table">
-                        <Typography
-                          variant="subtitle2"
-                          sx={{ p: 1 }}>
-                          State Tax Breakdown
-                        </Typography>
-                        <table>
-                          <thead>
-                            <tr>
-                              <th>State</th>
-                              <th>Tax Total</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {Object.entries(distributionsAndForfeitures.stateTaxTotals).map(([state, total]) => (
-                              <tr key={state}>
-                                <td>{state}</td>
-                                <td>{numberToCurrency(total)}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </Popover>
+                    <div
+                      className="state-tax-info-container"
+                      onMouseEnter={handlePopoverOpen}
+                      onMouseLeave={handlePopoverClose}>
+                      <InfoOutlinedIcon
+                        className="state-tax-info-icon"
+                        fontSize="small"
+                        style={{ cursor: "pointer", marginLeft: 4 }}
+                      />
+                      {open && (
+                        <div className="state-tax-tooltip">
+                          <div className="state-tax-popover-table">
+                            <Typography
+                              variant="subtitle2"
+                              sx={{ p: 1 }}>
+                              State Tax Breakdown
+                            </Typography>
+                            <table>
+                              <thead>
+                                <tr>
+                                  <th>State</th>
+                                  <th>Tax Total</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {Object.entries(distributionsAndForfeitures.stateTaxTotals).map(([state, total]) => (
+                                  <tr key={state}>
+                                    <td>{state}</td>
+                                    <td>{numberToCurrency(total as number)}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </>
                 )}
             </div>
