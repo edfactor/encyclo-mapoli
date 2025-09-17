@@ -49,8 +49,19 @@ export const LookupsApi = createApi({
           endProfitYear: params.endProfitYear
         }
       })
+    }),
+    getDuplicateSsnExists: builder.query<boolean, void>({
+      query: () => ({
+        url: "/lookup/duplicate-ssns/exists",
+        method: "GET"
+      })
     })
   })
 });
 
-export const { useLazyGetAccountingYearQuery, useLazyGetMissivesQuery, useLazyGetAccountingRangeQuery } = LookupsApi;
+export const {
+  useLazyGetAccountingYearQuery,
+  useLazyGetMissivesQuery,
+  useLazyGetAccountingRangeQuery,
+  useLazyGetDuplicateSsnExistsQuery
+} = LookupsApi;
