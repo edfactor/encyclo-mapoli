@@ -28,7 +28,6 @@ import {
   GrandTotalsByStoreResponseDto,
   GrossWagesReportRequest,
   GrossWagesReportResponse,
-  MissingCommasInPYName,
   NegativeEtvaForSSNsOnPayProfit,
   PagedReportResponse,
   ProfitMasterStatus,
@@ -118,7 +117,6 @@ export interface YearsEndState {
   rehireForfeituresQueryParams: StartAndEndDateRequest | null;
   rehireProfitSummaryQueryParams: StartAndEndDateRequest | null;
   rehireQueryParams: StartAndEndDateRequest | null;
-  missingCommaInPYName: PagedReportResponse<MissingCommasInPYName> | null;
   negativeEtvaForSSNsOnPayprofit: PagedReportResponse<NegativeEtvaForSSNsOnPayProfit> | null;
   negativeEtvaForSSNsOnPayprofitParams: ProfitYearRequest | null;
   profitSharingUpdate: ProfitShareUpdateResponse | null;
@@ -562,12 +560,7 @@ export const yearsEndSlice = createSlice({
     clearNegativeEtvaForSSNsOnPayprofit: (state) => {
       state.negativeEtvaForSSNsOnPayprofit = null;
     },
-    setMissingCommaInPYName: (state, action: PayloadAction<PagedReportResponse<MissingCommasInPYName>>) => {
-      state.missingCommaInPYName = action.payload;
-    },
-    clearMissingCommaInPYName: (state) => {
-      state.missingCommaInPYName = null;
-    },
+
     setForfeituresAndPointsQueryParams: (state, action: PayloadAction<ForfeituresAndPointsQueryParams>) => {
       state.forfeituresAndPointsQueryParams = action.payload;
     },

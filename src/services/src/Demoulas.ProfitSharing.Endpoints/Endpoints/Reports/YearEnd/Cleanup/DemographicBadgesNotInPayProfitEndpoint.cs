@@ -9,10 +9,11 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
 
-public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCsvBase<SortedPaginationRequestDto, DemographicBadgesNotInPayProfitResponse,
+public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCsvBase<ProfitYearRequest, DemographicBadgesNotInPayProfitResponse,
     DemographicBadgesNotInPayProfitEndpoint.DemographicBadgesNotInPayProfitResponseMap>
 {
     private readonly ICleanupReportService _cleanupReportService;
@@ -87,7 +88,7 @@ public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCsvBase<Sorte
 
     public override string ReportFileName => "DEMOGRAPHIC BADGES NOT IN PAYPROFIT";
 
-    public override Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetResponse(SortedPaginationRequestDto req, CancellationToken ct)
+    public override Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
         return _cleanupReportService.GetDemographicBadgesNotInPayProfitAsync(req, ct);
     }

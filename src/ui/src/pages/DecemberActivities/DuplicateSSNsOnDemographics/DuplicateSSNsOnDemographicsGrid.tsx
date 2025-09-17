@@ -1,9 +1,9 @@
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetDuplicateSSNsQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import ReportSummary from "../../../components/ReportSummary";
 import { CAPTIONS } from "../../../constants";
 import { GetDuplicateSSNsOnDemographicsColumns } from "./DuplicateSSNsOnDemographicsGridColumns";
 
@@ -19,6 +19,8 @@ const DuplicateSSNsOnDemographicsGrid: React.FC = () => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [triggerSearch, { isFetching }] = useLazyGetDuplicateSSNsQuery();
 
+  const profitYear = useDecemberFlowProfitYear();
+
   const onSearch = useCallback(async () => {
     const request = {
       pagination: {
@@ -26,7 +28,8 @@ const DuplicateSSNsOnDemographicsGrid: React.FC = () => {
         take: pageSize,
         sortBy: sortParams.sortBy,
         isSortDescending: sortParams.isSortDescending
-      }
+      },
+      profitYear: profitYear
     };
 
     await triggerSearch(request, false);
@@ -45,7 +48,6 @@ const DuplicateSSNsOnDemographicsGrid: React.FC = () => {
     <>
       {duplicateSSNsData?.response && (
         <>
-          <ReportSummary report={duplicateSSNsData} />
           <DSMGrid
             preferenceKey={CAPTIONS.DUPLICATE_SSNS}
             isLoading={isFetching}
