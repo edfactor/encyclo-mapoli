@@ -115,7 +115,8 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                     <InfoOutlinedIcon
                       className="state-tax-info-icon"
                       fontSize="small"
-                      onClick={handlePopoverOpen}
+                      onMouseEnter={handlePopoverOpen}
+                      onMouseLeave={handlePopoverClose}
                       style={{ cursor: "pointer", marginLeft: 4 }}
                     />
                     <Popover
@@ -123,7 +124,11 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                       anchorEl={anchorEl}
                       onClose={handlePopoverClose}
                       anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                      PaperProps={{ style: { maxHeight: 300, maxWidth: 350, overflow: "auto" } }}>
+                      PaperProps={{
+                        style: { maxHeight: 300, maxWidth: 350, overflow: "auto" },
+                        onMouseEnter: () => setAnchorEl(anchorEl),
+                        onMouseLeave: handlePopoverClose
+                      }}>
                       <div className="state-tax-popover-table">
                         <Typography
                           variant="subtitle2"
