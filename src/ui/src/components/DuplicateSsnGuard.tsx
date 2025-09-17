@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { useLazyGetDuplicateSsnExistsQuery } from "reduxstore/api/LookupsApi";
 import { ApiMessageAlert, setMessage } from "smart-ui-library";
+import { useLazyGetDuplicateSsnExistsQuery } from "../reduxstore/api/LookupsApi";
 import { Messages } from "../utils/messageDictonary";
 
 interface DuplicateSsnGuardProps {
