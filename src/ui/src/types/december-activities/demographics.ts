@@ -45,16 +45,6 @@ export interface DuplicateSSNsRequestDto extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
 }
 
-export interface MissingCommasInPYNameRequestDto {
-  pagination: SortedPaginationRequestDto;
-}
-
-export interface MissingCommasInPYName {
-  badgeNumber: number;
-  ssn: number;
-  employeeName: string;
-}
-
 export interface DuplicateNameAndBirthdayRequestDto extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
 }
