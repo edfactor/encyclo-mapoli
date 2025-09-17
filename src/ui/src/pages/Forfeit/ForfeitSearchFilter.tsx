@@ -1,17 +1,18 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetForfeituresAndPointsQuery } from "reduxstore/api/YearsEndApi";
+import { SearchAndReset } from "smart-ui-library";
+import * as yup from "yup";
+import DuplicateSsnGuard from "../../components/DuplicateSsnGuard";
+import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
+import { useLazyGetForfeituresAndPointsQuery } from "../../reduxstore/api/YearsEndApi";
 import {
   clearForfeituresAndPoints,
   clearForfeituresAndPointsQueryParams,
   setForfeituresAndPointsQueryParams
-} from "reduxstore/slices/yearsEndSlice";
-import { RootState } from "reduxstore/store";
-import { SearchAndReset } from "smart-ui-library";
-import * as yup from "yup";
+} from "../../reduxstore/slices/yearsEndSlice";
+import { RootState } from "../../reduxstore/store";
 
 interface ForfeitSearchParams {
   profitYear: number;
@@ -116,12 +117,16 @@ const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({ setIn
       <Grid
         width="100%"
         paddingX="24px">
-        <SearchAndReset
-          handleReset={handleReset}
-          handleSearch={validateAndSearch}
-          isFetching={isFetching}
-          disabled={!isValid}
-        />
+        <DuplicateSsnGuard>
+          {({ prerequisitesComplete }) => (
+            <SearchAndReset
+              handleReset={handleReset}
+              handleSearch={validateAndSearch}
+              isFetching={isFetching}
+              disabled={!isValid || !prerequisitesComplete}
+            />
+          )}
+        </DuplicateSsnGuard>
       </Grid>
     </form>
   );

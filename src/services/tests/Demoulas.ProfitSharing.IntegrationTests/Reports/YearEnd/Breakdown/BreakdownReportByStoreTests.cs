@@ -36,7 +36,7 @@ public class BreakdownReportByStoreTests
             new DemographicReaderService(new FrozenService(_dataContextFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
         var frozenService = new FrozenService(_dataContextFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object);
         IHttpContextAccessor httpCtxAcc = Mock.Of<IHttpContextAccessor>();
-        _breakdownService = new BreakdownReportService(_dataContextFactory, _calendarService, _totalService, new DemographicReaderService(frozenService, httpCtxAcc), new Mock<IPayrollDuplicateSsnReportServiceInternal>().Object);
+        _breakdownService = new BreakdownReportService(_dataContextFactory, _calendarService, _totalService, new DemographicReaderService(frozenService, httpCtxAcc), new Mock<IPayrollDuplicateSsnReportService>().Object);
     }
 
     [Fact]
@@ -62,7 +62,7 @@ public class BreakdownReportByStoreTests
     public async Task RunReport700()
     {
         ReportResponseBase<MemberYearSummaryDto> results =
-            await _breakdownService.GetActiveMembersByStore(new BreakdownByStoreRequest { StoreNumber = 700, ProfitYear = 2024,  Take = int.MaxValue },
+            await _breakdownService.GetActiveMembersByStore(new BreakdownByStoreRequest { StoreNumber = 700, ProfitYear = 2024, Take = int.MaxValue },
                 CancellationToken.None);
 
         List<(short Key, List<MemberYearSummaryDto>)> groupedEmployees =
