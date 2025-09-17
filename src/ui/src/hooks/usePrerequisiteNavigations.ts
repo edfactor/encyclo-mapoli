@@ -26,7 +26,17 @@ export interface UsePrerequisiteNavigationsResult {
   currentNavigation?: NavigationDto;
 }
 
-// Reusable hook to evaluate prerequisite navigation completion status.
+/**
+ * INTERNAL: Reusable hook to evaluate prerequisite navigation completion status.
+ *
+ * This hook dispatches a message (via setMessage) when prerequisites are incomplete,
+ * using the provided message template and key. Prefer using the higher-level
+ * PrerequisiteGuard component, which wraps this hook and renders ApiMessageAlert
+ * for you.
+ *
+ * Recommended usage for pages: <PrerequisiteGuard> rather than calling this hook directly.
+ * This remains exported for internal composition and testing.
+ */
 export const usePrerequisiteNavigations = (
   navigationId: number | null | undefined,
   messageConfig?: MessageConfig
@@ -67,25 +77,40 @@ export const usePrerequisiteNavigations = (
           .join(",");
         if (key !== lastIdsRef.current && messageConfig) {
           lastIdsRef.current = key;
-          let msg: MessageUpdateLike = messageConfig.messageTemplate;
+
+          // Build the message payload ensuring it has the shape { key, message: { type, title, message } }
+          let built: MessageUpdateLike = messageConfig.messageTemplate;
           if (messageConfig.build) {
-            msg = messageConfig.build(messageConfig.messageTemplate, incomplete, obj);
+            built = messageConfig.build(messageConfig.messageTemplate, incomplete, obj);
           } else {
             const first = incomplete[0];
-            msg = {
+            const text =
+              incomplete.length === 1
+                ? `${first.title} is '${first.statusName ?? "Not Complete"}' and must be 'Complete' before saving.`
+                : `Prerequisites incomplete: ${incomplete
+                    .map((i) => `${i.title} (${i.statusName ?? "Not Complete"})`)
+                    .join(", ")}. Each must be 'Complete' before saving.`;
+
+            built = {
               ...messageConfig.messageTemplate,
               message: {
                 ...messageConfig.messageTemplate.message,
-                message:
-                  incomplete.length === 1
-                    ? `${first.title} is '${first.statusName ?? "Not Complete"}' and must be 'Complete' before saving.`
-                    : `Prerequisites incomplete: ${incomplete
-                        .map((i) => `${i.title} (${i.statusName ?? "Not Complete"})`)
-                        .join(", ")}. Each must be 'Complete' before saving.`
+                message: text
               }
             };
           }
-          dispatch(setMessage(msg as any));
+
+          // Ensure final payload contains `key` and `message` at top level to match setMessage expectations
+          const finalPayload = {
+            key: built.key,
+            message: {
+              type: built.message.type,
+              title: built.message.title,
+              message: built.message.message || ""
+            }
+          };
+
+          dispatch(setMessage(finalPayload as any));
         }
       }
     } else {

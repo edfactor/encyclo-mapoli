@@ -135,7 +135,7 @@ public class TerminatedEmployeesEndPoint
                 csvWriter.WriteField(yd.YtdPsHours);
                 csvWriter.WriteField(yd.VestedPercent);
                 csvWriter.WriteField(yd.Age);
-                csvWriter.WriteField(yd.EnrollmentCode);
+                csvWriter.WriteField(yd.HasForfeited);
                 await csvWriter.NextRecordAsync();
             }
         }

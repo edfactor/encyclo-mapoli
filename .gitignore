@@ -370,3 +370,4 @@ FodyWeavers.xsd
 .DS_Store
 /test-results/user.json
 test-results
+/src/ui/tsconfig.tsbuildinfo

@@ -34,4 +34,9 @@ public static class Policy
     /// Manage beneficiaries (CRUD). New policy name for clarity; mapped to same roles as maintain.
     /// </summary>
     public static readonly string CanManageBeneficiaries = "CAN_MANAGE_BENEFICIARIES";
+
+    /// <summary>
+    /// View member distributions (read-only).
+    /// </summary>
+    public static readonly string CanViewDistributions = "CAN_VIEW_DISTRIBUTIONS";
 }

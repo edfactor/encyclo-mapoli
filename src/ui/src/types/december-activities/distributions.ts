@@ -1,6 +1,6 @@
 import type { SortedPaginationRequestDto, ProfitYearRequest, PagedReportResponse } from "../common/api";
 
-export interface DistributionsAndForfeituresRequestDto extends ProfitYearRequest {
+export interface DistributionsAndForfeituresRequestDto {
   startDate?: string;
   endDate?: string;
   pagination: SortedPaginationRequestDto;
@@ -32,7 +32,7 @@ export interface DistributionsAndForfeitures {
   enrolled: boolean | null;
 }
 
-export interface DistributionsAndForfeituresQueryParams extends ProfitYearRequest {
+export interface DistributionsAndForfeituresQueryParams {
   startDate?: string;
   endDate?: string;
 }

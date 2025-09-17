@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Text.Json;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Api;
@@ -438,7 +438,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         decimal sampleforfeiture = 5150m;
 
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        var req = new ProfitYearRequest() { Skip = 0, Take = byte.MaxValue, ProfitYear = (short)(DateTime.Now.Year - 1) };
+        var req = new DistributionsAndForfeituresRequest() { Skip = 0, Take = byte.MaxValue };
         TestResult<DistributionsAndForfeitureTotalsResponse> response;
 
 
@@ -471,7 +471,6 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
                 profitDetail.ProfitYear = (short)(DateTime.Now.Year - 1);
                 profitDetail.ProfitYearIteration = 0;
                 profitDetail.ProfitCodeId = (byte)profitCode;
-                profitDetail.ProfitCode = new ProfitCode() { Id = 1, Name = "Incoming contributions, forfeitures, earnings", Frequency = "Yearly" };
                 profitDetail.Forfeiture = sampleforfeiture;
                 profitDetail.MonthToDate = 3;
                 profitDetail.YearToDate = (short)(DateTime.Now.Year - 1);

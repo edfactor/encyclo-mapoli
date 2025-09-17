@@ -1,4 +1,4 @@
-﻿using CsvHelper.Configuration;
+using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -29,8 +29,8 @@ public class DistributionsAndForfeitureEndpoint : EndpointWithCsvTotalsBase<Dist
         Get("distributions-and-forfeitures");
         Summary(s =>
         {
-            s.Summary = "Lists distributions and forfeitures for a given year";
-            s.ExampleRequest = new DistributionsAndForfeituresRequest() { ProfitYear = 2025, Skip = SimpleExampleRequest.Skip, Take = SimpleExampleRequest.Take };
+            s.Summary = "Lists distributions and forfeitures for a date range";
+            s.ExampleRequest = new DistributionsAndForfeituresRequest() { Skip = SimpleExampleRequest.Skip, Take = SimpleExampleRequest.Take };
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
@@ -77,7 +77,7 @@ public class DistributionsAndForfeitureEndpoint : EndpointWithCsvTotalsBase<Dist
             Map(m => m.Age).Index(9).Name("AGE");
             Map(m => m.OtherName).Index(10).Name("OTHER NAME");
             Map(m => m.OtherSsn).Index(11).Name("OTHER SSN");
-            Map(m => m.EnrolledId).Index(12).Name("EC");
+            Map(m => m.HasForfeited).Index(12).Name("Forfeited");
         }
     }
 }
