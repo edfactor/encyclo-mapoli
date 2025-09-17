@@ -16,16 +16,19 @@ import {
   PSNColumnOptions,
   SSNColumnOptions,
   StateColumnOptions,
+  StreetAddressColumnOptions,
   TaxCodeColumnOptions,
   YesOrNoColumnOptions
 } from "./columnFactoryTypes";
 import { viewBadgeLinkRenderer } from "./masterInquiryLink";
 
-export const createAddressColumn = (options: AddressColumnOptions = {}): ColDef => {
+export const createAddressColumn = (options: StreetAddressColumnOptions = {}): ColDef => {
   const {
     headerName = "Address",
     field = "address",
     colId = field,
+    field1,
+    field2,
     minWidth = 200,
     maxWidth,
     alignment = "left",
@@ -50,11 +53,19 @@ export const createAddressColumn = (options: AddressColumnOptions = {}): ColDef 
   if (valueGetter) {
     column.valueGetter = valueGetter;
   } else {
-    column.valueGetter = (params) => {
-      const address1 = params.data.address || "";
-      const address2 = params.data.address2 || "";
-      return address2 && address2.trim() ? `${address1}, ${address2}` : address1;
-    };
+    if (field1 && field2) {
+      column.valueGetter = (params) => {
+        const address1 = params.data.address[field1] || "";
+        const address2 = params.data.address[field2] || "";
+        return address2 && address2.trim() ? `${address1}, ${address2}` : address1;
+      };
+    } else {
+      column.valueGetter = (params) => {
+        const address1 = params.data.address || "";
+        const address2 = params.data.address2 || "";
+        return address2 && address2.trim() ? `${address1}, ${address2}` : address1;
+      };
+    }
   }
 
   if (maxWidth) {

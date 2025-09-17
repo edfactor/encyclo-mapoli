@@ -1089,7 +1089,6 @@ export const {
   setDuplicateSSNsData,
   setEligibleEmployees,
   setEligibleEmployeesQueryParams,
-  setEmployeesOnMilitaryLeaveDetails,
   setEmployeeWagesForYear,
   setEmployeeWagesForYearQueryParams,
   setExecutiveHoursAndDollars,
