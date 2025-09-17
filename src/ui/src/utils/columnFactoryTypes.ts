@@ -32,6 +32,11 @@ export interface DataAccessColumnOptions extends FormattableColumnOptions {
   valueGetter?: (params: ValueGetterParams) => string;
 }
 
+export interface StreetAddressColumnOptions extends DataAccessColumnOptions {
+  field1?: string;
+  field2?: string;
+}
+
 // Specialized column interfaces (only those that add new properties)
 export interface SSNColumnOptions extends LimitedAlignmentColumnOptions {
   valueFormatter?: (params: ValueFormatterParams) => string;
