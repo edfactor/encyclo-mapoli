@@ -13,7 +13,6 @@ import {
 import { HeaderComponent } from "./RehireForfeituresHeaderComponent";
 
 function isTransactionEditable(params, profitYear: number): boolean {
-  console.log("Params", params);
   if (profitYear && params.data.profitYear !== profitYear) {
     return false;
   }
