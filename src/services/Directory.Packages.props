@@ -20,7 +20,6 @@
     <PackageVersion Include="Demoulas.Util" Version="2.5.8" />
     <PackageVersion Include="FastEndpoints.Testing" Version="7.0.1" />
     <PackageVersion Include="IdGen" Version="3.0.7" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.9" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.9" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="9.0.9" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.9" />
