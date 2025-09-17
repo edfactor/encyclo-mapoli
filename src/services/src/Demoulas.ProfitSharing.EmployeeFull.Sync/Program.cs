@@ -2,18 +2,12 @@
 using Demoulas.Common.Contracts.Configuration;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Services.Entities.Contexts;
-using Demoulas.Common.Data.Services.Interfaces;
-using Demoulas.Common.Data.Services.Service;
 using Demoulas.Common.Logging.Extensions;
-using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Metrics;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interceptors;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
-using Demoulas.ProfitSharing.Services;
-using Demoulas.ProfitSharing.Services.Internal.Interfaces;
-using Demoulas.ProfitSharing.Services.ItDevOps;
 using Demoulas.ProfitSharing.Services.LogMasking;
 using Demoulas.Util.Extensions;
 
@@ -47,13 +41,6 @@ builder.Configuration.Bind("Logging:FileSystem", fileSystemLog);
 smartConfig.MaskingOperators = [new UnformattedSocialSecurityNumberMaskingOperator()];
 builder.SetDefaultLoggerConfiguration(smartConfig, fileSystemLog);
 
-builder.Services.AddScoped<ITotalService, TotalService>();
-builder.Services.AddSingleton<ICalendarService, CalendarService>();
-builder.Services.AddScoped<ITotalService, TotalService>();
-builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
-builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
-builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
-builder.Services.AddScoped<IFrozenService, FrozenService>();
 
 builder.AddDatabaseServices((services, factoryRequests) =>
 {

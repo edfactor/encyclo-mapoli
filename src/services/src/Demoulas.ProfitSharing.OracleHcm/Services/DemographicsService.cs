@@ -94,22 +94,13 @@ public class DemographicsService : IDemographicsServiceInternal
         // Use writable context for the upsert operation
         return _dataContextFactory.UseWritableContext(async context =>
         {
-            // Extract lookup values for efficient querying
-            var oracleHcmIds = demographicOracleHcmIdLookup.Keys.ToList();
-            var ssnAndDobPairs = demographicOracleHcmIdLookup.Values
-                .Select(d => new { d.Ssn, d.DateOfBirth })
-                .ToList();
-
-            // this call is going to be SLOW - should revisit if we can find a better way to do this
-            List<Demographic> existingEntities = context.Demographics
-                .AsEnumerable()
-                .Where(d =>
-                    oracleHcmIds.Contains(d.OracleHcmId) ||
-                    ssnAndDobPairs.Any(pair => pair.Ssn == d.Ssn && pair.DateOfBirth == d.DateOfBirth))
-                .ToList();
+            List<Demographic> existingEntities = await context.Demographics
+                .Where(dbEntity =>
+                    CheckMatchToIdOrSsnAndDob(demographicOracleHcmIdLookup, dbEntity.Ssn, dbEntity.DateOfBirth, dbEntity.OracleHcmId))
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
 
             // Handle potential duplicates in the existing database (SSN duplicates)
-            List< Demographic> duplicateSsnEntities = existingEntities.GroupBy(e => e.Ssn)
+            List<Demographic> duplicateSsnEntities = existingEntities.GroupBy(e => e.Ssn)
                 .Where(g => g.Count() > 1)
                 .SelectMany(g => g)
                 .ToList();
@@ -453,11 +444,11 @@ public class DemographicsService : IDemographicsServiceInternal
         existingEntity.ModifiedAtUtc = modificationDate;
     }
 
-    ////private static bool CheckMatchToIdOrSsnAndDob(Dictionary<long, Demographic> demographicOracleHcmIdLookup, int ssn, DateOnly dob, long oracleHcmId)
-    ////{
-    ////    TimeOnly timeOnly = new TimeOnly(0, 0);
-    ////    return demographicOracleHcmIdLookup.Any(l => l.Key == oracleHcmId || (l.Value.DateOfBirth.ToDateTime(timeOnly) == dob.ToDateTime(timeOnly) && l.Value.Ssn == ssn));
-    ////}
+    private static bool CheckMatchToIdOrSsnAndDob(Dictionary<long, Demographic> demographicOracleHcmIdLookup, int ssn, DateOnly dob, long oracleHcmId)
+    {
+        TimeOnly timeOnly = new TimeOnly(0, 0);
+        return demographicOracleHcmIdLookup.Any(l => l.Key == oracleHcmId || (l.Value.DateOfBirth.ToDateTime(timeOnly) == dob.ToDateTime(timeOnly) && l.Value.Ssn == ssn));
+    }
 #endregion
 
 }
