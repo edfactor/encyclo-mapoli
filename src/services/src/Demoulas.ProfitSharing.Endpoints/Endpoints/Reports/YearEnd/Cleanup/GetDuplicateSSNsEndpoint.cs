@@ -9,16 +9,22 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Security;
 
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
-public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<SortedPaginationRequestDto, PayrollDuplicateSsnResponseDto, GetDuplicateSsNsEndpoint.GetDuplicateSsNsResponseMap>
+
+
+
+public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<ProfitYearRequest, PayrollDuplicateSsnResponseDto, GetDuplicateSsNsEndpoint.GetDuplicateSsNsResponseMap>
 {
     private readonly IPayrollDuplicateSsnReportService _cleanupReportService;
+
 
     public GetDuplicateSsNsEndpoint(IPayrollDuplicateSsnReportService cleanupReportService)
         : base(Navigation.Constants.DuplicateSSNsInDemographics)
     {
         _cleanupReportService = cleanupReportService;
+
     }
 
     public override void Configure()
@@ -56,7 +62,7 @@ public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<SortedPaginationRequ
 
     public override string ReportFileName => "DuplicateSSns";
 
-    public override Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetResponse(SortedPaginationRequestDto req, CancellationToken ct)
+    public override Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
         return _cleanupReportService.GetDuplicateSsnAsync(req, ct);
     }

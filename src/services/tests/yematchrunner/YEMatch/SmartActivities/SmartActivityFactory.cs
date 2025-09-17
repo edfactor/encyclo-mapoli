@@ -101,30 +101,26 @@ public static class SmartActivityFactory
             .ReportsYearEndCleanupDuplicateNamesAndBirthdaysEndpointAsync(_profitYear, null, null, 0, int.MaxValue, null);
         sb.Append($"Duplicate Names And Birthdays - records loaded: {r3.Response.Results.Count}\n");
 
-        ReportResponseBaseOfNamesMissingCommaResponse? r5 = await apiClient
-            .ReportsYearEndCleanupNamesMissingCommasEndpointAsync(null, null, 0, int.MaxValue, null);
-        sb.Append($"Missing Commas - records loaded: {r5.Response.Results.Count}\n");
-
         return new Outcome(aname, name, "", OutcomeStatus.Ok, sb.ToString(), null, true);
     }
 
     private static async Task<Outcome> A2_Military_and_Rehire(ApiClient apiClient, string aname, string name)
     {
-/*
-       StringBuilder sb = new();
+        /*
+               StringBuilder sb = new();
 
-        ReportResponseBaseOfEmployeesOnMilitaryLeaveResponse? result = await apiClient
-            .ReportsYearEndMilitaryEmployeesOnMilitaryLeaveEndpointAsync(null, null, 0, int.MaxValue, null);
-        sb.Append($"Employees On Military Leave - records loaded: {result.Response.Results.Count}\n");
+                ReportResponseBaseOfEmployeesOnMilitaryLeaveResponse? result = await apiClient
+                    .ReportsYearEndMilitaryEmployeesOnMilitaryLeaveEndpointAsync(null, null, 0, int.MaxValue, null);
+                sb.Append($"Employees On Military Leave - records loaded: {result.Response.Results.Count}\n");
 
-        StartAndEndDateRequest sedr = new();
-        //sedr.ProfitYear = _profitYear;
-        sedr.BeginningDate = DateOnly.FromDateTime(DateTime.Parse("2024-01-06", CultureInfo.InvariantCulture));
-        sedr.EndingDate = DateOnly.FromDateTime(DateTime.Parse("2025-01-04", CultureInfo.InvariantCulture));
+                StartAndEndDateRequest sedr = new();
+                //sedr.ProfitYear = _profitYear;
+                sedr.BeginningDate = DateOnly.FromDateTime(DateTime.Parse("2024-01-06", CultureInfo.InvariantCulture));
+                sedr.EndingDate = DateOnly.FromDateTime(DateTime.Parse("2025-01-04", CultureInfo.InvariantCulture));
 
-        ReportResponseBaseOfRehireForfeituresResponse? r2 = await apiClient.ReportsYearEndMilitaryRehireForfeituresEndpointAsync(null);
-        sb.Append($"Military And Rehire Forfeitures - records loaded: {r2.Response.Results.Count}\n");
-*/
+                ReportResponseBaseOfRehireForfeituresResponse? r2 = await apiClient.ReportsYearEndMilitaryRehireForfeituresEndpointAsync(null);
+                sb.Append($"Military And Rehire Forfeitures - records loaded: {r2.Response.Results.Count}\n");
+        */
         return TBD(name, name, "Changed to use POST, invokation requires update");
     }
 
