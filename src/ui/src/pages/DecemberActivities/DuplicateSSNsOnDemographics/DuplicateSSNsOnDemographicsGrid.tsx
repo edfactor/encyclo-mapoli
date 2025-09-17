@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 import { useLazyGetDuplicateSSNsQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import ReportSummary from "../../../components/ReportSummary";
 import { CAPTIONS } from "../../../constants";
 import { GetDuplicateSSNsOnDemographicsColumns } from "./DuplicateSSNsOnDemographicsGridColumns";
 
@@ -49,7 +48,6 @@ const DuplicateSSNsOnDemographicsGrid: React.FC = () => {
     <>
       {duplicateSSNsData?.response && (
         <>
-          <ReportSummary report={duplicateSSNsData} />
           <DSMGrid
             preferenceKey={CAPTIONS.DUPLICATE_SSNS}
             isLoading={isFetching}

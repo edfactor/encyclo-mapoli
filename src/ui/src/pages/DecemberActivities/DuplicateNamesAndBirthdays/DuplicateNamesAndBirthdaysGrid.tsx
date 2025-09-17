@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 import { useLazyGetDuplicateNamesAndBirthdaysQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import ReportSummary from "../../../components/ReportSummary";
 import { CAPTIONS } from "../../../constants";
 import { GetDuplicateNamesAndBirthdayColumns } from "./DuplicateNamesAndBirthdaysGridColumns";
 
@@ -60,7 +59,6 @@ const DuplicateNamesAndBirthdaysGrid: React.FC<DuplicateNamesAndBirthdaysGridSea
     <>
       {duplicateNamesAndBirthdays?.response && (
         <>
-          <ReportSummary report={duplicateNamesAndBirthdays} />
           <DSMGrid
             preferenceKey={CAPTIONS.DUPLICATE_NAMES}
             isLoading={isFetching}

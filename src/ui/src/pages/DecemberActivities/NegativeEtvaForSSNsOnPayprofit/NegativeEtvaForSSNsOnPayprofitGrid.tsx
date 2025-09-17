@@ -5,7 +5,6 @@ import { Path, useNavigate } from "react-router";
 import { useLazyGetNegativeEVTASSNQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import ReportSummary from "../../../components/ReportSummary";
 import { CAPTIONS } from "../../../constants";
 import { GetNegativeEtvaForSSNsOnPayProfitColumns } from "./NegativeEtvaForSSNsOnPayprofitGridColumns";
 
@@ -71,7 +70,6 @@ const NegativeEtvaForSSNsOnPayprofitGrid: React.FC<NegativeEtvaForSSNsOnPayprofi
     <>
       {negativeEtvaForSSNsOnPayprofit?.response && (
         <>
-          <ReportSummary report={negativeEtvaForSSNsOnPayprofit} />
           <DSMGrid
             preferenceKey={CAPTIONS.NEGATIVE_ETVA}
             isLoading={isFetching}

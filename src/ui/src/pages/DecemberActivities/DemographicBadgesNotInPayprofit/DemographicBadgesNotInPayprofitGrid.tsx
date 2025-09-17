@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 import { useLazyGetDemographicBadgesNotInPayprofitQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import ReportSummary from "../../../components/ReportSummary";
 import { GetDemographicBadgesNotInPayprofitColumns } from "./DemographicBadgesNotInPayprofitGridColumns";
 
 const DemographicBadgesNotInPayprofitGrid: React.FC = () => {
@@ -66,7 +65,6 @@ const DemographicBadgesNotInPayprofitGrid: React.FC = () => {
     <>
       {demographicBadges?.response && (
         <>
-          <ReportSummary report={demographicBadges} />
           <DSMGrid
             preferenceKey={"DEMO_BADGES"}
             isLoading={isFetching}
