@@ -43,16 +43,19 @@ public class DemographicsService : IDemographicsServiceInternal
     private readonly DemographicMapper _mapper;
     private readonly ILogger<DemographicsService> _logger;
     private readonly ITotalService _totalService;
+    private readonly IFakeSsnService _fakeSsnService;
 
     public DemographicsService(IProfitSharingDataContextFactory dataContextFactory,
         DemographicMapper mapper,
         ILogger<DemographicsService> logger,
-        ITotalService totalService)
+        ITotalService totalService, 
+        IFakeSsnService fakeSsnService)
     {
         _dataContextFactory = dataContextFactory;
         _mapper = mapper;
         _logger = logger;
         _totalService = totalService;
+        _fakeSsnService = fakeSsnService;
     }
 
     /// <summary>
@@ -164,6 +167,40 @@ public class DemographicsService : IDemographicsServiceInternal
             }
 
         }, cancellationToken);
+    }
+
+    /// <summary>
+    /// Merges profit details from a source demographic to a target demographic.
+    /// </summary>
+    /// <remarks>This method retrieves all profit details associated with the source demographic, creates
+    /// copies of them,  and associates the copies with the target demographic. An audit entry is created to log the
+    /// operation. Changes are saved to the database, and any errors during the save operation are logged.</remarks>
+    /// <param name="sourceDemographic">The demographic from which profit details will be copied.</param>
+    /// <param name="targetDemographic">The demographic to which profit details will be added.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
+    public Task MergeProfitDetailsToDemographic(Demographic sourceDemographic, Demographic targetDemographic, CancellationToken cancellationToken = default)
+    {
+        return _dataContextFactory.UseWritableContext(async context =>
+        {
+            var fakeSsn = await _fakeSsnService.GenerateFakeSsnAsync(cancellationToken);
+            sourceDemographic.Ssn = fakeSsn;
+
+            await AddDemographicSyncAuditAsync(targetDemographic,
+                $"Merging ProfitDetails from source OracleHcmId {sourceDemographic.OracleHcmId} to OracleHcmId {targetDemographic.OracleHcmId}", "ProfitDetails", context, cancellationToken);
+
+            // Save all changes to the database
+            try
+            {
+                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                _logger.LogCritical(e, "Failed to merge demographics: Source SSN {SourceSsn}, Target SSN {TargetSsn}", targetDemographic.Ssn.MaskSsn(), targetDemographic.Ssn.MaskSsn());
+            }
+
+        }, cancellationToken);
+
     }
 
     /// <summary>

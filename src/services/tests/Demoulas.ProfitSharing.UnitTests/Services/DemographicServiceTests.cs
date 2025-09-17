@@ -4,6 +4,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.OracleHcm.Mappers;
 using Demoulas.ProfitSharing.OracleHcm.Messaging;
 using Demoulas.ProfitSharing.OracleHcm.Services;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 using Demoulas.ProfitSharing.UnitTests.Common.Helpers;
@@ -80,12 +81,14 @@ public class DemographicsServiceTests
         var loggerMock = new Mock<ILogger<DemographicsService>>();
         var totalServiceMock = new Mock<ITotalService>();
         var mapper = new DemographicMapper(new AddressMapper(), new ContactInfoMapper());
+        var fakeSsnService = new Mock<IFakeSsnService>();
 
         var service = new DemographicsService(
             scenarioFactory,
             mapper,
             loggerMock.Object,
-            totalServiceMock.Object
+            totalServiceMock.Object,
+            fakeSsnService.Object
         );
 
         // Act
@@ -157,12 +160,14 @@ public class DemographicsServiceTests
         var loggerMock = new Mock<ILogger<DemographicsService>>();
         var totalServiceMock = new Mock<ITotalService>();
         var mapper = new DemographicMapper(new AddressMapper(), new ContactInfoMapper());
+        var fakeSsnService = new Mock<IFakeSsnService>();
 
         var service = new DemographicsService(
             scenarioFactory,
             mapper,
             loggerMock.Object,
-            totalServiceMock.Object
+            totalServiceMock.Object,
+            fakeSsnService.Object
         );
 
         // Act
@@ -350,12 +355,14 @@ public class DemographicsServiceTests
         var loggerMock = new Mock<ILogger<DemographicsService>>();
         var totalServiceMock = new Mock<ITotalService>();
         var mapper = new DemographicMapper(new AddressMapper(), new ContactInfoMapper());
+        var fakeSsnService = new Mock<IFakeSsnService>();
 
         var service = new DemographicsService(
             scenarioFactory,
             mapper,
             loggerMock.Object,
-            totalServiceMock.Object
+            totalServiceMock.Object,
+            fakeSsnService.Object
         );
 
         // Act
@@ -450,12 +457,14 @@ public class DemographicsServiceTests
         var loggerMock = new Mock<ILogger<DemographicsService>>();
         var totalServiceMock = new Mock<ITotalService>();
         var mapper = new DemographicMapper(new AddressMapper(), new ContactInfoMapper());
+        var fakeSsnService = new Mock<IFakeSsnService>();
 
         var service = new DemographicsService(
             scenarioFactory,
             mapper,
             loggerMock.Object,
-            totalServiceMock.Object
+            totalServiceMock.Object,
+            fakeSsnService.Object
         );
 
         // Act
@@ -551,6 +560,7 @@ public class DemographicsServiceTests
         var loggerMock = new Mock<ILogger<DemographicsService>>();
         var totalServiceMock = new Mock<ITotalService>();
         var mapper = new DemographicMapper(new AddressMapper(), new ContactInfoMapper());
+        var fakeSsnService = new Mock<IFakeSsnService>();
 
         totalServiceMock.Setup(t => t.GetVestingBalanceForSingleMemberAsync(It.IsAny<Demoulas.ProfitSharing.Common.Contracts.Request.SearchBy>(), It.IsAny<int>(), It.IsAny<short>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Demoulas.ProfitSharing.Common.Contracts.Response.BalanceEndpointResponse
@@ -570,7 +580,8 @@ public class DemographicsServiceTests
             scenarioFactory,
             mapper,
             loggerMock.Object,
-            totalServiceMock.Object
+            totalServiceMock.Object,
+            fakeSsnService.Object
         );
 
         // Act
@@ -671,6 +682,7 @@ public class DemographicsServiceTests
         var loggerMock = new Mock<ILogger<DemographicsService>>();
         var totalServiceMock = new Mock<ITotalService>();
         var mapper = new DemographicMapper(new AddressMapper(), new ContactInfoMapper());
+        var fakeSsnService = new Mock<IFakeSsnService>();
 
         totalServiceMock.Setup(t => t.GetVestingBalanceForSingleMemberAsync(It.IsAny<Demoulas.ProfitSharing.Common.Contracts.Request.SearchBy>(), It.IsAny<int>(), It.IsAny<short>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Demoulas.ProfitSharing.Common.Contracts.Response.BalanceEndpointResponse
@@ -690,7 +702,8 @@ public class DemographicsServiceTests
             scenarioFactory,
             mapper,
             loggerMock.Object,
-            totalServiceMock.Object
+            totalServiceMock.Object,
+            fakeSsnService.Object
         );
 
         // Act
@@ -706,5 +719,154 @@ public class DemographicsServiceTests
         // verify existing employee was updated with new SSN
         var existingEmployee = demographics.First(d => d.OracleHcmId == 1);
         Assert.Equal(44444444, existingEmployee.Ssn);
+    }
+
+    [Fact]
+    public async Task MergeProfitDetailsToDemographic_WithValidSourceAndTarget_MergesAndAudits()
+    {
+        // Arrange
+        var scenarioFactory = SetupScenarioFactoryWithSeededDemographics(out var demographics, out var histories, out var audits, out var beneficiaryContacts, out var profitDetails);
+
+        var sourceDemographic = new Demographic
+        {
+            OracleHcmId = 3,
+            Ssn = 333333333,
+            BadgeNumber = 103,
+            DateOfBirth = DateOnly.FromDateTime(DateTime.Today.AddYears(-30)),
+            StoreNumber = 1,
+            DepartmentId = 1,
+            PayClassificationId = 1,
+            HireDate = DateOnly.FromDateTime(DateTime.Today.AddYears(-5)),
+            EmploymentTypeId = 'F',
+            PayFrequencyId = 1,
+            EmploymentStatusId = 'A',
+            ContactInfo = new ContactInfo
+            {
+                PhoneNumber = "0987654321",
+                FirstName = "Source",
+                LastName = "User",
+                FullName = "User, Source",
+                MiddleName = "S",
+            },
+            Address = new Address
+            {
+                Street = "789 Pine St",
+                City = "SourceCity",
+                State = "SC",
+                PostalCode = "54321",
+            }
+        };
+
+        var targetDemographic = demographics[0]; // Use first seeded demographic as target
+
+        var loggerMock = new Mock<ILogger<DemographicsService>>();
+        var totalServiceMock = new Mock<ITotalService>();
+        var mapper = new DemographicMapper(new AddressMapper(), new ContactInfoMapper());
+        var fakeSsnService = new Mock<IFakeSsnService>();
+
+        // Setup fake SSN service to return a specific value for testing
+        const int fakeSsnValue = 999999999;
+        fakeSsnService.Setup(f => f.GenerateFakeSsnAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(fakeSsnValue);
+
+        var service = new DemographicsService(
+            scenarioFactory,
+            mapper,
+            loggerMock.Object,
+            totalServiceMock.Object,
+            fakeSsnService.Object
+        );
+
+        // Act
+        await service.MergeProfitDetailsToDemographic(sourceDemographic, targetDemographic, CancellationToken.None);
+
+        // Assert
+        // Verify source demographic SSN was changed to fake SSN
+        Assert.Equal(fakeSsnValue, sourceDemographic.Ssn);
+
+        // Verify audit record was created
+        var mergeAudit = audits.FirstOrDefault(a =>
+            a.OracleHcmId == targetDemographic.OracleHcmId &&
+            a.Message.Contains($"Merging ProfitDetails from source OracleHcmId {sourceDemographic.OracleHcmId}"));
+        Assert.NotNull(mergeAudit);
+        Assert.Equal("ProfitDetails", mergeAudit.PropertyName);
+        Assert.Equal(targetDemographic.BadgeNumber, mergeAudit.BadgeNumber);
+
+        // Verify fake SSN service was called
+        fakeSsnService.Verify(f => f.GenerateFakeSsnAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task MergeProfitDetailsToDemographic_WhenSaveChangesFails_LogsCriticalError()
+    {
+        // Arrange
+        var scenarioFactory = SetupScenarioFactoryWithSeededDemographics(out var demographics, out var histories, out var audits, out var beneficiaryContacts, out var profitDetails);
+
+        // Setup scenario factory to throw on SaveChanges
+        scenarioFactory.ProfitSharingDbContext
+            .Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("Test exception"));
+
+        var sourceDemographic = new Demographic
+        {
+            OracleHcmId = 3,
+            Ssn = 333333333,
+            BadgeNumber = 103,
+            DateOfBirth = DateOnly.FromDateTime(DateTime.Today.AddYears(-30)),
+            StoreNumber = 1,
+            DepartmentId = 1,
+            PayClassificationId = 1,
+            HireDate = DateOnly.FromDateTime(DateTime.Today.AddYears(-5)),
+            EmploymentTypeId = 'F',
+            PayFrequencyId = 1,
+            EmploymentStatusId = 'A',
+            ContactInfo = new ContactInfo
+            {
+                PhoneNumber = "0987654321",
+                FirstName = "Source",
+                LastName = "User",
+                FullName = "User, Source",
+                MiddleName = "S",
+            },
+            Address = new Address
+            {
+                Street = "789 Pine St",
+                City = "SourceCity",
+                State = "SC",
+                PostalCode = "54321",
+            }
+        };
+
+        var targetDemographic = demographics[0];
+
+        var loggerMock = new Mock<ILogger<DemographicsService>>();
+        var totalServiceMock = new Mock<ITotalService>();
+        var mapper = new DemographicMapper(new AddressMapper(), new ContactInfoMapper());
+        var fakeSsnService = new Mock<IFakeSsnService>();
+
+        fakeSsnService.Setup(f => f.GenerateFakeSsnAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(999999999);
+
+        var service = new DemographicsService(
+            scenarioFactory,
+            mapper,
+            loggerMock.Object,
+            totalServiceMock.Object,
+            fakeSsnService.Object
+        );
+
+        // Act 
+        await service.MergeProfitDetailsToDemographic(sourceDemographic, targetDemographic, CancellationToken.None);
+
+        // Assert
+        // Verify critical error was logged
+        loggerMock.Verify(
+            x => x.Log(
+                LogLevel.Critical,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => true),
+                It.IsAny<Exception>(),
+                It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)),
+            Times.Once);
     }
 }
