@@ -1,75 +1,39 @@
-﻿using System.Net.Http.Json;
-using Demoulas.ProfitSharing.Api;
-using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Services;
-using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
-using Moq;
+﻿using Demoulas.ProfitSharing.UnitTests.Common.Base;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
+using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Shouldly;
+using Demoulas.ProfitSharing.Security;
+using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Lookups;
 
-public class DuplicateSsnExistsEndpointTests
+public class DuplicateSsnExistsEndpointTests : ApiTestBase<Api.Program>
 {
-    [Fact]
-    public async Task Get_ReturnsTrue_WhenServiceReportsDuplicatesExist()
+    [Fact(DisplayName = "Lookup: Duplicate SSN exists - returns success")]
+    public async Task Get_ReturnsSuccess_WhenCalled()
     {
         // Arrange
-        var mockDataContextFactory = MockDataContextFactory.InitializeForTesting();
-        var mockReportService = new Mock<IPayrollDuplicateSsnReportService>();
-        mockReportService.Setup(s => s.DuplicateSsnExistsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(true);
-
-        WebApplicationFactory<Program> webApplicationFactory = new WebApplicationFactory<Program>();
-
-        var builder = webApplicationFactory.WithWebHostBuilder(hostBuilder =>
-        {
-            hostBuilder.UseEnvironment("Testing");
-            hostBuilder.ConfigureServices(services =>
-            {
-                services.AddTransient((_) => mockDataContextFactory);
-                services.AddTransient<ICalendarService, CalendarService>();
-                services.AddTransient<IPayrollDuplicateSsnReportService>(_ => mockReportService.Object);
-            });
-        });
-
-        var client = builder.CreateClient();
+        ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
 
         // Act
-        var result = await client.GetFromJsonAsync<bool>("/duplicate-ssns/exists");
+        var response = await ApiClient.GETAsync<DuplicateSsnExistsEndpoint, bool>();
 
         // Assert
-        result.ShouldBeTrue();
+        response.ShouldNotBeNull();
+        response.Response.IsSuccessStatusCode.ShouldBeTrue(response.Response.ReasonPhrase);
     }
 
-    [Fact]
-    public async Task Get_ReturnsFalse_WhenServiceReportsNoDuplicates()
+    [Fact(DisplayName = "Lookup: Duplicate SSN exists - returns boolean payload")]
+    public async Task Get_ReturnsBooleanContent_WhenCalled()
     {
         // Arrange
-        var mockDataContextFactory = MockDataContextFactory.InitializeForTesting();
-        var mockReportService = new Mock<IPayrollDuplicateSsnReportService>();
-        mockReportService.Setup(s => s.DuplicateSsnExistsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(false);
-
-        WebApplicationFactory<Program> webApplicationFactory = new WebApplicationFactory<Program>();
-
-        var builder = webApplicationFactory.WithWebHostBuilder(hostBuilder =>
-        {
-            hostBuilder.UseEnvironment("Testing");
-            hostBuilder.ConfigureServices(services =>
-            {
-                services.AddTransient((_) => mockDataContextFactory);
-                services.AddTransient<ICalendarService, CalendarService>();
-                services.AddTransient<IPayrollDuplicateSsnReportService>(_ => mockReportService.Object);
-            });
-        });
-
-        var client = builder.CreateClient();
+        ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
 
         // Act
-        var result = await client.GetFromJsonAsync<bool>("/duplicate-ssns/exists");
+        var value = await ApiClient.GETAsync<DuplicateSsnExistsEndpoint, bool>();
 
         // Assert
-        result.ShouldBeFalse();
+        value.ShouldBeOfType<bool>();
     }
 }
+

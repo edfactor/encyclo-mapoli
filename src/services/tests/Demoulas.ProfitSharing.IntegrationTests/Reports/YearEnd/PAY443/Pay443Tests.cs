@@ -16,7 +16,7 @@ public class Pay443Tests : PristineBaseTest
 
     public Pay443Tests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        _forfeituresAndPointsForYearService = new ForfeituresAndPointsForYearService(DbFactory, TotalService, DemographicReaderService, new Mock<IPayrollDuplicateSsnReportServiceInternal>().Object);
+        _forfeituresAndPointsForYearService = new ForfeituresAndPointsForYearService(DbFactory, TotalService, DemographicReaderService, new Mock<IPayrollDuplicateSsnReportService>().Object);
     }
 
     [Fact]
@@ -71,7 +71,8 @@ public class Pay443Tests : PristineBaseTest
         // ignore the report time
         expectedResponse = expectedResponse with
         {
-            ReportDate = actualResponse.ReportDate, Response = new PaginatedResponseDto<ForfeituresAndPointsForYearResponse> { Total = 0, Results = [] }
+            ReportDate = actualResponse.ReportDate,
+            Response = new PaginatedResponseDto<ForfeituresAndPointsForYearResponse> { Total = 0, Results = [] }
         };
         actualResponse = actualResponse with { Response = new PaginatedResponseDto<ForfeituresAndPointsForYearResponse> { Total = 0, Results = [] } };
 
