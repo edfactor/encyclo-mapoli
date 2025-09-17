@@ -51,7 +51,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     {
         DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         var response = await DownloadClient
-            .GETAsync<GetDuplicateSsNsEndpoint, PaginationRequestDto, PayrollDuplicateSsnResponseDto>(_paginationRequest);
+            .GETAsync<GetDuplicateSsNsEndpoint, ProfitYearRequest, PayrollDuplicateSsnResponseDto>(_paginationRequest);
 
 
         string content = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
@@ -116,7 +116,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
 
             await c.SaveChangesAsync(CancellationToken.None);
 
-            var stream = await _cleanupReportClient.DownloadDemographicBadgesNotInPayProfit(CancellationToken.None);
+            var stream = await _cleanupReportClient.DownloadDemographicBadgesNotInPayProfit(_paginationRequest.ProfitYear, CancellationToken.None);
             stream.ShouldNotBeNull();
 
             using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);

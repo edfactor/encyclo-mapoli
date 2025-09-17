@@ -52,9 +52,9 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         throw new NotImplementedException();
     }
 
-    public Task<Stream> DownloadDemographicBadgesNotInPayProfit(CancellationToken ct = default)
+    public Task<Stream> DownloadDemographicBadgesNotInPayProfit(short profitYear, CancellationToken ct = default)
     {
-        return DownloadCsvReport(0, "demographic-badges-not-in-payprofit", ct);
+        return DownloadCsvReport(profitYear, "demographic-badges-not-in-payprofit", ct);
     }
 
     #region Negative ETVA For SSNs On PayProfit
