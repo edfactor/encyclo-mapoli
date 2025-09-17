@@ -44,6 +44,16 @@ var cliRunner = builder.AddExecutable("Database-Cli",
         name: "import-from-navigation",
         displayName: "Import from navigation",
         executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "import-from-navigation", logger, "import-from-navigation")),
+        commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled })
+    .WithCommand(
+        name: "Nuclear-Option",
+        displayName: "Full Nuclear Reset",
+        executeCommand: (c) =>
+        {
+            CommandHelper.RunConsoleApp(projectPath!, "drop-recreate-db", logger, "drop-recreate-db");
+            CommandHelper.RunConsoleApp(projectPath!, "import-from-ready", logger, "import-from-ready");
+            return Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "import-from-navigation", logger, "import-from-navigation"));
+        },
         commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled });
 
 var configuration = new ConfigurationBuilder()

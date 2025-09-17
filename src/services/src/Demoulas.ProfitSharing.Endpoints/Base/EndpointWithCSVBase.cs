@@ -19,7 +19,7 @@ namespace Demoulas.ProfitSharing.Endpoints.Base;
 /// <typeparam name="RespType">Response type of the endpoint.</typeparam>
 /// <typeparam name="MapType">A mapping class that converts from a dto to a CSV format</typeparam>
 public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : FastEndpoints.Endpoint<ReqType, ReportResponseBase<RespType>>, IHasNavigationId
-    where ReqType : SortedPaginationRequestDto 
+    where ReqType : SortedPaginationRequestDto
     where RespType : class
     where MapType : ClassMap<RespType>
 {
@@ -34,8 +34,8 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : FastEndp
     {
         if (!Env.IsTestEnvironment())
         {
-           // Specify caching duration and store it in metadata
-           TimeSpan cacheDuration = TimeSpan.FromMinutes(5);
+            // Specify caching duration and store it in metadata
+            TimeSpan cacheDuration = TimeSpan.FromMinutes(5);
             Options(x => x.CacheOutput(p => p.Expire(cacheDuration)));
         }
 
@@ -48,7 +48,10 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : FastEndp
     /// </summary>
     protected SortedPaginationRequestDto SimpleExampleRequest => new SortedPaginationRequestDto
     {
-        Skip = 0, Take = byte.MaxValue, SortBy = "columnName", IsSortDescending = true
+        Skip = 0,
+        Take = byte.MaxValue,
+        SortBy = "columnName",
+        IsSortDescending = true
     };
 
     /// <summary>

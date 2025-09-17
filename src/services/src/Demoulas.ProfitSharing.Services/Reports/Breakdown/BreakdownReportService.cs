@@ -23,14 +23,14 @@ public sealed class BreakdownReportService : IBreakdownService
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly TotalService _totalService;
     private readonly IDemographicReaderService _demographicReaderService;
-    private readonly IPayrollDuplicateSsnReportServiceInternal _duplicateSsnReportService;
+    private readonly IPayrollDuplicateSsnReportService _duplicateSsnReportService;
 
     public BreakdownReportService(
         IProfitSharingDataContextFactory dataContextFactory,
         ICalendarService calendarService,
         TotalService totalService,
         IDemographicReaderService demographicReaderService,
-        IPayrollDuplicateSsnReportServiceInternal duplicateSsnReportService)
+        IPayrollDuplicateSsnReportService duplicateSsnReportService)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;

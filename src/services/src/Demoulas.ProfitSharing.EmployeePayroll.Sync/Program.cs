@@ -48,7 +48,10 @@ builder.Configuration.Bind("Logging:Smart", smartConfig);
 FileSystemLogConfig fileSystemLog = new FileSystemLogConfig();
 builder.Configuration.Bind("Logging:FileSystem", fileSystemLog);
 
-smartConfig.MaskingOperators = [new UnformattedSocialSecurityNumberMaskingOperator()];
+smartConfig.MaskingOperators = [
+    new UnformattedSocialSecurityNumberMaskingOperator(),
+    new SensitiveValueMaskingOperator()
+];
 builder.SetDefaultLoggerConfiguration(smartConfig, fileSystemLog);
 
 builder.AddEmployeePayrollSyncService();
