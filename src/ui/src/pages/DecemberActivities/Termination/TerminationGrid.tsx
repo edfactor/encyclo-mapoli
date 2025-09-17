@@ -115,6 +115,26 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     }
   }, [isFetching, pendingSuccessMessage, isPendingBulkMessage, dispatch]);
 
+  // Reusable function to refresh grid after save operations
+  const refreshGridAfterSave = useCallback((successMessage: string, isBulk = false) => {
+    if (searchParams) {
+      setPendingSuccessMessage(successMessage);
+      setIsPendingBulkMessage(isBulk);
+      // The unified useEffect will handle the actual API call
+    } else {
+      // If no search params, show message immediately
+      dispatch(
+        setMessage({
+          ...Messages.TerminationSaveSuccess,
+          message: {
+            ...Messages.TerminationSaveSuccess.message,
+            message: successMessage
+          }
+        })
+      );
+    }
+  }, [searchParams, dispatch]);
+
   const handleSave = useCallback(
     async (request: ForfeitureAdjustmentUpdateRequest, name: string) => {
       const rowId = request.badgeNumber; // Use badgeNumber as unique identifier
@@ -130,34 +150,10 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
         });
         onUnsavedChanges(Object.keys(editedValues).length > 1);
 
-        // Prepare success message
+        // Prepare success message and refresh grid
         const employeeName = name || "the selected employee";
         const successMessage = `The forfeiture adjustment of amount $${formatNumberWithComma(request.forfeitureAmount)} for ${employeeName} saved successfully`;
-
-        if (searchParams) {
-          const params = createRequest(
-            pageNumber * pageSize,
-            sortParams.sortBy,
-            sortParams.isSortDescending,
-            selectedProfitYear
-          );
-          if (params) {
-            // Set pending message and trigger search
-            setPendingSuccessMessage(successMessage);
-            triggerSearch(params, false);
-          }
-        } else {
-          // If no search params, show message immediately
-          dispatch(
-            setMessage({
-              ...Messages.TerminationSaveSuccess,
-              message: {
-                ...Messages.TerminationSaveSuccess.message,
-                message: successMessage
-              }
-            })
-          );
-        }
+        refreshGridAfterSave(successMessage);
       } catch (error) {
         console.error("Failed to save forfeiture adjustment:", error);
         alert("Failed to save. Please try again.");
@@ -173,13 +169,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       updateForfeitureAdjustment,
       editedValues,
       onUnsavedChanges,
-      searchParams,
-      pageNumber,
-      pageSize,
-      sortParams,
-      triggerSearch,
-      createRequest,
-      selectedProfitYear
+      refreshGridAfterSave
     ]
   );
 
@@ -239,53 +229,19 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     [pageSize]
   );
 
-  // Fetch data when pagination, sort, or searchParams change (only if initial search has been performed)
+  // Unified effect to handle all data fetching scenarios
   useEffect(() => {
-    if (!initialSearchLoaded || !searchParams) return; // Don't load data until search button is clicked
+    // Don't load data until search button is clicked
+    if (!initialSearchLoaded || !searchParams) return;
 
-    const params = createRequest(
-      pageNumber * pageSize,
-      sortParams.sortBy,
-      sortParams.isSortDescending,
-      selectedProfitYear
-    );
-    if (params) {
-      const key = buildRequestKey(
-        pageNumber * pageSize,
-        sortParams.sortBy,
-        sortParams.isSortDescending,
-        selectedProfitYear,
-        (params as any).beginningDate,
-        (params as any).endingDate,
-        (params as any).archive
-      );
-      if (lastRequestKeyRef.current === key) return;
-      lastRequestKeyRef.current = key;
-      triggerSearch(params, false);
-    }
-  }, [
-    searchParams,
-    pageNumber,
-    pageSize,
-    sortParams,
-    selectedProfitYear,
-    triggerSearch,
-    createRequest,
-    initialSearchLoaded,
-    buildRequestKey
-  ]);
-
-  // Archive trigger: when shouldArchive flips true, attempt search and clear flag when done; retry when data becomes available
-  useEffect(() => {
-    if (!shouldArchive) return;
-    let cancelled = false;
-    const run = async () => {
+    const executeSearch = async () => {
       const params = createRequest(
         pageNumber * pageSize,
         sortParams.sortBy,
         sortParams.isSortDescending,
         selectedProfitYear
       );
+
       if (params) {
         const key = buildRequestKey(
           pageNumber * pageSize,
@@ -296,32 +252,39 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
           (params as any).endingDate,
           (params as any).archive
         );
+
+        // Prevent duplicate requests
         if (lastRequestKeyRef.current === key) {
-          if (!cancelled) onArchiveHandled?.();
+          // If shouldArchive was true, clear it since we've already handled it
+          if (shouldArchive) {
+            onArchiveHandled?.();
+          }
           return;
         }
+
         lastRequestKeyRef.current = key;
         await triggerSearch(params, false);
-        if (!cancelled) onArchiveHandled?.();
+
+        // Clear archive flag after successful search
+        if (shouldArchive) {
+          onArchiveHandled?.();
+        }
       }
     };
-    run();
-    return () => {
-      cancelled = true;
-    };
+
+    executeSearch();
   }, [
-    shouldArchive,
     searchParams,
     pageNumber,
     pageSize,
     sortParams,
     selectedProfitYear,
+    shouldArchive, // Include shouldArchive in dependencies
     triggerSearch,
     createRequest,
-    onArchiveHandled,
-    fiscalData?.fiscalBeginDate,
-    fiscalData?.fiscalEndDate,
-    buildRequestKey
+    initialSearchLoaded,
+    buildRequestKey,
+    onArchiveHandled
   ]);
 
   const handleRowExpansion = (badgeNumber: string) => {
@@ -367,24 +330,10 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
         setSelectedRowIds([]);
         onUnsavedChanges(Object.keys(updatedEditedValues).length > 0);
 
-        // Prepare bulk success message
+        // Prepare bulk success message and refresh grid
         const employeeNames = names.map(name => name || "Unknown Employee");
         const bulkSuccessMessage = `Members affected: ${employeeNames.join("; ")}`;
-
-        if (searchParams) {
-          const params = createRequest(
-            pageNumber * pageSize,
-            sortParams.sortBy,
-            sortParams.isSortDescending,
-            selectedProfitYear
-          );
-          if (params) {
-            triggerSearch(params, false);
-          }
-          // Set the pending success message to be shown after grid reload
-          setPendingSuccessMessage(bulkSuccessMessage);
-          setIsPendingBulkMessage(true);
-        }
+        refreshGridAfterSave(bulkSuccessMessage, true);
       } catch (error) {
         console.error("Failed to save forfeiture adjustments:", error);
         alert("Failed to save one or more adjustments. Please try again.");
@@ -401,11 +350,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       updateForfeitureAdjustmentBulk,
       editedValues,
       onUnsavedChanges,
-      searchParams,
-      pageNumber,
-      pageSize,
-      sortParams,
-      triggerSearch
+      refreshGridAfterSave
     ]
   );
 
