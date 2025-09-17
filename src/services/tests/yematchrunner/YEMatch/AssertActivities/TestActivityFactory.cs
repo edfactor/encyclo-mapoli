@@ -27,7 +27,8 @@ internal static class TestActivityFactory
             new SetDateOfBirthTo19YearsAgo(),
             new S18_Rebuild2023ZeroCont(),
             new S24_Rebuild2023Enrollment(),
-            new Give2023Hours()
+            new Give2023Hours(),
+            new UpdateNavigation()
         ];
     }
 }
