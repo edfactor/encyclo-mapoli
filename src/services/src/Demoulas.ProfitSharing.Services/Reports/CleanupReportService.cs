@@ -297,8 +297,11 @@ FROM FILTERED_DEMOGRAPHIC p1
             var results = _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                // Always use live/now data
+                // This assumes all the payprofits for lastest year are available 
+                var latestYear = ctx.PayProfits.Max(p => p.ProfitYear);
                 var nameAndDobQuery = demographics
-                    .Include(d => d.PayProfits.Where(p => p.ProfitYear == req.ProfitYear))
+                    .Include(d => d.PayProfits.Where(p => p.ProfitYear == latestYear))
                     .Select(x => new
                     {
                         x.Ssn,
@@ -340,20 +343,26 @@ FROM FILTERED_DEMOGRAPHIC p1
                     CommentType.Constants.QdroOut.Id
                 };
 
-                var startDate = (DateTimeOffset?)(!req.StartDate.HasValue ? null : req.StartDate.Value.ToDateTimeOffset());
-                var endDate = (DateTimeOffset?)(!req.EndDate.HasValue ? null : req.EndDate.Value.ToDateTimeOffset());
+                var startDate = req.StartDate ?? ReferenceData.DsmMinValue;
+                // force to start of month, so returned reference range is correct - the day of the month is ignored.
+                startDate = new DateOnly(startDate.Year, startDate.Month, 1);
+
+                var endDate = req.EndDate ?? DateTime.Now.ToDateOnly();
+                // force to end of month, so returned reference range is correct - day of the month is ignored.
+                endDate = new DateOnly(endDate.Year, endDate.Month, DateTime.DaysInMonth(endDate.Year, endDate.Month));
 
                 var query = from pd in ctx.ProfitDetails
                     join nameAndDob in nameAndDobQuery on pd.Ssn equals nameAndDob.Ssn
-                    where pd.ProfitYear == req.ProfitYear &&
-                          _validProfitCodes.Contains(pd.ProfitCodeId) &&
+                    where _validProfitCodes.Contains(pd.ProfitCodeId) &&
                           (pd.ProfitCodeId != ProfitCode.Constants.Outgoing100PercentVestedPayment.Id ||
                            (pd.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id &&
                             (!pd.CommentTypeId.HasValue ||
                              !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
-                            (!req.StartDate.HasValue || pd.CreatedAtUtc >= startDate) &&
-                            (!req.EndDate.HasValue || pd.CreatedAtUtc <= endDate) &&
-                            !(pd.ProfitCodeId == /*9*/ ProfitCode.Constants.Outgoing100PercentVestedPayment && pd.CommentTypeId.HasValue && transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value))
+                              // PROFIT_DETAIL.profitYear <--- is the year selector 
+                              // PROFIT_DETAIL.MonthToDate <--- is the month selector  See QPAY129.pco
+                              (pd.ProfitYear > startDate.Year || (pd.ProfitYear == startDate.Year && pd.MonthToDate >= startDate.Month)) &&
+                              (pd.ProfitYear < endDate.Year || (pd.ProfitYear == endDate.Year && pd.MonthToDate <= endDate.Month)) &&
+                              !(pd.ProfitCodeId == /*9*/ ProfitCode.Constants.Outgoing100PercentVestedPayment && pd.CommentTypeId.HasValue && transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value))
 
                     select new
                     {
@@ -397,14 +406,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                     .Select(g => new { State = g.Key, Total = g.Sum(x => x.StateTax) })
                     .ToDictionaryAsync(x => x.State ?? string.Empty, x => x.Total, cancellationToken);
 
-                var calInfo =
-                    await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
-                var sortReq = req;
-                if (sortReq.SortBy != null && sortReq.SortBy.Equals("Age", StringComparison.OrdinalIgnoreCase))
-                {
-                    sortReq = req with { SortBy = "DateOfBirth" };
-                }
-                var paginated = await query.ToPaginationResultsAsync(sortReq, cancellationToken);
+                var paginated = await query.ToPaginationResultsAsync(req, cancellationToken);
 
                 var apiResponse = paginated.Results.Select(pd => new DistributionsAndForfeitureResponse
                 {
@@ -419,11 +421,11 @@ FROM FILTERED_DEMOGRAPHIC p1
                     FederalTax = pd.FederalTax,
                     ForfeitAmount = pd.ForfeitAmount,
                     Date = pd.MonthToDate is > 0 and <= 12 ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1) : pd.Date.ToDateOnly(),
+                    // Note, this computes "Age" at time of transaction, or "Age @ Txn"
                     Age = (byte)(pd.MonthToDate is > 0 and < 13
                         ? pd.DateOfBirth.Age(
                             new DateOnly(pd.YearToDate, pd.MonthToDate, 1).ToDateTime(TimeOnly.MinValue))
-                        : pd.DateOfBirth.Age(
-                            calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Local))),
+                        : pd.DateOfBirth.Age( endDate.ToDateTime(TimeOnly.MinValue) ) ),
                     HasForfeited = pd.HasForfeited,
                     IsExecutive = pd.PayFrequencyId == PayFrequency.Constants.Monthly
                 });
@@ -433,8 +435,8 @@ FROM FILTERED_DEMOGRAPHIC p1
                 {
                     ReportName = "Distributions and Forfeitures",
                     ReportDate = DateTimeOffset.UtcNow,
-                    StartDate = calInfo.FiscalBeginDate,
-                    EndDate = calInfo.FiscalEndDate,
+                    StartDate = startDate,
+                    EndDate = endDate,
                     DistributionTotal = totals.DistributionTotal,
                     StateTaxTotal = totals.StateTaxTotal,
                     FederalTaxTotal = totals.FederalTaxTotal,

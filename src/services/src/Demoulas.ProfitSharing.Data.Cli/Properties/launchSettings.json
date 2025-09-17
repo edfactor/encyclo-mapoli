@@ -10,15 +10,15 @@
         },
         "import-from-ready": {
             "commandName": "Project",
-            "commandLineArgs": "import-from-ready --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"..\\..\\..\\..\\src\\database\\ready_import\\SQL copy all from ready to smart ps.sql\""
+            "commandLineArgs": "import-from-ready --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"../../../../src/database/ready_import/SQL copy all from ready to smart ps.sql\""
         },
         "import-from-navigation": {
             "commandName": "Project",
-            "commandLineArgs": "import-from-navigation --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"..\\..\\..\\..\\src\\database\\ready_import\\Navigations\\add-navigation-data.sql\""
+            "commandLineArgs": "import-from-navigation --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"../../../../src/database/ready_import/Navigations/add-navigation-data.sql\""
         },
         "import-uat-navigation": {
             "commandName": "Project",
-            "commandLineArgs": "import-uat-navigation --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"..\\..\\..\\..\\src\\database\\ready_import\\Navigations\\add-uat-navigation-data.sql\""
+            "commandLineArgs": "import-uat-navigation --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"../../../../src/database/ready_import/Navigations/add-uat-navigation-data.sql\""
         },
         "create-dgml": {
             "commandName": "Project",

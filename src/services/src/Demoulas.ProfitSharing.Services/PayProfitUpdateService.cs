@@ -60,12 +60,24 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
 
                 var allSsns = allPayProfits.Select(pp => pp.Demographic!.Ssn).ToList();
 
-                _logger.LogInformation("Loading ProfitDetails for {TotalEmployees} employees...", totalPayProfits);
+                _logger.LogInformation("Loading ProfitDetails for {TotalEmployees} employees in batches...", totalPayProfits);
                 var dbStopwatch = System.Diagnostics.Stopwatch.StartNew();
-                var allProfitDetails = await ctx.ProfitDetails
-                    .Where(pd => pd.ProfitYear <= profitYear && allSsns.Contains(pd.Ssn))
-                    .AsNoTracking()
-                    .ToListAsync(ct);
+                var allProfitDetails = new List<ProfitDetail>();
+                const int batchSize = 2000;
+
+                int batchNumber = 0;
+                foreach (var ssnBatch in allSsns.Chunk(batchSize))
+                {
+                    batchNumber++;
+                    var batchProfitDetails = await ctx.ProfitDetails
+                        .Where(pd => pd.ProfitYear <= profitYear && ssnBatch.Contains(pd.Ssn))
+                        .AsNoTracking()
+                        .ToListAsync(ct);
+                    allProfitDetails.AddRange(batchProfitDetails);
+
+                    _logger.LogDebug("Loaded batch {BatchNumber} ({BatchStart}-{BatchEnd}) with {BatchCount} ProfitDetails",
+                        batchNumber, (batchNumber - 1) * batchSize + 1, Math.Min(batchNumber * batchSize, allSsns.Count), batchProfitDetails.Count);
+                }
                 dbStopwatch.Stop();
 
                 _logger.LogInformation("Loaded {ProfitDetailCount} ProfitDetails in {DbTime:mm\\:ss}", allProfitDetails.Count, dbStopwatch.Elapsed);

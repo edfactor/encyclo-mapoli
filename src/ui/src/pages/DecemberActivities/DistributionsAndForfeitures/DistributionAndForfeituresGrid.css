@@ -5,16 +5,56 @@
   padding: 8px 0;
 }
 
+.totals-flex-container > div:not(.totals-flex-popover) {
+  flex: 1;
+  min-width: 0;
+}
+
 .totals-flex-popover {
   display: flex;
   align-items: center;
   position: relative;
+  flex: 1.1;
+  min-width: 140px;
+}
+
+.totals-flex-popover > div:first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.totals-flex-popover .MuiGrid-root {
+  padding-right: 8px !important;
+}
+
+.totals-flex-popover .MuiTableCell-root {
+  white-space: nowrap;
+}
+
+.state-tax-info-container {
+  position: relative;
+  display: inline-block;
 }
 
 .state-tax-info-icon {
   cursor: pointer;
   margin-left: 4px;
   color: #4caf50;
+}
+
+.state-tax-tooltip {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  max-height: 300px;
+  max-width: 350px;
+  overflow: auto;
+  margin-top: 4px;
 }
 
 .state-tax-popover-table {

@@ -54,7 +54,7 @@ const MilitaryEntryAndModificationContent = () => {
     if (masterInquiryMemberDetails) {
       fetchMilitaryContributions();
     }
-  }, [masterInquiryMemberDetails, fetchMilitaryContributions]);
+  }, [masterInquiryMemberDetails]);
 
   return (
     <Grid
