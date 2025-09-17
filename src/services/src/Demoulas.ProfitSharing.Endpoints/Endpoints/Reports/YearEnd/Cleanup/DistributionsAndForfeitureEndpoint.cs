@@ -1,4 +1,4 @@
-﻿using CsvHelper.Configuration;
+using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -10,9 +10,10 @@ using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup.DistributionsAndForfeitureEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
-public class DistributionsAndForfeitureEndpoint: EndpointWithCsvTotalsBase<DistributionsAndForfeituresRequest, 
-    DistributionsAndForfeitureTotalsResponse, 
-    DistributionsAndForfeitureResponse, 
+
+public class DistributionsAndForfeitureEndpoint : EndpointWithCsvTotalsBase<DistributionsAndForfeituresRequest,
+    DistributionsAndForfeitureTotalsResponse,
+    DistributionsAndForfeitureResponse,
     DistributionsAndForfeitureResponseMap>
 {
     private readonly ICleanupReportService _cleanupReportService;
@@ -28,8 +29,8 @@ public class DistributionsAndForfeitureEndpoint: EndpointWithCsvTotalsBase<Distr
         Get("distributions-and-forfeitures");
         Summary(s =>
         {
-            s.Summary = "Lists distributions and forfeitures for a given year";
-            s.ExampleRequest = new DistributionsAndForfeituresRequest() { ProfitYear = 2025, Skip = SimpleExampleRequest.Skip, Take = SimpleExampleRequest.Take };
+            s.Summary = "Lists distributions and forfeitures for a date range";
+            s.ExampleRequest = new DistributionsAndForfeituresRequest() { Skip = SimpleExampleRequest.Skip, Take = SimpleExampleRequest.Take };
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
@@ -60,7 +61,7 @@ public class DistributionsAndForfeitureEndpoint: EndpointWithCsvTotalsBase<Distr
         return _cleanupReportService.GetDistributionsAndForfeitureAsync(req, ct);
     }
 
-    public sealed class DistributionsAndForfeitureResponseMap: ClassMap<DistributionsAndForfeitureResponse>
+    public sealed class DistributionsAndForfeitureResponseMap : ClassMap<DistributionsAndForfeitureResponse>
     {
         public DistributionsAndForfeitureResponseMap()
         {

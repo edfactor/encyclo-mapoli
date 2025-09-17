@@ -16,7 +16,7 @@ internal sealed class EmployeeFullSyncClient
     private readonly JsonSerializerOptions _jsonSerializerOptions;
 
 
-    public EmployeeFullSyncClient(HttpClient httpClient, OracleHcmConfig oracleHcmConfig, 
+    public EmployeeFullSyncClient(HttpClient httpClient, OracleHcmConfig oracleHcmConfig,
         ILogger<EmployeeFullSyncClient> logger)
     {
         _httpClient = httpClient;
@@ -33,20 +33,59 @@ internal sealed class EmployeeFullSyncClient
     /// <returns></returns>
     public async IAsyncEnumerable<OracleEmployee[]> GetAllEmployees([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        string url = await BuildUrl(cancellationToken: cancellationToken).ConfigureAwait(false);
+        // Track offset explicitly so we can advance to the next batch when a transient
+        // error occurs while reading the response (so we don't stop the whole enumeration).
+        int offset = 0;
+        int batchSize = Math.Min(75, (int)_oracleHcmConfig.Limit);
+        const int maxConsecutiveFailures = 5;
+        int consecutiveFailures = 0;
+
+        string url = await BuildUrl(offset, cancellationToken: cancellationToken).ConfigureAwait(false);
         while (true)
         {
             using HttpResponseMessage response = await GetOracleHcmValue(url, cancellationToken).ConfigureAwait(false);
-            OracleDemographics? demographics = await response.Content.ReadFromJsonAsync<OracleDemographics>(_jsonSerializerOptions, cancellationToken).ConfigureAwait(false);
+            OracleDemographics? demographics = null;
+
+            try
+            {
+                demographics = await response.Content.ReadFromJsonAsync<OracleDemographics>(_jsonSerializerOptions, cancellationToken).ConfigureAwait(false);
+                // reset consecutive failures on success
+                consecutiveFailures = 0;
+            }
+            catch (Exception e)
+            {
+                // Log the failure but continue to the next batch instead of terminating the whole enumeration.
+                consecutiveFailures++;
+                _logger.LogError(e, "Failed to retrieve employee demographics batch at offset {Offset} (failure {FailureCount}/{MaxFailures}): {Error}", offset,
+                    consecutiveFailures, maxConsecutiveFailures, e.Message);
+
+                if (consecutiveFailures >= maxConsecutiveFailures)
+                {
+                    _logger.LogCritical("Aborting iteration after {MaxFailures} consecutive failures starting at offset {Offset}", maxConsecutiveFailures, offset);
+                    break;
+                }
+
+                // Advance by one batch and continue. This keeps the IAsyncEnumerable alive even
+                // when a single batch fails to deserialize.
+                offset += batchSize;
+                string nextUrlFallback = await BuildUrl(offset, cancellationToken: cancellationToken).ConfigureAwait(false);
+                if (string.IsNullOrEmpty(nextUrlFallback))
+                {
+                    break;
+                }
+
+                url = nextUrlFallback;
+                continue;
+            }
 
             if (demographics?.Employees == null)
             {
                 break;
             }
 
-            foreach (var emps in demographics.Employees.Chunk(75))
+            foreach (var emps in demographics.Employees.Chunk(batchSize))
             {
-              yield return emps;
+                yield return emps;
             }
 
             if (!demographics.HasMore)
@@ -54,8 +93,9 @@ internal sealed class EmployeeFullSyncClient
                 break;
             }
 
-            // Construct the next URL for pagination
-            string nextUrl = await BuildUrl(demographics.Count + demographics.Offset, cancellationToken: cancellationToken).ConfigureAwait(false);
+            // Use the server-provided pagination information when available.
+            offset = demographics.Count + demographics.Offset;
+            string nextUrl = await BuildUrl(offset, cancellationToken: cancellationToken).ConfigureAwait(false);
             if (string.IsNullOrEmpty(nextUrl))
             {
                 break;

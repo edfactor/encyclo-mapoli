@@ -1,13 +1,12 @@
-import { Divider, Tab, Tabs } from "@mui/material";
-import { Grid } from "@mui/material";
-import { useState, useCallback } from "react";
+import { Divider, Grid, Tab, Tabs } from "@mui/material";
+import { useCallback, useState } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
+import StatusDropdownActionNode from "../../../../components/StatusDropdownActionNode";
 import { CAPTIONS } from "../../../../constants";
 import QPAY066TABreakdownParameters from "./QPAY066TABreakdownParameters";
 import StoreContent from "./StoreContent";
 import SummariesContent from "./SummariesContent";
 import TotalsContent from "./TotalsContent";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const QPAY066TA = () => {
   const [tabValue, setTabValue] = useState(0);

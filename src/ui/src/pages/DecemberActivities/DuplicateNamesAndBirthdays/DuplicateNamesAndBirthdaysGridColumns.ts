@@ -25,7 +25,10 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       headerName: "DOB",
       field: "dateOfBirth"
     }),
-    createAddressColumn({}),
+    createAddressColumn({
+      field1: "street",
+      field2: "street2"
+    }),
     createCityColumn({
       field: "address.city",
       colId: "address.city"

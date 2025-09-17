@@ -88,7 +88,9 @@ const MilitaryContributionForm = ({
             (error as any).data.errors[0].reason ===
             "Regular Contribution already recorded for Year. Duplicates are not allowed."
           ) {
-            setErrorMessage("There is already a contribution for that year.");
+            setErrorMessage(
+              "There is already a contribution for that year. Please check supplemental box and resubmit if applicable."
+            );
           }
         }
       }

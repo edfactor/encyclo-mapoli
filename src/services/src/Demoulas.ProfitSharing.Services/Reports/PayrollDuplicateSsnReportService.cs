@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Reports
 {
-    public class PayrollDuplicateSsnReportService : IPayrollDuplicateSsnReportServiceInternal, IPayrollDuplicateSsnReportService
+    public class PayrollDuplicateSsnReportService : IPayrollDuplicateSsnReportService
     {
         private readonly IProfitSharingDataContextFactory _dataContextFactory;
         private readonly IDemographicReaderService _demographicReaderService;

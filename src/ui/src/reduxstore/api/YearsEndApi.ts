@@ -182,7 +182,8 @@ export const YearsEndApi = createApi({
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
+          isSortDescending: params.pagination.isSortDescending,
+          profitYear: params.profitYear
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -205,7 +206,8 @@ export const YearsEndApi = createApi({
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
+          isSortDescending: params.pagination.isSortDescending,
+          profitYear: params.profitYear
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -225,7 +227,6 @@ export const YearsEndApi = createApi({
         url: `yearend/distributions-and-forfeitures`,
         method: "GET",
         params: {
-          profitYear: params.profitYear,
           startDate: params.startDate,
           endDate: params.endDate,
           take: params.pagination.take,

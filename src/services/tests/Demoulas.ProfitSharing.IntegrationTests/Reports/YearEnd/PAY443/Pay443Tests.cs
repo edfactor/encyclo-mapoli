@@ -3,7 +3,9 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Reports;
+using Moq;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.PAY443;
@@ -14,7 +16,7 @@ public class Pay443Tests : PristineBaseTest
 
     public Pay443Tests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        _forfeituresAndPointsForYearService = new ForfeituresAndPointsForYearService(DbFactory, TotalService, DemographicReaderService);
+        _forfeituresAndPointsForYearService = new ForfeituresAndPointsForYearService(DbFactory, TotalService, DemographicReaderService, new Mock<IPayrollDuplicateSsnReportService>().Object);
     }
 
     [Fact]
@@ -69,7 +71,8 @@ public class Pay443Tests : PristineBaseTest
         // ignore the report time
         expectedResponse = expectedResponse with
         {
-            ReportDate = actualResponse.ReportDate, Response = new PaginatedResponseDto<ForfeituresAndPointsForYearResponse> { Total = 0, Results = [] }
+            ReportDate = actualResponse.ReportDate,
+            Response = new PaginatedResponseDto<ForfeituresAndPointsForYearResponse> { Total = 0, Results = [] }
         };
         actualResponse = actualResponse with { Response = new PaginatedResponseDto<ForfeituresAndPointsForYearResponse> { Total = 0, Results = [] } };
 

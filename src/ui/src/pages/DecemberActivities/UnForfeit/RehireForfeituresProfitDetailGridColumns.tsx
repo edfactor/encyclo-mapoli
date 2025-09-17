@@ -12,7 +12,10 @@ import {
 } from "utils/gridColumnFactory";
 import { HeaderComponent } from "./RehireForfeituresHeaderComponent";
 
-function isTransactionEditiabe(params) {
+function isTransactionEditable(params, profitYear: number): boolean {
+  if (profitYear && params.data.profitYear !== profitYear) {
+    return false;
+  }
   return params.data.isDetail && params.data.suggestedUnforfeiture != null;
 }
 
@@ -58,7 +61,7 @@ export const GetProfitDetailColumns = (
       pinned: "right",
       resizable: true,
       sortable: false,
-      editable: (params: EditableCallbackParams) => isTransactionEditiabe(params),
+      editable: (params: EditableCallbackParams) => isTransactionEditable(params, selectedProfitYear),
       cellEditor: SuggestedForfeitEditor,
       cellRenderer: (params: ICellRendererParams) => {
         return SuggestedForfeitCellRenderer({ ...params, selectedProfitYear }, false, true);
@@ -92,7 +95,7 @@ export const GetProfitDetailColumns = (
         onSave
       },
       cellRenderer: (params: RehireForfeituresSaveButtonCellParams) => {
-        if (!isTransactionEditiabe(params)) {
+        if (!isTransactionEditable(params, selectedProfitYear)) {
           return "";
         }
 

@@ -117,7 +117,7 @@ export const usePrerequisiteNavigations = (
       setPrerequisitesComplete(true);
       setIncompletePrerequisites([]);
     }
-  }, [navigationId, navigationData, messageConfig, dispatch]);
+  }, [navigationId, navigationData, dispatch]);
 
   return { prerequisitesComplete, incompletePrerequisites, currentNavigation };
 };

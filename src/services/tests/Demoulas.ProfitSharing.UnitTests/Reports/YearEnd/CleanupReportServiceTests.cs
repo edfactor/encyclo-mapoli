@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Text.Json;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Api;
@@ -12,6 +12,7 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Demoulas.ProfitSharing.UnitTests.Common.Helpers;
+
 using FastEndpoints;
 using IdGen;
 using Microsoft.EntityFrameworkCore;
@@ -42,7 +43,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         var response = await _cleanupReportClient.GetDuplicateSsnAsync(_paginationRequest, CancellationToken.None);
         response.ShouldNotBeNull();
-        response.Response.Results.Count().ShouldBe(0); 
+        response.Response.Results.Count().ShouldBe(0);
     }
 
     [Fact(DisplayName = "PS-147: Check Duplicate SSNs (CSV)")]
@@ -50,7 +51,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     {
         DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         var response = await DownloadClient
-            .GETAsync <GetDuplicateSsNsEndpoint, PaginationRequestDto, PayrollDuplicateSsnResponseDto>(_paginationRequest);
+            .GETAsync<GetDuplicateSsNsEndpoint, ProfitYearRequest, PayrollDuplicateSsnResponseDto>(_paginationRequest);
 
 
         string content = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
@@ -88,7 +89,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
 
             _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
 
-            var oneRecord = new SortedPaginationRequestDto { Skip = 0, Take = 1 };
+            var oneRecord = new ProfitYearRequest { Skip = 0, Take = 1, ProfitYear = _paginationRequest.ProfitYear };
             response = await _cleanupReportClient.GetDemographicBadgesNotInPayProfitAsync(oneRecord, CancellationToken.None);
             response.ShouldNotBeNull();
             response.Response.Results.Count().ShouldBe(1);
@@ -115,7 +116,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
 
             await c.SaveChangesAsync(CancellationToken.None);
 
-            var stream = await _cleanupReportClient.DownloadDemographicBadgesNotInPayProfit(CancellationToken.None);
+            var stream = await _cleanupReportClient.DownloadDemographicBadgesNotInPayProfit(_paginationRequest.ProfitYear, CancellationToken.None);
             stream.ShouldNotBeNull();
 
             using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
@@ -129,67 +130,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         });
     }
 
-    [Fact(DisplayName = "PS-153: Names without commas (JSON)")]
-    public Task GetNamesWithoutCommas()
-    {
-        _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        return MockDbContextFactory.UseWritableContext(async ctx =>
-        {
-            var request = new SortedPaginationRequestDto() { Skip = 0, Take = 1000 };
-            var response = await _cleanupReportClient.GetNamesMissingCommaAsync(request, CancellationToken.None);
-            response.ShouldNotBeNull();
-            response.Response.Results.Count().ShouldBe(0);
 
-            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
-
-            byte disruptedNameCount = 10;
-            foreach (var dem in ctx.Demographics.Take(disruptedNameCount))
-            {
-                dem.ContactInfo.FullName = dem.ContactInfo.FullName?.Replace(", ", " ");
-            }
-
-            await ctx.SaveChangesAsync(CancellationToken.None);
-
-            response = await _cleanupReportClient.GetNamesMissingCommaAsync(request, CancellationToken.None);
-            response.ShouldNotBeNull();
-            response.Response.Results.Count().ShouldBe(disruptedNameCount);
-
-            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
-
-            var oneRecord = new SortedPaginationRequestDto { Skip = 0, Take = 1 };
-            response = await _cleanupReportClient.GetNamesMissingCommaAsync(oneRecord, CancellationToken.None);
-            response.ShouldNotBeNull();
-            response.Response.Results.Count().ShouldBe(1);
-
-            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
-        });
-    }
-
-    [Fact(DisplayName = "PS-153: Names without commas (CSV)")]
-    public Task GetNamesWithoutCommasCsv()
-    {
-        _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        return MockDbContextFactory.UseWritableContext(async ctx =>
-        {
-            byte disruptedNameCount = 10;
-            await ctx.Demographics.Take(disruptedNameCount)
-                .ForEachAsync(dem => { dem.ContactInfo.FullName = dem.ContactInfo.FullName?.Replace(", ", " "); });
-
-            await ctx.SaveChangesAsync(CancellationToken.None);
-
-            var stream = await _cleanupReportClient.DownloadNamesMissingComma(CancellationToken.None);
-            stream.ShouldNotBeNull();
-
-            using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
-            string result = await reader.ReadToEndAsync(CancellationToken.None);
-            result.ShouldNotBeNullOrEmpty();
-
-            var lines = result.Split(Environment.NewLine);
-            lines.Count().ShouldBe(disruptedNameCount + 4);
-
-            _testOutputHelper.WriteLine(result);
-        });
-    }
 
     [Fact(DisplayName = "PS-145 : Negative ETVA for SSNs on PayProfit (JSON)")]
     public Task GetNegativeEtvaReportJson()
@@ -240,7 +181,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     }
 
 
-   
+
     [Fact(DisplayName = "PS-61 : Year-end Profit Sharing Report (JSON)")]
     public async Task GetYearEndProfitSharingReport()
     {
@@ -252,7 +193,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             Take = byte.MaxValue,
             ProfitYear = profitYear,
             ReportId = YearEndProfitSharingReportId.Age21OrOlderWith1000Hours
-                 // Default to report 2 for active/inactive
+            // Default to report 2 for active/inactive
         };
         var testHours = 1001;
         await MockDbContextFactory.UseWritableContext(async ctx =>
@@ -438,7 +379,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         decimal sampleforfeiture = 5150m;
 
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        var req = new DistributionsAndForfeituresRequest() { Skip = 0, Take = byte.MaxValue, ProfitYear = (short)(DateTime.Now.Year - 1) };
+        var req = new DistributionsAndForfeituresRequest() { Skip = 0, Take = byte.MaxValue };
         TestResult<DistributionsAndForfeitureTotalsResponse> response;
 
 
@@ -471,7 +412,6 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
                 profitDetail.ProfitYear = (short)(DateTime.Now.Year - 1);
                 profitDetail.ProfitYearIteration = 0;
                 profitDetail.ProfitCodeId = (byte)profitCode;
-                profitDetail.ProfitCode = new ProfitCode() { Id = 1, Name = "Incoming contributions, forfeitures, earnings", Frequency = "Yearly" };
                 profitDetail.Forfeiture = sampleforfeiture;
                 profitDetail.MonthToDate = 3;
                 profitDetail.YearToDate = (short)(DateTime.Now.Year - 1);
@@ -568,7 +508,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     public async Task GetYearEndProfitSharingSummaryReportAsyncCheck()
     {
         var req = new FrozenProfitYearRequest() { ProfitYear = 2024, UseFrozenData = false };
-        var response  =
+        var response =
             await ApiClient
                 .POSTAsync<YearEndProfitSharingSummaryReportEndpoint,
                     FrozenProfitYearRequest, YearEndProfitSharingReportSummaryResponse>(req);

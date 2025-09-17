@@ -37,14 +37,14 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object), new HttpContextAccessor()));
-        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory,  new Mock<ICommitGuardOverride>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
         TerminatedEmployeeService mockService =
             new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService);
 
         Stopwatch stopwatch = Stopwatch.StartNew();
         stopwatch.Start();
-        var data = await mockService.GetReportAsync(new StartAndEndDateRequest{ BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue}, CancellationToken.None);
+        var data = await mockService.GetReportAsync(new StartAndEndDateRequest { BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue }, CancellationToken.None);
 
         string actualText = CreateTextReport(effectiveDateOfTestData, startDate, endDate, profitSharingYear, data);
         stopwatch.Stop();
@@ -77,7 +77,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
                 textReportGenerator.PrintDetails(ms.BadgePSn, ms.Name, yd.BeginningBalance,
                     yd.BeneficiaryAllocation, yd.DistributionAmount, yd.Forfeit,
                     yd.EndingBalance, yd.VestedBalance, yd.DateTerm, yd.YtdPsHours, yd.VestedPercent, yd.Age,
-                    yd.EnrollmentCode ?? 0);
+                    0);
             }
         }
         textReportGenerator.PrintTotals(report.TotalEndingBalance, report.TotalVested, report.TotalForfeit, report.TotalBeneficiaryAllocation);
