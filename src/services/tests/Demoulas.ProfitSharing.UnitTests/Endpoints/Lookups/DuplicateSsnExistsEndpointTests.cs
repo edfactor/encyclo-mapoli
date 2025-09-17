@@ -33,7 +33,7 @@ public class DuplicateSsnExistsEndpointTests : ApiTestBase<Api.Program>
         var value = await ApiClient.GETAsync<DuplicateSsnExistsEndpoint, bool>();
 
         // Assert
-        value.ShouldBeOfType<bool>();
+        value.Result.ShouldBeOfType<bool>();
     }
 }
 
