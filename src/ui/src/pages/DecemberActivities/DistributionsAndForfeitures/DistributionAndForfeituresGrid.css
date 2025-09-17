@@ -5,10 +5,30 @@
   padding: 8px 0;
 }
 
+.totals-flex-container > div:not(.totals-flex-popover) {
+  flex: 1;
+  min-width: 0;
+}
+
 .totals-flex-popover {
   display: flex;
   align-items: center;
   position: relative;
+  flex: 1.1;
+  min-width: 140px;
+}
+
+.totals-flex-popover > div:first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.totals-flex-popover .MuiGrid-root {
+  padding-right: 8px !important;
+}
+
+.totals-flex-popover .MuiTableCell-root {
+  white-space: nowrap;
 }
 
 .state-tax-info-icon {

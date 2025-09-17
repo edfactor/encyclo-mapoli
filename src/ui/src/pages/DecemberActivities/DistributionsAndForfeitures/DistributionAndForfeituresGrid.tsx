@@ -1,15 +1,15 @@
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { Popover, Typography } from "@mui/material";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Popover, Typography } from "@mui/material";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { useSelector } from "react-redux";
 import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
-import "./DistributionAndForfeituresGrid.css";
 import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import { CAPTIONS } from "../../../constants";
+import "./DistributionAndForfeituresGrid.css";
 import { GetDistributionsAndForfeituresColumns } from "./DistributionAndForfeituresGridColumns";
 
 interface DistributionsAndForfeituresGridSearchProps {
@@ -108,8 +108,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
               <TotalsGrid
                 displayData={[[numberToCurrency(distributionsAndForfeitures.stateTaxTotal || 0)]]}
                 leftColumnHeaders={["State Taxes"]}
-                topRowHeaders={[]}
-              />
+                topRowHeaders={[]}></TotalsGrid>
               {distributionsAndForfeitures.stateTaxTotals &&
                 Object.keys(distributionsAndForfeitures.stateTaxTotals).length > 0 && (
                   <>
@@ -142,7 +141,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                             {Object.entries(distributionsAndForfeitures.stateTaxTotals).map(([state, total]) => (
                               <tr key={state}>
                                 <td>{state}</td>
-                                <td>{numberToCurrency(total)}</td>
+                                <td>{numberToCurrency(total as number)}</td>
                               </tr>
                             ))}
                           </tbody>
