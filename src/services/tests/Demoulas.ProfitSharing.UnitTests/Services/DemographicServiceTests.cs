@@ -8,6 +8,7 @@ using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 using Demoulas.ProfitSharing.UnitTests.Common.Helpers;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
+using Demoulas.Util.Extensions;
 using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -176,7 +177,7 @@ public class DemographicsServiceTests
         Assert.Equal("123 Main St", demographics[0].Address.Street);
     }
 
-    private static ScenarioDataContextFactory SetupScenarioFactoryWithSeededDemographics(out List<Demographic> demographics, out List<DemographicHistory> histories, out List<DemographicSyncAudit> audits)
+    private static ScenarioDataContextFactory SetupScenarioFactoryWithSeededDemographics(out List<Demographic> demographics, out List<DemographicHistory> histories, out List<DemographicSyncAudit> audits, out List<BeneficiaryContact> beneficiaryContacts, out List<ProfitDetail> profitDetails)
     {
         // Use faker to produce realistic demographics (and match OracleEmployeeExtensions expectations)
         var faker = new DemographicFaker();
@@ -251,10 +252,79 @@ public class DemographicsServiceTests
 
         audits = new List<DemographicSyncAudit>();
 
+        // beneficiary contacts setup
+        beneficiaryContacts = new List<BeneficiaryContact>();
+        beneficiaryContacts.AddRange(
+        
+            new BeneficiaryContact
+            {
+                Id = 1,
+                Address = new Address
+                {
+                    Street = "789 Oak St",
+                    City = "BeneficiaryCity",
+                    State = "BS",
+                    PostalCode = "67890",
+                },
+                Ssn = demographics[0].Ssn,
+                ContactInfo = new ContactInfo
+                {
+                    PhoneNumber = "0987654321",
+                    FirstName = "Existing",
+                    LastName = "User",
+                    FullName = "User, Existing",
+                    MiddleName = "E"
+                },
+                DateOfBirth = DateOnly.FromDateTime(DateTime.Today.AddYears(-50)),
+                CreatedDate = DateTime.UtcNow.AddYears(-1).ToDateOnly()
+            },
+            new BeneficiaryContact
+            {
+                Id = 2,
+                Address = new Address
+                {
+                    Street = "789 Oak St",
+                    City = "BeneficiaryCity",
+                    State = "BS",
+                    PostalCode = "67890",
+                },
+                Ssn = demographics[1].Ssn,
+                ContactInfo = new ContactInfo
+                {
+                    PhoneNumber = "0987654321",
+                    FirstName = "Existing",
+                    LastName = "User",
+                    FullName = "User, Existing",
+                    MiddleName = "E"
+                },
+                DateOfBirth = DateOnly.FromDateTime(DateTime.Today.AddYears(-50)),
+                CreatedDate = DateTime.UtcNow.AddYears(-1).ToDateOnly()
+            }
+        );
+        // profit details setup
+        profitDetails = new List<ProfitDetail>()
+        {
+            new ProfitDetail
+            {
+              ProfitCodeId =1,
+              Ssn = demographics[0].Ssn,
+              Earnings = 1000.00M,
+            },
+            new ProfitDetail
+            {
+              ProfitCodeId =1,
+              Ssn = demographics[0].Ssn,
+              Earnings = 1000.00M,
+            }
+        };
+
         var scenarioFactory = new ScenarioDataContextFactory();
         scenarioFactory.ProfitSharingDbContext.Setup(c => c.Demographics).Returns(BuildMockDbSetWithBackingList(demographics).Object);
         scenarioFactory.ProfitSharingDbContext.Setup(c => c.DemographicHistories).Returns(BuildMockDbSetWithBackingList(histories).Object);
         scenarioFactory.ProfitSharingDbContext.Setup(c => c.DemographicSyncAudit).Returns(BuildMockDbSetWithBackingList(audits).Object);
+        scenarioFactory.ProfitSharingDbContext.Setup(c => c.BeneficiaryContacts).Returns(BuildMockDbSetWithBackingList(beneficiaryContacts).Object);
+        scenarioFactory.ProfitSharingDbContext.Setup(c => c.ProfitDetails).Returns(BuildMockDbSetWithBackingList(profitDetails).Object);
+
         scenarioFactory.ProfitSharingDbContext
             .Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(1);
@@ -269,7 +339,7 @@ public class DemographicsServiceTests
     public async Task AddDemographicsStreamAsync_HandlesDuplicateSsn()
     {
         // Arrange
-        var scenarioFactory = SetupScenarioFactoryWithSeededDemographics(out var demographics, out var _ /*histories*/, out var audits);
+        var scenarioFactory = SetupScenarioFactoryWithSeededDemographics(out var demographics, out var _ /*histories*/, out var audits, out var beneficiaryContacts, out var profitDetails);
 
 
         Dictionary<long, int>? fakeSsnLookup = demographics.ToDictionary(d => d.OracleHcmId, d => 222222222);
@@ -303,7 +373,7 @@ public class DemographicsServiceTests
     public async Task AddDemographicsStreamAsync_SSNMatch_NoDobMatch()
     {
         // Arrange
-        var scenarioFactory = SetupScenarioFactoryWithSeededDemographics(out var demographics, out var _ /*histories*/, out var audits);
+        var scenarioFactory = SetupScenarioFactoryWithSeededDemographics(out var demographics, out var _ /*histories*/, out var audits, out var beneficiaryContacts, out var profitDetails);
 
         //// diff dob and terminated employee
         var demoWithDiffDob = new Demographic
@@ -404,7 +474,7 @@ public class DemographicsServiceTests
     public async Task AddDemographicsStreamAsync_SSNMatch_NoDobMatch_ExistingEmployeeTerminated_NoBalance()
     {
         // Arrange
-        var scenarioFactory = SetupScenarioFactoryWithSeededDemographics(out var demographics, out var _ /*histories*/, out var audits);
+        var scenarioFactory = SetupScenarioFactoryWithSeededDemographics(out var demographics, out var _ /*histories*/, out var audits, out var beneficiaryContacts, out var profitDetails);
 
         // diff dob and terminated employee
         var demoWithDiffDob = new Demographic
@@ -524,7 +594,7 @@ public class DemographicsServiceTests
     public async Task AddDemographicsStreamAsync_SSNMatch_NoDobMatch_ExistingEmployeeTerminated_HasBalance()
     {
         // Arrange
-        var scenarioFactory = SetupScenarioFactoryWithSeededDemographics(out var demographics, out var histories, out var audits);
+        var scenarioFactory = SetupScenarioFactoryWithSeededDemographics(out var demographics, out var histories, out var audits, out var beneficiaryContacts, out var profitDetails);
 
         // diff dob and terminated employee
         var demoWithDiffDob = new Demographic
