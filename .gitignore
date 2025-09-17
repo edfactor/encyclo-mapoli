@@ -371,3 +371,5 @@ FodyWeavers.xsd
 /test-results/user.json
 test-results
 /src/ui/tsconfig.tsbuildinfo
+/src/services/tests/Demoulas.ProfitSharing.UnitTests/.vscode
+/.github/instructions

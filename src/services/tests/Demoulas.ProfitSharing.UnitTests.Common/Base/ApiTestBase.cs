@@ -32,7 +32,7 @@ public class ApiTestBase<TStartup> where TStartup : class
 
 
     public ServiceProvider? ServiceProvider { get; private set; }
-
+    
     /// <summary>
     ///   Initializes a default instance of <c>ApiTestBase</c>
     /// </summary>
@@ -52,17 +52,20 @@ public class ApiTestBase<TStartup> where TStartup : class
 
                 hostBuilder.ConfigureServices(services =>
                 {
-                    services.AddTransient((_)=> MockDbContextFactory);
+                    services.AddTransient((_) => MockDbContextFactory);
 
                     services.AddTransient((_) => MockEmbeddedSqlService.Initialize());
                     services.AddTransient<ICalendarService, CalendarService>();
+
+                    // Allow tests to provide additional service registrations before the provider is built.
+                    TestServiceOverrides.Hook?.Invoke(services);
 
                     ServiceProvider = services.BuildServiceProvider();
                 });
             });
 
         ApiClient = builder.CreateClient();
-        
+
         // When debugging, the 100-second default goes by quickly.
         if (Debugger.IsAttached)
         {
@@ -72,12 +75,12 @@ public class ApiTestBase<TStartup> where TStartup : class
         DownloadClient = builder.CreateClient();
         DownloadClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("text/csv"));
     }
-    
-   /// <summary>
-   /// Retrieves the year with the maximum profit from the database.
-   /// </summary>
-   /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-   /// <returns>A task representing the asynchronous operation, containing the year with the maximum profit as a <see cref="short"/>.</returns>
+
+    /// <summary>
+    /// Retrieves the year with the maximum profit from the database.
+    /// </summary>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task representing the asynchronous operation, containing the year with the maximum profit as a <see cref="short"/>.</returns>
     public Task<short> GetMaxProfitYearAsync(CancellationToken cancellationToken = default)
     {
         return MockDbContextFactory.UseReadOnlyContext(async ctx =>
