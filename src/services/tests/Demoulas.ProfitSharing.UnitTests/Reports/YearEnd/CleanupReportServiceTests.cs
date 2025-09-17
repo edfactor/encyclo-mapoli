@@ -12,6 +12,7 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Demoulas.ProfitSharing.UnitTests.Common.Helpers;
+
 using FastEndpoints;
 using IdGen;
 using Microsoft.EntityFrameworkCore;
@@ -424,7 +425,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             });
 
             response = await ApiClient
-                    .GETAsync<DistributionsAndForfeitureEndpoint, ProfitYearRequest, DistributionsAndForfeitureTotalsResponse>(req);
+                    .GETAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(req);
 
 
             response.Result.ShouldNotBeNull();
@@ -445,7 +446,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         });
 
         response = await ApiClient
-            .GETAsync<DistributionsAndForfeitureEndpoint, ProfitYearRequest,
+            .GETAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
                 DistributionsAndForfeitureTotalsResponse>(req);
 
         response.Result.ShouldNotBeNull();
@@ -464,7 +465,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         });
 
         response = await ApiClient
-            .GETAsync<DistributionsAndForfeitureEndpoint, ProfitYearRequest,
+            .GETAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
                 DistributionsAndForfeitureTotalsResponse>(req);
 
         response.ShouldNotBeNull();
@@ -482,7 +483,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         });
 
         response = await ApiClient
-            .GETAsync<DistributionsAndForfeitureEndpoint, ProfitYearRequest,
+            .GETAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
                 DistributionsAndForfeitureTotalsResponse>(req);
 
         response.ShouldNotBeNull();

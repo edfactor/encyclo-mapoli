@@ -111,41 +111,7 @@ public class CleanupReportService : ICleanupReportService
         }
     }
 
-    public async Task<ReportResponseBase<NamesMissingCommaResponse>> GetNamesMissingCommaAsync(
-        SortedPaginationRequestDto req,
-        CancellationToken cancellationToken = default)
-    {
-        using (_logger.BeginScope("Request BEGIN DEMOGRAPHIC BADGES NOT IN PAY PROFIT"))
-        {
-            var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
-            {
-                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
-                var query = from dem in demographics
-#pragma warning disable CA1847
-                            where dem.ContactInfo.FullName == null || !dem.ContactInfo.FullName.Contains(",")
-#pragma warning restore CA1847
-                            select new NamesMissingCommaResponse
-                            {
-                                BadgeNumber = dem.BadgeNumber,
-                                Ssn = dem.Ssn.MaskSsn(),
-                                EmployeeName = dem.ContactInfo.FullName ?? "",
-                                IsExecutive = dem.PayFrequencyId == PayFrequency.Constants.Monthly,
-                            };
-                return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
-            });
 
-            _logger.LogInformation("Returned {Results} records", results.Results.Count());
-
-            return new ReportResponseBase<NamesMissingCommaResponse>
-            {
-                ReportDate = DateTimeOffset.UtcNow,
-                StartDate = ReferenceData.DsmMinValue,
-                EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
-                ReportName = "MISSING COMMA IN PY_NAME",
-                Response = results
-            };
-        }
-    }
 
     public async Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdaysAsync(
         ProfitYearRequest req,
