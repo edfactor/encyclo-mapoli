@@ -19,6 +19,8 @@ import {
 import { ReportSummary } from "../../../components/ReportSummary";
 import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { useEditState } from "../../../hooks/useEditState";
+import { useRowSelection } from "../../../hooks/useRowSelection";
 import { Messages } from "../../../utils/messageDictonary";
 import { TerminationSearchRequest } from "./Termination";
 import { GetDetailColumns } from "./TerminationDetailsGridColumns";
@@ -57,9 +59,6 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
   const dispatch = useDispatch();
   const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
-  const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
-  const [editedValues, setEditedValues] = useState<Record<string, { value: number; hasError: boolean }>>({});
-  const [loadingRowIds, setLoadingRowIds] = useState<Set<number>>(new Set());
   const [pendingSuccessMessage, setPendingSuccessMessage] = useState<string | null>(null);
   const [isPendingBulkMessage, setIsPendingBulkMessage] = useState<boolean>(false);
   const selectedProfitYear = useDecemberFlowProfitYear();
@@ -67,6 +66,10 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   const [updateForfeitureAdjustmentBulk, { isLoading: isBulkSaving }] = useUpdateForfeitureAdjustmentBulkMutation();
   const [updateForfeitureAdjustment] = useUpdateForfeitureAdjustmentMutation();
   const lastRequestKeyRef = useRef<string | null>(null);
+
+  // Use separate hooks for edit and selection state
+  const editState = useEditState();
+  const selectionState = useRowSelection();
 
   const createRequest = useCallback(
     (
@@ -138,17 +141,15 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   const handleSave = useCallback(
     async (request: ForfeitureAdjustmentUpdateRequest, name: string) => {
       const rowId = request.badgeNumber; // Use badgeNumber as unique identifier
-      setLoadingRowIds((prev) => new Set(Array.from(prev).concat(rowId)));
+      editState.addLoadingRow(rowId);
 
       try {
         await updateForfeitureAdjustment(request);
         const rowKey = `${request.badgeNumber}-${request.profitYear}`;
-        setEditedValues((prev) => {
-          const updated = { ...prev };
-          delete updated[rowKey];
-          return updated;
-        });
-        onUnsavedChanges(Object.keys(editedValues).length > 1);
+        editState.removeEditedValue(rowKey);
+        // Check for remaining edits after removing this one
+        const remainingEdits = Object.keys(editState.editedValues).filter(key => key !== rowKey).length > 0;
+        onUnsavedChanges(remainingEdits);
 
         // Prepare success message and refresh grid
         const employeeName = name || "the selected employee";
@@ -158,16 +159,12 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
         console.error("Failed to save forfeiture adjustment:", error);
         alert("Failed to save. Please try again.");
       } finally {
-        setLoadingRowIds((prev) => {
-          const newSet = new Set(Array.from(prev));
-          newSet.delete(rowId);
-          return newSet;
-        });
+        editState.removeLoadingRow(rowId);
       }
     },
     [
       updateForfeitureAdjustment,
-      editedValues,
+      editState,
       onUnsavedChanges,
       refreshGridAfterSave
     ]
@@ -178,11 +175,10 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     setPageNumber(0);
   }, [resetPageFlag]);
 
-  // Track unsaved changes
+  // Track unsaved changes based on edit state only
   useEffect(() => {
-    const hasChanges = selectedRowIds.length > 0;
-    onUnsavedChanges(hasChanges);
-  }, [selectedRowIds, onUnsavedChanges]);
+    onUnsavedChanges(editState.hasAnyEdits);
+  }, [editState.hasAnyEdits, onUnsavedChanges]);
 
   // Refresh the grid when loading state changes
   const gridRef = useRef<any>(null);
@@ -193,7 +189,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
         suppressFlash: false
       });
     }
-  }, [loadingRowIds]);
+  }, [editState.loadingRowIds]);
 
   // Initialize expandedRows when data is loaded
   useEffect(() => {
@@ -294,41 +290,29 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     }));
   };
 
-  const addRowToSelectedRows = (id: number) => {
-    setSelectedRowIds([...selectedRowIds, id]);
-  };
-
-  const removeRowFromSelectedRows = (id: number) => {
-    setSelectedRowIds(selectedRowIds.filter((rowId) => rowId !== id));
-  };
-
-  const updateEditedValue = useCallback((rowKey: string, value: number, hasError: boolean) => {
-    setEditedValues((prev) => ({
-      ...prev,
-      [rowKey]: { value, hasError }
-    }));
-  }, []);
+  const addRowToSelectedRows = selectionState.addRowToSelection;
+  const removeRowFromSelectedRows = selectionState.removeRowFromSelection;
+  const updateEditedValue = editState.updateEditedValue;
 
   const handleBulkSave = useCallback(
     async (requests: ForfeitureAdjustmentUpdateRequest[], names: string[]) => {
       // Add all affected badge numbers to loading state
       const badgeNumbers = requests.map((request) => request.badgeNumber);
-      setLoadingRowIds((prev) => {
-        const newSet = new Set(Array.from(prev));
-        badgeNumbers.forEach((badgeNumber) => newSet.add(badgeNumber));
-        return newSet;
-      });
+      editState.addLoadingRows(badgeNumbers);
 
       try {
         await updateForfeitureAdjustmentBulk(requests);
-        const updatedEditedValues = { ...editedValues };
-        requests.forEach((request) => {
-          const rowKey = `${request.badgeNumber}-${request.profitYear}`;
-          delete updatedEditedValues[rowKey];
-        });
-        setEditedValues(updatedEditedValues);
-        setSelectedRowIds([]);
-        onUnsavedChanges(Object.keys(updatedEditedValues).length > 0);
+
+        // Clear edited values for saved requests
+        const rowKeys = requests.map(request => `${request.badgeNumber}-${request.profitYear}`);
+        editState.clearEditedValues(rowKeys);
+
+        // Clear selection after successful bulk save
+        selectionState.clearSelection();
+
+        // Check for remaining edits after clearing the saved ones
+        const remainingEditKeys = Object.keys(editState.editedValues).filter(key => !rowKeys.includes(key));
+        onUnsavedChanges(remainingEditKeys.length > 0);
 
         // Prepare bulk success message and refresh grid
         const employeeNames = names.map(name => name || "Unknown Employee");
@@ -339,16 +323,13 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
         alert("Failed to save one or more adjustments. Please try again.");
       } finally {
         // Remove all affected badge numbers from loading state
-        setLoadingRowIds((prev) => {
-          const newSet = new Set(Array.from(prev));
-          badgeNumbers.forEach((badgeNumber) => newSet.delete(badgeNumber));
-          return newSet;
-        });
+        editState.removeLoadingRows(badgeNumbers);
       }
     },
     [
       updateForfeitureAdjustmentBulk,
-      editedValues,
+      editState,
+      selectionState,
       onUnsavedChanges,
       refreshGridAfterSave
     ]
@@ -361,12 +342,12 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       GetDetailColumns(
         addRowToSelectedRows,
         removeRowFromSelectedRows,
-        selectedRowIds,
+        selectionState.selectedRowIds,
         selectedProfitYear,
         handleSave,
         handleBulkSave
       ),
-    [addRowToSelectedRows, removeRowFromSelectedRows, selectedRowIds, selectedProfitYear, handleSave, handleBulkSave]
+    [addRowToSelectedRows, removeRowFromSelectedRows, selectionState.selectedRowIds, selectedProfitYear, handleSave, handleBulkSave]
   );
 
   // Build grid data with expandable rows
@@ -579,9 +560,9 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
                 resizable: true
               },
               context: {
-                editedValues,
+                editedValues: editState.editedValues,
                 updateEditedValue,
-                loadingRowIds
+                loadingRowIds: editState.loadingRowIds
               }
             }}
           />
