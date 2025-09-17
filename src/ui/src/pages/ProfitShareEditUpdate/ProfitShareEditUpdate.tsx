@@ -422,7 +422,6 @@ const ProfitShareEditUpdate = () => {
             })
           );
         } else {
-          console.log("We did not get a status");
           dispatch(setProfitEditUpdateRevertChangesAvailable(false));
         }
       })
