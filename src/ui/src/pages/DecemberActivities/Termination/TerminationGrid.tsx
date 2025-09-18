@@ -465,9 +465,9 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     return [expansionColumn, ...visibleColumns, ...detailOnlyColumns];
   }, [mainColumns, detailColumns]);
 
-  // Row class for detail rows
+  // Row class for detail rows using Tailwind
   const getRowClass = (params: { data: { isDetail: boolean } }) => {
-    return params.data.isDetail ? "detail-row" : "";
+    return params.data.isDetail ? "bg-gray-100" : "";
   };
 
   const sortEventHandler = (update: ISortParams) => {
@@ -481,37 +481,11 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   };
 
   return (
-    <div className="termination-grid-container">
-      <style>
-        {`
-          .termination-spinner-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255,255,255,0.6);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-          .termination-spinner {
-            width: 48px;
-            height: 48px;
-          }
-          .detail-row {
-            background-color: #f5f5f5;
-          }
-          .invalid-cell {
-            background-color: #fff6f6;
-          }
-        `}
-      </style>
+    <div className="relative">
       {isFetching && (
-        <div className="termination-spinner-overlay">
+        <div className="absolute inset-0 w-full h-full bg-white/60 z-[1000] flex items-center justify-center">
           <div
-            className="spinner-border termination-spinner"
+            className="spinner-border w-12 h-12"
             role="status">
             <span className="visually-hidden">Loading...</span>
           </div>
