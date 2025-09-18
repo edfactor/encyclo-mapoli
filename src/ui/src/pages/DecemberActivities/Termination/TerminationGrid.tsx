@@ -526,8 +526,12 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
               rowData: gridData,
               columnDefs: columnDefs,
               getRowClass: getRowClass,
-              rowSelection: "multiple",
-              suppressRowClickSelection: true,
+              rowSelection: {
+                mode: "multiRow",
+                checkboxes: true,
+                headerCheckbox: true,
+                enableClickSelection: false
+              },
               rowHeight: 40,
               suppressMultiSort: true,
               defaultColDef: {

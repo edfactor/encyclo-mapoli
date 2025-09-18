@@ -230,7 +230,12 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
             rowData: mutableRowData,
             columnDefs: columnDefs,
             suppressMultiSort: true,
-            rowSelection: isModal ? "multiple" : undefined,
+            rowSelection: isModal ? {
+              mode: "multiRow",
+              checkboxes: true,
+              headerCheckbox: true,
+              enableClickSelection: false
+            } : undefined,
             onSelectionChanged: (event: SelectionChangedEvent) => {
               if (isModal) {
                 const selectedRows = event.api.getSelectedRows();

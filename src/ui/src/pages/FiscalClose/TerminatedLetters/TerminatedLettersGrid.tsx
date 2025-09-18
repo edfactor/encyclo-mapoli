@@ -228,9 +228,13 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridSearchProps> = ({
               rowData: terminatedLetters?.response.results,
               columnDefs: columnDefs,
               suppressMultiSort: true,
-              rowSelection: "multiple",
-              onSelectionChanged: handleSelectionChanged,
-              suppressRowClickSelection: true
+              rowSelection: {
+                mode: "multiRow",
+                checkboxes: true,
+                headerCheckbox: true,
+                enableClickSelection: false
+              },
+              onSelectionChanged: handleSelectionChanged
             }}
           />
         </>
