@@ -118,28 +118,28 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     <>
       {distributionsAndForfeitures?.response && (
         <>
-          <div className="flex items-start gap-4 py-2 sticky top-0 z-10 bg-white">
-            <div className="flex-1 min-w-0">
+          <div className="flex items-start gap-2 py-2 sticky top-0 z-10 bg-white">
+            <div className="flex-1">
               <TotalsGrid
                 displayData={[[numberToCurrency(distributionsAndForfeitures.distributionTotal || 0)]]}
                 leftColumnHeaders={["Distributions"]}
-                topRowHeaders={[]}></TotalsGrid>
+                topRowHeaders={[]}
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}></TotalsGrid>
             </div>
-            <div className="flex items-center relative flex-[1.1] min-w-[140px]">
-              <div className="flex-1 min-w-0 pr-2">
-                <TotalsGrid
-                  displayData={[[numberToCurrency(distributionsAndForfeitures.stateTaxTotal || 0)]]}
-                  leftColumnHeaders={["State Taxes"]}
-                  topRowHeaders={[]}></TotalsGrid>
-              </div>
+            <div className="flex-1 relative">
+              <TotalsGrid
+                displayData={[[numberToCurrency(distributionsAndForfeitures.stateTaxTotal || 0)]]}
+                leftColumnHeaders={["State Taxes"]}
+                topRowHeaders={[]}
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}></TotalsGrid>
               {distributionsAndForfeitures.stateTaxTotals &&
                 Object.keys(distributionsAndForfeitures.stateTaxTotals).length > 0 && (
                   <div
-                    className="relative inline-block"
+                    className="absolute top-1/2 -translate-y-1/2 -mt-0.5 right-2"
                     onMouseEnter={handlePopoverOpen}
                     onMouseLeave={handlePopoverClose}>
                     <InfoOutlinedIcon
-                      className="cursor-pointer ml-1 text-green-500"
+                      className="cursor-pointer text-green-500"
                       fontSize="small"
                     />
                     {open && (
@@ -165,24 +165,26 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                                 </tr>
                               ))}
                             </tbody>
-                          </table>
+                            </table>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                   </div>
                 )}
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1">
               <TotalsGrid
                 displayData={[[numberToCurrency(distributionsAndForfeitures.federalTaxTotal || 0)]]}
                 leftColumnHeaders={["Federal Taxes"]}
-                topRowHeaders={[]}></TotalsGrid>
+                topRowHeaders={[]}
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}></TotalsGrid>
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1">
               <TotalsGrid
                 displayData={[[numberToCurrency(distributionsAndForfeitures.forfeitureTotal || 0)]]}
                 leftColumnHeaders={["Forfeitures"]}
-                topRowHeaders={[]}></TotalsGrid>
+                topRowHeaders={[]}
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}></TotalsGrid>
             </div>
           </div>
 
