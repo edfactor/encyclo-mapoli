@@ -44,6 +44,7 @@ internal static class Program
             "goldenexpress" => new GoldenExpressRun { DataDirectory = dataDirectory },
             "masterinquiry" => new MasterInquiryRun { DataDirectory = dataDirectory },
             "tinker" => new TinkerRun { DataDirectory = dataDirectory },
+            "seven" => new SevenRun { DataDirectory = dataDirectory },
             "view" => new ViewRun { DataDirectory = dataDirectory },
             _ => throw new ArgumentException($"Unknown run type: {runType}. Valid options are: baseline, golden, goldenexpress, masterinquiry, tinker, view")
         };

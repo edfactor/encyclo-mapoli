@@ -108,7 +108,7 @@ export const GetDetailColumns = (
         if (!params.data.isDetail) return "";
         const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
         const hasError = params.context?.editedValues?.[rowKey]?.hasError;
-        return hasError ? "invalid-cell" : "";
+        return hasError ? "bg-red-50" : "";
       },
       editable: ({ node }) => node.data.isDetail && node.data.profitYear === selectedProfitYear,
       flex: 1,

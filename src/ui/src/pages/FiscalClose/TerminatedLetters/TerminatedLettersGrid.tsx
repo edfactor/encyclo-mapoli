@@ -21,7 +21,6 @@ import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { TerminatedLettersDetail } from "types/reports/terminated-letters";
 import { CAPTIONS } from "../../../constants";
-import "./TerminatedLettersGrid.css";
 import { GetTerminatedLettersColumns } from "./TerminatedLettersGridColumns";
 
 interface TerminatedLettersGridSearchProps {
@@ -229,9 +228,13 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridSearchProps> = ({
               rowData: terminatedLetters?.response.results,
               columnDefs: columnDefs,
               suppressMultiSort: true,
-              rowSelection: "multiple",
-              onSelectionChanged: handleSelectionChanged,
-              suppressRowClickSelection: true
+              rowSelection: {
+                mode: "multiRow",
+                checkboxes: true,
+                headerCheckbox: true,
+                enableClickSelection: false
+              },
+              onSelectionChanged: handleSelectionChanged
             }}
           />
         </>

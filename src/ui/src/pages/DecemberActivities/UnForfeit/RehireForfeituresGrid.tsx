@@ -531,8 +531,12 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
               rowData: gridData,
               columnDefs: columnDefs,
               getRowClass: (params: any) => (params.data.isDetail ? "detail-row" : ""),
-              rowSelection: "multiple",
-              suppressRowClickSelection: true,
+              rowSelection: {
+                mode: "multiRow",
+                checkboxes: true,
+                headerCheckbox: true,
+                enableClickSelection: false
+              },
               rowHeight: 40,
               suppressMultiSort: true,
               defaultColDef: {

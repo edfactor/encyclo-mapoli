@@ -50,8 +50,8 @@ import YTDWages from "../../pages/YTDWagesExtract/YTDWages";
 import EnvironmentUtils from "../../utils/environmentUtils";
 import { createUnauthorizedParams, isPathAllowedInNavigation } from "../../utils/navigationAccessUtils";
 
-import ImpersonationMultiSelect from "components/MenuBar/ImpersonationMultiSelect";
 import { MenuBar } from "components/MenuBar/MenuBar";
+import { ImpersonationMultiSelect } from "smart-ui-library";
 import BeneficiaryInquiry from "../../pages/BeneficiaryInquiry/BeneficiaryInquiry";
 import MilitaryEntryAndModification from "../../pages/DecemberActivities/MilitaryEntryAndModification/MilitaryEntryAndModification";
 import DevDebug from "../../pages/Dev/DevDebug";
