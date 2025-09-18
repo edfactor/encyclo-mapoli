@@ -501,7 +501,7 @@ public class DemographicsService : IDemographicsServiceInternal
     {
         List<Demographic> existingEntities = new();
 
-        if (!demographicsEntities.Any())
+        if (demographicsEntities.Any())
         {
             var ssnAndDobPairs = demographicsEntities.Select(d => (d.Ssn, d.DateOfBirth)).ToList();
             var oracleHcmIds = demographicsEntities.Select(d => d.OracleHcmId).ToHashSet();
@@ -547,8 +547,6 @@ public class DemographicsService : IDemographicsServiceInternal
             existingEntities = existingEntities.GroupBy(e => e.Id).Select(g => g.First()).ToList();
         }
             return existingEntities;
-        }
     }
     #endregion
-
 }
