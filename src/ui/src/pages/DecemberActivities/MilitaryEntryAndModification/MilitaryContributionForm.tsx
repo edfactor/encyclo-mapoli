@@ -12,7 +12,7 @@ interface FormData {
 }
 
 interface MilitaryContributionFormProps {
-  onSubmit: (contribution: MilitaryContribution) => void;
+  onSubmit: (contribution: MilitaryContribution & { contributionYear: number }) => void;
   onCancel: () => void;
   initialData?: MilitaryContribution;
   isLoading?: boolean;
@@ -76,7 +76,10 @@ const MilitaryContributionForm = ({
 
         await createMilitaryContribution(request).unwrap();
 
-        onSubmit(contribution);
+        onSubmit({
+          ...contribution,
+          contributionYear: data.contributionDate.getFullYear()
+        });
       } catch (error) {
         if (
           typeof error === "object" &&
@@ -85,8 +88,8 @@ const MilitaryContributionForm = ({
           (error as any).data?.errors?.[0]?.reason
         ) {
           if (
-            (error as any).data.errors[0].reason ===
-            "Regular Contribution already recorded for Year. Duplicates are not allowed."
+            (error as any).data.errors[0].reason &&
+            (error as any).data.errors[0].reason.includes("Duplicates are not allowed.")
           ) {
             setErrorMessage(
               "There is already a contribution for that year. Please check supplemental box and resubmit if applicable."

@@ -4,12 +4,13 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { DSMAccordion, Page } from "smart-ui-library";
+import { ApiMessageAlert, DSMAccordion, formatNumberWithComma, Page, setMessage } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
 import { InquiryApi } from "../../../reduxstore/api/InquiryApi";
+import { MessageKeys, Messages } from "../../../utils/messageDictonary";
 import useMilitaryEntryAndModification from "./hooks/useMilitaryEntryAndModification";
 import MilitaryContributionForm from "./MilitaryContributionForm";
 import MilitaryContributionGrid from "./MilitaryContributionFormGrid";
@@ -50,6 +51,27 @@ const MilitaryEntryAndModificationContent = () => {
     setMemberDetailsRefreshTrigger(prev => prev + 1);
   };
 
+  const handleContributionSaved = (contribution: { contributionAmount: number; contributionYear: number; isSupplementalContribution: boolean }) => {
+    const employeeName = masterInquiryMemberDetails?.firstName && masterInquiryMemberDetails?.lastName
+      ? `${masterInquiryMemberDetails.firstName} ${masterInquiryMemberDetails.lastName}`
+      : "the selected employee";
+
+    const contributionType = contribution.isSupplementalContribution ? "supplemental" : "regular";
+    const successMessage = `The ${contributionType} military contribution of $${formatNumberWithComma(contribution.contributionAmount)} for year ${contribution.contributionYear} for ${employeeName} saved successfully`;
+
+    dispatch(
+      setMessage({
+        ...Messages.MilitaryContributionSaveSuccess,
+        message: {
+          ...Messages.MilitaryContributionSaveSuccess.message,
+          message: successMessage
+        }
+      })
+    );
+
+    handleCloseForm();
+  };
+
   useEffect(() => {
     if (masterInquiryMemberDetails) {
       fetchMilitaryContributions();
@@ -60,6 +82,10 @@ const MilitaryEntryAndModificationContent = () => {
     <Grid
       container
       rowSpacing="24px">
+      <Grid width={"100%"}>
+        <ApiMessageAlert commonKey={MessageKeys.MilitaryContribution} />
+      </Grid>
+
       <Grid width={"100%"}>
         <DSMAccordion title="Filter">
           <MilitaryEntryAndModificationSearchFilter />
@@ -92,10 +118,9 @@ const MilitaryEntryAndModificationContent = () => {
         <DialogTitle>Add Military Contribution</DialogTitle>
         <DialogContent>
           <MilitaryContributionForm
-            onSubmit={(rows) => {
-              handleCloseForm();
+            onSubmit={(contribution) => {
+              handleContributionSaved(contribution);
               dispatch(InquiryApi.util.invalidateTags(["memberDetails"]));
-              // The handleCloseForm already triggers the member details refresh
             }}
             onCancel={handleCloseForm}
             badgeNumber={Number(masterInquiryMemberDetails?.badgeNumber)}
