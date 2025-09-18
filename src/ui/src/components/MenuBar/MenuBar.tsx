@@ -1,6 +1,5 @@
 import { FC } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import "./MenuBar.css";
 import { ICommon } from "../ICommon";
 import NavButton from "./NavButton";
 import PopupMenu from "./PopupMenu";
