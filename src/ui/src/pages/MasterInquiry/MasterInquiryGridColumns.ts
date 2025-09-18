@@ -28,7 +28,8 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "profitCodeId",
       colId: "profitCodeId",
       minWidth: 100,
-      type: "leftAligned",
+      headerClass: "left-align",
+      cellClass: "left-align",
       resizable: true,
       tooltipValueGetter: (params) => {
         return params.data?.profitCodeName;
@@ -62,7 +63,8 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "monthToDate",
       colId: "monthToDate",
       minWidth: 100,
-      type: "rightAligned",
+      headerClass: "right-align",
+      cellClass: "right-align",
       sortable: false,
       resizable: true,
       valueFormatter: (params) => {
@@ -106,7 +108,8 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "commentTypeName",
       colId: "commentTypeName",
       minWidth: 100,
-      type: "leftAligned",
+      headerClass: "left-align",
+      cellClass: "left-align",
       resizable: true
     },
     {

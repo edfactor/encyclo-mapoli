@@ -1,6 +1,6 @@
 import { Button, Grid, Stack } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import TotalsGrid from "components/TotalsGrid";
+import TotalsGrid from "components/TotalsGrid/TotalsGrid";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";

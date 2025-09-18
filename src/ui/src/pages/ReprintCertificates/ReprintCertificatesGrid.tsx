@@ -131,8 +131,12 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
         providedOptions={{
           rowData: gridData,
           columnDefs: columnDefs,
-          rowSelection: "multiple",
-          suppressRowClickSelection: true,
+          rowSelection: {
+            mode: "multiRow",
+            checkboxes: true,
+            headerCheckbox: true,
+            enableClickSelection: false
+          },
           onSelectionChanged: onSelectionChanged
         }}
       />

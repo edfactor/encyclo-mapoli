@@ -24,6 +24,7 @@ using Demoulas.Util.Extensions;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using NSwag.Generation.AspNetCore;
 using Scalar.AspNetCore;
+using Demoulas.ProfitSharing.Services.Middleware;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder();
 
@@ -132,7 +133,7 @@ void OktaDocumentSettings(AspNetCoreOpenApiDocumentGeneratorSettings settings)
 }
 
 builder.ConfigureDefaultEndpoints(meterNames: [],
-        activitySourceNames: [OracleHcmActivitySource.Instance.Name])
+    activitySourceNames: [OracleHcmActivitySource.Instance.Name, "Demoulas.ProfitSharing.Endpoints"])
     .AddSwaggerOpenApi(oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings)
     .AddSwaggerOpenApi(version: 2, oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings);
 
@@ -175,6 +176,9 @@ app.UseDefaultEndpoints(OktaSettingsAction)
         settings.Path = "/redoc";
         settings.DocumentPath = "/swagger/Release 1.0/swagger.json"; // Single document
     });
+
+// Global per-request instrumentation: Activity + log scope
+app.UseEndpointInstrumentation();
 
 OktaSwaggerConfiguration oktaSwaggerConfiguration = OktaSwaggerConfiguration.Empty();
 OktaSettingsAction(oktaSwaggerConfiguration);

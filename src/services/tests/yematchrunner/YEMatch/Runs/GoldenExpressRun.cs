@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using YEMatch.YEMatch.ArrangeActivites;
-using YEMatch.YEMatch.ReadyActivities;
+using YEMatch.YEMatch.AssertActivities;
 using YEMatch.YEMatch.SmartIntegrationTests;
 
 namespace YEMatch.YEMatch.Runs;
@@ -34,6 +34,7 @@ public class GoldenExpressRun : Runnable
             nameof(IntPay443), // Runs the SMART Integration test 
             "R21", // PAY444 - update intermediate values
             "R22", // PAY447 - creates a data file
+            nameof(UpdateNavigation), // Update the navigation table
             "P23", // Does Contributions
             "TestProfitDetailSelectedColumns", // TEST: PROFIT_DETAILS; code,cont,earn,fort,cmt,zercont,enrollment_id
             "TestEtvaNow", // Verify ETVA for 2025

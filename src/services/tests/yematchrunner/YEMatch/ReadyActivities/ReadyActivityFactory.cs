@@ -37,7 +37,7 @@ public static class ReadyActivityFactory
             // 241228 <-- Saturday of "last week" for 2024.   Week # 52 some year, some years Week 53
             new ReadyActivity(sshClient, SftpClient, chatty, "A2", "TERM-REHIRE", "BDATE=240106 EDATE=241228", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A3", "PROF-TERM", "SDATE=240106 EDATE=241228 YDATE=2024", dataDirectory),
-            new ReadyActivity(sshClient, SftpClient, chatty, "A4", "QRY-PSLOAN", "", dataDirectory),
+            new ReadyActivity(sshClient, SftpClient, chatty, "A4", "QRY-PSLOAN", "YR=2024", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A5", "PROF-DOLLAR-EXEC-EXTRACT", "YEAR=2024", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A6", "PAYPROFIT-CLEAR-EXEC", "", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A7", "!Ready-Screen-008-09", "", dataDirectory),
