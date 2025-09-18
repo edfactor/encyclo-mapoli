@@ -7,7 +7,7 @@ namespace Demoulas.ProfitSharing.Endpoints.Base;
 /// </summary>
 public interface IHasNavigationId
 {
-	short NavigationId { get; }
+    short NavigationId { get; }
 }
 
 /// <summary>
@@ -17,18 +17,20 @@ public interface IHasNavigationId
 /// <typeparam name="TRequest">The request DTO type.</typeparam>
 /// <typeparam name="TResponse">The response DTO type.</typeparam>
 public abstract class ProfitSharingEndpoint<TRequest, TResponse> : Endpoint<TRequest, TResponse>, IHasNavigationId
-	where TRequest : notnull
-	where TResponse : notnull
+    where TRequest : notnull
+    where TResponse : notnull
 {
-	protected ProfitSharingEndpoint(short navigationId)
-	{
-		NavigationId = navigationId;
-	}
+    protected ProfitSharingEndpoint(short navigationId)
+    {
+        NavigationId = navigationId;
+    }
 
-	/// <summary>
-	/// A short identifier representing the navigation/menu item for this endpoint.
-	/// </summary>
-	public short NavigationId { get; }
+    /// <summary>
+    /// A short identifier representing the navigation/menu item for this endpoint.
+    /// </summary>
+    public short NavigationId { get; }
+
+    // Intentionally no HandleAsync override here to avoid conflicts with derived ExecuteAsync implementations.
 }
 
 /// <summary>
@@ -36,14 +38,15 @@ public abstract class ProfitSharingEndpoint<TRequest, TResponse> : Endpoint<TReq
 /// </summary>
 /// <typeparam name="TRequest">The request DTO type.</typeparam>
 public abstract class ProfitSharingRequestEndpoint<TRequest> : Endpoint<TRequest>, IHasNavigationId
-	where TRequest : notnull
+    where TRequest : notnull
 {
-	protected ProfitSharingRequestEndpoint(short navigationId)
-	{
-		NavigationId = navigationId;
-	}
+    protected ProfitSharingRequestEndpoint(short navigationId)
+    {
+        NavigationId = navigationId;
+    }
 
-	public short NavigationId { get; }
+    public short NavigationId { get; }
+    // Intentionally no HandleAsync override here to avoid conflicts with derived ExecuteAsync implementations.
 }
 
 /// <summary>
@@ -51,14 +54,15 @@ public abstract class ProfitSharingRequestEndpoint<TRequest> : Endpoint<TRequest
 /// </summary>
 /// <typeparam name="TResponse">The response DTO type.</typeparam>
 public abstract class ProfitSharingResponseEndpoint<TResponse> : EndpointWithoutRequest<TResponse>, IHasNavigationId
-	where TResponse : notnull
+    where TResponse : notnull
 {
-	protected ProfitSharingResponseEndpoint(short navigationId)
-	{
-		NavigationId = navigationId;
-	}
+    protected ProfitSharingResponseEndpoint(short navigationId)
+    {
+        NavigationId = navigationId;
+    }
 
-	public short NavigationId { get; }
+    public short NavigationId { get; }
+    // Intentionally no HandleAsync override here to avoid conflicts with derived ExecuteAsync implementations.
 }
 
 /// <summary>
@@ -66,10 +70,11 @@ public abstract class ProfitSharingResponseEndpoint<TResponse> : EndpointWithout
 /// </summary>
 public abstract class ProfitSharingEndpoint : EndpointWithoutRequest, IHasNavigationId
 {
-	protected ProfitSharingEndpoint(short navigationId)
-	{
-		NavigationId = navigationId;
-	}
+    protected ProfitSharingEndpoint(short navigationId)
+    {
+        NavigationId = navigationId;
+    }
 
-	public short NavigationId { get; }
+    public short NavigationId { get; }
+    // Intentionally no HandleAsync override here to avoid conflicts with derived ExecuteAsync implementations.
 }
