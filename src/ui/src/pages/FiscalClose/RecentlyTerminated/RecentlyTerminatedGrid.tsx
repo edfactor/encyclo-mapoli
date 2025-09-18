@@ -5,7 +5,6 @@ import { useLazyGetRecentlyTerminatedReportQuery } from "reduxstore/api/YearsEnd
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
-import "./RecentlyTerminatedGrid.css";
 import { GetRecentlyTerminatedColumns } from "./RecentlyTerminatedGridColumns";
 
 interface RecentlyTerminatedGridSearchProps {

@@ -21,7 +21,6 @@ import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { TerminatedLettersDetail } from "types/reports/terminated-letters";
 import { CAPTIONS } from "../../../constants";
-import "./TerminatedLettersGrid.css";
 import { GetTerminatedLettersColumns } from "./TerminatedLettersGridColumns";
 
 interface TerminatedLettersGridSearchProps {
