@@ -211,7 +211,6 @@ const MasterInquiryGroupingGrid = ({ searchParams }: { searchParams: MasterInqui
               },
               rowHeight: 40,
               headerHeight: 36,
-              suppressRowClickSelection: true,
               suppressCellFocus: true
             }}
           />

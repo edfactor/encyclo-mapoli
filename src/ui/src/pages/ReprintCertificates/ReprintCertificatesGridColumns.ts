@@ -24,8 +24,6 @@ export const GetReprintCertificatesGridColumns = () //selectedRowIds: number[],
       field: "selection",
       colId: "selection",
       width: 50,
-      checkboxSelection: true,
-      headerCheckboxSelection: true,
       pinned: "right",
       sortable: false,
       resizable: false
