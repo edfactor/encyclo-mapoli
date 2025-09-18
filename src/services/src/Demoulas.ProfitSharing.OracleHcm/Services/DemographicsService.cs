@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
@@ -100,15 +101,7 @@ public class DemographicsService : IDemographicsServiceInternal
         // Use writable context for the upsert operation
         return _dataContextFactory.UseWritableContext(async context =>
         {
-
-            // this call is going to be SLOW -should revisit if we can find a better way to do this
-            List < Demographic > existingEntities = context.Demographics
-                .AsEnumerable()
-                .Where(d =>
-                    oracleHcmIds.Contains(d.OracleHcmId) ||
-                    ssnAndDobPairs.Any(pair => pair.Ssn == d.Ssn && pair.DateOfBirth == d.DateOfBirth))
-                .ToList();
-
+            List<Demographic> existingEntities = await GetMatchingDemographicsWithSqlAsync(demographicsEntities, context, cancellationToken);
 
             // Handle potential duplicates in the existing database (SSN duplicates)
             List<Demographic> duplicateSsnEntities = existingEntities.GroupBy(e => e.Ssn)
@@ -463,7 +456,128 @@ public class DemographicsService : IDemographicsServiceInternal
         existingEntity.EmploymentStatusId = incomingEntity.EmploymentStatusId;
         existingEntity.ModifiedAtUtc = modificationDate;
     }
+    /// <summary>
+    /// uses inline sql to retrieve demographics from the database that match either OracleHcmId or SSN and DateOfBirth.
+    /// performance is much better than linq method - 35x
+    /// have back up in case of failure to use existing linq method
+    /// </summary>
+    /// <param name="demographicsEntities"></param>
+    /// <param name="context"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    private async Task<List<Demographic>> GetMatchingDemographicsWithSqlAsync(
+    List<Demographic> demographicsEntities,
+    ProfitSharingDbContext context,
+    CancellationToken cancellationToken)
+    {
+        if (!demographicsEntities.Any())
+        {
+            return new List<Demographic>();
+        }
 
-#endregion
+        try
+        {
+            // Format Oracle HCM IDs as a comma-separated string
+            string hcmIdsInClause = string.Join(",", demographicsEntities.Select(d => d.OracleHcmId));
+
+            // Build SSN and DOB pairs for the IN clause
+            var ssnDobConditions = new List<string>();
+            foreach (var entity in demographicsEntities)
+            {
+                // Format date in Oracle format
+                string dateString = entity.DateOfBirth.ToString("yyyy-MM-dd");
+                ssnDobConditions.Add($"(d.SSN = {entity.Ssn} AND d.DATE_OF_BIRTH = TO_DATE('{dateString}', 'YYYY-MM-DD'))");
+            }
+
+            // Combine conditions with OR
+            string ssnDobWhereClause = string.Join(" OR ", ssnDobConditions);
+
+            // Build the complete SQL query
+            string sql = $@"
+            SELECT d.*
+            FROM DEMOGRAPHIC d
+            WHERE d.ORACLE_HCM_ID IN ({hcmIdsInClause})
+            OR ({ssnDobWhereClause})";
+
+            // Execute the SQL directly
+            var result = await context.Demographics
+                .FromSqlRaw(sql)
+                .Include(d => d.ContactInfo)
+                .Include(d => d.Address)
+                .ToListAsync(cancellationToken);
+
+            _logger.LogInformation("Retrieved {Count} matching demographics using direct SQL", result.Count);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error executing direct SQL query to find matching demographics. Falling back to LINQ method.");
+
+            // Fallback to the standard method if direct SQL fails
+            return await RetrieveDbChangedDemographicsAsync(demographicsEntities, context, cancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// method retrieves demographics from the database that match either OracleHcmId or SSN and DateOfBirth.
+    /// </summary>
+    /// <param name="demographicsEntities"></param>
+    /// <param name="context"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    private async Task<List<Demographic>> RetrieveDbChangedDemographicsAsync(List<Demographic> demographicsEntities, ProfitSharingDbContext context, CancellationToken cancellationToken)
+    {
+        List<Demographic> existingEntities = new();
+
+        if (demographicsEntities.Any())
+        {
+            var ssnAndDobPairs = demographicsEntities.Select(d => (d.Ssn, d.DateOfBirth)).ToList();
+            var oracleHcmIds = demographicsEntities.Select(d => d.OracleHcmId).ToHashSet();
+
+            // First, get all demographics with matching Oracle HCM IDs using an efficient Contains query
+            if (oracleHcmIds.Any())
+            {
+                var entitiesByOracleHcmId = await context.Demographics
+                    .Where(d => oracleHcmIds.Contains(d.OracleHcmId))
+                    .ToListAsync(cancellationToken)
+                    .ConfigureAwait(false);
+
+                existingEntities.AddRange(entitiesByOracleHcmId);
+            }
+
+            // Then, get all demographics with matching SSN and DOB pairs using a more complex query
+            if (ssnAndDobPairs.Any())
+            {
+                // Create in-memory table of SSN/DOB pairs
+                var pairTable = ssnAndDobPairs
+                    .Select(p => new { Ssn = p.Ssn, DateOfBirth = p.DateOfBirth })
+                    .ToList();
+
+                // Group by SSN to optimize the query (reduce number of OR conditions)
+                var ssnGroups = pairTable.GroupBy(p => p.Ssn).ToList();
+
+                foreach (var ssnGroup in ssnGroups)
+                {
+                    int ssn = ssnGroup.Key;
+                    var dobList = ssnGroup.Select(p => p.DateOfBirth).ToList();
+
+                    // For each SSN, query all matching DOBs in a single query
+                    var matchingRecords = await context.Demographics
+                        .Where(d => d.Ssn == ssn && dobList.Contains(d.DateOfBirth) && !oracleHcmIds.Contains(d.OracleHcmId))
+                        .ToListAsync(cancellationToken)
+                        .ConfigureAwait(false);
+
+                    existingEntities.AddRange(matchingRecords);
+                }
+            }
+
+            // Remove duplicates (in case a record was found by both criteria)
+            existingEntities = existingEntities.GroupBy(e => e.Id).Select(g => g.First()).ToList();
+        }
+        return existingEntities;
+    }
+
+
+    #endregion
 
 }
