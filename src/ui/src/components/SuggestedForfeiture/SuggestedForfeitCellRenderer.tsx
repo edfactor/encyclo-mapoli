@@ -10,9 +10,9 @@ interface SuggestedForfeitCellRendererProps extends ICellRendererParams {
 export function SuggestedForfeitCellRenderer(
   params: SuggestedForfeitCellRendererProps,
   isTerminations: boolean,
-  isRehireForfeiture: boolean
+  isUnForfeit: boolean
 ) {
-  if (isTerminations == isRehireForfeiture) {
+  if (isTerminations == isUnForfeit) {
     return null; // this combination makes no sense, throw exception?
   }
   if (!params.data?.isDetail) return null;

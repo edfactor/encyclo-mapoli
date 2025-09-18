@@ -3,7 +3,7 @@ import { Checkbox, CircularProgress, IconButton } from "@mui/material";
 import { ColDef, EditableCallbackParams, ICellRendererParams } from "ag-grid-community";
 import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "components/SuggestedForfeiture";
 import { numberToCurrency } from "smart-ui-library";
-import { ForfeitureAdjustmentUpdateRequest, RehireForfeituresSaveButtonCellParams } from "types";
+import { ForfeitureAdjustmentUpdateRequest, UnForfeitsSaveButtonCellParams } from "types";
 import {
   createCommentColumn,
   createCurrencyColumn,
@@ -94,7 +94,7 @@ export const GetProfitDetailColumns = (
         removeRowFromSelectedRows,
         onSave
       },
-      cellRenderer: (params: RehireForfeituresSaveButtonCellParams) => {
+      cellRenderer: (params: UnForfeitsSaveButtonCellParams) => {
         if (!isTransactionEditable(params, selectedProfitYear)) {
           return "";
         }

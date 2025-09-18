@@ -2,17 +2,17 @@ import { GridApi } from "ag-grid-community";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  useLazyGetRehireForfeituresQuery,
+  useLazyGetUnForfeitsQuery,
   useUpdateForfeitureAdjustmentBulkMutation,
   useUpdateForfeitureAdjustmentMutation
 } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { CalendarResponseDto, ForfeitureAdjustmentUpdateRequest, StartAndEndDateRequest } from "reduxstore/types";
 import { formatNumberWithComma, ISortParams, setMessage } from "smart-ui-library";
+import { Messages } from "../utils/messageDictonary";
 import useDecemberFlowProfitYear from "./useDecemberFlowProfitYear";
 import { useEditState } from "./useEditState";
 import { useRowSelection } from "./useRowSelection";
-import { Messages } from "../utils/messageDictonary";
 
 interface UnForfeitGridConfig {
   initialSearchLoaded: boolean;
@@ -49,17 +49,17 @@ export const useUnForfeitGrid = ({
   const [isPendingBulkMessage, setIsPendingBulkMessage] = useState<boolean>(false);
 
   const selectedProfitYear = useDecemberFlowProfitYear();
-  const { rehireForfeitures, rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const { unForfeits, unForfeitsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const dispatch = useDispatch();
 
-  const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetUnForfeitsQuery();
   const [updateForfeitureAdjustmentBulk] = useUpdateForfeitureAdjustmentBulkMutation();
   const [updateForfeitureAdjustment] = useUpdateForfeitureAdjustmentMutation();
 
   const editState = useEditState();
   const selectionState = useRowSelection();
   const gridRef = useRef<any>(null);
-  const prevRehireForfeitures = useRef<any>(null);
+  const prevUnForfeits = useRef<any>(null);
 
   const onGridReady = useCallback((params: { api: GridApi }) => {
     setGridApi(params.api);
@@ -86,14 +86,14 @@ export const useUnForfeitGrid = ({
   // Need a useEffect to reset the page number when total count changes (new search, not pagination)
   useEffect(() => {
     if (
-      rehireForfeitures !== prevRehireForfeitures.current &&
-      rehireForfeitures?.response?.total !== undefined &&
-      rehireForfeitures.response.total !== prevRehireForfeitures.current?.response?.total
+      unForfeits !== prevUnForfeits.current &&
+      unForfeits?.response?.total !== undefined &&
+      unForfeits.response.total !== prevUnForfeits.current?.response?.total
     ) {
       setPageNumber(0);
     }
-    prevRehireForfeitures.current = rehireForfeitures;
-  }, [rehireForfeitures]);
+    prevUnForfeits.current = unForfeits;
+  }, [unForfeits]);
 
   // Create a request object based on current parameters
   const createRequest = useCallback(
@@ -103,8 +103,8 @@ export const useUnForfeitGrid = ({
       isSortDescending: boolean
     ): (StartAndEndDateRequest & { archive?: boolean }) | null => {
       const baseRequest: StartAndEndDateRequest = {
-        beginningDate: rehireForfeituresQueryParams?.beginningDate || fiscalCalendarYear?.fiscalBeginDate || "",
-        endingDate: rehireForfeituresQueryParams?.endingDate || fiscalCalendarYear?.fiscalEndDate || "",
+        beginningDate: unForfeitsQueryParams?.beginningDate || fiscalCalendarYear?.fiscalBeginDate || "",
+        endingDate: unForfeitsQueryParams?.endingDate || fiscalCalendarYear?.fiscalEndDate || "",
         profitYear: selectedProfitYear,
         pagination: { skip, take: pageSize, sortBy, isSortDescending }
       };
@@ -115,7 +115,7 @@ export const useUnForfeitGrid = ({
       return finalRequest;
     },
     [
-      rehireForfeituresQueryParams,
+      unForfeitsQueryParams,
       fiscalCalendarYear?.fiscalBeginDate,
       fiscalCalendarYear?.fiscalEndDate,
       pageSize,
@@ -163,7 +163,7 @@ export const useUnForfeitGrid = ({
           const employeeName = name || "the selected employee";
           const successMessage = `The unforfeiture amount of $${formatNumberWithComma(request.forfeitureAmount)} for ${employeeName} saved successfully`;
 
-          if (rehireForfeituresQueryParams) {
+          if (unForfeitsQueryParams) {
             const searchRequest = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);
             if (searchRequest) {
               await triggerSearch(searchRequest, false);
@@ -182,7 +182,7 @@ export const useUnForfeitGrid = ({
       updateForfeitureAdjustment,
       editState,
       selectionState,
-      rehireForfeituresQueryParams,
+      unForfeitsQueryParams,
       pageNumber,
       pageSize,
       sortParams,
@@ -199,19 +199,15 @@ export const useUnForfeitGrid = ({
 
       try {
         await updateForfeitureAdjustmentBulk(requests);
-        const rowKeys = requests.map(request => `${request.badgeNumber}-${request.profitYear}`);
+        const rowKeys = requests.map((request) => `${request.badgeNumber}-${request.profitYear}`);
         editState.clearEditedValues(rowKeys);
         selectionState.clearSelection();
 
         const employeeNames = names.map((name) => name || "Unknown Employee");
         const bulkSuccessMessage = `Members affected: ${employeeNames.join("; ")}`;
 
-        if (rehireForfeituresQueryParams) {
-          const request = createRequest(
-            pageNumber * pageSize,
-            sortParams.sortBy,
-            sortParams.isSortDescending
-          );
+        if (unForfeitsQueryParams) {
+          const request = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);
           if (request) {
             await triggerSearch(request, false);
             setPendingSuccessMessage(bulkSuccessMessage);
@@ -229,7 +225,7 @@ export const useUnForfeitGrid = ({
       updateForfeitureAdjustmentBulk,
       editState,
       selectionState,
-      rehireForfeituresQueryParams,
+      unForfeitsQueryParams,
       pageNumber,
       pageSize,
       sortParams,
@@ -287,9 +283,9 @@ export const useUnForfeitGrid = ({
 
   // Initialize expandedRows when data is loaded
   useEffect(() => {
-    if (rehireForfeitures?.response?.results && rehireForfeitures.response.results.length > 0) {
+    if (unForfeits?.response?.results && unForfeits.response.results.length > 0) {
       const initialExpandState: Record<string, boolean> = {};
-      rehireForfeitures.response.results.forEach((row: any) => {
+      unForfeits.response.results.forEach((row: any) => {
         const hasDetails = row.details && row.details.length > 0;
         if (hasDetails) {
           initialExpandState[row.badgeNumber.toString()] = true;
@@ -297,7 +293,7 @@ export const useUnForfeitGrid = ({
       });
       setExpandedRows(initialExpandState);
     }
-  }, [rehireForfeitures?.response?.results]);
+  }, [unForfeits?.response?.results]);
 
   // Refresh the grid when loading state changes
   useEffect(() => {
@@ -326,11 +322,11 @@ export const useUnForfeitGrid = ({
 
   // Create the grid data with expandable rows
   const gridData = useMemo(() => {
-    if (!rehireForfeitures?.response?.results) return [];
+    if (!unForfeits?.response?.results) return [];
 
     const rows = [];
 
-    for (const row of rehireForfeitures.response.results) {
+    for (const row of unForfeits.response.results) {
       const hasDetails = row.details && row.details.length > 0;
 
       // Add main row
@@ -360,7 +356,7 @@ export const useUnForfeitGrid = ({
     }
 
     return rows;
-  }, [rehireForfeitures, expandedRows]);
+  }, [unForfeits, expandedRows]);
 
   const paginationHandlers = {
     setPageNumber: (value: number) => {
@@ -390,7 +386,7 @@ export const useUnForfeitGrid = ({
     expandedRows,
     gridData,
     isFetching,
-    rehireForfeitures,
+    unForfeits,
     selectedProfitYear,
 
     // Edit and selection state

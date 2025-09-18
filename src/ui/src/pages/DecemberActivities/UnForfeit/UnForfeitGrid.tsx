@@ -36,7 +36,7 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
     pageSize,
     gridData,
     isFetching,
-    rehireForfeitures,
+    unForfeits,
     selectedProfitYear,
     editState,
     selectionState,
@@ -162,7 +162,7 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
         `}
       </style>
 
-      {rehireForfeitures?.response && (
+      {unForfeits?.response && (
         <>
           <Grid
             container
@@ -170,7 +170,7 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
             alignItems="center"
             marginBottom={2}>
             <Grid>
-              <ReportSummary report={rehireForfeitures} />
+              <ReportSummary report={unForfeits} />
             </Grid>
           </Grid>
 
@@ -202,13 +202,13 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
             }}
           />
 
-          {!!rehireForfeitures && rehireForfeitures.response.results.length > 0 && (
+          {!!unForfeits && unForfeits.response.results.length > 0 && (
             <Pagination
               pageNumber={pageNumber}
               setPageNumber={paginationHandlers.setPageNumber}
               pageSize={pageSize}
               setPageSize={paginationHandlers.setPageSize}
-              recordCount={rehireForfeitures.response.total || 0}
+              recordCount={unForfeits.response.total || 0}
             />
           )}
         </>
