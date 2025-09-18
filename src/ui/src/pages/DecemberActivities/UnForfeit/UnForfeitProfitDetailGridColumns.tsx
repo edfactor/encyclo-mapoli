@@ -10,7 +10,7 @@ import {
   createHoursColumn,
   createYearColumn
 } from "utils/gridColumnFactory";
-import { HeaderComponent } from "./RehireForfeituresHeaderComponent";
+import { HeaderComponent } from "./UnForfeitHeaderComponent";
 
 function isTransactionEditable(params, profitYear: number): boolean {
   if (profitYear && params.data.profitYear !== profitYear) {

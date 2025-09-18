@@ -68,7 +68,7 @@ const schema = yup.object().shape({
   profitYear: yup.number().required("Profit year is required")
 });
 
-interface RehireForfeituresSearchFilterProps {
+interface UnForfeitSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
   fiscalData: CalendarResponseDto;
   onSearch?: () => void;
@@ -76,7 +76,7 @@ interface RehireForfeituresSearchFilterProps {
   setHasUnsavedChanges: (hasChanges: boolean) => void;
 }
 
-const RehireForfeituresSearchFilter: React.FC<RehireForfeituresSearchFilterProps> = ({
+const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
   setInitialSearchLoaded,
   fiscalData,
   onSearch,
@@ -267,4 +267,4 @@ const RehireForfeituresSearchFilter: React.FC<RehireForfeituresSearchFilterProps
   );
 };
 
-export default RehireForfeituresSearchFilter;
+export default UnForfeitSearchFilter;

@@ -5,10 +5,10 @@ import { DSMGrid, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { useUnForfeitGrid } from "../../../hooks/useUnForfeitGrid";
 import { CalendarResponseDto } from "../../../reduxstore/types";
-import { GetProfitDetailColumns } from "./RehireForfeituresProfitDetailGridColumns";
-import { GetRehireForfeituresGridColumns } from "./RehireForfeituresGridColumns";
+import { UnForfeitGridColumns } from "./UnForfeitGridColumns";
+import { GetProfitDetailColumns } from "./UnForfeitProfitDetailGridColumns";
 
-interface RehireForfeituresGridSearchProps {
+interface UnForfeitGridSearchProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
   resetPageFlag: boolean;
@@ -20,7 +20,7 @@ interface RehireForfeituresGridSearchProps {
   fiscalCalendarYear: CalendarResponseDto | null;
 }
 
-const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
+const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
   initialSearchLoaded,
   setInitialSearchLoaded,
   resetPageFlag,
@@ -61,7 +61,7 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
   });
 
   // Get the main and detail columns
-  const mainColumns = useMemo(() => GetRehireForfeituresGridColumns(), []);
+  const mainColumns = useMemo(() => UnForfeitGridColumns(), []);
   const detailColumns = useMemo(
     () =>
       GetProfitDetailColumns(
@@ -71,7 +71,13 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
         handleSave,
         handleBulkSave
       ),
-    [selectionState.addRowToSelection, selectionState.removeRowFromSelection, selectedProfitYear, handleSave, handleBulkSave]
+    [
+      selectionState.addRowToSelection,
+      selectionState.removeRowFromSelection,
+      selectedProfitYear,
+      handleSave,
+      handleBulkSave
+    ]
   );
 
   // Create column definitions with expand/collapse functionality and combine main/detail columns
@@ -211,4 +217,4 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
   );
 };
 
-export default RehireForfeituresGrid;
+export default UnForfeitGrid;
