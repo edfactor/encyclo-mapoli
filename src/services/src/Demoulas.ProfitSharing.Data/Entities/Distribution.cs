@@ -17,7 +17,7 @@ public sealed class Distribution : ModifiedBase
     public required char FrequencyId { get; set; }
     public DistributionFrequency? Frequency { get; set; }
     public required char StatusId { get; set; }
-    public required DistributionStatus Status { get; set; }
+    public DistributionStatus? Status { get; set; }
     
     public DistributionPayee? Payee { get; set; }
     public int? PayeeId { get; set; }
@@ -36,7 +36,7 @@ public sealed class Distribution : ModifiedBase
     public decimal StateTaxAmount { get; set; }
     public decimal CheckAmount { get; set; }
     public char TaxCodeId { get; set; }
-    public required TaxCode TaxCode { get; set; }
+    public TaxCode? TaxCode { get; set; }
     public bool IsDeceased { get; set; }
     public char? GenderId { get; set; }
     public Gender? Gender { get; set; }

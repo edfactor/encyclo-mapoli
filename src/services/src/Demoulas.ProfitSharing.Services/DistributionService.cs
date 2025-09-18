@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -20,11 +21,13 @@ public sealed class DistributionService : IDistributionService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
+    private readonly IAppUser? _appUser;
 
-    public DistributionService(IProfitSharingDataContextFactory dataContextFactory, IDemographicReaderService demographicReaderService)
+    public DistributionService(IProfitSharingDataContextFactory dataContextFactory, IDemographicReaderService demographicReaderService, IAppUser? appUser)
     {
         _dataContextFactory = dataContextFactory;
         _demographicReaderService = demographicReaderService;
+        _appUser = appUser;
     }
 
     public async Task<PaginatedResponseDto<DistributionSearchResponse>> SearchAsync(DistributionSearchRequest request, CancellationToken cancellationToken)
@@ -150,4 +153,126 @@ public sealed class DistributionService : IDistributionService
 
         return result;
     }
+
+    public async Task<CreateDistributionResponse> CreateDistribution(CreateDistributionRequest request, CancellationToken cancellationToken)
+    {
+        
+        if (request.GrossAmount <= 0)
+        {
+            throw new ArgumentException("Gross amount must be greater than zero.", nameof(request.GrossAmount));
+        }
+        if (request.FederalTaxPercentage < 0 || request.FederalTaxPercentage > 100)
+        {
+            throw new ArgumentException("Federal tax percentage must be between 0 and 100.", nameof(request.FederalTaxPercentage));
+        }
+        if (request.StateTaxPercentage < 0 || request.StateTaxPercentage > 100)
+        {
+            throw new ArgumentException("State tax percentage must be between 0 and 100.", nameof(request.StateTaxPercentage));
+        }
+        return await _dataContextFactory.UseWritableContext(async ctx =>
+        {
+            var demographic = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+            var dem = await demographic.Where(d => d.BadgeNumber == request.BadgeNumber).FirstOrDefaultAsync(cancellationToken);
+            if (dem == null)
+            {
+                throw new InvalidOperationException("Badge number not found.");
+            }
+            var maxSequence = await ctx.Distributions.Where(d => d.Ssn == dem.Ssn).MaxAsync(d => (byte?)d.PaymentSequence) ?? 0;
+            var distribution = new Distribution
+            {
+                Ssn = dem.Ssn,
+                EmployeeName = dem.ContactInfo!.FullName ?? "",
+                PaymentSequence = (byte)(maxSequence + 1),
+                StatusId = request.StatusId,
+                FrequencyId = request.FrequencyId,
+                PayeeId = request.PayeeId,
+                ForTheBenefitOfPayee = request.ForTheBenefitOfPayee,
+                ForTheBenefitOfAccountType = request.ForTheBenefitOfAccountType,
+                Tax1099ForEmployee = request.Tax1099ForEmployee,
+                Tax1099ForBeneficiary = request.Tax1099ForBeneficiary,
+                FederalTaxPercentage = request.FederalTaxPercentage,
+                StateTaxPercentage = request.StateTaxPercentage,
+                GrossAmount = request.GrossAmount,
+                FederalTaxAmount = request.FederalTaxAmount,
+                StateTaxAmount = request.StateTaxAmount,
+                CheckAmount = request.CheckAmount,
+                TaxCodeId = request.TaxCodeId,
+                IsDeceased = request.IsDeceased,
+                GenderId = request.GenderId,
+                QualifiedDomesticRelationsOrder = request.IsQdro,
+                Memo = request.Memo,
+                RothIra = request.IsRothIra,
+                CreatedAtUtc = DateTime.UtcNow,
+                UserName = _appUser != null ? _appUser.UserName : "unknown"
+            };
+
+            if (request.ThirdPartyPayee != null)
+            {
+                distribution.ThirdPartyPayee = new DistributionThirdPartyPayee
+                {
+                    Payee = request.ThirdPartyPayee.Payee,
+                    Name = request.ThirdPartyPayee.Name,
+                    Account = request.ThirdPartyPayee.Account,
+                    Address = new Data.Entities.Address()
+                    {
+                        Street = request.ThirdPartyPayee.Address.Street,
+                        Street2 = request.ThirdPartyPayee.Address.Street2,
+                        Street3 = request.ThirdPartyPayee.Address.Street3,
+                        Street4 = request.ThirdPartyPayee.Address.Street4,
+                        City = request.ThirdPartyPayee.Address.City,
+                        State = request.ThirdPartyPayee.Address.State,
+                        PostalCode = request.ThirdPartyPayee.Address.PostalCode,
+                        CountryIso = request.ThirdPartyPayee.Address.CountryIso ?? "US",
+                    },
+                    Memo = request.ThirdPartyPayee.Memo
+                };
+            }
+            await ctx.Distributions.AddAsync(distribution, cancellationToken);
+            await ctx.SaveChangesAsync(cancellationToken);
+
+            return new CreateDistributionResponse
+            {
+                Id = distribution.Id,
+                MaskSsn = distribution.Ssn.MaskSsn(),
+                PaymentSequence = distribution.PaymentSequence,
+                StatusId = distribution.StatusId,
+                FrequencyId = distribution.FrequencyId,
+                PayeeId = distribution.PayeeId,
+                ForTheBenefitOfPayee = distribution.ForTheBenefitOfPayee,
+                ForTheBenefitOfAccountType = distribution.ForTheBenefitOfAccountType,
+                Tax1099ForEmployee = distribution.Tax1099ForEmployee,
+                Tax1099ForBeneficiary = distribution.Tax1099ForBeneficiary,
+                FederalTaxPercentage = distribution.FederalTaxPercentage,
+                StateTaxPercentage = distribution.StateTaxPercentage,
+                GrossAmount = distribution.GrossAmount,
+                FederalTaxAmount = distribution.FederalTaxAmount,
+                StateTaxAmount = distribution.StateTaxAmount,
+                CheckAmount = distribution.CheckAmount,
+                TaxCodeId = distribution.TaxCodeId,
+                IsDeceased = distribution.IsDeceased,
+                GenderId = distribution.GenderId,
+                IsQdro = distribution.QualifiedDomesticRelationsOrder,
+                Memo = distribution.Memo,
+                IsRothIra = distribution.RothIra,
+                ThirdPartyPayee = new ThirdPartyPayee()
+                {
+                    Account = distribution.ThirdPartyPayee?.Account,
+                    Name = distribution.ThirdPartyPayee?.Name,
+                    Payee = distribution.ThirdPartyPayee?.Payee,
+                    Memo = distribution.ThirdPartyPayee?.Memo,
+                    Address = new Common.Contracts.Request.Distributions.Address()
+                    {
+                        Street = distribution.ThirdPartyPayee?.Address?.Street ?? string.Empty,
+                        Street2 = distribution.ThirdPartyPayee?.Address?.Street2,
+                        Street3 = distribution.ThirdPartyPayee?.Address?.Street3,
+                        Street4 = distribution.ThirdPartyPayee?.Address?.Street4,
+                        City = distribution.ThirdPartyPayee?.Address?.City,
+                        State = distribution.ThirdPartyPayee?.Address?.State,
+                        PostalCode = distribution.ThirdPartyPayee?.Address?.PostalCode,
+                        CountryIso = distribution.ThirdPartyPayee?.Address?.CountryIso ?? "US",
+                    }
+                }
+            };
+        }, cancellationToken);
+}
 }
