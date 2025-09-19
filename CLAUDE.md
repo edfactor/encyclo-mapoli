@@ -1,16 +1,110 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+AI Assistant Project Instructions for Claude Code (claude.ai/code) when working with this repository. Focus on THESE patterns; avoid generic advice.
 
-## Project Overview
+## Architecture Overview
 
-Smart Profit Sharing is a full-stack application with:
-- **Backend**: .NET 9 services using Fast-Endpoints, EntityFramework Core 9 with Oracle
-- **Frontend**: React 19 + TypeScript with Vite, Material-UI, Redux Toolkit
-- **Authentication**: Okta integration
-- **Database**: Oracle 19
+- Monorepo with two primary roots:
+  - `src/services/` (.NET 9) multi-project solution `Demoulas.ProfitSharing.slnx` (FastEndpoints, EF Core 9 + Oracle, Aspire, Serilog, Feature Flags, RabbitMQ, Mapperly, Shouldly)
+  - `src/ui/` (Vite + React + TypeScript + Tailwind + Redux Toolkit + internal `smart-ui-library`)
+- Database: Oracle 19. EF Core migrations via `ProfitSharingDbContext`; CLI utility project `Demoulas.ProfitSharing.Data.Cli` performs schema ops & imports from legacy READY system
+- Cross-cutting: Central package mgmt (`Directory.Packages.props`), shared build config (`Directory.Build.props`), global SDK pin (`global.json`)
 
-## Essential Commands
+## Key Backend Conventions
+
+- Startup/entrypoint: run/debug `Demoulas.ProfitSharing.AppHost` (Aspire host). Avoid creating new ad-hoc hosts
+- Use FastEndpoints; group endpoint files logically. Prefer minimal API style. Return typed results + proper status codes
+- Mapping: Prefer `Mapperly` for DTO<->entity; follow existing mapper classes (see `*Mapper.cs`). Don't hand-write repetitive mapping unless customization is needed
+- Data access: Use async EF Core patterns. Bulk maintenance uses `ExecuteUpdate/ExecuteDelete` where safe. For dynamic filters, build expressions (see `DemographicsService`). Avoid raw SQL unless performance justified—then parameterize
+- Auditing & History: When updating mutable domain entities with historical tracking (example: `DemographicsService` creating `DemographicHistory` with `ValidFrom/ValidTo`), replicate the pattern: close current record (`ValidTo = now`), insert new history row. NEVER overwrite historical rows
+- Identifiers: `OracleHcmId` is authoritative when present; fall back to composite `(Ssn,BadgeNumber)` only when Oracle id missing. Mirror guard logic (skip ambiguous BadgeNumber == 0 cases) if extending
+- Entity updates: Keep helper methods like `UpdateEntityValues` cohesive; prefer adding fields there instead of scattering manual per-field assignments
+- Validation errors & audits: Use `DemographicSyncAudit` pattern—batch add + save once. When adding new audit types, follow existing property naming
+
+## Endpoint Results Pattern (MANDATORY)
+
+All FastEndpoints MUST return typed minimal API union results AND internally use the domain `Result<T>` record (`Demoulas.ProfitSharing.Common.Contracts.Result<T>`) for service-layer outcomes.
+
+Patterns:
+- Service layer returns/constructs `Result<T>` (Success, Failure, ValidationFailure)
+- Endpoint converts domain result via `Match` (or helper) to: `Results<Ok<T>, NotFound, ProblemHttpResult>` (queries) or `Results<Ok, ProblemHttpResult>` (commands). Include `NotFound` for resource-missing semantics; add `ValidationProblem` only if you propagate structured validation errors directly
+- Helpers: Use `ResultHttpExtensions.ToResultOrNotFound()` + `ToHttpResult()` to reduce boilerplate (e.g., `dto.ToResultOrNotFound(Error.CalendarYearNotFound).ToHttpResult(Error.CalendarYearNotFound)`)
+- Implicit: `Result<T>` has an implicit conversion to `Results<Ok<T>, NotFound, ProblemHttpResult>` but ONLY use it when you do not need to distinguish specific not-found errors (otherwise call `ToHttpResult(Error.SomeNotFound)`)
+- Errors: Use specific not-found codes (e.g., `Error.CalendarYearNotFound`). Avoid reusing unrelated error descriptions to trigger NotFound
+- Map: `Success => TypedResults.Ok(value)`, not-found error => `TypedResults.NotFound()`, other errors/validation => `TypedResults.Problem(problem.Detail)`
+- Example (explicit mapping):
+  ```csharp
+  var result = await _svc.GetAsync(req.Id, ct);
+  return result.ToHttpResult(Error.SomeEntityNotFound);
+  ```
+- Avoid returning raw DTOs or nulls; always wrap service outcomes in `Result<T>` before translating to HTTP
+- Catch unexpected exceptions and map to `TypedResults.Problem(ex.Message)` (logging appropriately) unless a global handler already standardizes this
+
+## Backend Coding Style
+
+- File-scoped namespaces; one class per file; explicit access modifiers
+- Prefer explicit types unless initializer makes type obvious
+- Use `readonly` where applicable; private fields `_camelCase`; private static `s_` prefix; constants PascalCase
+- Always brace control blocks; favor null propagation `?.` and coalescing `??`
+- XML doc comments for public & internal APIs
+
+## Database & CLI
+
+- Migrations: `dotnet ef migrations add <Name> --context ProfitSharingDbContext` from `src/services` root
+- Schema ops (run from solution root or services dir):
+  - Upgrade: `Demoulas.ProfitSharing.Data.Cli upgrade-db --connection-name ProfitSharing`
+  - Drop/recreate: `... drop-recreate-db --connection-name ProfitSharing`
+  - Import legacy READY: `... import-from-ready --connection-name ProfitSharing --sql-file "src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema PROFITSHARE`
+  - Docs: `... generate-dgml` / `generate-markdown`
+
+## Frontend Conventions
+
+- Node managed via Volta; assume Node 20.x LTS. Do not hardcode npx version hacks
+- Package registry split: `.npmrc` sets private `smart-ui-library` registry; keep that line when modifying
+- State mgmt: Centralize API/data logic in `src/reduxstore/`; prefer RTK Query or slices patterns already present
+- Styling: Tailwind utility-first; extend via `tailwind.config.js`; avoid inline style objects for reusable patterns—create small components
+- E2E: Playwright tests under `src/ui/e2e`; new tests should support `.playwright.env` driven creds (no hard-coded secrets)
+
+## Testing & Quality
+
+- Backend: xUnit + Shouldly. Place tests under `src/services/tests/` mirroring namespace structure. Use deterministic data builders (Bogus) where needed
+- Frontend: Add Playwright or component tests colocated (if pattern emerges) but keep end-to-end in `e2e/`
+- Security warnings/analyzers treated as errors; keep build green
+
+## Logging & Observability
+
+- Use Serilog contextual logging. Critical issues (data mismatch / integrity) use `_logger.LogCritical` (see duplicate SSN guard). For expected fallbacks use Debug/Information
+- When adding history/audit flows, log both counts & key identifiers (badge, OracleHcmId) for traceability
+
+## Performance & Safety Patterns
+
+- For batched upserts (see `AddDemographicsStreamAsync`):
+  - Precompute lookups (`ToDictionary`, `ToLookup`) before DB roundtrips
+  - Build dynamic OR expressions instead of N roundtrips
+  - Guard against degenerate queries (e.g., all badge numbers zero) to prevent wide scans
+- Prefer `ConfigureAwait(false)` in library/service layer asynchronous calls
+
+## Secrets & Config
+
+- Never commit secrets—use user secrets (`secrets.json` pattern). Feature flags via .NET Feature Management; wire new flags centrally then inject `IFeatureManager`
+
+## When Extending
+
+- Add new endpoints through FastEndpoints with consistent foldering; register dependencies via DI in existing composition root
+- Share logic via interfaces in `Common` or specialized service projects; avoid cross-project circular refs
+- Update `COPILOT_INSTRUCTIONS.md` and this file if introducing a pervasive new pattern
+
+## Quick Commands
+
+### PowerShell
+```pwsh
+# Build services
+cd src/services; dotnet build Demoulas.ProfitSharing.slnx
+# Run tests
+cd src/services; dotnet test
+# Start UI
+cd src/ui; npm run dev
+```
 
 ### Frontend (UI) - Run from `src/ui/`
 ```bash
@@ -51,67 +145,14 @@ dotnet ef migrations add {migrationName} --context ProfitSharingDbContext
 dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
 ```
 
-## Architecture
+## Do NOT
 
-### Frontend Architecture
-- **State Management**: Redux Toolkit stores in `src/ui/src/reduxstore/`
-- **Routing**: React Router v7 with protected routes
-- **Components**: Reusable components in `src/ui/src/components/`
-- **Pages**: Feature-specific pages in `src/ui/src/pages/`
-- **API Integration**: Services communicate with .NET backend
-- **Forms**: React Hook Form with Yup validation
-- **UI Library**: Material-UI v7 components, custom `smart-ui-library` package
-- **Path Aliases**: Use `@/`, `components/`, `utils/`, `pages/`, etc. (configured in vite.config.ts)
-
-### Backend Architecture
-- **API Pattern**: Fast-Endpoints with REPR pattern
-- **Database**: Oracle with EF Core 9, migrations in Data project
-- **Projects**:
-  - `Demoulas.ProfitSharing.AppHost`: .NET Aspire host (startup project)
-  - `Demoulas.ProfitSharing.Services`: Main API endpoints
-  - `Demoulas.ProfitSharing.Data`: EF Core models and migrations
-  - `Demoulas.ProfitSharing.Data.Cli`: Database management CLI
-- **Testing**: Shouldly assertions, Bogus for test data generation
-- **Mapping**: Riok.Mapperly for object mapping
-- **Logging**: Serilog structured logging
-- **Security**: NetEscapades security headers, feature flags
-
-## Development Workflow
-
-1. **Branch Strategy**: Feature branches from `develop`, PR to `develop`
-2. **Git Hooks**: Pre-commit hooks configured (.pre-commit-config.yaml)
-3. **CI/CD**: Bitbucket Pipelines (bitbucket-pipelines.yml)
-4. **Node Version**: Managed by Volta (v22.16.0 specified in package.json)
-5. **Package Management**: Central NuGet packages (Directory.Packages.props)
-
-## Testing Strategy
-
-- **Unit Tests**: Vitest for frontend (`npm run test`), dotnet test for backend
-- **E2E Tests**: Playwright configured with authentication setup
-- **Test Data**: Bogus library for backend test data generation
-- **Coverage**: Frontend coverage via Vitest, reports in HTML format
-
-## Key Dependencies
-
-### Frontend
-- React 19.1.0, TypeScript 5.8.3
-- Material-UI v7, AG-Grid for data tables
-- Redux Toolkit for state, React Hook Form for forms
-- Okta Auth/React for authentication
-- Date handling: date-fns, dayjs
-
-### Backend
-- .NET 9, Fast-Endpoints
-- Oracle.EntityFrameworkCore for database
-- Serilog for logging, MassTransit/RabbitMQ for messaging
-- Feature management for feature flags
-
-## Environment Configuration
-
-- Frontend environments: `.env` files with Vite modes (production, qa, uat)
-- Backend secrets: Use .NET user-secrets (get from team member)
-- Oracle connection: Requires VPN access, uses EZConnect strings
-- NuGet: Ensure "ArtifactoryCloud" source is configured
+- Bypass history tracking for mutable audited entities
+- Introduce raw SQL without parameters
+- Duplicate mapping logic already covered by Mapperly profiles
+- Hardcode environment-specific connection strings or credentials
+- Create files unless they're absolutely necessary for achieving your goal
+- Proactively create documentation files (*.md) or README files unless explicitly requested
 
 ## Important Notes
 
@@ -120,3 +161,4 @@ dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
 - Run lint/typecheck before committing changes
 - Frontend dev server runs on port 3100
 - Use existing patterns and libraries rather than introducing new ones
+- Provide reasoning in PR descriptions when deviating from these patterns
