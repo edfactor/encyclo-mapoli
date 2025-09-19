@@ -6,13 +6,12 @@ import { CAPTIONS } from "../../../constants";
 import { useLazyGetAccountingRangeToCurrent } from "../../../hooks/useFiscalCalendarYear";
 import { useUnForfeitState } from "../../../hooks/useUnForfeitState";
 import { useUnsavedChangesGuard } from "../../../hooks/useUnsavedChangesGuard";
-import RehireForfeituresGrid from "./RehireForfeituresGrid";
-import RehireForfeituresSearchFilter from "./RehireForfeituresSearchFilter";
+import UnForfeitGrid from "./UnForfeitGrid";
+import UnForfeitSearchFilter from "./UnForfeitSearchFilter";
 
-const RehireForfeitures = () => {
+const UnForfeit = () => {
   const { state, actions } = useUnForfeitState();
-  const [fetchAccountingRange, { data: fiscalCalendarYear }] =
-    useLazyGetAccountingRangeToCurrent(6);
+  const [fetchAccountingRange, { data: fiscalCalendarYear }] = useLazyGetAccountingRangeToCurrent(6);
 
   // Use the navigation guard hook
   useUnsavedChangesGuard(state.hasUnsavedChanges);
@@ -21,13 +20,10 @@ const RehireForfeitures = () => {
     return <StatusDropdownActionNode onStatusChange={actions.handleStatusChange} />;
   };
 
-
   // Fetch the fiscal calendar year range on mount
   useEffect(() => {
     fetchAccountingRange();
   }, [fetchAccountingRange]);
-
-
 
   const isCalendarDataLoaded = !!fiscalCalendarYear?.fiscalBeginDate && !!fiscalCalendarYear?.fiscalEndDate;
 
@@ -64,7 +60,7 @@ const RehireForfeitures = () => {
           <>
             <Grid width={"100%"}>
               <DSMAccordion title="Filter">
-                <RehireForfeituresSearchFilter
+                <UnForfeitSearchFilter
                   setInitialSearchLoaded={actions.setInitialSearchLoaded}
                   fiscalData={fiscalCalendarYear}
                   onSearch={actions.handleSearch}
@@ -75,7 +71,7 @@ const RehireForfeitures = () => {
             </Grid>
 
             <Grid width="100%">
-              <RehireForfeituresGrid
+              <UnForfeitGrid
                 initialSearchLoaded={state.initialSearchLoaded}
                 setInitialSearchLoaded={actions.setInitialSearchLoaded}
                 resetPageFlag={state.resetPageFlag}
@@ -94,4 +90,4 @@ const RehireForfeitures = () => {
   );
 };
 
-export default RehireForfeitures;
+export default UnForfeit;

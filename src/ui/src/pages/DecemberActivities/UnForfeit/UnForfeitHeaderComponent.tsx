@@ -1,10 +1,8 @@
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { SelectableGridHeader } from "../../../components/SelectableGridHeader";
-import { ForfeitureAdjustmentUpdateRequest, RehireForfeituresHeaderComponentProps } from "../../../reduxstore/types";
+import { ForfeitureAdjustmentUpdateRequest, UnForfeitHeaderComponentProps } from "../../../reduxstore/types";
 
-export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = (
-  params: RehireForfeituresHeaderComponentProps
-) => {
+export const HeaderComponent: React.FC<UnForfeitHeaderComponentProps> = (params: UnForfeitHeaderComponentProps) => {
   const profitYear = useDecemberFlowProfitYear();
 
   const isNodeEligible = (

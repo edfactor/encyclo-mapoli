@@ -47,12 +47,12 @@ import {
   setProfitSharingUpdate,
   setProfitSharingUpdateAdjustmentSummary,
   setRecentlyTerminated,
-  setRehireForfeituresDetails,
   setTerminatedLetters,
   setTermination,
   setUnder21BreakdownByStore,
   setUnder21Inactive,
   setUnder21Totals,
+  setUnForfeitsDetails,
   setUpdateSummary,
   setVestedAmountsByAge,
   setYearEndProfitSharingReport,
@@ -114,7 +114,6 @@ import {
   QPAY066BTerminatedWithVestedBalanceRequest,
   QPAY066BTerminatedWithVestedBalanceResponse,
   RecentlyTerminatedResponse,
-  RehireForfeiture,
   StartAndEndDateRequest,
   SuggestedForfeitResponse,
   SuggestForfeitureAdjustmentRequest,
@@ -127,6 +126,7 @@ import {
   Under21InactiveResponse,
   Under21TotalsRequest,
   Under21TotalsResponse,
+  UnForfeit,
   UpdateSummaryRequest,
   UpdateSummaryResponse,
   VestedAmountsByAge,
@@ -290,10 +290,7 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getRehireForfeitures: builder.query<
-      PagedReportResponse<RehireForfeiture>,
-      StartAndEndDateRequest & { archive?: boolean }
-    >({
+    getUnForfeits: builder.query<PagedReportResponse<UnForfeit>, StartAndEndDateRequest & { archive?: boolean }>({
       query: (params) => {
         const baseUrl = `yearend/unforfeitures/`;
         const url = params.archive ? `${baseUrl}?archive=true` : baseUrl;
@@ -316,7 +313,7 @@ export const YearsEndApi = createApi({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setRehireForfeituresDetails(data));
+          dispatch(setUnForfeitsDetails(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -1356,7 +1353,7 @@ export const {
   useLazyGetForfeituresAndPointsQuery,
   useLazyGetForfeituresByAgeQuery,
   useLazyGetGrossWagesReportQuery,
-  useLazyGetRehireForfeituresQuery,
+  useLazyGetUnForfeitsQuery,
   useLazyGetNegativeEVTASSNQuery,
   useLazyGetProfitShareEditQuery,
   useLazyGetProfitShareUpdateQuery,
