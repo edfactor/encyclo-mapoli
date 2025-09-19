@@ -21,7 +21,7 @@ public class PayClassificationLookupEndpoint : ProfitSharingResponseEndpoint<ISe
 
     public override void Configure()
     {
-    Get("pay-classifications");
+        Get("pay-classifications");
         Summary(s =>
         {
             s.Summary = "Get all pay classifications";
@@ -29,12 +29,12 @@ public class PayClassificationLookupEndpoint : ProfitSharingResponseEndpoint<ISe
             {
                 200, new List<PayClassificationResponseDto>
                 {
-                    new PayClassificationResponseDto { Id = 0, Name = "Example"}
+                    new PayClassificationResponseDto { Id = "0", Name = "Example"}
                 }
             } };
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR}, {Role.FINANCEMANAGER}, {Role.DISTRIBUTIONSCLERK}, or {Role.HARDSHIPADMINISTRATOR}";
         });
-    Group<LookupGroup>();
+        Group<LookupGroup>();
 
         if (!Env.IsTestEnvironment())
         {

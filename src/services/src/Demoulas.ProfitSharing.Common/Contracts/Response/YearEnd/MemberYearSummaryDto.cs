@@ -9,7 +9,7 @@ public record MemberYearSummaryDto : IIsExecutive
     public required int BadgeNumber { get; init; }
     [MaskSensitive] public required string FullName { get; init; } = string.Empty;
 
-    public required byte PayClassificationId { get; init; }
+    public required string PayClassificationId { get; init; }
     public required string PayClassificationName { get; init; } = string.Empty;
 
     public decimal BeginningBalance { get; init; }

@@ -27,8 +27,9 @@ public class DemographicsRequestDtoValidator : Validator<DemographicsRequest>
             .NotEmpty().WithMessage("Department is required.");
 
         RuleFor(x => x.PayClassificationId)
-            .InclusiveBetween((byte)1, (byte)99)
-            .WithMessage("PayClassificationId must be a 2-digit number.");
+            .NotEmpty()
+            .MaximumLength(4)
+            .Matches("^[A-Z0-9]{1,4}$").WithMessage("PayClassificationId must be 1-4 chars alphanumeric (uppercase).");
 
         RuleFor(x => x.ContactInfo)
             .SetValidator(new ContactInfoRequestDtoValidator());

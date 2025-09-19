@@ -103,7 +103,7 @@ internal class EmployeeSyncChannelConsumer : BackgroundService
                 Ssn = employee.NationalIdentifier?.NationalIdentifierNumber.ConvertSsnToInt() ?? empSsnDic[employee.PersonId],
                 StoreNumber = employee.WorkRelationship?.Assignment.LocationCode ?? 0,
                 DepartmentId = employee.WorkRelationship?.Assignment.GetDepartmentId() ?? 0,
-                PayClassificationId = employee.WorkRelationship?.Assignment.JobCode ?? 0,
+                PayClassificationId = employee.WorkRelationship?.Assignment.JobCode ?? string.Empty,
                 EmploymentTypeCode = employee.WorkRelationship?.Assignment.GetEmploymentType() ?? char.MinValue,
                 PayFrequencyId = employee.WorkRelationship?.Assignment.GetPayFrequency() ?? byte.MinValue,
                 EmploymentStatusId = employee.WorkRelationship?.TerminationDate == null ? EmploymentStatus.Constants.Active : EmploymentStatus.Constants.Terminated,

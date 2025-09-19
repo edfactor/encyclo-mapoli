@@ -11,7 +11,7 @@ public sealed class DemographicFaker : Faker<Demographic>
     private static int _badgeNumberCounter = 1_000;
     private static int _idCounter = 10_000;
     private static long _oracleHcmIdCounter = 100_000;
-    
+
 
     public DemographicFaker()
     {
@@ -30,7 +30,7 @@ public sealed class DemographicFaker : Faker<Demographic>
             .RuleFor(d => d.DepartmentId, f => f.PickRandom<byte>(Department.Constants.Grocery, Department.Constants.Bakery, Department.Constants.BeerAndWine, Department.Constants.Dairy, Department.Constants.Deli, Department.Constants.Meat, Department.Constants.Produce))
             .RuleFor(d => d.Department, f => departmentFaker.Generate())
             .RuleFor(d => d.PayClassification, f => payClassificationFaker.Generate())
-            .RuleFor(d => d.PayClassificationId, f => f.Random.Byte(1, 98))
+            .RuleFor(d => d.PayClassificationId, f => f.PickRandom("1", "2", "4", "5", "6", "7", "10", "11", "13", "14", "15"))
             .RuleFor(d => d.ContactInfo, f => contactInfoFaker.Generate())
             .RuleFor(d => d.Address, f => addressFaker.Generate())
             .RuleFor(d => d.DateOfBirth, f => f.Date.Past(30, DateTime.Now.AddYears(-18)).ToDateOnly())
@@ -40,7 +40,7 @@ public sealed class DemographicFaker : Faker<Demographic>
             .RuleFor(d => d.TerminationCodeId, f => f.PickRandom('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'))
             .RuleFor(d => d.TerminationDate, f => f.Date.Past(5, new DateTime(2024, 12, 01, 01, 01, 01, DateTimeKind.Local)).ToDateOnly())
             .RuleFor(d => d.EmploymentTypeId, f => f.PickRandom<char>('P', 'H', 'G', 'F'))
-            .RuleFor(d => d.EmploymentType, f=> employeeTypeFaker.Generate())
+            .RuleFor(d => d.EmploymentType, f => employeeTypeFaker.Generate())
             .RuleFor(d => d.PayFrequencyId, f => f.PickRandom<byte>(1, 2))
             .RuleFor(d => d.GenderId, f => f.PickRandom<char>('M', 'F', 'X'))
             .RuleFor(tc => tc.EmploymentStatus, f => employmentStatusFaker.Generate())
