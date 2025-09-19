@@ -1,5 +1,5 @@
 ---THIS SCRIPT WILL LOAD ALL SMART PROFIT SHARING TABLES
----TO "YOUR CURRENT SCHEMA" FROM - {SOURCE_PROFITSHARE_SCHEMA}
+---TO "YOUR CURRENT SCHEMA" FROM - PROFITSHARE
 -------------------------------------------------------------------------------------
 DECLARE
     this_year NUMBER := 2025; -- <-------- ORACLE HCM loads data in this year.
@@ -53,7 +53,7 @@ BEGIN
                          ' ENABLE CONSTRAINT ' || fk.constraint_name;
     END LOOP;
 
---LOAD DEMOGRAPHIC TABLE TO - "YOUR CURRENT SCHEMA" FROM - {SOURCE_PROFITSHARE_SCHEMA}
+--LOAD DEMOGRAPHIC TABLE TO - "YOUR CURRENT SCHEMA" FROM - PROFITSHARE
 
 
     INSERT INTO DEMOGRAPHIC
@@ -92,7 +92,12 @@ BEGIN
                 PY_FNAME,
                 PY_MNAME,
                 PY_STOR,
-                PY_CLA,
+                /* Convert legacy numeric classification to string (new PK is NVARCHAR2(4)).
+                   Default null/blank to '0' (maps to seeded Id '0'). */
+                CASE
+                    WHEN PY_CLA IS NULL THEN '0'
+                    ELSE TRIM(TO_CHAR(PY_CLA))
+                END AS PAY_CLASSIFICATION_ID,
                 PY_EMP_TELNO,
                 PY_ADD,
                 PY_ADD2,
@@ -205,7 +210,7 @@ BEGIN
                     FROM EMPLOYMENT_STATUS
                     WHERE ID=LOWER(PY_SCOD)
                 ) AS EMPLOYMENT_STATUS_ID
-    FROM {SOURCE_PROFITSHARE_SCHEMA}.DEMOGRAPHICS;
+    FROM PROFITSHARE.DEMOGRAPHICS;
 
     INSERT INTO DEMOGRAPHIC_HISTORY(DEMOGRAPHIC_ID, VALID_FROM, VALID_TO, ORACLE_HCM_ID, BADGE_NUMBER, STORE_NUMBER, PAY_CLASSIFICATION_ID, DATE_OF_BIRTH, HIRE_DATE, REHIRE_DATE, TERMINATION_DATE, DEPARTMENT, EMPLOYMENT_TYPE_ID, PAY_FREQUENCY_ID, TERMINATION_CODE_ID, EMPLOYMENT_STATUS_ID, CREATED_DATETIME)
     SELECT ID, TO_TIMESTAMP('01-01-1900 00:00:00','MM-DD-YYYY HH24:MI:SS'), TO_TIMESTAMP('01-01-2100 00:00:00','MM-DD-YYYY HH24:MI:SS'), ORACLE_HCM_ID, BADGE_NUMBER, STORE_NUMBER, PAY_CLASSIFICATION_ID, DATE_OF_BIRTH, HIRE_DATE, REHIRE_DATE, TERMINATION_DATE, DEPARTMENT, EMPLOYMENT_TYPE_ID, PAY_FREQUENCY_ID, TERMINATION_CODE_ID, EMPLOYMENT_STATUS_ID, sys_extract_utc(systimestamp)
@@ -258,7 +263,7 @@ BEGIN
         NULL AS MOBILE_NUMBER,  -- mobile number isn't available
         NULL AS EMAIL_ADDRESS  -- email isn't available
     FROM
-        {SOURCE_PROFITSHARE_SCHEMA}.PAYBEN PYBEN;
+        PROFITSHARE.PAYBEN PYBEN;
 
     INSERT INTO BENEFICIARY
     (PSN_SUFFIX,
@@ -285,11 +290,11 @@ BEGIN
         CASE WHEN PAYREL.PYREL_PERCENT IS NULL THEN 0
              ELSE PAYREL.PYREL_PERCENT
             END AS PERCENT
-    FROM {SOURCE_PROFITSHARE_SCHEMA}.PAYBEN PYBEN
+    FROM PROFITSHARE.PAYBEN PYBEN
              INNER JOIN BENEFICIARY_CONTACT BC ON PYBEN.PYBEN_PAYSSN = BC.SSN
              LEFT join DEMOGRAPHIC d on PYBEN.PYBEN_PAYSSN = d.SSN
              LEFT join DEMOGRAPHIC d2 on TO_NUMBER(SUBSTR(LPAD(PYBEN_PSN,11,0),1,7)) = d2.BADGE_NUMBER
-             LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.PAYREL ON PYBEN.PYBEN_PSN = PAYREL.PYREL_PSN;
+             LEFT JOIN PROFITSHARE.PAYREL ON PYBEN.PYBEN_PSN = PAYREL.PYREL_PSN;
 
     --During import, the goal is to identify the employee to whom a beneficiary is most closely related.
 --Is the beneficiary an employee?
@@ -332,7 +337,7 @@ BEGIN
         NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE,
         0 as POINTS_EARNED,
         PY_PS_ETVA as ETVA
-    FROM {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT
+    FROM PROFITSHARE.PAYPROFIT
     where PAYPROF_BADGE in ( select BADGE_NUMBER from DEMOGRAPHIC  );
 
     -- Insert LAST YEARS data into the PAY_PROFIT table
@@ -367,8 +372,8 @@ BEGIN
         0 AS POINTS_EARNED,
         PY_PRIOR_ETVA as ETVA 
     FROM
-        {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT pp
-            LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.DEMOGRAPHICS d on d.DEM_BADGE = pp.PAYPROF_BADGE
+        PROFITSHARE.PAYPROFIT pp
+            LEFT JOIN PROFITSHARE.DEMOGRAPHICS d on d.DEM_BADGE = pp.PAYPROF_BADGE
     WHERE
         PAYPROF_BADGE IN (SELECT BADGE_NUMBER FROM DEMOGRAPHIC);
 
@@ -406,14 +411,14 @@ BEGIN
         PY_PROF_POINTS AS POINTS_EARNED, -- from the scramble, these are the correct points for 2023
         0 as ETVA
     FROM
-        {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT pp
-            LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.DEMOGRAPHICS d on d.DEM_BADGE = pp.PAYPROF_BADGE
+        PROFITSHARE.PAYPROFIT pp
+            LEFT JOIN PROFITSHARE.DEMOGRAPHICS d on d.DEM_BADGE = pp.PAYPROF_BADGE
     WHERE
         PAYPROF_BADGE IN (SELECT BADGE_NUMBER FROM DEMOGRAPHIC);
 
     ---------------------------------------------------------------
 
--- Migrate data into DISTRIBUTION_PAYEE table from {SOURCE_PROFITSHARE_SCHEMA}_PROFDIST
+-- Migrate data into DISTRIBUTION_PAYEE table from PROFITSHARE_PROFDIST
 -- Ensure that there are no duplicate entries based on unique PAYEE (SSN, NAME, and ADDRESS)
     INSERT INTO DISTRIBUTION_PAYEE (SSN, NAME, STREET, CITY, STATE, POSTAL_CODE, COUNTRY_ISO, MEMO)
     SELECT DISTINCT
@@ -425,11 +430,11 @@ BEGIN
         TO_NCHAR(PROFDIST_PAYZIP1) || PROFDIST_PAYZIP2,
         N'US', -- Default country
         NULL -- No memo available in original data
-    FROM {SOURCE_PROFITSHARE_SCHEMA}.PROFDIST
+    FROM PROFITSHARE.PROFDIST
     WHERE PROFDIST_PAYSSN IS NOT NULL;
 
 
-    -- Migrate data into DISTRIBUTION_THIRDPARTY_PAYEE table from {SOURCE_PROFITSHARE_SCHEMA}_PROFDIST
+    -- Migrate data into DISTRIBUTION_THIRDPARTY_PAYEE table from PROFITSHARE_PROFDIST
 -- Ensure that there are no duplicate entries based on unique third-party payee (SSN, NAME, and ADDRESS)
     INSERT INTO DISTRIBUTION_THIRDPARTY_PAYEE (PAYEE, NAME, ACCOUNT, STREET, STREET2, CITY, STATE, POSTAL_CODE, COUNTRY_ISO, MEMO)
     SELECT DISTINCT
@@ -443,11 +448,11 @@ BEGIN
         TO_NCHAR(PROFDIST_3RDZIP1) || PROFDIST_3RDZIP2,
         N'US', -- Default country
         NULL -- No memo available in original data
-    FROM {SOURCE_PROFITSHARE_SCHEMA}.PROFDIST
+    FROM PROFITSHARE.PROFDIST
     WHERE (PROFDIST_3RDPAYTO IS NOT NULL AND TRIM(PROFDIST_3RDPAYTO) != '');
 
 
---LOAD DISTRIBUTION TABLE TO - "YOUR CURRENT SCHEMA" FROM - {SOURCE_PROFITSHARE_SCHEMA}
+--LOAD DISTRIBUTION TABLE TO - "YOUR CURRENT SCHEMA" FROM - PROFITSHARE
     INSERT INTO DISTRIBUTION
     (SSN,
      PAYMENT_SEQUENCE,
@@ -526,7 +531,7 @@ BEGIN
             WHEN PROFDIST_ROTH_IRA = 'Y' THEN 1
             ELSE 0
             END as ecode
-    FROM {SOURCE_PROFITSHARE_SCHEMA}.PROFDIST;
+    FROM PROFITSHARE.PROFDIST;
 
 --PROFIT DETAIL table
     INSERT INTO PROFIT_DETAIL
@@ -575,7 +580,7 @@ BEGIN
         ELSE '20' || LPAD(PROFIT_YDTE, 2, '0')
         END AS FOUR_DIGIT_YEAR
 
-    FROM {SOURCE_PROFITSHARE_SCHEMA}.PROFIT_DETAIL;
+    FROM PROFITSHARE.PROFIT_DETAIL;
 
     -----------------THIS IS THE OTHER TABLE THAT ALSO GOES TO PROFIT_DETAIL----------------
 -- DO NOT TRUNCATE TABLE
@@ -626,7 +631,7 @@ BEGIN
             ELSE '20' || LPAD(PROFIT_SS_YDTE, 2, '0') 
             END AS FOUR_DIGIT_YEAR
 
-    FROM {SOURCE_PROFITSHARE_SCHEMA}.PROFIT_SS_DETAIL;
+    FROM PROFITSHARE.PROFIT_SS_DETAIL;
 
     ---------------------------------------------------------------------------------------------------------------------
 
@@ -678,7 +683,7 @@ BEGIN
         psc.REPLACE_CHECK,
         psc.PSC_CHECK_ID
     FROM
-        {SOURCE_PROFITSHARE_SCHEMA}.PROFIT_SHARE_CHECKS psc
+        PROFITSHARE.PROFIT_SHARE_CHECKS psc
             JOIN
         DEMOGRAPHIC d ON psc.EMPLOYEE_SSN = d.SSN;  -- Lookup the DEMOGRAPHIC_ID using the SSN from DEMOGRAPHIC
 
@@ -709,7 +714,7 @@ BEGIN
         PDR.PROFIT_DIST_REQ_DATE_AUTH,
         PDR.PROFIT_DIST_REQ_TAXCODE
     FROM
-        {SOURCE_PROFITSHARE_SCHEMA}.PROFIT_DIST_REQ PDR
+        PROFITSHARE.PROFIT_DIST_REQ PDR
             inner join DEMOGRAPHIC d on d.BADGE_NUMBER = PDR.PROFIT_DIST_REQ_EMP
             LEFT JOIN
         DISTRIBUTION_REQUEST_TYPE DTM ON PDR.PROFIT_DIST_REQ_TYPE = DTM.NAME
@@ -731,7 +736,7 @@ BEGIN
         BEGIN
             -- 1. Validate row counts
             SELECT COUNT(*) INTO source_count
-            FROM {SOURCE_PROFITSHARE_SCHEMA}.PROFIT_DIST_REQ
+            FROM PROFITSHARE.PROFIT_DIST_REQ
             WHERE PROFIT_DIST_REQ_TYPE IS NOT NULL;
 
             SELECT COUNT(*) INTO target_count
@@ -756,7 +761,7 @@ BEGIN
                          DRM.ID AS REASON_ID,
                          DSM.ID AS STATUS_ID,
                          DTM.ID AS TYPE_ID
-                     FROM {SOURCE_PROFITSHARE_SCHEMA}.PROFIT_DIST_REQ PDR
+                     FROM PROFITSHARE.PROFIT_DIST_REQ PDR
                               LEFT JOIN DEMOGRAPHIC D ON D.BADGE_NUMBER = PDR.PROFIT_DIST_REQ_EMP
                               LEFT JOIN DISTRIBUTION_REQUEST_TYPE DTM ON PDR.PROFIT_DIST_REQ_TYPE = DTM.NAME
                               LEFT JOIN DISTRIBUTION_REQUEST_REASON DRM ON PDR.PROFIT_DIST_REQ_REASON = DRM.NAME
@@ -804,58 +809,58 @@ FROM CALDAR_RECORD WHERE ACC_WKEND2_N >= LAST_YEAR * 10000 AND ACC_WKEND2_N <= (
 
 UPDATE DEMOGRAPHIC_HISTORY dh
    SET dh.VALID_FROM = demographic_cutoff
- WHERE EXISTS (SELECT 1 FROM {SOURCE_PROFITSHARE_SCHEMA}.DEMO_PROFSHARE dp
+ WHERE EXISTS (SELECT 1 FROM PROFITSHARE.DEMO_PROFSHARE dp
                         WHERE dh.BADGE_NUMBER = dp.DEM_BADGE AND (
-                    				dh.STORE_NUMBER != dp.PY_STOR OR
-                        			dh.PAY_CLASSIFICATION_ID != dp.PY_CLA OR
-                        			TO_NUMBER(TO_CHAR(dh.DATE_OF_BIRTH,'yyyymmdd')) != dp.PY_DOB OR
-                        			TO_NUMBER(TO_CHAR(dh.HIRE_DATE,'yyyymmdd')) != dp.PY_HIRE_DT OR
-                        			--Rehire Date comparisons
-	                        			(dh.REHIRE_DATE  IS NULL AND dp.PY_REHIRE_DT IS NOT NULL) OR
-	                        			(dh.REHIRE_DATE IS NOT NULL AND dp.PY_REHIRE_DT IS NULL) OR
-	                        			(dh.REHIRE_DATE IS NOT NULL AND dp.PY_REHIRE_DT IS NOT NULL AND TO_NUMBER(TO_CHAR(dh.REHIRE_DATE,'yyyymmdd')) != dp.PY_REHIRE_DT) OR
-	                        		--Termination Date comparisons
-	                        			(dh.TERMINATION_DATE  IS NULL AND dp.PY_TERM_DT IS NOT NULL) OR
-	                        			(dh.TERMINATION_DATE IS NOT NULL AND dp.PY_TERM_DT IS NULL) OR
-	                        			(dh.TERMINATION_DATE IS NOT NULL AND dp.PY_TERM_DT IS NOT NULL AND TO_NUMBER(TO_CHAR(dh.TERMINATION_DATE,'yyyymmdd')) != dp.PY_TERM_DT) OR
-	                        			
-                        			dh.DEPARTMENT != dp.PY_DP OR
-                        			dh.EMPLOYMENT_TYPE_ID != TRIM(dp.PY_FUL) OR
-                        			dh.PAY_FREQUENCY_ID != dp.PY_FREQ OR
-                        			--Termination Code Id comparisons
-                        				(dh.TERMINATION_CODE_ID  IS NULL AND dp.PY_TERM IS NOT NULL) OR
-	                        			(dh.TERMINATION_CODE_ID IS NOT NULL AND dp.PY_TERM IS NULL) OR
-	                        			(dh.TERMINATION_CODE_ID IS NOT NULL AND dp.PY_TERM IS NOT NULL AND dh.TERMINATION_CODE_ID != dp.PY_TERM) OR
-                        			dh.EMPLOYMENT_STATUS_ID != dp.PY_SCOD
-                        			
-						));
-						
+                                    dh.STORE_NUMBER != dp.PY_STOR OR
+                                    dh.PAY_CLASSIFICATION_ID != TRIM(TO_CHAR(dp.PY_CLA)) OR
+                                    TO_NUMBER(TO_CHAR(dh.DATE_OF_BIRTH,'yyyymmdd')) != dp.PY_DOB OR
+                                    TO_NUMBER(TO_CHAR(dh.HIRE_DATE,'yyyymmdd')) != dp.PY_HIRE_DT OR
+                                    --Rehire Date comparisons
+                                        (dh.REHIRE_DATE  IS NULL AND dp.PY_REHIRE_DT IS NOT NULL) OR
+                                        (dh.REHIRE_DATE IS NOT NULL AND dp.PY_REHIRE_DT IS NULL) OR
+                                        (dh.REHIRE_DATE IS NOT NULL AND dp.PY_REHIRE_DT IS NOT NULL AND TO_NUMBER(TO_CHAR(dh.REHIRE_DATE,'yyyymmdd')) != dp.PY_REHIRE_DT) OR
+                                    --Termination Date comparisons
+                                        (dh.TERMINATION_DATE  IS NULL AND dp.PY_TERM_DT IS NOT NULL) OR
+                                        (dh.TERMINATION_DATE IS NOT NULL AND dp.PY_TERM_DT IS NULL) OR
+                                        (dh.TERMINATION_DATE IS NOT NULL AND dp.PY_TERM_DT IS NOT NULL AND TO_NUMBER(TO_CHAR(dh.TERMINATION_DATE,'yyyymmdd')) != dp.PY_TERM_DT) OR
+                                        
+                                    dh.DEPARTMENT != dp.PY_DP OR
+                                    dh.EMPLOYMENT_TYPE_ID != TRIM(dp.PY_FUL) OR
+                                    dh.PAY_FREQUENCY_ID != dp.PY_FREQ OR
+                                    --Termination Code Id comparisons
+                                        (dh.TERMINATION_CODE_ID  IS NULL AND dp.PY_TERM IS NOT NULL) OR
+                                        (dh.TERMINATION_CODE_ID IS NOT NULL AND dp.PY_TERM IS NULL) OR
+                                        (dh.TERMINATION_CODE_ID IS NOT NULL AND dp.PY_TERM IS NOT NULL AND dh.TERMINATION_CODE_ID != dp.PY_TERM) OR
+                                    dh.EMPLOYMENT_STATUS_ID != dp.PY_SCOD
+                                    
+                        ));
+                        
 INSERT INTO DEMOGRAPHIC_HISTORY
-	  (DEMOGRAPHIC_ID, VALID_FROM,                         VALID_TO,           ORACLE_HCM_ID,   BADGE_NUMBER, STORE_NUMBER, PAY_CLASSIFICATION_ID, DATE_OF_BIRTH,                         HIRE_DATE,                                  REHIRE_DATE,                                                                                       TERMINATION_DATE,                                                                                          DEPARTMENT, EMPLOYMENT_TYPE_ID, PAY_FREQUENCY_ID, TERMINATION_CODE_ID, EMPLOYMENT_STATUS_ID, CREATED_DATETIME)
-SELECT d.ID,           TO_DATE('1900-01-01','yyyy-mm-dd'), demographic_cutoff AS VALID_TO, d.ORACLE_HCM_ID, dp.DEM_BADGE, dp.PY_STOR,   dp.PY_CLA,             TO_DATE(TO_CHAR(dp.PY_DOB),'yyyymmdd'),TO_DATE(TO_CHAR(dp.PY_HIRE_DT),'yyyymmdd'), CASE WHEN dp.PY_REHIRE_DT IS NULL THEN NULL ELSE TO_DATE(TO_CHAR(dp.PY_REHIRE_DT),'yyyymmdd') END, CASE WHEN dp.PY_TERM_DT IS NULL THEN NULL ELSE TO_DATE(TO_CHAR(dp.PY_TERM_DT),'yyyymmdd') END, dp.PY_DP,   TRIM(dp.PY_FUL),    dp.PY_FREQ,       dp.PY_TERM,          dp.PY_SCOD,           SYSTIMESTAMP AT TIME ZONE 'UTC'
+      (DEMOGRAPHIC_ID, VALID_FROM,                         VALID_TO,           ORACLE_HCM_ID,   BADGE_NUMBER, STORE_NUMBER, PAY_CLASSIFICATION_ID, DATE_OF_BIRTH,                         HIRE_DATE,                                  REHIRE_DATE,                                                                                       TERMINATION_DATE,                                                                                          DEPARTMENT, EMPLOYMENT_TYPE_ID, PAY_FREQUENCY_ID, TERMINATION_CODE_ID, EMPLOYMENT_STATUS_ID, CREATED_DATETIME)
+SELECT d.ID,           TO_DATE('1900-01-01','yyyy-mm-dd'), demographic_cutoff AS VALID_TO, d.ORACLE_HCM_ID, dp.DEM_BADGE, dp.PY_STOR,   TRIM(TO_CHAR(dp.PY_CLA)) AS PAY_CLASSIFICATION_ID, TO_DATE(TO_CHAR(dp.PY_DOB),'yyyymmdd'),TO_DATE(TO_CHAR(dp.PY_HIRE_DT),'yyyymmdd'), CASE WHEN dp.PY_REHIRE_DT IS NULL THEN NULL ELSE TO_DATE(TO_CHAR(dp.PY_REHIRE_DT),'yyyymmdd') END, CASE WHEN dp.PY_TERM_DT IS NULL THEN NULL ELSE TO_DATE(TO_CHAR(dp.PY_TERM_DT),'yyyymmdd') END, dp.PY_DP,   TRIM(dp.PY_FUL),    dp.PY_FREQ,       dp.PY_TERM,          dp.PY_SCOD,           SYSTIMESTAMP AT TIME ZONE 'UTC'
   FROM DEMOGRAPHIC d
-  JOIN {SOURCE_PROFITSHARE_SCHEMA}.DEMO_PROFSHARE dp ON d.BADGE_NUMBER = dp.DEM_BADGE
+  JOIN PROFITSHARE.DEMO_PROFSHARE dp ON d.BADGE_NUMBER = dp.DEM_BADGE
  WHERE  d.STORE_NUMBER != dp.PY_STOR OR
-		d.PAY_CLASSIFICATION_ID != dp.PY_CLA OR
-		TO_NUMBER(TO_CHAR(d.DATE_OF_BIRTH,'yyyymmdd')) != dp.PY_DOB OR
-		TO_NUMBER(TO_CHAR(d.HIRE_DATE,'yyyymmdd')) != dp.PY_HIRE_DT OR
-		--Rehire Date comparisons
-			(d.REHIRE_DATE  IS NULL AND dp.PY_REHIRE_DT IS NOT NULL) OR
-			(d.REHIRE_DATE IS NOT NULL AND dp.PY_REHIRE_DT IS NULL) OR
-			(d.REHIRE_DATE IS NOT NULL AND dp.PY_REHIRE_DT IS NOT NULL AND TO_NUMBER(TO_CHAR(d.REHIRE_DATE,'yyyymmdd')) != dp.PY_REHIRE_DT) OR
-		--Termination Date comparisons
-			(d.TERMINATION_DATE  IS NULL AND dp.PY_TERM_DT IS NOT NULL) OR
-			(d.TERMINATION_DATE IS NOT NULL AND dp.PY_TERM_DT IS NULL) OR
-			(d.TERMINATION_DATE IS NOT NULL AND dp.PY_TERM_DT IS NOT NULL AND TO_NUMBER(TO_CHAR(d.TERMINATION_DATE,'yyyymmdd')) != dp.PY_TERM_DT) OR
-			
-		d.DEPARTMENT != dp.PY_DP OR
-		d.EMPLOYMENT_TYPE_ID != TRIM(dp.PY_FUL) OR
-		d.PAY_FREQUENCY_ID != dp.PY_FREQ OR
-		--Termination Code Id comparisons
-			(d.TERMINATION_CODE_ID  IS NULL AND dp.PY_TERM IS NOT NULL) OR
-			(d.TERMINATION_CODE_ID IS NOT NULL AND dp.PY_TERM IS NULL) OR
-			(d.TERMINATION_CODE_ID IS NOT NULL AND dp.PY_TERM IS NOT NULL AND d.TERMINATION_CODE_ID != dp.PY_TERM) OR
-		d.EMPLOYMENT_STATUS_ID != dp.PY_SCOD;	*/
+                d.PAY_CLASSIFICATION_ID != TRIM(TO_CHAR(dp.PY_CLA)) OR
+        TO_NUMBER(TO_CHAR(d.DATE_OF_BIRTH,'yyyymmdd')) != dp.PY_DOB OR
+        TO_NUMBER(TO_CHAR(d.HIRE_DATE,'yyyymmdd')) != dp.PY_HIRE_DT OR
+        --Rehire Date comparisons
+            (d.REHIRE_DATE  IS NULL AND dp.PY_REHIRE_DT IS NOT NULL) OR
+            (d.REHIRE_DATE IS NOT NULL AND dp.PY_REHIRE_DT IS NULL) OR
+            (d.REHIRE_DATE IS NOT NULL AND dp.PY_REHIRE_DT IS NOT NULL AND TO_NUMBER(TO_CHAR(d.REHIRE_DATE,'yyyymmdd')) != dp.PY_REHIRE_DT) OR
+        --Termination Date comparisons
+            (d.TERMINATION_DATE  IS NULL AND dp.PY_TERM_DT IS NOT NULL) OR
+            (d.TERMINATION_DATE IS NOT NULL AND dp.PY_TERM_DT IS NULL) OR
+            (d.TERMINATION_DATE IS NOT NULL AND dp.PY_TERM_DT IS NOT NULL AND TO_NUMBER(TO_CHAR(d.TERMINATION_DATE,'yyyymmdd')) != dp.PY_TERM_DT) OR
+            
+        d.DEPARTMENT != dp.PY_DP OR
+        d.EMPLOYMENT_TYPE_ID != TRIM(dp.PY_FUL) OR
+        d.PAY_FREQUENCY_ID != dp.PY_FREQ OR
+        --Termination Code Id comparisons
+            (d.TERMINATION_CODE_ID  IS NULL AND dp.PY_TERM IS NOT NULL) OR
+            (d.TERMINATION_CODE_ID IS NOT NULL AND dp.PY_TERM IS NULL) OR
+            (d.TERMINATION_CODE_ID IS NOT NULL AND dp.PY_TERM IS NOT NULL AND d.TERMINATION_CODE_ID != dp.PY_TERM) OR
+        d.EMPLOYMENT_STATUS_ID != dp.PY_SCOD;	*/
 /*  END OF IMPORT OF DEMO_PROFSHARE       */
 
 

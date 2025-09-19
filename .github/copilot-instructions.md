@@ -45,9 +45,13 @@ Patterns:
 - XML doc comments for public & internal APIs.
 
 ## Database & CLI
-- Migrations: `dotnet ef migrations add <Name> --context ProfitSharingDbContext` from `src/services` root.
-- Schema ops (run from solution root or services dir):
-  - Upgrade: `Demoulas.ProfitSharing.Data.Cli upgrade-db --connection-name ProfitSharing`
+- Add a migration (run from repo root PowerShell):
+  ```pwsh
+  pwsh -NoLogo -Command "cd src/services/src/Demoulas.ProfitSharing.Data; dotnet ef migrations add <MigrationName> --context ProfitSharingDbContext"
+  ```
+  (Use singular imperative names, e.g., `AddMemberIndex`, `RenameColumnXToY`).
+- Apply schema changes: Run `Demoulas.ProfitSharing.Data.Cli` with the `upgrade-db` launch setting (or `Demoulas.ProfitSharing.Data.Cli upgrade-db --connection-name ProfitSharing`).
+- Other ops:
   - Drop/recreate: `... drop-recreate-db --connection-name ProfitSharing`
   - Import legacy READY: `... import-from-ready --connection-name ProfitSharing --sql-file "src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema PROFITSHARE`
   - Docs: `... generate-dgml` / `generate-markdown`.
@@ -61,6 +65,7 @@ Patterns:
 
 ## Testing & Quality
 - Backend: xUnit + Shouldly. Place tests under `src/services/tests/` mirroring namespace structure. Use deterministic data builders (Bogus) where needed.
+- All backend unit & service tests reside in the consolidated test project `Demoulas.ProfitSharing.UnitTests` (do NOT create stray ad-hoc test projects). Mirror source namespaces inside this project; prefer folder structure `Domain/`, `Services/`, `Endpoints/` for organization if adding new areas.
 - Frontend: Add Playwright or component tests colocated (if pattern emerges) but keep end-to-end in `e2e/`.
 - Security warnings/analyzers treated as errors; keep build green.
 
@@ -88,7 +93,7 @@ Patterns:
 # Build services
 cd src/services; dotnet build Demoulas.ProfitSharing.slnx
 # Run tests
-cd src/services; dotnet test
+dotnet test src/services/Demoulas.ProfitSharing.slnx
 # Start UI
 cd src/ui; npm run dev
 ```

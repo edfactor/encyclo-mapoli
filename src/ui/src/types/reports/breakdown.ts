@@ -16,7 +16,7 @@ export interface BreakdownByStoreEmployee {
   fullName: string;
   payFrequencyId: number;
   departmentId: number;
-  payClassificationId: number;
+  payClassificationId: string; // changed from number to string to match backend refactor
   beginningBalance: number;
   earnings: number;
   contributions: number;

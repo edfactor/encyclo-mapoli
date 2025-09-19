@@ -63,7 +63,7 @@ internal sealed class DemographicMap : ModifiedBaseMap<Demographic>
         builder.Property(e => e.PayClassificationId)
             .HasComment("PayClassification")
             .HasColumnName("PAY_CLASSIFICATION_ID")
-            .HasPrecision(2);
+            .HasMaxLength(4);
 
         _ = builder.Property(e => e.DateOfBirth)
             .HasComment("DateOfBirth")

@@ -46,20 +46,20 @@ public class PostFrozenService : IPostFrozenService
         ProfitCode.Constants.Outgoing100PercentVestedPayment.Id,
     };
 
-        public PostFrozenService(
-            IProfitSharingDataContextFactory profitSharingDataContextFactory, 
-            TotalService totalService, 
-            ICalendarService calendarService,
-            ILoggerFactory loggerFactory,
-            IDemographicReaderService demographicReaderService
-        )
-        {
-            _profitSharingDataContextFactory = profitSharingDataContextFactory;
-            _totalService = totalService;
-            _calendarService = calendarService;
-            _demographicReaderService = demographicReaderService;
-            _logger = loggerFactory.CreateLogger<PostFrozenService>();
-        }
+    public PostFrozenService(
+        IProfitSharingDataContextFactory profitSharingDataContextFactory,
+        TotalService totalService,
+        ICalendarService calendarService,
+        ILoggerFactory loggerFactory,
+        IDemographicReaderService demographicReaderService
+    )
+    {
+        _profitSharingDataContextFactory = profitSharingDataContextFactory;
+        _totalService = totalService;
+        _calendarService = calendarService;
+        _demographicReaderService = demographicReaderService;
+        _logger = loggerFactory.CreateLogger<PostFrozenService>();
+    }
 
     public async Task<ProfitSharingUnder21ReportResponse> ProfitSharingUnder21Report(ProfitYearRequest request, CancellationToken cancellationToken)
     {
@@ -76,11 +76,11 @@ public class PostFrozenService : IPostFrozenService
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
 
             var totalBaseQuery = await (from d in demographics.Where(x => x.DateOfBirth >= birthDate21)
-                    join balTbl in _totalService.TotalVestingBalance(ctx, request.ProfitYear, request.ProfitYear, calInfo.FiscalEndDate) on d.Ssn equals balTbl.Ssn into balTmp
-                    from bal in balTmp.DefaultIfEmpty()
-                    join lyBalTbl in _totalService.TotalVestingBalance(ctx, lastProfitYear, lastProfitYear, calInfo.FiscalEndDate) on d.Ssn equals lyBalTbl.Ssn into lyBalTmp
-                    from lyBal in lyBalTmp.DefaultIfEmpty()
-                    select new Under21IntermediaryResult() { d=d, bal = bal ?? new ParticipantTotalVestingBalance(), lyBal = lyBal ?? new ParticipantTotalVestingBalance() }
+                                        join balTbl in _totalService.TotalVestingBalance(ctx, request.ProfitYear, request.ProfitYear, calInfo.FiscalEndDate) on d.Ssn equals balTbl.Ssn into balTmp
+                                        from bal in balTmp.DefaultIfEmpty()
+                                        join lyBalTbl in _totalService.TotalVestingBalance(ctx, lastProfitYear, lastProfitYear, calInfo.FiscalEndDate) on d.Ssn equals lyBalTbl.Ssn into lyBalTmp
+                                        from lyBal in lyBalTmp.DefaultIfEmpty()
+                                        select new Under21IntermediaryResult() { d = d, bal = bal ?? new ParticipantTotalVestingBalance(), lyBal = lyBal ?? new ParticipantTotalVestingBalance() }
                 ).ToListAsync(cancellationToken);
 
             //Get Active under 21 counts
@@ -126,7 +126,7 @@ public class PostFrozenService : IPostFrozenService
 
             var pagedData = await (
                 from d in demographics.Where(x => x.DateOfBirth >= birthDate21)
-                join bal in _totalService.TotalVestingBalance(ctx, request.ProfitYear, request.ProfitYear, calInfo.FiscalEndDate) on d.Ssn equals bal.Ssn 
+                join bal in _totalService.TotalVestingBalance(ctx, request.ProfitYear, request.ProfitYear, calInfo.FiscalEndDate) on d.Ssn equals bal.Ssn
                 join lyPpTbl in ctx.PayProfits.Where(x => x.ProfitYear == request.ProfitYear - 1) on d.Id equals lyPpTbl.DemographicId into lyPpTmp
                 from lyPp in lyPpTmp.DefaultIfEmpty()
                 join tyPpTbl in ctx.PayProfits.Where(x => x.ProfitYear == request.ProfitYear) on d.Id equals tyPpTbl.DemographicId into tyPpTmp
@@ -151,7 +151,8 @@ public class PostFrozenService : IPostFrozenService
                     d.EmploymentStatusId,
                     (bal.CurrentBalance ?? 0),
                     tyPp != null ? tyPp.EnrollmentId : (byte)0
-                ){ IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly}).ToPaginationResultsAsync(request, cancellationToken: cancellationToken);
+                )
+                { IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly }).ToPaginationResultsAsync(request, cancellationToken: cancellationToken);
 
             var response = new ProfitSharingUnder21ReportResponse
             {
@@ -177,8 +178,9 @@ public class PostFrozenService : IPostFrozenService
         var age21 = calInfo.FiscalEndDate.AddYears(-21);
         short lastYear = (short)(request.ProfitYear - 1);
         var lastCalInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(lastYear, cancellation);
-        
-        var rslt = await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx => {
+
+        var rslt = await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
+        {
 
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
 
@@ -195,11 +197,11 @@ public class PostFrozenService : IPostFrozenService
                     select new
                     {
                         Ssn = pdGrp.Key,
-                        Earnings = pdGrp.Where(x=>_earningsProfitCodes.Contains(x.ProfitCodeId)).Sum(x=>x.Earnings),
-                        Contributions = pdGrp.Where(x=>_contributionProfitCodes.Contains(x.ProfitCodeId)).Sum(x=>x.Contribution),
-                        Forfeitures = pdGrp.Where(x=>x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id).Sum(x=>x.Forfeiture) - 
-                                      pdGrp.Where(x=>x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id).Sum(x=>x.Forfeiture),
-                        Distributions = pdGrp.Where(x=>_distributionProfitCodes.Contains(x.ProfitCodeId)).Sum(x=>x.Forfeiture * -1)
+                        Earnings = pdGrp.Where(x => _earningsProfitCodes.Contains(x.ProfitCodeId)).Sum(x => x.Earnings),
+                        Contributions = pdGrp.Where(x => _contributionProfitCodes.Contains(x.ProfitCodeId)).Sum(x => x.Contribution),
+                        Forfeitures = pdGrp.Where(x => x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id).Sum(x => x.Forfeiture) -
+                                      pdGrp.Where(x => x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id).Sum(x => x.Forfeiture),
+                        Distributions = pdGrp.Where(x => _distributionProfitCodes.Contains(x.ProfitCodeId)).Sum(x => x.Forfeiture * -1)
                     }
                 ) on d.Ssn equals tyPdGrpTbl.Ssn into tyPdGrpTmp
                 from tyPdGrp in tyPdGrpTmp.DefaultIfEmpty()
@@ -253,11 +255,11 @@ public class PostFrozenService : IPostFrozenService
 
             return await (
                 from d in demographicQuery.Where(x => x.DateOfBirth >= age21)
-                join pp in ctx.PayProfits.Where(x=>x.ProfitYear == request.ProfitYear) on d.Id equals pp.DemographicId
+                join pp in ctx.PayProfits.Where(x => x.ProfitYear == request.ProfitYear) on d.Id equals pp.DemographicId
                 join balTbl in _totalService.TotalVestingBalance(ctx, request.ProfitYear, calInfo.FiscalEndDate)
                     on d.Ssn equals balTbl.Ssn into balTmp
                 from bal in balTmp.DefaultIfEmpty()
-                where 
+                where
                     d.TerminationCodeId != TerminationCode.Constants.Retired &&
                     (
                         d.EmploymentStatusId == EmploymentStatus.Constants.Inactive ||
@@ -284,7 +286,8 @@ public class PostFrozenService : IPostFrozenService
         });
 
         var fiscalEndDateTime = calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Local);
-        foreach (var row in rslt.Results) {
+        foreach (var row in rslt.Results)
+        {
             row.Age = (byte)row.BirthDate.Age(fiscalEndDateTime);
         }
 
@@ -310,37 +313,37 @@ public class PostFrozenService : IPostFrozenService
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, true);
 
             var rootQuery = from d in demographicQuery.Where(x => x.DateOfBirth >= age21)
-                join pp in ctx.PayProfits.Where(x => x.ProfitYear == request.ProfitYear) on d.Id equals pp.DemographicId
-                select new
-                {
-                    d,
-                    pp
-                };
-            var baseQuery = from r in rootQuery 
-                join bal in _totalService.TotalVestingBalance(ctx, request.ProfitYear, calInfo.FiscalEndDate) on r.d.Ssn equals bal.Ssn
-                where bal.YearsInPlan > 0 || bal.VestedBalance > 0
-                select new 
-                { 
-                    r.d,
-                    r.pp,
-                    bal
-                };
-                    
+                            join pp in ctx.PayProfits.Where(x => x.ProfitYear == request.ProfitYear) on d.Id equals pp.DemographicId
+                            select new
+                            {
+                                d,
+                                pp
+                            };
+            var baseQuery = from r in rootQuery
+                            join bal in _totalService.TotalVestingBalance(ctx, request.ProfitYear, calInfo.FiscalEndDate) on r.d.Ssn equals bal.Ssn
+                            where bal.YearsInPlan > 0 || bal.VestedBalance > 0
+                            select new
+                            {
+                                r.d,
+                                r.pp,
+                                bal
+                            };
+
             rslt.NumberOfEmployees = await baseQuery.CountAsync(cancellationToken);
-            rslt.NumberOfActiveUnder21With1to2Years = await baseQuery.CountAsync(x => 
+            rslt.NumberOfActiveUnder21With1to2Years = await baseQuery.CountAsync(x =>
                     (
                         x.d.EmploymentStatusId == EmploymentStatus.Constants.Active ||
                         (x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated && x.d.TerminationDate > calInfo.FiscalEndDate)
-                    ) && 
-                    x.bal.YearsInPlan >= 1 && 
-                    x.bal.YearsInPlan <=2, 
+                    ) &&
+                    x.bal.YearsInPlan >= 1 &&
+                    x.bal.YearsInPlan <= 2,
                 cancellationToken);
             rslt.NumberOfActiveUnder21With20to80PctVested = await baseQuery.CountAsync(x =>
                     (
                         x.d.EmploymentStatusId == EmploymentStatus.Constants.Active ||
                         (x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated && x.d.TerminationDate > calInfo.FiscalEndDate)
                     ) &&
-                    x.bal.VestingPercent >= .2m && 
+                    x.bal.VestingPercent >= .2m &&
                     x.bal.VestingPercent <= .8m,
                 cancellationToken);
             rslt.NumberOfActiveUnder21With100PctVested = await baseQuery.CountAsync(x =>
@@ -353,7 +356,7 @@ public class PostFrozenService : IPostFrozenService
 
             rslt.NumberOfInActiveUnder21With1to2Years = await baseQuery.CountAsync(x =>
                     (
-                        x.d.EmploymentStatusId == EmploymentStatus.Constants.Inactive && 
+                        x.d.EmploymentStatusId == EmploymentStatus.Constants.Inactive &&
                         x.d.TerminationDate <= calInfo.FiscalEndDate
                     ) &&
                     x.bal.YearsInPlan >= 1 &&
@@ -403,9 +406,9 @@ public class PostFrozenService : IPostFrozenService
                 from b in rootQuery
                 join bal in _totalService.GetTotalBalanceSet(ctx, lastYear) on b.d.Ssn equals bal.Ssn
                 group bal by true into grp
-                select grp.Sum(x=>x.TotalAmount)
+                select grp.Sum(x => x.TotalAmount)
             ).FirstOrDefaultAsync(cancellationToken);
-                
+
             rslt.TotalEarnings = await (
                 from b in rootQuery
                 join pd in ctx.ProfitDetails on b.d.Ssn equals pd.Ssn
@@ -466,8 +469,8 @@ public class PostFrozenService : IPostFrozenService
             return true;
         });
 
-            return rslt;
-        }
+        return rslt;
+    }
 
     public async Task<List<string>> GetNewProfitSharingLabelsForMailMerge(ProfitYearRequest request, CancellationToken ct)
     {
@@ -475,7 +478,7 @@ public class PostFrozenService : IPostFrozenService
         var rslt = new List<string>();
         foreach (var person in people.Results)
         {
-            rslt.Add($"{person.StoreNumber.ToString("000")}-{person.DepartmentId.ToString("0")}-{person.PayClassificationId.ToString("0")}-{person.BadgeNumber}");
+            rslt.Add($"{person.StoreNumber.ToString("000")}-{person.DepartmentId.ToString("0")}-{person.PayClassificationId}-{person.BadgeNumber}");
             rslt.Add(person.EmployeeName);
             rslt.Add(person.Address1 ?? string.Empty);
             rslt.Add($"{person.City ?? string.Empty}, {person.State ?? string.Empty}, {person.PostalCode ?? string.Empty}");
@@ -484,13 +487,14 @@ public class PostFrozenService : IPostFrozenService
         return rslt;
     }
 
-    public async Task<PaginatedResponseDto<NewProfitSharingLabelResponse>> GetNewProfitSharingLabels (ProfitYearRequest request, CancellationToken cancellationToken)
+    public async Task<PaginatedResponseDto<NewProfitSharingLabelResponse>> GetNewProfitSharingLabels(ProfitYearRequest request, CancellationToken cancellationToken)
     {
         using (_logger.BeginScope("Request NEW PROFIT SHARING EMPLOYEE LABEL REPORT"))
         {
             var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
             var age21 = calInfo.FiscalEndDate.AddYears(-21);
-            var rslt = await (_profitSharingDataContextFactory.UseReadOnlyContext(async ctx => {
+            var rslt = await (_profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
+            {
                 var qry = (
                     from pp in ctx.PayProfits
                         .Include(x => x.Demographic)
@@ -498,10 +502,10 @@ public class PostFrozenService : IPostFrozenService
                         .Include(x => x.Demographic!.PayClassification)
                         .Include(x => x.Demographic!.Department)
                         .Include(x => x.Demographic!.EmploymentType)
-                        
+
                     where pp.Demographic!.DateOfBirth > age21 || pp.EmployeeTypeId == EmployeeType.Constants.NewLastYear
                     orderby pp.Demographic!.StoreNumber, pp.Demographic!.ContactInfo.LastName, pp.Demographic!.ContactInfo.FirstName
-                    select new 
+                    select new
                     {
                         pp.Demographic!.StoreNumber,
                         pp.Demographic.PayClassificationId,
@@ -522,8 +526,8 @@ public class PostFrozenService : IPostFrozenService
                     }
                 );
 
-                var rawData =  await qry.ToPaginationResultsAsync(request, cancellationToken);
-                var ssns = rawData.Results.Select(x=>x.Ssn).ToList();
+                var rawData = await qry.ToPaginationResultsAsync(request, cancellationToken);
+                var ssns = rawData.Results.Select(x => x.Ssn).ToList();
 
                 var balanceInfo = await _totalService.TotalVestingBalance(ctx, request.ProfitYear, calInfo.FiscalEndDate).Where(x => ssns.Contains(x.Ssn)).ToListAsync(cancellationToken);
 
@@ -567,7 +571,7 @@ public class PostFrozenService : IPostFrozenService
     public async Task<List<string>> GetProfitSharingLabelsExport(ProfitYearRequest request, CancellationToken ct)
     {
         var rawData = await GetProfitSharingLabels(request, ct);
-        var rslt = rawData.Results.Select(x=>$"{x.EmployeeName};{x.Address1};{x.City};{x.State};{x.PostalCode};{x.FirstName};{x.StoreNumber};{x.DepartmentId};{x.PayClassificationId};{x.BadgeNumber}").ToList();
+        var rslt = rawData.Results.Select(x => $"{x.EmployeeName};{x.Address1};{x.City};{x.State};{x.PostalCode};{x.FirstName};{x.StoreNumber};{x.DepartmentId};{x.PayClassificationId};{x.BadgeNumber}").ToList();
 
         return rslt;
     }
@@ -605,12 +609,12 @@ public class PostFrozenService : IPostFrozenService
                 var beneInfo = (
                     from bc in ctx.BeneficiaryContacts
                     join b in ctx.Beneficiaries on bc.Id equals b.BeneficiaryContactId
-                    where !demographicQuery.Any(d=>d.Ssn == bc.Ssn)
+                    where !demographicQuery.Any(d => d.Ssn == bc.Ssn)
                     select new
                     {
                         bc.Ssn,
                         StoreNumber = (short)0,
-                        PayClassificationId = (byte)0,
+                        PayClassificationId = string.Empty,
                         PayClassificationName = "",
                         DepartmentId = (byte)0,
                         DepartmentName = "",
@@ -628,7 +632,7 @@ public class PostFrozenService : IPostFrozenService
                 var demoAndBeneficiaries = demoInfo.Union(beneInfo);
 
                 return await (
-                    from pd in ctx.ProfitDetails.Where(x => x.ProfitYear == request.ProfitYear).Select(x=>x.Ssn).Distinct()
+                    from pd in ctx.ProfitDetails.Where(x => x.ProfitYear == request.ProfitYear).Select(x => x.Ssn).Distinct()
                     join d in demoAndBeneficiaries on pd equals d.Ssn
                     join pc in ctx.PayClassifications on d.PayClassificationId equals pc.Id
                     join dp in ctx.Departments on d.DepartmentId equals dp.Id

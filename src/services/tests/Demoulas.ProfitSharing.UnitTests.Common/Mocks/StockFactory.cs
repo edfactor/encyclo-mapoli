@@ -51,7 +51,7 @@ public static class StockFactory
             ModifiedAtUtc = default,
             StoreNumber = 0,
             PayClassification = null,
-            PayClassificationId = 0,
+            PayClassificationId = "0",
             ContactInfo = new ContactInfo
             {
                 FullName = null,

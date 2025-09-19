@@ -275,6 +275,37 @@ definitions:
           Write-Host "Source schema: $sourceSchema"
           Write-Host "Current directory: $(Get-Location)"
 
+          # -------------------------------------------------------------
+          # Full Reset & Import (Nuclear-Option parity)
+          #   Action: full-reset-and-import
+          #   Steps: drop-recreate-db -> import-from-ready -> import-from-navigation
+          # -------------------------------------------------------------
+          if ($action -eq "full-reset-and-import") {
+            if ($environment -ne "QA") {
+              Write-Error "Action 'full-reset-and-import' is restricted to QA environment only. Current environment: $environment"; exit 1
+            }
+            Write-Host "[Full Reset] Dropping & recreating schema $sourceSchema"
+            .\output\Demoulas.ProfitSharing.Data.Cli drop-recreate-db --connection-name ProfitSharing --source-schema $sourceSchema
+            if ($LASTEXITCODE -ne 0) { Write-Error "Drop/Recreate failed. Exiting"; exit 1 }
+
+            Write-Host "[Full Reset] Importing from READY into $sourceSchema"
+            .\output\Demoulas.ProfitSharing.Data.Cli import-from-ready --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema $sourceSchema
+            if ($LASTEXITCODE -ne 0) { Write-Error "Import from READY failed. Exiting"; exit 1 }
+
+            $navigationFile = ".\src\database\ready_import\Navigations\add-navigation-data.sql"
+            if ($environment -eq "UAT") {
+              $navigationFile = ".\src\database\ready_import\Navigations\add-uat-navigation-data.sql"
+              Write-Host "[Full Reset] Using UAT navigation data"
+            }
+
+            Write-Host "[Full Reset] Importing navigation data from $navigationFile"
+            .\output\Demoulas.ProfitSharing.Data.Cli import-from-navigation --connection-name ProfitSharing --sql-file $navigationFile --source-schema $sourceSchema
+            if ($LASTEXITCODE -ne 0) { Write-Error "Navigation import failed. Exiting"; exit 1 }
+
+            Write-Host "[Full Reset] Completed successfully."
+            exit 0
+          }
+
           .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --output-file ".\dist\migration.sql" --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema $sourceSchema
           if ($LASTEXITCODE -ne 0) { Write-Error "Database upgrade failed. Exiting"; exit 1 }
 
@@ -782,6 +813,7 @@ pipelines:
               - import-uat-navigation
               - generate-upgrade-script
               - validate-import
+              - full-reset-and-import
           - name: SourceSchema
             default: PROFITSHARE
             allowed-values:

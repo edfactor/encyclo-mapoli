@@ -143,7 +143,7 @@ export interface ProfitSharingLabelsRequest extends FrozenProfitYearRequest {
 
 export interface ProfitSharingLabel {
   storeNumber: number;
-  payClassificationId: number;
+  payClassificationId: string; // changed from number to string per backend
   payClassificationName: string;
   departmentId: number;
   departmentName: string;
