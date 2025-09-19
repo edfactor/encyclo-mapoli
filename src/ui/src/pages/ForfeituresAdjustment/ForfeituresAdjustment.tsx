@@ -15,12 +15,14 @@ import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { InquiryApi } from "../../reduxstore/api/InquiryApi";
 import { clearForfeitureAdjustmentData } from "../../reduxstore/slices/forfeituresAdjustmentSlice";
 import AddForfeitureModal from "./AddForfeitureModal";
+import AddUnforfeitModal from "./AddUnforfeitModal";
 import ForfeituresAdjustmentPanel from "./ForfeituresAdjustmentPanel";
 import ForfeituresAdjustmentSearchParameters from "./ForfeituresAdjustmentSearchParameters";
 
 const ForfeituresAdjustment = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [isAddForfeitureModalOpen, setIsAddForfeitureModalOpen] = useState(false);
+  const [isAddUnforfeitModalOpen, setIsAddUnforfeitModalOpen] = useState(false);
   const [pageNumberReset, setPageNumberReset] = useState(false);
   const { forfeitureAdjustmentData, forfeitureAdjustmentQueryParams } = useSelector(
     (state: RootState) => state.forfeituresAdjustment
@@ -44,6 +46,14 @@ const ForfeituresAdjustment = () => {
 
   const handleCloseAddForfeitureModal = () => {
     setIsAddForfeitureModalOpen(false);
+  };
+
+  const handleOpenAddUnforfeitModal = () => {
+    setIsAddUnforfeitModalOpen(true);
+  };
+
+  const handleCloseAddUnforfeitModal = () => {
+    setIsAddUnforfeitModalOpen(false);
   };
 
   const handleSaveForfeiture = (formData: { forfeitureAmount: number; classAction: boolean }) => {
@@ -86,6 +96,12 @@ const ForfeituresAdjustment = () => {
           console.error("Error refreshing forfeiture adjustments:", error);
         });
     }
+  };
+
+  const handleSaveUnforfeit = (formData: { forfeitureAmount: number; classAction: boolean }) => {
+    // Use the same logic as forfeiture save since the API endpoint is the same
+    // The amount will already be negative from the modal
+    handleSaveForfeiture(formData);
   };
 
   useEffect(() => {
@@ -139,6 +155,8 @@ const ForfeituresAdjustment = () => {
                 initialSearchLoaded={initialSearchLoaded}
                 setInitialSearchLoaded={setInitialSearchLoaded}
                 onAddForfeiture={handleOpenAddForfeitureModal}
+                onAddUnforfeit={handleOpenAddUnforfeitModal}
+                suggestedForfeitAmount={forfeitureAdjustmentData.suggestedForfeitAmount}
               />
             </Grid>
           )}
@@ -148,6 +166,13 @@ const ForfeituresAdjustment = () => {
           open={isAddForfeitureModalOpen}
           onClose={handleCloseAddForfeitureModal}
           onSave={handleSaveForfeiture}
+          suggestedForfeitResponse={forfeitureAdjustmentData}
+        />
+
+        <AddUnforfeitModal
+          open={isAddUnforfeitModalOpen}
+          onClose={handleCloseAddUnforfeitModal}
+          onSave={handleSaveUnforfeit}
           suggestedForfeitResponse={forfeitureAdjustmentData}
         />
       </Page>

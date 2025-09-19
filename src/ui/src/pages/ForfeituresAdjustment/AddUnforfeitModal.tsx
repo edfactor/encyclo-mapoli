@@ -5,7 +5,7 @@ import { useUpdateForfeitureAdjustmentMutation } from "reduxstore/api/YearsEndAp
 import { ForfeitureAdjustmentUpdateRequest, SuggestedForfeitResponse } from "reduxstore/types";
 import { SmartModal } from "smart-ui-library";
 
-interface AddForfeitureModalProps {
+interface AddUnforfeitModalProps {
   open: boolean;
   onClose: () => void;
   onSave: (formData: { forfeitureAmount: number; classAction: boolean }) => void;
@@ -21,7 +21,7 @@ const handleResponseError = (error: any) => {
     } else if (title.includes("Invalid badge number")) {
       alert("Invalid Badge Number");
     } else if (title.includes("Forfeiture amount cannot be zero")) {
-      alert("Forfeiture amount cannot be zero");
+      alert("Unforfeit amount cannot be zero");
     } else if (title.includes("Validation Error")) {
       alert("The submission contains data format errors.");
     } else {
@@ -32,7 +32,7 @@ const handleResponseError = (error: any) => {
   }
 };
 
-const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, onSave, suggestedForfeitResponse }) => {
+const AddUnforfeitModal: React.FC<AddUnforfeitModalProps> = ({ open, onClose, onSave, suggestedForfeitResponse }) => {
   const [formData, setFormData] = useState({
     badgeNumber: 0,
     forfeitureAmount: 0,
@@ -53,7 +53,7 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
         ...prev,
         badgeNumber: suggestedForfeitResponse.badgeNumber,
         suggestedForfeitAmount: suggestedForfeitResponse.suggestedForfeitAmount,
-        forfeitureAmount: suggestedForfeitResponse.suggestedForfeitAmount
+        forfeitureAmount: Math.abs(suggestedForfeitResponse.suggestedForfeitAmount) // Use absolute value for unforfeit
       }));
     }
   }, [suggestedForfeitResponse, open]);
@@ -87,30 +87,26 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
         onlyNetworkToastErrors?: boolean;
       } = {
         badgeNumber: formData.badgeNumber,
-        forfeitureAmount: formData.forfeitureAmount,
+        forfeitureAmount: -Math.abs(formData.forfeitureAmount), // Make it negative for unforfeit
         classAction: formData.classAction,
         profitYear: profitYear,
-        //suppressAllToastErrors: false,
-        onlyNetworkToastErrors: true // Suppress validation errors, only show network errors
+        onlyNetworkToastErrors: true
       };
 
       const result = await updateForfeiture(request);
 
-      // If the response has an error block, handle it
       if (result.error) {
         handleResponseError(result.error);
         return;
       }
 
       onSave({
-        forfeitureAmount: formData.forfeitureAmount,
+        forfeitureAmount: -Math.abs(formData.forfeitureAmount), // Return negative value
         classAction: formData.classAction
       });
 
-      // Close the modal
       onClose();
     } catch (error) {
-      // Sometimes 500 errors go down here
       handleResponseError(error);
     }
   };
@@ -119,7 +115,7 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
     <SmartModal
       open={open}
       onClose={onClose}
-      title="Add Forfeiture"
+      title="Add Unforfeit"
       actions={[
         <Button
           key="save"
@@ -140,7 +136,7 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
       <Grid
         container
         spacing={2}>
-        <Grid size={{ xs: 12 }}>Suggested Forfeiture Amount: {formData.suggestedForfeitAmount}</Grid>
+        <Grid size={{ xs: 12 }}>Suggested Unforfeit Amount: {formData.suggestedForfeitAmount ? Math.abs(formData.suggestedForfeitAmount) : 0}</Grid>
         <Grid size={{ xs: 12 }}>
           <FormControlLabel
             control={
@@ -158,7 +154,7 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
           <Typography
             variant="body2"
             gutterBottom>
-            Forfeiture Amount
+            Unforfeit Amount
           </Typography>
           <TextField
             name="forfeitureAmount"
@@ -175,4 +171,4 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
   );
 };
 
-export default AddForfeitureModal;
+export default AddUnforfeitModal;
