@@ -14,7 +14,7 @@ export interface CertificateReprintResponse {
   storeNumber: number;
   badgeNumber: number;
   fullName: string;
-  payClassificationId: number;
+  payClassificationId: string; // changed from number to string per backend change
   payClassificationName: string;
   beginningBalance: number;
   earnings: number;
