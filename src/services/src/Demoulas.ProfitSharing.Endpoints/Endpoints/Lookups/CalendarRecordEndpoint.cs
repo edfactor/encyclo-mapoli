@@ -1,16 +1,20 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Contracts; // for Result<T>
+using Demoulas.ProfitSharing.Common.Extensions; // for ToHttpResult / ToResultOrNotFound
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.Util.Extensions;
 using FastEndpoints;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 
-public class CalendarRecordEndpoint : ProfitSharingEndpoint<YearRequest, CalendarResponseDto>
+public class CalendarRecordEndpoint : ProfitSharingEndpoint<YearRequest, Results<Ok<CalendarResponseDto>, NotFound, ProblemHttpResult>>
 {
     private readonly ICalendarService _calendarService;
 
@@ -33,7 +37,7 @@ public class CalendarRecordEndpoint : ProfitSharingEndpoint<YearRequest, Calenda
                 }
             } };
         });
-    Group<LookupGroup>();
+        Group<LookupGroup>();
 
         if (!Env.IsTestEnvironment())
         {
@@ -43,8 +47,19 @@ public class CalendarRecordEndpoint : ProfitSharingEndpoint<YearRequest, Calenda
         }
     }
 
-    public override Task<CalendarResponseDto> ExecuteAsync(YearRequest req, CancellationToken ct)
+    public override async Task<Results<Ok<CalendarResponseDto>, NotFound, ProblemHttpResult>> ExecuteAsync(YearRequest req, CancellationToken ct)
     {
-        return _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, ct);
+        try
+        {
+            // Service currently returns a raw DTO; wrap into domain Result pattern for consistency
+            var dto = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, ct).ConfigureAwait(false);
+            return dto
+                .ToResultOrNotFound(Error.CalendarYearNotFound)
+                .ToHttpResult(Error.CalendarYearNotFound);
+        }
+        catch (Exception ex)
+        {
+            return TypedResults.Problem(ex.Message);
+        }
     }
 }

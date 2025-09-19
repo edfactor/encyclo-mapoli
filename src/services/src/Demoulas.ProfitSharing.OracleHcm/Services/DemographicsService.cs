@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
 using Exception = System.Exception;
+using System.Linq.Expressions;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
@@ -72,18 +73,77 @@ internal class DemographicsService : IDemographicsServiceInternal
 
         // Create lookup dictionaries for both OracleHcmId and SSN
         Dictionary<long, Demographic> demographicOracleHcmIdLookup = demographicsEntities.ToDictionary(entity => entity.OracleHcmId);
-        ILookup<(int Ssn, int BadgeNumber), Demographic> demographicSsnLookup = demographicsEntities.ToLookup(entity => (entity.Ssn, BadgeNumber: entity.BadgeNumber));
-        HashSet<int> ssnCollection = demographicsEntities.Select(d => d.Ssn).ToHashSet();
-        HashSet<DateOnly> dobCollection = demographicsEntities.Select(d => d.DateOfBirth).ToHashSet();
+        // Lookup keyed by (SSN, BadgeNumber) for fallback matching when OracleHcmId does not exist in DB
+        ILookup<(int Ssn, int BadgeNumber), Demographic> demographicSsnBadgeLookup = demographicsEntities.ToLookup(entity => (entity.Ssn, entity.BadgeNumber));
 
         // Use writable context for the upsert operation
         return _dataContextFactory.UseWritableContext(async context =>
         {
-            // Fetch existing entities from the database using both OracleHcmId and SSN
-            List<Demographic> existingEntities = await context.Demographics
-                .Where(dbEntity => demographicOracleHcmIdLookup.Keys.Contains(dbEntity.OracleHcmId) ||
-                                   (ssnCollection.Contains(dbEntity.Ssn) && dobCollection.Contains(dbEntity.DateOfBirth)))
+            // 1. Fetch existing entities by OracleHcmId (primary key for matching)
+            List<long> oracleIds = demographicOracleHcmIdLookup.Keys.ToList();
+            List<Demographic> existingEntitiesByOracleId = await context.Demographics
+                .Where(dbEntity => oracleIds.Contains(dbEntity.OracleHcmId))
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
+
+            HashSet<long> foundOracleIds = existingEntitiesByOracleId.Select(e => e.OracleHcmId).ToHashSet();
+
+            // 2. Determine which incoming entities still need fallback lookup (no OracleHcmId match)
+            var fallbackPairs = demographicsEntities
+                .Where(e => !foundOracleIds.Contains(e.OracleHcmId))
+                .Select(e => (e.Ssn, e.BadgeNumber))
+                .Distinct()
+                .ToList();
+
+            List<Demographic> existingEntitiesBySsnBadge = new();
+            if (fallbackPairs.Count > 0)
+            {
+                // Guard: If every fallback pair has BadgeNumber == 0 we consider this an invalid state
+                // (likely upstream mapping/parsing error) and skip building the dynamic expression to avoid
+                // an unbounded SSN-only lookup. Log at critical so it is surfaced.
+                if (fallbackPairs.All(p => p.BadgeNumber == 0))
+                {
+                    _logger.LogCritical("All fallback demographic pairs have BadgeNumber == 0. Aborting (SSN,BadgeNumber) fallback lookup. OracleIdsProcessed={OracleIdCount} FallbackCount={FallbackCount}", foundOracleIds.Count, fallbackPairs.Count);
+                }
+                else
+                {
+                    // Build (SSN && BadgeNumber) OR expression to avoid cross-product false positives.
+                    // (d.Ssn == p.Ssn && d.BadgeNumber == p.BadgeNumber) || ...
+                    ParameterExpression param = Expression.Parameter(typeof(Demographic), "d");
+                    Expression combined = Expression.Constant(false);
+
+                    foreach (var pair in fallbackPairs)
+                    {
+                        if (pair.BadgeNumber == 0)
+                        {
+                            continue; // Skip invalid badge numbers inside mixed set
+                        }
+                        Expression ssnEq = Expression.Equal(
+                            Expression.Property(param, nameof(Demographic.Ssn)),
+                            Expression.Constant(pair.Ssn));
+                        Expression badgeEq = Expression.Equal(
+                            Expression.Property(param, nameof(Demographic.BadgeNumber)),
+                            Expression.Constant(pair.BadgeNumber));
+                        Expression and = Expression.AndAlso(ssnEq, badgeEq);
+                        combined = Expression.OrElse(combined, and);
+                    }
+
+                    Expression<Func<Demographic, bool>> lambda = Expression.Lambda<Func<Demographic, bool>>(combined, param);
+                    if (lambda.Body != Expression.Constant(false))
+                    {
+                        existingEntitiesBySsnBadge = await context.Demographics
+                            .Where(lambda)
+                            .ToListAsync(cancellationToken).ConfigureAwait(false);
+                    }
+                }
+            }
+
+            // Merge results (distinct by Id to avoid duplicates if any record matched both criteria unexpectedly)
+            Dictionary<int, Demographic> existingEntitiesMap = existingEntitiesByOracleId
+                .Concat(existingEntitiesBySsnBadge)
+                .GroupBy(e => e.Id)
+                .ToDictionary(g => g.Key, g => g.First());
+
+            List<Demographic> existingEntities = existingEntitiesMap.Values.ToList();
 
             // Handle potential duplicates in the existing database (SSN duplicates)
             List<Demographic> duplicateSsnEntities = existingEntities.GroupBy(e => e.Ssn)
@@ -109,10 +169,13 @@ internal class DemographicsService : IDemographicsServiceInternal
 
             // Handle inserts for entities that do not exist in the database by OracleHcmId or SSN
             HashSet<long> existingOracleHcmIds = existingEntities.Select(dbEntity => dbEntity.OracleHcmId).ToHashSet();
-            HashSet<int> existingSsns = existingEntities.Select(dbEntity => dbEntity.Ssn).ToHashSet();
+            HashSet<(int Ssn, int BadgeNumber)> existingSsnBadgePairs = existingEntities
+                .Select(dbEntity => (dbEntity.Ssn, dbEntity.BadgeNumber))
+                .ToHashSet();
 
             List<Demographic> newEntities = demographicsEntities
-                .Where(entity => !existingOracleHcmIds.Contains(entity.OracleHcmId) && !existingSsns.Contains(entity.Ssn))
+                .Where(entity => !existingOracleHcmIds.Contains(entity.OracleHcmId) &&
+                                 !existingSsnBadgePairs.Contains((entity.Ssn, entity.BadgeNumber)))
                 .ToList();
 
             if (newEntities.Any())
@@ -157,14 +220,15 @@ internal class DemographicsService : IDemographicsServiceInternal
                 // Prioritize matching by OracleHcmId, but fallback to SSN if OracleHcmId is missing (legacy case)
                 if (demographicOracleHcmIdLookup.TryGetValue(existingEntity.OracleHcmId, out Demographic? entityByOracleHcmId))
                 {
-                    incomingEntity = entityByOracleHcmId;
+                    incomingEntity = entityByOracleHcmId; // Primary match by OracleHcmId
                 }
                 else
                 {
-                    Demographic? entityBySsn = demographicSsnLookup[(existingEntity.Ssn, existingEntity.BadgeNumber)].FirstOrDefault();
-                    if (entityBySsn != null)
+                    // Fallback precise match by (SSN, BadgeNumber)
+                    Demographic? entityBySsnBadge = demographicSsnBadgeLookup[(existingEntity.Ssn, existingEntity.BadgeNumber)].FirstOrDefault();
+                    if (entityBySsnBadge != null)
                     {
-                        incomingEntity = entityBySsn;
+                        incomingEntity = entityBySsnBadge;
                     }
                 }
 
