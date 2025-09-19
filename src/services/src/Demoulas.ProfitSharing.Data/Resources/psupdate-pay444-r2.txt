@@ -1,3 +1,0 @@
-PLACEHOLDER REPORT TEMPLATE
-This placeholder file satisfies embedded resource lookup for ProfitShareUpdate tests.
-Replace contents with finalized expected output once report formatting stabilizes.

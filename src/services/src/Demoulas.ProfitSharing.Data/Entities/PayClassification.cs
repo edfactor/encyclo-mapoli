@@ -100,6 +100,7 @@ public sealed class PayClassification : ILookupTable<string>
         public const string TechnicalSupport = "96";
         public const string ExecutiveOffice = "97";
         public const string Training = "98";
+        public const string IndianRidge = "99";
         public const string AdManager = "AD1";
         public const string AdReceptionist = "AD2";
         public const string DrBartender = "DR1";

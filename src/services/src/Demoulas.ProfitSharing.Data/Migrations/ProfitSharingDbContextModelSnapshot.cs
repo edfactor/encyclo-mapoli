@@ -30356,6 +30356,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         },
                         new
                         {
+                            Id = "99",
+                            Name = "Indian Ridge"
+                        },
+                        new
+                        {
                             Id = "AD1",
                             Name = "AD1-MANAGER"
                         },
