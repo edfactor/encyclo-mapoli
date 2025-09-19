@@ -1,5 +1,5 @@
 import { Button, Tooltip, Typography } from "@mui/material";
-import React, { useCallback, useMemo, useState, useEffect } from "react";
+import React, { useCallback, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, Pagination } from "smart-ui-library";
@@ -97,7 +97,8 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
             handleSortChanged={handleSortChange}
             providedOptions={{
               rowData: militaryContributionsData?.results,
-              columnDefs: columnDefs
+              columnDefs: columnDefs,
+              rowSelection: { mode: "singleRow" }
             }}
           />
 
