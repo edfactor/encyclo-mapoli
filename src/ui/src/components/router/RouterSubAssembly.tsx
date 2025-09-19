@@ -8,7 +8,7 @@ import DuplicateNamesAndBirthdays from "../../pages/DecemberActivities/Duplicate
 import DuplicateSSNsOnDemographics from "../../pages/DecemberActivities/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographics";
 import NegativeEtvaForSSNsOnPayprofit from "../../pages/DecemberActivities/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofit";
 import Termination from "../../pages/DecemberActivities/Termination/Termination";
-import RehireForfeitures from "../../pages/DecemberActivities/UnForfeit/RehireForfeitures";
+import UnForfeit from "../../pages/DecemberActivities/UnForfeit/UnForfeit";
 import EligibleEmployees from "../../pages/FiscalClose/EligibleEmployees/EligibleEmployees";
 import ManageExecutiveHoursAndDollars from "../../pages/FiscalClose/ManageExecutiveHoursAndDollars/ManageExecutiveHoursAndDollars";
 import QPAY066TA from "../../pages/FiscalClose/ProfitShareByStore/BreakdownReport/QPAY066TA";
@@ -209,7 +209,7 @@ const RouterSubAssembly: React.FC = () => {
                   element={<DuplicateNamesAndBirthdays />}></Route>
                 <Route
                   path={ROUTES.REHIRE_FORFEITURES}
-                  element={<RehireForfeitures />}></Route>
+                  element={<UnForfeit />}></Route>
                 <Route
                   path={ROUTES.DISTRIBUTIONS_AND_FORFEITURES}
                   element={<DistributionsAndForfeitures />}></Route>
