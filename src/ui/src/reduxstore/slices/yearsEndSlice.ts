@@ -40,7 +40,6 @@ import {
   ProfitSharingLabel,
   ProfitYearRequest,
   RecentlyTerminatedResponse,
-  RehireForfeiture,
   ReportsByAgeParams,
   StartAndEndDateRequest,
   TerminatedLettersRequest,
@@ -52,6 +51,7 @@ import {
   Under21InactiveResponse,
   Under21TotalsRequest,
   Under21TotalsResponse,
+  UnForfeit,
   UpdateSummaryResponse,
   VestedAmountsByAge,
   YearEndProfitSharingReportResponse,
@@ -113,8 +113,8 @@ export interface YearsEndState {
   grossWagesReport: GrossWagesReportResponse | null;
   grossWagesReportQueryParams: GrossWagesReportRequest | null;
   militaryEntryAndModification: EmployeeDetails | null;
-  rehireForfeitures: PagedReportResponse<RehireForfeiture> | null;
-  rehireForfeituresQueryParams: StartAndEndDateRequest | null;
+  unForfeits: PagedReportResponse<UnForfeit> | null;
+  unForfeitsQueryParams: StartAndEndDateRequest | null;
   rehireProfitSummaryQueryParams: StartAndEndDateRequest | null;
   rehireQueryParams: StartAndEndDateRequest | null;
   negativeEtvaForSSNsOnPayprofit: PagedReportResponse<NegativeEtvaForSSNsOnPayProfit> | null;
@@ -217,8 +217,8 @@ const initialState: YearsEndState = {
   recentlyTerminatedQueryParams: null,
   terminatedLetters: null,
   terminatedLettersQueryParams: null,
-  rehireForfeitures: null,
-  rehireForfeituresQueryParams: null,
+  unForfeits: null,
+  unForfeitsQueryParams: null,
   rehireProfitSummaryQueryParams: null,
   missingCommaInPYName: null,
   negativeEtvaForSSNsOnPayprofit: null,
@@ -389,8 +389,8 @@ export const yearsEndSlice = createSlice({
       // If StartAndEndDateRequest should be updated based on a year, update the appropriate property here.
       // For example, if it has a startDate and endDate, you may want to update those instead.
       // If you want to clear the data when the year changes, just clear the data.
-      if (state.rehireForfeituresQueryParams) {
-        state.rehireForfeitures = null;
+      if (state.unForfeitsQueryParams) {
+        state.unForfeits = null;
       }
 
       // Military and Rehire Profit Summary
@@ -570,17 +570,17 @@ export const yearsEndSlice = createSlice({
     setRehireProfitSummaryQueryParams: (state, action: PayloadAction<StartAndEndDateRequest>) => {
       state.rehireProfitSummaryQueryParams = action.payload;
     },
-    setRehireForfeituresDetails: (state, action: PayloadAction<PagedReportResponse<RehireForfeiture>>) => {
-      state.rehireForfeitures = action.payload;
+    setUnForfeitsDetails: (state, action: PayloadAction<PagedReportResponse<UnForfeit>>) => {
+      state.unForfeits = action.payload;
     },
-    clearRehireForfeituresDetails: (state) => {
-      state.rehireForfeitures = null;
+    clearUnForfeitsDetails: (state) => {
+      state.unForfeits = null;
     },
-    setRehireForfeituresQueryParams: (state, action: PayloadAction<StartAndEndDateRequest>) => {
-      state.rehireForfeituresQueryParams = action.payload;
+    setUnForfeitsQueryParams: (state, action: PayloadAction<StartAndEndDateRequest>) => {
+      state.unForfeitsQueryParams = action.payload;
     },
-    clearRehireForfeituresQueryParams: (state) => {
-      state.rehireForfeituresQueryParams = null;
+    clearUnForfeitsQueryParams: (state) => {
+      state.unForfeitsQueryParams = null;
     },
     setDistributionsAndForfeitures: (state, action: PayloadAction<DistributionsAndForfeitureTotalsResponse>) => {
       state.distributionsAndForfeitures = action.payload;
@@ -1059,8 +1059,8 @@ export const {
   clearExecutiveRowsSelected,
   clearForfeituresAndPoints,
   clearForfeituresAndPointsQueryParams,
-  clearRehireForfeituresDetails,
-  clearRehireForfeituresQueryParams,
+  clearUnForfeitsDetails,
+  clearUnForfeitsQueryParams,
   clearYearEndProfitSharingReport,
   clearYearEndProfitSharingReportTotals,
   removeExecutiveHoursAndDollarsGridRow,
@@ -1094,8 +1094,8 @@ export const {
   setForfeituresByAgeQueryParams,
   setGrossWagesReport,
   setGrossWagesReportQueryParams,
-  setRehireForfeituresDetails,
-  setRehireForfeituresQueryParams,
+  setUnForfeitsDetails,
+  setUnForfeitsQueryParams,
   setMissingCommaInPYName,
   setNegativeEtvaForSSNsOnPayprofit,
   setProfitMasterApply,
