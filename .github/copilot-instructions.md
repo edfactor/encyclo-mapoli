@@ -95,8 +95,8 @@ Patterns:
 ```pwsh
 # Build services
 cd src/services; dotnet build Demoulas.ProfitSharing.slnx
-# Run tests
-dotnet test src/services/Demoulas.ProfitSharing.slnx
+# Run tests (ONLY the consolidated UnitTests project; do not run entire solution test graph)
+dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitSharing.UnitTests.csproj --no-build
 # Start UI
 cd src/ui; npm run dev
 ```

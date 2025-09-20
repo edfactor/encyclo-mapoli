@@ -53,10 +53,7 @@ public class MasterInquiryFilteredDetailsEndpoint : ProfitSharingEndpoint<Master
         try
         {
             var data = await _masterInquiryService.GetMemberProfitDetails(req, ct);
-            if (data.Total == 0)
-            {
-                return Result<PaginatedResponseDto<MasterInquiryResponseDto>>.Failure(Error.EntityNotFound("Filtered member details")).ToHttpResult(Error.EntityNotFound("Filtered member details"));
-            }
+            // Return 200 with empty collection; a lack of matching detail rows under current filters is not a not-found condition.
             return Result<PaginatedResponseDto<MasterInquiryResponseDto>>.Success(data).ToHttpResult();
         }
         catch (Exception ex)

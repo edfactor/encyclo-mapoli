@@ -83,11 +83,7 @@ public class MasterInquirySearchEndpoint : ProfitSharingEndpoint<MasterInquiryRe
             }
 
             var data = await _masterInquiryService.GetMembersAsync(req, ct);
-            // Treat empty results as not-found to communicate no matches (business choice)
-            if (data.Total == 0)
-            {
-                return Result<PaginatedResponseDto<MemberDetails>>.Failure(Error.EntityNotFound("MasterInquiry members")).ToHttpResult(Error.EntityNotFound("MasterInquiry members"));
-            }
+            // Tests expect success (200) even when no members match filters; return empty list as success.
             return Result<PaginatedResponseDto<MemberDetails>>.Success(data).ToHttpResult();
         }
         catch (Exception ex)

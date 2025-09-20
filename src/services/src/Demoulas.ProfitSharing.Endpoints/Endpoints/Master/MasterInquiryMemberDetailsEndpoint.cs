@@ -53,10 +53,8 @@ public class MasterInquiryMemberDetailsEndpoint : ProfitSharingEndpoint<MasterIn
         try
         {
             var data = await _masterInquiryService.GetMemberProfitDetails(req, ct);
-            if (data.Total == 0)
-            {
-                return Result<PaginatedResponseDto<MasterInquiryResponseDto>>.Failure(Error.EntityNotFound("Member details")).ToHttpResult(Error.EntityNotFound("Member details"));
-            }
+            // Tests expect 200 with empty Results when the member exists or filters simply yield no profit details.
+            // We only return NotFound if a future service implementation explicitly indicates the member itself is missing.
             return Result<PaginatedResponseDto<MasterInquiryResponseDto>>.Success(data).ToHttpResult();
         }
         catch (Exception ex)
