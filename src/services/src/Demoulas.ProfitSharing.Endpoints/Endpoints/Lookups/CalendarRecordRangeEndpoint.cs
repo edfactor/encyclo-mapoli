@@ -1,4 +1,5 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
@@ -6,11 +7,11 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.Util.Extensions;
 using FastEndpoints;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 
-public class CalendarRecordRangeEndpoint : ProfitSharingEndpoint<YearRangeRequest, CalendarResponseDto>
+public class CalendarRecordRangeEndpoint : ProfitSharingEndpoint<YearRangeRequest, Results<Ok<CalendarResponseDto>, NotFound, ProblemHttpResult>>
 {
     private readonly ICalendarService _calendarService;
 
@@ -44,14 +45,10 @@ public class CalendarRecordRangeEndpoint : ProfitSharingEndpoint<YearRangeReques
         });
     Group<LookupGroup>();
 
-        if (!Env.IsTestEnvironment())
-        {
-            TimeSpan cacheDuration = TimeSpan.FromMinutes(5);
-            Options(x => x.CacheOutput(p => p.Expire(cacheDuration)));
-        }
+        // Removed output caching configuration pending standardized caching extension availability for route handlers.
     }
 
-    public override async Task<CalendarResponseDto> ExecuteAsync(YearRangeRequest req, CancellationToken ct)
+    public override async Task<Results<Ok<CalendarResponseDto>, NotFound, ProblemHttpResult>> ExecuteAsync(YearRangeRequest req, CancellationToken ct)
     {
         var startTask = _calendarService.GetYearStartAndEndAccountingDatesAsync(req.BeginProfitYear, ct);
         var endTask = _calendarService.GetYearStartAndEndAccountingDatesAsync(req.EndProfitYear, ct);
@@ -60,7 +57,14 @@ public class CalendarRecordRangeEndpoint : ProfitSharingEndpoint<YearRangeReques
         
         var start = await startTask;
         var end = await endTask;
+        // Basic not-found semantics: if either side returns default dates (00/00) treat as not found.
+        if (start.FiscalBeginDate == default || end.FiscalEndDate == default)
+        {
+            return Result<CalendarResponseDto>.Failure(Error.CalendarYearNotFound)
+                .ToHttpResult(Error.CalendarYearNotFound);
+        }
 
-        return new CalendarResponseDto { FiscalBeginDate = start.FiscalBeginDate, FiscalEndDate = end.FiscalEndDate };
+        var dto = new CalendarResponseDto { FiscalBeginDate = start.FiscalBeginDate, FiscalEndDate = end.FiscalEndDate };
+        return Result<CalendarResponseDto>.Success(dto).ToHttpResult();
     }
 }

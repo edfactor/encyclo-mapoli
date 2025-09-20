@@ -1,12 +1,14 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Navigations;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Navigations;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Navigations;
-public class GetNavigationStatusEndpoint : ProfitSharingEndpoint<GetNavigationStatusRequestDto, GetNavigationStatusResponseDto>
+public class GetNavigationStatusEndpoint : ProfitSharingEndpoint<GetNavigationStatusRequestDto, Results<Ok<GetNavigationStatusResponseDto>, NotFound, ProblemHttpResult>>
 {
 
     private readonly INavigationService _navigationService;
@@ -29,11 +31,11 @@ public class GetNavigationStatusEndpoint : ProfitSharingEndpoint<GetNavigationSt
         Group<NavigationGroup>();
     }
 
-    public override async Task<GetNavigationStatusResponseDto> ExecuteAsync(GetNavigationStatusRequestDto req, CancellationToken ct)
+    public override async Task<Results<Ok<GetNavigationStatusResponseDto>, NotFound, ProblemHttpResult>> ExecuteAsync(GetNavigationStatusRequestDto req, CancellationToken ct)
     {
         var navigationStatusList = await _navigationService.GetNavigationStatus(cancellationToken: ct);
         var response = new GetNavigationStatusResponseDto { NavigationStatusList = navigationStatusList };
-        return response;
+        return Result<GetNavigationStatusResponseDto>.Success(response).ToHttpResult();
     }
 
 }
