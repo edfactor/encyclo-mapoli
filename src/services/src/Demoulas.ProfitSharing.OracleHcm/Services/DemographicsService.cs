@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Linq.Dynamic.Core;
-using System.Linq.Expressions;
-using System.Runtime.Intrinsics.X86;
-using System.Threading;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
@@ -16,19 +6,13 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Mappers;
-using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
-using Demoulas.Util.Extensions;
 using EntityFramework.Exceptions.Common;
-using FastEndpoints;
 using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
-using static FastEndpoints.Ep;
 using Exception = System.Exception;
-using System.Linq.Expressions;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
@@ -50,7 +34,7 @@ public class DemographicsService : IDemographicsServiceInternal
     public DemographicsService(IProfitSharingDataContextFactory dataContextFactory,
         DemographicMapper mapper,
         ILogger<DemographicsService> logger,
-        ITotalService totalService, 
+        ITotalService totalService,
         IFakeSsnService fakeSsnService)
     {
         _dataContextFactory = dataContextFactory;
@@ -96,21 +80,12 @@ public class DemographicsService : IDemographicsServiceInternal
 
         // Create lookup dictionaries for both OracleHcmId and SSN
         Dictionary<long, Demographic> demographicOracleHcmIdLookup = demographicsEntities.ToDictionary(entity => entity.OracleHcmId);
-        // Lookup keyed by (SSN, BadgeNumber) for fallback matching when OracleHcmId does not exist in DB
-        ILookup<(int Ssn, int BadgeNumber), Demographic> demographicSsnBadgeLookup = demographicsEntities.ToLookup(entity => (entity.Ssn, entity.BadgeNumber));
+        ILookup<(int Ssn, int BadgeNumber), Demographic> demographicSsnLookup = demographicsEntities.ToLookup(entity => (entity.Ssn, BadgeNumber: entity.BadgeNumber));
 
         // Use writable context for the upsert operation
         return _dataContextFactory.UseWritableContext(async context =>
         {
-            List<Demographic> existingEntities = await GetMatchingDemographicsWithSqlAsync(demographicsEntities, context, cancellationToken);
-
-            // Merge results (distinct by Id to avoid duplicates if any record matched both criteria unexpectedly)
-            Dictionary<int, Demographic> existingEntitiesMap = existingEntitiesByOracleId
-                .Concat(existingEntitiesBySsnBadge)
-                .GroupBy(e => e.Id)
-                .ToDictionary(g => g.Key, g => g.First());
-
-            List<Demographic> existingEntities = existingEntitiesMap.Values.ToList();
+            List<Demographic> existingEntities = await GetMatchingDemographicsWithSqlAsync(demographicsEntities, context, cancellationToken).ConfigureAwait(false);
 
             // Handle potential duplicates in the existing database (SSN duplicates)
             List<Demographic> duplicateSsnEntities = existingEntities.GroupBy(e => e.Ssn)
@@ -120,31 +95,34 @@ public class DemographicsService : IDemographicsServiceInternal
 
             if (duplicateSsnEntities.Any())
             {
-                 AddDemographicSyncAudits(duplicateSsnEntities, "Duplicate SSNs found in the database.", "SSN", context);
+                AddDemographicSyncAudits(duplicateSsnEntities, "Duplicate SSNs found in the database.", "SSN", context);
             }
             else
             {
                 // use case:  check if user is changing their social security number, there are no ssn duplicates
-                foreach (var proposedChangeKV in demographicOracleHcmIdLookup.ToList())
+                foreach (var proposedChangeKv in demographicOracleHcmIdLookup.ToList())
                 {
                     // lookup for existing demographic by oracleHcmId and check if ssn is different than proposed change
-                    var demographicMarkedForSSNChange = existingEntities.FirstOrDefault(existingDemographic =>
-                        existingDemographic.OracleHcmId == proposedChangeKV.Key && existingDemographic.Ssn != proposedChangeKV.Value.Ssn);
+                    var demographicMarkedForSsnChange = existingEntities.FirstOrDefault(existingDemographic =>
+                        existingDemographic.OracleHcmId == proposedChangeKv.Key && existingDemographic.Ssn != proposedChangeKv.Value.Ssn);
 
-                    if (demographicMarkedForSSNChange != null)
+                    if (demographicMarkedForSsnChange != null)
                     {
                         // look for possible match with ssn for proposed change
-                        var existingEmployeeMatchToProposedSsn = await context.Demographics.FirstOrDefaultAsync(demographic => demographic.Ssn == proposedChangeKV.Value.Ssn, cancellationToken).ConfigureAwait(false);
+                        var existingEmployeeMatchToProposedSsn = await context.Demographics
+                            .FirstOrDefaultAsync(demographic => demographic.Ssn == proposedChangeKv.Value.Ssn, cancellationToken).ConfigureAwait(false);
 
                         if (existingEmployeeMatchToProposedSsn == null)
                         {
-                            await AddDemographicSyncAuditAsync(demographicMarkedForSSNChange, "SSN changed with no conflicts.", "SSN", context, cancellationToken).ConfigureAwait(false);
+                            await AddDemographicSyncAuditAsync(demographicMarkedForSsnChange, "SSN changed with no conflicts.", "SSN", context, cancellationToken)
+                                .ConfigureAwait(false);
                         }
                         // use case - ssn change for employee and ssn exists already in the system
                         else
                         {
                             // match for proposed ssn exists logic 
-                            await HandleExistingEmployeeMatchToProposedSsnAsync(existingEmployeeMatchToProposedSsn, demographicMarkedForSSNChange, context, cancellationToken).ConfigureAwait(false);
+                            await HandleExistingEmployeeMatchToProposedSsnAsync(existingEmployeeMatchToProposedSsn, demographicMarkedForSsnChange, context, cancellationToken)
+                                .ConfigureAwait(false);
                         }
                     }
                 }
@@ -153,7 +131,8 @@ public class DemographicsService : IDemographicsServiceInternal
             // checks for new ones and adds them as needed...
             await InsertNewDemographicsAsync(demographicsEntities, existingEntities, context, cancellationToken).ConfigureAwait(false);
             // checks for updates to existing demographics and updates them as needed...
-            await UpdateExistingDemographicsAsync(demographicOracleHcmIdLookup, demographicSsnLookup, existingEntities, currentModificationDate, context, cancellationToken).ConfigureAwait(false);
+            await UpdateExistingDemographicsAsync(demographicOracleHcmIdLookup, demographicSsnLookup, existingEntities, currentModificationDate, context, cancellationToken)
+                .ConfigureAwait(false);
 
             // Save all changes to the database
             try
@@ -182,11 +161,12 @@ public class DemographicsService : IDemographicsServiceInternal
     {
         return _dataContextFactory.UseWritableContext(async context =>
         {
-            var fakeSsn = await _fakeSsnService.GenerateFakeSsnAsync(cancellationToken);
+            var fakeSsn = await _fakeSsnService.GenerateFakeSsnAsync(cancellationToken).ConfigureAwait(false);
             sourceDemographic.Ssn = fakeSsn;
 
             await AddDemographicSyncAuditAsync(targetDemographic,
-                $"Merging ProfitDetails from source OracleHcmId {sourceDemographic.OracleHcmId} to OracleHcmId {targetDemographic.OracleHcmId}", "ProfitDetails", context, cancellationToken);
+                $"Merging ProfitDetails from source OracleHcmId {sourceDemographic.OracleHcmId} to OracleHcmId {targetDemographic.OracleHcmId}", "ProfitDetails", context,
+                cancellationToken).ConfigureAwait(false);
 
             // Save all changes to the database
             try
@@ -195,7 +175,8 @@ public class DemographicsService : IDemographicsServiceInternal
             }
             catch (Exception e)
             {
-                _logger.LogCritical(e, "Failed to merge demographics: Source SSN {SourceSsn}, Target SSN {TargetSsn}", targetDemographic.Ssn.MaskSsn(), targetDemographic.Ssn.MaskSsn());
+                _logger.LogCritical(e, "Failed to merge demographics: Source SSN {SourceSsn}, Target SSN {TargetSsn}", targetDemographic.Ssn.MaskSsn(),
+                    targetDemographic.Ssn.MaskSsn());
             }
 
         }, cancellationToken);
@@ -278,7 +259,9 @@ public class DemographicsService : IDemographicsServiceInternal
     /// <param name="context"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private static async Task UpdateExistingDemographicsAsync(Dictionary<long, Demographic> demographicOracleHcmIdLookup, ILookup<(int Ssn, int BadgeNumber), Demographic> demographicSsnLookup, List<Demographic> existingEntities, DateTimeOffset currentModificationDate, ProfitSharingDbContext context, CancellationToken cancellationToken)
+    private static async Task UpdateExistingDemographicsAsync(Dictionary<long, Demographic> demographicOracleHcmIdLookup,
+        ILookup<(int Ssn, int BadgeNumber), Demographic> demographicSsnLookup, List<Demographic> existingEntities, DateTimeOffset currentModificationDate,
+        ProfitSharingDbContext context, CancellationToken cancellationToken)
     {
         // Update existing entities based on either OracleHcmId or SSN & BadgeNumber
         foreach (Demographic existingEntity in existingEntities)
@@ -322,7 +305,8 @@ public class DemographicsService : IDemographicsServiceInternal
     /// <param name="context"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async Task InsertNewDemographicsAsync(List<Demographic> demographicsEntities, List<Demographic> existingEntities, ProfitSharingDbContext context, CancellationToken cancellationToken)
+    private async Task InsertNewDemographicsAsync(List<Demographic> demographicsEntities, List<Demographic> existingEntities, ProfitSharingDbContext context,
+        CancellationToken cancellationToken)
     {
         // Handle inserts for entities that do not exist in the database by OracleHcmId or SSN
         HashSet<long> existingOracleHcmIds = existingEntities.Select(dbEntity => dbEntity.OracleHcmId).ToHashSet();
@@ -374,7 +358,8 @@ public class DemographicsService : IDemographicsServiceInternal
     /// <param name="context"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private static async Task AddDemographicHistoryAsync(Demographic existingEntity, Demographic incomingEntity, DateTimeOffset currentModificationDate, ProfitSharingDbContext context, CancellationToken cancellationToken)
+    private static async Task AddDemographicHistoryAsync(Demographic existingEntity, Demographic incomingEntity, DateTimeOffset currentModificationDate,
+        ProfitSharingDbContext context, CancellationToken cancellationToken)
     {
         // Update the rest of the entity's fields
         bool updateHistory = !Demographic.DemographicHistoryEqual(existingEntity, incomingEntity);
@@ -410,24 +395,27 @@ public class DemographicsService : IDemographicsServiceInternal
     /// </summary>
     /// <param name="existingEmployeeMatchToProposedSsn"></param>
     /// existing employee in the system that matches the proposed ssn change
-    /// <param name="demographicMarkedForSSNChange"></param>
+    /// <param name="demographicMarkedForSsnChange"></param>
     /// existing employee that is changing their ssn (different from existingEmployeeMatchToProposedSsn)
     /// <param name="context"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async Task HandleExistingEmployeeMatchToProposedSsnAsync(Demographic existingEmployeeMatchToProposedSsn, Demographic demographicMarkedForSSNChange, ProfitSharingDbContext context, CancellationToken cancellationToken)
+    private async Task HandleExistingEmployeeMatchToProposedSsnAsync(Demographic existingEmployeeMatchToProposedSsn, Demographic demographicMarkedForSsnChange,
+        ProfitSharingDbContext context, CancellationToken cancellationToken)
     {
         // check if customer has money...
-        var result = await _totalService.GetVestingBalanceForSingleMemberAsync(SearchBy.Ssn, demographicMarkedForSSNChange.Ssn, (short)DateTime.Now.Year, cancellationToken).ConfigureAwait(false);
+        var result = await _totalService.GetVestingBalanceForSingleMemberAsync(SearchBy.Ssn, demographicMarkedForSsnChange.Ssn, (short)DateTime.Now.Year, cancellationToken)
+            .ConfigureAwait(false);
 
         // check if terminated employee with no money and change 
         if (existingEmployeeMatchToProposedSsn.EmploymentStatusId == EmploymentStatus.Constants.Terminated && result?.CurrentBalance == (decimal)0.0)
         {
-            await AddDemographicSyncAuditAsync(demographicMarkedForSSNChange, "Duplicate SSN found for terminated user with zero balance.", "SSN", context, cancellationToken).ConfigureAwait(false);
+            await AddDemographicSyncAuditAsync(demographicMarkedForSsnChange, "Duplicate SSN found for terminated user with zero balance.", "SSN", context, cancellationToken)
+                .ConfigureAwait(false);
         }
         else
         {
-            await AddDemographicSyncAuditAsync(demographicMarkedForSSNChange, "Duplicate SSN added for user.", "SSN", context, cancellationToken).ConfigureAwait(false);
+            await AddDemographicSyncAuditAsync(demographicMarkedForSsnChange, "Duplicate SSN added for user.", "SSN", context, cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -451,7 +439,7 @@ public class DemographicsService : IDemographicsServiceInternal
             PropertyName = property
         }).ToList();
 
-         context.DemographicSyncAudit.AddRange(audit);
+        context.DemographicSyncAudit.AddRange(audit);
     }
 
     /// <summary>
@@ -462,7 +450,8 @@ public class DemographicsService : IDemographicsServiceInternal
     /// <param name="property"></param>
     /// <param name="context"></param>
     /// <returns></returns>
-    private static async Task AddDemographicSyncAuditAsync(Demographic demographic, string message, string property, ProfitSharingDbContext context, CancellationToken cancellationToken)
+    private static async Task AddDemographicSyncAuditAsync(Demographic demographic, string message, string property, ProfitSharingDbContext context,
+        CancellationToken cancellationToken)
     {
         var audit = new DemographicSyncAudit
         {
@@ -499,6 +488,7 @@ public class DemographicsService : IDemographicsServiceInternal
         existingEntity.EmploymentStatusId = incomingEntity.EmploymentStatusId;
         existingEntity.ModifiedAtUtc = modificationDate;
     }
+
     /// <summary>
     /// uses inline sql to retrieve demographics from the database that match either OracleHcmId or SSN and DateOfBirth.
     /// performance is much better than linq method - 35x
@@ -509,9 +499,9 @@ public class DemographicsService : IDemographicsServiceInternal
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     private async Task<List<Demographic>> GetMatchingDemographicsWithSqlAsync(
-    List<Demographic> demographicsEntities,
-    ProfitSharingDbContext context,
-    CancellationToken cancellationToken)
+        List<Demographic> demographicsEntities,
+        ProfitSharingDbContext context,
+        CancellationToken cancellationToken)
     {
         if (!demographicsEntities.Any())
         {
@@ -547,7 +537,7 @@ public class DemographicsService : IDemographicsServiceInternal
                 .FromSqlRaw(sql)
                 .Include(d => d.ContactInfo)
                 .Include(d => d.Address)
-                .ToListAsync(cancellationToken);
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
 
             _logger.LogInformation("Retrieved {Count} matching demographics using direct SQL", result.Count);
             return result;
@@ -557,7 +547,7 @@ public class DemographicsService : IDemographicsServiceInternal
             _logger.LogError(ex, "Error executing direct SQL query to find matching demographics. Falling back to LINQ method.");
 
             // Fallback to the standard method if direct SQL fails
-            return await RetrieveDbChangedDemographicsAsync(demographicsEntities, context, cancellationToken);
+            return await RetrieveDbChangedDemographicsAsync(demographicsEntities, context, cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -568,7 +558,8 @@ public class DemographicsService : IDemographicsServiceInternal
     /// <param name="context"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async Task<List<Demographic>> RetrieveDbChangedDemographicsAsync(List<Demographic> demographicsEntities, ProfitSharingDbContext context, CancellationToken cancellationToken)
+    private async Task<List<Demographic>> RetrieveDbChangedDemographicsAsync(List<Demographic> demographicsEntities, ProfitSharingDbContext context,
+        CancellationToken cancellationToken)
     {
         List<Demographic> existingEntities = new();
 
@@ -617,6 +608,7 @@ public class DemographicsService : IDemographicsServiceInternal
             // Remove duplicates (in case a record was found by both criteria)
             existingEntities = existingEntities.GroupBy(e => e.Id).Select(g => g.First()).ToList();
         }
+
         return existingEntities;
     }
 
