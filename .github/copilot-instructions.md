@@ -13,7 +13,10 @@ Concise, project-specific guidance for AI coding agents working in this reposito
 - Startup/entrypoint: run/debug `Demoulas.ProfitSharing.AppHost` (Aspire host). Avoid creating new ad-hoc hosts.
 - Use FastEndpoints; group endpoint files logically. Prefer minimal API style. Return typed results + proper status codes.
 - Mapping: Prefer `Mapperly` for DTO<->entity; follow existing mapper classes (see `*Mapper.cs`). Don't hand-write repetitive mapping unless customization is needed.
-- Data access: Use async EF Core patterns. Bulk maintenance uses `ExecuteUpdate/ExecuteDelete` where safe. For dynamic filters, build expressions (see `DemographicsService`). Avoid raw SQL unless performance justified—then parameterize.
+- Data access (service layer ONLY): All EF Core usage (DbContext/`IProfitSharingDataContextFactory`, LINQ queries, transactions) lives in dedicated domain/application services (e.g., `...Services` projects). Endpoints MUST NOT directly query the database nor reference DbSets. They invoke injected services that return `Result<T>` (or domain objects) and perform only request validation, orchestration, and HTTP result translation.
+  - Bulk maintenance still uses `ExecuteUpdate/ExecuteDelete` inside services where safe.
+  - For dynamic filters build expressions in services (see `DemographicsService`).
+  - Avoid raw SQL; if performance requires it, encapsulate in the service layer, parameterize, and unit test.
 - Auditing & History: When updating mutable domain entities with historical tracking (example: `DemographicsService` creating `DemographicHistory` with `ValidFrom/ValidTo`), replicate the pattern: close current record (`ValidTo = now`), insert new history row. NEVER overwrite historical rows.
 - Identifiers: `OracleHcmId` is authoritative when present; fall back to composite `(Ssn,BadgeNumber)` only when Oracle id missing. Mirror guard logic (skip ambiguous BadgeNumber == 0 cases) if extending.
 - Entity updates: Keep helper methods like `UpdateEntityValues` cohesive; prefer adding fields there instead of scattering manual per-field assignments.
@@ -103,6 +106,7 @@ cd src/ui; npm run dev
 - Introduce raw SQL without parameters.
 - Duplicate mapping logic already covered by Mapperly profiles.
 - Hardcode environment-specific connection strings or credentials.
+- Access `DbContext`, `IProfitSharingDataContextFactory`, or any EF Core DbSet directly inside endpoint classes. (If present, refactor: move data logic into a service and have the endpoint call that service returning `Result<T>`.)
 
 ---
 Provide reasoning in PR descriptions when deviating from these patterns.
