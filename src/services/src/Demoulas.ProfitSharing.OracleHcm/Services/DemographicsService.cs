@@ -308,12 +308,15 @@ public class DemographicsService : IDemographicsServiceInternal
     private async Task InsertNewDemographicsAsync(List<Demographic> demographicsEntities, List<Demographic> existingEntities, ProfitSharingDbContext context,
         CancellationToken cancellationToken)
     {
-        // Handle inserts for entities that do not exist in the database by OracleHcmId or SSN
+        // Handle inserts for entities that do not exist in the database by OracleHcmId OR (SSN,BadgeNumber) pair
         HashSet<long> existingOracleHcmIds = existingEntities.Select(dbEntity => dbEntity.OracleHcmId).ToHashSet();
-        HashSet<int> existingSsns = existingEntities.Select(dbEntity => dbEntity.Ssn).ToHashSet();
+        HashSet<(int Ssn, int BadgeNumber)> existingSsnBadgePairs = existingEntities
+            .Select(dbEntity => (dbEntity.Ssn, dbEntity.BadgeNumber))
+            .ToHashSet();
 
         List<Demographic> newEntities = demographicsEntities
-            .Where(entity => !existingOracleHcmIds.Contains(entity.OracleHcmId) && !existingSsns.Contains(entity.Ssn))
+            .Where(entity => !existingOracleHcmIds.Contains(entity.OracleHcmId) &&
+                             !existingSsnBadgePairs.Contains((entity.Ssn, entity.BadgeNumber)))
             .ToList();
 
         if (newEntities.Any())
@@ -490,8 +493,8 @@ public class DemographicsService : IDemographicsServiceInternal
     }
 
     /// <summary>
-    /// uses inline sql to retrieve demographics from the database that match either OracleHcmId or SSN and DateOfBirth.
-    /// performance is much better than linq method - 35x
+    /// uses inline sql to retrieve demographics from the database that match either OracleHcmId (primary) or (SSN + BadgeNumber) as a fallback.
+    /// performance is much better than linq method - 35x (empirical prior measurement)
     /// have back up in case of failure to use existing linq method
     /// </summary>
     /// <param name="demographicsEntities"></param>
@@ -510,36 +513,55 @@ public class DemographicsService : IDemographicsServiceInternal
 
         try
         {
-            // Format Oracle HCM IDs as a comma-separated string
+            // Format Oracle HCM IDs as a comma-separated string (numeric - safe from injection)
             string hcmIdsInClause = string.Join(",", demographicsEntities.Select(d => d.OracleHcmId));
 
-            // Build SSN and DOB pairs for the IN clause
-            var ssnDobConditions = new List<string>();
-            foreach (var entity in demographicsEntities)
+            // Build distinct (SSN,BadgeNumber) fallback pairs only for those where OracleHcmId might not be present/found.
+            var ssnBadgePairs = demographicsEntities
+                .Select(d => (d.Ssn, d.BadgeNumber))
+                .Distinct()
+                .ToList();
+
+            // Guard: if all badge numbers are zero, log and skip fallback (avoid broad SSN-only scan intent)
+            bool allZeroBadges = ssnBadgePairs.Count > 0 && ssnBadgePairs.All(p => p.BadgeNumber == 0);
+            if (allZeroBadges)
             {
-                // Format date in Oracle format
-                string dateString = entity.DateOfBirth.ToString("yyyy-MM-dd");
-                ssnDobConditions.Add($"(d.SSN = {entity.Ssn} AND d.DATE_OF_BIRTH = TO_DATE('{dateString}', 'YYYY-MM-DD'))");
+                _logger.LogCritical("All fallback demographic pairs have BadgeNumber == 0. Skipping (SSN,BadgeNumber) fallback lookup. OracleHcmCount={OracleHcmCount}", demographicsEntities.Count);
             }
 
-            // Combine conditions with OR
-            string ssnDobWhereClause = string.Join(" OR ", ssnDobConditions);
+            var ssnBadgeConditions = new List<string>();
+            if (!allZeroBadges)
+            {
+                foreach (var pair in ssnBadgePairs)
+                {
+                    if (pair.BadgeNumber == 0)
+                    {
+                        continue; // skip invalid sentinel badge numbers
+                    }
+                    ssnBadgeConditions.Add($"(d.SSN = {pair.Ssn} AND d.BADGE_NUMBER = {pair.BadgeNumber})");
+                }
+            }
 
-            // Build the complete SQL query
-            string sql = $@"
-            SELECT d.*
-            FROM DEMOGRAPHIC d
-            WHERE d.ORACLE_HCM_ID IN ({hcmIdsInClause})
-            OR ({ssnDobWhereClause})";
+            string ssnBadgeWhereClause = ssnBadgeConditions.Count > 0 ? string.Join(" OR ", ssnBadgeConditions) : string.Empty;
 
-            // Execute the SQL directly
+            // Build SQL - if there are no fallback clauses we only query by OracleHcmId
+            string sql;
+            if (string.IsNullOrWhiteSpace(ssnBadgeWhereClause))
+            {
+                sql = $@"SELECT d.* FROM DEMOGRAPHIC d WHERE d.ORACLE_HCM_ID IN ({hcmIdsInClause})";
+            }
+            else
+            {
+                sql = $@"SELECT d.* FROM DEMOGRAPHIC d WHERE d.ORACLE_HCM_ID IN ({hcmIdsInClause}) OR ({ssnBadgeWhereClause})";
+            }
+
             var result = await context.Demographics
                 .FromSqlRaw(sql)
                 .Include(d => d.ContactInfo)
                 .Include(d => d.Address)
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
 
-            _logger.LogInformation("Retrieved {Count} matching demographics using direct SQL", result.Count);
+            _logger.LogInformation("Retrieved {Count} matching demographics using direct SQL (OracleIds + Fallback SSN/Badge)", result.Count);
             return result;
         }
         catch (Exception ex)
@@ -552,7 +574,7 @@ public class DemographicsService : IDemographicsServiceInternal
     }
 
     /// <summary>
-    /// method retrieves demographics from the database that match either OracleHcmId or SSN and DateOfBirth.
+    /// method retrieves demographics from the database that match either OracleHcmId or SSN and BadgeNumber (fallback).
     /// </summary>
     /// <param name="demographicsEntities"></param>
     /// <param name="context"></param>
@@ -565,7 +587,7 @@ public class DemographicsService : IDemographicsServiceInternal
 
         if (demographicsEntities.Any())
         {
-            var ssnAndDobPairs = demographicsEntities.Select(d => (d.Ssn, d.DateOfBirth)).ToList();
+            var ssnBadgePairs = demographicsEntities.Select(d => (d.Ssn, d.BadgeNumber)).Distinct().ToList();
             var oracleHcmIds = demographicsEntities.Select(d => d.OracleHcmId).ToHashSet();
 
             // First, get all demographics with matching Oracle HCM IDs using an efficient Contains query
@@ -579,29 +601,20 @@ public class DemographicsService : IDemographicsServiceInternal
                 existingEntities.AddRange(entitiesByOracleHcmId);
             }
 
-            // Then, get all demographics with matching SSN and DOB pairs using a more complex query
-            if (ssnAndDobPairs.Any())
+            // Then, get all demographics with matching (SSN,BadgeNumber) pairs (excluding those already found by OracleHcmId)
+            if (ssnBadgePairs.Any())
             {
-                // Create in-memory table of SSN/DOB pairs
-                var pairTable = ssnAndDobPairs
-                    .Select(p => new { Ssn = p.Ssn, DateOfBirth = p.DateOfBirth })
-                    .ToList();
-
-                // Group by SSN to optimize the query (reduce number of OR conditions)
-                var ssnGroups = pairTable.GroupBy(p => p.Ssn).ToList();
-
-                foreach (var ssnGroup in ssnGroups)
+                foreach (var pair in ssnBadgePairs)
                 {
-                    int ssn = ssnGroup.Key;
-                    var dobList = ssnGroup.Select(p => p.DateOfBirth).ToList();
-
-                    // For each SSN, query all matching DOBs in a single query
-                    var matchingRecords = await context.Demographics
-                        .Where(d => d.Ssn == ssn && dobList.Contains(d.DateOfBirth) && !oracleHcmIds.Contains(d.OracleHcmId))
+                    if (pair.BadgeNumber == 0)
+                    {
+                        continue; // skip invalid sentinel
+                    }
+                    var matches = await context.Demographics
+                        .Where(d => d.Ssn == pair.Ssn && d.BadgeNumber == pair.BadgeNumber && !oracleHcmIds.Contains(d.OracleHcmId))
                         .ToListAsync(cancellationToken)
                         .ConfigureAwait(false);
-
-                    existingEntities.AddRange(matchingRecords);
+                    existingEntities.AddRange(matches);
                 }
             }
 

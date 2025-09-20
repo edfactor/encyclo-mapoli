@@ -23,10 +23,13 @@ public static class DemographicsRequestExtension
             DateOfBirth = employee.DateOfBirth,
             HireDate = employee.WorkRelationship?.StartDate ?? ReferenceData.DsmMinValue,
             TerminationDate = employee.WorkRelationship?.TerminationDate,
-            Ssn = employee.NationalIdentifier?.NationalIdentifierNumber.ConvertSsnToInt() ?? fakeSsnLookup[employee.PersonId],
+            Ssn = employee.NationalIdentifier?.NationalIdentifierNumber != null
+                ? employee.NationalIdentifier.NationalIdentifierNumber.ConvertSsnToInt()
+                : (fakeSsnLookup.TryGetValue(employee.PersonId, out var fakeSsn) ? fakeSsn : 0),
             StoreNumber = employee.WorkRelationship?.Assignment.LocationCode ?? 0,
             DepartmentId = employee.WorkRelationship?.Assignment.GetDepartmentId() ?? 0,
-            PayClassificationId = employee.WorkRelationship?.Assignment.JobCode ?? 0,
+            // PayClassificationId is a string in DemographicsRequest; use JobCode or default "0"
+            PayClassificationId = employee.WorkRelationship?.Assignment.JobCode ?? "0",
             EmploymentTypeCode = employee.WorkRelationship?.Assignment.GetEmploymentType() ?? char.MinValue,
             PayFrequencyId = employee.WorkRelationship?.Assignment.GetPayFrequency() ?? byte.MinValue,
             EmploymentStatusId = employee.WorkRelationship?.TerminationDate == null ? EmploymentStatus.Constants.Active : EmploymentStatus.Constants.Terminated,
