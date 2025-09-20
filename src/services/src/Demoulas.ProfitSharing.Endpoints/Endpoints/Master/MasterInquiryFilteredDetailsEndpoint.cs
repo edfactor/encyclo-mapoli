@@ -2,14 +2,17 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Contracts; // Result, Error
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Master;
 
-public class MasterInquiryFilteredDetailsEndpoint : ProfitSharingEndpoint<MasterInquiryMemberDetailsRequest, PaginatedResponseDto<MasterInquiryResponseDto>>
+public class MasterInquiryFilteredDetailsEndpoint : ProfitSharingEndpoint<MasterInquiryMemberDetailsRequest, Results<Ok<PaginatedResponseDto<MasterInquiryResponseDto>>, NotFound, ProblemHttpResult>>
 {
     private readonly IMasterInquiryService _masterInquiryService;
 
@@ -45,8 +48,20 @@ public class MasterInquiryFilteredDetailsEndpoint : ProfitSharingEndpoint<Master
         Group<MasterInquiryGroup>();
     }
 
-    public override Task<PaginatedResponseDto<MasterInquiryResponseDto>> ExecuteAsync(MasterInquiryMemberDetailsRequest req, CancellationToken ct)
+    public override async Task<Results<Ok<PaginatedResponseDto<MasterInquiryResponseDto>>, NotFound, ProblemHttpResult>> ExecuteAsync(MasterInquiryMemberDetailsRequest req, CancellationToken ct)
     {
-        return _masterInquiryService.GetMemberProfitDetails(req, ct);
+        try
+        {
+            var data = await _masterInquiryService.GetMemberProfitDetails(req, ct);
+            if (data.Total == 0)
+            {
+                return Result<PaginatedResponseDto<MasterInquiryResponseDto>>.Failure(Error.EntityNotFound("Filtered member details")).ToHttpResult(Error.EntityNotFound("Filtered member details"));
+            }
+            return Result<PaginatedResponseDto<MasterInquiryResponseDto>>.Success(data).ToHttpResult();
+        }
+        catch (Exception ex)
+        {
+            return Result<PaginatedResponseDto<MasterInquiryResponseDto>>.Failure(Error.Unexpected(ex.Message)).ToHttpResult();
+        }
     }
-} 
+}
