@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Contracts;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
 /// <summary>
 /// Simple wrapper for non-paginated list responses to provide a consistent envelope
@@ -12,6 +12,6 @@ public sealed class ListResponseDto<T>
 
     public static ListResponseDto<T> From(IEnumerable<T> items) => new()
     {
-        Items = items is IReadOnlyList<T> rl ? rl : items.ToList()
+        Items = items as IReadOnlyList<T> ?? items.ToList()
     };
 }

@@ -9,6 +9,7 @@ using Demoulas.Util.Extensions;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.DependencyInjection;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 
