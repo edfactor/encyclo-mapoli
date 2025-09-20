@@ -13,6 +13,8 @@
     "prettier": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json}\"",
     "test": "vitest --coverage",
     "e2e": "playwright test",
+    "e2e:watch": "playwright test --watch",
+    "e2e:ui": "playwright test --ui",
     "preview": "vite preview"
   },
   "dependencies": {

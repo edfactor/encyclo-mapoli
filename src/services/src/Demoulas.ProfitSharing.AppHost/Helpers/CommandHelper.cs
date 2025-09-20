@@ -162,7 +162,7 @@ public static class CommandHelper
             {
                 logger.LogError(error);
             }
-            result = new ExecuteCommandResult { Success = false, ErrorMessage = error };            
+            result = new ExecuteCommandResult { Success = false, ErrorMessage = error };
         }
         else
         {
