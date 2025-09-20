@@ -1,15 +1,18 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
+using Demoulas.ProfitSharing.Common.Contracts; // Result, Error, ListResponseDto
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.Util.Extensions;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
-public sealed class DistributionStatusEndpoint: ProfitSharingResponseEndpoint<List<DistributionStatusResponse>>
+
+public sealed class DistributionStatusEndpoint : ProfitSharingResultResponseEndpoint<ListResponseDto<DistributionStatusResponse>>
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
 
@@ -42,8 +45,21 @@ public sealed class DistributionStatusEndpoint: ProfitSharingResponseEndpoint<Li
         }
     }
 
-    public override Task<List<DistributionStatusResponse>> ExecuteAsync(CancellationToken ct)
+    public override async Task<Results<Ok<ListResponseDto<DistributionStatusResponse>>, NotFound, ProblemHttpResult>> ExecuteAsync(CancellationToken ct)
     {
-        return _dataContextFactory.UseReadOnlyContext(c => c.DistributionStatuses.Select(x => new DistributionStatusResponse { Id = x.Id, Name = x.Name }).ToListAsync(ct));
+        try
+        {
+            var items = await _dataContextFactory.UseReadOnlyContext(c => c.DistributionStatuses
+                .OrderBy(x => x.Name)
+                .Select(x => new DistributionStatusResponse { Id = x.Id, Name = x.Name })
+                .ToListAsync(ct));
+            var dto = ListResponseDto<DistributionStatusResponse>.From(items);
+            var result = Result<ListResponseDto<DistributionStatusResponse>>.Success(dto);
+            return result.ToHttpResult();
+        }
+        catch (Exception ex)
+        {
+            return Result<ListResponseDto<DistributionStatusResponse>>.Failure(Error.Unexpected(ex.Message)).ToHttpResult();
+        }
     }
 }

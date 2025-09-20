@@ -1,20 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
+using Demoulas.ProfitSharing.Common.Contracts; // Result, Error, ListResponseDto
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.Util.Extensions;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
-public sealed class DistributionFrequencyEndpoint : ProfitSharingResponseEndpoint<List<DistributionFrequencyResponse>>
+
+public sealed class DistributionFrequencyEndpoint : ProfitSharingResultResponseEndpoint<ListResponseDto<DistributionFrequencyResponse>>
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
 
@@ -47,8 +45,21 @@ public sealed class DistributionFrequencyEndpoint : ProfitSharingResponseEndpoin
         }
     }
 
-    public override Task<List<DistributionFrequencyResponse>> ExecuteAsync(CancellationToken ct)
+    public override async Task<Results<Ok<ListResponseDto<DistributionFrequencyResponse>>, NotFound, ProblemHttpResult>> ExecuteAsync(CancellationToken ct)
     {
-        return _dataContextFactory.UseReadOnlyContext(c => c.DistributionFrequencies.Select(x => new DistributionFrequencyResponse { Id = x.Id, Name = x.Name }).ToListAsync(ct));
+        try
+        {
+            var items = await _dataContextFactory.UseReadOnlyContext(c => c.DistributionFrequencies
+                .OrderBy(x => x.Name)
+                .Select(x => new DistributionFrequencyResponse { Id = x.Id, Name = x.Name })
+                .ToListAsync(ct));
+            var dto = ListResponseDto<DistributionFrequencyResponse>.From(items);
+            var result = Result<ListResponseDto<DistributionFrequencyResponse>>.Success(dto);
+            return result.ToHttpResult();
+        }
+        catch (Exception ex)
+        {
+            return Result<ListResponseDto<DistributionFrequencyResponse>>.Failure(Error.Unexpected(ex.Message)).ToHttpResult();
+        }
     }
 }

@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
+using Demoulas.ProfitSharing.Common.Contracts; // Result, Error, ListResponseDto
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.Util.Extensions;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
-public sealed class TaxCodeEndpoint : ProfitSharingResponseEndpoint<List<TaxCodeResponse>>
+
+public sealed class TaxCodeEndpoint : ProfitSharingResultResponseEndpoint<ListResponseDto<TaxCodeResponse>>
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactor;
 
@@ -57,8 +55,21 @@ public sealed class TaxCodeEndpoint : ProfitSharingResponseEndpoint<List<TaxCode
         }
     }
 
-    public override Task<List<TaxCodeResponse>> ExecuteAsync(CancellationToken ct)
+    public override async Task<Results<Ok<ListResponseDto<TaxCodeResponse>>, NotFound, ProblemHttpResult>> ExecuteAsync(CancellationToken ct)
     {
-        return _dataContextFactor.UseReadOnlyContext(c => c.TaxCodes.Select(x => new TaxCodeResponse { Id = x.Id, Name = x.Name }).ToListAsync(ct));
+        try
+        {
+            var items = await _dataContextFactor.UseReadOnlyContext(c => c.TaxCodes
+                .OrderBy(x => x.Name)
+                .Select(x => new TaxCodeResponse { Id = x.Id, Name = x.Name })
+                .ToListAsync(ct));
+            var dto = ListResponseDto<TaxCodeResponse>.From(items);
+            var result = Result<ListResponseDto<TaxCodeResponse>>.Success(dto);
+            return result.ToHttpResult();
+        }
+        catch (Exception ex)
+        {
+            return Result<ListResponseDto<TaxCodeResponse>>.Failure(Error.Unexpected(ex.Message)).ToHttpResult();
+        }
     }
 }

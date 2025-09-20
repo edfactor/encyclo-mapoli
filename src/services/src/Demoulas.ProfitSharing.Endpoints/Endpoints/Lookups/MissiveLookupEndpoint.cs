@@ -1,4 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
+using Demoulas.ProfitSharing.Common.Contracts; // Result, Error, ListResponseDto
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
@@ -6,10 +7,12 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.Util.Extensions;
 using FastEndpoints;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
-public sealed class MissiveLookupEndpoint : ProfitSharingResponseEndpoint<List<MissiveResponse>>
+
+public sealed class MissiveLookupEndpoint : ProfitSharingResultResponseEndpoint<ListResponseDto<MissiveResponse>>
 {
     private readonly IMissiveService _missiveService;
 
@@ -32,7 +35,7 @@ public sealed class MissiveLookupEndpoint : ProfitSharingResponseEndpoint<List<M
             } };
         });
 
-    Group<LookupGroup>();
+        Group<LookupGroup>();
 
         if (!Env.IsTestEnvironment())
         {
@@ -42,8 +45,18 @@ public sealed class MissiveLookupEndpoint : ProfitSharingResponseEndpoint<List<M
         }
     }
 
-    public override Task<List<MissiveResponse>> ExecuteAsync(CancellationToken ct)
+    public override async Task<Results<Ok<ListResponseDto<MissiveResponse>>, NotFound, ProblemHttpResult>> ExecuteAsync(CancellationToken ct)
     {
-        return _missiveService.GetAllMissives(ct);
+        try
+        {
+            var items = await _missiveService.GetAllMissives(ct);
+            var dto = ListResponseDto<MissiveResponse>.From(items.OrderBy(x => x.Message));
+            var result = Result<ListResponseDto<MissiveResponse>>.Success(dto);
+            return result.ToHttpResult();
+        }
+        catch (Exception ex)
+        {
+            return Result<ListResponseDto<MissiveResponse>>.Failure(Error.Unexpected(ex.Message)).ToHttpResult();
+        }
     }
 }
