@@ -104,5 +104,28 @@ _ = builder.AddProject<Demoulas_ProfitSharing_EmployeeDelta_Sync>(name: "ProfitS
      .WithParentRelationship(database)
     .WithExplicitStart();
 
+// Playwright E2E test runner as an executable resource
+var uiRelativePath = "../../../ui/"; // relative to the AppHost project directory
+var uiFullPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), uiRelativePath));
+var playwrightTests = builder.AddExecutable("Playwright-Tests",
+    command: "npm",
+    workingDirectory: uiFullPath,
+    "run", "e2e")
+    .WithReference(api)
+    .WaitFor(api)
+    .WaitFor(ui)
+    .WithParentRelationship(api)
+    .WithCommand(
+        name: "run-e2e",
+        displayName: "Run E2E Tests",
+        executeCommand: c => Task.FromResult(CommandHelper.RunNpmScript(uiFullPath, "e2e", logger, "playwright-e2e")),
+        commandOptions: new CommandOptions { IconName = "Play", IconVariant = IconVariant.Filled })
+    .WithCommand(
+        name: "show-report",
+        displayName: "Open E2E Report",
+        executeCommand: c => Task.FromResult(CommandHelper.RunShellCommand(uiFullPath, "npx playwright show-report", logger, "playwright-report")),
+        commandOptions: new CommandOptions { IconName = "Link", IconVariant = IconVariant.Filled })
+    .WithExplicitStart();
+
 await using DistributedApplication host = builder.Build();
 await host.RunAsync();
