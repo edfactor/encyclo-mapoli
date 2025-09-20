@@ -4,11 +4,11 @@ import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { useEffect } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetUnForfeitsQuery } from "reduxstore/api/YearsEndApi";
 import {
-  clearRehireForfeituresDetails,
-  clearRehireForfeituresQueryParams,
-  setRehireForfeituresQueryParams
+  clearUnForfeitsDetails,
+  clearUnForfeitsQueryParams,
+  setUnForfeitsQueryParams
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
@@ -68,7 +68,7 @@ const schema = yup.object().shape({
   profitYear: yup.number().required("Profit year is required")
 });
 
-interface RehireForfeituresSearchFilterProps {
+interface UnForfeitSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
   fiscalData: CalendarResponseDto;
   onSearch?: () => void;
@@ -76,7 +76,7 @@ interface RehireForfeituresSearchFilterProps {
   setHasUnsavedChanges: (hasChanges: boolean) => void;
 }
 
-const RehireForfeituresSearchFilter: React.FC<RehireForfeituresSearchFilterProps> = ({
+const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
   setInitialSearchLoaded,
   fiscalData,
   onSearch,
@@ -84,8 +84,8 @@ const RehireForfeituresSearchFilter: React.FC<RehireForfeituresSearchFilterProps
   setHasUnsavedChanges
 }) => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-  const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
-  const { rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const [triggerSearch, { isFetching }] = useLazyGetUnForfeitsQuery();
+  const { unForfeitsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const dispatch = useDispatch();
 
   const selectedProfitYear = useDecemberFlowProfitYear();
@@ -107,7 +107,7 @@ const RehireForfeituresSearchFilter: React.FC<RehireForfeituresSearchFilterProps
         profitYear: selectedProfitYear
       };
 
-      dispatch(setRehireForfeituresQueryParams(updatedData));
+      dispatch(setUnForfeitsQueryParams(updatedData));
       triggerSearch(updatedData);
       if (onSearch) onSearch(); // Only call if onSearch is provided
     }
@@ -124,12 +124,12 @@ const RehireForfeituresSearchFilter: React.FC<RehireForfeituresSearchFilterProps
     resolver: yupResolver(schema),
     defaultValues: {
       beginningDate:
-        rehireForfeituresQueryParams?.beginningDate ||
+        unForfeitsQueryParams?.beginningDate ||
         (fiscalData.fiscalBeginDate ? mmDDYYFormat(fiscalData.fiscalBeginDate) : undefined),
       endingDate:
-        rehireForfeituresQueryParams?.endingDate ||
+        unForfeitsQueryParams?.endingDate ||
         (fiscalData.fiscalEndDate ? mmDDYYFormat(fiscalData.fiscalEndDate) : undefined),
-      excludeZeroBalance: rehireForfeituresQueryParams?.excludeZeroBalance || false,
+      excludeZeroBalance: unForfeitsQueryParams?.excludeZeroBalance || false,
       pagination: { skip: 0, take: 25, sortBy: "fullName", isSortDescending: false },
       profitYear: selectedProfitYear
     }
@@ -150,8 +150,8 @@ const RehireForfeituresSearchFilter: React.FC<RehireForfeituresSearchFilterProps
   const handleReset = () => {
     setHasUnsavedChanges(false);
     setInitialSearchLoaded(false);
-    dispatch(clearRehireForfeituresQueryParams());
-    dispatch(clearRehireForfeituresDetails());
+    dispatch(clearUnForfeitsQueryParams());
+    dispatch(clearUnForfeitsDetails());
 
     reset({
       beginningDate: fiscalData.fiscalBeginDate ? mmDDYYFormat(fiscalData.fiscalBeginDate) : undefined,
@@ -267,4 +267,4 @@ const RehireForfeituresSearchFilter: React.FC<RehireForfeituresSearchFilterProps
   );
 };
 
-export default RehireForfeituresSearchFilter;
+export default UnForfeitSearchFilter;

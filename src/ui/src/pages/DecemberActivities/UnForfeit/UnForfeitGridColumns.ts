@@ -9,7 +9,7 @@ import {
   createStoreColumn
 } from "utils/gridColumnFactory";
 
-export const GetRehireForfeituresGridColumns = (): ColDef[] => {
+export const UnForfeitGridColumns = (): ColDef[] => {
   return [
     createBadgeColumn({}),
     createNameColumn({

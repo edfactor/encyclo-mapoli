@@ -1,9 +1,9 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 
-import { CreateMilitaryContributionRequest, MasterInquiryDetail, MilitaryContributionRequest } from "reduxstore/types";
-import { createDataSourceAwareBaseQuery } from "./api";
 import { setMilitaryContributions, setMilitaryError } from "reduxstore/slices/militarySlice";
+import { CreateMilitaryContributionRequest, MasterInquiryDetail, MilitaryContributionRequest } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
+import { createDataSourceAwareBaseQuery } from "./api";
 
 const baseQuery = createDataSourceAwareBaseQuery();
 export const MilitaryApi = createApi({
@@ -34,12 +34,19 @@ export const MilitaryApi = createApi({
         }
       }
     }),
-    createMilitaryContribution: builder.mutation<MasterInquiryDetail, CreateMilitaryContributionRequest>({
-      query: (request) => ({
-        url: "military",
-        method: "POST",
-        body: request
-      })
+    createMilitaryContribution: builder.mutation<
+      MasterInquiryDetail,
+      CreateMilitaryContributionRequest & { suppressAllToastErrors?: boolean; onlyNetworkToastErrors?: boolean }
+    >({
+      query: (request) => {
+        const { suppressAllToastErrors, onlyNetworkToastErrors } = request;
+        return {
+          url: "military",
+          method: "POST",
+          body: request,
+          meta: { suppressAllToastErrors, onlyNetworkToastErrors }
+        };
+      }
     })
   })
 });

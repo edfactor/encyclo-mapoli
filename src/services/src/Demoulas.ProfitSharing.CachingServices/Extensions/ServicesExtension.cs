@@ -14,7 +14,7 @@ public static class ServicesExtension
 {
     public static IHostApplicationBuilder AddProjectCachingServices(this IHostApplicationBuilder builder)
     {
-        _ = builder.Services.AddKeyedSingleton<IBaseCacheService<LookupTableCache<byte>>, PayClassificationHostedService>(nameof(PayClassificationHostedService));
+        _ = builder.Services.AddKeyedSingleton<IBaseCacheService<LookupTableCache<string>>, PayClassificationHostedService>(nameof(PayClassificationHostedService));
         _ = builder.Services.AddKeyedSingleton<IBaseCacheService<LookupTableCache<byte>>, DepartmentHostedService>(nameof(DepartmentHostedService));
 
         _ = builder.Services.AddDistributedMemoryCache();

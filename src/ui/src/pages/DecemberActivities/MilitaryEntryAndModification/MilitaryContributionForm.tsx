@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useCreateMilitaryContributionMutation } from "reduxstore/api/MilitaryApi";
 import { CreateMilitaryContributionRequest, MilitaryContribution } from "reduxstore/types";
+import { UnhandledErrorResponse } from "../../../types/errors/errors";
 
 interface FormData {
   contributionDate: Date | null;
@@ -12,7 +13,7 @@ interface FormData {
 }
 
 interface MilitaryContributionFormProps {
-  onSubmit: (contribution: MilitaryContribution) => void;
+  onSubmit: (contribution: MilitaryContribution & { contributionYear: number }) => void;
   onCancel: () => void;
   initialData?: MilitaryContribution;
   isLoading?: boolean;
@@ -50,8 +51,6 @@ const MilitaryContributionForm = ({
   }, [initialData, reset]);
 
   const handleFormSubmit = async (data: FormData) => {
-    console.log("Form submitted with data:", data);
-
     // Clear any existing error message
     setErrorMessage(null);
 
@@ -76,21 +75,21 @@ const MilitaryContributionForm = ({
 
         await createMilitaryContribution(request).unwrap();
 
-        onSubmit(contribution);
+        onSubmit({
+          ...contribution,
+          contributionYear: data.contributionDate.getFullYear()
+        });
       } catch (error) {
-        if (
-          typeof error === "object" &&
-          error !== null &&
-          "data" in error &&
-          (error as any).data?.errors?.[0]?.reason
-        ) {
-          if (
-            (error as any).data.errors[0].reason ===
-            "Regular Contribution already recorded for Year. Duplicates are not allowed."
-          ) {
+        // The unhandled response is when a 400 or 500 is caught at API level, not in middleware,
+        // so we need UnhandledErrorResponse here
+        const serviceError = error as UnhandledErrorResponse;
+        if (serviceError && serviceError.data.errors) {
+          // If the error reason exists, check for the duplicate contribution message
+          if (serviceError.data.errors[0].reason.includes("Duplicates are not allowed.")) {
             setErrorMessage(
               "There is already a contribution for that year. Please check supplemental box and resubmit if applicable."
             );
+            return;
           }
         }
       }
@@ -137,6 +136,7 @@ const MilitaryContributionForm = ({
             render={({ field, fieldState: { error } }) => (
               <TextField
                 {...field}
+                value={field.value ?? ""}
                 id="contributionAmount"
                 type="number"
                 error={!!error}

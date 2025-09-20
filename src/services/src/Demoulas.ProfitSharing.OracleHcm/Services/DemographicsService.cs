@@ -28,6 +28,7 @@ using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
 using static FastEndpoints.Ep;
 using Exception = System.Exception;
+using System.Linq.Expressions;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
@@ -95,14 +96,21 @@ public class DemographicsService : IDemographicsServiceInternal
 
         // Create lookup dictionaries for both OracleHcmId and SSN
         Dictionary<long, Demographic> demographicOracleHcmIdLookup = demographicsEntities.ToDictionary(entity => entity.OracleHcmId);
-        ILookup<(int Ssn, int BadgeNumber), Demographic> demographicSsnLookup = demographicsEntities.ToLookup(entity => (entity.Ssn, BadgeNumber: entity.BadgeNumber));
-        HashSet<int> ssnCollection = demographicsEntities.Select(d => d.Ssn).ToHashSet();
-        HashSet<DateOnly> dobCollection = demographicsEntities.Select(d => d.DateOfBirth).ToHashSet();
+        // Lookup keyed by (SSN, BadgeNumber) for fallback matching when OracleHcmId does not exist in DB
+        ILookup<(int Ssn, int BadgeNumber), Demographic> demographicSsnBadgeLookup = demographicsEntities.ToLookup(entity => (entity.Ssn, entity.BadgeNumber));
 
         // Use writable context for the upsert operation
         return _dataContextFactory.UseWritableContext(async context =>
         {
             List<Demographic> existingEntities = await GetMatchingDemographicsWithSqlAsync(demographicsEntities, context, cancellationToken);
+
+            // Merge results (distinct by Id to avoid duplicates if any record matched both criteria unexpectedly)
+            Dictionary<int, Demographic> existingEntitiesMap = existingEntitiesByOracleId
+                .Concat(existingEntitiesBySsnBadge)
+                .GroupBy(e => e.Id)
+                .ToDictionary(g => g.Key, g => g.First());
+
+            List<Demographic> existingEntities = existingEntitiesMap.Values.ToList();
 
             // Handle potential duplicates in the existing database (SSN duplicates)
             List<Demographic> duplicateSsnEntities = existingEntities.GroupBy(e => e.Ssn)

@@ -20,6 +20,7 @@ public sealed record Error
         new(400, "Validation error", errors);
 
     public static Error EmployeeNotFound => new(100, "Employee not found");
+    public static Error CalendarYearNotFound => new(101, "Calendar year not found");
 
     public static implicit operator ProblemDetails(Error error)
     {

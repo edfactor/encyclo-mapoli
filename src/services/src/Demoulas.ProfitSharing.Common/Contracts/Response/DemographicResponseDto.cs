@@ -9,7 +9,7 @@ public record DemographicResponseDto
     public required short StoreNumber { get; set; }
 
     public required DepartmentResponseDto? Department { get; set; }
-    public required byte PayClassificationId { get; set; }
+    public required string PayClassificationId { get; set; }
 
     public required ContactInfoResponseDto ContactInfo { get; set; }
     public AddressResponseDto? Address { get; set; }
@@ -38,7 +38,7 @@ public record DemographicResponseDto
             OracleHcmId = 0,
             StoreNumber = 0,
             Department = new DepartmentResponseDto { Id = 3, Name = "Produce" },
-            PayClassificationId = 0,
+            PayClassificationId = "0",
             ContactInfo = ContactInfoResponseDto.ResponseExample(),
             Address = AddressResponseDto.ResponseExample(),
             DateOfBirth = default,

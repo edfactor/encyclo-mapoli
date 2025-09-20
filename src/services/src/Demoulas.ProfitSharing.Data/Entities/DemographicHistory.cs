@@ -12,7 +12,7 @@ public sealed class DemographicHistory : IDoNotAudit
     public required long OracleHcmId { get; set; }
     public int BadgeNumber { get; set; }
     public short StoreNumber { get; set; }
-    public byte PayClassificationId { get; set; }
+    public string PayClassificationId { get; set; } = string.Empty;
     public DateOnly DateOfBirth { get; set; }
     public DateOnly HireDate { get; set; }
     public DateOnly? ReHireDate { get; set; }
