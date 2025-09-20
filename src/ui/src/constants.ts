@@ -41,7 +41,6 @@ export const ROUTES = {
   PROFIT_SHARE_REPORT: "profit-share-report",
   PROFIT_SHARE_TOTALS: "profit-share-totals",
   PROFIT_SHARE_REPORT_EDIT_RUN: "profit-share-report-edit-run",
-  PROFIT_SHARE_REPORT_FINAL_RUN: "profit-share-report-final-run",
   PROFIT_SHARE_UPDATE: "profit-share-update",
   PROFNEW: "/",
 
