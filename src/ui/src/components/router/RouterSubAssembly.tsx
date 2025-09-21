@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
-import PSDrawer from "components/Drawer/PSDrawer";
-import DSMDynamicBreadcrumbs from "components/DSMDynamicBreadcrumbs/DSMDynamicBreadcrumbs";
-import ProtectedRoute from "components/ProtectedRoute/ProtectedRoute";
+import PSDrawer from "../../components/Drawer/PSDrawer";
+import DSMDynamicBreadcrumbs from "../../components/DSMDynamicBreadcrumbs/DSMDynamicBreadcrumbs";
+import ProtectedRoute from "../../components/ProtectedRoute/ProtectedRoute";
 import DemographicBadgesNotInPayprofit from "../../pages/DecemberActivities/DemographicBadgesNotInPayprofit/DemographicBadgesNotInPayprofit";
 import DistributionsAndForfeitures from "../../pages/DecemberActivities/DistributionsAndForfeitures/DistributionAndForfeitures";
 import DuplicateNamesAndBirthdays from "../../pages/DecemberActivities/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdays";
@@ -17,7 +17,6 @@ import ProfitShareByStore from "../../pages/FiscalClose/ProfitShareByStore/Profi
 import Under21TA from "../../pages/FiscalClose/ProfitShareByStore/Under21/Under21TA";
 import Under21Report from "../../pages/FiscalClose/ProfitShareByStore/Under21Report";
 import ProfitShareReportEditRun from "../../pages/FiscalFlow/ProfitShareReportEditRun/ProfitShareReportEditRun";
-import ProfitShareReportFinalRun from "../../pages/FiscalFlow/ProfitShareReportFinalRun/ProfitShareReportFinalRun";
 import Forfeit from "../../pages/Forfeit/Forfeit";
 import FrozenSummary from "../../pages/FrozenSummary/FrozenSummary";
 import MasterInquiry from "../../pages/MasterInquiry/MasterInquiry";
@@ -33,10 +32,6 @@ import ProfitShareTotals426 from "../../pages/ProfitShareTotals426/ProfitShareTo
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import { useGetNavigationQuery } from "reduxstore/api/NavigationApi";
-import { setImpersonating } from "reduxstore/slices/securitySlice";
-import { RootState } from "reduxstore/store";
-import { ImpersonationRoles } from "reduxstore/types";
 import { drawerClosedWidth, drawerOpenWidth, ROUTES } from "../../constants";
 import MenuData from "../../MenuData";
 import DemographicFreeze from "../../pages/ITOperations/DemographicFreeze/DemographicFreeze";
@@ -47,11 +42,15 @@ import ForfeituresByAge from "../../pages/PROF130/ForfeituresByAge/ForfeituresBy
 import ProfitShareEditUpdate from "../../pages/ProfitShareEditUpdate/ProfitShareEditUpdate";
 import Unauthorized from "../../pages/Unauthorized/Unauthorized";
 import YTDWages from "../../pages/YTDWagesExtract/YTDWages";
+import { useGetNavigationQuery } from "../../reduxstore/api/NavigationApi";
+import { setImpersonating } from "../../reduxstore/slices/securitySlice";
+import { RootState } from "../../reduxstore/store";
+import { ImpersonationRoles } from "../../reduxstore/types";
 import EnvironmentUtils from "../../utils/environmentUtils";
 import { createUnauthorizedParams, isPathAllowedInNavigation } from "../../utils/navigationAccessUtils";
 
-import { MenuBar } from "components/MenuBar/MenuBar";
 import { ImpersonationMultiSelect } from "smart-ui-library";
+import { MenuBar } from "../../components/MenuBar/MenuBar";
 import BeneficiaryInquiry from "../../pages/BeneficiaryInquiry/BeneficiaryInquiry";
 import MilitaryEntryAndModification from "../../pages/DecemberActivities/MilitaryEntryAndModification/MilitaryEntryAndModification";
 import DevDebug from "../../pages/Dev/DevDebug";
@@ -271,9 +270,6 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={ROUTES.PROFIT_SHARE_REPORT_EDIT_RUN}
                   element={<ProfitShareReportEditRun />}></Route>
-                <Route
-                  path={ROUTES.PROFIT_SHARE_REPORT_FINAL_RUN}
-                  element={<ProfitShareReportFinalRun />}></Route>
                 <Route
                   path={ROUTES.PROFIT_SHARE_UPDATE}
                   element={<ProfitShareEditUpdate />}></Route>

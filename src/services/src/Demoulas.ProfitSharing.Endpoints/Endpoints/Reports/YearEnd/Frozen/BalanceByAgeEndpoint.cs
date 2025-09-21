@@ -3,11 +3,14 @@ using CsvHelper.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Contracts; // Result, Error
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen.BalanceByAgeEndpoint;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 
@@ -40,9 +43,18 @@ public class BalanceByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReportsByAge
         base.Configure();
     }
 
-    public override Task<BalanceByAge> GetResponse(FrozenReportsByAgeRequest req, CancellationToken ct)
+    public override async Task<BalanceByAge> GetResponse(FrozenReportsByAgeRequest req, CancellationToken ct)
     {
-        return _frozenReportService.GetBalanceByAgeYearAsync(req, ct);
+        // Underlying base class already handles HTTP negotiation (JSON/CSV). We just ensure exceptions become domain failures upstream if needed.
+        try
+        {
+            return await _frozenReportService.GetBalanceByAgeYearAsync(req, ct);
+        }
+        catch (Exception ex)
+        {
+            // Rethrow as is; higher middleware will map. (Alternative: wrap in a domain Result and adapt base class, but out-of-scope since base expects raw DTO.)
+            throw new InvalidOperationException($"Failed to retrieve Balance By Age report: {ex.Message}", ex);
+        }
     }
 
     protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, BalanceByAge report, CancellationToken cancellationToken)

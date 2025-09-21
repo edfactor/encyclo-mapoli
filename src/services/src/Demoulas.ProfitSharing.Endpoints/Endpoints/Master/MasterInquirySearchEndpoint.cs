@@ -2,14 +2,17 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Contracts; // Result, Error
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Master;
 
-public class MasterInquirySearchEndpoint : ProfitSharingEndpoint<MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>
+public class MasterInquirySearchEndpoint : ProfitSharingEndpoint<MasterInquiryRequest, Results<Ok<PaginatedResponseDto<MemberDetails>>, NotFound, ProblemHttpResult>>
 {
     private readonly IMasterInquiryService _masterInquiryService;
 
@@ -70,12 +73,22 @@ public class MasterInquirySearchEndpoint : ProfitSharingEndpoint<MasterInquiryRe
         Group<MasterInquiryGroup>();
     }
 
-    public override Task<PaginatedResponseDto<MemberDetails>> ExecuteAsync(MasterInquiryRequest req, CancellationToken ct)
+    public override async Task<Results<Ok<PaginatedResponseDto<MemberDetails>>, NotFound, ProblemHttpResult>> ExecuteAsync(MasterInquiryRequest req, CancellationToken ct)
     {
-        if (req is { ProfitYear: 0, EndProfitYear: > 0 })
+        try
         {
-            req.ProfitYear = req.EndProfitYear.Value;
+            if (req is { ProfitYear: 0, EndProfitYear: > 0 })
+            {
+                req.ProfitYear = req.EndProfitYear.Value;
+            }
+
+            var data = await _masterInquiryService.GetMembersAsync(req, ct);
+            // Tests expect success (200) even when no members match filters; return empty list as success.
+            return Result<PaginatedResponseDto<MemberDetails>>.Success(data).ToHttpResult();
         }
-        return _masterInquiryService.GetMembersAsync(req, ct);
+        catch (Exception ex)
+        {
+            return Result<PaginatedResponseDto<MemberDetails>>.Failure(Error.Unexpected(ex.Message)).ToHttpResult();
+        }
     }
 }
