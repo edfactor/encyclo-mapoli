@@ -5,6 +5,9 @@ Concise, project-specific guidance for AI coding agents working in this reposito
 ## Architecture Overview
 - Monorepo with two primary roots:
   - `src/services/` (.NET 9) multi-project solution `Demoulas.ProfitSharing.slnx` (FastEndpoints, EF Core 9 + Oracle, Aspire, Serilog, Feature Flags, RabbitMQ, Mapperly, Shouldly).
+    - Note: this solution is hosted using .NET Aspire (see the Aspire host `Demoulas.ProfitSharing.AppHost`). The Aspire host provides lifecycle and configuration patterns that should be followed (do not create ad-hoc hosts). Aspire also provides first-class support for built-in database retry/resilience which should be used in preference to rolling your own retry logic at ad-hoc call sites.
+      - Aspire docs: https://github.com/dotnet/docs-aspire/blob/main/docs/cli/overview.md
+      - Aspire repo: https://github.com/dotnet/docs-aspire
   - `src/ui/` (Vite + React + TypeScript + Tailwind + Redux Toolkit + internal `smart-ui-library`).
 - Database: Oracle 19. EF Core migrations via `ProfitSharingDbContext`; CLI utility project `Demoulas.ProfitSharing.Data.Cli` performs schema ops & imports from legacy READY system.
 - Cross-cutting: Central package mgmt (`Directory.Packages.props`), shared build config (`Directory.Build.props`), global SDK pin (`global.json`).
