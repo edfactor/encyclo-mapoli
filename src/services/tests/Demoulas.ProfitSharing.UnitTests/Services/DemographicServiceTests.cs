@@ -1,6 +1,8 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Mappers;
 using Demoulas.ProfitSharing.OracleHcm.Messaging;
 using Demoulas.ProfitSharing.OracleHcm.Services;
@@ -162,7 +164,7 @@ public class DemographicsServiceTests
         var mapper = new DemographicMapper(new AddressMapper(), new ContactInfoMapper());
         var fakeSsnService = new Mock<IFakeSsnService>();
 
-        var service = new DemographicsService(
+        var service = new TestableDemographicsService(
             scenarioFactory,
             mapper,
             loggerMock.Object,
@@ -868,5 +870,27 @@ public class DemographicsServiceTests
                 It.IsAny<Exception>(),
                 It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)),
             Times.Once);
+    }
+}
+
+internal sealed class TestableDemographicsService : DemographicsService
+{
+    public TestableDemographicsService(
+        IProfitSharingDataContextFactory dataContextFactory,
+        DemographicMapper mapper,
+        ILogger<DemographicsService> logger,
+        ITotalService totalService,
+        IFakeSsnService fakeSsnService)
+        : base(dataContextFactory, mapper, logger, totalService, fakeSsnService)
+    {
+    }
+
+    protected override Task<List<Demographic>> GetMatchingDemographicsByFallbackSqlAsync(
+        List<(int Ssn, int Badge)> pairs,
+        ProfitSharingDbContext context,
+        CancellationToken ct)
+    {
+        // Mock implementation that returns empty list to avoid FromSqlRaw in tests
+        return Task.FromResult(new List<Demographic>());
     }
 }

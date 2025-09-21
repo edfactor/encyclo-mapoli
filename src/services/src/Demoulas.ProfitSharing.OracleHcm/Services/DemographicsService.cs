@@ -359,7 +359,7 @@ public class DemographicsService : IDemographicsServiceInternal
         return inserted;
     }
 
-    private static async Task<List<Demographic>> GetMatchingDemographicsByFallbackSqlAsync(List<(int Ssn, int Badge)> pairs, ProfitSharingDbContext context, CancellationToken ct)
+    protected virtual async Task<List<Demographic>> GetMatchingDemographicsByFallbackSqlAsync(List<(int Ssn, int Badge)> pairs, ProfitSharingDbContext context, CancellationToken ct)
     {
         List<string> clauses = new();
         List<OracleParameter> parameters = new();
