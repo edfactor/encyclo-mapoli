@@ -5,7 +5,8 @@ export enum MessageKeys {
   ProfitShareEditUpdate = "ProfitShareEditUpdate",
   TerminationSave = "TerminationSave",
   TerminationBulkSave = "TerminationBulkSave",
-  UnforfeitSave = "UnforfeitSave"
+  UnforfeitSave = "UnforfeitSave",
+  MilitaryContribution = "MilitaryContribution"
 }
 
 export class Messages {
@@ -42,6 +43,13 @@ export class Messages {
     message: {
       type: "success",
       title: "Forfeiture saved successfully"
+    }
+  };
+  static readonly MilitaryContributionSaveSuccess: MessageUpdate = {
+    key: MessageKeys.MilitaryContribution,
+    message: {
+      type: "success",
+      title: "Military contribution saved successfully"
     }
   };
   static readonly ProfitShareApplySuccess: MessageUpdate = {

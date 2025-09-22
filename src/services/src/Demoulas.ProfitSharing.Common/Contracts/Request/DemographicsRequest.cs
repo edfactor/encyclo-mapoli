@@ -16,7 +16,7 @@ public record DemographicsRequest : IMemberRequest
     public required short StoreNumber { get; set; }
 
     public required byte DepartmentId { get; set; }
-    public required byte PayClassificationId { get; set; }
+    public required string PayClassificationId { get; set; }
 
     public required ContactInfoRequestDto ContactInfo { get; set; }
     public required AddressRequestDto Address { get; set; }

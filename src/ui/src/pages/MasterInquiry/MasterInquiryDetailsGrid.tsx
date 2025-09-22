@@ -62,7 +62,13 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = memo(
             providedOptions={{
               rowData: profitData.results,
               columnDefs: columnDefs,
-              suppressMultiSort: true
+              suppressMultiSort: true,
+              rowSelection: {
+                mode: "multiRow",
+                checkboxes: false,
+                headerCheckbox: false,
+                enableClickSelection: false
+              }
             }}
           />
           {profitGridPagination && onPaginationChange && (

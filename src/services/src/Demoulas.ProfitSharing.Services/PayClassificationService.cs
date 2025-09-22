@@ -10,16 +10,16 @@ namespace Demoulas.ProfitSharing.Services;
 
 public sealed class PayClassificationService : IPayClassificationService
 {
-    private readonly IBaseCacheService<LookupTableCache<byte>> _accountCache;
+    private readonly IBaseCacheService<LookupTableCache<string>> _accountCache;
 
-    public PayClassificationService([FromKeyedServices(nameof(PayClassificationHostedService))] IBaseCacheService<LookupTableCache<byte>> accountCache)
+    public PayClassificationService([FromKeyedServices(nameof(PayClassificationHostedService))] IBaseCacheService<LookupTableCache<string>> accountCache)
     {
         _accountCache = accountCache;
     }
 
     public async Task<ISet<PayClassificationResponseDto>> GetAllPayClassificationsAsync(CancellationToken cancellationToken = default)
     {
-        ISet<LookupTableCache<byte>> arcobjects = await _accountCache.GetAllAsync(cancellationToken);
+        ISet<LookupTableCache<string>> arcobjects = await _accountCache.GetAllAsync(cancellationToken);
         return arcobjects.Select(o => new PayClassificationResponseDto { Id = o.Id, Name = o.Name }).ToFrozenSet();
     }
 }

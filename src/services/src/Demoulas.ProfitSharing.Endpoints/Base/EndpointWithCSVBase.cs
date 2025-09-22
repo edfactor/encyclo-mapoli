@@ -1,14 +1,23 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Diagnostics;
+using System.Globalization;
 using System.Text;
 using CsvHelper;
 using CsvHelper.Configuration;
+using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.Util.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Base;
+
+file static class EndpointActivity
+{
+    public static readonly ActivitySource Source = new("Demoulas.ProfitSharing.Endpoints");
+}
 
 /// <summary>
 /// Endpoints deriving from this class will automatically be able to return a CSV when the accept headers contain text/csv.
@@ -23,6 +32,7 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : FastEndp
     where RespType : class
     where MapType : ClassMap<RespType>
 {
+    // Activity source is held in non-generic static to avoid per-closed-generic duplication
     protected EndpointWithCsvBase(short navigationId)
     {
         NavigationId = navigationId;
@@ -69,7 +79,39 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : FastEndp
 
     public sealed override async Task HandleAsync(ReqType req, CancellationToken ct)
     {
-        string acceptHeader = HttpContext.Request.Headers.Accept.ToString().ToLower(CultureInfo.InvariantCulture);
+        string endpointName = GetType().Name;
+        using Activity? activity = Activity.Current is null
+            ? EndpointActivity.Source.StartActivity(endpointName, ActivityKind.Server)
+            : null;
+        if (activity is not null)
+        {
+            activity.DisplayName = endpointName;
+            activity.SetTag("endpoint.name", endpointName);
+            activity.SetTag("endpoint.class", GetType().FullName);
+            activity.SetTag("navigation.id", NavigationId);
+            if (HttpContext is not null)
+            {
+                activity.SetTag("http.route", HttpContext.Request?.Path.ToString());
+                activity.SetTag("http.method", HttpContext.Request?.Method);
+            }
+        }
+
+        var httpContext = HttpContext ?? throw new InvalidOperationException("HttpContext is not available during endpoint execution.");
+        var services = httpContext.RequestServices;
+        var loggerFactory = services.GetService<ILoggerFactory>();
+        var logger = loggerFactory?.CreateLogger(endpointName);
+        var appUser = services.GetService<IAppUser>();
+        string userName = appUser?.UserName ?? "Unknown";
+        activity?.SetTag("enduser.id", userName);
+        using IDisposable? scope = logger?.BeginScope(new Dictionary<string, object?>
+        {
+            ["UserName"] = userName,
+            ["Endpoint"] = endpointName,
+            ["NavigationId"] = NavigationId,
+        });
+
+        // httpContext is validated non-null above
+        string acceptHeader = httpContext.Request.Headers.Accept.ToString().ToLower(CultureInfo.InvariantCulture);
 
         if (acceptHeader.Contains("text/csv"))
         {

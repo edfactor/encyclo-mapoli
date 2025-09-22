@@ -1,13 +1,15 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Navigations;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Navigations;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Navigations;
-public class UpdateNavigationStatusEndpoint : ProfitSharingEndpoint<UpdateNavigationRequestDto, UpdateNavigationStatusResponseDto>
+public class UpdateNavigationStatusEndpoint : ProfitSharingEndpoint<UpdateNavigationRequestDto, Results<Ok<UpdateNavigationStatusResponseDto>, NotFound, ProblemHttpResult>>
 {
 
     private readonly INavigationService _navigationService;
@@ -29,11 +31,11 @@ public class UpdateNavigationStatusEndpoint : ProfitSharingEndpoint<UpdateNaviga
     Group<NavigationGroup>();
     }
 
-    public override async Task<UpdateNavigationStatusResponseDto> ExecuteAsync(UpdateNavigationRequestDto req, CancellationToken ct)
+    public override async Task<Results<Ok<UpdateNavigationStatusResponseDto>, NotFound, ProblemHttpResult>> ExecuteAsync(UpdateNavigationRequestDto req, CancellationToken ct)
     {
-    var isSuccessful  = await _navigationService.UpdateNavigation(req.NavigationId, req.StatusId, cancellationToken: ct);
+        var isSuccessful = await _navigationService.UpdateNavigation(req.NavigationId, req.StatusId, cancellationToken: ct);
         var response = new UpdateNavigationStatusResponseDto { IsSuccessful = isSuccessful };
-        return response;
+        return Result<UpdateNavigationStatusResponseDto>.Success(response).ToHttpResult();
     }
 
 }

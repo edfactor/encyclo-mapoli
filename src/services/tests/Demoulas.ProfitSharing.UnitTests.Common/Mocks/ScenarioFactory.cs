@@ -130,7 +130,7 @@ public sealed class ScenarioFactory
                 Ssn = 0,
                 BadgeNumber = 721,
                 StoreNumber = 0,
-                PayClassificationId = 0,
+                PayClassificationId = "0",
                 ContactInfo = new ContactInfo
                 {
                     FullName = "Lasty, Firsty",
@@ -240,11 +240,11 @@ public sealed class ScenarioFactory
         Mock<DbSet<DemographicHistory>> mockDemographicHistories = DemographicHistories.BuildMockDbSet();
         _sdb.ProfitSharingDbContext.Setup(m => m.DemographicHistories).Returns(mockDemographicHistories.Object);
         _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.DemographicHistories).Returns(mockDemographicHistories.Object);
-        
+
         Mock<DbSet<YearEndUpdateStatus>> mockYearEndUpdateStatuses = YearEndUpdateStatuses.BuildMockDbSet();
         _sdb.ProfitSharingDbContext.Setup(m => m.YearEndUpdateStatuses).Returns(mockYearEndUpdateStatuses.Object);
         _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.YearEndUpdateStatuses).Returns(mockYearEndUpdateStatuses.Object);
-        
+
 
         return _sdb;
     }

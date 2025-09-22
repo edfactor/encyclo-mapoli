@@ -3,13 +3,13 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
-public sealed record CertificateReprintResponse: IIsExecutive
+public sealed record CertificateReprintResponse : IIsExecutive
 {
     public required short StoreNumber { get; init; }
     public required int BadgeNumber { get; init; }
     [MaskSensitive] public required string FullName { get; init; } = string.Empty;
 
-    public required byte PayClassificationId { get; init; }
+    public required string PayClassificationId { get; init; }
     public required string PayClassificationName { get; init; } = string.Empty;
 
     public decimal BeginningBalance { get; init; }
@@ -38,12 +38,12 @@ public sealed record CertificateReprintResponse: IIsExecutive
 
     public static CertificateReprintResponse ResponseExample()
     {
-        return new CertificateReprintResponse() 
+        return new CertificateReprintResponse()
         {
             StoreNumber = 1,
             BadgeNumber = 12345,
             FullName = "Public, John",
-            PayClassificationId = 1,
+            PayClassificationId = "1",
             PayClassificationName = "Full Time",
             BeginningBalance = 1000.00M,
             Earnings = 500.00M,

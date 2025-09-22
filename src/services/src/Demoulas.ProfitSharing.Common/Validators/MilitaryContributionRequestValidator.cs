@@ -1,5 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.Util.Extensions;
 using FastEndpoints;
 using FluentValidation;
 
@@ -7,8 +8,13 @@ namespace Demoulas.ProfitSharing.Common.Validators;
 
 public class MilitaryContributionRequestValidator : Validator<CreateMilitaryContributionRequest>
 {
-    public MilitaryContributionRequestValidator(IEmployeeLookupService employeeLookup)
+    private readonly IEmployeeLookupService _employeeLookup;
+    private readonly IMilitaryService _militaryService;
+
+    public MilitaryContributionRequestValidator(IEmployeeLookupService employeeLookup, IMilitaryService militaryService)
     {
+        _employeeLookup = employeeLookup;
+        _militaryService = militaryService;
         RuleFor(r => r.ContributionAmount)
             .GreaterThan(0)
             .WithMessage($"The {nameof(CreateMilitaryContributionRequest.ContributionAmount)} must be greater than zero.");
@@ -28,8 +34,12 @@ public class MilitaryContributionRequestValidator : Validator<CreateMilitaryCont
         RuleFor(r => r.ContributionDate)
             .LessThanOrEqualTo(DateTime.Today)
             .WithMessage($"{nameof(CreateMilitaryContributionRequest.ContributionDate)} cannot be in the future.")
+            .MustAsync((request, _, ct) => ValidateNotBeforeHire(request, ct))
+            .WithMessage(request => $"Contribution year {request.ContributionDate.Year} is before the employee's earliest known hire year.")
+            .MustAsync((request, _, ct) => ValidateAtLeast21OnContribution(request, ct))
+            .WithMessage(request => $"Employee must be at least 21 years old on the contribution date {request.ContributionDate:yyyy-MM-dd}.")
             .MustAsync((request, _, ct) => ValidateContributionDate(request, ct))
-            .WithMessage($"Regular Contribution already recorded for {nameof(CreateMilitaryContributionRequest.ContributionDate.Year)}. Duplicates are not allowed.");
+            .WithMessage(request => $"Regular Contribution already recorded for year {request.ContributionDate.Year}. Duplicates are not allowed.");
     }
 
     private async Task<bool> ValidateContributionDate(CreateMilitaryContributionRequest req, CancellationToken token)
@@ -39,14 +49,38 @@ public class MilitaryContributionRequestValidator : Validator<CreateMilitaryCont
             return true;
         }
 
-        var ms = Resolve<IMilitaryService>();
-        var results = await ms.GetMilitaryServiceRecordAsync(new MilitaryContributionRequest { ProfitYear = req.ProfitYear, BadgeNumber = req.BadgeNumber, Take = short.MaxValue },
+        var results = await _militaryService.GetMilitaryServiceRecordAsync(new MilitaryContributionRequest { ProfitYear = req.ProfitYear, BadgeNumber = req.BadgeNumber, Take = short.MaxValue },
             isArchiveRequest: false,
             cancellationToken: token);
 
         if (!results.IsSuccess) { return false; }
         var records = results.Value!.Results;
 
-        return records.All(x => !x.IsSupplementalContribution && x.ContributionDate.Year != req.ContributionDate.Year);
+        return records.All(x => x.IsSupplementalContribution || x.ContributionDate.Year != req.ContributionDate.Year);
+    }
+
+    private async Task<bool> ValidateNotBeforeHire(CreateMilitaryContributionRequest req, CancellationToken token)
+    {
+        // If badge is invalid, let the BadgeNumber rule handle it; return false to fail validation here if hire date cannot be determined.
+        var earliest = await _employeeLookup.GetEarliestHireDateAsync(req.BadgeNumber, token);
+        if (!earliest.HasValue)
+        {
+            return false;
+        }
+
+        // Contribution year must be >= earliest hire year
+        return req.ContributionDate.Year >= earliest.Value.Year;
+    }
+
+    private async Task<bool> ValidateAtLeast21OnContribution(CreateMilitaryContributionRequest req, CancellationToken token)
+    {
+        var dob = await _employeeLookup.GetDateOfBirthAsync(req.BadgeNumber, token);
+        if (!dob.HasValue)
+        {
+            // If DOB is not available, fail validation so the issue can be surfaced.
+            return false;
+        }
+
+        return dob.Value.Age(req.ContributionDate) >= 21;
     }
 }

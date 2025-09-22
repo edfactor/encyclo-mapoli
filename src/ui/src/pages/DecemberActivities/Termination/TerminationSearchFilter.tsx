@@ -1,5 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Button, Grid } from "@mui/material";
+import { Button, FormHelperText, Grid } from "@mui/material";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -15,7 +15,17 @@ import { TerminationSearchRequest } from "./Termination";
 
 const schema = yup.object().shape({
   beginningDate: yup.string().required("Begin Date is required"),
-  endingDate: yup.string().required("End Date is required"),
+  endingDate: yup
+    .string()
+    .required("End Date is required")
+    .test("is-after-start", "End Date must be after Begin Date", function (value) {
+      const { beginningDate } = this.parent;
+      if (!beginningDate || !value) return true;
+      const startDate = tryddmmyyyyToDate(beginningDate);
+      const endDate = tryddmmyyyyToDate(value);
+      if (!startDate || !endDate) return true;
+      return endDate > startDate;
+    }),
   forfeitureStatus: yup.string().required("Forfeiture Status is required"),
   pagination: yup
     .object({
@@ -129,7 +139,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
                 id="beginningDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value || undefined);
-                  trigger("beginningDate");
+                  trigger("endingDate");
                 }}
                 value={field.value ? tryddmmyyyyToDate(field.value) : null}
                 required={false}
@@ -141,6 +151,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
               />
             )}
           />
+          {errors.beginningDate && <FormHelperText error>{errors.beginningDate.message}</FormHelperText>}
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
@@ -163,6 +174,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
               />
             )}
           />
+          {errors.endingDate && <FormHelperText error>{errors.endingDate.message}</FormHelperText>}
         </Grid>
       </Grid>
       <Grid

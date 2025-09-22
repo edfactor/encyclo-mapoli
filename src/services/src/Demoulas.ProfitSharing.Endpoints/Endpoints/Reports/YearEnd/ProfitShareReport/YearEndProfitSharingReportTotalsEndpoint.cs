@@ -1,14 +1,18 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Contracts; // Result, Error
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareReport;
-public sealed class YearEndProfitSharingReportTotalsEndpoint: ProfitSharingEndpoint<BadgeNumberRequest, YearEndProfitSharingReportTotals>
+
+public sealed class YearEndProfitSharingReportTotalsEndpoint : ProfitSharingEndpoint<BadgeNumberRequest, Results<Ok<YearEndProfitSharingReportTotals>, NotFound, ProblemHttpResult>>
 {
     private readonly IProfitSharingSummaryReportService _profitSharingSummaryReportService;
     private readonly IAuditService _auditService;
@@ -29,7 +33,7 @@ public sealed class YearEndProfitSharingReportTotalsEndpoint: ProfitSharingEndpo
         {
             s.Summary = ReportName;
             s.Description = "Returns the totals for the profit sharing report (426)";
-            s.ExampleRequest = new BadgeNumberRequest { ProfitYear = 2025, UseFrozenData = true};
+            s.ExampleRequest = new BadgeNumberRequest { ProfitYear = 2025, UseFrozenData = true };
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
@@ -42,13 +46,21 @@ public sealed class YearEndProfitSharingReportTotalsEndpoint: ProfitSharingEndpo
         Group<YearEndGroup>();
     }
 
-    public override Task<YearEndProfitSharingReportTotals> ExecuteAsync(BadgeNumberRequest req, CancellationToken ct)
+    public override async Task<Results<Ok<YearEndProfitSharingReportTotals>, NotFound, ProblemHttpResult>> ExecuteAsync(BadgeNumberRequest req, CancellationToken ct)
     {
-        return _auditService.ArchiveCompletedReportAsync(
-            ReportName,
-            req.ProfitYear,
-            req,
-            (archiveReq, _, cancellationToken) => _profitSharingSummaryReportService.GetYearEndProfitSharingTotalsAsync(archiveReq, cancellationToken),
-            ct);
+        try
+        {
+            var data = await _auditService.ArchiveCompletedReportAsync(
+                ReportName,
+                req.ProfitYear,
+                req,
+                (archiveReq, _, cancellationToken) => _profitSharingSummaryReportService.GetYearEndProfitSharingTotalsAsync(archiveReq, cancellationToken),
+                ct);
+            return Result<YearEndProfitSharingReportTotals>.Success(data).ToHttpResult();
+        }
+        catch (Exception ex)
+        {
+            return Result<YearEndProfitSharingReportTotals>.Failure(Error.Unexpected(ex.Message)).ToHttpResult();
+        }
     }
 }

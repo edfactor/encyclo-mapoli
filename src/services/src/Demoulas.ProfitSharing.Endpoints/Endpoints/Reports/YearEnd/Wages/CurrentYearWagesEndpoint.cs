@@ -4,6 +4,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Contracts; // Result, Error
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
@@ -55,9 +56,16 @@ public class CurrentYearWagesEndpoint : EndpointWithCsvBase<ProfitYearRequest, W
 
     public override string ReportFileName => "YTD Wages Extract (PROF-DOLLAR-EXTRACT)";
 
-    public override Task<ReportResponseBase<WagesCurrentYearResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
+    public override async Task<ReportResponseBase<WagesCurrentYearResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return _reportService.GetWagesReportAsync(req, ct);
+        try
+        {
+            return await _reportService.GetWagesReportAsync(req, ct);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to retrieve current year wages: {ex.Message}", ex);
+        }
     }
 
 

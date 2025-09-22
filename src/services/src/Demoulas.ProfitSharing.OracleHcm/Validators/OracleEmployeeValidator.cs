@@ -15,7 +15,7 @@ public sealed class OracleEmployeeValidator : Validator<OracleEmployee>
     private readonly NameItemValidator _nameItemValidator = new NameItemValidator();
     private readonly AddressItemValidator _addressValidator = new AddressItemValidator();
 
-    private readonly IBaseCacheService<LookupTableCache<byte>> _accountCache;
+    private readonly IBaseCacheService<LookupTableCache<string>> _accountCache;
     private readonly IBaseCacheService<LookupTableCache<byte>> _depCache;
     private const int MaxStoreId = 10_000;
 
@@ -30,7 +30,7 @@ public sealed class OracleEmployeeValidator : Validator<OracleEmployee>
 
     public OracleEmployeeValidator(
         [FromKeyedServices(nameof(PayClassificationHostedService))]
-        IBaseCacheService<LookupTableCache<byte>> accountCache,
+    IBaseCacheService<LookupTableCache<string>> accountCache,
         [FromKeyedServices(nameof(DepartmentHostedService))]
         IBaseCacheService<LookupTableCache<byte>> depCache)
     {
@@ -114,11 +114,15 @@ public sealed class OracleEmployeeValidator : Validator<OracleEmployee>
             .NotEmpty().WithMessage("DateOfBirth is required.");
     }
 
-    private async Task<bool> ValidatePayClassificationAsync(byte? jobCode, CancellationToken ct)
+    private async Task<bool> ValidatePayClassificationAsync(string? jobCode, CancellationToken ct)
     {
-        ISet<LookupTableCache<byte>> lookup = await _accountCache.GetAllAsync(ct).ConfigureAwait(false);
-        HashSet<byte> codes = lookup.Select(p => p.Id).ToHashSet();
-        return codes.Contains(jobCode ?? 0);
+        if (string.IsNullOrWhiteSpace(jobCode))
+        {
+            return false;
+        }
+        ISet<LookupTableCache<string>> lookup = await _accountCache.GetAllAsync(ct).ConfigureAwait(false);
+        HashSet<string> codes = lookup.Select(p => p.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        return codes.Contains(jobCode);
     }
 
     private async Task<bool> ValidateDepartmentIdAsync(byte departmentId, CancellationToken ct)

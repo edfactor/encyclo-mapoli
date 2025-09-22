@@ -1,219 +1,277 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Mappers;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Common.Metrics;
 using EntityFramework.Exceptions.Common;
 using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
-using Exception = System.Exception;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
 /// <summary>
-/// Provides services for handling demographic data related to employees within the Oracle HCM system.
+/// Demographics ingestion/upsert with primary OracleHcmId matching, (SSN,BadgeNumber) fallback, history tracking, and audit logging.
+/// Includes metrics counters & structured summary logging.
 /// </summary>
-/// <remarks>
-/// This service is responsible for processing, auditing, and managing demographic information.
-/// It integrates with data context factories, mappers, and logging to ensure efficient and reliable operations.
-/// </remarks>
-internal class DemographicsService : IDemographicsServiceInternal
+public class DemographicsService : IDemographicsServiceInternal
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly DemographicMapper _mapper;
     private readonly ILogger<DemographicsService> _logger;
+    private readonly ITotalService _totalService;
+    private readonly IFakeSsnService _fakeSsnService;
 
-    public DemographicsService(IProfitSharingDataContextFactory dataContextFactory,
-        DemographicMapper mapper,
-        ILogger<DemographicsService> logger)
+    public DemographicsService(IProfitSharingDataContextFactory dataContextFactory, DemographicMapper mapper, ILogger<DemographicsService> logger, ITotalService totalService, IFakeSsnService fakeSsnService)
     {
         _dataContextFactory = dataContextFactory;
         _mapper = mapper;
         _logger = logger;
+        _totalService = totalService;
+        _fakeSsnService = fakeSsnService;
     }
 
-    /// <summary>
-    /// Asynchronously processes a stream of demographic requests and batches them for upsert operations.
-    /// </summary>
-    /// <param name="employees">
-    /// An asynchronous enumerable of <see cref="DemographicsRequest"/> objects representing the demographic data to be processed.
-    /// </param>
-    /// <param name="batchSize">
-    /// The maximum number of requests to process in a single batch. Defaults to <see cref="byte.MaxValue"/>.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A <see cref="CancellationToken"/> to observe while waiting for the task to complete. Defaults to <see cref="CancellationToken.None"/>.
-    /// </param>
-    /// <returns>
-    /// A <see cref="Task"/> that represents the asynchronous operation.
-    /// </returns>
-    /// <remarks>
-    /// This method enqueues incoming demographic requests and processes them in batches. 
-    /// Once the batch size is reached, the requests are upserted into the database.
-    /// </remarks>
-    /// <exception cref="OperationCanceledException">
-    /// Thrown if the operation is canceled via the provided <paramref name="cancellationToken"/>.
-    /// </exception>
-    public Task AddDemographicsStreamAsync(DemographicsRequest[] employees, byte batchSize = byte.MaxValue,
-        CancellationToken cancellationToken = default)
+    public Task AddDemographicsStreamAsync(DemographicsRequest[] employees, byte batchSize = byte.MaxValue, CancellationToken cancellationToken = default)
     {
+        DemographicsIngestMetrics.EnsureInitialized();
+        long startTicks = Environment.TickCount64;
+        DateTimeOffset modification = DateTimeOffset.UtcNow;
+        List<Demographic> incoming = _mapper.Map(employees).ToList();
+        incoming.ForEach(e => e.ModifiedAtUtc = modification);
 
-        DateTimeOffset currentModificationDate = DateTimeOffset.UtcNow;
+        Dictionary<long, Demographic> byOracle = incoming.ToDictionary(e => e.OracleHcmId);
+        ILookup<(int Ssn, int Badge), Demographic> bySsnBadge = incoming.ToLookup(e => (e.Ssn, e.BadgeNumber));
 
-        // Map incoming demographic requests to entity models
-        List<Demographic> demographicsEntities = _mapper.Map(employees).ToList();
+        int requested = incoming.Count;
+        int primaryMatched = 0;
+        int fallbackPairsCount = 0;
+        int fallbackMatched = 0;
+        int inserted = 0;
+        int updated = 0;
+        bool skippedAllZeroBadgeFallback = false;
 
-        // Update LastModifiedDate for all entities
-        demographicsEntities.ForEach(entity => entity.ModifiedAtUtc = currentModificationDate);
-
-        // Create lookup dictionaries for both OracleHcmId and SSN
-        Dictionary<long, Demographic> demographicOracleHcmIdLookup = demographicsEntities.ToDictionary(entity => entity.OracleHcmId);
-        ILookup<(int Ssn, int BadgeNumber), Demographic> demographicSsnLookup = demographicsEntities.ToLookup(entity => (entity.Ssn, BadgeNumber: entity.BadgeNumber));
-        HashSet<int> ssnCollection = demographicsEntities.Select(d => d.Ssn).ToHashSet();
-        HashSet<DateOnly> dobCollection = demographicsEntities.Select(d => d.DateOfBirth).ToHashSet();
-
-        // Use writable context for the upsert operation
         return _dataContextFactory.UseWritableContext(async context =>
         {
-            // Fetch existing entities from the database using both OracleHcmId and SSN
-            List<Demographic> existingEntities = await context.Demographics
-                .Where(dbEntity => demographicOracleHcmIdLookup.Keys.Contains(dbEntity.OracleHcmId) ||
-                                   (ssnCollection.Contains(dbEntity.Ssn) && dobCollection.Contains(dbEntity.DateOfBirth)))
+            DemographicsIngestMetrics.BatchesTotal.Add(1);
+            DemographicsIngestMetrics.RecordsRequested.Add(requested);
+            // Primary match by OracleHcmId
+            List<long> oracleIds = byOracle.Keys.ToList();
+            List<Demographic> existingByOracle = await context.Demographics
+                .Where(d => oracleIds.Contains(d.OracleHcmId))
+                .Include(d => d.ContactInfo)
+                .Include(d => d.Address)
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
-
-            // Handle potential duplicates in the existing database (SSN duplicates)
-            List<Demographic> duplicateSsnEntities = existingEntities.GroupBy(e => e.Ssn)
-                .Where(g => g.Count() > 1)
-                .SelectMany(g => g)
-                .ToList();
-
-            if (duplicateSsnEntities.Any())
+            primaryMatched = existingByOracle.Count;
+            if (primaryMatched > 0)
             {
-                // Log duplicate SSN entries to the audit table
-                List<DemographicSyncAudit> audit = duplicateSsnEntities.Select(d => new DemographicSyncAudit
-                {
-                    BadgeNumber = d.BadgeNumber,
-                    OracleHcmId = d.OracleHcmId,
-                    InvalidValue = d.Ssn.MaskSsn(),
-                    Message = "Duplicate SSNs found in the database.",
-                    UserName = Constants.SystemAccountName,
-                    PropertyName = "SSN"
-                }).ToList();
+                DemographicsIngestMetrics.PrimaryMatched.Add(primaryMatched);
+            }
+            HashSet<long> matchedOracleIds = existingByOracle.Select(e => e.OracleHcmId).ToHashSet();
 
-                context.DemographicSyncAudit.AddRange(audit);
+            // Fallback (SSN,Badge)
+            List<(int Ssn, int Badge)> fallbackPairs = incoming
+                .Where(e => !matchedOracleIds.Contains(e.OracleHcmId))
+                .Select(e => (e.Ssn, e.BadgeNumber))
+                .Distinct()
+                .ToList();
+            fallbackPairsCount = fallbackPairs.Count;
+            if (fallbackPairsCount > 0)
+            {
+                DemographicsIngestMetrics.FallbackPairs.Add(fallbackPairsCount);
             }
 
-            // Handle inserts for entities that do not exist in the database by OracleHcmId or SSN
-            HashSet<long> existingOracleHcmIds = existingEntities.Select(dbEntity => dbEntity.OracleHcmId).ToHashSet();
-            HashSet<int> existingSsns = existingEntities.Select(dbEntity => dbEntity.Ssn).ToHashSet();
-
-            List<Demographic> newEntities = demographicsEntities
-                .Where(entity => !existingOracleHcmIds.Contains(entity.OracleHcmId) && !existingSsns.Contains(entity.Ssn))
-                .ToList();
-
-            if (newEntities.Any())
+            List<Demographic> existingByFallback = new();
+            if (fallbackPairs.Count > 0)
             {
-                // Bulk insert new entities
-
-                foreach (Demographic entity in newEntities)
+                if (fallbackPairs.All(p => p.Badge == 0))
                 {
-                    try
-                    {
-                        context.Demographics.Add(entity);
-
-                        DemographicHistory history = DemographicHistory.FromDemographic(entity);
-                        context.DemographicHistories.Add(history);
-                    }
-                    catch (InvalidOperationException e) when (e.Message.Contains(
-                                                                  "When attaching existing entities, ensure that only one entity instance with a given key value is attached."))
-                    {
-                        _logger.LogCritical(e, "Failed to process Demographic/OracleHCM employee record for BadgeNumber {BadgeNumber}", entity.BadgeNumber);
-                        try
-                        {
-                            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                        }
-                        catch (CannotInsertNullException exception)
-                        {
-                            _logger.LogCritical(exception, "Failed to save Demographic/OracleHCM employee batch");
-                        }
-                        catch (OracleException exception)
-                        {
-                            _logger.LogCritical(exception, "Failed to save Demographic/OracleHCM employee batch");
-                        }
-                    }
-                }
-            }
-
-
-            // Update existing entities based on either OracleHcmId or SSN & BadgeNumber
-            foreach (Demographic existingEntity in existingEntities)
-            {
-                Demographic? incomingEntity = null;
-
-                // Prioritize matching by OracleHcmId, but fallback to SSN if OracleHcmId is missing (legacy case)
-                if (demographicOracleHcmIdLookup.TryGetValue(existingEntity.OracleHcmId, out Demographic? entityByOracleHcmId))
-                {
-                    incomingEntity = entityByOracleHcmId;
+                    skippedAllZeroBadgeFallback = true;
+                    _logger.LogCritical("All fallback demographic pairs have BadgeNumber == 0. Aborting fallback lookup. OracleMatched={OracleMatched} FallbackPairs={FallbackPairs}", primaryMatched, fallbackPairs.Count);
+                    DemographicsIngestMetrics.FallbackSkippedAllZeroBadge.Add(1);
                 }
                 else
                 {
-                    Demographic? entityBySsn = demographicSsnLookup[(existingEntity.Ssn, existingEntity.BadgeNumber)].FirstOrDefault();
-                    if (entityBySsn != null)
+                    existingByFallback = await GetMatchingDemographicsByFallbackSqlAsync(fallbackPairs, context, cancellationToken).ConfigureAwait(false);
+                    fallbackMatched = existingByFallback.Count;
+                    if (fallbackMatched > 0)
                     {
-                        incomingEntity = entityBySsn;
+                        DemographicsIngestMetrics.FallbackMatched.Add(fallbackMatched);
                     }
-                }
-
-                // If we have a match, update the existing entity with new values
-                if (incomingEntity != null)
-                {
-                    // Correct OracleHcmId if it's missing or incorrect (for legacy records)
-                    // Assume all legacy records are below 2.1B and Oracle HCM ID is over that
-                    if (existingEntity.OracleHcmId != incomingEntity.OracleHcmId && existingEntity.OracleHcmId < int.MaxValue)
-                    {
-                        existingEntity.OracleHcmId = incomingEntity.OracleHcmId;
-                    }
-
-                    // Update the rest of the entity's fields
-                    bool updateHistory = !Demographic.DemographicHistoryEqual(existingEntity, incomingEntity);
-
-                    UpdateEntityValues(existingEntity, incomingEntity, currentModificationDate);
-                    if (updateHistory)
-                    {
-                        DemographicHistory newHistoryRecord = DemographicHistory.FromDemographic(incomingEntity, existingEntity.Id);
-                        DemographicHistory oldHistoryRecord = await context.DemographicHistories
-                            .Where(x => x.DemographicId == existingEntity.Id
-                                        && DateTimeOffset.UtcNow >= x.ValidFrom
-                                        && DateTimeOffset.UtcNow < x.ValidTo)
-                            .FirstAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-
-                        oldHistoryRecord.ValidTo = DateTimeOffset.UtcNow;
-                        newHistoryRecord.ValidFrom = oldHistoryRecord.ValidTo;
-                        context.DemographicHistories.Add(newHistoryRecord);
-                    }
-
-
                 }
             }
 
-            // Save all changes to the database
+            List<Demographic> existing = existingByOracle
+                .Concat(existingByFallback)
+                .GroupBy(e => e.Id)
+                .Select(g => g.First())
+                .ToList();
+
+            // Duplicate SSN audit
+            List<Demographic> duplicateSsns = existing
+                .GroupBy(e => e.Ssn)
+                .Where(g => g.Count() > 1)
+                .SelectMany(g => g)
+                .ToList();
+            if (duplicateSsns.Any())
+            {
+                AddDemographicSyncAudits(duplicateSsns, "Duplicate SSNs found in the database.", "SSN", context);
+            }
+            else
+            {
+                foreach (var kv in byOracle)
+                {
+                    var existingEntity = existing.FirstOrDefault(db => db.OracleHcmId == kv.Key && db.Ssn != kv.Value.Ssn);
+                    if (existingEntity == null)
+                    {
+                        continue;
+                    }
+                    var proposed = kv.Value;
+                    Demographic? matchToProposed = await context.Demographics.FirstOrDefaultAsync(d => d.Ssn == proposed.Ssn, cancellationToken).ConfigureAwait(false);
+                    if (matchToProposed == null)
+                    {
+                        await AddDemographicSyncAuditAsync(existingEntity, "SSN changed with no conflicts.", "SSN", context, cancellationToken).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        await HandleExistingEmployeeMatchToProposedSsnAsync(matchToProposed, existingEntity, context, cancellationToken).ConfigureAwait(false);
+                    }
+                }
+            }
+
+            inserted = await InsertNewDemographicsAsync(incoming, existing, context, cancellationToken).ConfigureAwait(false);
+            updated = await UpdateExistingDemographicsAsync(byOracle, bySsnBadge, existing, modification, context, cancellationToken).ConfigureAwait(false);
+            if (inserted > 0) { DemographicsIngestMetrics.RecordsInserted.Add(inserted); }
+            if (updated > 0) { DemographicsIngestMetrics.RecordsUpdated.Add(updated); }
+
+            try
+            {
+                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, "Failed to save batch: {DemographicsRequests}", employees);
+                DemographicsIngestMetrics.BatchFailures.Add(1);
+            }
+
+            _logger.LogInformation("Demographics ingest batch summary {@Metrics}", new
+            {
+                Requested = requested,
+                PrimaryMatched = primaryMatched,
+                FallbackPairs = fallbackPairsCount,
+                FallbackMatched = fallbackMatched,
+                Inserted = inserted,
+                Updated = updated,
+                SkippedAllZeroBadgeFallback = skippedAllZeroBadgeFallback
+            });
+            double durationMs = (Environment.TickCount64 - startTicks);
+            DemographicsIngestMetrics.BatchDurationMs.Record(durationMs);
+        }, cancellationToken);
+    }
+
+    public Task MergeProfitDetailsToDemographic(Demographic sourceDemographic, Demographic targetDemographic, CancellationToken cancellationToken = default)
+    {
+        return _dataContextFactory.UseWritableContext(async context =>
+        {
+            var fakeSsn = await _fakeSsnService.GenerateFakeSsnAsync(cancellationToken).ConfigureAwait(false);
+            sourceDemographic.Ssn = fakeSsn;
+            await AddDemographicSyncAuditAsync(targetDemographic, $"Merging ProfitDetails from source OracleHcmId {sourceDemographic.OracleHcmId} to OracleHcmId {targetDemographic.OracleHcmId}", "ProfitDetails", context, cancellationToken).ConfigureAwait(false);
             try
             {
                 await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
-                _logger.LogCritical(e, "Failed to save batch: {DemographicsRequests}", employees);
+                _logger.LogCritical(e, "Failed to merge demographics: Source SSN {SourceSsn}, Target SSN {TargetSsn}", targetDemographic.Ssn.MaskSsn(), targetDemographic.Ssn.MaskSsn());
             }
-
         }, cancellationToken);
     }
 
-    // Helper method to update entity fields
+    public Task AuditError(int badgeNumber, long oracleHcmId, IEnumerable<ValidationFailure> errorMessages, string requestedBy, CancellationToken cancellationToken = default, params object?[] args)
+    {
+        return _dataContextFactory.UseWritableContext(c =>
+        {
+            for (int i = 0; i < args?.Length; i++)
+            {
+                args[i] ??= "null";
+            }
+            IEnumerable<DemographicSyncAudit> auditRecords = errorMessages.Select(e => new DemographicSyncAudit
+            {
+                BadgeNumber = badgeNumber,
+                OracleHcmId = oracleHcmId,
+                InvalidValue = e.AttemptedValue?.ToString() ?? e.CustomState?.ToString(),
+                Message = e.ErrorMessage,
+                UserName = requestedBy,
+                PropertyName = e.PropertyName,
+            });
+            c.DemographicSyncAudit.AddRange(auditRecords);
+            return c.SaveChangesAsync(cancellationToken);
+        }, cancellationToken);
+    }
+
+    public Task CleanAuditError(CancellationToken cancellationToken)
+    {
+        return _dataContextFactory.UseWritableContext(c =>
+        {
+            DateTime clearBackTo = DateTime.Today.AddDays(-30);
+            return c.DemographicSyncAudit.Where(t => t.Created < clearBackTo).ExecuteDeleteAsync(cancellationToken);
+        }, cancellationToken);
+    }
+
+    #region Private Helpers
+
+    private async Task HandleExistingEmployeeMatchToProposedSsnAsync(Demographic existingEmployeeMatchToProposedSsn, Demographic demographicMarkedForSsnChange, ProfitSharingDbContext context, CancellationToken cancellationToken)
+    {
+        var result = await _totalService.GetVestingBalanceForSingleMemberAsync(SearchBy.Ssn, demographicMarkedForSsnChange.Ssn, (short)DateTime.Now.Year, cancellationToken).ConfigureAwait(false);
+        if (existingEmployeeMatchToProposedSsn.EmploymentStatusId == EmploymentStatus.Constants.Terminated && result?.CurrentBalance == 0.0m)
+        {
+            await AddDemographicSyncAuditAsync(demographicMarkedForSsnChange, "Duplicate SSN found for terminated user with zero balance.", "SSN", context, cancellationToken).ConfigureAwait(false);
+        }
+        else
+        {
+            await AddDemographicSyncAuditAsync(demographicMarkedForSsnChange, "Duplicate SSN added for user.", "SSN", context, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    private static void AddDemographicSyncAudits(List<Demographic> duplicateSsnEntities, string message, string property, ProfitSharingDbContext context)
+    {
+        List<DemographicSyncAudit> audit = duplicateSsnEntities.Select(d => new DemographicSyncAudit
+        {
+            BadgeNumber = d.BadgeNumber,
+            OracleHcmId = d.OracleHcmId,
+            InvalidValue = d.Ssn.MaskSsn(),
+            Message = message,
+            UserName = Constants.SystemAccountName,
+            PropertyName = property
+        }).ToList();
+        context.DemographicSyncAudit.AddRange(audit);
+    }
+
+    private static async Task AddDemographicSyncAuditAsync(Demographic demographic, string message, string property, ProfitSharingDbContext context, CancellationToken cancellationToken)
+    {
+        var audit = new DemographicSyncAudit
+        {
+            BadgeNumber = demographic.BadgeNumber,
+            OracleHcmId = demographic.OracleHcmId,
+            InvalidValue = demographic.Ssn.MaskSsn(),
+            Message = message,
+            UserName = Constants.SystemAccountName,
+            PropertyName = property
+        };
+        await context.DemographicSyncAudit.AddAsync(audit, cancellationToken).ConfigureAwait(false);
+    }
+
     private static void UpdateEntityValues(Demographic existingEntity, Demographic incomingEntity, DateTimeOffset modificationDate)
     {
         existingEntity.Ssn = incomingEntity.Ssn;
@@ -236,67 +294,97 @@ internal class DemographicsService : IDemographicsServiceInternal
         existingEntity.ModifiedAtUtc = modificationDate;
     }
 
-    /// <summary>
-    /// Audits demographic synchronization errors by logging them into the database.
-    /// </summary>
-    /// <param name="badgeNumber">
-    /// The badge number of the employee associated with the error.
-    /// </param>
-    /// <param name="oracleHcmId">
-    /// The Oracle HCM identifier of the employee.
-    /// </param>
-    /// <param name="errorMessages">
-    /// A collection of validation failures containing details about the errors.
-    /// </param>
-    /// <param name="requestedBy">
-    /// The username of the individual who initiated the request.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token to monitor for cancellation requests.
-    /// </param>
-    /// <param name="args">
-    /// Additional arguments providing context or metadata for the audit.
-    /// </param>
-    /// <returns>
-    /// A task that represents the asynchronous operation of auditing errors.
-    /// </returns>
-    /// <remarks>
-    /// This method processes validation errors and records them in the <see cref="DemographicSyncAudit"/> table.
-    /// It ensures that null values in the additional arguments are replaced with a default value.
-    /// </remarks>
-    public Task AuditError(int badgeNumber, long oracleHcmId, IEnumerable<ValidationFailure> errorMessages, string requestedBy, CancellationToken cancellationToken = default,
-        params object?[] args)
+    private static async Task<int> UpdateExistingDemographicsAsync(Dictionary<long, Demographic> byOracle, ILookup<(int Ssn, int Badge), Demographic> bySsnBadge, List<Demographic> existing, DateTimeOffset modification, ProfitSharingDbContext context, CancellationToken ct)
     {
-        return _dataContextFactory.UseWritableContext(c =>
+        int updated = 0;
+        foreach (var existingEntity in existing)
         {
-            for (int i = 0; i < args.Length; i++)
+            Demographic? incoming = byOracle.TryGetValue(existingEntity.OracleHcmId, out var found) ? found : bySsnBadge[(existingEntity.Ssn, existingEntity.BadgeNumber)].FirstOrDefault();
+            if (incoming == null)
             {
-                args[i] ??= "null"; // Replace null with a default value
+                continue;
             }
 
-            IEnumerable<DemographicSyncAudit> auditRecords = errorMessages.Select(e =>
-                new DemographicSyncAudit
-                {
-                    BadgeNumber = badgeNumber,
-                    OracleHcmId = oracleHcmId,
-                    InvalidValue = e.AttemptedValue?.ToString() ?? e.CustomState?.ToString(),
-                    Message = e.ErrorMessage,
-                    UserName = requestedBy,
-                    PropertyName = e.PropertyName,
-                });
-            c.DemographicSyncAudit.AddRange(auditRecords);
+            if (existingEntity.OracleHcmId != incoming.OracleHcmId && existingEntity.OracleHcmId < int.MaxValue)
+            {
+                existingEntity.OracleHcmId = incoming.OracleHcmId;
+            }
 
-            return c.SaveChangesAsync(cancellationToken);
-        }, cancellationToken);
+            bool changed = !Demographic.DemographicHistoryEqual(existingEntity, incoming);
+            if (existingEntity.Ssn != incoming.Ssn)
+            {
+                var beneficiaries = context.BeneficiaryContacts.Where(b => b.Ssn == existingEntity.Ssn);
+                await beneficiaries.ForEachAsync(b => b.Ssn = incoming.Ssn, ct).ConfigureAwait(false);
+                var profitDetails = context.ProfitDetails.Where(p => p.Ssn == existingEntity.Ssn);
+                await profitDetails.ForEachAsync(p => p.Ssn = incoming.Ssn, ct).ConfigureAwait(false);
+            }
+
+            UpdateEntityValues(existingEntity, incoming, modification);
+            if (changed)
+            {
+                DemographicHistory newHistory = DemographicHistory.FromDemographic(incoming, existingEntity.Id);
+                DemographicHistory oldHistory = await context.DemographicHistories
+                    .Where(h => h.DemographicId == existingEntity.Id && DateTimeOffset.UtcNow >= h.ValidFrom && DateTimeOffset.UtcNow < h.ValidTo)
+                    .FirstAsync(ct).ConfigureAwait(false);
+                oldHistory.ValidTo = DateTimeOffset.UtcNow;
+                newHistory.ValidFrom = oldHistory.ValidTo;
+                context.DemographicHistories.Add(newHistory);
+            }
+            updated++;
+        }
+        return updated;
     }
 
-    public Task CleanAuditError(CancellationToken cancellationToken)
+    private async Task<int> InsertNewDemographicsAsync(List<Demographic> incoming, List<Demographic> existing, ProfitSharingDbContext context, CancellationToken ct)
     {
-        return _dataContextFactory.UseWritableContext(c =>
+        HashSet<long> existingOracleIds = existing.Select(e => e.OracleHcmId).ToHashSet();
+        HashSet<(int Ssn, int Badge)> existingSsnBadges = existing.Select(e => (e.Ssn, e.BadgeNumber)).ToHashSet();
+        List<Demographic> newEntities = incoming
+            .Where(e => !existingOracleIds.Contains(e.OracleHcmId) && !existingSsnBadges.Contains((e.Ssn, e.BadgeNumber)))
+            .ToList();
+        int inserted = 0;
+        foreach (var entity in newEntities)
         {
-            DateTime clearBackTo = DateTime.Today.AddDays(-30);
-
-            return c.DemographicSyncAudit.Where(t => t.Created < clearBackTo).ExecuteDeleteAsync(cancellationToken);
-        }, cancellationToken);
+            try
+            {
+                context.Demographics.Add(entity);
+                context.DemographicHistories.Add(DemographicHistory.FromDemographic(entity));
+                inserted++;
+            }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("When attaching existing entities"))
+            {
+                try { await context.SaveChangesAsync(ct).ConfigureAwait(false); } catch (Exception inner) { _logger.LogCritical(inner, "Failed partial save during insert error"); }
+            }
+        }
+        return inserted;
     }
+
+    protected virtual async Task<List<Demographic>> GetMatchingDemographicsByFallbackSqlAsync(List<(int Ssn, int Badge)> pairs, ProfitSharingDbContext context, CancellationToken ct)
+    {
+        List<string> clauses = new();
+        List<OracleParameter> parameters = new();
+        int i = 0;
+        foreach (var (ssn, badge) in pairs)
+        {
+            if (badge == 0)
+            {
+                continue;
+            }
+            string pSsn = $":p{i}"; parameters.Add(new OracleParameter($"p{i}", ssn)); i++;
+            string pBadge = $":p{i}"; parameters.Add(new OracleParameter($"p{i}", badge)); i++;
+            clauses.Add($"(d.SSN = {pSsn} AND d.BADGE_NUMBER = {pBadge})");
+        }
+        if (clauses.Count == 0)
+        {
+            return new List<Demographic>();
+        }
+        string sql = $"SELECT d.* FROM DEMOGRAPHIC d WHERE {string.Join(" OR ", clauses)}";
+        return await context.Demographics
+            .FromSqlRaw(sql, parameters.ToArray())
+            .Include(d => d.ContactInfo)
+            .Include(d => d.Address)
+            .ToListAsync(ct).ConfigureAwait(false);
+    }
+
+    #endregion
 }

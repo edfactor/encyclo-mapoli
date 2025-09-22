@@ -29,7 +29,7 @@ import {
   ProfitYearRequest
 } from "reduxstore/types";
 import { DSMAccordion, numberToCurrency, Page, setMessage, SmartModal } from "smart-ui-library";
-import { TotalsGrid } from "../../components/TotalsGrid";
+import { TotalsGrid } from "../../components/TotalsGrid/TotalsGrid";
 // usePrerequisiteNavigations now encapsulated by PrerequisiteGuard
 import PrerequisiteGuard from "../../components/PrerequisiteGuard";
 import { MessageKeys, Messages } from "../../utils/messageDictonary";
