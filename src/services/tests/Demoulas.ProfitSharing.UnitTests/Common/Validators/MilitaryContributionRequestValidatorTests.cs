@@ -1,13 +1,9 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
+﻿using System.ComponentModel;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Validators;
-using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.Response.Military;
-using Demoulas.ProfitSharing.Common.Contracts;
-using System.Collections.Generic;
 using FluentValidation.Results;
 using Moq;
-using System;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Validators;
 
