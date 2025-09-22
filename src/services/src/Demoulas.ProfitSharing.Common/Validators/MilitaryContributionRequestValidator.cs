@@ -1,5 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.Util.Extensions;
 using FastEndpoints;
 using FluentValidation;
 
@@ -80,14 +81,6 @@ public class MilitaryContributionRequestValidator : Validator<CreateMilitaryCont
             return false;
         }
 
-        // Calculate age at contribution date
-        DateOnly contributionDate = DateOnly.FromDateTime(req.ContributionDate);
-        int age = contributionDate.Year - dob.Value.Year;
-        if (contributionDate < dob.Value.AddYears(age))
-        {
-            age--;
-        }
-
-        return age >= 21;
+        return dob.Value.Age(req.ContributionDate) >= 21;
     }
 }
