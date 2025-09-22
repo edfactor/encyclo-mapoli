@@ -35,6 +35,8 @@ public class MilitaryContributionRequestValidator : Validator<CreateMilitaryCont
             .WithMessage($"{nameof(CreateMilitaryContributionRequest.ContributionDate)} cannot be in the future.")
             .MustAsync((request, _, ct) => ValidateNotBeforeHire(request, ct))
             .WithMessage(request => $"Contribution year {request.ContributionDate.Year} is before the employee's earliest known hire year.")
+            .MustAsync((request, _, ct) => ValidateAtLeast21OnContribution(request, ct))
+            .WithMessage(request => $"Employee must be at least 21 years old on the contribution date {request.ContributionDate:yyyy-MM-dd}.")
             .MustAsync((request, _, ct) => ValidateContributionDate(request, ct))
             .WithMessage(request => $"Regular Contribution already recorded for year {request.ContributionDate.Year}. Duplicates are not allowed.");
     }
@@ -67,5 +69,25 @@ public class MilitaryContributionRequestValidator : Validator<CreateMilitaryCont
 
         // Contribution year must be >= earliest hire year
         return req.ContributionDate.Year >= earliest.Value.Year;
+    }
+
+    private async Task<bool> ValidateAtLeast21OnContribution(CreateMilitaryContributionRequest req, CancellationToken token)
+    {
+        var dob = await _employeeLookup.GetDateOfBirthAsync(req.BadgeNumber, token);
+        if (!dob.HasValue)
+        {
+            // If DOB is not available, fail validation so the issue can be surfaced.
+            return false;
+        }
+
+        // Calculate age at contribution date
+        DateOnly contributionDate = DateOnly.FromDateTime(req.ContributionDate);
+        int age = contributionDate.Year - dob.Value.Year;
+        if (contributionDate < dob.Value.AddYears(age))
+        {
+            age--;
+        }
+
+        return age >= 21;
     }
 }

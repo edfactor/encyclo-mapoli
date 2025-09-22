@@ -43,4 +43,18 @@ public sealed class EmployeeLookupService(IProfitSharingDataContextFactory facto
             return earliest;
         });
     }
+
+    public async Task<DateOnly?> GetDateOfBirthAsync(int badgeNumber, CancellationToken cancellationToken = default)
+    {
+        return await factory.UseReadOnlyContext(async ctx =>
+        {
+#pragma warning disable DSMPS001
+            var dob = await ctx.Demographics
+                .Where(d => d.BadgeNumber == badgeNumber)
+                .Select(d => (DateOnly?)d.DateOfBirth)
+                .FirstOrDefaultAsync(cancellationToken);
+#pragma warning restore DSMPS001
+            return dob;
+        });
+    }
 }

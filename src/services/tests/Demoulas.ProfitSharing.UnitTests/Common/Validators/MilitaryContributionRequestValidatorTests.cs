@@ -22,6 +22,9 @@ public class MilitaryContributionRequestValidatorTests
         employeeLookupMock
             .Setup(x => x.GetEarliestHireDateAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new DateOnly((short)DateTime.Today.Year - 1, 1, 1));
+        employeeLookupMock
+            .Setup(x => x.GetDateOfBirthAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new DateOnly((short)DateTime.Today.Year - 30, 1, 1));
 
         var militaryServiceMock = new Mock<IMilitaryService>(MockBehavior.Strict);
         // Default: return success with empty results for GetMilitaryServiceRecordAsync
@@ -105,6 +108,9 @@ public class MilitaryContributionRequestValidatorTests
         employeeLookupMock
             .Setup(x => x.GetEarliestHireDateAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((DateOnly?)null);
+        employeeLookupMock
+            .Setup(x => x.GetDateOfBirthAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((DateOnly?)null);
 
         var missingBadge = ValidRequest() with { BadgeNumber = 999999 };
         var missingBadgeResult = await validator.ValidateAsync(missingBadge);
@@ -151,5 +157,29 @@ public class MilitaryContributionRequestValidatorTests
         var result = await validator.ValidateAsync(req);
         Assert.False(result.IsValid);
         Assert.Contains(result.Errors, e => e.ErrorMessage.Contains("before the employee's earliest known hire year", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public async Task Contribution_by_employee_under_21_is_rejected()
+    {
+        var (validator, employeeLookupMock, _) = CreateValidator();
+        // Set DOB so employee is 20 at contribution date
+        var today = DateTime.Today;
+        short year = (short)(today.Year - 20);
+        employeeLookupMock.Reset();
+        employeeLookupMock
+            .Setup(x => x.BadgeExistsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        employeeLookupMock
+            .Setup(x => x.GetEarliestHireDateAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new DateOnly((short)today.Year - 1, 1, 1));
+        employeeLookupMock
+            .Setup(x => x.GetDateOfBirthAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new DateOnly(year, today.Month, Math.Min(1, today.Day)));
+
+        var req = ValidRequest((short)today.Year, new DateTime(today.Year, today.Month, today.Day, 0, 0, 0, DateTimeKind.Utc)) with { IsSupplementalContribution = false };
+        var result = await validator.ValidateAsync(req);
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.ErrorMessage.Contains("at least 21 years old", StringComparison.OrdinalIgnoreCase));
     }
 }
