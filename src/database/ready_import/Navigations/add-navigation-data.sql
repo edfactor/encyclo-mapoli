@@ -76,11 +76,11 @@ BEGIN
 
 -- Dev-only: PAY426N entries (not assigned to roles in SQL)
     INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED)
-    VALUES(74,18, 'PAY426N', '','pay426n', 1, 99, '', 1);
+    VALUES(74,14, 'PAY426N', '','pay426n', 1, 99, '', 1);
     
 -- Profit Summary (PAY426 summary)
     INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED)
-    VALUES(76,18, 'Profit Summary (PAY426 summary)', '','pay426-9', 1, 2, '', 0);
+    VALUES(76,14, 'Profit Summary (PAY426 summary)', '','pay426-9', 1, 2, '', 0);
 
 
     INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED)
