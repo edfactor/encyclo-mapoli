@@ -91,6 +91,47 @@ Patterns:
 - Share logic via interfaces in `Common` or specialized service projects; avoid cross-project circular refs.
 - Update `COPILOT_INSTRUCTIONS.md` and this file if introducing a pervasive new pattern.
 
+## Branching & Jira workflow (team conventions)
+
+To keep branches and PRs consistent across the org, follow these conventions. Copilot assistants and developers should follow this policy for any work associated with a Jira ticket.
+
+- Base branch: Always create feature / fix branches from `develop`. Do not branch from `main` or other long-lived branches unless explicitly instructed by a release manager.
+- Branch naming: Use the Jira ticket key as a prefix and a short dash-separated description. Examples:
+  - `fix/PS-1645-military-pre-hire-validation`
+  - `feature/PS-1720-add-reporting-view`
+- Ticket formats: Jira tickets may be referenced as a full URL or key. Normalize both forms to a key when creating branches or PRs:
+  - `https://demoulas.atlassian.net/browse/PS-1645` → `PS-1645`
+  - `PS-1645` → `PS-1645`
+
+- Typical local workflow (PowerShell):
+  ```pwsh
+  # ensure latest develop
+  git checkout develop
+  git pull origin develop
+
+  # create branch from develop
+  git checkout -b fix/PS-1645-military-pre-hire-validation
+
+  # make edits, stage, commit
+  git add <files>
+  git commit -m "PS-1645: Short description of the change"
+
+  # push and set upstream
+  git push -u origin fix/PS-1645-military-pre-hire-validation
+  ```
+
+- Pull request guidance:
+  - Open PR from your branch into `develop` (not `main`) unless the ticket or release manager instructs otherwise.
+  - Title should start with the Jira key: `PS-1645: Prevent military contributions before hire date`.
+  - Include the following in the PR body: summary of the change, which tests were run locally (and results), any migration or config changes, and QA steps to reproduce the fix.
+
+- Copilot assistant responsibilities:
+  - When asked to create or reference a branch for a Jira ticket, normalize ticket input (URL or key) to the ticket key and produce the suggested branch name using the pattern above.
+  - If a repository or the developer has an alternate branching policy for a particular ticket (e.g., release hotfix), mention the exception and prefer the explicit instruction.
+  - When making code edits for a Jira ticket, create a local branch from `develop`, run unit tests (or the focused tests), commit, and push the branch to origin; report the push URL for PR creation.
+
+These rules reduce merge conflicts, ensure CI runs the correct base, and make PRs easy to find by ticket key.
+
 ## Quick Commands (PowerShell)
 ```pwsh
 # Build services
