@@ -217,7 +217,8 @@ public sealed class DistributionService : IDistributionService
                 Memo = request.Memo,
                 RothIra = request.IsRothIra,
                 CreatedAtUtc = DateTime.UtcNow,
-                UserName = _appUser != null ? _appUser.UserName : "unknown"
+                UserName = _appUser != null ? _appUser.UserName : "unknown",
+                ThirdPartyPayeeAccount = request.ThirdPartyPayee?.Account
             };
 
             if (request.ThirdPartyPayee != null)
@@ -226,7 +227,6 @@ public sealed class DistributionService : IDistributionService
                 {
                     Payee = request.ThirdPartyPayee.Payee,
                     Name = request.ThirdPartyPayee.Name,
-                    Account = request.ThirdPartyPayee.Account,
                     Address = new Data.Entities.Address()
                     {
                         Street = request.ThirdPartyPayee.Address.Street,
@@ -270,7 +270,7 @@ public sealed class DistributionService : IDistributionService
                 IsRothIra = distribution.RothIra,
                 ThirdPartyPayee = new ThirdPartyPayee()
                 {
-                    Account = distribution.ThirdPartyPayee?.Account,
+                    Account = distribution.ThirdPartyPayeeAccount,
                     Name = distribution.ThirdPartyPayee?.Name,
                     Payee = distribution.ThirdPartyPayee?.Payee,
                     Memo = distribution.ThirdPartyPayee?.Memo,
@@ -350,6 +350,7 @@ public sealed class DistributionService : IDistributionService
                 distribution.ThirdPartyPayee!.Address.State = request.ThirdPartyPayee.Address.State;
                 distribution.ThirdPartyPayee!.Address.PostalCode = request.ThirdPartyPayee.Address.PostalCode;
                 distribution.ThirdPartyPayee!.Address.CountryIso = request.ThirdPartyPayee.Address.CountryIso ?? "US";
+                distribution.ThirdPartyPayeeAccount = request.ThirdPartyPayee?.Account;
             }
             else
             {
@@ -397,7 +398,7 @@ public sealed class DistributionService : IDistributionService
                 IsRothIra = distribution.RothIra,
                 ThirdPartyPayee = new ThirdPartyPayee()
                 {
-                    Account = distribution.ThirdPartyPayee?.Account,
+                    Account = distribution.ThirdPartyPayeeAccount,
                     Name = distribution.ThirdPartyPayee?.Name,
                     Payee = distribution.ThirdPartyPayee?.Payee,
                     Memo = distribution.ThirdPartyPayee?.Memo,

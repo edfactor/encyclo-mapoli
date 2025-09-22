@@ -43,5 +43,6 @@ public sealed class Distribution : ModifiedBase
     public bool QualifiedDomesticRelationsOrder { get; set; }
     public string? Memo { get; set; }
     public bool RothIra { get; set; }
-    
+    public string? ThirdPartyPayeeAccount { get; set; }
+
 }
