@@ -17,7 +17,7 @@ export const MenuData = (data: NavigationResponseDto | undefined): RouteCategory
 
   // Get top-level navigation items (parentId is null)
   const topLevelItems = data.navigation
-    .filter((m) => m.parentId === null)
+    .filter((m) => m.parentId === null && (m.isNavigable ?? true))
     .sort((a, b) => a.orderNumber - b.orderNumber);
 
   // Process each top-level item
@@ -29,7 +29,7 @@ export const MenuData = (data: NavigationResponseDto | undefined): RouteCategory
       values.requiredRoles.length > 0 && values.requiredRoles.some((role) => localStorageImpersonating.includes(role));
     const noRolesRequired = values.requiredRoles.length === 0;
 
-    if (hasRequiredRole || noRolesRequired) {
+    if ((hasRequiredRole || noRolesRequired) && (values.isNavigable ?? true)) {
       finalData.push(createRouteCategory(values));
     }
   });
@@ -55,13 +55,15 @@ const createRouteCategory = (navigationItem: NavigationDto): RouteCategory => {
 };
 
 const getRouteData = (data: NavigationDto[]): RouteData[] => {
-  return data.map((value) => ({
-    caption: value.title,
-    route: value.url,
-    disabled: false,
-    divider: false,
-    requiredPermission: ""
-  }));
+  return data
+    .filter((v) => v.isNavigable ?? true)
+    .map((value) => ({
+      caption: value.title,
+      route: value.url,
+      disabled: false,
+      divider: false,
+      requiredPermission: ""
+    }));
 };
 
 interface MenuLevel {
@@ -108,36 +110,42 @@ export const menuLevels = (data: NavigationResponseDto | undefined): MenuLevel[]
     return [];
   }
 
-  return yearEndList.items.map((value) => ({
-    navigationId: value.id,
-    statusId: value.statusId,
-    statusName: value.statusName,
-    mainTitle: value.title + addSubTitle(value.subTitle),
-    topPage: value.items && value.items.length > 0 ? populateTopPage(value.items) : []
-  }));
+  return yearEndList.items
+    .filter((v) => v.isNavigable ?? true)
+    .map((value) => ({
+      navigationId: value.id,
+      statusId: value.statusId,
+      statusName: value.statusName,
+      mainTitle: value.title + addSubTitle(value.subTitle),
+      topPage: value.items && value.items.length > 0 ? populateTopPage(value.items) : []
+    }));
 };
 
 const populateTopPage = (data: NavigationDto[]): TopPage[] => {
-  return data.map((value) => ({
-    navigationId: value.id,
-    statusId: value.statusId,
-    statusName: value.statusName,
-    topTitle: value.title + addSubTitle(value.subTitle),
-    disabled: value.disabled,
-    topRoute: value.url,
-    subPages: value.items && value.items.length > 0 ? populateSubPages(value.items) : []
-  }));
+  return data
+    .filter((v) => v.isNavigable ?? true)
+    .map((value) => ({
+      navigationId: value.id,
+      statusId: value.statusId,
+      statusName: value.statusName,
+      topTitle: value.title + addSubTitle(value.subTitle),
+      disabled: value.disabled,
+      topRoute: value.url,
+      subPages: value.items && value.items.length > 0 ? populateSubPages(value.items) : []
+    }));
 };
 
 const populateSubPages = (data: NavigationDto[]): SubPages[] => {
-  return data.map((value) => ({
-    navigationId: value.id,
-    statusId: value.statusId,
-    statusName: value.statusName,
-    subTitle: value.title + addSubTitle(value.subTitle),
-    disabled: value.disabled,
-    subRoute: value.url
-  }));
+  return data
+    .filter((v) => v.isNavigable ?? true)
+    .map((value) => ({
+      navigationId: value.id,
+      statusId: value.statusId,
+      statusName: value.statusName,
+      subTitle: value.title + addSubTitle(value.subTitle),
+      disabled: value.disabled,
+      subRoute: value.url
+    }));
 };
 
 export default MenuData;
