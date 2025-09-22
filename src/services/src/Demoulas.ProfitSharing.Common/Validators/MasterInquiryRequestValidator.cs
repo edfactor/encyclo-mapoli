@@ -31,10 +31,7 @@ public class MasterInquiryRequestValidator : AbstractValidator<MasterInquiryRequ
                 count++;
             }
 
-            if (x.EndProfitYear.HasValue)
-            {
-                count++;
-            }
+
 
             if (x.StartProfitMonth.HasValue)
             {
@@ -95,6 +92,12 @@ public class MasterInquiryRequestValidator : AbstractValidator<MasterInquiryRequ
             if (count < 2)
             {
                 var providedList = new List<string>();
+
+                if (x.ProfitYear.HasValue && x.ProfitYear.Value > 0)
+                {
+                    providedList.Add("ProfitYear");
+                }
+
                 if (x.BadgeNumber.HasValue && x.BadgeNumber.Value > 0)
                 {
                     providedList.Add("BadgeNumber");
@@ -103,11 +106,6 @@ public class MasterInquiryRequestValidator : AbstractValidator<MasterInquiryRequ
                 if (x.PsnSuffix > 0)
                 {
                     providedList.Add("PsnSuffix");
-                }
-
-                if (x.EndProfitYear.HasValue)
-                {
-                    providedList.Add("EndProfitYear");
                 }
 
                 if (x.StartProfitMonth.HasValue)
@@ -167,7 +165,7 @@ public class MasterInquiryRequestValidator : AbstractValidator<MasterInquiryRequ
 
                 var providedText = providedList.Count > 0 ? string.Join(", ", providedList) : "(none)";
                 var missing = 2 - providedList.Count;
-                var allCandidates = new[] { "BadgeNumber", "PsnSuffix", "EndProfitYear", "StartProfitMonth", "EndProfitMonth", "ProfitCode", "ContributionAmount", "EarningsAmount", "Ssn", "ForfeitureAmount", "PaymentAmount", "Name", "PaymentType (non-zero)", "MemberType (non-zero)" };
+                var allCandidates = new[] { "BadgeNumber", "PsnSuffix", "StartProfitMonth", "ProfitYear", "EndProfitMonth", "ProfitCode", "ContributionAmount", "EarningsAmount", "Ssn", "ForfeitureAmount", "PaymentAmount", "Name", "PaymentType (non-zero)", "MemberType (non-zero)" };
                 var suggestion = string.Join(", ", allCandidates.Where(a => !providedList.Contains(a.Replace(" (non-zero)", ""))));
 
                 ctx.AddFailure($"At least two filterable values must be provided; provided ({providedList.Count}): {providedText}. Provide {missing} more from: {suggestion}.");
