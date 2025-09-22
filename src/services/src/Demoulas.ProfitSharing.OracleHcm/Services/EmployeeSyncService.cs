@@ -12,6 +12,7 @@ using Demoulas.ProfitSharing.OracleHcm.Clients;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Job = Demoulas.ProfitSharing.Data.Entities.Scheduling.Job;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
@@ -23,28 +24,30 @@ namespace Demoulas.ProfitSharing.OracleHcm.Services;
 internal sealed class EmployeeSyncService : IEmployeeSyncService
 {
     private readonly EmployeeFullSyncClient _oracleEmployeeDataSyncClient;
-    private readonly IDemographicsServiceInternal _demographicsService;
     private readonly AtomFeedClient _atomFeedClient;
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly Channel<MessageRequest<OracleEmployee[]>> _employeeChannel;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
 
     public EmployeeSyncService(AtomFeedClient atomFeedClient,
         EmployeeFullSyncClient oracleEmployeeDataSyncClient,
-        IDemographicsServiceInternal demographicsService,
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
-        Channel<MessageRequest<OracleEmployee[]>> employeeChannel)
+        Channel<MessageRequest<OracleEmployee[]>> employeeChannel,
+        IServiceScopeFactory serviceScopeFactory)
     {
         _oracleEmployeeDataSyncClient = oracleEmployeeDataSyncClient;
-        _demographicsService = demographicsService;
         _atomFeedClient = atomFeedClient;
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
-
         _employeeChannel = employeeChannel;
+        _serviceScopeFactory = serviceScopeFactory;
     }
 
     public async Task ExecuteFullSyncAsync(string requestedBy = Constants.SystemAccountName, CancellationToken cancellationToken = default)
     {
         using Activity? activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ExecuteFullSyncAsync), ActivityKind.Internal);
+
+        using var scope = _serviceScopeFactory.CreateScope();
+        var demographicsService = scope.ServiceProvider.GetRequiredService<IDemographicsServiceInternal>();
 
         Job job = new Job
         {
@@ -64,7 +67,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         bool success = true;
         try
         {
-            await _demographicsService.CleanAuditError(cancellationToken).ConfigureAwait(false);
+            await demographicsService.CleanAuditError(cancellationToken).ConfigureAwait(false);
             await foreach (OracleEmployee[] oracleHcmEmployees in _oracleEmployeeDataSyncClient.GetAllEmployees(cancellationToken).ConfigureAwait(false) )
             {
                 await QueueEmployee(requestedBy, oracleHcmEmployees, cancellationToken).ConfigureAwait(false);
@@ -73,7 +76,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         catch (Exception ex)
         {
             success = false;
-            await _demographicsService.AuditError(0, 0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken).ConfigureAwait(false);
+            await demographicsService.AuditError(0, 0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -95,6 +98,8 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
     public async Task ExecuteDeltaSyncAsync(string requestedBy = Constants.SystemAccountName, CancellationToken cancellationToken = default)
     {
         using Activity? activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ExecuteDeltaSyncAsync), ActivityKind.Internal);
+        using var scope = _serviceScopeFactory.CreateScope();
+        var demographicsService = scope.ServiceProvider.GetRequiredService<IDemographicsServiceInternal>();
 
         Job job = new Job
         {
@@ -136,7 +141,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         catch (Exception ex)
         {
             success = false;
-            await _demographicsService.AuditError(0, 0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken).ConfigureAwait(false);
+            await demographicsService.AuditError(0, 0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -162,7 +167,10 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         }
         catch (Exception ex)
         {
-            await _demographicsService.AuditError(0, 0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken).ConfigureAwait(false);
+            using var scope = _serviceScopeFactory.CreateScope();
+            var demographicsService = scope.ServiceProvider.GetRequiredService<IDemographicsServiceInternal>();
+
+            await demographicsService.AuditError(0, 0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken).ConfigureAwait(false);
         }
     }
 
