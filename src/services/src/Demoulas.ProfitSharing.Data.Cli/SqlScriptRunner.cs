@@ -37,12 +37,18 @@ internal sealed class SqlScriptRunner
             throw new FileNotFoundException("SQL file not found", sqlFile);
         }
 
-        string sql = await File.ReadAllTextAsync(sqlFile, ct);
+        // Read bytes and detect BOM/encoding to provide consistent decoding across machines/editors
+        byte[] bytes = await File.ReadAllBytesAsync(sqlFile, ct);
+        string sql = DecodeToUtf8String(bytes);
         sql = Normalize(sql);
 
         foreach (var (key, value) in tokens)
         {
-            if (string.IsNullOrEmpty(key)) {continue;}
+            if (string.IsNullOrEmpty(key))
+            {
+                continue;
+            }
+
             sql = sql.Replace(key, value ?? string.Empty, StringComparison.Ordinal);
         }
 
@@ -57,7 +63,68 @@ internal sealed class SqlScriptRunner
 
     private static string Normalize(string sql)
     {
-        // common cleanup for provided scripts
-        return sql.Replace("COMMIT ;", string.Empty, StringComparison.OrdinalIgnoreCase).Trim();
+        if (string.IsNullOrEmpty(sql))
+        {
+            return sql;
+        }
+
+        // Normalize CRLF -> LF
+        sql = sql.Replace("\r\n", "\n").Replace('\r', '\n');
+
+        // Remove SQL*Plus standalone slash lines
+        var lines = sql.Split('\n');
+        var filtered = lines.Where(l => l.Trim() != "/");
+        sql = string.Join('\n', filtered);
+
+        // Remove common COMMIT variants
+        sql = sql.Replace("COMMIT ;", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("COMMIT;", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("COMMIT\n", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("COMMIT ", string.Empty, StringComparison.OrdinalIgnoreCase);
+
+        return sql.Trim();
+    }
+
+    private static string DecodeToUtf8String(byte[] bytes)
+    {
+        if (bytes == null || bytes.Length == 0) {return string.Empty;}
+
+        // Detect BOMs for UTF-8, UTF-16 (LE/BE) and UTF-32
+        // UTF-8 BOM: EF BB BF
+        if (bytes is [0xEF, 0xBB, 0xBF, ..])
+        {
+            // UTF8 with BOM -> decode as UTF8 skipping BOM
+            return new UTF8Encoding(false).GetString(bytes, 3, bytes.Length - 3);
+        }
+
+        // UTF-16 LE BOM: FF FE
+        if (bytes is [0xFF, 0xFE, ..])
+        {
+            return Encoding.Unicode.GetString(bytes, 2, bytes.Length - 2);
+        }
+
+        // UTF-16 BE BOM: FE FF
+        if (bytes is [0xFE, 0xFF, ..])
+        {
+            return Encoding.BigEndianUnicode.GetString(bytes, 2, bytes.Length - 2);
+        }
+
+        // UTF-32 LE BOM: FF FE 00 00
+        if (bytes is [0xFF, 0xFE, 0x00, 0x00, ..])
+        {
+            return Encoding.UTF32.GetString(bytes, 4, bytes.Length - 4);
+        }
+
+        // Try to decode as UTF8 first; fall back to ANSI (Windows-1252) if invalid
+        try
+        {
+            var utf8 = new UTF8Encoding(false, true);
+            return utf8.GetString(bytes);
+        }
+        catch (DecoderFallbackException)
+        {
+            // fall back to Windows-1252 (common on Windows) - best-effort
+            return Encoding.GetEncoding(1252).GetString(bytes);
+        }
     }
 }
