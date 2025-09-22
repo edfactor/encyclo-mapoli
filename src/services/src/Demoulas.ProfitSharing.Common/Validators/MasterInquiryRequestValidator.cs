@@ -93,7 +93,7 @@ public class MasterInquiryRequestValidator : AbstractValidator<MasterInquiryRequ
             {
                 var providedList = new List<string>();
 
-                if (x.ProfitYear.HasValue && x.ProfitYear.Value > 0)
+                if (x.ProfitYear > 0)
                 {
                     providedList.Add("ProfitYear");
                 }
