@@ -5,7 +5,8 @@ import { useState, useRef, useEffect } from "react";
 import { validateSuggestedForfeit } from "./validateSuggestedForfeit";
 
 export function SuggestedForfeitEditor(props: ICellEditorParams) {
-  const [value, setValue] = useState(props.data.suggestedForfeit ?? props.data.suggestedUnforfeiture ?? 0);
+  const initialValue = props.data.suggestedForfeit ?? props.data.suggestedUnforfeiture ?? 0;
+  const [inputValue, setInputValue] = useState(initialValue.toString());
   const [error, setError] = useState<string | null>(null);
   const refInput = useRef<HTMLInputElement>(null);
 
@@ -14,17 +15,19 @@ export function SuggestedForfeitEditor(props: ICellEditorParams) {
   }, []);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = parseFloat(event.target.value) || parseFloat(value);
-    setValue(newValue);
+    const rawInput = event.target.value;
+    setInputValue(rawInput);
+
+    const numericValue = rawInput === "" ? 0 : parseFloat(rawInput) || 0;
     const forfeitValue = props.data.forfeit || props.data.forfeiture || 0;
-    const newError = validateSuggestedForfeit(newValue, Math.abs(forfeitValue));
+    const newError = validateSuggestedForfeit(numericValue, Math.abs(forfeitValue));
     setError(newError);
 
     const rowKey = props.data.profitDetailId
       ? props.data.profitDetailId
       : `${props.data.badgeNumber}-${props.data.profitYear}${props.data.enrollmentId ? `-${props.data.enrollmentId}` : ""}-${props.node?.id || "unknown"}`;
 
-    props.context?.updateEditedValue?.(rowKey, newValue, !!newError);
+    props.context?.updateEditedValue?.(rowKey, numericValue, !!newError);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -32,7 +35,7 @@ export function SuggestedForfeitEditor(props: ICellEditorParams) {
       props.api.stopEditing();
     }
     if (event.key === "Escape") {
-      setValue(props.data.suggestedForfeit ?? 0);
+      setInputValue((props.data.suggestedForfeit ?? 0).toString());
       props.api.stopEditing();
     }
   };
@@ -50,7 +53,7 @@ export function SuggestedForfeitEditor(props: ICellEditorParams) {
         style={{ flex: 1 }}
         inputRef={refInput}
         type="number"
-        value={value}
+        value={inputValue}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         error={!!error}
