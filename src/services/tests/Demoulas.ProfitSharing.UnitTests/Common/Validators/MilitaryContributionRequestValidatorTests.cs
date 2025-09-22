@@ -182,4 +182,39 @@ public class MilitaryContributionRequestValidatorTests
         Assert.False(result.IsValid);
         Assert.Contains(result.Errors, e => e.ErrorMessage.Contains("at least 21 years old", StringComparison.OrdinalIgnoreCase));
     }
+
+    [Fact]
+    public async Task Duplicate_detection_by_contribution_year_rejects_regular_contribution_when_v_only_record_exists()
+    {
+        var (validator, _, militaryServiceMock) = CreateValidator();
+
+        // Arrange: the user selects ProfitYear = current (e.g., 2025) but ContributionDate = 2020.
+        // The service should look up existing records by the contribution year (2020) and reject
+        // a non-supplemental contribution when a V-only (YearsOfServiceCredit = 1) record exists for 2020.
+        var contributionYear = 2020;
+        var req = ValidRequest((short)DateTime.Today.Year, new DateTime(contributionYear, 1, 15, 0, 0, 0, DateTimeKind.Utc)) with { IsSupplementalContribution = false };
+
+        // Configure the military service mock to return an existing V-only record for contributionYear
+        militaryServiceMock.Reset();
+        militaryServiceMock
+            .Setup(m => m.GetMilitaryServiceRecordAsync(It.Is<Demoulas.ProfitSharing.Common.Contracts.Request.Military.MilitaryContributionRequest>(r => r.ProfitYear == contributionYear && r.BadgeNumber == req.BadgeNumber), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>>.Success(new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>
+            {
+                Results = new List<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>
+                {
+                    new Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse
+                    {
+                        BadgeNumber = req.BadgeNumber,
+                        ProfitYear = (short)contributionYear,
+                        Amount = 100,
+                        IsSupplementalContribution = false
+                    }
+                }
+            }));
+
+        var result = await validator.ValidateAsync(req);
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.ErrorMessage.Contains("Regular Contribution already recorded for year", StringComparison.OrdinalIgnoreCase));
+    }
 }
