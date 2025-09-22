@@ -11,7 +11,7 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Distributions;
-public sealed class CreateDistributionEndpoint : ProfitSharingEndpoint<CreateDistributionRequest, CreateDistributionResponse>
+public sealed class CreateDistributionEndpoint : ProfitSharingEndpoint<CreateDistributionRequest, CreateOrUpdateDistributionResponse>
 {
     private readonly IDistributionService _distributionService;
 
@@ -32,7 +32,7 @@ public sealed class CreateDistributionEndpoint : ProfitSharingEndpoint<CreateDis
             {
                 {
                     200,
-                    new CreateDistributionResponse
+                    new CreateOrUpdateDistributionResponse
                     {
                         Id = 1,
                         BadgeNumber = 12345,
@@ -55,7 +55,7 @@ public sealed class CreateDistributionEndpoint : ProfitSharingEndpoint<CreateDis
         });
     }
 
-    public override Task<CreateDistributionResponse> ExecuteAsync(CreateDistributionRequest req, CancellationToken ct)
+    public override Task<CreateOrUpdateDistributionResponse> ExecuteAsync(CreateDistributionRequest req, CancellationToken ct)
     {
         return _distributionService.CreateDistribution(req, ct);
     }
