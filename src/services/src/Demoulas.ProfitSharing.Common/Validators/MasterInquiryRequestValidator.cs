@@ -31,6 +31,16 @@ public class MasterInquiryRequestValidator : AbstractValidator<MasterInquiryRequ
                 count++;
             }
 
+            if (x.ProfitYear > 0)
+            {
+                count++;
+            }
+
+            if (x.EndProfitYear > 0)
+            {
+                count++;
+            }
+
 
 
             if (x.StartProfitMonth.HasValue)
@@ -93,7 +103,7 @@ public class MasterInquiryRequestValidator : AbstractValidator<MasterInquiryRequ
             {
                 var providedList = new List<string>();
 
-                if (x.ProfitYear > 0)
+                if (x.ProfitYear > 0 || x.EndProfitYear > 0)
                 {
                     providedList.Add("ProfitYear");
                 }
