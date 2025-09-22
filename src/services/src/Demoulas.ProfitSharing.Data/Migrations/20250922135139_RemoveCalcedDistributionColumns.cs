@@ -10,10 +10,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_DISTRIBUTION_DISTRIBUTIONSTATUS_STATUSID",
-                table: "DISTRIBUTION");
-
+         
             migrationBuilder.DropColumn(
                 name: "CHECK_AMOUNT",
                 table: "DISTRIBUTION");
@@ -25,22 +22,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             migrationBuilder.DropColumn(
                 name: "STATE_TAX_PERCENTAGE",
                 table: "DISTRIBUTION");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_DISTRIBUTION_DISTRIBUTIONSTATUSES_STATUSID",
-                table: "DISTRIBUTION",
-                column: "STATUS_ID",
-                principalTable: "DISTRIBUTION_STATUS",
-                principalColumn: "ID");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_DISTRIBUTION_DISTRIBUTIONSTATUSES_STATUSID",
-                table: "DISTRIBUTION");
-
             migrationBuilder.AddColumn<decimal>(
                 name: "CHECK_AMOUNT",
                 table: "DISTRIBUTION",
@@ -67,13 +53,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 scale: 2,
                 nullable: false,
                 defaultValue: 0m);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_DISTRIBUTION_DISTRIBUTIONSTATUS_STATUSID",
-                table: "DISTRIBUTION",
-                column: "STATUS_ID",
-                principalTable: "DISTRIBUTION_STATUS",
-                principalColumn: "ID");
         }
     }
 }
