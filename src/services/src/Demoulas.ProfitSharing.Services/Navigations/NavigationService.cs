@@ -117,8 +117,8 @@ public class NavigationService : INavigationService
                             Disabled = p.Disabled,
                             Items = null,
                             PrerequisiteNavigations = new List<NavigationDto>(),
-                            // If the entity does not define an explicit navigable flag, treat items with no Url as non-navigable
-                            IsNavigable = !string.IsNullOrWhiteSpace(p.Url)
+                            // Prefer the DB-backed flag when present; otherwise fall back to Url heuristic.
+                            IsNavigable = p.IsNavigable.HasValue ? p.IsNavigable.Value : !string.IsNullOrWhiteSpace(p.Url)
                         })
                         .ToList() ?? new List<NavigationDto>();
 
@@ -138,8 +138,9 @@ public class NavigationService : INavigationService
                         RequiredRoles = (requiredRolesForDto?.Where(r => roleNamesUpper.Contains(r.ToUpper())).ToList()) ?? new List<string>(),
                         // Project prerequisite navigations that are currently completed.
                         PrerequisiteNavigations = prereqs,
-                        // If the entity does not define an explicit navigable flag, treat items with no Url as non-navigable
-                        IsNavigable = !string.IsNullOrWhiteSpace(x.Url)
+                        // Prefer the DB-backed IsNavigable when present; otherwise fall back to Url-derived logic
+                        // Prefer the DB-backed flag when present; otherwise fall back to Url heuristic.
+                        IsNavigable = x.IsNavigable.HasValue ? x.IsNavigable.Value : !string.IsNullOrWhiteSpace(x.Url)
                     };
                 })
                 .ToList();
