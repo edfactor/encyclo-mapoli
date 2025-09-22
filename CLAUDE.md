@@ -206,3 +206,16 @@ dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
 - Frontend dev server runs on port 3100
 - Use existing patterns and libraries rather than introducing new ones
 - Provide reasoning in PR descriptions when deviating from these patterns
+
+## AI Assistant Operational Rules (Repository-specific)
+
+- Do NOT create or open Pull Requests automatically. AI assistants may prepare branch names, commit messages, and a suggested PR title/body, and provide the exact `git` commands to push the branch, but must stop short of actually creating or opening the PR in the remote hosting service. PR creation is a manual step for a human reviewer to perform.
+
+- When adding new unit tests, include a `Description` attribute on the test method with the Jira ticket number and a terse description in the following format:
+
+  ```csharp
+  [Description("PS-1721 : Duplicate detection by contribution year")]
+  public async Task MyNewTest() { ... }
+  ```
+
+  This attribute helps link tests to tickets and provides a terse description for test explorers and reviewers.
