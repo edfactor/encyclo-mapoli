@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
+using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using FluentValidation;
 
 namespace Demoulas.ProfitSharing.Common.Validators;
@@ -21,7 +21,7 @@ public class MasterInquiryRequestValidator : AbstractValidator<MasterInquiryRequ
         {
             var count = 0;
 
-            if (x.BadgeNumber.HasValue && x.BadgeNumber.Value > 0)
+            if (x.BadgeNumber is > 0)
             {
                 count++;
             }
