@@ -30,12 +30,12 @@ internal sealed class DistributionMap : ModifiedBaseMap<Distribution>
 
         builder.Property(d => d.Tax1099ForEmployee).HasColumnType("NUMBER(1)").HasColumnName("TAX1099_FOR_EMPLOYEE");
         builder.Property(d => d.Tax1099ForBeneficiary).HasColumnType("NUMBER(1)").HasColumnName("TAX1099_FOR_BENEFICIARY");
-        builder.Property(d => d.FederalTaxPercentage).HasPrecision(9, 2).HasColumnName("FEDERAL_TAX_PERCENTAGE");
-        builder.Property(d => d.StateTaxPercentage).HasPrecision(9, 2).HasColumnName("STATE_TAX_PERCENTAGE");
+        builder.Ignore(d => d.FederalTaxPercentage);
+        builder.Ignore(d => d.StateTaxPercentage);
         builder.Property(d => d.GrossAmount).HasPrecision(9, 2).HasColumnName("GROSS_AMOUNT");
         builder.Property(d => d.FederalTaxAmount).HasPrecision(9, 2).HasColumnName("FEDERAL_TAX_AMOUNT");
         builder.Property(d => d.StateTaxAmount).HasPrecision(9, 2).HasColumnName("STATE_TAX_AMOUNT");
-        builder.Property(d => d.CheckAmount).HasPrecision(9, 2).HasColumnName("CHECK_AMOUNT");
+        builder.Ignore(d => d.CheckAmount);
         builder.Property(d => d.TaxCodeId).HasColumnName("TAX_CODE_ID");
         builder.Property(d => d.IsDeceased).HasColumnName("DECEASED").HasColumnType("NUMBER(1)");
         builder.Property(d => d.GenderId).HasColumnName("GENDER_ID");

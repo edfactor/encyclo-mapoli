@@ -207,12 +207,9 @@ public sealed class DistributionService : IDistributionService
                 ForTheBenefitOfAccountType = request.ForTheBenefitOfAccountType,
                 Tax1099ForEmployee = request.Tax1099ForEmployee,
                 Tax1099ForBeneficiary = request.Tax1099ForBeneficiary,
-                FederalTaxPercentage = request.FederalTaxPercentage,
-                StateTaxPercentage = request.StateTaxPercentage,
                 GrossAmount = request.GrossAmount,
                 FederalTaxAmount = request.FederalTaxAmount,
                 StateTaxAmount = request.StateTaxAmount,
-                CheckAmount = request.CheckAmount,
                 TaxCodeId = request.TaxCodeId,
                 IsDeceased = request.IsDeceased,
                 GenderId = request.GenderId,
@@ -362,12 +359,9 @@ public sealed class DistributionService : IDistributionService
             distribution.ForTheBenefitOfPayee = request.ForTheBenefitOfPayee;
             distribution.Tax1099ForBeneficiary = request.Tax1099ForBeneficiary;
             distribution.Tax1099ForEmployee = request.Tax1099ForEmployee;
-            distribution.FederalTaxPercentage = request.FederalTaxPercentage;
-            distribution.StateTaxPercentage = request.StateTaxPercentage;
             distribution.GrossAmount = request.GrossAmount;
             distribution.FederalTaxAmount = request.FederalTaxAmount;
             distribution.StateTaxAmount = request.StateTaxAmount;
-            distribution.CheckAmount = request.CheckAmount;
             distribution.TaxCodeId = request.TaxCodeId;
             distribution.IsDeceased = request.IsDeceased;
             distribution.GenderId = request.GenderId;

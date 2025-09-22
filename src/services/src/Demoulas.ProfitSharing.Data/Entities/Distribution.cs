@@ -29,12 +29,12 @@ public sealed class Distribution : ModifiedBase
     public string? ForTheBenefitOfAccountType { get; set; }
     public bool Tax1099ForEmployee { get; set; }
     public bool Tax1099ForBeneficiary { get; set; }
-    public decimal FederalTaxPercentage { get; set; }
-    public decimal StateTaxPercentage { get; set; }
     public decimal GrossAmount { get; set; }
+    public decimal FederalTaxPercentage { get => FederalTaxAmount / GrossAmount; }
+    public decimal StateTaxPercentage { get => StateTaxAmount / GrossAmount; }
     public decimal FederalTaxAmount { get; set; }
     public decimal StateTaxAmount { get; set; }
-    public decimal CheckAmount { get; set; }
+    public decimal CheckAmount { get => GrossAmount - FederalTaxAmount - StateTaxAmount; }
     public char TaxCodeId { get; set; }
     public TaxCode? TaxCode { get; set; }
     public bool IsDeceased { get; set; }
