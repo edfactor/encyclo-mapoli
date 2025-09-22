@@ -104,5 +104,67 @@ _ = builder.AddProject<Demoulas_ProfitSharing_EmployeeDelta_Sync>(name: "ProfitS
      .WithParentRelationship(database)
     .WithExplicitStart();
 
+// Playwright E2E test runner as an executable resource
+var uiRelativePath = "../../../ui/"; // relative to the AppHost project directory
+var uiFullPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), uiRelativePath));
+var playwrightTests = builder.AddExecutable("Playwright-Tests",
+    command: "npm",
+    workingDirectory: uiFullPath,
+    "run", "e2e")
+    .WithReference(api)
+    .WaitFor(api)
+    .WaitFor(ui)
+    .WithParentRelationship(api)
+    .WithCommand(
+        name: "run-e2e",
+        displayName: "Run E2E Tests",
+        executeCommand: c => Task.FromResult(CommandHelper.RunNpmScript(uiFullPath, "e2e", logger, "playwright-e2e")),
+        commandOptions: new CommandOptions { IconName = "Play", IconVariant = IconVariant.Filled })
+    .WithCommand(
+        name: "show-report",
+        displayName: "Open E2E Report",
+        executeCommand: c => Task.FromResult(CommandHelper.RunShellCommand(uiFullPath, "npx playwright show-report", logger, "playwright-report")),
+        commandOptions: new CommandOptions { IconName = "Link", IconVariant = IconVariant.Filled })
+    .WithExplicitStart();
+
+// Continuous watch mode resource (does not auto-exit). Explicit start to avoid consuming resources by default.
+var playwrightWatch = builder.AddExecutable("Playwright-Tests-Watch",
+        command: OperatingSystem.IsWindows() ? "cmd.exe" : "bash",
+        workingDirectory: uiFullPath,
+        OperatingSystem.IsWindows() ? "/c" : "-lc",
+    "npm run e2e:watch")
+    .WithReference(api)
+    .WaitFor(api)
+    .WaitFor(ui)
+    .WithParentRelationship(api)
+    .WithExplicitStart()
+    .WithCommand(
+        name: "start-watch",
+        displayName: "Start E2E Watch",
+        executeCommand: c => Task.FromResult(CommandHelper.RunNpmScript(uiFullPath, "e2e:watch", logger, "playwright-watch")),
+        commandOptions: new CommandOptions { IconName = "Play", IconVariant = IconVariant.Filled })
+    .WithCommand(
+        name: "test-ui",
+        displayName: "Open Test UI",
+        executeCommand: c => Task.FromResult(CommandHelper.RunShellCommand(uiFullPath, "npx playwright test --ui", logger, "playwright-ui")),
+        commandOptions: new CommandOptions { IconName = "Browser", IconVariant = IconVariant.Filled });
+
+// Playwright report server (serves existing latest report). Explicit start; depends on tests having generated a report.
+int reportPort = 4321;
+var playwrightReport = builder.AddExecutable("Playwright-Report",
+        command: OperatingSystem.IsWindows() ? "cmd.exe" : "bash",
+        workingDirectory: uiFullPath,
+        OperatingSystem.IsWindows() ? "/c" : "-lc",
+        // Host on all interfaces so Aspire can proxy/expose it
+        $"npx playwright show-report --host 0.0.0.0 --port {reportPort}")
+    .WaitFor(playwrightTests)
+    .WithParentRelationship(playwrightTests)
+    .WithHttpEndpoint(port: reportPort, isProxied: false, name: "report")
+    .WithUrlForEndpoint("report", annotation =>
+    {
+        annotation.DisplayText = "Playwright Report";
+    })
+    .WithExplicitStart();
+
 await using DistributedApplication host = builder.Build();
 await host.RunAsync();

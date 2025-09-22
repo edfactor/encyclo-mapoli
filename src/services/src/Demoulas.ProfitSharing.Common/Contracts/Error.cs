@@ -21,6 +21,10 @@ public sealed record Error
 
     public static Error EmployeeNotFound => new(100, "Employee not found");
     public static Error CalendarYearNotFound => new(101, "Calendar year not found");
+    // Generic entity not found (dynamic description) - use only when a more specific constant does not exist
+    public static Error EntityNotFound(string entityName) => new(104, $"{entityName} not found");
+    // Unexpected error wrapper (message captured). Prefer logging full exception separately.
+    public static Error Unexpected(string message) => new(900, message);
 
     public static implicit operator ProblemDetails(Error error)
     {

@@ -94,6 +94,53 @@ Patterns:
 - Share logic via interfaces in `Common` or specialized service projects; avoid cross-project circular refs
 - Update `COPILOT_INSTRUCTIONS.md` and this file if introducing a pervasive new pattern
 
+## Branching & Jira workflow (team conventions)
+
+- Base branch: Always create feature / fix branches from `develop`. Do not branch from `main` or other long-lived branches unless explicitly instructed by a release manager.
+- Branch naming: Use the Jira ticket key as a prefix and a short dash-separated description. Examples:
+  - `fix/PS-1645-military-pre-hire-validation`
+  - `feature/PS-1720-add-reporting-view`
+- Ticket formats: Normalize both full URL and key to the ticket key when creating branches or PRs.
+- Typical local workflow (PowerShell):
+  ```pwsh
+  # ensure latest develop
+  git checkout develop
+  git pull origin develop
+
+  # create branch from develop
+  git checkout -b fix/PS-1645-military-pre-hire-validation
+
+  # make edits, stage, commit
+  git add <files>
+  git commit -m "PS-1645: Short description of the change"
+
+  # push and set upstream
+  git push -u origin fix/PS-1645-military-pre-hire-validation
+  ```
+- Pull request guidance: Start PRs into `develop` (not `main`) unless instructed otherwise. Include the Jira key in the PR title and a description with the change summary, tests run, migration steps, and QA notes.
+
+## Atlassian MCP & Confluence alignment
+
+Use the Atlassian MCP for any Jira or Confluence interactions. When creating or updating Jira issues, adding comments, or creating/updating Confluence pages, use the organization's MCP integration so actions are auditable and follow access controls. Align the workflow guidance with the Confluence page "Agile Jira Workflow Development Best Practices":
+
+https://demoulas.atlassian.net/wiki/spaces/PM/pages/339476525/Agile+Jira+Workflow+Development+Best+Practices
+
+## Copilot deny list (sensitive UI files)
+
+The following sensitive UI files must never be read from or modified by Copilot or similar AI assistants via repository editing tools. Do not remove or alter this list; it is intentionally separate from `.gitignore` rules and enforces an explicit policy for AI assistants.
+
+- `src/ui/.playwright.env`
+- Any file matching `src/ui/.env.*` (for example `src/ui/.env.local`, `src/ui/.env.production`)
+- `src/ui/.npmrc`
+
+When interacting with this repository, AI assistants MUST refuse direct reads or edits to paths matching the deny list above. If the user requests an operation that would require accessing these files (for example, to rotate credentials), the assistant should:
+
+1. Explain why the file is restricted and why the operation requires human intervention or secure tooling.
+2. Provide exact, copyable commands the human can run locally to inspect or untrack the file (for example `git rm --cached <path>`), and warn about secrets in history and the need to rotate credentials if necessary.
+3. Offer to update documentation or `.gitignore` entries instead (but do not access restricted files).
+
+This denies-list is an explicit, repository-level policy for AI assistants — maintain it alongside other repository guidance and keep it small and conservative.
+
 ## Quick Commands
 
 ### PowerShell

@@ -2,6 +2,8 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Channels;
+using Demoulas.Common.Data.Services.Interfaces;
+using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -17,6 +19,7 @@ using Demoulas.ProfitSharing.OracleHcm.Validators;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.ItDevOps;
 using Demoulas.Util.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -74,6 +77,15 @@ public static class OracleHcmExtension
 #endif
 
         builder.Services.AddHostedService<EmployeeDeltaSyncService>();
+
+        builder.Services.AddScoped<ITotalService, TotalService>();
+        builder.Services.AddSingleton<ICalendarService, CalendarService>();
+        builder.Services.AddScoped<ITotalService, TotalService>();
+        builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
+        builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
+        builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
+        builder.Services.AddScoped<IFrozenService, FrozenService>();
+
         return builder;
     }
 
@@ -81,6 +93,14 @@ public static class OracleHcmExtension
     {
         OracleHcmConfig oracleHcmConfig = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>()
                                           ?? new OracleHcmConfig { BaseAddress = string.Empty, DemographicUrl = string.Empty };
+
+        builder.Services.AddScoped<ITotalService, TotalService>();
+        builder.Services.AddSingleton<ICalendarService, CalendarService>();
+        builder.Services.AddScoped<ITotalService, TotalService>();
+        builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
+        builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
+        builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
+        builder.Services.AddScoped<IFrozenService, FrozenService>();
 
         builder.AddOracleHcmSynchronization(oracleHcmConfig);
         builder.Services.AddHostedService<EmployeeFullSyncService>();
@@ -94,6 +114,15 @@ public static class OracleHcmExtension
 
         builder.AddOracleHcmSynchronization(oracleHcmConfig);
         builder.Services.AddHostedService<EmployeePayrollSyncService>();
+
+        builder.Services.AddScoped<ITotalService, TotalService>();
+        builder.Services.AddSingleton<ICalendarService, CalendarService>();
+        builder.Services.AddScoped<ITotalService, TotalService>();
+        builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
+        builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
+        builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
+        builder.Services.AddScoped<IFrozenService, FrozenService>();
+
         return builder;
     }
 

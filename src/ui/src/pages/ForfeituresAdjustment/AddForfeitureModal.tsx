@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useUpdateForfeitureAdjustmentMutation } from "reduxstore/api/YearsEndApi";
 import { ForfeitureAdjustmentUpdateRequest, SuggestedForfeitResponse } from "reduxstore/types";
 import { SmartModal } from "smart-ui-library";
+import { ServiceErrorResponse } from "../../types/errors/errors";
 
 interface AddForfeitureModalProps {
   open: boolean;
@@ -12,10 +13,10 @@ interface AddForfeitureModalProps {
   suggestedForfeitResponse?: SuggestedForfeitResponse | null;
 }
 
-const handleResponseError = (error: any) => {
+const handleResponseError = (error: ServiceErrorResponse) => {
   const title = error?.data?.title;
 
-  if (typeof title === "string") {
+  if (title) {
     if (title.includes("Employee with badge number")) {
       alert("Badge Number not found");
     } else if (title.includes("Invalid badge number")) {
@@ -109,9 +110,10 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
 
       // Close the modal
       onClose();
-    } catch (error) {
-      // Sometimes 500 errors go down here
-      handleResponseError(error);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (_error: any) {
+      // This needs to be called with a blank set of properties to satisfy the type
+      handleResponseError({} as ServiceErrorResponse);
     }
   };
 

@@ -1,4 +1,6 @@
 ﻿using FastEndpoints;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Base;
 
@@ -63,6 +65,22 @@ public abstract class ProfitSharingResponseEndpoint<TResponse> : EndpointWithout
 
     public short NavigationId { get; }
     // Intentionally no HandleAsync override here to avoid conflicts with derived ExecuteAsync implementations.
+}
+
+/// <summary>
+/// Result-enabled variant for read-only lookup/list endpoints without a request body.
+/// Provides a consistent HTTP union result shape using domain Result{T} mapping helpers.
+/// </summary>
+/// <typeparam name="TResponse">Concrete response DTO or collection DTO.</typeparam>
+public abstract class ProfitSharingResultResponseEndpoint<TResponse> : EndpointWithoutRequest<Results<Ok<TResponse>, NotFound, ProblemHttpResult>>, IHasNavigationId
+    where TResponse : notnull
+{
+    protected ProfitSharingResultResponseEndpoint(short navigationId)
+    {
+        NavigationId = navigationId;
+    }
+
+    public short NavigationId { get; }
 }
 
 /// <summary>

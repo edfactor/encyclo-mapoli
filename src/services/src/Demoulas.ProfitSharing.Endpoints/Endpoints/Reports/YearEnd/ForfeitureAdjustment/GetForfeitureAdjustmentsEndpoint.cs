@@ -1,6 +1,9 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Contracts; // Result, Error
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
@@ -9,7 +12,7 @@ using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ForfeitureAdjustment;
 
-public class GetForfeitureAdjustmentsEndpoint : ProfitSharingRequestEndpoint<SuggestedForfeitureAdjustmentRequest>
+public class GetForfeitureAdjustmentsEndpoint : ProfitSharingEndpoint<SuggestedForfeitureAdjustmentRequest, Results<Ok<SuggestedForfeitureAdjustmentResponse>, NotFound, ProblemHttpResult>>
 {
     private readonly IForfeitureAdjustmentService _forfeitureAdjustmentService;
 
@@ -29,10 +32,20 @@ public class GetForfeitureAdjustmentsEndpoint : ProfitSharingRequestEndpoint<Sug
         });
         Group<YearEndGroup>();
     }
-
-    public override async Task HandleAsync(SuggestedForfeitureAdjustmentRequest req, CancellationToken ct)
+    public override async Task<Results<Ok<SuggestedForfeitureAdjustmentResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(SuggestedForfeitureAdjustmentRequest req, CancellationToken ct)
     {
-        SuggestedForfeitureAdjustmentResponse r = await _forfeitureAdjustmentService.GetSuggestedForfeitureAmount(req, ct);
-        await Send.OkAsync(r, ct);
+        try
+        {
+            var response = await _forfeitureAdjustmentService.GetSuggestedForfeitureAmount(req, ct);
+            return Result<SuggestedForfeitureAdjustmentResponse>.Success(response).ToHttpResult();
+        }
+        catch (ArgumentException aex) when (aex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+        {
+            return Result<SuggestedForfeitureAdjustmentResponse>.Failure(Error.EmployeeNotFound).ToHttpResult(Error.EmployeeNotFound);
+        }
+        catch (Exception ex)
+        {
+            return Result<SuggestedForfeitureAdjustmentResponse>.Failure(Error.Unexpected(ex.Message)).ToHttpResult();
+        }
     }
 }
