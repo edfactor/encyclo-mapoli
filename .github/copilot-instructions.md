@@ -124,6 +124,8 @@ To keep branches and PRs consistent across the org, follow these conventions. Co
   - Open PR from your branch into `develop` (not `main`) unless the ticket or release manager instructs otherwise.
   - Title should start with the Jira key: `PS-1645: Prevent military contributions before hire date`.
   - Include the following in the PR body: summary of the change, which tests were run locally (and results), any migration or config changes, and QA steps to reproduce the fix.
+  - When opening a PR for a Jira ticket, add a comment to the ticket with the PR link and a brief summary so reviewers and stakeholders are notified.
+  - If the Jira ticket does not have story points set, assign story points using the Fibonacci-like sequence commonly used by the team: `1, 2, 3, 5, 8, 13`.
 
 - Copilot assistant responsibilities:
   - When asked to create or reference a branch for a Jira ticket, normalize ticket input (URL or key) to the ticket key and produce the suggested branch name using the pattern above.
@@ -182,3 +184,16 @@ cd src/ui; npm run dev
 
 ---
 Provide reasoning in PR descriptions when deviating from these patterns.
+
+## AI Assistant Operational Rules (Repository-specific)
+
+- Do NOT create or open Pull Requests automatically. AI assistants may prepare branch names, commit messages, and a suggested PR title/body, and provide the exact `git` commands to push the branch, but must stop short of actually creating or opening the PR in the remote hosting service. PR creation is a manual step for a human reviewer to perform.
+
+- When adding new unit tests, include a `Description` attribute on the test method with the Jira ticket number and a terse description in the following format:
+
+  ```csharp
+  [Description("PS-1721 : Duplicate detection by contribution year")]
+  public async Task MyNewTest() { ... }
+  ```
+
+  This attribute helps link tests to tickets and provides a terse description for test explorers and reviewers.
