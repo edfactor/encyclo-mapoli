@@ -96,12 +96,8 @@ Patterns:
 
 ## Branching & Jira workflow (team conventions)
 
-- Base branch: Always create feature / fix branches from `develop`. Do not branch from `main` or other long-lived branches unless explicitly instructed by a release manager.
-- Branch naming: Use the Jira ticket key as a prefix and a short dash-separated description. Examples:
   - `fix/PS-1645-military-pre-hire-validation`
   - `feature/PS-1720-add-reporting-view`
-- Ticket formats: Normalize both full URL and key to the ticket key when creating branches or PRs.
-- Typical local workflow (PowerShell):
   ```pwsh
   # ensure latest develop
   git checkout develop
@@ -117,7 +113,8 @@ Patterns:
   # push and set upstream
   git push -u origin fix/PS-1645-military-pre-hire-validation
   ```
-- Pull request guidance: Start PRs into `develop` (not `main`) unless instructed otherwise. Include the Jira key in the PR title and a description with the change summary, tests run, migration steps, and QA notes.
+  - When opening a PR for a Jira ticket, add a comment to the ticket with the PR link and a brief summary so reviewers and stakeholders are notified.
+  - If the Jira ticket does not have story points set, assign story points using the Fibonacci-like sequence commonly used by the team: `1, 2, 3, 5, 8, 13`.
 
 ## Atlassian MCP & Confluence alignment
 
