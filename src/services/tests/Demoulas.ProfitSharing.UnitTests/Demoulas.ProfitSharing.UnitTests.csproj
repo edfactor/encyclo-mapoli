@@ -76,4 +76,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Endpoints\Distributions\" />
+  </ItemGroup>
+
 </Project>

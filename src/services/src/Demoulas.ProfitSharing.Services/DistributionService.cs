@@ -247,6 +247,7 @@ public sealed class DistributionService : IDistributionService
             return new CreateOrUpdateDistributionResponse
             {
                 Id = distribution.Id,
+                BadgeNumber = request.BadgeNumber, // Include BadgeNumber from the original request
                 MaskSsn = distribution.Ssn.MaskSsn(),
                 PaymentSequence = distribution.PaymentSequence,
                 StatusId = distribution.StatusId,
