@@ -1,0 +1,22 @@
+# Ensure SQL files use LF line endings in the working tree and are treated as text.
+# This helps avoid platform/editor differences (CRLF vs LF) and BOM-related issues
+# which can cause byte-level differences and break parsers.
+
+# Treat SQL files as text and normalize to LF
+*.sql text eol=lf
+
+# Explicitly treat common text files as text
+*.md text eol=lf
+*.ps1 text eol=lf
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Keep binary files alone
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+
+# Ensure repo uses consistent encoding for key source files (helpful guidance only - Git doesn't force encoding)
+# Editors should save SQL as UTF-8 without BOM. If you need to remove BOMs, run the renormalize steps below.
