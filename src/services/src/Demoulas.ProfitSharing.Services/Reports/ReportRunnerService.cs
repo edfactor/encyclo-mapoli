@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -15,18 +16,57 @@ public class ReportRunnerService : IReportRunnerService
     private readonly Dictionary<string, Func<CancellationToken, Task<Dictionary<string, object>>>> _reports;
     private readonly ITerminatedEmployeeService _terminatedEmployeeService;
     private readonly IUnforfeitService _unForfeitService;
+    private readonly ICleanupReportService _cleanupReportService;
+    private readonly IPayrollDuplicateSsnReportService _payrollDuplicateSsnReportService;
+    private readonly INegativeEtvaReportService _negativeEtvaReportService;
 
-    public ReportRunnerService(
-        ITerminatedEmployeeService terminatedEmployeeService,
+
+    public ReportRunnerService(ITerminatedEmployeeService terminatedEmployeeService,
         IProfitShareUpdateService profitShareUpdateService,
-        IUnforfeitService unForfeitService)
+        IUnforfeitService unForfeitService,
+        ICleanupReportService cleanupReportService,
+        IPayrollDuplicateSsnReportService payrollDuplicateSsnReportService,
+        INegativeEtvaReportService? negativeEtvaReportService)
     {
         _terminatedEmployeeService = terminatedEmployeeService;
         _profitShareUpdateService = profitShareUpdateService;
         _unForfeitService = unForfeitService;
+        _cleanupReportService = cleanupReportService;
+        _payrollDuplicateSsnReportService = payrollDuplicateSsnReportService;
+        _negativeEtvaReportService = negativeEtvaReportService;
+        short wallClockYear = (short)DateTime.Now.Year;
 
         _reports = new Dictionary<string, Func<CancellationToken, Task<Dictionary<string, object>>>>
         {
+            ["demographicBadgesNotInPayProfit"] = async ct => await Handle("demographicBadgesNotInPayProfit", ct, async () =>
+            {
+                var r = await _cleanupReportService.GetDemographicBadgesNotInPayProfitAsync(new ProfitYearRequest { ProfitYear = wallClockYear }, ct);
+                return (r.Response.Total, r.Response.Results.Count());
+            }),
+            ["duplicateNamesAndBirthdays"] = async ct => await Handle("duplicateNamesAndBirthdays", ct, async () =>
+            {
+                var r = await _cleanupReportService.GetDuplicateNamesAndBirthdaysAsync(new ProfitYearRequest { ProfitYear = wallClockYear }, ct);
+                return (r.Response.Total, r.Response.Results.Count());
+            }),
+            ["negativeEtvaReportService"] = async ct => await Handle("negativeEtvaReportService", ct, async () =>
+            {
+                var r = await _negativeEtvaReportService.GetNegativeETVAForSsNsOnPayProfitResponseAsync(new ProfitYearRequest { ProfitYear = wallClockYear }, ct);
+                return (r.Response.Total, r.Response.Results.Count());
+            }),
+            ["duplicateNamesAndBirthdays"] = async ct => await Handle("duplicateNamesAndBirthdays", ct, async () =>
+            {
+                var r = await _cleanupReportService.GetDistributionsAndForfeitureAsync(new DistributionsAndForfeituresRequest
+                {
+                    StartDate = new DateOnly(wallClockYear, 1, 1),
+                    EndDate = new DateOnly(wallClockYear, 12, 31)
+                }, ct);
+                return (r.Response.Total, r.Response.Results.Count());
+            }),
+            ["duplicateSsns"] = async ct => await Handle("duplicateSsns", ct, async () =>
+            {
+                var r = await _payrollDuplicateSsnReportService.GetDuplicateSsnAsync(new(), ct); 
+                return (r.Response.Total, r.Response.Results.Count());
+            }),
             ["terminations"] = async ct => await Handle("terminations", ct, async () =>
             {
                 TerminatedEmployeeAndBeneficiaryResponse result = await _terminatedEmployeeService
