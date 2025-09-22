@@ -180,15 +180,27 @@ public class MilitaryContributionRequestValidatorTests
     }
 
     [Fact]
+    [Description("PS-1721 : Duplicate detection by contribution year")]
     public async Task Duplicate_detection_by_contribution_year_rejects_regular_contribution_when_v_only_record_exists()
     {
-        var (validator, _, militaryServiceMock) = CreateValidator();
+        // Create validator and mocks
+        var (validator, employeeLookupMock, militaryServiceMock) = CreateValidator();
 
-        // Arrange: the user selects ProfitYear = current (e.g., 2025) but ContributionDate = 2020.
-        // The service should look up existing records by the contribution year (2020) and reject
-        // a non-supplemental contribution when a V-only (YearsOfServiceCredit = 1) record exists for 2020.
+        // Arrange: the user selects ProfitYear = current but ContributionDate = 2020.
         var contributionYear = 2020;
         var req = ValidRequest((short)DateTime.Today.Year, new DateTime(contributionYear, 1, 15, 0, 0, 0, DateTimeKind.Utc)) with { IsSupplementalContribution = false };
+
+        // Ensure employee lookup returns an earliest hire date before the contribution year and a DOB making employee >=21
+        employeeLookupMock.Reset();
+        employeeLookupMock
+            .Setup(x => x.BadgeExistsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        employeeLookupMock
+            .Setup(x => x.GetEarliestHireDateAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new DateOnly(2010, 1, 1)); // hired well before 2020
+        employeeLookupMock
+            .Setup(x => x.GetDateOfBirthAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new DateOnly(1980, 1, 1)); // age > 21 in 2020
 
         // Configure the military service mock to return an existing V-only record for contributionYear
         militaryServiceMock.Reset();
@@ -202,6 +214,7 @@ public class MilitaryContributionRequestValidatorTests
                     {
                         BadgeNumber = req.BadgeNumber,
                         ProfitYear = (short)contributionYear,
+                        ContributionDate = new DateOnly(contributionYear, 12, 31),
                         Amount = 100,
                         IsSupplementalContribution = false
                     }
