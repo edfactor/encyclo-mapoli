@@ -54,6 +54,20 @@ export interface EligibleEmployeesRequestDto extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
 }
 
+export interface EmployeeWagesForYear {
+  badgeNumber: number;
+  incomeCurrentYear: number;
+  hoursCurrentYear: number;
+  isExecutive: boolean;
+}
+
+export interface EmployeeWagesForYearRequestDto extends ProfitYearRequest {
+  pagination: SortedPaginationRequestDto;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface EmployeeWagesForYearResponse extends PagedReportResponse<EmployeeWagesForYear> {}
+
 export interface EligibleEmployee {
   oracleHcmId: number;
   badgeNumber: number;
