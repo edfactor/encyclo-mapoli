@@ -1,26 +1,34 @@
 import { Divider } from "@mui/material";
 import { Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { useRef, useState } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
+import { useRef } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
+import useYTDWages from "./hooks/useYTDWages";
 import YTDWagesGrid from "./YTDWagesGrid";
 import YTDWagesSearchFilter from "./YTDWagesSearchFilter";
 
 const YTDWages: React.FC = () => {
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
-  const [pageNumberReset, setPageNumberReset] = useState(false);
-  const { employeeWagesForYear } = useSelector((state: RootState) => state.yearsEnd);
-
   const componentRef = useRef<HTMLDivElement>(null);
+  const {
+    searchResults,
+    isSearching,
+    pagination,
+    showData,
+    hasResults,
+    executeSearch,
+    handlePaginationChange,
+    handleSortChange
+  } = useYTDWages();
+
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
   };
 
+  const recordCount = searchResults?.response?.total || 0;
+
   return (
     <Page
-      label={`YTD Wages Extract (PROF-DOLLAR-EXTRACT) (${employeeWagesForYear?.response && employeeWagesForYear.response.total} records)`}
+      label={`YTD Wages Extract (PROF-DOLLAR-EXTRACT) (${recordCount} records)`}
       actionNode={renderActionNode()}>
       <Grid
         container
@@ -33,8 +41,8 @@ const YTDWages: React.FC = () => {
           hidden={true}>
           <DSMAccordion title="Filter">
             <YTDWagesSearchFilter
-              setInitialSearchLoaded={setInitialSearchLoaded}
-              setPageReset={setPageNumberReset}
+              onSearch={executeSearch}
+              isSearching={isSearching}
             />
           </DSMAccordion>
         </Grid>
@@ -42,10 +50,13 @@ const YTDWages: React.FC = () => {
         <Grid width="100%">
           <YTDWagesGrid
             innerRef={componentRef}
-            initialSearchLoaded={initialSearchLoaded}
-            setInitialSearchLoaded={setInitialSearchLoaded}
-            pageNumberReset={pageNumberReset}
-            setPageNumberReset={setPageNumberReset}
+            data={searchResults}
+            isLoading={isSearching}
+            showData={showData}
+            hasResults={hasResults}
+            pagination={pagination}
+            onPaginationChange={handlePaginationChange}
+            onSortChange={handleSortChange}
           />
         </Grid>
       </Grid>

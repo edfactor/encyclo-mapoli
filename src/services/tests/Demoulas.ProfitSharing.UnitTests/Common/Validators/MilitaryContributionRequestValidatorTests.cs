@@ -1,13 +1,9 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
+﻿using System.ComponentModel;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Validators;
-using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.Response.Military;
-using Demoulas.ProfitSharing.Common.Contracts;
-using System.Collections.Generic;
 using FluentValidation.Results;
 using Moq;
-using System;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Validators;
 
@@ -181,5 +177,53 @@ public class MilitaryContributionRequestValidatorTests
         var result = await validator.ValidateAsync(req);
         Assert.False(result.IsValid);
         Assert.Contains(result.Errors, e => e.ErrorMessage.Contains("at least 21 years old", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    [Description("PS-1721 : Duplicate detection by contribution year")]
+    public async Task Duplicate_detection_by_contribution_year_rejects_regular_contribution_when_v_only_record_exists()
+    {
+        // Create validator and mocks
+        var (validator, employeeLookupMock, militaryServiceMock) = CreateValidator();
+
+        // Arrange: the user selects ProfitYear = current but ContributionDate = 2020.
+        var contributionYear = 2020;
+        var req = ValidRequest((short)DateTime.Today.Year, new DateTime(contributionYear, 1, 15, 0, 0, 0, DateTimeKind.Utc)) with { IsSupplementalContribution = false };
+
+        // Ensure employee lookup returns an earliest hire date before the contribution year and a DOB making employee >=21
+        employeeLookupMock.Reset();
+        employeeLookupMock
+            .Setup(x => x.BadgeExistsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        employeeLookupMock
+            .Setup(x => x.GetEarliestHireDateAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new DateOnly(2010, 1, 1)); // hired well before 2020
+        employeeLookupMock
+            .Setup(x => x.GetDateOfBirthAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new DateOnly(1980, 1, 1)); // age > 21 in 2020
+
+        // Configure the military service mock to return an existing V-only record for contributionYear
+        militaryServiceMock.Reset();
+        militaryServiceMock
+            .Setup(m => m.GetMilitaryServiceRecordAsync(It.Is<Demoulas.ProfitSharing.Common.Contracts.Request.Military.MilitaryContributionRequest>(r => r.ProfitYear == contributionYear && r.BadgeNumber == req.BadgeNumber), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>>.Success(new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>
+            {
+                Results = new List<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>
+                {
+                    new Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse
+                    {
+                        BadgeNumber = req.BadgeNumber,
+                        ProfitYear = (short)contributionYear,
+                        ContributionDate = new DateOnly(contributionYear, 12, 31),
+                        Amount = 100,
+                        IsSupplementalContribution = false
+                    }
+                }
+            }));
+
+        var result = await validator.ValidateAsync(req);
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.ErrorMessage.Contains("Regular Contribution already recorded for year", StringComparison.OrdinalIgnoreCase));
     }
 }

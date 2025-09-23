@@ -46,6 +46,11 @@ Patterns:
 - Prefer explicit types unless initializer makes type obvious
 - Use `readonly` where applicable; private fields `_camelCase`; private static `s_` prefix; constants PascalCase
 - Always brace control blocks; favor null propagation `?.` and coalescing `??`
+  - IMPORTANT: Avoid using the null-coalescing operator `??` inside expressions that will be translated by Entity Framework Core into SQL (for example, inside LINQ-to-Entities projections or where clauses). The Oracle EF Core provider and some EF translations can fail or produce unexpected SQL when `??` is used in queries. Instead prefer one of the following safe patterns:
+    - Use explicit conditional projection that EF can translate, e.g. `x.SomeNullableBool.HasValue ? x.SomeNullableBool.Value : fallback`.
+    - Materialize the data to memory before using `??` by calling `.AsEnumerable()` or `.ToList()` if the dataset is small and it's safe to do so, then apply the `??` coalescing in LINQ-to-Objects.
+    - Compute fallbacks or derived values in a service or computed property when possible (move complex logic out of the EF projection).
+  - When adding this rule to new code or code reviews, add a brief comment explaining why `??` was avoided (e.g., "avoid EF translation issues with Oracle provider").
 - XML doc comments for public & internal APIs
 
 ## Database & CLI
@@ -93,6 +98,50 @@ Patterns:
 - Add new endpoints through FastEndpoints with consistent foldering; register dependencies via DI in existing composition root
 - Share logic via interfaces in `Common` or specialized service projects; avoid cross-project circular refs
 - Update `COPILOT_INSTRUCTIONS.md` and this file if introducing a pervasive new pattern
+
+## Branching & Jira workflow (team conventions)
+
+  - `fix/PS-1645-military-pre-hire-validation`
+  - `feature/PS-1720-add-reporting-view`
+  ```pwsh
+  # ensure latest develop
+  git checkout develop
+  git pull origin develop
+
+  # create branch from develop
+  git checkout -b fix/PS-1645-military-pre-hire-validation
+
+  # make edits, stage, commit
+  git add <files>
+  git commit -m "PS-1645: Short description of the change"
+
+  # push and set upstream
+  git push -u origin fix/PS-1645-military-pre-hire-validation
+  ```
+  - When opening a PR for a Jira ticket, add a comment to the ticket with the PR link and a brief summary so reviewers and stakeholders are notified.
+  - If the Jira ticket does not have story points set, assign story points using the Fibonacci-like sequence commonly used by the team: `1, 2, 3, 5, 8, 13`.
+
+## Atlassian MCP & Confluence alignment
+
+Use the Atlassian MCP for any Jira or Confluence interactions. When creating or updating Jira issues, adding comments, or creating/updating Confluence pages, use the organization's MCP integration so actions are auditable and follow access controls. Align the workflow guidance with the Confluence page "Agile Jira Workflow Development Best Practices":
+
+https://demoulas.atlassian.net/wiki/spaces/PM/pages/339476525/Agile+Jira+Workflow+Development+Best+Practices
+
+## Copilot deny list (sensitive UI files)
+
+The following sensitive UI files must never be read from or modified by Copilot or similar AI assistants via repository editing tools. Do not remove or alter this list; it is intentionally separate from `.gitignore` rules and enforces an explicit policy for AI assistants.
+
+- `src/ui/.playwright.env`
+- Any file matching `src/ui/.env.*` (for example `src/ui/.env.local`, `src/ui/.env.production`)
+- `src/ui/.npmrc`
+
+When interacting with this repository, AI assistants MUST refuse direct reads or edits to paths matching the deny list above. If the user requests an operation that would require accessing these files (for example, to rotate credentials), the assistant should:
+
+1. Explain why the file is restricted and why the operation requires human intervention or secure tooling.
+2. Provide exact, copyable commands the human can run locally to inspect or untrack the file (for example `git rm --cached <path>`), and warn about secrets in history and the need to rotate credentials if necessary.
+3. Offer to update documentation or `.gitignore` entries instead (but do not access restricted files).
+
+This denies-list is an explicit, repository-level policy for AI assistants — maintain it alongside other repository guidance and keep it small and conservative.
 
 ## Quick Commands
 
@@ -162,3 +211,16 @@ dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
 - Frontend dev server runs on port 3100
 - Use existing patterns and libraries rather than introducing new ones
 - Provide reasoning in PR descriptions when deviating from these patterns
+
+## AI Assistant Operational Rules (Repository-specific)
+
+- Do NOT create or open Pull Requests automatically. AI assistants may prepare branch names, commit messages, and a suggested PR title/body, and provide the exact `git` commands to push the branch, but must stop short of actually creating or opening the PR in the remote hosting service. PR creation is a manual step for a human reviewer to perform.
+
+- When adding new unit tests, include a `Description` attribute on the test method with the Jira ticket number and a terse description in the following format:
+
+  ```csharp
+  [Description("PS-1721 : Duplicate detection by contribution year")]
+  public async Task MyNewTest() { ... }
+  ```
+
+  This attribute helps link tests to tickets and provides a terse description for test explorers and reviewers.

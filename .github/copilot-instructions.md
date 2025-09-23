@@ -45,6 +45,11 @@ Patterns:
 - Prefer explicit types unless initializer makes type obvious.
 - Use `readonly` where applicable; private fields `_camelCase`; private static `s_` prefix; constants PascalCase.
 - Always brace control blocks; favor null propagation `?.` and coalescing `??`.
+  - IMPORTANT: Avoid using the null-coalescing operator `??` inside expressions that will be translated by Entity Framework Core into SQL (for example, inside LINQ-to-Entities projections or where clauses). The Oracle EF Core provider and some EF translations can fail or produce unexpected SQL when `??` is used in queries. Instead prefer one of the following safe patterns:
+    - Use explicit conditional projection that EF can translate, e.g. `x.SomeNullableBool.HasValue ? x.SomeNullableBool.Value : fallback`.
+    - Materialize the data to memory before using `??` by calling `.AsEnumerable()` or `.ToList()` if the dataset is small and it's safe to do so, then apply the `??` coalescing in LINQ-to-Objects.
+    - Compute fallbacks or derived values in a service or computed property when possible (move complex logic out of the EF projection).
+  - When adding this rule to new code or code reviews, add a brief comment explaining why `??` was avoided (e.g., "avoid EF translation issues with Oracle provider").
 - XML doc comments for public & internal APIs.
 
 ## Database & CLI
@@ -89,7 +94,81 @@ Patterns:
 ## When Extending
 - Add new endpoints through FastEndpoints with consistent foldering; register dependencies via DI in existing composition root.
 - Share logic via interfaces in `Common` or specialized service projects; avoid cross-project circular refs.
-- Update `COPILOT_INSTRUCTIONS.md` and this file if introducing a pervasive new pattern.
+- Update `CLAUDE.md` and this file if introducing a pervasive new pattern.
+
+## Branching & Jira workflow (team conventions)
+
+To keep branches and PRs consistent across the org, follow these conventions. Copilot assistants and developers should follow this policy for any work associated with a Jira ticket.
+
+- Base branch: Always create feature / fix branches from `develop`. Do not branch from `main` or other long-lived branches unless explicitly instructed by a release manager.
+- Branch naming: Use the Jira ticket key as a prefix and a short dash-separated description. Examples:
+  - `fix/PS-1645-military-pre-hire-validation`
+  - `feature/PS-1720-add-reporting-view`
+- Ticket formats: Jira tickets may be referenced as a full URL or key. Normalize both forms to a key when creating branches or PRs:
+  - `https://demoulas.atlassian.net/browse/PS-1645` → `PS-1645`
+  - `PS-1645` → `PS-1645`
+
+- Typical local workflow (PowerShell):
+  ```pwsh
+  # ensure latest develop
+  git checkout develop
+  git pull origin develop
+
+  # create branch from develop
+  git checkout -b fix/PS-1645-military-pre-hire-validation
+
+  # make edits, stage, commit
+  git add <files>
+  git commit -m "PS-1645: Short description of the change"
+
+  # push and set upstream
+  git push -u origin fix/PS-1645-military-pre-hire-validation
+  ```
+
+- Pull request guidance:
+  - Open PR from your branch into `develop` (not `main`) unless the ticket or release manager instructs otherwise.
+  - Title should start with the Jira key: `PS-1645: Prevent military contributions before hire date`.
+  - Include the following in the PR body: summary of the change, which tests were run locally (and results), any migration or config changes, and QA steps to reproduce the fix.
+  - When opening a PR for a Jira ticket, add a comment to the ticket with the PR link and a brief summary so reviewers and stakeholders are notified.
+  - If the Jira ticket does not have story points set, assign story points using the Fibonacci-like sequence commonly used by the team: `1, 2, 3, 5, 8, 13`.
+
+- Copilot assistant responsibilities:
+  - When asked to create or reference a branch for a Jira ticket, normalize ticket input (URL or key) to the ticket key and produce the suggested branch name using the pattern above.
+  - If a repository or the developer has an alternate branching policy for a particular ticket (e.g., release hotfix), mention the exception and prefer the explicit instruction.
+  - When making code edits for a Jira ticket, create a local branch from `develop`, run unit tests (or the focused tests), commit, and push the branch to origin; report the push URL for PR creation.
+
+  ## Copilot deny list (sensitive UI files)
+
+  The following sensitive UI files must never be read from or modified by Copilot or similar AI assistants via repository editing tools. Do not remove or alter this list; it is intentionally separate from `.gitignore` rules and enforces an explicit policy for AI assistants.
+
+  - `src/ui/.playwright.env`
+  - Any file matching `src/ui/.env.*` (for example `src/ui/.env.local`, `src/ui/.env.production`)
+  - `src/ui/.npmrc`
+
+  When interacting with this repository, AI assistants MUST refuse direct reads or edits to paths matching the deny list above. If the user requests an operation that would require accessing these files (for example, to rotate credentials), the assistant should:
+
+  1. Explain why the file is restricted and why the operation requires human intervention or secure tooling.
+  2. Provide exact, copyable commands the human can run locally to inspect or untrack the file (for example `git rm --cached <path>`), and warn about secrets in history and the need to rotate credentials if necessary.
+  3. Offer to update documentation or `.gitignore` entries instead (but do not access restricted files).
+
+  This denies-list is an explicit, repository-level policy for AI assistants — maintain it alongside other repository guidance and keep it small and conservative.
+
+These rules reduce merge conflicts, ensure CI runs the correct base, and make PRs easy to find by ticket key.
+
+## Atlassian MCP & Confluence alignment
+
+Use the Atlassian MCP for any Jira or Confluence interactions. Copilot assistants must use the organization's Atlassian MCP integration when creating or updating Jira issues, adding comments to tickets, or creating/updating Confluence pages. This ensures actions are auditable and follow the organization's access controls.
+
+Align the workflow guidance in this document with the Confluence page "Agile Jira Workflow Development Best Practices":
+https://demoulas.atlassian.net/wiki/spaces/PM/pages/339476525/Agile+Jira+Workflow+Development+Best+Practices
+
+Key alignment points:
+- Always start branches from `develop` for feature and bugfix work as described in Confluence.
+- Use the ticket-key-first branch naming convention (e.g., `PS-####: short-desc`) and include the Jira key in PR titles.
+- Follow the Confluence guidance for issue types, transitions, and story/acceptance criteria formatting when creating or updating tickets.
+- When in doubt about branching or release strategy, follow the Confluence page or raise the question in the ticket comments and CC the release manager.
+
+Copilot assistants should reference and obey this Confluence guidance when normalizing ticket keys, creating branch names, and preparing PR bodies. If the Confluence page changes, update this file to reflect the new team guidance.
 
 ## Quick Commands (PowerShell)
 ```pwsh
@@ -110,3 +189,16 @@ cd src/ui; npm run dev
 
 ---
 Provide reasoning in PR descriptions when deviating from these patterns.
+
+## AI Assistant Operational Rules (Repository-specific)
+
+- Do NOT create or open Pull Requests automatically. AI assistants may prepare branch names, commit messages, and a suggested PR title/body, and provide the exact `git` commands to push the branch, but must stop short of actually creating or opening the PR in the remote hosting service. PR creation is a manual step for a human reviewer to perform.
+
+- When adding new unit tests, include a `Description` attribute on the test method with the Jira ticket number and a terse description in the following format:
+
+  ```csharp
+  [Description("PS-1721 : Duplicate detection by contribution year")]
+  public async Task MyNewTest() { ... }
+  ```
+
+  This attribute helps link tests to tickets and provides a terse description for test explorers and reviewers.

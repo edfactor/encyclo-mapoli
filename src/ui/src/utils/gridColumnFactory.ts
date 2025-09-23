@@ -268,6 +268,7 @@ export const createBadgeColumn = (options: BadgeColumnOptions = {}): ColDef => {
       // If dataValue is NaN just return nothing
 
       if (isNaN(dataValue)) return;
+      if (dataValue === 0) return;
       if (psnSuffix && params.data.psnSuffix) {
         return viewBadgeLinkRenderer(params.data.badgeNumber, params.data.psnSuffix, navigateFunction);
       }

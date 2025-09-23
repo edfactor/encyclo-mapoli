@@ -67,7 +67,7 @@ const PayBenReport = () => {
   };
 
   return (
-    <Page label="PAY BENEFICIARY REPORT">
+    <Page label="PAYROLL BENEFICIARY REPORT (PAYBEN/PAY495)">
       <Grid
         container
         rowSpacing="24px">
