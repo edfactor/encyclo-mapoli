@@ -16,22 +16,29 @@ namespace Demoulas.ProfitSharing.Data.Cli;
 public sealed class Program
 #pragma warning restore S1118
 {
-    public static Task<int> Main(string[] args)
+    public static async Task<int> Main(string[] args)
     {
-#pragma warning disable S3928
-        var configuration = new ConfigurationBuilder()
-            .AddCommandLine(args)
-            .AddEnvironmentVariables()
-            .Build();
+        try
+        {
+            #pragma warning disable S3928
+            var configuration = new ConfigurationBuilder()
+                .AddCommandLine(args)
+                .AddEnvironmentVariables()
+                .Build();
+
+            // Diagnostic output to help debug launch/profile argument propagation
+            await Console.Out.WriteLineAsync("[DEBUG] Received args: " + (args?.Length > 0 ? string.Join(' ', args) : "(none)"));
+            await Console.Out.WriteLineAsync("[DEBUG] Configuration[\"connection-name\"]: " + (configuration["connection-name"] ?? "(null)"));
+            await Console.Out.WriteLineAsync("[DEBUG] Env[connection-name]: " + (Environment.GetEnvironmentVariable("connection-name") ?? "(null)"));
 
         var rootCommand = new RootCommand("CLI tool for database operations");
 
         var commonOptions = new List<Option>
         {
-            new Option<string>("--connection-name", "The name of the configuration property that holds the connection string"),
-            new Option<string>("--sql-file", "The path to the custom SQL file"),
-            new Option<string>("--source-schema", "Name of the schema that is being used as the source database"),
-            new Option<string>("--output-file", "The path to save the file (if applicable)")
+            new Option<string>("--connection-name") { Description = "The name of the configuration property that holds the connection string" },
+            new Option<string>("--sql-file") { Description = "The path to the custom SQL file" },
+            new Option<string>("--source-schema") { Description = "Name of the schema that is being used as the source database" },
+            new Option<string>("--output-file") { Description = "The path to save the file (if applicable)" }
         };
 
         var upgradeDbCommand = new Command("upgrade-db", "Apply migrations to upgrade the database");
@@ -66,7 +73,7 @@ public sealed class Program
 
         var validateImportCommand = new Command("validate-import", "validate an import from ready against an existing database");
         commonOptions.ForEach(o => validateImportCommand.Add(o));
-        validateImportCommand.Add(new Option<string>("--current-year", "Current year of profit sharing"));
+    validateImportCommand.Add(new Option<string>("--current-year") { Description = "Current year of profit sharing" });
 
         // Handler implemented in dispatcher below
 
@@ -76,7 +83,7 @@ public sealed class Program
         rootCommand.Add(generateDgmlCommand);
         rootCommand.Add(generateMarkdownCommand);
         // Create the generate-upgrade-script command and add it so we can attach a handler below
-        var generateUpgradeScriptCmd = GenerateScriptHelper.CreateGenerateUpgradeScriptCommand(configuration, args, commonOptions);
+    var generateUpgradeScriptCmd = GenerateScriptHelper.CreateGenerateUpgradeScriptCommand(configuration, args ?? Array.Empty<string>(), commonOptions);
         rootCommand.Add(generateUpgradeScriptCmd);
         rootCommand.Add(validateImportCommand);
         rootCommand.Add(runSqlCommandForNavigation);
@@ -106,7 +113,7 @@ public sealed class Program
         });
 
         // Determine which command was invoked. Prefer the first non-option token from args as the command name.
-        var invokedCommand = args.FirstOrDefault(a => !string.IsNullOrWhiteSpace(a) && !a.StartsWith("-", StringComparison.Ordinal)) ?? string.Empty;
+    var invokedCommand = (args ?? Array.Empty<string>()).FirstOrDefault(a => !string.IsNullOrWhiteSpace(a) && !a.StartsWith("-", StringComparison.Ordinal)) ?? string.Empty;
 
         // Read option values from the already-configured IConfiguration (it includes command-line args via AddCommandLine)
         string? connectionName = configuration["connection-name"];
@@ -122,30 +129,37 @@ public sealed class Program
         if (!string.IsNullOrEmpty(outputFile)) { Environment.SetEnvironmentVariable("output-file", outputFile); }
         if (!string.IsNullOrEmpty(currentYear)) { Environment.SetEnvironmentVariable("current-year", currentYear); }
 
-        // Dispatch to the appropriate implementation
-        switch (invokedCommand)
+            // Dispatch to the appropriate implementation
+            switch (invokedCommand)
+            {
+                case "upgrade-db":
+                    return await ExecuteUpgradeDb(configuration, args ?? Array.Empty<string>());
+                case "drop-recreate-db":
+                    return await ExecuteDropRecreateDb(configuration, args ?? Array.Empty<string>());
+                case "import-from-ready":
+                    return await ExecuteImportFromReady(configuration, args ?? Array.Empty<string>());
+                case "import-from-navigation":
+                    return await ExecuteImportFromNavigation(configuration, args ?? Array.Empty<string>());
+                case "import-uat-navigation":
+                    return await ExecuteImportFromUatNavigation(configuration, args ?? Array.Empty<string>());
+                case "generate-dgml":
+                    return await ExecuteGenerateDgml(configuration, args ?? Array.Empty<string>());
+                case "generate-markdown":
+                    return await ExecuteGenerateMarkdown(configuration, args ?? Array.Empty<string>());
+                case "validate-import":
+                    return await ExecuteValidateImport(configuration, args ?? Array.Empty<string>());
+                case "generate-upgrade-script":
+                    return await ExecuteGenerateUpgradeScript(configuration, args ?? Array.Empty<string>());
+                default:
+                    Console.WriteLine($"Unknown or missing command '{invokedCommand}'.");
+                    return 1;
+            }
+        }
+        catch (Exception ex)
         {
-            case "upgrade-db":
-                return ExecuteUpgradeDb(configuration, args);
-            case "drop-recreate-db":
-                return ExecuteDropRecreateDb(configuration, args);
-            case "import-from-ready":
-                return ExecuteImportFromReady(configuration, args);
-            case "import-from-navigation":
-                return ExecuteImportFromNavigation(configuration, args);
-            case "import-uat-navigation":
-                return ExecuteImportFromUatNavigation(configuration, args);
-            case "generate-dgml":
-                return ExecuteGenerateDgml(configuration, args);
-            case "generate-markdown":
-                return ExecuteGenerateMarkdown(configuration, args);
-            case "validate-import":
-                return ExecuteValidateImport(configuration, args);
-            case "generate-upgrade-script":
-                return ExecuteGenerateUpgradeScript(configuration, args);
-            default:
-                Console.WriteLine($"Unknown or missing command '{invokedCommand}'.");
-                return Task.FromResult(1);
+            await Console.Error.WriteLineAsync("Unhandled error: " + ex.Message);
+            await Console.Error.WriteLineAsync(ex.ToString());
+            return 2;
         }
     }
 

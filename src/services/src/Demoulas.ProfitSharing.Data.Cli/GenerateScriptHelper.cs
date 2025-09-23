@@ -46,14 +46,39 @@ internal static class GenerateScriptHelper
         Func<IServiceProvider, ProfitSharingDbContext, Task> action)
     {
         string? connectionName = configuration["connection-name"];
-        if (string.IsNullOrEmpty(connectionName))
+
+        // Some run modes (for example when running via certain launch/profile tooling)
+        // may not expose the launch profile's commandLineArgs through the "args" passed
+        // to Main or the IConfiguration built from AddCommandLine. As a robustness
+        // measure, fall back to scanning the provided args[] for --connection-name
+        // (either "--connection-name value" or "--connection-name=value" forms).
+        if (string.IsNullOrEmpty(connectionName) && args != null && args.Length > 0)
         {
-#pragma warning disable S112
-            throw new NullReferenceException(nameof(connectionName));
-#pragma warning restore S112
+            for (int i = 0; i < args.Length; i++)
+            {
+                var a = args[i];
+                if (string.Equals(a, "--connection-name", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    connectionName = args[i + 1];
+                    break;
+                }
+                if (a.StartsWith("--connection-name=", StringComparison.OrdinalIgnoreCase))
+                {
+                    connectionName = a.Substring("--connection-name=".Length);
+                    break;
+                }
+            }
         }
 
-        HostApplicationBuilder builder = CreateHostBuilder(args);
+        if (string.IsNullOrEmpty(connectionName))
+        {
+            // Provide a clear error when the required connection-name is not supplied.
+            // Callers should pass the connection name via the `--connection-name` option
+            // or set an equivalent environment variable (e.g., when running in CI).
+            throw new ArgumentException("Missing required configuration: connection-name. Please provide --connection-name <name> or set the corresponding environment variable.");
+        }
+
+    HostApplicationBuilder builder = CreateHostBuilder(args ?? Array.Empty<string>());
 
 
         ElasticSearchConfig smartConfig = new ElasticSearchConfig();
