@@ -3,6 +3,7 @@ using System;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    partial class ProfitSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250922145100_FactorOutAccountFromThirdPartyPayee")]
+    partial class FactorOutAccountFromThirdPartyPayee
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -27672,10 +27675,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(15)")
                         .HasColumnName("ORACLE_HCM_ID");
 
-                    b.Property<string>("PayClassificationId")
-                        .IsRequired()
-                        .HasMaxLength(4)
-                        .HasColumnType("NVARCHAR2(4)")
+                    b.Property<byte>("PayClassificationId")
+                        .HasPrecision(2)
+                        .HasColumnType("NUMBER(2)")
                         .HasColumnName("PAY_CLASSIFICATION_ID")
                         .HasComment("PayClassification");
 
@@ -27829,10 +27831,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(15)")
                         .HasColumnName("ORACLE_HCM_ID");
 
-                    b.Property<string>("PayClassificationId")
-                        .IsRequired()
+                    b.Property<byte>("PayClassificationId")
                         .HasPrecision(2)
-                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnType("NUMBER(2)")
                         .HasColumnName("PAY_CLASSIFICATION_ID")
                         .HasComment("PayClassification");
 
@@ -29053,10 +29054,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(200)")
                         .HasColumnName("ICON");
 
-                    b.Property<bool?>("IsNavigable")
-                        .HasColumnType("NUMBER(1)")
-                        .HasColumnName("IS_NAVIGABLE");
-
                     b.Property<byte>("OrderNumber")
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("ORDER_NUMBER");
@@ -29890,9 +29887,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.PayClassification", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasMaxLength(4)
-                        .HasColumnType("NVARCHAR2(4)")
+                    b.Property<byte>("Id")
+                        .HasPrecision(2)
+                        .HasColumnType("NUMBER(2)")
                         .HasColumnName("ID");
 
                     b.Property<string>("Name")
@@ -29910,663 +29907,468 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "0",
+                            Id = (byte)0,
                             Name = "01"
                         },
                         new
                         {
-                            Id = "1",
+                            Id = (byte)1,
                             Name = "MANAGER"
                         },
                         new
                         {
-                            Id = "2",
+                            Id = (byte)2,
                             Name = "ASSISTANT MANAGER"
                         },
                         new
                         {
-                            Id = "4",
+                            Id = (byte)4,
                             Name = "SPIRITS MANAGER"
                         },
                         new
                         {
-                            Id = "5",
+                            Id = (byte)5,
                             Name = "ASST SPIRITS MANAGER"
                         },
                         new
                         {
-                            Id = "6",
+                            Id = (byte)6,
                             Name = "SPIRITS CLERK - FT"
                         },
                         new
                         {
-                            Id = "7",
+                            Id = (byte)7,
                             Name = "SPIRITS CLERK - PT"
                         },
                         new
                         {
-                            Id = "10",
+                            Id = (byte)10,
                             Name = "FRONT END MANAGER"
                         },
                         new
                         {
-                            Id = "11",
-                            Name = "ASST HEAD CASHIER"
+                            Id = (byte)11,
+                            Name = "ASSISTANT HEAD CASHIER"
                         },
                         new
                         {
-                            Id = "13",
+                            Id = (byte)13,
                             Name = "CASHIERS - AM"
                         },
                         new
                         {
-                            Id = "14",
+                            Id = (byte)14,
                             Name = "CASHIERS - PM"
                         },
                         new
                         {
-                            Id = "15",
-                            Name = "CASHIER 14-15"
+                            Id = (byte)15,
+                            Name = "CASHIERS 14-15"
                         },
                         new
                         {
-                            Id = "16",
+                            Id = (byte)16,
                             Name = "SACKERS - AM"
                         },
                         new
                         {
-                            Id = "17",
+                            Id = (byte)17,
                             Name = "SACKERS - PM"
                         },
                         new
                         {
-                            Id = "18",
+                            Id = (byte)18,
                             Name = "SACKERS 14-15"
                         },
                         new
                         {
-                            Id = "19",
-                            Name = "AVAILABLE"
+                            Id = (byte)19,
+                            Name = "STORE MAINTENANCE"
                         },
                         new
                         {
-                            Id = "20",
+                            Id = (byte)20,
                             Name = "OFFICE MANAGER"
                         },
                         new
                         {
-                            Id = "21",
+                            Id = (byte)21,
                             Name = "ASST OFFICE MANAGER"
                         },
                         new
                         {
-                            Id = "22",
-                            Name = "COURTESY BOOTH - FT"
+                            Id = (byte)22,
+                            Name = "COURTESY BOOTH - AM"
                         },
                         new
                         {
-                            Id = "23",
-                            Name = "COURTESY BOOTH - PT"
+                            Id = (byte)23,
+                            Name = "COURTESY BOOTH - PM"
                         },
                         new
                         {
-                            Id = "24",
+                            Id = (byte)24,
                             Name = "POS - FULL TIME"
                         },
                         new
                         {
-                            Id = "25",
-                            Name = "CLERK - FULL TIME AP"
+                            Id = (byte)25,
+                            Name = "CLERK -FULL TIME AP"
                         },
                         new
                         {
-                            Id = "26",
+                            Id = (byte)26,
                             Name = "CLERKS - FULL TIME AR"
                         },
                         new
                         {
-                            Id = "27",
+                            Id = (byte)27,
                             Name = "CLERKS - FULL TIME GROC"
                         },
                         new
                         {
-                            Id = "28",
-                            Name = "CLERKS - FULL TIME PERSH"
+                            Id = (byte)28,
+                            Name = "CLERKS - FULL TIME PERISHABLES"
                         },
                         new
                         {
-                            Id = "29",
-                            Name = "CLERKS F-T WAREHOUSE"
+                            Id = (byte)29,
+                            Name = "CLERKS - FULL TIME WAREHOUSE"
                         },
                         new
                         {
-                            Id = "30",
+                            Id = (byte)30,
                             Name = "MERCHANDISER"
                         },
                         new
                         {
-                            Id = "31",
+                            Id = (byte)31,
                             Name = "GROCERY MANAGER"
                         },
                         new
                         {
-                            Id = "32",
+                            Id = (byte)32,
                             Name = "ENDS - PART TIME"
                         },
                         new
                         {
-                            Id = "33",
+                            Id = (byte)33,
                             Name = "FIRST MEAT CUTTER"
                         },
                         new
                         {
-                            Id = "35",
-                            Name = "FT BAKER/BENCH"
+                            Id = (byte)35,
+                            Name = "NOT USED"
                         },
                         new
                         {
-                            Id = "36",
+                            Id = (byte)36,
                             Name = "MARKETS KITCHEN PT 16-17"
                         },
                         new
                         {
-                            Id = "37",
+                            Id = (byte)37,
                             Name = "CAFE PART TIME"
                         },
                         new
                         {
-                            Id = "38",
+                            Id = (byte)38,
                             Name = "RECEIVER"
                         },
                         new
                         {
-                            Id = "39",
-                            Name = "LOSS PREVENTION"
+                            Id = (byte)39,
+                            Name = "NOT USED"
                         },
                         new
                         {
-                            Id = "40",
+                            Id = (byte)40,
                             Name = "MEAT CUTTERS"
                         },
                         new
                         {
-                            Id = "41",
+                            Id = (byte)41,
                             Name = "APPR MEAT CUTTERS"
                         },
                         new
                         {
-                            Id = "42",
-                            Name = "MEAT CUTTER (PART TIME)"
+                            Id = (byte)42,
+                            Name = "MEAT CUTTER PART TIME"
                         },
                         new
                         {
-                            Id = "44",
+                            Id = (byte)43,
+                            Name = "TRAINEE MEAT CUTTER"
+                        },
+                        new
+                        {
+                            Id = (byte)44,
                             Name = "PART TIME SUBSHOP"
                         },
                         new
                         {
-                            Id = "45",
+                            Id = (byte)45,
                             Name = "ASST SUB SHOP MANAGER"
                         },
                         new
                         {
-                            Id = "46",
+                            Id = (byte)46,
                             Name = "SERVICE CASE - FULL TIME"
                         },
                         new
                         {
-                            Id = "47",
+                            Id = (byte)47,
                             Name = "WRAPPERS - FULL TIME"
                         },
                         new
                         {
-                            Id = "48",
+                            Id = (byte)48,
                             Name = "WRAPPERS - PART TIME AM"
                         },
                         new
                         {
-                            Id = "49",
+                            Id = (byte)49,
                             Name = "WRAPPERS - PART TIME PM"
                         },
                         new
                         {
-                            Id = "50",
+                            Id = (byte)50,
                             Name = "HEAD CLERK"
                         },
                         new
                         {
-                            Id = "51",
+                            Id = (byte)51,
                             Name = "SUB SHOP MANAGER"
                         },
                         new
                         {
-                            Id = "52",
+                            Id = (byte)52,
                             Name = "CLERKS - FULL TIME AM"
                         },
                         new
                         {
-                            Id = "53",
+                            Id = (byte)53,
                             Name = "CLERKS - PART TIME AM"
                         },
                         new
                         {
-                            Id = "54",
-                            Name = "CLERK - PART TIME PM"
+                            Id = (byte)54,
+                            Name = "CLERKS - PART TIME PM"
                         },
                         new
                         {
-                            Id = "55",
+                            Id = (byte)55,
                             Name = "POS - PART TIME"
                         },
                         new
                         {
-                            Id = "56",
-                            Name = "MARKETS KITCHEN-ASST MGR"
+                            Id = (byte)56,
+                            Name = "MARKETS KITCHEN - ASST MGR"
                         },
                         new
                         {
-                            Id = "57",
+                            Id = (byte)57,
                             Name = "MARKETS KITCHEN FT"
                         },
                         new
                         {
-                            Id = "58",
+                            Id = (byte)58,
                             Name = "MARKETS KITCHEN PT"
                         },
                         new
                         {
-                            Id = "59",
+                            Id = (byte)59,
                             Name = "KITCHEN MANAGER"
                         },
                         new
                         {
-                            Id = "62",
-                            Name = "FT CAKE"
+                            Id = (byte)60,
+                            Name = "NOT USED"
                         },
                         new
                         {
-                            Id = "63",
-                            Name = "PT CAKE"
+                            Id = (byte)61,
+                            Name = "PT BAKERY MERCHANDISER"
                         },
                         new
                         {
-                            Id = "64",
-                            Name = "OVEN WORKER PT"
+                            Id = (byte)62,
+                            Name = "FT CAKE & CREAMS"
                         },
                         new
                         {
-                            Id = "65",
+                            Id = (byte)63,
+                            Name = "CAKE & CREAM PT"
+                        },
+                        new
+                        {
+                            Id = (byte)64,
+                            Name = "OVER WORKER PT"
+                        },
+                        new
+                        {
+                            Id = (byte)65,
                             Name = "BENCH WORKER PT"
                         },
                         new
                         {
-                            Id = "66",
-                            Name = "FORK LIFT OPR (REC)- AM"
+                            Id = (byte)66,
+                            Name = "FORK LIFT OPR (REC) AM"
                         },
                         new
                         {
-                            Id = "67",
-                            Name = "FORK LIFT OPR (REC)- PM"
+                            Id = (byte)67,
+                            Name = "FORK LIFT OPR (REC) PM"
                         },
                         new
                         {
-                            Id = "68",
-                            Name = "FORK LIFT OPR (SHIP)- AM"
+                            Id = (byte)68,
+                            Name = "FORK LIFT OPR (SHIP) AM"
                         },
                         new
                         {
-                            Id = "69",
-                            Name = "FORK LIFT OPR (SHIP)- PM"
+                            Id = (byte)69,
+                            Name = "FORK LIFT OPR (SHIP) PM"
                         },
                         new
                         {
-                            Id = "70",
-                            Name = "FORK LIFT OPR (MISC)- AM"
+                            Id = (byte)70,
+                            Name = "FORK LIFT OPR (MISC.) AM"
                         },
                         new
                         {
-                            Id = "71",
-                            Name = "FORK LIFT OPR (MISC)- PM"
+                            Id = (byte)71,
+                            Name = "FORK LIFT OPR (MISC.) PM"
                         },
                         new
                         {
-                            Id = "72",
+                            Id = (byte)72,
                             Name = "LOADER - AM"
                         },
                         new
                         {
-                            Id = "73",
+                            Id = (byte)73,
                             Name = "LOADER - PM"
                         },
                         new
                         {
-                            Id = "74",
-                            Name = "GENERAL WAREHOUSE - FT - AM"
+                            Id = (byte)74,
+                            Name = "WHSE MAINTENANCE - AM"
                         },
                         new
                         {
-                            Id = "75",
-                            Name = "GENERAL WAREHOUSE - PT - AM"
+                            Id = (byte)75,
+                            Name = "WHSE MAINTENANCE - PM"
                         },
                         new
                         {
-                            Id = "77",
-                            Name = "SELECTOR (PART-TIME) AM"
+                            Id = (byte)77,
+                            Name = "SELECTOR PART TIME - AM"
                         },
                         new
                         {
-                            Id = "78",
-                            Name = "SELECTOR (PART-TIME) PM"
+                            Id = (byte)78,
+                            Name = "SELECTOR PART TIME - PM"
                         },
                         new
                         {
-                            Id = "79",
-                            Name = "SELECTOR FULL TIME-AM"
+                            Id = (byte)79,
+                            Name = "SELECTOR FULL TIME - AM"
                         },
                         new
                         {
-                            Id = "81",
-                            Name = "SELECTOR (FULL-TIME) PM"
+                            Id = (byte)80,
+                            Name = "TEMP FULLTIME"
                         },
                         new
                         {
-                            Id = "82",
+                            Id = (byte)81,
+                            Name = "SELECTOR FULL TIME - PM"
+                        },
+                        new
+                        {
+                            Id = (byte)82,
                             Name = "INSPECTOR"
                         },
                         new
                         {
-                            Id = "83",
-                            Name = "GENERAL WAREHOUSE - FT - PM"
+                            Id = (byte)83,
+                            Name = "GENERAL WAREHOUSE - AM"
                         },
                         new
                         {
-                            Id = "84",
-                            Name = "GENERAL WAREHOUSE - PT - PM"
+                            Id = (byte)84,
+                            Name = "GENERAL WAREHOUSE - PM"
                         },
                         new
                         {
-                            Id = "85",
-                            Name = "DRIVER (TRAILER)"
+                            Id = (byte)85,
+                            Name = "DRIVER - TRAILER"
                         },
                         new
                         {
-                            Id = "86",
-                            Name = "EXCEL"
+                            Id = (byte)86,
+                            Name = "DRIVER - STRAIGHT"
                         },
                         new
                         {
-                            Id = "87",
+                            Id = (byte)87,
                             Name = "MECHANIC"
                         },
                         new
                         {
-                            Id = "89",
+                            Id = (byte)88,
+                            Name = "GARAGE - PM"
+                        },
+                        new
+                        {
+                            Id = (byte)89,
                             Name = "FACILITY OPERATIONS"
                         },
                         new
                         {
-                            Id = "90",
+                            Id = (byte)90,
                             Name = "COMPUTER OPERATIONS"
                         },
                         new
                         {
-                            Id = "91",
+                            Id = (byte)91,
                             Name = "SIGN SHOP"
                         },
                         new
                         {
-                            Id = "92",
+                            Id = (byte)92,
                             Name = "INVENTORY"
                         },
                         new
                         {
-                            Id = "93",
+                            Id = (byte)93,
                             Name = "PROGRAMMING"
                         },
                         new
                         {
-                            Id = "94",
+                            Id = (byte)94,
                             Name = "HELP DESK"
                         },
                         new
                         {
-                            Id = "96",
+                            Id = (byte)95,
+                            Name = "DEFUNCT"
+                        },
+                        new
+                        {
+                            Id = (byte)96,
                             Name = "TECHNICAL SUPPORT"
                         },
                         new
                         {
-                            Id = "97",
-                            Name = "EXECUTIVE OFFICE"
-                        },
-                        new
-                        {
-                            Id = "98",
+                            Id = (byte)98,
                             Name = "TRAINING"
                         },
                         new
                         {
-                            Id = "99",
+                            Id = (byte)99,
                             Name = "Indian Ridge"
-                        },
-                        new
-                        {
-                            Id = "AD1",
-                            Name = "AD1-MANAGER"
-                        },
-                        new
-                        {
-                            Id = "AD2",
-                            Name = "AD2-RECEPTIONIST"
-                        },
-                        new
-                        {
-                            Id = "DR1",
-                            Name = "DR1-BARTENDER"
-                        },
-                        new
-                        {
-                            Id = "DR2",
-                            Name = "DR2-BUSSER"
-                        },
-                        new
-                        {
-                            Id = "DR3",
-                            Name = "DR3-HOSTESS"
-                        },
-                        new
-                        {
-                            Id = "DR4",
-                            Name = "DR4-MANAGER"
-                        },
-                        new
-                        {
-                            Id = "DR5",
-                            Name = "DR5-SERVER"
-                        },
-                        new
-                        {
-                            Id = "DR6",
-                            Name = "DR6-SERVER"
-                        },
-                        new
-                        {
-                            Id = "FM1",
-                            Name = "FM1-MAINTENANCE ATTENDANT"
-                        },
-                        new
-                        {
-                            Id = "FM2",
-                            Name = "FM2-MAINTENANCE ATTENDANT"
-                        },
-                        new
-                        {
-                            Id = "FM3",
-                            Name = "FM3-MANAGER-FACILITY MAINTENANCE"
-                        },
-                        new
-                        {
-                            Id = "FM4",
-                            Name = "FM4-MAINT ATTEND"
-                        },
-                        new
-                        {
-                            Id = "FM5",
-                            Name = "FM5-MANAGER"
-                        },
-                        new
-                        {
-                            Id = "FT1",
-                            Name = "FT1-BARTENDER"
-                        },
-                        new
-                        {
-                            Id = "FT2",
-                            Name = "FT2-MANAGER"
-                        },
-                        new
-                        {
-                            Id = "FT3",
-                            Name = "FT3-SERVER"
-                        },
-                        new
-                        {
-                            Id = "GM1",
-                            Name = "GM1-GOLF CART MAINT"
-                        },
-                        new
-                        {
-                            Id = "GM2",
-                            Name = "GM2-GOLF CART MAINT"
-                        },
-                        new
-                        {
-                            Id = "GM3",
-                            Name = "GM3-GROUNDS MAINTENANCE"
-                        },
-                        new
-                        {
-                            Id = "GM4",
-                            Name = "GM4-GROUNDS MAINTENANCE"
-                        },
-                        new
-                        {
-                            Id = "GM5",
-                            Name = "GM5-MANAGER"
-                        },
-                        new
-                        {
-                            Id = "GM6",
-                            Name = "GM6-MECHANIC"
-                        },
-                        new
-                        {
-                            Id = "GR1",
-                            Name = "GR1-BUSSER"
-                        },
-                        new
-                        {
-                            Id = "GR2",
-                            Name = "GR2-MANAGER"
-                        },
-                        new
-                        {
-                            Id = "GR3",
-                            Name = "GR3-SERVER"
-                        },
-                        new
-                        {
-                            Id = "GR4",
-                            Name = "GR4-SNACK SHACK"
-                        },
-                        new
-                        {
-                            Id = "GR5",
-                            Name = "GR5-POOLSIDE-GRILLE ROOM"
-                        },
-                        new
-                        {
-                            Id = "KT1",
-                            Name = "KT1-MANAGER"
-                        },
-                        new
-                        {
-                            Id = "KT2",
-                            Name = "KT2-CHEF"
-                        },
-                        new
-                        {
-                            Id = "KT3",
-                            Name = "KT3-CHEF-KITCHEN"
-                        },
-                        new
-                        {
-                            Id = "KT4",
-                            Name = "KT4-DISHWASHER"
-                        },
-                        new
-                        {
-                            Id = "KT5",
-                            Name = "KT5-DISHWASHER-KITCHEN"
-                        },
-                        new
-                        {
-                            Id = "KT6",
-                            Name = "KT6-PREP CHEF"
-                        },
-                        new
-                        {
-                            Id = "LG1",
-                            Name = "LG1-MANAGER"
-                        },
-                        new
-                        {
-                            Id = "LG2",
-                            Name = "LG2-LIFEGUARD"
-                        },
-                        new
-                        {
-                            Id = "PS1",
-                            Name = "PS1-PRO SHOP SERVICES"
-                        },
-                        new
-                        {
-                            Id = "PS2",
-                            Name = "PS2-PRO SHOP SERVICES"
-                        },
-                        new
-                        {
-                            Id = "PS3",
-                            Name = "PS3-MANAGER"
-                        },
-                        new
-                        {
-                            Id = "PS4",
-                            Name = "PS4-OUTSIDE SERVICES"
-                        },
-                        new
-                        {
-                            Id = "PS5",
-                            Name = "PS5-OUTSIDE SERVICES"
-                        },
-                        new
-                        {
-                            Id = "PS6",
-                            Name = "PS6-STARTER"
-                        },
-                        new
-                        {
-                            Id = "PS7",
-                            Name = "PS7-STARTER"
-                        },
-                        new
-                        {
-                            Id = "TN1",
-                            Name = "TN1-MANAGER"
-                        },
-                        new
-                        {
-                            Id = "TN2",
-                            Name = "TN2-TENNIS SERVICES"
                         });
                 });
 

@@ -8,7 +8,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 
 public sealed class DemographicFaker : Faker<Demographic>
 {
-    private static int _badgeNumberCounter = 1_000;
+    private static int _badgeNumberCounter = 10_000;
     private static int _idCounter = 10_000;
     private static long _oracleHcmIdCounter = 100_000;
 
