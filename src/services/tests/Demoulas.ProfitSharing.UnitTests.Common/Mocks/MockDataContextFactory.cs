@@ -79,6 +79,17 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.TaxCodes).Returns(mockTaxCodes.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.TaxCodes).Returns(mockTaxCodes.Object);
 
+        var stateTaxes = new List<StateTax>()
+        {
+            new StateTax() { Abbreviation = "NH", Rate = 0.00m, UserModified = "TestUser", DateModified = DateOnly.FromDateTime(DateTime.Today) },
+            new StateTax() { Abbreviation = "CA", Rate = 13.30m, UserModified = "TestUser", DateModified = DateOnly.FromDateTime(DateTime.Today) },
+            new StateTax() { Abbreviation = "TX", Rate = 0.00m, UserModified = "TestUser", DateModified = DateOnly.FromDateTime(DateTime.Today) },
+            new StateTax() { Abbreviation = "NY", Rate = 8.82m, UserModified = "TestUser", DateModified = DateOnly.FromDateTime(DateTime.Today) }
+        };
+        var mockStateTaxes = stateTaxes.BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.StateTaxes).Returns(mockStateTaxes.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.StateTaxes).Returns(mockStateTaxes.Object);
+
         var employmentTypes = new List<EmploymentType>()
         {
             new EmploymentType() {Id=EmploymentType.Constants.FullTimeAccruedPaidHolidays,Name=EmploymentType.Constants.FullTimeAccruedPaidHolidays.ToString() },
