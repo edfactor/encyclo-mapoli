@@ -51,7 +51,82 @@ Patterns:
     - Materialize the data to memory before using `??` by calling `.AsEnumerable()` or `.ToList()` if the dataset is small and it's safe to do so, then apply the `??` coalescing in LINQ-to-Objects.
     - Compute fallbacks or derived values in a service or computed property when possible (move complex logic out of the EF projection).
   - When adding this rule to new code or code reviews, add a brief comment explaining why `??` was avoided (e.g., "avoid EF translation issues with Oracle provider").
-- XML doc comments for public & internal APIs
+  - XML doc comments for public & internal APIs
+
+## Validation & Boundary Checks (MANDATORY)
+
+All incoming data MUST be validated with explicit boundary checks at both the server and client boundaries. Validation is a security and correctness concern: never rely solely on client-side checks. The following are required by policy for every endpoint and page that accepts user input.
+
+Server-side requirements (mandatory):
+- All request DTOs must have validation attributes or explicit validators that enforce:
+  - numeric ranges (min/max) for integers/floats (e.g., page size, amounts, counts)
+  - string length limits (min/max) and allowed character sets when applicable
+  - collection size limits (max items in array/list payloads)
+  - pagination bounds (max page size, max offset/skip)
+  - file upload limits (max file size, allowed content types)
+  - date/time ranges (not before/after bounds) and timezone normalization
+  - enum value validation (reject unknown or out-of-range enum numeric values)
+  - required fields and nullability constraints
+- Use FastEndpoints validation pipeline or FluentValidation (existing project conventions apply) to centralize validation logic. Validation failures must return structured `ValidationProblem` responses with field-level messages.
+- Use server-side guards to enforce maximum data volume to avoid expensive queries (e.g., cap requested rows to a safe maximum, require filters for wide scans).
+- For APIs that accept complex filters, build expression validators to reject queries that would result in unbounded or expensive scans (for example: all-badges-zero or empty filter sets that match too many rows).
+- All validators must be unit-tested (xUnit). Add tests for happy paths and boundary cases (min, max, empty, null, invalid enum) and at least one large/degenerate input test to assert the system rejects or truncates the request safely.
+
+Client-side requirements (recommended + required UX guardrails):
+- All pages must validate user input before submission using the project's front-end validation utilities (React + TypeScript). Client-side validation improves UX but is not a substitute for server-side checks.
+- Mirror server-side constraints in TypeScript types and validators: string lengths, numeric ranges, max collection sizes, allowed enum values, and file size/type checks.
+- Prevent users from requesting excessive data from the UI by enforcing pagination controls (max page size) and disabling controls that could produce wide unfiltered queries.
+
+Edge-case examples to cover (must be tested):
+- Empty / null payloads instead of expected objects
+- Oversized arrays (e.g., > 5k items) sent in request bodies
+- Very large numbers (bigger than database column bounds)
+- Dates outside business logic ranges (e.g., hire date in the future)
+- Invalid enum numeric values or stale enum ids from older UI versions
+
+Developer guidance & patterns:
+- Prefer declarative validators (FluentValidation) in DTO classes for clarity and testability.
+- Keep validation logic out of service/business methods; endpoints should validate and then call services with well-formed input.
+- When trimming/normalizing input (for example, truncating an over-long string), document the behavior and return the normalized value or a validation error depending on severity.
+- When limiting collection sizes, return `400 Bad Request` with a clear message when a client exceeds allowable limits.
+- Add tests that assert the actual HTTP response code and message for invalid inputs.
+
+Example (server-side DTO using FluentValidation):
+
+```csharp
+// DTO
+public class SearchRequest
+{
+    public int PageSize { get; init; } = 50;
+    public int Offset { get; init; }
+    public string? Query { get; init; }
+}
+
+// FluentValidation validator (install FluentValidation and register with FastEndpoints pipeline)
+public class SearchRequestValidator : AbstractValidator<SearchRequest>
+{
+    public SearchRequestValidator()
+    {
+        // numeric range with default value on DTO
+        RuleFor(x => x.PageSize)
+            .InclusiveBetween(1, 1000)
+            .WithMessage("PageSize must be between 1 and 1000.");
+
+        RuleFor(x => x.Offset)
+            .InclusiveBetween(0, 1_000_000)
+            .WithMessage("Offset must be between 0 and 1_000_000.");
+
+        RuleFor(x => x.Query)
+            .MaximumLength(200)
+            .WithMessage("Query must be at most 200 characters long.")
+            .When(x => x.Query != null);
+    }
+}
+
+// Registration example (Program.cs / DI):
+// builder.Services.AddValidatorsFromAssemblyContaining<SearchRequestValidator>();
+// FastEndpoints will pick up FluentValidation validators and return structured ValidationProblem responses.
+```
 
 ## Database & CLI
 
