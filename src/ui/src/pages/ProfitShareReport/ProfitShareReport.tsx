@@ -32,7 +32,7 @@ const ProfitShareReport = () => {
     if (hasToken && profitYear && !initialDataLoaded) {
       const totalsRequest = {
         profitYear: profitYear,
-        useFrozenData: true,
+        useFrozenData: false,
         badgeNumber: null
       };
 
@@ -162,7 +162,10 @@ const ProfitShareReport = () => {
               <CircularProgress />
             </Box>
           ) : (
-            <ProfitSummary onPresetParamsChange={handlePresetParamsChange} />
+            <ProfitSummary
+              onPresetParamsChange={handlePresetParamsChange}
+              frozenData={false}
+            />
           )}
         </Grid>
 
