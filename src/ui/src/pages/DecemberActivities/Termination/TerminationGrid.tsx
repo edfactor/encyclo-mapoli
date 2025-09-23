@@ -25,6 +25,7 @@ import { Messages } from "../../../utils/messageDictonary";
 import { TerminationSearchRequest } from "./Termination";
 import { GetDetailColumns } from "./TerminationDetailsGridColumns";
 import { GetTerminationColumns } from "./TerminationGridColumns";
+import { CircularProgress } from "@mui/material";
 
 interface TerminationGridSearchProps {
   initialSearchLoaded: boolean;
@@ -64,7 +65,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   const selectedProfitYear = useDecemberFlowProfitYear();
   // fiscalData is now passed from parent to avoid timing issues on refresh
   const [updateForfeitureAdjustmentBulk, { isLoading: isBulkSaving }] = useUpdateForfeitureAdjustmentBulkMutation();
-  const [updateForfeitureAdjustment] = useUpdateForfeitureAdjustmentMutation();
+  const [updateForfeitureAdjustment, { isLoading: isSingleSaving }] = useUpdateForfeitureAdjustmentMutation();
   const lastRequestKeyRef = useRef<string | null>(null);
 
   // Use separate hooks for edit and selection state
@@ -482,6 +483,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
 
   return (
     <div className="relative">
+      {/* Show loading overlay when fetching data */}
       {isFetching && (
         <div className="absolute inset-0 w-full h-full bg-white/60 z-[1000] flex items-center justify-center">
           <div
@@ -491,10 +493,18 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
           </div>
         </div>
       )}
+      
+      {/* Fix the conditional for showing the circular progress during bulk save */}
+      {(isBulkSaving || isSingleSaving) && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+          <CircularProgress />
+        </div>
+      )}
+      
       {termination?.response && (
         <>
           <ReportSummary report={termination} />
-
+          
           <div className="sticky top-0 z-10 flex bg-white">
             <TotalsGrid
               displayData={[[numberToCurrency(termination.totalEndingBalance || 0)]]}
@@ -513,6 +523,12 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
               leftColumnHeaders={["Total Beneficiary Allocations"]}
               topRowHeaders={[]}></TotalsGrid>
           </div>
+
+          {(isBulkSaving) && (
+            <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+              <CircularProgress />
+            </div>
+          )}
 
           <DSMGrid
             preferenceKey={"QPREV-PROF"}

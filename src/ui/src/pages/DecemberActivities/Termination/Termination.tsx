@@ -25,8 +25,13 @@ const Termination = () => {
   useUnsavedChangesGuard(state.hasUnsavedChanges);
 
   const renderActionNode = () => {
+    scrollToTop();
     return <StatusDropdownActionNode onStatusChange={actions.handleStatusChange} />;
   };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
   useEffect(() => {
     fetchAccountingRange();
