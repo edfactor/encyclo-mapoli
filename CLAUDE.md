@@ -46,6 +46,11 @@ Patterns:
 - Prefer explicit types unless initializer makes type obvious
 - Use `readonly` where applicable; private fields `_camelCase`; private static `s_` prefix; constants PascalCase
 - Always brace control blocks; favor null propagation `?.` and coalescing `??`
+  - IMPORTANT: Avoid using the null-coalescing operator `??` inside expressions that will be translated by Entity Framework Core into SQL (for example, inside LINQ-to-Entities projections or where clauses). The Oracle EF Core provider and some EF translations can fail or produce unexpected SQL when `??` is used in queries. Instead prefer one of the following safe patterns:
+    - Use explicit conditional projection that EF can translate, e.g. `x.SomeNullableBool.HasValue ? x.SomeNullableBool.Value : fallback`.
+    - Materialize the data to memory before using `??` by calling `.AsEnumerable()` or `.ToList()` if the dataset is small and it's safe to do so, then apply the `??` coalescing in LINQ-to-Objects.
+    - Compute fallbacks or derived values in a service or computed property when possible (move complex logic out of the EF projection).
+  - When adding this rule to new code or code reviews, add a brief comment explaining why `??` was avoided (e.g., "avoid EF translation issues with Oracle provider").
 - XML doc comments for public & internal APIs
 
 ## Database & CLI
@@ -96,12 +101,8 @@ Patterns:
 
 ## Branching & Jira workflow (team conventions)
 
-- Base branch: Always create feature / fix branches from `develop`. Do not branch from `main` or other long-lived branches unless explicitly instructed by a release manager.
-- Branch naming: Use the Jira ticket key as a prefix and a short dash-separated description. Examples:
   - `fix/PS-1645-military-pre-hire-validation`
   - `feature/PS-1720-add-reporting-view`
-- Ticket formats: Normalize both full URL and key to the ticket key when creating branches or PRs.
-- Typical local workflow (PowerShell):
   ```pwsh
   # ensure latest develop
   git checkout develop
@@ -117,7 +118,8 @@ Patterns:
   # push and set upstream
   git push -u origin fix/PS-1645-military-pre-hire-validation
   ```
-- Pull request guidance: Start PRs into `develop` (not `main`) unless instructed otherwise. Include the Jira key in the PR title and a description with the change summary, tests run, migration steps, and QA notes.
+  - When opening a PR for a Jira ticket, add a comment to the ticket with the PR link and a brief summary so reviewers and stakeholders are notified.
+  - If the Jira ticket does not have story points set, assign story points using the Fibonacci-like sequence commonly used by the team: `1, 2, 3, 5, 8, 13`.
 
 ## Atlassian MCP & Confluence alignment
 
@@ -209,3 +211,16 @@ dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
 - Frontend dev server runs on port 3100
 - Use existing patterns and libraries rather than introducing new ones
 - Provide reasoning in PR descriptions when deviating from these patterns
+
+## AI Assistant Operational Rules (Repository-specific)
+
+- Do NOT create or open Pull Requests automatically. AI assistants may prepare branch names, commit messages, and a suggested PR title/body, and provide the exact `git` commands to push the branch, but must stop short of actually creating or opening the PR in the remote hosting service. PR creation is a manual step for a human reviewer to perform.
+
+- When adding new unit tests, include a `Description` attribute on the test method with the Jira ticket number and a terse description in the following format:
+
+  ```csharp
+  [Description("PS-1721 : Duplicate detection by contribution year")]
+  public async Task MyNewTest() { ... }
+  ```
+
+  This attribute helps link tests to tickets and provides a terse description for test explorers and reviewers.

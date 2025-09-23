@@ -45,6 +45,11 @@ Patterns:
 - Prefer explicit types unless initializer makes type obvious.
 - Use `readonly` where applicable; private fields `_camelCase`; private static `s_` prefix; constants PascalCase.
 - Always brace control blocks; favor null propagation `?.` and coalescing `??`.
+  - IMPORTANT: Avoid using the null-coalescing operator `??` inside expressions that will be translated by Entity Framework Core into SQL (for example, inside LINQ-to-Entities projections or where clauses). The Oracle EF Core provider and some EF translations can fail or produce unexpected SQL when `??` is used in queries. Instead prefer one of the following safe patterns:
+    - Use explicit conditional projection that EF can translate, e.g. `x.SomeNullableBool.HasValue ? x.SomeNullableBool.Value : fallback`.
+    - Materialize the data to memory before using `??` by calling `.AsEnumerable()` or `.ToList()` if the dataset is small and it's safe to do so, then apply the `??` coalescing in LINQ-to-Objects.
+    - Compute fallbacks or derived values in a service or computed property when possible (move complex logic out of the EF projection).
+  - When adding this rule to new code or code reviews, add a brief comment explaining why `??` was avoided (e.g., "avoid EF translation issues with Oracle provider").
 - XML doc comments for public & internal APIs.
 
 ## Database & CLI
@@ -124,6 +129,8 @@ To keep branches and PRs consistent across the org, follow these conventions. Co
   - Open PR from your branch into `develop` (not `main`) unless the ticket or release manager instructs otherwise.
   - Title should start with the Jira key: `PS-1645: Prevent military contributions before hire date`.
   - Include the following in the PR body: summary of the change, which tests were run locally (and results), any migration or config changes, and QA steps to reproduce the fix.
+  - When opening a PR for a Jira ticket, add a comment to the ticket with the PR link and a brief summary so reviewers and stakeholders are notified.
+  - If the Jira ticket does not have story points set, assign story points using the Fibonacci-like sequence commonly used by the team: `1, 2, 3, 5, 8, 13`.
 
 - Copilot assistant responsibilities:
   - When asked to create or reference a branch for a Jira ticket, normalize ticket input (URL or key) to the ticket key and produce the suggested branch name using the pattern above.
@@ -182,3 +189,16 @@ cd src/ui; npm run dev
 
 ---
 Provide reasoning in PR descriptions when deviating from these patterns.
+
+## AI Assistant Operational Rules (Repository-specific)
+
+- Do NOT create or open Pull Requests automatically. AI assistants may prepare branch names, commit messages, and a suggested PR title/body, and provide the exact `git` commands to push the branch, but must stop short of actually creating or opening the PR in the remote hosting service. PR creation is a manual step for a human reviewer to perform.
+
+- When adding new unit tests, include a `Description` attribute on the test method with the Jira ticket number and a terse description in the following format:
+
+  ```csharp
+  [Description("PS-1721 : Duplicate detection by contribution year")]
+  public async Task MyNewTest() { ... }
+  ```
+
+  This attribute helps link tests to tickets and provides a terse description for test explorers and reviewers.

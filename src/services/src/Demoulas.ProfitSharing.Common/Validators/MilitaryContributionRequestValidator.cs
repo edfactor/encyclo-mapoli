@@ -49,7 +49,10 @@ public class MilitaryContributionRequestValidator : Validator<CreateMilitaryCont
             return true;
         }
 
-        var results = await _militaryService.GetMilitaryServiceRecordAsync(new MilitaryContributionRequest { ProfitYear = req.ProfitYear, BadgeNumber = req.BadgeNumber, Take = short.MaxValue },
+        // Query by the contribution date year rather than the selected ProfitYear so we detect
+        // existing records for the actual contribution year (fixes PS-1721 where users may select
+        // a different profit year in the UI than the contribution date year).
+        var results = await _militaryService.GetMilitaryServiceRecordAsync(new MilitaryContributionRequest { ProfitYear = (short)req.ContributionDate.Year, BadgeNumber = req.BadgeNumber, Take = short.MaxValue },
             isArchiveRequest: false,
             cancellationToken: token);
 
