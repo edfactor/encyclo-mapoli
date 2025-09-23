@@ -437,7 +437,7 @@ public sealed class DistributionService : IDistributionService
     {
         var validationErrors = new Dictionary<string, string[]>();
 
-        if (request.BadgeNumber < 1 || request.BadgeNumber > 9_999_999)
+        if (request.BadgeNumber < 9_999 || request.BadgeNumber > 9_999_999)
         {
             validationErrors[nameof(request.BadgeNumber)] = ["BadgeNumber must be a 7-digit number."];
         }
