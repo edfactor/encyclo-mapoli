@@ -1,13 +1,8 @@
 ﻿using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.Diagnostics;
 using System.Text;
-using Demoulas.Common.Contracts.Configuration;
 using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
 using Demoulas.ProfitSharing.Data.Cli.DiagramServices;
 using Demoulas.ProfitSharing.Data.Contexts;
-using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Services.LogMasking;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -80,7 +75,9 @@ public sealed class Program
         rootCommand.Add(runSqlCommand);
         rootCommand.Add(generateDgmlCommand);
         rootCommand.Add(generateMarkdownCommand);
-        rootCommand.Add(GenerateScriptHelper.CreateGenerateUpgradeScriptCommand(configuration, args, commonOptions));
+        // Create the generate-upgrade-script command and add it so we can attach a handler below
+        var generateUpgradeScriptCmd = GenerateScriptHelper.CreateGenerateUpgradeScriptCommand(configuration, args, commonOptions);
+        rootCommand.Add(generateUpgradeScriptCmd);
         rootCommand.Add(validateImportCommand);
         rootCommand.Add(runSqlCommandForNavigation);
 
@@ -89,38 +86,70 @@ public sealed class Program
 
         rootCommand.Add(runSqlCommandForUatNavigation);
 
-        // Manual dispatch to avoid depending on SetHandler/Handler extensions of System.CommandLine
-        // Map command name (first argument) to the logic above.
-        string? cmd = args.Length > 0 ? args[0] : null;
+        // Build typed options for RC SetHandler bindings
+        var connectionNameOption = new Option<string?>("--connection-name");
+        var sqlFileOption = new Option<string?>("--sql-file");
+        var sourceSchemaOption = new Option<string?>("--source-schema");
+        var outputFileOption = new Option<string?>("--output-file");
+        var currentYearOption = new Option<string?>("--current-year");
 
-        return cmd switch
-        {
-            "upgrade-db" => ExecuteUpgradeDb(configuration, args),
-            "drop-recreate-db" => ExecuteDropRecreateDb(configuration, args),
-            "import-from-ready" => ExecuteImportFromReady(configuration, args),
-            "import-from-navigation" => ExecuteImportFromNavigation(configuration, args),
-            "generate-dgml" => ExecuteGenerateDgml(configuration, args),
-            "generate-markdown" => ExecuteGenerateMarkdown(configuration, args),
-            "validate-import" => ExecuteValidateImport(configuration, args),
-            "import-uat-navigation" => ExecuteImportFromUatNavigation(configuration, args),
-            "generate-upgrade-script" => ExecuteGenerateUpgradeScript(configuration, args),
-            _ => RootCommandFallback(rootCommand, args)
-        };
-    }
+        var cmds = new[] { upgradeDbCommand, dropRecreateDbCommand, runSqlCommand, runSqlCommandForNavigation, runSqlCommandForUatNavigation, generateDgmlCommand, generateMarkdownCommand, validateImportCommand, generateUpgradeScriptCmd };
 
-    // Dispatcher implementations
-    private static Task<int> RootCommandFallback(RootCommand root, string[] args)
-    {
-        _ = args;
-        // Fallback to showing help when no command matches
-        Console.WriteLine(root.Description);
-        Console.WriteLine("Available commands:");
-        foreach (var c in root.Children.OfType<Command>())
+        // Use the Options collection directly to avoid relying on extension methods that may not be available
+        cmds.Select(c => c.Options).ToList().ForEach(options =>
         {
-            Console.WriteLine($"  {c.Name} - {c.Description}");
+            options.Add(connectionNameOption);
+            options.Add(sqlFileOption);
+            options.Add(sourceSchemaOption);
+            options.Add(outputFileOption);
+            options.Add(currentYearOption);
+        });
+
+        // Determine which command was invoked. Prefer the first non-option token from args as the command name.
+        var invokedCommand = args.FirstOrDefault(a => !string.IsNullOrWhiteSpace(a) && !a.StartsWith("-", StringComparison.Ordinal)) ?? string.Empty;
+
+        // Read option values from the already-configured IConfiguration (it includes command-line args via AddCommandLine)
+        string? connectionName = configuration["connection-name"];
+        string? sqlFile = configuration["sql-file"];
+        string? sourceSchema = configuration["source-schema"];
+        string? outputFile = configuration["output-file"];
+        string? currentYear = configuration["current-year"];
+
+        // Populate environment variables that the existing Execute* methods may read from IConfiguration or Env if required
+        if (!string.IsNullOrEmpty(connectionName)) { Environment.SetEnvironmentVariable("connection-name", connectionName); }
+        if (!string.IsNullOrEmpty(sqlFile)) { Environment.SetEnvironmentVariable("sql-file", sqlFile); }
+        if (!string.IsNullOrEmpty(sourceSchema)) { Environment.SetEnvironmentVariable("source-schema", sourceSchema); }
+        if (!string.IsNullOrEmpty(outputFile)) { Environment.SetEnvironmentVariable("output-file", outputFile); }
+        if (!string.IsNullOrEmpty(currentYear)) { Environment.SetEnvironmentVariable("current-year", currentYear); }
+
+        // Dispatch to the appropriate implementation
+        switch (invokedCommand)
+        {
+            case "upgrade-db":
+                return ExecuteUpgradeDb(configuration, args);
+            case "drop-recreate-db":
+                return ExecuteDropRecreateDb(configuration, args);
+            case "import-from-ready":
+                return ExecuteImportFromReady(configuration, args);
+            case "import-from-navigation":
+                return ExecuteImportFromNavigation(configuration, args);
+            case "import-uat-navigation":
+                return ExecuteImportFromUatNavigation(configuration, args);
+            case "generate-dgml":
+                return ExecuteGenerateDgml(configuration, args);
+            case "generate-markdown":
+                return ExecuteGenerateMarkdown(configuration, args);
+            case "validate-import":
+                return ExecuteValidateImport(configuration, args);
+            case "generate-upgrade-script":
+                return ExecuteGenerateUpgradeScript(configuration, args);
+            default:
+                Console.WriteLine($"Unknown or missing command '{invokedCommand}'.");
+                return Task.FromResult(1);
         }
-        return Task.FromResult(1);
     }
+
+    // Dispatcher implementations (handlers implemented as SetHandler above)
 
     private static async Task<int> ExecuteUpgradeDb(IConfiguration configuration, string[] args)
     {
@@ -303,6 +332,13 @@ public sealed class Program
             {
                 var fullPath = Path.GetFullPath(outputPath);
                 var directory = Path.GetDirectoryName(fullPath);
+                // Validate the path to avoid directory traversal or writing outside the current working directory
+                var cwd = Path.GetFullPath(Directory.GetCurrentDirectory());
+                if (!fullPath.StartsWith(cwd, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new UnauthorizedAccessException("Output path must be inside the current working directory.");
+                }
+
                 if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
                 {
                     Directory.CreateDirectory(directory);

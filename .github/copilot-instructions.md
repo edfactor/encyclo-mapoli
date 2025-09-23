@@ -398,6 +398,17 @@ cd src/ui; npm run dev
 ---
 Provide reasoning in PR descriptions when deviating from these patterns.
 
+## Formatting & EditorConfig (additional guidance)
+
+- Follow the repository `.editorconfig` for formatting and analyzer rules. This file is the authoritative source for whitespace, naming, and stylistic rules; update it only when you have a clear, repo-wide reason and include rationale in the PR.
+- Preferred style highlights:
+  - File-scoped namespaces and one class per file.
+  - Use explicit access modifiers for all types and members.
+  - Favor `is null` / `is not null` for null checks and `nameof(...)` for member names.
+  - Prefer pattern matching and switch expressions where they improve clarity.
+  - Avoid inserting ad-hoc formatting changes that conflict with `.editorconfig`.
+- If you need to add or change formatting rules, update `.editorconfig` and include a short explanation in the PR body so reviewers can assess scope and impact.
+
 ## AI Assistant Operational Rules (Repository-specific)
 
 - Do NOT create or open Pull Requests automatically. AI assistants may prepare branch names, commit messages, and a suggested PR title/body, and provide the exact `git` commands to push the branch, but must stop short of actually creating or opening the PR in the remote hosting service. PR creation is a manual step for a human reviewer to perform.
