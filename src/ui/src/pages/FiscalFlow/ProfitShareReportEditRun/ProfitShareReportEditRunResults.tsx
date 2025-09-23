@@ -93,7 +93,9 @@ const ProfitShareReportEditRunResults = () => {
             <InfoCard
               buttonDisabled={false}
               title={`${index + 1}. ${category.title}`}
-              handleClick={() => navigate(`/${category.destinationUrl}`)}
+              handleClick={() =>
+                navigate(`/${ROUTES.PAY426N}/${category.code.substring(category.code.lastIndexOf("-") + 1)}`)
+              }
               data={category.data}
               valid={true}
             />

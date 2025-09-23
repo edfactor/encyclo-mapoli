@@ -1,15 +1,15 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Typography, Box, CircularProgress } from "@mui/material";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { useNavigate, Path } from "react-router-dom";
-import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../reduxstore/store";
+import { Box, CircularProgress, Typography } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { Path, useNavigate } from "react-router-dom";
+import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
+import { FilterParams } from "reduxstore/types";
+import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { RootState } from "../../../reduxstore/store";
 import pay426Utils from "../Pay427Utils";
 import { GetProfitSharingReportGridColumns } from "./GetProfitSharingReportGridColumns";
 import presets from "./presets";
-import { FilterParams } from "reduxstore/types";
 
 interface ReportGridProps {
   params: FilterParams;
@@ -68,6 +68,17 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
       const matchingPreset = presets.find((preset) => JSON.stringify(preset.params) === JSON.stringify(params));
       const currentPageNumber = getCurrentPageNumber();
       const currentPageSize = getCurrentPageSize();
+      console.log("Fetching data with params:", {
+        profitYear: profitYear,
+        pagination: {
+          skip: currentPageNumber * currentPageSize,
+          take: currentPageSize,
+          sortBy: sortParams.sortBy,
+          isSortDescending: sortParams.isSortDescending
+        },
+        ...params,
+        reportId: matchingPreset ? Number(matchingPreset.id) : 0
+      });
       trigger({
         profitYear: profitYear,
         pagination: {
