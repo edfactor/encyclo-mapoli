@@ -1,6 +1,3 @@
----THIS SCRIPT WILL LOAD ALL SMART PROFIT SHARING TABLES
----TO "YOUR CURRENT SCHEMA" FROM - {SOURCE_PROFITSHARE_SCHEMA}
--------------------------------------------------------------------------------------
 DECLARE
     this_year NUMBER := 2025; -- <-------- ORACLE HCM loads data in this year.
     last_year NUMBER := 2024; -- <-------- active year end year for the scramble.   Scramble is frozen in 2024. 
@@ -11,7 +8,7 @@ BEGIN
  -- First disable all foreign key constraints
     FOR fk IN (SELECT constraint_name, table_name 
                FROM user_constraints 
-               WHERE constraint_type = 'R')
+               WHERE constraint_type = 'R') 
     LOOP
         EXECUTE IMMEDIATE 'ALTER TABLE ' || fk.table_name || 
                          ' DISABLE CONSTRAINT ' || fk.constraint_name;
