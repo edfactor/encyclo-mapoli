@@ -44,24 +44,45 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 throw new ArgumentException("Employee not found.");
             }
 
-            var totalVestingBalance = await _totalService.TotalVestingBalance(context, profitYear, DateTime.Now.ToDateOnly())
-                .Where(vb => vb.Ssn == demographic.Ssn).SingleAsync();
+            // Get the most recent PROFIT_CODE = 2 (forfeiture) transaction for this employee
+            var lastForfeitureTransaction = await context.ProfitDetails
+                .Where(pd => pd.Ssn == demographic.Ssn && pd.ProfitCodeId == 2)
+                .OrderByDescending(pd => pd.ProfitYear)
+                .ThenByDescending(pd => pd.CreatedAtUtc)
+                .FirstOrDefaultAsync(cancellationToken);
 
-            // If the employee is fully vested, then there is no forfeiture to suggest.
+            // PATH 1: Last transaction was a FORFEIT (positive amount)
+            // → Suggest UNFORFEIT (negative amount to reverse it)
+            if (lastForfeitureTransaction != null && lastForfeitureTransaction.Forfeiture > 0)
+            {
+                return new SuggestedForfeitureAdjustmentResponse 
+                { 
+                    SuggestedForfeitAmount = -lastForfeitureTransaction.Forfeiture, // Negative = unforfeit
+                    DemographicId = demographic.Id, 
+                    BadgeNumber = demographic.BadgeNumber 
+                };
+            }
+
+            // PATH 2: No forfeiture history OR last transaction was UNFORFEIT (negative amount)
+            // → Calculate how much SHOULD be forfeited based on vesting
+            var totalVestingBalance = await _totalService.TotalVestingBalance(context, profitYear, DateTime.Now.ToDateOnly())
+                .Where(vb => vb.Ssn == demographic.Ssn).SingleAsync(cancellationToken);
+
+            // If fully vested, nothing to forfeit
             if (totalVestingBalance.VestingPercent == 1m)
             {
                 return new SuggestedForfeitureAdjustmentResponse { SuggestedForfeitAmount = 0m, DemographicId = demographic.Id, BadgeNumber = demographic.BadgeNumber };
             }
 
-            return
-                // BOBH This is failing to account for the ETVA, correct?
-                new SuggestedForfeitureAdjustmentResponse
-                {
-                    SuggestedForfeitAmount =
-                        Math.Round((totalVestingBalance.CurrentBalance ?? 0m) - (totalVestingBalance.VestedBalance ?? 0m), 2, MidpointRounding.AwayFromZero),
-                    DemographicId = demographic.Id,
-                    BadgeNumber = demographic.BadgeNumber
-                };
+            // Calculate unvested amount that should be forfeited
+            var unvestedAmount = (totalVestingBalance.CurrentBalance ?? 0m) - (totalVestingBalance.VestedBalance ?? 0m);
+            
+            return new SuggestedForfeitureAdjustmentResponse
+            {
+                SuggestedForfeitAmount = Math.Round(unvestedAmount, 2, MidpointRounding.AwayFromZero), // Positive = forfeit
+                DemographicId = demographic.Id,
+                BadgeNumber = demographic.BadgeNumber
+            };
         });
     }
 
