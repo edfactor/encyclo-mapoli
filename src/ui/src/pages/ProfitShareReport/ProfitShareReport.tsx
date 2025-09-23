@@ -25,7 +25,7 @@ const ProfitShareReport = () => {
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
-  const [triggerSearch] = useLazyGetYearEndProfitSharingReportTotalsQuery();
+  const [triggerSearch, { isLoading: isTotalsLoading }] = useLazyGetYearEndProfitSharingReportTotalsQuery();
   const [finalizeReport, { isLoading: isFinalizing }] = useFinalizeReportMutation();
 
   useEffect(() => {
@@ -148,25 +148,23 @@ const ProfitShareReport = () => {
               </Typography>
             </div>
 
-            {yearEndProfitSharingReportTotals && (
+            {isTotalsLoading ? (
+              <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+                <CircularProgress />
+              </Box>
+            ) : yearEndProfitSharingReportTotals ? (
               <Box sx={{ px: 3, mt: 2 }}>
                 <ProfitShareTotalsDisplay totalsData={yearEndProfitSharingReportTotals} />
               </Box>
-            )}
+            ) : null}
           </Box>
         </Grid>
 
         <Grid width="100%">
-          {!initialDataLoaded ? (
-            <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-              <CircularProgress />
-            </Box>
-          ) : (
-            <ProfitSummary
-              onPresetParamsChange={handlePresetParamsChange}
-              frozenData={false}
-            />
-          )}
+          <ProfitSummary
+            onPresetParamsChange={handlePresetParamsChange}
+            frozenData={false}
+          />
         </Grid>
 
         {selectedPresetParams && (
