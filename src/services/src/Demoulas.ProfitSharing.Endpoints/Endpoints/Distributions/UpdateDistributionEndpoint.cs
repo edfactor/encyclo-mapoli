@@ -1,12 +1,15 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Distributions;
-public sealed class UpdateDistributionEndpoint : ProfitSharingEndpoint<UpdateDistributionRequest, CreateOrUpdateDistributionResponse>
+public sealed class UpdateDistributionEndpoint : ProfitSharingEndpoint<UpdateDistributionRequest, Results<Ok<CreateOrUpdateDistributionResponse>, NotFound, BadRequest, ProblemHttpResult>>
 {
     private readonly IDistributionService _distributionService;
 
@@ -34,8 +37,9 @@ public sealed class UpdateDistributionEndpoint : ProfitSharingEndpoint<UpdateDis
         });
     }
 
-    public override Task<CreateOrUpdateDistributionResponse> ExecuteAsync(UpdateDistributionRequest req, CancellationToken ct)
+    public override async Task<Results<Ok<CreateOrUpdateDistributionResponse>, NotFound, BadRequest, ProblemHttpResult>> ExecuteAsync(UpdateDistributionRequest req, CancellationToken ct)
     {
-        return _distributionService.UpdateDistribution(req, ct);
+        var result = await _distributionService.UpdateDistribution(req, ct);
+        return result.ToHttpResultWithValidation(Error.DistributionNotFound, Error.BadgeNumberNotFound);
     }
 }

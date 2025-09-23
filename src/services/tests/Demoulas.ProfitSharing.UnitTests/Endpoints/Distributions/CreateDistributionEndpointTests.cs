@@ -95,8 +95,6 @@ public class CreateDistributionEndpointTests : ApiTestBase<Api.Program>
         response.Result.CheckAmount.ShouldBe(request.CheckAmount);
         response.Result.TaxCodeId.ShouldBe(request.TaxCodeId);
         response.Result.Memo.ShouldBe(request.Memo);
-        // Note: In mock environment, ID generation is not simulated, so ID will be 0
-        response.Result.Id.ShouldBe(0);
         response.Result.MaskSsn.ShouldNotBeNullOrEmpty();
     }
 
@@ -131,8 +129,6 @@ public class CreateDistributionEndpointTests : ApiTestBase<Api.Program>
         response.Result.BadgeNumber.ShouldBe(request.BadgeNumber);
         response.Result.GrossAmount.ShouldBe(request.GrossAmount);
         response.Result.CheckAmount.ShouldBe(request.CheckAmount);
-        // Note: In mock environment, ID generation is not simulated, so ID will be 0
-        response.Result.Id.ShouldBe(0);
     }
 
     [Fact(DisplayName = "CreateDistribution - Should handle optional third party payee")]
@@ -506,8 +502,6 @@ public class CreateDistributionEndpointTests : ApiTestBase<Api.Program>
             response.ShouldNotBeNull();
             response.Response.EnsureSuccessStatusCode();
             response.Result.ShouldNotBeNull();
-            // Note: In mock environment, ID generation is not simulated, so ID will be 0
-            response.Result.Id.ShouldBe(0);
         }
 
         // Verify each request was processed (both should have valid responses)

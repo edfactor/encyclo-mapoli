@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
@@ -291,9 +292,14 @@ public sealed class DistributionService : IDistributionService
         }, cancellationToken);
     }
 
-    public async Task<CreateOrUpdateDistributionResponse> UpdateDistribution(UpdateDistributionRequest request, CancellationToken cancellationToken)
+    public async Task<Result<CreateOrUpdateDistributionResponse>> UpdateDistribution(UpdateDistributionRequest request, CancellationToken cancellationToken)
     {
-        ValidateDistributionRequest(request);
+        var validationResult = ValidateDistributionRequest(request);
+        if (!validationResult.IsSuccess)
+        {
+            return Result<CreateOrUpdateDistributionResponse>.Failure(validationResult.Error!);
+        }
+
         return await _dataContextFactory.UseWritableContext(async ctx =>
         {
             var distribution = await ctx.Distributions
@@ -303,13 +309,13 @@ public sealed class DistributionService : IDistributionService
                 .FirstOrDefaultAsync(cancellationToken);
             if (distribution == null)
             {
-                throw new InvalidOperationException("Distribution not found.");
+                return Result<CreateOrUpdateDistributionResponse>.Failure(Error.DistributionNotFound);
             }
             var demographic = await _demographicReaderService.BuildDemographicQuery(ctx, false);
             var dem = await demographic.Where(d => d.BadgeNumber == request.BadgeNumber).FirstOrDefaultAsync(cancellationToken);
             if (dem == null)
             {
-                throw new InvalidOperationException("Badge number not found.");
+                return Result<CreateOrUpdateDistributionResponse>.Failure(Error.BadgeNumberNotFound);
             }
             var balance = await _totalService.GetVestingBalanceForSingleMemberAsync(Common.Contracts.Request.SearchBy.Ssn, dem.Ssn, (short)DateTime.Today.Year, cancellationToken);
             if (request.TaxCodeId == TaxCode.Constants.NormalDistribution.Id && dem.DateOfBirth.Age() > 64)
@@ -322,7 +328,11 @@ public sealed class DistributionService : IDistributionService
             var originalGrossAmount = distribution.GrossAmount;
             if (request.GrossAmount > (balance != default ? balance.VestedBalance - originalGrossAmount : originalGrossAmount))
             {
-                throw new InvalidOperationException($"Gross amount {request.GrossAmount:C} exceeds vested balance {(balance?.VestedBalance ?? 0):C}.");
+                var validationErrors = new Dictionary<string, string[]>
+                {
+                    [nameof(request.GrossAmount)] = [$"Gross amount {request.GrossAmount:C} exceeds vested balance {(balance?.VestedBalance ?? 0):C}."]
+                };
+                return Result<CreateOrUpdateDistributionResponse>.ValidationFailure(validationErrors);
             }
 
             if (request.FrequencyId == DistributionFrequency.Constants.RolloverDirect)
@@ -342,7 +352,9 @@ public sealed class DistributionService : IDistributionService
                 {
                     Address = new Data.Entities.Address() { Street = string.Empty }
                 };
-
+                distribution.ThirdPartyPayee!.Name = request.ThirdPartyPayee.Name;
+                distribution.ThirdPartyPayee!.Payee = request.ThirdPartyPayee.Payee;
+                distribution.ThirdPartyPayee!.Memo = request.ThirdPartyPayee.Memo;
                 distribution.ThirdPartyPayee!.Address.Street = request.ThirdPartyPayee.Address.Street;
                 distribution.ThirdPartyPayee!.Address.Street2 = request.ThirdPartyPayee.Address.Street2;
                 distribution.ThirdPartyPayee!.Address.Street3 = request.ThirdPartyPayee.Address.Street3;
@@ -373,9 +385,10 @@ public sealed class DistributionService : IDistributionService
             distribution.ModifiedAtUtc = DateTime.UtcNow;
 
             await ctx.SaveChangesAsync(cancellationToken);
-            return new CreateOrUpdateDistributionResponse
+            var response = new CreateOrUpdateDistributionResponse
             {
                 Id = distribution.Id,
+                BadgeNumber = request.BadgeNumber,
                 MaskSsn = distribution.Ssn.MaskSsn(),
                 PaymentSequence = distribution.PaymentSequence,
                 StatusId = distribution.StatusId,
@@ -416,26 +429,37 @@ public sealed class DistributionService : IDistributionService
                     }
                 }
             };
+            return Result<CreateOrUpdateDistributionResponse>.Success(response);
         }, cancellationToken);
     }
 
-    private void ValidateDistributionRequest(CreateDistributionRequest request)
+    private Result<bool> ValidateDistributionRequest(CreateDistributionRequest request)
     {
+        var validationErrors = new Dictionary<string, string[]>();
+
+        if (request.BadgeNumber < 1 || request.BadgeNumber > 9_999_999)
+        {
+            validationErrors[nameof(request.BadgeNumber)] = ["BadgeNumber must be a 7-digit number."];
+        }
         if (request.GrossAmount <= 0)
         {
-            throw new ArgumentException("Gross amount must be greater than zero.", nameof(request.GrossAmount));
+            validationErrors[nameof(request.GrossAmount)] = ["Gross amount must be greater than zero."];
         }
         if (request.FederalTaxPercentage < 0 || request.FederalTaxPercentage > 100)
         {
-            throw new ArgumentException("Federal tax percentage must be between 0 and 100.", nameof(request.FederalTaxPercentage));
+            validationErrors[nameof(request.FederalTaxPercentage)] = ["Federal tax percentage must be between 0 and 100."];
         }
         if (request.StateTaxPercentage < 0 || request.StateTaxPercentage > 100)
         {
-            throw new ArgumentException("State tax percentage must be between 0 and 100.", nameof(request.StateTaxPercentage));
+            validationErrors[nameof(request.StateTaxPercentage)] = ["State tax percentage must be between 0 and 100."];
         }
         if (request.ThirdPartyPayee != default && request.FrequencyId != DistributionFrequency.Constants.RolloverDirect)
         {
-            throw new ArgumentException("Third party payee can only be set for Rollover Direct frequency.", nameof(request.ThirdPartyPayee));
+            validationErrors[nameof(request.ThirdPartyPayee)] = ["Third party payee can only be set for Rollover Direct frequency."];
         }
+
+        return validationErrors.Count > 0 
+            ? Result<bool>.ValidationFailure(validationErrors) 
+            : Result<bool>.Success(true);
     }
 }
