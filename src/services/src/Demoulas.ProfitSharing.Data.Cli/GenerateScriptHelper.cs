@@ -31,61 +31,10 @@ internal static class GenerateScriptHelper
         var generateScriptCommand = new Command("generate-upgrade-script", "Generate a SQL script to upgrade the database to the latest migration");
 
         // Add any common options you have
-        commonOptions.ForEach(generateScriptCommand.AddOption);
+        commonOptions.ForEach(o => generateScriptCommand.Add(o));
 
-        generateScriptCommand.SetHandler(async _ =>
-        {
-            var outputPath = configuration["output-file"];
-
-            // Use your existing helper method to retrieve a DbContext.
-            // The ExecuteWithDbContext signature presumably looks something like:
-            //   Task ExecuteWithDbContext(IConfiguration config, string[] args, Func<DbContext, Task> action)
-            await ExecuteWithDbContext(configuration, args, async (_, dbContext) =>
-            {
-                var migrator = dbContext.GetService<IMigrator>();
-
-                var appliedMigrations = await dbContext.Database.GetAppliedMigrationsAsync();
-                var currentMigration = appliedMigrations.LastOrDefault("0");
-
-                Console.WriteLine($"Current DB version: {currentMigration}");
-
-                var hasPendingChanges = await dbContext.Database.GetPendingMigrationsAsync();
-                if (!hasPendingChanges.Any())
-                {
-                    Console.WriteLine("Database is current. No changes need be applied.");
-                    return;
-                }
-
-                // Generate the migration script from "0" (initial) to the latest.
-                // If you only want pending migrations, you can detect the last applied migration and use that instead.
-                var script = migrator.GenerateScript(
-                    fromMigration: currentMigration,
-                    toMigration: null, // null means "to the latest"
-                    options: MigrationsSqlGenerationOptions.Idempotent | MigrationsSqlGenerationOptions.Script
-                );
-
-                if (!string.IsNullOrWhiteSpace(outputPath))
-                {
-                    // Normalize and ensure directory exists; allow any absolute/relative path
-                    var fullPath = Path.GetFullPath(outputPath);
-                    var directory = Path.GetDirectoryName(fullPath);
-                    if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
-                    {
-                        Directory.CreateDirectory(directory);
-                    }
-
-                    // Write the script to a file
-                    await File.WriteAllTextAsync(fullPath, script);
-                    Console.WriteLine($"SQL upgrade script generated at: {fullPath}");
-                }
-                else
-                {
-                    // Print the script to the console
-                    Console.WriteLine("Generated SQL Script:");
-                    Console.WriteLine(script);
-                }
-            });
-        });
+        // Note: handler execution is performed by the caller (Program) to avoid depending on
+        // System.CommandLine handler extension APIs which may change between previews.
 
         return generateScriptCommand;
     }
