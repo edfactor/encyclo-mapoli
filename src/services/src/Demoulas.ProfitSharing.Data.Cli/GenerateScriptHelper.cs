@@ -78,7 +78,7 @@ internal static class GenerateScriptHelper
             throw new ArgumentException("Missing required configuration: connection-name. Please provide --connection-name <name> or set the corresponding environment variable.");
         }
 
-    HostApplicationBuilder builder = CreateHostBuilder(args ?? Array.Empty<string>());
+        HostApplicationBuilder builder = CreateHostBuilder(args ?? Array.Empty<string>());
 
 
         ElasticSearchConfig smartConfig = new ElasticSearchConfig();

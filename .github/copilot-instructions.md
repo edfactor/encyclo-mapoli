@@ -84,26 +84,47 @@ Edge-case examples to cover (must be tested):
 - Invalid enum numeric values or stale enum ids from older UI versions
 
 Developer guidance & patterns:
-- Prefer declarative validators (attributes or FluentValidation) in DTO classes for clarity and testability.
+- Prefer declarative validators (FluentValidation) in DTO classes for clarity and testability.
 - Keep validation logic out of service/business methods; endpoints should validate and then call services with well-formed input.
 - When trimming/normalizing input (for example, truncating an over-long string), document the behavior and return the normalized value or a validation error depending on severity.
 - When limiting collection sizes, return `400 Bad Request` with a clear message when a client exceeds allowable limits.
 - Add tests that assert the actual HTTP response code and message for invalid inputs.
 
-Example (server-side DTO using data annotations):
+Example (server-side DTO using FluentValidation):
+
 ```csharp
+// DTO
 public class SearchRequest
 {
-    [Required]
-    [Range(1, 1000)]
-    public int PageSize { get; init; } = 50;
-
-    [Range(0, 1000000)]
-    public int Offset { get; init; }
-
-    [StringLength(200, MinimumLength = 0)]
-    public string? Query { get; init; }
+  public int PageSize { get; init; } = 50;
+  public int Offset { get; init; }
+  public string? Query { get; init; }
 }
+
+// FluentValidation validator (install FluentValidation and register with FastEndpoints pipeline)
+public class SearchRequestValidator : AbstractValidator<SearchRequest>
+{
+  public SearchRequestValidator()
+  {
+    // numeric range with default value on DTO
+    RuleFor(x => x.PageSize)
+      .InclusiveBetween(1, 1000)
+      .WithMessage("PageSize must be between 1 and 1000.");
+
+    RuleFor(x => x.Offset)
+      .InclusiveBetween(0, 1_000_000)
+      .WithMessage("Offset must be between 0 and 1_000_000.");
+
+    RuleFor(x => x.Query)
+      .MaximumLength(200)
+      .WithMessage("Query must be at most 200 characters long.")
+      .When(x => x.Query != null);
+  }
+}
+
+// Registration example (Program.cs / DI):
+// builder.Services.AddValidatorsFromAssemblyContaining<SearchRequestValidator>();
+// FastEndpoints will pick up FluentValidation validators and return structured ValidationProblem responses.
 ```
 
 Example (frontend TypeScript guard):
@@ -276,9 +297,7 @@ Configuration (appsettings / environment variable keys)
 - `OpenTelemetry:Exporter:Console:Enabled` (bool) - dev only
 - `OpenTelemetry:Tracing:Sampler` (`always_on`|`parentbased_always_on`|`traceidratio`) and `OpenTelemetry:Tracing:SamplerRate` (0.01..1.0)
 - `OpenTelemetry:Metrics:Enabled` (bool)
-- `SecurityTelemetry:EnableSensitiveFieldCounting` (bool) - default false
-- `SecurityTelemetry:SensitiveFields` (array) - e.g., `['Ssn','Salary','BankAccount']`
-- `SecurityTelemetry:HighCardinalityTagging:Enabled` (bool) - default false (only enable with care)
+// SecurityTelemetry configuration keys removed for brevity. Implement telemetry toggles in your host configuration as needed.
 
 Wiring note (important):
 
@@ -295,13 +314,8 @@ Conceptual (non-compiling) example showing the pattern:
 // ...existing code that applies the shared Aspire extension (do not duplicate AddOpenTelemetry)
 // e.g. Demoulas.Common.Logging.Extensions.AspireServiceDefaultExtensions.ApplyDefaults(builder, configuration);
 
-// Register your security telemetry components
-builder.Services.AddSingleton<SecurityTelemetryMiddleware>();
-builder.Services.AddSingleton<SecurityTelemetryService>();
-
-app.UseMiddleware<SecurityTelemetryMiddleware>();
-
-// Inside SecurityTelemetryService or middleware you can use standard runtime telemetry APIs:
+// Register lightweight telemetry components via DI (services/middleware) as appropriate for your host.
+// Inside such components use the runtime telemetry APIs to emit traces and metrics, for example:
 // private static readonly ActivitySource s_activity = new("Demoulas.ProfitSharing.Security");
 // private static readonly Meter s_meter = new("Demoulas.ProfitSharing.Metrics");
 // private static readonly Counter<long> s_sensitiveFieldCounter = s_meter.CreateCounter<long>("ps_sensitive_field_access_total");
@@ -310,13 +324,13 @@ app.UseMiddleware<SecurityTelemetryMiddleware>();
 
 Notes:
 - Keep metric labels low-cardinality (service, environment, endpoint_category). For per-user investigations emit a log or trace exemplar with `user_id` rather than attaching `user_id` to every metric label.
-- Guard sensitive counters behind a configuration toggle (e.g., `SecurityTelemetry:EnableSensitiveFieldCounting`) and ensure the default is off for production until approved.
+-- Guard sensitive counters behind a configuration toggle and ensure sensible defaults (PII counting disabled by default in production) until approved.
 
 Implementation guidance and cautions:
 - Avoid high-cardinality metric labels (e.g., using raw `user_id` on every metric). High-cardinality labels hurt metric backends and performance.
 - Use low-cardinality dimensions on metrics (e.g., `user_role`, `org_id`, `endpoint_category`) and emit per-user details to logs/traces when thresholds are exceeded. Link logs/traces back to exemplars when supported.
 - For per-user investigations, use traces (sampled with higher rate for suspicious requests) and structured logs containing `user_id`, `badgeNumber`, `OracleHcmId` (mask or hash values when necessary) and a telemetry correlation id.
-- Provide toggles for `SecurityTelemetry:EnableSensitiveFieldCounting` and ensure it defaults to `false` in production unless IT has approved telemetry PII handling and storage.
+-- Provide toggles for any sensitive-field counting and ensure they default to disabled in production unless approved by IT/privacy.
 - When counting access to sensitive fields, the implementation should report counts to a metric called e.g. `ps_sensitive_field_access_total{field="Ssn", endpoint="/api/employee"}` — but do not include `user_id` as a cardinality label in metric series. Instead, emit an associated log or trace stamped with the `user_id` and correlation id for detailed investigation.
 
 Recommended metrics (low-cardinality) to emit
@@ -370,7 +384,7 @@ Developer checklist for implementing security telemetry
 3. Implement middleware that:
    - extracts `user_id`, `user_role`, `correlation_id` from the request/security principal;
    - measures response size and increments `ps_large_downloads_total` when thresholds are exceeded;
-   - increments `ps_sensitive_field_access_total{field=...}` when application code reads sensitive fields (guarded behind `SecurityTelemetry:EnableSensitiveFieldCounting`).
+  - increments `ps_sensitive_field_access_total{field=...}` when application code reads sensitive fields (guarded behind a configuration toggle).
 4. Emit structured logs for sensitive-field reads (masked/hashes) with correlation ids.
 5. Add Prometheus/OTel collection and alert rules in infra repo / runbook.
 

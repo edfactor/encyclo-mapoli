@@ -20,7 +20,7 @@ public sealed class Program
     {
         try
         {
-            #pragma warning disable S3928
+#pragma warning disable S3928
             var configuration = new ConfigurationBuilder()
                 .AddCommandLine(args)
                 .AddEnvironmentVariables()
@@ -31,9 +31,9 @@ public sealed class Program
             await Console.Out.WriteLineAsync("[DEBUG] Configuration[\"connection-name\"]: " + (configuration["connection-name"] ?? "(null)"));
             await Console.Out.WriteLineAsync("[DEBUG] Env[connection-name]: " + (Environment.GetEnvironmentVariable("connection-name") ?? "(null)"));
 
-        var rootCommand = new RootCommand("CLI tool for database operations");
+            var rootCommand = new RootCommand("CLI tool for database operations");
 
-        var commonOptions = new List<Option>
+            var commonOptions = new List<Option>
         {
             new Option<string>("--connection-name") { Description = "The name of the configuration property that holds the connection string" },
             new Option<string>("--sql-file") { Description = "The path to the custom SQL file" },
@@ -41,93 +41,93 @@ public sealed class Program
             new Option<string>("--output-file") { Description = "The path to save the file (if applicable)" }
         };
 
-        var upgradeDbCommand = new Command("upgrade-db", "Apply migrations to upgrade the database");
-        commonOptions.ForEach(o => upgradeDbCommand.Add(o));
+            var upgradeDbCommand = new Command("upgrade-db", "Apply migrations to upgrade the database");
+            commonOptions.ForEach(o => upgradeDbCommand.Add(o));
 
-        // Handler implemented in dispatcher below
+            // Handler implemented in dispatcher below
 
-        var dropRecreateDbCommand = new Command("drop-recreate-db", "Drop and recreate the database");
-        commonOptions.ForEach(o => dropRecreateDbCommand.Add(o));
+            var dropRecreateDbCommand = new Command("drop-recreate-db", "Drop and recreate the database");
+            commonOptions.ForEach(o => dropRecreateDbCommand.Add(o));
 
-        // Handler implemented in dispatcher below
+            // Handler implemented in dispatcher below
 
-        var runSqlCommand = new Command("import-from-ready", "Run a custom SQL script after migrations");
-        commonOptions.ForEach(o => runSqlCommand.Add(o));
+            var runSqlCommand = new Command("import-from-ready", "Run a custom SQL script after migrations");
+            commonOptions.ForEach(o => runSqlCommand.Add(o));
 
-        // Handler implemented in dispatcher below
+            // Handler implemented in dispatcher below
 
-        var runSqlCommandForNavigation = new Command("import-from-navigation", "Run a custom SQL script to add all navigations");
-        commonOptions.ForEach(o => runSqlCommandForNavigation.Add(o));
+            var runSqlCommandForNavigation = new Command("import-from-navigation", "Run a custom SQL script to add all navigations");
+            commonOptions.ForEach(o => runSqlCommandForNavigation.Add(o));
 
-        // Handler implemented in dispatcher below
+            // Handler implemented in dispatcher below
 
-        var generateDgmlCommand = new Command("generate-dgml", "Generate a DGML file for the DbContext model");
-        commonOptions.ForEach(o => generateDgmlCommand.Add(o));
+            var generateDgmlCommand = new Command("generate-dgml", "Generate a DGML file for the DbContext model");
+            commonOptions.ForEach(o => generateDgmlCommand.Add(o));
 
-        // Handler implemented in dispatcher below
+            // Handler implemented in dispatcher below
 
-        var generateMarkdownCommand = new Command("generate-markdown", "Generate a Markdown file from DGML");
-        commonOptions.ForEach(o => generateMarkdownCommand.Add(o));
+            var generateMarkdownCommand = new Command("generate-markdown", "Generate a Markdown file from DGML");
+            commonOptions.ForEach(o => generateMarkdownCommand.Add(o));
 
-        // Handler implemented in dispatcher below
+            // Handler implemented in dispatcher below
 
-        var validateImportCommand = new Command("validate-import", "validate an import from ready against an existing database");
-        commonOptions.ForEach(o => validateImportCommand.Add(o));
-    validateImportCommand.Add(new Option<string>("--current-year") { Description = "Current year of profit sharing" });
+            var validateImportCommand = new Command("validate-import", "validate an import from ready against an existing database");
+            commonOptions.ForEach(o => validateImportCommand.Add(o));
+            validateImportCommand.Add(new Option<string>("--current-year") { Description = "Current year of profit sharing" });
 
-        // Handler implemented in dispatcher below
+            // Handler implemented in dispatcher below
 
-        rootCommand.Add(upgradeDbCommand);
-        rootCommand.Add(dropRecreateDbCommand);
-        rootCommand.Add(runSqlCommand);
-        rootCommand.Add(generateDgmlCommand);
-        rootCommand.Add(generateMarkdownCommand);
-        // Create the generate-upgrade-script command and add it so we can attach a handler below
-    var generateUpgradeScriptCmd = GenerateScriptHelper.CreateGenerateUpgradeScriptCommand(configuration, args ?? Array.Empty<string>(), commonOptions);
-        rootCommand.Add(generateUpgradeScriptCmd);
-        rootCommand.Add(validateImportCommand);
-        rootCommand.Add(runSqlCommandForNavigation);
+            rootCommand.Add(upgradeDbCommand);
+            rootCommand.Add(dropRecreateDbCommand);
+            rootCommand.Add(runSqlCommand);
+            rootCommand.Add(generateDgmlCommand);
+            rootCommand.Add(generateMarkdownCommand);
+            // Create the generate-upgrade-script command and add it so we can attach a handler below
+            var generateUpgradeScriptCmd = GenerateScriptHelper.CreateGenerateUpgradeScriptCommand(configuration, args ?? Array.Empty<string>(), commonOptions);
+            rootCommand.Add(generateUpgradeScriptCmd);
+            rootCommand.Add(validateImportCommand);
+            rootCommand.Add(runSqlCommandForNavigation);
 
-        var runSqlCommandForUatNavigation = new Command("import-uat-navigation", "Run a custom SQL script to add UAT navigations");
-        commonOptions.ForEach(o => runSqlCommandForUatNavigation.Add(o));
+            var runSqlCommandForUatNavigation = new Command("import-uat-navigation", "Run a custom SQL script to add UAT navigations");
+            commonOptions.ForEach(o => runSqlCommandForUatNavigation.Add(o));
 
-        rootCommand.Add(runSqlCommandForUatNavigation);
+            rootCommand.Add(runSqlCommandForUatNavigation);
 
-        // Build typed options for RC SetHandler bindings
-        var connectionNameOption = new Option<string?>("--connection-name");
-        var sqlFileOption = new Option<string?>("--sql-file");
-        var sourceSchemaOption = new Option<string?>("--source-schema");
-        var outputFileOption = new Option<string?>("--output-file");
-        var currentYearOption = new Option<string?>("--current-year");
+            // Build typed options for RC SetHandler bindings
+            var connectionNameOption = new Option<string?>("--connection-name");
+            var sqlFileOption = new Option<string?>("--sql-file");
+            var sourceSchemaOption = new Option<string?>("--source-schema");
+            var outputFileOption = new Option<string?>("--output-file");
+            var currentYearOption = new Option<string?>("--current-year");
 
-        var cmds = new[] { upgradeDbCommand, dropRecreateDbCommand, runSqlCommand, runSqlCommandForNavigation, runSqlCommandForUatNavigation, generateDgmlCommand, generateMarkdownCommand, validateImportCommand, generateUpgradeScriptCmd };
+            var cmds = new[] { upgradeDbCommand, dropRecreateDbCommand, runSqlCommand, runSqlCommandForNavigation, runSqlCommandForUatNavigation, generateDgmlCommand, generateMarkdownCommand, validateImportCommand, generateUpgradeScriptCmd };
 
-        // Use the Options collection directly to avoid relying on extension methods that may not be available
-        cmds.Select(c => c.Options).ToList().ForEach(options =>
-        {
-            options.Add(connectionNameOption);
-            options.Add(sqlFileOption);
-            options.Add(sourceSchemaOption);
-            options.Add(outputFileOption);
-            options.Add(currentYearOption);
-        });
+            // Use the Options collection directly to avoid relying on extension methods that may not be available
+            cmds.Select(c => c.Options).ToList().ForEach(options =>
+            {
+                options.Add(connectionNameOption);
+                options.Add(sqlFileOption);
+                options.Add(sourceSchemaOption);
+                options.Add(outputFileOption);
+                options.Add(currentYearOption);
+            });
 
-        // Determine which command was invoked. Prefer the first non-option token from args as the command name.
-    var invokedCommand = (args ?? Array.Empty<string>()).FirstOrDefault(a => !string.IsNullOrWhiteSpace(a) && !a.StartsWith("-", StringComparison.Ordinal)) ?? string.Empty;
+            // Determine which command was invoked. Prefer the first non-option token from args as the command name.
+            var invokedCommand = (args ?? Array.Empty<string>()).FirstOrDefault(a => !string.IsNullOrWhiteSpace(a) && !a.StartsWith("-", StringComparison.Ordinal)) ?? string.Empty;
 
-        // Read option values from the already-configured IConfiguration (it includes command-line args via AddCommandLine)
-        string? connectionName = configuration["connection-name"];
-        string? sqlFile = configuration["sql-file"];
-        string? sourceSchema = configuration["source-schema"];
-        string? outputFile = configuration["output-file"];
-        string? currentYear = configuration["current-year"];
+            // Read option values from the already-configured IConfiguration (it includes command-line args via AddCommandLine)
+            string? connectionName = configuration["connection-name"];
+            string? sqlFile = configuration["sql-file"];
+            string? sourceSchema = configuration["source-schema"];
+            string? outputFile = configuration["output-file"];
+            string? currentYear = configuration["current-year"];
 
-        // Populate environment variables that the existing Execute* methods may read from IConfiguration or Env if required
-        if (!string.IsNullOrEmpty(connectionName)) { Environment.SetEnvironmentVariable("connection-name", connectionName); }
-        if (!string.IsNullOrEmpty(sqlFile)) { Environment.SetEnvironmentVariable("sql-file", sqlFile); }
-        if (!string.IsNullOrEmpty(sourceSchema)) { Environment.SetEnvironmentVariable("source-schema", sourceSchema); }
-        if (!string.IsNullOrEmpty(outputFile)) { Environment.SetEnvironmentVariable("output-file", outputFile); }
-        if (!string.IsNullOrEmpty(currentYear)) { Environment.SetEnvironmentVariable("current-year", currentYear); }
+            // Populate environment variables that the existing Execute* methods may read from IConfiguration or Env if required
+            if (!string.IsNullOrEmpty(connectionName)) { Environment.SetEnvironmentVariable("connection-name", connectionName); }
+            if (!string.IsNullOrEmpty(sqlFile)) { Environment.SetEnvironmentVariable("sql-file", sqlFile); }
+            if (!string.IsNullOrEmpty(sourceSchema)) { Environment.SetEnvironmentVariable("source-schema", sourceSchema); }
+            if (!string.IsNullOrEmpty(outputFile)) { Environment.SetEnvironmentVariable("output-file", outputFile); }
+            if (!string.IsNullOrEmpty(currentYear)) { Environment.SetEnvironmentVariable("current-year", currentYear); }
 
             // Dispatch to the appropriate implementation
             switch (invokedCommand)
