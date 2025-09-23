@@ -13,6 +13,7 @@ using Demoulas.ProfitSharing.Services.Caching.Extensions;
 using Demoulas.ProfitSharing.Services.Certificates;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.ItDevOps;
+using Demoulas.ProfitSharing.Services.Lookup;
 using Demoulas.ProfitSharing.Services.MasterInquiry;
 using Demoulas.ProfitSharing.Services.Military;
 using Demoulas.ProfitSharing.Services.Navigations;
@@ -94,6 +95,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IPayBenReportService, PayBenReportService>();
 
         _ = builder.Services.AddScoped<IReportRunnerService, ReportRunnerService>();
+        _ = builder.Services.AddScoped<IStateTaxLookupService, StateTaxLookupService>();
 
 
         builder.AddProjectCachingServices();
