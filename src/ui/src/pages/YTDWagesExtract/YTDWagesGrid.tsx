@@ -1,11 +1,11 @@
 import { useMemo } from "react";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { DSMGrid, Pagination } from "smart-ui-library";
 
 import { RefObject } from "react";
 import ReportSummary from "../../components/ReportSummary";
 import { EmployeeWagesForYearResponse } from "../../reduxstore/types";
 import { GetYTDWagesColumns } from "./YTDWagesGridColumns";
-import { PaginationState } from "./hooks/useYTDWagesReducer";
+import { GridPaginationState, GridPaginationActions } from "../../hooks/useGridPagination";
 
 interface YTDWagesGridProps {
   innerRef: RefObject<HTMLDivElement | null>;
@@ -13,9 +13,9 @@ interface YTDWagesGridProps {
   isLoading: boolean;
   showData: boolean;
   hasResults: boolean;
-  pagination: PaginationState;
-  onPaginationChange: (pageNumber: number, pageSize: number, sortParams: ISortParams) => void;
-  onSortChange: (sortParams: ISortParams) => void;
+  pagination: GridPaginationState & GridPaginationActions;
+  onPaginationChange: (pageNumber: number, pageSize: number) => void;
+  onSortChange: (sortParams: any) => void;
 }
 
 const YTDWagesGrid = ({
@@ -29,16 +29,6 @@ const YTDWagesGrid = ({
   onSortChange
 }: YTDWagesGridProps) => {
   const columnDefs = useMemo(() => GetYTDWagesColumns(), []);
-
-  const handlePaginationChange = (pageNumber: number) => {
-    // Pagination component sends 1-based page number, convert to 0-based
-    onPaginationChange(pageNumber - 1, pagination.pageSize, pagination.sortParams);
-  };
-
-  const handlePageSizeChange = (pageSize: number) => {
-    // When page size changes, reset to page 0 with new page size
-    onPaginationChange(0, pageSize, pagination.sortParams);
-  };
 
   return (
     <>
@@ -57,16 +47,17 @@ const YTDWagesGrid = ({
         </div>
       )}
       {hasResults && data?.response && (
-        <>
-          <Pagination
-            rowsPerPageOptions={[5, 10, 25, 50, 100]}
-            pageNumber={pagination.pageNumber}
-            setPageNumber={handlePaginationChange}
-            pageSize={pagination.pageSize}
-            setPageSize={handlePageSizeChange}
-            recordCount={data.response.total || 0}
-          />
-        </>
+        <Pagination
+          pageNumber={pagination.pageNumber}
+          setPageNumber={(value: number) => {
+            onPaginationChange(value - 1, pagination.pageSize);
+          }}
+          pageSize={pagination.pageSize}
+          setPageSize={(value: number) => {
+            onPaginationChange(0, value);
+          }}
+          recordCount={data.response.total || 0}
+        />
       )}
     </>
   );

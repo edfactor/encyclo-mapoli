@@ -15,9 +15,7 @@ const YTDWages: React.FC = () => {
     pagination,
     showData,
     hasResults,
-    executeSearch,
-    handlePaginationChange,
-    handleSortChange
+    executeSearch
   } = useYTDWages();
 
   const renderActionNode = () => {
@@ -55,8 +53,8 @@ const YTDWages: React.FC = () => {
             showData={showData}
             hasResults={hasResults}
             pagination={pagination}
-            onPaginationChange={handlePaginationChange}
-            onSortChange={handleSortChange}
+            onPaginationChange={pagination.handlePaginationChange}
+            onSortChange={pagination.handleSortChange}
           />
         </Grid>
       </Grid>
