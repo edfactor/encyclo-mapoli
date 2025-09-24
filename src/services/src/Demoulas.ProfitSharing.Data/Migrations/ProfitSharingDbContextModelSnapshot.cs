@@ -28056,11 +28056,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<decimal>("CheckAmount")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("CHECK_AMOUNT");
-
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
@@ -28077,11 +28072,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("FEDERAL_TAX_AMOUNT");
-
-                    b.Property<decimal>("FederalTaxPercentage")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("FEDERAL_TAX_PERCENTAGE");
 
                     b.Property<string>("ForTheBenefitOfAccountType")
                         .HasMaxLength(30)
@@ -28149,11 +28139,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("STATE_TAX_AMOUNT");
 
-                    b.Property<decimal>("StateTaxPercentage")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("STATE_TAX_PERCENTAGE");
-
                     b.Property<string>("StatusId")
                         .IsRequired()
                         .HasColumnType("NVARCHAR2(1)")
@@ -28171,6 +28156,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .IsRequired()
                         .HasColumnType("NVARCHAR2(1)")
                         .HasColumnName("TAX_CODE_ID");
+
+                    b.Property<string>("ThirdPartyPayeeAccount")
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)")
+                        .HasColumnName("THIRD_PARTY_PAYEE_ACCOUNT");
 
                     b.Property<int?>("ThirdPartyPayeeId")
                         .HasColumnType("NUMBER(10)")
@@ -28622,11 +28612,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("ID");
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Account")
-                        .HasMaxLength(30)
-                        .HasColumnType("NVARCHAR2(30)")
-                        .HasColumnName("ACCOUNT");
 
                     b.Property<string>("Memo")
                         .HasMaxLength(128)

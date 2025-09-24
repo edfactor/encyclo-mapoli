@@ -1,4 +1,4 @@
-import type { SortedPaginationRequestDto, ProfitYearRequest } from "../common/api";
+import type { ProfitYearRequest, SortedPaginationRequestDto } from "../common/api";
 
 export interface ExecutiveHoursAndDollarsRequestDto extends ProfitYearRequest {
   badgeNumber?: number;
@@ -39,11 +39,11 @@ export interface ExecutiveHoursAndDollars {
   employmentStatusName: string;
 }
 
-export interface EmployeeWagesForYearRequestDto extends ProfitYearRequest {
+export interface ExecutiveEmployeeWagesForYearRequestDto extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
 }
 
-export interface EmployeeWagesForYear {
+export interface ExecutiveEmployeeWagesForYear {
   badgeNumber: number;
   hoursExecutive: number;
   incomeExecutive: number;

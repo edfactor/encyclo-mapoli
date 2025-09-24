@@ -10,6 +10,7 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Common.Common;
 using Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using MockQueryable.Moq;
@@ -23,6 +24,113 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
     private readonly Mock<ProfitSharingDbContext> _profitSharingDbContext;
     private readonly Mock<ProfitSharingReadOnlyDbContext> _profitSharingReadOnlyDbContext;
     private readonly Mock<DemoulasCommonDataContext> _storeInfoDbContext;
+
+    /// <summary>
+    /// Creates a mock DbSet that uses a backing list to persist Add/Remove operations
+    /// </summary>
+    private static Mock<DbSet<T>> BuildMockDbSetWithBackingList<T>(List<T> data) where T : class
+    {
+        // Start with IQueryable-enabled DbSet backed by the list
+        var mockSet = data.BuildMockDbSet();
+
+        // Auto-increment counter for ID generation (for entities with Id property)
+        var nextId = data.Count > 0 ? GetMaxId(data) + 1 : 1;
+
+        // Ensure Add/Remove operations mutate the backing list
+        mockSet.Setup(s => s.Add(It.IsAny<T>()))
+            .Callback<T>(e => {
+                SetIdIfNeeded(e, nextId++);
+                data.Add(e);
+            });
+        mockSet.Setup(s => s.AddRange(It.IsAny<IEnumerable<T>>()))
+            .Callback<IEnumerable<T>>(range => {
+                foreach (var e in range)
+                {
+                    SetIdIfNeeded(e, nextId++);
+                    data.Add(e);
+                }
+            });
+        mockSet.Setup(s => s.Remove(It.IsAny<T>()))
+            .Callback<T>(e => data.Remove(e));
+        mockSet.Setup(s => s.RemoveRange(It.IsAny<IEnumerable<T>>()))
+            .Callback<IEnumerable<T>>(range =>
+            {
+                foreach (var e in range.ToList())
+                {
+                    data.Remove(e);
+                }
+            });
+
+        // Async adds used by service (e.g., DemographicSyncAudit.AddAsync)
+        mockSet.Setup(s => s.AddAsync(It.IsAny<T>(), It.IsAny<CancellationToken>()))
+            .Callback<T, CancellationToken>((e, _) => {
+                SetIdIfNeeded(e, nextId++);
+                data.Add(e);
+            })
+            .Returns<T, CancellationToken>((e, _) =>
+                ValueTask.FromResult((EntityEntry<T>)null!));
+
+        return mockSet;
+    }
+
+    /// <summary>
+    /// Helper method to set ID property for entities that have one
+    /// </summary>
+    private static void SetIdIfNeeded<T>(T entity, long id) where T : class
+    {
+        var idProperty = typeof(T).GetProperty("Id");
+        if (idProperty != null && idProperty.CanWrite)
+        {
+            // Convert the id to the appropriate type
+            var targetType = idProperty.PropertyType;
+            if (targetType == typeof(long))
+            {
+                idProperty.SetValue(entity, id);
+            }
+            else if (targetType == typeof(int))
+            {
+                idProperty.SetValue(entity, (int)id);
+            }
+            else if (targetType == typeof(short))
+            {
+                idProperty.SetValue(entity, (short)id);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Helper method to get the maximum ID from existing entities
+    /// </summary>
+    private static long GetMaxId<T>(List<T> data) where T : class
+    {
+        var idProperty = typeof(T).GetProperty("Id");
+        if (idProperty == null)
+        {
+            return 0;
+        }
+
+        long maxId = 0;
+        foreach (var item in data)
+        {
+            var value = idProperty.GetValue(item);
+            if (value != null)
+            {
+                if (value is long longVal && longVal > maxId)
+                {
+                    maxId = longVal;
+                }
+                else if (value is int intVal && intVal > maxId)
+                {
+                    maxId = intVal;
+                }
+                else if (value is short shortVal && shortVal > maxId)
+                {
+                    maxId = shortVal;
+                }
+            }
+        }
+        return maxId;
+    }
 
     private MockDataContextFactory()
     {
@@ -78,6 +186,17 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         var mockTaxCodes = taxCodes.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.TaxCodes).Returns(mockTaxCodes.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.TaxCodes).Returns(mockTaxCodes.Object);
+
+        var stateTaxes = new List<StateTax>()
+        {
+            new StateTax() { Abbreviation = "NH", Rate = 0.00m, UserModified = "TestUser", DateModified = DateOnly.FromDateTime(DateTime.Today) },
+            new StateTax() { Abbreviation = "CA", Rate = 13.30m, UserModified = "TestUser", DateModified = DateOnly.FromDateTime(DateTime.Today) },
+            new StateTax() { Abbreviation = "TX", Rate = 0.00m, UserModified = "TestUser", DateModified = DateOnly.FromDateTime(DateTime.Today) },
+            new StateTax() { Abbreviation = "NY", Rate = 8.82m, UserModified = "TestUser", DateModified = DateOnly.FromDateTime(DateTime.Today) }
+        };
+        var mockStateTaxes = stateTaxes.BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.StateTaxes).Returns(mockStateTaxes.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.StateTaxes).Returns(mockStateTaxes.Object);
 
         var employmentTypes = new List<EmploymentType>()
         {
@@ -183,7 +302,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext.Setup(m => m.Departments).Returns(mockDepartments.Object);
 
         var distributions = new DistributionFaker().Generate(500);
-        var mockDistributions = distributions.BuildMockDbSet();
+        var mockDistributions = BuildMockDbSetWithBackingList(distributions);
         _profitSharingDbContext.Setup(m => m.Distributions).Returns(mockDistributions.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Distributions).Returns(mockDistributions.Object);
 
