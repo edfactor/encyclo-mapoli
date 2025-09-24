@@ -141,6 +141,93 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     }
   }, [searchParams, dispatch]);
 
+  // Add state to track when to refresh data after save
+  const [shouldRefreshData, setShouldRefreshData] = useState(false);
+  const [saveSuccessType, setSaveSuccessType] = useState<'single' | 'bulk' | null>(null);
+  const [successMessages, setSuccessMessages] = useState<{ message: string, type: 'single' | 'bulk' }[]>([]);
+
+  // Define a function to refresh the data after save
+  const refreshDataAfterSave = useCallback((successMessage: string, isBulk: boolean) => {
+    if (searchParams) {
+      // Store success message to display after refresh
+      setSuccessMessages(prev => [...prev, { 
+        message: successMessage, 
+        type: isBulk ? 'bulk' : 'single' 
+      }]);
+      
+      // Set flag to trigger refresh in the useEffect
+      setShouldRefreshData(true);
+      setSaveSuccessType(isBulk ? 'bulk' : 'single');
+    } else {
+      // If no search params, just show message immediately
+      dispatch(
+        setMessage({
+          ...Messages.TerminationSaveSuccess,
+          message: {
+            ...Messages.TerminationSaveSuccess.message,
+            message: successMessage
+          }
+        })
+      );
+    }
+  }, [searchParams, dispatch]);
+
+  // Effect to refresh data after save
+  useEffect(() => {
+    const refreshData = async () => {
+      if (shouldRefreshData && searchParams) {
+        try {
+          // Construct search params with current pagination and sort
+          const params = {
+            ...searchParams,
+            pageNumber,
+            pageSize,
+            sortBy: sortParams.sortBy,
+            isSortDescending: sortParams.isSortDescending
+          };
+          
+          // Perform the search to get fresh data
+          await triggerSearch(params).unwrap();
+          
+          // Show success messages after refresh
+          if (successMessages.length > 0) {
+            // Get the most recent message
+            const latestMessage = successMessages[successMessages.length - 1];
+            
+            // Show appropriate message based on type
+            const messageTemplate = latestMessage.type === 'bulk' 
+              ? Messages.TerminationBulkSaveSuccess 
+              : Messages.TerminationSaveSuccess;
+              
+            dispatch(
+              setMessage({
+                ...messageTemplate,
+                message: {
+                  ...messageTemplate.message,
+                  message: latestMessage.message
+                }
+              })
+            );
+            
+            // Clear messages after displaying
+            setSuccessMessages([]);
+          }
+        } catch (error) {
+          console.error("Error refreshing termination data:", error);
+          if (onErrorOccurred) {
+            onErrorOccurred();
+          }
+        } finally {
+          // Reset refresh flag
+          setShouldRefreshData(false);
+          setSaveSuccessType(null);
+        }
+      }
+    };
+    
+    refreshData();
+  }, [shouldRefreshData, searchParams, pageNumber, pageSize, sortParams, triggerSearch, dispatch, successMessages, onErrorOccurred]);
+
   const handleSave = useCallback(
     async (request: ForfeitureAdjustmentUpdateRequest, name: string) => {
       const rowId = request.badgeNumber; // Use badgeNumber as unique identifier
@@ -157,7 +244,9 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
         // Prepare success message and refresh grid
         const employeeName = name || "the selected employee";
         const successMessage = `The forfeiture adjustment of amount $${formatNumberWithComma(request.forfeitureAmount)} for ${employeeName} saved successfully`;
-        refreshGridAfterSave(successMessage);
+        
+        // Use the new function to refresh data and show success message
+        refreshDataAfterSave(successMessage, false);
       } catch (error) {
         console.error("Failed to save forfeiture adjustment:", error);
         
@@ -184,7 +273,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       updateForfeitureAdjustment,
       editState,
       onUnsavedChanges,
-      refreshGridAfterSave,
+      refreshDataAfterSave,
       dispatch,
       onErrorOccurred
     ]
@@ -321,24 +410,26 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       editState.addLoadingRows(badgeNumbers);
 
       try {
+        // Call API to save bulk changes
         await updateForfeitureAdjustmentBulk(requests);
 
         // Clear edited values for saved requests
         const rowKeys = requests.map(request => `${request.badgeNumber}-${request.profitYear}`);
         editState.clearEditedValues(rowKeys);
 
-        // Clear selection after successful bulk save
+        // Clear selection
         selectionState.clearSelection();
 
-        // Check for remaining edits after clearing the saved ones
+        // Check for remaining edits
         const remainingEditKeys = Object.keys(editState.editedValues).filter(key => !rowKeys.includes(key));
         onUnsavedChanges(remainingEditKeys.length > 0);
 
         // Prepare bulk success message and refresh grid
         const employeeNames = names.map(name => name || "Unknown Employee");
         const bulkSuccessMessage = `Members affected: ${employeeNames.join("; ")}`;
-        refreshGridAfterSave(bulkSuccessMessage, true);
-
+        
+        // Use the new function to refresh data and show success message
+        refreshDataAfterSave(bulkSuccessMessage, true);
       } catch (error) {
         console.error("Failed to save forfeiture adjustments:", error);
         
@@ -367,7 +458,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       editState,
       selectionState,
       onUnsavedChanges,
-      refreshGridAfterSave,
+      refreshDataAfterSave,
       dispatch,
       onErrorOccurred
     ]
