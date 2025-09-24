@@ -1,18 +1,24 @@
-import { Divider } from "@mui/material";
-import { Grid } from "@mui/material";
-import { useState } from "react";
+import { Divider, Grid } from "@mui/material";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import { useRef } from "react";
 import { Page } from "smart-ui-library";
 import DuplicateNamesAndBirthdaysGrid from "./DuplicateNamesAndBirthdaysGrid";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import useDuplicateNamesAndBirthdays from "./hooks/useDuplicateNamesAndBirthdays";
 
 const DuplicateNamesAndBirthdays = () => {
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const componentRef = useRef<HTMLDivElement>(null);
+  const { searchResults, isSearching, pagination, showData, hasResults } =
+    useDuplicateNamesAndBirthdays();
+
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
   };
+
+  const recordCount = searchResults?.response?.total || 0;
+
   return (
     <Page
-      label="Duplicate Names and Birthdays"
+      label={`Duplicate Names and Birthdays (${recordCount} records)`}
       actionNode={renderActionNode()}>
       <Grid
         container
@@ -23,8 +29,14 @@ const DuplicateNamesAndBirthdays = () => {
 
         <Grid width="100%">
           <DuplicateNamesAndBirthdaysGrid
-            setInitialSearchLoaded={setInitialSearchLoaded}
-            initialSearchLoaded={initialSearchLoaded}
+            innerRef={componentRef}
+            data={searchResults}
+            isLoading={isSearching}
+            showData={showData}
+            hasResults={hasResults ?? false}
+            pagination={pagination}
+            onPaginationChange={pagination.handlePaginationChange}
+            onSortChange={pagination.handleSortChange}
           />
         </Grid>
       </Grid>

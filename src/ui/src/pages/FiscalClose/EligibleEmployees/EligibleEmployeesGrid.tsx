@@ -1,107 +1,61 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSelector } from "react-redux";
-import { useLazyGetEligibleEmployeesQuery } from "reduxstore/api/YearsEndApi";
-import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { RefObject, useMemo } from "react";
+import { DSMGrid, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
+import { EligibleEmployeesResponse } from "../../../reduxstore/types";
 import { GetEligibleEmployeesColumns } from "./EligibleEmployeesGridColumns";
+import { GridPaginationState, GridPaginationActions } from "../../../hooks/useGridPagination";
 
 interface EligibleEmployeesGridProps {
-  initialSearchLoaded: boolean;
-  setInitialSearchLoaded: (loaded: boolean) => void;
+  innerRef: RefObject<HTMLDivElement | null>;
+  data: EligibleEmployeesResponse | null;
+  isLoading: boolean;
+  showData: boolean;
+  hasResults: boolean;
+  pagination: GridPaginationState & GridPaginationActions;
+  onPaginationChange: (pageNumber: number, pageSize: number) => void;
+  onSortChange: (sortParams: any) => void;
 }
 
-const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
-  initialSearchLoaded,
-  setInitialSearchLoaded
-}) => {
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
-    isSortDescending: false
-  });
-
-  const { eligibleEmployees, eligibleEmployeesQueryParams } = useSelector((state: RootState) => state.yearsEnd);
-
-  const sortEventHandler = (update: ISortParams) => setSortParams(update);
+const EligibleEmployeesGrid = ({
+  innerRef,
+  data,
+  isLoading,
+  showData,
+  hasResults,
+  pagination,
+  onPaginationChange,
+  onSortChange
+}: EligibleEmployeesGridProps) => {
   const columnDefs = useMemo(() => GetEligibleEmployeesColumns(), []);
-
-  const [triggerSearch, { isFetching }] = useLazyGetEligibleEmployeesQuery();
-
-  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-
-  const onSearch = useCallback(async () => {
-    const request = {
-      profitYear: eligibleEmployeesQueryParams?.profitYear ?? 0,
-      pagination: {
-        skip: pageNumber * pageSize,
-        take: pageSize,
-        sortBy: sortParams.sortBy,
-        isSortDescending: sortParams.isSortDescending
-      }
-    };
-
-    await triggerSearch(request, false);
-  }, [
-    eligibleEmployeesQueryParams?.profitYear,
-    pageNumber,
-    pageSize,
-    sortParams.isSortDescending,
-    sortParams.sortBy,
-    triggerSearch
-  ]);
-
-  useEffect(() => {
-    if (hasToken && initialSearchLoaded) {
-      onSearch();
-    }
-  }, [hasToken, initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
-
-  // Need a useEffect on a change in eligibleEmployees to reset the page number when total count changes (new search, not pagination)
-  const prevEligibleEmployees = useRef<any>(null);
-  useEffect(() => {
-    if (
-      eligibleEmployees !== prevEligibleEmployees.current &&
-      eligibleEmployees?.response?.total !== undefined &&
-      eligibleEmployees.response.total !== prevEligibleEmployees.current?.response?.total
-    ) {
-      setPageNumber(0);
-    }
-    prevEligibleEmployees.current = eligibleEmployees;
-  }, [eligibleEmployees]);
 
   return (
     <>
-      {eligibleEmployees?.response && (
-        <>
-          <ReportSummary report={eligibleEmployees} />
+      {showData && data?.response && (
+        <div ref={innerRef}>
+          <ReportSummary report={data} />
           <DSMGrid
             preferenceKey={"ELIGIBLE_EMPLOYEES"}
-            isLoading={isFetching}
-            handleSortChanged={sortEventHandler}
+            isLoading={isLoading}
+            handleSortChanged={onSortChange}
             providedOptions={{
-              rowData: eligibleEmployees?.response.results,
+              rowData: data.response.results,
               columnDefs: columnDefs,
               suppressMultiSort: true
             }}
           />
-        </>
+        </div>
       )}
-      {!!eligibleEmployees && eligibleEmployees.response.results.length > 0 && (
+      {hasResults && data?.response && (
         <Pagination
-          pageNumber={pageNumber}
+          pageNumber={pagination.pageNumber}
           setPageNumber={(value: number) => {
-            setPageNumber(value - 1);
-            setInitialSearchLoaded(true);
+            onPaginationChange(value - 1, pagination.pageSize);
           }}
-          pageSize={pageSize}
+          pageSize={pagination.pageSize}
           setPageSize={(value: number) => {
-            setPageSize(value);
-            setPageNumber(1);
-            setInitialSearchLoaded(true);
+            onPaginationChange(0, value);
           }}
-          recordCount={eligibleEmployees.response.total}
+          recordCount={data.response.total || 0}
         />
       )}
     </>

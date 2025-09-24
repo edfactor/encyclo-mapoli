@@ -1,52 +1,29 @@
-import { Divider } from "@mui/material";
-import { Grid } from "@mui/material";
-import { Page } from "smart-ui-library";
-import { useState, useEffect } from "react";
-import EligibleEmployeesGrid from "./EligibleEmployeesGrid";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "reduxstore/store";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { useLazyGetEligibleEmployeesQuery } from "reduxstore/api/YearsEndApi";
-import { setEligibleEmployeesQueryParams } from "reduxstore/slices/yearsEndSlice";
+import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import { useRef } from "react";
+import { Page } from "smart-ui-library";
+import EligibleEmployeesGrid from "./EligibleEmployeesGrid";
+import useEligibleEmployees from "./hooks/useEligibleEmployees";
 
 const EligibleEmployees = () => {
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
-  const [hasInitialSearchRun, setHasInitialSearchRun] = useState(false);
-  const hasToken = !!useSelector((state: RootState) => state.security.token);
-  const profitYear = useFiscalCloseProfitYear();
-  const dispatch = useDispatch();
-  const [triggerSearch] = useLazyGetEligibleEmployeesQuery();
-
-  useEffect(() => {
-    if (hasToken && profitYear && !hasInitialSearchRun) {
-      setHasInitialSearchRun(true);
-
-      const request = {
-        profitYear: profitYear,
-        pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false }
-      };
-
-      triggerSearch(request, false)
-        .then((result) => {
-          if (result.data) {
-            dispatch(setEligibleEmployeesQueryParams(profitYear));
-            setInitialSearchLoaded(true);
-          }
-        })
-        .catch((error) => {
-          console.error("Initial eligible employees search failed:", error);
-        });
-    }
-  }, [hasToken, profitYear, hasInitialSearchRun, triggerSearch, dispatch]);
+  const componentRef = useRef<HTMLDivElement>(null);
+  const {
+    searchResults,
+    isSearching,
+    pagination,
+    showData,
+    hasResults
+  } = useEligibleEmployees();
 
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
   };
 
+  const recordCount = searchResults?.response?.total || 0;
+
   return (
     <Page
-      label="Get Eligible Employees"
+      label={`Get Eligible Employees (${recordCount} records)`}
       actionNode={renderActionNode()}>
       <Grid
         container
@@ -57,8 +34,14 @@ const EligibleEmployees = () => {
 
         <Grid width="100%">
           <EligibleEmployeesGrid
-            initialSearchLoaded={initialSearchLoaded}
-            setInitialSearchLoaded={setInitialSearchLoaded}
+            innerRef={componentRef}
+            data={searchResults}
+            isLoading={isSearching}
+            showData={showData}
+            hasResults={hasResults ?? false}
+            pagination={pagination}
+            onPaginationChange={pagination.handlePaginationChange}
+            onSortChange={pagination.handleSortChange}
           />
         </Grid>
       </Grid>
