@@ -1,12 +1,13 @@
 import { RefObject, useCallback, useMemo } from "react";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GridPaginationActions, GridPaginationState } from "../../../hooks/useGridPagination";
-import { DemographicBadgesNotInPayprofit, PagedReportResponse } from "../../../types";
-import { GetDemographicBadgesNotInPayprofitColumns } from "./DemographicBadgesNotInPayprofitGridColumns";
+import { PayBenReportResponse } from "../../../types";
+import { CAPTIONS } from "../../../constants";
+import { PayBenReportGridColumn } from "./PayBenReportGridColumns";
 
-interface DemographicBadgesNotInPayprofitGridProps {
+interface PayBenReportGridProps {
   innerRef: RefObject<HTMLDivElement | null>;
-  data: PagedReportResponse<DemographicBadgesNotInPayprofit> | null;
+  data: PayBenReportResponse | null;
   isLoading: boolean;
   showData: boolean;
   hasResults: boolean;
@@ -15,7 +16,7 @@ interface DemographicBadgesNotInPayprofitGridProps {
   onSortChange: (sortParams: any) => void;
 }
 
-const DemographicBadgesNotInPayprofitGrid = ({
+const PayBenReportGrid = ({
   innerRef,
   data,
   isLoading,
@@ -24,14 +25,14 @@ const DemographicBadgesNotInPayprofitGrid = ({
   pagination,
   onPaginationChange,
   onSortChange
-}: DemographicBadgesNotInPayprofitGridProps) => {
-  const columnDefs = useMemo(() => GetDemographicBadgesNotInPayprofitColumns(), []);
+}: PayBenReportGridProps) => {
+  const columnDefs = useMemo(() => PayBenReportGridColumn(), []);
 
   const handleSortChanged = useCallback(
     (update: ISortParams) => {
       // Handle empty sortBy case - set default (preserving original logic)
       if (update.sortBy === "") {
-        update.sortBy = "badgeNumber";
+        update.sortBy = "ssn";
         update.isSortDescending = true;
       }
 
@@ -44,20 +45,22 @@ const DemographicBadgesNotInPayprofitGrid = ({
 
   return (
     <>
-      {showData && data?.response && (
+      {showData && data?.results && (
         <div ref={innerRef}>
           <DSMGrid
-            preferenceKey={"DEMO_BADGES"}
+            preferenceKey={CAPTIONS.PAYBEN_REPORT}
             isLoading={isLoading}
             handleSortChanged={handleSortChanged}
             providedOptions={{
-              rowData: data.response.results,
-              columnDefs: columnDefs
+              rowData: data.results,
+              columnDefs: columnDefs,
+              suppressMultiSort: true,
+              masterDetail: true
             }}
           />
         </div>
       )}
-      {hasResults && data?.response && (
+      {hasResults && data && (
         <Pagination
           pageNumber={pagination.pageNumber}
           setPageNumber={(value: number) => {
@@ -67,11 +70,11 @@ const DemographicBadgesNotInPayprofitGrid = ({
           setPageSize={(value: number) => {
             onPaginationChange(0, value);
           }}
-          recordCount={data.response.total || 0}
+          recordCount={data.total || 0}
         />
       )}
     </>
   );
 };
 
-export default DemographicBadgesNotInPayprofitGrid;
+export default PayBenReportGrid;

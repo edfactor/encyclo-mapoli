@@ -1,49 +1,45 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetEmployeeWagesForYearQuery } from "../../../reduxstore/api/YearsEndApi";
-import { setEmployeeWagesForYearQueryParams } from "../../../reduxstore/slices/yearsEndSlice";
-import { RootState } from "../../../reduxstore/store";
-import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
-import { useGridPagination } from "../../../hooks/useGridPagination";
+import { useSelector } from "react-redux";
+import { useLazyGetNegativeEVTASSNQuery } from "../../../../reduxstore/api/YearsEndApi";
+import { RootState } from "../../../../reduxstore/store";
+import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { useGridPagination } from "../../../../hooks/useGridPagination";
 import {
   initialState,
-  ytdWagesReducer,
+  negativeEtvaForSSNsOnPayprofitReducer,
   selectShowData,
   selectHasResults
-} from "./useYTDWagesReducer";
+} from "./useNegativeEtvaForSSNsOnPayprofitReducer";
 
-export interface YTDWagesSearchParams {
+export interface NegativeEtvaForSSNsOnPayprofitSearchParams {
   profitYear: number;
 }
 
-const useYTDWages = () => {
-  const [state, dispatch] = useReducer(ytdWagesReducer, initialState);
-  const reduxDispatch = useDispatch();
+const useNegativeEtvaForSSNsOnPayprofit = () => {
+  const [state, dispatch] = useReducer(negativeEtvaForSSNsOnPayprofitReducer, initialState);
 
-  const [triggerSearch, { isFetching: isSearching }] = useLazyGetEmployeeWagesForYearQuery();
+  const [triggerSearch, { isFetching: isSearching }] = useLazyGetNegativeEVTASSNQuery();
   const hasToken = !!useSelector((state: RootState) => state.security.token);
-  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
+  const decemberFlowProfitYear = useDecemberFlowProfitYear();
 
   const handlePaginationChange = useCallback(
     (pageNumber: number, pageSize: number, sortParams: any) => {
-      if (fiscalCloseProfitYear && hasToken) {
+      if (decemberFlowProfitYear && hasToken) {
         try {
           const request = {
-            profitYear: fiscalCloseProfitYear,
+            profitYear: decemberFlowProfitYear,
             pagination: {
               skip: pageNumber * pageSize,
               take: pageSize,
               sortBy: sortParams.sortBy,
               isSortDescending: sortParams.isSortDescending
-            },
-            acceptHeader: "application/json"
+            }
           };
 
           triggerSearch(request, false)
             .unwrap()
             .then((result) => {
               dispatch({ type: "SEARCH_SUCCESS", payload: result });
-              reduxDispatch(setEmployeeWagesForYearQueryParams(fiscalCloseProfitYear));
             })
             .catch((error) => {
               console.error("Pagination search failed:", error);
@@ -55,18 +51,18 @@ const useYTDWages = () => {
         }
       }
     },
-    [fiscalCloseProfitYear, hasToken, triggerSearch, reduxDispatch]
+    [decemberFlowProfitYear, hasToken, triggerSearch]
   );
 
   const pagination = useGridPagination({
     initialPageSize: 25,
-    initialSortBy: "storeNumber",
+    initialSortBy: "badgeNumber",
     initialSortDescending: false,
     onPaginationChange: handlePaginationChange
   });
 
   const executeSearch = useCallback(
-    async (searchParams: YTDWagesSearchParams, source = "manual") => {
+    async (searchParams: NegativeEtvaForSSNsOnPayprofitSearchParams, source = "manual") => {
       if (!hasToken) return;
 
       dispatch({ type: "SEARCH_START", payload: { profitYear: searchParams.profitYear } });
@@ -79,31 +75,27 @@ const useYTDWages = () => {
             take: pagination.pageSize,
             sortBy: pagination.sortParams.sortBy,
             isSortDescending: pagination.sortParams.isSortDescending
-          },
-          acceptHeader: "application/json"
+          }
         };
 
         const result = await triggerSearch(request, false).unwrap();
         dispatch({ type: "SEARCH_SUCCESS", payload: result });
-        reduxDispatch(setEmployeeWagesForYearQueryParams(searchParams.profitYear));
       } catch (error) {
         console.error("Search failed:", error);
         dispatch({ type: "SEARCH_ERROR" });
       }
     },
-    [hasToken, pagination, triggerSearch, reduxDispatch]
+    [hasToken, pagination, triggerSearch]
   );
 
   const hasInitiallySearched = useRef(false);
 
   useEffect(() => {
-    if (fiscalCloseProfitYear && !state.data && hasToken && !state.search.isLoading && !hasInitiallySearched.current) {
+    if (decemberFlowProfitYear && !state.data && hasToken && !state.search.isLoading && !hasInitiallySearched.current) {
       hasInitiallySearched.current = true;
-      executeSearch({ profitYear: fiscalCloseProfitYear }, "auto-initial");
+      executeSearch({ profitYear: decemberFlowProfitYear }, "auto-initial");
     }
-    // Note: executeSearch is intentionally excluded from dependencies to prevent infinite loops
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fiscalCloseProfitYear, state.data, hasToken, state.search.isLoading]);
+  }, [decemberFlowProfitYear, state.data, hasToken, state.search.isLoading]);
 
   return {
     searchResults: state.data,
@@ -117,4 +109,4 @@ const useYTDWages = () => {
   };
 };
 
-export default useYTDWages;
+export default useNegativeEtvaForSSNsOnPayprofit;

@@ -185,7 +185,6 @@ const ProfitShareReport = () => {
                       isLoading={false}
                       pageNumber={1}
                       pageSize={yearEndProfitSharingReport.response.results.length}
-                      sortParams={{ sortBy: "badgeNumber", isSortDescending: true }}
                       recordCount={yearEndProfitSharingReport.response.results.length}
                       onPageChange={() => {}}
                       onPageSizeChange={() => {}}
