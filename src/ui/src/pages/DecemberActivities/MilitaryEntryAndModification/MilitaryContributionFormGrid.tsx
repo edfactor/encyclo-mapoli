@@ -98,10 +98,13 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
             providedOptions={{
               rowData: militaryContributionsData?.results,
               columnDefs: columnDefs,
-              // Configure rowSelection to single selection but disable checkboxes
-              // so the extra checkbox column is not rendered by the grid wrapper.
+              // Configure rowSelection similarly to other grids: use multiRow
+              // but explicitly disable checkbox rendering and click-selection so
+              // the grid does not show the left-hand checkbox column.
               rowSelection: {
-                mode: "singleRow",
+                mode: "multiRow",
+                checkboxes: false,
+                headerCheckbox: false,
                 enableClickSelection: false
               }
             }}
