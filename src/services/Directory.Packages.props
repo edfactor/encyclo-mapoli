@@ -27,11 +27,11 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.9" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="8.2.0" />
     <PackageVersion Include="CsvHelper" Version="33.1.0" />
-    <PackageVersion Include="Demoulas.Common.Api" Version="2.1.0" />
+    <PackageVersion Include="Demoulas.Common.Api" Version="3.0.1" />
     <PackageVersion Include="Demoulas.Common.Data.Contexts" Version="2.8.3" />
     <PackageVersion Include="Demoulas.Common.Data.Services" Version="3.5.8" />
     <PackageVersion Include="Demoulas.Common.Contracts" Version="2.6.0" />
-    <PackageVersion Include="Demoulas.Common.Caching" Version="2.1.4" />
+    <PackageVersion Include="Demoulas.Common.Caching" Version="3.0.0" />
     <PackageVersion Include="Demoulas.Security" Version="3.5.4" />
     <PackageVersion Include="EFCore.NamingConventions" Version="9.0.0" />
     <PackageVersion Include="FastEndpoints.Security" Version="5.31.0" />
@@ -55,10 +55,10 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
-    <PackageVersion Include="NetEscapades.AspNetCore.SecurityHeaders" Version="1.1.0" />
+    <PackageVersion Include="NetEscapades.AspNetCore.SecurityHeaders" Version="1.2.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="NSwag.Core" Version="14.1.0" />
-    <PackageVersion Include="Okta.AspNetCore" Version="4.6.6" />
+    <PackageVersion Include="Okta.AspNetCore" Version="4.6.7" />
     <PackageVersion Include="OpenTelemetry.Api" Version="1.12.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.9.0" />
@@ -72,7 +72,7 @@
     <PackageVersion Include="Quartz" Version="3.15.0" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.15.0" />
     <PackageVersion Include="Riok.Mapperly" Version="4.2.1" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.8.4" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.8.6" />
     <PackageVersion Include="Serilog.AspNetCore" Version="8.0.2" />
     <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageVersion Include="Serilog.Enrichers.Memory" Version="1.0.4" />
@@ -90,7 +90,7 @@
     <PackageVersion Include="MockQueryable.Moq" Version="8.0.0" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Include="SSH.NET" Version="2025.0.0" />
-  <PackageVersion Include="System.CommandLine" Version="2.0.0-rc.1.25451.107" />
+    <PackageVersion Include="System.CommandLine" Version="2.0.0-rc.1.25451.107" />
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="9.0.9" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.6.0" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />

@@ -15,7 +15,7 @@ public sealed class DemographicReaderService : IDemographicReaderService
     private readonly IHttpContextAccessor _http;
 
     public const string ItemKey = "__demographic_data_window";
-    
+
     private FrozenStateResponse? _frozenState = null;
 
     public DemographicReaderService(
@@ -62,6 +62,23 @@ public sealed class DemographicReaderService : IDemographicReaderService
 
 #pragma warning disable DSMPS001
         return ctx.Demographics;
+#pragma warning restore DSMPS001
+    }
+
+    public IQueryable<Demographic> BuildDemographicQueryAsOf(IProfitSharingDbContext ctx, DateTimeOffset asOf)
+    {
+        // Build a temporal snapshot based on an explicit as-of timestamp. This bypasses the active frozen state.
+        if (_http.HttpContext != null)
+        {
+            var meta = new DataWindowMetadata(
+                IsFrozen: true,
+                ProfitYear: (short)asOf.Year,
+                WindowEnd: asOf);
+            _http.HttpContext.Items[ItemKey] = meta;
+        }
+
+#pragma warning disable DSMPS001
+        return FrozenService.GetDemographicSnapshotAsOf(ctx, asOf);
 #pragma warning restore DSMPS001
     }
 }
