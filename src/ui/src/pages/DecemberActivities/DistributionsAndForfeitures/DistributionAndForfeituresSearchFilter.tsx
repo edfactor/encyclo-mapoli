@@ -92,6 +92,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
           endDate: formatDateOnly(data.endDate)
         })
       );
+      setInitialSearchLoaded(true);
     }
   });
 

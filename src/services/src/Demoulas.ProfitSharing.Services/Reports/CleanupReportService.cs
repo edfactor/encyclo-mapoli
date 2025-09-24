@@ -280,9 +280,10 @@ FROM FILTERED_DEMOGRAPHIC p1
                         x.BadgeNumber,
                         x.PayFrequencyId,
                         PsnSuffix = (short)0,
-                        EnrollmentId = x.PayProfits.FirstOrDefault() != null
-                            ? x.PayProfits.FirstOrDefault()!.EnrollmentId
-                            : Enrollment.Constants.Import_Status_Unknown,
+                        EnrollmentId =  x.PayProfits
+                            .Where(p => p.ProfitYear == latestYear)
+                            .Select(p => p.EnrollmentId)
+                            .FirstOrDefault()
                     }).Union(ctx.Beneficiaries.Include(b => b.Contact).Select(x => new
                     {
                         x.Contact!.Ssn,
@@ -351,8 +352,8 @@ FROM FILTERED_DEMOGRAPHIC p1
                                 Date = pd.CreatedAtUtc,
                                 nameAndDob.DateOfBirth,
                                 HasForfeited = nameAndDob.EnrolledId == /*3*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords ||
-                                               nameAndDob.EnrolledId == /*4*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords,
-                                nameAndDob.PayFrequencyId,
+                                               nameAndDob.EnrolledId == /*4*/ Enrollment.Constants.NewVestingPlanHasForfeitureRecords,
+                                nameAndDob.PayFrequencyId
                             };
 
 
