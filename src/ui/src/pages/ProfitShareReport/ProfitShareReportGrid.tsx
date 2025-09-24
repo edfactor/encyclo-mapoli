@@ -7,7 +7,6 @@ interface ProfitShareReportGridProps {
   isLoading: boolean;
   pageNumber: number;
   pageSize: number;
-  sortParams: ISortParams;
   recordCount: number;
   onPageChange: (value: number) => void;
   onPageSizeChange: (value: number) => void;
@@ -19,7 +18,6 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
   isLoading,
   pageNumber,
   pageSize,
-  sortParams,
   recordCount,
   onPageChange,
   onPageSizeChange,
@@ -42,7 +40,7 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
-            onPageChange(value);
+            onPageChange(value - 1);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
