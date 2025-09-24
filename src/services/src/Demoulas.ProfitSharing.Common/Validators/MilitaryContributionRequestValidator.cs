@@ -7,6 +7,13 @@ using System.Diagnostics.Metrics;
 
 namespace Demoulas.ProfitSharing.Common.Validators;
 
+/// <summary>
+/// Validates requests to create Military Contributions according to business rules.
+/// </summary>
+/// <remarks>
+/// Documentation: Military Contributions validation rules, temporal semantics, and QA plan are documented here:
+/// https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/537919492/Military+Contributions+Validation+Behavior+and+Operations
+/// </remarks>
 public class MilitaryContributionRequestValidator : Validator<CreateMilitaryContributionRequest>
 {
     private readonly IEmployeeLookupService _employeeLookup;

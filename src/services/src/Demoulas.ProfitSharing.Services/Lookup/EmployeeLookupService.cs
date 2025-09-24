@@ -64,7 +64,7 @@ public sealed class EmployeeLookupService(IProfitSharingDataContextFactory facto
         return await factory.UseReadOnlyContext(async ctx =>
         {
             var asOfTimestamp = new DateTimeOffset(asOfDate.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
-            var demoQuery = await demographicReaderService.BuildDemographicQueryAsOf(ctx, asOfTimestamp);
+            var demoQuery = demographicReaderService.BuildDemographicQueryAsOf(ctx, asOfTimestamp);
             var row = await demoQuery
                 .Where(d => d.BadgeNumber == badgeNumber)
                 .Select(d => new { d.EmploymentStatusId, d.TerminationDate })

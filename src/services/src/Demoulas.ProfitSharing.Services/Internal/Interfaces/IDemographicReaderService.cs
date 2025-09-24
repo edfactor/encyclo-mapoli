@@ -13,5 +13,5 @@ public interface IDemographicReaderService
     /// <summary>
     /// Builds a demographic query representing data as-of a specific point in time (ignores active frozen state).
     /// </summary>
-    Task<IQueryable<Demographic>> BuildDemographicQueryAsOf(IProfitSharingDbContext ctx, DateTimeOffset asOf);
+    IQueryable<Demographic> BuildDemographicQueryAsOf(IProfitSharingDbContext ctx, DateTimeOffset asOf);
 }

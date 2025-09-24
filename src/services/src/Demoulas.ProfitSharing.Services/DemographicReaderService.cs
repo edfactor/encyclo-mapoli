@@ -65,20 +65,20 @@ public sealed class DemographicReaderService : IDemographicReaderService
 #pragma warning restore DSMPS001
     }
 
-    public Task<IQueryable<Demographic>> BuildDemographicQueryAsOf(IProfitSharingDbContext ctx, DateTimeOffset asOf)
+    public IQueryable<Demographic> BuildDemographicQueryAsOf(IProfitSharingDbContext ctx, DateTimeOffset asOf)
     {
         // Build a temporal snapshot based on an explicit as-of timestamp. This bypasses the active frozen state.
         if (_http.HttpContext != null)
         {
             var meta = new DataWindowMetadata(
                 IsFrozen: true,
-                ProfitYear: null,
+                ProfitYear: (short)asOf.Year,
                 WindowEnd: asOf);
             _http.HttpContext.Items[ItemKey] = meta;
         }
 
 #pragma warning disable DSMPS001
-        return Task.FromResult(FrozenService.GetDemographicSnapshotAsOf(ctx, asOf));
+        return FrozenService.GetDemographicSnapshotAsOf(ctx, asOf);
 #pragma warning restore DSMPS001
     }
 }
