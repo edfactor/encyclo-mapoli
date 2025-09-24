@@ -52,6 +52,99 @@ Patterns:
   - When adding this rule to new code or code reviews, add a brief comment explaining why `??` was avoided (e.g., "avoid EF translation issues with Oracle provider").
 - XML doc comments for public & internal APIs.
 
+## Validation & Boundary Checks (MANDATORY)
+
+All incoming data MUST be validated with explicit boundary checks at both the server and client boundaries. Validation is a security and correctness concern: never rely solely on client-side checks. The following are required by policy for every endpoint and page that accepts user input.
+
+Server-side requirements (mandatory):
+- All request DTOs must have validation attributes or explicit validators that enforce:
+  - numeric ranges (min/max) for integers/floats (e.g., page size, amounts, counts)
+  - string length limits (min/max) and allowed character sets when applicable
+  - collection size limits (max items in array/list payloads)
+  - pagination bounds (max page size, max offset/skip)
+  - file upload limits (max file size, allowed content types)
+  - date/time ranges (not before/after bounds) and timezone normalization
+  - enum value validation (reject unknown or out-of-range enum numeric values)
+  - required fields and nullability constraints
+- Use FastEndpoints validation pipeline or FluentValidation (existing project conventions apply) to centralize validation logic. Validation failures must return structured `ValidationProblem` responses with field-level messages.
+- Use server-side guards to enforce maximum data volume to avoid expensive queries (e.g., cap requested rows to a safe maximum, require filters for wide scans).
+- For APIs that accept complex filters, build expression validators to reject queries that would result in unbounded or expensive scans (for example: all-badges-zero or empty filter sets that match too many rows).
+- All validators must be unit-tested (xUnit). Add tests for happy paths and boundary cases (min, max, empty, null, invalid enum) and at least one large/degenerate input test to assert the system rejects or truncates the request safely.
+
+Client-side requirements (recommended + required UX guardrails):
+- All pages must validate user input before submission using the project's front-end validation utilities (React + TypeScript). Client-side validation improves UX but is not a substitute for server-side checks.
+- Mirror server-side constraints in TypeScript types and validators: string lengths, numeric ranges, max collection sizes, allowed enum values, and file size/type checks.
+- Prevent users from requesting excessive data from the UI by enforcing pagination controls (max page size) and disabling controls that could produce wide unfiltered queries.
+
+Edge-case examples to cover (must be tested):
+- Empty / null payloads instead of expected objects
+- Oversized arrays (e.g., > 5k items) sent in request bodies
+- Very large numbers (bigger than database column bounds)
+- Dates outside business logic ranges (e.g., hire date in the future)
+- Invalid enum numeric values or stale enum ids from older UI versions
+
+Developer guidance & patterns:
+- Prefer declarative validators (FluentValidation) in DTO classes for clarity and testability.
+- Keep validation logic out of service/business methods; endpoints should validate and then call services with well-formed input.
+- When trimming/normalizing input (for example, truncating an over-long string), document the behavior and return the normalized value or a validation error depending on severity.
+- When limiting collection sizes, return `400 Bad Request` with a clear message when a client exceeds allowable limits.
+- Add tests that assert the actual HTTP response code and message for invalid inputs.
+
+Example (server-side DTO using FluentValidation):
+
+```csharp
+// DTO
+public class SearchRequest
+{
+  public int PageSize { get; init; } = 50;
+  public int Offset { get; init; }
+  public string? Query { get; init; }
+}
+
+// FluentValidation validator (install FluentValidation and register with FastEndpoints pipeline)
+public class SearchRequestValidator : AbstractValidator<SearchRequest>
+{
+  public SearchRequestValidator()
+  {
+    // numeric range with default value on DTO
+    RuleFor(x => x.PageSize)
+      .InclusiveBetween(1, 1000)
+      .WithMessage("PageSize must be between 1 and 1000.");
+
+    RuleFor(x => x.Offset)
+      .InclusiveBetween(0, 1_000_000)
+      .WithMessage("Offset must be between 0 and 1_000_000.");
+
+    RuleFor(x => x.Query)
+      .MaximumLength(200)
+      .WithMessage("Query must be at most 200 characters long.")
+      .When(x => x.Query != null);
+  }
+}
+
+// Registration example (Program.cs / DI):
+// builder.Services.AddValidatorsFromAssemblyContaining<SearchRequestValidator>();
+// FastEndpoints will pick up FluentValidation validators and return structured ValidationProblem responses.
+```
+
+Example (frontend TypeScript guard):
+```ts
+// ...existing code...
+function validateSearchInput(input: SearchInput): string[] {
+  const errors: string[] = [];
+  if (input.pageSize < 1 || input.pageSize > 1000) errors.push('pageSize must be 1..1000');
+  if ((input.query ?? '').length > 200) errors.push('query max length 200');
+  return errors;
+}
+```
+
+Quality gates (enforcement):
+- Pull requests that add new endpoints or UI pages must include validation for all incoming inputs and at least one unit test covering an invalid boundary case.
+- Code reviews should flag missing validators or reliance on client-side checks alone.
+
+Security note:
+- Proper boundary checking reduces risk of data exfiltration and denial-of-service via expensive queries or unbounded result sets. Combine validators with the telemetry and alerting guidance to detect suspicious or abusive request patterns.
+
 ## Database & CLI
 - Add a migration (run from repo root PowerShell):
   ```pwsh
@@ -170,6 +263,135 @@ Key alignment points:
 
 Copilot assistants should reference and obey this Confluence guidance when normalizing ticket keys, creating branch names, and preparing PR bodies. If the Confluence page changes, update this file to reflect the new team guidance.
 
+## OpenTelemetry & Security Telemetry (recommended)
+
+Additions in this section describe recommended packages, configuration keys, wiring patterns, metrics, logs and alerting that help IT Security detect abusive or unexpected data access patterns (for example: a user requesting large numbers of records, repeated downloads of sensitive fields, or unusually large response payloads).
+
+Scope and goals:
+- Provide low-risk, low-cardinality metrics that indicate aggregate access and volume trends.
+- Provide higher-fidelity traces/logs (sampled) and exemplar linking to investigate suspicious users while avoiding high-cardinality metric explosion.
+- Provide configuration toggles to opt-in/out of sensitive-field counting and PII-in-telemetry policies.
+
+Recommended NuGet packages (add via centralized `Directory.Packages.props` when possible):
+- `OpenTelemetry` (core)
+- `OpenTelemetry.Extensions.Hosting` (host integration)
+- `OpenTelemetry.Instrumentation.AspNetCore` (automatic HTTP/server traces)
+- `OpenTelemetry.Instrumentation.Http` (outgoing HTTP client)
+- `OpenTelemetry.Instrumentation.SqlClient` (DB-level spans/metrics as needed)
+- `OpenTelemetry.Metrics` (metrics API)
+- `OpenTelemetry.Exporter.Otlp` (OTLP exporter - preferred for production)
+- `OpenTelemetry.Exporter.Console` (local/dev debugging only)
+
+Where to wire it:
+- Primary host: `src/services/src/Demoulas.ProfitSharing.AppHost/Program.cs` (Aspire host)
+- API project: `src/services/src/Demoulas.ProfitSharing.Api/Program.cs`
+
+Important repository note:
+- The repository provides a centralized initial OpenTelemetry/logging setup via `Demoulas.Common.Logging.Extensions.AspireServiceDefaultExtensions`. Use this extension in your Aspire host (`AppHost`) and Api startup rather than duplicating base wiring. Extend or augment the telemetry after the extension has been applied (for example, add security-specific metrics, middleware, or additional exporters) instead of replacing or duplicating the base configuration.
+
+  Rationale: the extension centralizes Serilog/OpenTelemetry bootstrapping, common resource attributes, and host-specific configuration; duplicating that wiring can lead to conflicting exporters, double-instrumentation, or inconsistent sampling/resource tags.
+
+Configuration (appsettings / environment variable keys)
+- `OpenTelemetry:Enabled` (bool)
+- `OpenTelemetry:Otlp:Endpoint` (string) - OTLP collector endpoint (include protocol `http://` or `https://`)
+- `OpenTelemetry:Exporter:Console:Enabled` (bool) - dev only
+- `OpenTelemetry:Tracing:Sampler` (`always_on`|`parentbased_always_on`|`traceidratio`) and `OpenTelemetry:Tracing:SamplerRate` (0.01..1.0)
+- `OpenTelemetry:Metrics:Enabled` (bool)
+// SecurityTelemetry configuration keys removed for brevity. Implement telemetry toggles in your host configuration as needed.
+
+Wiring note (important):
+
+- Do NOT call `builder.Services.AddOpenTelemetry()` in library or host `Program.cs` — the repository uses a centralized bootstrap provided by `Demoulas.Common.Logging.Extensions.AspireServiceDefaultExtensions`. That extension centralizes Serilog/OpenTelemetry bootstrapping, resource attributes, exporter configuration, and sampling.
+- Instead, ensure your host calls the shared Aspire extension (the AppHost and Api templates already do this). After the shared extension has been applied, extend telemetry by registering middleware/services that emit security-specific metrics or logs (do not replace or duplicate the base wiring).
+
+How to extend safely (conceptual guidance):
+
+- Register a small service or middleware responsible for security telemetry (response sizes, sensitive-field access counts, bulk-export counts). This component should use the runtime telemetry APIs (for example `System.Diagnostics.ActivitySource` for traces and `System.Diagnostics.Metrics.Meter` for metrics) to emit events and counters. These APIs integrate with the pre-configured OpenTelemetry pipeline from the shared extension.
+
+Conceptual (non-compiling) example showing the pattern:
+
+```csharp
+// ...existing code that applies the shared Aspire extension (do not duplicate AddOpenTelemetry)
+// e.g. Demoulas.Common.Logging.Extensions.AspireServiceDefaultExtensions.ApplyDefaults(builder, configuration);
+
+// Register lightweight telemetry components via DI (services/middleware) as appropriate for your host.
+// Inside such components use the runtime telemetry APIs to emit traces and metrics, for example:
+// private static readonly ActivitySource s_activity = new("Demoulas.ProfitSharing.Security");
+// private static readonly Meter s_meter = new("Demoulas.ProfitSharing.Metrics");
+// private static readonly Counter<long> s_sensitiveFieldCounter = s_meter.CreateCounter<long>("ps_sensitive_field_access_total");
+// s_sensitiveFieldCounter.Add(1, new("field", "Ssn"), new("endpoint", "/api/employee"));
+```
+
+Notes:
+- Keep metric labels low-cardinality (service, environment, endpoint_category). For per-user investigations emit a log or trace exemplar with `user_id` rather than attaching `user_id` to every metric label.
+-- Guard sensitive counters behind a configuration toggle and ensure sensible defaults (PII counting disabled by default in production) until approved.
+
+Implementation guidance and cautions:
+- Avoid high-cardinality metric labels (e.g., using raw `user_id` on every metric). High-cardinality labels hurt metric backends and performance.
+- Use low-cardinality dimensions on metrics (e.g., `user_role`, `org_id`, `endpoint_category`) and emit per-user details to logs/traces when thresholds are exceeded. Link logs/traces back to exemplars when supported.
+- For per-user investigations, use traces (sampled with higher rate for suspicious requests) and structured logs containing `user_id`, `badgeNumber`, `OracleHcmId` (mask or hash values when necessary) and a telemetry correlation id.
+-- Provide toggles for any sensitive-field counting and ensure they default to disabled in production unless approved by IT/privacy.
+- When counting access to sensitive fields, the implementation should report counts to a metric called e.g. `ps_sensitive_field_access_total{field="Ssn", endpoint="/api/employee"}` — but do not include `user_id` as a cardinality label in metric series. Instead, emit an associated log or trace stamped with the `user_id` and correlation id for detailed investigation.
+
+Recommended metrics (low-cardinality) to emit
+- app_requests_total{service,environment,endpoint_category,method,response_status}
+- app_request_duration_seconds_bucket{service,environment,endpoint_category}
+- app_response_bytes_sum / app_response_bytes_count (histogram) by {service,environment,endpoint_category}
+- app_user_request_rate{service,environment,user_role} - aggregated per role (not per id)
+- ps_sensitive_field_access_total{service,environment,field,endpoint_category} - counts of sensitive field reads (no user_id tag by default)
+- ps_large_downloads_total{service,environment,endpoint_category} - increments when response size > configured threshold (e.g., 5 MB)
+- ps_bulk_export_operations_total{service,environment,export_type} - background job/export counts
+
+Suggested logs/traces for enrichment
+- Log structured event when `ps_sensitive_field_access_total` is incremented with: timestamp, correlation_id, endpoint, field, user_role, masked_or_hashed_user_id, record_count, request_query_parameters (redacted)
+- On thresholds (rate or volume) exceeded for a single user, increase trace sampling for that user's requests for a limited window (e.g., 10 minutes) to collect more context.
+
+Sample alerting queries and rules
+- High cardinality caution: avoid queries that iterate over all `user_id` values in metric systems that do not support it. Prefer aggregation by `user_role` or by `org_id`.
+
+- PromQL (alert when a single account performs excessive requests in 5m):
+  sum by (user_id) (increase(app_requests_total[5m]))
+  > 500
+  # Note: only use if your metric backend and retention supports per-user label cardinality.
+
+- PromQL (safer, role-based):
+  sum by (user_role) (increase(app_requests_total[5m]))
+  > 10000
+
+- Large download detection (PromQL):
+  increase(ps_large_downloads_total[10m]) > 5
+
+- Sensitive field spike detection (PromQL):
+  increase(ps_sensitive_field_access_total{field="Ssn"}[1h]) > 100
+
+- SIEM / Log search (ELK / Splunk style):
+  `event.type: "sensitive_field_access" AND field: "Ssn" AND user_id: "X" | stats count() by user_id | where count > 100`
+
+Operational recommendations
+- Start with metrics enabled but sensitive-field counting disabled. Use role-based and endpoint-based alerts first to tune thresholds.
+- If enabling per-user metrics, put strict quotas on cardinality and retention and obtain approval from IT and privacy teams.
+- Ensure telemetry collectors and storage (OTLP/Prometheus/Splunk/Elastic) have appropriate access controls, encryption at rest, and retention/archival policies.
+- Document who can query per-user telemetry and under what process (audit trail for who accessed telemetry data).
+
+Privacy, compliance & security considerations
+- Mask or hash direct identifiers (SSN, OracleHcmId) before sending them to telemetry systems when possible. Keep raw identifiers in the primary database only.
+- Use feature flags and secure environment variables to control whether telemetry includes PII or not.
+- Add explicit documentation and an approval workflow before enabling sensitive telemetry for production.
+
+Developer checklist for implementing security telemetry
+1. Add OpenTelemetry packages to `Directory.Packages.props` and restore.
+2. Wire basic tracing & metrics to OTLP in AppHost and Api `Program.cs` with configuration toggles.
+3. Implement middleware that:
+   - extracts `user_id`, `user_role`, `correlation_id` from the request/security principal;
+   - measures response size and increments `ps_large_downloads_total` when thresholds are exceeded;
+  - increments `ps_sensitive_field_access_total{field=...}` when application code reads sensitive fields (guarded behind a configuration toggle).
+4. Emit structured logs for sensitive-field reads (masked/hashes) with correlation ids.
+5. Add Prometheus/OTel collection and alert rules in infra repo / runbook.
+
+Next steps & references
+- When ready to implement code, update `src/services/src/Demoulas.ProfitSharing.AppHost/Program.cs` and `src/services/src/Demoulas.ProfitSharing.Api/Program.cs` following code snippet patterns above and register a short-lived feature flag to toggle sensitive counting.
+- Keep the default production posture conservative: metrics ON, PII counting OFF.
+
 ## Quick Commands (PowerShell)
 ```pwsh
 # Build services
@@ -189,6 +411,17 @@ cd src/ui; npm run dev
 
 ---
 Provide reasoning in PR descriptions when deviating from these patterns.
+
+## Formatting & EditorConfig (additional guidance)
+
+- Follow the repository `.editorconfig` for formatting and analyzer rules. This file is the authoritative source for whitespace, naming, and stylistic rules; update it only when you have a clear, repo-wide reason and include rationale in the PR.
+- Preferred style highlights:
+  - File-scoped namespaces and one class per file.
+  - Use explicit access modifiers for all types and members.
+  - Favor `is null` / `is not null` for null checks and `nameof(...)` for member names.
+  - Prefer pattern matching and switch expressions where they improve clarity.
+  - Avoid inserting ad-hoc formatting changes that conflict with `.editorconfig`.
+- If you need to add or change formatting rules, update `.editorconfig` and include a short explanation in the PR body so reviewers can assess scope and impact.
 
 ## AI Assistant Operational Rules (Repository-specific)
 
