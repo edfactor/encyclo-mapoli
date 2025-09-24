@@ -97,16 +97,7 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
             handleSortChanged={handleSortChange}
             providedOptions={{
               rowData: militaryContributionsData?.results,
-              columnDefs: columnDefs,
-              // Configure rowSelection similarly to other grids: use multiRow
-              // but explicitly disable checkbox rendering and click-selection so
-              // the grid does not show the left-hand checkbox column.
-              rowSelection: {
-                mode: "multiRow",
-                checkboxes: false,
-                headerCheckbox: false,
-                enableClickSelection: false
-              }
+              columnDefs: columnDefs
             }}
           />
 
