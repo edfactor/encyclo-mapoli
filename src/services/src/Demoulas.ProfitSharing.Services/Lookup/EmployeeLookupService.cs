@@ -1,10 +1,11 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Lookup;
 
-public sealed class EmployeeLookupService(IProfitSharingDataContextFactory factory) : IEmployeeLookupService
+public sealed class EmployeeLookupService(IProfitSharingDataContextFactory factory, IDemographicReaderService demographicReaderService) : IEmployeeLookupService
 {
     public async Task<bool> BadgeExistsAsync(int badgeNumber, CancellationToken cancellationToken = default)
     {
@@ -56,5 +57,40 @@ public sealed class EmployeeLookupService(IProfitSharingDataContextFactory facto
 #pragma warning restore DSMPS001
             return dob;
         });
+    }
+
+    public async Task<char?> GetEmploymentStatusIdAsOfAsync(int badgeNumber, DateOnly asOfDate, CancellationToken cancellationToken = default)
+    {
+        return await factory.UseReadOnlyContext(async ctx =>
+        {
+            var asOfTimestamp = new DateTimeOffset(asOfDate.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
+            var demoQuery = await demographicReaderService.BuildDemographicQueryAsOf(ctx, asOfTimestamp);
+            var row = await demoQuery
+                .Where(d => d.BadgeNumber == badgeNumber)
+                .Select(d => new { d.EmploymentStatusId, d.TerminationDate })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (row is null)
+            {
+                return (char?)null;
+            }
+
+            if (row.TerminationDate.HasValue && row.TerminationDate.Value <= asOfDate)
+            {
+                return Demoulas.ProfitSharing.Data.Entities.EmploymentStatus.Constants.Terminated;
+            }
+
+            return row.EmploymentStatusId;
+        });
+    }
+
+    public async Task<bool?> IsActiveAsOfAsync(int badgeNumber, DateOnly asOfDate, CancellationToken cancellationToken = default)
+    {
+        var status = await GetEmploymentStatusIdAsOfAsync(badgeNumber, asOfDate, cancellationToken);
+        if (!status.HasValue)
+        {
+            return null;
+        }
+        return status.Value == Demoulas.ProfitSharing.Data.Entities.EmploymentStatus.Constants.Active;
     }
 }
