@@ -25,7 +25,7 @@ const MilitaryEntryAndModificationContent = () => {
   const dispatch = useDispatch();
   const { missiveAlerts } = useMissiveAlerts();
 
-  const { contributionsData, isLoadingContributions, contributionsGridPagination, fetchMilitaryContributions } =
+  const { contributionsData, isLoadingContributions, contributionsGridPagination, fetchMilitaryContributions, resetSearch } =
     useMilitaryEntryAndModification();
 
   const handleStatusChange = (newStatus: string, statusName?: string) => {
@@ -77,6 +77,14 @@ const MilitaryEntryAndModificationContent = () => {
       fetchMilitaryContributions();
     }
   }, [masterInquiryMemberDetails]);
+
+  // Clear the member and contributions state when this component unmounts
+  // to ensure visiting the page fresh doesn't show the previous search.
+  useEffect(() => {
+    return () => {
+      resetSearch();
+    };
+  }, []);
 
   return (
     <Grid
