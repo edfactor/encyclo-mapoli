@@ -68,17 +68,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
       const matchingPreset = presets.find((preset) => JSON.stringify(preset.params) === JSON.stringify(params));
       const currentPageNumber = getCurrentPageNumber();
       const currentPageSize = getCurrentPageSize();
-      console.log("Fetching data with params:", {
-        profitYear: profitYear,
-        pagination: {
-          skip: currentPageNumber * currentPageSize,
-          take: currentPageSize,
-          sortBy: sortParams.sortBy,
-          isSortDescending: sortParams.isSortDescending
-        },
-        ...params,
-        reportId: matchingPreset ? Number(matchingPreset.id) : 0
-      });
+
       trigger({
         profitYear: profitYear,
         pagination: {
