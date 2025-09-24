@@ -15,9 +15,9 @@ import ProfitShareReportGrid from "./ProfitShareReportGrid";
 import ProfitShareReportSearchFilters from "./ProfitShareReportSearchFilters";
 
 const ProfitShareReport = () => {
-  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPresetParams, setSelectedPresetParams] = useState<FilterParams | null>(null);
+  const [isLoadingTotals, setIsLoadingTotals] = useState(false);
 
   const { yearEndProfitSharingReportTotals, yearEndProfitSharingReport } = useSelector(
     (state: RootState) => state.yearsEnd
@@ -25,11 +25,14 @@ const ProfitShareReport = () => {
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
-  const [triggerSearch, { isLoading: isTotalsLoading }] = useLazyGetYearEndProfitSharingReportTotalsQuery();
+  const [triggerSearch] = useLazyGetYearEndProfitSharingReportTotalsQuery();
   const [finalizeReport, { isLoading: isFinalizing }] = useFinalizeReportMutation();
 
+  // Load both tables when page loads - this is consistent with other pages which only display data and do not take input.
   useEffect(() => {
-    if (hasToken && profitYear && !initialDataLoaded) {
+    if (hasToken && profitYear) {
+      setIsLoadingTotals(true);
+
       const totalsRequest = {
         profitYear: profitYear,
         useFrozenData: false,
@@ -38,16 +41,16 @@ const ProfitShareReport = () => {
 
       triggerSearch(totalsRequest, false)
         .then((result) => {
+          setIsLoadingTotals(false);
           if (result.data) {
             dispatch(setYearEndProfitSharingReportQueryParams(profitYear));
-            setInitialDataLoaded(true);
           }
         })
         .catch((error) => {
-          console.error("Initial totals search failed:", error);
+          setIsLoadingTotals(false);
         });
     }
-  }, [hasToken, profitYear, initialDataLoaded, triggerSearch, dispatch]);
+  }, [hasToken, profitYear, triggerSearch, dispatch]);
 
   const handleCommit = async () => {
     if (profitYear) {
@@ -71,6 +74,8 @@ const ProfitShareReport = () => {
   const handleStatusChange = (newStatus: string, statusName?: string) => {
     // Check if the status is "Complete" and trigger search with archive=true
     if (statusName === "Complete" && profitYear) {
+      setIsLoadingTotals(true);
+
       const totalsRequest = {
         profitYear: profitYear,
         useFrozenData: true,
@@ -80,12 +85,14 @@ const ProfitShareReport = () => {
 
       triggerSearch(totalsRequest, false)
         .then((result) => {
+          setIsLoadingTotals(false);
           if (result.data) {
             dispatch(setYearEndProfitSharingReportQueryParams(profitYear));
           }
         })
         .catch((error) => {
           console.error("Archive search failed:", error);
+          setIsLoadingTotals(false);
         });
     }
   };
@@ -113,7 +120,7 @@ const ProfitShareReport = () => {
   }, [yearEndProfitSharingReport?.response.results]);
 
   const renderActionNode = () => {
-    if (!initialDataLoaded || !yearEndProfitSharingReportTotals) return null;
+    if (!yearEndProfitSharingReportTotals) return null;
 
     return (
       <div className="flex h-10 items-center gap-2">
@@ -148,15 +155,15 @@ const ProfitShareReport = () => {
               </Typography>
             </div>
 
-            {isTotalsLoading ? (
+            {isLoadingTotals ? (
               <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
                 <CircularProgress />
               </Box>
-            ) : yearEndProfitSharingReportTotals ? (
+            ) : (
               <Box sx={{ px: 3, mt: 2 }}>
                 <ProfitShareTotalsDisplay totalsData={yearEndProfitSharingReportTotals} />
               </Box>
-            ) : null}
+            )}
           </Box>
         </Grid>
 
