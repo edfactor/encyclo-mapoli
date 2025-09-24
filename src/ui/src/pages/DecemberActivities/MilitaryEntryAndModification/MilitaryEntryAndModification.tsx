@@ -25,8 +25,13 @@ const MilitaryEntryAndModificationContent = () => {
   const dispatch = useDispatch();
   const { missiveAlerts } = useMissiveAlerts();
 
-  const { contributionsData, isLoadingContributions, contributionsGridPagination, fetchMilitaryContributions, resetSearch } =
-    useMilitaryEntryAndModification();
+  const {
+    contributionsData,
+    isLoadingContributions,
+    contributionsGridPagination,
+    fetchMilitaryContributions,
+    resetSearch
+  } = useMilitaryEntryAndModification();
 
   const handleStatusChange = (newStatus: string, statusName?: string) => {
     if (statusName === "Complete" && currentStatus !== "Complete") {
@@ -48,13 +53,18 @@ const MilitaryEntryAndModificationContent = () => {
   const handleCloseForm = () => {
     setIsDialogOpen(false);
     fetchMilitaryContributions();
-    setMemberDetailsRefreshTrigger(prev => prev + 1);
+    setMemberDetailsRefreshTrigger((prev) => prev + 1);
   };
 
-  const handleContributionSaved = (contribution: { contributionAmount: number; contributionYear: number; isSupplementalContribution: boolean }) => {
-    const employeeName = masterInquiryMemberDetails?.firstName && masterInquiryMemberDetails?.lastName
-      ? `${masterInquiryMemberDetails.firstName} ${masterInquiryMemberDetails.lastName}`
-      : "the selected employee";
+  const handleContributionSaved = (contribution: {
+    contributionAmount: number;
+    contributionYear: number;
+    isSupplementalContribution: boolean;
+  }) => {
+    const employeeName =
+      masterInquiryMemberDetails?.firstName && masterInquiryMemberDetails?.lastName
+        ? `${masterInquiryMemberDetails.firstName} ${masterInquiryMemberDetails.lastName}`
+        : "the selected employee";
 
     const contributionType = contribution.isSupplementalContribution ? "supplemental" : "regular";
     const successMessage = `The ${contributionType} military contribution of $${formatNumberWithComma(contribution.contributionAmount)} for year ${contribution.contributionYear} for ${employeeName} saved successfully`;
