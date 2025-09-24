@@ -37,6 +37,7 @@ interface TerminationGridSearchProps {
   fiscalData: CalendarResponseDto | null;
   shouldArchive?: boolean;
   onArchiveHandled?: () => void;
+  onErrorOccurred?: () => void; // Add this prop
 }
 
 const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
@@ -48,7 +49,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   hasUnsavedChanges,
   fiscalData,
   shouldArchive,
-  onArchiveHandled
+  onArchiveHandled,
+  onErrorOccurred
 }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -158,7 +160,22 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
         refreshGridAfterSave(successMessage);
       } catch (error) {
         console.error("Failed to save forfeiture adjustment:", error);
-        alert("Failed to save. Please try again.");
+        
+        // Show error message
+        dispatch(
+          setMessage({
+            key: "TerminationSave",
+            message: {
+              message: `Failed to save adjustment for ${name || "employee"}.`,
+              type: "error"
+            }
+          })
+        );
+        
+        // Call the passed-in error handler instead of internal scrollToTop
+        if (onErrorOccurred) {
+          onErrorOccurred();
+        }
       } finally {
         editState.removeLoadingRow(rowId);
       }
@@ -167,7 +184,9 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       updateForfeitureAdjustment,
       editState,
       onUnsavedChanges,
-      refreshGridAfterSave
+      refreshGridAfterSave,
+      dispatch,
+      onErrorOccurred
     ]
   );
 
@@ -319,9 +338,25 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
         const employeeNames = names.map(name => name || "Unknown Employee");
         const bulkSuccessMessage = `Members affected: ${employeeNames.join("; ")}`;
         refreshGridAfterSave(bulkSuccessMessage, true);
+
       } catch (error) {
         console.error("Failed to save forfeiture adjustments:", error);
-        alert("Failed to save one or more adjustments. Please try again.");
+        
+        // Show error message
+        dispatch(
+          setMessage({
+            key: "TerminationSave",
+            message: {
+              message: `Failed to save bulk adjustments.`,
+              type: "error"
+            }
+          })
+        );
+        
+        // Call the passed-in error handler instead of internal scrollToTop
+        if (onErrorOccurred) {
+          onErrorOccurred();
+        }
       } finally {
         // Remove all affected badge numbers from loading state
         editState.removeLoadingRows(badgeNumbers);
@@ -332,7 +367,9 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       editState,
       selectionState,
       onUnsavedChanges,
-      refreshGridAfterSave
+      refreshGridAfterSave,
+      dispatch,
+      onErrorOccurred
     ]
   );
 
