@@ -7,15 +7,12 @@ interface ForfeituresAdjustmentPanelProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
   onAddForfeiture?: () => void;
-  onAddUnforfeit?: () => void;
   suggestedForfeitAmount?: number;
 }
 
 const ForfeituresAdjustmentPanel: React.FC<ForfeituresAdjustmentPanelProps> = ({
   initialSearchLoaded,
-  onAddForfeiture,
-  onAddUnforfeit,
-  suggestedForfeitAmount
+  onAddForfeiture
 }) => {
   return (
     <>
@@ -28,26 +25,15 @@ const ForfeituresAdjustmentPanel: React.FC<ForfeituresAdjustmentPanelProps> = ({
               justifyContent: "space-between",
               alignItems: "center"
             }}>
-            {(onAddForfeiture || onAddUnforfeit) && (
+            {onAddForfeiture && (
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                 {onAddForfeiture && (
                   <Button
                     onClick={onAddForfeiture}
                     variant="contained"
                     startIcon={<AddOutlined />}
-                    color="primary"
-                    disabled={suggestedForfeitAmount !== undefined && suggestedForfeitAmount !== null && suggestedForfeitAmount <= 0}>
+                    color="primary">
                     ADD FORFEITURE
-                  </Button>
-                )}
-                {onAddUnforfeit && (
-                  <Button
-                    onClick={onAddUnforfeit}
-                    variant="contained"
-                    startIcon={<AddOutlined />}
-                    color="primary"
-                    disabled={suggestedForfeitAmount !== undefined && suggestedForfeitAmount !== null && suggestedForfeitAmount >= 0}>
-                    ADD UNFORFEIT
                   </Button>
                 )}
               </div>
