@@ -178,39 +178,40 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       if (shouldRefreshData && searchParams) {
         try {
           // Construct search params with current pagination and sort
-          const params = {
-            ...searchParams,
-            pageNumber,
-            pageSize,
-            sortBy: sortParams.sortBy,
-            isSortDescending: sortParams.isSortDescending
-          };
+          const params = createRequest(
+            pageNumber * pageSize,
+            sortParams.sortBy,
+            sortParams.isSortDescending,
+            selectedProfitYear
+          );
           
-          // Perform the search to get fresh data
-          await triggerSearch(params).unwrap();
-          
-          // Show success messages after refresh
-          if (successMessages.length > 0) {
-            // Get the most recent message
-            const latestMessage = successMessages[successMessages.length - 1];
+          if (params) {
+            // Perform the search to get fresh data
+            await triggerSearch(params, false);
             
-            // Show appropriate message based on type
-            const messageTemplate = latestMessage.type === 'bulk' 
-              ? Messages.TerminationBulkSaveSuccess 
-              : Messages.TerminationSaveSuccess;
+            // Show success messages after refresh
+            if (successMessages.length > 0) {
+              // Get the most recent message
+              const latestMessage = successMessages[successMessages.length - 1];
               
-            dispatch(
-              setMessage({
-                ...messageTemplate,
-                message: {
-                  ...messageTemplate.message,
-                  message: latestMessage.message
-                }
-              })
-            );
-            
-            // Clear messages after displaying
-            setSuccessMessages([]);
+              // Show appropriate message based on type
+              const messageTemplate = latestMessage.type === 'bulk' 
+                ? Messages.TerminationBulkSaveSuccess 
+                : Messages.TerminationSaveSuccess;
+                
+              dispatch(
+                setMessage({
+                  ...messageTemplate,
+                  message: {
+                    ...messageTemplate.message,
+                    message: latestMessage.message
+                  }
+                })
+              );
+              
+              // Clear messages after displaying
+              setSuccessMessages([]);
+            }
           }
         } catch (error) {
           console.error("Error refreshing termination data:", error);
@@ -226,7 +227,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     };
     
     refreshData();
-  }, [shouldRefreshData, searchParams, pageNumber, pageSize, sortParams, triggerSearch, dispatch, successMessages, onErrorOccurred]);
+  }, [shouldRefreshData, searchParams, pageNumber, pageSize, sortParams, triggerSearch, dispatch, successMessages, onErrorOccurred, selectedProfitYear, createRequest]);
 
   const handleSave = useCallback(
     async (request: ForfeitureAdjustmentUpdateRequest, name: string) => {
