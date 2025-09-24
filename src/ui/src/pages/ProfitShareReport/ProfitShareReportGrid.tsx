@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetProfitShareReportColumns } from "./ProfitShareReportGridColumns";
 
@@ -25,12 +25,27 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
 }) => {
   const columnDefs = useMemo(() => GetProfitShareReportColumns(), []);
 
+  const handleSortChanged = useCallback(
+    (update: ISortParams) => {
+      // Handle empty sortBy case - set default to badgeNumber
+      if (update.sortBy === "") {
+        update.sortBy = "badgeNumber";
+        update.isSortDescending = false;
+      }
+
+      // Reset to page 0 when sorting changes
+      onPageChange(0);
+      onSortChange(update);
+    },
+    [onPageChange, onSortChange]
+  );
+
   return (
     <>
       <DSMGrid
         preferenceKey={"ProfitShareReportGrid"}
         isLoading={isLoading}
-        handleSortChanged={onSortChange}
+        handleSortChanged={handleSortChanged}
         providedOptions={{
           rowData: data,
           columnDefs: columnDefs
