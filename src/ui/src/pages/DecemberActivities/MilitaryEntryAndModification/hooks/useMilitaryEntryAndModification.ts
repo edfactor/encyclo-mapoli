@@ -171,10 +171,10 @@ export const useMilitaryEntryAndModification = () => {
         }
       })
         .unwrap()
-        .then((data) => {
+        .then((data: any) => {
           dispatch({ type: "CONTRIBUTIONS_FETCH_SUCCESS", payload: { data } });
         })
-        .catch((error) => {
+        .catch((error: any) => {
           dispatch({ type: "CONTRIBUTIONS_FETCH_FAILURE", payload: { error: error?.toString() || "Unknown error" } });
         });
     },
@@ -212,6 +212,34 @@ export const useMilitaryEntryAndModification = () => {
           // Member found
           reduxDispatch(setMasterInquiryData(response.results[0]));
           dispatch({ type: "SEARCH_SUCCESS", payload: { memberFound: true } });
+
+          // Immediately fetch military contributions for the found member so records
+          // are shown right away (fixes PS-1725). Use the returned member data
+          // directly instead of relying on the redux selector update.
+          try {
+            dispatch({ type: "CONTRIBUTIONS_FETCH_START" });
+            const member = response.results[0];
+            await fetchContributions({
+              badgeNumber: Number(member.badgeNumber),
+              profitYear: profitYear,
+              contributionAmount: 0,
+              contributionDate: "",
+              pagination: { skip: 0, take: 25, sortBy: "contributionDate", isSortDescending: false }
+            })
+              .unwrap()
+              .then((data: any) => {
+                dispatch({ type: "CONTRIBUTIONS_FETCH_SUCCESS", payload: { data } });
+              })
+              .catch((error: any) => {
+                dispatch({
+                  type: "CONTRIBUTIONS_FETCH_FAILURE",
+                  payload: { error: error?.toString() || "Unknown error" }
+                });
+              });
+          } catch (err) {
+            // swallow - already handled in promise chain, but log just in case
+            console.error("Failed to auto-fetch military contributions:", err);
+          }
         } else {
           // No member found - show the Member Not Found message
           dispatch({ type: "SEARCH_SUCCESS", payload: { memberFound: false } });

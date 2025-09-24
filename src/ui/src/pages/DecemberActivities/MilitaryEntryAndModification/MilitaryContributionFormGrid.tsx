@@ -97,8 +97,7 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
             handleSortChanged={handleSortChange}
             providedOptions={{
               rowData: militaryContributionsData?.results,
-              columnDefs: columnDefs,
-              rowSelection: { mode: "singleRow" }
+              columnDefs: columnDefs
             }}
           />
 
