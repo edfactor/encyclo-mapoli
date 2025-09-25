@@ -298,7 +298,7 @@ const RouterSubAssembly: React.FC = () => {
                 </Route>
                 <Route
                   path={ROUTES.PAY426_SUMMARY}
-                  element={<ProfitSummary />}
+                  element={<ProfitSummary frozenData={true} />}
                 />
                 <Route
                   path={ROUTES.PROFIT_SHARE_BY_STORE}
