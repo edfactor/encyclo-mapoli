@@ -20,8 +20,8 @@ import ProfitShareReportEditRun from "../../pages/FiscalFlow/ProfitShareReportEd
 import Forfeit from "../../pages/Forfeit/Forfeit";
 import FrozenSummary from "../../pages/FrozenSummary/FrozenSummary";
 import MasterInquiry from "../../pages/MasterInquiry/MasterInquiry";
-import Pay450Summary from "../../pages/PaymasterUpdate/Pay450Summary";
-import ProfCtrlSheet from "../../pages/PaymasterUpdate/ProfCtrlSheet";
+import Pay450Summary from "../../pages/PaymasterUpdate/PayMasterUpdateSummary";
+import ProfitSharingControlSheet from "../../pages/PaymasterUpdate/ProfitSharingControlSheet";
 import BalanceByYears from "../../pages/PROF130/BalanceByYears/BalanceByYears";
 import VestedAmountsByAge from "../../pages/PROF130/VestedAmountsByAge/VestedAmountsByAge";
 import Profall from "../../pages/Profall/Profall";
@@ -287,7 +287,7 @@ const RouterSubAssembly: React.FC = () => {
                   element={<Pay450Summary />}></Route>
                 <Route
                   path={ROUTES.PROF_CTRLSHEET}
-                  element={<ProfCtrlSheet />}></Route>
+                  element={<ProfitSharingControlSheet />}></Route>
                 <Route
                   path={ROUTES.PROFIT_SHARE_BY_STORE}
                   element={<ProfitShareByStore />}></Route>
