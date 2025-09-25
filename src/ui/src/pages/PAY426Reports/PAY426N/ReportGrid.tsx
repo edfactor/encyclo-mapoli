@@ -1,13 +1,13 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { Path, useNavigate } from "react-router-dom";
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
 import { FilterParams } from "reduxstore/types";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { DSMGrid, Pagination } from "smart-ui-library";
+import { useGridPagination } from "../../../hooks/useGridPagination";
 import { RootState } from "../../../reduxstore/store";
-import pay426Utils from "../Pay427Utils";
 import { GetProfitSharingReportGridColumns } from "./GetProfitSharingReportGridColumns";
 import presets from "./presets";
 
@@ -18,34 +18,39 @@ interface ReportGridProps {
 
 const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
   const navigate = useNavigate();
-
-  const [pageNumberByPreset, setPageNumberByPreset] = useState<{ [key: string]: number }>({});
-  const [pageSizeByPreset, setPageSizeByPreset] = useState<{ [key: string]: number }>({});
-
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "employeeName",
-    isSortDescending: false
-  });
-
   const [trigger, { isFetching }] = useLazyGetYearEndProfitSharingReportQuery();
   const hasToken = useSelector((state: RootState) => !!state.security.token);
   const profitYear = useFiscalCloseProfitYear();
-
   const data = useSelector((state: RootState) => state.yearsEnd.yearEndProfitSharingReport);
+
+  const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "employeeName",
+    initialSortDescending: false,
+    onPaginationChange: useCallback(
+      (pageNum: number, pageSz: number, sortPrms: any) => {
+        if (hasToken && params) {
+          const matchingPreset = presets.find((preset) => JSON.stringify(preset.params) === JSON.stringify(params));
+          trigger({
+            profitYear: profitYear,
+            pagination: {
+              skip: pageNum * pageSz,
+              take: pageSz,
+              sortBy: sortPrms.sortBy,
+              isSortDescending: sortPrms.isSortDescending
+            },
+            ...params,
+            reportId: matchingPreset ? Number(matchingPreset.id) : 0
+          });
+        }
+      },
+      [hasToken, params, profitYear, trigger]
+    )
+  });
 
   const getCurrentPresetId = () => {
     const matchingPreset = presets.find((preset) => JSON.stringify(preset.params) === JSON.stringify(params));
     return matchingPreset ? matchingPreset.id : "default";
-  };
-
-  const getCurrentPageNumber = () => {
-    const presetId = getCurrentPresetId();
-    return pageNumberByPreset[presetId] ?? 0;
-  };
-
-  const getCurrentPageSize = () => {
-    const presetId = getCurrentPresetId();
-    return pageSizeByPreset[presetId] ?? 25;
   };
 
   // Notify parent component about loading state changes
@@ -66,22 +71,20 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
   useEffect(() => {
     if (hasToken && params) {
       const matchingPreset = presets.find((preset) => JSON.stringify(preset.params) === JSON.stringify(params));
-      const currentPageNumber = getCurrentPageNumber();
-      const currentPageSize = getCurrentPageSize();
 
       trigger({
         profitYear: profitYear,
         pagination: {
-          skip: currentPageNumber * currentPageSize,
-          take: currentPageSize,
-          sortBy: sortParams.sortBy,
-          isSortDescending: sortParams.isSortDescending
+          skip: pageNumber * pageSize,
+          take: pageSize,
+          sortBy: "employeeName",
+          isSortDescending: false
         },
         ...params,
         reportId: matchingPreset ? Number(matchingPreset.id) : 0
       });
     }
-  }, [trigger, hasToken, profitYear, pageNumberByPreset, pageSizeByPreset, sortParams, params]);
+  }, [trigger, hasToken, profitYear, params]);
 
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {
@@ -90,32 +93,8 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
     [navigate]
   );
 
-  const sortEventHandler = (update: ISortParams) => {
-    const matchingPreset = presets.find((preset) => JSON.stringify(preset.params) === JSON.stringify(params));
-    const currentPageSize = getCurrentPageSize();
-    const presetId = getCurrentPresetId();
-    const t = () => {
-      trigger({
-        profitYear: profitYear,
-        pagination: {
-          skip: 0,
-          take: currentPageSize,
-          sortBy: update.sortBy,
-          isSortDescending: update.isSortDescending
-        },
-        ...params,
-        reportId: matchingPreset ? Number(matchingPreset.id) : 0
-      });
-    };
-
-    const setPageNumberForPreset = (value: React.SetStateAction<number>) => {
-      setPageNumberByPreset((prev) => ({
-        ...prev,
-        [presetId]: typeof value === "function" ? value(prev[presetId] ?? 0) : value
-      }));
-    };
-
-    pay426Utils.sortEventHandler(update, sortParams, setSortParams, setPageNumberForPreset, t);
+  const sortEventHandler = (update: any) => {
+    handleSortChange(update);
   };
 
   const columnDefs = useMemo(
@@ -177,15 +156,13 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
           />
           {!!data && data.response.results.length > 0 && (
             <Pagination
-              pageNumber={getCurrentPageNumber()}
+              pageNumber={pageNumber}
               setPageNumber={(value: number) => {
-                const presetId = getCurrentPresetId();
-                setPageNumberByPreset((prev) => ({ ...prev, [presetId]: value - 1 }));
+                handlePaginationChange(value - 1, pageSize);
               }}
-              pageSize={getCurrentPageSize()}
+              pageSize={pageSize}
               setPageSize={(value: number) => {
-                const presetId = getCurrentPresetId();
-                setPageSizeByPreset((prev) => ({ ...prev, [presetId]: value }));
+                handlePaginationChange(0, value);
               }}
               recordCount={data.response.total}
             />
