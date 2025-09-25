@@ -20,8 +20,7 @@ export interface TerminationSearchRequest extends StartAndEndDateRequest {
 const Termination = () => {
   const [fetchAccountingRange, { data: fiscalData, isLoading: isRangeLoading }] = useLazyGetAccountingRangeToCurrent(6);
   const { state, actions } = useTerminationState();
-  // const topRef = useRef<HTMLDivElement>(null);
-
+  
   // Function to scroll to top - only used for error cases
   const scrollToTop = useCallback(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
