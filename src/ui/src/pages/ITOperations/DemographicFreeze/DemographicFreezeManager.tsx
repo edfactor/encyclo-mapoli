@@ -62,7 +62,8 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
   const {
     control,
     handleSubmit,
-    formState: { errors, isValid }
+    formState: { errors, isValid },
+    reset
   } = useForm<DemographicFreezeSearch>({
     resolver: yupResolver(schema) as Resolver<DemographicFreezeSearch>,
     defaultValues: {
@@ -95,6 +96,10 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
             asOfDateTime,
             profitYear: data.profitYear
           });
+
+          // Clear the form fields after successful freeze so the As-of date/time
+          // are removed and the Create button becomes disabled (form invalid).
+          reset({ profitYear: profitYear || currentYear, asOfDate: null, asOfTime: null });
 
           setInitialSearchLoaded(true);
           // Could add a success notification here
