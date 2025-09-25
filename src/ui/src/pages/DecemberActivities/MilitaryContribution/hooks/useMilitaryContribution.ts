@@ -133,7 +133,7 @@ const militaryReducer = (state: MilitaryState, action: MilitaryAction): Military
   }
 };
 
-export const useMilitaryEntryAndModification = () => {
+export const useMilitaryContribution = () => {
   const [state, dispatch] = useReducer(militaryReducer, initialState);
   const reduxDispatch = useDispatch();
   const [triggerSearch] = useLazySearchProfitMasterInquiryQuery();
@@ -293,4 +293,4 @@ export const useMilitaryEntryAndModification = () => {
   };
 };
 
-export default useMilitaryEntryAndModification;
+export default useMilitaryContribution;

@@ -52,7 +52,7 @@ import { createUnauthorizedParams, isPathAllowedInNavigation } from "../../utils
 import { ImpersonationMultiSelect } from "smart-ui-library";
 import { MenuBar } from "../../components/MenuBar/MenuBar";
 import BeneficiaryInquiry from "../../pages/BeneficiaryInquiry/BeneficiaryInquiry";
-import MilitaryEntryAndModification from "../../pages/DecemberActivities/MilitaryEntryAndModification/MilitaryEntryAndModification";
+import MilitaryContribution from "../../pages/DecemberActivities/MilitaryContribution/MilitaryContribution";
 import DevDebug from "../../pages/Dev/DevDebug";
 import RecentlyTerminated from "../../pages/FiscalClose/RecentlyTerminated/RecentlyTerminated";
 import TerminatedLetters from "../../pages/FiscalClose/TerminatedLetters/TerminatedLetters";
@@ -250,8 +250,8 @@ const RouterSubAssembly: React.FC = () => {
                   path={ROUTES.PROF_TERM}
                   element={<Termination />}></Route>
                 <Route
-                  path={ROUTES.MILITARY_ENTRY_AND_MODIFICATION}
-                  element={<MilitaryEntryAndModification />}></Route>
+                  path={ROUTES.MILITARY_CONTRIBUTION}
+                  element={<MilitaryContribution />}></Route>
                 <Route
                   path={ROUTES.PROFIT_SHARE_REPORT}
                   element={<ProfitShareReport />}></Route>

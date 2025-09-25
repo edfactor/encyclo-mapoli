@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import useMilitaryEntryAndModification from "./hooks/useMilitaryEntryAndModification";
+import useMilitaryContribution from "./hooks/useMilitaryContribution";
 
 interface SearchFormData {
   socialSecurity?: string;
@@ -42,10 +42,10 @@ const validationSchema = yup
     Boolean(values.socialSecurity || values.badgeNumber)
   );
 
-const MilitaryEntryAndModificationSearchFilter: React.FC = () => {
+const MilitaryContributionSearchFilter: React.FC = () => {
   const [activeField, setActiveField] = useState<"socialSecurity" | "badgeNumber" | null>(null);
   const defaultProfitYear = useDecemberFlowProfitYear();
-  const { isSearching, executeSearch, resetSearch } = useMilitaryEntryAndModification();
+  const { isSearching, executeSearch, resetSearch } = useMilitaryContribution();
 
   const {
     control,
@@ -158,4 +158,4 @@ const MilitaryEntryAndModificationSearchFilter: React.FC = () => {
   );
 };
 
-export default MilitaryEntryAndModificationSearchFilter;
+export default MilitaryContributionSearchFilter;
