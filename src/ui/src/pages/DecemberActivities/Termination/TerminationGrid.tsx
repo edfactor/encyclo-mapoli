@@ -25,7 +25,6 @@ import { Messages } from "../../../utils/messageDictonary";
 import { TerminationSearchRequest } from "./Termination";
 import { GetDetailColumns } from "./TerminationDetailsGridColumns";
 import { GetTerminationColumns } from "./TerminationGridColumns";
-import { CircularProgress } from "@mui/material";
 
 interface TerminationGridSearchProps {
   initialSearchLoaded: boolean;
@@ -141,6 +140,12 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     }
   }, [searchParams, dispatch]);
 
+  // Add state to track current scroll position
+  const [gridScrollPosition, setGridScrollPosition] = useState<{ top: number, left: number } | null>(null);
+  
+  // Add reference to track if we're currently restoring scroll position
+  const isRestoringScrollRef = useRef(false);
+
   // Add state to track when to refresh data after save
   const [shouldRefreshData, setShouldRefreshData] = useState(false);
   const [saveSuccessType, setSaveSuccessType] = useState<'single' | 'bulk' | null>(null);
@@ -177,6 +182,25 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     const refreshData = async () => {
       if (shouldRefreshData && searchParams) {
         try {
+          // Store current scroll position before refreshing data
+          if (gridRef.current?.api) {
+            try {
+              // Get the scrollable viewport container - use proper AG Grid API methods
+              const gridBodyViewport = document.querySelector('.ag-body-viewport');
+              if (gridBodyViewport) {
+                setGridScrollPosition({
+                  top: gridBodyViewport.scrollTop,
+                  left: gridBodyViewport.scrollLeft
+                });
+                
+                // Log for debugging
+                console.log('Saving scroll position:', gridBodyViewport.scrollTop, gridBodyViewport.scrollLeft);
+              }
+            } catch (err) {
+              console.error("Error saving scroll position:", err);
+            }
+          }
+          
           // Construct search params with current pagination and sort
           const params = createRequest(
             pageNumber * pageSize,
@@ -228,6 +252,44 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     
     refreshData();
   }, [shouldRefreshData, searchParams, pageNumber, pageSize, sortParams, triggerSearch, dispatch, successMessages, onErrorOccurred, selectedProfitYear, createRequest]);
+
+  // Add effect to restore scroll position after data refresh
+  useEffect(() => {
+    const restoreScrollPosition = () => {
+      if (gridRef.current?.api && gridScrollPosition && !isFetching && !isRestoringScrollRef.current) {
+        // Set flag to prevent multiple scroll attempts
+        isRestoringScrollRef.current = true;
+        
+        // Need to wait for the grid to fully render after data load
+        setTimeout(() => {
+          try {
+            // Get the scrollable viewport container - use DOM selector instead of API method
+            const gridBodyViewport = document.querySelector('.ag-body-viewport');
+            if (gridBodyViewport) {
+              // Set the scroll position directly
+              gridBodyViewport.scrollTop = gridScrollPosition.top;
+              gridBodyViewport.scrollLeft = gridScrollPosition.left;
+              
+              // Log for debugging
+              console.log('Restored scroll position:', gridScrollPosition);
+            }
+          } catch (err) {
+            console.error('Error restoring scroll position:', err);
+          } finally {
+            // Reset scroll position state
+            setGridScrollPosition(null);
+            
+            // Reset the flag after a longer delay to ensure the scroll has been applied
+            setTimeout(() => {
+              isRestoringScrollRef.current = false;
+            }, 300);
+          }
+        }, 250); // Increased delay to ensure grid is fully rendered
+      }
+    };
+    
+    restoreScrollPosition();
+  }, [gridScrollPosition, isFetching]);
 
   const handleSave = useCallback(
     async (request: ForfeitureAdjustmentUpdateRequest, name: string) => {
@@ -613,7 +675,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   return (
     <div className="relative">
       {/* Show loading overlay when fetching data */}
-      {isFetching && (
+      {isFetching || isBulkSaving || isSingleSaving  && (
         <div className="absolute inset-0 w-full h-full bg-white/60 z-[1000] flex items-center justify-center">
           <div
             className="spinner-border w-12 h-12"
@@ -624,7 +686,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       )}
       
       {/* Fix the conditional for showing the circular progress during bulk save */}
-      {(isBulkSaving || isSingleSaving) && (
+      {(false) && (
         <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
           <CircularProgress />
         </div>
@@ -652,12 +714,6 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
               leftColumnHeaders={["Total Beneficiary Allocations"]}
               topRowHeaders={[]}></TotalsGrid>
           </div>
-
-          {(isBulkSaving) && (
-            <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-              <CircularProgress />
-            </div>
-          )}
 
           <DSMGrid
             preferenceKey={"QPREV-PROF"}
