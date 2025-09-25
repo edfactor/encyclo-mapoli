@@ -18,6 +18,7 @@ export interface NavigationDto {
   icon: string;
   requiredRoles: string[];
   disabled: boolean;
+  isNavigable?: boolean;
   // Prerequisite navigation elements that are currently completed.
   prerequisiteNavigations?: NavigationDto[];
   items: NavigationDto[];

@@ -21,7 +21,6 @@ import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
 interface ForfeituresAdjustmentSearchParams {
   ssn?: string;
   badge?: string;
-  year?: number;
 }
 
 interface ForfeituresAdjustmentSearchParametersProps {
@@ -55,14 +54,7 @@ const schema = yup
           value >= 10000 && value <= 9999999
         );
       })
-      .transform((value) => value || undefined),
-    year: yup
-      .number()
-      .typeError("Year must be a number")
-      .integer("Year must be an integer")
-      .min(2020, "Year must be 2020 or later")
-      .max(2100, "Year must be 2100 or earlier")
-      .optional()
+      .transform((value) => value || undefined)
   })
   .test("at-least-one-required", "Either SSN or Badge is required", (values) => Boolean(values.ssn || values.badge));
 
@@ -89,8 +81,7 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
     resolver: yupResolver(schema) as Resolver<ForfeituresAdjustmentSearchParams>,
     defaultValues: {
       ssn: forfeitureAdjustmentQueryParams?.ssn || "",
-      badge: forfeitureAdjustmentQueryParams?.badge || "",
-      year: forfeitureAdjustmentQueryParams?.profitYear || profitYear
+      badge: forfeitureAdjustmentQueryParams?.badge || ""
     },
     mode: "onBlur"
   });
@@ -129,7 +120,7 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
     const searchParams = {
       ssn: data.ssn,
       badge: data.badge,
-      profitYear: data.year || profitYear,
+      profitYear: new Date().getFullYear(), // Use current wall clock year
       skip: 0,
       take: 255,
       sortBy: "badgeNumber",
@@ -168,8 +159,7 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
     setPageReset(true);
     reset({
       ssn: "",
-      badge: "",
-      year: profitYear
+      badge: ""
     });
     dispatch(clearForfeitureAdjustmentData());
     dispatch(clearForfeitureAdjustmentQueryParams());
@@ -213,10 +203,12 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
                   error={!!errors.ssn || !!errors.root?.message}
                   placeholder="SSN"
                   onChange={(e) => {
-                    if (!isNaN(Number(e.target.value))) {
-                      const parsedValue = e.target.value === "" ? null : Number(e.target.value);
+                    const value = e.target.value;
+                    // Allow empty string or numeric values
+                    if (value === "" || !isNaN(Number(value))) {
+                      const parsedValue = value === "" ? "" : Number(value);
                       field.onChange(parsedValue);
-                      if (e.target.value !== "") {
+                      if (value !== "") {
                         toggleSearchFieldEntered(true, "ssn");
                       } else {
                         toggleSearchFieldEntered(false, "ssn");
@@ -244,10 +236,12 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
                   placeholder="Badge"
                   disabled={activeField === "ssn"}
                   onChange={(e) => {
-                    if (!isNaN(Number(e.target.value))) {
-                      const parsedValue = e.target.value === "" ? null : Number(e.target.value);
+                    const value = e.target.value;
+                    // Allow empty string or numeric values
+                    if (value === "" || !isNaN(Number(value))) {
+                      const parsedValue = value === "" ? "" : Number(value);
                       field.onChange(parsedValue);
-                      if (e.target.value !== "") {
+                      if (value !== "") {
                         toggleSearchFieldEntered(true, "badge");
                       } else {
                         toggleSearchFieldEntered(false, "badge");
@@ -260,26 +254,6 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
             {errors.badge && <FormHelperText error>{errors.badge.message}</FormHelperText>}
           </Grid>
 
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <Controller
-              name="year"
-              control={control}
-              render={({ field }) => (
-                <DsmDatePicker
-                  id="profitYear"
-                  onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
-                  value={field.value ? new Date(field.value, 0) : null}
-                  required={true}
-                  label="Year"
-                  disableFuture
-                  views={["year"]}
-                  error={errors.year?.message}
-                  disabled={true}
-                />
-              )}
-            />
-            {errors.year && <FormHelperText error>{errors.year.message}</FormHelperText>}
-          </Grid>
         </Grid>
       </Grid>
       <Grid

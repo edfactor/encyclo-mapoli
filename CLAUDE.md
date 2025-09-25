@@ -46,7 +46,87 @@ Patterns:
 - Prefer explicit types unless initializer makes type obvious
 - Use `readonly` where applicable; private fields `_camelCase`; private static `s_` prefix; constants PascalCase
 - Always brace control blocks; favor null propagation `?.` and coalescing `??`
-- XML doc comments for public & internal APIs
+  - IMPORTANT: Avoid using the null-coalescing operator `??` inside expressions that will be translated by Entity Framework Core into SQL (for example, inside LINQ-to-Entities projections or where clauses). The Oracle EF Core provider and some EF translations can fail or produce unexpected SQL when `??` is used in queries. Instead prefer one of the following safe patterns:
+    - Use explicit conditional projection that EF can translate, e.g. `x.SomeNullableBool.HasValue ? x.SomeNullableBool.Value : fallback`.
+    - Materialize the data to memory before using `??` by calling `.AsEnumerable()` or `.ToList()` if the dataset is small and it's safe to do so, then apply the `??` coalescing in LINQ-to-Objects.
+    - Compute fallbacks or derived values in a service or computed property when possible (move complex logic out of the EF projection).
+  - When adding this rule to new code or code reviews, add a brief comment explaining why `??` was avoided (e.g., "avoid EF translation issues with Oracle provider").
+  - XML doc comments for public & internal APIs
+
+## Validation & Boundary Checks (MANDATORY)
+
+All incoming data MUST be validated with explicit boundary checks at both the server and client boundaries. Validation is a security and correctness concern: never rely solely on client-side checks. The following are required by policy for every endpoint and page that accepts user input.
+
+Server-side requirements (mandatory):
+- All request DTOs must have validation attributes or explicit validators that enforce:
+  - numeric ranges (min/max) for integers/floats (e.g., page size, amounts, counts)
+  - string length limits (min/max) and allowed character sets when applicable
+  - collection size limits (max items in array/list payloads)
+  - pagination bounds (max page size, max offset/skip)
+  - file upload limits (max file size, allowed content types)
+  - date/time ranges (not before/after bounds) and timezone normalization
+  - enum value validation (reject unknown or out-of-range enum numeric values)
+  - required fields and nullability constraints
+- Use FastEndpoints validation pipeline or FluentValidation (existing project conventions apply) to centralize validation logic. Validation failures must return structured `ValidationProblem` responses with field-level messages.
+- Use server-side guards to enforce maximum data volume to avoid expensive queries (e.g., cap requested rows to a safe maximum, require filters for wide scans).
+- For APIs that accept complex filters, build expression validators to reject queries that would result in unbounded or expensive scans (for example: all-badges-zero or empty filter sets that match too many rows).
+- All validators must be unit-tested (xUnit). Add tests for happy paths and boundary cases (min, max, empty, null, invalid enum) and at least one large/degenerate input test to assert the system rejects or truncates the request safely.
+
+Client-side requirements (recommended + required UX guardrails):
+- All pages must validate user input before submission using the project's front-end validation utilities (React + TypeScript). Client-side validation improves UX but is not a substitute for server-side checks.
+- Mirror server-side constraints in TypeScript types and validators: string lengths, numeric ranges, max collection sizes, allowed enum values, and file size/type checks.
+- Prevent users from requesting excessive data from the UI by enforcing pagination controls (max page size) and disabling controls that could produce wide unfiltered queries.
+
+Edge-case examples to cover (must be tested):
+- Empty / null payloads instead of expected objects
+- Oversized arrays (e.g., > 5k items) sent in request bodies
+- Very large numbers (bigger than database column bounds)
+- Dates outside business logic ranges (e.g., hire date in the future)
+- Invalid enum numeric values or stale enum ids from older UI versions
+
+Developer guidance & patterns:
+- Prefer declarative validators (FluentValidation) in DTO classes for clarity and testability.
+- Keep validation logic out of service/business methods; endpoints should validate and then call services with well-formed input.
+- When trimming/normalizing input (for example, truncating an over-long string), document the behavior and return the normalized value or a validation error depending on severity.
+- When limiting collection sizes, return `400 Bad Request` with a clear message when a client exceeds allowable limits.
+- Add tests that assert the actual HTTP response code and message for invalid inputs.
+
+Example (server-side DTO using FluentValidation):
+
+```csharp
+// DTO
+public class SearchRequest
+{
+    public int PageSize { get; init; } = 50;
+    public int Offset { get; init; }
+    public string? Query { get; init; }
+}
+
+// FluentValidation validator (install FluentValidation and register with FastEndpoints pipeline)
+public class SearchRequestValidator : AbstractValidator<SearchRequest>
+{
+    public SearchRequestValidator()
+    {
+        // numeric range with default value on DTO
+        RuleFor(x => x.PageSize)
+            .InclusiveBetween(1, 1000)
+            .WithMessage("PageSize must be between 1 and 1000.");
+
+        RuleFor(x => x.Offset)
+            .InclusiveBetween(0, 1_000_000)
+            .WithMessage("Offset must be between 0 and 1_000_000.");
+
+        RuleFor(x => x.Query)
+            .MaximumLength(200)
+            .WithMessage("Query must be at most 200 characters long.")
+            .When(x => x.Query != null);
+    }
+}
+
+// Registration example (Program.cs / DI):
+// builder.Services.AddValidatorsFromAssemblyContaining<SearchRequestValidator>();
+// FastEndpoints will pick up FluentValidation validators and return structured ValidationProblem responses.
+```
 
 ## Database & CLI
 
@@ -93,6 +173,50 @@ Patterns:
 - Add new endpoints through FastEndpoints with consistent foldering; register dependencies via DI in existing composition root
 - Share logic via interfaces in `Common` or specialized service projects; avoid cross-project circular refs
 - Update `COPILOT_INSTRUCTIONS.md` and this file if introducing a pervasive new pattern
+
+## Branching & Jira workflow (team conventions)
+
+  - `fix/PS-1645-military-pre-hire-validation`
+  - `feature/PS-1720-add-reporting-view`
+  ```pwsh
+  # ensure latest develop
+  git checkout develop
+  git pull origin develop
+
+  # create branch from develop
+  git checkout -b fix/PS-1645-military-pre-hire-validation
+
+  # make edits, stage, commit
+  git add <files>
+  git commit -m "PS-1645: Short description of the change"
+
+  # push and set upstream
+  git push -u origin fix/PS-1645-military-pre-hire-validation
+  ```
+  - When opening a PR for a Jira ticket, add a comment to the ticket with the PR link and a brief summary so reviewers and stakeholders are notified.
+  - If the Jira ticket does not have story points set, assign story points using the Fibonacci-like sequence commonly used by the team: `1, 2, 3, 5, 8, 13`.
+
+## Atlassian MCP & Confluence alignment
+
+Use the Atlassian MCP for any Jira or Confluence interactions. When creating or updating Jira issues, adding comments, or creating/updating Confluence pages, use the organization's MCP integration so actions are auditable and follow access controls. Align the workflow guidance with the Confluence page "Agile Jira Workflow Development Best Practices":
+
+https://demoulas.atlassian.net/wiki/spaces/PM/pages/339476525/Agile+Jira+Workflow+Development+Best+Practices
+
+## Copilot deny list (sensitive UI files)
+
+The following sensitive UI files must never be read from or modified by Copilot or similar AI assistants via repository editing tools. Do not remove or alter this list; it is intentionally separate from `.gitignore` rules and enforces an explicit policy for AI assistants.
+
+- `src/ui/.playwright.env`
+- Any file matching `src/ui/.env.*` (for example `src/ui/.env.local`, `src/ui/.env.production`)
+- `src/ui/.npmrc`
+
+When interacting with this repository, AI assistants MUST refuse direct reads or edits to paths matching the deny list above. If the user requests an operation that would require accessing these files (for example, to rotate credentials), the assistant should:
+
+1. Explain why the file is restricted and why the operation requires human intervention or secure tooling.
+2. Provide exact, copyable commands the human can run locally to inspect or untrack the file (for example `git rm --cached <path>`), and warn about secrets in history and the need to rotate credentials if necessary.
+3. Offer to update documentation or `.gitignore` entries instead (but do not access restricted files).
+
+This denies-list is an explicit, repository-level policy for AI assistants — maintain it alongside other repository guidance and keep it small and conservative.
 
 ## Quick Commands
 
@@ -162,3 +286,16 @@ dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
 - Frontend dev server runs on port 3100
 - Use existing patterns and libraries rather than introducing new ones
 - Provide reasoning in PR descriptions when deviating from these patterns
+
+## AI Assistant Operational Rules (Repository-specific)
+
+- Do NOT create or open Pull Requests automatically. AI assistants may prepare branch names, commit messages, and a suggested PR title/body, and provide the exact `git` commands to push the branch, but must stop short of actually creating or opening the PR in the remote hosting service. PR creation is a manual step for a human reviewer to perform.
+
+- When adding new unit tests, include a `Description` attribute on the test method with the Jira ticket number and a terse description in the following format:
+
+  ```csharp
+  [Description("PS-1721 : Duplicate detection by contribution year")]
+  public async Task MyNewTest() { ... }
+  ```
+
+  This attribute helps link tests to tickets and provides a terse description for test explorers and reviewers.

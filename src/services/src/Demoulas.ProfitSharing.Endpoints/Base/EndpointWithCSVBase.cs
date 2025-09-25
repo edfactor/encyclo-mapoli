@@ -119,40 +119,16 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : FastEndp
             req = req with { Skip = 0, Take = int.MaxValue };
         }
 
-        try
-        {
-            ReportResponseBase<RespType> response = await GetResponse(req, ct);
+        ReportResponseBase<RespType> response = await GetResponse(req, ct);
 
-            if (acceptHeader.Contains("text/csv"))
-            {
-                await using MemoryStream csvData = await GenerateCsvStreamAsync(response, ct);
-                await Send.StreamAsync(csvData, $"{ReportFileName}.csv", contentType: "text/csv", cancellation: ct);
-                return;
-            }
+        if (acceptHeader.Contains("text/csv"))
+        {
+            await using MemoryStream csvData = await GenerateCsvStreamAsync(response, ct);
+            await Send.StreamAsync(csvData, $"{ReportFileName}.csv", contentType: "text/csv", cancellation: ct);
+            return;
+        }
 
-            await Send.OkAsync(response, ct);
-        }
-        catch (OperationCanceledException oce)
-        {
-            // Cancellation occurred (timeout or client/broker cancelled). Translate to 503 Service Unavailable
-            logger?.LogWarning(oce, "Request for endpoint {Endpoint} was canceled.", endpointName);
-            if (!httpContext.Response.HasStarted)
-            {
-                // Use TypedResults.Problem and execute it to produce a ProblemDetails response via the minimal API pipeline
-                var problemResult = TypedResults.Problem(detail: "Request was canceled or timed out.", statusCode: StatusCodes.Status503ServiceUnavailable, title: "Service temporarily unavailable");
-                await problemResult.ExecuteAsync(httpContext);
-            }
-        }
-        catch (InvalidOperationException ioe) when (ioe.InnerException is OperationCanceledException oc)
-        {
-            // Some endpoints/services wrap the OCE in an InvalidOperationException. Unwrap and treat as cancellation.
-            logger?.LogWarning(oc, "Request for endpoint {Endpoint} was canceled (wrapped by InvalidOperationException).", endpointName);
-            if (!httpContext.Response.HasStarted)
-            {
-                var problemResult = TypedResults.Problem(detail: "Request was canceled or timed out.", statusCode: StatusCodes.Status503ServiceUnavailable, title: "Service temporarily unavailable");
-                await problemResult.ExecuteAsync(httpContext);
-            }
-        }
+        await Send.OkAsync(response, ct);
     }
 
     private async Task<MemoryStream> GenerateCsvStreamAsync(ReportResponseBase<RespType> report, CancellationToken cancellationToken)

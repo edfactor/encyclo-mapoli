@@ -31,61 +31,10 @@ internal static class GenerateScriptHelper
         var generateScriptCommand = new Command("generate-upgrade-script", "Generate a SQL script to upgrade the database to the latest migration");
 
         // Add any common options you have
-        commonOptions.ForEach(generateScriptCommand.AddOption);
+        commonOptions.ForEach(o => generateScriptCommand.Add(o));
 
-        generateScriptCommand.SetHandler(async _ =>
-        {
-            var outputPath = configuration["output-file"];
-
-            // Use your existing helper method to retrieve a DbContext.
-            // The ExecuteWithDbContext signature presumably looks something like:
-            //   Task ExecuteWithDbContext(IConfiguration config, string[] args, Func<DbContext, Task> action)
-            await ExecuteWithDbContext(configuration, args, async (_, dbContext) =>
-            {
-                var migrator = dbContext.GetService<IMigrator>();
-
-                var appliedMigrations = await dbContext.Database.GetAppliedMigrationsAsync();
-                var currentMigration = appliedMigrations.LastOrDefault("0");
-
-                Console.WriteLine($"Current DB version: {currentMigration}");
-
-                var hasPendingChanges = await dbContext.Database.GetPendingMigrationsAsync();
-                if (!hasPendingChanges.Any())
-                {
-                    Console.WriteLine("Database is current. No changes need be applied.");
-                    return;
-                }
-
-                // Generate the migration script from "0" (initial) to the latest.
-                // If you only want pending migrations, you can detect the last applied migration and use that instead.
-                var script = migrator.GenerateScript(
-                    fromMigration: currentMigration,
-                    toMigration: null, // null means "to the latest"
-                    options: MigrationsSqlGenerationOptions.Idempotent | MigrationsSqlGenerationOptions.Script
-                );
-
-                if (!string.IsNullOrWhiteSpace(outputPath))
-                {
-                    // Normalize and ensure directory exists; allow any absolute/relative path
-                    var fullPath = Path.GetFullPath(outputPath);
-                    var directory = Path.GetDirectoryName(fullPath);
-                    if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
-                    {
-                        Directory.CreateDirectory(directory);
-                    }
-
-                    // Write the script to a file
-                    await File.WriteAllTextAsync(fullPath, script);
-                    Console.WriteLine($"SQL upgrade script generated at: {fullPath}");
-                }
-                else
-                {
-                    // Print the script to the console
-                    Console.WriteLine("Generated SQL Script:");
-                    Console.WriteLine(script);
-                }
-            });
-        });
+        // Note: handler execution is performed by the caller (Program) to avoid depending on
+        // System.CommandLine handler extension APIs which may change between previews.
 
         return generateScriptCommand;
     }
@@ -97,14 +46,39 @@ internal static class GenerateScriptHelper
         Func<IServiceProvider, ProfitSharingDbContext, Task> action)
     {
         string? connectionName = configuration["connection-name"];
-        if (string.IsNullOrEmpty(connectionName))
+
+        // Some run modes (for example when running via certain launch/profile tooling)
+        // may not expose the launch profile's commandLineArgs through the "args" passed
+        // to Main or the IConfiguration built from AddCommandLine. As a robustness
+        // measure, fall back to scanning the provided args[] for --connection-name
+        // (either "--connection-name value" or "--connection-name=value" forms).
+        if (string.IsNullOrEmpty(connectionName) && args != null && args.Length > 0)
         {
-#pragma warning disable S112
-            throw new NullReferenceException(nameof(connectionName));
-#pragma warning restore S112
+            for (int i = 0; i < args.Length; i++)
+            {
+                var a = args[i];
+                if (string.Equals(a, "--connection-name", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    connectionName = args[i + 1];
+                    break;
+                }
+                if (a.StartsWith("--connection-name=", StringComparison.OrdinalIgnoreCase))
+                {
+                    connectionName = a.Substring("--connection-name=".Length);
+                    break;
+                }
+            }
         }
 
-        HostApplicationBuilder builder = CreateHostBuilder(args);
+        if (string.IsNullOrEmpty(connectionName))
+        {
+            // Provide a clear error when the required connection-name is not supplied.
+            // Callers should pass the connection name via the `--connection-name` option
+            // or set an equivalent environment variable (e.g., when running in CI).
+            throw new ArgumentException("Missing required configuration: connection-name. Please provide --connection-name <name> or set the corresponding environment variable.");
+        }
+
+        HostApplicationBuilder builder = CreateHostBuilder(args ?? Array.Empty<string>());
 
 
         ElasticSearchConfig smartConfig = new ElasticSearchConfig();

@@ -37,6 +37,7 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
   const [formData, setFormData] = useState({
     badgeNumber: 0,
     forfeitureAmount: 0,
+    suggestedForfeitAmount: null,
     classAction: false
   });
   const [updateForfeiture, { isLoading }] = useUpdateForfeitureAdjustmentMutation();
@@ -52,6 +53,7 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
       setFormData((prev) => ({
         ...prev,
         badgeNumber: suggestedForfeitResponse.badgeNumber,
+        suggestedForfeitAmount: suggestedForfeitResponse.suggestedForfeitAmount,
         forfeitureAmount: suggestedForfeitResponse.suggestedForfeitAmount
       }));
     }
@@ -140,6 +142,7 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
       <Grid
         container
         spacing={2}>
+        <Grid size={{ xs: 12 }}>Suggested Forfeiture Amount: {formData.suggestedForfeitAmount}</Grid>
         <Grid size={{ xs: 12 }}>
           <FormControlLabel
             control={

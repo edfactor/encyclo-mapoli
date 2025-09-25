@@ -12,7 +12,7 @@ const DemographicFreeze = () => {
     <Page label="IT Commands - Demographic Freeze">
       <Grid
         container
-        rowSpacing="24px">
+        rowSpacing={3}>
         <Grid width={"100%"}>
           <Divider />
         </Grid>

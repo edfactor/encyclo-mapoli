@@ -54,8 +54,13 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
     },
     createStatusColumn({
       field: "employeeStatus",
-      minWidth: 120,
-      alignment: "center"
+      valueFormatter: (params) => {
+        const value = typeof params.value === "string" ? params.value.toLowerCase() : params.value;
+        if (value === "a") return "Active";
+        if (value === "i") return "Inactive";
+        if (value === "t") return "Terminated";
+        return params.value;
+      }
     }),
     createCurrencyColumn({
       headerName: "Balance",

@@ -19,6 +19,7 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
         _ = builder.Property(x => x.StatusId).HasColumnName("STATUS_ID");
         _ = builder.Property(x => x.ParentId).HasColumnName("PARENT_ID");
         _ = builder.Property(x => x.Disabled).HasColumnName("DISABLED");
+        _ = builder.Property(x => x.IsNavigable).HasColumnName("IS_NAVIGABLE");
 
         builder.HasOne(m => m.NavigationStatus)
             .WithMany(x => x.Navigations)

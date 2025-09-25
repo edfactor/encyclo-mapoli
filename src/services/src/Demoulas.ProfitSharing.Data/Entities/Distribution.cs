@@ -17,7 +17,7 @@ public sealed class Distribution : ModifiedBase
     public required char FrequencyId { get; set; }
     public DistributionFrequency? Frequency { get; set; }
     public required char StatusId { get; set; }
-    public required DistributionStatus Status { get; set; }
+    public DistributionStatus? Status { get; set; }
     
     public DistributionPayee? Payee { get; set; }
     public int? PayeeId { get; set; }
@@ -29,19 +29,20 @@ public sealed class Distribution : ModifiedBase
     public string? ForTheBenefitOfAccountType { get; set; }
     public bool Tax1099ForEmployee { get; set; }
     public bool Tax1099ForBeneficiary { get; set; }
-    public decimal FederalTaxPercentage { get; set; }
-    public decimal StateTaxPercentage { get; set; }
     public decimal GrossAmount { get; set; }
+    public decimal FederalTaxPercentage { get => FederalTaxAmount / GrossAmount; }
+    public decimal StateTaxPercentage { get => StateTaxAmount / GrossAmount; }
     public decimal FederalTaxAmount { get; set; }
     public decimal StateTaxAmount { get; set; }
-    public decimal CheckAmount { get; set; }
+    public decimal CheckAmount { get => GrossAmount - FederalTaxAmount - StateTaxAmount; }
     public char TaxCodeId { get; set; }
-    public required TaxCode TaxCode { get; set; }
+    public TaxCode? TaxCode { get; set; }
     public bool IsDeceased { get; set; }
     public char? GenderId { get; set; }
     public Gender? Gender { get; set; }
     public bool QualifiedDomesticRelationsOrder { get; set; }
     public string? Memo { get; set; }
     public bool RothIra { get; set; }
-    
+    public string? ThirdPartyPayeeAccount { get; set; }
+
 }

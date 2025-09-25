@@ -10,16 +10,11 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
   return [
     createBadgeColumn({
       headerName: "Badge",
-
       renderAsLink: false
     }),
     createSSNColumn({}),
-    createNameColumn({
-      field: "employeeName"
-    }),
-    createStoreColumn({
-      field: "store"
-    }),
+    createNameColumn({}),
+    createStoreColumn({}),
     createStatusColumn({
       alignment: "right",
       valueFormatter: (params) => {
