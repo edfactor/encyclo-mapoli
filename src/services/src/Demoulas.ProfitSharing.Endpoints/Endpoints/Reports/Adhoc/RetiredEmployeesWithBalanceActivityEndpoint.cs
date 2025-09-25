@@ -8,20 +8,26 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Security;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
+
 public sealed class RetiredEmployeesWithBalanceActivityEndpoint : EndpointWithCsvBase<TerminatedEmployeesWithBalanceBreakdownRequest, MemberYearSummaryDto, RetiredEmployeesWithBalanceActivityEndpoint.BreakdownEndpointMap>
 {
     private readonly IBreakdownService _breakdownService;
+    private readonly ILogger<RetiredEmployeesWithBalanceActivityEndpoint> _logger;
 
-    public RetiredEmployeesWithBalanceActivityEndpoint(IBreakdownService breakdownService)
+    public RetiredEmployeesWithBalanceActivityEndpoint(IBreakdownService breakdownService, ILogger<RetiredEmployeesWithBalanceActivityEndpoint> logger)
         : base(Navigation.Constants.QPAY066AdHocReports)
     {
         _breakdownService = breakdownService;
+        _logger = logger;
     }
 
     public override string ReportFileName => "Breakdown by Store - QPAY066i - Retired employees with balance activity over the year";
@@ -38,9 +44,54 @@ public sealed class RetiredEmployeesWithBalanceActivityEndpoint : EndpointWithCs
         base.Configure();
     }
 
-    public override Task<ReportResponseBase<MemberYearSummaryDto>> GetResponse(TerminatedEmployeesWithBalanceBreakdownRequest breakdownByStoreRequest, CancellationToken ct)
+    public override async Task<ReportResponseBase<MemberYearSummaryDto>> GetResponse(TerminatedEmployeesWithBalanceBreakdownRequest breakdownByStoreRequest, CancellationToken ct)
     {
-        return _breakdownService.GetRetiredEmployessWithBalanceActivity(breakdownByStoreRequest, ct);
+        using var activity = this.StartEndpointActivity(HttpContext);
+
+        try
+        {
+            this.RecordRequestMetrics(HttpContext, _logger, breakdownByStoreRequest);
+
+            var result = await _breakdownService.GetRetiredEmployessWithBalanceActivity(breakdownByStoreRequest, ct);
+
+            // Record retired employees with balance activity metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "retired-employees-balance-activity"),
+                new("endpoint", "RetiredEmployeesWithBalanceActivityEndpoint"),
+                new("report_type", "breakdown"),
+                new("employee_status", "retired"),
+                new("activity_filter", "balance-activity"));
+
+            var resultCount = result?.Response?.Results?.Count() ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                new("record_type", "retired-employees-active"),
+                new("endpoint", "RetiredEmployeesWithBalanceActivityEndpoint"));
+
+            _logger.LogInformation("Retired employees with balance activity report generated, returned {Count} employees (correlation: {CorrelationId})",
+                resultCount, HttpContext.TraceIdentifier);
+
+            if (result != null)
+            {
+                this.RecordResponseMetrics(HttpContext, _logger, result);
+                return result;
+            }
+
+            var emptyResult = new ReportResponseBase<MemberYearSummaryDto>
+            {
+                ReportName = ReportFileName,
+                StartDate = DateOnly.FromDateTime(DateTime.Today),
+                EndDate = DateOnly.FromDateTime(DateTime.Today),
+                Response = new() { Results = [] }
+            };
+
+            this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
+            return emptyResult;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 
     public sealed class BreakdownEndpointMap : ClassMap<MemberYearSummaryDto>
