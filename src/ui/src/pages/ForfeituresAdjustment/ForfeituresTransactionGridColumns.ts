@@ -83,15 +83,11 @@ export const GetForfeituresTransactionGridColumns = (): ColDef[] => {
       }
     },
     createHoursColumn({
-      field: "currentHoursYear",
-      minWidth: 120,
-      sortable: false
+      field: "currentHoursYear"
     }),
     createCurrencyColumn({
       headerName: "Wages",
-      field: "currentIncomeYear",
-      minWidth: 120,
-      sortable: false
+      field: "currentIncomeYear"
     }),
     {
       headerName: "Comment Type",
