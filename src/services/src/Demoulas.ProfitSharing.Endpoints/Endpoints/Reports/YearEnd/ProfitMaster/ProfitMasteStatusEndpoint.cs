@@ -1,21 +1,26 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using FastEndpoints;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitMaster;
 
 public class ProfitMasterStatusEndpoint : ProfitSharingEndpoint<ProfitYearRequest, ProfitMasterUpdateResponse>
 {
     private readonly IProfitMasterService _profitMasterService;
+    private readonly ILogger<ProfitMasterStatusEndpoint> _logger;
 
-    public ProfitMasterStatusEndpoint(IProfitMasterService profitMasterService)
+    public ProfitMasterStatusEndpoint(IProfitMasterService profitMasterService, ILogger<ProfitMasterStatusEndpoint> logger)
         : base(Navigation.Constants.MasterUpdate)
     {
         _profitMasterService = profitMasterService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -32,14 +37,40 @@ public class ProfitMasterStatusEndpoint : ProfitSharingEndpoint<ProfitYearReques
 
     public override async Task HandleAsync(ProfitYearRequest req, CancellationToken ct)
     {
-        var response = await _profitMasterService.Status(req, ct);
-        if (response == null)
+        using var activity = this.StartEndpointActivity(HttpContext);
+        
+        try
         {
-            await Send.NoContentAsync(ct);
+            this.RecordRequestMetrics(HttpContext, _logger, req);
+
+            var response = await _profitMasterService.Status(req, ct);
+
+            // Record year-end profit master status metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "year-end-profit-master-status"),
+                new("endpoint", "ProfitMasterStatusEndpoint"),
+                new("report_type", "status"),
+                new("profit_year", req.ProfitYear.ToString()));
+
+            _logger.LogInformation("Year-end profit master status retrieved for year {ProfitYear} (correlation: {CorrelationId})",
+                req.ProfitYear, HttpContext.TraceIdentifier);
+
+            if (response == null)
+            {
+                _logger.LogInformation("No profit master status data found for year {ProfitYear} (correlation: {CorrelationId})",
+                    req.ProfitYear, HttpContext.TraceIdentifier);
+                await Send.NoContentAsync(ct);
+            }
+            else
+            {
+                this.RecordResponseMetrics(HttpContext, _logger, response);
+                await Send.OkAsync(response, ct);
+            }
         }
-        else
+        catch (Exception ex)
         {
-            await Send.OkAsync(response, ct);
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
         }
     }
 }

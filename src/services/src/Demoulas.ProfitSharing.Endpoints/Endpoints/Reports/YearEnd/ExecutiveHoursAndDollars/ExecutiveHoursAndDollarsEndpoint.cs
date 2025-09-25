@@ -4,10 +4,13 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
 
@@ -17,12 +20,14 @@ public class ExecutiveHoursAndDollarsEndpoint :
 {
     private readonly IExecutiveHoursAndDollarsService _reportService;
     private readonly IAuditService _auditService;
+    private readonly ILogger<ExecutiveHoursAndDollarsEndpoint> _logger;
 
-    public  ExecutiveHoursAndDollarsEndpoint(IExecutiveHoursAndDollarsService reportService, IAuditService auditService)
+    public  ExecutiveHoursAndDollarsEndpoint(IExecutiveHoursAndDollarsService reportService, IAuditService auditService, ILogger<ExecutiveHoursAndDollarsEndpoint> logger)
         : base(Navigation.Constants.ManageExecutiveHours)
     {
         _reportService = reportService;
         _auditService = auditService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -43,28 +48,72 @@ public class ExecutiveHoursAndDollarsEndpoint :
 
     public override string ReportFileName => "Executive Hours and Dollars";
 
-    public override Task<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> GetResponse(ExecutiveHoursAndDollarsRequest req, CancellationToken ct)
+    public override async Task<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> GetResponse(ExecutiveHoursAndDollarsRequest req, CancellationToken ct)
     {
-        return _auditService.ArchiveCompletedReportAsync(ReportFileName,
-            req.ProfitYear,
-            req,
-            (archiveReq, isArchiveRequest, cancellationToken) =>
-            {
-                if (isArchiveRequest)
-                {
-                    archiveReq = archiveReq with
-                    {
-                        BadgeNumber = null,
-                        FullNameContains = null,
-                        Ssn = null,
-                        HasExecutiveHoursAndDollars = true,
-                        IsMonthlyPayroll = true
-                    };
-                }
+        using var activity = this.StartEndpointActivity(HttpContext);
 
-                return _reportService.GetExecutiveHoursAndDollarsReportAsync(archiveReq, cancellationToken);
-            }, 
-            ct);
+        try
+        {
+            this.RecordRequestMetrics(HttpContext, _logger, req);
+
+            var result = await _auditService.ArchiveCompletedReportAsync(ReportFileName,
+                req.ProfitYear,
+                req,
+                (archiveReq, isArchiveRequest, cancellationToken) =>
+                {
+                    if (isArchiveRequest)
+                    {
+                        archiveReq = archiveReq with
+                        {
+                            BadgeNumber = null,
+                            FullNameContains = null,
+                            Ssn = null,
+                            HasExecutiveHoursAndDollars = true,
+                            IsMonthlyPayroll = true
+                        };
+                    }
+
+                    return _reportService.GetExecutiveHoursAndDollarsReportAsync(archiveReq, cancellationToken);
+                }, 
+                ct);
+
+            // Record year-end executive hours and dollars report metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "year-end-executive-hours-dollars"),
+                new("endpoint", "ExecutiveHoursAndDollarsEndpoint"),
+                new("report_type", "executive-hours-dollars"),
+                new("profit_year", req.ProfitYear.ToString()));
+
+            var resultCount = result?.Response?.Results?.Count() ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                new("record_type", "executive-hours-dollars"),
+                new("endpoint", "ExecutiveHoursAndDollarsEndpoint"));
+
+            _logger.LogInformation("Year-end executive hours and dollars report generated for year {ProfitYear}, returned {Count} records (correlation: {CorrelationId})",
+                req.ProfitYear, resultCount, HttpContext.TraceIdentifier);
+
+            if (result != null)
+            {
+                this.RecordResponseMetrics(HttpContext, _logger, result);
+                return result;
+            }
+
+            var emptyResult = new ReportResponseBase<ExecutiveHoursAndDollarsResponse>
+            {
+                ReportName = ReportFileName,
+                StartDate = DateOnly.FromDateTime(DateTime.Today),
+                EndDate = DateOnly.FromDateTime(DateTime.Today),
+                Response = new() { Results = [] }
+            };
+
+            this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
+            return emptyResult;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 
     public sealed class ExecutiveHoursAndDollarsMap : ClassMap<ExecutiveHoursAndDollarsResponse>

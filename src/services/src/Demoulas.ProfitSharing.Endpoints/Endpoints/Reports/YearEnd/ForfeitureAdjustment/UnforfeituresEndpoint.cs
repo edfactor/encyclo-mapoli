@@ -11,6 +11,8 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Endpoints.TypeConverters;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ForfeitureAdjustment;
 
@@ -19,12 +21,14 @@ public class UnforfeituresEndpoint :
 {
     private readonly IUnforfeitService _reportService;
     private readonly IAuditService _auditService;
+    private readonly ILogger<UnforfeituresEndpoint> _logger;
 
-    public UnforfeituresEndpoint(IUnforfeitService reportService, IAuditService auditService)
+    public UnforfeituresEndpoint(IUnforfeitService reportService, IAuditService auditService, ILogger<UnforfeituresEndpoint> logger)
         : base(Navigation.Constants.Unforfeit)
     {
         _reportService = reportService;
         _auditService = auditService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -62,14 +66,29 @@ public class UnforfeituresEndpoint :
 
     public override string ReportFileName => "REHIRE'S PROFIT SHARING DATA";
 
-    public override Task<ReportResponseBase<UnforfeituresResponse>> GetResponse(StartAndEndDateRequest req, CancellationToken ct)
+    public override async Task<ReportResponseBase<UnforfeituresResponse>> GetResponse(StartAndEndDateRequest req, CancellationToken ct)
     {
-        return _auditService.ArchiveCompletedReportAsync(
-            "Rehire Forfeiture Adjustments Endpoint",
-            (short)req.EndingDate.Year,
-            req,
-            (archiveReq, _, cancellationToken) => _reportService.FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(archiveReq, cancellationToken),
-            ct);
+        using var activity = this.StartEndpointActivity(HttpContext, "year-end-unforfeitures-report");
+        this.RecordRequestMetrics(HttpContext, _logger, req, "operation:year-end-unforfeitures-report", $"date_range:{req.BeginningDate:yyyy-MM-dd}_to_{req.EndingDate:yyyy-MM-dd}", $"ending_year:{req.EndingDate.Year}", $"profit_year:{req.ProfitYear}");
+
+        try
+        {
+            var result = await _auditService.ArchiveCompletedReportAsync(
+                "Rehire Forfeiture Adjustments Endpoint",
+                (short)req.EndingDate.Year,
+                req,
+                (archiveReq, _, cancellationToken) => _reportService.FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(archiveReq, cancellationToken),
+                ct);
+
+            this.RecordResponseMetrics(HttpContext, _logger, result, true);
+            
+            return result;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 
     protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, ReportResponseBase<UnforfeituresResponse> report, CancellationToken cancellationToken)

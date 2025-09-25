@@ -22,6 +22,7 @@ using FastEndpoints;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
@@ -35,7 +36,8 @@ public class RehireForfeituresTests : ApiTestBase<Program>
     {
         IUnforfeitService mockService = ServiceProvider?.GetRequiredService<IUnforfeitService>()!;
         IAuditService auditService = ServiceProvider?.GetRequiredService<IAuditService>()!;
-        _endpoint = new UnforfeituresEndpoint(mockService, auditService);
+        var logger = ServiceProvider?.GetRequiredService<ILogger<UnforfeituresEndpoint>>()!;
+        _endpoint = new UnforfeituresEndpoint(mockService, auditService, logger);
     }
 
 

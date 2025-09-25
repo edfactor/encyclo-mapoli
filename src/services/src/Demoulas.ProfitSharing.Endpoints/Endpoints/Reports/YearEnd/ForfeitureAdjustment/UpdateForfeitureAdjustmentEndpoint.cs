@@ -7,17 +7,21 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ForfeitureAdjustment;
 
 public class UpdateForfeitureAdjustmentEndpoint : ProfitSharingEndpoint<ForfeitureAdjustmentUpdateRequest, Results<NoContent, ProblemHttpResult>>
 {
     private readonly IForfeitureAdjustmentService _forfeitureAdjustmentService;
+    private readonly ILogger<UpdateForfeitureAdjustmentEndpoint> _logger;
 
-    public UpdateForfeitureAdjustmentEndpoint(IForfeitureAdjustmentService forfeitureAdjustmentService)
+    public UpdateForfeitureAdjustmentEndpoint(IForfeitureAdjustmentService forfeitureAdjustmentService, ILogger<UpdateForfeitureAdjustmentEndpoint> logger)
         : base(Navigation.Constants.ProfitShareForfeit)
     {
         _forfeitureAdjustmentService = forfeitureAdjustmentService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -36,23 +40,10 @@ public class UpdateForfeitureAdjustmentEndpoint : ProfitSharingEndpoint<Forfeitu
     }
     public override async Task<Results<NoContent, ProblemHttpResult>> ExecuteAsync(ForfeitureAdjustmentUpdateRequest req, CancellationToken ct)
     {
-        try
+        return await this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
             await _forfeitureAdjustmentService.UpdateForfeitureAdjustmentAsync(req, ct);
             return TypedResults.NoContent();
-        }
-        catch (ArgumentException aex)
-        {
-            // Business rule / not found style errors -> 400 Problem for now (no dedicated NotFound union in this endpoint)
-            return TypedResults.Problem(aex.Message);
-        }
-        catch (InvalidOperationException ioex)
-        {
-            return TypedResults.Problem(ioex.Message);
-        }
-        catch (Exception ex)
-        {
-            return TypedResults.Problem(Error.Unexpected(ex.Message).Description);
-        }
+        }, "operation:year-end-forfeiture-adjustment-update", $"badge_number:{req.BadgeNumber}", $"forfeiture_amount:{req.ForfeitureAmount}", $"class_action:{req.ClassAction}", $"profit_year:{req.ProfitYear}");
     }
 }

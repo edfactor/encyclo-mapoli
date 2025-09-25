@@ -4,21 +4,26 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Security;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
 
 public class NegativeEtvaForSsNsOnPayProfitEndPoint : EndpointWithCsvBase<ProfitYearRequest, NegativeEtvaForSsNsOnPayProfitResponse, NegativeEtvaForSsNsOnPayProfitEndPoint.NegativeEtvaForSsNsOnPayProfitResponseMap>
 {
     private readonly INegativeEtvaReportService _reportService;
+    private readonly ILogger<NegativeEtvaForSsNsOnPayProfitEndPoint> _logger;
 
-    public NegativeEtvaForSsNsOnPayProfitEndPoint(INegativeEtvaReportService reportService)
+    public NegativeEtvaForSsNsOnPayProfitEndPoint(INegativeEtvaReportService reportService, ILogger<NegativeEtvaForSsNsOnPayProfitEndPoint> logger)
         : base(Navigation.Constants.NegativeETVA)
     {
         _reportService = reportService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -55,9 +60,53 @@ public class NegativeEtvaForSsNsOnPayProfitEndPoint : EndpointWithCsvBase<Profit
         base.Configure();
     }
 
-    public override Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
+    public override async Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return _reportService.GetNegativeETVAForSsNsOnPayProfitResponseAsync(req, ct);
+        using var activity = this.StartEndpointActivity(HttpContext);
+
+        try
+        {
+            this.RecordRequestMetrics(HttpContext, _logger, req);
+
+            var result = await _reportService.GetNegativeETVAForSsNsOnPayProfitResponseAsync(req, ct);
+
+            // Record year-end cleanup report metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "year-end-cleanup-negative-etva"),
+                new("endpoint", "NegativeEtvaForSsNsOnPayProfitEndPoint"),
+                new("report_type", "cleanup"),
+                new("cleanup_type", "negative-etva-ssns"));
+
+            var resultCount = result?.Response?.Results?.Count() ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                new("record_type", "negative-etva-cleanup"),
+                new("endpoint", "NegativeEtvaForSsNsOnPayProfitEndPoint"));
+
+            _logger.LogInformation("Year-end cleanup report for negative ETVA SSNs generated, returned {Count} records (correlation: {CorrelationId})",
+                resultCount, HttpContext.TraceIdentifier);
+
+            if (result != null)
+            {
+                this.RecordResponseMetrics(HttpContext, _logger, result);
+                return result;
+            }
+
+            var emptyResult = new ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>
+            {
+                ReportName = ReportFileName,
+                StartDate = DateOnly.FromDateTime(DateTime.Today),
+                EndDate = DateOnly.FromDateTime(DateTime.Today),
+                Response = new() { Results = [] }
+            };
+
+            this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
+            return emptyResult;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 
     public override string ReportFileName => "ETVA-LESS-THAN-ZERO";
