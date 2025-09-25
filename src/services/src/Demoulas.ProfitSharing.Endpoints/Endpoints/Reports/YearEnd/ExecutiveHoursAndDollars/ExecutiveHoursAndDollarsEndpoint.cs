@@ -90,7 +90,7 @@ public class ExecutiveHoursAndDollarsEndpoint :
                 new("endpoint", "ExecutiveHoursAndDollarsEndpoint"));
 
             _logger.LogInformation("Year-end executive hours and dollars report generated for year {ProfitYear}, returned {Count} records (correlation: {CorrelationId})",
-                req.ProfitYear, resultCount, HttpContext.TraceIdentifier);
+                req.ProfitYear, resultCount, HttpContext?.TraceIdentifier ?? "test-correlation");
 
             if (result != null)
             {

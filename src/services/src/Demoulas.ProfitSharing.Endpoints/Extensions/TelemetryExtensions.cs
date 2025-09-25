@@ -29,16 +29,16 @@ public static class TelemetryExtensions
     /// <param name="httpContext">The current HTTP context</param>
     /// <param name="operationName">Optional custom operation name, defaults to endpoint type name</param>
     /// <returns>The created activity or null if not enabled</returns>
-    public static Activity? StartEndpointActivity(this IHasNavigationId endpoint, HttpContext httpContext, string? operationName = null)
+    public static Activity? StartEndpointActivity(this IHasNavigationId endpoint, HttpContext? httpContext, string? operationName = null)
     {
         var endpointName = operationName ?? endpoint.GetType().Name;
         var activity = EndpointTelemetry.ActivitySource.StartActivity($"endpoint.{endpointName}");
 
         if (activity != null)
         {
-            var correlationId = httpContext.TraceIdentifier;
-            var userId = httpContext.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "anonymous";
-            var userRole = httpContext.User?.FindFirst(ClaimTypes.Role)?.Value ?? "unknown";
+            var correlationId = httpContext?.TraceIdentifier ?? "test-correlation";
+            var userId = httpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "anonymous";
+            var userRole = httpContext?.User?.FindFirst(ClaimTypes.Role)?.Value ?? "unknown";
 
             activity.SetTag(EndpointKey, endpointName);
             activity.SetTag(NavigationIdKey, endpoint.NavigationId.ToString());
@@ -60,15 +60,15 @@ public static class TelemetryExtensions
     /// <param name="sensitiveFields">Optional list of sensitive field names that were accessed</param>
     public static void RecordRequestMetrics<TRequest>(
         this IHasNavigationId endpoint,
-        HttpContext httpContext,
+        HttpContext? httpContext,
         ILogger logger,
         TRequest request,
         params string[] sensitiveFields)
         where TRequest : notnull
     {
         var endpointName = endpoint.GetType().Name;
-        var userRole = httpContext.User?.FindFirst(ClaimTypes.Role)?.Value ?? "unknown";
-        var correlationId = httpContext.TraceIdentifier;
+        var userRole = httpContext?.User?.FindFirst(ClaimTypes.Role)?.Value ?? "unknown";
+        var correlationId = httpContext?.TraceIdentifier ?? "test-correlation";
 
         // Calculate request size for monitoring
         var requestSize = EstimateObjectSize(request);
@@ -113,7 +113,7 @@ public static class TelemetryExtensions
     /// <param name="errorType">Optional error type for failure scenarios</param>
     public static void RecordResponseMetrics<TResponse>(
         this IHasNavigationId endpoint,
-        HttpContext httpContext,
+        HttpContext? httpContext,
         ILogger logger,
         TResponse response,
         bool isSuccess = true,
@@ -121,8 +121,8 @@ public static class TelemetryExtensions
         where TResponse : notnull
     {
         var endpointName = endpoint.GetType().Name;
-        var userRole = httpContext.User?.FindFirst(ClaimTypes.Role)?.Value ?? "unknown";
-        var correlationId = httpContext.TraceIdentifier;
+        var userRole = httpContext?.User?.FindFirst(ClaimTypes.Role)?.Value ?? "unknown";
+        var correlationId = httpContext?.TraceIdentifier ?? "test-correlation";
 
         // Calculate response size
         var responseSize = EstimateObjectSize(response);
@@ -169,14 +169,14 @@ public static class TelemetryExtensions
     /// <param name="activity">The current activity to set error status on</param>
     public static void RecordException(
         this IHasNavigationId endpoint,
-        HttpContext httpContext,
+        HttpContext? httpContext,
         ILogger logger,
         Exception exception,
         Activity? activity = null)
     {
         var endpointName = endpoint.GetType().Name;
-        var userRole = httpContext.User?.FindFirst(ClaimTypes.Role)?.Value ?? "unknown";
-        var correlationId = httpContext.TraceIdentifier;
+        var userRole = httpContext?.User?.FindFirst(ClaimTypes.Role)?.Value ?? "unknown";
+        var correlationId = httpContext?.TraceIdentifier ?? "test-correlation";
 
         // Record error metrics
         EndpointTelemetry.EndpointErrorsTotal.Add(1,
@@ -271,7 +271,7 @@ public static class TelemetryExtensions
     /// <returns>The response from the execution function</returns>
     public static async Task<TResponse> ExecuteWithTelemetry<TRequest, TResponse>(
         this IHasNavigationId endpoint,
-        HttpContext httpContext,
+        HttpContext? httpContext,
         ILogger logger,
         TRequest request,
         Func<Task<TResponse>> executeFunc,

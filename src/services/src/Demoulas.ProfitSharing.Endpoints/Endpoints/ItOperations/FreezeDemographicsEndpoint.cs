@@ -55,7 +55,7 @@ public class FreezeDemographicsEndpoint : ProfitSharingEndpoint<SetFrozenStateRe
                 new("endpoint", "FreezeDemographicsEndpoint"));
 
             _logger.LogInformation("Demographics frozen for ProfitYear: {ProfitYear}, AsOfDateTime: {AsOfDateTime}, User: {UserName}, FrozenId: {FrozenId} (correlation: {CorrelationId})",
-                req.ProfitYear, req.AsOfDateTime, _appUser.UserName, response?.Id, HttpContext.TraceIdentifier);
+                req.ProfitYear, req.AsOfDateTime, _appUser.UserName, response?.Id, HttpContext?.TraceIdentifier ?? "test-correlation");
 
             return response ?? new FrozenStateResponse { Id = 0 };
         });
