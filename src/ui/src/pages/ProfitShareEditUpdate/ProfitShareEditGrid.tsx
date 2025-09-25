@@ -1,10 +1,11 @@
 import { Typography } from "@mui/material";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetProfitShareEditQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { ProfitShareUpdateRequest } from "reduxstore/types";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { DSMGrid, Pagination } from "smart-ui-library";
+import { useGridPagination } from "../../hooks/useGridPagination";
 import { ProfitShareEditUpdateGridColumns } from "./ProfitShareEditGridColumns";
 
 interface ProfitShareEditGridProps {
@@ -20,19 +21,41 @@ const ProfitShareEditGrid = ({
   pageNumberReset,
   setPageNumberReset
 }: ProfitShareEditGridProps) => {
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "name",
-    isSortDescending: false
-  });
-
   const editColumnDefs = useMemo(() => ProfitShareEditUpdateGridColumns(), []);
   const { profitSharingEdit, profitSharingEditQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearchUpdate, { isFetching }] = useLazyGetProfitShareEditQuery();
 
-  const sortEventHandler = (update: ISortParams) => setSortParams(update);
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "name",
+    initialSortDescending: false,
+    onPaginationChange: useCallback(async (pageNum: number, pageSz: number, sortPrms: any) => {
+      if (initialSearchLoaded && hasToken) {
+        const request: ProfitShareUpdateRequest = {
+          pagination: {
+            sortBy: sortPrms.sortBy,
+            isSortDescending: sortPrms.isSortDescending,
+            skip: pageNum * pageSz,
+            take: pageSz
+          },
+          profitYear: profitSharingEditQueryParams?.profitYear.getFullYear() ?? 0,
+          contributionPercent: profitSharingEditQueryParams?.contributionPercent ?? 0,
+          earningsPercent: profitSharingEditQueryParams?.earningsPercent ?? 0,
+          incomingForfeitPercent: profitSharingEditQueryParams?.incomingForfeitPercent ?? 0,
+          secondaryEarningsPercent: profitSharingEditQueryParams?.secondaryEarningsPercent ?? 0,
+          maxAllowedContributions: profitSharingEditQueryParams?.maxAllowedContributions ?? 0,
+          badgeToAdjust: profitSharingEditQueryParams?.badgeToAdjust ?? 0,
+          adjustContributionAmount: profitSharingEditQueryParams?.adjustContributionAmount ?? 0,
+          adjustEarningsAmount: profitSharingEditQueryParams?.adjustEarningsAmount ?? 0,
+          adjustIncomingForfeitAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0,
+          badgeToAdjust2: profitSharingEditQueryParams?.badgeToAdjust2 ?? 0,
+          adjustEarningsSecondaryAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0
+        };
+        await triggerSearchUpdate(request, false);
+      }
+    }, [initialSearchLoaded, hasToken, profitSharingEditQueryParams, triggerSearchUpdate])
+  });
 
   const onSearch = useCallback(async () => {
     const request: ProfitShareUpdateRequest = {
@@ -63,14 +86,14 @@ const ProfitShareEditGrid = ({
     if (initialSearchLoaded && hasToken) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken]);
+  }, [initialSearchLoaded, onSearch, hasToken]);
 
   useEffect(() => {
     if (pageNumberReset) {
-      setPageNumber(0);
+      resetPagination();
       setPageNumberReset(false);
     }
-  }, [pageNumberReset, setPageNumberReset]);
+  }, [pageNumberReset, setPageNumberReset, resetPagination]);
 
   return (
     <>
@@ -86,7 +109,7 @@ const ProfitShareEditGrid = ({
           <DSMGrid
             preferenceKey={"ProfitShareEditGrid"}
             isLoading={isFetching}
-            handleSortChanged={sortEventHandler}
+            handleSortChanged={handleSortChange}
             maxHeight={400}
             providedOptions={{
               rowData: "response" in profitSharingEdit ? profitSharingEdit.response?.results : [],
@@ -96,13 +119,12 @@ const ProfitShareEditGrid = ({
           <Pagination
             pageNumber={pageNumber}
             setPageNumber={(value: number) => {
-              setPageNumber(value - 1);
+              handlePaginationChange(value - 1, pageSize);
               setInitialSearchLoaded(true);
             }}
             pageSize={pageSize}
             setPageSize={(value: number) => {
-              setPageSize(value);
-              setPageNumber(1);
+              handlePaginationChange(0, value);
               setInitialSearchLoaded(true);
             }}
             recordCount={profitSharingEdit?.response.total ?? 0}

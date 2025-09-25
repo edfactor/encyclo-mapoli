@@ -1,10 +1,11 @@
 import { Grid } from "@mui/material";
 import { TotalsGrid } from "components/TotalsGrid/TotalsGrid";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetBalanceByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, numberToCurrency } from "smart-ui-library";
+import { DSMGrid, numberToCurrency } from "smart-ui-library";
+import { useGridPagination } from "../../../hooks/useGridPagination";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { GetBalanceByAgeColumns } from "./BalanceByAgeGridColumns";
 
@@ -13,23 +14,24 @@ interface BalanceByAgeGridProps {
 }
 
 const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded }) => {
-  const [_discard0, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
-    isSortDescending: false
-  });
-
   const { balanceByAgeTotal, balanceByAgeFullTime, balanceByAgePartTime, balanceByAgeQueryParams } = useSelector(
     (state: RootState) => state.yearsEnd
   );
   const [triggerSearch, { isFetching }] = useLazyGetBalanceByAgeQuery();
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
 
-  const sortEventHandler = (update: ISortParams) => setSortParams(update);
+  const { handleSortChange } = useGridPagination({
+    initialPageSize: 255,
+    initialSortBy: "badgeNumber",
+    initialSortDescending: false,
+    onPaginationChange: useCallback(() => {
+      // This component doesn't use pagination, only sorting
+    }, [])
+  });
 
   const columnDefsTotal = GetBalanceByAgeColumns(FrozenReportsByAgeRequestType.Total);
   const columnDefsFullTime = GetBalanceByAgeColumns(FrozenReportsByAgeRequestType.FullTime);
   const columnDefsPartTime = GetBalanceByAgeColumns(FrozenReportsByAgeRequestType.PartTime);
-
-  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
 
   const onSearch = useCallback(async () => {
     await triggerSearch(
@@ -159,10 +161,9 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
               <DSMGrid
                 preferenceKey={"AGE_Total"}
                 isLoading={isFetching}
-                handleSortChanged={sortEventHandler}
+                handleSortChanged={handleSortChange}
                 providedOptions={{
                   rowData: balanceByAgeTotal?.response.results ?? [],
-
                   columnDefs: columnDefsTotal ?? []
                 }}
               />
@@ -171,10 +172,9 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
               <DSMGrid
                 preferenceKey={"AGE_FullTime"}
                 isLoading={isFetching}
-                handleSortChanged={sortEventHandler}
+                handleSortChanged={handleSortChange}
                 providedOptions={{
                   rowData: balanceByAgeFullTime?.response.results ?? [],
-
                   columnDefs: columnDefsFullTime ?? []
                 }}
               />
@@ -183,7 +183,7 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
               <DSMGrid
                 preferenceKey={"AGE_PartTime"}
                 isLoading={isFetching}
-                handleSortChanged={sortEventHandler}
+                handleSortChanged={handleSortChange}
                 providedOptions={{
                   rowData: balanceByAgePartTime?.response.results ?? [],
                   columnDefs: columnDefsPartTime ?? []

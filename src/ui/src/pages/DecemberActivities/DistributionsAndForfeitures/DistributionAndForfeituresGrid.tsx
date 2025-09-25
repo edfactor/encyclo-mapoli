@@ -5,10 +5,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useSelector } from "react-redux";
 import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, numberToCurrency, Pagination } from "smart-ui-library";
+import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import { CAPTIONS } from "../../../constants";
+import { useGridPagination } from "../../../hooks/useGridPagination";
 import { GetDistributionsAndForfeituresColumns } from "./DistributionAndForfeituresGridColumns";
 
 interface DistributionsAndForfeituresGridSearchProps {
@@ -20,14 +21,40 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   initialSearchLoaded,
   setInitialSearchLoaded
 }) => {
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "employeeName, date",
-    isSortDescending: false
-  });
   const [showTooltip, setShowTooltip] = useState(false);
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
+  const { distributionsAndForfeitures, distributionsAndForfeituresQueryParams } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
+  const profitYear = useDecemberFlowProfitYear();
+  const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
+
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "employeeName, date",
+    initialSortDescending: false,
+    onPaginationChange: useCallback(async (pageNum: number, pageSz: number, sortPrms: any) => {
+      if (hasToken && initialSearchLoaded) {
+        const request = {
+          profitYear: profitYear || 0,
+          ...(distributionsAndForfeituresQueryParams?.startDate && {
+            startDate: distributionsAndForfeituresQueryParams?.startDate
+          }),
+          ...(distributionsAndForfeituresQueryParams?.endDate && {
+            endDate: distributionsAndForfeituresQueryParams?.endDate
+          }),
+          pagination: {
+            skip: pageNum * pageSz,
+            take: pageSz,
+            sortBy: sortPrms.sortBy,
+            isSortDescending: sortPrms.isSortDescending
+          }
+        };
+        await triggerSearch(request, false);
+      }
+    }, [hasToken, initialSearchLoaded, profitYear, distributionsAndForfeituresQueryParams?.startDate, distributionsAndForfeituresQueryParams?.endDate, triggerSearch])
+  });
 
   const handlePopoverOpen = () => {
     if (hoverTimeout) {
@@ -45,13 +72,6 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   };
 
   const open = showTooltip;
-
-  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-  const { distributionsAndForfeitures, distributionsAndForfeituresQueryParams } = useSelector(
-    (state: RootState) => state.yearsEnd
-  );
-  const profitYear = useDecemberFlowProfitYear();
-  const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
 
   const onSearch = useCallback(async () => {
     const request = {
@@ -90,16 +110,16 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
       distributionsAndForfeitures.response.results.length !==
         prevDistributionsAndForfeitures.current?.response?.results?.length
     ) {
-      setPageNumber(0);
+      resetPagination();
     }
     prevDistributionsAndForfeitures.current = distributionsAndForfeitures;
-  }, [distributionsAndForfeitures]);
+  }, [distributionsAndForfeitures, resetPagination]);
 
   useEffect(() => {
     if (hasToken && initialSearchLoaded) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken, setInitialSearchLoaded]);
+  }, [initialSearchLoaded, onSearch, hasToken]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -110,7 +130,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     };
   }, [hoverTimeout]);
 
-  const sortEventHandler = (update: ISortParams) => setSortParams(update);
+  const sortEventHandler = (update: any) => handleSortChange(update);
   const columnDefs = useMemo(() => GetDistributionsAndForfeituresColumns(), []);
   const stateTaxTotals = distributionsAndForfeitures?.stateTaxTotals || {};
 
@@ -205,13 +225,12 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
-            setPageNumber(value - 1);
+            handlePaginationChange(value - 1, pageSize);
             setInitialSearchLoaded(true);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
-            setPageSize(value);
-            setPageNumber(1);
+            handlePaginationChange(0, value);
             setInitialSearchLoaded(true);
           }}
           recordCount={distributionsAndForfeitures.response.total}

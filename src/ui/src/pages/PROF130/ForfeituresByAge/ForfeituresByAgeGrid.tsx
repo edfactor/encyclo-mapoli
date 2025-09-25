@@ -1,35 +1,37 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetForfeituresByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams } from "smart-ui-library";
+import { DSMGrid } from "smart-ui-library";
 import { TotalsGrid } from "components/TotalsGrid/TotalsGrid";
 import { GetForfeituresByAgeColumns } from "./ForfeituresByAgeGridColumns";
 import { Grid } from "@mui/material";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { numberToCurrency } from "smart-ui-library";
+import { useGridPagination } from "../../../hooks/useGridPagination";
 
 interface ForfeituresByAgeGridProps {
   initialSearchLoaded: boolean;
 }
 
 const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSearchLoaded }) => {
-  const [_discard0, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
-    isSortDescending: false
-  });
-
   const { forfeituresByAgeTotal, forfeituresByAgeFullTime, forfeituresByAgePartTime, forfeituresByAgeQueryParams } =
     useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearch, { isFetching }] = useLazyGetForfeituresByAgeQuery();
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
 
-  const sortEventHandler = (update: ISortParams) => setSortParams(update);
+  const { handleSortChange } = useGridPagination({
+    initialPageSize: 255,
+    initialSortBy: "badgeNumber",
+    initialSortDescending: false,
+    onPaginationChange: useCallback(() => {
+      // This component doesn't use pagination, only sorting
+    }, [])
+  });
 
   const columnDefsTotal = GetForfeituresByAgeColumns(FrozenReportsByAgeRequestType.Total);
   const columnDefsFullTime = GetForfeituresByAgeColumns(FrozenReportsByAgeRequestType.FullTime);
   const columnDefsPartTime = GetForfeituresByAgeColumns(FrozenReportsByAgeRequestType.PartTime);
-
-  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
 
   const onSearch = useCallback(async () => {
     await triggerSearch(
@@ -125,7 +127,7 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
               <DSMGrid
                 preferenceKey={"AGE_Total"}
                 isLoading={isFetching}
-                handleSortChanged={sortEventHandler}
+                handleSortChanged={handleSortChange}
                 providedOptions={{
                   rowData: forfeituresByAgeTotal?.response.results ?? [],
                   columnDefs: columnDefsTotal || []
@@ -136,7 +138,7 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
               <DSMGrid
                 preferenceKey={"AGE_FullTime"}
                 isLoading={isFetching}
-                handleSortChanged={sortEventHandler}
+                handleSortChanged={handleSortChange}
                 providedOptions={{
                   rowData: forfeituresByAgeFullTime?.response.results ?? [],
                   columnDefs: columnDefsFullTime || []
@@ -147,7 +149,7 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
               <DSMGrid
                 preferenceKey={"AGE_PartTime"}
                 isLoading={isFetching}
-                handleSortChanged={sortEventHandler}
+                handleSortChanged={handleSortChange}
                 providedOptions={{
                   rowData: forfeituresByAgePartTime?.response.results ?? [],
                   columnDefs: columnDefsPartTime || []

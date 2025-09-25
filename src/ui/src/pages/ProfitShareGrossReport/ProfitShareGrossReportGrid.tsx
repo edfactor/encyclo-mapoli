@@ -1,12 +1,13 @@
 import { Typography } from "@mui/material";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { DSMGrid, Pagination } from "smart-ui-library";
 import { Path, useNavigate } from "react-router";
 import { GetProfitShareGrossReportColumns } from "./ProfitShareGrossReportColumns";
 import { useLazyGetGrossWagesReportQuery } from "reduxstore/api/YearsEndApi";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { GrossWagesReportDto } from "reduxstore/types";
+import { useGridPagination } from "../../hooks/useGridPagination";
 
 const totalsRow = {
   psWages: 0,
@@ -28,18 +29,30 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
   pageNumberReset,
   setPageNumberReset
 }) => {
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
-    isSortDescending: false
-  });
-
   const { grossWagesReport, grossWagesReportQueryParams } = useSelector((state: RootState) => state.yearsEnd);
-
   const [triggerSearch, { isFetching }] = useLazyGetGrossWagesReportQuery();
-  const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const navigate = useNavigate();
+
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "badgeNumber",
+    initialSortDescending: false,
+    onPaginationChange: useCallback(async (pageNum: number, pageSz: number, sortPrms: any) => {
+      if (initialSearchLoaded) {
+        const request: GrossWagesReportDto = {
+          profitYear: grossWagesReportQueryParams?.profitYear ?? 0,
+          pagination: {
+            skip: pageNum * pageSz,
+            take: pageSz,
+            sortBy: sortPrms.sortBy,
+            isSortDescending: sortPrms.isSortDescending
+          },
+          minGrossAmount: grossWagesReportQueryParams?.minGrossAmount ?? 0
+        };
+        await triggerSearch(request, false);
+      }
+    }, [initialSearchLoaded, grossWagesReportQueryParams?.profitYear, grossWagesReportQueryParams?.minGrossAmount, triggerSearch])
+  });
 
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {
@@ -79,14 +92,14 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
     if (initialSearchLoaded) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, onSearch, sortParams]);
+  }, [initialSearchLoaded, onSearch]);
 
   useEffect(() => {
     if (pageNumberReset) {
-      setPageNumber(0);
+      resetPagination();
       setPageNumberReset(false);
     }
-  }, [pageNumberReset, setPageNumberReset]);
+  }, [pageNumberReset, setPageNumberReset, resetPagination]);
 
   return (
     <>
@@ -102,7 +115,7 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
           <DSMGrid
             preferenceKey={"PROFIT_SHARE_GROSS_REPORT"}
             isLoading={isFetching}
-            handleSortChanged={sortEventHandler}
+            handleSortChanged={handleSortChange}
             providedOptions={{
               rowData: grossWagesReport?.response.results,
               pinnedTopRowData: [
@@ -122,13 +135,12 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
-            setPageNumber(value - 1);
+            handlePaginationChange(value - 1, pageSize);
             setInitialSearchLoaded(true);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
-            setPageSize(value);
-            setPageNumber(1);
+            handlePaginationChange(0, value);
             setInitialSearchLoaded(true);
           }}
           recordCount={grossWagesReport.response.total}

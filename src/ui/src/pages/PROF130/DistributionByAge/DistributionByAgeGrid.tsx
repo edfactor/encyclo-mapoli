@@ -1,23 +1,19 @@
 import { Grid } from "@mui/material";
 import { TotalsGrid } from "components/TotalsGrid/TotalsGrid";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetDistributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, numberToCurrency } from "smart-ui-library";
+import { DSMGrid, numberToCurrency } from "smart-ui-library";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { GetDistributionsByAgeColumns } from "./DistributionByAgeGridColumns";
+import { useGridPagination } from "../../../hooks/useGridPagination";
 
 interface DistributionByAgeGridProps {
   initialSearchLoaded: boolean;
 }
 
 const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSearchLoaded }) => {
-  const [_discard0, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
-    isSortDescending: false
-  });
-
   const {
     distributionsByAgeTotal,
     distributionsByAgeFullTime,
@@ -25,12 +21,18 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
     distributionsByAgeQueryParams
   } = useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearch, { isFetching }] = useLazyGetDistributionsByAgeQuery();
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
 
-  const sortEventHandler = (update: ISortParams) => setSortParams(update);
+  const { handleSortChange } = useGridPagination({
+    initialPageSize: 255,
+    initialSortBy: "badgeNumber",
+    initialSortDescending: false,
+    onPaginationChange: useCallback(() => {
+      // This component doesn't use pagination, only sorting
+    }, [])
+  });
 
   const columnDefsTotal = useMemo(() => GetDistributionsByAgeColumns(FrozenReportsByAgeRequestType.Total), []);
-
-  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
 
   const onSearch = useCallback(async () => {
     await triggerSearch(
@@ -97,7 +99,7 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
               <DSMGrid
                 preferenceKey={"DIST_AGE_Total"}
                 isLoading={isFetching}
-                handleSortChanged={sortEventHandler}
+                handleSortChanged={handleSortChange}
                 providedOptions={{
                   rowData: distributionsByAgeTotal?.response?.results ?? [],
                   columnDefs: columnDefsTotal ?? []
@@ -129,7 +131,7 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
               <DSMGrid
                 preferenceKey={"DIST_AGE_FullTime"}
                 isLoading={isFetching}
-                handleSortChanged={sortEventHandler}
+                handleSortChanged={handleSortChange}
                 providedOptions={{
                   rowData: distributionsByAgeFullTime?.response?.results ?? [],
                   columnDefs: columnDefsTotal ?? []
@@ -161,7 +163,7 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
               <DSMGrid
                 preferenceKey={"DIST_AGE_PartTime"}
                 isLoading={isFetching}
-                handleSortChanged={sortEventHandler}
+                handleSortChanged={handleSortChange}
                 providedOptions={{
                   rowData: distributionsByAgePartTime?.response?.results ?? [],
                   columnDefs: columnDefsTotal ?? []
