@@ -3,7 +3,9 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Microsoft.Extensions.Logging;
@@ -58,33 +60,43 @@ public class AdhocBeneficiariesReportEndpoint : EndpointWithCsvTotalsBase<AdhocB
 
     public override string ReportFileName => "AdhocBeneficiariesReport";
 
-    public override async Task<AdhocBeneficiariesReportResponse> GetResponse(AdhocBeneficiariesReportRequest req, CancellationToken ct)
-    {
-        var result = await _reportService.GetAdhocBeneficiariesReportAsync(req, ct);
-
-        // Record business metrics for adhoc beneficiaries report
-        Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.BusinessOperationsTotal.Add(1,
-            new KeyValuePair<string, object?>("operation", "adhoc-beneficiaries-report"),
-            new KeyValuePair<string, object?>("endpoint.category", "reports"));
-
-        // Record result count
-        var resultCount = result?.Response?.Results?.Count() ?? 0;
-        Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
-            new KeyValuePair<string, object?>("operation", "adhoc-beneficiaries-report"),
-            new KeyValuePair<string, object?>("endpoint.category", "reports"));
-
-        _logger.LogInformation("Adhoc beneficiaries report generated, returned {Count} beneficiaries, total balance: {TotalBalance} (correlation: {CorrelationId})",
-            resultCount, result?.TotalEndingBalance, HttpContext.TraceIdentifier);
-
-        return result ?? new AdhocBeneficiariesReportResponse
+    public override Task<AdhocBeneficiariesReportResponse> GetResponse(AdhocBeneficiariesReportRequest req, CancellationToken ct) =>
+        this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
-            ReportName = ReportFileName,
-            ReportDate = DateTimeOffset.Now,
-            StartDate = DateOnly.FromDateTime(DateTime.Today),
-            EndDate = DateOnly.FromDateTime(DateTime.Today),
-            Response = new PaginatedResponseDto<BeneficiaryReportDto> { Results = [] }
-        };
-    }
+            var result = await _reportService.GetAdhocBeneficiariesReportAsync(req, ct);
+
+            // Record standardized business metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "adhoc-beneficiaries-report"),
+                new("endpoint", "AdhocBeneficiariesReportEndpoint"),
+                new("report_type", "beneficiaries"));
+
+            // Record result count and financial metrics
+            var resultCount = result?.Response?.Results?.Count() ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                new("record_type", "beneficiaries"),
+                new("endpoint", "AdhocBeneficiariesReportEndpoint"));
+
+            if (result?.TotalEndingBalance > 0)
+            {
+                EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                    new("operation", "financial-calculation"),
+                    new("calculation_type", "total-ending-balance"),
+                    new("endpoint", "AdhocBeneficiariesReportEndpoint"));
+            }
+
+            _logger.LogInformation("Adhoc beneficiaries report generated, returned {Count} beneficiaries, total balance: {TotalBalance} (correlation: {CorrelationId})",
+                resultCount, result?.TotalEndingBalance, HttpContext.TraceIdentifier);
+
+            return result ?? new AdhocBeneficiariesReportResponse
+            {
+                ReportName = ReportFileName,
+                ReportDate = DateTimeOffset.Now,
+                StartDate = DateOnly.FromDateTime(DateTime.Today),
+                EndDate = DateOnly.FromDateTime(DateTime.Today),
+                Response = new PaginatedResponseDto<BeneficiaryReportDto> { Results = [] }
+            };
+        });
 
 
 
