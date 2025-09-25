@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
 
-public sealed class ProfitControlSheetEndpoint: ProfitSharingEndpoint<ProfitYearRequest, ProfitControlSheetResponse>
+public sealed class ProfitControlSheetEndpoint : ProfitSharingEndpoint<ProfitYearRequest, ProfitControlSheetResponse>
 {
     private readonly IFrozenReportService _frozenReportService;
     private readonly ILogger<ProfitControlSheetEndpoint> _logger;
@@ -50,7 +50,7 @@ public sealed class ProfitControlSheetEndpoint: ProfitSharingEndpoint<ProfitYear
             var result = await _frozenReportService.GetProfitControlSheet(req, ct);
 
             // Record business operation metrics
-            EndpointTelemetry.BusinessOperationsTotal.Add(1, 
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
                 new("operation", "profit_control_sheet"),
                 new("profit_year", req.ProfitYear.ToString()));
 

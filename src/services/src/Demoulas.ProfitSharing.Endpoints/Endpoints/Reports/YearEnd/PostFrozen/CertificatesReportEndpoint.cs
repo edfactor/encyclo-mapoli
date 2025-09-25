@@ -10,7 +10,8 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
-public sealed class CertificatesReportEndpoint: EndpointWithCsvBase<CerficatePrintRequest, CertificateReprintResponse, CertificatesReportEndpoint.CertificateReprintResponseMap>
+
+public sealed class CertificatesReportEndpoint : EndpointWithCsvBase<CerficatePrintRequest, CertificateReprintResponse, CertificatesReportEndpoint.CertificateReprintResponseMap>
 {
     private readonly ICertificateService _certificateService;
     private readonly ILogger<CertificatesReportEndpoint> _logger;
@@ -56,7 +57,7 @@ public sealed class CertificatesReportEndpoint: EndpointWithCsvBase<CerficatePri
     }
 
     public override string ReportFileName => "Certificate Reprint";
-    
+
     public override async Task<ReportResponseBase<CertificateReprintResponse>> GetResponse(CerficatePrintRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
@@ -67,7 +68,7 @@ public sealed class CertificatesReportEndpoint: EndpointWithCsvBase<CerficatePri
             var result = await _certificateService.GetMembersWithBalanceActivityByStore(req, ct);
 
             // Record business operation metrics
-            EndpointTelemetry.BusinessOperationsTotal.Add(1, 
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
                 new("operation", "certificates_report"),
                 new("profit_year", req.ProfitYear.ToString()));
 

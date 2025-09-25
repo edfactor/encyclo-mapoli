@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
+
 public sealed class NewProfitSharingLabelsForMailMergeEndpoint : ProfitSharingEndpoint<ProfitYearRequest, PaginatedResponseDto<NewProfitSharingLabelResponse>>
 {
     private readonly IPostFrozenService _postFrozenService;
@@ -51,7 +52,7 @@ public sealed class NewProfitSharingLabelsForMailMergeEndpoint : ProfitSharingEn
             var response = await _postFrozenService.GetNewProfitSharingLabelsForMailMerge(req, ct);
 
             // Record business operation metrics
-            EndpointTelemetry.BusinessOperationsTotal.Add(1, 
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
                 new("operation", "new_profit_sharing_labels_mail_merge"),
                 new("profit_year", req.ProfitYear.ToString()));
 

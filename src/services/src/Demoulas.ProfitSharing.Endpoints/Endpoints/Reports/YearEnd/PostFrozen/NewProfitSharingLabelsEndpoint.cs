@@ -12,7 +12,8 @@ using FastEndpoints;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
-public class NewProfitSharingLabelsEndpoint: ProfitSharingEndpoint<ProfitYearRequest, PaginatedResponseDto<NewProfitSharingLabelResponse>>
+
+public class NewProfitSharingLabelsEndpoint : ProfitSharingEndpoint<ProfitYearRequest, PaginatedResponseDto<NewProfitSharingLabelResponse>>
 {
     private readonly IPostFrozenService _postFrozenService;
     private readonly ILogger<NewProfitSharingLabelsEndpoint> _logger;
@@ -26,12 +27,12 @@ public class NewProfitSharingLabelsEndpoint: ProfitSharingEndpoint<ProfitYearReq
     public override void Configure()
     {
         Get("post-frozen/new-profit-sharing-labels");
-        Summary(s => 
+        Summary(s =>
         {
             s.Summary = "Returns the new profit sharing labels as a file";
             s.Description = "Returns either the JSON needed for the report showing which labels will be produced";
             s.ExampleRequest = ProfitYearRequest.RequestExample();
-            s.ResponseExamples= new Dictionary<int, object>()
+            s.ResponseExamples = new Dictionary<int, object>()
             {
                 {200, NewProfitSharingLabelResponse.SampleResponse() }
             };
@@ -50,7 +51,7 @@ public class NewProfitSharingLabelsEndpoint: ProfitSharingEndpoint<ProfitYearReq
             var response = await _postFrozenService.GetNewProfitSharingLabels(req, ct);
 
             // Record business operation metrics
-            EndpointTelemetry.BusinessOperationsTotal.Add(1, 
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
                 new("operation", "new_profit_sharing_labels"),
                 new("profit_year", req.ProfitYear.ToString()));
 
