@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
 
@@ -15,11 +16,13 @@ public class AdhocBeneficiariesReportEndpoint : EndpointWithCsvTotalsBase<AdhocB
     AdhocBeneficiariesReportEndpoint.AdhocBeneficiariesReportResponseMap>
 {
     private readonly IAdhocBeneficiariesReport _reportService;
+    private readonly ILogger<AdhocBeneficiariesReportEndpoint> _logger;
 
-    public AdhocBeneficiariesReportEndpoint(IAdhocBeneficiariesReport reportService)
+    public AdhocBeneficiariesReportEndpoint(IAdhocBeneficiariesReport reportService, ILogger<AdhocBeneficiariesReportEndpoint> logger)
         : base(Navigation.Constants.QPAY066AdHocReports)
     {
         _reportService = reportService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -55,12 +58,35 @@ public class AdhocBeneficiariesReportEndpoint : EndpointWithCsvTotalsBase<AdhocB
 
     public override string ReportFileName => "AdhocBeneficiariesReport";
 
-    public override Task<AdhocBeneficiariesReportResponse> GetResponse(AdhocBeneficiariesReportRequest req, CancellationToken ct)
+    public override async Task<AdhocBeneficiariesReportResponse> GetResponse(AdhocBeneficiariesReportRequest req, CancellationToken ct)
     {
-        return _reportService.GetAdhocBeneficiariesReportAsync(req, ct);
+        var result = await _reportService.GetAdhocBeneficiariesReportAsync(req, ct);
+
+        // Record business metrics for adhoc beneficiaries report
+        Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.BusinessOperationsTotal.Add(1,
+            new KeyValuePair<string, object?>("operation", "adhoc-beneficiaries-report"),
+            new KeyValuePair<string, object?>("endpoint.category", "reports"));
+
+        // Record result count
+        var resultCount = result?.Response?.Results?.Count() ?? 0;
+        Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+            new KeyValuePair<string, object?>("operation", "adhoc-beneficiaries-report"),
+            new KeyValuePair<string, object?>("endpoint.category", "reports"));
+
+        _logger.LogInformation("Adhoc beneficiaries report generated, returned {Count} beneficiaries, total balance: {TotalBalance} (correlation: {CorrelationId})",
+            resultCount, result?.TotalEndingBalance, HttpContext.TraceIdentifier);
+
+        return result ?? new AdhocBeneficiariesReportResponse
+        {
+            ReportName = ReportFileName,
+            ReportDate = DateTimeOffset.Now,
+            StartDate = DateOnly.FromDateTime(DateTime.Today),
+            EndDate = DateOnly.FromDateTime(DateTime.Today),
+            Response = new PaginatedResponseDto<BeneficiaryReportDto> { Results = [] }
+        };
     }
 
-   
+
 
     public sealed class AdhocBeneficiariesReportResponseMap : ClassMap<BeneficiaryReportDto>
     {
