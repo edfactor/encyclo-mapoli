@@ -299,7 +299,7 @@ public class CreateDistributionEndpointTests : ApiTestBase<Api.Program>
     [InlineData('M')]
     [InlineData('Q')]
     [InlineData('A')]
-    [InlineData('L')]
+    [InlineData('H')]
     public async Task CreateDistribution_WithValidFrequencyIds_ShouldReturnSuccess(char frequencyId)
     {
         // Arrange

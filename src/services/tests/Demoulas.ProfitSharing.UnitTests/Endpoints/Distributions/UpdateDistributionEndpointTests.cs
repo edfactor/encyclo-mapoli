@@ -340,7 +340,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
     [Theory(DisplayName = "UpdateDistribution - Should accept valid frequency ID updates")]
     [InlineData('M')]
     [InlineData('Q')]
-    [InlineData('L')]
+    [InlineData('H')]
     [InlineData('R')]
     public async Task UpdateDistribution_WithValidFrequencyIdUpdates_ShouldReturnSuccess(char frequencyId)
     {
