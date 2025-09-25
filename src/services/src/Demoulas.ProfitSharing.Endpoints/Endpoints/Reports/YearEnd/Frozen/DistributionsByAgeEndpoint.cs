@@ -3,10 +3,13 @@ using CsvHelper.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Microsoft.Extensions.Logging;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen.DistributionsByAgeEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
@@ -14,11 +17,13 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 public class DistributionsByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReportsByAgeRequest, DistributionsByAge, DistributionsByAgeDetail, ProfitSharingDistributionsByAgeMapper>
 {
     private readonly IFrozenReportService _frozenReportService;
+    private readonly ILogger<DistributionsByAgeEndpoint> _logger;
 
-    public DistributionsByAgeEndpoint(IFrozenReportService frozenReportService)
+    public DistributionsByAgeEndpoint(IFrozenReportService frozenReportService, ILogger<DistributionsByAgeEndpoint> logger)
         : base(Navigation.Constants.DistributionsByAge)
     {
         _frozenReportService = frozenReportService;
+        _logger = logger;
     }
 
     public override string ReportFileName => "PROFIT SHARING DISTRIBUTIONS BY AGE";
@@ -45,9 +50,66 @@ public class DistributionsByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReport
         base.Configure();
     }
 
-    public override Task<DistributionsByAge> GetResponse(FrozenReportsByAgeRequest req, CancellationToken ct)
+    public override async Task<DistributionsByAge> GetResponse(FrozenReportsByAgeRequest req, CancellationToken ct)
     {
-        return _frozenReportService.GetDistributionsByAgeYearAsync(req, ct);
+        using var activity = this.StartEndpointActivity(HttpContext);
+        this.RecordRequestMetrics(HttpContext, _logger, req);
+
+        try
+        {
+            var result = await _frozenReportService.GetDistributionsByAgeYearAsync(req, ct);
+
+            // Record business operation metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "distributions_by_age"),
+                new("profit_year", req.ProfitYear.ToString()));
+
+            var resultCount = result?.Response?.Results?.Count() ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                new("record_type", "frozen-distributions-by-age"),
+                new("endpoint", "DistributionsByAgeEndpoint"));
+
+            if (result?.TotalEmployees > 0)
+            {
+                EndpointTelemetry.RecordCountsProcessed.Record(result.TotalEmployees,
+                    new("operation", "distributions_by_age"),
+                    new("metric_type", "total_employees"));
+
+                EndpointTelemetry.RecordCountsProcessed.Record((long)result.DistributionTotalAmount,
+                    new("operation", "distributions_by_age"),
+                    new("metric_type", "distribution_total_amount"));
+            }
+
+            _logger.LogInformation("Year-end frozen distributions by age report generated, returned {Count} records (correlation: {CorrelationId})",
+                resultCount, HttpContext.TraceIdentifier);
+
+            if (result != null)
+            {
+                this.RecordResponseMetrics(HttpContext, _logger, result);
+                return result;
+            }
+
+            var emptyResult = new DistributionsByAge
+            {
+                ReportName = ReportFileName,
+                StartDate = DateOnly.FromDateTime(DateTime.Today),
+                EndDate = DateOnly.FromDateTime(DateTime.Today),
+                Response = new() { Results = [] },
+                TotalEmployees = 0,
+                RegularTotalEmployees = 0,
+                HardshipTotalEmployees = 0,
+                RegularTotalAmount = 0M,
+                HardshipTotalAmount = 0M
+            };
+
+            this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
+            return emptyResult;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 
     protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, DistributionsByAge report, CancellationToken cancellationToken)
@@ -78,9 +140,9 @@ public class DistributionsByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReport
         csvWriter.WriteHeader<DistributionsByAgeDetail>();
         await csvWriter.NextRecordAsync();
 
-       
+
     }
-  
+
 
     public class ProfitSharingDistributionsByAgeMapper : ClassMap<DistributionsByAgeDetail>
     {

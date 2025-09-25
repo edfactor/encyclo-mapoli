@@ -3,10 +3,13 @@ using CsvHelper.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Microsoft.Extensions.Logging;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen.BalanceByYearsEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
@@ -14,11 +17,13 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 public class BalanceByYearsEndpoint : EndpointWithCsvTotalsBase<FrozenReportsByAgeRequest, BalanceByYears, BalanceByYearsDetail, ProfitSharingBalanceByYearsMapper>
 {
     private readonly IFrozenReportService _frozenReportService;
+    private readonly ILogger<BalanceByYearsEndpoint> _logger;
 
-    public BalanceByYearsEndpoint(IFrozenReportService frozenReportService)
+    public BalanceByYearsEndpoint(IFrozenReportService frozenReportService, ILogger<BalanceByYearsEndpoint> logger)
         : base(Navigation.Constants.BalanceByYears)
     {
         _frozenReportService = frozenReportService;
+        _logger = logger;
     }
 
     public override string ReportFileName => "PROFIT SHARING BALANCE BY YEARS";
@@ -40,9 +45,56 @@ public class BalanceByYearsEndpoint : EndpointWithCsvTotalsBase<FrozenReportsByA
         base.Configure();
     }
 
-    public override Task<BalanceByYears> GetResponse(FrozenReportsByAgeRequest req, CancellationToken ct)
+    public override async Task<BalanceByYears> GetResponse(FrozenReportsByAgeRequest req, CancellationToken ct)
     {
-        return _frozenReportService.GetBalanceByYearsAsync(req, ct);
+        using var activity = this.StartEndpointActivity(HttpContext);
+
+        try
+        {
+            this.RecordRequestMetrics(HttpContext, _logger, req);
+
+            var result = await _frozenReportService.GetBalanceByYearsAsync(req, ct);
+
+            // Record year-end frozen balance by years report metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "year-end-frozen-balance-by-years"),
+                new("endpoint", "BalanceByYearsEndpoint"),
+                new("report_type", "frozen"),
+                new("frozen_report_type", "balance-by-years"));
+
+            var resultCount = result?.Response?.Results?.Count() ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                new("record_type", "frozen-balance-by-years"),
+                new("endpoint", "BalanceByYearsEndpoint"));
+
+            _logger.LogInformation("Year-end frozen balance by years report generated, returned {Count} records (correlation: {CorrelationId})",
+                resultCount, HttpContext.TraceIdentifier);
+
+            if (result != null)
+            {
+                this.RecordResponseMetrics(HttpContext, _logger, result);
+                return result;
+            }
+
+            var emptyResult = new BalanceByYears
+            {
+                ReportName = ReportFileName,
+                StartDate = DateOnly.FromDateTime(DateTime.Today),
+                EndDate = DateOnly.FromDateTime(DateTime.Today),
+                Response = new() { Results = [] },
+                TotalMembers = 0,
+                BalanceTotalAmount = 0,
+                TotalBeneficiaries = 0
+            };
+
+            this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
+            return emptyResult;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 
     protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, BalanceByYears report, CancellationToken cancellationToken)

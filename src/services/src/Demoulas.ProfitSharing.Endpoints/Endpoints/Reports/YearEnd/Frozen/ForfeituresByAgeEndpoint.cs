@@ -3,10 +3,13 @@ using CsvHelper.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Microsoft.Extensions.Logging;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen.ForfeituresByAgeEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
@@ -14,11 +17,13 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 public class ForfeituresByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReportsByAgeRequest, ForfeituresByAge, ForfeituresByAgeDetail, ProfitSharingForfeituresByAgeMapper>
 {
     private readonly IFrozenReportService _frozenReportService;
+    private readonly ILogger<ForfeituresByAgeEndpoint> _logger;
 
-    public ForfeituresByAgeEndpoint(IFrozenReportService frozenReportService)
+    public ForfeituresByAgeEndpoint(IFrozenReportService frozenReportService, ILogger<ForfeituresByAgeEndpoint> logger)
         : base(Navigation.Constants.ForfeituresByAge)
     {
         _frozenReportService = frozenReportService;
+        _logger = logger;
     }
 
     public override string ReportFileName => "PROFIT SHARING FORFEITURE BY AGE";
@@ -45,9 +50,53 @@ public class ForfeituresByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReportsB
         base.Configure();
     }
 
-    public override Task<ForfeituresByAge> GetResponse(FrozenReportsByAgeRequest req, CancellationToken ct)
+    public override async Task<ForfeituresByAge> GetResponse(FrozenReportsByAgeRequest req, CancellationToken ct)
     {
-        return _frozenReportService.GetForfeituresByAgeYearAsync(req, ct);
+        using var activity = this.StartEndpointActivity(HttpContext);
+        this.RecordRequestMetrics(HttpContext, _logger, req);
+
+        try
+        {
+            var result = await _frozenReportService.GetForfeituresByAgeYearAsync(req, ct);
+
+            // Record business operation metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "forfeitures_by_age"),
+                new("profit_year", req.ProfitYear.ToString()));
+
+            var resultCount = result?.Response?.Results?.Count() ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                new("record_type", "frozen-forfeitures-by-age"),
+                new("endpoint", "ForfeituresByAgeEndpoint"));
+
+            _logger.LogInformation("Year-end frozen forfeitures by age report generated, returned {Count} records (correlation: {CorrelationId})",
+                resultCount, HttpContext.TraceIdentifier);
+
+            if (result != null)
+            {
+                this.RecordResponseMetrics(HttpContext, _logger, result);
+                return result;
+            }
+
+            // Create empty result if needed
+            var emptyResult = new ForfeituresByAge
+            {
+                ReportName = ReportFileName,
+                StartDate = DateOnly.FromDateTime(DateTime.Today),
+                EndDate = DateOnly.FromDateTime(DateTime.Today),
+                Response = new() { Results = [] },
+                TotalEmployees = 0,
+                TotalAmount = 0M
+            };
+
+            this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
+            return emptyResult;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 
     protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, ForfeituresByAge report, CancellationToken cancellationToken)
@@ -68,9 +117,9 @@ public class ForfeituresByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReportsB
         csvWriter.WriteHeader<ForfeituresByAgeDetail>();
         await csvWriter.NextRecordAsync();
 
-       
+
     }
-  
+
 
     public class ProfitSharingForfeituresByAgeMapper : ClassMap<ForfeituresByAgeDetail>
     {
