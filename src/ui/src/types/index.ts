@@ -38,5 +38,4 @@ export * from "./reports/recent-termination";
 export * from "./reports/terminated-letters";
 
 // UI types
-export * from "./ui/components";
 export * from "./ui/grid";
