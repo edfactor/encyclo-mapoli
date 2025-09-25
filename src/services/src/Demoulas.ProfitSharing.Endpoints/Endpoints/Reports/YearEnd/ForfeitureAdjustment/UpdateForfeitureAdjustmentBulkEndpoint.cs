@@ -8,16 +8,20 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ForfeitureAdjustment;
 
 public class UpdateForfeitureAdjustmentBulkEndpoint : ProfitSharingEndpoint<List<ForfeitureAdjustmentUpdateRequest>, Results<NoContent, ProblemHttpResult>>
 {
     private readonly IForfeitureAdjustmentService _forfeitureAdjustmentService;
+    private readonly ILogger<UpdateForfeitureAdjustmentBulkEndpoint> _logger;
 
-    public UpdateForfeitureAdjustmentBulkEndpoint(IForfeitureAdjustmentService forfeitureAdjustmentService) : base(Navigation.Constants.Forfeitures)
+    public UpdateForfeitureAdjustmentBulkEndpoint(IForfeitureAdjustmentService forfeitureAdjustmentService, ILogger<UpdateForfeitureAdjustmentBulkEndpoint> logger) : base(Navigation.Constants.Forfeitures)
     {
         _forfeitureAdjustmentService = forfeitureAdjustmentService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -39,22 +43,10 @@ public class UpdateForfeitureAdjustmentBulkEndpoint : ProfitSharingEndpoint<List
     }
     public override async Task<Results<NoContent, ProblemHttpResult>> ExecuteAsync(List<ForfeitureAdjustmentUpdateRequest> req, CancellationToken ct)
     {
-        try
+        return await this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
             await _forfeitureAdjustmentService.UpdateForfeitureAdjustmentBulkAsync(req, ct);
             return TypedResults.NoContent();
-        }
-        catch (ArgumentException aex)
-        {
-            return TypedResults.Problem(aex.Message);
-        }
-        catch (InvalidOperationException ioex)
-        {
-            return TypedResults.Problem(ioex.Message);
-        }
-        catch (Exception ex)
-        {
-            return TypedResults.Problem(Error.Unexpected(ex.Message).Description);
-        }
+        }, "operation:year-end-forfeiture-adjustment-bulk-update", $"request_count:{req.Count}", $"total_forfeiture_amount:{req.Sum(r => r.ForfeitureAmount)}");
     }
 }

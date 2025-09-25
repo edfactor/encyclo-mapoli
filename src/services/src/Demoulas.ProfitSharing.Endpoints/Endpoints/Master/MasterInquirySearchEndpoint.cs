@@ -7,19 +7,24 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Master;
 
 public class MasterInquirySearchEndpoint : ProfitSharingEndpoint<MasterInquiryRequest, Results<Ok<PaginatedResponseDto<MemberDetails>>, NotFound, ProblemHttpResult>>
 {
     private readonly IMasterInquiryService _masterInquiryService;
+    private readonly ILogger<MasterInquirySearchEndpoint> _logger;
 
-    public MasterInquirySearchEndpoint(IMasterInquiryService masterInquiryService)
+    public MasterInquirySearchEndpoint(IMasterInquiryService masterInquiryService, ILogger<MasterInquirySearchEndpoint> logger)
         : base(Navigation.Constants.MasterInquiry)
     {
         _masterInquiryService = masterInquiryService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -73,9 +78,9 @@ public class MasterInquirySearchEndpoint : ProfitSharingEndpoint<MasterInquiryRe
         Group<MasterInquiryGroup>();
     }
 
-    public override async Task<Results<Ok<PaginatedResponseDto<MemberDetails>>, NotFound, ProblemHttpResult>> ExecuteAsync(MasterInquiryRequest req, CancellationToken ct)
+    public override Task<Results<Ok<PaginatedResponseDto<MemberDetails>>, NotFound, ProblemHttpResult>> ExecuteAsync(MasterInquiryRequest req, CancellationToken ct)
     {
-        try
+        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
             if (req is { ProfitYear: 0, EndProfitYear: > 0 })
             {
@@ -83,12 +88,24 @@ public class MasterInquirySearchEndpoint : ProfitSharingEndpoint<MasterInquiryRe
             }
 
             var data = await _masterInquiryService.GetMembersAsync(req, ct);
+
+            // Record business metrics
+            Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new KeyValuePair<string, object?>("operation", "search"),
+                new KeyValuePair<string, object?>("endpoint.category", "master-inquiry"));
+
+            // Record result count for monitoring bulk operations
+            var resultCount = data.Results?.Count() ?? 0;
+            Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                new KeyValuePair<string, object?>("endpoint.name", nameof(MasterInquirySearchEndpoint)),
+                new KeyValuePair<string, object?>("operation", "search"));
+
+            // Log search operation with filter details (no sensitive data)
+            _logger.LogInformation("Master inquiry search completed: {ResultCount} records found for profit year {ProfitYear} (correlation: {CorrelationId})",
+                resultCount, req.ProfitYear, HttpContext.TraceIdentifier);
+
             // Tests expect success (200) even when no members match filters; return empty list as success.
             return Result<PaginatedResponseDto<MemberDetails>>.Success(data).ToHttpResult();
-        }
-        catch (Exception ex)
-        {
-            return Result<PaginatedResponseDto<MemberDetails>>.Failure(Error.Unexpected(ex.Message)).ToHttpResult();
-        }
+        });
     }
 }

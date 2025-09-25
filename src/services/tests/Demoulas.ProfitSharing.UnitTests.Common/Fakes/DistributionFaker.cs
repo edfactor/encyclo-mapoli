@@ -12,7 +12,13 @@ internal sealed class DistributionFaker : Faker<Distribution>
             .RuleFor(d => d.Ssn, f => f.Person.Ssn().ConvertSsnToInt())
             .RuleFor(d => d.PaymentSequence, f => (byte)(f.IndexFaker % 10 + 1))
             .RuleFor(d => d.EmployeeName, f => f.Person.FullName)
-            .RuleFor(d => d.FrequencyId, f => f.PickRandom('M', 'Q', 'A', 'H', 'P', 'R'))
+            .RuleFor(d => d.FrequencyId, f => f.PickRandom(
+                DistributionFrequency.Constants.Monthly,
+                DistributionFrequency.Constants.Quarterly,
+                DistributionFrequency.Constants.Annually,
+                DistributionFrequency.Constants.Hardship,
+                DistributionFrequency.Constants.PayDirect,
+                DistributionFrequency.Constants.RolloverDirect))
             .RuleFor(d => d.StatusId, f => f.PickRandom('P', 'C', 'H', 'X', 'D', 'Y', 'O'))
             .RuleFor(d => d.GrossAmount, f => Math.Round(f.Finance.Amount(100, 10_000), 2))
             .RuleFor(d => d.FederalTaxPercentage, f => Math.Round(f.Random.Decimal(0, 30), 2))
