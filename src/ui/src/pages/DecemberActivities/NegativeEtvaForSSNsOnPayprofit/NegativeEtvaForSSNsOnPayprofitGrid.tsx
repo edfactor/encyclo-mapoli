@@ -1,59 +1,34 @@
-import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
+import { RefObject, useCallback, useMemo } from "react";
 import { Path, useNavigate } from "react-router";
-import { useLazyGetNegativeEVTASSNQuery } from "reduxstore/api/YearsEndApi";
-import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { DSMGrid, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
+import { GridPaginationState, GridPaginationActions } from "../../../hooks/useGridPagination";
+import { NegativeEtvaForSSNDetail, PagedReportResponse } from "../../../types";
 import { GetNegativeEtvaForSSNsOnPayProfitColumns } from "./NegativeEtvaForSSNsOnPayprofitGridColumns";
 
 interface NegativeEtvaForSSNsOnPayprofitGridProps {
-  initialSearchLoaded: boolean;
-  setInitialSearchLoaded: (loaded: boolean) => void;
+  innerRef: RefObject<HTMLDivElement | null>;
+  data: PagedReportResponse<NegativeEtvaForSSNDetail> | null;
+  isLoading: boolean;
+  showData: boolean;
+  hasResults: boolean;
+  pagination: GridPaginationState & GridPaginationActions;
+  onPaginationChange: (pageNumber: number, pageSize: number) => void;
+  onSortChange: (sortParams: any) => void;
 }
 
-const NegativeEtvaForSSNsOnPayprofitGrid: React.FC<NegativeEtvaForSSNsOnPayprofitGridProps> = ({
-  initialSearchLoaded,
-  setInitialSearchLoaded
-}) => {
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
-    isSortDescending: false
-  });
-
-  const { negativeEtvaForSSNsOnPayprofit } = useSelector((state: RootState) => state.yearsEnd);
-
-  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-  const profitYear = useDecemberFlowProfitYear();
-  const [triggerSearch, { isFetching }] = useLazyGetNegativeEVTASSNQuery();
-
-  const onSearch = useCallback(async () => {
-    const request = {
-      profitYear: profitYear || 0,
-      pagination: {
-        skip: pageNumber * pageSize,
-        take: pageSize,
-        sortBy: sortParams.sortBy,
-        isSortDescending: sortParams.isSortDescending
-      }
-    };
-
-    await triggerSearch(request, false);
-  }, [pageNumber, pageSize, triggerSearch, profitYear, sortParams]);
-
-  useEffect(() => {
-    if (initialSearchLoaded && hasToken && profitYear) {
-      onSearch();
-    }
-  }, [initialSearchLoaded, pageNumber, pageSize, onSearch, hasToken, profitYear]);
-
-  const sortEventHandler = (update: ISortParams) => setSortParams(update);
-
+const NegativeEtvaForSSNsOnPayprofitGrid = ({
+  innerRef,
+  data,
+  isLoading,
+  showData,
+  hasResults,
+  pagination,
+  onPaginationChange,
+  onSortChange
+}: NegativeEtvaForSSNsOnPayprofitGridProps) => {
   const navigate = useNavigate();
-  // Wrapper to pass react function to non-react class
+
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {
       navigate(destination);
@@ -68,33 +43,30 @@ const NegativeEtvaForSSNsOnPayprofitGrid: React.FC<NegativeEtvaForSSNsOnPayprofi
 
   return (
     <>
-      {negativeEtvaForSSNsOnPayprofit?.response && (
-        <>
+      {showData && data?.response && (
+        <div ref={innerRef}>
           <DSMGrid
             preferenceKey={CAPTIONS.NEGATIVE_ETVA}
-            isLoading={isFetching}
-            handleSortChanged={sortEventHandler}
+            isLoading={isLoading}
+            handleSortChanged={onSortChange}
             providedOptions={{
-              rowData: negativeEtvaForSSNsOnPayprofit.response.results,
+              rowData: data.response.results,
               columnDefs: columnDefs
             }}
           />
-        </>
+        </div>
       )}
-      {!!negativeEtvaForSSNsOnPayprofit && negativeEtvaForSSNsOnPayprofit.response.results.length > 0 && (
+      {hasResults && data?.response && (
         <Pagination
-          pageNumber={pageNumber}
+          pageNumber={pagination.pageNumber}
           setPageNumber={(value: number) => {
-            setPageNumber(value - 1);
-            setInitialSearchLoaded(true);
+            onPaginationChange(value - 1, pagination.pageSize);
           }}
-          pageSize={pageSize}
+          pageSize={pagination.pageSize}
           setPageSize={(value: number) => {
-            setPageSize(value);
-            setPageNumber(1);
-            setInitialSearchLoaded(true);
+            onPaginationChange(0, value);
           }}
-          recordCount={negativeEtvaForSSNsOnPayprofit.response.total}
+          recordCount={data.response.total || 0}
         />
       )}
     </>

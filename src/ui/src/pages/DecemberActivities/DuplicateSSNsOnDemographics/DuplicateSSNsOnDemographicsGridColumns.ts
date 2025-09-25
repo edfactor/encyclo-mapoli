@@ -7,15 +7,14 @@ import {
   createNameColumn,
   createSSNColumn,
   createStateColumn,
+  createStatusColumn,
   createStoreColumn
 } from "../../../utils/gridColumnFactory";
 
 export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({
-      headerName: "Badge"
-    }),
-    createSSNColumn({ alignment: "left" }),
+    createBadgeColumn({}),
+    createSSNColumn({}),
     createNameColumn({
       field: "name"
     }),
@@ -34,17 +33,9 @@ export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
       headerName: "Rehired Date",
       field: "rehireDate"
     }),
-    createStoreColumn({
-      minWidth: 50
-    }),
+    createStoreColumn({}),
+    createStatusColumn({}),
     {
-      headerName: "Status",
-      field: "status",
-      colId: "status",
-      minWidth: 60,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
       valueFormatter: (params) => {
         const id = params.data.status; // assuming 'status' is in the row data
         const name = params.data.employmentStatusName; // assuming 'statusName' is in the row data

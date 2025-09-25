@@ -75,6 +75,7 @@ export interface EligibleEmployee {
   departmentId: number;
   department: string;
   storeNumber: number;
+  isExecutive: boolean;
 }
 
 export interface EligibleEmployeeResponseDto extends PagedReportResponse<EligibleEmployee> {

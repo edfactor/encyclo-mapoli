@@ -298,7 +298,7 @@ const RouterSubAssembly: React.FC = () => {
                 </Route>
                 <Route
                   path={ROUTES.PAY426_SUMMARY}
-                  element={<ProfitSummary />}
+                  element={<ProfitSummary frozenData={true} />}
                 />
                 <Route
                   path={ROUTES.PROFIT_SHARE_BY_STORE}
@@ -337,9 +337,10 @@ const RouterSubAssembly: React.FC = () => {
                   element={<DevDebug />}
                 />
                 <Route
-                  path={ROUTES.PAY426N}
+                  path={`${ROUTES.PAY426N}/:presetNumber?`}
                   element={<PAY426N />}
                 />
+
                 <Route
                   path={ROUTES.QPAY066_ADHOC}
                   element={<QPAY066AdHocReports />}

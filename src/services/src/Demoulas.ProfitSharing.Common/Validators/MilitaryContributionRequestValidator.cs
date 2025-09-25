@@ -3,13 +3,25 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.Util.Extensions;
 using FastEndpoints;
 using FluentValidation;
+using System.Diagnostics.Metrics;
 
 namespace Demoulas.ProfitSharing.Common.Validators;
 
+/// <summary>
+/// Validates requests to create Military Contributions according to business rules.
+/// </summary>
+/// <remarks>
+/// Documentation: Military Contributions validation rules, temporal semantics, and QA plan are documented here:
+/// https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/537919492/Military+Contributions+Validation+Behavior+and+Operations
+/// </remarks>
 public class MilitaryContributionRequestValidator : Validator<CreateMilitaryContributionRequest>
 {
     private readonly IEmployeeLookupService _employeeLookup;
     private readonly IMilitaryService _militaryService;
+    private static readonly Meter s_meter = new("Demoulas.ProfitSharing.Validators");
+    private static readonly Counter<long> s_validationFailures = s_meter.CreateCounter<long>(
+        "ps_validation_failures_total",
+        description: "Counts of validation failures by validator and rule");
 
     public MilitaryContributionRequestValidator(IEmployeeLookupService employeeLookup, IMilitaryService militaryService)
     {
@@ -40,6 +52,41 @@ public class MilitaryContributionRequestValidator : Validator<CreateMilitaryCont
             .WithMessage(request => $"Employee must be at least 21 years old on the contribution date {request.ContributionDate:yyyy-MM-dd}.")
             .MustAsync((request, _, ct) => ValidateContributionDate(request, ct))
             .WithMessage(request => $"Regular Contribution already recorded for year {request.ContributionDate.Year}. Duplicates are not allowed.");
+
+        // YOS requires supplemental when posting for a different profit year than the contribution date year
+        RuleFor(r => r.IsSupplementalContribution)
+            .Must((request, isSupp) =>
+            {
+                if (request.ProfitYear == (short)request.ContributionDate.Year)
+                {
+                    return true; // same year, either regular or supplemental allowed subject to other rules
+                }
+                // Different posting year than contribution date year must be supplemental (no YOS credit)
+                return isSupp || TrackFailure("YosRequiresSupplementalWhenYearMismatch");
+            })
+            .WithMessage(r => $"When profit year ({r.ProfitYear}) differs from contribution year ({r.ContributionDate.Year}), the contribution must be marked Supplemental.");
+
+        // Employment status eligibility: only Active as-of contribution date
+        RuleFor(r => r.ContributionDate)
+            .MustAsync(async (request, _, ct) =>
+            {
+                // If badge is invalid, let the BadgeNumber rule handle it; avoid compounding errors
+                if (!await _employeeLookup.BadgeExistsAsync(request.BadgeNumber, ct))
+                {
+                    return true;
+                }
+                var isActive = await _employeeLookup.IsActiveAsOfAsync(request.BadgeNumber, DateOnly.FromDateTime(request.ContributionDate), ct);
+                if (!isActive.HasValue)
+                {
+                    return TrackFailure("EmploymentStatusMissing");
+                }
+                if (!isActive.Value)
+                {
+                    return TrackFailure("EmploymentStatusNotActive");
+                }
+                return true; // Active only
+            })
+            .WithMessage(request => $"Employee employment status is not eligible for contributions as of {DateOnly.FromDateTime(request.ContributionDate):yyyy-MM-dd}.");
     }
 
     private async Task<bool> ValidateContributionDate(CreateMilitaryContributionRequest req, CancellationToken token)
@@ -56,10 +103,14 @@ public class MilitaryContributionRequestValidator : Validator<CreateMilitaryCont
             isArchiveRequest: false,
             cancellationToken: token);
 
-        if (!results.IsSuccess) { return false; }
+        if (!results.IsSuccess)
+        {
+            return TrackFailure("ServiceError");
+        }
         var records = results.Value!.Results;
 
-        return records.All(x => x.IsSupplementalContribution || x.ContributionDate.Year != req.ContributionDate.Year);
+        var ok = records.All(x => x.IsSupplementalContribution || x.ContributionDate.Year != req.ContributionDate.Year);
+        return ok || TrackFailure("DuplicateRegularContribution");
     }
 
     private async Task<bool> ValidateNotBeforeHire(CreateMilitaryContributionRequest req, CancellationToken token)
@@ -68,11 +119,11 @@ public class MilitaryContributionRequestValidator : Validator<CreateMilitaryCont
         var earliest = await _employeeLookup.GetEarliestHireDateAsync(req.BadgeNumber, token);
         if (!earliest.HasValue)
         {
-            return false;
+            return TrackFailure("HireDateMissing");
         }
 
         // Contribution year must be >= earliest hire year
-        return req.ContributionDate.Year >= earliest.Value.Year;
+        return req.ContributionDate.Year >= earliest.Value.Year || TrackFailure("BeforeHireYear");
     }
 
     private async Task<bool> ValidateAtLeast21OnContribution(CreateMilitaryContributionRequest req, CancellationToken token)
@@ -81,9 +132,17 @@ public class MilitaryContributionRequestValidator : Validator<CreateMilitaryCont
         if (!dob.HasValue)
         {
             // If DOB is not available, fail validation so the issue can be surfaced.
-            return false;
+            return TrackFailure("DobMissing");
         }
 
-        return dob.Value.Age(req.ContributionDate) >= 21;
+        return dob.Value.Age(req.ContributionDate) >= 21 || TrackFailure("AgeUnder21");
+    }
+
+    private static bool TrackFailure(string rule)
+    {
+        s_validationFailures.Add(1,
+            new KeyValuePair<string, object?>("validator", "MilitaryContribution"),
+            new KeyValuePair<string, object?>("rule", rule));
+        return false;
     }
 }

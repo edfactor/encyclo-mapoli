@@ -1,18 +1,29 @@
-import { Divider } from "@mui/material";
-import { useState } from "react";
-import { Grid } from "@mui/material";
-import NegativeEtvaForSSNsOnPayprofitGrid from "./NegativeEtvaForSSNsOnPayprofitGrid";
-import { Page } from "smart-ui-library";
+import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import { useRef } from "react";
+import { Page } from "smart-ui-library";
+import NegativeEtvaForSSNsOnPayprofitGrid from "./NegativeEtvaForSSNsOnPayprofitGrid";
+import useNegativeEtvaForSSNsOnPayprofit from "./hooks/useNegativeEtvaForSSNsOnPayprofit";
 
 const NegativeEtvaForSSNsOnPayprofit = () => {
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(true);
+  const componentRef = useRef<HTMLDivElement>(null);
+  const {
+    searchResults,
+    isSearching,
+    pagination,
+    showData,
+    hasResults
+  } = useNegativeEtvaForSSNsOnPayprofit();
+
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
   };
+
+  const recordCount = searchResults?.response?.total || 0;
+
   return (
     <Page
-      label="Negative ETVA for SSNs on Payprofit"
+      label={`Negative ETVA for SSNs on Payprofit (${recordCount} records)`}
       actionNode={renderActionNode()}>
       <Grid
         container
@@ -23,8 +34,14 @@ const NegativeEtvaForSSNsOnPayprofit = () => {
 
         <Grid width="100%">
           <NegativeEtvaForSSNsOnPayprofitGrid
-            initialSearchLoaded={initialSearchLoaded}
-            setInitialSearchLoaded={setInitialSearchLoaded}
+            innerRef={componentRef}
+            data={searchResults}
+            isLoading={isSearching}
+            showData={showData}
+            hasResults={hasResults ?? false}
+            pagination={pagination}
+            onPaginationChange={pagination.handlePaginationChange}
+            onSortChange={pagination.handleSortChange}
           />
         </Grid>
       </Grid>
