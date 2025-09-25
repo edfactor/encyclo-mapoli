@@ -58,35 +58,8 @@ export interface SuggestedForfeitResponse {
 // Alias for backwards compatibility
 export type SuggestForfeitAmountResponse = SuggestedForfeitResponse;
 
-// Rehire forfeitures editing functionality
-export interface UnForfeitEditedValues {
-  [rowKey: string]: {
-    value: number;
-    hasError: boolean;
-  };
-}
-
 export interface UnForfeitHeaderComponentProps extends IHeaderParams {
   addRowToSelectedRows: (id: number) => void;
   removeRowFromSelectedRows: (id: number) => void;
   onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[]) => Promise<void>;
-}
-
-export interface UnForfeitSaveButtonCellParams extends ICellRendererParams {
-  removeRowFromSelectedRows: (id: number) => void;
-  addRowToSelectedRows: (id: number) => void;
-  onSave?: (request: ForfeitureAdjustmentUpdateRequest) => Promise<void>;
-}
-
-export interface UnForfeitUpdatePayload {
-  badgeNumber: number;
-  profitYear: number;
-  suggestedForfeit: number;
-}
-
-export interface UnForfeitSelectedRow {
-  id: number;
-  badgeNumber: number;
-  profitYear: number;
-  suggestedForfeit: number;
 }
