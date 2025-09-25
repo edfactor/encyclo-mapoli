@@ -36,6 +36,7 @@ interface TerminationGridSearchProps {
   fiscalData: CalendarResponseDto | null;
   shouldArchive?: boolean;
   onArchiveHandled?: () => void;
+  onErrorOccurred?: () => void; // Add this prop
 }
 
 const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
@@ -47,7 +48,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   hasUnsavedChanges,
   fiscalData,
   shouldArchive,
-  onArchiveHandled
+  onArchiveHandled,
+  onErrorOccurred
 }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -64,7 +66,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   const selectedProfitYear = useDecemberFlowProfitYear();
   // fiscalData is now passed from parent to avoid timing issues on refresh
   const [updateForfeitureAdjustmentBulk, { isLoading: isBulkSaving }] = useUpdateForfeitureAdjustmentBulkMutation();
-  const [updateForfeitureAdjustment] = useUpdateForfeitureAdjustmentMutation();
+  const [updateForfeitureAdjustment, { isLoading: isSingleSaving }] = useUpdateForfeitureAdjustmentMutation();
   const lastRequestKeyRef = useRef<string | null>(null);
 
   // Use separate hooks for edit and selection state
@@ -138,6 +140,157 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     }
   }, [searchParams, dispatch]);
 
+  // Add state to track current scroll position
+  const [gridScrollPosition, setGridScrollPosition] = useState<{ top: number, left: number } | null>(null);
+  
+  // Add reference to track if we're currently restoring scroll position
+  const isRestoringScrollRef = useRef(false);
+
+  // Add state to track when to refresh data after save
+  const [shouldRefreshData, setShouldRefreshData] = useState(false);
+  const [saveSuccessType, setSaveSuccessType] = useState<'single' | 'bulk' | null>(null);
+  const [successMessages, setSuccessMessages] = useState<{ message: string, type: 'single' | 'bulk' }[]>([]);
+
+  // Define a function to refresh the data after save
+  const refreshDataAfterSave = useCallback((successMessage: string, isBulk: boolean) => {
+    if (searchParams) {
+      // Store success message to display after refresh
+      setSuccessMessages(prev => [...prev, { 
+        message: successMessage, 
+        type: isBulk ? 'bulk' : 'single' 
+      }]);
+      
+      // Set flag to trigger refresh in the useEffect
+      setShouldRefreshData(true);
+      setSaveSuccessType(isBulk ? 'bulk' : 'single');
+    } else {
+      // If no search params, just show message immediately
+      dispatch(
+        setMessage({
+          ...Messages.TerminationSaveSuccess,
+          message: {
+            ...Messages.TerminationSaveSuccess.message,
+            message: successMessage
+          }
+        })
+      );
+    }
+  }, [searchParams, dispatch]);
+
+  // Effect to refresh data after save
+  useEffect(() => {
+    const refreshData = async () => {
+      if (shouldRefreshData && searchParams) {
+        try {
+          // Store current scroll position before refreshing data
+          if (gridRef.current?.api) {
+            try {
+              // Get the scrollable viewport container - use proper AG Grid API methods
+              const gridBodyViewport = document.querySelector('.ag-body-viewport');
+              if (gridBodyViewport) {
+                setGridScrollPosition({
+                  top: gridBodyViewport.scrollTop,
+                  left: gridBodyViewport.scrollLeft
+                });
+                
+                // Log for debugging
+                console.log('Saving scroll position:', gridBodyViewport.scrollTop, gridBodyViewport.scrollLeft);
+              }
+            } catch (err) {
+              console.error("Error saving scroll position:", err);
+            }
+          }
+          
+          // Construct search params with current pagination and sort
+          const params = createRequest(
+            pageNumber * pageSize,
+            sortParams.sortBy,
+            sortParams.isSortDescending,
+            selectedProfitYear
+          );
+          
+          if (params) {
+            // Perform the search to get fresh data
+            await triggerSearch(params, false);
+            
+            // Show success messages after refresh
+            if (successMessages.length > 0) {
+              // Get the most recent message
+              const latestMessage = successMessages[successMessages.length - 1];
+              
+              // Show appropriate message based on type
+              const messageTemplate = latestMessage.type === 'bulk' 
+                ? Messages.TerminationBulkSaveSuccess 
+                : Messages.TerminationSaveSuccess;
+                
+              dispatch(
+                setMessage({
+                  ...messageTemplate,
+                  message: {
+                    ...messageTemplate.message,
+                    message: latestMessage.message
+                  }
+                })
+              );
+              
+              // Clear messages after displaying
+              setSuccessMessages([]);
+            }
+          }
+        } catch (error) {
+          console.error("Error refreshing termination data:", error);
+          if (onErrorOccurred) {
+            onErrorOccurred();
+          }
+        } finally {
+          // Reset refresh flag
+          setShouldRefreshData(false);
+          setSaveSuccessType(null);
+        }
+      }
+    };
+    
+    refreshData();
+  }, [shouldRefreshData, searchParams, pageNumber, pageSize, sortParams, triggerSearch, dispatch, successMessages, onErrorOccurred, selectedProfitYear, createRequest]);
+
+  // Add effect to restore scroll position after data refresh
+  useEffect(() => {
+    const restoreScrollPosition = () => {
+      if (gridRef.current?.api && gridScrollPosition && !isFetching && !isRestoringScrollRef.current) {
+        // Set flag to prevent multiple scroll attempts
+        isRestoringScrollRef.current = true;
+        
+        // Need to wait for the grid to fully render after data load
+        setTimeout(() => {
+          try {
+            // Get the scrollable viewport container - use DOM selector instead of API method
+            const gridBodyViewport = document.querySelector('.ag-body-viewport');
+            if (gridBodyViewport) {
+              // Set the scroll position directly
+              gridBodyViewport.scrollTop = gridScrollPosition.top;
+              gridBodyViewport.scrollLeft = gridScrollPosition.left;
+              
+              // Log for debugging
+              console.log('Restored scroll position:', gridScrollPosition);
+            }
+          } catch (err) {
+            console.error('Error restoring scroll position:', err);
+          } finally {
+            // Reset scroll position state
+            setGridScrollPosition(null);
+            
+            // Reset the flag after a longer delay to ensure the scroll has been applied
+            setTimeout(() => {
+              isRestoringScrollRef.current = false;
+            }, 300);
+          }
+        }, 250); // Increased delay to ensure grid is fully rendered
+      }
+    };
+    
+    restoreScrollPosition();
+  }, [gridScrollPosition, isFetching]);
+
   const handleSave = useCallback(
     async (request: ForfeitureAdjustmentUpdateRequest, name: string) => {
       const rowId = request.badgeNumber; // Use badgeNumber as unique identifier
@@ -154,10 +307,27 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
         // Prepare success message and refresh grid
         const employeeName = name || "the selected employee";
         const successMessage = `The forfeiture adjustment of amount $${formatNumberWithComma(request.forfeitureAmount)} for ${employeeName} saved successfully`;
-        refreshGridAfterSave(successMessage);
+        
+        // Use the new function to refresh data and show success message
+        refreshDataAfterSave(successMessage, false);
       } catch (error) {
         console.error("Failed to save forfeiture adjustment:", error);
-        alert("Failed to save. Please try again.");
+        
+        // Show error message
+        dispatch(
+          setMessage({
+            key: "TerminationSave",
+            message: {
+              message: `Failed to save adjustment for ${name || "employee"}.`,
+              type: "error"
+            }
+          })
+        );
+        
+        // Call the passed-in error handler instead of internal scrollToTop
+        if (onErrorOccurred) {
+          onErrorOccurred();
+        }
       } finally {
         editState.removeLoadingRow(rowId);
       }
@@ -166,7 +336,9 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       updateForfeitureAdjustment,
       editState,
       onUnsavedChanges,
-      refreshGridAfterSave
+      refreshDataAfterSave,
+      dispatch,
+      onErrorOccurred
     ]
   );
 
@@ -301,26 +473,44 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       editState.addLoadingRows(badgeNumbers);
 
       try {
+        // Call API to save bulk changes
         await updateForfeitureAdjustmentBulk(requests);
 
         // Clear edited values for saved requests
         const rowKeys = requests.map(request => `${request.badgeNumber}-${request.profitYear}`);
         editState.clearEditedValues(rowKeys);
 
-        // Clear selection after successful bulk save
+        // Clear selection
         selectionState.clearSelection();
 
-        // Check for remaining edits after clearing the saved ones
+        // Check for remaining edits
         const remainingEditKeys = Object.keys(editState.editedValues).filter(key => !rowKeys.includes(key));
         onUnsavedChanges(remainingEditKeys.length > 0);
 
         // Prepare bulk success message and refresh grid
         const employeeNames = names.map(name => name || "Unknown Employee");
         const bulkSuccessMessage = `Members affected: ${employeeNames.join("; ")}`;
-        refreshGridAfterSave(bulkSuccessMessage, true);
+        
+        // Use the new function to refresh data and show success message
+        refreshDataAfterSave(bulkSuccessMessage, true);
       } catch (error) {
         console.error("Failed to save forfeiture adjustments:", error);
-        alert("Failed to save one or more adjustments. Please try again.");
+        
+        // Show error message
+        dispatch(
+          setMessage({
+            key: "TerminationSave",
+            message: {
+              message: `Failed to save bulk adjustments.`,
+              type: "error"
+            }
+          })
+        );
+        
+        // Call the passed-in error handler instead of internal scrollToTop
+        if (onErrorOccurred) {
+          onErrorOccurred();
+        }
       } finally {
         // Remove all affected badge numbers from loading state
         editState.removeLoadingRows(badgeNumbers);
@@ -331,7 +521,9 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       editState,
       selectionState,
       onUnsavedChanges,
-      refreshGridAfterSave
+      refreshDataAfterSave,
+      dispatch,
+      onErrorOccurred
     ]
   );
 
@@ -482,7 +674,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
 
   return (
     <div className="relative">
-      {isFetching && (
+      {/* Show loading overlay when fetching data */}
+      {(isFetching) && (
         <div className="absolute inset-0 w-full h-full bg-white/60 z-[1000] flex items-center justify-center">
           <div
             className="spinner-border w-12 h-12"
@@ -491,10 +684,21 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
           </div>
         </div>
       )}
+
+      {(isBulkSaving || isSingleSaving) && (
+        <div className="absolute inset-0 w-full h-full bg-white/60 z-[1000] flex items-center justify-center">
+          <div
+            className="spinner-border w-12 h-12"
+            role="status">
+            <span className="visually-hidden">Saving...</span>
+          </div>
+        </div>
+      )}
+      
       {termination?.response && (
         <>
           <ReportSummary report={termination} />
-
+          
           <div className="sticky top-0 z-10 flex bg-white">
             <TotalsGrid
               displayData={[[numberToCurrency(termination.totalEndingBalance || 0)]]}
