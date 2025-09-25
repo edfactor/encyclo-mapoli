@@ -675,7 +675,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   return (
     <div className="relative">
       {/* Show loading overlay when fetching data */}
-      {isFetching || isBulkSaving || isSingleSaving  && (
+      {(isFetching) && (
         <div className="absolute inset-0 w-full h-full bg-white/60 z-[1000] flex items-center justify-center">
           <div
             className="spinner-border w-12 h-12"
@@ -684,11 +684,14 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
           </div>
         </div>
       )}
-      
-      {/* Fix the conditional for showing the circular progress during bulk save */}
-      {(false) && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <CircularProgress />
+
+      {(isBulkSaving || isSingleSaving) && (
+        <div className="absolute inset-0 w-full h-full bg-white/60 z-[1000] flex items-center justify-center">
+          <div
+            className="spinner-border w-12 h-12"
+            role="status">
+            <span className="visually-hidden">Saving...</span>
+          </div>
         </div>
       )}
       

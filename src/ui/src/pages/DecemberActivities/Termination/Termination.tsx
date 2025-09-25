@@ -20,7 +20,7 @@ export interface TerminationSearchRequest extends StartAndEndDateRequest {
 const Termination = () => {
   const [fetchAccountingRange, { data: fiscalData, isLoading: isRangeLoading }] = useLazyGetAccountingRangeToCurrent(6);
   const { state, actions } = useTerminationState();
-  const topRef = useRef<HTMLDivElement>(null);
+  // const topRef = useRef<HTMLDivElement>(null);
 
   // Function to scroll to top - only used for error cases
   const scrollToTop = useCallback(() => {
@@ -32,8 +32,6 @@ const Termination = () => {
 
   // Modify renderActionNode to NOT automatically scroll to top
   const renderActionNode = () => {
-    // Remove the auto-scroll behavior
-    // Previously: scrollToTop(); - this has been removed
 
     return <StatusDropdownActionNode onStatusChange={actions.handleStatusChange} />;
   };
@@ -67,8 +65,6 @@ const Termination = () => {
     <Page
       label={CAPTIONS.TERMINATIONS}
       actionNode={renderActionNode()}>
-      {/* Add ref at the top */}
-      <div ref={topRef}></div>
 
       <div>
         <ApiMessageAlert commonKey="TerminationSave" />
