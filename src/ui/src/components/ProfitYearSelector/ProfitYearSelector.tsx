@@ -134,6 +134,11 @@ const ProfitYearSelector = ({
               }
             }
           }}>
+          <MenuItem
+            key=""
+            value="">
+            <span className="text-gray-400 italic">Select Profit Year</span>
+          </MenuItem>
           {yearsToDisplay.map((year) => (
             <MenuItem
               key={year}

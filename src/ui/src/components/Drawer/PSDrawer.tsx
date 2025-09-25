@@ -258,7 +258,7 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
           alignItems: "center",
           gap: 1,
           justifyContent: "space-between",
-          width: drawerOpen ? "300px" : "auto",
+          width: drawerOpen ? "338px" : "auto",
           transition: (theme) =>
             theme.transitions.create("left", {
               easing: theme.transitions.easing.sharp,
@@ -298,7 +298,7 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
           // THIS IS WHAT STYLES THE AQUAMARINE COLORED SPACE
           "& .MuiDrawer-paper": {
             width: drawerOpen ? drawerOpenWidth : drawerClosedWidth,
-
+            borderRight: "1px solid #BDBDBD",
             boxSizing: "border-box",
             overflowX: "hidden",
             "& > *": {
@@ -336,6 +336,10 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
                   gap: 1,
                   borderBottom: 1,
                   borderColor: "divider",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "background.paper",
+                  zIndex: 1,
                   "&:hover": {
                     backgroundColor: (theme) => theme.palette.action.hover
                   }
