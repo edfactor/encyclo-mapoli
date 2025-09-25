@@ -1,6 +1,6 @@
 export const MAX_EMPLOYEE_BADGE_LENGTH: number = 7;
 
-export const drawerOpenWidth: number = 330;
+export const drawerOpenWidth: number = 368;
 export const drawerClosedWidth: number = 64;
 
 export const MENU_LABELS = {
