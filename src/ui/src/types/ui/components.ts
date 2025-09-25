@@ -12,6 +12,3 @@ export type {
   MasstransitBus
 } from "../../reduxstore/healthTypes";
 
-export interface ProfitShareTotalsDisplayProps {
-  totalsData: YearEndProfitSharingReportTotalsResponse | null | undefined;
-}
