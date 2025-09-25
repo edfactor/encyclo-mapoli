@@ -200,8 +200,10 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             PayProfit payProfit = await SetupTestEmployee_With_HoursAndDollars(c);
             ExecutiveHoursAndDollarsRequest request = new()
             {
-                FullNameContains = payProfit.Demographic!.ContactInfo.FullName, 
-                ProfitYear = ProfitShareTestYear, Skip = 0, Take = 10
+                FullNameContains = payProfit.Demographic!.ContactInfo.FullName,
+                ProfitYear = ProfitShareTestYear,
+                Skip = 0,
+                Take = 10
             };
             ReportResponseBase<ExecutiveHoursAndDollarsResponse> expectedResponse = StockResponse();
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
@@ -228,7 +230,10 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             PayProfit payProfit = await SetupTestEmployee_With_HoursAndDollars(c);
             ExecutiveHoursAndDollarsRequest request = new()
             {
-                FullNameContains = $"ZZ{payProfit.Demographic!.ContactInfo.FullName}", ProfitYear = ProfitShareTestYear, Skip = 0, Take = 10
+                FullNameContains = $"ZZ{payProfit.Demographic!.ContactInfo.FullName}",
+                ProfitYear = ProfitShareTestYear,
+                Skip = 0,
+                Take = 10
             };
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 

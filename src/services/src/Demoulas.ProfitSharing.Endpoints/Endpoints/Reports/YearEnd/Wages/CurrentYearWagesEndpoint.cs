@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Wages.CurrentYearWagesEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Wages;
+
 public class CurrentYearWagesEndpoint : EndpointWithCsvBase<ProfitYearRequest, WagesCurrentYearResponse, WagesCurrentYearResponseMap>
 {
     private readonly IWagesService _reportService;
@@ -28,7 +29,7 @@ public class CurrentYearWagesEndpoint : EndpointWithCsvBase<ProfitYearRequest, W
 
     public override void Configure()
     {
-        Get("wages-current-year");  
+        Get("wages-current-year");
         Summary(s =>
         {
             s.Summary = "Wages for the specified year";
@@ -64,7 +65,7 @@ public class CurrentYearWagesEndpoint : EndpointWithCsvBase<ProfitYearRequest, W
     public override async Task<ReportResponseBase<WagesCurrentYearResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
-        
+
         try
         {
             this.RecordRequestMetrics(HttpContext, _logger, req);
@@ -100,7 +101,7 @@ public class CurrentYearWagesEndpoint : EndpointWithCsvBase<ProfitYearRequest, W
                 EndDate = DateOnly.FromDateTime(DateTime.Today),
                 Response = new() { Results = [] }
             };
-            
+
             this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
             return emptyResult;
         }

@@ -53,7 +53,7 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
         // Act
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
         var response =
-            await ApiClient.GETAsync<CurrentYearWagesEndpoint, ProfitYearRequest, ReportResponseBase<WagesCurrentYearResponse>>(new ProfitYearRequest{ ProfitYear = 2023});
+            await ApiClient.GETAsync<CurrentYearWagesEndpoint, ProfitYearRequest, ReportResponseBase<WagesCurrentYearResponse>>(new ProfitYearRequest { ProfitYear = 2023 });
 
         // Assert
         response.Result.ReportName.ShouldBe(expectedResponse.ReportName);

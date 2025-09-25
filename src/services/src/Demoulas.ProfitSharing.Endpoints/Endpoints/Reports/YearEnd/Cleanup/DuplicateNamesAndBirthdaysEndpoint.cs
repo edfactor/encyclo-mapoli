@@ -14,6 +14,7 @@ using Demoulas.ProfitSharing.Security;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
+
 public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYearRequest, DuplicateNamesAndBirthdaysResponse, DuplicateNamesAndBirthdaysEndpoint.DuplicateNamesAndBirthdaysResponseMap>
 {
     private readonly ICleanupReportService _cleanupReportService;

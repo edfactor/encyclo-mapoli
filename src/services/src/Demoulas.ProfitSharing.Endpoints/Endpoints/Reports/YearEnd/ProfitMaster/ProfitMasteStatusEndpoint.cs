@@ -38,7 +38,7 @@ public class ProfitMasterStatusEndpoint : ProfitSharingEndpoint<ProfitYearReques
     public override async Task HandleAsync(ProfitYearRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
-        
+
         try
         {
             this.RecordRequestMetrics(HttpContext, _logger, req);

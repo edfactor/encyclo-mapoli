@@ -22,7 +22,7 @@ public class ExecutiveHoursAndDollarsEndpoint :
     private readonly IAuditService _auditService;
     private readonly ILogger<ExecutiveHoursAndDollarsEndpoint> _logger;
 
-    public  ExecutiveHoursAndDollarsEndpoint(IExecutiveHoursAndDollarsService reportService, IAuditService auditService, ILogger<ExecutiveHoursAndDollarsEndpoint> logger)
+    public ExecutiveHoursAndDollarsEndpoint(IExecutiveHoursAndDollarsService reportService, IAuditService auditService, ILogger<ExecutiveHoursAndDollarsEndpoint> logger)
         : base(Navigation.Constants.ManageExecutiveHours)
     {
         _reportService = reportService;
@@ -74,7 +74,7 @@ public class ExecutiveHoursAndDollarsEndpoint :
                     }
 
                     return _reportService.GetExecutiveHoursAndDollarsReportAsync(archiveReq, cancellationToken);
-                }, 
+                },
                 ct);
 
             // Record year-end executive hours and dollars report metrics

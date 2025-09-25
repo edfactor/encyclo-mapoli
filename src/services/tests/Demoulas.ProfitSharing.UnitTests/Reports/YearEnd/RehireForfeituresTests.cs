@@ -199,7 +199,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         var profitYear = (short)Math.Min(demo.ReHireDate!.Value.Year, 2024);
 
 
-        var payProfit = await c.PayProfits.Include(p=> p.Enrollment).FirstAsync(pp => pp.DemographicId == demo.Id);
+        var payProfit = await c.PayProfits.Include(p => p.Enrollment).FirstAsync(pp => pp.DemographicId == demo.Id);
         payProfit.EnrollmentId = Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
         payProfit.Enrollment = new Enrollment
         {
@@ -230,12 +230,12 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         example.FullName = demo.ContactInfo.FullName;
         example.ReHiredDate = demo.ReHireDate ?? ReferenceData.DsmMinValue;
         example.Details = details.Select(pd => new RehireTransactionDetailResponse
-            {
-                Forfeiture = pd.Forfeiture,
-                Remark = pd.Remark,
-                ProfitYear = pd.ProfitYear,
-                HoursTransactionYear = payProfit.CurrentHoursYear,
-                ProfitCodeId = 0
+        {
+            Forfeiture = pd.Forfeiture,
+            Remark = pd.Remark,
+            ProfitYear = pd.ProfitYear,
+            HoursTransactionYear = payProfit.CurrentHoursYear,
+            ProfitCodeId = 0
         })
             .ToList();
 

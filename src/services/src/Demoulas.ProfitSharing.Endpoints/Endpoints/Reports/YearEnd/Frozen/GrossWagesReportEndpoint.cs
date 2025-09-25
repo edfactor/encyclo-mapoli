@@ -10,6 +10,7 @@ using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
+
 public sealed class GrossWagesReportEndpoint : EndpointWithCsvTotalsBase<GrossWagesReportRequest, GrossWagesReportResponse, GrossWagesReportDetail, GrossWagesReportEndpoint.GrossReportMapper>
 {
     private readonly IFrozenReportService _frozenReportService;
@@ -47,7 +48,7 @@ public sealed class GrossWagesReportEndpoint : EndpointWithCsvTotalsBase<GrossWa
     public override async Task<GrossWagesReportResponse> GetResponse(GrossWagesReportRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
-        
+
         try
         {
             this.RecordRequestMetrics(HttpContext, _logger, req);
@@ -87,7 +88,7 @@ public sealed class GrossWagesReportEndpoint : EndpointWithCsvTotalsBase<GrossWa
                 TotalLoans = 0,
                 TotalForfeitures = 0
             };
-            
+
             this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
             return emptyResult;
         }
