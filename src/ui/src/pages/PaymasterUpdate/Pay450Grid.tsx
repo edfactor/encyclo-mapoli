@@ -1,11 +1,12 @@
 import { Typography } from "@mui/material";
-import { useCallback, useMemo, useState, useEffect } from "react";
+import { useCallback, useMemo, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Path } from "react-router";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { DSMGrid, Pagination } from "smart-ui-library";
 import { GetPay450GridColumns } from "./Pay450GridColumns";
 import { YearsEndApi } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
+import { useGridPagination } from "../../hooks/useGridPagination";
 
 interface Pay450GridProps {
   initialSearchLoaded: boolean;
@@ -23,15 +24,31 @@ const Pay450Grid: React.FC<Pay450GridProps> = ({
   setPageNumberReset
 }) => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "name",
-    isSortDescending: false
-  });
-
   const { updateSummary } = useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearch, { isFetching }] = YearsEndApi.endpoints.getUpdateSummary.useLazyQuery();
+
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "name",
+    initialSortDescending: false,
+    onPaginationChange: useCallback(async (pageNum: number, pageSz: number, sortPrms: any) => {
+      if (initialSearchLoaded && hasToken) {
+        try {
+          await triggerSearch({
+            profitYear,
+            pagination: {
+              skip: pageNum * pageSz,
+              take: pageSz,
+              sortBy: sortPrms.sortBy,
+              isSortDescending: sortPrms.isSortDescending
+            }
+          });
+        } catch (error) {
+          console.error("API call failed:", error);
+        }
+      }
+    }, [initialSearchLoaded, hasToken, profitYear, triggerSearch])
+  });
 
   const onSearch = useCallback(async () => {
     try {
@@ -53,16 +70,14 @@ const Pay450Grid: React.FC<Pay450GridProps> = ({
     if (initialSearchLoaded && hasToken) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken]);
-
-  const sortEventHandler = (update: ISortParams) => setSortParams(update);
+  }, [initialSearchLoaded, onSearch, hasToken]);
 
   useEffect(() => {
     if (pageNumberReset) {
-      setPageNumber(0);
+      resetPagination();
       setPageNumberReset(false);
     }
-  }, [pageNumberReset, setPageNumberReset]);
+  }, [pageNumberReset, setPageNumberReset, resetPagination]);
 
   // Mock function to handle navigation (needed for GetPay450GridColumns)
   const handleNavigationForButton = useCallback((destination: string | Partial<Path>) => {
@@ -116,7 +131,7 @@ const Pay450Grid: React.FC<Pay450GridProps> = ({
           <DSMGrid
             preferenceKey={"ELIGIBLE_EMPLOYEES"}
             isLoading={isFetching}
-            handleSortChanged={sortEventHandler}
+            handleSortChanged={handleSortChange}
             providedOptions={{
               rowData: gridData,
               pinnedTopRowData: getSummaryRow(),
@@ -129,13 +144,12 @@ const Pay450Grid: React.FC<Pay450GridProps> = ({
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
-            setPageNumber(value - 1);
+            handlePaginationChange(value - 1, pageSize);
             setInitialSearchLoaded(true);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
-            setPageSize(value);
-            setPageNumber(0);
+            handlePaginationChange(0, value);
             setInitialSearchLoaded(true);
           }}
           recordCount={updateSummary.response.total}
