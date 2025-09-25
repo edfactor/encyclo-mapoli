@@ -156,12 +156,14 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
             label="Class Action"
           />
         </Grid>
-        <Grid size={{ xs: 6 }}>
+        <Grid size={{ xs: 12 }}>
           <Typography
             variant="body2"
             gutterBottom>
-            Forfeiture Amount
+            Forfeiture Amount (A negative value will be treated as an unforfeiture)
           </Typography>
+        </Grid>
+        <Grid size={{ xs: 2 }}>
           <TextField
             name="forfeitureAmount"
             value={formData.forfeitureAmount}

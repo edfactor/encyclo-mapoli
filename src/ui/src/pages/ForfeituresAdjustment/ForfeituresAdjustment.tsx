@@ -19,7 +19,6 @@ import { useGridPagination } from "../../hooks/useGridPagination";
 import { InquiryApi } from "../../reduxstore/api/InquiryApi";
 import { clearForfeitureAdjustmentData } from "../../reduxstore/slices/forfeituresAdjustmentSlice";
 import AddForfeitureModal from "./AddForfeitureModal";
-import AddUnforfeitModal from "./AddUnforfeitModal";
 import ForfeituresAdjustmentPanel from "./ForfeituresAdjustmentPanel";
 import ForfeituresAdjustmentSearchParameters from "./ForfeituresAdjustmentSearchParameters";
 import ForfeituresTransactionGrid from "./ForfeituresTransactionGrid";
@@ -27,7 +26,6 @@ import ForfeituresTransactionGrid from "./ForfeituresTransactionGrid";
 const ForfeituresAdjustment = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [isAddForfeitureModalOpen, setIsAddForfeitureModalOpen] = useState(false);
-  const [isAddUnforfeitModalOpen, setIsAddUnforfeitModalOpen] = useState(false);
   const [pageNumberReset, setPageNumberReset] = useState(false);
   const [transactionData, setTransactionData] = useState<any>(null);
   const { forfeitureAdjustmentData, forfeitureAdjustmentQueryParams } = useSelector(
@@ -36,7 +34,8 @@ const ForfeituresAdjustment = () => {
   const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch] = useLazyGetForfeitureAdjustmentsQuery();
   const [triggerMemberDetails] = useLazyGetProfitMasterInquiryMemberQuery();
-  const [triggerTransactionDetails, { isLoading: isLoadingTransactions }] = useLazyGetProfitMasterInquiryMemberDetailsQuery();
+  const [triggerTransactionDetails, { isLoading: isLoadingTransactions }] =
+    useLazyGetProfitMasterInquiryMemberDetailsQuery();
   const dispatch = useDispatch();
 
   const handleTransactionGridPaginationChange = (pageNumber: number, pageSize: number, sortParams: any) => {
@@ -64,14 +63,6 @@ const ForfeituresAdjustment = () => {
 
   const handleCloseAddForfeitureModal = () => {
     setIsAddForfeitureModalOpen(false);
-  };
-
-  const handleOpenAddUnforfeitModal = () => {
-    setIsAddUnforfeitModalOpen(true);
-  };
-
-  const handleCloseAddUnforfeitModal = () => {
-    setIsAddUnforfeitModalOpen(false);
   };
 
   const handleSaveForfeiture = (formData: { forfeitureAmount: number; classAction: boolean }) => {
@@ -116,13 +107,6 @@ const ForfeituresAdjustment = () => {
     }
   };
 
-  const handleSaveUnforfeit = (formData: { forfeitureAmount: number; classAction: boolean }) => {
-    // Use the same logic as forfeiture save since the API endpoint is the same
-    // The amount will already be negative from the modal
-    handleSaveForfeiture(formData);
-  };
-
-
   const fetchTransactionDetails = (pageNumber = 0, pageSize = 50, sortParams = null) => {
     if (forfeitureAdjustmentData) {
       const apiParams = {
@@ -142,7 +126,9 @@ const ForfeituresAdjustment = () => {
             return transaction.profitCodeId === 2;
           });
 
-          console.log(`Filtered ${filteredResults.length} forfeit transactions from ${response.results.length} total transactions`);
+          console.log(
+            `Filtered ${filteredResults.length} forfeit transactions from ${response.results.length} total transactions`
+          );
 
           setTransactionData({
             results: filteredResults,
@@ -217,8 +203,6 @@ const ForfeituresAdjustment = () => {
                 initialSearchLoaded={initialSearchLoaded}
                 setInitialSearchLoaded={setInitialSearchLoaded}
                 onAddForfeiture={handleOpenAddForfeitureModal}
-                onAddUnforfeit={handleOpenAddUnforfeitModal}
-                suggestedForfeitAmount={forfeitureAdjustmentData.suggestedForfeitAmount}
               />
             </Grid>
           )}
@@ -240,13 +224,6 @@ const ForfeituresAdjustment = () => {
           open={isAddForfeitureModalOpen}
           onClose={handleCloseAddForfeitureModal}
           onSave={handleSaveForfeiture}
-          suggestedForfeitResponse={forfeitureAdjustmentData}
-        />
-
-        <AddUnforfeitModal
-          open={isAddUnforfeitModalOpen}
-          onClose={handleCloseAddUnforfeitModal}
-          onSave={handleSaveUnforfeit}
           suggestedForfeitResponse={forfeitureAdjustmentData}
         />
       </Page>
