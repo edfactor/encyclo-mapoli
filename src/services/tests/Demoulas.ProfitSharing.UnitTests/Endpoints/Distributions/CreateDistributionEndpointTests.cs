@@ -9,6 +9,7 @@ using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
 using System.Net;
@@ -34,7 +35,7 @@ public class CreateDistributionEndpointTests : ApiTestBase<Api.Program>
             var demographic = await ctx.Demographics
                 .Where(d => d.BadgeNumber > 0) // Ensure we get a valid badge number
                 .FirstOrDefaultAsync();
-            
+
             if (demographic != null)
             {
                 badgeNumber = demographic.BadgeNumber;
@@ -59,7 +60,7 @@ public class CreateDistributionEndpointTests : ApiTestBase<Api.Program>
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
         var validBadgeNumber = await GetValidBadgeNumberAsync();
-        
+
         var request = new CreateDistributionRequest
         {
             BadgeNumber = validBadgeNumber,
@@ -104,7 +105,7 @@ public class CreateDistributionEndpointTests : ApiTestBase<Api.Program>
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
         var validBadgeNumber = await GetValidBadgeNumberAsync();
-        
+
         var request = new CreateDistributionRequest
         {
             BadgeNumber = validBadgeNumber,
@@ -137,7 +138,7 @@ public class CreateDistributionEndpointTests : ApiTestBase<Api.Program>
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
         var validBadgeNumber = await GetValidBadgeNumberAsync();
-        
+
         var request = new CreateDistributionRequest
         {
             BadgeNumber = validBadgeNumber,
@@ -190,7 +191,7 @@ public class CreateDistributionEndpointTests : ApiTestBase<Api.Program>
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
         var validBadgeNumber = await GetValidBadgeNumberAsync();
-        
+
         var request = new CreateDistributionRequest
         {
             BadgeNumber = validBadgeNumber,
@@ -229,7 +230,7 @@ public class CreateDistributionEndpointTests : ApiTestBase<Api.Program>
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
         var validBadgeNumber = await GetValidBadgeNumberAsync();
-        
+
         var request = new CreateDistributionRequest
         {
             BadgeNumber = validBadgeNumber,
@@ -269,7 +270,7 @@ public class CreateDistributionEndpointTests : ApiTestBase<Api.Program>
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
         var validBadgeNumber = await GetValidBadgeNumberAsync();
-        
+
         var request = new CreateDistributionRequest
         {
             BadgeNumber = validBadgeNumber,
@@ -304,7 +305,7 @@ public class CreateDistributionEndpointTests : ApiTestBase<Api.Program>
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
         var validBadgeNumber = await GetValidBadgeNumberAsync();
-        
+
         var request = new CreateDistributionRequest
         {
             BadgeNumber = validBadgeNumber,
@@ -376,13 +377,14 @@ public class CreateDistributionEndpointTests : ApiTestBase<Api.Program>
     {
         // Arrange
         var mockDistributionService = new Mock<IDistributionService>();
-        
+
         // Act & Assert
         // Verify the endpoint can be instantiated with its dependencies
-        var endpoint = new CreateDistributionEndpoint(mockDistributionService.Object);
+        var loggerMock = new Mock<ILogger<CreateDistributionEndpoint>>();
+        var endpoint = new CreateDistributionEndpoint(mockDistributionService.Object, loggerMock.Object);
         endpoint.ShouldNotBeNull();
         mockDistributionService.ShouldNotBeNull();
-        
+
         // Note: FastEndpoints configuration is typically verified through integration tests
         // since the Configure() method requires the FastEndpoints framework context
     }
@@ -392,7 +394,7 @@ public class CreateDistributionEndpointTests : ApiTestBase<Api.Program>
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
-        
+
         // Create a request that might cause service-level validation issues
         var request = new CreateDistributionRequest
         {
@@ -424,7 +426,7 @@ public class CreateDistributionEndpointTests : ApiTestBase<Api.Program>
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
-        
+
         // Create a request with some required fields missing or invalid
         var request = new CreateDistributionRequest
         {
@@ -456,7 +458,7 @@ public class CreateDistributionEndpointTests : ApiTestBase<Api.Program>
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
         var validBadgeNumber = await GetValidBadgeNumberAsync();
-        
+
         var request1 = new CreateDistributionRequest
         {
             BadgeNumber = validBadgeNumber,
@@ -496,7 +498,7 @@ public class CreateDistributionEndpointTests : ApiTestBase<Api.Program>
         // Assert
         responses.ShouldNotBeNull();
         responses.Length.ShouldBe(2);
-        
+
         foreach (var response in responses)
         {
             response.ShouldNotBeNull();

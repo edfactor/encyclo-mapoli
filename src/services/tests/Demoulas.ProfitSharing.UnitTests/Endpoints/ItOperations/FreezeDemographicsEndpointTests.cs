@@ -3,6 +3,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.ItOperations;
@@ -17,7 +18,8 @@ public class FreezeDemographicsEndpointTests
         _frozenServiceMock = new Mock<IFrozenService>();
         var appUserMock = new Mock<IAppUser>();
         appUserMock.Setup(u => u.UserName).Returns("TestUser");
-        _endpoint = new FreezeDemographicsEndpoint(_frozenServiceMock.Object, appUserMock.Object);
+        var loggerMock = new Mock<ILogger<FreezeDemographicsEndpoint>>();
+        _endpoint = new FreezeDemographicsEndpoint(_frozenServiceMock.Object, appUserMock.Object, loggerMock.Object);
     }
 
     [Fact]
