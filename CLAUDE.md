@@ -307,6 +307,7 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
 ## Testing & Quality
 
 - Backend: xUnit + Shouldly. Place tests under `src/services/tests/` mirroring namespace structure. Use deterministic data builders (Bogus) where needed
+- **Telemetry Testing**: All endpoint tests should verify telemetry integration (activity creation, metrics recording, business operations tracking). See `TELEMETRY_GUIDE.md` for testing patterns
 - Frontend: Add Playwright or component tests colocated (if pattern emerges) but keep end-to-end in `e2e/`
 - Security warnings/analyzers treated as errors; keep build green
 
@@ -330,6 +331,9 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
 ## When Extending
 
 - Add new endpoints through FastEndpoints with consistent foldering; register dependencies via DI in existing composition root
+- ALL new endpoints MUST implement telemetry using `TelemetryExtensions` patterns (see Telemetry & Observability section)
+- Include appropriate business metrics for the endpoint's domain (year-end, reports, lookups, etc.)
+- Declare all sensitive fields accessed in telemetry calls for security auditing
 - Share logic via interfaces in `Common` or specialized service projects; avoid cross-project circular refs
 - Update `COPILOT_INSTRUCTIONS.md` and this file if introducing a pervasive new pattern
 
@@ -434,6 +438,10 @@ dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
 - Introduce raw SQL without parameters
 - Duplicate mapping logic already covered by Mapperly profiles
 - Hardcode environment-specific connection strings or credentials
+- Create endpoints without comprehensive telemetry using `TelemetryExtensions` patterns
+- Use legacy telemetry patterns instead of `ExecuteWithTelemetry` or manual `TelemetryExtensions` methods
+- Access sensitive fields without declaring them in telemetry calls (security requirement)
+- Skip logger injection in endpoint constructors (required for telemetry correlation)
 - Create files unless they're absolutely necessary for achieving your goal
 - Proactively create documentation files (*.md) or README files unless explicitly requested
 
@@ -458,3 +466,12 @@ dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
   ```
 
   This attribute helps link tests to tickets and provides a terse description for test explorers and reviewers.
+
+## Documentation References
+
+**Core Telemetry Documentation**:
+- `TELEMETRY_GUIDE.md` - Comprehensive 75+ page reference covering developers, QA, and DevOps with architecture, implementation patterns, metrics reference, security guidelines, configuration, and troubleshooting
+- `TELEMETRY_QUICK_REFERENCE.md` - Developer cheat sheet with 3-step implementation process, copy-paste examples, business metrics patterns, and troubleshooting checklist
+- `TELEMETRY_DEVOPS_GUIDE.md` - Production operations guide with deployment checklist, monitoring setup (Prometheus/Grafana), security configuration, alert rules, and disaster recovery procedures
+
+These documents contain essential patterns and examples for implementing telemetry correctly across all endpoint types. Reference them when creating new endpoints or troubleshooting telemetry issues.
