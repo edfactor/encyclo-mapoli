@@ -21,6 +21,14 @@ public static class EndpointTelemetry
     public static Counter<long> EndpointErrorsTotal { get; private set; } = null!;
     public static Histogram<long> ResponseSizeBytes { get; private set; } = null!;
 
+    // Additional comprehensive metrics for endpoint monitoring
+    public static Histogram<long> RequestSizeBytes { get; private set; } = null!;
+    public static Histogram<double> EndpointDurationMs { get; private set; } = null!;
+    public static Counter<long> UserActivityTotal { get; private set; } = null!;
+    public static Counter<long> BusinessOperationsTotal { get; private set; } = null!;
+    public static Histogram<long> RecordCountsProcessed { get; private set; } = null!;
+    public static Counter<long> ValidationFailuresTotal { get; private set; } = null!;
+
     private static bool _initialized;
     private static readonly object _initLock = new();
 
@@ -29,11 +37,11 @@ public static class EndpointTelemetry
     /// </summary>
     public static void Initialize()
     {
-        if (_initialized) return;
+        if (_initialized) { return; }
 
         lock (_initLock)
         {
-            if (_initialized) return;
+            if (_initialized) { return; }
 
             SensitiveFieldAccessTotal = Meter.CreateCounter<long>(
                 "ps_sensitive_field_access_total",
@@ -50,6 +58,31 @@ public static class EndpointTelemetry
             ResponseSizeBytes = Meter.CreateHistogram<long>(
                 "ps_response_size_bytes",
                 "Size of HTTP responses in bytes");
+
+            // Additional comprehensive metrics for endpoint monitoring
+            RequestSizeBytes = Meter.CreateHistogram<long>(
+                "ps_request_size_bytes",
+                "Size of HTTP requests in bytes");
+
+            EndpointDurationMs = Meter.CreateHistogram<double>(
+                "ps_endpoint_duration_ms",
+                "Endpoint execution duration in milliseconds");
+
+            UserActivityTotal = Meter.CreateCounter<long>(
+                "ps_user_activity_total",
+                "User activity count by role and endpoint");
+
+            BusinessOperationsTotal = Meter.CreateCounter<long>(
+                "ps_business_operations_total",
+                "Business operations count by type");
+
+            RecordCountsProcessed = Meter.CreateHistogram<long>(
+                "ps_record_counts",
+                "Number of records returned or processed");
+
+            ValidationFailuresTotal = Meter.CreateCounter<long>(
+                "ps_validation_failures_total",
+                "Request validation failures by type");
 
             _initialized = true;
         }
