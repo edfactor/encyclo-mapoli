@@ -290,7 +290,8 @@ export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => 
     sortable = true,
     resizable = true,
     valueFormatter = (params) => numberToCurrency(params.value),
-    valueGetter
+    valueGetter,
+    cellStyle
   } = options;
 
   const column: ColDef = {
@@ -314,6 +315,11 @@ export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => 
 
   if (valueGetter) {
     column.valueGetter = valueGetter;
+  }
+
+  if (cellStyle) {
+    // Ensure cellStyle is a plain object or function returning a plain object with string keys/values
+    column.cellStyle = cellStyle as any;
   }
 
   return column;
