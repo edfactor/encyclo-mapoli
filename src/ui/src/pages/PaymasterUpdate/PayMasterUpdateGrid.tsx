@@ -1,14 +1,14 @@
 import { Typography } from "@mui/material";
-import { useCallback, useMemo, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { Path } from "react-router";
-import { DSMGrid, Pagination } from "smart-ui-library";
-import { GetPay450GridColumns } from "./Pay450GridColumns";
 import { YearsEndApi } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
+import { DSMGrid, Pagination } from "smart-ui-library";
 import { useGridPagination } from "../../hooks/useGridPagination";
+import { GetPayMasterUpdateGridColumns } from "./PayMasterUpdateGridColumns";
 
-interface Pay450GridProps {
+interface PayMasterUpdateGridProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
   profitYear: number;
@@ -16,7 +16,7 @@ interface Pay450GridProps {
   setPageNumberReset: (reset: boolean) => void;
 }
 
-const Pay450Grid: React.FC<Pay450GridProps> = ({
+const PayMasterUpdateGrid: React.FC<PayMasterUpdateGridProps> = ({
   initialSearchLoaded,
   setInitialSearchLoaded,
   profitYear,
@@ -27,28 +27,32 @@ const Pay450Grid: React.FC<Pay450GridProps> = ({
   const { updateSummary } = useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearch, { isFetching }] = YearsEndApi.endpoints.getUpdateSummary.useLazyQuery();
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } = useGridPagination({
-    initialPageSize: 25,
-    initialSortBy: "name",
-    initialSortDescending: false,
-    onPaginationChange: useCallback(async (pageNum: number, pageSz: number, sortPrms: any) => {
-      if (initialSearchLoaded && hasToken) {
-        try {
-          await triggerSearch({
-            profitYear,
-            pagination: {
-              skip: pageNum * pageSz,
-              take: pageSz,
-              sortBy: sortPrms.sortBy,
-              isSortDescending: sortPrms.isSortDescending
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
+    useGridPagination({
+      initialPageSize: 25,
+      initialSortBy: "name",
+      initialSortDescending: false,
+      onPaginationChange: useCallback(
+        async (pageNum: number, pageSz: number, sortPrms: any) => {
+          if (initialSearchLoaded && hasToken) {
+            try {
+              await triggerSearch({
+                profitYear,
+                pagination: {
+                  skip: pageNum * pageSz,
+                  take: pageSz,
+                  sortBy: sortPrms.sortBy,
+                  isSortDescending: sortPrms.isSortDescending
+                }
+              });
+            } catch (error) {
+              console.error("API call failed:", error);
             }
-          });
-        } catch (error) {
-          console.error("API call failed:", error);
-        }
-      }
-    }, [initialSearchLoaded, hasToken, profitYear, triggerSearch])
-  });
+          }
+        },
+        [initialSearchLoaded, hasToken, profitYear, triggerSearch]
+      )
+    });
 
   const onSearch = useCallback(async () => {
     try {
@@ -79,12 +83,15 @@ const Pay450Grid: React.FC<Pay450GridProps> = ({
     }
   }, [pageNumberReset, setPageNumberReset, resetPagination]);
 
-  // Mock function to handle navigation (needed for GetPay450GridColumns)
+  // Mock function to handle navigation (needed for GetPayMasterUpdateGridColumns)
   const handleNavigationForButton = useCallback((destination: string | Partial<Path>) => {
     console.log("Navigation to", destination);
   }, []);
 
-  const columnDefs = useMemo(() => GetPay450GridColumns(handleNavigationForButton), [handleNavigationForButton]);
+  const columnDefs = useMemo(
+    () => GetPayMasterUpdateGridColumns(handleNavigationForButton),
+    [handleNavigationForButton]
+  );
 
   const getSummaryRow = useCallback(() => {
     if (!updateSummary) return [];
@@ -159,4 +166,4 @@ const Pay450Grid: React.FC<Pay450GridProps> = ({
   );
 };
 
-export default Pay450Grid;
+export default PayMasterUpdateGrid;

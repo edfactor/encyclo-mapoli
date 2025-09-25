@@ -6,7 +6,7 @@ import {
   createStoreColumn
 } from "../../utils/gridColumnFactory";
 
-export const GetPay450GridColumns = (navFunction: (badgeNumber: string) => void): (ColDef | ColGroupDef)[] => {
+export const GetPayMasterUpdateGridColumns = (navFunction: (badgeNumber: string) => void): (ColDef | ColGroupDef)[] => {
   return [
     createBadgeColumn({
       navigateFunction: navFunction
