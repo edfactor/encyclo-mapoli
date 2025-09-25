@@ -1,5 +1,5 @@
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { useEffect } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { ApiMessageAlert, DSMAccordion, Page } from "smart-ui-library";
 
 import { CircularProgress, Divider, Grid } from "@mui/material";
@@ -20,11 +20,18 @@ export interface TerminationSearchRequest extends StartAndEndDateRequest {
 const Termination = () => {
   const [fetchAccountingRange, { data: fiscalData, isLoading: isRangeLoading }] = useLazyGetAccountingRangeToCurrent(6);
   const { state, actions } = useTerminationState();
+  
+  // Function to scroll to top - only used for error cases
+  const scrollToTop = useCallback(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   // Use the navigation guard hook
   useUnsavedChangesGuard(state.hasUnsavedChanges);
 
+  // Modify renderActionNode to NOT automatically scroll to top
   const renderActionNode = () => {
+
     return <StatusDropdownActionNode onStatusChange={actions.handleStatusChange} />;
   };
 
@@ -34,10 +41,30 @@ const Termination = () => {
 
   const isCalendarDataLoaded = !!fiscalData?.fiscalBeginDate && !!fiscalData?.fiscalEndDate;
 
+  // Add listener for error messages to scroll to top
+  useEffect(() => {
+    const handleMessageEvent = (event: CustomEvent) => {
+      // Check if the message is an error related to Termination
+      if (
+        event.detail?.key === 'TerminationSave' &&
+        event.detail?.message?.type === 'error'
+      ) {
+        scrollToTop();
+      }
+    };
+
+    window.addEventListener('dsmMessage' as any, handleMessageEvent);
+
+    return () => {
+      window.removeEventListener('dsmMessage' as any, handleMessageEvent);
+    };
+  }, [scrollToTop]);
+
   return (
     <Page
       label={CAPTIONS.TERMINATIONS}
       actionNode={renderActionNode()}>
+
       <div>
         <ApiMessageAlert commonKey="TerminationSave" />
         <Grid
@@ -56,12 +83,12 @@ const Termination = () => {
             </Grid>
           ) : (
             <>
-              <Grid width="100%">
+              <Grid width={"100%"}>
                 <DSMAccordion title="Filter">
                   <TerminationSearchFilter
-                    setInitialSearchLoaded={actions.setInitialSearchLoaded}
                     fiscalData={fiscalData}
                     onSearch={actions.handleSearch}
+                    setInitialSearchLoaded={actions.setInitialSearchLoaded}
                     hasUnsavedChanges={state.hasUnsavedChanges}
                   />
                 </DSMAccordion>
@@ -77,6 +104,7 @@ const Termination = () => {
                   fiscalData={fiscalData}
                   shouldArchive={state.shouldArchive}
                   onArchiveHandled={actions.handleArchiveHandled}
+                  onErrorOccurred={scrollToTop} // Pass down the error handler
                 />
               </Grid>
             </>
