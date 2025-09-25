@@ -1,21 +1,26 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
 
 public sealed class ProfitControlSheetEndpoint: ProfitSharingEndpoint<ProfitYearRequest, ProfitControlSheetResponse>
 {
     private readonly IFrozenReportService _frozenReportService;
+    private readonly ILogger<ProfitControlSheetEndpoint> _logger;
 
-    public ProfitControlSheetEndpoint(IFrozenReportService frozenReportService) : base(Navigation.Constants.ProfControlSheet)
+    public ProfitControlSheetEndpoint(IFrozenReportService frozenReportService, ILogger<ProfitControlSheetEndpoint> logger) : base(Navigation.Constants.ProfControlSheet)
     {
         _frozenReportService = frozenReportService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -35,8 +40,37 @@ public sealed class ProfitControlSheetEndpoint: ProfitSharingEndpoint<ProfitYear
         Group<YearEndGroup>();
     }
 
-    public override Task<ProfitControlSheetResponse> ExecuteAsync(ProfitYearRequest req, CancellationToken ct)
+    public override async Task<ProfitControlSheetResponse> ExecuteAsync(ProfitYearRequest req, CancellationToken ct)
     {
-        return _frozenReportService.GetProfitControlSheet(req, ct);
+        using var activity = this.StartEndpointActivity(HttpContext);
+        this.RecordRequestMetrics(HttpContext, _logger, req);
+
+        try
+        {
+            var result = await _frozenReportService.GetProfitControlSheet(req, ct);
+
+            // Record business operation metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1, 
+                new("operation", "profit_control_sheet"),
+                new("profit_year", req.ProfitYear.ToString()));
+
+            _logger.LogInformation("Year-end post-frozen profit control sheet generated (correlation: {CorrelationId})",
+                HttpContext.TraceIdentifier);
+
+            if (result != null)
+            {
+                this.RecordResponseMetrics(HttpContext, _logger, result);
+                return result;
+            }
+
+            var emptyResult = new ProfitControlSheetResponse();
+            this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
+            return emptyResult;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 }

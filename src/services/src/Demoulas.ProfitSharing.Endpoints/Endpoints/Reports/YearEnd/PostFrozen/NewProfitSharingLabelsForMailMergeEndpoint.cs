@@ -2,22 +2,27 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
 public sealed class NewProfitSharingLabelsForMailMergeEndpoint : ProfitSharingEndpoint<ProfitYearRequest, PaginatedResponseDto<NewProfitSharingLabelResponse>>
 {
     private readonly IPostFrozenService _postFrozenService;
+    private readonly ILogger<NewProfitSharingLabelsForMailMergeEndpoint> _logger;
 
-    public NewProfitSharingLabelsForMailMergeEndpoint(IPostFrozenService postFrozenService)
+    public NewProfitSharingLabelsForMailMergeEndpoint(IPostFrozenService postFrozenService, ILogger<NewProfitSharingLabelsForMailMergeEndpoint> logger)
         : base(Navigation.Constants.QNEWPROFLBL)
     {
         _postFrozenService = postFrozenService;
+        _logger = logger;
     }
     public override void Configure()
     {
@@ -38,24 +43,54 @@ public sealed class NewProfitSharingLabelsForMailMergeEndpoint : ProfitSharingEn
 
     public override async Task HandleAsync(ProfitYearRequest req, CancellationToken ct)
     {
-        var response = await _postFrozenService.GetNewProfitSharingLabelsForMailMerge(req, ct);
-        var memoryStream = new MemoryStream();
-        await using var writer = new StreamWriter(memoryStream);
-        foreach (var line in response)
+        using var activity = this.StartEndpointActivity(HttpContext);
+        this.RecordRequestMetrics(HttpContext, _logger, req);
+
+        try
         {
-            await writer.WriteLineAsync(line);
+            var response = await _postFrozenService.GetNewProfitSharingLabelsForMailMerge(req, ct);
+
+            // Record business operation metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1, 
+                new("operation", "new_profit_sharing_labels_mail_merge"),
+                new("profit_year", req.ProfitYear.ToString()));
+
+            var lineCount = response?.Count() ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(lineCount,
+                new("record_type", "post-frozen-mail-merge-labels"),
+                new("endpoint", "NewProfitSharingLabelsForMailMergeEndpoint"));
+
+            var memoryStream = new MemoryStream();
+            await using var writer = new StreamWriter(memoryStream);
+            foreach (var line in response ?? Enumerable.Empty<string>())
+            {
+                await writer.WriteLineAsync(line);
+            }
+            await writer.FlushAsync(ct);
+
+            memoryStream.Position = 0;
+
+            // Record file size for telemetry
+            EndpointTelemetry.RecordCountsProcessed.Record(memoryStream.Length,
+                new("operation", "new_profit_sharing_labels_mail_merge"),
+                new("metric_type", "file_size_bytes"));
+
+            _logger.LogInformation("Year-end post-frozen new profit sharing labels for mail merge generated, {LineCount} lines, {FileSize} bytes (correlation: {CorrelationId})",
+                lineCount, memoryStream.Length, HttpContext.TraceIdentifier);
+
+            System.Net.Mime.ContentDisposition cd = new System.Net.Mime.ContentDisposition
+            {
+                FileName = "NEWPROFLBL.txt",
+                Inline = false
+            };
+            HttpContext.Response.Headers.Append("Content-Disposition", cd.ToString());
+
+            await Send.StreamAsync(memoryStream, "NEWPROFLBL.txt", contentType: "text/plain", cancellation: ct);
         }
-        await writer.FlushAsync(ct);
-
-        memoryStream.Position = 0;
-
-        System.Net.Mime.ContentDisposition cd = new System.Net.Mime.ContentDisposition
+        catch (Exception ex)
         {
-            FileName = "NEWPROFLBL.txt",
-            Inline = false
-        };
-        HttpContext.Response.Headers.Append("Content-Disposition", cd.ToString());
-
-        await Send.StreamAsync(memoryStream, "NEWPROFLBL.txt", contentType: "text/plain", cancellation: ct);
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 }
