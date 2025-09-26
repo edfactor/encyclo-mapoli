@@ -43,19 +43,18 @@ public class NavigationService : INavigationService
             return query.ToListAsync(cancellationToken);
         });
 
-        // Check if the current user has any read-only roles by querying the database
+        // Check if the current user has any read-only roles based on database configuration
         var userRoles = _appUser.GetUserAllRoles()?.Where(r => !string.IsNullOrWhiteSpace(r)).ToList() ?? new List<string>();
-        var userHasReadOnlyRole = false;
-
-        if (userRoles.Any())
+        var userHasReadOnlyRole = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
-            userHasReadOnlyRole = await _dataContextFactory.UseReadOnlyContext(async context =>
-            {
-                return await context.NavigationRoles
-                    .Where(nr => userRoles.Contains(nr.Name) && nr.IsReadOnly)
-                    .AnyAsync(cancellationToken);
-            });
-        }
+            var readOnlyRoleNames = await context.NavigationRoles
+                .Where(nr => nr.IsReadOnly)
+                .Select(nr => nr.Name.ToUpper())
+                .ToListAsync(cancellationToken);
+
+            return userRoles.Any(userRole => 
+                readOnlyRoleNames.Contains(userRole.ToUpper()));
+        });
 
         var lookup = flatList.ToLookup(x => x.ParentId);
         // helper to get raw required roles (uppercase) from entity
