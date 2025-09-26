@@ -43,6 +43,19 @@ public class NavigationService : INavigationService
             return query.ToListAsync(cancellationToken);
         });
 
+        // Check if the current user has any read-only roles based on database configuration
+        var userRoles = _appUser.GetUserAllRoles()?.Where(r => !string.IsNullOrWhiteSpace(r)).ToList() ?? new List<string>();
+        var userHasReadOnlyRole = await _dataContextFactory.UseReadOnlyContext(async context =>
+        {
+            var readOnlyRoleNames = await context.NavigationRoles
+                .Where(nr => nr.IsReadOnly)
+                .Select(nr => nr.Name.ToUpper())
+                .ToListAsync(cancellationToken);
+
+            return userRoles.Any(userRole =>
+                readOnlyRoleNames.Contains(userRole.ToUpper()));
+        });
+
         var lookup = flatList.ToLookup(x => x.ParentId);
         // helper to get raw required roles (uppercase) from entity
         static List<string> EntityRolesToUpper(System.Collections.Generic.ICollection<Data.Entities.Navigations.NavigationRole>? roles)
@@ -118,7 +131,8 @@ public class NavigationService : INavigationService
                             Items = null,
                             PrerequisiteNavigations = new List<NavigationDto>(),
                             // Prefer the DB-backed flag when present; otherwise fall back to Url heuristic.
-                            IsNavigable = p.IsNavigable.HasValue ? p.IsNavigable.Value : !string.IsNullOrWhiteSpace(p.Url)
+                            IsNavigable = p.IsNavigable.HasValue ? p.IsNavigable.Value : !string.IsNullOrWhiteSpace(p.Url),
+                            IsReadOnly = userHasReadOnlyRole
                         })
                         .ToList() ?? new List<NavigationDto>();
 
@@ -140,7 +154,8 @@ public class NavigationService : INavigationService
                         PrerequisiteNavigations = prereqs,
                         // Prefer the DB-backed IsNavigable when present; otherwise fall back to Url-derived logic
                         // Prefer the DB-backed flag when present; otherwise fall back to Url heuristic.
-                        IsNavigable = x.IsNavigable.HasValue ? x.IsNavigable.Value : !string.IsNullOrWhiteSpace(x.Url)
+                        IsNavigable = x.IsNavigable.HasValue ? x.IsNavigable.Value : !string.IsNullOrWhiteSpace(x.Url),
+                        IsReadOnly = userHasReadOnlyRole
                     };
                 })
                 .ToList();
