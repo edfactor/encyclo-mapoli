@@ -38,12 +38,14 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
 
         // Ensure Add/Remove operations mutate the backing list
         mockSet.Setup(s => s.Add(It.IsAny<T>()))
-            .Callback<T>(e => {
+            .Callback<T>(e =>
+            {
                 SetIdIfNeeded(e, nextId++);
                 data.Add(e);
             });
         mockSet.Setup(s => s.AddRange(It.IsAny<IEnumerable<T>>()))
-            .Callback<IEnumerable<T>>(range => {
+            .Callback<IEnumerable<T>>(range =>
+            {
                 foreach (var e in range)
                 {
                     SetIdIfNeeded(e, nextId++);
@@ -63,7 +65,8 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
 
         // Async adds used by service (e.g., DemographicSyncAudit.AddAsync)
         mockSet.Setup(s => s.AddAsync(It.IsAny<T>(), It.IsAny<CancellationToken>()))
-            .Callback<T, CancellationToken>((e, _) => {
+            .Callback<T, CancellationToken>((e, _) =>
+            {
                 SetIdIfNeeded(e, nextId++);
                 data.Add(e);
             })
@@ -168,8 +171,13 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.NavigationStatuses).Returns(mockNavigationStatus.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.NavigationStatuses).Returns(mockNavigationStatus.Object);
 
+        List<NavigationRole>? navigationRoles = new NavigationFaker().GetAllNavigationRoles();
+        Mock<DbSet<NavigationRole>> mockNavigationRoles = navigationRoles.BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.NavigationRoles).Returns(mockNavigationRoles.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.NavigationRoles).Returns(mockNavigationRoles.Object);
 
-       
+
+
 
 
         List<PayClassification>? payClassifications = new PayClassificationFaker().Generate(500);
@@ -225,7 +233,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
             demographics.Find(d => d.Id == payProfit.DemographicId)?.PayProfits.Add(payProfit);
         }
 
-        List<ParticipantTotal> participantTotals = new ParticipantTotalFaker(demographics,beneficiaries).Generate(demographics.Count + beneficiaries.Count);
+        List<ParticipantTotal> participantTotals = new ParticipantTotalFaker(demographics, beneficiaries).Generate(demographics.Count + beneficiaries.Count);
         Constants.FakeParticipantTotals = participantTotals.BuildMockDbSet();
 
         List<ParticipantTotalVestingBalance> participantTotalVestingBalances = new ParticipantTotalVestingBalanceFaker(demographics, beneficiaries).Generate(demographics.Count + beneficiaries.Count);
@@ -236,7 +244,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
 
         var profitShareTotal = new ProfitShareTotalFaker().Generate();
         Constants.ProfitShareTotals = (new List<ProfitShareTotal>() { profitShareTotal }).BuildMockDbSet();
-       
+
 
 
         List<FrozenState>? frozenStates = new FrozenStateFaker().Generate(1);
@@ -245,7 +253,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         Mock<DbSet<Beneficiary>> mockBeneficiaries = beneficiaries.BuildMockDbSet();
         Mock<DbSet<BeneficiaryContact>> mockBeneficiaryContacts =
             beneficiaries.Where(b => b.Contact != null).Select(b => b.Contact!).ToList().BuildMockDbSet();
-        
+
         _profitSharingDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);
         _profitSharingDbContext.Setup(m => m.BeneficiaryContacts).Returns(mockBeneficiaryContacts.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);

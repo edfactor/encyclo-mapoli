@@ -11,6 +11,7 @@ import { MasterInquiryRequest, GroupedProfitSummaryDto, MasterInquiryResponseDto
 import { NestedGrid } from "components/DSMNestedGrid/NestedGrid";
 import { INestedGridColumn, INestedGridRowData } from "components/DSMNestedGrid/NestedGridRow";
 import { numberToCurrency, DSMGrid } from "smart-ui-library";
+import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
 
 const MasterInquiryGroupingGrid = ({ searchParams }: { searchParams: MasterInquiryRequest }) => {
   const [getProfitMasterInquiryGrouping, { isLoading: isGroupingLoading }] =
@@ -19,6 +20,13 @@ const MasterInquiryGroupingGrid = ({ searchParams }: { searchParams: MasterInqui
     useLazyGetProfitMasterInquiryFilteredDetailsQuery();
   const [expandedRowIds, setExpandedRowIds] = useState<Set<string>>(new Set());
   const [expandedRowDataMap, setExpandedRowDataMap] = useState<Record<string, MasterInquiryResponseDto[]>>({});
+  
+  // Use dynamic grid height for detail grids with smaller percentage
+  const detailGridMaxHeight = useDynamicGridHeight({
+    heightPercentage: 0.25, // 25% for detail grids
+    minHeight: 200,
+    maxHeight: 400
+  });
 
   const searchParamsForQuery = useMemo(
     () => ({
@@ -199,7 +207,7 @@ const MasterInquiryGroupingGrid = ({ searchParams }: { searchParams: MasterInqui
             preferenceKey={`master-inquiry-detail-${row.id}`}
             isLoading={isFetchingFilteredDetails && !expandedRowDataMap[rowId]}
             showColumnControl={false}
-            maxHeight={250}
+            maxHeight={detailGridMaxHeight}
             providedOptions={{
               rowData: expandedRowDataMap[rowId] || [],
               columnDefs: detailColumns,

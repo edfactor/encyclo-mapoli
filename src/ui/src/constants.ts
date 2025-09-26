@@ -83,6 +83,7 @@ export const ROUTES = {
   PROFALL: "profall",
   DEMO_FREEZE: "demographic-freeze",
   DEV_DEBUG: "dev-debug",
+  DOCUMENTATION: "documentation",
   PROFIT_SHARE_EDIT: "profit-share-edit",
   SAVE_PROF_PAYMSTR: "save-prof-paymstr"
 } as const;

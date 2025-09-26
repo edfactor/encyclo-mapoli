@@ -12,11 +12,8 @@ import {
 } from "utils/gridColumnFactory";
 import { HeaderComponent } from "./UnForfeitHeaderComponent";
 
-function isTransactionEditable(params, profitYear: number): boolean {
-  if (profitYear && params.data.profitYear !== profitYear) {
-    return false;
-  }
-  return params.data.isDetail && params.data.suggestedUnforfeiture != null;
+function isTransactionEditable(params): boolean {
+  return params.data.suggestedUnforfeiture != null;
 }
 
 export const GetProfitDetailColumns = (
@@ -61,7 +58,7 @@ export const GetProfitDetailColumns = (
       pinned: "right",
       resizable: true,
       sortable: false,
-      editable: (params: EditableCallbackParams) => isTransactionEditable(params, selectedProfitYear),
+      editable: (params: EditableCallbackParams) => isTransactionEditable(params),
       cellEditor: SuggestedForfeitEditor,
       cellRenderer: (params: ICellRendererParams) => {
         return SuggestedForfeitCellRenderer({ ...params, selectedProfitYear }, false, true);
@@ -95,7 +92,7 @@ export const GetProfitDetailColumns = (
         onSave
       },
       cellRenderer: (params: UnForfeitsSaveButtonCellParams) => {
-        if (!isTransactionEditable(params, selectedProfitYear)) {
+        if (!isTransactionEditable(params)) {
           return "";
         }
 

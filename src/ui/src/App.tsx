@@ -1,22 +1,22 @@
+import { Description, Settings } from "@mui/icons-material";
 import { createTheme, ThemeProvider } from "@mui/material";
 import { OktaAuth } from "@okta/okta-auth-js";
 import AppErrorBoundary from "components/ErrorBoundary";
 import PSLayout from "components/Layout/PSLayout";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useLazyGetMissivesQuery } from "reduxstore/api/LookupsApi";
 import { colors, themeOptions, ToastServiceProvider } from "smart-ui-library";
 import "smart-ui-library/dist/smart-ui-library.css";
 import "../agGridConfig";
 import Router from "./components/router/Router";
 import oktaConfig from "./Okta/config";
+import { useLazyGetHealthQuery } from "./reduxstore/api/AppSupportApi";
 import { useGetAppVersionQuery } from "./reduxstore/api/CommonApi";
 import { clearUserData, setUserGroups, setUsername } from "./reduxstore/slices/securitySlice"; // Adjust path as needed
 import { RootState } from "./reduxstore/store";
-import EnvironmentUtils from "./utils/environmentUtils";
-import { Settings } from "@mui/icons-material";
-import { useLazyGetMissivesQuery } from "reduxstore/api/LookupsApi";
-import { useLazyGetHealthQuery } from "./reduxstore/api/AppSupportApi";
 import { getHealthStatusDescription } from "./utils/appSupportUtil";
+import EnvironmentUtils from "./utils/environmentUtils";
 
 // Types
 interface BuildInfo {
@@ -169,6 +169,13 @@ const App = () => {
             icon: <Settings />,
             onClick: () => {
               window.location.href = "/dev-debug";
+            }
+          },
+          {
+            title: "Documentation",
+            icon: <Description />,
+            onClick: () => {
+              window.location.href = "/documentation";
             }
           }
         ]}
