@@ -113,7 +113,12 @@ const RouterSubAssembly: React.FC = () => {
       // Remove the impersonationRole param from the URL so it isn't reapplied on refresh
       params.delete("impersonationRole");
       const newSearch = params.toString();
-      navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ""}`, { replace: true });
+
+      // Validate pathname to prevent open redirect attacks
+      const isValidPath = location.pathname.startsWith("/") && !location.pathname.includes("://");
+      const safePath = isValidPath ? location.pathname : "/";
+
+      navigate(`${safePath}${newSearch ? `?${newSearch}` : ""}`, { replace: true });
     }
   }, [location.search, hasImpersonationRole, impersonating, dispatch, navigate, location.pathname]);
 

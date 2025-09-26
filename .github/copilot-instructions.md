@@ -6,6 +6,7 @@ Concise, project-specific guidance for AI coding agents working in this reposito
 - Monorepo with two primary roots:
   - `src/services/` (.NET 9) multi-project solution `Demoulas.ProfitSharing.slnx` (FastEndpoints, EF Core 9 + Oracle, Aspire, Serilog, Feature Flags, RabbitMQ, Mapperly, Shouldly).
     - Note: this solution is hosted using .NET Aspire (see the Aspire host `Demoulas.ProfitSharing.AppHost`). The Aspire host provides lifecycle and configuration patterns that should be followed (do not create ad-hoc hosts). Aspire also provides first-class support for built-in database retry/resilience which should be used in preference to rolling your own retry logic at ad-hoc call sites.
+    - **To start the entire application (API + UI), run `aspire run` from the project root directory.**
       - Aspire docs: https://github.com/dotnet/docs-aspire/blob/main/docs/cli/overview.md
       - Aspire repo: https://github.com/dotnet/docs-aspire
   - `src/ui/` (Vite + React + TypeScript + Tailwind + Redux Toolkit + internal `smart-ui-library`).
@@ -608,12 +609,12 @@ Next steps & references
 
 ## Quick Commands (PowerShell)
 ```pwsh
+# Start the entire application (API + UI) - RUN FROM PROJECT ROOT
+aspire run
 # Build services
 cd src/services; dotnet build Demoulas.ProfitSharing.slnx
 # Run tests (ONLY the consolidated UnitTests project; do not run entire solution test graph)
 dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitSharing.UnitTests.csproj --no-build
-# Start UI
-cd src/ui; npm run dev
 ```
 
 ## Do NOT

@@ -1,7 +1,8 @@
-using Demoulas.Common.Contracts.Contracts.Request;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -258,18 +259,23 @@ FROM FILTERED_DEMOGRAPHIC p1
         }
     }
 
-    public async Task<DistributionsAndForfeitureTotalsResponse> GetDistributionsAndForfeitureAsync(
+    public async Task<Result<DistributionsAndForfeitureTotalsResponse>> GetDistributionsAndForfeitureAsync(
         DistributionsAndForfeituresRequest req,
         CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request BEGIN DISTRIBUTIONS AND FORFEITURES"))
         {
-            var results = _dataContextFactory.UseReadOnlyContext(async ctx =>
+            var results = await _dataContextFactory.UseReadOnlyContext<Result<DistributionsAndForfeitureTotalsResponse>>(async ctx =>
             {
-                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                if (!await ctx.PayProfits.AnyAsync(cancellationToken))
+                {
+                    return Result<DistributionsAndForfeitureTotalsResponse>.Failure(Error.NoPayProfitsDataAvailable);
+                }
+
                 // Always use live/now data
                 // This assumes all the payprofits for lastest year are available 
-                var latestYear = ctx.PayProfits.Max(p => p.ProfitYear);
+                var latestYear = await ctx.PayProfits.MaxAsync(p => p.ProfitYear, cancellationToken);
+                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
                 var nameAndDobQuery = demographics
                     .Include(d => d.PayProfits.Where(p => p.ProfitYear == latestYear))
                     .Select(x => new
@@ -280,7 +286,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                         x.BadgeNumber,
                         x.PayFrequencyId,
                         PsnSuffix = (short)0,
-                        EnrollmentId =  x.PayProfits
+                        EnrollmentId = x.PayProfits
                             .Where(p => p.ProfitYear == latestYear)
                             .Select(p => p.EnrollmentId)
                             .FirstOrDefault()
@@ -405,7 +411,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                 });
 
 
-                return new DistributionsAndForfeitureTotalsResponse()
+                var response = new DistributionsAndForfeitureTotalsResponse()
                 {
                     ReportName = "Distributions and Forfeitures",
                     ReportDate = DateTimeOffset.UtcNow,
@@ -422,9 +428,11 @@ FROM FILTERED_DEMOGRAPHIC p1
                         Total = paginated.Total
                     }
                 };
+
+                return Result<DistributionsAndForfeitureTotalsResponse>.Success(response);
             });
 
-            return await results;
+            return results;
         }
     }
 }

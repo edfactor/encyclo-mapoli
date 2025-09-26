@@ -72,16 +72,23 @@ public class ReportRunnerService : IReportRunnerService
             }),
             ["distributionsAndForfeiture"] = async ct => await Handle("distributionsAndForfeiture", ct, async () =>
             {
-                var r = await _cleanupReportService.GetDistributionsAndForfeitureAsync(new DistributionsAndForfeituresRequest
+                var result = await _cleanupReportService.GetDistributionsAndForfeitureAsync(new DistributionsAndForfeituresRequest
                 {
                     StartDate = new DateOnly(wallClockYear, 1, 1),
                     EndDate = new DateOnly(wallClockYear, 12, 31)
                 }, ct);
+
+                if (result.IsError)
+                {
+                    return (0, 0); // Return empty counts when validation fails
+                }
+
+                var r = result.Value!;
                 return (r.Response.Total, r.Response.Results.Count());
             }),
             ["duplicateSsns"] = async ct => await Handle("duplicateSsns", ct, async () =>
             {
-                var r = await _payrollDuplicateSsnReportService.GetDuplicateSsnAsync(new(), ct); 
+                var r = await _payrollDuplicateSsnReportService.GetDuplicateSsnAsync(new(), ct);
                 return (r.Response.Total, r.Response.Results.Count());
             }),
             ["terminations"] = async ct => await Handle("terminations", ct, async () =>

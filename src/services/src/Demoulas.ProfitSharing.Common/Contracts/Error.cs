@@ -25,6 +25,7 @@ public sealed record Error
     public static Error BadgeNumberNotFound => new(103, "Badge number not found");
     // Generic entity not found (dynamic description) - use only when a more specific constant does not exist
     public static Error EntityNotFound(string entityName) => new(104, $"{entityName} not found");
+    public static Error NoPayProfitsDataAvailable => new(105, "No PayProfits data available in the system");
     // Unexpected error wrapper (message captured). Prefer logging full exception separately.
     public static Error Unexpected(string message) => new(900, message);
 

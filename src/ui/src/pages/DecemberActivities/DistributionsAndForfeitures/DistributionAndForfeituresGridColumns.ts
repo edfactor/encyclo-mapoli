@@ -1,5 +1,4 @@
 import { ColDef } from "ag-grid-community";
-import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
 import {
   createAgeColumn,
   createBadgeColumn,
