@@ -7,6 +7,7 @@ import ReportSummary from "../../../components/ReportSummary";
 import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { useLazyGetDistributionsAndForfeituresQuery } from "../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../reduxstore/store";
 import { GetDistributionsAndForfeituresColumns } from "./DistributionAndForfeituresGridColumns";
@@ -28,37 +29,9 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   });
   const [showTooltip, setShowTooltip] = useState(false);
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [gridMaxHeight, setGridMaxHeight] = useState(400);
 
-  // Calculate dynamic grid height based on window size
-  const calculateGridHeight = useCallback(() => {
-    const windowHeight = window.innerHeight;
-    const targetHeight = Math.floor(windowHeight * 0.5); // 50% of window height
-
-    // Set reasonable bounds: minimum 300px, maximum 800px
-    const minHeight = 300;
-    const maxHeight = 800;
-
-    return Math.max(minHeight, Math.min(maxHeight, targetHeight));
-  }, []);
-
-  // Initialize and update grid height on window resize
-  useEffect(() => {
-    const updateGridHeight = () => {
-      setGridMaxHeight(calculateGridHeight());
-    };
-
-    // Set initial height
-    updateGridHeight();
-
-    // Add resize listener
-    window.addEventListener("resize", updateGridHeight);
-
-    // Cleanup
-    return () => {
-      window.removeEventListener("resize", updateGridHeight);
-    };
-  }, [calculateGridHeight]);
+  // Use dynamic grid height utility hook
+  const gridMaxHeight = useDynamicGridHeight();
 
   const handlePopoverOpen = () => {
     if (hoverTimeout) {
