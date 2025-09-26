@@ -30,7 +30,7 @@ const MilitaryContributionForm = ({
   profitYear
 }: MilitaryContributionFormProps) => {
   const [createMilitaryContribution, { isLoading: isSubmitting }] = useCreateMilitaryContributionMutation();
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
   const { control, handleSubmit, reset } = useForm<FormData>({
     defaultValues: {
@@ -51,8 +51,10 @@ const MilitaryContributionForm = ({
   }, [initialData, reset]);
 
   const handleFormSubmit = async (data: FormData) => {
-    // Clear any existing error message
-    setErrorMessage(null);
+    // Clear any existing error messages
+    setErrorMessages([]);
+
+    console.log("Form data on submit:", data);
 
     if (data.contributionDate && data.contributionAmount !== null) {
       const contribution: MilitaryContribution = {
@@ -73,23 +75,42 @@ const MilitaryContributionForm = ({
           onlyNetworkToastErrors: true // Suppress validation errors, only show network errors
         };
 
+        console.log("Submitting contribution:", request);
+
         await createMilitaryContribution(request).unwrap();
+
+        console.log("Contribution created successfully:", contribution);
 
         onSubmit({
           ...contribution,
           contributionYear: data.contributionDate.getFullYear()
         });
       } catch (error) {
+        console.log("Error creating contribution:", error);
         // The unhandled response is when a 400 or 500 is caught at API level, not in middleware,
         // so we need UnhandledErrorResponse here
         const serviceError = error as UnhandledErrorResponse;
         if (serviceError && serviceError.data.errors) {
-          // If the error reason exists, check for the duplicate contribution message
-          if (serviceError.data.errors[0].reason.includes("Duplicates are not allowed.")) {
-            setErrorMessage(
-              "There is already a contribution for that year. Please check supplemental box and resubmit if applicable."
-            );
-            return;
+          const errorMessages: string[] = [];
+
+          for (const err of serviceError.data.errors) {
+            if (err.reason.includes("Duplicates are not allowed.")) {
+              errorMessages.push(
+                "- There is already a contribution for that year. Please check supplemental box and resubmit if applicable."
+              );
+            }
+            if (err.reason.includes("When profit year")) {
+              errorMessages.push("- When profit year differs from contribution year, it must be supplemental.");
+            }
+            if (err.reason.includes("Employee employment status is not eligible for contributions")) {
+              errorMessages.push(`- ` + err.reason);
+            }
+          }
+
+          if (errorMessages.length > 0) {
+            setErrorMessages(errorMessages);
+          } else {
+            setErrorMessages(["An unexpected error occurred. Please try again."]);
           }
         }
       }
@@ -173,12 +194,14 @@ const MilitaryContributionForm = ({
           />
         </Grid>
 
-        {errorMessage && (
+        {errorMessages.length > 0 && (
           <Grid size={{ xs: 12 }}>
             <Typography
               variant="body1"
               sx={{ color: "#db1532" }}>
-              {errorMessage}
+              {errorMessages.map((msg, index) => (
+                <div key={index}>{msg}</div>
+              ))}
             </Typography>
           </Grid>
         )}
