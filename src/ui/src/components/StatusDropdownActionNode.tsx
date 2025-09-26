@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetNavigationQuery } from "reduxstore/api/NavigationApi";
+import { useLazyGetNavigationQuery } from "../reduxstore/api/NavigationApi";
 import {
   useLazyGetNavigationStatusQuery,
   useLazyUpdateNavigationStatusQuery
-} from "reduxstore/api/NavigationStatusApi";
-import { RootState } from "reduxstore/store";
-import { NavigationDto } from "reduxstore/types";
+} from "../reduxstore/api/NavigationStatusApi";
+import { RootState } from "../reduxstore/store";
+import { NavigationDto } from "../types/navigation/navigation";
 import StatusDropdown from "./StatusDropdown";
 
 interface StatusDropdownActionNodeProps {
@@ -15,11 +15,7 @@ interface StatusDropdownActionNodeProps {
   onStatusChange?: (newStatus: string, statusName?: string) => void;
 }
 
-const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({
-  initialStatus,
-  navigationId,
-  onStatusChange
-}) => {
+const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({ onStatusChange }) => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [currentStatus, setCurrentStatus] = useState("1");
   const [navigationObj, setNavigationObj] = useState<NavigationDto | null>(null);
@@ -70,6 +66,9 @@ const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({
     setCurrentStatus(obj?.statusId + "");
   }, [data, navigationList, currentNavigationId, hasToken]);
 
+  const isReadOnly = navigationObj?.isReadOnly ?? false;
+  const readOnlyTooltip = "You are in read-only mode and cannot change the status of this item.";
+
   return (
     <div className="flex h-10 items-center gap-2">
       {isSuccess ? (
@@ -77,6 +76,8 @@ const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({
           navigationStatusList={data.navigationStatusList}
           onStatusChange={handleStatusChange}
           initialStatus={currentStatus}
+          disabled={isReadOnly}
+          tooltip={isReadOnly ? readOnlyTooltip : undefined}
         />
       ) : (
         <></>
