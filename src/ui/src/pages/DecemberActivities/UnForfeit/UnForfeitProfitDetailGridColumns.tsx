@@ -1,5 +1,5 @@
 import { SaveOutlined } from "@mui/icons-material";
-import { Checkbox, CircularProgress, IconButton } from "@mui/material";
+import { Checkbox, CircularProgress, IconButton, Tooltip } from "@mui/material";
 import { ColDef, EditableCallbackParams, ICellRendererParams } from "ag-grid-community";
 import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "components/SuggestedForfeiture";
 import { numberToCurrency } from "smart-ui-library";
@@ -12,8 +12,8 @@ import {
 } from "utils/gridColumnFactory";
 import { HeaderComponent } from "./UnForfeitHeaderComponent";
 
-function isTransactionEditable(params): boolean {
-  return params.data.suggestedUnforfeiture != null;
+function isTransactionEditable(params, isReadOnly: boolean = false): boolean {
+  return params.data.suggestedUnforfeiture != null && !isReadOnly;
 }
 
 export const GetProfitDetailColumns = (
@@ -21,7 +21,8 @@ export const GetProfitDetailColumns = (
   removeRowFromSelectedRows: (id: number) => void,
   selectedProfitYear: number,
   onSave?: (request: ForfeitureAdjustmentUpdateRequest, name: string) => Promise<void>,
-  onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[], names: string[]) => Promise<void>
+  onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[], names: string[]) => Promise<void>,
+  isReadOnly: boolean = false
 ): ColDef[] => {
   return [
     createYearColumn({
@@ -58,7 +59,7 @@ export const GetProfitDetailColumns = (
       pinned: "right",
       resizable: true,
       sortable: false,
-      editable: (params: EditableCallbackParams) => isTransactionEditable(params),
+      editable: (params: EditableCallbackParams) => isTransactionEditable(params, isReadOnly),
       cellEditor: SuggestedForfeitEditor,
       cellRenderer: (params: ICellRendererParams) => {
         return SuggestedForfeitCellRenderer({ ...params, selectedProfitYear }, false, true);
@@ -84,7 +85,8 @@ export const GetProfitDetailColumns = (
       headerComponentParams: {
         addRowToSelectedRows,
         removeRowFromSelectedRows,
-        onBulkSave
+        onBulkSave,
+        isReadOnly
       },
       cellRendererParams: {
         addRowToSelectedRows,
@@ -92,7 +94,7 @@ export const GetProfitDetailColumns = (
         onSave
       },
       cellRenderer: (params: UnForfeitsSaveButtonCellParams) => {
-        if (!isTransactionEditable(params)) {
+        if (!isTransactionEditable(params, isReadOnly)) {
           return "";
         }
 
@@ -101,13 +103,15 @@ export const GetProfitDetailColumns = (
         const rowKey = params.data.profitDetailId;
         const currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedUnforfeiture;
         const isLoading = params.context?.loadingRowIds?.has(params.data.badgeNumber);
+        const isDisabled = (currentValue || 0) === 0 || isLoading || isReadOnly;
+        const readOnlyTooltip = "You are in read-only mode and cannot save changes.";
 
-        return (
-          <div>
-            <Checkbox
-              checked={isSelected}
-              disabled={(currentValue || 0) === 0}
-              onChange={() => {
+        const checkboxElement = (
+          <Checkbox
+            checked={isSelected}
+            disabled={isDisabled}
+            onChange={() => {
+              if (!isReadOnly) {
                 if (isSelected) {
                   params.removeRowFromSelectedRows(id);
                   params.node?.setSelected(false);
@@ -116,25 +120,47 @@ export const GetProfitDetailColumns = (
                   params.node?.setSelected(true);
                 }
                 params.api.refreshCells({ force: true });
-              }}
-            />
-            <IconButton
-              onClick={async () => {
-                if (params.data.isDetail && params.onSave) {
-                  const request: ForfeitureAdjustmentUpdateRequest = {
-                    badgeNumber: params.data.badgeNumber,
-                    forfeitureAmount: -(currentValue || 0),
-                    profitYear: selectedProfitYear,
-                    offsettingProfitDetailId: params.data.profitDetailId,
-                    classAction: false
-                  };
-                  const employeeName = params.data.fullName || params.data.name || "Unknown Employee";
-                  await params.onSave(request, employeeName);
-                }
-              }}
-              disabled={(currentValue || 0) === 0 || isLoading}>
-              {isLoading ? <CircularProgress size={20} /> : <SaveOutlined />}
-            </IconButton>
+              }
+            }}
+          />
+        );
+
+        const saveButtonElement = (
+          <IconButton
+            onClick={async () => {
+              if (!isReadOnly && params.data.isDetail && params.onSave) {
+                const request: ForfeitureAdjustmentUpdateRequest = {
+                  badgeNumber: params.data.badgeNumber,
+                  forfeitureAmount: -(currentValue || 0),
+                  profitYear: selectedProfitYear,
+                  offsettingProfitDetailId: params.data.profitDetailId,
+                  classAction: false
+                };
+                const employeeName = params.data.fullName || params.data.name || "Unknown Employee";
+                await params.onSave(request, employeeName);
+              }
+            }}
+            disabled={isDisabled}>
+            {isLoading ? <CircularProgress size={20} /> : <SaveOutlined />}
+          </IconButton>
+        );
+
+        return (
+          <div>
+            {isReadOnly ? (
+              <Tooltip title={readOnlyTooltip}>
+                <span>{checkboxElement}</span>
+              </Tooltip>
+            ) : (
+              checkboxElement
+            )}
+            {isReadOnly ? (
+              <Tooltip title={readOnlyTooltip}>
+                <span>{saveButtonElement}</span>
+              </Tooltip>
+            ) : (
+              saveButtonElement
+            )}
           </div>
         );
       }

@@ -65,6 +65,7 @@ export const HeaderComponent: React.FC<UnForfeitHeaderComponentProps> = (params:
       isNodeEligible={isNodeEligible}
       createUpdatePayload={createUpdatePayload}
       isBulkSaving={hasSavingInProgress}
+      isReadOnly={params.isReadOnly}
     />
   );
 };

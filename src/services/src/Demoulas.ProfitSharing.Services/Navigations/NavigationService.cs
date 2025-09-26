@@ -58,7 +58,7 @@ public class NavigationService : INavigationService
 
         var lookup = flatList.ToLookup(x => x.ParentId);
         // helper to get raw required roles (uppercase) from entity
-        static List<string> EntityRolesToUpper(System.Collections.Generic.ICollection<Data.Entities.Navigations.NavigationRole>? roles)
+        static List<string> EntityRolesToUpper(ICollection<Data.Entities.Navigations.NavigationRole>? roles)
         {
             return roles == null
                 ? new List<string>()
@@ -131,7 +131,7 @@ public class NavigationService : INavigationService
                             Items = null,
                             PrerequisiteNavigations = new List<NavigationDto>(),
                             // Prefer the DB-backed flag when present; otherwise fall back to Url heuristic.
-                            IsNavigable = p.IsNavigable.HasValue ? p.IsNavigable.Value : !string.IsNullOrWhiteSpace(p.Url),
+                            IsNavigable = p.IsNavigable ?? !string.IsNullOrWhiteSpace(p.Url),
                             IsReadOnly = userHasReadOnlyRole
                         })
                         .ToList() ?? new List<NavigationDto>();
@@ -154,7 +154,7 @@ public class NavigationService : INavigationService
                         PrerequisiteNavigations = prereqs,
                         // Prefer the DB-backed IsNavigable when present; otherwise fall back to Url-derived logic
                         // Prefer the DB-backed flag when present; otherwise fall back to Url heuristic.
-                        IsNavigable = x.IsNavigable.HasValue ? x.IsNavigable.Value : !string.IsNullOrWhiteSpace(x.Url),
+                        IsNavigable = x.IsNavigable ?? !string.IsNullOrWhiteSpace(x.Url),
                         IsReadOnly = userHasReadOnlyRole
                     };
                 })

@@ -1,4 +1,4 @@
-import { ICellRendererParams, IHeaderParams } from "ag-grid-community";
+import { IHeaderParams } from "ag-grid-community";
 import type { ProfitYearRequest, SortedPaginationRequestDto } from "../common/api";
 
 export interface ForfeitureDetail extends ProfitYearRequest {
@@ -62,4 +62,5 @@ export interface UnForfeitHeaderComponentProps extends IHeaderParams {
   addRowToSelectedRows: (id: number) => void;
   removeRowFromSelectedRows: (id: number) => void;
   onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[]) => Promise<void>;
+  isReadOnly?: boolean;
 }

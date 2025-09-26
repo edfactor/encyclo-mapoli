@@ -13,29 +13,40 @@ interface RenderAddExecutiveButtonProps {
   reportReponse: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   isModal?: boolean;
   onOpenModal: () => void;
+  isReadOnly?: boolean;
 }
 
-const RenderAddExecutiveButton: React.FC<RenderAddExecutiveButtonProps> = ({ reportReponse, isModal, onOpenModal }) => {
+const RenderAddExecutiveButton: React.FC<RenderAddExecutiveButtonProps> = ({
+  reportReponse,
+  isModal,
+  onOpenModal,
+  isReadOnly = false
+}) => {
   // We cannot add an employee if there is no result set there
   const gridAvailable: boolean = reportReponse?.response != null && reportReponse?.response != undefined;
+  const isDisabled = !gridAvailable || isReadOnly;
 
   const addButton = (
     <Button
-      disabled={!gridAvailable}
+      disabled={isDisabled}
       variant="outlined"
       color="secondary"
       size="medium"
-      startIcon={<AddOutlined color={gridAvailable ? "secondary" : "disabled"} />}
-      onClick={() => onOpenModal()}>
+      startIcon={<AddOutlined color={isDisabled ? "disabled" : "secondary"} />}
+      onClick={isReadOnly ? undefined : () => onOpenModal()}>
       Add Executive
     </Button>
   );
 
-  if (!isModal && !gridAvailable) {
+  if (!isModal && isDisabled) {
+    const tooltipTitle = isReadOnly
+      ? "You are in read-only mode and cannot add executives."
+      : "You can only add an executive to search results.";
+
     return (
       <Tooltip
         placement="top"
-        title="You can only add an executive to search results.">
+        title={tooltipTitle}>
         <span>{addButton}</span>
       </Tooltip>
     );
@@ -60,6 +71,7 @@ interface ManageExecutiveHoursAndDollarsGridSearchProps {
   modalSelectedExecutives?: any[];
   addExecutivesToMainGrid?: () => void;
   isModalSearching?: boolean;
+  isReadOnly?: boolean;
   // Props for modal grid (not needed when isModal=false)
   modalResults?: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   modalGridPagination?: any;
@@ -85,7 +97,8 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
   executeModalSearch = () => {},
   modalSelectedExecutives = [],
   addExecutivesToMainGrid = () => {},
-  isModalSearching = false
+  isModalSearching = false,
+  isReadOnly = false
 }) => {
   const currentData = isModal ? modalResults : gridData;
   const currentPagination = isModal ? modalGridPagination : mainGridPagination;
@@ -207,6 +220,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
                 reportReponse={gridData}
                 isModal={isModal}
                 onOpenModal={openModal}
+                isReadOnly={isReadOnly}
               />
             </div>
           </>
@@ -230,12 +244,14 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
             rowData: mutableRowData,
             columnDefs: columnDefs,
             suppressMultiSort: true,
-            rowSelection: isModal ? {
-              mode: "multiRow",
-              checkboxes: true,
-              headerCheckbox: true,
-              enableClickSelection: false
-            } : undefined,
+            rowSelection: isModal
+              ? {
+                  mode: "multiRow",
+                  checkboxes: true,
+                  headerCheckbox: true,
+                  enableClickSelection: false
+                }
+              : undefined,
             onSelectionChanged: (event: SelectionChangedEvent) => {
               if (isModal) {
                 const selectedRows = event.api.getSelectedRows();
@@ -283,6 +299,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
             modalResults={modalResults}
             selectExecutivesInModal={selectExecutivesInModal}
             modalGridPagination={modalGridPagination}
+            isReadOnly={isReadOnly}
           />
         </SmartModal>
       )}

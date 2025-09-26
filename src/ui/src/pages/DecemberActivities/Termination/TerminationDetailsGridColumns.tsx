@@ -1,9 +1,9 @@
 import { SaveOutlined } from "@mui/icons-material";
 import { Checkbox, CircularProgress, IconButton, Tooltip } from "@mui/material";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "components/SuggestedForfeiture";
 import { numberToCurrency } from "smart-ui-library";
-import { ForfeitureAdjustmentUpdateRequest } from "types";
+import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "../../../components/SuggestedForfeiture";
+import { ForfeitureAdjustmentUpdateRequest } from "../../../types";
 import {
   createAgeColumn,
   createCurrencyColumn,
@@ -11,7 +11,7 @@ import {
   createHoursColumn,
   createYearColumn,
   createYesOrNoColumn
-} from "utils/gridColumnFactory";
+} from "../../../utils/gridColumnFactory";
 import { HeaderComponent } from "./TerminationHeaderComponent";
 
 interface SaveButtonCellParams extends ICellRendererParams {
@@ -27,7 +27,8 @@ export const GetDetailColumns = (
   selectedRowIds: number[],
   selectedProfitYear: number,
   onSave?: (request: ForfeitureAdjustmentUpdateRequest, name: string) => Promise<void>,
-  onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[], names: string[]) => Promise<void>
+  onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[], names: string[]) => Promise<void>,
+  isReadOnly = false
 ): ColDef[] => {
   return [
     createYearColumn({
@@ -151,7 +152,8 @@ export const GetDetailColumns = (
       headerComponentParams: {
         addRowToSelectedRows,
         removeRowFromSelectedRows,
-        onBulkSave
+        onBulkSave,
+        isReadOnly
       },
       cellRendererParams: {
         addRowToSelectedRows,
@@ -169,45 +171,63 @@ export const GetDetailColumns = (
         const currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedForfeit;
         const isLoading = params.context?.loadingRowIds?.has(params.data.badgeNumber);
         const isZeroValue = currentValue === 0 || currentValue === null || currentValue === undefined;
+        const isDisabled = hasError || isLoading || isZeroValue || isReadOnly;
+        const readOnlyTooltip = "You are in read-only mode and cannot save changes.";
 
-        return (
-          <div>
-            <Tooltip
-              title={isZeroValue ? "Forfeit cannot be zero." : ""}
-              arrow>
-              <span>
-                <Checkbox
-                  checked={isSelected}
-                  disabled={isZeroValue}
-                  onChange={() => {
+        const checkboxElement = (
+          <Tooltip
+            title={isZeroValue ? "Forfeit cannot be zero." : isReadOnly ? readOnlyTooltip : ""}
+            arrow>
+            <span>
+              <Checkbox
+                checked={isSelected}
+                disabled={isDisabled}
+                onChange={() => {
+                  if (!isReadOnly) {
                     if (isSelected) {
                       params.removeRowFromSelectedRows(id);
                     } else {
                       params.addRowToSelectedRows(id);
                     }
                     params.node?.setSelected(!isSelected);
-                  }}
-                />
-              </span>
-            </Tooltip>
-            <IconButton
-              onClick={async () => {
-                if (params.data.isDetail && params.onSave) {
-                  const request: ForfeitureAdjustmentUpdateRequest = {
-                    badgeNumber: params.data.badgeNumber,
-                    profitYear: params.data.profitYear,
-                    forfeitureAmount: currentValue || 0,
-                    classAction: false,
-                    offsettingProfitDetailId: undefined
-                  };
+                  }
+                }}
+              />
+            </span>
+          </Tooltip>
+        );
 
-                  const employeeName = params.data.fullName || params.data.name || "the selected employee";
-                  await params.onSave(request, employeeName);
-                }
-              }}
-              disabled={hasError || isLoading || isZeroValue}>
-              {isLoading ? <CircularProgress size={20} /> : <SaveOutlined />}
-            </IconButton>
+        const saveButtonElement = (
+          <IconButton
+            onClick={async () => {
+              if (!isReadOnly && params.data.isDetail && params.onSave) {
+                const request: ForfeitureAdjustmentUpdateRequest = {
+                  badgeNumber: params.data.badgeNumber,
+                  profitYear: params.data.profitYear,
+                  forfeitureAmount: currentValue || 0,
+                  classAction: false,
+                  offsettingProfitDetailId: undefined
+                };
+
+                const employeeName = params.data.fullName || params.data.name || "the selected employee";
+                await params.onSave(request, employeeName);
+              }
+            }}
+            disabled={isDisabled}>
+            {isLoading ? <CircularProgress size={20} /> : <SaveOutlined />}
+          </IconButton>
+        );
+
+        return (
+          <div>
+            {checkboxElement}
+            {isReadOnly ? (
+              <Tooltip title={readOnlyTooltip}>
+                <span>{saveButtonElement}</span>
+              </Tooltip>
+            ) : (
+              saveButtonElement
+            )}
           </div>
         );
       }

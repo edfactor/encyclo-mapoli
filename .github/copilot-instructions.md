@@ -396,6 +396,50 @@ Security note:
 ## Secrets & Config
 - Never commit secrets—use user secrets (`secrets.json` pattern). Feature flags via .NET Feature Management; wire new flags centrally then inject `IFeatureManager`.
 
+## Documentation Creation Guidelines
+
+When creating documentation for new features, architectural changes, or implementation guides:
+
+### File Locations
+- **Primary Documentation**: Create `.md` files in `docs/` folder at project root
+- **User-Accessible Documentation**: Copy final documents to `src/ui/public/docs/` for web access
+- **Template References**: Use existing documentation structure from `docs/` folder as examples
+
+### File naming Conventions
+- Use `UPPERCASE_WITH_UNDERSCORES.md` for major guides (e.g., `TELEMETRY_GUIDE.md`, `READ_ONLY_FUNCTIONALITY.md`)
+- Use `PascalCase-With-Hyphens.md` for specific features (e.g., `Distribution-Processing-Requirements.md`)
+- Use ticket-prefixed names for implementation summaries (e.g., `PS-1623_READ_ONLY_SUMMARY.md`)
+
+### Required Documentation Updates
+When creating new documentation:
+1. **Create primary file** in `docs/` folder with comprehensive content
+2. **Update `docs/README.md`** to include new documentation references
+3. **Copy to public folder** for web accessibility: `src/ui/public/docs/`
+4. **Update Documentation page** in `src/ui/src/pages/Documentation/Documentation.tsx`:
+   ```typescript
+   {
+     key: "feature-name",
+     title: "Feature Documentation Title", 
+     filename: "FEATURE_DOCUMENTATION.md",
+     description: "Brief description of what this documentation covers"
+   }
+   ```
+5. **Update instruction files** (`copilot-instructions.md` and `CLAUDE.md`) if introducing new patterns
+
+### Documentation Structure Standards
+- **Overview section** with clear objectives and scope
+- **Architecture/Implementation sections** with code examples
+- **Testing/Quality guidelines** with specific checklists
+- **Troubleshooting section** with common issues and solutions
+- **References section** linking to related documentation
+
+### Content Guidelines
+- Include copy-paste code examples for common patterns
+- Provide checklists for implementation and testing
+- Document both "what to do" and "what NOT to do"
+- Include specific file paths and command examples
+- Add cross-references to related documentation files
+
 ## When Extending
 - Add new endpoints through FastEndpoints with consistent foldering; register dependencies via DI in existing composition root.
 - ALL new endpoints MUST implement telemetry using `TelemetryExtensions` patterns (see Telemetry & Observability section).
@@ -662,4 +706,9 @@ Provide reasoning in PR descriptions when deviating from these patterns.
 - `TELEMETRY_QUICK_REFERENCE.md` - Developer cheat sheet with 3-step implementation process, copy-paste examples, business metrics patterns, and troubleshooting checklist
 - `TELEMETRY_DEVOPS_GUIDE.md` - Production operations guide with deployment checklist, monitoring setup (Prometheus/Grafana), security configuration, alert rules, and disaster recovery procedures
 
-These documents contain essential patterns and examples for implementing telemetry correctly across all endpoint types. Reference them when creating new endpoints or troubleshooting telemetry issues.
+**Read-Only Functionality Documentation**:
+- `READ_ONLY_FUNCTIONALITY.md` - Complete guide to read-only role implementation covering architecture, implementation patterns, testing, and maintenance for ITDEVOPS and AUDITOR roles
+- `READ_ONLY_QUICK_REFERENCE.md` - Developer cheat sheet with copy-paste code examples, implementation checklist, common patterns, and troubleshooting guide
+- `PS-1623_READ_ONLY_SUMMARY.md` - Executive summary of read-only role implementation with status tracking and deployment verification
+
+These documents contain essential patterns and examples for implementing telemetry and read-only functionality correctly across all components. Reference them when creating new endpoints or troubleshooting issues.
