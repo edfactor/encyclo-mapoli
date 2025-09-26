@@ -4,13 +4,15 @@ import { DSMAccordion, Page } from "smart-ui-library";
 import ManageExecutiveHoursAndDollarsGrid from "./ManageExecutiveHoursAndDollarsGrid";
 import ManageExecutiveHoursAndDollarsSearchFilter from "./ManageExecutiveHoursAndDollarsSearchFilter";
 
+// PS-1623: Secure-by-default, all add actions are read-only unless explicitly overridden. QA: Verify add button is disabled unless isReadOnly is false.
+
 interface RenderAddButtonInternalProps {
   canAddExecutives: boolean;
   onAddToMainGrid: () => void;
   isReadOnly?: boolean;
 }
 
-const RenderAddButton = ({ canAddExecutives, onAddToMainGrid, isReadOnly = false }: RenderAddButtonInternalProps) => {
+const RenderAddButton = ({ canAddExecutives, onAddToMainGrid, isReadOnly = true }: RenderAddButtonInternalProps) => {
   const isDisabled = !canAddExecutives || isReadOnly;
 
   const addButton = (
@@ -62,7 +64,7 @@ const SearchAndAddExecutive = ({
   modalResults,
   selectExecutivesInModal,
   modalGridPagination,
-  isReadOnly = false
+  isReadOnly = true // PS-1623: Secure-by-default, QA: Verify add button is disabled unless isReadOnly is false.
 }: SearchAndAddExecutiveProps) => {
   const canAddExecutives = modalSelectedExecutives.length > 0;
 

@@ -15,7 +15,7 @@ interface RenderSaveButtonProps {
   isReadOnly?: boolean;
 }
 
-const RenderSaveButton = memo(({ hasPendingChanges, onSave, isReadOnly = false }: RenderSaveButtonProps) => {
+const RenderSaveButton = memo(({ hasPendingChanges, onSave, isReadOnly = true }: RenderSaveButtonProps) => {
   const isDisabled = !hasPendingChanges || isReadOnly;
   const readOnlyTooltip = "You are in read-only mode and cannot save changes.";
   const noPendingChangesTooltip = "You must change hours or dollars to save.";
