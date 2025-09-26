@@ -3,6 +3,7 @@ import { ColDef, ICellRendererParams } from "ag-grid-community";
 import React, { useMemo } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
+import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { useUnForfeitGrid } from "../../../hooks/useUnForfeitGrid";
 import { CalendarResponseDto } from "../../../reduxstore/types";
 import { UnForfeitGridColumns } from "./UnForfeitGridColumns";
@@ -31,6 +32,9 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
   setHasUnsavedChanges,
   fiscalCalendarYear
 }) => {
+  // Use dynamic grid height utility hook
+  const gridMaxHeight = useDynamicGridHeight();
+
   const {
     pageNumber,
     pageSize,
@@ -178,7 +182,7 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
             preferenceKey={"REHIRE-FORFEITURES"}
             isLoading={isFetching}
             handleSortChanged={sortEventHandler}
-            maxHeight={400}
+            maxHeight={gridMaxHeight}
             providedOptions={{
               rowData: gridData,
               columnDefs: columnDefs,

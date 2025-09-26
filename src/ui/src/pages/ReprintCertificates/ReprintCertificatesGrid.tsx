@@ -5,6 +5,7 @@ import { useLazyGetCertificatesReportQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { CertificatePrintRequest } from "reduxstore/types";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
 import { ReprintCertificatesFilterParams } from "./ReprintCertificatesFilterSection";
 import { GetReprintCertificatesGridColumns, ReprintCertificateEmployee } from "./ReprintCertificatesGridColumns";
 
@@ -22,6 +23,9 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
   });
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
+  
+  // Use dynamic grid height utility hook
+  const gridMaxHeight = useDynamicGridHeight();
 
   const { certificates } = useSelector((state: RootState) => state.yearsEnd);
   const [getCertificatesReport, { isFetching }] = useLazyGetCertificatesReportQuery();
@@ -127,7 +131,7 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
         preferenceKey="REPRINT_CERTIFICATES_GRID"
         isLoading={isFetching}
         handleSortChanged={sortEventHandler}
-        maxHeight={400}
+        maxHeight={gridMaxHeight}
         providedOptions={{
           rowData: gridData,
           columnDefs: columnDefs,
