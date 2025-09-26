@@ -1,4 +1,5 @@
 import { ColDef } from "ag-grid-community";
+import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
 import {
   createAgeColumn,
   createBadgeColumn,
@@ -12,7 +13,7 @@ import {
 
 export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({ pinned: "left" }),
+    createBadgeColumn({}),
     createNameColumn({
       field: "employeeName",
       minWidth: 150
