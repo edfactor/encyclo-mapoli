@@ -13,34 +13,34 @@ public class NavigationFaker
         // Common role sets (Ids follow NavigationRole.Contants; Names mirror Security.Role strings)
         var rolesInquiries = new List<NavigationRole>
         {
-            new NavigationRole { Id = 1, Name = "System-Administrator" },
-            new NavigationRole { Id = 2, Name = "Finance-Manager" },
-            new NavigationRole { Id = 3, Name = "Distributions-Clerk" },
-            new NavigationRole { Id = 4, Name = "Hardship-Administrator" },
-            new NavigationRole { Id = 6, Name = "IT-DevOps" }
+            new NavigationRole { Id = 1, Name = "System-Administrator", IsReadOnly = false },
+            new NavigationRole { Id = 2, Name = "Finance-Manager", IsReadOnly = false },
+            new NavigationRole { Id = 3, Name = "Distributions-Clerk", IsReadOnly = false },
+            new NavigationRole { Id = 4, Name = "Hardship-Administrator", IsReadOnly = false },
+            new NavigationRole { Id = 6, Name = "IT-DevOps", IsReadOnly = true }
         };
 
         var rolesMasterInquiry = new List<NavigationRole>(rolesInquiries);
 
         var rolesBeneficiaries = new List<NavigationRole>
         {
-            new NavigationRole { Id = 1, Name = "System-Administrator" },
-            new NavigationRole { Id = 2, Name = "Finance-Manager" },
-            new NavigationRole { Id = 3, Name = "Distributions-Clerk" },
-            new NavigationRole { Id = 6, Name = "IT-DevOps" }
+            new NavigationRole { Id = 1, Name = "System-Administrator", IsReadOnly = false },
+            new NavigationRole { Id = 2, Name = "Finance-Manager", IsReadOnly = false },
+            new NavigationRole { Id = 3, Name = "Distributions-Clerk", IsReadOnly = false },
+            new NavigationRole { Id = 6, Name = "IT-DevOps", IsReadOnly = true }
         };
 
         var rolesYearEnd = new List<NavigationRole>
         {
-            new NavigationRole { Id = 1, Name = "System-Administrator" },
-            new NavigationRole { Id = 2, Name = "Finance-Manager" },
-            new NavigationRole { Id = 4, Name = "Hardship-Administrator" },
-            new NavigationRole { Id = 6, Name = "IT-DevOps" }
+            new NavigationRole { Id = 1, Name = "System-Administrator", IsReadOnly = false },
+            new NavigationRole { Id = 2, Name = "Finance-Manager", IsReadOnly = false },
+            new NavigationRole { Id = 4, Name = "Hardship-Administrator", IsReadOnly = false },
+            new NavigationRole { Id = 6, Name = "IT-DevOps", IsReadOnly = true }
         };
 
         var rolesFreeze = new List<NavigationRole>
         {
-            new NavigationRole { Id = 6, Name = "IT-DevOps" }
+            new NavigationRole { Id = 6, Name = "IT-DevOps", IsReadOnly = true }
         };
 
         var rolesItDevOpsTop = new List<NavigationRole>(rolesFreeze);

@@ -21,4 +21,9 @@ public record NavigationDto : IdRequest
     // No business logic is applied here; this is populated upstream or remains empty for now.
     public List<NavigationDto>? PrerequisiteNavigations { get; set; }
     public List<NavigationDto>? Items { get; set; }
+    /// <summary>
+    /// Indicates whether the current user has any read-only roles that would restrict editing capabilities.
+    /// This is used by the UI to disable or hide action buttons for users in read-only roles.
+    /// </summary>
+    public bool IsReadOnly { get; set; }
 }
