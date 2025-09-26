@@ -199,7 +199,7 @@ const useMasterInquiry = () => {
 
           if (details.missives && missives) {
             const localMissives: MissiveResponse[] = details.missives
-              .map((id: number) => missives.find((m: MissiveResponse) => m.id === id))
+              .map((id: number) => missives.items.find((m: MissiveResponse) => m.id === id))
               .filter(Boolean) as MissiveResponse[];
 
             if (localMissives.length > 0) {
