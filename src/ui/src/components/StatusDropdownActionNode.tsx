@@ -67,7 +67,7 @@ const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({ onS
   }, [data, navigationList, currentNavigationId, hasToken]);
 
   const isReadOnly = navigationObj?.isReadOnly ?? false;
-  const readOnlyTooltip = "You are in read-only mode and cannot change the status of this item.";
+  const readOnlyTooltip = "You are in read-only mode and cannot change the status of this page.";
 
   return (
     <div className="flex h-10 items-center gap-2">

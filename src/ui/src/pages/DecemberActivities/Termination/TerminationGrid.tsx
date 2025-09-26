@@ -21,6 +21,7 @@ import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { useEditState } from "../../../hooks/useEditState";
+import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
 import { useRowSelection } from "../../../hooks/useRowSelection";
 import { Messages } from "../../../utils/messageDictonary";
 import { TerminationSearchRequest } from "./Termination";
@@ -72,6 +73,9 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   const gridMaxHeight = useDynamicGridHeight();
   const [updateForfeitureAdjustment, { isLoading: isSingleSaving }] = useUpdateForfeitureAdjustmentMutation();
   const lastRequestKeyRef = useRef<string | null>(null);
+
+  // Check if current navigation should be read-only
+  const isReadOnly = useReadOnlyNavigation();
 
   // Use separate hooks for edit and selection state
   const editState = useEditState();
@@ -554,7 +558,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
         selectionState.selectedRowIds,
         selectedProfitYear,
         handleSave,
-        handleBulkSave
+        handleBulkSave,
+        isReadOnly
       ),
     [
       addRowToSelectedRows,
@@ -562,7 +567,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       selectionState.selectedRowIds,
       selectedProfitYear,
       handleSave,
-      handleBulkSave
+      handleBulkSave,
+      isReadOnly
     ]
   );
 

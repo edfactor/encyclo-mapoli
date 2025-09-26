@@ -4,6 +4,7 @@ import React, { useMemo } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
 import { useUnForfeitGrid } from "../../../hooks/useUnForfeitGrid";
 import { CalendarResponseDto } from "../../../reduxstore/types";
 import { UnForfeitGridColumns } from "./UnForfeitGridColumns";
@@ -34,6 +35,9 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
 }) => {
   // Use dynamic grid height utility hook
   const gridMaxHeight = useDynamicGridHeight();
+
+  // Check if current navigation should be read-only
+  const isReadOnly = useReadOnlyNavigation();
 
   const {
     pageNumber,
@@ -73,14 +77,16 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
         selectionState.removeRowFromSelection,
         selectedProfitYear,
         handleSave,
-        handleBulkSave
+        handleBulkSave,
+        isReadOnly
       ),
     [
       selectionState.addRowToSelection,
       selectionState.removeRowFromSelection,
       selectedProfitYear,
       handleSave,
-      handleBulkSave
+      handleBulkSave,
+      isReadOnly
     ]
   );
 

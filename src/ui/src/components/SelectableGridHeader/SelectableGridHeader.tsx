@@ -1,6 +1,6 @@
-import { IHeaderParams, IRowNode } from "ag-grid-community";
-import { Checkbox, IconButton, CircularProgress } from "@mui/material";
 import { SaveOutlined } from "@mui/icons-material";
+import { Checkbox, CircularProgress, IconButton, Tooltip } from "@mui/material";
+import { IHeaderParams, IRowNode } from "ag-grid-community";
 import { ForfeitureAdjustmentUpdateRequest } from "types";
 
 interface SelectableGridHeaderProps extends IHeaderParams {
@@ -35,6 +35,7 @@ interface SelectableGridHeaderProps extends IHeaderParams {
   onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[], names: string[]) => Promise<void>;
   isBulkSaving?: () => boolean;
   loadingRowIds?: Set<number>;
+  isReadOnly?: boolean;
 }
 
 export const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props) => {
@@ -99,21 +100,43 @@ export const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props)
   const { totalEligible, totalSelected } = getSelectionState();
   const allSelected = totalSelected === totalEligible && totalEligible > 0;
   const someSelected = totalSelected > 0 && totalSelected < totalEligible;
-  const isSaveDisabled = (props.isBulkSaving ? props.isBulkSaving() : false) || totalSelected === 0;
+  const isSaveDisabled = (props.isBulkSaving ? props.isBulkSaving() : false) || totalSelected === 0 || props.isReadOnly;
+  const readOnlyTooltip = "You are in read-only mode and cannot perform bulk operations.";
+
+  const checkboxElement = (
+    <Checkbox
+      onClick={props.isReadOnly ? undefined : handleSelectAll}
+      checked={allSelected}
+      indeterminate={someSelected}
+      onChange={props.isReadOnly ? undefined : handleSelectAll}
+      disabled={props.isReadOnly}
+    />
+  );
+
+  const saveButtonElement = (
+    <IconButton
+      onClick={props.isReadOnly ? undefined : handleSave}
+      disabled={isSaveDisabled}>
+      {props.isBulkSaving && props.isBulkSaving() ? <CircularProgress size={20} /> : <SaveOutlined />}
+    </IconButton>
+  );
 
   return (
     <div>
-      <Checkbox
-        onClick={handleSelectAll}
-        checked={allSelected}
-        indeterminate={someSelected}
-        onChange={handleSelectAll}
-      />
-      <IconButton
-        onClick={handleSave}
-        disabled={isSaveDisabled}>
-        {props.isBulkSaving && props.isBulkSaving() ? <CircularProgress size={20} /> : <SaveOutlined />}
-      </IconButton>
+      {props.isReadOnly ? (
+        <Tooltip title={readOnlyTooltip}>
+          <span>{checkboxElement}</span>
+        </Tooltip>
+      ) : (
+        checkboxElement
+      )}
+      {props.isReadOnly ? (
+        <Tooltip title={readOnlyTooltip}>
+          <span>{saveButtonElement}</span>
+        </Tooltip>
+      ) : (
+        saveButtonElement
+      )}
     </div>
   );
 };
