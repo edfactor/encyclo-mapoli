@@ -1,9 +1,9 @@
 import { SaveOutlined } from "@mui/icons-material";
 import { Checkbox, CircularProgress, IconButton, Tooltip } from "@mui/material";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "components/SuggestedForfeiture";
 import { numberToCurrency } from "smart-ui-library";
-import { ForfeitureAdjustmentUpdateRequest } from "types";
+import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "../../../components/SuggestedForfeiture";
+import { ForfeitureAdjustmentUpdateRequest } from "../../../types";
 import {
   createAgeColumn,
   createCurrencyColumn,
@@ -11,7 +11,7 @@ import {
   createHoursColumn,
   createYearColumn,
   createYesOrNoColumn
-} from "utils/gridColumnFactory";
+} from "../../../utils/gridColumnFactory";
 import { HeaderComponent } from "./TerminationHeaderComponent";
 
 interface SaveButtonCellParams extends ICellRendererParams {

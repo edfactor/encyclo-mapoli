@@ -7,26 +7,33 @@ import ManageExecutiveHoursAndDollarsSearchFilter from "./ManageExecutiveHoursAn
 interface RenderAddButtonInternalProps {
   canAddExecutives: boolean;
   onAddToMainGrid: () => void;
+  isReadOnly?: boolean;
 }
 
-const RenderAddButton = ({ canAddExecutives, onAddToMainGrid }: RenderAddButtonInternalProps) => {
+const RenderAddButton = ({ canAddExecutives, onAddToMainGrid, isReadOnly = false }: RenderAddButtonInternalProps) => {
+  const isDisabled = !canAddExecutives || isReadOnly;
+
   const addButton = (
     <Button
-      disabled={!canAddExecutives}
+      disabled={isDisabled}
       variant="outlined"
       color="primary"
       size="medium"
-      startIcon={<AddOutlined color={canAddExecutives ? "primary" : "disabled"} />}
-      onClick={onAddToMainGrid}>
+      startIcon={<AddOutlined color={isDisabled ? "disabled" : "primary"} />}
+      onClick={isReadOnly ? undefined : onAddToMainGrid}>
       Add to Main Grid
     </Button>
   );
 
-  if (!canAddExecutives) {
+  if (isDisabled) {
+    const tooltipTitle = isReadOnly
+      ? "You are in read-only mode and cannot add executives."
+      : "You must select only one row to add.";
+
     return (
       <Tooltip
         placement="top"
-        title="You must select only one row to add.">
+        title={tooltipTitle}>
         <span>{addButton}</span>
       </Tooltip>
     );
@@ -44,18 +51,19 @@ interface SearchAndAddExecutiveProps {
   modalResults: any;
   selectExecutivesInModal: (executives: any[]) => void;
   modalGridPagination: any;
+  isReadOnly?: boolean;
 }
 
-const SearchAndAddExecutive = ({ 
+const SearchAndAddExecutive = ({
   executeModalSearch,
   modalSelectedExecutives,
   addExecutivesToMainGrid,
   isModalSearching,
   modalResults,
   selectExecutivesInModal,
-  modalGridPagination
+  modalGridPagination,
+  isReadOnly = false
 }: SearchAndAddExecutiveProps) => {
-
   const canAddExecutives = modalSelectedExecutives.length > 0;
 
   const handleReset = () => {
@@ -70,6 +78,7 @@ const SearchAndAddExecutive = ({
           <RenderAddButton
             canAddExecutives={canAddExecutives}
             onAddToMainGrid={addExecutivesToMainGrid}
+            isReadOnly={isReadOnly}
           />
         </div>
       }>
@@ -90,7 +99,7 @@ const SearchAndAddExecutive = ({
           </DSMAccordion>
         </Grid>
         <Grid width="100%">
-          <ManageExecutiveHoursAndDollarsGrid 
+          <ManageExecutiveHoursAndDollarsGrid
             isModal={true}
             modalResults={modalResults}
             isSearching={isModalSearching}
