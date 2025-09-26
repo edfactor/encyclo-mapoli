@@ -125,21 +125,19 @@ public sealed class UnforfeitService : IUnforfeitService
                             ProfitCodeId = x.pd.ProfitCodeId,
                             WagesTransactionYear = x.pp != null ? x.pp.CurrentIncomeYear + x.pp.IncomeExecutive : null,
                             SuggestedUnforfeiture =
+                                // we only care about the latest forf/unforf transaction 
+                                x.pd.Id == g.Max(item => item.pd.Id) &&
+                                // check if this row is a forfeit
+                                x.pd.CommentType != null && x.pd.CommentType == CommentType.Constants.Forfeit &&
                                 // see if the employee qualifies for forfeiture
-                                g.Key.YearsOfService == 1 && g.Key.EnrollmentId == /*2*/ Enrollment.Constants.NewVestingPlanHasContributions
-                                                    || g.Key.EnrollmentId == /*3*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords
-                                                    || g.Key.EnrollmentId == /*4*/ Enrollment.Constants.NewVestingPlanHasForfeitureRecords
-                                ?
-                                // go through the forfeiture/unforfeiture transactions and find the last one, if that is forfeit then suggest it as an unforfeiture.
-                                g.OrderByDescending(item => item.pd.ProfitYear)
-                                    .Select(item =>  item.pd.CommentType != null && item.pd.CommentType == CommentType.Constants.Forfeit
-                                        ? item.pd.Forfeiture
-                                        : (decimal?)null)
-                                    .FirstOrDefault()
-                                : null,
+                                (g.Key.YearsOfService == 1 && g.Key.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions
+                                 || g.Key.EnrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords
+                                 || g.Key.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords)
+                                    ? x.pd.Forfeiture
+                                    : null,
                             ProfitDetailId = x.pd.Id
                         })
-                        .OrderByDescending(x => x.ProfitYear)
+                        .OrderByDescending(x => x.ProfitDetailId)
                         .ToList()
                 };
             return await query.ToPaginationResultsAsync(req, cancellationToken);

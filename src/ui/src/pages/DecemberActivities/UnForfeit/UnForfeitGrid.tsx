@@ -185,8 +185,8 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
               getRowClass: (params: any) => (params.data.isDetail ? "detail-row" : ""),
               rowSelection: {
                 mode: "multiRow",
-                checkboxes: true,
-                headerCheckbox: true,
+                checkboxes: false,
+                headerCheckbox: false,
                 enableClickSelection: false
               },
               rowHeight: 40,
