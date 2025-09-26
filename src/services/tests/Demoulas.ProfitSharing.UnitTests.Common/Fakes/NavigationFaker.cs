@@ -2,13 +2,14 @@
 using System.Linq;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Fakes;
+
 public class NavigationFaker
 {
     public List<Navigation> DummyNavigationData()
     {
-    // Common statuses
-    var notStarted = new NavigationStatus { Id = NavigationStatus.Constants.NotStarted, Name = "Not Started" };
-    var complete = new NavigationStatus { Id = NavigationStatus.Constants.Complete, Name = "Complete" };
+        // Common statuses
+        var notStarted = new NavigationStatus { Id = NavigationStatus.Constants.NotStarted, Name = "Not Started" };
+        var complete = new NavigationStatus { Id = NavigationStatus.Constants.Complete, Name = "Complete" };
 
         // Common role sets (Ids follow NavigationRole.Contants; Names mirror Security.Role strings)
         var rolesInquiries = new List<NavigationRole>
@@ -45,7 +46,7 @@ public class NavigationFaker
 
         var rolesItDevOpsTop = new List<NavigationRole>(rolesFreeze);
 
-    var list = new List<Navigation>()
+        var list = new List<Navigation>()
     {
             // Top-level menus
             new Navigation { Id = 50, ParentId = null, Title = "INQUIRIES", SubTitle = "", Url = "", StatusId = 1, OrderNumber = 1, Icon = "", Disabled = false, RequiredRoles = new List<NavigationRole>(rolesInquiries), NavigationStatus = notStarted },
