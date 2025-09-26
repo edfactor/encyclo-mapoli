@@ -4,8 +4,8 @@ import StandaloneMemberDetails from "pages/MasterInquiry/StandaloneMemberDetails
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  useLazyGetProfitMasterInquiryMemberQuery,
-  useLazyGetProfitMasterInquiryMemberDetailsQuery
+  useLazyGetProfitMasterInquiryMemberDetailsQuery,
+  useLazyGetProfitMasterInquiryMemberQuery
 } from "reduxstore/api/InquiryApi";
 import { useLazyGetForfeitureAdjustmentsQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";

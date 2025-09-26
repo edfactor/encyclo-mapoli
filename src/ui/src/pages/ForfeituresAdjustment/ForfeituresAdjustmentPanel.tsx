@@ -28,8 +28,8 @@ const ForfeituresAdjustmentPanel: React.FC<ForfeituresAdjustmentPanelProps> = ({
             }}>
             {onAddForfeiture && (
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                {onAddForfeiture && (
-                  isReadOnly ? (
+                {onAddForfeiture &&
+                  (isReadOnly ? (
                     <Tooltip title="You are in read-only mode and cannot add forfeitures.">
                       <span>
                         <Button
@@ -49,8 +49,7 @@ const ForfeituresAdjustmentPanel: React.FC<ForfeituresAdjustmentPanelProps> = ({
                       color="primary">
                       ADD FORFEITURE
                     </Button>
-                  )
-                )}
+                  ))}
               </div>
             )}
           </div>
