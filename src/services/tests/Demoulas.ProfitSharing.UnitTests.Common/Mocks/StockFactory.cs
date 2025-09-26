@@ -150,13 +150,14 @@ public static class StockFactory
 
     public static List<YearEndUpdateStatus> CreateYearEndUpdateStatuses(short profitYear)
     {
+        const string V = "UnitTest";
         return
         [
             new YearEndUpdateStatus
             {
                 ProfitYear = profitYear,
                 CreatedAtUtc = default,
-                UserName = "someone",
+                UserName = V,
                 BeneficiariesEffected = 0,
                 EmployeesEffected = 0,
                 EtvasEffected = 0,

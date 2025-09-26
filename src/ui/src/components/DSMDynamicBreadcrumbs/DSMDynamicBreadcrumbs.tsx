@@ -1,7 +1,7 @@
 import { Breadcrumbs, Link, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Location, useLocation, useNavigate } from "react-router-dom";
-import { getReadablePathName } from "utils/getReadablePathName";
+import { getReadablePathName } from "../../utils/getReadablePathName";
 import { BreadcrumbItem } from "./DSMBreadcrumbItem";
 
 interface DSMDynamicBreadcrumbsProps {
@@ -32,9 +32,12 @@ const DSMDynamicBreadcrumbs: React.FC<DSMDynamicBreadcrumbsProps> = ({ separator
 
   const handleClick = (path: string, index: number) => {
     if (path !== location.pathname) {
+      // Sanitize path to prevent open redirect - only allow internal paths
+      const sanitizedPath = path.startsWith("/") && !path.startsWith("//") && !path.includes("://") ? path : "/";
+
       const newHistory = navigationHistory.slice(0, index + 1);
       setNavigationHistory(newHistory);
-      navigate(path);
+      navigate(sanitizedPath);
     }
   };
 
