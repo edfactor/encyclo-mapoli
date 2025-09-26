@@ -54,6 +54,7 @@ import { MenuBar } from "../../components/MenuBar/MenuBar";
 import BeneficiaryInquiry from "../../pages/BeneficiaryInquiry/BeneficiaryInquiry";
 import MilitaryEntryAndModification from "../../pages/DecemberActivities/MilitaryEntryAndModification/MilitaryEntryAndModification";
 import DevDebug from "../../pages/Dev/DevDebug";
+import Documentation from "../../pages/Documentation/Documentation";
 import RecentlyTerminated from "../../pages/FiscalClose/RecentlyTerminated/RecentlyTerminated";
 import TerminatedLetters from "../../pages/FiscalClose/TerminatedLetters/TerminatedLetters";
 import ForfeituresAdjustment from "../../pages/ForfeituresAdjustment/ForfeituresAdjustment";
@@ -342,6 +343,10 @@ const RouterSubAssembly: React.FC = () => {
                   element={<DevDebug />}
                 />
                 <Route
+                  path={ROUTES.DOCUMENTATION}
+                  element={<Documentation />}
+                />
+                <Route
                   path={`${ROUTES.PAY426N}/:presetNumber?`}
                   element={<PAY426N />}
                 />
@@ -399,7 +404,8 @@ const RouterSubAssembly: React.FC = () => {
       data?.navigation &&
       token &&
       location.pathname !== "/unauthorized" &&
-      location.pathname !== "/dev-debug"
+      location.pathname !== "/dev-debug" &&
+      location.pathname !== "/documentation"
     ) {
       const currentPath = location.pathname;
       const isAllowed = isPathAllowedInNavigation(currentPath, data.navigation);
