@@ -56,7 +56,7 @@ const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
       container
       direction="column"
       width="100%">
-      <ReportSummary report={under21Breakdown} />
+      {under21Breakdown && <ReportSummary report={under21Breakdown} />}
       <Grid width="100%">
         <DSMGrid
           preferenceKey="UNDER_21_BREAKDOWN_REPORT"
