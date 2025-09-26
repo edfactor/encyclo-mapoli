@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetContributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid } from "smart-ui-library";
 import { TotalsGrid } from "components/TotalsGrid/TotalsGrid";
@@ -8,7 +7,6 @@ import { GetContributionsByAgeColumns } from "./ContributionsByAgeGridColumns";
 import { Grid } from "@mui/material";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { numberToCurrency } from "smart-ui-library";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 
 interface ContributionsByAgeGridProps {
@@ -19,12 +17,8 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
   const {
     contributionsByAgeTotal,
     contributionsByAgeFullTime,
-    contributionsByAgePartTime,
-    contributionsByAgeQueryParams
+    contributionsByAgePartTime
   } = useSelector((state: RootState) => state.yearsEnd);
-  const [triggerSearch, { isFetching }] = useLazyGetContributionsByAgeQuery();
-  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
-  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
 
   const { handleSortChange } = useGridPagination({
     initialPageSize: 255,
@@ -37,23 +31,7 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
 
   const columnDefsTotal = useMemo(() => GetContributionsByAgeColumns(FrozenReportsByAgeRequestType.Total), []);
 
-  const onSearch = useCallback(async () => {
-    triggerSearch(
-      {
-        profitYear: fiscalCloseProfitYear || contributionsByAgeQueryParams?.profitYear || 0,
-        reportType: FrozenReportsByAgeRequestType.Total,
-        pagination: { skip: 0, take: 255 }
-      },
-      false
-    );
-
-  }, []);
-
-  useEffect(() => {
-    if (hasToken && initialSearchLoaded && contributionsByAgeQueryParams?.profitYear) {
-      onSearch();
-    }
-  }, [contributionsByAgeQueryParams?.profitYear, hasToken, initialSearchLoaded, onSearch]);
+  // No need for API calls in child component - parent handles data loading
 
   return (
     <>
@@ -81,7 +59,7 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
                   topRowHeaders={["Total", "EMPS", "Amount"]}></TotalsGrid>
         <DSMGrid
                   preferenceKey={"CONT_AGE_Total"}
-                  isLoading={isFetching}
+                  isLoading={false}
                   handleSortChanged={handleSortChange}
                   providedOptions={{
           rowData: contributionsByAgeTotal?.response?.results ?? [],
@@ -105,7 +83,7 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
                   topRowHeaders={["FullTime", "EMPS", "Amount"]}></TotalsGrid>
         <DSMGrid
                   preferenceKey={"CONT_AGE_FullTime"}
-                  isLoading={isFetching}
+                  isLoading={false}
                   handleSortChanged={handleSortChange}
                   providedOptions={{
           rowData: contributionsByAgeFullTime?.response?.results ?? [],
@@ -129,7 +107,7 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
                   topRowHeaders={["Total", "EMPS", "Amount"]}></TotalsGrid>
         <DSMGrid
                   preferenceKey={"CONT_AGE_PartTime"}
-                  isLoading={isFetching}
+                  isLoading={false}
                   handleSortChanged={handleSortChange}
                   providedOptions={{
         rowData: contributionsByAgePartTime?.response?.results ?? [],
