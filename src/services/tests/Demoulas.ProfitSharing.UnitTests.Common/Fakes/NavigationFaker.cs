@@ -129,4 +129,18 @@ public class NavigationFaker
 
         return list;
     }
+
+    public List<NavigationRole> GetAllNavigationRoles()
+    {
+        // Create all the navigation roles used in the system with their IsReadOnly flags
+        return new List<NavigationRole>
+        {
+            new NavigationRole { Id = 1, Name = "System-Administrator", IsReadOnly = false },
+            new NavigationRole { Id = 2, Name = "Finance-Manager", IsReadOnly = false },
+            new NavigationRole { Id = 3, Name = "Distributions-Clerk", IsReadOnly = false },
+            new NavigationRole { Id = 4, Name = "Hardship-Administrator", IsReadOnly = false },
+            new NavigationRole { Id = 6, Name = "IT-DevOps", IsReadOnly = true },
+            new NavigationRole { Id = 9, Name = "Auditor", IsReadOnly = true }
+        };
+    }
 }

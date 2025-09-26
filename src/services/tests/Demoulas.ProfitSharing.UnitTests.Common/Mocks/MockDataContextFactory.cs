@@ -168,6 +168,11 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.NavigationStatuses).Returns(mockNavigationStatus.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.NavigationStatuses).Returns(mockNavigationStatus.Object);
 
+        List<NavigationRole>? navigationRoles = new NavigationFaker().GetAllNavigationRoles();
+        Mock<DbSet<NavigationRole>> mockNavigationRoles = navigationRoles.BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.NavigationRoles).Returns(mockNavigationRoles.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.NavigationRoles).Returns(mockNavigationRoles.Object);
+
 
        
 
