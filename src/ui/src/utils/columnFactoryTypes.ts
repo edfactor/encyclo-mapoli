@@ -46,6 +46,7 @@ export interface BadgeColumnOptions extends LimitedAlignmentColumnOptions {
   renderAsLink?: boolean;
   psnSuffix?: boolean;
   navigateFunction?: (path: string) => void;
+  pinned?: "left" | "right";
 }
 
 export interface CurrencyColumnOptions extends BaseColumnOptions {

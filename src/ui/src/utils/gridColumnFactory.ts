@@ -241,7 +241,8 @@ export const createBadgeColumn = (options: BadgeColumnOptions = {}): ColDef => {
     resizable = true,
     renderAsLink = true,
     psnSuffix = false,
-    navigateFunction
+    navigateFunction,
+    pinned
   } = options;
 
   const alignmentClass = alignment === "center" ? "center-align" : "left-align";
@@ -256,6 +257,10 @@ export const createBadgeColumn = (options: BadgeColumnOptions = {}): ColDef => {
     resizable,
     sortable
   };
+
+  if (pinned) {
+    column.pinned = pinned;
+  }
 
   if (maxWidth) {
     column.maxWidth = maxWidth;
