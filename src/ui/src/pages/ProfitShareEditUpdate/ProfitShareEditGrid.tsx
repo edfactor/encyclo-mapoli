@@ -5,6 +5,7 @@ import { useLazyGetProfitShareEditQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { ProfitShareUpdateRequest } from "reduxstore/types";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
 import { ProfitShareEditUpdateGridColumns } from "./ProfitShareEditGridColumns";
 
 interface ProfitShareEditGridProps {
@@ -23,6 +24,9 @@ const ProfitShareEditGrid = ({
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
+  
+  // Use dynamic grid height utility hook
+  const gridMaxHeight = useDynamicGridHeight();
   const [sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "name",
     isSortDescending: false
@@ -87,7 +91,7 @@ const ProfitShareEditGrid = ({
             preferenceKey={"ProfitShareEditGrid"}
             isLoading={isFetching}
             handleSortChanged={sortEventHandler}
-            maxHeight={400}
+            maxHeight={gridMaxHeight}
             providedOptions={{
               rowData: "response" in profitSharingEdit ? profitSharingEdit.response?.results : [],
               columnDefs: editColumnDefs
