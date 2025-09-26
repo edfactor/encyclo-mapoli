@@ -743,7 +743,6 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
           </div>
 
           <DSMGrid
-            preferenceKey={"QPREV-PROF"}
             handleSortChanged={sortEventHandler}
             maxHeight={gridMaxHeight}
             isLoading={isFetching}
@@ -756,8 +755,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
               getRowClass: getRowClass,
               rowSelection: {
                 mode: "multiRow",
-                checkboxes: true,
-                headerCheckbox: true,
+                checkboxes: false,
+                headerCheckbox: false,
                 enableClickSelection: false
               },
               rowHeight: 40,
