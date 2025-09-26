@@ -8,16 +8,20 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.Util.Extensions;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 
 public class CalendarRecordRangeEndpoint : ProfitSharingEndpoint<YearRangeRequest, Results<Ok<CalendarResponseDto>, NotFound, ProblemHttpResult>>
 {
     private readonly ICalendarService _calendarService;
+    private readonly ILogger<CalendarRecordRangeEndpoint> _logger;
 
-    public CalendarRecordRangeEndpoint(ICalendarService calendarService) : base(Navigation.Constants.Inquiries)
+    public CalendarRecordRangeEndpoint(ICalendarService calendarService, ILogger<CalendarRecordRangeEndpoint> logger) : base(Navigation.Constants.Inquiries)
     {
         _calendarService = calendarService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -43,28 +47,43 @@ public class CalendarRecordRangeEndpoint : ProfitSharingEndpoint<YearRangeReques
             s.Responses[400] = "Bad Request. Both BeginProfitYear and EndProfitYear must be valid years.";
             s.Responses[404] = "Not Found. No accounting dates found for the specified years.";
         });
-    Group<LookupGroup>();
+        Group<LookupGroup>();
 
         // Removed output caching configuration pending standardized caching extension availability for route handlers.
     }
 
-    public override async Task<Results<Ok<CalendarResponseDto>, NotFound, ProblemHttpResult>> ExecuteAsync(YearRangeRequest req, CancellationToken ct)
+    public override Task<Results<Ok<CalendarResponseDto>, NotFound, ProblemHttpResult>> ExecuteAsync(YearRangeRequest req, CancellationToken ct)
     {
-        var startTask = _calendarService.GetYearStartAndEndAccountingDatesAsync(req.BeginProfitYear, ct);
-        var endTask = _calendarService.GetYearStartAndEndAccountingDatesAsync(req.EndProfitYear, ct);
-
-        await Task.WhenAll(startTask, endTask);
-        
-        var start = await startTask;
-        var end = await endTask;
-        // Basic not-found semantics: if either side returns default dates (00/00) treat as not found.
-        if (start.FiscalBeginDate == default || end.FiscalEndDate == default)
+        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
-            return Result<CalendarResponseDto>.Failure(Error.CalendarYearNotFound)
-                .ToHttpResult(Error.CalendarYearNotFound);
-        }
+            var startTask = _calendarService.GetYearStartAndEndAccountingDatesAsync(req.BeginProfitYear, ct);
+            var endTask = _calendarService.GetYearStartAndEndAccountingDatesAsync(req.EndProfitYear, ct);
 
-        var dto = new CalendarResponseDto { FiscalBeginDate = start.FiscalBeginDate, FiscalEndDate = end.FiscalEndDate };
-        return Result<CalendarResponseDto>.Success(dto).ToHttpResult();
+            await Task.WhenAll(startTask, endTask);
+
+            var start = await startTask;
+            var end = await endTask;
+
+            // Record business metrics
+            Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new KeyValuePair<string, object?>("operation", "calendar-range-lookup"),
+                new KeyValuePair<string, object?>("endpoint.category", "lookups"));
+
+            // Basic not-found semantics: if either side returns default dates (00/00) treat as not found.
+            if (start.FiscalBeginDate == default || end.FiscalEndDate == default)
+            {
+                _logger.LogWarning("Calendar year range lookup failed for years {BeginYear}-{EndYear} (correlation: {CorrelationId})",
+                    req.BeginProfitYear, req.EndProfitYear, HttpContext.TraceIdentifier);
+
+                return Result<CalendarResponseDto>.Failure(Error.CalendarYearNotFound)
+                    .ToHttpResult(Error.CalendarYearNotFound);
+            }
+
+            _logger.LogInformation("Calendar range lookup completed for years {BeginYear}-{EndYear} (correlation: {CorrelationId})",
+                req.BeginProfitYear, req.EndProfitYear, HttpContext.TraceIdentifier);
+
+            var dto = new CalendarResponseDto { FiscalBeginDate = start.FiscalBeginDate, FiscalEndDate = end.FiscalEndDate };
+            return Result<CalendarResponseDto>.Success(dto).ToHttpResult();
+        });
     }
 }

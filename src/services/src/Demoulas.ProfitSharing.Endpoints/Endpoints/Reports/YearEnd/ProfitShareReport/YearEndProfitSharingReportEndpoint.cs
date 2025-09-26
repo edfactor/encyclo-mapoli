@@ -4,27 +4,32 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareReport;
 
 /// <summary>
 /// Endpoint for generating the year-end profit sharing report. Returns a list of employees eligible for profit sharing, with filtering options and CSV export support.
 /// </summary>
-public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse,YearEndProfitSharingReportDetail, YearEndProfitSharingReportEndpoint.YearEndProfitSharingReportClassMap>
+public class YearEndProfitSharingReportEndpoint : EndpointWithCsvTotalsBase<YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse, YearEndProfitSharingReportDetail, YearEndProfitSharingReportEndpoint.YearEndProfitSharingReportClassMap>
 {
     private readonly IProfitSharingSummaryReportService _cleanupReportService;
     private readonly IAuditService _auditService;
+    private readonly ILogger<YearEndProfitSharingReportEndpoint> _logger;
     private const string Report_Name = "Yearend Profit Sharing Report";
 
-    public YearEndProfitSharingReportEndpoint(IProfitSharingSummaryReportService cleanupReportService, IAuditService auditService)
+    public YearEndProfitSharingReportEndpoint(IProfitSharingSummaryReportService cleanupReportService, IAuditService auditService, ILogger<YearEndProfitSharingReportEndpoint> logger)
         : base(Navigation.Constants.ProfitShareReportFinalRun)
     {
         _cleanupReportService = cleanupReportService;
         _auditService = auditService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -39,7 +44,7 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearE
                     .Cast<YearEndProfitSharingReportId>()
                     .Select(e => $"{(int)e}: {GetEnumDescription(e)}"));
 
-            s.ExampleRequest = new YearEndProfitSharingReportRequest() { ProfitYear = 2025, ReportId = YearEndProfitSharingReportId.Age18To20With1000Hours, Skip = SimpleExampleRequest.Skip, Take = SimpleExampleRequest.Take};
+            s.ExampleRequest = new YearEndProfitSharingReportRequest() { ProfitYear = 2025, ReportId = YearEndProfitSharingReportId.Age18To20With1000Hours, Skip = SimpleExampleRequest.Skip, Take = SimpleExampleRequest.Take };
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
@@ -58,15 +63,47 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearE
     /// <summary>
     /// Handles the request and returns the year-end profit sharing report response.
     /// </summary>
-    public override Task<YearEndProfitSharingReportResponse> GetResponse(YearEndProfitSharingReportRequest req, CancellationToken ct)
+    public override async Task<YearEndProfitSharingReportResponse> GetResponse(YearEndProfitSharingReportRequest req, CancellationToken ct)
     {
-        return _auditService.ArchiveCompletedReportAsync(
-            Report_Name,
-            req.ProfitYear,
-            req,
-            (archiveReq, _, cancellationToken) => _cleanupReportService.GetYearEndProfitSharingReportAsync(archiveReq, cancellationToken),
-            ct);
+        using var activity = this.StartEndpointActivity(HttpContext);
 
+        try
+        {
+            // This endpoint accesses SSN data, so mark as sensitive
+            this.RecordRequestMetrics(HttpContext, _logger, req, "Ssn");
+
+            var response = await _auditService.ArchiveCompletedReportAsync(
+                Report_Name,
+                req.ProfitYear,
+                req,
+                (archiveReq, _, cancellationToken) => _cleanupReportService.GetYearEndProfitSharingReportAsync(archiveReq, cancellationToken),
+                ct);
+
+            // Record year-end profit sharing report metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "year-end-profit-sharing-report"),
+                new("endpoint", "YearEndProfitSharingReportEndpoint"),
+                new("profit_year", req.ProfitYear.ToString()),
+                new("report_id", req.ReportId.ToString()));
+
+            // Record counts processed
+            var recordCount = response.Response?.Results?.Count() ?? 0;
+            var totalCount = response.Response?.Total ?? 0;
+
+            EndpointTelemetry.RecordCountsProcessed.Record(recordCount,
+                new("endpoint", "YearEndProfitSharingReportEndpoint"),
+                new("entity_type", "year-end participants"),
+                new("profit_year", req.ProfitYear.ToString()));
+
+            this.RecordResponseMetrics(HttpContext, _logger, response);
+
+            return response;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex);
+            throw;
+        }
     }
 
     public override string ReportFileName => "yearend-profit-sharing-report";
@@ -78,7 +115,7 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearE
         return attr?.Description ?? value.ToString();
     }
 
-    public class YearEndProfitSharingReportClassMap: ClassMap<YearEndProfitSharingReportDetail>
+    public class YearEndProfitSharingReportClassMap : ClassMap<YearEndProfitSharingReportDetail>
     {
         public YearEndProfitSharingReportClassMap()
         {

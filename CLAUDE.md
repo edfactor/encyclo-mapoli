@@ -40,6 +40,165 @@ Patterns:
 - Avoid returning raw DTOs or nulls; always wrap service outcomes in `Result<T>` before translating to HTTP
 - Catch unexpected exceptions and map to `TypedResults.Problem(ex.Message)` (logging appropriately) unless a global handler already standardizes this
 
+## Telemetry & Observability Patterns (MANDATORY)
+
+All FastEndpoints MUST implement comprehensive telemetry using the established `TelemetryExtensions` patterns. Telemetry provides critical visibility into application usage, performance, security, and business operations for development, QA, and production support teams.
+
+### Required Implementation (Choose One Pattern)
+
+**Automatic Pattern (Recommended)**: Use the `ExecuteWithTelemetry` wrapper for comprehensive telemetry with minimal code:
+
+```csharp
+using Demoulas.ProfitSharing.Common.Telemetry;
+
+public override async Task<MyResponse> ExecuteAsync(MyRequest req, CancellationToken ct)
+{
+    return await this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
+    {
+        // Your business logic here
+        var result = await _service.ProcessAsync(req, ct);
+        
+        // Add business metrics (required for business operations)
+        EndpointTelemetry.BusinessOperationsTotal.Add(1,
+            new("operation", "year-end-processing"),
+            new("endpoint", nameof(MyEndpoint)));
+            
+        return result;
+    }, "Ssn", "OracleHcmId"); // List all sensitive fields accessed
+}
+```
+
+**Manual Pattern (Advanced Control)**: Use individual telemetry methods for fine-grained control:
+
+```csharp
+using Demoulas.ProfitSharing.Common.Telemetry;
+
+private readonly ILogger<MyEndpoint> _logger;
+
+public override async Task<MyResponse> ExecuteAsync(MyRequest req, CancellationToken ct)
+{
+    using var activity = this.StartEndpointActivity(HttpContext);
+    
+    try
+    {
+        // Record request metrics (required)
+        this.RecordRequestMetrics(HttpContext, _logger, req, "Ssn", "OracleHcmId");
+        
+        // Business logic
+        var response = await _service.ProcessAsync(req, ct);
+        
+        // Business metrics (required for business operations)
+        EndpointTelemetry.BusinessOperationsTotal.Add(1,
+            new("operation", "employee-lookup"),
+            new("endpoint", nameof(MyEndpoint)));
+            
+        // Record count metrics (when processing collections)
+        if (response.Records?.Count > 0)
+        {
+            EndpointTelemetry.RecordCountsProcessed.Record(response.Records.Count,
+                new("record_type", "employee"),
+                new("endpoint", nameof(MyEndpoint)));
+        }
+        
+        // Record response metrics (required)
+        this.RecordResponseMetrics(HttpContext, _logger, response);
+        
+        return response;
+    }
+    catch (Exception ex)
+    {
+        // Record exception metrics (required)
+        this.RecordException(HttpContext, _logger, ex, activity);
+        throw;
+    }
+}
+```
+
+### Logger Injection (Required)
+
+All endpoints MUST inject `ILogger<TEndpoint>` for telemetry correlation and structured logging:
+
+```csharp
+public class MyEndpoint : Endpoint<MyRequest, MyResponse>
+{
+    private readonly IMyService _service;
+    private readonly ILogger<MyEndpoint> _logger; // Required for telemetry
+    
+    public MyEndpoint(IMyService service, ILogger<MyEndpoint> logger)
+    {
+        _service = service;
+        _logger = logger;
+    }
+}
+```
+
+### Business Metrics (Context-Specific)
+
+Add business operation metrics appropriate to the endpoint category:
+
+**Year-End Operations**:
+```csharp
+EndpointTelemetry.BusinessOperationsTotal.Add(1,
+    new("operation", "year-end-enrollment"),
+    new("profit_year", profitYear.ToString()),
+    new("endpoint", nameof(YearEndEnrollmentEndpoint)));
+```
+
+**Report Generation**:
+```csharp
+EndpointTelemetry.BusinessOperationsTotal.Add(1,
+    new("operation", "report-generation"),
+    new("report_type", "profit-sharing"),
+    new("endpoint", nameof(ProfitSharingReportEndpoint)));
+```
+
+**Employee Lookups**:
+```csharp
+EndpointTelemetry.BusinessOperationsTotal.Add(1,
+    new("operation", "employee-lookup"),
+    new("lookup_type", "by-ssn"),
+    new("endpoint", nameof(EmployeeLookupEndpoint)));
+```
+
+### Sensitive Field Guidelines (CRITICAL)
+
+When endpoints access sensitive fields, ALWAYS list them in telemetry calls:
+
+**Common Sensitive Fields**:
+- `"Ssn"` - Social Security Numbers
+- `"OracleHcmId"` - Internal employee identifiers  
+- `"BadgeNumber"` - Employee badge numbers
+- `"Salary"` - Salary information
+- `"BeneficiaryInfo"` - Beneficiary details
+
+**Examples**:
+```csharp
+// Single sensitive field
+this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => { ... }, "Ssn");
+
+// Multiple sensitive fields
+this.RecordRequestMetrics(HttpContext, _logger, req, "Ssn", "OracleHcmId", "Salary");
+
+// No sensitive fields (common for lookup endpoints)
+this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => { ... });
+```
+
+### Migration from Legacy Patterns
+
+**Updating Existing Endpoints**:
+- Replace ad-hoc OpenTelemetry activity creation with `StartEndpointActivity`
+- Replace manual metrics with `TelemetryExtensions` methods
+- Consolidate scattered telemetry logic using `ExecuteWithTelemetry` wrapper
+- Add missing logger injection where absent
+- Ensure sensitive field declarations are complete
+
+### Documentation References
+
+Complete implementation details and examples available in:
+- `TELEMETRY_GUIDE.md` - Comprehensive reference for developers, QA, and DevOps
+- `TELEMETRY_QUICK_REFERENCE.md` - Developer cheat sheet with copy-paste examples  
+- `TELEMETRY_DEVOPS_GUIDE.md` - Production monitoring and operations guide
+
 ## Backend Coding Style
 
 - File-scoped namespaces; one class per file; explicit access modifiers
@@ -148,6 +307,7 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
 ## Testing & Quality
 
 - Backend: xUnit + Shouldly. Place tests under `src/services/tests/` mirroring namespace structure. Use deterministic data builders (Bogus) where needed
+- **Telemetry Testing**: All endpoint tests should verify telemetry integration (activity creation, metrics recording, business operations tracking). See `TELEMETRY_GUIDE.md` for testing patterns
 - Frontend: Add Playwright or component tests colocated (if pattern emerges) but keep end-to-end in `e2e/`
 - Security warnings/analyzers treated as errors; keep build green
 
@@ -171,6 +331,9 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
 ## When Extending
 
 - Add new endpoints through FastEndpoints with consistent foldering; register dependencies via DI in existing composition root
+- ALL new endpoints MUST implement telemetry using `TelemetryExtensions` patterns (see Telemetry & Observability section)
+- Include appropriate business metrics for the endpoint's domain (year-end, reports, lookups, etc.)
+- Declare all sensitive fields accessed in telemetry calls for security auditing
 - Share logic via interfaces in `Common` or specialized service projects; avoid cross-project circular refs
 - Update `COPILOT_INSTRUCTIONS.md` and this file if introducing a pervasive new pattern
 
@@ -275,6 +438,10 @@ dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
 - Introduce raw SQL without parameters
 - Duplicate mapping logic already covered by Mapperly profiles
 - Hardcode environment-specific connection strings or credentials
+- Create endpoints without comprehensive telemetry using `TelemetryExtensions` patterns
+- Use legacy telemetry patterns instead of `ExecuteWithTelemetry` or manual `TelemetryExtensions` methods
+- Access sensitive fields without declaring them in telemetry calls (security requirement)
+- Skip logger injection in endpoint constructors (required for telemetry correlation)
 - Create files unless they're absolutely necessary for achieving your goal
 - Proactively create documentation files (*.md) or README files unless explicitly requested
 
@@ -299,3 +466,12 @@ dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
   ```
 
   This attribute helps link tests to tickets and provides a terse description for test explorers and reviewers.
+
+## Documentation References
+
+**Core Telemetry Documentation**:
+- `TELEMETRY_GUIDE.md` - Comprehensive 75+ page reference covering developers, QA, and DevOps with architecture, implementation patterns, metrics reference, security guidelines, configuration, and troubleshooting
+- `TELEMETRY_QUICK_REFERENCE.md` - Developer cheat sheet with 3-step implementation process, copy-paste examples, business metrics patterns, and troubleshooting checklist
+- `TELEMETRY_DEVOPS_GUIDE.md` - Production operations guide with deployment checklist, monitoring setup (Prometheus/Grafana), security configuration, alert rules, and disaster recovery procedures
+
+These documents contain essential patterns and examples for implementing telemetry correctly across all endpoint types. Reference them when creating new endpoints or troubleshooting telemetry issues.

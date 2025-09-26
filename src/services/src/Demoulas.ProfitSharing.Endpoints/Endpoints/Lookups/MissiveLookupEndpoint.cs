@@ -1,14 +1,17 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Contracts; // Result, Error, ListResponseDto
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.Util.Extensions;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
@@ -16,10 +19,12 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 public sealed class MissiveLookupEndpoint : ProfitSharingResultResponseEndpoint<ListResponseDto<MissiveResponse>>
 {
     private readonly IMissiveService _missiveService;
+    private readonly ILogger<MissiveLookupEndpoint> _logger;
 
-    public MissiveLookupEndpoint(IMissiveService missiveService) : base(Navigation.Constants.Inquiries)
+    public MissiveLookupEndpoint(IMissiveService missiveService, ILogger<MissiveLookupEndpoint> logger) : base(Navigation.Constants.Inquiries)
     {
         _missiveService = missiveService;
+        _logger = logger;
     }
     public override void Configure()
     {
@@ -48,15 +53,38 @@ public sealed class MissiveLookupEndpoint : ProfitSharingResultResponseEndpoint<
 
     public override async Task<Results<Ok<ListResponseDto<MissiveResponse>>, NotFound, ProblemHttpResult>> ExecuteAsync(CancellationToken ct)
     {
+        using var activity = this.StartEndpointActivity(HttpContext);
+
         try
         {
+            this.RecordRequestMetrics(HttpContext, _logger, new { });
+
             var items = await _missiveService.GetAllMissives(ct);
-            var dto = ListResponseDto<MissiveResponse>.From(items.OrderBy(x => x.Message));
+            var orderedItems = items.OrderBy(x => x.Message).ToList();
+
+            // Record business metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "missive-lookup"),
+                new("endpoint", "MissiveLookupEndpoint"));
+
+            EndpointTelemetry.RecordCountsProcessed.Record(orderedItems.Count,
+                new("record_type", "missives"),
+                new("endpoint", "MissiveLookupEndpoint"));
+
+            _logger.LogInformation("Missive lookup completed, returned {MissiveCount} missives (correlation: {CorrelationId})",
+                orderedItems.Count, HttpContext.TraceIdentifier);
+
+            var dto = ListResponseDto<MissiveResponse>.From(orderedItems);
             var result = Result<ListResponseDto<MissiveResponse>>.Success(dto);
-            return result.ToHttpResult();
+            var httpResult = result.ToHttpResult();
+
+            this.RecordResponseMetrics(HttpContext, _logger, httpResult);
+
+            return httpResult;
         }
         catch (Exception ex)
         {
+            this.RecordException(HttpContext, _logger, ex, activity);
             return Result<ListResponseDto<MissiveResponse>>.Failure(Error.Unexpected(ex.Message)).ToHttpResult();
         }
     }

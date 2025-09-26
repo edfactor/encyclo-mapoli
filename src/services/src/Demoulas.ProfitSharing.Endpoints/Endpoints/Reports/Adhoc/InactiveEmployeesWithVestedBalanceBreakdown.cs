@@ -3,20 +3,26 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
+
 public sealed class InactiveEmployeesWithVestedBalanceBreakdown : EndpointWithCsvBase<BreakdownByStoreRequest, MemberYearSummaryDto, InactiveEmployeesWithVestedBalanceBreakdown.BreakdownEndpointMap>
 {
     private readonly IBreakdownService _breakdownService;
+    private readonly ILogger<InactiveEmployeesWithVestedBalanceBreakdown> _logger;
 
-    public InactiveEmployeesWithVestedBalanceBreakdown(IBreakdownService breakdownService)
+    public InactiveEmployeesWithVestedBalanceBreakdown(IBreakdownService breakdownService, ILogger<InactiveEmployeesWithVestedBalanceBreakdown> logger)
         : base(Navigation.Constants.QPAY066AdHocReports)
     {
         _breakdownService = breakdownService;
+        _logger = logger;
     }
 
     public override string ReportFileName => "Breakdown by Store - QPAY066i - Inactive employees with vested balance";
@@ -33,9 +39,54 @@ public sealed class InactiveEmployeesWithVestedBalanceBreakdown : EndpointWithCs
         base.Configure();
     }
 
-    public override Task<ReportResponseBase<MemberYearSummaryDto>> GetResponse(BreakdownByStoreRequest breakdownByStoreRequest, CancellationToken ct)
+    public override async Task<ReportResponseBase<MemberYearSummaryDto>> GetResponse(BreakdownByStoreRequest breakdownByStoreRequest, CancellationToken ct)
     {
-        return _breakdownService.GetInactiveMembersWithVestedBalanceByStore(breakdownByStoreRequest, ct);
+        using var activity = this.StartEndpointActivity(HttpContext);
+
+        try
+        {
+            this.RecordRequestMetrics(HttpContext, _logger, breakdownByStoreRequest);
+
+            var result = await _breakdownService.GetInactiveMembersWithVestedBalanceByStore(breakdownByStoreRequest, ct);
+
+            // Record breakdown report metrics with vested balance specialization
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "inactive-employees-vested-balance-breakdown"),
+                new("endpoint", "InactiveEmployeesWithVestedBalanceBreakdown"),
+                new("report_type", "breakdown"),
+                new("employee_status", "inactive"),
+                new("balance_filter", "vested"));
+
+            var resultCount = result?.Response?.Results?.Count() ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                new("record_type", "inactive-employees-vested"),
+                new("endpoint", "InactiveEmployeesWithVestedBalanceBreakdown"));
+
+            _logger.LogInformation("Inactive employees with vested balance breakdown report generated, returned {Count} employees (correlation: {CorrelationId})",
+                resultCount, HttpContext.TraceIdentifier);
+
+            if (result != null)
+            {
+                this.RecordResponseMetrics(HttpContext, _logger, result);
+                return result;
+            }
+
+            var emptyResult = new ReportResponseBase<MemberYearSummaryDto>
+            {
+                ReportName = ReportFileName,
+                StartDate = DateOnly.FromDateTime(DateTime.Today),
+                EndDate = DateOnly.FromDateTime(DateTime.Today),
+                Response = new() { Results = [] }
+            };
+
+            this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
+            return emptyResult;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 
     public sealed class BreakdownEndpointMap : ClassMap<MemberYearSummaryDto>

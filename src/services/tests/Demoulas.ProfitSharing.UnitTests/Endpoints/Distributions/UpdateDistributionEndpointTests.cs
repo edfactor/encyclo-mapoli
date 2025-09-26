@@ -9,6 +9,7 @@ using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
 using System.Net;
@@ -339,7 +340,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
     [Theory(DisplayName = "UpdateDistribution - Should accept valid frequency ID updates")]
     [InlineData('M')]
     [InlineData('Q')]
-    [InlineData('L')]
+    [InlineData('H')]
     [InlineData('R')]
     public async Task UpdateDistribution_WithValidFrequencyIdUpdates_ShouldReturnSuccess(char frequencyId)
     {
@@ -473,7 +474,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         // the test infrastructure doesn't properly enforce authorization 
         // policies for valid JWT tokens. The endpoint DOES have proper authorization
         // as shown by other tests that return 401 Unauthorized when no token is provided.
-        
+
         // Arrange
         // First create a distribution with proper permissions
         ApiClient.CreateAndAssignTokenForClient(Role.ITDEVOPS);
@@ -503,7 +504,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         // Assert
         response.ShouldNotBeNull();
         response.Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
-        
+
     }
 
     [Fact(DisplayName = "UpdateDistribution - Endpoint configuration should be correct")]
@@ -514,7 +515,8 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         // Act & Assert
         // Verify the endpoint can be instantiated with its dependencies
-        var endpoint = new UpdateDistributionEndpoint(mockDistributionService.Object);
+        var loggerMock = new Mock<ILogger<UpdateDistributionEndpoint>>();
+        var endpoint = new UpdateDistributionEndpoint(mockDistributionService.Object, loggerMock.Object);
         endpoint.ShouldNotBeNull();
         mockDistributionService.ShouldNotBeNull();
 

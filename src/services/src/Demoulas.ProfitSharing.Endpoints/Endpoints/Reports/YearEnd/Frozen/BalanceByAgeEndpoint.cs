@@ -4,24 +4,29 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts; // Result, Error
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen.BalanceByAgeEndpoint;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 
 public class BalanceByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReportsByAgeRequest, BalanceByAge, BalanceByAgeDetail, ProfitSharingBalanceByAgeMapper>
 {
     private readonly IFrozenReportService _frozenReportService;
+    private readonly ILogger<BalanceByAgeEndpoint> _logger;
 
-    public BalanceByAgeEndpoint(IFrozenReportService frozenReportService)
+    public BalanceByAgeEndpoint(IFrozenReportService frozenReportService, ILogger<BalanceByAgeEndpoint> logger)
         : base(Navigation.Constants.BalanceByAge)
     {
         _frozenReportService = frozenReportService;
+        _logger = logger;
     }
 
     public override string ReportFileName => "PROFIT SHARING BALANCE BY AGE";
@@ -45,13 +50,52 @@ public class BalanceByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReportsByAge
 
     public override async Task<BalanceByAge> GetResponse(FrozenReportsByAgeRequest req, CancellationToken ct)
     {
-        // Underlying base class already handles HTTP negotiation (JSON/CSV). We just ensure exceptions become domain failures upstream if needed.
+        using var activity = this.StartEndpointActivity(HttpContext);
+
         try
         {
-            return await _frozenReportService.GetBalanceByAgeYearAsync(req, ct);
+            this.RecordRequestMetrics(HttpContext, _logger, req);
+
+            var result = await _frozenReportService.GetBalanceByAgeYearAsync(req, ct);
+
+            // Record year-end frozen balance by age report metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "year-end-frozen-balance-by-age"),
+                new("endpoint", "BalanceByAgeEndpoint"),
+                new("report_type", "frozen"),
+                new("frozen_report_type", "balance-by-age"));
+
+            var resultCount = result?.Response?.Results?.Count() ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                new("record_type", "frozen-balance-by-age"),
+                new("endpoint", "BalanceByAgeEndpoint"));
+
+            _logger.LogInformation("Year-end frozen balance by age report generated, returned {Count} records (correlation: {CorrelationId})",
+                resultCount, HttpContext.TraceIdentifier);
+
+            if (result != null)
+            {
+                this.RecordResponseMetrics(HttpContext, _logger, result);
+                return result;
+            }
+
+            var emptyResult = new BalanceByAge
+            {
+                ReportName = ReportFileName,
+                StartDate = DateOnly.FromDateTime(DateTime.Today),
+                EndDate = DateOnly.FromDateTime(DateTime.Today),
+                Response = new() { Results = [] },
+                TotalMembers = 0,
+                BalanceTotalAmount = 0,
+                TotalBeneficiaries = 0
+            };
+
+            this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
+            return emptyResult;
         }
         catch (Exception ex)
         {
+            this.RecordException(HttpContext, _logger, ex, activity);
             // Rethrow as is; higher middleware will map. (Alternative: wrap in a domain Result and adapt base class, but out-of-scope since base expects raw DTO.)
             throw new InvalidOperationException($"Failed to retrieve Balance By Age report: {ex.Message}", ex);
         }

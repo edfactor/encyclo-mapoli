@@ -4,22 +4,28 @@ using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
+using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Navigations;
-public class GetNavigationEndpoint: ProfitSharingEndpoint<NavigationRequestDto,NavigationResponseDto>
+
+public class GetNavigationEndpoint : ProfitSharingEndpoint<NavigationRequestDto, NavigationResponseDto>
 {
 
     private readonly INavigationService _navigationService;
+    private readonly ILogger<GetNavigationEndpoint> _logger;
 
-    public GetNavigationEndpoint(INavigationService navigationService)
+    public GetNavigationEndpoint(INavigationService navigationService, ILogger<GetNavigationEndpoint> logger)
         : base(Navigation.Constants.Unknown)
     {
         _navigationService = navigationService;
+        _logger = logger;
     }
 
     public override void Configure()
     {
-      
+
         Get("");
         Summary(m =>
         {
@@ -30,11 +36,30 @@ public class GetNavigationEndpoint: ProfitSharingEndpoint<NavigationRequestDto,N
         Group<NavigationGroup>();
     }
 
-    public override async Task<NavigationResponseDto> ExecuteAsync(NavigationRequestDto req, CancellationToken ct)
+    public override Task<NavigationResponseDto> ExecuteAsync(NavigationRequestDto req, CancellationToken ct)
     {
-        var navigationList = await  _navigationService.GetNavigation(cancellationToken: ct);
-        var response = new NavigationResponseDto { Navigation = navigationList };
-        return response;
+        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
+        {
+            var navigationList = await _navigationService.GetNavigation(cancellationToken: ct);
+            var response = new NavigationResponseDto { Navigation = navigationList };
+
+            // Record business metrics
+            Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new KeyValuePair<string, object?>("operation", "get"),
+                new KeyValuePair<string, object?>("endpoint.category", "navigation"));
+
+            // Record navigation count for monitoring
+            var navigationCount = navigationList?.Count() ?? 0;
+            Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.RecordCountsProcessed.Record(navigationCount,
+                new KeyValuePair<string, object?>("endpoint.name", nameof(GetNavigationEndpoint)),
+                new KeyValuePair<string, object?>("operation", "get"));
+
+            // Log navigation retrieval
+            _logger.LogInformation("Navigation list retrieved: {NavigationCount} items (correlation: {CorrelationId})",
+                navigationCount, HttpContext.TraceIdentifier);
+
+            return response;
+        });
     }
 
 }

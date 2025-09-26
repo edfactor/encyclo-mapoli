@@ -22,6 +22,7 @@ using FastEndpoints;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
@@ -35,7 +36,8 @@ public class RehireForfeituresTests : ApiTestBase<Program>
     {
         IUnforfeitService mockService = ServiceProvider?.GetRequiredService<IUnforfeitService>()!;
         IAuditService auditService = ServiceProvider?.GetRequiredService<IAuditService>()!;
-        _endpoint = new UnforfeituresEndpoint(mockService, auditService);
+        var logger = ServiceProvider?.GetRequiredService<ILogger<UnforfeituresEndpoint>>()!;
+        _endpoint = new UnforfeituresEndpoint(mockService, auditService, logger);
     }
 
 
@@ -197,7 +199,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         var profitYear = (short)Math.Min(demo.ReHireDate!.Value.Year, 2024);
 
 
-        var payProfit = await c.PayProfits.Include(p=> p.Enrollment).FirstAsync(pp => pp.DemographicId == demo.Id);
+        var payProfit = await c.PayProfits.Include(p => p.Enrollment).FirstAsync(pp => pp.DemographicId == demo.Id);
         payProfit.EnrollmentId = Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
         payProfit.Enrollment = new Enrollment
         {
@@ -228,12 +230,12 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         example.FullName = demo.ContactInfo.FullName;
         example.ReHiredDate = demo.ReHireDate ?? ReferenceData.DsmMinValue;
         example.Details = details.Select(pd => new RehireTransactionDetailResponse
-            {
-                Forfeiture = pd.Forfeiture,
-                Remark = pd.Remark,
-                ProfitYear = pd.ProfitYear,
-                HoursTransactionYear = payProfit.CurrentHoursYear,
-                ProfitCodeId = 0
+        {
+            Forfeiture = pd.Forfeiture,
+            Remark = pd.Remark,
+            ProfitYear = pd.ProfitYear,
+            HoursTransactionYear = payProfit.CurrentHoursYear,
+            ProfitCodeId = 0
         })
             .ToList();
 

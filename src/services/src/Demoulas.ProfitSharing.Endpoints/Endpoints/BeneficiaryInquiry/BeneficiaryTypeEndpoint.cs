@@ -5,17 +5,25 @@ using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Common.Extensions;
+using Demoulas.ProfitSharing.Common.Telemetry;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
+using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.BeneficiaryInquiry;
+
 public class BeneficiaryTypeEndpoint : ProfitSharingEndpoint<BeneficiaryTypesRequestDto, BeneficiaryTypesResponseDto>
 {
 
     private readonly IBeneficiaryInquiryService _beneficiaryService;
+    private readonly ILogger<BeneficiaryTypeEndpoint> _logger;
 
-    public BeneficiaryTypeEndpoint(IBeneficiaryInquiryService beneficiaryService) : base(Navigation.Constants.Beneficiaries)
+    public BeneficiaryTypeEndpoint(IBeneficiaryInquiryService beneficiaryService, ILogger<BeneficiaryTypeEndpoint> logger) : base(Navigation.Constants.Beneficiaries)
     {
         _beneficiaryService = beneficiaryService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -32,8 +40,37 @@ public class BeneficiaryTypeEndpoint : ProfitSharingEndpoint<BeneficiaryTypesReq
 
     public override async Task<BeneficiaryTypesResponseDto> ExecuteAsync(BeneficiaryTypesRequestDto req, CancellationToken ct)
     {
-        var response = await _beneficiaryService.GetBeneficiaryTypes(req, ct);
-        return response;
+        using var activity = this.StartEndpointActivity(HttpContext);
+
+        try
+        {
+            this.RecordRequestMetrics(HttpContext, _logger, req);
+
+            var response = await _beneficiaryService.GetBeneficiaryTypes(req, ct);
+
+            // Business metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "beneficiary-type-lookup"),
+                new("endpoint", "BeneficiaryTypeEndpoint"));
+
+            var typeCount = response?.BeneficiaryTypeList?.Count ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(typeCount,
+                new("record_type", "beneficiary-types"),
+                new("endpoint", "BeneficiaryTypeEndpoint"));
+
+            _logger.LogInformation("Beneficiary type lookup completed, returned {TypeCount} types (correlation: {CorrelationId})",
+                typeCount, HttpContext.TraceIdentifier);
+
+            var safeResponse = response ?? new BeneficiaryTypesResponseDto();
+            this.RecordResponseMetrics(HttpContext, _logger, safeResponse);
+
+            return safeResponse;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 
 }
