@@ -1110,7 +1110,10 @@ export const YearsEndApi = createApi({
           const { data } = await queryFulfilled;
           dispatch(setProfitShareSummaryReport(data));
         } catch (err) {
-          console.log("Err: " + err);
+          console.error(
+            "Error fetching year-end profit sharing summary report:",
+            err instanceof Error ? err.stack || err.message : JSON.stringify(err, null, 2)
+          );
         }
       }
     }),
