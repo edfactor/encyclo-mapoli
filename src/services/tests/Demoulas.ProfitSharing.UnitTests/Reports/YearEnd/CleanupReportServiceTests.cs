@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Text;
 using System.Text.Json;
 using Demoulas.Common.Contracts.Contracts.Request;
@@ -5,6 +6,8 @@ using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Report;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareReport;
@@ -490,6 +493,46 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         response.Result.Response.Results.Count().ShouldBe(0);
 
         _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+    }
+
+    [Fact]
+    [Description("PS-1731 : Distributions and Forfeitures returns Result<T> pattern and handles successful case")]
+    public async Task GetDistributionsAndForfeitures_ReturnsResultPattern()
+    {
+        // Arrange - create a service directly to test Result<T> pattern
+        var cleanupService = ServiceProvider!.GetRequiredService<ICleanupReportService>();
+        var req = new DistributionsAndForfeituresRequest() { Skip = 0, Take = byte.MaxValue };
+
+        // Act - call service method directly
+        var result = await cleanupService.GetDistributionsAndForfeitureAsync(req, CancellationToken.None);
+
+        // Assert - verify it returns Result<T> pattern correctly
+        result.ShouldNotBeNull();
+
+        if (result.IsSuccess)
+        {
+            // When successful, verify the structure
+            result.IsError.ShouldBeFalse();
+            result.Value.ShouldNotBeNull();
+            result.Error.ShouldBeNull();
+            result.Value!.ReportName.ShouldBe("Distributions and Forfeitures");
+            result.Value.Response.ShouldNotBeNull();
+            _testOutputHelper.WriteLine($"Success: Returned {result.Value.Response.Results.Count()} records");
+        }
+        else
+        {
+            // When it fails (like no PayProfits data), verify error structure
+            result.IsError.ShouldBeTrue();
+            result.IsSuccess.ShouldBeFalse();
+            result.Error.ShouldNotBeNull();
+            result.Value.ShouldBeNull();
+
+            // Could be NoPayProfitsDataAvailable or other validation errors
+            result.Error.Code.ShouldBeOneOf(105); // NoPayProfitsDataAvailable
+            _testOutputHelper.WriteLine($"Error: {result.Error.Description} (Code: {result.Error.Code})");
+        }
+
+        _testOutputHelper.WriteLine($"Result pattern validation passed - IsSuccess: {result.IsSuccess}, IsError: {result.IsError}");
     }
 
     //[Fact(DisplayName = "CleanupReportService auth check")]

@@ -2,18 +2,24 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
-public sealed class CertificatesReportEndpoint: EndpointWithCsvBase<CerficatePrintRequest, CertificateReprintResponse, CertificatesReportEndpoint.CertificateReprintResponseMap>
+
+public sealed class CertificatesReportEndpoint : EndpointWithCsvBase<CerficatePrintRequest, CertificateReprintResponse, CertificatesReportEndpoint.CertificateReprintResponseMap>
 {
     private readonly ICertificateService _certificateService;
+    private readonly ILogger<CertificatesReportEndpoint> _logger;
 
-    public CertificatesReportEndpoint(ICertificateService certificateService) : base(Navigation.Constants.PrintProfitCerts)
+    public CertificatesReportEndpoint(ICertificateService certificateService, ILogger<CertificatesReportEndpoint> logger) : base(Navigation.Constants.PrintProfitCerts)
     {
         _certificateService = certificateService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -51,10 +57,59 @@ public sealed class CertificatesReportEndpoint: EndpointWithCsvBase<CerficatePri
     }
 
     public override string ReportFileName => "Certificate Reprint";
-    
-    public override Task<ReportResponseBase<CertificateReprintResponse>> GetResponse(CerficatePrintRequest req, CancellationToken ct)
+
+    public override async Task<ReportResponseBase<CertificateReprintResponse>> GetResponse(CerficatePrintRequest req, CancellationToken ct)
     {
-        return _certificateService.GetMembersWithBalanceActivityByStore(req, ct);
+        using var activity = this.StartEndpointActivity(HttpContext);
+        this.RecordRequestMetrics(HttpContext, _logger, req);
+
+        try
+        {
+            var result = await _certificateService.GetMembersWithBalanceActivityByStore(req, ct);
+
+            // Record business operation metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "certificates_report"),
+                new("profit_year", req.ProfitYear.ToString()));
+
+            var resultCount = result?.Response?.Results?.Count() ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                new("record_type", "post-frozen-certificates"),
+                new("endpoint", "CertificatesReportEndpoint"));
+
+            var badgeCount = req.BadgeNumbers?.Length ?? 0;
+            if (badgeCount > 0)
+            {
+                EndpointTelemetry.RecordCountsProcessed.Record(badgeCount,
+                    new("operation", "certificates_report"),
+                    new("metric_type", "badge_numbers_requested"));
+            }
+
+            _logger.LogInformation("Year-end post-frozen certificates report generated, returned {Count} certificate records for {BadgeCount} badge numbers (correlation: {CorrelationId})",
+                resultCount, badgeCount, HttpContext.TraceIdentifier);
+
+            if (result != null)
+            {
+                this.RecordResponseMetrics(HttpContext, _logger, result);
+                return result;
+            }
+
+            var emptyResult = new ReportResponseBase<CertificateReprintResponse>
+            {
+                ReportName = ReportFileName,
+                StartDate = DateOnly.FromDateTime(DateTime.Today),
+                EndDate = DateOnly.FromDateTime(DateTime.Today),
+                Response = new() { Results = [] }
+            };
+
+            this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
+            return emptyResult;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 
     public sealed class CertificateReprintResponseMap : CsvHelper.Configuration.ClassMap<CertificateReprintResponse>

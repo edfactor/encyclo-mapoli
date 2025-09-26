@@ -1,7 +1,7 @@
 import { Breadcrumbs, Link, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Location, useLocation, useNavigate } from "react-router-dom";
-import { getReadablePathName } from "utils/getReadablePathName";
+import { getReadablePathName } from "../../utils/getReadablePathName";
 import { BreadcrumbItem } from "./DSMBreadcrumbItem";
 
 interface DSMDynamicBreadcrumbsProps {
@@ -10,8 +10,8 @@ interface DSMDynamicBreadcrumbsProps {
 }
 
 // Prevents login from showing up as first breadcrumb after Auth Redirect
-// Also excludes unauthorized page and dev debug from breadcrumb history
-const EXCLUDED_PATHS = ["/login", "/login/callback", "/unauthorized", "/dev-debug"];
+// Also excludes unauthorized page, dev debug, and documentation from breadcrumb history
+const EXCLUDED_PATHS = ["/login", "/login/callback", "/unauthorized", "/dev-debug", "/documentation"];
 
 const DSMDynamicBreadcrumbs: React.FC<DSMDynamicBreadcrumbsProps> = ({ separator = "/", customItems }) => {
   const navigate = useNavigate();
@@ -32,9 +32,12 @@ const DSMDynamicBreadcrumbs: React.FC<DSMDynamicBreadcrumbsProps> = ({ separator
 
   const handleClick = (path: string, index: number) => {
     if (path !== location.pathname) {
+      // Sanitize path to prevent open redirect - only allow internal paths
+      const sanitizedPath = path.startsWith("/") && !path.startsWith("//") && !path.includes("://") ? path : "/";
+
       const newHistory = navigationHistory.slice(0, index + 1);
       setNavigationHistory(newHistory);
-      navigate(path);
+      navigate(sanitizedPath);
     }
   };
 

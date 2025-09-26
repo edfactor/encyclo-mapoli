@@ -2,21 +2,27 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
+
 public sealed class GrossWagesReportEndpoint : EndpointWithCsvTotalsBase<GrossWagesReportRequest, GrossWagesReportResponse, GrossWagesReportDetail, GrossWagesReportEndpoint.GrossReportMapper>
 {
     private readonly IFrozenReportService _frozenReportService;
+    private readonly ILogger<GrossWagesReportEndpoint> _logger;
 
     public override string ReportFileName => GrossWagesReportResponse.REPORT_NAME;
 
-    public GrossWagesReportEndpoint(IFrozenReportService frozenReportService)
+    public GrossWagesReportEndpoint(IFrozenReportService frozenReportService, ILogger<GrossWagesReportEndpoint> logger)
         : base(Navigation.Constants.ProfShareGrossRpt)
     {
         _frozenReportService = frozenReportService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -39,9 +45,58 @@ public sealed class GrossWagesReportEndpoint : EndpointWithCsvTotalsBase<GrossWa
         base.Configure();
     }
 
-    public override Task<GrossWagesReportResponse> GetResponse(GrossWagesReportRequest req, CancellationToken ct)
+    public override async Task<GrossWagesReportResponse> GetResponse(GrossWagesReportRequest req, CancellationToken ct)
     {
-        return _frozenReportService.GetGrossWagesReport(req, ct);
+        using var activity = this.StartEndpointActivity(HttpContext);
+
+        try
+        {
+            this.RecordRequestMetrics(HttpContext, _logger, req);
+
+            var result = await _frozenReportService.GetGrossWagesReport(req, ct);
+
+            // Record year-end frozen gross wages report metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "year-end-frozen-gross-wages-report"),
+                new("endpoint", "GrossWagesReportEndpoint"),
+                new("report_type", "frozen-wages"),
+                new("report_code", "GROSS-WAGES-RPT"),
+                new("minimum_gross_amount", req.MinGrossAmount.ToString()));
+
+            var resultCount = result?.Response?.Results?.Count() ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                new("record_type", "gross-wages-employees"),
+                new("endpoint", "GrossWagesReportEndpoint"));
+
+            _logger.LogInformation("Year-end frozen gross wages report generated with minimum gross amount {MinGrossAmount}, returned {Count} employees (correlation: {CorrelationId})",
+                req.MinGrossAmount, resultCount, HttpContext.TraceIdentifier);
+
+            if (result != null)
+            {
+                this.RecordResponseMetrics(HttpContext, _logger, result);
+                return result;
+            }
+
+            var emptyResult = new GrossWagesReportResponse
+            {
+                ReportName = ReportFileName,
+                StartDate = DateOnly.FromDateTime(DateTime.Today),
+                EndDate = DateOnly.FromDateTime(DateTime.Today),
+                Response = new() { Results = [] },
+                TotalGrossWages = 0,
+                TotalProfitSharingAmount = 0,
+                TotalLoans = 0,
+                TotalForfeitures = 0
+            };
+
+            this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
+            return emptyResult;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 
     public class GrossReportMapper : ClassMap<GrossWagesReportDetail>

@@ -1,12 +1,12 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 
-import { setNavigationStatus, setNavigationStatusError } from "reduxstore/slices/NavigationStatusSlice";
+import { setNavigationStatus, setNavigationStatusError } from "../../reduxstore/slices/NavigationStatusSlice";
 import {
   GetNavigationStatusRequestDto,
   GetNavigationStatusResponseDto,
   UpdateNavigationRequestDto,
   UpdateNavigationResponseDto
-} from "reduxstore/types";
+} from "../../reduxstore/types";
 import { createDataSourceAwareBaseQuery } from "./api";
 import { NavigationApi } from "./NavigationApi";
 

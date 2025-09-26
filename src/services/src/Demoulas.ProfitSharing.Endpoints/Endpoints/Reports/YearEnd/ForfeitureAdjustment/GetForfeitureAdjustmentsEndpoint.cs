@@ -9,16 +9,20 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ForfeitureAdjustment;
 
 public class GetForfeitureAdjustmentsEndpoint : ProfitSharingEndpoint<SuggestedForfeitureAdjustmentRequest, Results<Ok<SuggestedForfeitureAdjustmentResponse>, NotFound, ProblemHttpResult>>
 {
     private readonly IForfeitureAdjustmentService _forfeitureAdjustmentService;
+    private readonly ILogger<GetForfeitureAdjustmentsEndpoint> _logger;
 
-    public GetForfeitureAdjustmentsEndpoint(IForfeitureAdjustmentService forfeitureAdjustmentService) : base(Navigation.Constants.Forfeitures)
+    public GetForfeitureAdjustmentsEndpoint(IForfeitureAdjustmentService forfeitureAdjustmentService, ILogger<GetForfeitureAdjustmentsEndpoint> logger) : base(Navigation.Constants.Forfeitures)
     {
         _forfeitureAdjustmentService = forfeitureAdjustmentService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -32,20 +36,12 @@ public class GetForfeitureAdjustmentsEndpoint : ProfitSharingEndpoint<SuggestedF
         });
         Group<YearEndGroup>();
     }
-    public override async Task<Results<Ok<SuggestedForfeitureAdjustmentResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(SuggestedForfeitureAdjustmentRequest req, CancellationToken ct)
+    public override Task<Results<Ok<SuggestedForfeitureAdjustmentResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(SuggestedForfeitureAdjustmentRequest req, CancellationToken ct)
     {
-        try
+        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
             var response = await _forfeitureAdjustmentService.GetSuggestedForfeitureAmount(req, ct);
             return Result<SuggestedForfeitureAdjustmentResponse>.Success(response).ToHttpResult();
-        }
-        catch (ArgumentException aex) when (aex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
-        {
-            return Result<SuggestedForfeitureAdjustmentResponse>.Failure(Error.EmployeeNotFound).ToHttpResult(Error.EmployeeNotFound);
-        }
-        catch (Exception ex)
-        {
-            return Result<SuggestedForfeitureAdjustmentResponse>.Failure(Error.Unexpected(ex.Message)).ToHttpResult();
-        }
+        }, "operation:year-end-forfeiture-adjustments-get", $"has_ssn:{req.Ssn.HasValue}", $"has_badge:{req.Badge.HasValue}", $"ssn:{req.Ssn}", $"badge:{req.Badge}");
     }
 }

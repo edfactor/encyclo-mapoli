@@ -4,6 +4,7 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { memo, useState } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
+import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
 import useManageExecutiveHoursAndDollars from "./hooks/useManageExecutiveHoursAndDollars";
 import ManageExecutiveHoursAndDollarsGrid from "./ManageExecutiveHoursAndDollarsGrid";
 import ManageExecutiveHoursAndDollarsSearchFilter from "./ManageExecutiveHoursAndDollarsSearchFilter";
@@ -11,26 +12,33 @@ import ManageExecutiveHoursAndDollarsSearchFilter from "./ManageExecutiveHoursAn
 interface RenderSaveButtonProps {
   hasPendingChanges: boolean;
   onSave: () => void;
+  isReadOnly?: boolean;
 }
 
-const RenderSaveButton = memo(({ hasPendingChanges, onSave }: RenderSaveButtonProps) => {
+const RenderSaveButton = memo(({ hasPendingChanges, onSave, isReadOnly = true }: RenderSaveButtonProps) => {
+  const isDisabled = !hasPendingChanges || isReadOnly;
+  const readOnlyTooltip = "You are in read-only mode and cannot save changes.";
+  const noPendingChangesTooltip = "You must change hours or dollars to save.";
+
   const saveButton = (
     <Button
-      disabled={!hasPendingChanges}
+      disabled={isDisabled}
       variant="outlined"
       color="primary"
       size="medium"
-      startIcon={<SaveOutlined color={hasPendingChanges ? "primary" : "disabled"} />}
-      onClick={onSave}>
+      startIcon={<SaveOutlined color={isDisabled ? "disabled" : "primary"} />}
+      onClick={isReadOnly ? undefined : onSave}>
       Save
     </Button>
   );
 
-  if (!hasPendingChanges) {
+  const tooltipTitle = isReadOnly ? readOnlyTooltip : noPendingChangesTooltip;
+
+  if (isDisabled) {
     return (
       <Tooltip
         placement="top"
-        title="You must change hours or dollars to save.">
+        title={tooltipTitle}>
         <span>{saveButton}</span>
       </Tooltip>
     );
@@ -66,6 +74,7 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
     isModalSearching
   } = hookData;
 
+  const isReadOnly = useReadOnlyNavigation();
   const [currentStatus, setCurrentStatus] = useState<string | null>(null);
 
   const handleStatusChange = (newStatus: string, statusName?: string) => {
@@ -115,6 +124,7 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
             modalSelectedExecutives={modalSelectedExecutives}
             addExecutivesToMainGrid={addExecutivesToMainGrid}
             isModalSearching={isModalSearching}
+            isReadOnly={isReadOnly}
           />
         </Grid>
       )}
@@ -125,6 +135,7 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
 const ManageExecutiveHoursAndDollars = () => {
   const hookData = useManageExecutiveHoursAndDollars();
   const { hasPendingChanges, saveChanges } = hookData;
+  const isReadOnly = useReadOnlyNavigation();
 
   return (
     <Page
@@ -133,6 +144,7 @@ const ManageExecutiveHoursAndDollars = () => {
         <RenderSaveButton
           hasPendingChanges={hasPendingChanges}
           onSave={saveChanges}
+          isReadOnly={isReadOnly}
         />
       }>
       <ManageExecutiveHoursAndDollarsContent hookData={hookData} />

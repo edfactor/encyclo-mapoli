@@ -5,6 +5,7 @@ import { useLazyGetProfitShareEditQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { ProfitShareUpdateRequest } from "reduxstore/types";
 import { DSMGrid, Pagination } from "smart-ui-library";
+import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
 import { useGridPagination } from "../../hooks/useGridPagination";
 import { ProfitShareEditUpdateGridColumns } from "./ProfitShareEditGridColumns";
 
@@ -22,40 +23,47 @@ const ProfitShareEditGrid = ({
   setPageNumberReset
 }: ProfitShareEditGridProps) => {
   const hasToken = !!useSelector((state: RootState) => state.security.token);
+
+  // Use dynamic grid height utility hook
+  const gridMaxHeight = useDynamicGridHeight();
   const editColumnDefs = useMemo(() => ProfitShareEditUpdateGridColumns(), []);
   const { profitSharingEdit, profitSharingEditQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearchUpdate, { isFetching }] = useLazyGetProfitShareEditQuery();
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } = useGridPagination({
-    initialPageSize: 25,
-    initialSortBy: "name",
-    initialSortDescending: false,
-    onPaginationChange: useCallback(async (pageNum: number, pageSz: number, sortPrms: any) => {
-      if (initialSearchLoaded && hasToken) {
-        const request: ProfitShareUpdateRequest = {
-          pagination: {
-            sortBy: sortPrms.sortBy,
-            isSortDescending: sortPrms.isSortDescending,
-            skip: pageNum * pageSz,
-            take: pageSz
-          },
-          profitYear: profitSharingEditQueryParams?.profitYear.getFullYear() ?? 0,
-          contributionPercent: profitSharingEditQueryParams?.contributionPercent ?? 0,
-          earningsPercent: profitSharingEditQueryParams?.earningsPercent ?? 0,
-          incomingForfeitPercent: profitSharingEditQueryParams?.incomingForfeitPercent ?? 0,
-          secondaryEarningsPercent: profitSharingEditQueryParams?.secondaryEarningsPercent ?? 0,
-          maxAllowedContributions: profitSharingEditQueryParams?.maxAllowedContributions ?? 0,
-          badgeToAdjust: profitSharingEditQueryParams?.badgeToAdjust ?? 0,
-          adjustContributionAmount: profitSharingEditQueryParams?.adjustContributionAmount ?? 0,
-          adjustEarningsAmount: profitSharingEditQueryParams?.adjustEarningsAmount ?? 0,
-          adjustIncomingForfeitAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0,
-          badgeToAdjust2: profitSharingEditQueryParams?.badgeToAdjust2 ?? 0,
-          adjustEarningsSecondaryAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0
-        };
-        await triggerSearchUpdate(request, false);
-      }
-    }, [initialSearchLoaded, hasToken, profitSharingEditQueryParams, triggerSearchUpdate])
-  });
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
+    useGridPagination({
+      initialPageSize: 25,
+      initialSortBy: "name",
+      initialSortDescending: false,
+      onPaginationChange: useCallback(
+        async (pageNum: number, pageSz: number, sortPrms: any) => {
+          if (initialSearchLoaded && hasToken) {
+            const request: ProfitShareUpdateRequest = {
+              pagination: {
+                sortBy: sortPrms.sortBy,
+                isSortDescending: sortPrms.isSortDescending,
+                skip: pageNum * pageSz,
+                take: pageSz
+              },
+              profitYear: profitSharingEditQueryParams?.profitYear.getFullYear() ?? 0,
+              contributionPercent: profitSharingEditQueryParams?.contributionPercent ?? 0,
+              earningsPercent: profitSharingEditQueryParams?.earningsPercent ?? 0,
+              incomingForfeitPercent: profitSharingEditQueryParams?.incomingForfeitPercent ?? 0,
+              secondaryEarningsPercent: profitSharingEditQueryParams?.secondaryEarningsPercent ?? 0,
+              maxAllowedContributions: profitSharingEditQueryParams?.maxAllowedContributions ?? 0,
+              badgeToAdjust: profitSharingEditQueryParams?.badgeToAdjust ?? 0,
+              adjustContributionAmount: profitSharingEditQueryParams?.adjustContributionAmount ?? 0,
+              adjustEarningsAmount: profitSharingEditQueryParams?.adjustEarningsAmount ?? 0,
+              adjustIncomingForfeitAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0,
+              badgeToAdjust2: profitSharingEditQueryParams?.badgeToAdjust2 ?? 0,
+              adjustEarningsSecondaryAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0
+            };
+            await triggerSearchUpdate(request, false);
+          }
+        },
+        [initialSearchLoaded, hasToken, profitSharingEditQueryParams, triggerSearchUpdate]
+      )
+    });
 
   const onSearch = useCallback(async () => {
     const request: ProfitShareUpdateRequest = {
@@ -110,7 +118,7 @@ const ProfitShareEditGrid = ({
             preferenceKey={"ProfitShareEditGrid"}
             isLoading={isFetching}
             handleSortChanged={handleSortChange}
-            maxHeight={400}
+            maxHeight={gridMaxHeight}
             providedOptions={{
               rowData: "response" in profitSharingEdit ? profitSharingEdit.response?.results : [],
               columnDefs: editColumnDefs

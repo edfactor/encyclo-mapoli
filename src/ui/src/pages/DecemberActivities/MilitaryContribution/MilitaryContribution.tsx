@@ -9,6 +9,7 @@ import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveA
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
+import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
 import { InquiryApi } from "../../../reduxstore/api/InquiryApi";
 import { MessageKeys, Messages } from "../../../utils/messageDictonary";
 import useMilitaryContribution from "./hooks/useMilitaryContribution";
@@ -24,6 +25,7 @@ const MilitaryContributionContent = () => {
   const profitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
   const { missiveAlerts } = useMissiveAlerts();
+  const isReadOnly = useReadOnlyNavigation();
 
   const {
     contributionsData,
@@ -47,7 +49,9 @@ const MilitaryContributionContent = () => {
   };
 
   const handleOpenForm = () => {
-    setIsDialogOpen(true);
+    if (!isReadOnly) {
+      setIsDialogOpen(true);
+    }
   };
 
   const handleCloseForm = () => {
@@ -120,6 +124,7 @@ const MilitaryContributionContent = () => {
             contributionsGridPagination={contributionsGridPagination}
             onAddContribution={handleOpenForm}
             refreshTrigger={memberDetailsRefreshTrigger}
+            isReadOnly={isReadOnly}
           />
         ) : (
           <div className="military-contribution-message">

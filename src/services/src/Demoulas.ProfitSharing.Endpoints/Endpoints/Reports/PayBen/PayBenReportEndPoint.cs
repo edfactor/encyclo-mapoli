@@ -5,6 +5,8 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.PayBen;
 
@@ -12,11 +14,13 @@ public class PayBenReportEndpoint : ProfitSharingEndpoint<PayBenReportRequest,
     PaginatedResponseDto<PayBenReportResponse>>
 {
     private readonly IPayBenReportService _reportService;
+    private readonly ILogger<PayBenReportEndpoint> _logger;
 
-    public PayBenReportEndpoint(IPayBenReportService reportService)
+    public PayBenReportEndpoint(IPayBenReportService reportService, ILogger<PayBenReportEndpoint> logger)
         : base(Navigation.Constants.PayBenReport)
     {
         _reportService = reportService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -33,8 +37,27 @@ public class PayBenReportEndpoint : ProfitSharingEndpoint<PayBenReportRequest,
     }
 
 
-    public override  Task<PaginatedResponseDto<PayBenReportResponse>> ExecuteAsync(PayBenReportRequest req, CancellationToken ct)
+    public override Task<PaginatedResponseDto<PayBenReportResponse>> ExecuteAsync(PayBenReportRequest req, CancellationToken ct)
     {
-        return _reportService.GetPayBenReport(req, ct);
+        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
+        {
+            var result = await _reportService.GetPayBenReport(req, ct);
+
+            // Record business metrics
+            Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new KeyValuePair<string, object?>("operation", "payben-report"),
+                new KeyValuePair<string, object?>("endpoint.category", "reports"));
+
+            // Record result count
+            var resultCount = result?.Results?.Count() ?? 0;
+            Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                new KeyValuePair<string, object?>("operation", "payben-report"),
+                new KeyValuePair<string, object?>("endpoint.category", "reports"));
+
+            _logger.LogInformation("PayBen report generated, returned {Count} records (correlation: {CorrelationId})",
+                resultCount, HttpContext.TraceIdentifier);
+
+            return result ?? new PaginatedResponseDto<PayBenReportResponse>();
+        });
     }
 }

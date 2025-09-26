@@ -8,6 +8,7 @@ interface HeaderComponentProps extends IHeaderParams {
   removeRowFromSelectedRows: (id: number) => void;
   onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[], names: string[]) => Promise<void>;
   isBulkSaving?: boolean;
+  isReadOnly?: boolean;
 }
 
 export const HeaderComponent: React.FC<HeaderComponentProps> = (params: HeaderComponentProps) => {
@@ -67,6 +68,7 @@ export const HeaderComponent: React.FC<HeaderComponentProps> = (params: HeaderCo
       isNodeEligible={isNodeEligible}
       createUpdatePayload={createUpdatePayload}
       isBulkSaving={hasSavingInProgress}
+      isReadOnly={params.isReadOnly}
     />
   );
 };

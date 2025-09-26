@@ -29746,6 +29746,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("ID");
 
+                    b.Property<bool>("IsReadOnly")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(1)")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IS_READ_ONLY");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(65)
@@ -29761,51 +29767,61 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         new
                         {
                             Id = (byte)1,
+                            IsReadOnly = false,
                             Name = "System-Administrator"
                         },
                         new
                         {
                             Id = (byte)10,
+                            IsReadOnly = false,
                             Name = "Beneficiary-Administrator"
                         },
                         new
                         {
                             Id = (byte)2,
+                            IsReadOnly = false,
                             Name = "Finance-Manager"
                         },
                         new
                         {
                             Id = (byte)3,
+                            IsReadOnly = false,
                             Name = "Distributions-Clerk"
                         },
                         new
                         {
                             Id = (byte)4,
+                            IsReadOnly = false,
                             Name = "Hardship-Administrator"
                         },
                         new
                         {
                             Id = (byte)5,
+                            IsReadOnly = false,
                             Name = "Impersonation"
                         },
                         new
                         {
                             Id = (byte)6,
+                            IsReadOnly = true,
                             Name = "IT-DevOps"
                         },
                         new
                         {
                             Id = (byte)7,
+                            IsReadOnly = false,
                             Name = "IT-Operations"
                         },
                         new
                         {
                             Id = (byte)8,
+                            IsReadOnly = false,
                             Name = "Executive-Administrator"
                         },
                         new
                         {
                             Id = (byte)9,
+                            IsReadOnly = true,
                             Name = "Auditor"
                         });
                 });

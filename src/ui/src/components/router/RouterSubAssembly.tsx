@@ -54,6 +54,7 @@ import { MenuBar } from "../../components/MenuBar/MenuBar";
 import BeneficiaryInquiry from "../../pages/BeneficiaryInquiry/BeneficiaryInquiry";
 import MilitaryContribution from "../../pages/DecemberActivities/MilitaryContribution/MilitaryContribution";
 import DevDebug from "../../pages/Dev/DevDebug";
+import Documentation from "../../pages/Documentation/Documentation";
 import RecentlyTerminated from "../../pages/FiscalClose/RecentlyTerminated/RecentlyTerminated";
 import TerminatedLetters from "../../pages/FiscalClose/TerminatedLetters/TerminatedLetters";
 import ForfeituresAdjustment from "../../pages/ForfeituresAdjustment/ForfeituresAdjustment";
@@ -113,7 +114,12 @@ const RouterSubAssembly: React.FC = () => {
       // Remove the impersonationRole param from the URL so it isn't reapplied on refresh
       params.delete("impersonationRole");
       const newSearch = params.toString();
-      navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ""}`, { replace: true });
+
+      // Validate pathname to prevent open redirect attacks
+      const isValidPath = location.pathname.startsWith("/") && !location.pathname.includes("://");
+      const safePath = isValidPath ? location.pathname : "/";
+
+      navigate(`${safePath}${newSearch ? `?${newSearch}` : ""}`, { replace: true });
     }
   }, [location.search, hasImpersonationRole, impersonating, dispatch, navigate, location.pathname]);
 
@@ -337,6 +343,10 @@ const RouterSubAssembly: React.FC = () => {
                   element={<DevDebug />}
                 />
                 <Route
+                  path={ROUTES.DOCUMENTATION}
+                  element={<Documentation />}
+                />
+                <Route
                   path={`${ROUTES.PAY426N}/:presetNumber?`}
                   element={<PAY426N />}
                 />
@@ -394,7 +404,8 @@ const RouterSubAssembly: React.FC = () => {
       data?.navigation &&
       token &&
       location.pathname !== "/unauthorized" &&
-      location.pathname !== "/dev-debug"
+      location.pathname !== "/dev-debug" &&
+      location.pathname !== "/documentation"
     ) {
       const currentPath = location.pathname;
       const isAllowed = isPathAllowedInNavigation(currentPath, data.navigation);
