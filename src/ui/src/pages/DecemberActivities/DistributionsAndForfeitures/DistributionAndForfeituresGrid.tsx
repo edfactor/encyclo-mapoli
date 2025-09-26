@@ -28,6 +28,37 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   });
   const [showTooltip, setShowTooltip] = useState(false);
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [gridMaxHeight, setGridMaxHeight] = useState(400);
+
+  // Calculate dynamic grid height based on window size
+  const calculateGridHeight = useCallback(() => {
+    const windowHeight = window.innerHeight;
+    const targetHeight = Math.floor(windowHeight * 0.5); // 50% of window height
+
+    // Set reasonable bounds: minimum 300px, maximum 800px
+    const minHeight = 300;
+    const maxHeight = 800;
+
+    return Math.max(minHeight, Math.min(maxHeight, targetHeight));
+  }, []);
+
+  // Initialize and update grid height on window resize
+  useEffect(() => {
+    const updateGridHeight = () => {
+      setGridMaxHeight(calculateGridHeight());
+    };
+
+    // Set initial height
+    updateGridHeight();
+
+    // Add resize listener
+    window.addEventListener("resize", updateGridHeight);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("resize", updateGridHeight);
+    };
+  }, [calculateGridHeight]);
 
   const handlePopoverOpen = () => {
     if (hoverTimeout) {
@@ -202,6 +233,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
             preferenceKey={CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES}
             isLoading={isFetching}
             handleSortChanged={sortEventHandler}
+            maxHeight={gridMaxHeight}
             providedOptions={{
               rowData: distributionsAndForfeitures?.response.results,
               columnDefs: columnDefs,
