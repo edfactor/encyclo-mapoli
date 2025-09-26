@@ -52,7 +52,7 @@ public class NavigationService : INavigationService
                 .Select(nr => nr.Name.ToUpper())
                 .ToListAsync(cancellationToken);
 
-            return userRoles.Any(userRole => 
+            return userRoles.Any(userRole =>
                 readOnlyRoleNames.Contains(userRole.ToUpper()));
         });
 
