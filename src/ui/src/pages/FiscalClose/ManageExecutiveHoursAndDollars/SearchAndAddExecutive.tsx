@@ -1,5 +1,14 @@
 import { AddOutlined } from "@mui/icons-material";
-import { Button, Divider, Grid, Tooltip } from "@mui/material";
+impoconst SearchAndAddExecutive = ({ 
+  executeModalSearch,
+  modalSelectedExecutives,
+  addExecutivesToMainGrid,
+  isModalSearching,
+  modalResults,
+  selectExecutivesInModal,
+  modalGridPagination,
+  isReadOnly = true
+}: SearchAndAddExecutiveProps) => {n, Divider, Grid, Tooltip } from "@mui/material";
 import { DSMAccordion, Page } from "smart-ui-library";
 import ManageExecutiveHoursAndDollarsGrid from "./ManageExecutiveHoursAndDollarsGrid";
 import ManageExecutiveHoursAndDollarsSearchFilter from "./ManageExecutiveHoursAndDollarsSearchFilter";
@@ -10,7 +19,7 @@ interface RenderAddButtonInternalProps {
   isReadOnly?: boolean;
 }
 
-const RenderAddButton = ({ canAddExecutives, onAddToMainGrid, isReadOnly = false }: RenderAddButtonInternalProps) => {
+const RenderAddButton = ({ canAddExecutives, onAddToMainGrid, isReadOnly = true }: RenderAddButtonInternalProps) => {
   const isDisabled = !canAddExecutives || isReadOnly;
 
   const addButton = (

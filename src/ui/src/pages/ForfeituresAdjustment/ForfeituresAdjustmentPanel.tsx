@@ -13,7 +13,7 @@ interface ForfeituresAdjustmentPanelProps {
 const ForfeituresAdjustmentPanel: React.FC<ForfeituresAdjustmentPanelProps> = ({
   initialSearchLoaded,
   onAddForfeiture,
-  isReadOnly = false
+  isReadOnly = true
 }) => {
   return (
     <>
