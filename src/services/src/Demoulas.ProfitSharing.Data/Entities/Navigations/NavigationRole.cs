@@ -18,17 +18,6 @@ public class NavigationRole : ILookupTable<byte>
         public const byte BeneficiaryAdministrator = 10;
     }
 
-    /// <summary>
-    /// Helper method to check if a role ID is designated as read-only.
-    /// Currently ItDevOps (6) and Auditor (9) are read-only roles.
-    /// </summary>
-    /// <param name="roleId">The role ID to check</param>
-    /// <returns>True if the role is read-only, false otherwise</returns>
-    public static bool IsReadOnlyRole(byte roleId)
-    {
-        return roleId == Contants.ItDevOps || roleId == Contants.Auditor;
-    }
-
     public byte Id { get; set; }
     public required string Name { get; set; }
     public bool IsReadOnly { get; set; }

@@ -46,15 +46,15 @@ public class NavigationService : INavigationService
         // Check if the current user has any read-only roles by querying the database
         var userRoles = _appUser.GetUserAllRoles()?.Where(r => !string.IsNullOrWhiteSpace(r)).ToList() ?? new List<string>();
         var userHasReadOnlyRole = false;
-        
+
         if (userRoles.Any())
         {
-            userHasReadOnlyRole = await _dataContextFactory.UseWritableContext(async context =>
+            userHasReadOnlyRole = await _dataContextFactory.UseReadOnlyContext(async context =>
             {
                 return await context.NavigationRoles
                     .Where(nr => userRoles.Contains(nr.Name) && nr.IsReadOnly)
                     .AnyAsync(cancellationToken);
-            }, cancellationToken);
+            });
         }
 
         var lookup = flatList.ToLookup(x => x.ParentId);
