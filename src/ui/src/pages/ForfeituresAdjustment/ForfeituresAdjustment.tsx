@@ -16,6 +16,7 @@ import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
 import { CAPTIONS } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { useGridPagination } from "../../hooks/useGridPagination";
+import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
 import { InquiryApi } from "../../reduxstore/api/InquiryApi";
 import { clearForfeitureAdjustmentData } from "../../reduxstore/slices/forfeituresAdjustmentSlice";
 import AddForfeitureModal from "./AddForfeitureModal";
@@ -32,6 +33,7 @@ const ForfeituresAdjustment = () => {
     (state: RootState) => state.forfeituresAdjustment
   );
   const profitYear = useDecemberFlowProfitYear();
+  const isReadOnly = useReadOnlyNavigation();
   const [triggerSearch] = useLazyGetForfeitureAdjustmentsQuery();
   const [triggerMemberDetails] = useLazyGetProfitMasterInquiryMemberQuery();
   const [triggerTransactionDetails, { isLoading: isLoadingTransactions }] =
@@ -203,6 +205,7 @@ const ForfeituresAdjustment = () => {
                 initialSearchLoaded={initialSearchLoaded}
                 setInitialSearchLoaded={setInitialSearchLoaded}
                 onAddForfeiture={handleOpenAddForfeitureModal}
+                isReadOnly={isReadOnly}
               />
             </Grid>
           )}

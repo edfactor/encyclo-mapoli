@@ -1,18 +1,19 @@
 import { AddOutlined } from "@mui/icons-material";
-import { Button, Typography } from "@mui/material";
+import { Button, Tooltip } from "@mui/material";
 import React from "react";
-import { formatNumberWithComma } from "smart-ui-library";
 
 interface ForfeituresAdjustmentPanelProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
   onAddForfeiture?: () => void;
   suggestedForfeitAmount?: number;
+  isReadOnly?: boolean;
 }
 
 const ForfeituresAdjustmentPanel: React.FC<ForfeituresAdjustmentPanelProps> = ({
   initialSearchLoaded,
-  onAddForfeiture
+  onAddForfeiture,
+  isReadOnly = false
 }) => {
   return (
     <>
@@ -28,13 +29,27 @@ const ForfeituresAdjustmentPanel: React.FC<ForfeituresAdjustmentPanelProps> = ({
             {onAddForfeiture && (
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                 {onAddForfeiture && (
-                  <Button
-                    onClick={onAddForfeiture}
-                    variant="contained"
-                    startIcon={<AddOutlined />}
-                    color="primary">
-                    ADD FORFEITURE
-                  </Button>
+                  isReadOnly ? (
+                    <Tooltip title="You are in read-only mode and cannot add forfeitures.">
+                      <span>
+                        <Button
+                          disabled={true}
+                          variant="contained"
+                          startIcon={<AddOutlined />}
+                          color="primary">
+                          ADD FORFEITURE
+                        </Button>
+                      </span>
+                    </Tooltip>
+                  ) : (
+                    <Button
+                      onClick={onAddForfeiture}
+                      variant="contained"
+                      startIcon={<AddOutlined />}
+                      color="primary">
+                      ADD FORFEITURE
+                    </Button>
+                  )
                 )}
               </div>
             )}
