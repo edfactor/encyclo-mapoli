@@ -10,8 +10,8 @@ interface DSMDynamicBreadcrumbsProps {
 }
 
 // Prevents login from showing up as first breadcrumb after Auth Redirect
-// Also excludes unauthorized page and dev debug from breadcrumb history
-const EXCLUDED_PATHS = ["/login", "/login/callback", "/unauthorized", "/dev-debug"];
+// Also excludes unauthorized page, dev debug, and documentation from breadcrumb history
+const EXCLUDED_PATHS = ["/login", "/login/callback", "/unauthorized", "/dev-debug", "/documentation"];
 
 const DSMDynamicBreadcrumbs: React.FC<DSMDynamicBreadcrumbsProps> = ({ separator = "/", customItems }) => {
   const navigate = useNavigate();
