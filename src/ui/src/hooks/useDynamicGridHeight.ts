@@ -18,12 +18,12 @@ interface UseDynamicGridHeightOptions {
  *
  * @example
  * ```tsx
- * // Use default settings (50% of window height, 300-800px bounds)
+ * // Use default settings (40% of window height, 300-800px bounds)
  * const gridMaxHeight = useDynamicGridHeight();
  *
  * // Custom settings
  * const gridMaxHeight = useDynamicGridHeight({
- *   heightPercentage: 0.75, // 75% of window height
+ *   heightPercentage: 0.40, // 40% of window height
  *   minHeight: 400,
  *   maxHeight: 1000
  * });
