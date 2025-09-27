@@ -6,8 +6,9 @@ import { useSelector } from "react-redux";
 import { useLazyGetBeneficiariesQuery, useLazyUpdateBeneficiaryQuery } from "reduxstore/api/BeneficiariesApi";
 import { RootState } from "reduxstore/store";
 import { BeneficiaryDto, BeneficiaryRequestDto } from "reduxstore/types";
-import { DSMGrid, ISortParams, Paged, Pagination } from "smart-ui-library";
+import { DSMGrid, Paged, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
+import { useGridPagination } from "../../hooks/useGridPagination";
 import { BeneficiaryInquiryGridColumns } from "./BeneficiaryInquiryGridColumns";
 import { BeneficiaryOfGridColumns } from "./BeneficiaryOfGridColumn";
 interface BeneficiaryInquiryGridProps {
@@ -25,20 +26,38 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
   createOrUpdateBeneficiary,
   deleteBeneficiary
 }) => {
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-  const [_sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "psnSuffix",
-    isSortDescending: true
-  });
   const [errorPercentage, setErrorPercentage] = useState<boolean>(false);
-
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-  // const { beneficiaryList, beneficiaryRequest } = useSelector((state: RootState) => state.beneficiaries);
   const [beneficiaryList, setBeneficiaryList] = useState<Paged<BeneficiaryDto> | undefined>();
   const [beneficiaryOfList, setBeneficiaryOfList] = useState<Paged<BeneficiaryDto> | undefined>();
   const [triggerSearch, { isFetching }] = useLazyGetBeneficiariesQuery();
   const [triggerUpdate] = useLazyUpdateBeneficiaryQuery();
+
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange } = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "psnSuffix",
+    initialSortDescending: true,
+    onPaginationChange: useCallback((pageNum: number, pageSz: number, sortPrms: any) => {
+      if (selectedMember?.badgeNumber && selectedMember?.psnSuffix) {
+        const request = createBeneficiaryInquiryRequest(
+          pageNum * pageSz,
+          sortPrms.sortBy,
+          sortPrms.isSortDescending,
+          pageSz,
+          selectedMember?.badgeNumber,
+          selectedMember?.psnSuffix
+        );
+        if (request) {
+          triggerSearch(request, false)
+            .unwrap()
+            .then((res) => {
+              setBeneficiaryList(res.beneficiaries);
+              setBeneficiaryOfList(res.beneficiaryOf);
+            });
+        }
+      }
+    }, [selectedMember])
+  });
 
   const createBeneficiaryInquiryRequest = (
     skip: number,
@@ -59,13 +78,12 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
     return request;
   };
 
-  const sortEventHandler = (update: ISortParams) => {
+  const sortEventHandler = (update: any) => {
     if (update.sortBy === "") {
       update.sortBy = "psnSuffix";
       update.isSortDescending = true;
     }
-    setSortParams(update);
-    setPageNumber(0);
+    handleSortChange(update);
   };
   const actionButtons = (data: any): JSX.Element => {
     return (
@@ -166,9 +184,9 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
   const onSearch = useCallback(() => {
     const request = createBeneficiaryInquiryRequest(
       pageNumber * pageSize,
-      _sortParams.sortBy,
-      _sortParams.isSortDescending,
-      25,
+      sortParams.sortBy,
+      sortParams.isSortDescending,
+      pageSize,
       selectedMember?.badgeNumber,
       selectedMember?.psnSuffix
     );
@@ -180,13 +198,13 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
         setBeneficiaryList(res.beneficiaries);
         setBeneficiaryOfList(res.beneficiaryOf);
       });
-  }, [selectedMember, _sortParams]);
+  }, [selectedMember, sortParams, pageNumber, pageSize, triggerSearch]);
 
   useEffect(() => {
     if (hasToken) {
       onSearch();
     }
-  }, [selectedMember, pageNumber, pageSize, _sortParams, count]);
+  }, [selectedMember, count, onSearch, hasToken]);
 
   return (
     <>
@@ -244,14 +262,11 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
-            setPageNumber(value - 1);
-            //setInitialSearchLoaded(true);
+            handlePaginationChange(value - 1, pageSize);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
-            setPageSize(value);
-            setPageNumber(1);
-            //setInitialSearchLoaded(true);
+            handlePaginationChange(0, value);
           }}
           recordCount={beneficiaryList?.total}
         />

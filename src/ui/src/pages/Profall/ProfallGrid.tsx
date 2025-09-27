@@ -1,13 +1,14 @@
 import { Typography } from "@mui/material";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { Path, useNavigate } from "react-router";
 import { useLazyGetProfitSharingLabelsQuery } from "reduxstore/api/YearsEndApi";
 import { useSelector } from "react-redux";
 
 import { RootState } from "reduxstore/store";
-import { DSMGrid, Pagination, ISortParams } from "smart-ui-library";
+import { DSMGrid, Pagination } from "smart-ui-library";
 import { GetProfallGridColumns } from "./ProfallGridColumns";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useGridPagination } from "../../hooks/useGridPagination";
 
 interface ProfallGridProps {
   pageNumberReset: boolean;
@@ -16,18 +17,32 @@ interface ProfallGridProps {
 
 const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumberReset }) => {
   const navigate = useNavigate();
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
-    isSortDescending: false
-  });
-
   const profitSharingLabels = useSelector((state: RootState) => state.yearsEnd.profitSharingLabels);
   const securityState = useSelector((state: RootState) => state.security);
   const [getProfitSharingLabels, { isFetching }] = useLazyGetProfitSharingLabelsQuery();
-
   const profitYear = useFiscalCloseProfitYear();
+
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "badgeNumber",
+    initialSortDescending: false,
+    onPaginationChange: useCallback((pageNum: number, pageSz: number, sortPrms: any) => {
+      if (profitYear && securityState.token) {
+        const yearToUse = profitYear || new Date().getFullYear();
+        const skip = pageNum * pageSz;
+        getProfitSharingLabels({
+          profitYear: yearToUse,
+          useFrozenData: true,
+          pagination: {
+            take: pageSz,
+            skip: skip,
+            sortBy: sortPrms.sortBy || "badgeNumber",
+            isSortDescending: sortPrms.isSortDescending
+          }
+        });
+      }
+    }, [profitYear, securityState.token, getProfitSharingLabels])
+  });
 
   const fetchData = useCallback(() => {
     const yearToUse = profitYear || new Date().getFullYear();
@@ -50,9 +65,7 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
     if (profitYear && securityState.token) {
       fetchData();
     }
-  }, [profitYear, pageNumber, pageSize, sortParams, securityState.token, fetchData]);
-
-  const sortEventHandler = (update: ISortParams) => setSortParams(update);
+  }, [profitYear, securityState.token, fetchData]);
 
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {
@@ -63,10 +76,10 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
 
   useEffect(() => {
     if (pageNumberReset) {
-      setPageNumber(0);
+      resetPagination();
       setPageNumberReset(false);
     }
-  }, [pageNumberReset, setPageNumberReset]);
+  }, [pageNumberReset, setPageNumberReset, resetPagination]);
 
   const columnDefs = useMemo(() => GetProfallGridColumns(handleNavigationForButton), [handleNavigationForButton]);
 
@@ -88,7 +101,7 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
       <DSMGrid
         preferenceKey={"PROFALL_REPORT"}
         isLoading={isFetching}
-        handleSortChanged={sortEventHandler}
+        handleSortChanged={handleSortChange}
         providedOptions={{
           rowData: rowData,
           columnDefs: columnDefs
@@ -98,12 +111,11 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
-            setPageNumber(value - 1);
+            handlePaginationChange(value - 1, pageSize);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
-            setPageSize(value);
-            setPageNumber(0);
+            handlePaginationChange(0, value);
           }}
           recordCount={recordCount}
         />

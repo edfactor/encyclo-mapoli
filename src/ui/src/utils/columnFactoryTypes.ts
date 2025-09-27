@@ -52,6 +52,7 @@ export interface CurrencyColumnOptions extends BaseColumnOptions {
   field: string; // Required field
   valueGetter?: (params: ValueGetterParams) => string;
   valueFormatter?: (params: ValueFormatterParams) => string;
+  cellStyle?: (params: ValueFormatterParams) => React.CSSProperties | null;
 }
 
 export interface DateColumnOptions extends LimitedAlignmentColumnOptions {

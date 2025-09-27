@@ -1,43 +1,50 @@
 import { useCallback, useMemo } from "react";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { DSMGrid, Pagination } from "smart-ui-library";
+import { useGridPagination } from "../../hooks/useGridPagination";
 import { GetProfitShareReportColumns } from "./ProfitShareReportGridColumns";
 
 interface ProfitShareReportGridProps {
   data: any[];
   isLoading: boolean;
-  pageNumber: number;
-  pageSize: number;
   recordCount: number;
-  onPageChange: (value: number) => void;
-  onPageSizeChange: (value: number) => void;
-  onSortChange: (update: ISortParams) => void;
+  onPageChange?: (pageNum: number, pageSz: number, sortPrms: any) => void;
+  onSortChange?: (update: any) => void;
 }
 
 const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
   data,
   isLoading,
-  pageNumber,
-  pageSize,
   recordCount,
   onPageChange,
-  onPageSizeChange,
   onSortChange
 }) => {
   const columnDefs = useMemo(() => GetProfitShareReportColumns(), []);
 
+  const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "badgeNumber",
+    initialSortDescending: false,
+    onPaginationChange: useCallback((pageNum: number, pageSz: number, sortPrms: any) => {
+      if (onPageChange) {
+        onPageChange(pageNum, pageSz, sortPrms);
+      }
+    }, [onPageChange])
+  });
+
   const handleSortChanged = useCallback(
-    (update: ISortParams) => {
+    (update: any) => {
       // Handle empty sortBy case - set default to badgeNumber
       if (update.sortBy === "") {
         update.sortBy = "badgeNumber";
         update.isSortDescending = false;
       }
 
-      // Reset to page 0 when sorting changes
-      onPageChange(0);
-      onSortChange(update);
+      handleSortChange(update);
+      if (onSortChange) {
+        onSortChange(update);
+      }
     },
-    [onPageChange, onSortChange]
+    [handleSortChange, onSortChange]
   );
 
   return (
@@ -55,11 +62,11 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
-            onPageChange(value - 1);
+            handlePaginationChange(value - 1, pageSize);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
-            onPageSizeChange(value);
+            handlePaginationChange(0, value);
           }}
           recordCount={recordCount}
         />

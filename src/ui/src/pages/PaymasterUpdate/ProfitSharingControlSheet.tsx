@@ -1,5 +1,4 @@
-import { Divider, Typography } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Divider, Grid, Typography } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
@@ -7,10 +6,11 @@ import { useLazyGetControlSheetQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { Page, TotalsGrid } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
-const ProfCtrlSheet = () => {
+
+const ProfitSharingControlSheet = () => {
   const profitYear = useFiscalCloseProfitYear();
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-  const [triggerFetch, { isFetching }] = useLazyGetControlSheetQuery();
+  const [triggerFetch] = useLazyGetControlSheetQuery();
   const controlSheet = useSelector((state: RootState) => state.yearsEnd.controlSheet);
 
   useEffect(() => {
@@ -66,4 +66,4 @@ const ProfCtrlSheet = () => {
   );
 };
 
-export default ProfCtrlSheet;
+export default ProfitSharingControlSheet;

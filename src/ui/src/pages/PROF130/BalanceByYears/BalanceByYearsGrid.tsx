@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetBalanceByYearsQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, numberToCurrency } from "smart-ui-library";
 import { TotalsGrid } from "components/TotalsGrid/TotalsGrid";
@@ -19,9 +18,8 @@ const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLo
     isSortDescending: false
   });
 
-  const { balanceByYearsTotal, balanceByYearsFullTime, balanceByYearsPartTime, balanceByYearsQueryParams } =
+  const { balanceByYearsTotal, balanceByYearsFullTime, balanceByYearsPartTime } =
     useSelector((state: RootState) => state.yearsEnd);
-  const [triggerSearch, { isFetching }] = useLazyGetBalanceByYearsQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
@@ -29,40 +27,7 @@ const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLo
   const columnDefsFullTime = GetBalanceByYearsGridColumns(FrozenReportsByAgeRequestType.FullTime);
   const columnDefsPartTime = GetBalanceByYearsGridColumns(FrozenReportsByAgeRequestType.PartTime);
 
-  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-
-  const onSearch = useCallback(async () => {
-    await triggerSearch(
-      {
-        profitYear: balanceByYearsQueryParams?.profitYear ?? 0,
-        reportType: FrozenReportsByAgeRequestType.Total,
-        pagination: { skip: 0, take: 255 }
-      },
-      false
-    ).unwrap();
-    await triggerSearch(
-      {
-        profitYear: balanceByYearsQueryParams?.profitYear ?? 0,
-        reportType: FrozenReportsByAgeRequestType.FullTime,
-        pagination: { skip: 0, take: 255 }
-      },
-      false
-    ).unwrap();
-    await triggerSearch(
-      {
-        profitYear: balanceByYearsQueryParams?.profitYear ?? 0,
-        reportType: FrozenReportsByAgeRequestType.PartTime,
-        pagination: { skip: 0, take: 255 }
-      },
-      false
-    ).unwrap();
-  }, [triggerSearch, balanceByYearsQueryParams?.profitYear]);
-
-  useEffect(() => {
-    if (hasToken && initialSearchLoaded && balanceByYearsQueryParams?.profitYear) {
-      onSearch();
-    }
-  }, [balanceByYearsQueryParams?.profitYear, hasToken, initialSearchLoaded, onSearch]);
+  // No need for API calls in child component - parent handles data loading
 
   return (
     <>
@@ -160,7 +125,7 @@ const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLo
             <Grid size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_Total"}
-                isLoading={isFetching}
+                isLoading={false}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: balanceByYearsTotal?.response.results ?? [],
@@ -171,7 +136,7 @@ const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLo
             <Grid size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_FullTime"}
-                isLoading={isFetching}
+                isLoading={false}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: balanceByYearsFullTime?.response.results ?? [],
@@ -182,7 +147,7 @@ const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLo
             <Grid size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_PartTime"}
-                isLoading={isFetching}
+                isLoading={false}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: balanceByYearsPartTime?.response.results ?? [],

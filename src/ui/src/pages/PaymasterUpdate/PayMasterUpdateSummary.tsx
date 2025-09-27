@@ -9,14 +9,14 @@ import { RootState } from "reduxstore/store";
 import { DSMAccordion, numberToCurrency, Page, SmartModal } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
-import Pay450Grid from "./Pay450Grid";
-import Pay450SearchFilters from "./Pay450SearchFilters";
+import PayMasterUpdateGrid from "./PayMasterUpdateGrid";
+import PayMasterUpdateSearchFilters from "./PayMasterUpdateSearchFilter";
 
 interface ProfitYearSearch {
   profitYear: number;
 }
 
-const Pay450Summary = () => {
+const PayMasterUpdateSummary = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [pageNumberReset, setPageNumberReset] = useState(false);
@@ -167,7 +167,7 @@ const Pay450Summary = () => {
         rowSpacing="24px">
         <Grid width={"100%"}>
           <DSMAccordion title="Filter">
-            <Pay450SearchFilters
+            <PayMasterUpdateSearchFilters
               onSearch={onSearch}
               setPageReset={setPageNumberReset}
             />
@@ -202,7 +202,7 @@ const Pay450Summary = () => {
           </Grid>
         )}
         <Grid width="100%">
-          <Pay450Grid
+          <PayMasterUpdateGrid
             initialSearchLoaded={initialSearchLoaded}
             setInitialSearchLoaded={setInitialSearchLoaded}
             profitYear={fiscalCloseProfitYear}
@@ -236,4 +236,4 @@ const Pay450Summary = () => {
   );
 };
 
-export default Pay450Summary;
+export default PayMasterUpdateSummary;

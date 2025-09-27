@@ -1,69 +1,36 @@
 import { Grid } from "@mui/material";
 import { TotalsGrid } from "components/TotalsGrid/TotalsGrid";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetDistributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, numberToCurrency } from "smart-ui-library";
+import { DSMGrid, numberToCurrency } from "smart-ui-library";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { GetDistributionsByAgeColumns } from "./DistributionByAgeGridColumns";
+import { useGridPagination } from "../../../hooks/useGridPagination";
 
 interface DistributionByAgeGridProps {
   initialSearchLoaded: boolean;
 }
 
 const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSearchLoaded }) => {
-  const [_discard0, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
-    isSortDescending: false
-  });
-
   const {
     distributionsByAgeTotal,
     distributionsByAgeFullTime,
-    distributionsByAgePartTime,
-    distributionsByAgeQueryParams
+    distributionsByAgePartTime
   } = useSelector((state: RootState) => state.yearsEnd);
-  const [triggerSearch, { isFetching }] = useLazyGetDistributionsByAgeQuery();
 
-  const sortEventHandler = (update: ISortParams) => setSortParams(update);
+  const { handleSortChange } = useGridPagination({
+    initialPageSize: 255,
+    initialSortBy: "badgeNumber",
+    initialSortDescending: false,
+    onPaginationChange: useCallback(() => {
+      // This component doesn't use pagination, only sorting
+    }, [])
+  });
 
   const columnDefsTotal = useMemo(() => GetDistributionsByAgeColumns(FrozenReportsByAgeRequestType.Total), []);
 
-  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-
-  const onSearch = useCallback(async () => {
-    await triggerSearch(
-      {
-        profitYear: distributionsByAgeQueryParams?.profitYear || 0,
-        reportType: FrozenReportsByAgeRequestType.Total,
-        pagination: { skip: 0, take: 255 }
-      },
-      false
-    );
-    await triggerSearch(
-      {
-        profitYear: distributionsByAgeQueryParams?.profitYear || 0,
-        reportType: FrozenReportsByAgeRequestType.FullTime,
-        pagination: { skip: 0, take: 255 }
-      },
-      false
-    ).unwrap();
-    await triggerSearch(
-      {
-        profitYear: distributionsByAgeQueryParams?.profitYear || 0,
-        reportType: FrozenReportsByAgeRequestType.PartTime,
-        pagination: { skip: 0, take: 255 }
-      },
-      false
-    );
-  }, [triggerSearch, distributionsByAgeQueryParams?.profitYear]);
-
-  useEffect(() => {
-    if (hasToken && initialSearchLoaded && distributionsByAgeQueryParams?.profitYear) {
-      onSearch();
-    }
-  }, [distributionsByAgeQueryParams?.profitYear, hasToken, initialSearchLoaded, onSearch]);
+  // No need for API calls in child component - parent handles data loading
 
   return (
     <>
@@ -96,8 +63,8 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
                 topRowHeaders={["Total", "EMPS", "Amount"]}></TotalsGrid>
               <DSMGrid
                 preferenceKey={"DIST_AGE_Total"}
-                isLoading={isFetching}
-                handleSortChanged={sortEventHandler}
+                isLoading={false}
+                handleSortChanged={handleSortChange}
                 providedOptions={{
                   rowData: distributionsByAgeTotal?.response?.results ?? [],
                   columnDefs: columnDefsTotal ?? []
@@ -128,8 +95,8 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
                 topRowHeaders={["FullTime", "EMPS", "Amount"]}></TotalsGrid>
               <DSMGrid
                 preferenceKey={"DIST_AGE_FullTime"}
-                isLoading={isFetching}
-                handleSortChanged={sortEventHandler}
+                isLoading={false}
+                handleSortChanged={handleSortChange}
                 providedOptions={{
                   rowData: distributionsByAgeFullTime?.response?.results ?? [],
                   columnDefs: columnDefsTotal ?? []
@@ -160,8 +127,8 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
                 topRowHeaders={["Total", "EMPS", "Amount"]}></TotalsGrid>
               <DSMGrid
                 preferenceKey={"DIST_AGE_PartTime"}
-                isLoading={isFetching}
-                handleSortChanged={sortEventHandler}
+                isLoading={false}
+                handleSortChanged={handleSortChange}
                 providedOptions={{
                   rowData: distributionsByAgePartTime?.response?.results ?? [],
                   columnDefs: columnDefsTotal ?? []
