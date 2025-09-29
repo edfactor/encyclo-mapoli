@@ -2,8 +2,6 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
-import { RootState } from "reduxstore/store";
 import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
@@ -11,6 +9,8 @@ import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { useGridPagination } from "../../../hooks/useGridPagination";
+import { useLazyGetDistributionsAndForfeituresQuery } from "../../../reduxstore/api/YearsEndApi";
+import { RootState } from "../../../reduxstore/store";
 import { GetDistributionsAndForfeituresColumns } from "./DistributionAndForfeituresGridColumns";
 
 interface DistributionsAndForfeituresGridSearchProps {
@@ -31,9 +31,12 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
 
+  // Make the initial page size configurable via state so it can be updated if needed
+  const [initialPageSize, setInitialPageSize] = useState<number>(25);
+
   const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
     useGridPagination({
-      initialPageSize: 25,
+      initialPageSize,
       initialSortBy: "employeeName, date",
       initialSortDescending: false,
       onPaginationChange: useCallback(
@@ -257,6 +260,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
           setPageSize={(value: number) => {
             handlePaginationChange(0, value);
             setInitialSearchLoaded(true);
+            setInitialPageSize(value);
           }}
           recordCount={distributionsAndForfeitures.response.total}
         />

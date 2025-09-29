@@ -1,20 +1,20 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, Divider, FormLabel, Grid, MenuItem, Select, Typography } from "@mui/material";
 import { ICellRendererParams } from "ag-grid-community";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useMemo, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { useSelector } from "react-redux";
-import { useLazyAdhocBeneficiariesReportQuery } from "reduxstore/api/YearsEndApi";
-import { RootState } from "reduxstore/store";
+import { DSMAccordion, DSMGrid, ISortParams, Page, Pagination, SearchAndReset } from "smart-ui-library";
+import * as yup from "yup";
+import { CAPTIONS } from "../../../constants";
+import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
+import { useLazyAdhocBeneficiariesReportQuery } from "../../../reduxstore/api/YearsEndApi";
+import { RootState } from "../../../reduxstore/store";
 import {
   AdhocBeneficiariesReportRequest,
   adhocBeneficiariesReportResponse,
   BeneficiaryReportDto
-} from "reduxstore/types";
-import { DSMAccordion, DSMGrid, ISortParams, Page, Pagination, SearchAndReset } from "smart-ui-library";
-import * as yup from "yup";
-import { CAPTIONS } from "../../../constants";
+} from "../../../reduxstore/types";
 import { GetProfitDetailColumnDef, PayBeNextColumnDef } from "./PayBeNextColumnDef";
 
 const schema = yup.object().shape({
@@ -32,8 +32,8 @@ const PayBeNext = () => {
   const profitYear = useFiscalCloseProfitYear();
   const [triggerReport, { isFetching, isSuccess }] = useLazyAdhocBeneficiariesReportQuery();
   const [adhocBeneficiariesReport, setAdhocBeneficiariesReport] = useState<adhocBeneficiariesReportResponse>();
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageNumber, setPageNumber] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(25);
   const [_sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "psnSuffix",
     isSortDescending: true
