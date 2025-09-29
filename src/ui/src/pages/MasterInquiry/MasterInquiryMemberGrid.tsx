@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import React, { memo, useMemo } from "react";
-import { EmployeeDetails } from "reduxstore/types";
 import { DSMGrid, formatNumberWithComma, Pagination } from "smart-ui-library";
+import { EmployeeDetails } from "../../reduxstore/types";
 import { GetMasterInquiryMemberGridColumns } from "./MasterInquiryMemberGridColumns";
 
 interface SearchResponse {

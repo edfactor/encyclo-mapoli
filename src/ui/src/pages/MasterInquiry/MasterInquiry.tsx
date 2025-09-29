@@ -1,8 +1,8 @@
 import { CircularProgress, Divider, Grid } from "@mui/material";
-import MissiveAlerts from "components/MissiveAlerts/MissiveAlerts";
 import { memo } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
+import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
 import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
 import useMasterInquiry from "./hooks/useMasterInquiry";
 import MasterInquiryGrid from "./MasterInquiryDetailsGrid";
