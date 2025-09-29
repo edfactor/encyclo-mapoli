@@ -14,7 +14,9 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
     }),
     createSSNColumn({}),
     createNameColumn({}),
-    createStoreColumn({}),
+    createStoreColumn({
+      field: "store"
+    }),
     createStatusColumn({
       alignment: "right",
       valueFormatter: (params) => {
