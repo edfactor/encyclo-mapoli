@@ -31,6 +31,7 @@ public static class ReadyActivityFactory
         // Appropriate for December of 2025
         var firstSaturday = "250104"; // 240106
         var lastSaturday = "251227"; // 241228
+        var cutOffSaturday = "260103";
         var YEAR = "2025"; // {YEAR}
 
         List<IActivity> activities =
@@ -48,7 +49,7 @@ public static class ReadyActivityFactory
             new ReadyActivity(sshClient, SftpClient, chatty, "A5", "PROF-DOLLAR-EXEC-EXTRACT", $"YEAR={YEAR}", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A6", "PAYPROFIT-CLEAR-EXEC", "", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A7", "!Ready-Screen-008-09", "", dataDirectory),
-            new ReadyActivity(sshClient, SftpClient, chatty, "A8", "PROF-SHARE", $"sw[3]=1 CDATE={lastSaturday} SUMREP=Y YEAREND=N", dataDirectory),
+            new ReadyActivity(sshClient, SftpClient, chatty, "A8", "PROF-SHARE", $"sw[3]=1 CDATE={cutOffSaturday} SUMREP=Y YEAREND=N", dataDirectory),
 
             // Frozen
             new ReadyActivity(sshClient, SftpClient, chatty, "A9", "!YE-Oracle-Payroll-Processing", "", dataDirectory),

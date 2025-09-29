@@ -26,7 +26,7 @@ public class GoldenDecemberRun : Runnable
             "R3", // PROF-TERM
             "R4", // QRY-PSLOAN
             "R5", // PROF-DOLLAR-EXEC-EXTRACT
-            "R6", // PAYPROFIT-CLEAR-EXEC
+            // "R6", // PAYPROFIT-CLEAR-EXEC
             "R7", // !Ready-Screen-008-09
             "R8", // PROF-SHARE
             "R9", // !YE-Oracle-Payroll-Processing
