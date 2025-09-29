@@ -47,11 +47,12 @@ import {
   setProfitSharingUpdate,
   setProfitSharingUpdateAdjustmentSummary,
   setRecentlyTerminated,
-  setRehireForfeituresDetails,
+  setTerminatedLetters,
   setTermination,
   setUnder21BreakdownByStore,
   setUnder21Inactive,
   setUnder21Totals,
+  setUnForfeitsDetails,
   setUpdateSummary,
   setVestedAmountsByAge,
   setYearEndProfitSharingReport,
@@ -113,10 +114,11 @@ import {
   QPAY066BTerminatedWithVestedBalanceRequest,
   QPAY066BTerminatedWithVestedBalanceResponse,
   RecentlyTerminatedResponse,
-  RehireForfeiture,
   StartAndEndDateRequest,
   SuggestedForfeitResponse,
   SuggestForfeitureAdjustmentRequest,
+  TerminatedLettersRequest,
+  TerminatedLettersResponse,
   TerminationResponse,
   Under21BreakdownByStoreRequest,
   Under21BreakdownByStoreResponse,
@@ -124,6 +126,7 @@ import {
   Under21InactiveResponse,
   Under21TotalsRequest,
   Under21TotalsResponse,
+  UnForfeit,
   UpdateSummaryRequest,
   UpdateSummaryResponse,
   VestedAmountsByAge,
@@ -179,7 +182,8 @@ export const YearsEndApi = createApi({
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
+          isSortDescending: params.pagination.isSortDescending,
+          profitYear: params.profitYear
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -202,7 +206,8 @@ export const YearsEndApi = createApi({
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
+          isSortDescending: params.pagination.isSortDescending,
+          profitYear: params.profitYear
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -222,7 +227,6 @@ export const YearsEndApi = createApi({
         url: `yearend/distributions-and-forfeitures`,
         method: "GET",
         params: {
-          profitYear: params.profitYear,
           startDate: params.startDate,
           endDate: params.endDate,
           take: params.pagination.take,
@@ -286,10 +290,7 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getRehireForfeitures: builder.query<
-      PagedReportResponse<RehireForfeiture>,
-      StartAndEndDateRequest & { archive?: boolean }
-    >({
+    getUnForfeits: builder.query<PagedReportResponse<UnForfeit>, StartAndEndDateRequest & { archive?: boolean }>({
       query: (params) => {
         const baseUrl = `yearend/unforfeitures/`;
         const url = params.archive ? `${baseUrl}?archive=true` : baseUrl;
@@ -312,7 +313,7 @@ export const YearsEndApi = createApi({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setRehireForfeituresDetails(data));
+          dispatch(setUnForfeitsDetails(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -656,6 +657,7 @@ export const YearsEndApi = createApi({
     }),
     getTerminationReport: builder.query<TerminationResponse, TerminationRequestWithArchive>({
       query: (params) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const body: any = {
           beginningDate: params.beginningDate,
           endingDate: params.endingDate,
@@ -686,7 +688,6 @@ export const YearsEndApi = createApi({
     }),
     getRecentlyTerminatedReport: builder.query<RecentlyTerminatedResponse, StartAndEndDateRequest>({
       query: (params) => {
-        console.log("getRecentlyTerminatedReport params:", params);
         return {
           url: "yearend/adhoc-terminated-employees-report",
           method: "GET",
@@ -710,6 +711,51 @@ export const YearsEndApi = createApi({
           console.log("Err: " + err);
         }
       }
+    }),
+    getTerminatedLettersReport: builder.query<TerminatedLettersResponse, TerminatedLettersRequest>({
+      query: (params) => {
+        return {
+          url: "yearend/adhoc-terminated-employees-report-needing-letter",
+          method: "GET",
+          params: {
+            profitYear: params.profitYear,
+            beginningDate: params.beginningDate,
+            endingDate: params.endingDate,
+            excludeZeroBalance: params.excludeZeroBalance,
+            badgeNumbers: params.badgeNumbers,
+            take: params.pagination.take,
+            skip: params.pagination.skip,
+            sortBy: params.pagination.sortBy,
+            isSortDescending: params.pagination.isSortDescending
+          }
+        };
+      },
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setTerminatedLetters(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+    getTerminatedLettersDownload: builder.query<Blob, TerminatedLettersRequest>({
+      query: (params) => ({
+        url: "yearend/adhoc-terminated-employees-report-needing-letter/download",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          beginningDate: params.beginningDate,
+          endingDate: params.endingDate,
+          excludeZeroBalance: params.excludeZeroBalance,
+          badgeNumbers: params.badgeNumbers,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        },
+        responseHandler: (response) => response.blob()
+      })
     }),
     getProfitShareUpdate: builder.query<ProfitShareUpdateResponse, ProfitShareUpdateRequest>({
       query: (params) => ({
@@ -1064,7 +1110,10 @@ export const YearsEndApi = createApi({
           const { data } = await queryFulfilled;
           dispatch(setProfitShareSummaryReport(data));
         } catch (err) {
-          console.log("Err: " + err);
+          console.error(
+            "Error fetching year-end profit sharing summary report:",
+            err instanceof Error ? err.stack || err.message : JSON.stringify(err, null, 2)
+          );
         }
       }
     }),
@@ -1301,13 +1350,13 @@ export const {
   useLazyGetDuplicateNamesAndBirthdaysQuery,
   useLazyGetDuplicateSSNsQuery,
   useLazyGetEligibleEmployeesQuery,
-  useLazyGetEmployeesOnMilitaryLeaveQuery,
+  //useLazyGetEmployeesOnMilitaryLeaveQuery,
   useLazyGetEmployeeWagesForYearQuery,
   useLazyGetExecutiveHoursAndDollarsQuery,
   useLazyGetForfeituresAndPointsQuery,
   useLazyGetForfeituresByAgeQuery,
   useLazyGetGrossWagesReportQuery,
-  useLazyGetRehireForfeituresQuery,
+  useLazyGetUnForfeitsQuery,
   useLazyGetNegativeEVTASSNQuery,
   useLazyGetProfitShareEditQuery,
   useLazyGetProfitShareUpdateQuery,
@@ -1334,5 +1383,7 @@ export const {
   useLazyAdhocBeneficiariesReportQuery,
   useLazyPayBenReportQuery,
   useLazyGetQPAY066BTerminatedWithVestedBalanceQuery,
-  useLazyGetRecentlyTerminatedReportQuery
+  useLazyGetRecentlyTerminatedReportQuery,
+  useLazyGetTerminatedLettersReportQuery,
+  useLazyGetTerminatedLettersDownloadQuery
 } = YearsEndApi;

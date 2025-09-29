@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Data.Interfaces;
+﻿using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,11 +13,12 @@ public static class SmartPayProfitLoader
     public static async Task<Dictionary<int, PayProfitData>> GetSmartPayProfitDataByBadge(
         TotalService totalService,
         IProfitSharingDataContextFactory dbFactory,
-        short profitYear)
+        short profitYear,
+        DateOnly asOfDate)
     {
         return await dbFactory.UseReadOnlyContext(async ctx =>
         {
-            Dictionary<int, byte> yearsOfService = await totalService.GetYearsOfService(ctx, profitYear)
+            Dictionary<int, byte> yearsOfService = await totalService.GetYearsOfService(ctx, profitYear, asOfDate)
                 .ToDictionaryAsync(y => y.Ssn, y => y.Years);
 
             var result = await ctx.PayProfits

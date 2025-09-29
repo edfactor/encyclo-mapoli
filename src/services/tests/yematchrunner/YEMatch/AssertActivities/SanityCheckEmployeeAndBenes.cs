@@ -1,10 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
+﻿using System.Diagnostics.CodeAnalysis;
 using Oracle.ManagedDataAccess.Client;
 using Shouldly;
-using YEMatch.YEMatch.AssertActivities;
 
-namespace YEMatch.YEMatch.ArrangeActivites;
+namespace YEMatch.YEMatch.AssertActivities;
 
 [SuppressMessage("Minor Code Smell", "S1199:Nested code blocks should not be used")]
 public class SanityCheckEmployeeAndBenes : BaseSqlActivity

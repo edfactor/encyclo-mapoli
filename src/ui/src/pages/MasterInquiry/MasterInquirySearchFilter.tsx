@@ -299,7 +299,17 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
     );
 
     const TextInputField = useCallback(
-      ({ name, label, type = "text", disabled = false }: { name: keyof MasterInquirySearch; label: string; type?: string; disabled?: boolean }) => (
+      ({
+        name,
+        label,
+        type = "text",
+        disabled = false
+      }: {
+        name: keyof MasterInquirySearch;
+        label: string;
+        type?: string;
+        disabled?: boolean;
+      }) => (
         <Grid size={{ xs: 12, sm: 6, md: type === "number" ? 2 : 4 }}>
           <FormLabel>{label}</FormLabel>
           <Controller
@@ -444,15 +454,28 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
     });
 
     // Watch the three mutually exclusive fields
-    const watchedValues = useWatch({
-      control,
-      name: ["socialSecurity", "name", "badgeNumber"]
-    });
+    const socialSecurityValue = useWatch({ control, name: "socialSecurity" });
+    const nameValue = useWatch({ control, name: "name" });
+    const badgeNumberWatchValue = useWatch({ control, name: "badgeNumber" });
 
-    const [socialSecurityValue, nameValue, badgeNumberWatchValue] = watchedValues;
+    // Watch all fields that should enable the search button
+    const watchedBadgeNumber = useWatch({ control, name: "badgeNumber" });
+    const watchedStartProfitMonth = useWatch({ control, name: "startProfitMonth" });
+    const watchedEndProfitMonth = useWatch({ control, name: "endProfitMonth" });
+    const watchedSocialSecurity = useWatch({ control, name: "socialSecurity" });
+    const watchedName = useWatch({ control, name: "name" });
+    const watchedContribution = useWatch({ control, name: "contribution" });
+    const watchedEarnings = useWatch({ control, name: "earnings" });
+    const watchedForfeiture = useWatch({ control, name: "forfeiture" });
+    const watchedPayment = useWatch({ control, name: "payment" });
+    const watchedMemberType = useWatch({ control, name: "memberType" });
+    const watchedPaymentType = useWatch({ control, name: "paymentType" });
 
     // Helper function to check if a value is non-empty
-    const hasValue = (value: any) => value !== null && value !== undefined && value !== "";
+    const hasValue = useCallback(
+      (value: string | number | null | undefined) => value !== null && value !== undefined && value !== "",
+      []
+    );
 
     // Determine which fields should be disabled based on which have values
     const hasSocialSecurity = hasValue(socialSecurityValue);
@@ -465,6 +488,39 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
     const isBadgeNumberDisabled = hasSocialSecurity || hasName;
 
     const isMemberTypeDisabled = badgeNumberValue !== null && badgeNumberValue !== undefined;
+
+    // Determine if search button should be enabled
+    const hasSearchCriteria = useMemo(() => {
+      // Check if any of the specific fields have values
+      const hasFieldValues =
+        hasValue(watchedBadgeNumber) ||
+        hasValue(watchedStartProfitMonth) ||
+        hasValue(watchedEndProfitMonth) ||
+        hasValue(watchedSocialSecurity) ||
+        hasValue(watchedName) ||
+        hasValue(watchedContribution) ||
+        hasValue(watchedEarnings) ||
+        hasValue(watchedForfeiture) ||
+        hasValue(watchedPayment);
+
+      // Check if memberType or paymentType are not at default values
+      const hasNonDefaultSelections = watchedMemberType !== "all" || watchedPaymentType !== "all";
+
+      return hasFieldValues || hasNonDefaultSelections;
+    }, [
+      watchedBadgeNumber,
+      watchedStartProfitMonth,
+      watchedEndProfitMonth,
+      watchedSocialSecurity,
+      watchedName,
+      watchedContribution,
+      watchedEarnings,
+      watchedForfeiture,
+      watchedPayment,
+      watchedMemberType,
+      watchedPaymentType,
+      hasValue
+    ]);
 
     return (
       <form onSubmit={validateAndSearch}>
@@ -544,7 +600,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
                 handleReset={handleReset}
                 handleSearch={validateAndSearch}
                 isFetching={isSearching}
-                disabled={!isValid || isSearching}
+                disabled={!isValid || isSearching || !hasSearchCriteria}
               />
             </Grid>
           </Grid>

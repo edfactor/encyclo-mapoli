@@ -14,9 +14,9 @@ public class TotalServiceIntegrationTests : PristineBaseTest
     public async Task Verify_years()
     {
         short yearsUpTo = 2023;
-
+        var calInfo = await CalendarService.GetYearStartAndEndAccountingDatesAsync(yearsUpTo, CancellationToken.None);
         Dictionary<int, PayProfitData> ppReady = await ReadyPayProfitLoader.GetReadyPayProfitByBadge(DbFactory.ConnectionString);
-        Dictionary<int, PayProfitData> ppSmartYis = await SmartPayProfitLoader.GetSmartPayProfitDataByBadge(TotalService, DbFactory, yearsUpTo);
+        Dictionary<int, PayProfitData> ppSmartYis = await SmartPayProfitLoader.GetSmartPayProfitDataByBadge(TotalService, DbFactory, yearsUpTo, calInfo.FiscalEndDate);
 
         Dictionary<int, int> readyYearByBadge = ppReady.ToDictionary(k => k.Key, v => v.Value.Years);
         Dictionary<int, int> smartYearByBadge = ppSmartYis.ToDictionary(k => k.Key, v => v.Value.Years);

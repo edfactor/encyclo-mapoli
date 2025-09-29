@@ -1,51 +1,51 @@
-import React, { useMemo } from "react";
-import { Typography } from "@mui/material";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { Grid } from "@mui/material";
+import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
-import { GetUnder21BreakdownColumnDefs } from "./GetUnder21BreakdownColumnDefs";
 import { useNavigate } from "react-router-dom";
+import { RootState } from "reduxstore/store";
+import { DSMGrid, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../../components/ReportSummary";
+import { useGridPagination } from "../../../../hooks/useGridPagination";
+import { GetUnder21BreakdownColumnDefs } from "./GetUnder21BreakdownColumnDefs";
 
 interface Under21BreakdownGridProps {
   isLoading?: boolean;
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
-  pageNumber: number;
-  setPageNumber: (value: number) => void;
-  pageSize: number;
-  setPageSize: (value: number) => void;
-  sortParams: ISortParams;
-  setSortParams: (value: ISortParams) => void;
 }
 
 const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
   isLoading = false,
   initialSearchLoaded,
-  setInitialSearchLoaded,
-  pageNumber,
-  setPageNumber,
-  pageSize,
-  setPageSize,
-  sortParams,
-  setSortParams
+  setInitialSearchLoaded
 }) => {
   const under21Breakdown = useSelector((state: RootState) => state.yearsEnd.under21BreakdownByStore);
   const navigate = useNavigate();
 
-  // Handle navigation for badge clicks
-  const handleNavigation = (path: string) => {
-    navigate(path);
-  };
+  const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "badgeNumber",
+    initialSortDescending: false,
+    onPaginationChange: () => {
+      // This component doesn't trigger API calls on pagination change
+      // The data is already loaded from the parent component
+    }
+  });
 
-  const sortEventHandler = (update: ISortParams) => {
+  // Handle navigation for badge clicks
+  const handleNavigation = React.useCallback(
+    (path: string) => {
+      navigate(path);
+    },
+    [navigate]
+  );
+
+  const sortEventHandler = (update: any) => {
     if (update.sortBy === "") {
       update.sortBy = "badgeNumber";
       update.isSortDescending = false;
     }
-    setSortParams(update);
-    setPageNumber(0);
+    handleSortChange(update);
     setInitialSearchLoaded(true);
   };
 
@@ -56,7 +56,7 @@ const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
       container
       direction="column"
       width="100%">
-      <ReportSummary report={under21Breakdown} />
+      {under21Breakdown && <ReportSummary report={under21Breakdown} />}
       <Grid width="100%">
         <DSMGrid
           preferenceKey="UNDER_21_BREAKDOWN_REPORT"
@@ -71,13 +71,12 @@ const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
           <Pagination
             pageNumber={pageNumber}
             setPageNumber={(value: number) => {
-              setPageNumber(value - 1);
+              handlePaginationChange(value - 1, pageSize);
               setInitialSearchLoaded(true);
             }}
             pageSize={pageSize}
             setPageSize={(value: number) => {
-              setPageSize(value);
-              setPageNumber(1);
+              handlePaginationChange(0, value);
               setInitialSearchLoaded(true);
             }}
             recordCount={under21Breakdown.response.total || 0}

@@ -45,6 +45,7 @@ public class MilitaryService : IMilitaryService
                 ProfitYear = req.ProfitYear,
                 ProfitYearIteration = 1,
                 CommentTypeId = /* 19 */CommentType.Constants.Military.Id,
+                Remark = /* 19 */CommentType.Constants.Military.Name,
                 Contribution = req.ContributionAmount,
                 Ssn = d.Ssn,
                 YearsOfServiceCredit = (byte)(req.IsSupplementalContribution ? 0 : 1),

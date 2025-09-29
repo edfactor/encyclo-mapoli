@@ -5,7 +5,7 @@ import AssociatesGrid from "./AssociatesGrid";
 import { useState } from "react";
 
 interface StoreContentProps {
-  store: number;
+  store: number | null;
 }
 
 const StoreContent: React.FC<StoreContentProps> = ({ store }) => {
@@ -22,7 +22,7 @@ const StoreContent: React.FC<StoreContentProps> = ({ store }) => {
         <Typography
           variant="h2"
           sx={{ color: "#0258A5", marginBottom: "16px" }}>
-          {`Store ${store}`}
+          {store ? `Store ${store}` : 'No Store Selected'}
         </Typography>
       </Grid>
 
@@ -31,21 +31,25 @@ const StoreContent: React.FC<StoreContentProps> = ({ store }) => {
         direction="column"
         spacing={3}
         width="100%">
-        <Grid>
-          <StoreManagementGrid
-            store={store}
-            pageNumberReset={pageNumberReset}
-            setPageNumberReset={setPageNumberReset}
-          />
-        </Grid>
+        {store && (
+          <>
+            <Grid>
+              <StoreManagementGrid
+                store={store}
+                pageNumberReset={pageNumberReset}
+                setPageNumberReset={setPageNumberReset}
+              />
+            </Grid>
 
-        <Grid style={{ marginTop: "32px" }}>
-          <AssociatesGrid
-            store={store}
-            pageNumberReset={pageNumberReset}
-            setPageNumberReset={setPageNumberReset}
-          />
-        </Grid>
+            <Grid style={{ marginTop: "32px" }}>
+              <AssociatesGrid
+                store={store}
+                pageNumberReset={pageNumberReset}
+                setPageNumberReset={setPageNumberReset}
+              />
+            </Grid>
+          </>
+        )}
       </Grid>
     </Grid>
   );

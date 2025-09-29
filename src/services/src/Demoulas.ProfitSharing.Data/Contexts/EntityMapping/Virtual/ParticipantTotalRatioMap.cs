@@ -16,6 +16,7 @@ internal sealed class ParticipantTotalRatioMap : IEntityTypeConfiguration<Partic
             .IsRequired();
 
         builder.Property(x => x.Ratio)
-            .HasColumnName("RATIO");
+            .HasColumnName("RATIO")
+            .HasPrecision(18, 6);
     }
 }

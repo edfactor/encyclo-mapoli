@@ -1,11 +1,11 @@
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetRecentlyTerminatedReportQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { DSMGrid, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
-import "./RecentlyTerminatedGrid.css";
+import { useGridPagination } from "../../../hooks/useGridPagination";
 import { GetRecentlyTerminatedColumns } from "./RecentlyTerminatedGridColumns";
 
 interface RecentlyTerminatedGridSearchProps {
@@ -17,17 +17,38 @@ const RecentlyTerminatedGrid: React.FC<RecentlyTerminatedGridSearchProps> = ({
   initialSearchLoaded,
   setInitialSearchLoaded
 }) => {
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "fullName, terminationDate",
-    isSortDescending: false
-  });
-
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { recentlyTerminated, recentlyTerminatedQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch, { isFetching }] = useLazyGetRecentlyTerminatedReportQuery();
+
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "fullName, terminationDate",
+    initialSortDescending: false,
+    onPaginationChange: useCallback(async (pageNum: number, pageSz: number, sortPrms: any) => {
+      if (hasToken && initialSearchLoaded) {
+        const request: any = {
+          profitYear: profitYear || 0,
+          pagination: {
+            skip: pageNum * pageSz,
+            take: pageSz,
+            sortBy: sortPrms.sortBy,
+            isSortDescending: sortPrms.isSortDescending
+          }
+        };
+
+        if (recentlyTerminatedQueryParams?.beginningDate !== undefined) {
+          request.beginningDate = recentlyTerminatedQueryParams.beginningDate;
+        }
+        if (recentlyTerminatedQueryParams?.endingDate !== undefined) {
+          request.endingDate = recentlyTerminatedQueryParams.endingDate;
+        }
+
+        await triggerSearch(request, false);
+      }
+    }, [hasToken, initialSearchLoaded, profitYear, recentlyTerminatedQueryParams?.beginningDate, recentlyTerminatedQueryParams?.endingDate, triggerSearch])
+  });
 
   const onSearch = useCallback(async () => {
     const request: any = {
@@ -66,18 +87,18 @@ const RecentlyTerminatedGrid: React.FC<RecentlyTerminatedGridSearchProps> = ({
       recentlyTerminated?.response?.results &&
       recentlyTerminated.response.results.length !== prevRecentlyTerminated.current?.response?.results?.length
     ) {
-      setPageNumber(0);
+      resetPagination();
     }
     prevRecentlyTerminated.current = recentlyTerminated;
-  }, [recentlyTerminated]);
+  }, [recentlyTerminated, resetPagination]);
 
   useEffect(() => {
     if (hasToken && initialSearchLoaded) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken, setInitialSearchLoaded]);
+  }, [initialSearchLoaded, onSearch, hasToken]);
 
-  const sortEventHandler = (update: ISortParams) => setSortParams(update);
+  const sortEventHandler = (update: any) => handleSortChange(update);
   const columnDefs = useMemo(() => GetRecentlyTerminatedColumns(), []);
 
   return (
@@ -100,13 +121,12 @@ const RecentlyTerminatedGrid: React.FC<RecentlyTerminatedGridSearchProps> = ({
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
-            setPageNumber(value - 1);
+            handlePaginationChange(value - 1, pageSize);
             setInitialSearchLoaded(true);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
-            setPageSize(value);
-            setPageNumber(1);
+            handlePaginationChange(0, value);
             setInitialSearchLoaded(true);
           }}
           recordCount={recentlyTerminated.response.total}

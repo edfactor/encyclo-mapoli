@@ -9,23 +9,30 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using System.Linq.Expressions;
 
 namespace Demoulas.ProfitSharing.Services.ItDevOps;
 
 /// <summary>
 /// This service contains logic related to getting temporal data for tables with ValidFrom and ValidTo.
 /// </summary>
-public class FrozenService: IFrozenService
+public class FrozenService : IFrozenService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ICommitGuardOverride _guardOverride;
+    private readonly IServiceProvider _serviceProvider;
 
-    public FrozenService(IProfitSharingDataContextFactory dataContextFactory, ICommitGuardOverride guardOverride)
+    public FrozenService(IProfitSharingDataContextFactory dataContextFactory,
+        ICommitGuardOverride guardOverride,
+        IServiceProvider serviceProvider)
     {
         _dataContextFactory = dataContextFactory;
         _guardOverride = guardOverride;
+        _serviceProvider = serviceProvider;
     }
 
     /// <summary>
@@ -36,14 +43,33 @@ public class FrozenService: IFrozenService
     /// <returns></returns>
     internal static IQueryable<Demographic> GetDemographicSnapshot(IProfitSharingDbContext ctx, short profitYear)
     {
-        return 
-            from dh in ctx.DemographicHistories
+        // Use a correlated subquery against FrozenStates to evaluate the window; this avoids duplicating the projection.
+        Expression<Func<DemographicHistory, bool>> window = dh =>
+            ctx.FrozenStates.Any(fs => fs.ProfitYear == profitYear && fs.IsActive && fs.AsOfDateTime >= dh.ValidFrom && fs.AsOfDateTime < dh.ValidTo);
+
+        return BuildDemographicSnapshot(ctx, window);
+    }
+
+    /// <summary>
+    /// Returns a query object representing Demographic data as-of an explicit timestamp.
+    /// </summary>
+    /// <param name="ctx">The data context used for querying</param>
+    /// <param name="asOf">Point-in-time for the snapshot (UTC offset preserved)</param>
+    /// <returns></returns>
+    internal static IQueryable<Demographic> GetDemographicSnapshotAsOf(IProfitSharingDbContext ctx, DateTimeOffset asOf)
+    {
+        Expression<Func<DemographicHistory, bool>> window = dh => asOf >= dh.ValidFrom && asOf < dh.ValidTo;
+        return BuildDemographicSnapshot(ctx, window);
+    }
+
+    private static IQueryable<Demographic> BuildDemographicSnapshot(IProfitSharingDbContext ctx, Expression<Func<DemographicHistory, bool>> withinWindow)
+    {
+        return
+            from dh in ctx.DemographicHistories.Where(withinWindow)
 #pragma warning disable DSMPS001
             join d in ctx.Demographics on dh.DemographicId equals d.Id
 #pragma warning restore DSMPS001
-            from fs in ctx.FrozenStates.Where(x => x.ProfitYear == profitYear && x.IsActive)
             join dpts in ctx.Departments on dh.DepartmentId equals dpts.Id
-            where fs.AsOfDateTime >= dh.ValidFrom && fs.AsOfDateTime < dh.ValidTo
             select new Demographic
             {
                 Id = dh.DemographicId,
@@ -84,11 +110,18 @@ public class FrozenService: IFrozenService
 
         var thisYear = DateTime.Today.Year;
         validator.RuleFor(r => r)
-            .InclusiveBetween((short)(thisYear-1), (short)thisYear)
+            .InclusiveBetween((short)(thisYear - 1), (short)thisYear)
             .WithMessage($"ProfitYear must be between {thisYear - 1} and {thisYear}.");
 
+
+        var duplicateSsnReportService = _serviceProvider.GetRequiredService<IPayrollDuplicateSsnReportService>();
+        // Inline async rule to prevent freezing when duplicate SSNs exist.
+        validator.RuleFor(r => r)
+            .MustAsync(async (_, ct) => !await duplicateSsnReportService.DuplicateSsnExistsAsync(ct))
+            .WithMessage("Cannot freeze demographics when duplicate SSNs exist.  Please resolve duplicate SSNs and try again.");
+
         await validator.ValidateAndThrowAsync(profitYear, cancellationToken);
-        
+
         using (_guardOverride.AllowFor(roles: Role.ITDEVOPS))
         {
             return await _dataContextFactory.UseWritableContext(async ctx =>
@@ -130,10 +163,11 @@ public class FrozenService: IFrozenService
                 return new FrozenStateResponse
                 {
                     Id = frozenState.Id,
-                    ProfitYear = profitYear,
-                    FrozenBy = userName,
-                    AsOfDateTime = asOfDateTime,
-                    IsActive = true
+                    ProfitYear = frozenState.ProfitYear,
+                    FrozenBy = frozenState.FrozenBy,
+                    AsOfDateTime = frozenState.AsOfDateTime,
+                    IsActive = frozenState.IsActive,
+                    CreatedDateTime = frozenState.CreatedDateTime
                 };
             }, cancellationToken);
         }
@@ -155,7 +189,7 @@ public class FrozenService: IFrozenService
         return _dataContextFactory.UseReadOnlyContext(ctx =>
         {
             //Inactivate any prior frozen states
-            return ctx.FrozenStates.Select(f=> new FrozenStateResponse
+            return ctx.FrozenStates.Select(f => new FrozenStateResponse
             {
                 Id = f.Id,
                 ProfitYear = f.ProfitYear,
@@ -172,7 +206,7 @@ public class FrozenService: IFrozenService
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             //Inactivate any prior frozen states
-            var frozen = await ctx.FrozenStates.Where(f=> f.IsActive).Select(f => new FrozenStateResponse
+            var frozen = await ctx.FrozenStates.Where(f => f.IsActive).Select(f => new FrozenStateResponse
             {
                 Id = f.Id,
                 ProfitYear = f.ProfitYear,
@@ -181,10 +215,15 @@ public class FrozenService: IFrozenService
                 IsActive = f.IsActive,
                 CreatedDateTime = f.CreatedDateTime
             }).FirstOrDefaultAsync(cancellationToken);
-            
-            return frozen ?? new FrozenStateResponse { Id = 0, ProfitYear = (short)DateTime.Today.Year, 
+
+            return frozen ?? new FrozenStateResponse
+            {
+                Id = 0,
+                ProfitYear = (short)DateTime.Today.Year,
                 CreatedDateTime = ReferenceData.DsmMinValue.ToDateTime(TimeOnly.MinValue),
-                AsOfDateTime = DateTimeOffset.UtcNow, IsActive = false};
+                AsOfDateTime = DateTimeOffset.UtcNow,
+                IsActive = false
+            };
         });
     }
 

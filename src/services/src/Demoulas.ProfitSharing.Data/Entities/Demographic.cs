@@ -55,7 +55,7 @@ public sealed class Demographic : Member
     public required short StoreNumber { get; set; }
 
     public PayClassification? PayClassification { get; set; }
-    public required byte PayClassificationId { get; set; }
+    public required string PayClassificationId { get; set; }
 
     public required ContactInfo ContactInfo { get; set; }
     public required Address Address { get; set; }

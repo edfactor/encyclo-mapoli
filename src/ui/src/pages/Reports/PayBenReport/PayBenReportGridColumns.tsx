@@ -3,6 +3,11 @@ import { createBadgeColumn, createPSNColumn, createSSNColumn } from "../../../ut
 
 export const PayBenReportGridColumn = (): ColDef[] => {
   return [
+    createPSNColumn({
+      enableLinking: true,
+      linkingStyle: "badge-psn",
+      navigateFunction: ()=>{}
+    }),
     createSSNColumn({ minWidth: 170, sortable: false }),
     {
       headerName: "Beneficiary",
@@ -12,10 +17,7 @@ export const PayBenReportGridColumn = (): ColDef[] => {
       cellClass: "center-align",
       resizable: true
     },
-    createPSNColumn({
-      enableLinking: true,
-      linkingStyle: "badge-psn"
-    }),
+
     createBadgeColumn({ minWidth: 120 }),
     {
       headerName: "Beneficiary of",

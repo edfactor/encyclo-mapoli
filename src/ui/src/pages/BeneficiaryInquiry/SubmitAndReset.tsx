@@ -2,7 +2,6 @@ import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Grid } from "@mui/material";
 import React, { FC } from "react";
-import "./SubmitAndReset.css";
 
 export interface ISubmitAndResetProps {
   disabled?: boolean;
@@ -22,13 +21,7 @@ export const SubmitAndReset: FC<ISubmitAndResetProps> = ({
     <Grid
       size={12}
       {...props}>
-      <div
-        className="search-buttons"
-        style={{
-          display: "flex",
-          justifyContent: "left",
-          marginTop: "16px"
-        }}>
+      <div className="flex justify-start mt-4 [&>button]:mr-5">
         <Button
           variant="contained"
           disabled={disabled || isFetching}
@@ -36,6 +29,21 @@ export const SubmitAndReset: FC<ISubmitAndResetProps> = ({
           type="submit"
           onClick={handleSearch}
           sx={{
+            borderRadius: "2px",
+            background: "#2e7d32",
+            border: "none",
+            display: "flex",
+            padding: "8px 22px",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            color: "white",
+            fontFamily: "Lato",
+            fontSize: "15px",
+            fontWeight: 400,
+            lineHeight: "26px",
+            letterSpacing: "0.46px",
+            textTransform: "uppercase",
             "&.Mui-disabled": {
               background: "#eaeaea",
               color: "#c0c0c0"
@@ -43,7 +51,7 @@ export const SubmitAndReset: FC<ISubmitAndResetProps> = ({
           }}>
           {isFetching ? (
             //Prevent loading spinner from shrinking button
-            <div className="spinner">
+            <div className="min-w-[61px]">
               <CircularProgress
                 color="inherit"
                 size="20px"
@@ -54,11 +62,31 @@ export const SubmitAndReset: FC<ISubmitAndResetProps> = ({
           )}
         </Button>
         <Button
-          className="reset"
           type="reset"
           variant="contained"
           data-testid="resetButton"
-          onClick={handleReset}>
+          onClick={handleReset}
+          sx={{
+            color: "#2e7d32",
+            background: "none",
+            border: "none",
+            borderRadius: "2px",
+            display: "flex",
+            padding: "8px 22px",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            fontFamily: "Lato",
+            fontSize: "15px",
+            fontWeight: 400,
+            lineHeight: "26px",
+            letterSpacing: "0.46px",
+            textTransform: "uppercase",
+            width: "69px",
+            "&:hover": {
+              backgroundColor: "#d3d3d3"
+            }
+          }}>
           Reset
         </Button>
       </div>

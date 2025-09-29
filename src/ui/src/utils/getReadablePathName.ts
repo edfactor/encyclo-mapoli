@@ -30,8 +30,6 @@ const pathToReadableName: Record<string, string> = {
   "fiscal-close": "Year End Flow",
   "profit-share-update": "Profit Share Update (PAY444 PAY447)",
   "profit-share-report-edit-run": "Profit Share Report Edit Run",
-  "profit-share-report-final-run": "Profit Share Report Final Run",
-  "paymaster-update": "Paymaster Update",
   "profit-share-by-store": "Profit Share by Store",
   "profit-share-gross-report": "Profit Share Gross Report",
   "pay426-1": "Pay 426 Active 18-20",
@@ -61,6 +59,7 @@ const pathToReadableName: Record<string, string> = {
   profall: "Profall",
   "pay426-final-run": "Pay 426 Final Run",
   "dev-debug": "Dev Debug",
+  documentation: "Documentation",
   beneficiary: "Beneficiary Inquiry",
   "adhoc-beneficiaries-report": "Pay Be Next",
   "payben-report": "Pay Beneficiary Report",
@@ -69,7 +68,9 @@ const pathToReadableName: Record<string, string> = {
   qpay600: "QPAY600",
   "reprint-certificates": "Reprint Certificates",
   "print-profit-certs": "Print Profit Certificates",
-  "recently-terminated": "Recently Terminated"
+  "recently-terminated": "Recently Terminated",
+  "terminated-letters": "Terminated Letters",
+  "it devops": "IT DevOps"
 };
 
 export const getReadablePathName = (path: string): string => {

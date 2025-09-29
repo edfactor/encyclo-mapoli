@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Demoulas.ProfitSharing.Common.Contracts;
 
@@ -36,5 +38,39 @@ public sealed record Result<T>
     public TResult Match<TResult>(Func<T, TResult> onSuccess, Func<ProblemDetails, TResult> onError)
     {
         return IsSuccess ? onSuccess(Value!) : onError(Error!);
+    }
+
+    /// <summary>
+    /// Converts this result into an HTTP union using supplied not-found errors. Use explicitly when not using implicit cast.
+    /// </summary>
+    public Results<Ok<T>, NotFound, ProblemHttpResult> ToHttpResult(params Error[] notFoundErrors)
+    {
+        if (IsSuccess)
+        {
+            return TypedResults.Ok(Value!);
+        }
+
+        ProblemDetails pd = Error!;
+        if (notFoundErrors.Any(e => e.Description == pd.Detail))
+        {
+            return TypedResults.NotFound();
+        }
+        return TypedResults.Problem(pd.Detail);
+    }
+
+    /// <summary>
+    /// Implicitly converts a <see cref="Result{T}"/> to <see cref="Results{Ok, NotFound, ProblemHttpResult}"/> assuming no not-found semantics.
+    /// Preferred only when caller already encoded appropriate error description for not-found.
+    /// For specific not-found mapping, call <see cref="ToHttpResult"/> explicitly.
+    /// </summary>
+    public static implicit operator Results<Ok<T>, NotFound, ProblemHttpResult>(Result<T> result)
+    {
+        if (result.IsSuccess)
+        {
+            return TypedResults.Ok(result.Value!);
+        }
+
+        ProblemDetails pd = result.Error!; // implicit conversion from Error
+        return TypedResults.Problem(pd.Detail);
     }
 }

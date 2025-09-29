@@ -370,3 +370,6 @@ FodyWeavers.xsd
 .DS_Store
 /test-results/user.json
 test-results
+/src/ui/tsconfig.tsbuildinfo
+/src/services/tests/Demoulas.ProfitSharing.UnitTests/.vscode
+/.vscode/mcp.json

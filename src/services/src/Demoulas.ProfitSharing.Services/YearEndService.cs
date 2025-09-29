@@ -69,8 +69,8 @@ public sealed class YearEndService : IYearEndService
           EmployeeType                - Is this a "new employee  in the plan" - aka this is your first year >21 and >1000 hours - employee may already have V-ONLY records
           PsCertificateIssuedDate     - indicates that this employee should get a physically printed certificate.   It is really a proxy for Earn Points > 0.
           
-          The "rebuild" argument is for rebuilding a prior year.   It rebuilds a year, but doesnt push the year values forward to the next year.  "rebuild" should only 
-          be used after importing scramble data to rebuild the prior year's values.
+          The "rebuild" argument is for rebuilding a prior year.   It rebuilds a year, but does not push the year values forward to the next year.  "rebuild" should only 
+          be used after importing scramble/uat/prod data to rebuild the prior Year End values.
     */
     public async Task RunFinalYearEndUpdates(short profitYear, bool rebuild, CancellationToken ct)
     {

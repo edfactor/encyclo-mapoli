@@ -8,17 +8,15 @@ import {
 } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { CalendarResponseDto, ForfeitureAdjustmentUpdateRequest, StartAndEndDateRequest } from "reduxstore/types";
-import {
-  DSMGrid,
-  formatNumberWithComma,
-  ISortParams,
-  numberToCurrency,
-  Pagination,
-  setMessage
-} from "smart-ui-library";
+import { DSMGrid, formatNumberWithComma, numberToCurrency, Pagination, setMessage } from "smart-ui-library";
 import { ReportSummary } from "../../../components/ReportSummary";
 import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { useEditState } from "../../../hooks/useEditState";
+import { useGridPagination } from "../../../hooks/useGridPagination";
+import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
+import { useRowSelection } from "../../../hooks/useRowSelection";
 import { Messages } from "../../../utils/messageDictonary";
 import { TerminationSearchRequest } from "./Termination";
 import { GetDetailColumns } from "./TerminationDetailsGridColumns";
@@ -34,6 +32,7 @@ interface TerminationGridSearchProps {
   fiscalData: CalendarResponseDto | null;
   shouldArchive?: boolean;
   onArchiveHandled?: () => void;
+  onErrorOccurred?: () => void; // Add this prop
 }
 
 const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
@@ -45,55 +44,82 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   hasUnsavedChanges,
   fiscalData,
   shouldArchive,
-  onArchiveHandled
+  onArchiveHandled,
+  onErrorOccurred
 }) => {
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
-    isSortDescending: true
-  });
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
   const dispatch = useDispatch();
   const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
-  const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
-  const [editedValues, setEditedValues] = useState<Record<string, { value: number; hasError: boolean }>>({});
-  const [loadingRowIds, setLoadingRowIds] = useState<Set<number>>(new Set());
   const [pendingSuccessMessage, setPendingSuccessMessage] = useState<string | null>(null);
   const [isPendingBulkMessage, setIsPendingBulkMessage] = useState<boolean>(false);
   const selectedProfitYear = useDecemberFlowProfitYear();
   // fiscalData is now passed from parent to avoid timing issues on refresh
   const [updateForfeitureAdjustmentBulk, { isLoading: isBulkSaving }] = useUpdateForfeitureAdjustmentBulkMutation();
-  const [updateForfeitureAdjustment] = useUpdateForfeitureAdjustmentMutation();
+
+  // Use dynamic grid height utility hook
+  const gridMaxHeight = useDynamicGridHeight();
+  const [updateForfeitureAdjustment, { isLoading: isSingleSaving }] = useUpdateForfeitureAdjustmentMutation();
   const lastRequestKeyRef = useRef<string | null>(null);
+
+  // Check if current navigation should be read-only
+  const isReadOnly = useReadOnlyNavigation();
+
+  // Use separate hooks for edit and selection state
+  const editState = useEditState();
+  const selectionState = useRowSelection();
 
   const createRequest = useCallback(
     (
       skip: number,
       sortBy: string,
       isSortDescending: boolean,
-      profitYear: number
+      profitYear: number,
+      pageSz: number
     ): (StartAndEndDateRequest & { archive?: boolean }) | null => {
       const base: StartAndEndDateRequest = searchParams
         ? {
             ...searchParams,
             profitYear,
-            pagination: { skip, take: pageSize, sortBy, isSortDescending }
+            pagination: { skip, take: pageSz, sortBy, isSortDescending }
           }
         : {
             beginningDate: fiscalData?.fiscalBeginDate || "",
             endingDate: fiscalData?.fiscalEndDate || "",
             profitYear,
-            pagination: { skip, take: pageSize, sortBy, isSortDescending }
+            pagination: { skip, take: pageSz, sortBy, isSortDescending }
           };
 
       if (!base.beginningDate || !base.endingDate) return null;
 
       return shouldArchive ? { ...base, archive: true } : base;
     },
-    [searchParams, pageSize, fiscalData?.fiscalBeginDate, fiscalData?.fiscalEndDate, shouldArchive]
+    [searchParams, fiscalData?.fiscalBeginDate, fiscalData?.fiscalEndDate, shouldArchive]
   );
+
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
+    useGridPagination({
+      initialPageSize: 25,
+      initialSortBy: "badgeNumber",
+      initialSortDescending: true,
+      onPaginationChange: useCallback(
+        async (pageNum: number, pageSz: number, sortPrms: any) => {
+          if (initialSearchLoaded && searchParams) {
+            const params = createRequest(
+              pageNum * pageSz,
+              sortPrms.sortBy,
+              sortPrms.isSortDescending,
+              selectedProfitYear,
+              pageSz
+            );
+            if (params) {
+              await triggerSearch(params, false);
+            }
+          }
+        },
+        [initialSearchLoaded, searchParams, createRequest, selectedProfitYear, triggerSearch]
+      )
+    });
 
   // Effect to show success message after grid finishes loading
   useEffect(() => {
@@ -115,84 +141,251 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     }
   }, [isFetching, pendingSuccessMessage, isPendingBulkMessage, dispatch]);
 
-  const handleSave = useCallback(
-    async (request: ForfeitureAdjustmentUpdateRequest, name: string) => {
-      const rowId = request.badgeNumber; // Use badgeNumber as unique identifier
-      setLoadingRowIds((prev) => new Set(Array.from(prev).concat(rowId)));
+  // Reusable function to refresh grid after save operations
+  const refreshGridAfterSave = useCallback(
+    (successMessage: string, isBulk = false) => {
+      if (searchParams) {
+        setPendingSuccessMessage(successMessage);
+        setIsPendingBulkMessage(isBulk);
+        // The unified useEffect will handle the actual API call
+      } else {
+        // If no search params, show message immediately
+        dispatch(
+          setMessage({
+            ...Messages.TerminationSaveSuccess,
+            message: {
+              ...Messages.TerminationSaveSuccess.message,
+              message: successMessage
+            }
+          })
+        );
+      }
+    },
+    [searchParams, dispatch]
+  );
 
-      try {
-        await updateForfeitureAdjustment(request);
-        const rowKey = `${request.badgeNumber}-${request.profitYear}`;
-        setEditedValues((prev) => {
-          const updated = { ...prev };
-          delete updated[rowKey];
-          return updated;
-        });
-        onUnsavedChanges(Object.keys(editedValues).length > 1);
+  // Add state to track current scroll position
+  const [gridScrollPosition, setGridScrollPosition] = useState<{ top: number; left: number } | null>(null);
 
-        // Prepare success message
-        const employeeName = name || "the selected employee";
-        const successMessage = `The forfeiture adjustment of amount $${formatNumberWithComma(request.forfeitureAmount)} for ${employeeName} saved successfully`;
+  // Add reference to track if we're currently restoring scroll position
+  const isRestoringScrollRef = useRef(false);
 
-        if (searchParams) {
+  // Add state to track when to refresh data after save
+  const [shouldRefreshData, setShouldRefreshData] = useState(false);
+  const [saveSuccessType, setSaveSuccessType] = useState<"single" | "bulk" | null>(null);
+  const [successMessages, setSuccessMessages] = useState<{ message: string; type: "single" | "bulk" }[]>([]);
+
+  // Define a function to refresh the data after save
+  const refreshDataAfterSave = useCallback(
+    (successMessage: string, isBulk: boolean) => {
+      if (searchParams) {
+        // Store success message to display after refresh
+        setSuccessMessages((prev) => [
+          ...prev,
+          {
+            message: successMessage,
+            type: isBulk ? "bulk" : "single"
+          }
+        ]);
+
+        // Set flag to trigger refresh in the useEffect
+        setShouldRefreshData(true);
+        setSaveSuccessType(isBulk ? "bulk" : "single");
+      } else {
+        // If no search params, just show message immediately
+        dispatch(
+          setMessage({
+            ...Messages.TerminationSaveSuccess,
+            message: {
+              ...Messages.TerminationSaveSuccess.message,
+              message: successMessage
+            }
+          })
+        );
+      }
+    },
+    [searchParams, dispatch]
+  );
+
+  // Effect to refresh data after save
+  useEffect(() => {
+    const refreshData = async () => {
+      if (shouldRefreshData && searchParams) {
+        try {
+          // Store current scroll position before refreshing data
+          if (gridRef.current?.api) {
+            try {
+              // Get the scrollable viewport container - use proper AG Grid API methods
+              const gridBodyViewport = document.querySelector(".ag-body-viewport");
+              if (gridBodyViewport) {
+                setGridScrollPosition({
+                  top: gridBodyViewport.scrollTop,
+                  left: gridBodyViewport.scrollLeft
+                });
+
+                // Log for debugging
+                console.log("Saving scroll position:", gridBodyViewport.scrollTop, gridBodyViewport.scrollLeft);
+              }
+            } catch (err) {
+              console.error("Error saving scroll position:", err);
+            }
+          }
+
+          // Construct search params with current pagination and sort
           const params = createRequest(
             pageNumber * pageSize,
             sortParams.sortBy,
             sortParams.isSortDescending,
-            selectedProfitYear
+            selectedProfitYear,
+            pageSize
           );
+
           if (params) {
-            // Set pending message and trigger search
-            setPendingSuccessMessage(successMessage);
-            triggerSearch(params, false);
+            // Perform the search to get fresh data
+            await triggerSearch(params, false);
+
+            // Show success messages after refresh
+            if (successMessages.length > 0) {
+              // Get the most recent message
+              const latestMessage = successMessages[successMessages.length - 1];
+
+              // Show appropriate message based on type
+              const messageTemplate =
+                latestMessage.type === "bulk" ? Messages.TerminationBulkSaveSuccess : Messages.TerminationSaveSuccess;
+
+              dispatch(
+                setMessage({
+                  ...messageTemplate,
+                  message: {
+                    ...messageTemplate.message,
+                    message: latestMessage.message
+                  }
+                })
+              );
+
+              // Clear messages after displaying
+              setSuccessMessages([]);
+            }
           }
-        } else {
-          // If no search params, show message immediately
-          dispatch(
-            setMessage({
-              ...Messages.TerminationSaveSuccess,
-              message: {
-                ...Messages.TerminationSaveSuccess.message,
-                message: successMessage
-              }
-            })
-          );
+        } catch (error) {
+          console.error("Error refreshing termination data:", error);
+          if (onErrorOccurred) {
+            onErrorOccurred();
+          }
+        } finally {
+          // Reset refresh flag
+          setShouldRefreshData(false);
+          setSaveSuccessType(null);
         }
+      }
+    };
+
+    refreshData();
+  }, [
+    shouldRefreshData,
+    searchParams,
+    pageNumber,
+    pageSize,
+    sortParams,
+    triggerSearch,
+    dispatch,
+    successMessages,
+    onErrorOccurred,
+    selectedProfitYear,
+    createRequest
+  ]);
+
+  // Add effect to restore scroll position after data refresh
+  useEffect(() => {
+    const restoreScrollPosition = () => {
+      if (gridRef.current?.api && gridScrollPosition && !isFetching && !isRestoringScrollRef.current) {
+        // Set flag to prevent multiple scroll attempts
+        isRestoringScrollRef.current = true;
+
+        // Need to wait for the grid to fully render after data load
+        setTimeout(() => {
+          try {
+            // Get the scrollable viewport container - use DOM selector instead of API method
+            const gridBodyViewport = document.querySelector(".ag-body-viewport");
+            if (gridBodyViewport) {
+              // Set the scroll position directly
+              gridBodyViewport.scrollTop = gridScrollPosition.top;
+              gridBodyViewport.scrollLeft = gridScrollPosition.left;
+
+              // Log for debugging
+              console.log("Restored scroll position:", gridScrollPosition);
+            }
+          } catch (err) {
+            console.error("Error restoring scroll position:", err);
+          } finally {
+            // Reset scroll position state
+            setGridScrollPosition(null);
+
+            // Reset the flag after a longer delay to ensure the scroll has been applied
+            setTimeout(() => {
+              isRestoringScrollRef.current = false;
+            }, 300);
+          }
+        }, 250); // Increased delay to ensure grid is fully rendered
+      }
+    };
+
+    restoreScrollPosition();
+  }, [gridScrollPosition, isFetching]);
+
+  const handleSave = useCallback(
+    async (request: ForfeitureAdjustmentUpdateRequest, name: string) => {
+      const rowId = request.badgeNumber; // Use badgeNumber as unique identifier
+      editState.addLoadingRow(rowId);
+
+      try {
+        await updateForfeitureAdjustment(request);
+        const rowKey = `${request.badgeNumber}-${request.profitYear}`;
+        editState.removeEditedValue(rowKey);
+        // Check for remaining edits after removing this one
+        const remainingEdits = Object.keys(editState.editedValues).filter((key) => key !== rowKey).length > 0;
+        onUnsavedChanges(remainingEdits);
+
+        // Prepare success message and refresh grid
+        const employeeName = name || "the selected employee";
+        const successMessage = `The forfeiture adjustment of amount $${formatNumberWithComma(request.forfeitureAmount)} for ${employeeName} saved successfully`;
+
+        // Use the new function to refresh data and show success message
+        refreshDataAfterSave(successMessage, false);
       } catch (error) {
         console.error("Failed to save forfeiture adjustment:", error);
-        alert("Failed to save. Please try again.");
+
+        // Show error message
+        dispatch(
+          setMessage({
+            key: "TerminationSave",
+            message: {
+              message: `Failed to save adjustment for ${name || "employee"}.`,
+              type: "error"
+            }
+          })
+        );
+
+        // Call the passed-in error handler instead of internal scrollToTop
+        if (onErrorOccurred) {
+          onErrorOccurred();
+        }
       } finally {
-        setLoadingRowIds((prev) => {
-          const newSet = new Set(Array.from(prev));
-          newSet.delete(rowId);
-          return newSet;
-        });
+        editState.removeLoadingRow(rowId);
       }
     },
-    [
-      updateForfeitureAdjustment,
-      editedValues,
-      onUnsavedChanges,
-      searchParams,
-      pageNumber,
-      pageSize,
-      sortParams,
-      triggerSearch,
-      createRequest,
-      selectedProfitYear
-    ]
+    [updateForfeitureAdjustment, editState, onUnsavedChanges, refreshDataAfterSave, dispatch, onErrorOccurred]
   );
 
   // Reset page number to 0 when resetPageFlag changes
   useEffect(() => {
-    setPageNumber(0);
-  }, [resetPageFlag]);
+    resetPagination();
+  }, [resetPageFlag, resetPagination]);
 
-  // Track unsaved changes
+  // Track unsaved changes based on edit state only
   useEffect(() => {
-    const hasChanges = selectedRowIds.length > 0;
-    onUnsavedChanges(hasChanges);
-  }, [selectedRowIds, onUnsavedChanges]);
+    onUnsavedChanges(editState.hasAnyEdits);
+  }, [editState.hasAnyEdits, onUnsavedChanges]);
 
   // Refresh the grid when loading state changes
   const gridRef = useRef<any>(null);
@@ -203,7 +396,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
         suppressFlash: false
       });
     }
-  }, [loadingRowIds]);
+  }, [editState.loadingRowIds]);
 
   // Initialize expandedRows when data is loaded
   useEffect(() => {
@@ -231,97 +424,73 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       sortBy: string,
       isSortDescending: boolean,
       profitYear: number,
+      pageSz: number,
       beginningDate?: string,
       endingDate?: string,
       archive?: boolean
     ) =>
-      `${skip}|${pageSize}|${sortBy}|${isSortDescending}|${profitYear}|${beginningDate ?? ""}|${endingDate ?? ""}|${archive ? "1" : "0"}`,
-    [pageSize]
+      `${skip}|${pageSz}|${sortBy}|${isSortDescending}|${profitYear}|${beginningDate ?? ""}|${endingDate ?? ""}|${archive ? "1" : "0"}`,
+    []
   );
 
-  // Fetch data when pagination, sort, or searchParams change (only if initial search has been performed)
+  // Unified effect to handle all data fetching scenarios
   useEffect(() => {
-    if (!initialSearchLoaded || !searchParams) return; // Don't load data until search button is clicked
+    // Don't load data until search button is clicked
+    if (!initialSearchLoaded || !searchParams) return;
 
-    const params = createRequest(
-      pageNumber * pageSize,
-      sortParams.sortBy,
-      sortParams.isSortDescending,
-      selectedProfitYear
-    );
-    if (params) {
-      const key = buildRequestKey(
-        pageNumber * pageSize,
-        sortParams.sortBy,
-        sortParams.isSortDescending,
-        selectedProfitYear,
-        (params as any).beginningDate,
-        (params as any).endingDate,
-        (params as any).archive
-      );
-      if (lastRequestKeyRef.current === key) return;
-      lastRequestKeyRef.current = key;
-      triggerSearch(params, false);
-    }
-  }, [
-    searchParams,
-    pageNumber,
-    pageSize,
-    sortParams,
-    selectedProfitYear,
-    triggerSearch,
-    createRequest,
-    initialSearchLoaded,
-    buildRequestKey
-  ]);
-
-  // Archive trigger: when shouldArchive flips true, attempt search and clear flag when done; retry when data becomes available
-  useEffect(() => {
-    if (!shouldArchive) return;
-    let cancelled = false;
-    const run = async () => {
+    const executeSearch = async () => {
       const params = createRequest(
         pageNumber * pageSize,
         sortParams.sortBy,
         sortParams.isSortDescending,
-        selectedProfitYear
+        selectedProfitYear,
+        pageSize
       );
+
       if (params) {
         const key = buildRequestKey(
           pageNumber * pageSize,
           sortParams.sortBy,
           sortParams.isSortDescending,
           selectedProfitYear,
+          pageSize,
           (params as any).beginningDate,
           (params as any).endingDate,
           (params as any).archive
         );
+
+        // Prevent duplicate requests
         if (lastRequestKeyRef.current === key) {
-          if (!cancelled) onArchiveHandled?.();
+          // If shouldArchive was true, clear it since we've already handled it
+          if (shouldArchive) {
+            onArchiveHandled?.();
+          }
           return;
         }
+
         lastRequestKeyRef.current = key;
         await triggerSearch(params, false);
-        if (!cancelled) onArchiveHandled?.();
+
+        // Clear archive flag after successful search
+        if (shouldArchive) {
+          onArchiveHandled?.();
+        }
       }
     };
-    run();
-    return () => {
-      cancelled = true;
-    };
+
+    executeSearch();
   }, [
-    shouldArchive,
     searchParams,
     pageNumber,
     pageSize,
     sortParams,
     selectedProfitYear,
+    shouldArchive, // Include shouldArchive in dependencies
     triggerSearch,
     createRequest,
-    onArchiveHandled,
-    fiscalData?.fiscalBeginDate,
-    fiscalData?.fiscalEndDate,
-    buildRequestKey
+    initialSearchLoaded,
+    buildRequestKey,
+    onArchiveHandled
   ]);
 
   const handleRowExpansion = (badgeNumber: string) => {
@@ -331,81 +500,68 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     }));
   };
 
-  const addRowToSelectedRows = (id: number) => {
-    setSelectedRowIds([...selectedRowIds, id]);
-  };
-
-  const removeRowFromSelectedRows = (id: number) => {
-    setSelectedRowIds(selectedRowIds.filter((rowId) => rowId !== id));
-  };
-
-  const updateEditedValue = useCallback((rowKey: string, value: number, hasError: boolean) => {
-    setEditedValues((prev) => ({
-      ...prev,
-      [rowKey]: { value, hasError }
-    }));
-  }, []);
+  const addRowToSelectedRows = selectionState.addRowToSelection;
+  const removeRowFromSelectedRows = selectionState.removeRowFromSelection;
+  const updateEditedValue = editState.updateEditedValue;
 
   const handleBulkSave = useCallback(
     async (requests: ForfeitureAdjustmentUpdateRequest[], names: string[]) => {
       // Add all affected badge numbers to loading state
       const badgeNumbers = requests.map((request) => request.badgeNumber);
-      setLoadingRowIds((prev) => {
-        const newSet = new Set(Array.from(prev));
-        badgeNumbers.forEach((badgeNumber) => newSet.add(badgeNumber));
-        return newSet;
-      });
+      editState.addLoadingRows(badgeNumbers);
 
       try {
+        // Call API to save bulk changes
         await updateForfeitureAdjustmentBulk(requests);
-        const updatedEditedValues = { ...editedValues };
-        requests.forEach((request) => {
-          const rowKey = `${request.badgeNumber}-${request.profitYear}`;
-          delete updatedEditedValues[rowKey];
-        });
-        setEditedValues(updatedEditedValues);
-        setSelectedRowIds([]);
-        onUnsavedChanges(Object.keys(updatedEditedValues).length > 0);
 
-        // Prepare bulk success message
-        const employeeNames = names.map(name => name || "Unknown Employee");
+        // Clear edited values for saved requests
+        const rowKeys = requests.map((request) => `${request.badgeNumber}-${request.profitYear}`);
+        editState.clearEditedValues(rowKeys);
+
+        // Clear selection
+        selectionState.clearSelection();
+
+        // Check for remaining edits
+        const remainingEditKeys = Object.keys(editState.editedValues).filter((key) => !rowKeys.includes(key));
+        onUnsavedChanges(remainingEditKeys.length > 0);
+
+        // Prepare bulk success message and refresh grid
+        const employeeNames = names.map((name) => name || "Unknown Employee");
         const bulkSuccessMessage = `Members affected: ${employeeNames.join("; ")}`;
 
-        if (searchParams) {
-          const params = createRequest(
-            pageNumber * pageSize,
-            sortParams.sortBy,
-            sortParams.isSortDescending,
-            selectedProfitYear
-          );
-          if (params) {
-            triggerSearch(params, false);
-          }
-          // Set the pending success message to be shown after grid reload
-          setPendingSuccessMessage(bulkSuccessMessage);
-          setIsPendingBulkMessage(true);
-        }
+        // Use the new function to refresh data and show success message
+        refreshDataAfterSave(bulkSuccessMessage, true);
       } catch (error) {
         console.error("Failed to save forfeiture adjustments:", error);
-        alert("Failed to save one or more adjustments. Please try again.");
+
+        // Show error message
+        dispatch(
+          setMessage({
+            key: "TerminationSave",
+            message: {
+              message: `Failed to save bulk adjustments.`,
+              type: "error"
+            }
+          })
+        );
+
+        // Call the passed-in error handler instead of internal scrollToTop
+        if (onErrorOccurred) {
+          onErrorOccurred();
+        }
       } finally {
         // Remove all affected badge numbers from loading state
-        setLoadingRowIds((prev) => {
-          const newSet = new Set(Array.from(prev));
-          badgeNumbers.forEach((badgeNumber) => newSet.delete(badgeNumber));
-          return newSet;
-        });
+        editState.removeLoadingRows(badgeNumbers);
       }
     },
     [
       updateForfeitureAdjustmentBulk,
-      editedValues,
+      editState,
+      selectionState,
       onUnsavedChanges,
-      searchParams,
-      pageNumber,
-      pageSize,
-      sortParams,
-      triggerSearch
+      refreshDataAfterSave,
+      dispatch,
+      onErrorOccurred
     ]
   );
 
@@ -416,12 +572,21 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       GetDetailColumns(
         addRowToSelectedRows,
         removeRowFromSelectedRows,
-        selectedRowIds,
+        selectionState.selectedRowIds,
         selectedProfitYear,
         handleSave,
-        handleBulkSave
+        handleBulkSave,
+        isReadOnly
       ),
-    [addRowToSelectedRows, removeRowFromSelectedRows, selectedRowIds, selectedProfitYear, handleSave, handleBulkSave]
+    [
+      addRowToSelectedRows,
+      removeRowFromSelectedRows,
+      selectionState.selectedRowIds,
+      selectedProfitYear,
+      handleSave,
+      handleBulkSave,
+      isReadOnly
+    ]
   );
 
   // Build grid data with expandable rows
@@ -539,58 +704,38 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     return [expansionColumn, ...visibleColumns, ...detailOnlyColumns];
   }, [mainColumns, detailColumns]);
 
-  // Row class for detail rows
+  // Row class for detail rows using Tailwind
   const getRowClass = (params: { data: { isDetail: boolean } }) => {
-    return params.data.isDetail ? "detail-row" : "";
+    return params.data.isDetail ? "bg-gray-100" : "";
   };
 
-  const sortEventHandler = (update: ISortParams) => {
-    setSortParams((prev) => {
-      if (prev.sortBy === update.sortBy && prev.isSortDescending === update.isSortDescending) {
-        return prev; // no change
-      }
-      return update;
-    });
-    setPageNumber((prev) => (prev === 0 ? prev : 0));
+  const sortEventHandler = (update: any) => {
+    handleSortChange(update);
   };
 
   return (
-    <div className="termination-grid-container">
-      <style>
-        {`
-          .termination-spinner-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255,255,255,0.6);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-          .termination-spinner {
-            width: 48px;
-            height: 48px;
-          }
-          .detail-row {
-            background-color: #f5f5f5;
-          }
-          .invalid-cell {
-            background-color: #fff6f6;
-          }
-        `}
-      </style>
+    <div className="relative">
+      {/* Show loading overlay when fetching data */}
       {isFetching && (
-        <div className="termination-spinner-overlay">
+        <div className="absolute inset-0 z-[1000] flex h-full w-full items-center justify-center bg-white/60">
           <div
-            className="spinner-border termination-spinner"
+            className="spinner-border h-12 w-12"
             role="status">
             <span className="visually-hidden">Loading...</span>
           </div>
         </div>
       )}
+
+      {(isBulkSaving || isSingleSaving) && (
+        <div className="absolute inset-0 z-[1000] flex h-full w-full items-center justify-center bg-white/60">
+          <div
+            className="spinner-border h-12 w-12"
+            role="status">
+            <span className="visually-hidden">Saving...</span>
+          </div>
+        </div>
+      )}
+
       {termination?.response && (
         <>
           <ReportSummary report={termination} />
@@ -615,9 +760,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
           </div>
 
           <DSMGrid
-            preferenceKey={"QPREV-PROF"}
             handleSortChanged={sortEventHandler}
-            maxHeight={400}
+            maxHeight={gridMaxHeight}
             isLoading={isFetching}
             providedOptions={{
               onGridReady: (params) => {
@@ -626,17 +770,21 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
               rowData: gridData,
               columnDefs: columnDefs,
               getRowClass: getRowClass,
-              rowSelection: "multiple",
-              suppressRowClickSelection: true,
+              rowSelection: {
+                mode: "multiRow",
+                checkboxes: false,
+                headerCheckbox: false,
+                enableClickSelection: false
+              },
               rowHeight: 40,
               suppressMultiSort: true,
               defaultColDef: {
                 resizable: true
               },
               context: {
-                editedValues,
+                editedValues: editState.editedValues,
                 updateEditedValue,
-                loadingRowIds
+                loadingRowIds: editState.loadingRowIds
               }
             }}
           />
@@ -649,7 +797,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
                   alert("Please save your changes.");
                   return;
                 }
-                setPageNumber(value - 1);
+                handlePaginationChange(value - 1, pageSize);
                 setInitialSearchLoaded(true);
               }}
               pageSize={pageSize}
@@ -658,8 +806,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
                   alert("Please save your changes.");
                   return;
                 }
-                setPageSize(value);
-                setPageNumber(1);
+                handlePaginationChange(0, value);
                 setInitialSearchLoaded(true);
               }}
               recordCount={termination.response.total || 0}

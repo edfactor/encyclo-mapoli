@@ -1,8 +1,8 @@
-import { Divider } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
+import { useParams } from "react-router-dom";
 import { clearYearEndProfitSharingReport } from "reduxstore/slices/yearsEndSlice";
 import { ReportPreset } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
@@ -17,6 +17,18 @@ const PAY426N: React.FC = () => {
   const [showSummaryReport, setShowSummaryReport] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
+
+  const { presetNumber } = useParams<{
+    presetNumber: string;
+  }>();
+
+  if (presetNumber && !currentPreset) {
+    const preset = presets.find((p) => p.id === presetNumber);
+    if (preset) {
+      setCurrentPreset(preset);
+      setShowSummaryReport(preset.id === "9");
+    }
+  }
 
   const handlePresetChange = (preset: ReportPreset | null) => {
     dispatch(clearYearEndProfitSharingReport());

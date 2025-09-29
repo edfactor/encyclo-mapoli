@@ -9,7 +9,7 @@ export interface QPAY066BTerminatedEmployee {
   storeNumber: number;
   badgeNumber: number;
   fullName: string;
-  payClassificationId: number;
+  payClassificationId: string; // changed from number to string per backend DTO change
   payClassificationName: string;
   beginningBalance: number;
   earnings: number;

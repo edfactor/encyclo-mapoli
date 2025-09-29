@@ -8,9 +8,7 @@ import {
 
 export const GetEligibleEmployeesColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({
-      headerName: "Badge"
-    }),
+    createBadgeColumn({}),
     createNameColumn({
       field: "fullName"
     }),

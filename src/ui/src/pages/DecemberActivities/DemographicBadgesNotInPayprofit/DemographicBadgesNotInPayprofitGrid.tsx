@@ -1,92 +1,73 @@
-import { Typography } from "@mui/material";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
-import { useLazyGetDemographicBadgesNotInPayprofitQuery } from "reduxstore/api/YearsEndApi";
-import { RootState } from "reduxstore/store";
+import { RefObject, useCallback, useMemo } from "react";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { GridPaginationActions, GridPaginationState } from "../../../hooks/useGridPagination";
+import { DemographicBadgesNotInPayprofit, PagedReportResponse } from "../../../types";
 import { GetDemographicBadgesNotInPayprofitColumns } from "./DemographicBadgesNotInPayprofitGridColumns";
-import ReportSummary from "../../../components/ReportSummary";
 
-const DemographicBadgesNotInPayprofitGrid: React.FC = () => {
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-  const [_sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
-    isSortDescending: true
-  });
-  const { demographicBadges } = useSelector((state: RootState) => state.yearsEnd);
-  const [triggerSearch, { isFetching }] = useLazyGetDemographicBadgesNotInPayprofitQuery();
+interface DemographicBadgesNotInPayprofitGridProps {
+  innerRef: RefObject<HTMLDivElement | null>;
+  data: PagedReportResponse<DemographicBadgesNotInPayprofit> | null;
+  isLoading: boolean;
+  showData: boolean;
+  hasResults: boolean;
+  pagination: GridPaginationState & GridPaginationActions;
+  onPaginationChange: (pageNumber: number, pageSize: number) => void;
+  onSortChange: (sortParams: any) => void;
+}
 
-  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-  const onSearch = useCallback(async () => {
-    const request = {
-      pagination: {
-        skip: pageNumber * pageSize,
-        take: pageSize,
-        sortBy: _sortParams.sortBy,
-        isSortDescending: _sortParams.isSortDescending
-      }
-    };
-
-    await triggerSearch(request, false);
-  }, [pageNumber, pageSize, _sortParams, triggerSearch]);
-
-  const sortEventHandler = (update: ISortParams) => {
-    if (update.sortBy === "") {
-      update.sortBy = "badgeNumber";
-      update.isSortDescending = true;
-    }
-
-    const request = {
-      pagination: {
-        skip: pageNumber * pageSize,
-        take: pageSize,
-        sortBy: update.sortBy,
-        isSortDescending: update.isSortDescending
-      }
-    };
-    setSortParams(update);
-    setPageNumber(0);
-
-    triggerSearch(request, false);
-  };
-
-  useEffect(() => {
-    if (hasToken) {
-      onSearch();
-    }
-  }, [hasToken, pageNumber, pageSize, _sortParams, onSearch]);
-
+const DemographicBadgesNotInPayprofitGrid = ({
+  innerRef,
+  data,
+  isLoading,
+  showData,
+  hasResults,
+  pagination,
+  onPaginationChange,
+  onSortChange
+}: DemographicBadgesNotInPayprofitGridProps) => {
   const columnDefs = useMemo(() => GetDemographicBadgesNotInPayprofitColumns(), []);
+
+  const handleSortChanged = useCallback(
+    (update: ISortParams) => {
+      // Handle empty sortBy case - set default (preserving original logic)
+      if (update.sortBy === "") {
+        update.sortBy = "badgeNumber";
+        update.isSortDescending = true;
+      }
+
+      // Reset to page 0 when sorting changes (preserving original logic)
+      onPaginationChange(0, pagination.pageSize);
+      onSortChange(update);
+    },
+    [onPaginationChange, onSortChange, pagination.pageSize]
+  );
 
   return (
     <>
-      {demographicBadges?.response && (
-        <>
-          <ReportSummary report={demographicBadges} />
+      {showData && data?.response && (
+        <div ref={innerRef}>
           <DSMGrid
             preferenceKey={"DEMO_BADGES"}
-            isLoading={isFetching}
-            handleSortChanged={sortEventHandler}
+            isLoading={isLoading}
+            handleSortChanged={handleSortChanged}
             providedOptions={{
-              rowData: demographicBadges?.response.results,
+              rowData: data.response.results,
               columnDefs: columnDefs
             }}
           />
-        </>
+        </div>
       )}
-      {demographicBadges?.response && demographicBadges.response.results.length > 0 && (
+      {hasResults && data?.response && (
         <Pagination
-          pageNumber={pageNumber}
+          pageNumber={pagination.pageNumber}
           setPageNumber={(value: number) => {
-            setPageNumber(value - 1);
+            onPaginationChange(value - 1, pagination.pageSize);
           }}
-          pageSize={pageSize}
+          pageSize={pagination.pageSize}
           setPageSize={(value: number) => {
-            setPageSize(value);
-            setPageNumber(1);
+            onPaginationChange(0, value);
           }}
-          recordCount={demographicBadges.response.total}
+          recordCount={data.response.total || 0}
         />
       )}
     </>

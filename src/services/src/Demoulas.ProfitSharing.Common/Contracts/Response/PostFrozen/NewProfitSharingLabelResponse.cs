@@ -14,7 +14,7 @@
             return new NewProfitSharingLabelResponse()
             {
                 StoreNumber = 22,
-                PayClassificationId = 2,
+                PayClassificationId = "2",
                 PayClassificationName = "Assistant Manager",
                 DepartmentId = 2,
                 DepartmentName = "Grocery",

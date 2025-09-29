@@ -54,6 +54,20 @@ export interface EligibleEmployeesRequestDto extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
 }
 
+export interface EmployeeWagesForYear {
+  badgeNumber: number;
+  incomeCurrentYear: number;
+  hoursCurrentYear: number;
+  isExecutive: boolean;
+}
+
+export interface EmployeeWagesForYearRequestDto extends ProfitYearRequest {
+  pagination: SortedPaginationRequestDto;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface EmployeeWagesForYearResponse extends PagedReportResponse<EmployeeWagesForYear> {}
+
 export interface EligibleEmployee {
   oracleHcmId: number;
   badgeNumber: number;
@@ -61,6 +75,7 @@ export interface EligibleEmployee {
   departmentId: number;
   department: string;
   storeNumber: number;
+  isExecutive: boolean;
 }
 
 export interface EligibleEmployeeResponseDto extends PagedReportResponse<EligibleEmployee> {
@@ -143,7 +158,7 @@ export interface ProfitSharingLabelsRequest extends FrozenProfitYearRequest {
 
 export interface ProfitSharingLabel {
   storeNumber: number;
-  payClassificationId: number;
+  payClassificationId: string; // changed from number to string per backend
   payClassificationName: string;
   departmentId: number;
   departmentName: string;

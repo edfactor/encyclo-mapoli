@@ -4,21 +4,27 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.TypeConverters;
 using Demoulas.ProfitSharing.Security;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
+
 public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYearRequest, DuplicateNamesAndBirthdaysResponse, DuplicateNamesAndBirthdaysEndpoint.DuplicateNamesAndBirthdaysResponseMap>
 {
     private readonly ICleanupReportService _cleanupReportService;
+    private readonly ILogger<DuplicateNamesAndBirthdaysEndpoint> _logger;
 
-    public DuplicateNamesAndBirthdaysEndpoint(ICleanupReportService cleanupReportService)
+    public DuplicateNamesAndBirthdaysEndpoint(ICleanupReportService cleanupReportService, ILogger<DuplicateNamesAndBirthdaysEndpoint> logger)
         : base(Navigation.Constants.DuplicateNamesAndBirthdays)
     {
         _cleanupReportService = cleanupReportService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -80,9 +86,53 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
 
     public override string ReportFileName => "duplicate-names-and-birthdays";
 
-    public override Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
+    public override async Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return _cleanupReportService.GetDuplicateNamesAndBirthdaysAsync(req, ct);
+        using var activity = this.StartEndpointActivity(HttpContext);
+
+        try
+        {
+            this.RecordRequestMetrics(HttpContext, _logger, req);
+
+            var result = await _cleanupReportService.GetDuplicateNamesAndBirthdaysAsync(req, ct);
+
+            // Record year-end cleanup report metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "year-end-cleanup-duplicate-names-birthdays"),
+                new("endpoint", "DuplicateNamesAndBirthdaysEndpoint"),
+                new("report_type", "cleanup"),
+                new("cleanup_type", "duplicate-names-and-birthdays"));
+
+            var resultCount = result?.Response?.Results?.Count() ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                new("record_type", "duplicate-names-birthdays-cleanup"),
+                new("endpoint", "DuplicateNamesAndBirthdaysEndpoint"));
+
+            _logger.LogInformation("Year-end cleanup report for duplicate names and birthdays generated, returned {Count} records (correlation: {CorrelationId})",
+                resultCount, HttpContext.TraceIdentifier);
+
+            if (result != null)
+            {
+                this.RecordResponseMetrics(HttpContext, _logger, result);
+                return result;
+            }
+
+            var emptyResult = new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>
+            {
+                ReportName = ReportFileName,
+                StartDate = DateOnly.FromDateTime(DateTime.Today),
+                EndDate = DateOnly.FromDateTime(DateTime.Today),
+                Response = new() { Results = [] }
+            };
+
+            this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
+            return emptyResult;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 
     public sealed class DuplicateNamesAndBirthdaysResponseMap : ClassMap<DuplicateNamesAndBirthdaysResponse>

@@ -4,17 +4,25 @@ using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Common.Extensions;
+using Demoulas.ProfitSharing.Common.Telemetry;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
+using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.BeneficiaryInquiry;
+
 public class BeneficiaryKindEndpoint : ProfitSharingEndpoint<BeneficiaryKindRequestDto, BeneficiaryKindResponseDto>
 {
 
     private readonly IBeneficiaryInquiryService _beneficiaryService;
+    private readonly ILogger<BeneficiaryKindEndpoint> _logger;
 
-    public BeneficiaryKindEndpoint(IBeneficiaryInquiryService beneficiaryService)
+    public BeneficiaryKindEndpoint(IBeneficiaryInquiryService beneficiaryService, ILogger<BeneficiaryKindEndpoint> logger)
         : base(Navigation.Constants.Beneficiaries)
     {
         _beneficiaryService = beneficiaryService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -31,8 +39,37 @@ public class BeneficiaryKindEndpoint : ProfitSharingEndpoint<BeneficiaryKindRequ
 
     public override async Task<BeneficiaryKindResponseDto> ExecuteAsync(BeneficiaryKindRequestDto req, CancellationToken ct)
     {
-        var response = await _beneficiaryService.GetBeneficiaryKind(req, ct);
-        return response;
+        using var activity = this.StartEndpointActivity(HttpContext);
+
+        try
+        {
+            this.RecordRequestMetrics(HttpContext, _logger, req);
+
+            var response = await _beneficiaryService.GetBeneficiaryKind(req, ct);
+
+            // Business metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "beneficiary-kind-lookup"),
+                new("endpoint", "BeneficiaryKindEndpoint"));
+
+            var kindCount = response?.BeneficiaryKindList?.Count ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(kindCount,
+                new("record_type", "beneficiary-kinds"),
+                new("endpoint", "BeneficiaryKindEndpoint"));
+
+            _logger.LogInformation("Beneficiary kind lookup completed, returned {KindCount} kinds (correlation: {CorrelationId})",
+                kindCount, HttpContext.TraceIdentifier);
+
+            var safeResponse = response ?? new BeneficiaryKindResponseDto();
+            this.RecordResponseMetrics(HttpContext, _logger, safeResponse);
+
+            return safeResponse;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 
 }

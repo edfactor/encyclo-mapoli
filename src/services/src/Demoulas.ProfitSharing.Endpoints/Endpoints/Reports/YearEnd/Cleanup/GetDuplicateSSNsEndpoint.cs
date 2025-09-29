@@ -4,21 +4,29 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Security;
-
+using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
-public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<SortedPaginationRequestDto, PayrollDuplicateSsnResponseDto, GetDuplicateSsNsEndpoint.GetDuplicateSsNsResponseMap>
+
+
+
+public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<ProfitYearRequest, PayrollDuplicateSsnResponseDto, GetDuplicateSsNsEndpoint.GetDuplicateSsNsResponseMap>
 {
     private readonly IPayrollDuplicateSsnReportService _cleanupReportService;
+    private readonly ILogger<GetDuplicateSsNsEndpoint> _logger;
 
-    public GetDuplicateSsNsEndpoint(IPayrollDuplicateSsnReportService cleanupReportService)
+    public GetDuplicateSsNsEndpoint(IPayrollDuplicateSsnReportService cleanupReportService, ILogger<GetDuplicateSsNsEndpoint> logger)
         : base(Navigation.Constants.DuplicateSSNsInDemographics)
     {
         _cleanupReportService = cleanupReportService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -56,9 +64,53 @@ public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<SortedPaginationRequ
 
     public override string ReportFileName => "DuplicateSSns";
 
-    public override Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetResponse(SortedPaginationRequestDto req, CancellationToken ct)
+    public override async Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return _cleanupReportService.GetDuplicateSsnAsync(req, ct);
+        using var activity = this.StartEndpointActivity(HttpContext);
+
+        try
+        {
+            this.RecordRequestMetrics(HttpContext, _logger, req);
+
+            var result = await _cleanupReportService.GetDuplicateSsnAsync(req, ct);
+
+            // Record year-end cleanup report metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "year-end-cleanup-duplicate-ssns"),
+                new("endpoint", "GetDuplicateSsNsEndpoint"),
+                new("report_type", "cleanup"),
+                new("cleanup_type", "duplicate-ssns"));
+
+            var resultCount = result?.Response?.Results?.Count() ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                new("record_type", "duplicate-ssns-cleanup"),
+                new("endpoint", "GetDuplicateSsNsEndpoint"));
+
+            _logger.LogInformation("Year-end cleanup report for duplicate SSNs generated, returned {Count} records (correlation: {CorrelationId})",
+                resultCount, HttpContext.TraceIdentifier);
+
+            if (result != null)
+            {
+                this.RecordResponseMetrics(HttpContext, _logger, result);
+                return result;
+            }
+
+            var emptyResult = new ReportResponseBase<PayrollDuplicateSsnResponseDto>
+            {
+                ReportName = ReportFileName,
+                StartDate = DateOnly.FromDateTime(DateTime.Today),
+                EndDate = DateOnly.FromDateTime(DateTime.Today),
+                Response = new() { Results = [] }
+            };
+
+            this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
+            return emptyResult;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 
     public sealed class GetDuplicateSsNsResponseMap : ClassMap<PayrollDuplicateSsnResponseDto>

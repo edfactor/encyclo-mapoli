@@ -59,6 +59,7 @@ public sealed class Navigation
         public const short RecentlyTerminated = 66;
         public const short PayBenReport = 67;
         public const short Adhocbeneficiariesreport = 68;
+        public const short TerminatedLetters = 69;
 
         // Prof Share Report By Age sub-items
         public const short ContributionsByAge = 35;
@@ -85,6 +86,9 @@ public sealed class Navigation
     public byte? StatusId { get; set; }
     public byte OrderNumber { get; set; }
     public bool? Disabled { get; set; }
+    // When false the page exists in the system but should not be shown in navigation menus/drawers.
+    // Backed by database column IS_NAVIGABLE (NUMBER(1)).
+    public bool? IsNavigable { get; set; }
     public string? Icon { get; set; }
 
     public List<NavigationRole>? RequiredRoles { get; set; } = [];

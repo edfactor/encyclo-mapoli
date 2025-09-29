@@ -51,7 +51,7 @@ public static class StockFactory
             ModifiedAtUtc = default,
             StoreNumber = 0,
             PayClassification = null,
-            PayClassificationId = 0,
+            PayClassificationId = "0",
             ContactInfo = new ContactInfo
             {
                 FullName = null,
@@ -150,13 +150,14 @@ public static class StockFactory
 
     public static List<YearEndUpdateStatus> CreateYearEndUpdateStatuses(short profitYear)
     {
+        const string V = "UnitTest";
         return
         [
             new YearEndUpdateStatus
             {
                 ProfitYear = profitYear,
                 CreatedAtUtc = default,
-                UserName = "someone",
+                UserName = V,
                 BeneficiariesEffected = 0,
                 EmployeesEffected = 0,
                 EtvasEffected = 0,
@@ -170,7 +171,8 @@ public static class StockFactory
                 AdjustContributionAmount = 0,
                 AdjustEarningsAmount = 0,
                 AdjustIncomingForfeitAmount = 0,
-                AdjustEarningsSecondaryAmount = 0
+                AdjustEarningsSecondaryAmount = 0,
+                IsYearEndCompleted = false,
             }
         ];
     }

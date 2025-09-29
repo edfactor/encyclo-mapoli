@@ -48,6 +48,7 @@ public class MasterInquiryEmployeeDetailsTests : ApiTestBase<Api.Program>
         var request = new MasterInquiryRequest { EndProfitMonth = 12, Skip = 0, Take = 25, ProfitYear = profitYear };
         var response = await ApiClient.POSTAsync<MasterInquirySearchEndpoint, MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>(request);
         response.ShouldNotBeNull();
+        response.Response.IsSuccessStatusCode.ShouldBeTrue(response.Response.ReasonPhrase);
         response.Response.EnsureSuccessStatusCode();
     }
 
@@ -58,6 +59,7 @@ public class MasterInquiryEmployeeDetailsTests : ApiTestBase<Api.Program>
         var request = new MasterInquiryRequest { ProfitCode = 1, Skip = 0, Take = 25, ProfitYear = profitYear }; // Use a valid ProfitCode constant as needed
         var response = await ApiClient.POSTAsync<MasterInquirySearchEndpoint, MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>(request);
         response.ShouldNotBeNull();
+        response.Response.IsSuccessStatusCode.ShouldBeTrue(response.Response.ReasonPhrase);
         response.Response.EnsureSuccessStatusCode();
     }
 
@@ -138,5 +140,28 @@ public class MasterInquiryEmployeeDetailsTests : ApiTestBase<Api.Program>
         var response = await ApiClient.POSTAsync<MasterInquirySearchEndpoint, MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>(request);
         response.ShouldNotBeNull();
         response.Response.EnsureSuccessStatusCode();
+    }
+
+    [Fact(DisplayName = "Master Inquiry Search - Empty result returns 200 (Success)")]
+    public async Task MasterInquiryEmptyResultReturnsOk()
+    {
+        // Arrange: Provide two filters to satisfy validator (ProfitYear + Ssn) but pick an improbable Ssn to force empty result.
+        ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
+        var request = new MasterInquiryRequest
+        {
+            ProfitYear = profitYear,
+            Ssn = 999999998, // Intentionally improbable SSN to yield no matches; adjust if future fixture data collides.
+            Skip = 0,
+            Take = 10
+        };
+
+        // Act
+        var response = await ApiClient.POSTAsync<MasterInquirySearchEndpoint, MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>(request);
+
+        // Assert
+        response.ShouldNotBeNull();
+        response.Response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK, "Empty filtered result sets must return 200 per endpoint contract.");
+        response.Result.Results.ShouldNotBeNull();
+        response.Result.Results.Count().ShouldBe(0, "Expected zero results for an SSN that should not exist in seeded test data.");
     }
 }

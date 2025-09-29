@@ -1,5 +1,5 @@
-import { ICellRendererParams, IHeaderParams } from "ag-grid-community";
-import type { SortedPaginationRequestDto, ProfitYearRequest } from "../common/api";
+import { IHeaderParams } from "ag-grid-community";
+import type { ProfitYearRequest, SortedPaginationRequestDto } from "../common/api";
 
 export interface ForfeitureDetail extends ProfitYearRequest {
   forfeiture: number;
@@ -11,7 +11,7 @@ export interface ForfeitureDetail extends ProfitYearRequest {
   profitDetailId: number;
 }
 
-export interface RehireForfeiture {
+export interface UnForfeit {
   badgeNumber: number;
   fullName: string;
   ssn: string;
@@ -58,35 +58,9 @@ export interface SuggestedForfeitResponse {
 // Alias for backwards compatibility
 export type SuggestForfeitAmountResponse = SuggestedForfeitResponse;
 
-// Rehire forfeitures editing functionality
-export interface RehireForfeituresEditedValues {
-  [rowKey: string]: {
-    value: number;
-    hasError: boolean;
-  };
-}
-
-export interface RehireForfeituresHeaderComponentProps extends IHeaderParams {
+export interface UnForfeitHeaderComponentProps extends IHeaderParams {
   addRowToSelectedRows: (id: number) => void;
   removeRowFromSelectedRows: (id: number) => void;
   onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[]) => Promise<void>;
-}
-
-export interface RehireForfeituresSaveButtonCellParams extends ICellRendererParams {
-  removeRowFromSelectedRows: (id: number) => void;
-  addRowToSelectedRows: (id: number) => void;
-  onSave?: (request: ForfeitureAdjustmentUpdateRequest) => Promise<void>;
-}
-
-export interface RehireForfeituresUpdatePayload {
-  badgeNumber: number;
-  profitYear: number;
-  suggestedForfeit: number;
-}
-
-export interface RehireForfeituresSelectedRow {
-  id: number;
-  badgeNumber: number;
-  profitYear: number;
-  suggestedForfeit: number;
+  isReadOnly?: boolean;
 }

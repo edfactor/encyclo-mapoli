@@ -34,7 +34,7 @@ public class NegativeEtvaReportService : INegativeEtvaReportService
     {
         using (_logger.BeginScope("Request NEGATIVE ETVA FOR SSNs ON PAYPROFIT"))
         {
-            var results = await _dataContextFactory.UseReadOnlyContext(async c =>
+            var data = await _dataContextFactory.UseReadOnlyContext(async c =>
             {
                 var demographics = await _demographicReaderService.BuildDemographicQuery(c);
                 
@@ -46,10 +46,10 @@ public class NegativeEtvaReportService : INegativeEtvaReportService
                     .Where(p => p.ProfitYear == req.ProfitYear
                                 && ssnUnion.Contains(p.Demographic!.Ssn)
                                 && p.Etva < 0)
-                    .Select(p => new NegativeEtvaForSsNsOnPayProfitResponse
+                    .Select(p => new
                     {
-                        BadgeNumber = p.Demographic!.BadgeNumber,
-                        Ssn = p.Demographic.Ssn.MaskSsn(),
+                        p.Demographic!.BadgeNumber,
+                        p.Demographic.Ssn,
                         EtvaValue = p.Etva,
                         IsExecutive = p.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly,
                     })
@@ -57,7 +57,19 @@ public class NegativeEtvaReportService : INegativeEtvaReportService
                     .ToPaginationResultsAsync(req, cancellationToken);
             });
 
-            _logger.LogWarning("Returned {Results} records", results.Results.Count());
+            var results = new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<NegativeEtvaForSsNsOnPayProfitResponse>
+            {
+                Results = data.Results.Select(r => new NegativeEtvaForSsNsOnPayProfitResponse
+                {
+                    BadgeNumber = r.BadgeNumber,
+                    Ssn = r.Ssn.MaskSsn(),
+                    EtvaValue = r.EtvaValue,
+                    IsExecutive = r.IsExecutive
+                }),
+                Total = data.Total,
+            };
+
+            _logger.LogInformation("Returned {Results} records", results.Results.Count());
 
             var cal = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
 

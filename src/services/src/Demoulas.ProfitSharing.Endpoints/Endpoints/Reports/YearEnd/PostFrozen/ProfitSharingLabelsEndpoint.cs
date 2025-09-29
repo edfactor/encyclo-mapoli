@@ -2,21 +2,27 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
+
 public sealed class ProfitSharingLabelsEndpoint : ProfitSharingEndpoint<FrozenProfitYearRequest, PaginatedResponseDto<ProfitSharingLabelResponse>>
 {
     private readonly IPostFrozenService _postFrozenService;
+    private readonly ILogger<ProfitSharingLabelsEndpoint> _logger;
 
-    public ProfitSharingLabelsEndpoint(IPostFrozenService postFrozenService)
+    public ProfitSharingLabelsEndpoint(IPostFrozenService postFrozenService, ILogger<ProfitSharingLabelsEndpoint> logger)
         : base(Navigation.Constants.PROFALL)
     {
         _postFrozenService = postFrozenService;
+        _logger = logger;
     }
     public override void Configure()
     {
@@ -37,8 +43,42 @@ public sealed class ProfitSharingLabelsEndpoint : ProfitSharingEndpoint<FrozenPr
 
     public override async Task HandleAsync(FrozenProfitYearRequest req, CancellationToken ct)
     {
-        var response = await _postFrozenService.GetProfitSharingLabels(req, ct);
+        using var activity = this.StartEndpointActivity(HttpContext);
+        this.RecordRequestMetrics(HttpContext, _logger, req);
 
-        await Send.OkAsync(response, ct);
+        try
+        {
+            var response = await _postFrozenService.GetProfitSharingLabels(req, ct);
+
+            // Record business operation metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "profit_sharing_labels"),
+                new("profit_year", req.ProfitYear.ToString()));
+
+            var resultCount = response?.Results?.Count() ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                new("record_type", "post-frozen-profit-sharing-labels"),
+                new("endpoint", "ProfitSharingLabelsEndpoint"));
+
+            _logger.LogInformation("Year-end post-frozen profit sharing labels generated, returned {Count} label records (correlation: {CorrelationId})",
+                resultCount, HttpContext.TraceIdentifier);
+
+            if (response != null)
+            {
+                this.RecordResponseMetrics(HttpContext, _logger, response);
+                await Send.OkAsync(response, ct);
+            }
+            else
+            {
+                var emptyResponse = new PaginatedResponseDto<ProfitSharingLabelResponse> { Results = [] };
+                this.RecordResponseMetrics(HttpContext, _logger, emptyResponse);
+                await Send.OkAsync(emptyResponse, ct);
+            }
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 }

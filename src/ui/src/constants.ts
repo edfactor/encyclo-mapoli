@@ -1,6 +1,6 @@
 export const MAX_EMPLOYEE_BADGE_LENGTH: number = 7;
 
-export const drawerOpenWidth: number = 330;
+export const drawerOpenWidth: number = 368;
 export const drawerClosedWidth: number = 64;
 
 export const MENU_LABELS = {
@@ -29,7 +29,7 @@ export const ROUTES = {
   BALANCE_BY_YEARS: "balance-by-years",
   VESTED_AMOUNTS_BY_AGE: "vested-amounts-by-age",
   PROF_TERM: "prof-term",
-  MILITARY_ENTRY_AND_MODIFICATION: "military-entry-and-modification",
+  MILITARY_CONTRIBUTION: "military-contribution",
 
   DECEMBER_PROCESS_ACCORDION: "december-process-accordion",
   DEMOGRAPHIC_BADGES: "demographic-badges-not-in-payprofit",
@@ -41,7 +41,6 @@ export const ROUTES = {
   PROFIT_SHARE_REPORT: "profit-share-report",
   PROFIT_SHARE_TOTALS: "profit-share-totals",
   PROFIT_SHARE_REPORT_EDIT_RUN: "profit-share-report-edit-run",
-  PROFIT_SHARE_REPORT_FINAL_RUN: "profit-share-report-final-run",
   PROFIT_SHARE_UPDATE: "profit-share-update",
   PROFNEW: "/",
 
@@ -68,11 +67,11 @@ export const ROUTES = {
   QPAY600: "qpay600",
   REPRINT_CERTIFICATES: "reprint-certificates",
   FORFEIT: "forfeit",
-  PAYMASTER_UPDATE: "paymaster-update",
   PROFIT_MASTER_UPDATE: "profit-master-update",
   PROFIT_SHARE_BY_STORE: "profit-share-by-store",
   PROFIT_SHARE_GROSS_REPORT: "profit-share-gross-report",
   RECENTLY_TERMINATED: "recently-terminated",
+  TERMINATED_LETTERS: "terminated-letters",
   PAY450_SUMMARY: "pay450-summary",
   PROF_CTRLSHEET: "prof-control-sheet",
   PRINT_PROFIT_CERTS: "print-profit-certs",
@@ -84,6 +83,7 @@ export const ROUTES = {
   PROFALL: "profall",
   DEMO_FREEZE: "demographic-freeze",
   DEV_DEBUG: "dev-debug",
+  DOCUMENTATION: "documentation",
   PROFIT_SHARE_EDIT: "profit-share-edit",
   SAVE_PROF_PAYMSTR: "save-prof-paymstr"
 } as const;
@@ -157,6 +157,7 @@ export const CAPTIONS = {
   QPAY066TA_UNDER21: "QPAY066TA-UNDR21",
   QPAY066TA: "QPAY066TA",
   RECENTLY_TERMINATED: "Recently Terminated (PROF-VESTED|PAY508)",
+  TERMINATED_LETTERS: "Terminated Letters (QPROF003-1)",
   REPORTS_BY_AGE: "Reports by Age",
   SUMMARY: "Summary",
   TERMINATIONS: "Terminations (QPAY066)",

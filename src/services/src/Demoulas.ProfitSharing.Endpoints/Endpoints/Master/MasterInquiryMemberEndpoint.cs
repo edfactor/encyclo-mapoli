@@ -1,14 +1,18 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Contracts; // Result, Error
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Common.Extensions; // ToResultOrNotFound
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Master;
 
-public class MasterInquiryMemberEndpoint : ProfitSharingEndpoint<MasterInquiryMemberRequest, MemberProfitPlanDetails>
+public class MasterInquiryMemberEndpoint : ProfitSharingEndpoint<MasterInquiryMemberRequest, Results<Ok<MemberProfitPlanDetails>, NotFound, ProblemHttpResult>>
 {
     private readonly IMasterInquiryService _masterInquiryService;
 
@@ -54,7 +58,6 @@ public class MasterInquiryMemberEndpoint : ProfitSharingEndpoint<MasterInquiryMe
                         YearToDateProfitSharingHours = 1200.5m,
                         YearsInPlan = 10,
                         PercentageVested = 100m,
-                        ContributionsLastYear = true,
                         EnrollmentId = 2,
                         Enrollment = "Active",
                         HireDate = new DateOnly(2010,
@@ -93,14 +96,17 @@ public class MasterInquiryMemberEndpoint : ProfitSharingEndpoint<MasterInquiryMe
         Group<MasterInquiryGroup>();
     }
 
-    public override async Task<MemberProfitPlanDetails> ExecuteAsync(MasterInquiryMemberRequest req, CancellationToken ct)
+    public override async Task<Results<Ok<MemberProfitPlanDetails>, NotFound, ProblemHttpResult>> ExecuteAsync(MasterInquiryMemberRequest req, CancellationToken ct)
     {
-        var result = await _masterInquiryService.GetMemberVestingAsync(req, ct);
-        if (result is null)
+        try
         {
-            await Send.NotFoundAsync(ct);
-            return null!;
+            var entity = await _masterInquiryService.GetMemberVestingAsync(req, ct);
+            var result = entity.ToResultOrNotFound(Error.EntityNotFound("Member"));
+            return result.ToHttpResult(Error.EntityNotFound("Member"));
         }
-        return result;
+        catch (Exception ex)
+        {
+            return Result<MemberProfitPlanDetails>.Failure(Error.Unexpected(ex.Message)).ToHttpResult();
+        }
     }
 }

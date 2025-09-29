@@ -11,6 +11,7 @@ using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.Util.Extensions;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -22,17 +23,20 @@ public sealed class BreakdownReportService : IBreakdownService
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly TotalService _totalService;
     private readonly IDemographicReaderService _demographicReaderService;
+    private readonly IPayrollDuplicateSsnReportService _duplicateSsnReportService;
 
     public BreakdownReportService(
         IProfitSharingDataContextFactory dataContextFactory,
         ICalendarService calendarService,
         TotalService totalService,
-        IDemographicReaderService demographicReaderService)
+        IDemographicReaderService demographicReaderService,
+        IPayrollDuplicateSsnReportService duplicateSsnReportService)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
         _totalService = totalService;
         _demographicReaderService = demographicReaderService;
+        _duplicateSsnReportService = duplicateSsnReportService;
     }
 
     #region ── Helper DTOs ────────────────────────────────────────────────────────────────
@@ -45,7 +49,7 @@ public sealed class BreakdownReportService : IBreakdownService
         public int Ssn { get; init; }
         public string DepartmentName { get; init; } = string.Empty;
         public string PayClassificationName { get; init; } = string.Empty;
-        public byte PayClassificationId { get; init; }
+        public string PayClassificationId { get; init; } = string.Empty;
         public DateOnly DateOfBirth { get; init; }
         public char EmploymentStatusId { get; init; }
         public byte DepartmentId { get; init; }
@@ -110,7 +114,7 @@ public sealed class BreakdownReportService : IBreakdownService
         {
             var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
 
-            var memberStores =await (await BuildEmployeesBaseQuery(ctx, request.ProfitYear, calInfo.FiscalEndDate))
+            var memberStores = await (await BuildEmployeesBaseQuery(ctx, request.ProfitYear, calInfo.FiscalEndDate))
                 .Select(m => new { m.Ssn, m.StoreNumber })
                 .ToListAsync(cancellationToken);
 
@@ -120,7 +124,7 @@ public sealed class BreakdownReportService : IBreakdownService
             var snapshots = await GetEmployeeFinancialSnapshotsAsync(
                 ctx, request.ProfitYear, ssns, cancellationToken);
 
-            
+
             var combined = memberStores
                 .Join(
                     snapshots,
@@ -244,61 +248,61 @@ public sealed class BreakdownReportService : IBreakdownService
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Active, BalanceEnum.BalanceOrNoBalance, withBeneficiaryAllocation: false, Ssns: null, BadgeNumbers: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilterEnum.Active, BalanceEnum.BalanceOrNoBalance, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
-    public Task<ReportResponseBase<MemberYearSummaryDto>> GetMembersWithBalanceActivityByStore(BreakdownByStoreRequest request, int[]? Ssns, int[] BadgeNumbers, CancellationToken cancellationToken)
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetMembersWithBalanceActivityByStore(BreakdownByStoreRequest request, int[]? ssns, int[] badgeNumbers, CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.All, BalanceEnum.HasBalanceActivity, withBeneficiaryAllocation: false, Ssns, BadgeNumbers, cancellationToken);
+        return GetMembersByStore(request, StatusFilterEnum.All, BalanceEnum.HasBalanceActivity, withBeneficiaryAllocation: false, ssns, badgeNumbers, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetInactiveMembersByStore(
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Inactive, BalanceEnum.BalanceOrNoBalance, withBeneficiaryAllocation: false, Ssns: null, BadgeNumbers:null, cancellationToken);
+        return GetMembersByStore(request, StatusFilterEnum.Inactive, BalanceEnum.BalanceOrNoBalance, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetInactiveMembersWithVestedBalanceByStore(
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Inactive, BalanceEnum.HasVestedBalance, withBeneficiaryAllocation: false, Ssns: null, BadgeNumbers: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilterEnum.Inactive, BalanceEnum.HasVestedBalance, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetRetiredEmployessWithBalanceActivity(
        TerminatedEmployeesWithBalanceBreakdownRequest request,
        CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Retired, BalanceEnum.HasBalanceActivity, withBeneficiaryAllocation: false, Ssns: null, BadgeNumbers: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilterEnum.Retired, BalanceEnum.HasBalanceActivity, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithVestedBalanceByStore(
        BreakdownByStoreRequest request,
        CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.HasVestedBalance, withBeneficiaryAllocation: false, Ssns: null, BadgeNumbers: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.HasVestedBalance, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithBalanceActivityByStore(
        BreakdownByStoreRequest request,
        CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.HasBalanceActivity, withBeneficiaryAllocation: false, Ssns: null, BadgeNumbers: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.HasBalanceActivity, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithCurrentBalanceNotVestedByStore(
        BreakdownByStoreRequest request,
        CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.HasCurrentBalanceNotVested, withBeneficiaryAllocation: false, Ssns: null, BadgeNumbers: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.HasCurrentBalanceNotVested, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithBeneficiaryByStore(
        TerminatedEmployeesWithBalanceBreakdownRequest request,
        CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.BalanceOrNoBalance, withBeneficiaryAllocation: true, Ssns:null, BadgeNumbers: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.BalanceOrNoBalance, withBeneficiaryAllocation: true, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
     #region ── Private: common building blocks ───────────────────────────────────────────
@@ -308,11 +312,11 @@ public sealed class BreakdownReportService : IBreakdownService
         StatusFilterEnum employeeStatusFilter,
         BalanceEnum balanceFilter,
         bool withBeneficiaryAllocation,
-        int[]? Ssns,
-        int[]? BadgeNumbers,
+        int[]? ssns,
+        int[]? badgeNumbers,
         CancellationToken cancellationToken)
     {
-        
+
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
@@ -336,7 +340,8 @@ public sealed class BreakdownReportService : IBreakdownService
                 if (employeeStatusFilter == StatusFilterEnum.Terminated)
                 {
                     employeesBase = employeesBase.Where(e => e.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension);
-                } else
+                }
+                else
                 {
                     employeesBase = employeesBase.Where(e => e.TerminationCodeId == TerminationCode.Constants.RetiredReceivingPension);
                 }
@@ -380,15 +385,15 @@ public sealed class BreakdownReportService : IBreakdownService
                 _ => employeesBase
             };
 
-            if (Ssns != null && Ssns.Length > 0)
+            if (ssns != null && ssns.Length > 0)
             {
-                var ssnSet = Ssns.ToHashSet();
+                var ssnSet = ssns.ToHashSet();
                 employeesBase = employeesBase.Where(e => ssnSet.Contains(e.Ssn));
             }
 
-            if (BadgeNumbers != null && BadgeNumbers.Length > 0)
+            if (badgeNumbers != null && badgeNumbers.Length > 0)
             {
-                var badgeNumberSet = BadgeNumbers.ToHashSet();
+                var badgeNumberSet = badgeNumbers.ToHashSet();
                 employeesBase = employeesBase.Where(e => badgeNumberSet.Contains(e.BadgeNumber));
             }
 
@@ -567,7 +572,7 @@ public sealed class BreakdownReportService : IBreakdownService
        */
         var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
         var query =
-            from d in demographics.Include(x=>x.Address)
+            from d in demographics.Include(x => x.Address)
 
             join pp in ctx.PayProfits on d.Id equals pp.DemographicId
 
@@ -622,7 +627,7 @@ public sealed class BreakdownReportService : IBreakdownService
                 CertificateSort = d.EmploymentStatusId ==
                         //Active 
                         EmploymentStatus.Constants.Active || d.TerminationDate > fiscalEndDate ?
-                     (  d.DepartmentId == Department.Constants.Grocery  && d.PayClassificationId == PayClassification.Constants.Manager ? 10
+                     (d.DepartmentId == Department.Constants.Grocery && d.PayClassificationId == PayClassification.Constants.Manager ? 10
                       : d.DepartmentId == Department.Constants.Grocery && d.PayClassificationId == PayClassification.Constants.AssistantManager ? 20
                       : d.DepartmentId == Department.Constants.Grocery && d.PayClassificationId == PayClassification.Constants.Merchandiser ? 30
                       : d.DepartmentId == Department.Constants.Grocery && d.PayClassificationId == PayClassification.Constants.FrontEndManager ? 40
@@ -635,26 +640,26 @@ public sealed class BreakdownReportService : IBreakdownService
                       : d.DepartmentId == Department.Constants.Bakery && d.PayClassificationId == PayClassification.Constants.Manager ? 110
                       : d.DepartmentId == Department.Constants.BeerAndWine && d.PayClassificationId == PayClassification.Constants.Manager ? 120
                       : 1999
-                     ) 
-                        //Terminated
-                      : (d.EmploymentStatusId == EmploymentStatus.Constants.Terminated && d.TerminationDate <= fiscalEndDate) ? 
+                     )
+                      //Terminated
+                      : (d.EmploymentStatusId == EmploymentStatus.Constants.Terminated && d.TerminationDate <= fiscalEndDate) ?
                      (
                         10
                      )
                       //Inactive
-                      : d.EmploymentStatusId == EmploymentStatus.Constants.Inactive ? 
+                      : d.EmploymentStatusId == EmploymentStatus.Constants.Inactive ?
                      (
                         d.TerminationCodeId == TerminationCode.Constants.WorkmansCompensation ? 1 :
                         d.TerminationCodeId == TerminationCode.Constants.Transferred ? 2 :
                         d.TerminationCodeId == TerminationCode.Constants.FmlaApproved ? 3 :
                         d.TerminationCodeId == TerminationCode.Constants.PersonalOrFamilyReason ? 4 :
                         d.TerminationCodeId == TerminationCode.Constants.HealthReasonsNonFmla ? 5 :
-                        d.TerminationCodeId == TerminationCode.Constants.Military? 6 :
+                        d.TerminationCodeId == TerminationCode.Constants.Military ? 6 :
                         d.TerminationCodeId == TerminationCode.Constants.SchoolOrSports ? 7 :
                         d.TerminationCodeId == TerminationCode.Constants.OffForSummer ? 8 :
-                        d.TerminationCodeId == TerminationCode.Constants.Injured ? 9 : 
+                        d.TerminationCodeId == TerminationCode.Constants.Injured ? 9 :
                         11
-                     ) :  0,                                                                
+                     ) : 0,
                 /* ── plain columns ───────────────────────────────────────────── */
                 FullName = d.ContactInfo.FullName!,
                 Ssn = d.Ssn,
@@ -700,6 +705,12 @@ public sealed class BreakdownReportService : IBreakdownService
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(profitYear, ct);
         var priorYear = (short)(profitYear - 1);
 
+        var validator = new InlineValidator<short>();
+        // Inline async rule to prevent running when duplicate SSNs exist.
+        validator.RuleFor(r => r)
+            .MustAsync(async (_, ct) => !await _duplicateSsnReportService.DuplicateSsnExistsAsync(ct))
+            .WithMessage("There are presently duplicate SSN's in the system, which will cause this process to fail.");
+
         // Dictionaries ----------------------------------------------------------------
         var vestingBySsn = await _totalService.GetVestingRatio(ctx, profitYear, calInfo.FiscalEndDate)
             .Where(vr => employeeSsns.Contains(vr.Ssn))
@@ -709,6 +720,7 @@ public sealed class BreakdownReportService : IBreakdownService
             .GetTotalBalanceSet(ctx, priorYear)
             .Where(tbs => employeeSsns.Contains(tbs.Ssn))
             .ToDictionaryAsync(tbs => tbs.Ssn, tbs => tbs.TotalAmount ?? 0, ct);
+
 
         var txnsBySsn = await _totalService
             .GetTransactionsBySsnForProfitYearForOracle(ctx, profitYear)
@@ -820,6 +832,6 @@ public sealed class BreakdownReportService : IBreakdownService
             IsExecutive = member.PayFrequencyId == PayFrequency.Constants.Monthly
         };
     }
-    
+
     #endregion
 }

@@ -20,12 +20,21 @@ export interface LimitedAlignmentColumnOptions extends BaseColumnOptions {
   alignment?: "left" | "center";
 }
 
+export interface AddressColumnOptions extends AlignableColumnOptions {
+  valueGetter?: (params: ValueGetterParams) => string;
+}
+
 export interface FormattableColumnOptions extends AlignableColumnOptions {
   valueFormatter?: (params: ValueFormatterParams) => string;
 }
 
 export interface DataAccessColumnOptions extends FormattableColumnOptions {
   valueGetter?: (params: ValueGetterParams) => string;
+}
+
+export interface StreetAddressColumnOptions extends DataAccessColumnOptions {
+  field1?: string;
+  field2?: string;
 }
 
 // Specialized column interfaces (only those that add new properties)
@@ -43,6 +52,7 @@ export interface CurrencyColumnOptions extends BaseColumnOptions {
   field: string; // Required field
   valueGetter?: (params: ValueGetterParams) => string;
   valueFormatter?: (params: ValueFormatterParams) => string;
+  cellStyle?: (params: ValueFormatterParams) => React.CSSProperties | null;
 }
 
 export interface DateColumnOptions extends LimitedAlignmentColumnOptions {

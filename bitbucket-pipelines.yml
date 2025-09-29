@@ -275,6 +275,37 @@ definitions:
           Write-Host "Source schema: $sourceSchema"
           Write-Host "Current directory: $(Get-Location)"
 
+          # -------------------------------------------------------------
+          # Full Reset & Import (Nuclear-Option parity)
+          #   Action: full-reset-and-import
+          #   Steps: drop-recreate-db -> import-from-ready -> import-from-navigation
+          # -------------------------------------------------------------
+          if ($action -eq "full-reset-and-import") {
+            if ($environment -ne "QA") {
+              Write-Error "Action 'full-reset-and-import' is restricted to QA environment only. Current environment: $environment"; exit 1
+            }
+            Write-Host "[Full Reset] Dropping & recreating schema $sourceSchema"
+            .\output\Demoulas.ProfitSharing.Data.Cli drop-recreate-db --connection-name ProfitSharing --source-schema $sourceSchema
+            if ($LASTEXITCODE -ne 0) { Write-Error "Drop/Recreate failed. Exiting"; exit 1 }
+
+            Write-Host "[Full Reset] Importing from READY into $sourceSchema"
+            .\output\Demoulas.ProfitSharing.Data.Cli import-from-ready --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema $sourceSchema
+            if ($LASTEXITCODE -ne 0) { Write-Error "Import from READY failed. Exiting"; exit 1 }
+
+            $navigationFile = ".\src\database\ready_import\Navigations\add-navigation-data.sql"
+            if ($environment -eq "UAT") {
+              $navigationFile = ".\src\database\ready_import\Navigations\add-uat-navigation-data.sql"
+              Write-Host "[Full Reset] Using UAT navigation data"
+            }
+
+            Write-Host "[Full Reset] Importing navigation data from $navigationFile"
+            .\output\Demoulas.ProfitSharing.Data.Cli import-from-navigation --connection-name ProfitSharing --sql-file $navigationFile --source-schema $sourceSchema
+            if ($LASTEXITCODE -ne 0) { Write-Error "Navigation import failed. Exiting"; exit 1 }
+
+            Write-Host "[Full Reset] Completed successfully."
+            exit 0
+          }
+
           .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --output-file ".\dist\migration.sql" --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema $sourceSchema
           if ($LASTEXITCODE -ne 0) { Write-Error "Database upgrade failed. Exiting"; exit 1 }
 
@@ -429,15 +460,162 @@ definitions:
       script:
         - mkdir -p reports
         - gitleaks detect --source . --config gitleaks.toml --redact --no-banner --report-format json --report-path reports/gitleaks.json --exit-code 0
-              - echo "Gitleaks findings (redacted JSON):"
-              - head -c 200000 reports/gitleaks.json || true
-              - |
-                if [ -s reports/gitleaks.json ] && [ "$(wc -c < reports/gitleaks.json)" -gt 2 ]; then
-                  echo "Leaks found. Failing the build.";
-                  exit 1;
-                else
-                  echo "No leaks found.";
-                fi
+        - echo "Gitleaks findings (redacted JSON):"
+        - head -c 200000 reports/gitleaks.json || true
+        - |
+          # Robust leak evaluation without python dependency
+          if [ ! -s reports/gitleaks.json ]; then
+            echo "No leaks found (empty report).";
+          else
+            if command -v jq >/dev/null 2>&1; then
+              findings_count=$(jq 'if type=="array" then length elif (.findings|type? == "array") then (.findings|length) else 0 end' reports/gitleaks.json 2>/dev/null || echo 0)
+            else
+              # Fallback: treat literal [] or [ ] as zero, anything else non-empty as 1
+              if grep -q '"Description"' reports/gitleaks.json; then
+                # Some formats include fields; attempt crude count of occurrences of "RuleID"
+                findings_count=$(grep -o '"RuleID"' reports/gitleaks.json | wc -l | tr -d ' ')
+              elif grep -Eq '^\s*\[\s*\]\s*$' reports/gitleaks.json; then
+                findings_count=0
+              else
+                # Non-empty & not literal empty array: assume at least 1
+                findings_count=1
+              fi
+            fi
+            echo "Gitleaks findings count: $findings_count"
+            if [ "${findings_count}" -gt 0 ]; then
+              echo "Leaks found. Failing the build.";
+              exit 1;
+            else
+              echo "No leaks found.";
+            fi
+          fi
+    run-playwright-tests: &run-playwright-tests
+      name: "Run Playwright E2E Tests (QA)"
+      runs-on:
+        - windows
+        - self.hosted
+        - volta
+      artifacts:
+        - ui/playwright-report/**
+        - ui/test-results/**
+        - src/UI/playwright-report/**
+        - src/UI/test-results/**
+        - playwright-artifacts/**
+      script:
+        - |
+          <#
+            Playwright E2E Runner (QA)
+            Sections:
+              1) Locate project dir
+              2) Ensure Node version (Volta)
+              3) Materialize .env from QA_Playwright variable
+              4) Install deps & browsers
+              5) Execute tests (JUnit + HTML)
+              6) Collect artifacts & set exit code
+          #>
+
+          Write-Host "[1] Locate Playwright project directory" -ForegroundColor Cyan
+          $candidateDirs = @('ui','src/UI','src/ui')
+          $playwrightDir = $candidateDirs | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $playwrightDir) { Write-Error "Playwright project directory not found. Checked: $($candidateDirs -join ', ')"; exit 1 }
+          Set-Location $playwrightDir
+          Write-Host "Using directory: $playwrightDir"
+
+          Write-Host "[2] Ensure compatible Node.js version" -ForegroundColor Cyan
+          $targetNode = '22.16.0'
+          try { $currentNode = (node -v) 2>$null } catch { $currentNode = 'unknown' }
+          Write-Host "Current node: $currentNode"
+          if (Get-Command volta -ErrorAction SilentlyContinue) {
+            volta install node@$targetNode | Out-Null
+            Write-Host "Node after install: $(node -v)"
+          } else {
+            Write-Host "Volta unavailable; proceeding with existing Node version" -ForegroundColor Yellow
+          }
+
+          Write-Host "[3] Build .env from QA_Playwright variable" -ForegroundColor Cyan
+          if (-not $env:QA_Playwright) { Write-Error "QA_Playwright variable not set"; exit 1 }
+          $raw = $env:QA_Playwright
+          # Tokenize by whitespace; handle patterns like KEY=value and KEY= value
+          $parts = $raw -split '\s+' | Where-Object { $_ -and ($_ -notmatch '^\s*$') }
+          $kv = @{}
+          for ($i = 0; $i -lt $parts.Length; $i++) {
+            $p = $parts[$i]
+            if ($p -match '^([A-Za-z_][A-Za-z0-9_]*)=(.*)$') {
+              $k = $matches[1]
+              $v = $matches[2]
+              if ($v -eq '') {
+                # Value may be next token (e.g. USER_NAME= rharding)
+                if ($i + 1 -lt $parts.Length -and ($parts[$i+1] -notmatch '^[A-Za-z_][A-Za-z0-9_]*=')) {
+                  $v = $parts[$i+1]
+                  $i++
+                }
+              }
+              $v = $v.Trim().Trim('"').Trim("'")
+              if (-not $kv.ContainsKey($k)) { $kv[$k] = $v }
+            }
+          }
+          $userKey = ($kv.Keys | Where-Object { $_ -in 'USER_NAME','USERNAME','USER','LOGIN' } | Select-Object -First 1)
+          $passKey = ($kv.Keys | Where-Object { $_ -in 'PASSWORD','PASS','PWD' } | Select-Object -First 1)
+          $userVal = if ($userKey) { $kv[$userKey] } else { '' }
+          $passVal = if ($passKey) { $kv[$passKey] } else { '' }
+          $ciVal = if ($kv.ContainsKey('CI')) { $kv['CI'] } else { '' }
+          $qaVal = if ($kv.ContainsKey('QA')) { $kv['QA'] } else { '' }
+          if (-not $userVal -or -not $passVal) {
+            Write-Host 'Parsed keys (no secrets): ' + ($kv.Keys -join ', ')
+            Write-Error 'Missing USER credential (USER_NAME/USERNAME/USER/LOGIN) and/or PASSWORD (PASSWORD/PASS/PWD) in QA_Playwright value.'; exit 1
+          }
+          $lines = @(
+            "CI=$ciVal",
+            "QA=$qaVal",
+            "USER_NAME=$userVal",
+            "PASSWORD=$passVal"
+          )
+          Set-Content ./.env -Value $lines
+          Write-Host ".env keys emitted: CI, QA, USER_NAME, PASSWORD"
+          # Some configs expect a .playwright.env specifically; create it if not present
+          Copy-Item ./.env ./.playwright.env -Force
+
+          Write-Host "[4] Install dependencies & browsers" -ForegroundColor Cyan
+          if (Test-Path node_modules) { Remove-Item -Recurse -Force node_modules }
+          npm ci
+          npx playwright install --with-deps; if ($LASTEXITCODE -ne 0) { npx playwright install }
+
+          Write-Host "[5] Run tests" -ForegroundColor Cyan
+          New-Item -ItemType Directory -Path test-results -Force | Out-Null
+
+          # Diagnostic: show any duplicate playwright test packages
+          Get-ChildItem -Path node_modules -Filter playwright -Recurse -Depth 3 -ErrorAction SilentlyContinue | Select-Object -First 5 | ForEach-Object { Write-Host "Found playwright path: $($_.FullName)" }
+          Get-ChildItem -Path node_modules -Filter "@playwright" -Recurse -Depth 5 -ErrorAction SilentlyContinue | Select-Object -First 5 | ForEach-Object { Write-Host "Found @playwright path: $($_.FullName)" }
+          # Use direct CLI to avoid potential global 'playwright' package ambiguity
+          $playwrightCli = Join-Path (Resolve-Path ./node_modules/@playwright/test).Path "cli.js"
+          if (-not (Test-Path $playwrightCli)) { Write-Error "Playwright CLI not found at $playwrightCli"; Get-ChildItem node_modules/@playwright/test -Recurse -Depth 2; exit 1 }
+          node $playwrightCli test --reporter "list,junit" --config=playwright.config.ts --output=test-results --workers=4
+          $pwExit = $LASTEXITCODE
+
+          Write-Host "[6] Prepare Bitbucket test-reports ingestion" -ForegroundColor Cyan
+          $repoRoot = $env:BITBUCKET_CLONE_DIR; if (-not $repoRoot) { $repoRoot = (Resolve-Path '..').Path }
+          $bbTestRoot = Join-Path $repoRoot 'test-reports'
+          $bbPlaywrightDir = Join-Path $bbTestRoot 'playwright'
+          if (!(Test-Path $bbPlaywrightDir)) { New-Item -ItemType Directory -Path $bbPlaywrightDir -Force | Out-Null }
+          # Locate a junit xml (reporter names can vary). Prefer explicit junit.xml if present.
+          $junitCandidate = @(
+            Get-ChildItem -Path test-results -Recurse -Filter junit*.xml -ErrorAction SilentlyContinue,
+            Get-ChildItem -Path test-results -Recurse -Filter *.xml -ErrorAction SilentlyContinue | Where-Object { (Get-Content $_.FullName -TotalCount 5) -match '<testsuite' }
+          ) | Where-Object { $_ } | Select-Object -First 1
+          if ($junitCandidate) {
+            Copy-Item $junitCandidate.FullName (Join-Path $bbPlaywrightDir 'junit.xml') -Force
+            Write-Host "Copied JUnit report to test-reports/playwright/junit.xml"
+          } else {
+            Write-Host "No JUnit XML found to copy." -ForegroundColor Yellow
+          }
+
+          Write-Host "[7] Collect artifacts" -ForegroundColor Cyan
+          $artifactRoot = Join-Path $repoRoot 'playwright-artifacts'
+            if (!(Test-Path $artifactRoot)) { New-Item -ItemType Directory -Path $artifactRoot | Out-Null }
+          foreach ($d in 'playwright-report','test-results') { if (Test-Path $d) { Copy-Item -Recurse -Force $d (Join-Path $artifactRoot $d) } }
+
+          Write-Host "[8] Finalize with exit code $pwExit" -ForegroundColor Cyan
+          exit $pwExit
           
 
 pipelines:
@@ -508,63 +686,6 @@ pipelines:
           script:
             - $env:API_SERVER_QA = "appt23d"
             - pwsh -File ./scripts/Check-Health.ps1 -Url $env:QA_BASE_URL -envServerName $env:API_SERVER_QA
-
-      - step:
-          name: "Tag repository with application version"
-          runs-on:
-            - windows
-            - self.hosted
-          script:
-            - |
-              # Locate API artifact and extract version from .buildinfo.json (fallback to build number)
-              $apiZip = ".\dist\Demoulas.ProfitSharing.Api.zip"
-              $version = $null
-
-              if (Test-Path $apiZip) {
-                Write-Host "Found API artifact: $apiZip"
-                $temp = Join-Path $env:TEMP "api_extract_$($env:BITBUCKET_BUILD_NUMBER)"
-                if (Test-Path $temp) { Remove-Item -Recurse -Force $temp }
-                New-Item -ItemType Directory -Path $temp | Out-Null
-                Expand-Archive -Path $apiZip -DestinationPath $temp -Force
-                $buildInfoFile = Get-ChildItem -Path $temp -Filter ".buildinfo.json" -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 1
-                if ($buildInfoFile) { $buildInfoPath = $buildInfoFile.FullName } else { Write-Host "No .buildinfo.json inside artifact" }
-              } else {
-                Write-Host "API artifact not found at $apiZip - searching workspace for .buildinfo.json"
-                $found = Get-ChildItem -Path . -Filter ".buildinfo.json" -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 1
-                if ($found) { $buildInfoPath = $found.FullName }
-              }
-
-              if ($buildInfoPath) {
-                try {
-                  $json = Get-Content $buildInfoPath -Raw | ConvertFrom-Json
-                  $version = $json.version
-                  if (-not $version) { $version = $json.Version }
-                  if (-not $version) { $version = $json.buildVersion }
-                } catch {
-                  Write-Host "Failed to parse $buildInfoPath: $_"
-                }
-              }
-
-              if (-not $version) { $version = $env:BITBUCKET_BUILD_NUMBER; Write-Host "Using build number as version: $version" }
-
-              $tag = "v$version"
-              Write-Host "Preparing to create tag: $tag"
-
-              # Configure git identity for tagging
-              git config user.email "pipeline@local"
-              git config user.name "Bitbucket Pipeline"
-
-              # Check if tag already exists on remote
-              $exists = git ls-remote --tags origin $tag
-              if ($exists) { Write-Host "Tag $tag already exists on remote. Skipping tag creation."; exit 0 }
-
-              # Create annotated tag on the current commit (or BITBUCKET_COMMIT)
-              git tag -a $tag -m "Release $tag (build $env:BITBUCKET_BUILD_NUMBER)" $env:BITBUCKET_COMMIT
-
-              # Push tag to origin. Note: runner must have push permissions configured (SSH key / credentials)
-              git push origin refs/tags/$tag
-
-              Write-Host "Tag $tag created and pushed."
 
       - step:
           name: "Gate: Promote to UAT"
@@ -692,6 +813,7 @@ pipelines:
               - import-uat-navigation
               - generate-upgrade-script
               - validate-import
+              - full-reset-and-import
           - name: SourceSchema
             default: PROFITSHARE
             allowed-values:
@@ -739,6 +861,8 @@ pipelines:
                 echo "Validated: Environment=$Environment, SourceSchema=$SourceSchema"
               fi
       - step: *upgrade-database
+    playwright_e2e_qa:
+      - step: *run-playwright-tests
 
 
 

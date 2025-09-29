@@ -1,16 +1,22 @@
-import { FormLabel, MenuItem, Select, TextField } from "@mui/material";
-import { Grid } from "@mui/material";
-import { Controller, useForm, useWatch } from "react-hook-form";
-import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+import { FormLabel, Grid, MenuItem, Select, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { useDispatch } from "react-redux";
-import { setBreakdownByStoreQueryParams } from "reduxstore/slices/yearsEndSlice";
+import {
+  clearBreakdownByStore,
+  clearBreakdownByStoreMangement,
+  clearBreakdownByStoreTotals,
+  clearBreakdownGrandTotals,
+  setBreakdownByStoreQueryParams
+} from "reduxstore/slices/yearsEndSlice";
+import { SearchAndReset } from "smart-ui-library";
+import * as yup from "yup";
+import DuplicateSsnGuard from "../../../../components/DuplicateSsnGuard";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 
 interface BreakdownSearchParams {
-  store?: number;
+  store?: number | null;
   employeeStatus?: string;
   badgeId?: number | null;
   employeeName?: string;
@@ -34,10 +40,15 @@ const schema = yup.object().shape({
 
 interface QPAY066TABreakdownParametersProps {
   activeTab: "all" | "stores" | "summaries" | "totals";
-  onStoreChange?: (store: number) => void;
+  onStoreChange?: (store: number | null) => void;
+  onReset?: () => void;
 }
 
-const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> = ({ activeTab, onStoreChange }) => {
+const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> = ({
+  activeTab,
+  onStoreChange,
+  onReset
+}) => {
   const dispatch = useDispatch();
   const profitYear = useDecemberFlowProfitYear();
 
@@ -60,7 +71,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
   } = useForm<BreakdownSearchParams>({
     resolver: yupResolver(schema),
     defaultValues: {
-      store: 700,
+      store: null,
       employeeStatus: "",
       badgeId: null,
       employeeName: "",
@@ -109,13 +120,26 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
 
   const handleReset = () => {
     reset({
-      store: 700,
+      store: null,
       employeeStatus: "",
       badgeId: null,
       employeeName: "",
       sortBy: "badgeNumber",
       isSortDescending: true
     });
+    dispatch(clearBreakdownByStore());
+    dispatch(clearBreakdownByStoreMangement());
+    dispatch(clearBreakdownByStoreTotals());
+    dispatch(clearBreakdownGrandTotals());
+
+    if (onStoreChange) {
+      onStoreChange(null);
+    }
+
+    // allow parent to clear grids
+    if (onReset) {
+      onReset();
+    }
   };
 
   const getGridSizes = () => {
@@ -125,14 +149,6 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
       return { xs: 12, sm: 6, md: 4 };
     }
   };
-
-  // Add a watch to see all form values
-  const formValues = watch();
-
-  // Log form values on change to help with debugging
-  useEffect(() => {
-    console.log("Current form values:", formValues);
-  }, [formValues]);
 
   return (
     <form
@@ -192,7 +208,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                       size="small"
                       fullWidth>
                       <MenuItem value="">
-                        <em>All</em>
+                        <em>Clear Selection</em>
                       </MenuItem>
                       {employeeStatuses.map((status) => (
                         <MenuItem
@@ -250,17 +266,21 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
         width="100%"
         paddingX="24px"
         marginTop={2}>
-        <SearchAndReset
-          handleReset={handleReset}
-          handleSearch={(e) => {
-            e.preventDefault();
-            // Call validateAndSubmit which contains the handleSubmit logic
-            validateAndSubmit();
-          }}
-          isFetching={false}
-          disabled={false}
-          searchButtonText="Search"
-        />
+        <DuplicateSsnGuard>
+          {({ prerequisitesComplete }) => (
+            <SearchAndReset
+              handleReset={handleReset}
+              handleSearch={(e) => {
+                e.preventDefault();
+                // Call validateAndSubmit which contains the handleSubmit logic
+                validateAndSubmit();
+              }}
+              isFetching={false}
+              disabled={!prerequisitesComplete}
+              searchButtonText="Search"
+            />
+          )}
+        </DuplicateSsnGuard>
       </Grid>
     </form>
   );

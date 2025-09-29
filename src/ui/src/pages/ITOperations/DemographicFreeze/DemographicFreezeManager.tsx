@@ -1,11 +1,11 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Box, Button, FormHelperText, FormLabel, TextField } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Box, Button, FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { useFreezeDemographicsMutation } from "reduxstore/api/ItOperationsApi";
 import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
+import DuplicateSsnGuard from "../../../components/DuplicateSsnGuard";
 
 // Update the interface to include new fields
 interface DemographicFreezeSearch {
@@ -62,7 +62,8 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
   const {
     control,
     handleSubmit,
-    formState: { errors, isValid }
+    formState: { errors, isValid },
+    reset
   } = useForm<DemographicFreezeSearch>({
     resolver: yupResolver(schema) as Resolver<DemographicFreezeSearch>,
     defaultValues: {
@@ -96,6 +97,10 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
             profitYear: data.profitYear
           });
 
+          // Clear the form fields after successful freeze so the As-of date/time
+          // are removed and the Create button becomes disabled (form invalid).
+          reset({ profitYear: profitYear || currentYear, asOfDate: null, asOfTime: null });
+
           setInitialSearchLoaded(true);
           // Could add a success notification here
         }
@@ -113,94 +118,98 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
   };
 
   return (
-    <form onSubmit={onSubmit}>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          flexWrap: "wrap",
-          alignItems: "flex-end", // Align items at the bottom for consistent baseline
-          paddingX: "24px",
-          gap: "24px"
-        }}>
-        {/* Profit Year */}
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Controller
-            name="profitYear"
-            control={control}
-            render={({ field }) => (
-              <DsmDatePicker
-                id="profitYear"
-                onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
-                value={field.value ? new Date(field.value, 0) : null}
-                required={true}
-                label="Profit Year"
-                disableFuture
-                views={["year"]}
-                minDate={new Date(previousYear, 0)}
-                maxDate={new Date(currentYear, 11)}
-                error={errors.profitYear?.message}
+    <DuplicateSsnGuard>
+      {({ prerequisitesComplete }) => (
+        <form onSubmit={onSubmit}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              flexWrap: "wrap",
+              alignItems: "flex-end", // Align items at the bottom for consistent baseline
+              paddingX: "24px",
+              gap: "24px"
+            }}>
+            {/* Profit Year */}
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Controller
+                name="profitYear"
+                control={control}
+                render={({ field }) => (
+                  <DsmDatePicker
+                    id="profitYear"
+                    onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
+                    value={field.value ? new Date(field.value, 0) : null}
+                    required={true}
+                    label="Profit Year"
+                    disableFuture
+                    views={["year"]}
+                    minDate={new Date(previousYear, 0)}
+                    maxDate={new Date(currentYear, 11)}
+                    error={errors.profitYear?.message}
+                  />
+                )}
               />
-            )}
-          />
-          {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
-        </Grid>
+              {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
+            </Grid>
 
-        {/* As of Date */}
-        <Box sx={fieldStyle}>
-          <Controller
-            name="asOfDate"
-            control={control}
-            render={({ field }) => (
-              <DsmDatePicker
-                id="asOfDate"
-                onChange={(date) => field.onChange(date)}
-                value={field.value}
-                required={true}
-                label="As of Date"
-                minDate={new Date(previousYear, 0, 1)}
-                maxDate={new Date()}
-                error={errors.asOfDate?.message}
+            {/* As of Date */}
+            <Box sx={fieldStyle}>
+              <Controller
+                name="asOfDate"
+                control={control}
+                render={({ field }) => (
+                  <DsmDatePicker
+                    id="asOfDate"
+                    onChange={(date) => field.onChange(date)}
+                    value={field.value}
+                    required={true}
+                    label="As of Date"
+                    minDate={new Date(previousYear, 0, 1)}
+                    maxDate={new Date()}
+                    error={errors.asOfDate?.message}
+                  />
+                )}
               />
-            )}
-          />
-        </Box>
+            </Box>
 
-        {/* As of Time */}
-        <Box sx={fieldStyle}>
-          <Controller
-            name="asOfTime"
-            control={control}
-            render={({ field }) => (
-              <>
-                <FormLabel>As of Time (HH:MM)</FormLabel>
-                <TextField
-                  id="asOfTime"
-                  type="time"
-                  required
-                  fullWidth
-                  onChange={field.onChange}
-                  value={field.value || ""}
-                  error={!!errors.asOfTime}
-                />
-              </>
-            )}
-          />
-          {errors.asOfTime && <FormHelperText error>{errors.asOfTime.message}</FormHelperText>}
-        </Box>
+            {/* As of Time */}
+            <Box sx={fieldStyle}>
+              <Controller
+                name="asOfTime"
+                control={control}
+                render={({ field }) => (
+                  <>
+                    <FormLabel>As of Time (HH:MM)</FormLabel>
+                    <TextField
+                      id="asOfTime"
+                      type="time"
+                      required
+                      fullWidth
+                      onChange={field.onChange}
+                      value={field.value || ""}
+                      error={!!errors.asOfTime}
+                    />
+                  </>
+                )}
+              />
+              {errors.asOfTime && <FormHelperText error>{errors.asOfTime.message}</FormHelperText>}
+            </Box>
 
-        {/* Submit Button */}
-        <Box sx={{ mt: 2, mb: 2 }}>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            disabled={isLoading || !isValid}>
-            {isLoading ? "Submitting..." : "Create Freeze Point"}
-          </Button>
-        </Box>
-      </Box>
-    </form>
+            {/* Submit Button */}
+            <Box sx={{ mt: 2, mb: 2 }}>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                disabled={isLoading || !isValid || !prerequisitesComplete}>
+                {isLoading ? "Submitting..." : "Create Freeze Point"}
+              </Button>
+            </Box>
+          </Box>
+        </form>
+      )}
+    </DuplicateSsnGuard>
   );
 };
 

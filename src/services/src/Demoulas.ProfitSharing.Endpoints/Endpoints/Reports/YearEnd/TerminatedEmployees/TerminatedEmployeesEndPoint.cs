@@ -9,25 +9,31 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
+using Demoulas.ProfitSharing.Common.Telemetry;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployees;
 
 public class TerminatedEmployeesEndPoint
-    : EndpointWithCsvTotalsBase<StartAndEndDateRequest, 
-        TerminatedEmployeeAndBeneficiaryResponse, 
-        TerminatedEmployeeAndBeneficiaryDataResponseDto, 
+    : EndpointWithCsvTotalsBase<StartAndEndDateRequest,
+        TerminatedEmployeeAndBeneficiaryResponse,
+        TerminatedEmployeeAndBeneficiaryDataResponseDto,
         TerminatedEmployeesEndPoint.TerminatedEmployeeCsvMap>
 {
     private readonly ITerminatedEmployeeService _terminatedEmployeeService;
     private readonly IAuditService _auditService;
+    private readonly ILogger<TerminatedEmployeesEndPoint> _logger;
 
     public TerminatedEmployeesEndPoint(
         ITerminatedEmployeeService terminatedEmployeeService,
-        IAuditService auditService)
+        IAuditService auditService,
+        ILogger<TerminatedEmployeesEndPoint> logger)
         : base(Navigation.Constants.Terminations)
     {
         _terminatedEmployeeService = terminatedEmployeeService;
         _auditService = auditService;
+        _logger = logger;
     }
 
     public override string ReportFileName => "TerminatedEmployeeAndBeneficiaryReport";
@@ -75,13 +81,46 @@ public class TerminatedEmployeesEndPoint
         base.Configure();
     }
 
-    public override Task<TerminatedEmployeeAndBeneficiaryResponse> GetResponse(StartAndEndDateRequest req, CancellationToken ct)
+    public override async Task<TerminatedEmployeeAndBeneficiaryResponse> GetResponse(StartAndEndDateRequest req, CancellationToken ct)
     {
-        return _auditService.ArchiveCompletedReportAsync(ReportFileName,
-            (short)req.EndingDate.Year,
-            req,
-            (archiveReq, _, cancellationToken) => _terminatedEmployeeService.GetReportAsync(archiveReq, cancellationToken),
-            ct);
+        using var activity = this.StartEndpointActivity(HttpContext);
+        this.RecordRequestMetrics(HttpContext, _logger, req);
+
+        try
+        {
+            var result = await _auditService.ArchiveCompletedReportAsync(ReportFileName,
+                (short)req.EndingDate.Year,
+                req,
+                (archiveReq, _, cancellationToken) => _terminatedEmployeeService.GetReportAsync(archiveReq, cancellationToken),
+                ct);
+
+            // Record year-end terminated employees report metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "year-end-terminated-employees-report"),
+                new("endpoint", "TerminatedEmployeesEndPoint"),
+                new("report_type", "terminated-employees"),
+                new("date_range_days", (req.EndingDate.DayNumber - req.BeginningDate.DayNumber).ToString()));
+
+            var resultCount = result?.Response?.Results?.Count() ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                new("record_type", "terminated-employees-and-beneficiaries"),
+                new("endpoint", "TerminatedEmployeesEndPoint"));
+
+            _logger.LogInformation("Year-end terminated employees report generated for date range {StartDate} to {EndDate}, returned {Count} records (correlation: {CorrelationId})",
+                req.BeginningDate, req.EndingDate, resultCount, HttpContext.TraceIdentifier);
+
+            if (result != null)
+            {
+                this.RecordResponseMetrics(HttpContext, _logger, result);
+            }
+
+            return result!;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 
     protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, TerminatedEmployeeAndBeneficiaryResponse responseWithTotals, CancellationToken cancellationToken)
@@ -135,7 +174,7 @@ public class TerminatedEmployeesEndPoint
                 csvWriter.WriteField(yd.YtdPsHours);
                 csvWriter.WriteField(yd.VestedPercent);
                 csvWriter.WriteField(yd.Age);
-                csvWriter.WriteField(yd.EnrollmentCode);
+                csvWriter.WriteField(yd.HasForfeited);
                 await csvWriter.NextRecordAsync();
             }
         }

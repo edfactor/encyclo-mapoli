@@ -2,10 +2,11 @@
 using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
-public record ProfitSharingLabelResponse: IIsExecutive
+
+public record ProfitSharingLabelResponse : IIsExecutive
 {
     public short StoreNumber { get; set; }
-    public byte PayClassificationId { get; set; }
+    public string PayClassificationId { get; set; } = string.Empty;
     public string? PayClassificationName { get; set; }
     public byte DepartmentId { get; set; }
     public string? DepartmentName { get; set; }
@@ -23,7 +24,7 @@ public record ProfitSharingLabelResponse: IIsExecutive
         return new ProfitSharingLabelResponse()
         {
             StoreNumber = 22,
-            PayClassificationId = 2,
+            PayClassificationId = "2",
             PayClassificationName = "Assistant Manager",
             DepartmentId = 2,
             DepartmentName = "Grocery",

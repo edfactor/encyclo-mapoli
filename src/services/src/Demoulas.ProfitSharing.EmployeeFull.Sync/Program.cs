@@ -3,14 +3,12 @@ using Demoulas.Common.Contracts.Configuration;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.Common.Logging.Extensions;
-using Demoulas.ProfitSharing.Common.LogMasking;
 using Demoulas.ProfitSharing.Common.Metrics;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interceptors;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
+using Demoulas.ProfitSharing.Services.LogMasking;
 using Demoulas.Util.Extensions;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -40,7 +38,10 @@ builder.Configuration.Bind("Logging:Smart", smartConfig);
 FileSystemLogConfig fileSystemLog = new FileSystemLogConfig();
 builder.Configuration.Bind("Logging:FileSystem", fileSystemLog);
 
-smartConfig.MaskingOperators = [new UnformattedSocialSecurityNumberMaskingOperator()];
+smartConfig.MaskingOperators = [
+    new UnformattedSocialSecurityNumberMaskingOperator(),
+    new SensitiveValueMaskingOperator()
+];
 builder.SetDefaultLoggerConfiguration(smartConfig, fileSystemLog);
 
 

@@ -1,18 +1,17 @@
 import { SaveOutlined } from "@mui/icons-material";
 import { Checkbox, CircularProgress, IconButton, Tooltip } from "@mui/material";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "components/SuggestedForfeiture";
 import { numberToCurrency } from "smart-ui-library";
-import { ForfeitureAdjustmentUpdateRequest } from "types";
-import { getForfeitedStatus } from "utils/enrollmentUtil";
+import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "../../../components/SuggestedForfeiture";
+import { ForfeitureAdjustmentUpdateRequest } from "../../../types";
 import {
   createAgeColumn,
   createCurrencyColumn,
   createDateColumn,
   createHoursColumn,
-  createStatusColumn,
-  createYearColumn
-} from "utils/gridColumnFactory";
+  createYearColumn,
+  createYesOrNoColumn
+} from "../../../utils/gridColumnFactory";
 import { HeaderComponent } from "./TerminationHeaderComponent";
 
 interface SaveButtonCellParams extends ICellRendererParams {
@@ -28,36 +27,44 @@ export const GetDetailColumns = (
   selectedRowIds: number[],
   selectedProfitYear: number,
   onSave?: (request: ForfeitureAdjustmentUpdateRequest, name: string) => Promise<void>,
-  onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[], names: string[]) => Promise<void>
+  onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[], names: string[]) => Promise<void>,
+  isReadOnly = true
 ): ColDef[] => {
   return [
     createYearColumn({
       headerName: "Profit Year",
-      field: "profitYear"
+      field: "profitYear",
+      sortable: false
     }),
     createCurrencyColumn({
       headerName: "Beginning Balance",
-      field: "beginningBalance"
+      field: "beginningBalance",
+      sortable: false
     }),
     createCurrencyColumn({
       headerName: "Beneficiary Allocation",
-      field: "beneficiaryAllocation"
+      field: "beneficiaryAllocation",
+      sortable: false
     }),
     createCurrencyColumn({
       headerName: "Distribution Amount",
-      field: "distributionAmount"
+      field: "distributionAmount",
+      sortable: false
     }),
     createCurrencyColumn({
       headerName: "Forfeit Amount",
-      field: "forfeit"
+      field: "forfeit",
+      sortable: false
     }),
     createCurrencyColumn({
       headerName: "Ending Balance",
-      field: "endingBalance"
+      field: "endingBalance",
+      sortable: false
     }),
     createCurrencyColumn({
       headerName: "Vested Balance",
-      field: "vestedBalance"
+      field: "vestedBalance",
+      sortable: false
     }),
     {
       headerName: "Vested %",
@@ -71,21 +78,23 @@ export const GetDetailColumns = (
     },
     createDateColumn({
       headerName: "Term Date",
-      field: "dateTerm"
+      field: "dateTerm",
+      sortable: false
     }),
     createHoursColumn({
       headerName: "YTD PS Hours",
-      field: "ytdPsHours"
+      field: "ytdPsHours",
+      sortable: false
     }),
     createAgeColumn({
       maxWidth: 70,
       sortable: false
     }),
-    createStatusColumn({
-      headerName: "Forfeit",
-      field: "enrollmentCode",
-      // Yes, the enrollmentCode is tied to the Forfeited status. See PS-1279
-      valueFormatter: (params) => getForfeitedStatus(params.value)
+    createYesOrNoColumn({
+      headerName: "Forfeited",
+      field: "hasForfeited",
+      colId: "hasForfeited",
+      sortable: false
     }),
     {
       headerName: "Suggested Forfeit",
@@ -100,7 +109,7 @@ export const GetDetailColumns = (
         if (!params.data.isDetail) return "";
         const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
         const hasError = params.context?.editedValues?.[rowKey]?.hasError;
-        return hasError ? "invalid-cell" : "";
+        return hasError ? "bg-red-50" : "";
       },
       editable: ({ node }) => node.data.isDetail && node.data.profitYear === selectedProfitYear,
       flex: 1,
@@ -143,7 +152,8 @@ export const GetDetailColumns = (
       headerComponentParams: {
         addRowToSelectedRows,
         removeRowFromSelectedRows,
-        onBulkSave
+        onBulkSave,
+        isReadOnly
       },
       cellRendererParams: {
         addRowToSelectedRows,
@@ -161,43 +171,63 @@ export const GetDetailColumns = (
         const currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedForfeit;
         const isLoading = params.context?.loadingRowIds?.has(params.data.badgeNumber);
         const isZeroValue = currentValue === 0 || currentValue === null || currentValue === undefined;
+        const isDisabled = hasError || isLoading || isZeroValue || isReadOnly;
+        const readOnlyTooltip = "You are in read-only mode and cannot save changes.";
 
-        return (
-          <div>
-            <Tooltip title={isZeroValue ? "Forfeit cannot be zero." : ""} arrow>
-              <span>
-                <Checkbox
-                  checked={isSelected}
-                  disabled={isZeroValue}
-                  onChange={() => {
+        const checkboxElement = (
+          <Tooltip
+            title={isZeroValue ? "Forfeit cannot be zero." : isReadOnly ? readOnlyTooltip : ""}
+            arrow>
+            <span>
+              <Checkbox
+                checked={isSelected}
+                disabled={isDisabled}
+                onChange={() => {
+                  if (!isReadOnly) {
                     if (isSelected) {
                       params.removeRowFromSelectedRows(id);
                     } else {
                       params.addRowToSelectedRows(id);
                     }
                     params.node?.setSelected(!isSelected);
-                  }}
-                />
-              </span>
-            </Tooltip>
-            <IconButton
-              onClick={async () => {
-                if (params.data.isDetail && params.onSave) {
-                  const request: ForfeitureAdjustmentUpdateRequest = {
-                    badgeNumber: params.data.badgeNumber,
-                    profitYear: params.data.profitYear,
-                    forfeitureAmount: currentValue || 0,
-                    classAction: false,
-                    offsettingProfitDetailId: undefined
-                  };
+                  }
+                }}
+              />
+            </span>
+          </Tooltip>
+        );
 
-                  const employeeName = params.data.fullName || params.data.name || "the selected employee";
-                  await params.onSave(request, employeeName);
-                }
-              }}
-              disabled={hasError || isLoading || isZeroValue}>
-              {isLoading ? <CircularProgress size={20} /> : <SaveOutlined />}
-            </IconButton>
+        const saveButtonElement = (
+          <IconButton
+            onClick={async () => {
+              if (!isReadOnly && params.data.isDetail && params.onSave) {
+                const request: ForfeitureAdjustmentUpdateRequest = {
+                  badgeNumber: params.data.badgeNumber,
+                  profitYear: params.data.profitYear,
+                  forfeitureAmount: currentValue || 0,
+                  classAction: false,
+                  offsettingProfitDetailId: undefined
+                };
+
+                const employeeName = params.data.fullName || params.data.name || "the selected employee";
+                await params.onSave(request, employeeName);
+              }
+            }}
+            disabled={isDisabled}>
+            {isLoading ? <CircularProgress size={20} /> : <SaveOutlined />}
+          </IconButton>
+        );
+
+        return (
+          <div>
+            {checkboxElement}
+            {isReadOnly ? (
+              <Tooltip title={readOnlyTooltip}>
+                <span>{saveButtonElement}</span>
+              </Tooltip>
+            ) : (
+              saveButtonElement
+            )}
           </div>
         );
       }

@@ -1,23 +1,26 @@
-import { Divider, Tab, Tabs } from "@mui/material";
-import { Grid } from "@mui/material";
-import { useState } from "react";
+import { Divider, Grid, Tab, Tabs } from "@mui/material";
+import { useCallback, useState } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
+import StatusDropdownActionNode from "../../../../components/StatusDropdownActionNode";
 import { CAPTIONS } from "../../../../constants";
 import QPAY066TABreakdownParameters from "./QPAY066TABreakdownParameters";
 import StoreContent from "./StoreContent";
 import SummariesContent from "./SummariesContent";
 import TotalsContent from "./TotalsContent";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const QPAY066TA = () => {
   const [tabValue, setTabValue] = useState(0);
-  const [store, setStore] = useState(700);
-
-  const tabs = ["ALL", "STORES", "SUMMARIES", "TOTALS"];
+  const [store, setStore] = useState<number | null>(null);
+  const tabs = ["ALL", "STORE", "TOTALS", "SUMMARIES"];
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
+
+  const handleReset = useCallback(() => {
+    setStore(null);
+    setTabValue(0);
+  }, []);
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
   };
@@ -54,9 +57,9 @@ const QPAY066TA = () => {
       case 1:
         return <StoreContent store={store} />;
       case 2:
-        return <SummariesContent />;
-      case 3:
         return <TotalsContent store={store} />;
+      case 3:
+        return <SummariesContent />;
       default:
         return null;
     }
@@ -71,6 +74,16 @@ const QPAY066TA = () => {
         rowSpacing="24px">
         <Grid width="100%">
           <Divider />
+        </Grid>
+
+        <Grid width="100%">
+          <DSMAccordion title="Filter">
+            <QPAY066TABreakdownParameters
+              activeTab={getActiveTab()}
+              onStoreChange={(newStore) => setStore(newStore)}
+              onReset={handleReset}
+            />
+          </DSMAccordion>
         </Grid>
 
         <Grid width="100%">
@@ -90,16 +103,7 @@ const QPAY066TA = () => {
           </Tabs>
         </Grid>
 
-        <Grid width="100%">
-          <DSMAccordion title="Filter">
-            <QPAY066TABreakdownParameters
-              activeTab={getActiveTab()}
-              onStoreChange={(newStore) => setStore(newStore)}
-            />
-          </DSMAccordion>
-        </Grid>
-
-        <Grid width="100%">{renderContent()}</Grid>
+        {store && <Grid width="100%">{renderContent()}</Grid>}
       </Grid>
     </Page>
   );

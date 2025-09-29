@@ -5,6 +5,7 @@ import { useLazyGetCertificatesReportQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { CertificatePrintRequest } from "reduxstore/types";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
 import { ReprintCertificatesFilterParams } from "./ReprintCertificatesFilterSection";
 import { GetReprintCertificatesGridColumns, ReprintCertificateEmployee } from "./ReprintCertificatesGridColumns";
 
@@ -20,7 +21,11 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
     sortBy: "badgeNumber",
     isSortDescending: false
   });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
+  
+  // Use dynamic grid height utility hook
+  const gridMaxHeight = useDynamicGridHeight();
 
   const { certificates } = useSelector((state: RootState) => state.yearsEnd);
   const [getCertificatesReport, { isFetching }] = useLazyGetCertificatesReportQuery();
@@ -65,6 +70,7 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
       const request = buildApiRequest();
       getCertificatesReport(request);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageNumber, pageSize, sortParams]);
 
   const sortEventHandler = (update: ISortParams) => {
@@ -101,6 +107,7 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (event: any) => {
       const selectedNodes = event.api.getSelectedNodes();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const selectedIds = selectedNodes.map((node: any) => node.data.badge);
       setSelectedRowIds(selectedIds);
       onSelectionChange?.(selectedIds);
@@ -124,12 +131,16 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
         preferenceKey="REPRINT_CERTIFICATES_GRID"
         isLoading={isFetching}
         handleSortChanged={sortEventHandler}
-        maxHeight={400}
+        maxHeight={gridMaxHeight}
         providedOptions={{
           rowData: gridData,
           columnDefs: columnDefs,
-          rowSelection: "multiple",
-          suppressRowClickSelection: true,
+          rowSelection: {
+            mode: "multiRow",
+            checkboxes: true,
+            headerCheckbox: true,
+            enableClickSelection: false
+          },
           onSelectionChanged: onSelectionChanged
         }}
       />

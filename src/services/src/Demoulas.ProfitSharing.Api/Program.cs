@@ -6,8 +6,9 @@ using Demoulas.Common.Logging.Extensions;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
-using Demoulas.ProfitSharing.Common.LogMasking;
 using Demoulas.ProfitSharing.Common.Metrics;
+using Demoulas.ProfitSharing.Common.Telemetry;
+using Microsoft.Extensions.DependencyInjection;
 using Demoulas.ProfitSharing.Data;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
@@ -17,12 +18,15 @@ using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Security.Extensions;
+using Demoulas.ProfitSharing.Services.Serialization;
 using Demoulas.ProfitSharing.Services.Extensions;
+using Demoulas.ProfitSharing.Services.LogMasking; // retains AddProjectServices & other extension methods
 using Demoulas.Security.Extensions;
 using Demoulas.Util.Extensions;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using NSwag.Generation.AspNetCore;
 using Scalar.AspNetCore;
+using Demoulas.ProfitSharing.Services.Middleware;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder();
 
@@ -45,7 +49,10 @@ builder.Configuration.Bind("Logging:Smart", smartConfig);
 FileSystemLogConfig fileSystemLog = new FileSystemLogConfig();
 builder.Configuration.Bind("Logging:FileSystem", fileSystemLog);
 
-smartConfig.MaskingOperators = [new UnformattedSocialSecurityNumberMaskingOperator()];
+smartConfig.MaskingOperators = [
+    new UnformattedSocialSecurityNumberMaskingOperator(),
+    new SensitiveValueMaskingOperator()
+];
 builder.SetDefaultLoggerConfiguration(smartConfig, fileSystemLog);
 
 _ = builder.AddSecurityServices();
@@ -95,6 +102,13 @@ OracleHcmConfig oracleHcmConfig = builder.Configuration.GetSection("OracleHcm").
 
 builder.AddOracleHcmSynchronization(oracleHcmConfig);
 
+// Register masking converter (must be first so it can wrap others)
+builder.Services.ConfigureHttpJsonOptions(o =>
+{
+    // Insert at index 0 to ensure highest precedence
+    o.SerializerOptions.Converters.Insert(0, new MaskingJsonConverterFactory());
+});
+
 builder.AddDatabaseServices((services, factoryRequests) =>
 {
     // Register contexts without immediately resolving the interceptor
@@ -121,9 +135,12 @@ void OktaDocumentSettings(AspNetCoreOpenApiDocumentGeneratorSettings settings)
 }
 
 builder.ConfigureDefaultEndpoints(meterNames: [],
-        activitySourceNames: [OracleHcmActivitySource.Instance.Name])
+    activitySourceNames: [OracleHcmActivitySource.Instance.Name, "Demoulas.ProfitSharing.Endpoints"])
     .AddSwaggerOpenApi(oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings)
     .AddSwaggerOpenApi(version: 2, oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings);
+
+// Add Profit Sharing specific telemetry (extends base Aspire setup)
+builder.Services.AddProfitSharingTelemetry(builder.Configuration);
 
 builder.Services.AddHealthChecks().AddCheck<EnvironmentHealthCheck>("Environment");
 
@@ -149,15 +166,25 @@ GlobalMeter.RegisterObservableGauges();
 GlobalMeter.RecordDeploymentStartup();
 
 app.UseCors();
-app.UseSecurityHeaders();
 app.UseDemographicHeaders();
+
 app.UseSensitiveValueMasking();
+
+if (app.Environment.IsProduction())
+{
+    // Breaks swagger, but swagger isn't available in production/UAT anyway
+    app.UseSecurityHeaders();
+}
+
 app.UseDefaultEndpoints(OktaSettingsAction)
     .UseReDoc(settings =>
     {
         settings.Path = "/redoc";
         settings.DocumentPath = "/swagger/Release 1.0/swagger.json"; // Single document
     });
+
+// Global per-request instrumentation: Activity + log scope
+app.UseEndpointInstrumentation();
 
 OktaSwaggerConfiguration oktaSwaggerConfiguration = OktaSwaggerConfiguration.Empty();
 OktaSettingsAction(oktaSwaggerConfiguration);

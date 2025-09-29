@@ -3,6 +3,11 @@ using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Common.Extensions;
+using Demoulas.ProfitSharing.Common.Telemetry;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
+using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
@@ -10,10 +15,12 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
 public class GetTableMetadataEndpoint : ProfitSharingResponseEndpoint<List<RowCountResult>>
 {
     private readonly ITableMetadataService _frozenService;
+    private readonly ILogger<GetTableMetadataEndpoint> _logger;
 
-    public GetTableMetadataEndpoint(ITableMetadataService frozenService) : base(Navigation.Constants.ItDevOps)
+    public GetTableMetadataEndpoint(ITableMetadataService frozenService, ILogger<GetTableMetadataEndpoint> logger) : base(Navigation.Constants.ItDevOps)
     {
         _frozenService = frozenService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -40,8 +47,38 @@ public class GetTableMetadataEndpoint : ProfitSharingResponseEndpoint<List<RowCo
         Group<ItDevOpsAllUsersGroup>();
     }
 
-    public override Task<List<RowCountResult>> ExecuteAsync(CancellationToken ct)
+    public override async Task<List<RowCountResult>> ExecuteAsync(CancellationToken ct)
     {
-        return _frozenService.GetAllTableRowCountsAsync(ct);
+        using var activity = this.StartEndpointActivity(HttpContext);
+
+        try
+        {
+            this.RecordRequestMetrics(HttpContext, _logger, new { });
+
+            var response = await _frozenService.GetAllTableRowCountsAsync(ct);
+
+            // Business metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "table-metadata-query"),
+                new("endpoint", "GetTableMetadataEndpoint"));
+
+            var tableCount = response?.Count ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(tableCount,
+                new("record_type", "table-metadata"),
+                new("endpoint", "GetTableMetadataEndpoint"));
+
+            _logger.LogInformation("Table metadata query completed, returned {TableCount} tables (correlation: {CorrelationId})",
+                tableCount, HttpContext.TraceIdentifier);
+
+            var safeResponse = response ?? new List<RowCountResult>();
+            this.RecordResponseMetrics(HttpContext, _logger, safeResponse);
+
+            return safeResponse;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 }

@@ -84,6 +84,81 @@ public class NavigationServiceTests : ApiTestBase<Program>
         var success = await new NavigationService(MockDbContextFactory, iAppUser).UpdateNavigation(navigationId: 3, statusId: 1, cancellationToken: CancellationToken.None);
         Assert.True(success);
     }
+
+    [Fact(DisplayName = "PS-1623: IsReadOnly flag should be true for users with read-only roles")]
+    public async Task GetNavigations_WithReadOnlyRole_SetsIsReadOnlyFlag()
+    {
+        // Arrange: Set up user with read-only role (ITDEVOPS)
+        var appUser = new Mock<IAppUser>();
+        appUser.Setup(u => u.GetUserAllRoles(It.IsAny<List<string>?>()))
+            .Returns(new List<string> { Role.ITDEVOPS });
+
+        var svc = new NavigationService(MockDbContextFactory, appUser.Object);
+
+        // Act: Get navigation items
+        var navigation = await svc.GetNavigation(CancellationToken.None);
+
+        // Assert: All navigation items should have IsReadOnly = true
+        Assert.NotNull(navigation);
+        Assert.All(navigation, n => Assert.True(n.IsReadOnly, $"Navigation item '{n.Title}' should have IsReadOnly = true for ITDEVOPS role"));
+        
+        // Also check child items
+        var itemsWithChildren = navigation.Where(n => n.Items?.Any() == true);
+        foreach (var parent in itemsWithChildren)
+        {
+            Assert.All(parent.Items!, child => Assert.True(child.IsReadOnly, $"Child navigation item '{child.Title}' should have IsReadOnly = true for ITDEVOPS role"));
+        }
+    }
+
+    [Fact(DisplayName = "PS-1623: IsReadOnly flag should be false for users without read-only roles")]
+    public async Task GetNavigations_WithoutReadOnlyRole_SetsIsReadOnlyFlagFalse()
+    {
+        // Arrange: Set up user with non-read-only role (FINANCEMANAGER)
+        var appUser = new Mock<IAppUser>();
+        appUser.Setup(u => u.GetUserAllRoles(It.IsAny<List<string>?>()))
+            .Returns(new List<string> { Role.FINANCEMANAGER });
+
+        var svc = new NavigationService(MockDbContextFactory, appUser.Object);
+
+        // Act: Get navigation items
+        var navigation = await svc.GetNavigation(CancellationToken.None);
+
+        // Assert: All navigation items should have IsReadOnly = false
+        Assert.NotNull(navigation);
+        Assert.All(navigation, n => Assert.False(n.IsReadOnly, $"Navigation item '{n.Title}' should have IsReadOnly = false for FINANCEMANAGER role"));
+        
+        // Also check child items
+        var itemsWithChildren = navigation.Where(n => n.Items?.Any() == true);
+        foreach (var parent in itemsWithChildren)
+        {
+            Assert.All(parent.Items!, child => Assert.False(child.IsReadOnly, $"Child navigation item '{child.Title}' should have IsReadOnly = false for FINANCEMANAGER role"));
+        }
+    }
+
+    [Fact(DisplayName = "PS-1623: IsReadOnly flag should be true for users with Auditor role")]
+    public async Task GetNavigations_WithAuditorRole_SetsIsReadOnlyFlag()
+    {
+        // Arrange: Set up user with read-only role (AUDITOR)
+        var appUser = new Mock<IAppUser>();
+        appUser.Setup(u => u.GetUserAllRoles(It.IsAny<List<string>?>()))
+            .Returns(new List<string> { Role.AUDITOR });
+
+        var svc = new NavigationService(MockDbContextFactory, appUser.Object);
+
+        // Act: Get navigation items
+        var navigation = await svc.GetNavigation(CancellationToken.None);
+
+        // Assert: All navigation items should have IsReadOnly = true
+        Assert.NotNull(navigation);
+        Assert.All(navigation, n => Assert.True(n.IsReadOnly, $"Navigation item '{n.Title}' should have IsReadOnly = true for AUDITOR role"));
+        
+        // Also check child items
+        var itemsWithChildren = navigation.Where(n => n.Items?.Any() == true);
+        foreach (var parent in itemsWithChildren)
+        {
+            Assert.All(parent.Items!, child => Assert.True(child.IsReadOnly, $"Child navigation item '{child.Title}' should have IsReadOnly = true for AUDITOR role"));
+        }
+    }
 }
 
 

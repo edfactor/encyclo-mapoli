@@ -59,9 +59,10 @@ const activeInactivePlaceholders: YearEndProfitSharingReportSummaryLineItem[] = 
 
 interface ProfitSummaryProps {
   onPresetParamsChange?: (params: FilterParams | null) => void;
+  frozenData: boolean;
 }
 
-const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) => {
+const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, frozenData }) => {
   const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingSummaryReportQuery();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedLineItem, setSelectedLineItem] = useState<string | null>(null);
@@ -142,7 +143,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) =
   useEffect(() => {
     if (hasToken) {
       trigger({
-        useFrozenData: true,
+        useFrozenData: frozenData,
         profitYear: profitYear,
         badgeNumber: null
       });

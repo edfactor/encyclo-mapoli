@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useUpdateForfeitureAdjustmentMutation } from "reduxstore/api/YearsEndApi";
 import { ForfeitureAdjustmentUpdateRequest, SuggestedForfeitResponse } from "reduxstore/types";
 import { SmartModal } from "smart-ui-library";
+import { ServiceErrorResponse } from "../../types/errors/errors";
 
 interface AddForfeitureModalProps {
   open: boolean;
@@ -12,10 +13,10 @@ interface AddForfeitureModalProps {
   suggestedForfeitResponse?: SuggestedForfeitResponse | null;
 }
 
-const handleResponseError = (error: any) => {
+const handleResponseError = (error: ServiceErrorResponse) => {
   const title = error?.data?.title;
 
-  if (typeof title === "string") {
+  if (title) {
     if (title.includes("Employee with badge number")) {
       alert("Badge Number not found");
     } else if (title.includes("Invalid badge number")) {
@@ -36,6 +37,7 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
   const [formData, setFormData] = useState({
     badgeNumber: 0,
     forfeitureAmount: 0,
+    suggestedForfeitAmount: null,
     classAction: false
   });
   const [updateForfeiture, { isLoading }] = useUpdateForfeitureAdjustmentMutation();
@@ -51,6 +53,7 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
       setFormData((prev) => ({
         ...prev,
         badgeNumber: suggestedForfeitResponse.badgeNumber,
+        suggestedForfeitAmount: suggestedForfeitResponse.suggestedForfeitAmount,
         forfeitureAmount: suggestedForfeitResponse.suggestedForfeitAmount
       }));
     }
@@ -107,9 +110,10 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
 
       // Close the modal
       onClose();
-    } catch (error) {
-      // Sometimes 500 errors go down here
-      handleResponseError(error);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (_error: any) {
+      // This needs to be called with a blank set of properties to satisfy the type
+      handleResponseError({} as ServiceErrorResponse);
     }
   };
 
@@ -138,6 +142,7 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
       <Grid
         container
         spacing={2}>
+        <Grid size={{ xs: 12 }}>Suggested Forfeiture Amount: {formData.suggestedForfeitAmount}</Grid>
         <Grid size={{ xs: 12 }}>
           <FormControlLabel
             control={
@@ -151,12 +156,14 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
             label="Class Action"
           />
         </Grid>
-        <Grid size={{ xs: 6 }}>
+        <Grid size={{ xs: 12 }}>
           <Typography
             variant="body2"
             gutterBottom>
-            Forfeiture Amount
+            Forfeiture Amount (A negative value will be treated as an unforfeiture)
           </Typography>
+        </Grid>
+        <Grid size={{ xs: 2 }}>
           <TextField
             name="forfeitureAmount"
             value={formData.forfeitureAmount}

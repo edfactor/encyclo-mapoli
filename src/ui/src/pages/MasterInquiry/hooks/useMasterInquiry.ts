@@ -150,9 +150,18 @@ const useMasterInquiry = () => {
             pagination: params.pagination
           };
 
-          const alertMessage = isSimpleSearch(searchFormData)
-            ? MASTER_INQUIRY_MESSAGES.MEMBER_NOT_FOUND
-            : MASTER_INQUIRY_MESSAGES.NO_RESULTS_FOUND;
+          const isSimple = isSimpleSearch(searchFormData);
+          const isBeneficiarySearch = masterInquiryRequestParams?.memberType === "beneficiaries";
+          
+          let alertMessage;
+          if (isSimple && isBeneficiarySearch) {
+            alertMessage = MASTER_INQUIRY_MESSAGES.BENEFICIARY_NOT_FOUND;
+          } else if (isSimple) {
+            alertMessage = MASTER_INQUIRY_MESSAGES.MEMBER_NOT_FOUND;
+          } else {
+            alertMessage = MASTER_INQUIRY_MESSAGES.NO_RESULTS_FOUND;
+          }
+          
           addAlert(alertMessage);
         }
       } catch (error) {
@@ -190,7 +199,7 @@ const useMasterInquiry = () => {
 
           if (details.missives && missives) {
             const localMissives: MissiveResponse[] = details.missives
-              .map((id: number) => missives.find((m: MissiveResponse) => m.id === id))
+              .map((id: number) => missives.items.find((m: MissiveResponse) => m.id === id))
               .filter(Boolean) as MissiveResponse[];
 
             if (localMissives.length > 0) {

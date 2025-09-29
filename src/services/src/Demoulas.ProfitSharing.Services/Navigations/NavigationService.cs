@@ -3,17 +3,21 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Navigations;
+
 public class NavigationService : INavigationService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IAppUser _appUser;
+    private readonly ILogger<NavigationService>? _logger;
 
-    public NavigationService(IProfitSharingDataContextFactory dataContextFactory, IAppUser appUser)
+    public NavigationService(IProfitSharingDataContextFactory dataContextFactory, IAppUser appUser, ILogger<NavigationService>? logger = null)
     {
         _dataContextFactory = dataContextFactory;
         _appUser = appUser;
+        _logger = logger;
     }
 
 
@@ -39,26 +43,78 @@ public class NavigationService : INavigationService
             return query.ToListAsync(cancellationToken);
         });
 
-        var lookup = flatList.ToLookup(x => x.ParentId);
-        List<NavigationDto> BuildTree(short? parentId)
+        // Check if the current user has any read-only roles based on database configuration
+        var userRoles = _appUser.GetUserAllRoles()?.Where(r => !string.IsNullOrWhiteSpace(r)).ToList() ?? new List<string>();
+        var userHasReadOnlyRole = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
+            var readOnlyRoleNames = await context.NavigationRoles
+                .Where(nr => nr.IsReadOnly)
+                .Select(nr => nr.Name.ToUpper())
+                .ToListAsync(cancellationToken);
+
+            return userRoles.Any(userRole =>
+                readOnlyRoleNames.Contains(userRole.ToUpper()));
+        });
+
+        var lookup = flatList.ToLookup(x => x.ParentId);
+        // helper to get raw required roles (uppercase) from entity
+        static List<string> EntityRolesToUpper(ICollection<Data.Entities.Navigations.NavigationRole>? roles)
+        {
+            return roles == null
+                ? new List<string>()
+                : roles.Where(r => !string.IsNullOrWhiteSpace(r.Name)).Select(r => r.Name.ToUpper()).ToList();
+        }
+        // Build tree while enforcing permission inheritance and that child roles are never broader than parent.
+        List<NavigationDto> BuildTree(short? parentId, List<string>? parentEffectiveRoles = null)
+        {
+            parentEffectiveRoles ??= new List<string>();
+
             return lookup[parentId]
-                .Select(x => new NavigationDto
+                .Select(x =>
                 {
-                    Id = x.Id,
-                    Icon = x.Icon,
-                    OrderNumber = x.OrderNumber, 
-                    ParentId = x.ParentId,
-                    StatusId = x.StatusId,
-                    StatusName = x.NavigationStatus?.Name,
-                    Title = x.Title,
-                    Url = x.Url,
-                    SubTitle = x.SubTitle,
-                    Items = BuildTree(x.Id),
-                    Disabled = x.Disabled,
-                    RequiredRoles = x.RequiredRoles?.Where(r=> roleNamesUpper.Contains(r.Name.ToUpper())).Select(m => m.Name).ToList(),
-                    // Project prerequisite navigations that are currently completed.
-                    PrerequisiteNavigations = x.PrerequisiteNavigations?
+                    // compute entity roles (upper-case)
+                    var entityRolesUpper = EntityRolesToUpper(x.RequiredRoles);
+
+                    // determine effective roles: if entity has none, inherit from parent; otherwise intersect with parent (if parent has roles)
+                    List<string> effectiveRolesUpper;
+                    if (entityRolesUpper == null || entityRolesUpper.Count == 0)
+                    {
+                        effectiveRolesUpper = new List<string>(parentEffectiveRoles);
+                    }
+                    else if (parentEffectiveRoles == null || parentEffectiveRoles.Count == 0)
+                    {
+                        // top-level or parent has no roles -> child's specified roles are allowed
+                        effectiveRolesUpper = entityRolesUpper;
+                    }
+                    else
+                    {
+                        // intersect child with parent so child cannot have broader permissions
+                        var intersection = entityRolesUpper.Intersect(parentEffectiveRoles).ToList();
+                        if (intersection.Count != entityRolesUpper.Count)
+                        {
+                            // log a warning that child's specified roles were broader than parent; note intersection applied
+                            try
+                            {
+                                _logger?.LogWarning("Navigation id {NavigationId} has RequiredRoles that are broader than its parent; applying intersection of specified roles and parent roles.", x.Id);
+                            }
+                            catch
+                            {
+                                // ignore logger failures
+                            }
+                        }
+                        effectiveRolesUpper = intersection;
+                    }
+
+                    // Map required role names back to original casing from entity but only include those that are in effectiveRolesUpper and in current user's roles
+                    var requiredRolesForDto = x.RequiredRoles == null
+                        ? (effectiveRolesUpper?.ToList() ?? new List<string>())
+                        : x.RequiredRoles.Where(r => !string.IsNullOrWhiteSpace(r.Name) && effectiveRolesUpper.Contains(r.Name.ToUpper())).Select(r => r.Name).ToList();
+
+                    // Items (children) inherit effectiveRolesUpper as their parent roles
+                    var items = BuildTree(x.Id, effectiveRolesUpper);
+
+                    // Map prerequisite navigations (keep simple mapping, but enforce that their RequiredRoles are filtered by current user's roles)
+                    var prereqs = x.PrerequisiteNavigations?
                         .Select(p => new NavigationDto
                         {
                             Id = p.Id,
@@ -73,9 +129,34 @@ public class NavigationService : INavigationService
                             RequiredRoles = p.RequiredRoles?.Where(r => roleNamesUpper.Contains(r.Name.ToUpper())).Select(m => m.Name).ToList(),
                             Disabled = p.Disabled,
                             Items = null,
-                            PrerequisiteNavigations = new List<NavigationDto>()
+                            PrerequisiteNavigations = new List<NavigationDto>(),
+                            // Prefer the DB-backed flag when present; otherwise fall back to Url heuristic.
+                            IsNavigable = p.IsNavigable ?? !string.IsNullOrWhiteSpace(p.Url),
+                            IsReadOnly = userHasReadOnlyRole
                         })
-                        .ToList() ?? new List<NavigationDto>()
+                        .ToList() ?? new List<NavigationDto>();
+
+                    return new NavigationDto
+                    {
+                        Id = x.Id,
+                        Icon = x.Icon,
+                        OrderNumber = x.OrderNumber,
+                        ParentId = x.ParentId,
+                        StatusId = x.StatusId,
+                        StatusName = x.NavigationStatus?.Name,
+                        Title = x.Title,
+                        Url = x.Url,
+                        SubTitle = x.SubTitle,
+                        Items = items,
+                        Disabled = x.Disabled,
+                        RequiredRoles = (requiredRolesForDto?.Where(r => roleNamesUpper.Contains(r.ToUpper())).ToList()) ?? new List<string>(),
+                        // Project prerequisite navigations that are currently completed.
+                        PrerequisiteNavigations = prereqs,
+                        // Prefer the DB-backed IsNavigable when present; otherwise fall back to Url-derived logic
+                        // Prefer the DB-backed flag when present; otherwise fall back to Url heuristic.
+                        IsNavigable = x.IsNavigable ?? !string.IsNullOrWhiteSpace(x.Url),
+                        IsReadOnly = userHasReadOnlyRole
+                    };
                 })
                 .ToList();
         }

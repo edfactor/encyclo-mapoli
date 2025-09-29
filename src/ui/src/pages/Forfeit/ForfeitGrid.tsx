@@ -1,11 +1,12 @@
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetForfeituresAndPointsQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
+import { DSMGrid, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import ReportSummary from "../../components/ReportSummary";
 import { CAPTIONS } from "../../constants";
+import { useGridPagination } from "../../hooks/useGridPagination";
 import { GetProfitShareForfeitColumns } from "./ForfeitGridColumns";
 
 interface ForfeitGridProps {
@@ -21,17 +22,33 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
   pageNumberReset,
   setPageNumberReset
 }) => {
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
-    isSortDescending: false
-  });
   const { forfeituresAndPoints } = useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearch, { isFetching }] = useLazyGetForfeituresAndPointsQuery();
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
-
   const columnDefs = useMemo(() => GetProfitShareForfeitColumns(), []);
+
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "badgeNumber",
+    initialSortDescending: false,
+    onPaginationChange: useCallback(async (pageNum: number, pageSz: number, sortPrms: any) => {
+      if (initialSearchLoaded) {
+        await triggerSearch(
+          {
+            profitYear: fiscalCloseProfitYear,
+            useFrozenData: true,
+            pagination: {
+              skip: pageNum * pageSz,
+              take: pageSz,
+              sortBy: sortPrms.sortBy,
+              isSortDescending: sortPrms.isSortDescending
+            }
+          },
+          false
+        ).unwrap();
+      }
+    }, [initialSearchLoaded, fiscalCloseProfitYear, triggerSearch])
+  });
 
   const onSearch = useCallback(async () => {
     await triggerSearch(
@@ -53,25 +70,30 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
     if (initialSearchLoaded) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
+  }, [initialSearchLoaded, onSearch]);
 
   useEffect(() => {
     if (pageNumberReset) {
-      setPageNumber(0);
+      resetPagination();
       setPageNumberReset(false);
     }
-  }, [pageNumberReset, setPageNumberReset]);
+  }, [pageNumberReset, setPageNumberReset, resetPagination]);
 
-  const sortEventHandler = (update: ISortParams) => setSortParams(update);
+  const sortEventHandler = (update: any) => handleSortChange(update);
 
-  const totalForfeitures = forfeituresAndPoints?.totalForfeitures ?? 0;
-  const totalForfeitPoints = forfeituresAndPoints?.totalForfeitPoints ?? 0;
-  const totalEarningPoints = forfeituresAndPoints?.totalEarningPoints ?? 0;
+  // Some API responses may return numeric totals as strings; coerce safely before formatting.
+  const safeNumber = (val: unknown) => {
+    const n = typeof val === "number" ? val : parseFloat(val as string);
+    return Number.isFinite(n) ? n : 0;
+  };
+  const totalForfeituresRaw = safeNumber(forfeituresAndPoints?.totalForfeitures);
+  const totalForfeitPoints = safeNumber(forfeituresAndPoints?.totalForfeitPoints);
+  const totalEarningPoints = safeNumber(forfeituresAndPoints?.totalEarningPoints);
 
   const totalsRow = {
-    forfeitures: totalForfeitures.toFixed(2) ?? "0",
-    contForfeitPoints: totalForfeitPoints ?? 0,
-    earningPoints: totalEarningPoints ?? 0
+    forfeitures: totalForfeituresRaw.toFixed(2),
+    contForfeitPoints: totalForfeitPoints,
+    earningPoints: totalEarningPoints
   };
 
   return (
@@ -112,13 +134,12 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
             <Pagination
               pageNumber={pageNumber}
               setPageNumber={(value: number) => {
-                setPageNumber(value - 1);
+                handlePaginationChange(value - 1, pageSize);
                 setInitialSearchLoaded(true);
               }}
               pageSize={pageSize}
               setPageSize={(value: number) => {
-                setPageSize(value);
-                setPageNumber(1);
+                handlePaginationChange(0, value);
                 setInitialSearchLoaded(true);
               }}
               recordCount={forfeituresAndPoints.response.total}

@@ -4,23 +4,29 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
 
-public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCsvBase<SortedPaginationRequestDto, DemographicBadgesNotInPayProfitResponse,
+public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCsvBase<ProfitYearRequest, DemographicBadgesNotInPayProfitResponse,
     DemographicBadgesNotInPayProfitEndpoint.DemographicBadgesNotInPayProfitResponseMap>
 {
     private readonly ICleanupReportService _cleanupReportService;
+    private readonly ILogger<DemographicBadgesNotInPayProfitEndpoint> _logger;
 
-    public DemographicBadgesNotInPayProfitEndpoint(ICleanupReportService cleanupReportService)
+    public DemographicBadgesNotInPayProfitEndpoint(ICleanupReportService cleanupReportService, ILogger<DemographicBadgesNotInPayProfitEndpoint> logger)
         : base(Navigation.Constants.DemographicBadgesNotInPayProfit)
     {
         _cleanupReportService = cleanupReportService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -87,9 +93,53 @@ public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCsvBase<Sorte
 
     public override string ReportFileName => "DEMOGRAPHIC BADGES NOT IN PAYPROFIT";
 
-    public override Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetResponse(SortedPaginationRequestDto req, CancellationToken ct)
+    public override async Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return _cleanupReportService.GetDemographicBadgesNotInPayProfitAsync(req, ct);
+        using var activity = this.StartEndpointActivity(HttpContext);
+
+        try
+        {
+            this.RecordRequestMetrics(HttpContext, _logger, req);
+
+            var result = await _cleanupReportService.GetDemographicBadgesNotInPayProfitAsync(req, ct);
+
+            // Record year-end cleanup report metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "year-end-cleanup-demographic-badges"),
+                new("endpoint", "DemographicBadgesNotInPayProfitEndpoint"),
+                new("report_type", "cleanup"),
+                new("cleanup_type", "demographic-badges-not-in-payprofit"));
+
+            var resultCount = result?.Response?.Results?.Count() ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                new("record_type", "demographic-badges-cleanup"),
+                new("endpoint", "DemographicBadgesNotInPayProfitEndpoint"));
+
+            _logger.LogInformation("Year-end cleanup report for demographic badges not in payprofit generated, returned {Count} records (correlation: {CorrelationId})",
+                resultCount, HttpContext.TraceIdentifier);
+
+            if (result != null)
+            {
+                this.RecordResponseMetrics(HttpContext, _logger, result);
+                return result;
+            }
+
+            var emptyResult = new ReportResponseBase<DemographicBadgesNotInPayProfitResponse>
+            {
+                ReportName = ReportFileName,
+                StartDate = DateOnly.FromDateTime(DateTime.Today),
+                EndDate = DateOnly.FromDateTime(DateTime.Today),
+                Response = new() { Results = [] }
+            };
+
+            this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
+            return emptyResult;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 
     public sealed class DemographicBadgesNotInPayProfitResponseMap : ClassMap<DemographicBadgesNotInPayProfitResponse>

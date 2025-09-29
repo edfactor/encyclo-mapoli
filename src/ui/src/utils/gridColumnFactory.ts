@@ -1,6 +1,5 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { formatNumberWithComma, numberToCurrency, yyyyMMDDToMMDDYYYY } from "smart-ui-library";
-import { GRID_COLUMN_WIDTHS } from "../constants";
 import {
   AlignableColumnOptions,
   BadgeColumnOptions,
@@ -17,17 +16,71 @@ import {
   PSNColumnOptions,
   SSNColumnOptions,
   StateColumnOptions,
+  StreetAddressColumnOptions,
   TaxCodeColumnOptions,
   YesOrNoColumnOptions
 } from "./columnFactoryTypes";
 import { viewBadgeLinkRenderer } from "./masterInquiryLink";
+
+export const createAddressColumn = (options: StreetAddressColumnOptions = {}): ColDef => {
+  const {
+    headerName = "Address",
+    field = "address",
+    colId = field,
+    field1,
+    field2,
+    minWidth = 200,
+    maxWidth,
+    alignment = "left",
+    sortable = true,
+    resizable = true,
+    valueGetter
+  } = options;
+
+  const alignmentClass = alignment === "center" ? "center-align" : "left-align";
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    headerClass: alignmentClass,
+    cellClass: alignmentClass,
+    resizable,
+    sortable
+  };
+
+  if (valueGetter) {
+    column.valueGetter = valueGetter;
+  } else {
+    if (field1 && field2) {
+      column.valueGetter = (params) => {
+        const address1 = params.data.address[field1] || "";
+        const address2 = params.data.address[field2] || "";
+        return address2 && address2.trim() ? `${address1}, ${address2}` : address1;
+      };
+    } else {
+      column.valueGetter = (params) => {
+        const address1 = params.data.address || "";
+        const address2 = params.data.address2 || "";
+        return address2 && address2.trim() ? `${address1}, ${address2}` : address1;
+      };
+    }
+  }
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  return column;
+};
 
 export const createStateColumn = (options: StateColumnOptions = {}): ColDef => {
   const {
     headerName = "State",
     field = "state",
     colId = field,
-    minWidth = 100,
+    minWidth = 80,
     maxWidth,
     alignment = "left",
     sortable = true,
@@ -145,7 +198,7 @@ export const createPercentageColumn = (options: PercentageColumnOptions): ColDef
 export const createSSNColumn = (options: SSNColumnOptions = {}): ColDef => {
   const {
     headerName = "SSN",
-    minWidth = GRID_COLUMN_WIDTHS.SSN,
+    minWidth = 80,
     maxWidth,
     alignment = "center",
     sortable = true,
@@ -213,7 +266,9 @@ export const createBadgeColumn = (options: BadgeColumnOptions = {}): ColDef => {
       // We could get a PSN as a string
       const dataValue: number = field === "badgeNumber" ? params.data.badgeNumber : Number(params.data[field]);
       // If dataValue is NaN just return nothing
+
       if (isNaN(dataValue)) return;
+      if (dataValue === 0) return;
       if (psnSuffix && params.data.psnSuffix) {
         return viewBadgeLinkRenderer(params.data.badgeNumber, params.data.psnSuffix, navigateFunction);
       }
@@ -230,12 +285,13 @@ export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => 
     headerName,
     field,
     colId = field,
-    minWidth = 120,
+    minWidth = 80,
     maxWidth,
     sortable = true,
     resizable = true,
     valueFormatter = (params) => numberToCurrency(params.value),
-    valueGetter
+    valueGetter,
+    cellStyle
   } = options;
 
   const column: ColDef = {
@@ -259,6 +315,11 @@ export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => 
 
   if (valueGetter) {
     column.valueGetter = valueGetter;
+  }
+
+  if (cellStyle) {
+    // Ensure cellStyle is a plain object or function returning a plain object with string keys/values
+    column.cellStyle = cellStyle as any;
   }
 
   return column;
@@ -297,12 +358,30 @@ export const createDateColumn = (options: DateColumnOptions): ColDef => {
     headerName,
     field,
     colId = field,
-    minWidth = 120,
+    minWidth = 80,
     maxWidth,
     alignment = "center",
     sortable = true,
     resizable = true,
-    valueFormatter = (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
+    valueFormatter = (params) => {
+      const value = params.value;
+      // Only format if value is a valid date string (yyyyMMdd or yyyy-MM-dd)
+      if (!value) return "";
+      // Accepts both string and Date
+      if (typeof value === "string" && /^\d{8}$/.test(value)) {
+        return yyyyMMDDToMMDDYYYY(value);
+      }
+      if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        // Convert to yyyymmdd and format
+        const compact = value.replace(/-/g, "");
+        return yyyyMMDDToMMDDYYYY(compact);
+      }
+      if (value instanceof Date && !isNaN(value.getTime())) {
+        // Format as MM/DD/YYYY
+        return value.toLocaleDateString("en-US");
+      }
+      return "";
+    }
   } = options;
 
   const alignmentClass = alignment === "center" ? "center-align" : "left-align";
@@ -717,7 +796,7 @@ export const createCityColumn = (options: CityColumnOptions = {}): ColDef => {
     minWidth = 120,
     maxWidth,
     alignment = "left",
-    sortable = true,
+    sortable = false,
     resizable = true,
     nestedPath,
     valueGetter,
@@ -767,15 +846,15 @@ export const createTaxCodeColumn = (options: TaxCodeColumnOptions = {}): ColDef 
     headerName = "Tax Code",
     field = "taxCodeId",
     colId = field,
-    minWidth = 100,
+    minWidth = 60,
     maxWidth,
     alignment = "left",
     sortable = true,
     resizable = true,
     hideZeroValues = true,
     showBrackets = true,
-    idField = "taxCodeId",
-    nameField = "taxCodeName",
+    idField,
+    nameField,
     valueFormatter
   } = options;
 
@@ -795,24 +874,26 @@ export const createTaxCodeColumn = (options: TaxCodeColumnOptions = {}): ColDef 
   if (maxWidth) {
     column.maxWidth = maxWidth;
   }
+  // If we do not have these three, it's just a default render of the string
+  if ((idField && nameField) || valueFormatter) {
+    if (valueFormatter) {
+      column.valueFormatter = valueFormatter;
+    } else {
+      column.valueFormatter = (params) => {
+        const id = params.data?.["taxCodeId"];
+        const name = params.data?.["taxCodeName"];
 
-  if (valueFormatter) {
-    column.valueFormatter = valueFormatter;
-  } else {
-    column.valueFormatter = (params) => {
-      const id = params.data?.[idField];
-      const name = params.data?.[nameField];
+        if (hideZeroValues && (id == 0 || id == null)) {
+          return "";
+        }
 
-      if (hideZeroValues && (id == 0 || id == null)) {
-        return "";
-      }
-
-      if (showBrackets) {
-        return `[${id}] ${name || ""}`;
-      } else {
-        return `${id} - ${name || ""}`;
-      }
-    };
+        if (showBrackets) {
+          return `[${id}] ${name || ""}`;
+        } else {
+          return `${id} - ${name || ""}`;
+        }
+      };
+    }
   }
 
   return column;
@@ -823,7 +904,7 @@ export const createPhoneColumn = (options: FormattableColumnOptions = {}): ColDe
     headerName = "Phone Number",
     field = "phoneNumber",
     colId = field,
-    minWidth = 130,
+    minWidth = 80,
     maxWidth,
     alignment = "center",
     sortable = true,
@@ -863,7 +944,7 @@ export const createPSNColumn = (options: PSNColumnOptions = {}): ColDef => {
     headerName = "PSN",
     field = "psn",
     colId = field,
-    minWidth = 120,
+    minWidth = 80,
     maxWidth,
     alignment = "center",
     sortable = true,

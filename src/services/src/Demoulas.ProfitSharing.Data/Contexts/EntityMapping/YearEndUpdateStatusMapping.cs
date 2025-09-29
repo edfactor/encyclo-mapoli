@@ -92,6 +92,9 @@ internal sealed class YearEndUpdateStatusMapping : ModifiedBaseMap<YearEndUpdate
             .HasColumnName("ADJUST_EARNINGS_SECONDARY_AMOUNT")
             .HasPrecision(5, 2); // Usually only pennies
         
+        _ = builder.Property(e => e.IsYearEndCompleted)
+            .HasColumnName("IS_YEAR_END_COMPLETED");
+        
         base.Configure(builder);
     }
 }

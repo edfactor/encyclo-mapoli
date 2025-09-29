@@ -28,7 +28,8 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "profitCodeId",
       colId: "profitCodeId",
       minWidth: 100,
-      type: "leftAligned",
+      headerClass: "left-align",
+      cellClass: "left-align",
       resizable: true,
       tooltipValueGetter: (params) => {
         return params.data?.profitCodeName;
@@ -42,23 +43,19 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
     },
     createCurrencyColumn({
       headerName: "Contribution",
-      field: "contribution",
-      minWidth: 120
+      field: "contribution"
     }),
     createCurrencyColumn({
       headerName: "Earnings",
-      field: "earnings",
-      minWidth: 120
+      field: "earnings"
     }),
     createCurrencyColumn({
       headerName: "Forfeiture",
-      field: "forfeiture",
-      minWidth: 120
+      field: "forfeiture"
     }),
     createCurrencyColumn({
       headerName: "Payment",
-      field: "payment",
-      minWidth: 120
+      field: "payment"
     }),
     {
       headerName: "Month/Year",
@@ -66,7 +63,8 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "monthToDate",
       colId: "monthToDate",
       minWidth: 100,
-      type: "rightAligned",
+      headerClass: "right-align",
+      cellClass: "right-align",
       sortable: false,
       resizable: true,
       valueFormatter: (params) => {
@@ -110,7 +108,8 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "commentTypeName",
       colId: "commentTypeName",
       minWidth: 100,
-      type: "leftAligned",
+      headerClass: "left-align",
+      cellClass: "left-align",
       resizable: true
     },
     {
@@ -136,10 +135,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       useWords: true
     }),
     createStatusColumn({
-      field: "employmentStatus",
-      minWidth: 60,
-      alignment: "right",
-      sortable: false
+      field: "employmentStatus"
     })
   ];
 };

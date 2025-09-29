@@ -10,7 +10,9 @@ import {
 
 export const GetMasterInquiryMemberGridColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({}),
+    createBadgeColumn({
+      psnSuffix: true
+    }),
     createNameColumn({ field: "fullName" }),
     createSSNColumn({ maxWidth: 250 }),
     { field: "address", headerName: "Street", maxWidth: 400 },

@@ -19,6 +19,7 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
         _ = builder.Property(x => x.StatusId).HasColumnName("STATUS_ID");
         _ = builder.Property(x => x.ParentId).HasColumnName("PARENT_ID");
         _ = builder.Property(x => x.Disabled).HasColumnName("DISABLED");
+        _ = builder.Property(x => x.IsNavigable).HasColumnName("IS_NAVIGABLE");
 
         builder.HasOne(m => m.NavigationStatus)
             .WithMany(x => x.Navigations)
@@ -533,6 +534,18 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 Url = "recently-terminated",
                 StatusId = 1,
                 OrderNumber = 18,
+                Icon = "",
+                Disabled = false
+            },
+            new Navigation
+            {
+                Id = Navigation.Constants.TerminatedLetters,
+                ParentId = Navigation.Constants.FiscalClose,
+                Title = "Terminated Letters",
+                SubTitle = "QPROF003-1",
+                Url = "terminated-letters",
+                StatusId = 1,
+                OrderNumber = 19,
                 Icon = "",
                 Disabled = false
             },

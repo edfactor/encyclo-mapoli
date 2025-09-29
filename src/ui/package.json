@@ -12,6 +12,9 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "prettier": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json}\"",
     "test": "vitest --coverage",
+    "e2e": "playwright test",
+    "e2e:watch": "playwright test --watch",
+    "e2e:ui": "playwright test --ui",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -23,7 +26,7 @@
     "@mui/material": "^7.2.0",
     "@mui/system": "5.17.1",
     "@mui/x-date-pickers": "7.28.3",
-    "@okta/okta-auth-js": "^7.13.1",
+    "@okta/okta-auth-js": "^7.14.0",
     "@okta/okta-react": "6.9.0",
     "@reduxjs/toolkit": "2.6.1",
     "@testing-library/jest-dom": "6.6.3",
@@ -31,7 +34,7 @@
     "@testing-library/user-event": "~14.5.2",
     "@types/jest": "~29.5.12",
     "@types/lodash": "4.17.16",
-    "@types/node": "~20.12.12",
+    "@types/node": "^20.19.0",
     "@types/react": "19.1.0",
     "@types/react-datepicker": "6.2.0",
     "@types/react-dom": "19.1.2",
@@ -49,17 +52,19 @@
     "react-dom": "19.1.0",
     "react-error-boundary": "4.1.2",
     "react-hook-form": "7.55.0",
+    "react-markdown": "^10.1.0",
     "react-redux": "9.2.0",
     "react-router": "7.5.2",
     "react-router-bootstrap": "0.26.3",
     "react-router-dom": "7.5.2",
     "redux": "5.0.1",
-    "smart-ui-library": "^5.4.3",
+    "smart-ui-library": "^5.6.2",
     "typescript": "5.8.3",
     "web-vitals": "~4.0.1",
     "yup": "~1.4.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.26.10",
     "@eslint/compat": "1.2.8",
     "@eslint/eslintrc": "3.3.1",
     "@eslint/js": "9.24.0",
@@ -68,7 +73,7 @@
     "@types/react-dom": "19.1.2",
     "@typescript-eslint/eslint-plugin": "8.29.1",
     "@typescript-eslint/parser": "8.29.1",
-    "@vitejs/plugin-react": "4.3.4",
+    "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "10.4.21",
     "eslint": "^9.34.0",
     "eslint-config-prettier": "10.1.1",
@@ -82,10 +87,10 @@
     "sass": "1.86.3",
     "tailwindcss": "3.4.17",
     "typescript": "5.8.3",
-    "vite": "^6.3.5",
+    "vite": "^7.1.5",
     "vite-plugin-compression": "0.5.1"
   },
   "volta": {
-    "node": "20.4.0"
+    "node": "22.16.0"
   }
 }

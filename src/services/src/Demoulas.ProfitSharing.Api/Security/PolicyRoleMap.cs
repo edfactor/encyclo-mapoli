@@ -26,6 +26,9 @@ public static class PolicyRoleMap
 
         // IT roles can freeze and add demographics to support data integrity and operational needs.
         [Policy.CanFreezeDemographics] = [Role.ITDEVOPS, Role.ITOPERATIONS],
+
+        // Distribution views are read-only; allow Finance, Clerks, Admin, and Auditor.
+        [Policy.CanViewDistributions] = [Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR, Role.AUDITOR],
     };
 
     public static string[] GetRoles(string policyName) => Map.TryGetValue(policyName, out var roles) ? roles : [];

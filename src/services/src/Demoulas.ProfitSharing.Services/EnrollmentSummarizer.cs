@@ -11,7 +11,7 @@ internal enum VestingStateType
 }
 
 /*
- * Essentially the Enrollment flag is a summarizer of profit detail rows.   It tells you "at a glance" if an employee
+ * Essentially, the Enrollment flag (enrollment_id / py_ps_enrolled) is a summarizer of profit detail rows.   It tells you "at a glance" if an employee
  * is new, or is returning, or has forfeited and/or left the plan.
  *
  * This logic is extracted from PAY450.cbl

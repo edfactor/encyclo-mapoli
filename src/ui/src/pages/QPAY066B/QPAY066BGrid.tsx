@@ -1,34 +1,43 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Typography, Box, CircularProgress } from "@mui/material";
-import { DSMGrid, ISortParams, Pagination, numberToCurrency } from "smart-ui-library";
-import { useNavigate, Path } from "react-router-dom";
+import { Box, CircularProgress, Typography } from "@mui/material";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
+import { Path, useNavigate } from "react-router-dom";
+import { DSMGrid, Pagination, numberToCurrency } from "smart-ui-library";
+import { TotalsGrid } from "../../components/TotalsGrid/TotalsGrid";
+import { useGridPagination } from "../../hooks/useGridPagination";
+import { useLazyGetQPAY066BTerminatedWithVestedBalanceQuery } from "../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../reduxstore/store";
-import { QPAY066BTerminatedEmployee } from "../../reduxstore/types";
 import { QPAY066BFilterParams } from "./QPAY066BFilterSection";
 import { GetQPAY066BGridColumns } from "./QPAY066BGridColumns";
-import { useLazyGetQPAY066BTerminatedWithVestedBalanceQuery } from "../../reduxstore/api/YearsEndApi";
-import { TotalsGrid } from "../../components/TotalsGrid/TotalsGrid";
 
 interface QPAY066BGridProps {
   filterParams: QPAY066BFilterParams;
   onLoadingChange?: (isLoading: boolean) => void;
 }
 
-const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ filterParams, onLoadingChange }) => {
+const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ _filterParams, onLoadingChange }) => {
   const navigate = useNavigate();
-
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
-    isSortDescending: false
-  });
-
   const hasToken = useSelector((state: RootState) => !!state.security.token);
-
   const [getQPAY066BData, { data: qpay066bData, isFetching }] = useLazyGetQPAY066BTerminatedWithVestedBalanceQuery();
+
+  const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "badgeNumber",
+    initialSortDescending: false,
+    onPaginationChange: useCallback((pageNum: number, pageSz: number, sortPrms: any) => {
+      if (hasToken) {
+        getQPAY066BData({
+          profitYear: 2024,
+          pagination: {
+            take: pageSz,
+            skip: pageNum * pageSz,
+            sortBy: sortPrms.sortBy,
+            isSortDescending: sortPrms.isSortDescending
+          }
+        });
+      }
+    }, [hasToken, getQPAY066BData])
+  });
 
   useEffect(() => {
     onLoadingChange?.(isFetching);
@@ -41,12 +50,12 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ filterParams, onLoadingChan
         pagination: {
           take: pageSize,
           skip: pageNumber * pageSize,
-          sortBy: sortParams.sortBy,
-          isSortDescending: sortParams.isSortDescending
+          sortBy: "badgeNumber",
+          isSortDescending: false
         }
       });
     }
-  }, [hasToken, pageNumber, pageSize, sortParams, getQPAY066BData]);
+  }, [hasToken, getQPAY066BData]);
 
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {
@@ -55,8 +64,8 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ filterParams, onLoadingChan
     [navigate]
   );
 
-  const sortEventHandler = (update: ISortParams) => {
-    setSortParams(update);
+  const sortEventHandler = (update: any) => {
+    handleSortChange(update);
   };
 
   const columnDefs = useMemo(() => GetQPAY066BGridColumns(handleNavigationForButton), [handleNavigationForButton]);
@@ -123,10 +132,10 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ filterParams, onLoadingChan
           />
           {!!qpay066bData?.response?.results?.length && (
             <Pagination
-              pageNumber={pageNumber + 1}
-              setPageNumber={(value: number) => setPageNumber(value - 1)}
+              pageNumber={pageNumber}
+              setPageNumber={(value: number) => handlePaginationChange(value - 1, pageSize)}
               pageSize={pageSize}
-              setPageSize={setPageSize}
+              setPageSize={(value: number) => handlePaginationChange(0, value)}
               recordCount={qpay066bData.response.total}
             />
           )}

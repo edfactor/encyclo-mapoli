@@ -1,91 +1,59 @@
-import { Typography } from "@mui/material";
-import React, { useState, useMemo, useCallback, useEffect } from "react";
-import { useSelector } from "react-redux";
-import { useLazyGetDuplicateNamesAndBirthdaysQuery } from "reduxstore/api/YearsEndApi";
-import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { GetDuplicateNamesAndBirthdayColumns } from "./DuplicateNamesAndBirthdaysGridColumns";
-import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import { RefObject, useMemo } from "react";
+import { DSMGrid, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
-import ReportSummary from "../../../components/ReportSummary";
+import { DuplicateNameAndBirthday, PagedReportResponse } from "../../../types";
+import { GetDuplicateNamesAndBirthdayColumns } from "./DuplicateNamesAndBirthdaysGridColumns";
+import { GridPaginationState, GridPaginationActions } from "../../../hooks/useGridPagination";
 
-interface DuplicateNamesAndBirthdaysGridSearchProps {
-  initialSearchLoaded: boolean;
-  setInitialSearchLoaded: (loaded: boolean) => void;
+interface DuplicateNamesAndBirthdaysGridProps {
+  innerRef: RefObject<HTMLDivElement | null>;
+  data: PagedReportResponse<DuplicateNameAndBirthday> | null;
+  isLoading: boolean;
+  showData: boolean;
+  hasResults: boolean;
+  pagination: GridPaginationState & GridPaginationActions;
+  onPaginationChange: (pageNumber: number, pageSize: number) => void;
+  onSortChange: (sortParams: any) => void;
 }
 
-const DuplicateNamesAndBirthdaysGrid: React.FC<DuplicateNamesAndBirthdaysGridSearchProps> = ({
-  initialSearchLoaded,
-  setInitialSearchLoaded
-}) => {
-  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "name",
-    isSortDescending: false
-  });
-
-  const { duplicateNamesAndBirthdays } = useSelector((state: RootState) => state.yearsEnd);
-  const profitYear = useDecemberFlowProfitYear();
-  const [triggerSearch, { isFetching }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
-
-  const onSearch = useCallback(async () => {
-    const request = {
-      profitYear: profitYear || 0,
-      pagination: {
-        skip: pageNumber * pageSize,
-        take: pageSize,
-        sortBy: sortParams.sortBy,
-        isSortDescending: sortParams.isSortDescending
-      }
-    };
-
-    await triggerSearch(request, false);
-  }, [profitYear, pageNumber, pageSize, sortParams, triggerSearch]);
-
-  useEffect(() => {
-    if (hasToken && (!initialSearchLoaded || pageNumber || pageSize !== 25 || sortParams)) {
-      onSearch();
-      if (!initialSearchLoaded) {
-        setInitialSearchLoaded(true);
-      }
-    }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken, setInitialSearchLoaded]);
-
-  const sortEventHandler = (update: ISortParams) => setSortParams(update);
+const DuplicateNamesAndBirthdaysGrid = ({
+  innerRef,
+  data,
+  isLoading,
+  showData,
+  hasResults,
+  pagination,
+  onPaginationChange,
+  onSortChange
+}: DuplicateNamesAndBirthdaysGridProps) => {
   const columnDefs = useMemo(() => GetDuplicateNamesAndBirthdayColumns(), []);
 
   return (
     <>
-      {duplicateNamesAndBirthdays?.response && (
-        <>
-          <ReportSummary report={duplicateNamesAndBirthdays} />
+      {showData && data?.response && (
+        <div ref={innerRef}>
           <DSMGrid
             preferenceKey={CAPTIONS.DUPLICATE_NAMES}
-            isLoading={isFetching}
-            handleSortChanged={sortEventHandler}
+            isLoading={isLoading}
+            handleSortChanged={onSortChange}
             providedOptions={{
-              rowData: duplicateNamesAndBirthdays?.response.results,
+              rowData: data.response.results,
               columnDefs: columnDefs
             }}
           />
-        </>
+        </div>
       )}
-      {!!duplicateNamesAndBirthdays && duplicateNamesAndBirthdays.response.results.length > 0 && (
+      {hasResults && data?.response && (
         <Pagination
-          pageNumber={pageNumber}
+          pageNumber={pagination.pageNumber}
           setPageNumber={(value: number) => {
-            setPageNumber(value - 1);
-            setInitialSearchLoaded(true);
+            onPaginationChange(value - 1, pagination.pageSize);
           }}
-          pageSize={pageSize}
+          pageSize={pagination.pageSize}
           setPageSize={(value: number) => {
-            setPageSize(value);
-            setPageNumber(1);
-            setInitialSearchLoaded(true);
+            onPaginationChange(0, value);
           }}
-          recordCount={duplicateNamesAndBirthdays.response.total}
+          recordCount={data.response.total || 0}
         />
       )}
     </>

@@ -199,7 +199,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     GetReportFilter((int)YearEndProfitSharingReportId.TerminatedUnder18NoWages, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21))
             };
 
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, req.UseFrozenData);
             var beneQry = ctx.BeneficiaryContacts
                 .Where(bc => !demographics.Any(x => x.Ssn == bc.Ssn))
                 .Join(_totalService.GetTotalBalanceSet(ctx, req.ProfitYear), x => x.Ssn, x => x.Ssn,
@@ -402,20 +402,21 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     /// </summary>
     private async Task<IQueryable<EmployeeWithBalance>> BuildFilteredEmployeeSetAsync(
         ProfitSharingReadOnlyDbContext ctx,
-        ProfitYearRequest req,
-        int? badgeNumber)
+        FrozenProfitYearRequest req,
+        int? badgeNumber,
+        DateOnly asOfDate)
     {
         IQueryable<PayProfit> basePayProfits = ctx.PayProfits
             .Where(p => p.ProfitYear == req.ProfitYear)
             .Include(p => p.Demographic)
             .ThenInclude(d => d!.ContactInfo);
 
-        var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, true);
+        var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, req.UseFrozenData);
         // No IsYearEnd check, always join
         basePayProfits = basePayProfits
             .Join(demographicQuery, p => p.DemographicId, d => d.Id, (p, _) => p);
 
-        var yearsOfService = _totalService.GetYearsOfService(ctx, req.ProfitYear);
+        var yearsOfService = _totalService.GetYearsOfService(ctx, req.ProfitYear, asOfDate);
         var employeeQry =
             from pp in basePayProfits
             join et in ctx.EmploymentTypes on pp.Demographic!.EmploymentTypeId equals et.Id
@@ -448,9 +449,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             employeeQry = employeeQry.Where(e => e.BadgeNumber == badgeNumber);
         }
 
-        var beginningBalance = (short)(req.ProfitYear - 1);
-        var balances = _totalService.GetTotalBalanceSet(ctx, beginningBalance);
-        var priorBalances = _totalService.GetTotalBalanceSet(ctx, (short)(beginningBalance - 1));
+        var beginningBalanceYear = (short)(req.ProfitYear - 1);
+        var balances = _totalService.GetTotalBalanceSet(ctx, beginningBalanceYear);
+        var priorBalances = _totalService.GetTotalBalanceSet(ctx, (short)(beginningBalanceYear - 1));
         var employeeWithBalanceQry =
             from e in employeeQry
             join bal in balances on e.Ssn equals bal.Ssn into balTmp
@@ -462,7 +463,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 Employee = e,
                 ProfitYear = req.ProfitYear,
                 Balance = (decimal)(bal != null && bal.TotalAmount != null ? bal.TotalAmount : 0),
-                PriorProfitYear = (short)(req.ProfitYear - 1),
+                PriorProfitYear = beginningBalanceYear,
                 PriorBalance = (decimal)(priorBal != null && priorBal.TotalAmount != null ? priorBal.TotalAmount : 0)
             };
         return employeeWithBalanceQry;
@@ -479,10 +480,10 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     /// <summary>
     /// Returns a queryable of year-end profit sharing report details for the given year and optional badge number.
     /// </summary>
-    private async Task<IQueryable<YearEndProfitSharingReportDetail>> ActiveSummary(ProfitSharingReadOnlyDbContext ctx, ProfitYearRequest req, DateOnly ageAsOfDate,
+    private async Task<IQueryable<YearEndProfitSharingReportDetail>> ActiveSummary(ProfitSharingReadOnlyDbContext ctx, FrozenProfitYearRequest req, DateOnly ageAsOfDate,
         int? badgeNumber = null)
     {
-        var employees = await BuildFilteredEmployeeSetAsync(ctx, req, badgeNumber);
+        var employees = await BuildFilteredEmployeeSetAsync(ctx, req, badgeNumber, ageAsOfDate);
 
 
 

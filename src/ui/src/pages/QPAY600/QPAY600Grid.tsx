@@ -1,7 +1,8 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { DSMGrid, Pagination } from "smart-ui-library";
+import { useGridPagination } from "../../hooks/useGridPagination";
 import { RootState } from "../../reduxstore/store";
 import { QPAY600FilterParams } from "./QPAY600FilterSection";
 import { GetQPAY600GridColumns } from "./QPAY600GridColumns";
@@ -13,16 +14,17 @@ interface QPAY600GridProps {
 }
 
 const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, employeeStatus, onLoadingChange }) => {
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-
-  const [_sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "employeeName",
-    isSortDescending: false
-  });
-
-  const [isFetching, setIsFetching] = useState(false);
   const hasToken = useSelector((state: RootState) => !!state.security.token);
+  const [isFetching, setIsFetching] = useState(false);
+
+  const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "employeeName",
+    initialSortDescending: false,
+    onPaginationChange: () => {
+      // This component uses mock data, no API calls needed
+    }
+  });
 
   const mockData = useMemo(() => {
     return {
@@ -79,7 +81,7 @@ const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, employeeStatus,
         totalLastYearWages: 2175000.0
       }
     };
-  }, [filterParams]);
+  }, []);
 
   useEffect(() => {
     onLoadingChange?.(isFetching);
@@ -96,8 +98,8 @@ const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, employeeStatus,
     }
   }, [hasToken, filterParams]);
 
-  const sortEventHandler = (update: ISortParams) => {
-    setSortParams(update);
+  const sortEventHandler = (update: any) => {
+    handleSortChange(update);
   };
 
   const columnDefs = useMemo(() => GetQPAY600GridColumns(), []);
@@ -162,9 +164,9 @@ const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, employeeStatus,
           {!!data && data.results.length > 0 && (
             <Pagination
               pageNumber={pageNumber}
-              setPageNumber={(value: number) => setPageNumber(value - 1)}
+              setPageNumber={(value: number) => handlePaginationChange(value - 1, pageSize)}
               pageSize={pageSize}
-              setPageSize={(value: number) => setPageSize(value)}
+              setPageSize={(value: number) => handlePaginationChange(0, value)}
               recordCount={data.total}
             />
           )}

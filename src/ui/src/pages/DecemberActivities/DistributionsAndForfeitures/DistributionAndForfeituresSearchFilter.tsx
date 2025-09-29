@@ -1,8 +1,9 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormHelperText } from "@mui/material";
+import { CircularProgress, FormHelperText } from "@mui/material";
 import { Grid } from "@mui/material";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
 import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import {
   clearDistributionsAndForfeitures,
@@ -12,9 +13,10 @@ import {
 import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import useFiscalCalendarYear from "hooks/useFiscalCalendarYear";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { format } from "date-fns";
+import { tryddmmyyyyToDate } from "../../../utils/dateUtils";
 
 const formatDateOnly = (date: Date | null): string | undefined => {
   if (!date) return undefined;
@@ -22,19 +24,11 @@ const formatDateOnly = (date: Date | null): string | undefined => {
 };
 
 interface DistributionsAndForfeituresSearch {
-  profitYear: number;
   startDate: Date | null;
   endDate: Date | null;
 }
 
 const schema = yup.object().shape({
-  profitYear: yup
-    .number()
-    .typeError("Year must be a number")
-    .integer("Year must be an integer")
-    .min(2020, "Year must be 2020 or later")
-    .max(2100, "Year must be 2100 or earlier")
-    .required("Year is required"),
   startDate: yup.date().nullable(),
   endDate: yup
     .date()
@@ -43,10 +37,6 @@ const schema = yup.object().shape({
       const { startDate } = this.parent;
       if (!startDate || !value) return true;
       return value > startDate;
-    })
-    .test("is-too-early", "Insuffient data for dates before 2024", function (value) {
-      if (!value) return true;
-      return value > new Date(2024, 1, 1);
     })
 });
 
@@ -61,7 +51,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
   const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
   const dispatch = useDispatch();
   const { distributionsAndForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
-  const profitYear = useDecemberFlowProfitYear();
+  const fiscalData = useFiscalCalendarYear();
   const {
     control,
     handleSubmit,
@@ -71,17 +61,25 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
   } = useForm<DistributionsAndForfeituresSearch>({
     resolver: yupResolver(schema) as Resolver<DistributionsAndForfeituresSearch>,
     defaultValues: {
-      profitYear: profitYear || distributionsAndForfeituresQueryParams?.profitYear || undefined,
       startDate: null,
       endDate: null
     }
   });
 
+  // Set form defaults when fiscal data becomes available
+  useEffect(() => {
+    if (fiscalData) {
+      reset({
+        startDate: tryddmmyyyyToDate(fiscalData.fiscalBeginDate),
+        endDate: tryddmmyyyyToDate(fiscalData.fiscalEndDate)
+      });
+    }
+  }, [fiscalData, reset]);
+
   const validateAndSearch = handleSubmit((data) => {
     if (isValid && hasToken) {
       triggerSearch(
         {
-          profitYear: data.profitYear,
           ...(data.startDate && { startDate: formatDateOnly(data.startDate) }),
           ...(data.endDate && { endDate: formatDateOnly(data.endDate) }),
           pagination: { skip: 0, take: 25, sortBy: "employeeName, date", isSortDescending: false }
@@ -90,11 +88,11 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
       ).unwrap();
       dispatch(
         setDistributionsAndForfeituresQueryParams({
-          profitYear: data.profitYear,
           startDate: formatDateOnly(data.startDate),
           endDate: formatDateOnly(data.endDate)
         })
       );
+      setInitialSearchLoaded(true);
     }
   });
 
@@ -103,9 +101,8 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
 
     // Clear the form fields
     reset({
-      profitYear: profitYear || undefined,
-      startDate: null,
-      endDate: null
+      startDate: fiscalData ? tryddmmyyyyToDate(fiscalData.fiscalBeginDate) : null,
+      endDate: fiscalData ? tryddmmyyyyToDate(fiscalData.fiscalEndDate) : null
     });
 
     // Clear the data in Redux store
@@ -113,32 +110,23 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
     dispatch(clearDistributionsAndForfeituresQueryParams());
   };
 
+  if (!fiscalData) {
+    return (
+      <Grid
+        container
+        justifyContent="center"
+        padding="24px">
+        <CircularProgress />
+      </Grid>
+    );
+  }
+
   return (
     <form onSubmit={validateAndSearch}>
       <Grid
         container
         paddingX="24px"
         gap="24px">
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Controller
-            name="profitYear"
-            control={control}
-            render={({ field }) => (
-              <DsmDatePicker
-                id="profitYear"
-                onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
-                value={field.value ? new Date(field.value, 0) : null}
-                required={true}
-                label="Profit Year"
-                disableFuture
-                views={["year"]}
-                error={errors.profitYear?.message}
-                disabled={true}
-              />
-            )}
-          />
-          {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
-        </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="startDate"
@@ -152,7 +140,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                 }}
                 value={field.value}
                 required={false}
-                label="Start Date"
+                label="Start Date (Day is not used)"
                 disableFuture
                 error={errors.startDate?.message}
               />
@@ -173,7 +161,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                 }}
                 value={field.value}
                 required={false}
-                label="End Date"
+                label="End Date (Day is not used)"
                 disableFuture
                 error={errors.endDate?.message}
               />

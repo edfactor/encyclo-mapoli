@@ -1,15 +1,16 @@
-import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Popover, Typography } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { Typography } from "@mui/material";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, numberToCurrency, Pagination } from "smart-ui-library";
+import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
-import "./DistributionAndForfeituresGrid.css";
 import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import { CAPTIONS } from "../../../constants";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { useGridPagination } from "../../../hooks/useGridPagination";
 import { GetDistributionsAndForfeituresColumns } from "./DistributionAndForfeituresGridColumns";
 
 interface DistributionsAndForfeituresGridSearchProps {
@@ -21,27 +22,71 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   initialSearchLoaded,
   setInitialSearchLoaded
 }) => {
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "employeeName, date",
-    isSortDescending: false
-  });
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const handlePopoverOpen = (event: React.MouseEvent<SVGSVGElement>) => {
-    setAnchorEl(event.currentTarget as unknown as HTMLElement);
-  };
-  const handlePopoverClose = () => {
-    setAnchorEl(null);
-  };
-  const open = Boolean(anchorEl);
-
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { distributionsAndForfeitures, distributionsAndForfeituresQueryParams } = useSelector(
     (state: RootState) => state.yearsEnd
   );
   const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
+
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
+    useGridPagination({
+      initialPageSize: 25,
+      initialSortBy: "employeeName, date",
+      initialSortDescending: false,
+      onPaginationChange: useCallback(
+        async (pageNum: number, pageSz: number, sortPrms: any) => {
+          if (hasToken && initialSearchLoaded) {
+            const request = {
+              profitYear: profitYear || 0,
+              ...(distributionsAndForfeituresQueryParams?.startDate && {
+                startDate: distributionsAndForfeituresQueryParams?.startDate
+              }),
+              ...(distributionsAndForfeituresQueryParams?.endDate && {
+                endDate: distributionsAndForfeituresQueryParams?.endDate
+              }),
+              pagination: {
+                skip: pageNum * pageSz,
+                take: pageSz,
+                sortBy: sortPrms.sortBy,
+                isSortDescending: sortPrms.isSortDescending
+              }
+            };
+            await triggerSearch(request, false);
+          }
+        },
+        [
+          hasToken,
+          initialSearchLoaded,
+          profitYear,
+          distributionsAndForfeituresQueryParams?.startDate,
+          distributionsAndForfeituresQueryParams?.endDate,
+          triggerSearch
+        ]
+      )
+    });
+
+  // Use dynamic grid height utility hook
+  const gridMaxHeight = useDynamicGridHeight();
+
+  const handlePopoverOpen = () => {
+    if (hoverTimeout) {
+      clearTimeout(hoverTimeout);
+      setHoverTimeout(null);
+    }
+    setShowTooltip(true);
+  };
+
+  const handlePopoverClose = () => {
+    const timeout = setTimeout(() => {
+      setShowTooltip(false);
+    }, 100); // Small delay to prevent flickering
+    setHoverTimeout(timeout);
+  };
+
+  const open = showTooltip;
 
   const onSearch = useCallback(async () => {
     const request = {
@@ -80,86 +125,111 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
       distributionsAndForfeitures.response.results.length !==
         prevDistributionsAndForfeitures.current?.response?.results?.length
     ) {
-      setPageNumber(0);
+      resetPagination();
     }
     prevDistributionsAndForfeitures.current = distributionsAndForfeitures;
-  }, [distributionsAndForfeitures]);
+  }, [distributionsAndForfeitures, resetPagination]);
 
   useEffect(() => {
-    if (hasToken && (initialSearchLoaded || sortParams)) {
+    if (hasToken && initialSearchLoaded) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken, setInitialSearchLoaded]);
+  }, [initialSearchLoaded, onSearch, hasToken]);
 
-  const sortEventHandler = (update: ISortParams) => setSortParams(update);
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
+      }
+    };
+  }, [hoverTimeout]);
+
+  const sortEventHandler = (update: any) => handleSortChange(update);
   const columnDefs = useMemo(() => GetDistributionsAndForfeituresColumns(), []);
-  const stateTaxTotals = distributionsAndForfeitures?.stateTaxTotals || {};
 
   return (
     <>
       {distributionsAndForfeitures?.response && (
         <>
-          <div className="totals-flex-container sticky top-0 z-10 flex bg-white">
-            <TotalsGrid
-              displayData={[[numberToCurrency(distributionsAndForfeitures.distributionTotal || 0)]]}
-              leftColumnHeaders={["Distributions"]}
-              topRowHeaders={[]}></TotalsGrid>
-            <div className="totals-flex-popover">
+          <div className="sticky top-0 z-10 flex items-start gap-2 bg-white py-2">
+            <div className="flex-1">
+              <TotalsGrid
+                displayData={[[numberToCurrency(distributionsAndForfeitures.distributionTotal || 0)]]}
+                leftColumnHeaders={["Distributions"]}
+                topRowHeaders={[]}
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}></TotalsGrid>
+            </div>
+            <div className="relative flex-1">
               <TotalsGrid
                 displayData={[[numberToCurrency(distributionsAndForfeitures.stateTaxTotal || 0)]]}
                 leftColumnHeaders={["State Taxes"]}
                 topRowHeaders={[]}
-              />
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}></TotalsGrid>
               {distributionsAndForfeitures.stateTaxTotals &&
                 Object.keys(distributionsAndForfeitures.stateTaxTotals).length > 0 && (
-                  <>
+                  <div
+                    className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
+                    onMouseEnter={handlePopoverOpen}
+                    onMouseLeave={handlePopoverClose}>
                     <InfoOutlinedIcon
-                      className="state-tax-info-icon"
+                      className="cursor-pointer text-green-500"
                       fontSize="small"
-                      onClick={handlePopoverOpen}
-                      style={{ cursor: "pointer", marginLeft: 4 }}
                     />
-                    <Popover
-                      open={open}
-                      anchorEl={anchorEl}
-                      onClose={handlePopoverClose}
-                      anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                      PaperProps={{ style: { maxHeight: 300, maxWidth: 350, overflow: "auto" } }}>
-                      <div className="state-tax-popover-table">
-                        <Typography
-                          variant="subtitle2"
-                          sx={{ p: 1 }}>
-                          State Tax Breakdown
-                        </Typography>
-                        <table>
-                          <thead>
-                            <tr>
-                              <th>State</th>
-                              <th>Tax Total</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {Object.entries(distributionsAndForfeitures.stateTaxTotals).map(([state, total]) => (
-                              <tr key={state}>
-                                <td>{state}</td>
-                                <td>{numberToCurrency(total)}</td>
+                    {open && (
+                      <div className="absolute left-0 top-full z-[1000] mt-1 max-h-[300px] max-w-[350px] overflow-auto rounded border border-gray-300 bg-white shadow-lg">
+                        <div className="p-2 px-4 pb-4">
+                          <Typography
+                            variant="subtitle2"
+                            sx={{ p: 1 }}>
+                            State Tax Breakdown
+                          </Typography>
+                          <table className="w-full border-collapse text-[0.95rem]">
+                            <thead>
+                              <tr>
+                                <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">State</th>
+                                <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">
+                                  Tax Total
+                                </th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                            </thead>
+                            <tbody>
+                              {Object.entries(distributionsAndForfeitures.stateTaxTotals).map(
+                                ([state, total], index, array) => (
+                                  <tr key={state}>
+                                    <td
+                                      className={`px-2 py-1 text-left ${index < array.length - 1 ? "border-b border-gray-100" : ""}`}>
+                                      {state}
+                                    </td>
+                                    <td
+                                      className={`px-2 py-1 text-right ${index < array.length - 1 ? "border-b border-gray-100" : ""}`}>
+                                      {numberToCurrency(total as number)}
+                                    </td>
+                                  </tr>
+                                )
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
-                    </Popover>
-                  </>
+                    )}
+                  </div>
                 )}
             </div>
-            <TotalsGrid
-              displayData={[[numberToCurrency(distributionsAndForfeitures.federalTaxTotal || 0)]]}
-              leftColumnHeaders={["Federal Taxes"]}
-              topRowHeaders={[]}></TotalsGrid>
-            <TotalsGrid
-              displayData={[[numberToCurrency(distributionsAndForfeitures.forfeitureTotal || 0)]]}
-              leftColumnHeaders={["Forfeitures"]}
-              topRowHeaders={[]}></TotalsGrid>
+            <div className="flex-1">
+              <TotalsGrid
+                displayData={[[numberToCurrency(distributionsAndForfeitures.federalTaxTotal || 0)]]}
+                leftColumnHeaders={["Federal Taxes"]}
+                topRowHeaders={[]}
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}></TotalsGrid>
+            </div>
+            <div className="flex-1">
+              <TotalsGrid
+                displayData={[[numberToCurrency(distributionsAndForfeitures.forfeitureTotal || 0)]]}
+                leftColumnHeaders={["Forfeitures"]}
+                topRowHeaders={[]}
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}></TotalsGrid>
+            </div>
           </div>
 
           <ReportSummary report={distributionsAndForfeitures} />
@@ -167,6 +237,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
             preferenceKey={CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES}
             isLoading={isFetching}
             handleSortChanged={sortEventHandler}
+            maxHeight={gridMaxHeight}
             providedOptions={{
               rowData: distributionsAndForfeitures?.response.results,
               columnDefs: columnDefs,
@@ -179,13 +250,12 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
-            setPageNumber(value - 1);
+            handlePaginationChange(value - 1, pageSize);
             setInitialSearchLoaded(true);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
-            setPageSize(value);
-            setPageNumber(1);
+            handlePaginationChange(0, value);
             setInitialSearchLoaded(true);
           }}
           recordCount={distributionsAndForfeitures.response.total}

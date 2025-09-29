@@ -1,43 +1,37 @@
 import { Box } from "@mui/material";
-import PSDrawer from "components/Drawer/PSDrawer";
-import DSMDynamicBreadcrumbs from "components/DSMDynamicBreadcrumbs/DSMDynamicBreadcrumbs";
-import ProtectedRoute from "components/ProtectedRoute/ProtectedRoute";
-import DemographicBadgesNotInPayprofit from "pages/DecemberActivities/DemographicBadgesNotInPayprofit/DemographicBadgesNotInPayprofit";
-import DistributionsAndForfeitures from "pages/DecemberActivities/DistributionsAndForfeitures/DistributionAndForfeitures";
-import DuplicateNamesAndBirthdays from "pages/DecemberActivities/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdays";
-import DuplicateSSNsOnDemographics from "pages/DecemberActivities/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographics";
-import NegativeEtvaForSSNsOnPayprofit from "pages/DecemberActivities/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofit";
-import Termination from "pages/DecemberActivities/Termination/Termination";
-import RehireForfeitures from "pages/DecemberActivities/UnForfeit/RehireForfeitures";
-import EligibleEmployees from "pages/FiscalClose/EligibleEmployees/EligibleEmployees";
-import ManageExecutiveHoursAndDollars from "pages/FiscalClose/ManageExecutiveHoursAndDollars/ManageExecutiveHoursAndDollars";
-import QPAY066TA from "pages/FiscalClose/ProfitShareByStore/BreakdownReport/QPAY066TA";
-import NewPSLabels from "pages/FiscalClose/ProfitShareByStore/NewPSLabels";
-import ProfitShareByStore from "pages/FiscalClose/ProfitShareByStore/ProfitShareByStore";
-import Under21TA from "pages/FiscalClose/ProfitShareByStore/Under21/Under21TA";
-import Under21Report from "pages/FiscalClose/ProfitShareByStore/Under21Report";
-import ProfitShareReportEditRun from "pages/FiscalFlow/ProfitShareReportEditRun/ProfitShareReportEditRun";
-import ProfitShareReportFinalRun from "pages/FiscalFlow/ProfitShareReportFinalRun/ProfitShareReportFinalRun";
-import Forfeit from "pages/Forfeit/Forfeit";
-import FrozenSummary from "pages/FrozenSummary/FrozenSummary";
-import MasterInquiry from "pages/MasterInquiry/MasterInquiry";
-import Pay450Summary from "pages/PaymasterUpdate/Pay450Summary";
-import PaymasterUpdate from "pages/PaymasterUpdate/PaymasterUpdate";
-import ProfCtrlSheet from "pages/PaymasterUpdate/ProfCtrlSheet";
-import BalanceByYears from "pages/PROF130/BalanceByYears/BalanceByYears";
-import VestedAmountsByAge from "pages/PROF130/VestedAmountsByAge/VestedAmountsByAge";
-import Profall from "pages/Profall/Profall";
-import ProfitShareGrossReport from "pages/ProfitShareGrossReport/ProfitShareGrossReport";
-import ProfitShareReport from "pages/ProfitShareReport/ProfitShareReport";
-import ProfitShareTotals426 from "pages/ProfitShareTotals426/ProfitShareTotals426";
+import PSDrawer from "../../components/Drawer/PSDrawer";
+import DSMDynamicBreadcrumbs from "../../components/DSMDynamicBreadcrumbs/DSMDynamicBreadcrumbs";
+import ProtectedRoute from "../../components/ProtectedRoute/ProtectedRoute";
+import DemographicBadgesNotInPayprofit from "../../pages/DecemberActivities/DemographicBadgesNotInPayprofit/DemographicBadgesNotInPayprofit";
+import DistributionsAndForfeitures from "../../pages/DecemberActivities/DistributionsAndForfeitures/DistributionAndForfeitures";
+import DuplicateNamesAndBirthdays from "../../pages/DecemberActivities/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdays";
+import DuplicateSSNsOnDemographics from "../../pages/DecemberActivities/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographics";
+import NegativeEtvaForSSNsOnPayprofit from "../../pages/DecemberActivities/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofit";
+import Termination from "../../pages/DecemberActivities/Termination/Termination";
+import UnForfeit from "../../pages/DecemberActivities/UnForfeit/UnForfeit";
+import EligibleEmployees from "../../pages/FiscalClose/EligibleEmployees/EligibleEmployees";
+import ManageExecutiveHoursAndDollars from "../../pages/FiscalClose/ManageExecutiveHoursAndDollars/ManageExecutiveHoursAndDollars";
+import QPAY066TA from "../../pages/FiscalClose/ProfitShareByStore/BreakdownReport/QPAY066TA";
+import NewPSLabels from "../../pages/FiscalClose/ProfitShareByStore/NewPSLabels";
+import ProfitShareByStore from "../../pages/FiscalClose/ProfitShareByStore/ProfitShareByStore";
+import Under21TA from "../../pages/FiscalClose/ProfitShareByStore/Under21/Under21TA";
+import Under21Report from "../../pages/FiscalClose/ProfitShareByStore/Under21Report";
+import ProfitShareReportEditRun from "../../pages/FiscalFlow/ProfitShareReportEditRun/ProfitShareReportEditRun";
+import Forfeit from "../../pages/Forfeit/Forfeit";
+import FrozenSummary from "../../pages/FrozenSummary/FrozenSummary";
+import MasterInquiry from "../../pages/MasterInquiry/MasterInquiry";
+import Pay450Summary from "../../pages/PaymasterUpdate/PayMasterUpdateSummary";
+import ProfitSharingControlSheet from "../../pages/PaymasterUpdate/ProfitSharingControlSheet";
+import BalanceByYears from "../../pages/PROF130/BalanceByYears/BalanceByYears";
+import VestedAmountsByAge from "../../pages/PROF130/VestedAmountsByAge/VestedAmountsByAge";
+import Profall from "../../pages/Profall/Profall";
+import ProfitShareGrossReport from "../../pages/ProfitShareGrossReport/ProfitShareGrossReport";
+import ProfitShareReport from "../../pages/ProfitShareReport/ProfitShareReport";
+import ProfitShareTotals426 from "../../pages/ProfitShareTotals426/ProfitShareTotals426";
 
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import { useGetNavigationQuery } from "reduxstore/api/NavigationApi";
-import { setImpersonating } from "reduxstore/slices/securitySlice";
-import { RootState } from "reduxstore/store";
-import { ImpersonationRoles } from "reduxstore/types";
 import { drawerClosedWidth, drawerOpenWidth, ROUTES } from "../../constants";
 import MenuData from "../../MenuData";
 import DemographicFreeze from "../../pages/ITOperations/DemographicFreeze/DemographicFreeze";
@@ -48,24 +42,30 @@ import ForfeituresByAge from "../../pages/PROF130/ForfeituresByAge/ForfeituresBy
 import ProfitShareEditUpdate from "../../pages/ProfitShareEditUpdate/ProfitShareEditUpdate";
 import Unauthorized from "../../pages/Unauthorized/Unauthorized";
 import YTDWages from "../../pages/YTDWagesExtract/YTDWages";
+import { useGetNavigationQuery } from "../../reduxstore/api/NavigationApi";
+import { setImpersonating } from "../../reduxstore/slices/securitySlice";
+import { RootState } from "../../reduxstore/store";
+import { ImpersonationRoles } from "../../reduxstore/types";
 import EnvironmentUtils from "../../utils/environmentUtils";
 import { createUnauthorizedParams, isPathAllowedInNavigation } from "../../utils/navigationAccessUtils";
 
-import ImpersonationMultiSelect from "components/MenuBar/ImpersonationMultiSelect";
-import { MenuBar } from "components/MenuBar/MenuBar";
-import BeneficiaryInquiry from "pages/BeneficiaryInquiry/BeneficiaryInquiry";
-import RecentlyTerminated from "pages/FiscalClose/RecentlyTerminated/RecentlyTerminated";
-import PAY426N from "pages/PAY426Reports/PAY426N/PAY426N";
-import ProfitSummary from "pages/PAY426Reports/ProfitSummary/ProfitSummary";
-import QPAY066AdHocReports from "pages/QPAY066AdHocReports/QPAY066AdHocReports";
-import QPAY066B from "pages/QPAY066B/QPAY066B";
-import QPAY600 from "pages/QPAY600/QPAY600";
-import PayBeNext from "pages/Reports/PayBeNext/PayBeNext";
-import PayBenReport from "pages/Reports/PayBenReport/PayBenReport";
-import ReprintCertificates from "pages/ReprintCertificates/ReprintCertificates";
-import MilitaryEntryAndModification from "../../pages/DecemberActivities/MilitaryEntryAndModification/MilitaryEntryAndModification";
+import { ImpersonationMultiSelect } from "smart-ui-library";
+import { MenuBar } from "../../components/MenuBar/MenuBar";
+import BeneficiaryInquiry from "../../pages/BeneficiaryInquiry/BeneficiaryInquiry";
+import MilitaryContribution from "../../pages/DecemberActivities/MilitaryContribution/MilitaryContribution";
 import DevDebug from "../../pages/Dev/DevDebug";
+import Documentation from "../../pages/Documentation/Documentation";
+import RecentlyTerminated from "../../pages/FiscalClose/RecentlyTerminated/RecentlyTerminated";
+import TerminatedLetters from "../../pages/FiscalClose/TerminatedLetters/TerminatedLetters";
 import ForfeituresAdjustment from "../../pages/ForfeituresAdjustment/ForfeituresAdjustment";
+import PAY426N from "../../pages/PAY426Reports/PAY426N/PAY426N";
+import ProfitSummary from "../../pages/PAY426Reports/ProfitSummary/ProfitSummary";
+import QPAY066AdHocReports from "../../pages/QPAY066AdHocReports/QPAY066AdHocReports";
+import QPAY066B from "../../pages/QPAY066B/QPAY066B";
+import QPAY600 from "../../pages/QPAY600/QPAY600";
+import PayBeNext from "../../pages/Reports/PayBeNext/PayBeNext";
+import PayBenReport from "../../pages/Reports/PayBenReport/PayBenReport";
+import ReprintCertificates from "../../pages/ReprintCertificates/ReprintCertificates";
 import LandingPage from "./LandingPage";
 
 const RouterSubAssembly: React.FC = () => {
@@ -114,7 +114,12 @@ const RouterSubAssembly: React.FC = () => {
       // Remove the impersonationRole param from the URL so it isn't reapplied on refresh
       params.delete("impersonationRole");
       const newSearch = params.toString();
-      navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ""}`, { replace: true });
+
+      // Validate pathname to prevent open redirect attacks
+      const isValidPath = location.pathname.startsWith("/") && !location.pathname.includes("://");
+      const safePath = isValidPath ? location.pathname : "/";
+
+      navigate(`${safePath}${newSearch ? `?${newSearch}` : ""}`, { replace: true });
     }
   }, [location.search, hasImpersonationRole, impersonating, dispatch, navigate, location.pathname]);
 
@@ -209,7 +214,7 @@ const RouterSubAssembly: React.FC = () => {
                   element={<DuplicateNamesAndBirthdays />}></Route>
                 <Route
                   path={ROUTES.REHIRE_FORFEITURES}
-                  element={<RehireForfeitures />}></Route>
+                  element={<UnForfeit />}></Route>
                 <Route
                   path={ROUTES.DISTRIBUTIONS_AND_FORFEITURES}
                   element={<DistributionsAndForfeitures />}></Route>
@@ -251,8 +256,8 @@ const RouterSubAssembly: React.FC = () => {
                   path={ROUTES.PROF_TERM}
                   element={<Termination />}></Route>
                 <Route
-                  path={ROUTES.MILITARY_ENTRY_AND_MODIFICATION}
-                  element={<MilitaryEntryAndModification />}></Route>
+                  path={ROUTES.MILITARY_CONTRIBUTION}
+                  element={<MilitaryContribution />}></Route>
                 <Route
                   path={ROUTES.PROFIT_SHARE_REPORT}
                   element={<ProfitShareReport />}></Route>
@@ -272,9 +277,6 @@ const RouterSubAssembly: React.FC = () => {
                   path={ROUTES.PROFIT_SHARE_REPORT_EDIT_RUN}
                   element={<ProfitShareReportEditRun />}></Route>
                 <Route
-                  path={ROUTES.PROFIT_SHARE_REPORT_FINAL_RUN}
-                  element={<ProfitShareReportFinalRun />}></Route>
-                <Route
                   path={ROUTES.PROFIT_SHARE_UPDATE}
                   element={<ProfitShareEditUpdate />}></Route>
                 <Route
@@ -287,14 +289,11 @@ const RouterSubAssembly: React.FC = () => {
                   path={ROUTES.PROFIT_SHARE_GROSS_REPORT}
                   element={<ProfitShareGrossReport />}></Route>
                 <Route
-                  path={ROUTES.PAYMASTER_UPDATE}
-                  element={<PaymasterUpdate />}></Route>
-                <Route
                   path={ROUTES.PAY450_SUMMARY}
                   element={<Pay450Summary />}></Route>
                 <Route
                   path={ROUTES.PROF_CTRLSHEET}
-                  element={<ProfCtrlSheet />}></Route>
+                  element={<ProfitSharingControlSheet />}></Route>
                 <Route
                   path={ROUTES.PROFIT_SHARE_BY_STORE}
                   element={<ProfitShareByStore />}></Route>
@@ -305,7 +304,7 @@ const RouterSubAssembly: React.FC = () => {
                 </Route>
                 <Route
                   path={ROUTES.PAY426_SUMMARY}
-                  element={<ProfitSummary />}
+                  element={<ProfitSummary frozenData={true} />}
                 />
                 <Route
                   path={ROUTES.PROFIT_SHARE_BY_STORE}
@@ -344,9 +343,14 @@ const RouterSubAssembly: React.FC = () => {
                   element={<DevDebug />}
                 />
                 <Route
-                  path={ROUTES.PAY426N}
+                  path={ROUTES.DOCUMENTATION}
+                  element={<Documentation />}
+                />
+                <Route
+                  path={`${ROUTES.PAY426N}/:presetNumber?`}
                   element={<PAY426N />}
                 />
+
                 <Route
                   path={ROUTES.QPAY066_ADHOC}
                   element={<QPAY066AdHocReports />}
@@ -366,6 +370,10 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={ROUTES.RECENTLY_TERMINATED}
                   element={<RecentlyTerminated />}
+                />
+                <Route
+                  path={ROUTES.TERMINATED_LETTERS}
+                  element={<TerminatedLetters />}
                 />
               </Routes>
             </Box>
@@ -396,7 +404,8 @@ const RouterSubAssembly: React.FC = () => {
       data?.navigation &&
       token &&
       location.pathname !== "/unauthorized" &&
-      location.pathname !== "/dev-debug"
+      location.pathname !== "/dev-debug" &&
+      location.pathname !== "/documentation"
     ) {
       const currentPath = location.pathname;
       const isAllowed = isPathAllowedInNavigation(currentPath, data.navigation);

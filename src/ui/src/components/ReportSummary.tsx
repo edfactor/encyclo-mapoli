@@ -17,11 +17,13 @@ export function ReportSummary<T>({ report }: ReportSummaryProps<T>) {
     <Box
       className="flex flex-wrap items-center gap-2"
       sx={{ padding: "0px 24px" }}>
-      <Typography
-        variant="h2"
-        className="text-dsm-secondary">
-        {`${report.reportName || ""} (${formatNumberWithComma(report.response.total) || 0})`}
-      </Typography>
+      {report && (
+        <Typography
+          variant="h2"
+          className="text-dsm-secondary">
+          {`${report.reportName || ""} (${formatNumberWithComma(report.response.total) || 0})`}
+        </Typography>
+      )}
       <Box className="flex flex-wrap gap-1">
         <Chip
           label={`Report range: ${mmDDYYFormat(report.startDate)} to ${mmDDYYFormat(report.endDate)}`}

@@ -3,7 +3,10 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import StandaloneMemberDetails from "pages/MasterInquiry/StandaloneMemberDetails";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetProfitMasterInquiryMemberQuery } from "reduxstore/api/InquiryApi";
+import {
+  useLazyGetProfitMasterInquiryMemberDetailsQuery,
+  useLazyGetProfitMasterInquiryMemberQuery
+} from "reduxstore/api/InquiryApi";
 import { useLazyGetForfeitureAdjustmentsQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { ApiMessageAlert, DSMAccordion, formatNumberWithComma, Page, setMessage } from "smart-ui-library";
@@ -12,23 +15,41 @@ import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAler
 import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
 import { CAPTIONS } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
+import { useGridPagination } from "../../hooks/useGridPagination";
+import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
 import { InquiryApi } from "../../reduxstore/api/InquiryApi";
 import { clearForfeitureAdjustmentData } from "../../reduxstore/slices/forfeituresAdjustmentSlice";
 import AddForfeitureModal from "./AddForfeitureModal";
 import ForfeituresAdjustmentPanel from "./ForfeituresAdjustmentPanel";
 import ForfeituresAdjustmentSearchParameters from "./ForfeituresAdjustmentSearchParameters";
+import ForfeituresTransactionGrid from "./ForfeituresTransactionGrid";
 
 const ForfeituresAdjustment = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [isAddForfeitureModalOpen, setIsAddForfeitureModalOpen] = useState(false);
   const [pageNumberReset, setPageNumberReset] = useState(false);
+  const [transactionData, setTransactionData] = useState<any>(null);
   const { forfeitureAdjustmentData, forfeitureAdjustmentQueryParams } = useSelector(
     (state: RootState) => state.forfeituresAdjustment
   );
   const profitYear = useDecemberFlowProfitYear();
+  const isReadOnly = useReadOnlyNavigation();
   const [triggerSearch] = useLazyGetForfeitureAdjustmentsQuery();
   const [triggerMemberDetails] = useLazyGetProfitMasterInquiryMemberQuery();
+  const [triggerTransactionDetails, { isLoading: isLoadingTransactions }] =
+    useLazyGetProfitMasterInquiryMemberDetailsQuery();
   const dispatch = useDispatch();
+
+  const handleTransactionGridPaginationChange = (pageNumber: number, pageSize: number, sortParams: any) => {
+    fetchTransactionDetails(pageNumber, pageSize, sortParams);
+  };
+
+  const transactionGridPagination = useGridPagination({
+    initialPageSize: 50,
+    initialSortBy: "profitYear",
+    initialSortDescending: true,
+    onPaginationChange: handleTransactionGridPaginationChange
+  });
 
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
@@ -88,6 +109,41 @@ const ForfeituresAdjustment = () => {
     }
   };
 
+  const fetchTransactionDetails = (pageNumber = 0, pageSize = 50, sortParams = null) => {
+    if (forfeitureAdjustmentData) {
+      const apiParams = {
+        memberType: 1,
+        id: forfeitureAdjustmentData.demographicId,
+        skip: pageNumber * pageSize,
+        take: pageSize,
+        sortBy: sortParams?.sortBy,
+        isSortDescending: sortParams?.isSortDescending
+      };
+
+      triggerTransactionDetails(apiParams)
+        .unwrap()
+        .then((response) => {
+          // Filter for "Outgoing forfeitures" transactions (profit code 2)
+          const filteredResults = response.results.filter((transaction: any) => {
+            return transaction.profitCodeId === 2;
+          });
+
+          console.log(
+            `Filtered ${filteredResults.length} forfeit transactions from ${response.results.length} total transactions`
+          );
+
+          setTransactionData({
+            results: filteredResults,
+            total: filteredResults.length
+          });
+        })
+        .catch((error) => {
+          console.error("Error fetching transaction details:", error);
+          setTransactionData(null);
+        });
+    }
+  };
+
   useEffect(() => {
     if (forfeitureAdjustmentQueryParams && (!forfeitureAdjustmentData || !initialSearchLoaded)) {
       triggerSearch(forfeitureAdjustmentQueryParams)
@@ -100,6 +156,16 @@ const ForfeituresAdjustment = () => {
         });
     }
   }, []);
+
+  useEffect(() => {
+    if (forfeitureAdjustmentData && initialSearchLoaded) {
+      fetchTransactionDetails(
+        transactionGridPagination.pageNumber,
+        transactionGridPagination.pageSize,
+        transactionGridPagination.sortParams
+      );
+    }
+  }, [forfeitureAdjustmentData, initialSearchLoaded]);
 
   return (
     <MissiveAlertProvider>
@@ -139,6 +205,19 @@ const ForfeituresAdjustment = () => {
                 initialSearchLoaded={initialSearchLoaded}
                 setInitialSearchLoaded={setInitialSearchLoaded}
                 onAddForfeiture={handleOpenAddForfeitureModal}
+                isReadOnly={isReadOnly}
+              />
+            </Grid>
+          )}
+
+          {forfeitureAdjustmentData && profitYear && initialSearchLoaded && (
+            <Grid width="100%">
+              <ForfeituresTransactionGrid
+                transactionData={transactionData}
+                isLoading={isLoadingTransactions}
+                gridPagination={transactionGridPagination}
+                onPaginationChange={transactionGridPagination.handlePaginationChange}
+                onSortChange={transactionGridPagination.handleSortChange}
               />
             </Grid>
           )}

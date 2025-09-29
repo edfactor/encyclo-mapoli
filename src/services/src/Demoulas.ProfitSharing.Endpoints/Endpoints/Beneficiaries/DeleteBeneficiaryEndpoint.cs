@@ -1,12 +1,16 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Beneficiaries;
-public class DeleteBeneficiaryEndpoint:ProfitSharingRequestEndpoint<IdRequest>
+
+public class DeleteBeneficiaryEndpoint : ProfitSharingEndpoint<IdRequest, Results<Ok, ProblemHttpResult>>
 {
     private readonly IBeneficiaryService _beneficiaryService;
 
@@ -25,9 +29,16 @@ public class DeleteBeneficiaryEndpoint:ProfitSharingRequestEndpoint<IdRequest>
         Group<BeneficiariesGroup>();
     }
 
-    public override async Task HandleAsync(IdRequest req, CancellationToken ct)
+    public override async Task<Results<Ok, ProblemHttpResult>> ExecuteAsync(IdRequest req, CancellationToken ct)
     {
-        await _beneficiaryService.DeleteBeneficiary(req.Id, ct);
-        await Send.OkAsync(req, ct);
+        try
+        {
+            await _beneficiaryService.DeleteBeneficiary(req.Id, ct);
+            return TypedResults.Ok();
+        }
+        catch (Exception ex)
+        {
+            return TypedResults.Problem(ex.Message);
+        }
     }
 }

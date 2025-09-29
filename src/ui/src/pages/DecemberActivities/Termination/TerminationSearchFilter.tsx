@@ -1,5 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Button, Grid } from "@mui/material";
+import { Button, FormHelperText, Grid } from "@mui/material";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,7 +15,17 @@ import { TerminationSearchRequest } from "./Termination";
 
 const schema = yup.object().shape({
   beginningDate: yup.string().required("Begin Date is required"),
-  endingDate: yup.string().required("End Date is required"),
+  endingDate: yup
+    .string()
+    .required("End Date is required")
+    .test("is-after-start", "End Date must be after Begin Date", function (value) {
+      const { beginningDate } = this.parent;
+      if (!beginningDate || !value) return true;
+      const startDate = tryddmmyyyyToDate(beginningDate);
+      const endDate = tryddmmyyyyToDate(value);
+      if (!startDate || !endDate) return true;
+      return endDate > startDate;
+    }),
   forfeitureStatus: yup.string().required("Forfeiture Status is required"),
   pagination: yup
     .object({
@@ -23,7 +34,8 @@ const schema = yup.object().shape({
       sortBy: yup.string().required(),
       isSortDescending: yup.boolean().required()
     })
-    .required()
+    .required(),
+  profitYear: yup.number().required("Profit year is required")
 });
 
 interface TerminationSearchFilterProps {
@@ -41,6 +53,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
 }) => {
   const [openErrorModal, setOpenErrorModal] = useState(!fiscalData === false);
   const dispatch = useDispatch();
+  const selectedProfitYear = useDecemberFlowProfitYear();
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
   const {
     control,
@@ -54,7 +67,8 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
       beginningDate: termination?.startDate || (fiscalData ? fiscalData.fiscalBeginDate : "") || "",
       endingDate: termination?.endDate || (fiscalData ? fiscalData.fiscalEndDate : "") || "",
       forfeitureStatus: "showAll",
-      pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
+      pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true },
+      profitYear: selectedProfitYear
     }
   });
 
@@ -66,6 +80,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
 
     const params = {
       ...data,
+      profitYear: selectedProfitYear,
       beginningDate: data.beginningDate
         ? mmDDYYFormat(data.beginningDate)
         : mmDDYYFormat(fiscalData?.fiscalBeginDate || ""),
@@ -124,7 +139,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
                 id="beginningDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value || undefined);
-                  trigger("beginningDate");
+                  trigger("endingDate");
                 }}
                 value={field.value ? tryddmmyyyyToDate(field.value) : null}
                 required={false}
@@ -136,6 +151,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
               />
             )}
           />
+          {errors.beginningDate && <FormHelperText error>{errors.beginningDate.message}</FormHelperText>}
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
@@ -158,6 +174,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
               />
             )}
           />
+          {errors.endingDate && <FormHelperText error>{errors.endingDate.message}</FormHelperText>}
         </Grid>
       </Grid>
       <Grid
