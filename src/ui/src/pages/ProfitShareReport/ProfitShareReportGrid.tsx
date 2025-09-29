@@ -1,3 +1,4 @@
+import { Box, CircularProgress } from "@mui/material";
 import { useCallback, useEffect, useMemo } from "react";
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
 import { DSMGrid, Pagination } from "smart-ui-library";
@@ -19,15 +20,6 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
 
   const data = searchResults?.response?.results || [];
   const recordCount = searchResults?.response?.total || 0;
-
-  console.log('ProfitShareReportGrid - Debug:', {
-    searchParams,
-    isInitialSearchLoaded,
-    profitYear,
-    searchResults,
-    data,
-    recordCount
-  });
   const columnDefs = useMemo(() => GetProfitShareReportColumns(), []);
 
   const createRequest = useCallback(
@@ -80,7 +72,6 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
         pageSize
       );
       if (params) {
-        console.log('Executing initial search with params:', params);
         await triggerSearch(params, false);
       }
     };
@@ -100,6 +91,15 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
     },
     [handleSortChange]
   );
+
+  // Show loading spinner when fetching data
+  if (isFetching && data.length === 0) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <>
