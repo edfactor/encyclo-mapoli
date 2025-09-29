@@ -258,9 +258,9 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
+            setInitialPageSize(value);
             handlePaginationChange(0, value);
             setInitialSearchLoaded(true);
-            setInitialPageSize(value);
           }}
           recordCount={distributionsAndForfeitures.response.total}
         />
