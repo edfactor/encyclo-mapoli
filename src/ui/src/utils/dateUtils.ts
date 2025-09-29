@@ -67,9 +67,9 @@ export const tryddmmyyyyToDate = (date?: string | Date | null): Date | null => {
   try {
     let parsedDate: Date | null = null;
 
-    // Case 1: Try parsing as DD/MM/YYYY format
+    // Case 1: Try parsing as MM/DD/YYYY format
     if (typeof date === "string" && date.includes("/") && date.split("/").length === 3) {
-      const tempDate = parse(date, "dd/MM/yyyy", new Date());
+      const tempDate = parse(date, "MM/dd/yyyy", new Date());
       if (isValid(tempDate)) {
         parsedDate = tempDate;
       }
