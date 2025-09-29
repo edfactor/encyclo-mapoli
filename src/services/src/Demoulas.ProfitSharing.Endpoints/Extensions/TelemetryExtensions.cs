@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Security.Claims;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Common.Contracts;
@@ -213,43 +213,6 @@ public static class TelemetryExtensions
             logger?.LogError(exception, "Unhandled exception in {Endpoint} for user role {UserRole} (correlation: {CorrelationId}): {ExceptionType}",
                 endpointName, userRole, correlationId, exception.GetType().Name);
         }
-    }
-
-    /// <summary>
-    /// Helper method to mask sensitive data in log messages.
-    /// </summary>
-    /// <param name="value">The value to mask</param>
-    /// <param name="fieldName">The field name (for context-aware masking)</param>
-    /// <returns>Masked value safe for logging</returns>
-    public static string MaskSensitiveValue(string? value, string fieldName)
-    {
-        if (string.IsNullOrEmpty(value))
-        {
-            return "null";
-        }
-
-        return fieldName.ToLowerInvariant() switch
-        {
-            "ssn" or "socialsecuritynumber" => value.Length >= 4 ? $"XXX-XX-{value[^4..]}" : "XXX-XX-XXXX",
-            "email" => MaskEmail(value),
-            "phone" or "phonenumber" => value.Length >= 4 ? $"XXX-XXX-{value[^4..]}" : "XXX-XXX-XXXX",
-            _ => value.Length > 4 ? $"{value[..2]}***{value[^2..]}" : "****"
-        };
-    }
-
-    private static string MaskEmail(string email)
-    {
-        var atIndex = email.IndexOf('@');
-        if (atIndex <= 0)
-        {
-            return "***@***.***";
-        }
-
-        var localPart = email[..atIndex];
-        var domainPart = email[(atIndex + 1)..];
-
-        var maskedLocal = localPart.Length > 2 ? $"{localPart[0]}***{localPart[^1]}" : "***";
-        return $"{maskedLocal}@{domainPart}";
     }
 
     /// <summary>
