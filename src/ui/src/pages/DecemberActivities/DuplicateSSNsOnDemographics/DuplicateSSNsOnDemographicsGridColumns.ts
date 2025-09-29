@@ -18,7 +18,10 @@ export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
     createNameColumn({
       field: "name"
     }),
-    createAddressColumn({}),
+    createAddressColumn({
+      field1: "street",
+      field2: "street2"
+    }),
     createCityColumn({
       valueGetter: (params) => params.data.address?.city || ""
     }),
