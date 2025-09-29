@@ -40,7 +40,6 @@ export const ROUTES = {
   REHIRE_FORFEITURES: "unforfeitures",
   PROFIT_SHARE_REPORT: "profit-share-report",
   PROFIT_SHARE_TOTALS: "profit-share-totals",
-  PROFIT_SHARE_REPORT_EDIT_RUN: "profit-share-report-edit-run",
   PROFIT_SHARE_UPDATE: "profit-share-update",
   PROFNEW: "/",
 
@@ -146,7 +145,6 @@ export const CAPTIONS = {
   PROFNEW: "PROFNEW",
   PROFIT_SHARE_BY_STORE: "Profit Share by Store (QPAY066TA)",
   PROFIT_SHARE_GROSS_REPORT: "Profit Share Gross Report (QPAY501)",
-  PROFIT_SHARE_REPORT_EDIT_RUN: "Profit Share Report Edit Run (PAY426N)",
   PROFIT_SHARE_REPORT_FINAL_RUN: "Profit Share Report Final Run (PAY426N)",
   PROFIT_SHARE_REPORT: "Profit Share Report (PAY426)",
   PROFIT_SHARE_TOTALS: "Profit Share Totals Report (PAY426)",

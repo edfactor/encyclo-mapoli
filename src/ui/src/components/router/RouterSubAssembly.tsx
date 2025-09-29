@@ -16,7 +16,6 @@ import NewPSLabels from "../../pages/FiscalClose/ProfitShareByStore/NewPSLabels"
 import ProfitShareByStore from "../../pages/FiscalClose/ProfitShareByStore/ProfitShareByStore";
 import Under21TA from "../../pages/FiscalClose/ProfitShareByStore/Under21/Under21TA";
 import Under21Report from "../../pages/FiscalClose/ProfitShareByStore/Under21Report";
-import ProfitShareReportEditRun from "../../pages/FiscalFlow/ProfitShareReportEditRun/ProfitShareReportEditRun";
 import Forfeit from "../../pages/Forfeit/Forfeit";
 import FrozenSummary from "../../pages/FrozenSummary/FrozenSummary";
 import MasterInquiry from "../../pages/MasterInquiry/MasterInquiry";
@@ -273,9 +272,6 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={ROUTES.FISCAL_CLOSE}
                   element={<></>}></Route>
-                <Route
-                  path={ROUTES.PROFIT_SHARE_REPORT_EDIT_RUN}
-                  element={<ProfitShareReportEditRun />}></Route>
                 <Route
                   path={ROUTES.PROFIT_SHARE_UPDATE}
                   element={<ProfitShareEditUpdate />}></Route>
