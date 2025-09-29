@@ -1,4 +1,4 @@
-import { Button, Grid, Stack } from "@mui/material";
+import { Button, Grid, Stack, Tooltip } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import TotalsGrid from "components/TotalsGrid/TotalsGrid";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
@@ -8,14 +8,15 @@ import { useLazyGetUpdateSummaryQuery, useUpdateEnrollmentMutation } from "redux
 import { RootState } from "reduxstore/store";
 import { DSMAccordion, numberToCurrency, Page, SmartModal } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
-import Pay450Grid from "./Pay450Grid";
-import Pay450SearchFilters from "./Pay450SearchFilters";
+import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
+import PayMasterUpdateGrid from "./PayMasterUpdateGrid";
+import PayMasterUpdateSearchFilters from "./PayMasterUpdateSearchFilter";
 
 interface ProfitYearSearch {
   profitYear: number;
 }
 
-const Pay450Summary = () => {
+const PayMasterUpdateSummary = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [pageNumberReset, setPageNumberReset] = useState(false);
@@ -23,6 +24,7 @@ const Pay450Summary = () => {
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const { updateSummary } = useSelector((state: RootState) => state.yearsEnd);
   const navigationList = useSelector((state: RootState) => state.navigation.navigationData);
+  const isReadOnly = useReadOnlyNavigation();
 
   const [getUpdateSummary] = useLazyGetUpdateSummaryQuery();
   const [updateEnrollment] = useUpdateEnrollmentMutation();
@@ -90,16 +92,27 @@ const Pay450Summary = () => {
   const renderActionNode = () => {
     if (!updateSummary) return null;
 
+    const updateButton = (
+      <Button
+        onClick={isReadOnly ? undefined : () => setIsModalOpen(true)}
+        variant="outlined"
+        disabled={isReadOnly}
+        className="h-10 min-w-fit whitespace-nowrap">
+        Update
+      </Button>
+    );
+
     return (
       <Stack
         direction="row"
         spacing={2}>
-        <Button
-          onClick={() => setIsModalOpen(true)}
-          variant="outlined"
-          className="h-10 min-w-fit whitespace-nowrap">
-          Update
-        </Button>
+        {isReadOnly ? (
+          <Tooltip title="You are in read-only mode and cannot update enrollment.">
+            <span>{updateButton}</span>
+          </Tooltip>
+        ) : (
+          updateButton
+        )}
         <StatusDropdownActionNode onStatusChange={handleStatusChange} />
       </Stack>
     );
@@ -154,7 +167,7 @@ const Pay450Summary = () => {
         rowSpacing="24px">
         <Grid width={"100%"}>
           <DSMAccordion title="Filter">
-            <Pay450SearchFilters
+            <PayMasterUpdateSearchFilters
               onSearch={onSearch}
               setPageReset={setPageNumberReset}
             />
@@ -189,7 +202,7 @@ const Pay450Summary = () => {
           </Grid>
         )}
         <Grid width="100%">
-          <Pay450Grid
+          <PayMasterUpdateGrid
             initialSearchLoaded={initialSearchLoaded}
             setInitialSearchLoaded={setInitialSearchLoaded}
             profitYear={fiscalCloseProfitYear}
@@ -223,4 +236,4 @@ const Pay450Summary = () => {
   );
 };
 
-export default Pay450Summary;
+export default PayMasterUpdateSummary;

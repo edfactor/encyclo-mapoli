@@ -3,8 +3,6 @@ import {
   createCurrencyColumn,
   createHoursColumn,
   createStateColumn,
-  createStatusColumn,
-  createTaxCodeColumn,
   createYearColumn,
   createYesOrNoColumn
 } from "../../utils/gridColumnFactory";
@@ -14,8 +12,7 @@ export const GetForfeituresTransactionGridColumns = (): ColDef[] => {
     createYearColumn({
       headerName: "Profit Year",
       field: "profitYear",
-      minWidth: 100,
-      alignment: "right",
+
       sortable: true,
       valueFormatter: (params) => {
         const year = params.data.profitYear;
@@ -86,15 +83,11 @@ export const GetForfeituresTransactionGridColumns = (): ColDef[] => {
       }
     },
     createHoursColumn({
-      field: "currentHoursYear",
-      minWidth: 120,
-      sortable: false
+      field: "currentHoursYear"
     }),
     createCurrencyColumn({
       headerName: "Wages",
-      field: "currentIncomeYear",
-      minWidth: 120,
-      sortable: false
+      field: "currentIncomeYear"
     }),
     {
       headerName: "Comment Type",

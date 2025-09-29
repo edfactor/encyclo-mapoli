@@ -67,6 +67,27 @@ const documentationFiles = [
     title: "Telemetry Overview",
     filename: "TELEMETRY.md",
     description: "High-level overview of telemetry implementation and system architecture"
+  },
+  {
+    key: "read-only-functionality",
+    title: "Read-Only Functionality Guide",
+    filename: "READ_ONLY_FUNCTIONALITY.md",
+    description:
+      "Complete guide to read-only role implementation covering architecture, implementation patterns, testing, and maintenance for ITDEVOPS and AUDITOR roles"
+  },
+  {
+    key: "read-only-quick-reference",
+    title: "Read-Only Quick Reference",
+    filename: "READ_ONLY_QUICK_REFERENCE.md",
+    description:
+      "Developer cheat sheet with copy-paste code examples, implementation checklist, common patterns, and troubleshooting guide for read-only features"
+  },
+  {
+    key: "ps-1623-summary",
+    title: "PS-1623 Read-Only Implementation Summary",
+    filename: "PS-1623_READ_ONLY_SUMMARY.md",
+    description:
+      "Executive summary of PS-1623 read-only role implementation including status tracking, impact assessment, and deployment verification steps"
   }
 ];
 

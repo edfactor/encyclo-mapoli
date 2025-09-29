@@ -41,7 +41,7 @@ BEGIN
     VALUES(6,2, 'Duplicate Names and Birthdays', '','duplicate-names-and-birthdays', 1, 4, '', 0, 1);
 --sub values for December Activities
     INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED, IS_NAVIGABLE)
-    VALUES(7,1, 'Military Contributions', '008-13','military-entry-and-modification', 1, 3, '', 0, 1);
+    VALUES(7,1, 'Military Contributions', '008-13','military-contribution', 1, 3, '', 0, 1);
 
     INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED, IS_NAVIGABLE)
     VALUES(8,1, 'Unforfeit', 'QPREV-PROF','unforfeitures', 1, 2, '', 0, 1);
@@ -392,6 +392,8 @@ BEGIN
     INSERT INTO NAVIGATION_PREREQUISITES (NAVIGATION_ID, PREREQUISITE_ID) VALUES (60, 13);
     INSERT INTO NAVIGATION_PREREQUISITES (NAVIGATION_ID, PREREQUISITE_ID) VALUES (60, 8);
     INSERT INTO NAVIGATION_PREREQUISITES (NAVIGATION_ID, PREREQUISITE_ID) VALUES (60, 10);
+
+    UPDATE NAVIGATION_ROLE SET IS_READ_ONLY=1 where ID IN ( 6, 9 );
 
 END;
 COMMIT ;

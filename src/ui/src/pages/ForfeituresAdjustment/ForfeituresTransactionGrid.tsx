@@ -1,8 +1,9 @@
 import { Typography, CircularProgress } from "@mui/material";
-import { memo, useMemo } from "react";
+import { memo, useMemo, useCallback } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import { GetForfeituresTransactionGridColumns } from "./ForfeituresTransactionGridColumns";
+import { useGridPagination } from "../../hooks/useGridPagination";
 
 interface TransactionData {
   results: any[];
@@ -12,35 +13,35 @@ interface TransactionData {
 interface ForfeituresTransactionGridProps {
   transactionData?: TransactionData | null;
   isLoading?: boolean;
-  gridPagination?: {
-    pageNumber: number;
-    pageSize: number;
-    sortParams: any;
-  };
-  onPaginationChange?: (pageNumber: number, pageSize: number) => void;
+  onPaginationChange?: (pageNumber: number, pageSize: number, sortParams: any) => void;
   onSortChange?: (sortParams: any) => void;
 }
 
 const ForfeituresTransactionGrid: React.FC<ForfeituresTransactionGridProps> = memo(
-  ({ transactionData, isLoading, gridPagination, onPaginationChange, onSortChange }) => {
+  ({ transactionData, isLoading, onPaginationChange, onSortChange }) => {
     const columnDefs = useMemo(() => GetForfeituresTransactionGridColumns(), []);
+
+    const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
+      initialPageSize: 25,
+      initialSortBy: "transactionDate",
+      initialSortDescending: true,
+      onPaginationChange: useCallback((pageNum: number, pageSz: number, sortPrms: any) => {
+        if (onPaginationChange) {
+          onPaginationChange(pageNum, pageSz, sortPrms);
+        }
+      }, [onPaginationChange])
+    });
+
+    const handleSortChangeInternal = useCallback((sortParams: any) => {
+      handleSortChange(sortParams);
+      if (onSortChange) {
+        onSortChange(sortParams);
+      }
+    }, [handleSortChange, onSortChange]);
 
     if (isLoading) {
       return <CircularProgress />;
     }
-
-
-    const handlePaginationChange = (pageNumber: number, pageSize: number) => {
-      if (onPaginationChange) {
-        onPaginationChange(pageNumber, pageSize);
-      }
-    };
-
-    const handleSortChange = (sortParams: any) => {
-      if (onSortChange) {
-        onSortChange(sortParams);
-      }
-    };
 
     const displayData = transactionData || { results: [], total: 0 };
 
@@ -56,7 +57,7 @@ const ForfeituresTransactionGrid: React.FC<ForfeituresTransactionGridProps> = me
           </div>
           <DSMGrid
             preferenceKey={`${CAPTIONS.FORFEITURES_ADJUSTMENT}_TRANSACTIONS`}
-            handleSortChanged={handleSortChange}
+            handleSortChanged={handleSortChangeInternal}
             isLoading={!!isLoading}
             providedOptions={{
               rowData: displayData.results,
@@ -70,13 +71,13 @@ const ForfeituresTransactionGrid: React.FC<ForfeituresTransactionGridProps> = me
               }
             }}
           />
-          {gridPagination && onPaginationChange && (
+          {onPaginationChange && (
             <Pagination
-              pageNumber={gridPagination.pageNumber}
+              pageNumber={pageNumber}
               setPageNumber={(value: number) => {
-                handlePaginationChange(value - 1, gridPagination.pageSize);
+                handlePaginationChange(value - 1, pageSize);
               }}
-              pageSize={gridPagination.pageSize}
+              pageSize={pageSize}
               setPageSize={(value: number) => {
                 handlePaginationChange(0, value);
               }}
@@ -92,9 +93,6 @@ const ForfeituresTransactionGrid: React.FC<ForfeituresTransactionGridProps> = me
       prevProps.transactionData?.results === nextProps.transactionData?.results &&
       prevProps.transactionData?.total === nextProps.transactionData?.total &&
       prevProps.isLoading === nextProps.isLoading &&
-      prevProps.gridPagination?.pageNumber === nextProps.gridPagination?.pageNumber &&
-      prevProps.gridPagination?.pageSize === nextProps.gridPagination?.pageSize &&
-      prevProps.gridPagination?.sortParams === nextProps.gridPagination?.sortParams &&
       prevProps.onPaginationChange === nextProps.onPaginationChange &&
       prevProps.onSortChange === nextProps.onSortChange
     );

@@ -8,10 +8,11 @@ import {
 } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { CalendarResponseDto, ForfeitureAdjustmentUpdateRequest, StartAndEndDateRequest } from "reduxstore/types";
-import { formatNumberWithComma, ISortParams, setMessage } from "smart-ui-library";
+import { formatNumberWithComma, setMessage } from "smart-ui-library";
 import { Messages } from "../utils/messageDictonary";
 import useDecemberFlowProfitYear from "./useDecemberFlowProfitYear";
 import { useEditState } from "./useEditState";
+import { useGridPagination } from "./useGridPagination";
 import { useRowSelection } from "./useRowSelection";
 
 interface UnForfeitGridConfig {
@@ -37,12 +38,6 @@ export const useUnForfeitGrid = ({
   setHasUnsavedChanges,
   fiscalCalendarYear
 }: UnForfeitGridConfig) => {
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "fullName",
-    isSortDescending: false
-  });
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
   const [pendingSuccessMessage, setPendingSuccessMessage] = useState<string | null>(null);
@@ -60,6 +55,50 @@ export const useUnForfeitGrid = ({
   const selectionState = useRowSelection();
   const gridRef = useRef<any>(null);
   const prevUnForfeits = useRef<any>(null);
+
+  // Create a request object based on current parameters
+  const createRequest = useCallback(
+    (
+      skip: number,
+      sortBy: string,
+      isSortDescending: boolean
+    ): (StartAndEndDateRequest & { archive?: boolean }) | null => {
+      const baseRequest: StartAndEndDateRequest = {
+        beginningDate: unForfeitsQueryParams?.beginningDate || fiscalCalendarYear?.fiscalBeginDate || "",
+        endingDate: unForfeitsQueryParams?.endingDate || fiscalCalendarYear?.fiscalEndDate || "",
+        profitYear: selectedProfitYear,
+        pagination: { skip, take: 25, sortBy, isSortDescending } // Use fixed pageSize for now, will be updated dynamically
+      };
+
+      if (!baseRequest.beginningDate || !baseRequest.endingDate) return null;
+
+      const finalRequest = shouldArchive ? { ...baseRequest, archive: true } : baseRequest;
+      return finalRequest;
+    },
+    [
+      unForfeitsQueryParams,
+      fiscalCalendarYear?.fiscalBeginDate,
+      fiscalCalendarYear?.fiscalEndDate,
+      shouldArchive,
+      selectedProfitYear
+    ]
+  );
+
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "fullName",
+    initialSortDescending: false,
+    onPaginationChange: useCallback(async (pageNum: number, pageSz: number, sortPrms: any) => {
+      if (initialSearchLoaded) {
+        const request = createRequest(pageNum * pageSz, sortPrms.sortBy, sortPrms.isSortDescending);
+        if (request && request.pagination) {
+          // Update the pageSize in the request
+          request.pagination.take = pageSz;
+          await triggerSearch(request, false);
+        }
+      }
+    }, [initialSearchLoaded, createRequest, triggerSearch])
+  });
 
   const onGridReady = useCallback((params: { api: GridApi }) => {
     setGridApi(params.api);
@@ -90,39 +129,10 @@ export const useUnForfeitGrid = ({
       unForfeits?.response?.total !== undefined &&
       unForfeits.response.total !== prevUnForfeits.current?.response?.total
     ) {
-      setPageNumber(0);
+      resetPagination();
     }
     prevUnForfeits.current = unForfeits;
-  }, [unForfeits]);
-
-  // Create a request object based on current parameters
-  const createRequest = useCallback(
-    (
-      skip: number,
-      sortBy: string,
-      isSortDescending: boolean
-    ): (StartAndEndDateRequest & { archive?: boolean }) | null => {
-      const baseRequest: StartAndEndDateRequest = {
-        beginningDate: unForfeitsQueryParams?.beginningDate || fiscalCalendarYear?.fiscalBeginDate || "",
-        endingDate: unForfeitsQueryParams?.endingDate || fiscalCalendarYear?.fiscalEndDate || "",
-        profitYear: selectedProfitYear,
-        pagination: { skip, take: pageSize, sortBy, isSortDescending }
-      };
-
-      if (!baseRequest.beginningDate || !baseRequest.endingDate) return null;
-
-      const finalRequest = shouldArchive ? { ...baseRequest, archive: true } : baseRequest;
-      return finalRequest;
-    },
-    [
-      unForfeitsQueryParams,
-      fiscalCalendarYear?.fiscalBeginDate,
-      fiscalCalendarYear?.fiscalEndDate,
-      pageSize,
-      shouldArchive,
-      selectedProfitYear
-    ]
-  );
+  }, [unForfeits, resetPagination]);
 
   const performSearch = useCallback(
     async (skip: number, sortBy: string, isSortDescending: boolean) => {
@@ -272,8 +282,8 @@ export const useUnForfeitGrid = ({
 
   // Reset page number to 0 when resetPageFlag changes
   useEffect(() => {
-    setPageNumber(0);
-  }, [resetPageFlag]);
+    resetPagination();
+  }, [resetPageFlag, resetPagination]);
 
   useEffect(() => {
     const hasChanges = selectionState.selectedRowIds.length > 0 || Object.keys(editState.editedValues).length > 0;
@@ -306,10 +316,8 @@ export const useUnForfeitGrid = ({
   }, [editState.loadingRowIds]);
 
   // Sort handler that immediately triggers a search with the new sort parameters
-  const sortEventHandler = (update: ISortParams) => {
-    setSortParams(update);
-    setPageNumber(0);
-    performSearch(0, update.sortBy, update.isSortDescending);
+  const sortEventHandler = (update: any) => {
+    handleSortChange(update);
   };
 
   // Handle row expansion toggle
@@ -364,7 +372,7 @@ export const useUnForfeitGrid = ({
         alert("Please save your changes.");
         return;
       }
-      setPageNumber(value - 1);
+      handlePaginationChange(value - 1, pageSize);
       setInitialSearchLoaded(true);
     },
     setPageSize: (value: number) => {
@@ -372,8 +380,7 @@ export const useUnForfeitGrid = ({
         alert("Please save your changes.");
         return;
       }
-      setPageSize(value);
-      setPageNumber(0);
+      handlePaginationChange(0, value);
       setInitialSearchLoaded(true);
     }
   };

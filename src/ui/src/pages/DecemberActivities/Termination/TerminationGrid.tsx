@@ -8,19 +8,14 @@ import {
 } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { CalendarResponseDto, ForfeitureAdjustmentUpdateRequest, StartAndEndDateRequest } from "reduxstore/types";
-import {
-  DSMGrid,
-  formatNumberWithComma,
-  ISortParams,
-  numberToCurrency,
-  Pagination,
-  setMessage
-} from "smart-ui-library";
+import { DSMGrid, formatNumberWithComma, numberToCurrency, Pagination, setMessage } from "smart-ui-library";
 import { ReportSummary } from "../../../components/ReportSummary";
 import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { useEditState } from "../../../hooks/useEditState";
+import { useGridPagination } from "../../../hooks/useGridPagination";
+import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
 import { useRowSelection } from "../../../hooks/useRowSelection";
 import { Messages } from "../../../utils/messageDictonary";
 import { TerminationSearchRequest } from "./Termination";
@@ -52,12 +47,6 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   onArchiveHandled,
   onErrorOccurred
 }) => {
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
-    isSortDescending: true
-  });
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
   const dispatch = useDispatch();
@@ -73,6 +62,9 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   const [updateForfeitureAdjustment, { isLoading: isSingleSaving }] = useUpdateForfeitureAdjustmentMutation();
   const lastRequestKeyRef = useRef<string | null>(null);
 
+  // Check if current navigation should be read-only
+  const isReadOnly = useReadOnlyNavigation();
+
   // Use separate hooks for edit and selection state
   const editState = useEditState();
   const selectionState = useRowSelection();
@@ -82,27 +74,52 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       skip: number,
       sortBy: string,
       isSortDescending: boolean,
-      profitYear: number
+      profitYear: number,
+      pageSz: number
     ): (StartAndEndDateRequest & { archive?: boolean }) | null => {
       const base: StartAndEndDateRequest = searchParams
         ? {
             ...searchParams,
             profitYear,
-            pagination: { skip, take: pageSize, sortBy, isSortDescending }
+            pagination: { skip, take: pageSz, sortBy, isSortDescending }
           }
         : {
             beginningDate: fiscalData?.fiscalBeginDate || "",
             endingDate: fiscalData?.fiscalEndDate || "",
             profitYear,
-            pagination: { skip, take: pageSize, sortBy, isSortDescending }
+            pagination: { skip, take: pageSz, sortBy, isSortDescending }
           };
 
       if (!base.beginningDate || !base.endingDate) return null;
 
       return shouldArchive ? { ...base, archive: true } : base;
     },
-    [searchParams, pageSize, fiscalData?.fiscalBeginDate, fiscalData?.fiscalEndDate, shouldArchive]
+    [searchParams, fiscalData?.fiscalBeginDate, fiscalData?.fiscalEndDate, shouldArchive]
   );
+
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
+    useGridPagination({
+      initialPageSize: 25,
+      initialSortBy: "badgeNumber",
+      initialSortDescending: true,
+      onPaginationChange: useCallback(
+        async (pageNum: number, pageSz: number, sortPrms: any) => {
+          if (initialSearchLoaded && searchParams) {
+            const params = createRequest(
+              pageNum * pageSz,
+              sortPrms.sortBy,
+              sortPrms.isSortDescending,
+              selectedProfitYear,
+              pageSz
+            );
+            if (params) {
+              await triggerSearch(params, false);
+            }
+          }
+        },
+        [initialSearchLoaded, searchParams, createRequest, selectedProfitYear, triggerSearch]
+      )
+    });
 
   // Effect to show success message after grid finishes loading
   useEffect(() => {
@@ -219,7 +236,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
             pageNumber * pageSize,
             sortParams.sortBy,
             sortParams.isSortDescending,
-            selectedProfitYear
+            selectedProfitYear,
+            pageSize
           );
 
           if (params) {
@@ -361,8 +379,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
 
   // Reset page number to 0 when resetPageFlag changes
   useEffect(() => {
-    setPageNumber(0);
-  }, [resetPageFlag]);
+    resetPagination();
+  }, [resetPageFlag, resetPagination]);
 
   // Track unsaved changes based on edit state only
   useEffect(() => {
@@ -406,12 +424,13 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       sortBy: string,
       isSortDescending: boolean,
       profitYear: number,
+      pageSz: number,
       beginningDate?: string,
       endingDate?: string,
       archive?: boolean
     ) =>
-      `${skip}|${pageSize}|${sortBy}|${isSortDescending}|${profitYear}|${beginningDate ?? ""}|${endingDate ?? ""}|${archive ? "1" : "0"}`,
-    [pageSize]
+      `${skip}|${pageSz}|${sortBy}|${isSortDescending}|${profitYear}|${beginningDate ?? ""}|${endingDate ?? ""}|${archive ? "1" : "0"}`,
+    []
   );
 
   // Unified effect to handle all data fetching scenarios
@@ -424,7 +443,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
         pageNumber * pageSize,
         sortParams.sortBy,
         sortParams.isSortDescending,
-        selectedProfitYear
+        selectedProfitYear,
+        pageSize
       );
 
       if (params) {
@@ -433,6 +453,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
           sortParams.sortBy,
           sortParams.isSortDescending,
           selectedProfitYear,
+          pageSize,
           (params as any).beginningDate,
           (params as any).endingDate,
           (params as any).archive
@@ -554,7 +575,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
         selectionState.selectedRowIds,
         selectedProfitYear,
         handleSave,
-        handleBulkSave
+        handleBulkSave,
+        isReadOnly
       ),
     [
       addRowToSelectedRows,
@@ -562,7 +584,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       selectionState.selectedRowIds,
       selectedProfitYear,
       handleSave,
-      handleBulkSave
+      handleBulkSave,
+      isReadOnly
     ]
   );
 
@@ -686,14 +709,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     return params.data.isDetail ? "bg-gray-100" : "";
   };
 
-  const sortEventHandler = (update: ISortParams) => {
-    setSortParams((prev) => {
-      if (prev.sortBy === update.sortBy && prev.isSortDescending === update.isSortDescending) {
-        return prev; // no change
-      }
-      return update;
-    });
-    setPageNumber((prev) => (prev === 0 ? prev : 0));
+  const sortEventHandler = (update: any) => {
+    handleSortChange(update);
   };
 
   return (
@@ -743,7 +760,6 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
           </div>
 
           <DSMGrid
-            preferenceKey={"QPREV-PROF"}
             handleSortChanged={sortEventHandler}
             maxHeight={gridMaxHeight}
             isLoading={isFetching}
@@ -756,8 +772,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
               getRowClass: getRowClass,
               rowSelection: {
                 mode: "multiRow",
-                checkboxes: true,
-                headerCheckbox: true,
+                checkboxes: false,
+                headerCheckbox: false,
                 enableClickSelection: false
               },
               rowHeight: 40,
@@ -781,7 +797,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
                   alert("Please save your changes.");
                   return;
                 }
-                setPageNumber(value - 1);
+                handlePaginationChange(value - 1, pageSize);
                 setInitialSearchLoaded(true);
               }}
               pageSize={pageSize}
@@ -790,8 +806,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
                   alert("Please save your changes.");
                   return;
                 }
-                setPageSize(value);
-                setPageNumber(1);
+                handlePaginationChange(0, value);
                 setInitialSearchLoaded(true);
               }}
               recordCount={termination.response.total || 0}

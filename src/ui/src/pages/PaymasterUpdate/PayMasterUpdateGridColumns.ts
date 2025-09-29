@@ -6,17 +6,12 @@ import {
   createStoreColumn
 } from "../../utils/gridColumnFactory";
 
-export const GetPay450GridColumns = (navFunction: (badgeNumber: string) => void): (ColDef | ColGroupDef)[] => {
+export const GetPayMasterUpdateGridColumns = (navFunction: (badgeNumber: string) => void): (ColDef | ColGroupDef)[] => {
   return [
     createBadgeColumn({
-      headerName: "Badge",
-      minWidth: 100,
-      alignment: "left",
       navigateFunction: navFunction
     }),
-    createNameColumn({
-      field: "employeeName"
-    }),
+    createNameColumn({}),
     createStoreColumn({
       minWidth: 80
     }),
@@ -25,13 +20,11 @@ export const GetPay450GridColumns = (navFunction: (badgeNumber: string) => void)
       children: [
         createCurrencyColumn({
           headerName: "P/S Amount",
-          field: "psAmountOriginal",
-          minWidth: 120
+          field: "psAmountOriginal"
         }),
         createCurrencyColumn({
           headerName: "P/S Vested",
-          field: "psVestedOriginal",
-          minWidth: 120
+          field: "psVestedOriginal"
         }),
         {
           headerName: "Years",
@@ -56,13 +49,11 @@ export const GetPay450GridColumns = (navFunction: (badgeNumber: string) => void)
       children: [
         createCurrencyColumn({
           headerName: "P/S Amount",
-          field: "psAmountUpdated",
-          minWidth: 120
+          field: "psAmountUpdated"
         }),
         createCurrencyColumn({
           headerName: "P/S Vested",
-          field: "psVestedUpdated",
-          minWidth: 120
+          field: "psVestedUpdated"
         }),
         {
           headerName: "Years",
