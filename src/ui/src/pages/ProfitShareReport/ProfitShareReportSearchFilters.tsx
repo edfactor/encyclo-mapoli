@@ -30,9 +30,10 @@ const schema = yup.object().shape({
 interface ProfitShareReportSearchFilterProps {
   profitYear: number;
   presetParams: FilterParams;
+  onSearchParamsUpdate?: (searchParams: any) => void;
 }
 
-const ProfitShareReportSearchFilters: React.FC<ProfitShareReportSearchFilterProps> = ({ profitYear, presetParams }) => {
+const ProfitShareReportSearchFilters: React.FC<ProfitShareReportSearchFilterProps> = ({ profitYear, presetParams, onSearchParamsUpdate }) => {
   const [triggerSearch, { isFetching }] = useLazyGetYearEndProfitSharingReportQuery();
   const dispatch = useDispatch();
 
@@ -63,14 +64,19 @@ const ProfitShareReportSearchFilters: React.FC<ProfitShareReportSearchFilterProp
       profitYear: profitYear,
       pagination: {
         skip: 0,
-        take: 10,
+        take: 25,
         sortBy: "badgeNumber",
-        isSortDescending: true
+        isSortDescending: false
       }
     };
 
     triggerSearch(request, false);
     dispatch(setYearEndProfitSharingReportQueryParams(profitYear));
+
+    // Notify parent component of search parameters
+    if (onSearchParamsUpdate) {
+      onSearchParamsUpdate(request);
+    }
   });
 
   const handleReset = () => {
