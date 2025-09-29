@@ -17,7 +17,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Military;
 
-public class GetMilitaryContributionRecords : ProfitSharingEndpoint<MilitaryContributionRequest, Results<Ok<PaginatedResponseDto<MilitaryContributionResponse>>, ProblemHttpResult>>
+public class GetMilitaryContributionRecords : ProfitSharingEndpoint<GetMilitaryContributionRequest, Results<Ok<PaginatedResponseDto<MilitaryContributionResponse>>, ProblemHttpResult>>
 {
     private readonly IMilitaryService _militaryService;
     private readonly IAuditService _auditService;
@@ -43,16 +43,16 @@ public class GetMilitaryContributionRecords : ProfitSharingEndpoint<MilitaryCont
         Group<MilitaryGroup>();
     }
 
-    public override async Task<Results<Ok<PaginatedResponseDto<MilitaryContributionResponse>>, ProblemHttpResult>> ExecuteAsync(MilitaryContributionRequest req, CancellationToken ct)
+    public override async Task<Results<Ok<PaginatedResponseDto<MilitaryContributionResponse>>, ProblemHttpResult>> ExecuteAsync(GetMilitaryContributionRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 
         try
         {
             this.RecordRequestMetrics(HttpContext, _logger, req);
-
+            var currentYear = (short)DateTimeOffset.UtcNow.Year;
             var response = await _auditService.ArchiveCompletedReportAsync(ReportName,
-                req.ProfitYear,
+                currentYear,
                 req,
                 (archiveReq, isArchiveRequest, cancellationToken) => _militaryService.GetMilitaryServiceRecordAsync(archiveReq, isArchiveRequest, cancellationToken),
                 ct);
@@ -69,13 +69,13 @@ public class GetMilitaryContributionRecords : ProfitSharingEndpoint<MilitaryCont
                     new("record_type", "military-contributions"),
                     new("endpoint", "GetMilitaryContributionRecords"));
 
-                _logger.LogInformation("Military contribution records query completed for ProfitYear: {ProfitYear}, returned {ResultCount} records (correlation: {CorrelationId})",
-                    req.ProfitYear, resultCount, HttpContext.TraceIdentifier);
+                _logger.LogInformation("Military contribution records query completed for Year: {Year}, returned {ResultCount} records (correlation: {CorrelationId})",
+                    currentYear, resultCount, HttpContext.TraceIdentifier);
             }
             else
             {
-                _logger.LogWarning("Military contribution records query failed for ProfitYear: {ProfitYear} - {Error} (correlation: {CorrelationId})",
-                    req.ProfitYear, response.Error, HttpContext.TraceIdentifier);
+                _logger.LogWarning("Military contribution records query failed for Year: {Year} - {Error} (correlation: {CorrelationId})",
+                    currentYear, response.Error, HttpContext.TraceIdentifier);
             }
 
             var httpResult = response.Match<Results<Ok<PaginatedResponseDto<MilitaryContributionResponse>>, ProblemHttpResult>>(

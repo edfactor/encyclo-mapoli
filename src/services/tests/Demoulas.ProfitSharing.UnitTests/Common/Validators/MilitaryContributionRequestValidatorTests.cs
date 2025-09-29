@@ -28,7 +28,7 @@ public class MilitaryContributionRequestValidatorTests
         var militaryServiceMock = new Mock<IMilitaryService>(MockBehavior.Strict);
         // Default: return success with empty results for GetMilitaryServiceRecordAsync
         militaryServiceMock
-            .Setup(m => m.GetMilitaryServiceRecordAsync(It.IsAny<Demoulas.ProfitSharing.Common.Contracts.Request.Military.MilitaryContributionRequest>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .Setup(m => m.GetMilitaryServiceRecordAsync(It.IsAny<Demoulas.ProfitSharing.Common.Contracts.Request.Military.GetMilitaryContributionRequest>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>>.Success(new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse> { Results = new List<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>() }));
 
         var validator = new MilitaryContributionRequestValidator(employeeLookupMock.Object, militaryServiceMock.Object);
@@ -269,7 +269,7 @@ public class MilitaryContributionRequestValidatorTests
         // Configure the military service mock to return an existing V-only record for contributionYear
         militaryServiceMock.Reset();
         militaryServiceMock
-            .Setup(m => m.GetMilitaryServiceRecordAsync(It.Is<Demoulas.ProfitSharing.Common.Contracts.Request.Military.MilitaryContributionRequest>(r => r.ProfitYear == contributionYear && r.BadgeNumber == req.BadgeNumber), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .Setup(m => m.GetMilitaryServiceRecordAsync(It.Is<Demoulas.ProfitSharing.Common.Contracts.Request.Military.GetMilitaryContributionRequest>(r => r.BadgeNumber == req.BadgeNumber), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>>.Success(new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>
             {
                 Results = new List<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>
@@ -318,7 +318,7 @@ public class MilitaryContributionRequestValidatorTests
         // No existing records needed for this rule
         militaryServiceMock.Reset();
         militaryServiceMock
-            .Setup(m => m.GetMilitaryServiceRecordAsync(It.IsAny<Demoulas.ProfitSharing.Common.Contracts.Request.Military.MilitaryContributionRequest>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .Setup(m => m.GetMilitaryServiceRecordAsync(It.IsAny<Demoulas.ProfitSharing.Common.Contracts.Request.Military.GetMilitaryContributionRequest>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>>.Success(new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>
             {
                 Results = new List<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>()

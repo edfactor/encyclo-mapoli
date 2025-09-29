@@ -32,7 +32,7 @@ public class CreateMilitaryContributionRecord : ProfitSharingRequestEndpoint<Cre
             s.Summary = "Create Military Contribution Record";
             s.ResponseExamples = new Dictionary<int, object>
             {
-                { 200, new MilitaryContributionResponse { ProfitYear = Convert.ToInt16(DateTime.Now.Year) } }
+                { 200, new CreateMilitaryContributionRequest { ProfitYear = Convert.ToInt16(DateTime.Now.Year) } }
             };
             s.ExampleRequest = CreateMilitaryContributionRequest.RequestExample();
         });
@@ -66,8 +66,8 @@ public class CreateMilitaryContributionRecord : ProfitSharingRequestEndpoint<Cre
 
                     this.RecordResponseMetrics(HttpContext, _logger, success);
 
-                    await Send.CreatedAtAsync<GetMilitaryContributionRecords>(
-                        routeValues: new MilitaryContributionRequest
+                    await Send.CreatedAtAsync<CreateMilitaryContributionRecord>(
+                        routeValues: new MilitaryContributionResponse
                         {
                             BadgeNumber = req.BadgeNumber,
                             ProfitYear = req.ProfitYear,

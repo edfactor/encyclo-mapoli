@@ -68,26 +68,21 @@ public class MilitaryService : IMilitaryService
         }, cancellationToken);
     }
 
-    public async Task<Result<PaginatedResponseDto<MilitaryContributionResponse>>> GetMilitaryServiceRecordAsync(MilitaryContributionRequest req, bool isArchiveRequest,
+    public async Task<Result<PaginatedResponseDto<MilitaryContributionResponse>>> GetMilitaryServiceRecordAsync(GetMilitaryContributionRequest req, bool isArchiveRequest,
         CancellationToken cancellationToken = default)
     {
         #region Validation
 
-        var validator = new InlineValidator<MilitaryContributionRequest>();
+        var validator = new InlineValidator<GetMilitaryContributionRequest>();
 
         if (!isArchiveRequest)
         {
             validator.RuleFor(r => r.BadgeNumber)
                 .GreaterThan(0)
-                .WithMessage($"{nameof(MilitaryContributionRequest.BadgeNumber)} must be greater than zero.");
+                .WithMessage($"{nameof(GetMilitaryContributionRequest.BadgeNumber)} must be greater than zero.");
         }
 
-        validator.RuleFor(r => r.ProfitYear)
-            .GreaterThanOrEqualTo((short)2000)
-            .WithMessage($"{nameof(MilitaryContributionRequest.ProfitYear)} must not less than 2000.")
-            .LessThanOrEqualTo((short)DateTime.Today.Year)
-            .WithMessage($"{nameof(MilitaryContributionRequest.ProfitYear)} must not be greater than this year.");
-
+    
         var validationResult = await validator.ValidateAsync(req, cancellationToken);
 
         if (!validationResult.IsValid)
@@ -110,7 +105,7 @@ public class MilitaryService : IMilitaryService
                     c => c.Ssn,
                     cm => cm.Ssn,
                     (pd, d) => new { pd, d })
-                .Where(x => x.pd.ProfitYear == req.ProfitYear && x.pd.CommentTypeId == CommentType.Constants.Military.Id)
+                .Where(x => x.pd.CommentTypeId == CommentType.Constants.Military.Id)
                 .OrderByDescending(x => x.pd.ProfitYear)
                 .ThenByDescending(x => x.pd.CreatedAtUtc)
                 .Select(x => new MilitaryContributionResponse
@@ -118,7 +113,7 @@ public class MilitaryService : IMilitaryService
                     BadgeNumber = x.d.BadgeNumber,
                     ProfitYear = x.pd.ProfitYear,
                     CommentTypeId = x.pd.CommentTypeId,
-                    ContributionDate = new DateOnly(x.pd.YearToDate == 0 ? req.ProfitYear : x.pd.YearToDate, x.pd.MonthToDate == 0 ? 12 : x.pd.MonthToDate, 31),
+                    ContributionDate = new DateOnly(x.pd.YearToDate == 0 ? x.pd.ProfitYear : x.pd.YearToDate, x.pd.MonthToDate == 0 ? 12 : x.pd.MonthToDate, 31),
                     Amount = x.pd.Contribution,
                     IsSupplementalContribution = x.pd.YearsOfServiceCredit == 0,
                     IsExecutive = x.d.PayFrequencyId == Demoulas.ProfitSharing.Data.Entities.PayFrequency.Constants.Monthly
