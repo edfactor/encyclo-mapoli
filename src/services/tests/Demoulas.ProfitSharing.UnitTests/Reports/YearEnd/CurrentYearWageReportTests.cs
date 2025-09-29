@@ -18,6 +18,7 @@ using Demoulas.Util.Extensions;
 using FastEndpoints;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
@@ -30,8 +31,9 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
     public CurrentYearWageReportTests()
     {
         var calendarService = ServiceProvider!.GetRequiredService<ICalendarService>();
+        var logger = ServiceProvider!.GetRequiredService<ILogger<CurrentYearWagesEndpoint>>();
         WagesService mockService = new WagesService(MockDbContextFactory, calendarService);
-        _endpoint = new CurrentYearWagesEndpoint(mockService);
+        _endpoint = new CurrentYearWagesEndpoint(mockService, logger);
     }
 
 
@@ -51,7 +53,7 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
         // Act
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
         var response =
-            await ApiClient.GETAsync<CurrentYearWagesEndpoint, ProfitYearRequest, ReportResponseBase<WagesCurrentYearResponse>>(new ProfitYearRequest{ ProfitYear = 2023});
+            await ApiClient.GETAsync<CurrentYearWagesEndpoint, ProfitYearRequest, ReportResponseBase<WagesCurrentYearResponse>>(new ProfitYearRequest { ProfitYear = 2023 });
 
         // Assert
         response.Result.ReportName.ShouldBe(expectedResponse.ReportName);

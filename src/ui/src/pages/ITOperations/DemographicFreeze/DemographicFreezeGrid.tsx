@@ -1,10 +1,11 @@
 import { Typography } from "@mui/material";
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useMemo, useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetHistoricalFrozenStateResponseQuery } from "reduxstore/api/ItOperationsApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import { GetFreezeColumns } from "./DemographicFreezeGridColumns";
+import { useGridPagination } from "../../../hooks/useGridPagination";
 
 interface DemoFreezeSearchProps {
   initialSearchLoaded: boolean;
@@ -20,46 +21,52 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({
   setPageNumberReset
 }) => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-
   const freezeResults = useSelector((state: RootState) => state.frozen.frozenStateCollectionData);
-
   const [triggerSearch, { isFetching }] = useLazyGetHistoricalFrozenStateResponseQuery();
+
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "createdDateTime",
+    initialSortDescending: true,
+    onPaginationChange: useCallback((pageNum: number, pageSz: number, sortPrms: any) => {
+      if (initialSearchLoaded) {
+        // Trigger search when pagination or sorting changes
+        const request = {
+          skip: pageNum * pageSz,
+          take: pageSz,
+          sortBy: sortPrms.sortBy,
+          isSortDescending: sortPrms.isSortDescending
+        };
+        triggerSearch(request, false);
+      }
+    }, [initialSearchLoaded, triggerSearch])
+  });
 
   const onSearch = useCallback(async () => {
     const request = {
       skip: pageNumber * pageSize,
       take: pageSize,
-      sortBy: "createdDateTime",
-      isSortDescending: true
+      sortBy: sortParams.sortBy,
+      isSortDescending: sortParams.isSortDescending
     };
 
     await triggerSearch(request, false);
-  }, [pageNumber, pageSize, triggerSearch]);
+  }, [pageNumber, pageSize, sortParams, triggerSearch]);
 
   // First useEffect to trigger the search on initial render
   useEffect(() => {
     if (!hasToken) return;
     onSearch();
-  }, [onSearch, hasToken]); // Only depends on onSearch, will execute once when component mounts
-
-  // Second useEffect to handle pagination changes
-  useEffect(() => {
-    // Skip the initial render since we already triggered the search
-    if (initialSearchLoaded) {
-      onSearch();
-    }
-  }, [pageNumber, pageSize, initialSearchLoaded, onSearch]);
+  }, [onSearch, hasToken]);
 
   const columnDefs = useMemo(() => GetFreezeColumns(), []);
 
   useEffect(() => {
     if (pageNumberReset) {
-      setPageNumber(0);
+      resetPagination();
       setPageNumberReset(false);
     }
-  }, [pageNumberReset, setPageNumberReset]);
+  }, [pageNumberReset, setPageNumberReset, resetPagination]);
 
   return (
     <>
@@ -75,6 +82,7 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({
           <DSMGrid
             preferenceKey={"FREEZE"}
             isLoading={isFetching}
+            handleSortChanged={handleSortChange}
             providedOptions={{
               rowData: freezeResults?.results,
               columnDefs: columnDefs
@@ -86,13 +94,12 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
-            setPageNumber(value - 1);
+            handlePaginationChange(value - 1, pageSize);
             setInitialSearchLoaded(true);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
-            setPageSize(value);
-            setPageNumber(1);
+            handlePaginationChange(0, value);
             setInitialSearchLoaded(true);
           }}
           recordCount={freezeResults.total}

@@ -3,9 +3,12 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Microsoft.Extensions.Logging;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc.TerminatedEmployeesReportEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
@@ -13,11 +16,13 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
 public sealed class TerminatedEmployeesReportEndpoint : EndpointWithCsvBase<StartAndEndDateRequest, AdhocTerminatedEmployeeResponse, TerminatedEmployeesReportResponseMap>
 {
     private readonly IAdhocTerminatedEmployeesService _adhocTerminatedEmployeesService;
+    private readonly ILogger<TerminatedEmployeesReportEndpoint> _logger;
 
-    public TerminatedEmployeesReportEndpoint(IAdhocTerminatedEmployeesService adhocTerminatedEmployeesService)
+    public TerminatedEmployeesReportEndpoint(IAdhocTerminatedEmployeesService adhocTerminatedEmployeesService, ILogger<TerminatedEmployeesReportEndpoint> logger)
         : base(Navigation.Constants.RecentlyTerminated)
     {
         _adhocTerminatedEmployeesService = adhocTerminatedEmployeesService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -71,9 +76,54 @@ public sealed class TerminatedEmployeesReportEndpoint : EndpointWithCsvBase<Star
     }
     public override string ReportFileName => "Adhoc Terminated Employees Report";
 
-    public override Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetResponse(StartAndEndDateRequest req, CancellationToken ct)
+    public override async Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetResponse(StartAndEndDateRequest req, CancellationToken ct)
     {
-        return _adhocTerminatedEmployeesService.GetTerminatedEmployees(req, ct);
+        using var activity = this.StartEndpointActivity(HttpContext);
+
+        try
+        {
+            // This endpoint accesses SSN data, so mark as sensitive
+            this.RecordRequestMetrics(HttpContext, _logger, req, "Ssn");
+
+            var result = await _adhocTerminatedEmployeesService.GetTerminatedEmployees(req, ct);
+
+            // Record terminated employees report metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "terminated-employees-report"),
+                new("endpoint", "TerminatedEmployeesReportEndpoint"),
+                new("report_type", "terminated-employees"),
+                new("employee_status", "terminated"));
+
+            var resultCount = result?.Response?.Results?.Count() ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                new("record_type", "terminated-employees"),
+                new("endpoint", "TerminatedEmployeesReportEndpoint"));
+
+            _logger.LogInformation("Terminated employees report generated, returned {Count} employees (correlation: {CorrelationId})",
+                resultCount, HttpContext.TraceIdentifier);
+
+            if (result != null)
+            {
+                this.RecordResponseMetrics(HttpContext, _logger, result);
+                return result;
+            }
+
+            var emptyResult = new ReportResponseBase<AdhocTerminatedEmployeeResponse>
+            {
+                ReportName = ReportFileName,
+                StartDate = DateOnly.FromDateTime(DateTime.Today),
+                EndDate = DateOnly.FromDateTime(DateTime.Today),
+                Response = new() { Results = [] }
+            };
+
+            this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
+            return emptyResult;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 
     public class TerminatedEmployeesReportResponseMap : ClassMap<AdhocTerminatedEmployeeResponse>

@@ -15,6 +15,7 @@ interface MilitaryContributionGridProps {
   contributionsGridPagination: any;
   onAddContribution: () => void;
   refreshTrigger?: number;
+  isReadOnly?: boolean;
 }
 
 const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
@@ -22,7 +23,8 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
   isLoadingContributions,
   contributionsGridPagination,
   onAddContribution,
-  refreshTrigger
+  refreshTrigger,
+  isReadOnly = false
 }) => {
   const profitYear = useDecemberFlowProfitYear();
   const { masterInquiryMemberDetails } = useSelector((state: RootState) => state.inquiry);
@@ -73,17 +75,19 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
 
             <Tooltip
               title={
-                masterInquiryMemberDetails?.payFrequencyId == 2
-                  ? "You cannot add a contribution to someone paid monthly."
-                  : ""
+                isReadOnly
+                  ? "You are in read-only mode and cannot add contributions."
+                  : masterInquiryMemberDetails?.payFrequencyId == 2
+                    ? "You cannot add a contribution to someone paid monthly."
+                    : ""
               }
               placement="top">
               <span>
                 <Button
                   variant="outlined"
                   color="primary"
-                  disabled={masterInquiryMemberDetails?.payFrequencyId == 2}
-                  onClick={onAddContribution}
+                  disabled={isReadOnly || masterInquiryMemberDetails?.payFrequencyId == 2}
+                  onClick={isReadOnly ? undefined : onAddContribution}
                   sx={{ marginTop: "6px" }}>
                   Add Military Contribution
                 </Button>

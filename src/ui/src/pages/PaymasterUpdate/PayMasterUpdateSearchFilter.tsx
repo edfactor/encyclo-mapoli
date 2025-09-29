@@ -1,13 +1,12 @@
-import { FormHelperText } from "@mui/material";
-import { Grid } from "@mui/material";
-import { useForm, Controller } from "react-hook-form";
-import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+import { FormHelperText, Grid } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { setUpdateSummary } from "reduxstore/slices/yearsEndSlice";
+import { Controller, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
+import { setUpdateSummary } from "reduxstore/slices/yearsEndSlice";
+import { SearchAndReset } from "smart-ui-library";
+import * as yup from "yup";
 
 interface ProfitYearSearch {
   profitYear: number;
@@ -28,7 +27,11 @@ interface ProfitYearSearchFilterProps {
   setPageReset: (reset: boolean) => void;
 }
 
-const Pay450SearchFilters: React.FC<ProfitYearSearchFilterProps> = ({ onSearch, isFetching = false, setPageReset }) => {
+const PayMasterUpdateSearchFilters: React.FC<ProfitYearSearchFilterProps> = ({
+  onSearch,
+  isFetching = false,
+  setPageReset
+}) => {
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
 
   const dispatch = useDispatch();
@@ -103,4 +106,4 @@ const Pay450SearchFilters: React.FC<ProfitYearSearchFilterProps> = ({ onSearch, 
   );
 };
 
-export default Pay450SearchFilters;
+export default PayMasterUpdateSearchFilters;

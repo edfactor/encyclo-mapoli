@@ -26,7 +26,7 @@ export function SuggestedForfeitCellRenderer(
       return null;
     }
   } else {
-    // only allow Unforfeit on last trasnaction.
+    // only allow Unforfeit on last transaction.
     if (params.data.index != 0) {
       return null;
     }

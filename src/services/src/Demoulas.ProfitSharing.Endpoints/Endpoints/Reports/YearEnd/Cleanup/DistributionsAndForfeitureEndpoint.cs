@@ -1,27 +1,30 @@
-using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
-using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup.DistributionsAndForfeitureEndpoint;
+using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
+using Demoulas.ProfitSharing.Endpoints.Groups;
+using FastEndpoints;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
 
-public class DistributionsAndForfeitureEndpoint : EndpointWithCsvTotalsBase<DistributionsAndForfeituresRequest,
-    DistributionsAndForfeitureTotalsResponse,
-    DistributionsAndForfeitureResponse,
-    DistributionsAndForfeitureResponseMap>
+public class DistributionsAndForfeitureEndpoint : ProfitSharingEndpoint<DistributionsAndForfeituresRequest, Results<Ok<DistributionsAndForfeitureTotalsResponse>, NotFound, ProblemHttpResult>>
 {
     private readonly ICleanupReportService _cleanupReportService;
+    private readonly ILogger<DistributionsAndForfeitureEndpoint> _logger;
 
-    public DistributionsAndForfeitureEndpoint(ICleanupReportService cleanupReportService)
+    public DistributionsAndForfeitureEndpoint(ICleanupReportService cleanupReportService, ILogger<DistributionsAndForfeitureEndpoint> logger)
         : base(Navigation.Constants.DistributionsAndForfeitures)
     {
         _cleanupReportService = cleanupReportService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -30,54 +33,38 @@ public class DistributionsAndForfeitureEndpoint : EndpointWithCsvTotalsBase<Dist
         Summary(s =>
         {
             s.Summary = "Lists distributions and forfeitures for a date range";
-            s.ExampleRequest = new DistributionsAndForfeituresRequest() { Skip = SimpleExampleRequest.Skip, Take = SimpleExampleRequest.Take };
+            s.ExampleRequest = new DistributionsAndForfeituresRequest() { Skip = 0, Take = 100 };
             s.ResponseExamples = new Dictionary<int, object>
             {
-                {
-                    200,
-                    new ReportResponseBase<DistributionsAndForfeitureResponse>
-                    {
-                        ReportName = ReportFileName,
-                        ReportDate = DateTimeOffset.Now,
-                        StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
-                        EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
-                        Response = new PaginatedResponseDto<DistributionsAndForfeitureResponse>
-                        {
-                            Results = new List<DistributionsAndForfeitureResponse> { DistributionsAndForfeitureResponse.ResponseExample() }
-                        }
-                    }
-                }
+                { 200, DistributionsAndForfeitureTotalsResponse.ResponseExample() }
             };
-
         });
         Group<YearEndGroup>();
-        base.Configure();
     }
 
-    public override string ReportFileName => "DistributionsAndForfeitures";
-
-    public override Task<DistributionsAndForfeitureTotalsResponse> GetResponse(DistributionsAndForfeituresRequest req, CancellationToken ct)
+    public override Task<Results<Ok<DistributionsAndForfeitureTotalsResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(DistributionsAndForfeituresRequest req, CancellationToken ct)
     {
-        return _cleanupReportService.GetDistributionsAndForfeitureAsync(req, ct);
-    }
-
-    public sealed class DistributionsAndForfeitureResponseMap : ClassMap<DistributionsAndForfeitureResponse>
-    {
-        public DistributionsAndForfeitureResponseMap()
+        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
-            Map(m => m.BadgeNumber).Index(0).Name("BADGE #");
-            Map(m => m.EmployeeName).Index(1).Name("NAME");
-            Map(m => m.Ssn).Index(2).Name("SSN");
-            Map(m => m.Date).Index(3).Name("DATE");
-            Map(m => m.DistributionAmount).Index(4).Name("DISTRIBUTION AMOUNT");
-            Map(m => m.TaxCode).Index(5).Name("TC");
-            Map(m => m.StateTax).Index(6).Name("STATE TAX");
-            Map(m => m.FederalTax).Index(7).Name("FEDERAL TAX");
-            Map(m => m.ForfeitAmount).Index(8).Name("FORFEIT AMOUNT");
-            Map(m => m.Age).Index(9).Name("AGE");
-            Map(m => m.OtherName).Index(10).Name("OTHER NAME");
-            Map(m => m.OtherSsn).Index(11).Name("OTHER SSN");
-            Map(m => m.HasForfeited).Index(12).Name("Forfeited");
-        }
+            var serviceResult = await _cleanupReportService.GetDistributionsAndForfeitureAsync(req, ct);
+
+            // Record year-end cleanup report metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "year-end-cleanup-distributions-forfeitures"),
+                new("endpoint", nameof(DistributionsAndForfeitureEndpoint)));
+
+            if (serviceResult.IsSuccess && serviceResult.Value?.Response?.Results != null)
+            {
+                var resultCount = serviceResult.Value.Response.Results.Count();
+                EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                    new("record_type", "distributions-forfeitures-cleanup"),
+                    new("endpoint", nameof(DistributionsAndForfeitureEndpoint)));
+
+                _logger.LogInformation("Year-end cleanup report for distributions and forfeitures generated, returned {Count} records (correlation: {CorrelationId})",
+                    resultCount, HttpContext.TraceIdentifier);
+            }
+
+            return serviceResult.ToHttpResult(Error.NoPayProfitsDataAvailable);
+        });
     }
 }

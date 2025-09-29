@@ -290,7 +290,8 @@ export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => 
     sortable = true,
     resizable = true,
     valueFormatter = (params) => numberToCurrency(params.value),
-    valueGetter
+    valueGetter,
+    cellStyle
   } = options;
 
   const column: ColDef = {
@@ -314,6 +315,11 @@ export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => 
 
   if (valueGetter) {
     column.valueGetter = valueGetter;
+  }
+
+  if (cellStyle) {
+    // Ensure cellStyle is a plain object or function returning a plain object with string keys/values
+    column.cellStyle = cellStyle as any;
   }
 
   return column;
@@ -357,7 +363,25 @@ export const createDateColumn = (options: DateColumnOptions): ColDef => {
     alignment = "center",
     sortable = true,
     resizable = true,
-    valueFormatter = (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
+    valueFormatter = (params) => {
+      const value = params.value;
+      // Only format if value is a valid date string (yyyyMMdd or yyyy-MM-dd)
+      if (!value) return "";
+      // Accepts both string and Date
+      if (typeof value === "string" && /^\d{8}$/.test(value)) {
+        return yyyyMMDDToMMDDYYYY(value);
+      }
+      if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        // Convert to yyyymmdd and format
+        const compact = value.replace(/-/g, "");
+        return yyyyMMDDToMMDDYYYY(compact);
+      }
+      if (value instanceof Date && !isNaN(value.getTime())) {
+        // Format as MM/DD/YYYY
+        return value.toLocaleDateString("en-US");
+      }
+      return "";
+    }
   } = options;
 
   const alignmentClass = alignment === "center" ? "center-align" : "left-align";

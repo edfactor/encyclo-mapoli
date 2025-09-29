@@ -6,17 +6,21 @@ using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.YearEnd;
 
 public sealed class CertificatesFileEndpoint : ProfitSharingEndpoint<CerficatePrintRequest, string>
 {
     private readonly ICertificateService _certificateService;
+    private readonly ILogger<CertificatesFileEndpoint> _logger;
 
-    public CertificatesFileEndpoint(ICertificateService certificateService)
+    public CertificatesFileEndpoint(ICertificateService certificateService, ILogger<CertificatesFileEndpoint> logger)
         : base(Navigation.Constants.PrintProfitCerts)
     {
         _certificateService = certificateService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -33,18 +37,49 @@ public sealed class CertificatesFileEndpoint : ProfitSharingEndpoint<CerficatePr
 
     public override async Task HandleAsync(CerficatePrintRequest req, CancellationToken ct)
     {
-        var response = await _certificateService.GetCertificateFile(req, ct);
-        var memoryStream = new MemoryStream();
-        await using var writer = new StreamWriter(memoryStream);
-        await writer.WriteAsync(response);
+        using var activity = this.StartEndpointActivity(HttpContext);
 
-        await writer.FlushAsync(ct);
+        try
+        {
+            // Record request metrics
+            this.RecordRequestMetrics(HttpContext, _logger, req);
 
-        memoryStream.Position = 0;
+            var response = await _certificateService.GetCertificateFile(req, ct);
+            var memoryStream = new MemoryStream();
+            await using var writer = new StreamWriter(memoryStream);
+            await writer.WriteAsync(response);
 
-        System.Net.Mime.ContentDisposition cd = new System.Net.Mime.ContentDisposition { FileName = "PAYCERT.txt", Inline = false };
-        HttpContext.Response.Headers.Append("Content-Disposition", cd.ToString());
+            await writer.FlushAsync(ct);
 
-        await Send.StreamAsync(memoryStream, "PAYCERT.txt", contentType: "text/plain", cancellation: ct);
+            memoryStream.Position = 0;
+            var fileSize = memoryStream.Length;
+
+            // Record business metrics - file download
+            Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new KeyValuePair<string, object?>("operation", "certificate-file-download"),
+                new KeyValuePair<string, object?>("endpoint.category", "year-end"));
+
+            // Record file size
+            Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.RequestSizeBytes.Record(fileSize,
+                new KeyValuePair<string, object?>("direction", "response"),
+                new KeyValuePair<string, object?>("endpoint.category", "year-end"));
+
+            // Log certificate file generation
+            _logger.LogInformation("Certificate file generated for profit year {ProfitYear}, file size: {FileSize} bytes (correlation: {CorrelationId})",
+                req.ProfitYear, fileSize, HttpContext.TraceIdentifier);
+
+            System.Net.Mime.ContentDisposition cd = new System.Net.Mime.ContentDisposition { FileName = "PAYCERT.txt", Inline = false };
+            HttpContext.Response.Headers.Append("Content-Disposition", cd.ToString());
+
+            await Send.StreamAsync(memoryStream, "PAYCERT.txt", contentType: "text/plain", cancellation: ct);
+
+            // Record successful file download
+            this.RecordResponseMetrics(HttpContext, _logger, new { FileSize = fileSize, FileName = "PAYCERT.txt" }, isSuccess: true);
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 }

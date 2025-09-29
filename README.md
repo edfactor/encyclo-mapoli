@@ -7,7 +7,24 @@
 - **Bitbucket:** [Smart Profit Sharing Repository](https://bitbucket.org/demoulas/smart-profit-sharing)
 
 - **QA URL:** [Profit Sharing QA](https://ps.qa.demoulas.net/)
- - **Developer Setup:** [developer_setup/README.md](./developer_setup/README.md)
+- **Developer Setup:** [developer_setup/README.md](./developer_setup/README.md)
+
+## Documentation
+
+### Technical Documentation
+- **[Telemetry Guide](./TELEMETRY_GUIDE.md)** - Comprehensive telemetry implementation for developers, QA, and DevOps
+- **[Telemetry Quick Reference](./TELEMETRY_QUICK_REFERENCE.md)** - Developer cheat sheet with copy-paste examples
+- **[Telemetry DevOps Guide](./TELEMETRY_DEVOPS_GUIDE.md)** - Production operations and monitoring setup
+- **[Read-Only Functionality](./READ_ONLY_FUNCTIONALITY.md)** - Complete guide to read-only role implementation
+- **[Read-Only Quick Reference](./READ_ONLY_QUICK_REFERENCE.md)** - Quick implementation guide for read-only features
+
+### Project Documentation
+- **[PS-1623 Read-Only Summary](./PS-1623_READ_ONLY_SUMMARY.md)** - Executive summary of read-only role implementation
+
+### Templates
+- **[Navigation Setup](../templates/Navigation-Setup.md)** - Navigation system configuration
+- **[Redux Setup](../templates/Redux-Setup.md)** - Redux store and state management
+- **[Front-End Unit Tests](../templates/Front-End-Unit-Tests.md)** - Frontend testing patterns
 
 ## Definition of Ready (DoR)
 The Definition of Ready outlines the prerequisites for any user story, task, or bug fix to be considered ready for development. It emphasizes clarity, testability, and quality in our software engineering processes.

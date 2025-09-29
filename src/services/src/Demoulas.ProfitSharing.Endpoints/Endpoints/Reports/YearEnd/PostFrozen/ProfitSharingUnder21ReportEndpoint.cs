@@ -6,6 +6,9 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
+using Demoulas.ProfitSharing.Common.Telemetry;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
 
@@ -15,11 +18,13 @@ public class ProfitSharingUnder21ReportEndpoint : EndpointWithCsvTotalsBase<Prof
     ProfitSharingUnder21ReportEndpoint.ProfitSharingUnder21ReportClassMap>
 {
     private readonly IPostFrozenService _postFrozenService;
+    private readonly ILogger<ProfitSharingUnder21ReportEndpoint> _logger;
 
-    public ProfitSharingUnder21ReportEndpoint(IPostFrozenService postFrozenService)
+    public ProfitSharingUnder21ReportEndpoint(IPostFrozenService postFrozenService, ILogger<ProfitSharingUnder21ReportEndpoint> logger)
         : base(Navigation.Constants.QPAY066Under21)
     {
         _postFrozenService = postFrozenService;
+        _logger = logger;
     }
     public override string ReportFileName => ProfitSharingUnder21ReportResponse.REPORT_NAME;
 
@@ -45,12 +50,43 @@ public class ProfitSharingUnder21ReportEndpoint : EndpointWithCsvTotalsBase<Prof
         base.Configure();
     }
 
-    public override Task<ProfitSharingUnder21ReportResponse> GetResponse(ProfitYearRequest req, CancellationToken ct)
+    public override async Task<ProfitSharingUnder21ReportResponse> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return _postFrozenService.ProfitSharingUnder21Report(req, ct);
+        using var activity = this.StartEndpointActivity(HttpContext);
+        this.RecordRequestMetrics(HttpContext, _logger, req);
+
+        try
+        {
+            var result = await _postFrozenService.ProfitSharingUnder21Report(req, ct);
+
+            // Record business operation metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "profit_sharing_under_21_report"),
+                new("profit_year", req.ProfitYear.ToString()));
+
+            var recordCount = result?.Response?.Results?.Count() ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(recordCount,
+                new("record_type", "post-frozen-under-21-participants"),
+                new("endpoint", "ProfitSharingUnder21ReportEndpoint"));
+
+            _logger.LogInformation("Year-end post-frozen under-21 report generated: {Count} participants under 21 with PS benefits (correlation: {CorrelationId})",
+                recordCount, HttpContext.TraceIdentifier);
+
+            if (result != null)
+            {
+                this.RecordResponseMetrics(HttpContext, _logger, result);
+            }
+
+            return result!;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 
-    public class ProfitSharingUnder21ReportClassMap: ClassMap<ProfitSharingUnder21ReportDetail>
+    public class ProfitSharingUnder21ReportClassMap : ClassMap<ProfitSharingUnder21ReportDetail>
     {
         public ProfitSharingUnder21ReportClassMap()
         {

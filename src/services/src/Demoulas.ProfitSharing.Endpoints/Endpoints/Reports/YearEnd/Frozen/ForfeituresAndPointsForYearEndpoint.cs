@@ -3,20 +3,26 @@ using CsvHelper.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
+
 public class ForfeituresAndPointsForYearEndpoint : EndpointWithCsvTotalsBase<FrozenProfitYearRequest, ForfeituresAndPointsForYearResponseWithTotals, ForfeituresAndPointsForYearResponse, ForfeituresAndPointsForYearEndpoint.ForfeituresAndPointsForYearEndpointMapper>
 {
     private readonly IForfeituresAndPointsForYearService _forfeituresAndPointsForYearService;
+    private readonly ILogger<ForfeituresAndPointsForYearEndpoint> _logger;
 
-    public ForfeituresAndPointsForYearEndpoint(IForfeituresAndPointsForYearService forfeituresAndPointsForYearService)
+    public ForfeituresAndPointsForYearEndpoint(IForfeituresAndPointsForYearService forfeituresAndPointsForYearService, ILogger<ForfeituresAndPointsForYearEndpoint> logger)
         : base(Navigation.Constants.Forfeitures)
     {
         _forfeituresAndPointsForYearService = forfeituresAndPointsForYearService;
+        _logger = logger;
     }
     public override string ReportFileName => "Forfeitures and Points for Year";
 
@@ -43,9 +49,69 @@ public class ForfeituresAndPointsForYearEndpoint : EndpointWithCsvTotalsBase<Fro
         base.Configure();
     }
 
-    public override Task<ForfeituresAndPointsForYearResponseWithTotals> GetResponse(FrozenProfitYearRequest req, CancellationToken ct)
+    public override async Task<ForfeituresAndPointsForYearResponseWithTotals> GetResponse(FrozenProfitYearRequest req, CancellationToken ct)
     {
-        return _forfeituresAndPointsForYearService.GetForfeituresAndPointsForYearAsync(req, ct);
+        using var activity = this.StartEndpointActivity(HttpContext);
+        this.RecordRequestMetrics(HttpContext, _logger, req);
+
+        try
+        {
+            var result = await _forfeituresAndPointsForYearService.GetForfeituresAndPointsForYearAsync(req, ct);
+
+            // Record business operation metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "forfeitures_and_points"),
+                new("profit_year", req.ProfitYear.ToString()));
+
+            var resultCount = result?.Response?.Results?.Count() ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                new("record_type", "frozen-forfeitures-points"),
+                new("endpoint", "ForfeituresAndPointsForYearEndpoint"));
+
+            if (result != null)
+            {
+                EndpointTelemetry.RecordCountsProcessed.Record((long)result.TotalForfeitures,
+                    new("operation", "forfeitures_and_points"),
+                    new("metric_type", "total_forfeitures"));
+
+                EndpointTelemetry.RecordCountsProcessed.Record((long)result.TotalForfeitPoints,
+                    new("operation", "forfeitures_and_points"),
+                    new("metric_type", "total_forfeit_points"));
+
+                EndpointTelemetry.RecordCountsProcessed.Record((long)result.TotalEarningPoints,
+                    new("operation", "forfeitures_and_points"),
+                    new("metric_type", "total_earning_points"));
+            }
+
+            _logger.LogInformation("Year-end frozen forfeitures and points report generated, returned {Count} records (correlation: {CorrelationId})",
+                resultCount, HttpContext.TraceIdentifier);
+
+            if (result != null)
+            {
+                this.RecordResponseMetrics(HttpContext, _logger, result);
+                return result;
+            }
+
+            // Return empty result if needed (though this service likely always returns data)
+            var emptyResult = new ForfeituresAndPointsForYearResponseWithTotals
+            {
+                ReportName = ReportFileName,
+                StartDate = DateOnly.FromDateTime(DateTime.Today),
+                EndDate = DateOnly.FromDateTime(DateTime.Today),
+                Response = new() { Results = [] },
+                TotalForfeitures = 0,
+                TotalForfeitPoints = 0,
+                TotalEarningPoints = 0
+            };
+
+            this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
+            return emptyResult;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 
     protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, ForfeituresAndPointsForYearResponseWithTotals report, CancellationToken cancellationToken)
@@ -53,15 +119,15 @@ public class ForfeituresAndPointsForYearEndpoint : EndpointWithCsvTotalsBase<Fro
         csvWriter.WriteField("Total Forfeitures:");
         csvWriter.WriteField(report.TotalForfeitures);
         await csvWriter.NextRecordAsync();
-        
+
         csvWriter.WriteField("Total Forfeit Points:");
         csvWriter.WriteField(report.TotalForfeitPoints);
         await csvWriter.NextRecordAsync();
-        
+
         csvWriter.WriteField("Total Earning Points:");
         csvWriter.WriteField(report.TotalEarningPoints);
         await csvWriter.NextRecordAsync();
-        
+
         await csvWriter.NextRecordAsync();
 
         csvWriter.Context.RegisterClassMap<ForfeituresAndPointsForYearEndpointMapper>();

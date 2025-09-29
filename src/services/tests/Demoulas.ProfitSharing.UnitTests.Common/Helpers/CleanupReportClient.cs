@@ -4,6 +4,7 @@ using System.Web;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -46,7 +47,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         return CallReportEndpoint<DemographicBadgesNotInPayProfitResponse, ProfitYearRequest>(req, "demographic-badges-not-in-payprofit", cancellationToken);
     }
 
-    public Task<DistributionsAndForfeitureTotalsResponse> GetDistributionsAndForfeitureAsync(DistributionsAndForfeituresRequest req,
+    public Task<Result<DistributionsAndForfeitureTotalsResponse>> GetDistributionsAndForfeitureAsync(DistributionsAndForfeituresRequest req,
         CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();

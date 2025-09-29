@@ -59,6 +59,7 @@ const pathToReadableName: Record<string, string> = {
   profall: "Profall",
   "pay426-final-run": "Pay 426 Final Run",
   "dev-debug": "Dev Debug",
+  documentation: "Documentation",
   beneficiary: "Beneficiary Inquiry",
   "adhoc-beneficiaries-report": "Pay Be Next",
   "payben-report": "Pay Beneficiary Report",

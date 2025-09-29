@@ -7,6 +7,8 @@ using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Metrics;
+using Demoulas.ProfitSharing.Common.Telemetry;
+using Microsoft.Extensions.DependencyInjection;
 using Demoulas.ProfitSharing.Data;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
@@ -137,6 +139,9 @@ builder.ConfigureDefaultEndpoints(meterNames: [],
     .AddSwaggerOpenApi(oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings)
     .AddSwaggerOpenApi(version: 2, oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings);
 
+// Add Profit Sharing specific telemetry (extends base Aspire setup)
+builder.Services.AddProfitSharingTelemetry(builder.Configuration);
+
 builder.Services.AddHealthChecks().AddCheck<EnvironmentHealthCheck>("Environment");
 
 
@@ -162,6 +167,7 @@ GlobalMeter.RecordDeploymentStartup();
 
 app.UseCors();
 app.UseDemographicHeaders();
+
 app.UseSensitiveValueMasking();
 
 if (app.Environment.IsProduction())

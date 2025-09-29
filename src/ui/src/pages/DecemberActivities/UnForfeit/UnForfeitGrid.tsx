@@ -3,6 +3,8 @@ import { ColDef, ICellRendererParams } from "ag-grid-community";
 import React, { useMemo } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
+import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
 import { useUnForfeitGrid } from "../../../hooks/useUnForfeitGrid";
 import { CalendarResponseDto } from "../../../reduxstore/types";
 import { UnForfeitGridColumns } from "./UnForfeitGridColumns";
@@ -31,6 +33,12 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
   setHasUnsavedChanges,
   fiscalCalendarYear
 }) => {
+  // Use dynamic grid height utility hook
+  const gridMaxHeight = useDynamicGridHeight();
+
+  // Check if current navigation should be read-only
+  const isReadOnly = useReadOnlyNavigation();
+
   const {
     pageNumber,
     pageSize,
@@ -69,14 +77,16 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
         selectionState.removeRowFromSelection,
         selectedProfitYear,
         handleSave,
-        handleBulkSave
+        handleBulkSave,
+        isReadOnly
       ),
     [
       selectionState.addRowToSelection,
       selectionState.removeRowFromSelection,
       selectedProfitYear,
       handleSave,
-      handleBulkSave
+      handleBulkSave,
+      isReadOnly
     ]
   );
 
@@ -178,15 +188,15 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
             preferenceKey={"REHIRE-FORFEITURES"}
             isLoading={isFetching}
             handleSortChanged={sortEventHandler}
-            maxHeight={400}
+            maxHeight={gridMaxHeight}
             providedOptions={{
               rowData: gridData,
               columnDefs: columnDefs,
               getRowClass: (params: any) => (params.data.isDetail ? "detail-row" : ""),
               rowSelection: {
                 mode: "multiRow",
-                checkboxes: true,
-                headerCheckbox: true,
+                checkboxes: false,
+                headerCheckbox: false,
                 enableClickSelection: false
               },
               rowHeight: 40,

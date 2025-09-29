@@ -13,6 +13,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Audit;
+using Microsoft.Extensions.Logging;
 using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
@@ -44,9 +45,10 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         var calendarService = ServiceProvider!.GetRequiredService<ICalendarService>();
         var appUser = ServiceProvider!.GetService<IAppUser>();
         Mock<IHttpContextAccessor> mockHttpContextAccessor = new();
+        Mock<ILogger<ExecutiveHoursAndDollarsEndpoint>> mockLogger = new();
         ExecutiveHoursAndDollarsService mockService = new(MockDbContextFactory, calendarService);
         IAuditService mockAuditService = new AuditService(MockDbContextFactory, appUser, mockHttpContextAccessor.Object);
-        _endpoint = new ExecutiveHoursAndDollarsEndpoint(mockService, mockAuditService);
+        _endpoint = new ExecutiveHoursAndDollarsEndpoint(mockService, mockAuditService, mockLogger.Object);
     }
 
 
@@ -198,8 +200,10 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             PayProfit payProfit = await SetupTestEmployee_With_HoursAndDollars(c);
             ExecutiveHoursAndDollarsRequest request = new()
             {
-                FullNameContains = payProfit.Demographic!.ContactInfo.FullName, 
-                ProfitYear = ProfitShareTestYear, Skip = 0, Take = 10
+                FullNameContains = payProfit.Demographic!.ContactInfo.FullName,
+                ProfitYear = ProfitShareTestYear,
+                Skip = 0,
+                Take = 10
             };
             ReportResponseBase<ExecutiveHoursAndDollarsResponse> expectedResponse = StockResponse();
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
@@ -226,7 +230,10 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             PayProfit payProfit = await SetupTestEmployee_With_HoursAndDollars(c);
             ExecutiveHoursAndDollarsRequest request = new()
             {
-                FullNameContains = $"ZZ{payProfit.Demographic!.ContactInfo.FullName}", ProfitYear = ProfitShareTestYear, Skip = 0, Take = 10
+                FullNameContains = $"ZZ{payProfit.Demographic!.ContactInfo.FullName}",
+                ProfitYear = ProfitShareTestYear,
+                Skip = 0,
+                Take = 10
             };
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 

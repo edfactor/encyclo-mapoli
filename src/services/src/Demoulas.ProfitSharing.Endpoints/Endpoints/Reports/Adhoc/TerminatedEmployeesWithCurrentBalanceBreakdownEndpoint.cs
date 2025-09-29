@@ -3,20 +3,26 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
+
 public sealed class TerminatedEmployeesWithCurrentBalanceBreakdownEndpoint : EndpointWithCsvBase<TerminatedEmployeesWithBalanceBreakdownRequest, MemberYearSummaryDto, TerminatedEmployeesWithCurrentBalanceBreakdownEndpoint.BreakdownEndpointMap>
 {
     private readonly IBreakdownService _breakdownService;
+    private readonly ILogger<TerminatedEmployeesWithCurrentBalanceBreakdownEndpoint> _logger;
 
-    public TerminatedEmployeesWithCurrentBalanceBreakdownEndpoint(IBreakdownService breakdownService)
+    public TerminatedEmployeesWithCurrentBalanceBreakdownEndpoint(IBreakdownService breakdownService, ILogger<TerminatedEmployeesWithCurrentBalanceBreakdownEndpoint> logger)
         : base(Navigation.Constants.QPAY066AdHocReports)
     {
         _breakdownService = breakdownService;
+        _logger = logger;
     }
 
     public override string ReportFileName => "Breakdown by Store - Terminated Employees with a Current Balance";
@@ -33,9 +39,54 @@ public sealed class TerminatedEmployeesWithCurrentBalanceBreakdownEndpoint : End
         base.Configure();
     }
 
-    public override Task<ReportResponseBase<MemberYearSummaryDto>> GetResponse(TerminatedEmployeesWithBalanceBreakdownRequest breakdownByStoreRequest, CancellationToken ct)
+    public override async Task<ReportResponseBase<MemberYearSummaryDto>> GetResponse(TerminatedEmployeesWithBalanceBreakdownRequest breakdownByStoreRequest, CancellationToken ct)
     {
-        return _breakdownService.GetTerminatedMembersWithCurrentBalanceNotVestedByStore(breakdownByStoreRequest, ct);
+        using var activity = this.StartEndpointActivity(HttpContext);
+
+        try
+        {
+            this.RecordRequestMetrics(HttpContext, _logger, breakdownByStoreRequest);
+
+            var result = await _breakdownService.GetTerminatedMembersWithCurrentBalanceNotVestedByStore(breakdownByStoreRequest, ct);
+
+            // Record terminated employees with current balance breakdown metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "terminated-employees-current-balance-breakdown"),
+                new("endpoint", "TerminatedEmployeesWithCurrentBalanceBreakdownEndpoint"),
+                new("report_type", "breakdown"),
+                new("employee_status", "terminated"),
+                new("balance_filter", "current-balance-not-vested"));
+
+            var resultCount = result?.Response?.Results?.Count() ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                new("record_type", "terminated-employees-current-balance"),
+                new("endpoint", "TerminatedEmployeesWithCurrentBalanceBreakdownEndpoint"));
+
+            _logger.LogInformation("Terminated employees with current balance (not vested) breakdown report generated, returned {Count} employees (correlation: {CorrelationId})",
+                resultCount, HttpContext.TraceIdentifier);
+
+            if (result != null)
+            {
+                this.RecordResponseMetrics(HttpContext, _logger, result);
+                return result;
+            }
+
+            var emptyResult = new ReportResponseBase<MemberYearSummaryDto>
+            {
+                ReportName = ReportFileName,
+                StartDate = DateOnly.FromDateTime(DateTime.Today),
+                EndDate = DateOnly.FromDateTime(DateTime.Today),
+                Response = new() { Results = [] }
+            };
+
+            this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
+            return emptyResult;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 
     public sealed class BreakdownEndpointMap : ClassMap<MemberYearSummaryDto>

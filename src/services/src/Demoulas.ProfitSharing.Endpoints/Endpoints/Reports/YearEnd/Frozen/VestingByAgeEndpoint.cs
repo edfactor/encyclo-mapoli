@@ -3,10 +3,13 @@ using CsvHelper.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Microsoft.Extensions.Logging;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen.VestingByAgeEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
@@ -14,11 +17,13 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 public class VestingByAgeEndpoint : EndpointWithCsvTotalsBase<ProfitYearAndAsOfDateRequest, VestedAmountsByAge, VestedAmountsByAgeDetail, ProfitSharingVestingByAgeByAgeMapper>
 {
     private readonly IFrozenReportService _frozenReportService;
+    private readonly ILogger<VestingByAgeEndpoint> _logger;
 
-    public VestingByAgeEndpoint(IFrozenReportService frozenReportService)
+    public VestingByAgeEndpoint(IFrozenReportService frozenReportService, ILogger<VestingByAgeEndpoint> logger)
         : base(Navigation.Constants.VestedAmountsByAge)
     {
         _frozenReportService = frozenReportService;
+        _logger = logger;
     }
 
     public override string ReportFileName => "PROFIT SHARING VESTING BY AGE";
@@ -40,9 +45,51 @@ public class VestingByAgeEndpoint : EndpointWithCsvTotalsBase<ProfitYearAndAsOfD
         base.Configure();
     }
 
-    public override Task<VestedAmountsByAge> GetResponse(ProfitYearAndAsOfDateRequest req, CancellationToken ct)
+    public override async Task<VestedAmountsByAge> GetResponse(ProfitYearAndAsOfDateRequest req, CancellationToken ct)
     {
-        return _frozenReportService.GetVestedAmountsByAgeYearAsync(req, ct);
+        using var activity = this.StartEndpointActivity(HttpContext);
+        this.RecordRequestMetrics(HttpContext, _logger, req);
+
+        try
+        {
+            var result = await _frozenReportService.GetVestedAmountsByAgeYearAsync(req, ct);
+
+            // Record business operation metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "vesting_by_age"),
+                new("profit_year", req.ProfitYear.ToString()));
+
+            var resultCount = result?.Response?.Results?.Count() ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                new("record_type", "frozen-vesting-by-age"),
+                new("endpoint", "VestingByAgeEndpoint"));
+
+            _logger.LogInformation("Year-end frozen vesting by age report generated, returned {Count} records (correlation: {CorrelationId})",
+                resultCount, HttpContext.TraceIdentifier);
+
+            if (result != null)
+            {
+                this.RecordResponseMetrics(HttpContext, _logger, result);
+                return result;
+            }
+
+            // Create empty result if needed
+            var emptyResult = new VestedAmountsByAge
+            {
+                ReportName = ReportFileName,
+                StartDate = DateOnly.FromDateTime(DateTime.Today),
+                EndDate = DateOnly.FromDateTime(DateTime.Today),
+                Response = new() { Results = [] }
+            };
+
+            this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
+            return emptyResult;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 
     protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, VestedAmountsByAge report, CancellationToken cancellationToken)

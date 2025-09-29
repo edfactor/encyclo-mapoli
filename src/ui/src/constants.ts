@@ -29,7 +29,7 @@ export const ROUTES = {
   BALANCE_BY_YEARS: "balance-by-years",
   VESTED_AMOUNTS_BY_AGE: "vested-amounts-by-age",
   PROF_TERM: "prof-term",
-  MILITARY_ENTRY_AND_MODIFICATION: "military-entry-and-modification",
+  MILITARY_CONTRIBUTION: "military-contribution",
 
   DECEMBER_PROCESS_ACCORDION: "december-process-accordion",
   DEMOGRAPHIC_BADGES: "demographic-badges-not-in-payprofit",
@@ -83,6 +83,7 @@ export const ROUTES = {
   PROFALL: "profall",
   DEMO_FREEZE: "demographic-freeze",
   DEV_DEBUG: "dev-debug",
+  DOCUMENTATION: "documentation",
   PROFIT_SHARE_EDIT: "profit-share-edit",
   SAVE_PROF_PAYMSTR: "save-prof-paymstr"
 } as const;
