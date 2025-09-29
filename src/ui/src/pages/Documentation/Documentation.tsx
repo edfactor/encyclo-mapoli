@@ -88,6 +88,12 @@ const documentationFiles = [
     filename: "PS-1623_READ_ONLY_SUMMARY.md",
     description:
       "Executive summary of PS-1623 read-only role implementation including status tracking, impact assessment, and deployment verification steps"
+  },
+  {
+    key: "duplicate-names-birthdays",
+    title: "Duplicate Names & Birthdays Report",
+    filename: "Duplicate-Names-And-Birthdays-Report.md",
+    description: "Implementation notes and operational guidance for the Duplicate Names and Birthdays cleanup report"
   }
 ];
 
