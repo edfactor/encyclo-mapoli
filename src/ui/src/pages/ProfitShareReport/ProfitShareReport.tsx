@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Divider, Grid, Typography } from "@mui/material";
+import { Box, Button, Divider, Grid, Typography } from "@mui/material";
 import ProfitShareTotalsDisplay from "components/ProfitShareTotalsDisplay";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
@@ -8,9 +8,10 @@ import { useFinalizeReportMutation, useLazyGetYearEndProfitSharingReportTotalsQu
 import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { FilterParams } from "reduxstore/types";
-import { DSMAccordion, Page, SmartModal } from "smart-ui-library";
+import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import ProfitSummary from "../PAY426Reports/ProfitSummary/ProfitSummary";
+import CommitModal from "./CommitModal";
 import ProfitShareReportGrid from "./ProfitShareReportGrid";
 import ProfitShareReportSearchFilters from "./ProfitShareReportSearchFilters";
 
@@ -205,74 +206,12 @@ const ProfitShareReport = () => {
         )}
       </Grid>
 
-      <SmartModal
+      <CommitModal
         open={isModalOpen}
         onClose={handleCancel}
-        actions={[
-          <Button
-            onClick={handleCommit}
-            variant="contained"
-            color="primary"
-            disabled={isFinalizing}
-            className="mr-2">
-            {isFinalizing ? (
-              <CircularProgress
-                size={24}
-                color="inherit"
-              />
-            ) : (
-              "Yes, Commit"
-            )}
-          </Button>,
-          <Button
-            onClick={handleCancel}
-            variant="outlined">
-            No, Cancel
-          </Button>
-        ]}
-        title="Are you ready to Commit?">
-        Committing this change will update and save:
-        <div>
-          <table
-            cellPadding={20}
-            style={{ width: "100%" }}>
-            <tr>
-              <td>Earn Points</td>
-              <td>How much money goes towards allocating a contribution</td>
-            </tr>
-            <tr>
-              <td>ZeroContributionReason</td>
-              <td>
-                {" "}
-                Why did an employee get a zero contribution? Normal, Under21, Terminated (Vest Only), Retired, Soon to
-                be Retired
-              </td>
-            </tr>
-
-            <tr>
-              <td>EmployeeType</td>
-              <td>
-                {" "}
-                Is this a "new employee in the plan" - aka this is your first year &gt;21 and &gt;1000 hours - employee
-                may already have V-ONLY records
-              </td>
-            </tr>
-            <tr>
-              <td>PsCertificateIssuedDate</td>
-              <td>
-                {" "}
-                indicates that this employee should get a physically printed certificate. It is a proxy for Earn Points
-                &gt; 0.
-              </td>
-            </tr>
-          </table>
-        </div>
-        <div>
-          This "COMMIT" is safe to run multiple times, until the "Master Update" is saved. Running "COMMIT" after Master
-          Update means that the Master Update will potentially not have computed the correct earnings and contribution
-          amounts.
-        </div>
-      </SmartModal>
+        onCommit={handleCommit}
+        isFinalizing={isFinalizing}
+      />
     </Page>
   );
 };
