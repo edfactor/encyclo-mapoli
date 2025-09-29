@@ -19,8 +19,10 @@ const ProfitShareReport = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPresetParams, setSelectedPresetParams] = useState<FilterParams | null>(null);
   const [isLoadingTotals, setIsLoadingTotals] = useState(false);
+  const [currentSearchParams, setCurrentSearchParams] = useState<any>(null);
+  const [isInitialSearchLoaded, setIsInitialSearchLoaded] = useState(false);
 
-  const { yearEndProfitSharingReportTotals, yearEndProfitSharingReport } = useSelector(
+  const { yearEndProfitSharingReportTotals } = useSelector(
     (state: RootState) => state.yearsEnd
   );
   const hasToken = !!useSelector((state: RootState) => state.security.token);
@@ -70,6 +72,13 @@ const ProfitShareReport = () => {
 
   const handlePresetParamsChange = (params: FilterParams | null) => {
     setSelectedPresetParams(params);
+    setCurrentSearchParams(null);
+    setIsInitialSearchLoaded(false);
+  };
+
+  const handleSearchParamsUpdate = (searchParams: any) => {
+    setCurrentSearchParams(searchParams);
+    setIsInitialSearchLoaded(true);
   };
 
   const handleStatusChange = (newStatus: string, statusName?: string) => {
@@ -110,7 +119,7 @@ const ProfitShareReport = () => {
   }, [selectedPresetParams]);
 
   useEffect(() => {
-    if (yearEndProfitSharingReport?.response.results?.length) {
+    if (currentSearchParams && isInitialSearchLoaded) {
       setTimeout(() => {
         document.querySelector('[data-testid="results-grid"]')?.scrollIntoView({
           behavior: "smooth",
@@ -118,7 +127,7 @@ const ProfitShareReport = () => {
         });
       }, 100);
     }
-  }, [yearEndProfitSharingReport?.response.results]);
+  }, [currentSearchParams, isInitialSearchLoaded]);
 
   const renderActionNode = () => {
     if (!yearEndProfitSharingReportTotals) return null;
@@ -183,21 +192,19 @@ const ProfitShareReport = () => {
               <ProfitShareReportSearchFilters
                 profitYear={profitYear}
                 presetParams={selectedPresetParams}
+                onSearchParamsUpdate={handleSearchParamsUpdate}
               />
-              {yearEndProfitSharingReport?.response.results &&
-                yearEndProfitSharingReport.response.results.length > 0 && (
-                  <Box
-                    sx={{ mt: 3 }}
-                    data-testid="results-grid">
-                    <ProfitShareReportGrid
-                      data={yearEndProfitSharingReport.response.results}
-                      isLoading={false}
-                      recordCount={yearEndProfitSharingReport.response.results.length}
-                      onPageChange={() => {}}
-                      onSortChange={() => {}}
-                    />
-                  </Box>
-                )}
+              {currentSearchParams && (
+                <Box
+                  sx={{ mt: 3 }}
+                  data-testid="results-grid">
+                  <ProfitShareReportGrid
+                    searchParams={currentSearchParams}
+                    isInitialSearchLoaded={isInitialSearchLoaded}
+                    profitYear={profitYear}
+                  />
+                </Box>
+              )}
             </DSMAccordion>
           </Grid>
         )}

@@ -1,38 +1,92 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
+import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import { useGridPagination } from "../../hooks/useGridPagination";
 import { GetProfitShareReportColumns } from "./ProfitShareReportGridColumns";
 
 interface ProfitShareReportGridProps {
-  data: any[];
-  isLoading: boolean;
-  recordCount: number;
-  onPageChange?: (pageNum: number, pageSize: number, sortPrms: any) => void;
-  onSortChange?: (update: any) => void;
+  searchParams: any;
+  isInitialSearchLoaded: boolean;
+  profitYear: number;
 }
 
 const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
-  data,
-  isLoading,
-  recordCount,
-  onPageChange,
-  onSortChange
+  searchParams,
+  isInitialSearchLoaded,
+  profitYear
 }) => {
+  const [triggerSearch, { data: searchResults, isFetching }] = useLazyGetYearEndProfitSharingReportQuery();
+
+  const data = searchResults?.response?.results || [];
+  const recordCount = searchResults?.response?.total || 0;
+
+  console.log('ProfitShareReportGrid - Debug:', {
+    searchParams,
+    isInitialSearchLoaded,
+    profitYear,
+    searchResults,
+    data,
+    recordCount
+  });
   const columnDefs = useMemo(() => GetProfitShareReportColumns(), []);
 
-  const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
+  const createRequest = useCallback(
+    (skip: number, sortBy: string, isSortDescending: boolean, profitYear: number, pageSz: number) => {
+      if (!searchParams) return null;
+
+      return {
+        ...searchParams,
+        profitYear,
+        pagination: { skip, take: pageSz, sortBy, isSortDescending }
+      };
+    },
+    [searchParams]
+  );
+
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange } = useGridPagination({
     initialPageSize: 25,
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
     onPaginationChange: useCallback(
-      (pageNum: number, pageSize: number, sortPrms: any) => {
-        if (onPageChange) {
-          onPageChange(pageNum, pageSize, sortPrms);
+      async (pageNum: number, pageSz: number, sortPrms: any) => {
+        if (isInitialSearchLoaded && searchParams) {
+          const params = createRequest(
+            pageNum * pageSz,
+            sortPrms.sortBy,
+            sortPrms.isSortDescending,
+            profitYear,
+            pageSz
+          );
+          if (params) {
+            triggerSearch(params, false);
+          }
         }
       },
-      [onPageChange]
+      [isInitialSearchLoaded, searchParams, createRequest, profitYear, triggerSearch]
     )
   });
+
+  // Initial search effect - trigger search when component first loads with search params
+  useEffect(() => {
+    // Don't load data until search button is clicked
+    if (!isInitialSearchLoaded || !searchParams) return;
+
+    const executeInitialSearch = async () => {
+      const params = createRequest(
+        pageNumber * pageSize,
+        sortParams.sortBy,
+        sortParams.isSortDescending,
+        profitYear,
+        pageSize
+      );
+      if (params) {
+        console.log('Executing initial search with params:', params);
+        await triggerSearch(params, false);
+      }
+    };
+
+    executeInitialSearch();
+  }, [isInitialSearchLoaded, searchParams, createRequest, profitYear, pageNumber, pageSize, sortParams, triggerSearch]);
 
   const handleSortChanged = useCallback(
     (update: any) => {
@@ -43,18 +97,15 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
       }
 
       handleSortChange(update);
-      if (onSortChange) {
-        onSortChange(update);
-      }
     },
-    [handleSortChange, onSortChange]
+    [handleSortChange]
   );
 
   return (
     <>
       <DSMGrid
         preferenceKey={"ProfitShareReportGrid"}
-        isLoading={isLoading}
+        isLoading={isFetching}
         handleSortChanged={handleSortChanged}
         providedOptions={{
           rowData: data,
@@ -72,6 +123,7 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
             handlePaginationChange(0, value);
           }}
           recordCount={recordCount}
+          rowsPerPageOptions={[5, 10, 25, 50, 100]}
         />
       )}
     </>
