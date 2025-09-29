@@ -33,9 +33,9 @@ public class MilitaryContributionRequestValidator : Validator<CreateMilitaryCont
 
         RuleFor(r => r.ProfitYear)
             .GreaterThanOrEqualTo((short)2020)
-            .WithMessage($"{nameof(MilitaryContributionRequest.ProfitYear)} must not less than 2020.")
+            .WithMessage($"{nameof(CreateMilitaryContributionRequest.ProfitYear)} must not less than 2020.")
             .LessThanOrEqualTo((short)DateTime.Today.Year)
-            .WithMessage($"{nameof(MilitaryContributionRequest.ProfitYear)} must not be greater than this year.");
+            .WithMessage($"{nameof(CreateMilitaryContributionRequest.ProfitYear)} must not be greater than this year.");
 
         RuleFor(r => r.BadgeNumber)
             .GreaterThan(0)
@@ -99,7 +99,7 @@ public class MilitaryContributionRequestValidator : Validator<CreateMilitaryCont
         // Query by the contribution date year rather than the selected ProfitYear so we detect
         // existing records for the actual contribution year (fixes PS-1721 where users may select
         // a different profit year in the UI than the contribution date year).
-        var results = await _militaryService.GetMilitaryServiceRecordAsync(new MilitaryContributionRequest { ProfitYear = (short)req.ContributionDate.Year, BadgeNumber = req.BadgeNumber, Take = short.MaxValue },
+        var results = await _militaryService.GetMilitaryServiceRecordAsync(new GetMilitaryContributionRequest { BadgeNumber = req.BadgeNumber, Take = short.MaxValue },
             isArchiveRequest: false,
             cancellationToken: token);
 
@@ -107,7 +107,7 @@ public class MilitaryContributionRequestValidator : Validator<CreateMilitaryCont
         {
             return TrackFailure("ServiceError");
         }
-        var records = results.Value!.Results;
+        var records = results.Value!.Results.Where(x=> x.ProfitYear == (short)req.ContributionDate.Year);
 
         var ok = records.All(x => x.IsSupplementalContribution || x.ContributionDate.Year != req.ContributionDate.Year);
         return ok || TrackFailure("DuplicateRegularContribution");
