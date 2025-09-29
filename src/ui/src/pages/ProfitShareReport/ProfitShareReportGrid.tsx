@@ -7,7 +7,7 @@ interface ProfitShareReportGridProps {
   data: any[];
   isLoading: boolean;
   recordCount: number;
-  onPageChange?: (pageNum: number, pageSz: number, sortPrms: any) => void;
+  onPageChange?: (pageNum: number, pageSize: number, sortPrms: any) => void;
   onSortChange?: (update: any) => void;
 }
 
@@ -24,11 +24,14 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
     initialPageSize: 25,
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
-    onPaginationChange: useCallback((pageNum: number, pageSz: number, sortPrms: any) => {
-      if (onPageChange) {
-        onPageChange(pageNum, pageSz, sortPrms);
-      }
-    }, [onPageChange])
+    onPaginationChange: useCallback(
+      (pageNum: number, pageSize: number, sortPrms: any) => {
+        if (onPageChange) {
+          onPageChange(pageNum, pageSize, sortPrms);
+        }
+      },
+      [onPageChange]
+    )
   });
 
   const handleSortChanged = useCallback(

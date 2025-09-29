@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Grid, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Divider, Grid, Typography } from "@mui/material";
 import ProfitShareTotalsDisplay from "components/ProfitShareTotalsDisplay";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
@@ -192,11 +192,8 @@ const ProfitShareReport = () => {
                     <ProfitShareReportGrid
                       data={yearEndProfitSharingReport.response.results}
                       isLoading={false}
-                      pageNumber={1}
-                      pageSize={yearEndProfitSharingReport.response.results.length}
                       recordCount={yearEndProfitSharingReport.response.results.length}
                       onPageChange={() => {}}
-                      onPageSizeChange={() => {}}
                       onSortChange={() => {}}
                     />
                   </Box>
