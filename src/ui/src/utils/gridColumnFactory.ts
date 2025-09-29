@@ -319,6 +319,10 @@ export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => 
 
   if (cellStyle) {
     // Ensure cellStyle is a plain object or function returning a plain object with string keys/values
+    // cellStyle can be either a plain object or a function; typing here is loose to
+    // match ag-grid expected types. Use an explicit any cast and disable the linter
+    // for this line to avoid noisy typing conflicts.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     column.cellStyle = cellStyle as any;
   }
 
@@ -372,9 +376,7 @@ export const createDateColumn = (options: DateColumnOptions): ColDef => {
         return yyyyMMDDToMMDDYYYY(value);
       }
       if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
-        // Convert to yyyymmdd and format
-        const compact = value.replace(/-/g, "");
-        return yyyyMMDDToMMDDYYYY(compact);
+        return yyyyMMDDToMMDDYYYY(value);
       }
       if (value instanceof Date && !isNaN(value.getTime())) {
         // Format as MM/DD/YYYY
