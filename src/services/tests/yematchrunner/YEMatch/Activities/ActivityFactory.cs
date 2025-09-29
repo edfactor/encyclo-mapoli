@@ -70,4 +70,18 @@ public sealed class ActivityFactory
             .Concat(inst._integrationActivities)
             .ToDictionary(s => s.Name(), a => a);
     }
+
+    public static void SetNewScramble()
+    {
+        // This is a hack to reach into a class and fiddle with it, but we are still thinking
+        // about how to dynamicaly switch between "classic" and "new" scramble choices.
+        ReadyActivity ra = (ReadyActivity) ActivityFactory.AllActivtiesByName()["R0"];
+        ra.Args = "profitshare"; // lock this Runner to the latest schema.
+    }
+
+    public static bool isNewScramble()
+    {
+        ReadyActivity ra = (ReadyActivity) ActivityFactory.AllActivtiesByName()["R0"];
+        return ra.Args == "profitshare";
+    }
 }

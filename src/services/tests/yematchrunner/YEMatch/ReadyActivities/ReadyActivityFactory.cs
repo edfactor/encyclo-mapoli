@@ -15,7 +15,7 @@ public static class ReadyActivityFactory
         string? username = secretConfig["YEMatchHost:Username"];
         string? password = secretConfig["YEMatchHost:Password"];
         string host = "tduapp01";
-        bool chatty = false;
+        bool chatty = true;
 
         if (username == null || password == null)
         {
@@ -30,7 +30,8 @@ public static class ReadyActivityFactory
 
         List<IActivity> activities =
         [
-            new ReadyActivity(sshClient, SftpClient, chatty, "A0", "PROFSHARE-BUILD-READY", "", dataDirectory),
+            // We still default to the OLD SCRAMBLE - although GoldenDecember overrides this. 
+            new ReadyActivity(sshClient, SftpClient, chatty, "A0", "PROFSHARE-BUILD-READY", "PROFITSHARE2", dataDirectory),
 
             // Clean Up
             new ReadyActivity(sshClient, SftpClient, chatty, "A1", "PROFSHARE-SSN-CLEANUP-RPTS", "", dataDirectory),

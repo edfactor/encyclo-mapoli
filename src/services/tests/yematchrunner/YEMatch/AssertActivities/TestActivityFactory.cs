@@ -25,10 +25,8 @@ internal static class TestActivityFactory
             new SanityCheckEmployeeAndBenes(),
             new OverwriteBadges(),
             new SetDateOfBirthTo19YearsAgo(),
-            new S18_Rebuild2023ZeroCont(),
-            new S24_Rebuild2023Enrollment(),
-            new Give2023Hours(),
             new UpdateNavigation()
+            , new Give2023Hours()
         ];
     }
 }
