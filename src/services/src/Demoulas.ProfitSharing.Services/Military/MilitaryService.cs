@@ -99,6 +99,7 @@ public class MilitaryService : IMilitaryService
         var result = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+            // We grab all Military Contributions for all time
             var query = ctx.ProfitDetails
                 .Include(pd => pd.CommentType)
                 .Join(demographics,
