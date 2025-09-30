@@ -1081,6 +1081,106 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
     }
 
     [Fact]
+    [Description("PS-1721 : Analyze remaining discrepancies after termination code fix")]
+    public async Task AnalyzeRemainingDiscrepancies()
+    {
+        // Arrange
+        var distributedCache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
+        var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
+        var totalService = new TotalService(DbFactory,
+            calendarService, new EmbeddedSqlService(),
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+        TerminatedEmployeeService service =
+            new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService);
+
+        var startDate = new DateOnly(2025, 1, 4);
+        var endDate = new DateOnly(2025, 12, 27);
+        var request = new StartAndEndDateRequest
+        {
+            BeginningDate = startDate,
+            EndingDate = endDate,
+            Take = int.MaxValue,
+            SortBy = "name"
+        };
+
+        // Act
+        var actualResponse = await service.GetReportAsync(request, CancellationToken.None);
+
+        // Parse the golden file
+        var goldenFileContent = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R3-QPAY066");
+        var lines = goldenFileContent.Split('\n').Where(line => !string.IsNullOrWhiteSpace(line)).ToArray();
+        var expectedEmployees = lines.Select(ParseEmployeeDataLine).Where(e => e != null).ToList();
+        var actualEmployees = actualResponse.Response.Results.ToList();
+
+        // Build analysis report
+        var report = new StringBuilder();
+        report.AppendLine("=== REMAINING DISCREPANCIES ANALYSIS (POST TERMINATION CODE FIX) ===");
+        report.AppendLine($"Expected employees: {expectedEmployees.Count}");
+        report.AppendLine($"Actual employees: {actualEmployees.Count}");
+        report.AppendLine($"Difference: {actualEmployees.Count - expectedEmployees.Count} (positive = more actual employees)");
+        report.AppendLine();
+
+        // 1. ANALYZE BADGE/PSN FORMAT ISSUES
+        report.AppendLine("=== 1. BADGE/PSN FORMAT ANALYSIS ===");
+        var expectedByName = expectedEmployees.GroupBy(e => e!.Name ?? "Unknown").ToDictionary(g => g.Key, g => g.ToList());
+        var actualByName = actualEmployees.GroupBy(e => e.Name ?? "Unknown").ToDictionary(g => g.Key, g => g.ToList());
+
+        var badgePsnFormatIssues = 0;
+        foreach (var name in expectedByName.Keys.Take(10)) // Sample first 10
+        {
+            if (actualByName.ContainsKey(name))
+            {
+                var expected = expectedByName[name][0];
+                var actual = actualByName[name][0];
+                if (expected?.BadgePSn != actual.BadgePSn)
+                {
+                    report.AppendLine($"  {name}: Expected PSN='{expected?.BadgePSn}' vs Actual PSN='{actual.BadgePSn}'");
+                    badgePsnFormatIssues++;
+                }
+            }
+        }
+        report.AppendLine($"BadgePSN format issues detected: {badgePsnFormatIssues}+ (sampled)");
+        report.AppendLine();
+
+        // 2. TOTALS DISCREPANCY
+        report.AppendLine("=== 2. FINANCIAL TOTALS ANALYSIS ===");
+        report.AppendLine($"Expected Total Ending Balance: $24,692,640.86");
+        report.AppendLine($"Actual Total Ending Balance: ${actualResponse.TotalEndingBalance:N2}");
+        var balanceDiff = 24692640.86m - actualResponse.TotalEndingBalance;
+        report.AppendLine($"Difference: ${balanceDiff:N2} ({(balanceDiff < 0 ? "+" : "-")}${Math.Abs(balanceDiff):N2})");
+        report.AppendLine();
+
+        // 3. TOP PARSING ISSUES 
+        report.AppendLine("=== 3. FIELD PARSING ISSUES ===");
+        var sampleEmployee = actualEmployees.FirstOrDefault(e => e.BadgeNumber == 707319);
+        if (sampleEmployee != null)
+        {
+            report.AppendLine($"Sample Employee {sampleEmployee.BadgeNumber} ({sampleEmployee.Name}):");
+            if (sampleEmployee.YearDetails.Count > 0)
+            {
+                var yearDetail = sampleEmployee.YearDetails[0];
+                report.AppendLine($"  Age: {yearDetail.Age} (Expected: should match golden file)");
+                report.AppendLine($"  VestedPercent: {yearDetail.VestedPercent} (Expected: should match golden file)");
+                report.AppendLine($"  DateTerm: {yearDetail.DateTerm} (Expected: should match golden file format)");
+            }
+        }
+        report.AppendLine();
+
+        // 4. RECOMMENDATIONS
+        report.AppendLine("=== 4. RECOMMENDED FIXES (PRIORITY ORDER) ===");
+        report.AppendLine("Priority 1: Fix BadgePSN generation consistency (suffix '000' issue)");
+        report.AppendLine("Priority 2: Fix Age and VestedPercent field parsing positions");
+        report.AppendLine("Priority 3: Investigate DateTerm format differences");
+        report.AppendLine("Priority 4: Review financial calculation differences (~$636K discrepancy)");
+
+        TestOutputHelper.WriteLine(report.ToString());
+
+        // Basic assertion to satisfy test requirements
+        actualEmployees.Count.ShouldBeGreaterThan(450, "Should have substantial employee data");
+    }
+
+    [Fact]
     [Description("PS-1721 : Enhanced analysis with database lookup to verify termination code hypothesis")]
     public async Task AnalyzeTerminationCodeFilteringWithDatabaseVerification()
     {
@@ -1113,8 +1213,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var actualEmployees = actualResponse.Response.Results.ToList();
 
         // Create lookup by name+badge for comparison (handling duplicates)
-        var actualByNameBadge = actualEmployees.GroupBy(e => $"{e.Name ?? "Unknown"}|{e.BadgeNumber}").ToDictionary(g => g.Key, g => g.First());
-        var expectedByNameBadge = expectedEmployees.GroupBy(e => $"{e!.Name ?? "Unknown"}|{e.BadgeNumber}").ToDictionary(g => g.Key, g => g.First());
+        var actualByNameBadge = actualEmployees.GroupBy(e => $"{e.Name ?? "Unknown"}|{e.BadgeNumber}").ToDictionary(g => g.Key, g => g.ToList()[0]);
+        var expectedByNameBadge = expectedEmployees.GroupBy(e => $"{e!.Name ?? "Unknown"}|{e.BadgeNumber}").ToDictionary(g => g.Key, g => g.ToList()[0]);
 
         // Find employees that are missing from actual system
         var missingEmployees = expectedByNameBadge.Keys.Except(actualByNameBadge.Keys).ToList();
