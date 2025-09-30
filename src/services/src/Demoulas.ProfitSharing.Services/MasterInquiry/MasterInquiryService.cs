@@ -159,7 +159,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             else
             {
                 // For both, merge and deduplicate by SSN
-                var employeeDetails = await GetAllDemographicDetailsForSsns(ctx, ssnList, currentYear, previousYear, cancellationToken);
+                var employeeDetails = await GetAllDemographicDetailsForSsns(ctx, ssnList, currentYear, previousYear, duplicateSsns, cancellationToken);
                 var beneficiaryDetails = await GetAllBeneficiaryDetailsForSsns(ctx, ssnList, cancellationToken);
 
                 // Combine and deduplicate by SSN
@@ -1028,7 +1028,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         return query;
     }
 
-    private async Task<List<MemberDetails>> GetAllDemographicDetailsForSsns(ProfitSharingReadOnlyDbContext ctx, ISet<int> ssns, short currentYear, short previousYear, CancellationToken cancellationToken)
+    private async Task<List<MemberDetails>> GetAllDemographicDetailsForSsns(ProfitSharingReadOnlyDbContext ctx, ISet<int> ssns, short currentYear, short previousYear, ISet<int> duplicateSsns, CancellationToken cancellationToken)
     {
         var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
         var query = demographics
@@ -1086,6 +1086,17 @@ public sealed class MasterInquiryService : IMasterInquiryService
         foreach (var memberData in members)
         {
             var missiveList = missivesDict.TryGetValue(memberData.Ssn, out var m) ? m : new List<int>();
+
+            var duplicateBadges = new HashSet<int>();
+            if (duplicateSsns.Contains(memberData.Ssn))
+            {
+                var duplicateMembers = await demographics
+                    .Where(d => d.Ssn == memberData.Ssn && d.Id != memberData.Id)
+                    .Select(d => d.BadgeNumber)
+                    .ToListAsync(cancellationToken);
+                duplicateBadges.UnionWith(duplicateMembers);
+
+            }
             detailsList.Add(new MemberDetails
             {
                 IsEmployee = true,
@@ -1113,7 +1124,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 EmploymentStatus = memberData.EmploymentStatus?.Name,
                 ReceivedContributionsLastYear = memberData.PreviousPayProfit?.PsCertificateIssuedDate != null,
                 Missives = missiveList,
-                IsExecutive = memberData.IsExecutive
+                IsExecutive = memberData.IsExecutive,
+                BadgesOfDuplicateSsns = duplicateBadges.ToList()
             });
         }
 
