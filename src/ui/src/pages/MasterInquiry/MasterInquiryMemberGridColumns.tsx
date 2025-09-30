@@ -14,7 +14,16 @@ export const GetMasterInquiryMemberGridColumns = (): ColDef[] => {
       psnSuffix: true
     }),
     createNameColumn({ field: "fullName" }),
-    createSSNColumn({ maxWidth: 250 }),
+    createSSNColumn({ 
+      maxWidth: 250,
+      valueFormatter: (params: ValueFormatterParams) => {
+        const value = params.value;
+        if (value && params.data.badgesOfDuplicateSsns && params.data.badgesOfDuplicateSsns.length) {
+          return value + " (duplicate)";
+        }
+        return value;
+      }
+    }),
     { field: "address", headerName: "Street", maxWidth: 400 },
     { field: "addressCity", headerName: "City", maxWidth: 300 },
     { field: "addressState", headerName: "State", maxWidth: 100 },
