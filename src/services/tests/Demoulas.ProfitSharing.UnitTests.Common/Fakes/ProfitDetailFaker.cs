@@ -52,7 +52,16 @@ internal sealed class ProfitDetailFaker : Faker<ProfitDetail>
             .RuleFor(pd => pd.MonthToDate, fake => fake.Random.Byte(0, 12))
             .RuleFor(pd => pd.YearToDate, fake => (short)2024)
             .RuleFor(pd => pd.Remark, fake => fake.Lorem.Slug())
-            .RuleFor(pd => pd.ZeroContributionReasonId, fake => (byte?)0)
+            .RuleFor(pd => pd.ZeroContributionReasonId, fake => fake.PickRandom(
+                ZeroContributionReason.Constants.Normal,
+                ZeroContributionReason.Constants.Under21WithOver1Khours,
+                ZeroContributionReason.Constants.TerminatedEmployeeOver1000HoursWorkedGetsYearVested,
+                ZeroContributionReason.Constants.Over64WithLess1000Hours1YearVesting,
+                ZeroContributionReason.Constants.Over64WithLess1000Hours2YearsVesting,
+                ZeroContributionReason.Constants.Over64WithOver1000Hours3YearsVesting,
+                ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
+                ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay,
+                ZeroContributionReason.Constants.Unknown))
             .RuleFor(pd => pd.FederalTaxes, fake => fake.Finance.Amount(0, 10_000))
             .RuleFor(pd => pd.StateTaxes, fake => fake.Finance.Amount(0, 1000))
             .RuleFor(pd => pd.TaxCode, fake => taxCodeFaker.Generate())
