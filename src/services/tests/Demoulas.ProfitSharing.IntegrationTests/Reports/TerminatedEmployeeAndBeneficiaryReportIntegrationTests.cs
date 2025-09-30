@@ -462,35 +462,35 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
             return null;
         }
     }
-    
+
     private static string SafeSubstring(string input, int startIndex, int length)
     {
         if (startIndex >= input.Length)
         {
             return string.Empty;
         }
-        
+
         int actualLength = Math.Min(length, input.Length - startIndex);
         return actualLength > 0 ? input.Substring(startIndex, actualLength) : string.Empty;
     }
-    
+
     private static bool TryParseBadgeAndSuffix(string badgePsnStr, out int badgeNumber, out short psnSuffix)
     {
         badgeNumber = 0;
         psnSuffix = 0;
-        
+
         if (string.IsNullOrEmpty(badgePsnStr))
         {
             return false;
         }
-        
+
         // Try to parse as a simple badge number first
         if (int.TryParse(badgePsnStr, out badgeNumber))
         {
             psnSuffix = 0;
             return true;
         }
-        
+
         // If that fails, try to parse with suffix logic
         // Look for patterns like 7029671000 where the last 4 digits might be suffix
         if (badgePsnStr.Length > 6)
@@ -502,7 +502,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
                 {
                     var badgeStr = badgePsnStr.Substring(0, badgePsnStr.Length - suffixLength);
                     var suffixStr = badgePsnStr.Substring(badgePsnStr.Length - suffixLength);
-                    
+
                     if (int.TryParse(badgeStr, out badgeNumber) && short.TryParse(suffixStr, out psnSuffix))
                     {
                         return true;
@@ -510,14 +510,14 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
                 }
             }
         }
-        
+
         // Fallback: try to parse the whole thing as badge number
         if (int.TryParse(badgePsnStr, out badgeNumber))
         {
             psnSuffix = 0;
             return true;
         }
-        
+
         return false;
     }
 
@@ -540,7 +540,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
 
             // Remove commas and other formatting characters
             fieldStr = fieldStr.Replace(",", "").Replace("$", "").Trim();
-            
+
             if (string.IsNullOrEmpty(fieldStr))
             {
                 return 0;

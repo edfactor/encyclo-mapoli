@@ -94,6 +94,13 @@ const documentationFiles = [
     title: "Duplicate Names & Birthdays Report",
     filename: "Duplicate-Names-And-Birthdays-Report.md",
     description: "Implementation notes and operational guidance for the Duplicate Names and Birthdays cleanup report"
+  },
+  {
+    key: "military-contribution-qa-guide",
+    title: "Military Contribution QA Testing Guide",
+    filename: "MILITARY_CONTRIBUTION_QA_GUIDE.md",
+    description:
+      "Comprehensive QA testing guide for military contribution business logic, validation rules, test scenarios, and expected behaviors"
   }
 ];
 
