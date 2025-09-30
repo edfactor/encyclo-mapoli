@@ -3,6 +3,7 @@ This "golden" directory consists of output from READY ran agaist the scramble da
 
 The scramble has been slightly altered to remove a few problematic bene members.
 
+The reports are generated using the YE Runner's "GoldenDecemberRun" or "GoldenRun" runner (which is in this repo.)
 The reports are generated using the YE Runner's "GoldenRun" runner (which is in this repo.)
 
 All of the files have the following convention;

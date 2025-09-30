@@ -1,23 +1,22 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using YEMatch.YEMatch.ArrangeActivites;
-using YEMatch.YEMatch.ReadyActivities;
-
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-
 namespace YEMatch.YEMatch.Runs;
 
+using System.Diagnostics.CodeAnalysis;
+
+
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+#pragma warning disable CS0162 // Unreachable code detected
+
 [SuppressMessage("AsyncUsage", "AsyncFixer01:Unnecessary async/await usage")]
-public class GoldenRun : Runnable
+public class GoldenYearEndRun : Runnable
 {
     public override async Task Exec()
     {
-        GetGold.Purge();
+        // The database needs to be in the right state for this to work.
+        throw new NotImplementedException();
 
         // Generate the Golden files.  Run READY from Frozen to the YE Completed.
         await Run(Specify(
             "R0", // import obfuscated
-            nameof(DropBadBenesReady),
-            nameof(FixFrozenReady),
             // "R1",  - we cant run these (R1...R14) because the SHIFT has already been run on the Scramble
             // "R2",
             // "R3",
@@ -49,6 +48,5 @@ public class GoldenRun : Runnable
             "R27",
             "R28"
         ));
-        
     }
 }
