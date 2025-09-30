@@ -56,12 +56,8 @@ internal sealed class ProfitDetailFaker : Faker<ProfitDetail>
                 ZeroContributionReason.Constants.Normal,
                 ZeroContributionReason.Constants.Under21WithOver1Khours,
                 ZeroContributionReason.Constants.TerminatedEmployeeOver1000HoursWorkedGetsYearVested,
-                ZeroContributionReason.Constants.Over64WithLess1000Hours1YearVesting,
-                ZeroContributionReason.Constants.Over64WithLess1000Hours2YearsVesting,
-                ZeroContributionReason.Constants.Over64WithOver1000Hours3YearsVesting,
                 ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
-                ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay,
-                ZeroContributionReason.Constants.Unknown))
+                ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay))
             .RuleFor(pd => pd.FederalTaxes, fake => fake.Finance.Amount(0, 10_000))
             .RuleFor(pd => pd.StateTaxes, fake => fake.Finance.Amount(0, 1000))
             .RuleFor(pd => pd.TaxCode, fake => taxCodeFaker.Generate())
