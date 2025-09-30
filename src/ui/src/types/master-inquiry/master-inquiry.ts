@@ -1,4 +1,4 @@
-import type { SortedPaginationRequestDto, ProfitYearRequest } from "../common/api";
+import type { ProfitYearRequest, SortedPaginationRequestDto } from "../common/api";
 
 export interface MasterInquirySearch {
   endProfitYear?: number | null;
@@ -124,6 +124,7 @@ export interface MasterInquiryResponseDto {
   currentHoursYear: number;
   employmentStatusId: string;
   employmentStatus?: string;
+  badgesOfDuplicateSsns: number[];
 }
 
 export interface GroupedProfitSummaryDto {

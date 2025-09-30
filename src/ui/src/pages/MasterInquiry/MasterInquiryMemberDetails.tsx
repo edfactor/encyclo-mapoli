@@ -84,8 +84,16 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         gender,
         dateOfBirth,
         ssn: ssnValue,
-        allocationToAmount
+        allocationToAmount,
+        badgesOfDuplicateSsns,
       } = memberDetails;
+
+      const duplicateBadgeLink = [];
+      if (badgesOfDuplicateSsns && badgesOfDuplicateSsns.length) {
+        for (let badge of badgesOfDuplicateSsns) {
+          duplicateBadgeLink.push({label:'Duplicate SSN with', value: viewBadgeLinkRenderer(badge), labelColor: 'error' });
+        }
+      }
 
       return [
         ...(isEmployee ? [{ label: "Badge", value: viewBadgeLinkRenderer(badgeNumber) }] : []),
@@ -96,6 +104,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         { label: "Gender", value: gender || "N/A" },
         { label: "DOB", value: mmDDYYFormat(dateOfBirth) },
         { label: "SSN", value: `${ssnValue}` },
+        ...duplicateBadgeLink,
         { label: "Allocation To", value: numberToCurrency(allocationToAmount) }
       ];
     }, [memberDetails]);
