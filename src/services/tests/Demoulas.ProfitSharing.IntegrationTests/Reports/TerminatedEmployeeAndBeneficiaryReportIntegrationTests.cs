@@ -416,11 +416,11 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
             // Parse YTD PS Hours (7 characters, decimal)
             var ytdPsHours = ParseDecimalField(line, 116, 7);
 
-            // Parse vested percent (3 characters, right-aligned)
-            var vestedPercent = ParseIntField(line, 118, 3);
+            // Parse vested percent (2 characters, right-aligned at position 124)
+            var vestedPercent = ParseIntField(line, 124, 2);
 
-            // Parse age (3 characters, right-aligned)  
-            var age = ParseNullableIntField(line, 122, 3);
+            // Parse age (2 characters, right-aligned at position 131-132)  
+            var age = ParseNullableIntField(line, 131, 2);
 
             // Parse badge number and PSN suffix from badgePsnStr with safer logic
             if (!TryParseBadgeAndSuffix(badgePsnStr, out int badgeNumber, out short psnSuffix))

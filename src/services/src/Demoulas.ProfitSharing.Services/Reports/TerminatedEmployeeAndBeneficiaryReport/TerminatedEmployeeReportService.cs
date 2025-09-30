@@ -40,7 +40,7 @@ public sealed class TerminatedEmployeeReportService
     }
 
     #region Get Employees and Beneficiaries
-    
+
     private (short beginProfitYear, short endProfitYear) GetProfitYearRange(StartAndEndDateRequest request)
     {
         return ((short)request.BeginningDate.Year, (short)request.EndingDate.Year);
@@ -76,36 +76,36 @@ public sealed class TerminatedEmployeeReportService
         IQueryable<TerminatedEmployeeDto> terminatedEmployees, DateOnly asOfDate)
     {
         var query = from employee in terminatedEmployees
-            join payProfit in ctx.PayProfits on employee.Demographic.Id equals payProfit.DemographicId
-            join yipTbl in _totalService.GetYearsOfService(ctx, (short)request.EndingDate.Year, asOfDate) on payProfit.Demographic!.Ssn equals yipTbl.Ssn into yipTmp
-            from yip in yipTmp.DefaultIfEmpty()
-            where payProfit.ProfitYear >= request.BeginningDate.Year && payProfit.ProfitYear <= request.EndingDate.Year
-            select new MemberSlice
-            {
-                PsnSuffix = 0,
-                Id = employee.Demographic.Id,
-                BadgeNumber = employee.Demographic.BadgeNumber,
-                Ssn = employee.Demographic.Ssn,
-                BirthDate = employee.Demographic.DateOfBirth,
-                HoursCurrentYear = payProfit.CurrentHoursYear,
-                EmploymentStatusCode = employee.Demographic.EmploymentStatusId,
-                FullName = employee.Demographic.ContactInfo.FullName,
-                FirstName = employee.Demographic.ContactInfo.FirstName,
-                LastName = employee.Demographic.ContactInfo.LastName,
-                YearsInPs = yip != null ? (yip.Years) : (byte)0,
-                TerminationDate = employee.Demographic.TerminationDate,
-                IncomeRegAndExecCurrentYear = payProfit.CurrentIncomeYear + payProfit.IncomeExecutive,
-                TerminationCode = employee.Demographic.TerminationCodeId,
-                ZeroCont = (employee.Demographic.TerminationCodeId == TerminationCode.Constants.Deceased
-                    ? ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested
-                    : payProfit.ZeroContributionReasonId != null ? payProfit.ZeroContributionReasonId : 0),
-                EnrollmentId = payProfit.EnrollmentId,
-                Etva = payProfit.Etva,
-                ProfitYear = payProfit.ProfitYear,
-                IsOnlyBeneficiary = false,
-                IsBeneficiaryAndEmployee = false,
-                IsExecutive = employee.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly
-            };
+                    join payProfit in ctx.PayProfits on employee.Demographic.Id equals payProfit.DemographicId
+                    join yipTbl in _totalService.GetYearsOfService(ctx, (short)request.EndingDate.Year, asOfDate) on payProfit.Demographic!.Ssn equals yipTbl.Ssn into yipTmp
+                    from yip in yipTmp.DefaultIfEmpty()
+                    where payProfit.ProfitYear >= request.BeginningDate.Year && payProfit.ProfitYear <= request.EndingDate.Year
+                    select new MemberSlice
+                    {
+                        PsnSuffix = 0,
+                        Id = employee.Demographic.Id,
+                        BadgeNumber = employee.Demographic.BadgeNumber,
+                        Ssn = employee.Demographic.Ssn,
+                        BirthDate = employee.Demographic.DateOfBirth,
+                        HoursCurrentYear = payProfit.CurrentHoursYear,
+                        EmploymentStatusCode = employee.Demographic.EmploymentStatusId,
+                        FullName = employee.Demographic.ContactInfo.FullName,
+                        FirstName = employee.Demographic.ContactInfo.FirstName,
+                        LastName = employee.Demographic.ContactInfo.LastName,
+                        YearsInPs = yip != null ? (yip.Years) : (byte)0,
+                        TerminationDate = employee.Demographic.TerminationDate,
+                        IncomeRegAndExecCurrentYear = payProfit.CurrentIncomeYear + payProfit.IncomeExecutive,
+                        TerminationCode = employee.Demographic.TerminationCodeId,
+                        ZeroCont = (employee.Demographic.TerminationCodeId == TerminationCode.Constants.Deceased
+                            ? ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested
+                            : payProfit.ZeroContributionReasonId != null ? payProfit.ZeroContributionReasonId : 0),
+                        EnrollmentId = payProfit.EnrollmentId,
+                        Etva = payProfit.Etva,
+                        ProfitYear = payProfit.ProfitYear,
+                        IsOnlyBeneficiary = false,
+                        IsBeneficiaryAndEmployee = false,
+                        IsExecutive = employee.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly
+                    };
 
         return query;
     }
@@ -179,9 +179,9 @@ public sealed class TerminatedEmployeeReportService
 
         var profitDetailsRaw = ctx.ProfitDetails
             .Where(pd => pd.ProfitYear >= profitYearRange.beginProfitYear && pd.ProfitYear <= profitYearRange.endProfitYear && ssns.Contains(pd.Ssn));
-            
+
         var profitDetailsDict = await profitDetailsRaw
-            .GroupBy(pd =>new {pd.Ssn, pd.ProfitYear})
+            .GroupBy(pd => new { pd.Ssn, pd.ProfitYear })
             .ToDictionaryAsync(g => g.Key, g => new InternalProfitDetailDto
             {
                 Ssn = g.Key.Ssn,
@@ -217,7 +217,7 @@ public sealed class TerminatedEmployeeReportService
 
         // Build a list of all year details, then group by BadgeNumber, PsnSuffix, Name
         var yearDetailsList = new List<(int BadgeNumber, short PsnSuffix, string? Name, TerminatedEmployeeAndBeneficiaryYearDetailDto YearDetail)>();
-        
+
         foreach (var memberSlice in memberSliceUnion)
         {
             var key = new { memberSlice.Ssn, memberSlice.ProfitYear };
@@ -308,15 +308,15 @@ public sealed class TerminatedEmployeeReportService
         }
 
         // Group by BadgeNumber, PsnSuffix, Name
-         PaginatedResponseDto<TerminatedEmployeeAndBeneficiaryDataResponseDto> grouped = await yearDetailsList
-            .GroupBy(x => new { x.BadgeNumber, x.PsnSuffix, x.Name })
-            .Select(g => new TerminatedEmployeeAndBeneficiaryDataResponseDto
-            {
-                BadgeNumber = g.Key.BadgeNumber,
-                PsnSuffix = g.Key.PsnSuffix,
-                Name = g.Key.Name,
-                YearDetails = g.Select(x => x.YearDetail).OrderByDescending(y => y.ProfitYear).ToList()
-            }).AsQueryable().ToPaginationResultsAsync(req, cancellationToken);
+        PaginatedResponseDto<TerminatedEmployeeAndBeneficiaryDataResponseDto> grouped = await yearDetailsList
+           .GroupBy(x => new { x.BadgeNumber, x.PsnSuffix, x.Name })
+           .Select(g => new TerminatedEmployeeAndBeneficiaryDataResponseDto
+           {
+               BadgeNumber = g.Key.BadgeNumber,
+               PsnSuffix = g.Key.PsnSuffix,
+               Name = g.Key.Name,
+               YearDetails = g.Select(x => x.YearDetail).OrderByDescending(y => y.ProfitYear).ToList()
+           }).AsQueryable().ToPaginationResultsAsync(req, cancellationToken);
 
         return new TerminatedEmployeeAndBeneficiaryResponse
         {
