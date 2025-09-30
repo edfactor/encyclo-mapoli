@@ -23,7 +23,7 @@ public sealed class AdjustmentsGroup : GroupBase
                 .ProducesProblemFE<ProblemDetails>(StatusCodes.Status500InternalServerError)
                 .WithRequestTimeout(TimeSpan.FromMinutes(1))
                 .WithTags(RouteName));
-            ep.Policies(Policy.CanViewBalances);
+            ep.Policies(Policy.CanRunMasterInquiry);
         });
     }
 
