@@ -1,8 +1,10 @@
 ﻿using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -56,8 +58,16 @@ internal sealed class MissiveService : IMissiveService
 
                 // Pre-fetch balances for all SSNs
                 var balances = await _totalService.GetVestingBalanceForMembersAsync(Common.Contracts.Request.SearchBy.Ssn, ssnSet, profitYear, cancellation);
-                var balanceMap = balances.ToDictionary(b => b.Id, b => b);
-                
+                Dictionary<int, BalanceEndpointResponse> balanceMap = new ();
+                try
+                {
+                    balanceMap = balances.ToDictionary(b => b.Id, b => b);
+                }
+                catch (ArgumentException)
+                {
+                    //Swallow duplicate key exception
+                }
+
                 // Pre-fetch BeneficiaryContacts for all SSNs
                 var beneficiaryContacts = await ctx.BeneficiaryContacts.Where(bc => ssnSet.Contains(bc.Ssn)).Select(bc => bc.Ssn).Distinct().ToListAsync(cancellation);
 

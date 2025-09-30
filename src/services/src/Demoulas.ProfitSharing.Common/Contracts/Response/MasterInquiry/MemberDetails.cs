@@ -46,4 +46,5 @@ public record MemberDetails : IdRequest, INameParts, IFullNameProperty, IPhoneNu
     [MaskSensitive] public string? TerminationReason { get; set; }
 
     public List<int> Missives { get; set; } = [];
+    public List<int> BadgesOfDuplicateSsns { get; set; } = [];
 }
