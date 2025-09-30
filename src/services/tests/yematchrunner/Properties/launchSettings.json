@@ -1,36 +1,40 @@
 {
-  "profiles": {
-    "Baseline Run": {
-      "commandName": "Project",
-      "commandLineArgs": "--run baseline"
-    },
-    "Golden Run": {
-      "commandName": "Project",
-      "commandLineArgs": "--run golden"
-    },
-    "Golden Express Run": {
-      "commandName": "Project",
-      "commandLineArgs": "--run goldenexpress"
-    },
+    "profiles": {
+        "Baseline Run": {
+            "commandName": "Project",
+            "commandLineArgs": "--run baseline"
+        },
+        "Golden Run": {
+            "commandName": "Project",
+            "commandLineArgs": "--run golden"
+        },
+        "Golden Express Run": {
+            "commandName": "Project",
+            "commandLineArgs": "--run goldenexpress"
+        },
+        "Golden December Run": {
+            "commandName": "Project",
+            "commandLineArgs": "--run goldendecemberexpress"
+        },
         "Golden Republish Run": {
             "commandName": "Project",
             "commandLineArgs": "--run goldenrepublish"
         },
-    "Master Inquiry Run": {
-      "commandName": "Project",
-      "commandLineArgs": "--run masterinquiry"
-    },
-      "Seven Run": {
-          "commandName": "Project",
-          "commandLineArgs": "--run seven"
-      },
-    "View Run": {
-      "commandName": "Project",
-      "commandLineArgs": "--run view"
-    },
-    "Tinker Run": {
-      "commandName": "Project",
-      "commandLineArgs": "--run tinker"
+        "Master Inquiry Run": {
+            "commandName": "Project",
+            "commandLineArgs": "--run masterinquiry"
+        },
+        "Seven Run": {
+            "commandName": "Project",
+            "commandLineArgs": "--run seven"
+        },
+        "View Run": {
+            "commandName": "Project",
+            "commandLineArgs": "--run view"
+        },
+        "Tinker Run": {
+            "commandName": "Project",
+            "commandLineArgs": "--run tinker"
+        }
     }
-  }
 }

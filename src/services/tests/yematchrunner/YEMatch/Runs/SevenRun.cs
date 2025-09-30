@@ -19,9 +19,6 @@ public class SevenRun : Runnable
             nameof(ImportReadyDbToSmartDb), // Import SMART database from READY   database
             "S12", // Freeze on Smart
             "SanityCheckEmployeeAndBenes",
-            "Give2023Hours",
-            "S18_Rebuild2023ZeroCont",
-            "S24_Rebuild2023Enrollment",
             nameof(UpdateNavigation),
             "S23", // Does Contributions
             "S24" // Create PAY450 report on READY, does enrollment update on SMART

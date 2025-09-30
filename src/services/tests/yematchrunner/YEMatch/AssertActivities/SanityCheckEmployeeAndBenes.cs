@@ -62,7 +62,10 @@ public class SanityCheckEmployeeAndBenes : BaseSqlActivity
                         where ssn in (700007178, 700009305)
                         order by system, ssn
                 """);
-            // Console.WriteLine($"smart\n{smrtRehire}\n ready\n{readyRehire}\n")
+            if (smrtRehire != readyRehire)
+            {
+                Console.WriteLine($"smart\n{smrtRehire}\n ready\n{readyRehire}\n");
+            }
             smrtRehire.ShouldBeEquivalentTo(readyRehire);
         }
         

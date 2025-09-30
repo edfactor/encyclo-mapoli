@@ -9,11 +9,12 @@ using YEMatch.YEMatch.Activities;
 namespace YEMatch.YEMatch.ReadyActivities;
 
 [SuppressMessage("Major Code Smell", "S6966:Awaitable method should be used")]
-public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty, string AName, string ksh, string args, string dataDirectory) : IActivity
+public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty, string AName, string ksh, string _args, string dataDirectory) : IActivity
 {
     public const string OptionalLocalResourceBase = "/Users/robertherrmann/prj/smart-profit-sharing/src/services/tests/Demoulas.ProfitSharing.IntegrationTests/Resources/";
     private const bool UpdateIntegrationTestResources = false;
-
+    public string Args = _args; 
+    
     public string Name()
     {
         return AName.Substring(0, 1).Replace("A", "R") + AName.Substring(1);
@@ -29,18 +30,18 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
             return new Outcome(Name(), ksh, "", OutcomeStatus.NoOperation, "", null, false);
         }
 
-        Console.WriteLine($"    $ EJR {ksh} {args}");
+        Console.WriteLine($"    $ EJR {ksh} {Args}");
 
         Stopwatch stopwatch = Stopwatch.StartNew();
         SshCommand? result = null;
         try
         {
             result = client.RunCommand(
-                $". ~/setyematch;sed -e's|/production/|/dsmdev/data/PAYROLL/tmp-yematch/|g' jcl/{ksh}.ksh > jcl/YE-{ksh}.ksh;chmod +x jcl/YE-{ksh}.ksh;EJR YE-{ksh} {args}");
+                $". ~/setyematch;sed -e's|/production/|/dsmdev/data/PAYROLL/tmp-yematch/|g' jcl/{ksh}.ksh > jcl/YE-{ksh}.ksh;chmod +x jcl/YE-{ksh}.ksh;EJR YE-{ksh} {Args}");
         }
         catch (Exception e)
         {
-            return new Outcome(Name(), ksh, $"{ksh} {args}", OutcomeStatus.Error, e.Message, null, false, result?.Result ?? "", result?.Error ?? "");
+            return new Outcome(Name(), ksh, $"{ksh} {Args}", OutcomeStatus.Error, e.Message, null, false, result?.Result ?? "", result?.Error ?? "");
         }
 
         stopwatch.Stop();
@@ -161,12 +162,12 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
         if (result.ExitStatus != 0)
         {
             Console.WriteLine($"-- ERROR EXIT.  Standard Out;\n{lines}");
-            return new Outcome(Name(), ksh, $"{ksh} {args}", OutcomeStatus.Error, $"got bad exit status = {result.ExitStatus}", null, false,
+            return new Outcome(Name(), ksh, $"{ksh} {Args}", OutcomeStatus.Error, $"got bad exit status = {result.ExitStatus}", null, false,
                 result.Result,
                 result.Error);
         }
 
-        return new Outcome(Name(), ksh, $"{ksh} {args}", OutcomeStatus.Ok, lines[^1], took, false, result.Result, result.Error);
+        return new Outcome(Name(), ksh, $"{ksh} {Args}", OutcomeStatus.Ok, lines[^1], took, false, result.Result, result.Error);
     }
 
     private void IfChatty(string msg)
