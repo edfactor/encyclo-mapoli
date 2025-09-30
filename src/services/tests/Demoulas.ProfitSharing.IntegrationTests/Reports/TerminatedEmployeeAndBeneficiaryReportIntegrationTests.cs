@@ -28,10 +28,10 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
     {
         // These are arguments to the program/rest endpoint
         // Plan admin may choose a range of dates (ie. Q2 ?)
-        short profitSharingYear = 2024;
-        DateOnly startDate = new DateOnly(2024, 01, 6);
-        DateOnly endDate = new DateOnly(2024, 12, 28);
-        DateOnly effectiveDateOfTestData = new DateOnly(2024, 04, 08);
+        short profitSharingYear = 2025;
+        DateOnly startDate = new DateOnly(2025, 01, 4);
+        DateOnly endDate = new DateOnly(2025, 12, 27);
+        DateOnly effectiveDateOfTestData = new DateOnly(2025, 9, 29);
 
         var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
@@ -44,7 +44,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
 
         Stopwatch stopwatch = Stopwatch.StartNew();
         stopwatch.Start();
-        var data = await mockService.GetReportAsync(new StartAndEndDateRequest { BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue }, CancellationToken.None);
+        var data = await mockService.GetReportAsync(new StartAndEndDateRequest { BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue, SortBy = "name" }, CancellationToken.None);
 
         string actualText = CreateTextReport(effectiveDateOfTestData, startDate, endDate, profitSharingYear, data);
         stopwatch.Stop();
@@ -52,7 +52,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
 
         actualText.ShouldNotBeNullOrEmpty();
 
-        string expectedText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.terminatedEmployeeAndBeneficiaryReport-correct.txt");
+        string expectedText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R3-QPAY066");
 
         ProfitShareUpdateTests.AssertReportsAreEquivalent(expectedText, actualText);
     }

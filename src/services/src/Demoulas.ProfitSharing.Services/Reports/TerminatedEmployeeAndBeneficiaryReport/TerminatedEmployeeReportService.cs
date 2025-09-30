@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Data.Contexts.Extensions;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -306,7 +307,7 @@ public sealed class TerminatedEmployeeReportService
         }
 
         // Group by BadgeNumber, PsnSuffix, Name
-        var grouped = await yearDetailsList
+         PaginatedResponseDto<TerminatedEmployeeAndBeneficiaryDataResponseDto> grouped = await yearDetailsList
             .GroupBy(x => new { x.BadgeNumber, x.PsnSuffix, x.Name })
             .Select(g => new TerminatedEmployeeAndBeneficiaryDataResponseDto
             {
