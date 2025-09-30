@@ -58,9 +58,9 @@ public class MergeProfitDetailsService : IMergeProfitDetailsService
 
                 // Perform the merge operation
                 var rowsAffected = await ctx.ProfitDetails
-                    .Where(p => p.Ssn == destinationSsn)
+                    .Where(p => p.Ssn == sourceSsn)
                     .ExecuteUpdateAsync(
-                        s => s.SetProperty(p => p.Ssn, sourceSsn),
+                        s => s.SetProperty(p => p.Ssn, destinationSsn),
                         cancellationToken);
 
                 return Result<bool>.Success(true);
