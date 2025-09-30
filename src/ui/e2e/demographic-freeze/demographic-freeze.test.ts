@@ -1,15 +1,11 @@
 import { expect, test } from "@playwright/test";
-import { baseUrl } from "../env.setup";
+import { baseUrl, impersonateRole } from "../env.setup";
 
 test.describe("Demographic Freeze: ", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(baseUrl);
     await page.waitForLoadState("networkidle");
-    await page.getByRole("combobox", { name: "roles" }).click();
-    await page.getByRole("option", { name: "IT-DevOps" }).getByRole("checkbox").check();
-    await page.locator("body").click();
-    await page.reload();
-    await page.waitForLoadState("networkidle");
+  await impersonateRole(page, 'IT-DevOps');
     await page.getByRole("button", { name: "IT DEVOPS" }).click();
     await page.getByRole("link", { name: "Demographic Freeze" }).click();
   });
