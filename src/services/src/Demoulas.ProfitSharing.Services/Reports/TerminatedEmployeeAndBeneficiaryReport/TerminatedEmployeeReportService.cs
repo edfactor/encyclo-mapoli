@@ -63,7 +63,7 @@ public sealed class TerminatedEmployeeReportService
             .Where(d => d.EmploymentStatusId == EmploymentStatus.Constants.Terminated
                         && d.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension
                         && d.TerminationCodeId != TerminationCode.Constants.Retired
-                        && d.TerminationDate >= request.BeginningDate && d.TerminationDate <= request.EndingDate)
+                        && (d.TerminationDate == null || (d.TerminationDate >= request.BeginningDate && d.TerminationDate <= request.EndingDate)))
             .Select(d => new TerminatedEmployeeDto
             {
                 Demographic = d
