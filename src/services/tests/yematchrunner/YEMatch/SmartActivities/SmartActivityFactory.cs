@@ -65,13 +65,16 @@ public static class SmartActivityFactory
 
     private static async Task<Outcome> A0_Initialize_Database_with_Obfuscated_data(ApiClient apiClient, string aname, string name)
     {
+        // We now use the CLI ImportReadyToSmartDB to do the import, so it handles the 2023 rebuild 
+        throw new NotImplementedException();
+
+#if false        
         // Quick authentication sanity check
         AppVersionInfo? r = await apiClient.DemoulasCommonApiEndpointsAppVersionInfoEndpointAsync(null);
         // Might be nice to also include the database version. What database is used.  Wall clock time.
         Console.WriteLine(" Connected to SMART build:" + r.BuildNumber + " git-hash:" + r.ShortGitHash);
 
         // Consider using CLI tool for reset the smart schema to stock 
-
         int res = ScriptRunner.Run(false, "import-bh"); // Good enough and fast
         if (res != 0)
         {
@@ -79,6 +82,7 @@ public static class SmartActivityFactory
         }
 
         return new Outcome(aname, name, "", OutcomeStatus.Ok, "Database setup complete.\n", null, true);
+#endif
     }
 
     private static async Task<Outcome> A1_Profit_Sharing_Clean_up_Reports(ApiClient apiClient, string aname, string name)

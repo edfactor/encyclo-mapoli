@@ -15,16 +15,29 @@ public class TinkerRun : Runnable
     public override async Task Exec()
     {
         await Run(Specify(
-            "R0",
-            nameof(DropBadBenesReady),  // Jane does this in her script
-            nameof(FixFrozenReady), // Jane does this in her script
-            nameof(ImportReadyDbToSmartDb), // Import SMART database from READY   database
-            "S12", // Freeze on Smart
-            nameof(SanityCheckEmployeeAndBenes),
-            "R20", // PAY443 
-            nameof(IntPay443)
-        ));
+            
+            // Test the Enrollment change issue.
+            
+            "R0", // import obfuscated
+            nameof(DropBadBenesReady),
+            nameof(FixFrozenReady),
+            "R15",
+            "R16",
+            "R17",
+            "R18",
+            "R19",
+            "R20",
+            "R21",
+            "R22",
+            "R23",
+            "R24",
+            "R24B",
+            "R25",
+            "R26",
+            "R27",
+            "R28"
+            ));
 
-        // GetGold.Fetch(DataDirectory, ReadyActivityFactory.SftpClient!)
+       // use sql to compare proftitshare2 vs tbherrmann for py_enrollment
     }
 }
