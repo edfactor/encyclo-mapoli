@@ -66,11 +66,6 @@ public class MergeProfitDetailsService : IMergeProfitDetailsService
                 return Result<bool>.Success(true);
             }, cancellationToken);
         }
-        catch (OperationCanceledException)
-        {
-            // Re-throw cancellation to maintain expected behavior
-            throw;
-        }
         catch (Exception ex)
         {
             return Result<bool>.Failure(Error.MergeOperationFailed(ex.Message));
