@@ -42,6 +42,7 @@ export const useUnForfeitGrid = ({
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
   const [pendingSuccessMessage, setPendingSuccessMessage] = useState<string | null>(null);
   const [isPendingBulkMessage, setIsPendingBulkMessage] = useState<boolean>(false);
+  const [isBulkSaveInProgress, setIsBulkSaveInProgress] = useState<boolean>(false);
 
   const selectedProfitYear = useDecemberFlowProfitYear();
   const { unForfeits, unForfeitsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
@@ -123,8 +124,10 @@ export const useUnForfeitGrid = ({
   }, [isFetching, pendingSuccessMessage, isPendingBulkMessage, dispatch]);
 
   // Need a useEffect to reset the page number when total count changes (new search, not pagination)
+  // Skip reset during bulk save operations to preserve grid position
   useEffect(() => {
     if (
+      !isBulkSaveInProgress &&
       unForfeits !== prevUnForfeits.current &&
       unForfeits?.response?.total !== undefined &&
       unForfeits.response.total !== prevUnForfeits.current?.response?.total
@@ -132,7 +135,7 @@ export const useUnForfeitGrid = ({
       resetPagination();
     }
     prevUnForfeits.current = unForfeits;
-  }, [unForfeits, resetPagination]);
+  }, [unForfeits, resetPagination, isBulkSaveInProgress]);
 
   const performSearch = useCallback(
     async (skip: number, sortBy: string, isSortDescending: boolean) => {
@@ -206,6 +209,7 @@ export const useUnForfeitGrid = ({
     async (requests: ForfeitureAdjustmentUpdateRequest[], names: string[]) => {
       const badgeNumbers = requests.map((request) => request.badgeNumber);
       editState.addLoadingRows(badgeNumbers);
+      setIsBulkSaveInProgress(true);
 
       try {
         await updateForfeitureAdjustmentBulk(requests);
@@ -229,6 +233,7 @@ export const useUnForfeitGrid = ({
         alert("Failed to save one or more adjustments. Please try again.");
       } finally {
         editState.removeLoadingRows(badgeNumbers);
+        setIsBulkSaveInProgress(false);
       }
     },
     [

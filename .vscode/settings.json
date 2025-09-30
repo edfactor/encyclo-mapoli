@@ -1,4 +1,5 @@
 {
+  "dotnet.defaultSolution": "src/Services/src/Demoulas.ProfitSharing.slnx",
   "editor.codeActionsOnSave": {
     "source.organizeImports": "always"
   },
