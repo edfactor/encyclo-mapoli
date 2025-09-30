@@ -1213,8 +1213,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var actualEmployees = actualResponse.Response.Results.ToList();
 
         // Create lookup by name+badge for comparison (handling duplicates)
-        var actualByNameBadge = actualEmployees.GroupBy(e => $"{e.Name ?? "Unknown"}|{e.BadgeNumber}").ToDictionary(g => g.Key, g => g.ToList()[0]);
-        var expectedByNameBadge = expectedEmployees.GroupBy(e => $"{e!.Name ?? "Unknown"}|{e.BadgeNumber}").ToDictionary(g => g.Key, g => g.ToList()[0]);
+        var actualByNameBadge = actualEmployees.GroupBy(e => $"{e.Name ?? "Unknown"}|{e.BadgeNumber}").ToDictionary(g => g.Key, g => g.First());
+        var expectedByNameBadge = expectedEmployees.GroupBy(e => $"{e!.Name ?? "Unknown"}|{e.BadgeNumber}").ToDictionary(g => g.Key, g => g.First());
 
         // Find employees that are missing from actual system
         var missingEmployees = expectedByNameBadge.Keys.Except(actualByNameBadge.Keys).ToList();
@@ -1342,6 +1342,141 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
 
         // This test verifies our hypothesis - add simple assertion to satisfy linter
         expectedEmployees.Count.ShouldBeGreaterThan(0); // Basic assertion that we have data to analyze
+    }
+
+    [Fact]
+    [Description("PS-XXXX : Focused analysis of BadgePSN format generation differences")]
+    public async Task InvestigateBadgePSNFormatDiscrepancies()
+    {
+        // Arrange
+        var startDate = new DateOnly(2023, 10, 1);
+        var endDate = new DateOnly(2024, 9, 30);
+        var request = new StartAndEndDateRequest { BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue };
+
+        var distributedCache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
+        var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
+        var totalService = new TotalService(DbFactory,
+            calendarService, new EmbeddedSqlService(),
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
+        var demographicReaderService = new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+        var terminatedEmployeeService = new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService);
+
+        // Act
+        var actualData = await terminatedEmployeeService.GetReportAsync(request, CancellationToken.None);
+        var expectedText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R3-QPAY066");
+        var lines = expectedText.Split('\n').Where(line => !string.IsNullOrWhiteSpace(line)).ToArray();
+        var expectedEmployees = lines.Select(ParseEmployeeDataLine).Where(e => e != null).ToList();
+
+        // Analysis
+        var report = new StringBuilder();
+        report.AppendLine("=== BADGE PSN FORMAT ANALYSIS ===");
+        report.AppendLine($"Expected employees: {expectedEmployees.Count}");
+        report.AppendLine($"Actual employees: {actualData.Response.Results.Count()}");
+        report.AppendLine();
+
+        // Group by badge number for comparison
+        var expectedByBadge = expectedEmployees
+            .Where(e => e != null)
+            .GroupBy(e => e!.BadgeNumber)
+            .ToDictionary(g => g.Key, g => g.First());
+        var actualByBadge = actualData.Response.Results
+            .GroupBy(e => e.BadgeNumber)
+            .ToDictionary(g => g.Key, g => g.First());
+
+        // Find PSN format differences
+        var psnFormatIssues = new List<(int Badge, string? Expected, string Actual, string Analysis)>();
+
+        foreach (var badge in expectedByBadge.Keys.Take(50)) // Sample first 50 for detailed analysis
+        {
+            if (actualByBadge.TryGetValue(badge, out var actualEmployee))
+            {
+                var expectedEmployee = expectedByBadge[badge];
+                if (expectedEmployee?.BadgePSn != actualEmployee.BadgePSn)
+                {
+                    var expectedPsn = expectedEmployee?.BadgePSn ?? "NULL";
+                    var actualPsn = actualEmployee.BadgePSn ?? "NULL";
+
+                    // Analyze the pattern
+                    string analysis = "Unknown difference";
+                    if (expectedPsn != "NULL" && actualPsn != "NULL")
+                    {
+                        if (actualPsn.StartsWith(expectedPsn) && actualPsn.Length > expectedPsn.Length)
+                        {
+                            var suffix = actualPsn[expectedPsn.Length..];
+                            analysis = $"Actual has suffix '{suffix}'";
+                        }
+                        else if (expectedPsn.StartsWith(actualPsn) && expectedPsn.Length > actualPsn.Length)
+                        {
+                            var suffix = expectedPsn[actualPsn.Length..];
+                            analysis = $"Expected has suffix '{suffix}'";
+                        }
+                        else if (expectedPsn.Length == actualPsn.Length)
+                        {
+                            analysis = "Same length, different content";
+                        }
+                        else
+                        {
+                            analysis = $"Length diff: Expected={expectedPsn.Length}, Actual={actualPsn.Length}";
+                        }
+                    }
+
+                    psnFormatIssues.Add((badge, expectedPsn, actualPsn, analysis));
+                }
+            }
+        }
+
+        report.AppendLine($"BadgePSN format issues found: {psnFormatIssues.Count}");
+        report.AppendLine();
+
+        // Pattern analysis
+        var suffixPatterns = psnFormatIssues
+            .GroupBy(issue => issue.Analysis)
+            .OrderByDescending(g => g.Count())
+            .ToList();
+
+        report.AppendLine("=== PATTERN ANALYSIS ===");
+        foreach (var pattern in suffixPatterns)
+        {
+            report.AppendLine($"{pattern.Key}: {pattern.Count()} occurrences");
+
+            // Show first few examples
+            foreach (var example in pattern.Take(3))
+            {
+                report.AppendLine($"  Badge {example.Badge}: '{example.Expected}' → '{example.Actual}'");
+            }
+            if (pattern.Count() > 3)
+            {
+                report.AppendLine($"  ... and {pattern.Count() - 3} more");
+            }
+            report.AppendLine();
+        }
+
+        // Investigate PSN generation patterns
+        report.AppendLine("=== PSN GENERATION PATTERN ANALYSIS ===");
+        report.AppendLine("Note: PSN (Profit Sharing Number) is computed as BadgeNumber + PsnSuffix");
+        report.AppendLine("For employees (not beneficiaries), PsnSuffix should typically be 0");
+        report.AppendLine("BadgePSn property: if PsnSuffix == 0 ? BadgeNumber.ToString() : $\"{BadgeNumber}{PsnSuffix}\"");
+        report.AppendLine();
+
+        // Recommendations
+        report.AppendLine();
+        report.AppendLine("=== RECOMMENDATIONS ===");
+        if (suffixPatterns.Any(p => p.Key.Contains("suffix '000'")))
+        {
+            report.AppendLine("1. SMART system appears to be adding '000' suffix inappropriately");
+            report.AppendLine("2. Check BadgePSN generation logic in TerminatedEmployeeReportService");
+            report.AppendLine("3. Compare with READY system's PSN formatting rules");
+        }
+        else
+        {
+            report.AppendLine("1. PSN differences don't follow a clear '000' suffix pattern");
+            report.AppendLine("2. May need deeper investigation into PSN calculation algorithm");
+        }
+
+        TestOutputHelper.WriteLine(report.ToString());
+
+        // Assertion for test framework
+        actualData.Response.Results.Count().ShouldBeGreaterThan(400, "Should have substantial employee data for analysis");
     }
 
 
