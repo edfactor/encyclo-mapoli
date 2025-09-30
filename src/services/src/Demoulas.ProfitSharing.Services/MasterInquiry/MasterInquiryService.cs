@@ -129,6 +129,13 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
             // Get unique SSNs from the query
             var ssnList = await query.Select(x => x.Member.Ssn).ToHashSetAsync(cancellationToken);
+            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+
+            var duplicateSsns = await demographics
+                .GroupBy(d => d.Ssn)
+                .Where(g => g.Count() > 1 && ssnList.Contains(g.Key))
+                .Select(g => g.Key)
+                .ToHashSetAsync(cancellationToken);
 
             if (ssnList.Count == 0 && (req.Ssn != 0 || req.BadgeNumber != 0))
             {
@@ -143,7 +150,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
             if (memberType == 1)
             {
-                detailsList = await GetDemographicDetailsForSsns(ctx, req, ssnList, currentYear, previousYear, cancellationToken);
+                detailsList = await GetDemographicDetailsForSsns(ctx, req, ssnList, currentYear, previousYear, duplicateSsns, cancellationToken);
             }
             else if (memberType == 2)
             {
@@ -564,6 +571,20 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
         var missives = await _missiveService.DetermineMissivesForSsns([memberData.Ssn], currentYear, cancellationToken);
         var missiveList = missives.TryGetValue(memberData.Ssn, out var m) ? m : new List<int>();
+        var duplicateSsns = await demographics
+                .GroupBy(d => d.Ssn)
+                .Where(g => g.Count() > 1 && g.Key == memberData.Ssn)
+                .Select(g => g.Key)
+                .ToHashSetAsync(cancellationToken);
+
+        List<int> badgeNumbersOfDuplicates = [];
+        if (duplicateSsns.Any())
+        {
+            badgeNumbersOfDuplicates = await demographics
+                .Where(d => d.Ssn == memberData.Ssn && d.Id != memberData.DemographicId)
+                .Select(d => d.BadgeNumber)
+                .ToListAsync(cancellationToken);
+        }
 
         return (ssn: memberData.Ssn, memberDetails: new MemberDetails
         {
@@ -601,7 +622,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
             PhoneNumber = memberData.PhoneNumber,
 
             ReceivedContributionsLastYear = memberData.PreviousPayProfit?.PsCertificateIssuedDate != null,
-            Missives = missiveList
+            Missives = missiveList,
+            BadgesOfDuplicateSsns = badgeNumbersOfDuplicates
         });
     }
 
@@ -724,6 +746,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 PreviousEtva = memberData.PreviousEtva,
                 EmploymentStatus = memberData.EmploymentStatus,
                 Missives = memberData.Missives,
+                BadgesOfDuplicateSsns = memberData.BadgesOfDuplicateSsns,
                 YearsInPlan = balance?.YearsInPlan ?? 0,
                 PercentageVested = balance?.VestingPercent ?? 0,
                 BadgeNumber = memberData.BadgeNumber,
@@ -751,7 +774,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         return detailsList;
     }
 
-    private async Task<PaginatedResponseDto<MemberDetails>> GetDemographicDetailsForSsns(ProfitSharingReadOnlyDbContext ctx, SortedPaginationRequestDto req, ISet<int> ssns, short currentYear, short previousYear, CancellationToken cancellationToken)
+    private async Task<PaginatedResponseDto<MemberDetails>> GetDemographicDetailsForSsns(ProfitSharingReadOnlyDbContext ctx, SortedPaginationRequestDto req, ISet<int> ssns, short currentYear, short previousYear, ISet<int> duplicateSsns, CancellationToken cancellationToken)
     {
         var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
         var query = demographics
@@ -809,12 +832,23 @@ public sealed class MasterInquiryService : IMasterInquiryService
             })
             .ToPaginationResultsAsync(req, cancellationToken);
 
-        var missivesDict = await _missiveService.DetermineMissivesForSsns(members.Results.Select(m => m.Ssn), currentYear, cancellationToken);
+        var missivesDict = await _missiveService.DetermineMissivesForSsns(members.Results.Select(m => m.Ssn).Except(duplicateSsns), currentYear, cancellationToken);
 
         var detailsList = new List<MemberDetails>();
         foreach (var memberData in members.Results)
         {
             var missiveList = missivesDict.TryGetValue(memberData.Ssn, out var m) ? m : new List<int>();
+            var duplicateBadges = new HashSet<int>();
+            if (duplicateSsns.Contains(memberData.Ssn))
+            {
+                var duplicateMembers = await demographics
+                    .Where(d => d.Ssn == memberData.Ssn && d.Id != memberData.Id)
+                    .Select(d => d.BadgeNumber)
+                    .ToListAsync(cancellationToken);
+                duplicateBadges.UnionWith(duplicateMembers);
+
+            }
+
             detailsList.Add(new MemberDetails
             {
                 IsEmployee = true,
@@ -842,7 +876,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
                 EmploymentStatus = memberData.EmploymentStatus?.Name,
                 ReceivedContributionsLastYear = memberData.PreviousPayProfit?.PsCertificateIssuedDate != null,
-                Missives = missiveList
+                Missives = missiveList,
+                BadgesOfDuplicateSsns = duplicateBadges.ToList()
             });
         }
 
