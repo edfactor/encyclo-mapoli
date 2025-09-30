@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Extensions;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -18,11 +19,17 @@ public class MergeProfitDetailsService : IMergeProfitDetailsService
         _demographicReaderService = demographicReaderService;
     }
 
-    public Task MergeProfitDetailsToDemographic(int sourceSsn, int destinationSsn, CancellationToken cancellationToken = default)
+    public async Task<Result<bool>> MergeProfitDetailsToDemographic(int sourceSsn, int destinationSsn, CancellationToken cancellationToken = default)
     {
-        return _dataContextFactory.UseWritableContext(async ctx =>
+        // Early validation: prevent merging with same SSN
+        if (sourceSsn == destinationSsn)
         {
-            try
+            return Result<bool>.Failure(Error.SameDemographicMerge);
+        }
+
+        try
+        {
+            return await _dataContextFactory.UseWritableContext(async ctx =>
             {
                 var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
                 HashSet<int> ssns = new() { sourceSsn, destinationSsn };
@@ -31,27 +38,42 @@ public class MergeProfitDetailsService : IMergeProfitDetailsService
                      .Where(d => ssns.Contains(d.Ssn))
                      .ToListAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
-                // confirm we have both source and destination
+                // Confirm we have both source and destination
                 Demographic? sourceDemographic = source.FirstOrDefault(d => d.Ssn == sourceSsn);
                 Demographic? destinationDemographic = source.FirstOrDefault(e => e.Ssn == destinationSsn);
 
-                if (sourceDemographic == null || destinationDemographic == null)
+                // Validate demographics existence with specific error messages
+                if (sourceDemographic == null && destinationDemographic == null)
                 {
-                    throw new KeyNotFoundException($"Could not find both source SSN {sourceSsn.MaskSsn()} and destination SSN {destinationSsn.MaskSsn()} in demographics.");
+                    return Result<bool>.Failure(Error.BothDemographicsNotFound);
+                }
+                if (sourceDemographic == null)
+                {
+                    return Result<bool>.Failure(Error.SourceDemographicNotFound);
+                }
+                if (destinationDemographic == null)
+                {
+                    return Result<bool>.Failure(Error.DestinationDemographicNotFound);
                 }
 
-                await ctx.ProfitDetails
+                // Perform the merge operation
+                var rowsAffected = await ctx.ProfitDetails
                     .Where(p => p.Ssn == destinationSsn)
                     .ExecuteUpdateAsync(
                         s => s.SetProperty(p => p.Ssn, sourceSsn),
                         cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Error merging profit details from SSN {sourceSsn.MaskSsn()} to SSN {destinationSsn.MaskSsn()}: {ex.Message}", ex);
-            }
 
-
-        }, cancellationToken);
+                return Result<bool>.Success(true);
+            }, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            // Re-throw cancellation to maintain expected behavior
+            throw;
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Failure(Error.MergeOperationFailed(ex.Message));
+        }
     }
 }

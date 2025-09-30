@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel;
+using Demoulas.Common.Api.Contracts;
+using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Demographics;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Demographics;
@@ -98,7 +100,7 @@ public class MergeProfitDetailsEndpointTests
                 request.SourceSsn,
                 request.DestinationSsn,
                 It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<bool>.Success(true));
 
         // Act
         await _endpoint.HandleAsync(request, cancellationToken);
@@ -134,7 +136,7 @@ public class MergeProfitDetailsEndpointTests
                 It.IsAny<int>(),
                 It.IsAny<int>(),
                 It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<bool>.Success(true));
 
         // Act
         await _endpoint.HandleAsync(request, cancellationToken);
@@ -161,7 +163,7 @@ public class MergeProfitDetailsEndpointTests
                 It.IsAny<int>(),
                 It.IsAny<int>(),
                 It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<bool>.Success(true));
 
         // Act
         await _endpoint.HandleAsync(request, cancellationToken);
@@ -198,7 +200,7 @@ public class MergeProfitDetailsEndpointTests
                 It.IsAny<int>(),
                 It.IsAny<int>(),
                 It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<bool>.Success(true));
 
         // Act
         await _endpoint.HandleAsync(request, CancellationToken.None);
@@ -224,7 +226,7 @@ public class MergeProfitDetailsEndpointTests
                 It.IsAny<int>(),
                 It.IsAny<int>(),
                 It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<bool>.Success(true));
 
         // Act
         await _endpoint.HandleAsync(request, CancellationToken.None);
@@ -302,7 +304,7 @@ public class MergeProfitDetailsEndpointTests
                 It.IsAny<int>(),
                 It.IsAny<CancellationToken>()))
             .Callback(() => serviceCallCount++)
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<bool>.Success(true));
 
         // Act
         await _endpoint.HandleAsync(request, CancellationToken.None);
@@ -334,7 +336,7 @@ public class MergeProfitDetailsEndpointTests
                 It.IsAny<int>(),
                 It.IsAny<int>(),
                 It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<bool>.Success(true));
 
         // Act & Assert
         using var cancellationTokenSource = new CancellationTokenSource(timeout);
@@ -357,7 +359,7 @@ public class MergeProfitDetailsEndpointTests
                 It.IsAny<int>(),
                 It.IsAny<int>(),
                 It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<bool>.Success(true));
 
         // Act
         for (int i = 0; i < concurrentCalls; i++)
@@ -394,7 +396,7 @@ public class MergeProfitDetailsEndpointTests
                 It.IsAny<int>(),
                 It.IsAny<int>(),
                 It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<bool>.Success(true));
 
         // Act
         await _endpoint.HandleAsync(request, CancellationToken.None);
