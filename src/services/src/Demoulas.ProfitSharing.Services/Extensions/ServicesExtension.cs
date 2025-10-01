@@ -24,6 +24,7 @@ using Demoulas.ProfitSharing.Services.Reports.Breakdown;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Demoulas.ProfitSharing.Services.MergeProfitDetails;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;
 
@@ -96,7 +97,7 @@ public static class ServicesExtension
 
         _ = builder.Services.AddScoped<IReportRunnerService, ReportRunnerService>();
         _ = builder.Services.AddScoped<IStateTaxLookupService, StateTaxLookupService>();
-
+        _ = builder.Services.AddScoped<IMergeProfitDetailsService, MergeProfitDetailsService>();
 
         builder.AddProjectCachingServices();
 
