@@ -117,6 +117,12 @@ public sealed class TerminatedEmployeeReportService
             .ThenInclude(c => c!.ContactInfo)
             .Include(b => b.Demographic)
             .Select(b => new { Beneficiary = b, b.Demographic })
+            // BUSINESS RULE ALIGNMENT WITH READY SYSTEM:
+            // Exclude beneficiaries who have matching SSNs with active employees.
+            // READY system treats active employees as employees only, not as beneficiaries.
+            // This prevents active employees from appearing as beneficiaries with PSN suffixes.
+            .Where(x => !(x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn && 
+                         x.Demographic.EmploymentStatusId == EmploymentStatus.Constants.Active))
             .Select(x => new MemberSlice
             {
                 PsnSuffix = x.Beneficiary.PsnSuffix,
