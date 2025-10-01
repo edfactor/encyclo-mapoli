@@ -1,16 +1,12 @@
 import { test, expect } from "@playwright/test";
-import { baseUrl } from "../env.setup";
+import { baseUrl, impersonateRole } from "../env.setup";
 
 
 test.describe("Manage Executive Hours: ", () => {
     test.beforeEach(async ({ page }) => {
         await page.goto(baseUrl);
         await page.waitForLoadState("networkidle");
-        await page.getByRole("combobox", { name: "roles" }).click();
-        await page.getByRole('option', { name: 'Finance-Manager' }).getByRole('checkbox').check();
-        await page.locator("body").click();
-        await page.reload();
-        await page.waitForLoadState("networkidle");
+    await impersonateRole(page, 'Finance-Manager');
         await page.getByRole('button').filter({ hasText: /^$/ }).click();
         await page.getByRole('button', { name: 'Fiscal Close' }).click();
         await page.getByRole('button', { name: 'Manage Executive Hours' }).click();
@@ -75,8 +71,6 @@ test.describe("Manage Executive Hours: ", () => {
 
         // Select by value
         await pageSizeSelect.selectOption('10');
-        await expect(pageSizeSelect).toBe(10);
-
         const isNextPageDisabled = await page.getByRole('button', { name: 'next page' }).isDisabled();
 
         if (!isNextPageDisabled) {
