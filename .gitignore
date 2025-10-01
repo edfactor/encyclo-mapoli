@@ -284,6 +284,11 @@ FakesAssemblies/
 .ntvs_analysis.dat
 node_modules/
 
+# Coverage tool folders
+src/ui/coverage/
+src/ui/FE_Tests/
+
+
 # Visual Studio 6 build log
 *.plg
 
