@@ -1,0 +1,14 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Demoulas.ProfitSharing.Security -> D:\source\Demoulas\smart-profit-sharing\src\services\src\Demoulas.ProfitSharing.Security\bin\Debug\net9.0\Demoulas.ProfitSharing.Security.dll
+  Demoulas.ProfitSharing.Analyzers -> D:\source\Demoulas\smart-profit-sharing\src\services\src\Demoulas.ProfitSharing.Analyzers\bin\Debug\netstandard2.0\Demoulas.ProfitSharing.Analyzers.dll
+  Demoulas.ProfitSharing.Common -> D:\source\Demoulas\smart-profit-sharing\src\services\src\Demoulas.ProfitSharing.Common\bin\Debug\net9.0\Demoulas.ProfitSharing.Common.dll
+  Demoulas.ProfitSharing.Data -> D:\source\Demoulas\smart-profit-sharing\src\services\src\Demoulas.ProfitSharing.Data\bin\Debug\net9.0\Demoulas.ProfitSharing.Data.dll
+  Demoulas.ProfitSharing.Services.Caching -> D:\source\Demoulas\smart-profit-sharing\src\services\src\Demoulas.ProfitSharing.CachingServices\bin\Debug\net9.0\Demoulas.ProfitSharing.Services.Caching.dll
+  Demoulas.ProfitSharing.Endpoints -> D:\source\Demoulas\smart-profit-sharing\src\services\src\Demoulas.ProfitSharing.Endpoints\bin\Debug\net9.0\Demoulas.ProfitSharing.Endpoints.dll
+  Demoulas.ProfitSharing.Services -> D:\source\Demoulas\smart-profit-sharing\src\services\src\Demoulas.ProfitSharing.Services\bin\Debug\net9.0\Demoulas.ProfitSharing.Services.dll
+  Demoulas.ProfitSharing.OracleHcm -> D:\source\Demoulas\smart-profit-sharing\src\services\src\Demoulas.ProfitSharing.OracleHcm\bin\Debug\net9.0\Demoulas.ProfitSharing.OracleHcm.dll
+  Demoulas.ProfitSharing.UnitTests.Common -> D:\source\Demoulas\smart-profit-sharing\src\services\tests\Demoulas.ProfitSharing.UnitTests.Common\bin\Debug\net9.0\Demoulas.ProfitSharing.UnitTests.Common.dll
+  Demoulas.ProfitSharing.Api -> D:\source\Demoulas\smart-profit-sharing\src\services\src\Demoulas.ProfitSharing.Api\bin\Debug\net9.0\Demoulas.ProfitSharing.Api.dll
+D:\source\Demoulas\smart-profit-sharing\src\services\tests\Demoulas.ProfitSharing.IntegrationTests\Reports\TerminatedEmployeeAndBeneficiaryReportIntegrationTests.cs(505,34): error AsyncFixer02: ReadAllLinesAsync should be used instead of File.ReadAllLines. (https://github.com/semihokur/AsyncFixer) [D:\source\Demoulas\smart-profit-sharing\src\services\tests\Demoulas.ProfitSharing.IntegrationTests\Demoulas.ProfitSharing.IntegrationTests.csproj]
+D:\source\Demoulas\smart-profit-sharing\src\services\tests\Demoulas.ProfitSharing.IntegrationTests\Reports\TerminatedEmployeeAndBeneficiaryReportIntegrationTests.cs(505,34): error S6966: Await ReadAllLinesAsync instead. (https://rules.sonarsource.com/csharp/RSPEC-6966) [D:\source\Demoulas\smart-profit-sharing\src\services\tests\Demoulas.ProfitSharing.IntegrationTests\Demoulas.ProfitSharing.IntegrationTests.csproj]
