@@ -76,12 +76,23 @@ public sealed class TerminatedEmployeeReportService
     private IQueryable<MemberSlice> GetEmployeesAsMembers(IProfitSharingDbContext ctx, StartAndEndDateRequest request,
         IQueryable<TerminatedEmployeeDto> terminatedEmployees, DateOnly asOfDate)
     {
+        // CRITICAL FIX: COBOL BUSINESS LOGIC ALIGNMENT (QPAY066 lines 604-634)
+        // COBOL queries PAYPROFIT WITHOUT year filter: "WHERE PAYPROF_BADGE = :H-DEM-BADGE"
+        // In READY's snapshot model, PayProfit has ONE record per employee with current/last year columns.
+        // In SMART's temporal model, PayProfit has MULTIPLE records (one per year per employee).
+        // Must get PayProfit for REQUESTED YEAR ONLY to match COBOL's "current year" behavior.
+        // Use LEFT JOIN so employees without PayProfit for requested year are still included (with nulls).
+
+        var requestedYear = (short)request.EndingDate.Year;
+
         var query = from employee in terminatedEmployees
-                    join payProfit in ctx.PayProfits on employee.Demographic.Id equals payProfit.DemographicId
-                    join yipTbl in _totalService.GetYearsOfService(ctx, (short)request.EndingDate.Year, asOfDate) on payProfit.Demographic!.Ssn equals yipTbl.Ssn into yipTmp
+                    join payProfit in ctx.PayProfits.Where(pp => pp.ProfitYear == requestedYear)
+                        on employee.Demographic.Id equals payProfit.DemographicId into payProfitTmp
+                    from payProfit in payProfitTmp.DefaultIfEmpty()
+                    join yipTbl in _totalService.GetYearsOfService(ctx, requestedYear, asOfDate)
+                        on employee.Demographic.Ssn equals yipTbl.Ssn into yipTmp
                     from yip in yipTmp.DefaultIfEmpty()
-                    where payProfit.ProfitYear >= request.BeginningDate.Year && payProfit.ProfitYear <= request.EndingDate.Year
-                    // COBOL ANALYSIS: READY does NOT filter by YTD work hours - processes all terminated employees regardless of hours
+                        // COBOL ANALYSIS: READY does NOT filter by YTD work hours - processes all terminated employees regardless of hours
                     select new MemberSlice
                     {
                         PsnSuffix = 0,
@@ -89,21 +100,21 @@ public sealed class TerminatedEmployeeReportService
                         BadgeNumber = employee.Demographic.BadgeNumber,
                         Ssn = employee.Demographic.Ssn,
                         BirthDate = employee.Demographic.DateOfBirth,
-                        HoursCurrentYear = payProfit.CurrentHoursYear,
+                        HoursCurrentYear = payProfit != null ? payProfit.CurrentHoursYear : 0,
                         EmploymentStatusCode = employee.Demographic.EmploymentStatusId,
                         FullName = employee.Demographic.ContactInfo.FullName,
                         FirstName = employee.Demographic.ContactInfo.FirstName,
                         LastName = employee.Demographic.ContactInfo.LastName,
                         YearsInPs = yip != null ? (yip.Years) : (byte)0,
                         TerminationDate = employee.Demographic.TerminationDate,
-                        IncomeRegAndExecCurrentYear = payProfit.CurrentIncomeYear + payProfit.IncomeExecutive,
+                        IncomeRegAndExecCurrentYear = payProfit != null ? (payProfit.CurrentIncomeYear + payProfit.IncomeExecutive) : 0,
                         TerminationCode = employee.Demographic.TerminationCodeId,
                         ZeroCont = (employee.Demographic.TerminationCodeId == TerminationCode.Constants.Deceased
                             ? ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested
-                            : payProfit.ZeroContributionReasonId != null ? payProfit.ZeroContributionReasonId : 0),
-                        EnrollmentId = payProfit.EnrollmentId,
-                        Etva = payProfit.Etva,
-                        ProfitYear = payProfit.ProfitYear,
+                            : (payProfit != null && payProfit.ZeroContributionReasonId != null ? payProfit.ZeroContributionReasonId : 0)),
+                        EnrollmentId = payProfit != null ? payProfit.EnrollmentId : (byte)0,
+                        Etva = payProfit != null ? payProfit.Etva : 0,
+                        ProfitYear = requestedYear, // Always use requested year, even if no PayProfit record
                         IsOnlyBeneficiary = false,
                         IsBeneficiaryAndEmployee = false,
                         IsExecutive = employee.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly
