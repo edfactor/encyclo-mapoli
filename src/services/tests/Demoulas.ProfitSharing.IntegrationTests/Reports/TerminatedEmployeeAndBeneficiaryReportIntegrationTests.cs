@@ -815,25 +815,23 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         }
 
         // If that fails (number too large), try to parse with suffix logic
-        // Look for patterns like 7039171000 where the last 3-4 digits are suffix
+        // Suffixes are always 4 digits for beneficiaries (e.g., 1000, 2000)
         if (badgePsnStr.Length > 6)
         {
-            // Try different suffix lengths (3 or 4 digits)
-            for (int suffixLength = 3; suffixLength <= 4; suffixLength++)
+            // For numbers longer than 6 digits, try splitting with 4-digit suffix
+            const int suffixLength = 4;
+            if (badgePsnStr.Length > suffixLength)
             {
-                if (badgePsnStr.Length > suffixLength)
-                {
-                    var badgeStr = badgePsnStr.Substring(0, badgePsnStr.Length - suffixLength);
-                    var suffixStr = badgePsnStr.Substring(badgePsnStr.Length - suffixLength);
+                var badgeStr = badgePsnStr.Substring(0, badgePsnStr.Length - suffixLength);
+                var suffixStr = badgePsnStr.Substring(badgePsnStr.Length - suffixLength);
 
-                    // Use long for badge parsing since combined values can exceed int.MaxValue
-                    if (long.TryParse(badgeStr, out long longBadge) && 
-                        longBadge <= int.MaxValue && 
-                        short.TryParse(suffixStr, out psnSuffix))
-                    {
-                        badgeNumber = (int)longBadge;
-                        return true;
-                    }
+                // Use long for badge parsing since combined values can exceed int.MaxValue
+                if (long.TryParse(badgeStr, out long longBadge) && 
+                    longBadge <= int.MaxValue && 
+                    short.TryParse(suffixStr, out psnSuffix))
+                {
+                    badgeNumber = (int)longBadge;
+                    return true;
                 }
             }
         }
@@ -3471,6 +3469,242 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
 
         // Assert for test completion
         testCases.ShouldNotBeEmpty("Should have test cases");
+    }
+
+    [Fact]
+    [Description("PS-1623 : Debug the parsing logic for 7039171000 step by step")]
+    public void DebugParsingLogicFor7039171000()
+    {
+        TestOutputHelper.WriteLine("=== DEBUGGING PARSING LOGIC FOR 7039171000 ===");
+        
+        string testInput = "7039171000";
+        TestOutputHelper.WriteLine($"Input: '{testInput}'");
+        TestOutputHelper.WriteLine($"Length: {testInput.Length}");
+        
+        // Test int.TryParse
+        bool canParseAsInt = int.TryParse(testInput, out int asInt);
+        TestOutputHelper.WriteLine($"int.TryParse result: {canParseAsInt}, value: {asInt}");
+        
+        // Test long.TryParse
+        bool canParseAsLong = long.TryParse(testInput, out long asLong);
+        TestOutputHelper.WriteLine($"long.TryParse result: {canParseAsLong}, value: {asLong}");
+        
+        // Test our parsing method
+        bool parseSuccess = TryParseBadgeAndSuffix(testInput, out int badge, out short suffix);
+        TestOutputHelper.WriteLine($"TryParseBadgeAndSuffix result: {parseSuccess}, badge: {badge}, suffix: {suffix}");
+        
+        // Step through the parsing logic manually
+        TestOutputHelper.WriteLine("\n=== MANUAL STEP-THROUGH ===");
+        
+        // Step 1: int.TryParse
+        if (int.TryParse(testInput, out int badgeNumber))
+        {
+            TestOutputHelper.WriteLine($"Step 1: SUCCESS - int.TryParse worked: {badgeNumber}");
+            TestOutputHelper.WriteLine("This would set suffix=0 and return true");
+        }
+        else
+        {
+            TestOutputHelper.WriteLine("Step 1: FAILED - int.TryParse failed, moving to step 2");
+        }
+        
+        // Step 2: Length > 6 check
+        if (testInput.Length > 6)
+        {
+            TestOutputHelper.WriteLine($"Step 2: Length > 6 check PASSED ({testInput.Length} > 6)");
+            
+            // Try different suffix lengths
+            for (int suffixLength = 3; suffixLength <= 4; suffixLength++)
+            {
+                TestOutputHelper.WriteLine($"\n  Trying suffix length: {suffixLength}");
+                if (testInput.Length > suffixLength)
+                {
+                    var badgeStr = testInput.Substring(0, testInput.Length - suffixLength);
+                    var suffixStr = testInput.Substring(testInput.Length - suffixLength);
+                    
+                    TestOutputHelper.WriteLine($"    Badge part: '{badgeStr}'");
+                    TestOutputHelper.WriteLine($"    Suffix part: '{suffixStr}'");
+                    
+                    bool badgeParseOk = long.TryParse(badgeStr, out long longBadge);
+                    bool suffixParseOk = short.TryParse(suffixStr, out short parsedSuffix);
+                    
+                    TestOutputHelper.WriteLine($"    Badge parse (long): {badgeParseOk}, value: {longBadge}");
+                    TestOutputHelper.WriteLine($"    Badge <= int.MaxValue: {longBadge <= int.MaxValue}");
+                    TestOutputHelper.WriteLine($"    Suffix parse (short): {suffixParseOk}, value: {parsedSuffix}");
+                    
+                    if (badgeParseOk && longBadge <= int.MaxValue && suffixParseOk)
+                    {
+                        TestOutputHelper.WriteLine($"    ✅ SUCCESS! Would return badge={longBadge}, suffix={parsedSuffix}");
+                        break;
+                    }
+                    else
+                    {
+                        TestOutputHelper.WriteLine("    ❌ Failed one of the conditions");
+                    }
+                }
+            }
+        }
+        
+        // Step 3: Final fallback
+        TestOutputHelper.WriteLine("\n=== STEP 3: FINAL FALLBACK ===");
+        if (long.TryParse(testInput, out long fallbackLong))
+        {
+            TestOutputHelper.WriteLine($"long.TryParse SUCCESS: {fallbackLong}");
+            
+            string badgeStr = testInput.Length > 7 ? testInput.Substring(0, 6) : testInput;
+            TestOutputHelper.WriteLine($"Badge string (first 6 or full): '{badgeStr}'");
+            
+            if (int.TryParse(badgeStr, out int fallbackBadge))
+            {
+                string remainingStr = testInput.Substring(badgeStr.Length);
+                TestOutputHelper.WriteLine($"Remaining string: '{remainingStr}'");
+                
+                if (remainingStr.Length > 0 && short.TryParse(remainingStr, out short calculatedSuffix))
+                {
+                    TestOutputHelper.WriteLine($"Calculated suffix: {calculatedSuffix}");
+                    TestOutputHelper.WriteLine($"✅ Would return badge={fallbackBadge}, suffix={calculatedSuffix}");
+                }
+                else
+                {
+                    TestOutputHelper.WriteLine("Suffix calculation failed, would set suffix=0");
+                    TestOutputHelper.WriteLine($"✅ Would return badge={fallbackBadge}, suffix=0");
+                }
+            }
+        }
+        
+        // Assert for test completion
+        parseSuccess.ShouldBeTrue("Should successfully parse the test input");
+    }
+
+    [Fact]
+    [Description("PS-1623 : Analyze beneficiary count discrepancy between our parsing and manual count")]
+    public void AnalyzeBeneficiaryCountDiscrepancy()
+    {
+        // Parse READY system data using our parsing logic
+        string expectedText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R3-QPAY066");
+        var readyData = ParseGoldenFileToDto(expectedText);
+        var readyEmployees = readyData.Response.Results.ToList();
+
+        // Analyze raw lines to manually count beneficiaries
+        var lines = expectedText.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        var dataLines = new List<string>();
+        bool inDataSection = false;
+
+        foreach (var line in lines)
+        {
+            var trimmedLine = line.Trim();
+
+            // Skip header lines until we reach the data section
+            if (trimmedLine.StartsWith("BADGE/PSN # EMPLOYEE NAME"))
+            {
+                inDataSection = true;
+                continue;
+            }
+
+            // Stop when we hit totals or footer
+            if (inDataSection && (trimmedLine.StartsWith("TOTALS") || trimmedLine.StartsWith("***")))
+            {
+                break;
+            }
+
+            // Collect data lines
+            if (inDataSection && !string.IsNullOrWhiteSpace(trimmedLine) && 
+                trimmedLine.Length > 50 && // Minimum length for a data line
+                !trimmedLine.StartsWith("BADGE/PSN") && // Skip repeated headers
+                !trimmedLine.StartsWith("---")) // Skip separator lines
+            {
+                dataLines.Add(line);
+            }
+        }
+
+        TestOutputHelper.WriteLine($"Total raw data lines found: {dataLines.Count}");
+        TestOutputHelper.WriteLine($"Total parsed employees: {readyEmployees.Count}");
+
+        // Manual analysis of BadgePSn patterns
+        var manualBeneficiaryCount = 0;
+        var manualEmployeeCount = 0;
+        var parsedBeneficiaryCount = readyEmployees.Count(e => e.PsnSuffix != 0);
+        var parsedEmployeeCount = readyEmployees.Count(e => e.PsnSuffix == 0);
+
+        TestOutputHelper.WriteLine("\n=== MANUAL ANALYSIS OF RAW LINES ===");
+        
+        var beneficiaryLines = new List<string>();
+        var employeeLines = new List<string>();
+
+        foreach (var line in dataLines.Take(20)) // Sample first 20 lines
+        {
+            var badgePsnStr = SafeSubstring(line, 0, 11).Trim();
+            TestOutputHelper.WriteLine($"Line: {line.Substring(0, Math.Min(80, line.Length))}");
+            TestOutputHelper.WriteLine($"  BadgePSn raw: '{badgePsnStr}'");
+            
+            // Parse using our current logic
+            var parseSuccess = TryParseBadgeAndSuffix(badgePsnStr, out int badge, out short suffix);
+            TestOutputHelper.WriteLine($"  Parsed: Success={parseSuccess}, Badge={badge}, Suffix={suffix}");
+            
+            // Manual analysis - look for patterns that indicate beneficiaries
+            // Beneficiaries typically have longer numbers or specific suffixes
+            var couldBeBeneficiary = false;
+            
+            if (badgePsnStr.Length > 0)
+            {
+                // Pattern 1: Numbers longer than 6 digits might be badge+suffix
+                if (badgePsnStr.Length > 6)
+                {
+                    couldBeBeneficiary = true;
+                }
+                
+                // Pattern 2: Ends with specific suffixes (1000, 2000, etc.)
+                if (badgePsnStr.EndsWith("1000") || badgePsnStr.EndsWith("2000") || 
+                    badgePsnStr.EndsWith("3000") || badgePsnStr.EndsWith("4000"))
+                {
+                    couldBeBeneficiary = true;
+                }
+
+                if (couldBeBeneficiary)
+                {
+                    manualBeneficiaryCount++;
+                    beneficiaryLines.Add(line);
+                    TestOutputHelper.WriteLine($"  ** MANUAL: Classified as BENEFICIARY");
+                }
+                else
+                {
+                    manualEmployeeCount++;
+                    employeeLines.Add(line);
+                    TestOutputHelper.WriteLine($"  ** MANUAL: Classified as EMPLOYEE");
+                }
+            }
+            else
+            {
+                manualEmployeeCount++;
+                employeeLines.Add(line);
+                TestOutputHelper.WriteLine($"  ** MANUAL: Classified as EMPLOYEE (empty BadgePSn)");
+            }
+            
+            // Show discrepancy
+            var parsedType = suffix == 0 ? "EMPLOYEE" : "BENEFICIARY";
+            var manualType = couldBeBeneficiary ? "BENEFICIARY" : "EMPLOYEE";
+            if (parsedType != manualType)
+            {
+                TestOutputHelper.WriteLine($"  ❌ DISCREPANCY: Parsed={parsedType}, Manual={manualType}");
+            }
+            else
+            {
+                TestOutputHelper.WriteLine($"  ✅ MATCH: {parsedType}");
+            }
+            
+            TestOutputHelper.WriteLine("");
+        }
+
+        TestOutputHelper.WriteLine($"\n=== COMPARISON SUMMARY ===");
+        TestOutputHelper.WriteLine($"PARSED LOGIC:");
+        TestOutputHelper.WriteLine($"  Employees (PsnSuffix=0): {parsedEmployeeCount}");
+        TestOutputHelper.WriteLine($"  Beneficiaries (PsnSuffix≠0): {parsedBeneficiaryCount}");
+        TestOutputHelper.WriteLine($"MANUAL ANALYSIS (sample):");
+        TestOutputHelper.WriteLine($"  Employees: {manualEmployeeCount}");
+        TestOutputHelper.WriteLine($"  Beneficiaries: {manualBeneficiaryCount}");
+
+        // Assert for test completion
+        dataLines.ShouldNotBeEmpty("Should have data lines to analyze");
+        readyEmployees.ShouldNotBeEmpty("Should have parsed employees");
     }
 
 
