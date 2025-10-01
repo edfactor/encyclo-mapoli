@@ -275,6 +275,11 @@ public sealed class TerminatedEmployeeReportService
             decimal vestedBalance = thisYearBalance?.VestedBalance ?? 0m;
             var vestingPercent = thisYearBalance?.VestingPercent ?? 0;
 
+            // CRITICAL FIX: Use CurrentBalance from TotalVestingBalance for COBOL W-PSAMT alignment
+            // COBOL W-PSAMT represents the current total profit sharing balance (all transactions through current year)
+            // This is NOT just beginningAmount + transactions, but the complete calculated balance from TotalsService
+            decimal currentTotalBalance = thisYearBalance?.CurrentBalance ?? 0m;
+
             var member = new Member
             {
                 BadgeNumber = memberSlice.BadgeNumber,
@@ -298,8 +303,9 @@ public sealed class TerminatedEmployeeReportService
                 BeneficiaryAllocation = transactionsThisYear.BeneficiaryAllocation,
                 DistributionAmount = transactionsThisYear.Distribution,
                 ForfeitAmount = transactionsThisYear.TotalForfeitures,
-                EndingBalance = (beginningAmount ?? 0)
-                                + transactionsThisYear.TotalForfeitures + transactionsThisYear.Distribution + transactionsThisYear.BeneficiaryAllocation,
+                // CRITICAL FIX: Use currentTotalBalance instead of manual calculation
+                // This aligns with COBOL W-PSAMT which is the complete balance from TotalsService
+                EndingBalance = currentTotalBalance,
                 VestedBalance = vestedBalance
             };
 
@@ -384,8 +390,13 @@ public sealed class TerminatedEmployeeReportService
     /// <returns>True if the member should be included in the report</returns>
     private static bool IsInteresting(Member member)
     {
-        // TEMPORARY DEBUG: Let's see what values we're getting and use the original logic for now
-        // Original logic that was working (balance-based filtering only)
+        // COBOL BUSINESS LOGIC ALIGNMENT: Based on QPAY066 lines 883-894
+        // COBOL includes employees if ANY of these are non-zero:
+        // - W-PSAMT (current profit sharing amount) = member.EndingBalance (now using TotalsService.CurrentBalance)
+        // - W-BEN-ALLOC (beneficiary allocation) = member.BeneficiaryAllocation
+        // - W-PSLOAN (distributions/loans) = member.DistributionAmount
+        // - W-PSFORF (forfeitures) = member.ForfeitAmount
+        // PLUS beginning balance (our addition for completeness)
 
         // Beginning balance (most important filter)
         if (member.BeginningAmount != 0)
@@ -393,19 +404,27 @@ public sealed class TerminatedEmployeeReportService
             return true;
         }
 
-        // Distribution amount
+        // CRITICAL FIX: Current total balance (corresponds to COBOL W-PSAMT)
+        // EndingBalance now uses TotalsService.CurrentBalance which represents complete calculated balance
+        // This matches COBOL's W-PSAMT logic exactly
+        if (member.EndingBalance != 0)
+        {
+            return true;
+        }
+
+        // Distribution amount (corresponds to COBOL W-PSLOAN)
         if (member.DistributionAmount != 0)
         {
             return true;
         }
 
-        // Forfeit amount
+        // Forfeit amount (corresponds to COBOL W-PSFORF)
         if (member.ForfeitAmount != 0)
         {
             return true;
         }
 
-        // Beneficiary allocation (always included)
+        // Beneficiary allocation (corresponds to COBOL W-BEN-ALLOC)
         if (member.BeneficiaryAllocation != 0)
         {
             return true;
