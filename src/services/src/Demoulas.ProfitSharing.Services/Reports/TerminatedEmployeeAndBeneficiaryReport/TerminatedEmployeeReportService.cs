@@ -81,7 +81,7 @@ public sealed class TerminatedEmployeeReportService
                     join yipTbl in _totalService.GetYearsOfService(ctx, (short)request.EndingDate.Year, asOfDate) on payProfit.Demographic!.Ssn equals yipTbl.Ssn into yipTmp
                     from yip in yipTmp.DefaultIfEmpty()
                     where payProfit.ProfitYear >= request.BeginningDate.Year && payProfit.ProfitYear <= request.EndingDate.Year
-                        && payProfit.CurrentHoursYear > 0 // BUSINESS RULE ALIGNMENT: READY excludes employees with no YTD work hours
+                        // COBOL ANALYSIS: READY does NOT filter by YTD work hours - processes all terminated employees regardless of hours
                     select new MemberSlice
                     {
                         PsnSuffix = 0,

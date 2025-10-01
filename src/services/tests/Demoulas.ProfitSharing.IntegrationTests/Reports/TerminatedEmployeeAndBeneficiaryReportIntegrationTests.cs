@@ -4511,16 +4511,16 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
     }
 
     [Fact]
-    public async Task InvestigateYtdWorkHoursForMissingEmployees()
+    public async Task InvestigatePayProfitRecordsForMissingEmployees()
     {
-        TestOutputHelper.WriteLine("Investigating YTD work hours for missing employees based on SME feedback...");
+        TestOutputHelper.WriteLine("Investigating PayProfit records for missing employees after COBOL analysis...");
 
-        // Known missing employee badge numbers from previous analysis
+        // Missing employee badge numbers from current analysis
         int[] missingBadges = { 700655, 700680, 701825, 702967, 703280, 703426, 703537, 704691, 704823, 705936 };
 
         await DbFactory.UseReadOnlyContext<object>(async ctx =>
         {
-            TestOutputHelper.WriteLine("\nAnalyzing missing employees' YTD work hours and employment data:");
+            TestOutputHelper.WriteLine("\nAnalyzing missing employees' PayProfit records and demographic data:");
 
             foreach (var badge in missingBadges)
             {
@@ -4531,19 +4531,34 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
 
                 if (employee != null)
                 {
+                    TestOutputHelper.WriteLine($"Badge {badge} ({employee.ContactInfo!.FullName}):");
+                    TestOutputHelper.WriteLine($"  - Employment Status: {employee.EmploymentStatusId}");
+                    TestOutputHelper.WriteLine($"  - Termination Date: {employee.TerminationDate?.ToString() ?? "null"}");
+                    TestOutputHelper.WriteLine($"  - Termination Code: {employee.TerminationCodeId?.ToString() ?? "null"}");
+                    
                     var payProfit = employee.PayProfits.FirstOrDefault();
                     if (payProfit != null)
                     {
-                        TestOutputHelper.WriteLine($"Badge {badge} ({employee.ContactInfo!.FullName}):");
+                        TestOutputHelper.WriteLine($"  - Has PayProfit 2025: YES");
                         TestOutputHelper.WriteLine($"  - YTD Hours: {payProfit.CurrentHoursYear}");
                         TestOutputHelper.WriteLine($"  - YTD Income: {payProfit.CurrentIncomeYear}");
-                        TestOutputHelper.WriteLine($"  - Employment Status: {employee.EmploymentStatusId}");
-                        TestOutputHelper.WriteLine($"  - Termination Date: {employee.TerminationDate?.ToString() ?? "null"}");
-                        TestOutputHelper.WriteLine($"  - Termination Code: {employee.TerminationCodeId?.ToString() ?? "null"}");
+                        TestOutputHelper.WriteLine($"  - PS Amount: {payProfit.PsAmount}");
+                        TestOutputHelper.WriteLine($"  - Enrollment: {payProfit.EnrollmentId}");
+                        TestOutputHelper.WriteLine($"  - PS Years: {payProfit.PsYears}");
                     }
                     else
                     {
-                        TestOutputHelper.WriteLine($"Badge {badge} ({employee.ContactInfo!.FullName}): NO PayProfit record for 2025");
+                        TestOutputHelper.WriteLine($"  - Has PayProfit 2025: NO - This might explain why COBOL includes but C# excludes!");
+                        
+                        // Check if they have PayProfit for other years
+                        var allPayProfits = await ctx.PayProfits
+                            .Where(p => p.DemographicId == employee.Id)
+                            .ToListAsync();
+                        TestOutputHelper.WriteLine($"  - PayProfit records for other years: {allPayProfits.Count}");
+                        foreach (var pp in allPayProfits.OrderByDescending(p => p.ProfitYear))
+                        {
+                            TestOutputHelper.WriteLine($"    - Year {pp.ProfitYear}: Hours={pp.CurrentHoursYear}, Amount={pp.PsAmount}");
+                        }
                     }
                 }
                 else
