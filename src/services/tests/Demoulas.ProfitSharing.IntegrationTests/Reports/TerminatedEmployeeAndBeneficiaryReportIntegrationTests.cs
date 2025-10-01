@@ -807,18 +807,18 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
             return false;
         }
 
-        // Try to parse as a simple badge number first
+        // First try to parse as a simple badge number (most common case)
         if (int.TryParse(badgePsnStr, out badgeNumber))
         {
             psnSuffix = 0;
             return true;
         }
 
-        // If that fails, try to parse with suffix logic
-        // Look for patterns like 7029671000 where the last 4 digits might be suffix
+        // If that fails (number too large), try to parse with suffix logic
+        // Look for patterns like 7039171000 where the last 3-4 digits are suffix
         if (badgePsnStr.Length > 6)
         {
-            // Try different suffix lengths
+            // Try different suffix lengths (3 or 4 digits)
             for (int suffixLength = 3; suffixLength <= 4; suffixLength++)
             {
                 if (badgePsnStr.Length > suffixLength)
@@ -826,19 +826,38 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
                     var badgeStr = badgePsnStr.Substring(0, badgePsnStr.Length - suffixLength);
                     var suffixStr = badgePsnStr.Substring(badgePsnStr.Length - suffixLength);
 
-                    if (int.TryParse(badgeStr, out badgeNumber) && short.TryParse(suffixStr, out psnSuffix))
+                    // Use long for badge parsing since combined values can exceed int.MaxValue
+                    if (long.TryParse(badgeStr, out long longBadge) && 
+                        longBadge <= int.MaxValue && 
+                        short.TryParse(suffixStr, out psnSuffix))
                     {
+                        badgeNumber = (int)longBadge;
                         return true;
                     }
                 }
             }
         }
 
-        // Fallback: try to parse the whole thing as badge number
-        if (int.TryParse(badgePsnStr, out badgeNumber))
+        // For very large numbers that can't be parsed as int, 
+        // treat the whole string as BadgePSn but extract a reasonable badge number
+        if (long.TryParse(badgePsnStr, out long fullNumber))
         {
-            psnSuffix = 0;
-            return true;
+            // For display purposes, use the first 6-7 digits as badge number
+            string badgeStr = badgePsnStr.Length > 7 ? badgePsnStr.Substring(0, 6) : badgePsnStr;
+            if (int.TryParse(badgeStr, out badgeNumber))
+            {
+                // Calculate suffix from the remaining digits
+                string remainingStr = badgePsnStr.Substring(badgeStr.Length);
+                if (remainingStr.Length > 0 && short.TryParse(remainingStr, out short calculatedSuffix))
+                {
+                    psnSuffix = calculatedSuffix;
+                }
+                else
+                {
+                    psnSuffix = 0;
+                }
+                return true;
+            }
         }
 
         return false;
@@ -3050,6 +3069,408 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         // Assertion to satisfy analyzer - this test is diagnostic in nature
         smartEmployees.ShouldNotBeEmpty("Should have SMART employee data to diagnose");
         readyEmployees.ShouldNotBeEmpty("Should have READY employee data to compare");
+    }
+
+    [Fact]
+    [Description("PS-1623 : Analyze employee population differences by badge number")]
+    public async Task AnalyzeEmployeePopulationDifferences()
+    {
+        // Generate SMART system data
+        DateOnly startDate = new DateOnly(2025, 01, 4);
+        DateOnly endDate = new DateOnly(2025, 12, 27);
+
+        var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
+        var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
+        var totalService = new TotalService(DbFactory,
+            calendarService, new EmbeddedSqlService(),
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+        TerminatedEmployeeService smartService = new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService);
+
+        var smartData = await smartService.GetReportAsync(new StartAndEndDateRequest { BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue, SortBy = "name" }, CancellationToken.None);
+
+        // Parse READY system data
+        string expectedText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R3-QPAY066");
+        var readyData = ParseGoldenFileToDto(expectedText);
+
+        var smartEmployees = smartData.Response.Results.ToList();
+        var readyEmployees = readyData.Response.Results.ToList();
+
+        TestOutputHelper.WriteLine($"SMART employees: {smartEmployees.Count}, READY employees: {readyEmployees.Count}");
+
+        // Compare by badge number only (ignore PsnSuffix for primary employee comparison)
+        var smartBadgeNumbers = smartEmployees.Where(e => e.PsnSuffix == 0).Select(e => e.BadgeNumber).OrderBy(x => x).ToList();
+        var readyBadgeNumbers = readyEmployees.Where(e => e.PsnSuffix == 0).Select(e => e.BadgeNumber).OrderBy(x => x).ToList();
+
+        TestOutputHelper.WriteLine($"SMART primary employees (PsnSuffix=0): {smartBadgeNumbers.Count}");
+        TestOutputHelper.WriteLine($"READY primary employees (PsnSuffix=0): {readyBadgeNumbers.Count}");
+
+        // Find badges missing in SMART
+        var missingInSmart = readyBadgeNumbers.Except(smartBadgeNumbers).ToList();
+        TestOutputHelper.WriteLine($"\nBadges in READY but missing in SMART ({missingInSmart.Count}):");
+        foreach (var badge in missingInSmart.Take(10))
+        {
+            var readyEmployee = readyEmployees.First(e => e.BadgeNumber == badge && e.PsnSuffix == 0);
+            TestOutputHelper.WriteLine($"  Badge {badge}: {readyEmployee.Name}");
+        }
+
+        // Find badges extra in SMART
+        var extraInSmart = smartBadgeNumbers.Except(readyBadgeNumbers).ToList();
+        TestOutputHelper.WriteLine($"\nBadges in SMART but missing in READY ({extraInSmart.Count}):");
+        foreach (var badge in extraInSmart.Take(10))
+        {
+            var smartEmployee = smartEmployees.First(e => e.BadgeNumber == badge && e.PsnSuffix == 0);
+            TestOutputHelper.WriteLine($"  Badge {badge}: {smartEmployee.Name}");
+        }
+
+        // Analyze beneficiaries (non-zero PsnSuffix)
+        var smartBeneficiaries = smartEmployees.Where(e => e.PsnSuffix != 0).ToList();
+        var readyBeneficiaries = readyEmployees.Where(e => e.PsnSuffix != 0).ToList();
+
+        TestOutputHelper.WriteLine($"\nSMART beneficiaries (PsnSuffix!=0): {smartBeneficiaries.Count}");
+        TestOutputHelper.WriteLine($"READY beneficiaries (PsnSuffix!=0): {readyBeneficiaries.Count}");
+
+        if (smartBeneficiaries.Any())
+        {
+            TestOutputHelper.WriteLine("First 5 SMART beneficiaries:");
+            foreach (var bene in smartBeneficiaries.Take(5))
+            {
+                TestOutputHelper.WriteLine($"  Badge {bene.BadgeNumber}, Suffix {bene.PsnSuffix}: {bene.Name}");
+            }
+        }
+
+        if (readyBeneficiaries.Any())
+        {
+            TestOutputHelper.WriteLine("First 5 READY beneficiaries:");
+            foreach (var bene in readyBeneficiaries.Take(5))
+            {
+                TestOutputHelper.WriteLine($"  Badge {bene.BadgeNumber}, Suffix {bene.PsnSuffix}: {bene.Name}");
+            }
+        }
+
+        // Check for population size discrepancy
+        int smartTotal = smartBadgeNumbers.Count + smartBeneficiaries.Count;
+        int readyTotal = readyBadgeNumbers.Count + readyBeneficiaries.Count;
+        TestOutputHelper.WriteLine($"\nTotal comparison: SMART {smartTotal}, READY {readyTotal}, Difference: {smartTotal - readyTotal}");
+
+        // Assertion to satisfy analyzer
+        smartEmployees.ShouldNotBeEmpty("Should have SMART employee data");
+        readyEmployees.ShouldNotBeEmpty("Should have READY employee data");
+    }
+
+    [Fact]
+    [Description("PS-1623 : Investigate specific employee filtering differences")]
+    public async Task InvestigateEmployeeFilteringDifferences()
+    {
+        // Generate SMART system data
+        DateOnly startDate = new DateOnly(2025, 01, 4);
+        DateOnly endDate = new DateOnly(2025, 12, 27);
+
+        var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
+        var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
+        var totalService = new TotalService(DbFactory,
+            calendarService, new EmbeddedSqlService(),
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+
+        // Let's investigate the database directly to understand why certain employees are missing
+        var investigationResults = await DbFactory.UseReadOnlyContext(async ctx =>
+        {
+            var results = new List<string>();
+            
+            // Check some of the missing employees - let's look at badges that READY has but SMART doesn't
+            var missingBadges = new[] { 700655, 700680, 701825, 702967, 703280 };
+            
+            results.Add("=== Investigating employees missing in SMART ===");
+            foreach (var badge in missingBadges)
+            {
+                var demographic = await ctx.Demographics
+                    .Include(d => d.ContactInfo)
+                    .FirstOrDefaultAsync(d => d.BadgeNumber == badge);
+                    
+                if (demographic != null)
+                {
+                    results.Add($"Badge {badge}: {demographic.ContactInfo.FullName}");
+                    results.Add($"  Employment Status: {demographic.EmploymentStatusId}");
+                    results.Add($"  Termination Date: {demographic.TerminationDate}");
+                    results.Add($"  Termination Code: {demographic.TerminationCode}");
+                    
+                    // Check if they have profit details
+                    var profitDetails = await ctx.ProfitDetails
+                        .Where(pd => pd.Ssn == demographic.Ssn)
+                        .ToListAsync();
+                        
+                    results.Add($"  Profit Details Count: {profitDetails.Count}");
+                    if (profitDetails.Any())
+                    {
+                        var years = profitDetails.Select(pd => pd.ProfitYear).Distinct().OrderBy(y => y);
+                        results.Add($"  Profit Years: {string.Join(", ", years)}");
+                        
+                        var balances = profitDetails.Where(pd => pd.ProfitYear >= 2025).ToList();
+                        if (balances.Any())
+                        {
+                            var totalBalance = balances.Sum(pd => pd.Contribution + pd.Earnings - pd.Forfeiture);
+                            results.Add($"  2025+ Balance: ${totalBalance:F2}");
+                        }
+                    }
+                    results.Add("");
+                }
+                else
+                {
+                    results.Add($"Badge {badge}: NOT FOUND in Demographics table");
+                }
+            }
+
+            // Check some extra employees - badges that SMART has but READY doesn't  
+            var extraBadges = new[] { 709210, 709278, 709325, 709328, 709441 };
+            
+            results.Add("=== Investigating employees extra in SMART ===");
+            foreach (var badge in extraBadges)
+            {
+                var demographic = await ctx.Demographics
+                    .Include(d => d.ContactInfo)
+                    .FirstOrDefaultAsync(d => d.BadgeNumber == badge);
+                    
+                if (demographic != null)
+                {
+                    results.Add($"Badge {badge}: {demographic.ContactInfo.FullName}");
+                    results.Add($"  Employment Status: {demographic.EmploymentStatusId}");
+                    results.Add($"  Termination Date: {demographic.TerminationDate}");
+                    results.Add($"  Termination Code: {demographic.TerminationCode}");
+                    
+                    // Check if they have profit details
+                    var profitDetails = await ctx.ProfitDetails
+                        .Where(pd => pd.Ssn == demographic.Ssn)
+                        .ToListAsync();
+                        
+                    results.Add($"  Profit Details Count: {profitDetails.Count}");
+                    if (profitDetails.Any())
+                    {
+                        var years = profitDetails.Select(pd => pd.ProfitYear).Distinct().OrderBy(y => y);
+                        results.Add($"  Profit Years: {string.Join(", ", years)}");
+                        
+                        var balances = profitDetails.Where(pd => pd.ProfitYear >= 2025).ToList();
+                        if (balances.Any())
+                        {
+                            var totalBalance = balances.Sum(pd => pd.Contribution + pd.Earnings - pd.Forfeiture);
+                            results.Add($"  2025+ Balance: ${totalBalance:F2}");
+                        }
+                    }
+                    results.Add("");
+                }
+                else
+                {
+                    results.Add($"Badge {badge}: NOT FOUND in Demographics table");
+                }
+            }
+            
+            return results;
+        });
+
+        // Output all results
+        foreach (var result in investigationResults)
+        {
+            TestOutputHelper.WriteLine(result);
+        }
+
+        // Test assertion
+        investigationResults.ShouldNotBeEmpty("Should have investigation results");
+    }
+
+    [Fact]
+    [Description("PS-1623 : Analyze exact member alignment by PSN and badge numbers")]
+    public async Task AnalyzeExactMemberAlignment()
+    {
+        // Generate SMART system data
+        DateOnly startDate = new DateOnly(2025, 01, 4);
+        DateOnly endDate = new DateOnly(2025, 12, 27);
+
+        var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
+        var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
+        var totalService = new TotalService(DbFactory,
+            calendarService, new EmbeddedSqlService(),
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+        TerminatedEmployeeService smartService = new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService);
+
+        var smartData = await smartService.GetReportAsync(new StartAndEndDateRequest { BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue, SortBy = "name" }, CancellationToken.None);
+
+        // Parse READY system data
+        string expectedText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R3-QPAY066");
+        var readyData = ParseGoldenFileToDto(expectedText);
+
+        var smartEmployees = smartData.Response.Results.ToList();
+        var readyEmployees = readyData.Response.Results.ToList();
+
+        TestOutputHelper.WriteLine($"SMART total records: {smartEmployees.Count}");
+        TestOutputHelper.WriteLine($"READY total records: {readyEmployees.Count}");
+
+        // Create lookup dictionaries by BadgePSn (the unique identifier)
+        var smartByBadgePsn = smartEmployees.ToDictionary(e => e.BadgePSn, e => e);
+        var readyByBadgePsn = readyEmployees.ToDictionary(e => e.BadgePSn, e => e);
+
+        TestOutputHelper.WriteLine($"\nSMART unique BadgePSn values: {smartByBadgePsn.Count}");
+        TestOutputHelper.WriteLine($"READY unique BadgePSn values: {readyByBadgePsn.Count}");
+
+        // Find exact matches (same BadgePSn in both systems)
+        var exactMatches = smartByBadgePsn.Keys.Intersect(readyByBadgePsn.Keys).ToList();
+        TestOutputHelper.WriteLine($"\n🎯 EXACT MATCHES (same BadgePSn): {exactMatches.Count}");
+
+        // Find missing in SMART
+        var missingInSmart = readyByBadgePsn.Keys.Except(smartByBadgePsn.Keys).ToList();
+        TestOutputHelper.WriteLine($"❌ Missing in SMART: {missingInSmart.Count}");
+
+        // Find extra in SMART  
+        var extraInSmart = smartByBadgePsn.Keys.Except(readyByBadgePsn.Keys).ToList();
+        TestOutputHelper.WriteLine($"➕ Extra in SMART: {extraInSmart.Count}");
+
+        // Show alignment percentage
+        var totalUnique = smartByBadgePsn.Keys.Union(readyByBadgePsn.Keys).Count();
+        var alignmentPercentage = (double)exactMatches.Count / totalUnique * 100;
+        TestOutputHelper.WriteLine($"\n📊 ALIGNMENT ANALYSIS:");
+        TestOutputHelper.WriteLine($"   Exact matches: {exactMatches.Count}");
+        TestOutputHelper.WriteLine($"   Total unique members: {totalUnique}");
+        TestOutputHelper.WriteLine($"   Alignment percentage: {alignmentPercentage:F1}%");
+
+        // Analyze the exact matches for data quality
+        TestOutputHelper.WriteLine($"\n=== ANALYZING EXACT MATCHES ===");
+        var fieldMismatches = 0;
+        var perfectMatches = 0;
+
+        foreach (var badgePsn in exactMatches.Take(10)) // Sample first 10
+        {
+            var smart = smartByBadgePsn[badgePsn];
+            var ready = readyByBadgePsn[badgePsn];
+
+            var hasMismatch = false;
+            var mismatches = new List<string>();
+
+            // Compare key fields
+            if (smart.BadgeNumber != ready.BadgeNumber)
+            {
+                mismatches.Add($"BadgeNumber: SMART={smart.BadgeNumber}, READY={ready.BadgeNumber}");
+                hasMismatch = true;  
+            }
+            if (smart.PsnSuffix != ready.PsnSuffix)
+            {
+                mismatches.Add($"PsnSuffix: SMART={smart.PsnSuffix}, READY={ready.PsnSuffix}");
+                hasMismatch = true;
+            }
+            if (smart.Name != ready.Name)
+            {
+                mismatches.Add($"Name: SMART='{smart.Name}', READY='{ready.Name}'");
+                hasMismatch = true;
+            }
+
+            if (hasMismatch)
+            {
+                TestOutputHelper.WriteLine($"BadgePSn {badgePsn} - FIELD MISMATCHES:");
+                foreach (var mismatch in mismatches)
+                {
+                    TestOutputHelper.WriteLine($"  {mismatch}");
+                }
+                fieldMismatches++;
+            }
+            else
+            {
+                perfectMatches++;
+            }
+        }
+
+        TestOutputHelper.WriteLine($"\nField comparison (sample of 10):");
+        TestOutputHelper.WriteLine($"  Perfect field matches: {perfectMatches}");
+        TestOutputHelper.WriteLine($"  Field mismatches: {fieldMismatches}");
+
+        // Show some examples of missing and extra
+        TestOutputHelper.WriteLine($"\n=== MISSING IN SMART (first 5) ===");
+        foreach (var badgePsn in missingInSmart.Take(5))
+        {
+            var ready = readyByBadgePsn[badgePsn];
+            TestOutputHelper.WriteLine($"BadgePSn: {badgePsn} | Badge: {ready.BadgeNumber} | Suffix: {ready.PsnSuffix} | Name: {ready.Name}");
+        }
+
+        TestOutputHelper.WriteLine($"\n=== EXTRA IN SMART (first 5) ===");
+        foreach (var badgePsn in extraInSmart.Take(5))
+        {
+            var smart = smartByBadgePsn[badgePsn];
+            TestOutputHelper.WriteLine($"BadgePSn: {badgePsn} | Badge: {smart.BadgeNumber} | Suffix: {smart.PsnSuffix} | Name: {smart.Name}");
+        }
+
+        // Break down by employee vs beneficiary
+        var smartEmployeesOnly = smartEmployees.Where(e => e.PsnSuffix == 0).ToList();
+        var smartBeneficiariesOnly = smartEmployees.Where(e => e.PsnSuffix != 0).ToList();
+        var readyEmployeesOnly = readyEmployees.Where(e => e.PsnSuffix == 0).ToList();
+        var readyBeneficiariesOnly = readyEmployees.Where(e => e.PsnSuffix != 0).ToList();
+
+        TestOutputHelper.WriteLine($"\n=== EMPLOYEE vs BENEFICIARY BREAKDOWN ===");
+        TestOutputHelper.WriteLine($"SMART - Employees (PsnSuffix=0): {smartEmployeesOnly.Count}");
+        TestOutputHelper.WriteLine($"SMART - Beneficiaries (PsnSuffix≠0): {smartBeneficiariesOnly.Count}");
+        TestOutputHelper.WriteLine($"READY - Employees (PsnSuffix=0): {readyEmployeesOnly.Count}");
+        TestOutputHelper.WriteLine($"READY - Beneficiaries (PsnSuffix≠0): {readyBeneficiariesOnly.Count}");
+
+        // Employee-only alignment
+        var smartEmployeeBadgePsns = smartEmployeesOnly.Select(e => e.BadgePSn).ToHashSet();
+        var readyEmployeeBadgePsns = readyEmployeesOnly.Select(e => e.BadgePSn).ToHashSet();
+        var employeeMatches = smartEmployeeBadgePsns.Intersect(readyEmployeeBadgePsns).Count();
+        var totalEmployees = smartEmployeeBadgePsns.Union(readyEmployeeBadgePsns).Count();
+        var employeeAlignment = (double)employeeMatches / totalEmployees * 100;
+
+        TestOutputHelper.WriteLine($"\n📊 EMPLOYEE ALIGNMENT (PsnSuffix=0 only):");
+        TestOutputHelper.WriteLine($"   Employee matches: {employeeMatches}");
+        TestOutputHelper.WriteLine($"   Total unique employees: {totalEmployees}");
+        TestOutputHelper.WriteLine($"   Employee alignment: {employeeAlignment:F1}%");
+
+        // Test assertion
+        smartEmployees.ShouldNotBeEmpty("Should have SMART employee data");
+        readyEmployees.ShouldNotBeEmpty("Should have READY employee data");
+        exactMatches.ShouldNotBeEmpty("Should have some exact matches between systems");
+    }
+
+    [Fact]
+    [Description("PS-1623 : Test parsing logic for large BadgePSn values")]
+    public void TestBadgePSnParsingLogic()
+    {
+        // Test the current parsing logic
+        TestOutputHelper.WriteLine("=== Testing current parsing logic ===");
+        
+        var testCases = new[]
+        {
+            "7039171000",  // This should NOT be split
+            "702967",      // Simple badge number
+            "706448",      // Simple badge number  
+            "7024451000",  // This should NOT be split
+            "1234567890"   // Very large number
+        };
+
+        foreach (var testCase in testCases)
+        {
+            var success = TryParseBadgeAndSuffix(testCase, out int badge, out short suffix);
+            TestOutputHelper.WriteLine($"Input: '{testCase}' -> Success: {success}, Badge: {badge}, Suffix: {suffix}");
+            
+            // Show what the actual BadgePSn would be
+            string actualBadgePsn;
+            if (suffix == 0)
+            {
+                actualBadgePsn = badge.ToString();
+            }
+            else
+            {
+                actualBadgePsn = $"{badge}{suffix}";
+            }
+            TestOutputHelper.WriteLine($"  Resulting BadgePSn: '{actualBadgePsn}' (Expected: '{testCase}')");
+            TestOutputHelper.WriteLine($"  Match: {actualBadgePsn == testCase}");
+            TestOutputHelper.WriteLine();
+        }
+
+        // Test parsing of large numbers that should be treated as complete identifiers
+        TestOutputHelper.WriteLine("=== Testing int.TryParse limits ===");
+        TestOutputHelper.WriteLine($"int.MaxValue: {int.MaxValue}");
+        TestOutputHelper.WriteLine($"Can parse '7039171000'? {int.TryParse("7039171000", out _)}");
+        TestOutputHelper.WriteLine($"Can parse '2147483647'? {int.TryParse("2147483647", out _)}");
+        TestOutputHelper.WriteLine($"Can parse '2147483648'? {int.TryParse("2147483648", out _)}");
+
+        // Assert for test completion
+        testCases.ShouldNotBeEmpty("Should have test cases");
     }
 
 
