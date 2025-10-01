@@ -175,8 +175,16 @@ public sealed class TerminatedEmployeeReportService
         var profitYearRange = GetProfitYearRange(req);
         var ssns = memberSliceUnion.Select(ms => ms.Ssn).ToHashSet();
 
+        // COBOL Transaction Year Boundary Filtering Implementation
+        // Based on COBOL logic: "Does NOT process transactions after the entered year"
+        // This prevents including transactions from future years that shouldn't affect the report
+        var transactionYearBoundary = req.EndingDate.Year;
+
         var profitDetailsRaw = ctx.ProfitDetails
-            .Where(pd => pd.ProfitYear >= profitYearRange.beginProfitYear && pd.ProfitYear <= profitYearRange.endProfitYear && ssns.Contains(pd.Ssn));
+            .Where(pd => pd.ProfitYear >= profitYearRange.beginProfitYear 
+                      && pd.ProfitYear <= profitYearRange.endProfitYear 
+                      && pd.ProfitYear <= transactionYearBoundary // NEW: Transaction year boundary filtering
+                      && ssns.Contains(pd.Ssn));
 
         var profitDetailsDict = await profitDetailsRaw
             .GroupBy(pd => new { pd.Ssn, pd.ProfitYear })
