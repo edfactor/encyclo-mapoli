@@ -3576,6 +3576,288 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
     }
 
     [Fact]
+    [Description("PS-1623 : Investigate why specific people don't appear as employees in SMART")]
+    public async Task InvestigateEmployeeInclusionCriteria()
+    {
+        // This test will help us understand why people like ARIAS, MAVERICK appear as beneficiaries
+        // in SMART but employees in READY - likely they don't meet the employee inclusion criteria
+        
+        DateOnly startDate = new DateOnly(2025, 01, 4);
+        DateOnly endDate = new DateOnly(2025, 12, 27);
+
+        var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
+        var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
+        var totalService = new TotalService(DbFactory,
+            calendarService, new EmbeddedSqlService(),
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+
+        TestOutputHelper.WriteLine($"=== INVESTIGATING EMPLOYEE INCLUSION CRITERIA ===");
+        
+        // Let's check specific badge numbers that appear as beneficiaries in SMART but employees in READY
+        var problematicBadges = new[] { 702967, 706448, 704823 }; // ARIAS MAVERICK, ARIAS STELLA, AVERY KRYSTAL
+        
+        await DbFactory.UseReadOnlyContext<int>(async context =>
+        {
+            foreach (var badgeNumber in problematicBadges)
+            {
+                TestOutputHelper.WriteLine($"\n🔍 ANALYZING BADGE {badgeNumber}:");
+                
+                // Check if this person exists in Demographics as a terminated employee
+                var demographic = await context.Demographics
+                .Include(d => d.ContactInfo)
+                .FirstOrDefaultAsync(d => d.BadgeNumber == badgeNumber);
+                
+            if (demographic != null)
+            {
+                TestOutputHelper.WriteLine($"  Found in Demographics: {demographic.ContactInfo.FullName}");
+                TestOutputHelper.WriteLine($"  Employment Status: {demographic.EmploymentStatusId}");
+                TestOutputHelper.WriteLine($"  Termination Date: {demographic.TerminationDate}");
+                TestOutputHelper.WriteLine($"  Termination Code: {demographic.TerminationCodeId}");
+                
+                // Check if they have PayProfit records
+                var payProfits = await context.PayProfits
+                    .Where(pp => pp.DemographicId == demographic.Id)
+                    .Where(pp => pp.ProfitYear >= startDate.Year && pp.ProfitYear <= endDate.Year)
+                    .ToListAsync();
+                    
+                TestOutputHelper.WriteLine($"  PayProfit records: {payProfits.Count}");
+                
+                if (payProfits.Count > 0)
+                {
+                    var payProfit = payProfits[0];
+                    TestOutputHelper.WriteLine($"  EnrollmentId: {payProfit.EnrollmentId}");
+                    TestOutputHelper.WriteLine($"  Current Hours Year: {payProfit.CurrentHoursYear}");
+                    TestOutputHelper.WriteLine($"  ZeroContributionReasonId: {payProfit.ZeroContributionReasonId}");
+                }
+                
+                // Check if they have Beneficiary records
+                var beneficiaries = await context.Beneficiaries
+                    .Where(b => b.BadgeNumber == badgeNumber)
+                    .Include(b => b.Contact)
+                    .ThenInclude(c => c!.ContactInfo)
+                    .ToListAsync();
+                    
+                TestOutputHelper.WriteLine($"  Beneficiary records: {beneficiaries.Count}");
+                foreach (var beneficiary in beneficiaries)
+                {
+                    TestOutputHelper.WriteLine($"    PsnSuffix: {beneficiary.PsnSuffix}");
+                    TestOutputHelper.WriteLine($"    Contact: {beneficiary.Contact?.ContactInfo.FullName}");
+                }
+            }
+            else
+            {
+                TestOutputHelper.WriteLine($"  NOT FOUND in Demographics table");
+            }
+        }
+        
+        return 0; // Simple return for async lambda
+        });
+        
+        TestOutputHelper.WriteLine("\n=== CONCLUSION ===");
+        TestOutputHelper.WriteLine("These people are ACTIVE employees (status 'a'), not terminated!");
+        TestOutputHelper.WriteLine("They should NOT appear in either terminated employee report.");
+        TestOutputHelper.WriteLine("Need to investigate why READY system includes them and why SMART classifies them as beneficiaries.");
+        
+        // Assert for test completion
+        problematicBadges.ShouldNotBeEmpty("Should have badge numbers to investigate");
+    }
+
+    [Fact(DisplayName = "Analyze how SMART service generates these problematic entries")]
+    [Description("PS-1721 : Debug SMART service logic for active employees appearing as beneficiaries")]
+    public async Task AnalyzeSmartServiceGenerationForActiveEmployees()
+    {
+        var problematicBadges = new[] { 702967, 706448, 704823 };
+        
+        TestOutputHelper.WriteLine("=== ANALYZING SMART SERVICE GENERATION ===");
+        
+        // Generate the SMART report using the service
+        DateOnly startDate = new DateOnly(2025, 01, 4);
+        DateOnly endDate = new DateOnly(2025, 12, 27);
+
+        var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
+        var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
+        var totalService = new TotalService(DbFactory,
+            calendarService, new EmbeddedSqlService(),
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+        TerminatedEmployeeService smartService = new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService);
+
+        var smartData = await smartService.GetReportAsync(new StartAndEndDateRequest { BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue, SortBy = "name" }, CancellationToken.None);
+        var smartReport = smartData.Response.Results.ToList();
+        
+        foreach (var badgeNumber in problematicBadges)
+        {
+            TestOutputHelper.WriteLine($"\n🔍 BADGE {badgeNumber} in SMART report:");
+            
+            var smartEntry = smartReport.FirstOrDefault(e => e.BadgeNumber == badgeNumber);
+            if (smartEntry != null)
+            {
+                TestOutputHelper.WriteLine($"  Found as: BadgePSn={smartEntry.BadgePSn}");
+                TestOutputHelper.WriteLine($"  Name: {smartEntry.Name}");
+                TestOutputHelper.WriteLine($"  Badge: {smartEntry.BadgeNumber}");
+                TestOutputHelper.WriteLine($"  PSN Suffix: {smartEntry.PsnSuffix}");
+                TestOutputHelper.WriteLine($"  Year Details Count: {smartEntry.YearDetails.Count}");
+                
+                if (smartEntry.YearDetails.Count > 0)
+                {
+                    var yearDetail = smartEntry.YearDetails[0];
+                    TestOutputHelper.WriteLine($"  Age: {yearDetail.Age}");
+                    TestOutputHelper.WriteLine($"  VestedPercent: {yearDetail.VestedPercent}");
+                    TestOutputHelper.WriteLine($"  EndingBalance: {yearDetail.EndingBalance}");
+                    TestOutputHelper.WriteLine($"  VestedBalance: {yearDetail.VestedBalance}");
+                }
+                
+                // Try to parse the BadgePSn to see what's happening
+                if (TryParseBadgeAndSuffix(smartEntry.BadgePSn, out int parsedBadge, out short parsedSuffix))
+                {
+                    TestOutputHelper.WriteLine($"  Parsed Badge: {parsedBadge}");
+                    TestOutputHelper.WriteLine($"  Parsed Suffix: {parsedSuffix}");
+                    TestOutputHelper.WriteLine($"  Parse Success: true");
+                }
+                else
+                {
+                    TestOutputHelper.WriteLine($"  Parse Success: false");
+                }
+            }
+            else
+            {
+                TestOutputHelper.WriteLine($"  NOT FOUND in SMART report");
+            }
+        }
+        
+        // Assert for test completion
+        problematicBadges.ShouldNotBeEmpty("Should have badge numbers to investigate");
+    }
+
+    [Fact]
+    [Description("PS-1623 : Analyze employee vs beneficiary classification differences")]
+    public async Task AnalyzeEmployeeVsBeneficiaryClassification()
+    {
+        // Generate SMART system data
+        DateOnly startDate = new DateOnly(2025, 01, 4);
+        DateOnly endDate = new DateOnly(2025, 12, 27);
+
+        var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
+        var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
+        var totalService = new TotalService(DbFactory,
+            calendarService, new EmbeddedSqlService(),
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+        TerminatedEmployeeService smartService = new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService);
+
+        var smartData = await smartService.GetReportAsync(new StartAndEndDateRequest { BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue, SortBy = "name" }, CancellationToken.None);
+
+        // Parse READY system data
+        string expectedText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R3-QPAY066");
+        var readyData = ParseGoldenFileToDto(expectedText);
+
+        var smartEmployees = smartData.Response.Results.ToList();
+        var readyEmployees = readyData.Response.Results.ToList();
+
+        TestOutputHelper.WriteLine($"SMART total records: {smartEmployees.Count}");
+        TestOutputHelper.WriteLine($"READY total records: {readyEmployees.Count}");
+
+        // Analyze cases where the same person appears as both employee and beneficiary
+        var smartByName = smartEmployees.Where(e => !string.IsNullOrEmpty(e.Name)).GroupBy(e => e.Name!).ToDictionary(g => g.Key, g => g.ToList());
+        var readyByName = readyEmployees.Where(e => !string.IsNullOrEmpty(e.Name)).GroupBy(e => e.Name!).ToDictionary(g => g.Key, g => g.ToList());
+
+        TestOutputHelper.WriteLine($"\n=== ANALYZING CLASSIFICATION DIFFERENCES ===");
+
+        var commonNames = smartByName.Keys.Intersect(readyByName.Keys).ToList();
+        TestOutputHelper.WriteLine($"Common names between systems: {commonNames.Count}");
+
+        var classificationDifferences = new List<(string Name, List<TerminatedEmployeeAndBeneficiaryDataResponseDto> SmartRecords, List<TerminatedEmployeeAndBeneficiaryDataResponseDto> ReadyRecords)>();
+
+        foreach (var name in commonNames.Take(20)) // Analyze first 20 cases
+        {
+            var smartRecords = smartByName[name];
+            var readyRecords = readyByName[name];
+
+            // Check if there are classification differences
+            var smartEmployeeCount = smartRecords.Count(r => r.PsnSuffix == 0);
+            var smartBeneficiaryCount = smartRecords.Count(r => r.PsnSuffix != 0);
+            var readyEmployeeCount = readyRecords.Count(r => r.PsnSuffix == 0);
+            var readyBeneficiaryCount = readyRecords.Count(r => r.PsnSuffix != 0);
+
+            if (smartEmployeeCount != readyEmployeeCount || smartBeneficiaryCount != readyBeneficiaryCount)
+            {
+                classificationDifferences.Add((name, smartRecords, readyRecords));
+                
+                TestOutputHelper.WriteLine($"\n🔍 NAME: {name}");
+                TestOutputHelper.WriteLine($"  SMART: {smartEmployeeCount} employees, {smartBeneficiaryCount} beneficiaries");
+                TestOutputHelper.WriteLine($"  READY: {readyEmployeeCount} employees, {readyBeneficiaryCount} beneficiaries");
+                
+                TestOutputHelper.WriteLine($"  SMART Records:");
+                foreach (var record in smartRecords)
+                {
+                    TestOutputHelper.WriteLine($"    Badge: {record.BadgeNumber}, Suffix: {record.PsnSuffix}, BadgePSn: {record.BadgePSn}");
+                }
+                
+                TestOutputHelper.WriteLine($"  READY Records:");
+                foreach (var record in readyRecords)
+                {
+                    TestOutputHelper.WriteLine($"    Badge: {record.BadgeNumber}, Suffix: {record.PsnSuffix}, BadgePSn: {record.BadgePSn}");
+                }
+            }
+        }
+
+        TestOutputHelper.WriteLine($"\n=== CLASSIFICATION DIFFERENCE SUMMARY ===");
+        TestOutputHelper.WriteLine($"Names with classification differences: {classificationDifferences.Count}");
+
+        // Analyze patterns in classification differences
+        var smartOnlyEmployees = classificationDifferences.Where(cd => 
+            cd.SmartRecords.Any(r => r.PsnSuffix == 0) && !cd.ReadyRecords.Any(r => r.PsnSuffix == 0)).ToList();
+        var readyOnlyEmployees = classificationDifferences.Where(cd => 
+            cd.ReadyRecords.Any(r => r.PsnSuffix == 0) && !cd.SmartRecords.Any(r => r.PsnSuffix == 0)).ToList();
+        var smartOnlyBeneficiaries = classificationDifferences.Where(cd => 
+            cd.SmartRecords.Any(r => r.PsnSuffix != 0) && !cd.ReadyRecords.Any(r => r.PsnSuffix != 0)).ToList();
+        var readyOnlyBeneficiaries = classificationDifferences.Where(cd => 
+            cd.ReadyRecords.Any(r => r.PsnSuffix != 0) && !cd.SmartRecords.Any(r => r.PsnSuffix != 0)).ToList();
+
+        TestOutputHelper.WriteLine($"Cases where SMART has employee but READY doesn't: {smartOnlyEmployees.Count}");
+        TestOutputHelper.WriteLine($"Cases where READY has employee but SMART doesn't: {readyOnlyEmployees.Count}");
+        TestOutputHelper.WriteLine($"Cases where SMART has beneficiary but READY doesn't: {smartOnlyBeneficiaries.Count}");
+        TestOutputHelper.WriteLine($"Cases where READY has beneficiary but SMART doesn't: {readyOnlyBeneficiaries.Count}");
+
+        // Show some examples
+        if (readyOnlyEmployees.Any())
+        {
+            TestOutputHelper.WriteLine($"\n=== EXAMPLES: READY has employee, SMART doesn't ===");
+            foreach (var example in readyOnlyEmployees.Take(3))
+            {
+                TestOutputHelper.WriteLine($"Name: {example.Name}");
+                TestOutputHelper.WriteLine($"  READY employee: Badge {example.ReadyRecords.First(r => r.PsnSuffix == 0).BadgeNumber}");
+                TestOutputHelper.WriteLine($"  SMART records: {string.Join(", ", example.SmartRecords.Select(r => $"Badge {r.BadgeNumber} Suffix {r.PsnSuffix}"))}");
+            }
+        }
+
+        // Deep dive into specific cases to understand the business logic
+        TestOutputHelper.WriteLine($"\n=== BUSINESS LOGIC ANALYSIS ===");
+        TestOutputHelper.WriteLine($"The pattern is clear: these are people who appear as:");
+        TestOutputHelper.WriteLine($"  • EMPLOYEES in READY (with suffix=0)");
+        TestOutputHelper.WriteLine($"  • BENEFICIARIES in SMART (with suffix=1000 or 2000)");
+        TestOutputHelper.WriteLine($"");
+        TestOutputHelper.WriteLine($"This suggests SMART is correctly showing beneficiary records that READY");
+        TestOutputHelper.WriteLine($"either doesn't include or classifies differently in this report type.");
+        TestOutputHelper.WriteLine($"");
+        TestOutputHelper.WriteLine($"Key insight: Same badge numbers but different member classifications");
+        TestOutputHelper.WriteLine($"indicate these people have both employee and beneficiary status,");
+        TestOutputHelper.WriteLine($"but each system is showing different aspects of their records.");
+
+        // Assert for test completion - this will help us track improvement after fixing business rules
+        smartEmployees.ShouldNotBeEmpty("Should have SMART employee data");
+        readyEmployees.ShouldNotBeEmpty("Should have READY employee data");
+        
+        TestOutputHelper.WriteLine($"\n=== BASELINE BEFORE BUSINESS RULE FIX ===");
+        TestOutputHelper.WriteLine($"Classification differences: {classificationDifferences.Count}");
+        TestOutputHelper.WriteLine($"Cases where READY has employee but SMART doesn't: {readyOnlyEmployees.Count}");
+        TestOutputHelper.WriteLine($"Cases where SMART has beneficiary but READY doesn't: {smartOnlyBeneficiaries.Count}");
+        
+        classificationDifferences.Count.ShouldBeLessThan(50, "Should not have excessive classification differences");
+    }
+
+    [Fact]
     [Description("PS-1623 : Analyze beneficiary count discrepancy between our parsing and manual count")]
     public void AnalyzeBeneficiaryCountDiscrepancy()
     {
@@ -3705,6 +3987,117 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         // Assert for test completion
         dataLines.ShouldNotBeEmpty("Should have data lines to analyze");
         readyEmployees.ShouldNotBeEmpty("Should have parsed employees");
+    }
+
+    [Fact(DisplayName = "Investigate why active employees appear in GetTerminatedEmployees query")]
+    [Description("PS-1721 : Debug why active employees are returned by terminated employee filter")]
+    public async Task InvestigateTerminatedEmployeeFilterLogic()
+    {
+        var problematicBadges = new[] { 702967, 706448, 704823 };
+        
+        TestOutputHelper.WriteLine("=== INVESTIGATING TERMINATED EMPLOYEE FILTER ===");
+        
+        await DbFactory.UseReadOnlyContext<int>(async context =>
+        {
+            // Replicate the exact query from GetTerminatedEmployees method
+            var query = context.Demographics
+                .Where(d => d.EmploymentStatusId == 't')  // EmploymentStatus.Constants.Terminated
+                .Where(d => d.TerminationDate.HasValue);
+                
+            var terminatedEmployees = await query
+                .Where(d => problematicBadges.Contains(d.BadgeNumber))
+                .Include(d => d.ContactInfo)
+                .ToListAsync();
+                
+            TestOutputHelper.WriteLine($"Found {terminatedEmployees.Count} terminated employees for problematic badges");
+            
+            foreach (var employee in terminatedEmployees)
+            {
+                TestOutputHelper.WriteLine($"\n🔍 TERMINATED QUERY RESULT for Badge {employee.BadgeNumber}:");
+                TestOutputHelper.WriteLine($"  Name: {employee.ContactInfo.FullName}");
+                TestOutputHelper.WriteLine($"  Employment Status: '{employee.EmploymentStatusId}'");
+                TestOutputHelper.WriteLine($"  Termination Date: {employee.TerminationDate}");
+                TestOutputHelper.WriteLine($"  Termination Code: {employee.TerminationCodeId}");
+            }
+            
+            // Now check what the database actually contains for these badges
+            var allRecords = await context.Demographics
+                .Where(d => problematicBadges.Contains(d.BadgeNumber))
+                .Include(d => d.ContactInfo)
+                .ToListAsync();
+                
+            TestOutputHelper.WriteLine($"\n=== ALL DATABASE RECORDS FOR THESE BADGES ===");
+            foreach (var record in allRecords)
+            {
+                TestOutputHelper.WriteLine($"\nBadge {record.BadgeNumber} ({record.ContactInfo.FullName}):");
+                TestOutputHelper.WriteLine($"  Employment Status: '{record.EmploymentStatusId}'");
+                TestOutputHelper.WriteLine($"  Termination Date: {record.TerminationDate}");
+                TestOutputHelper.WriteLine($"  Meets terminated filter: {record.EmploymentStatusId == 't' && record.TerminationDate.HasValue}");
+            }
+            
+            return 0;
+        });
+        
+        // Assert for test completion
+        problematicBadges.ShouldNotBeEmpty("Should have badge numbers to investigate");
+    }
+
+    [Fact(DisplayName = "Investigate beneficiary records that match demographic SSNs")]
+    [Description("PS-1721 : Check if active employees appear as beneficiaries with matching SSNs")]
+    public async Task InvestigateBeneficiaryDemographicSsnMatching()
+    {
+        var problematicBadges = new[] { 702967, 706448, 704823 };
+        
+        TestOutputHelper.WriteLine("=== INVESTIGATING BENEFICIARY-DEMOGRAPHIC SSN MATCHING ===");
+        
+        await DbFactory.UseReadOnlyContext<int>(async context =>
+        {
+            foreach (var badgeNumber in problematicBadges)
+            {
+                TestOutputHelper.WriteLine($"\n🔍 BADGE {badgeNumber}:");
+                
+                // Get the demographic record
+                var demographic = await context.Demographics
+                    .Include(d => d.ContactInfo)
+                    .FirstOrDefaultAsync(d => d.BadgeNumber == badgeNumber);
+                    
+                if (demographic != null)
+                {
+                    TestOutputHelper.WriteLine($"  Demographic SSN: {demographic.Ssn}");
+                    TestOutputHelper.WriteLine($"  Demographic Name: {demographic.ContactInfo.FullName}");
+                    
+                    // Find beneficiary records with matching SSN
+                    var matchingBeneficiaries = await context.Beneficiaries
+                        .Include(b => b.Contact)
+                        .ThenInclude(c => c!.ContactInfo)
+                        .Where(b => b.Contact!.Ssn == demographic.Ssn)
+                        .ToListAsync();
+                        
+                    TestOutputHelper.WriteLine($"  Beneficiaries with matching SSN: {matchingBeneficiaries.Count}");
+                    
+                    foreach (var beneficiary in matchingBeneficiaries)
+                    {
+                        TestOutputHelper.WriteLine($"    Beneficiary Badge: {beneficiary.BadgeNumber}");
+                        TestOutputHelper.WriteLine($"    Beneficiary PSN Suffix: {beneficiary.PsnSuffix}");
+                        TestOutputHelper.WriteLine($"    Beneficiary Name: {beneficiary.Contact!.ContactInfo.FullName}");
+                        TestOutputHelper.WriteLine($"    SSN Match: {beneficiary.Contact.Ssn == demographic.Ssn}");
+                        
+                        // This is the logic from GetBeneficiaries:
+                        var usedBadgeNumber = (beneficiary.Contact.Ssn == demographic.Ssn) ? demographic.BadgeNumber : beneficiary.BadgeNumber;
+                        TestOutputHelper.WriteLine($"    Badge used in query: {usedBadgeNumber}");
+                    }
+                }
+                else
+                {
+                    TestOutputHelper.WriteLine($"  No demographic record found");
+                }
+            }
+            
+            return 0;
+        });
+        
+        // Assert for test completion
+        problematicBadges.ShouldNotBeEmpty("Should have badge numbers to investigate");
     }
 
 

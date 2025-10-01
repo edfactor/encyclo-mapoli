@@ -145,11 +145,10 @@ public sealed class TerminatedEmployeeReportService
         return query;
     }
 
-    private static Task<List<MemberSlice>> CombineEmployeeAndBeneficiarySlices(IQueryable<MemberSlice> terminatedWithContributions,
+    private static async Task<List<MemberSlice>> CombineEmployeeAndBeneficiarySlices(IQueryable<MemberSlice> terminatedWithContributions,
         IQueryable<MemberSlice> beneficiaries, CancellationToken cancellation)
     {
         // NOTE: the server side union fails
-        var benes = beneficiaries;
         var employees = terminatedWithContributions.Where(member => ((member.EnrollmentId == Enrollment.Constants.NotEnrolled ||
                                                                             member.EnrollmentId == Enrollment.Constants.OldVestingPlanHasContributions ||
                                                                             member.EnrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords)
@@ -158,8 +157,25 @@ public sealed class TerminatedEmployeeReportService
                                                                           ((member.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ||
                                                                             member.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords)
                                                                            && member.YearsInPs > 1));
-        return benes.Concat(employees)
-            .ToListAsync(cancellation);
+
+        // BUSINESS RULE ALIGNMENT WITH READY SYSTEM:
+        // To match READY's behavior, prioritize employee records over beneficiary records
+        // when the same person (by BadgeNumber) appears in both categories.
+        // This prevents duplicate entries and ensures consistent classification.
+        
+        var employeeList = await employees.ToListAsync(cancellation);
+        var beneficiaryList = await beneficiaries.ToListAsync(cancellation);
+        
+        // Get badge numbers of employees to exclude duplicate beneficiaries
+        var employeeBadgeNumbers = employeeList.Select(e => e.BadgeNumber).ToHashSet();
+        
+        // Only include beneficiaries who don't have a corresponding employee record
+        var uniqueBeneficiaries = beneficiaryList.Where(b => !employeeBadgeNumbers.Contains(b.BadgeNumber)).ToList();
+        
+        // Combine unique records: all employees + beneficiaries without employee equivalents
+        var result = employeeList.Concat(uniqueBeneficiaries).ToList();
+        
+        return result;
     }
 
     #endregion
