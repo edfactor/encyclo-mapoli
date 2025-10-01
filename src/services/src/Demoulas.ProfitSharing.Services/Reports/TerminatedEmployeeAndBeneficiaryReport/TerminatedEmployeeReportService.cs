@@ -333,35 +333,44 @@ public sealed class TerminatedEmployeeReportService
 
 
     /// <summary>
-    /// Do we include the member in the report or not?    They are interesting if they have money (as a bene) or
-    /// have been in the plan long enough to have money.
+    /// Do we include the member in the report or not? Based on COBOL QPAY066 filtering logic:
+    /// "Only those who had a non zero beginning balance" - matches COBOL logic from QPAY066.pco lines 999-1053.
+    /// Implements the same balance filtering as the legacy READY system.
     /// </summary>
-    /// <param name="member"></param>
-    /// <returns></returns>
+    /// <param name="member">The member to evaluate for inclusion</param>
+    /// <returns>True if the member should be included in the report</returns>
     private static bool IsInteresting(Member member)
     {
-        // Has a bene allocation
+        // COBOL Balance Filter Implementation (PRIMARY FIX for population differences)
+        // Based on QPAY066.pco comment: "Only those who had a non zero beginning balance"
+        // Checks: W-PSAMT != 0 OR W-PSLOAN != 0 OR W-PSFORF != 0 OR W-BEN-ALLOC != 0
+
+        // W-PSAMT (Profit Sharing Amount) - Beginning Balance
+        if (member.BeginningAmount != 0)
+        {
+            return true;
+        }
+
+        // W-PSLOAN (Profit Sharing Disbursements) - Distribution Amount
+        if (member.DistributionAmount != 0)
+        {
+            return true;
+        }
+
+        // W-PSFORF (Profit Sharing Forfeitures) - Forfeit Amount
+        if (member.ForfeitAmount != 0)
+        {
+            return true;
+        }
+
+        // W-BEN-ALLOC (Beneficiary Allocations) - Beneficiary Allocation
         if (member.BeneficiaryAllocation != 0)
         {
             return true;
         }
 
-        //  OldPlan, > 2 years, has beginning amount
-        if ((member.EnrollmentId is (Enrollment.Constants.NotEnrolled /*0*/ or Enrollment.Constants.OldVestingPlanHasContributions /*1*/
-                 or Enrollment.Constants.OldVestingPlanHasForfeitureRecords /*3*/)
-             && member.YearsInPlan > 2
-             && member.BeginningAmount != 0))
-        {
-            return true;
-        }
-
-        // NewPlan, > 1 year, has beginning amount
-        if (member.EnrollmentId is (Enrollment.Constants.NewVestingPlanHasContributions /*2*/ or Enrollment.Constants.NewVestingPlanHasForfeitureRecords /*4*/ ) &&
-            member.YearsInPlan > 1 && member.BeginningAmount != 0)
-        {
-            return true;
-        }
-
+        // If none of the balance criteria are met, exclude from report
+        // This matches COBOL logic that only includes employees with profit sharing activity
         return false;
     }
 }
