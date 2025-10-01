@@ -9,6 +9,7 @@ using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 
@@ -20,14 +21,17 @@ public sealed class TerminatedEmployeeReportService
     private readonly IProfitSharingDataContextFactory _factory;
     private readonly TotalService _totalService;
     private readonly IDemographicReaderService _demographicReaderService;
+    private readonly ILogger<TerminatedEmployeeReportService> _logger;
 
     public TerminatedEmployeeReportService(IProfitSharingDataContextFactory factory,
         TotalService totalService,
-        IDemographicReaderService demographicReaderService)
+        IDemographicReaderService demographicReaderService,
+        ILogger<TerminatedEmployeeReportService> logger)
     {
         _factory = factory;
         _totalService = totalService;
         _demographicReaderService = demographicReaderService;
+        _logger = logger;
     }
 
     public Task<TerminatedEmployeeAndBeneficiaryResponse> CreateDataAsync(StartAndEndDateRequest req, CancellationToken cancellationToken)
@@ -49,7 +53,17 @@ public sealed class TerminatedEmployeeReportService
     private async Task<List<MemberSlice>> RetrieveMemberSlices(IProfitSharingDbContext ctx, StartAndEndDateRequest request,
         CancellationToken cancellationToken)
     {
+        _logger.LogInformation(
+            "RetrieveMemberSlices: Starting retrieval for date range {BeginningDate} to {EndingDate}",
+            request.BeginningDate, request.EndingDate);
+
         var terminatedEmployees = await GetTerminatedEmployees(ctx, request);
+        
+        var terminatedCount = await terminatedEmployees.CountAsync(cancellationToken);
+        _logger.LogInformation(
+            "RetrieveMemberSlices: Found {TerminatedEmployeeCount} terminated employees",
+            terminatedCount);
+
         var terminatedWithContributions = GetEmployeesAsMembers(ctx, request, terminatedEmployees, request.EndingDate);
         var beneficiaries = GetBeneficiaries(ctx, request);
         return await CombineEmployeeAndBeneficiarySlices(terminatedWithContributions, beneficiaries, cancellationToken);
@@ -126,6 +140,10 @@ public sealed class TerminatedEmployeeReportService
 #pragma warning disable S1172
     private IQueryable<MemberSlice> GetBeneficiaries(IProfitSharingDbContext ctx, StartAndEndDateRequest request)
     {
+        _logger.LogInformation(
+            "GetBeneficiaries: Loading beneficiaries for date range {BeginningDate} to {EndingDate}",
+            request.BeginningDate, request.EndingDate);
+
         // This query loads the Beneficiary and then the employee they are related to
         var query = ctx.Beneficiaries
             .Include(b => b.Contact)
@@ -133,6 +151,7 @@ public sealed class TerminatedEmployeeReportService
             .Include(b => b.Demographic)
             .Select(b => new { Beneficiary = b, b.Demographic })
             // BUSINESS RULE ALIGNMENT WITH COBOL QPAY066:
+            // COBOL Logic (lines 767-769): IF H-TEDAT >= W-FDLY AND H-TEDAT <= W-LDLY THEN GO TO ITER-WRITE-PAYBEN-TEMP-FILE (skip)
             // Exclude beneficiaries who have matching SSNs with terminated employees in the date range.
             // COBOL logic: Skip beneficiaries if their demographics show termination date within range.
             // This prevents terminated employees from appearing as both employees and beneficiaries.
@@ -145,12 +164,16 @@ public sealed class TerminatedEmployeeReportService
             {
                 // COBOL BUSINESS RULE: When beneficiary matches demographics AND termination date is NOT in range,
                 // use badge number with PSN=0 (appears as primary employee), otherwise use PSN suffix
+                // COBOL Lines 775-782: If SQLCODE=0 (found) and not in date range, use DEM_BADGE; else use PYBEN_PSN
                 PsnSuffix = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn &&
                            x.Demographic.EmploymentStatusId != EmploymentStatus.Constants.Terminated)
                            ? (short)0 // Active employees processed as beneficiaries appear as primary (PSN=0)
                            : x.Beneficiary.PsnSuffix,
                 Id = x.Beneficiary.BeneficiaryContactId,
-                BadgeNumber = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn) ? x.Demographic.BadgeNumber : x.Beneficiary!.BadgeNumber,
+                // PSN Structure: BadgeNumber (7 digits from employee's Demographic) + PsnSuffix (4 digits)
+                // Beneficiary.BadgeNumber is inherited from Member base but should always use the employee's badge
+                // from the linked Demographic record to construct the correct 11-digit PSN
+                BadgeNumber = x.Demographic!.BadgeNumber,
                 Ssn = x.Beneficiary.Contact!.Ssn,
                 BirthDate = x.Beneficiary.Contact!.DateOfBirth,
                 HoursCurrentYear = 0, // default for beneficiaries
@@ -165,7 +188,10 @@ public sealed class TerminatedEmployeeReportService
                 ZeroCont = ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
                 EnrollmentId = 0, // default for beneficiaries
                 Etva = 0, // default for beneficiaries
-                ProfitYear = 0, // default for beneficiaries
+                // CRITICAL FIX: Beneficiaries must use the requested profit year to match transaction lookups in profitDetailsDict
+                // Previously was 0, which caused beneficiary transactions (stored with actual year) to never be found
+                // This caused beneficiaries to be filtered out by IsInteresting (no transactions = no beneficiary allocation)
+                ProfitYear = (short)request.EndingDate.Year,
                 IsOnlyBeneficiary = !((x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn &&
                                      x.Demographic.EmploymentStatusId != EmploymentStatus.Constants.Terminated)), // Active employees appear as primary
                 IsBeneficiaryAndEmployee = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn),
@@ -175,7 +201,7 @@ public sealed class TerminatedEmployeeReportService
         return query;
     }
 
-    private static async Task<List<MemberSlice>> CombineEmployeeAndBeneficiarySlices(IQueryable<MemberSlice> terminatedWithContributions,
+    private async Task<List<MemberSlice>> CombineEmployeeAndBeneficiarySlices(IQueryable<MemberSlice> terminatedWithContributions,
         IQueryable<MemberSlice> beneficiaries, CancellationToken cancellation)
     {
         // NOTE: the server side union fails
@@ -196,14 +222,35 @@ public sealed class TerminatedEmployeeReportService
         var employeeList = await employees.ToListAsync(cancellation);
         var beneficiaryList = await beneficiaries.ToListAsync(cancellation);
 
+        _logger.LogInformation(
+            "CombineEmployeeAndBeneficiarySlices: Retrieved {EmployeeCount} employees and {BeneficiaryCount} beneficiaries",
+            employeeList.Count, beneficiaryList.Count);
+
         // Get badge numbers of employees to exclude duplicate beneficiaries
         var employeeBadgeNumbers = employeeList.Select(e => e.BadgeNumber).ToHashSet();
 
         // Only include beneficiaries who don't have a corresponding employee record
         var uniqueBeneficiaries = beneficiaryList.Where(b => !employeeBadgeNumbers.Contains(b.BadgeNumber)).ToList();
 
+        _logger.LogInformation(
+            "CombineEmployeeAndBeneficiarySlices: After filtering duplicates, {UniqueBeneficiaryCount} unique beneficiaries remain (filtered out {FilteredCount})",
+            uniqueBeneficiaries.Count, beneficiaryList.Count - uniqueBeneficiaries.Count);
+
+        // Log sample beneficiary details for debugging
+        var beneficiariesWith1000Suffix = uniqueBeneficiaries.Where(b => b.PsnSuffix == -1000).Take(5).ToList();
+        if (beneficiariesWith1000Suffix.Any())
+        {
+            _logger.LogInformation(
+                "Sample beneficiaries with -1000 suffix: {Beneficiaries}",
+                string.Join(", ", beneficiariesWith1000Suffix.Select(b => $"{b.BadgeNumber}{b.PsnSuffix} ({b.FullName})")));
+        }
+
         // Combine unique records: all employees + beneficiaries without employee equivalents
         var result = employeeList.Concat(uniqueBeneficiaries).ToList();
+
+        _logger.LogInformation(
+            "CombineEmployeeAndBeneficiarySlices: Combined result has {TotalCount} members ({EmployeeCount} employees + {BeneficiaryCount} unique beneficiaries)",
+            result.Count, employeeList.Count, uniqueBeneficiaries.Count);
 
         return result;
     }
