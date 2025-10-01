@@ -439,8 +439,16 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
                     TestOutputHelper.WriteLine($"DEBUG Line length: {line.Length}");
                     if (line.Length >= 133)
                     {
-                        TestOutputHelper.WriteLine($"DEBUG Age field (pos 131-132): '{line.Substring(131, 2)}'");
-                        TestOutputHelper.WriteLine($"DEBUG VestedPercent field (pos 124-125): '{line.Substring(124, 2)}'");
+                        TestOutputHelper.WriteLine($"DEBUG Age field (pos 130-131): '{SafeSubstring(line, 130, 2)}'");
+                        TestOutputHelper.WriteLine($"DEBUG VestedPercent field (pos 126-127): '{SafeSubstring(line, 126, 2)}'");
+                        
+                        // Let's analyze the exact positions to find where the '40' is
+                        TestOutputHelper.WriteLine("DEBUG Character-by-character analysis:");
+                        for (int i = 110; i < Math.Min(line.Length, 135); i++)
+                        {
+                            char c = line[i];
+                            TestOutputHelper.WriteLine($"    Position {i}: '{c}' ('{(c == ' ' ? "SPACE" : c.ToString())}')");
+                        }
                     }
                     break;
                 }
@@ -739,11 +747,15 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
             // Parse YTD PS Hours (7 characters, decimal)
             var ytdPsHours = ParseDecimalField(line, 116, 7);
 
-            // Parse vested percent (2 characters, right-aligned at position 124)
-            var vestedPercent = ParseIntField(line, 124, 2);
+            // Parse vested percent (2 characters, right-aligned at position 126-127)
+            // READY format: integer percentage (40 = 40%), SMART format: decimal (0.4 = 40%)
+            // Convert READY integer to decimal format to match SMART
+            var vestedPercentInt = ParseIntField(line, 126, 2);
+            var vestedPercent = vestedPercentInt / 100.0m;
 
-            // Parse age (2 characters, right-aligned at position 131-132)  
-            var age = ParseNullableIntField(line, 131, 2);
+            // Parse age (2 characters, right-aligned at position 130-131)
+            // Fixed: was using 131-132 which captured only last digit + carriage return
+            var age = ParseNullableIntField(line, 130, 2);
 
             // Parse badge number and PSN suffix from badgePsnStr with safer logic
             if (!TryParseBadgeAndSuffix(badgePsnStr, out int badgeNumber, out short psnSuffix))
@@ -2972,6 +2984,132 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
     }
 
     [Fact]
+    [Description("PS-1623 : Investigate VestedPercent calculation differences between SMART and READY")]
+    public async Task InvestigateVestedPercentCalculationDifferences()
+    {
+        // 🎯 PURPOSE: Investigate specific VestedPercent calculation differences
+        // From field differences analysis: Expected='0' (READY), Actual='0.4' (SMART)
+        // This suggests READY might handle vesting percentages differently than SMART
+        
+        TestOutputHelper.WriteLine("🔍 VESTED PERCENT CALCULATION INVESTIGATION");
+        TestOutputHelper.WriteLine("===========================================");
+        TestOutputHelper.WriteLine("Investigating specific VestedPercent differences: Expected='0', Actual='0.4'");
+        TestOutputHelper.WriteLine("");
+
+        // Setup services
+        var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
+        var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
+        var totalService = new TotalService(DbFactory, calendarService, new EmbeddedSqlService(), 
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
+        var demographicReaderService = new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+        var service = new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService);
+
+        // Get SMART system data
+        var req = new StartAndEndDateRequest
+        {
+            BeginningDate = new DateOnly(2024, 1, 1),
+            EndingDate = new DateOnly(2024, 12, 31),
+            Take = 10000,
+            Skip = 0
+        };
+
+        var smartData = await service.GetReportAsync(req, CancellationToken.None);
+        var smartEmployees = smartData.Response.Results.ToList();
+
+        // Parse READY system data from golden file
+        var readyEmployees = ParseReadySystemEmployees();
+
+        TestOutputHelper.WriteLine($"📊 DATA COMPARISON:");
+        TestOutputHelper.WriteLine($"   • SMART employees: {smartEmployees.Count}");
+        TestOutputHelper.WriteLine($"   • READY employees: {readyEmployees.Count}");
+        TestOutputHelper.WriteLine("");
+
+        // Find employees with VestedPercent differences
+        var employeesWithVestingDifferences = new List<(string Name, string Badge, decimal SmartVesting, decimal ReadyVesting, decimal SmartVested, decimal ReadyVested)>();
+
+        foreach (var smartEmployee in smartEmployees.Take(100)) // Sample first 100
+        {
+            if (!smartEmployee.YearDetails.Any()) continue;
+            
+            // Find matching READY employee
+            var readyMatch = readyEmployees.FirstOrDefault(r => 
+                r.BadgeNumber == smartEmployee.BadgeNumber && 
+                r.PsnSuffix == smartEmployee.PsnSuffix);
+                
+            if (readyMatch?.YearDetails?.Any() != true) continue;
+
+            var smartDetail = smartEmployee.YearDetails[0];
+            var readyDetail = readyMatch.YearDetails[0];
+
+            // Check for VestedPercent differences
+            if (Math.Abs(smartDetail.VestedPercent - readyDetail.VestedPercent) > 0.01m)
+            {
+                employeesWithVestingDifferences.Add((
+                    smartEmployee.Name ?? "Unknown",
+                    $"{smartEmployee.BadgeNumber}-{smartEmployee.PsnSuffix}",
+                    smartDetail.VestedPercent,
+                    readyDetail.VestedPercent,
+                    smartDetail.VestedBalance,
+                    readyDetail.VestedBalance
+                ));
+            }
+        }
+
+        TestOutputHelper.WriteLine($"🎯 VESTED PERCENT DIFFERENCES ANALYSIS:");
+        TestOutputHelper.WriteLine($"   • Total employees with VestedPercent differences: {employeesWithVestingDifferences.Count}");
+        TestOutputHelper.WriteLine("");
+
+        // Show specific examples
+        TestOutputHelper.WriteLine("📋 DETAILED VESTED PERCENT EXAMPLES:");
+        foreach (var diff in employeesWithVestingDifferences.Take(10))
+        {
+            TestOutputHelper.WriteLine($"   Employee: {diff.Name} ({diff.Badge})");
+            TestOutputHelper.WriteLine($"      SMART VestedPercent: {diff.SmartVesting:F4} | VestedBalance: ${diff.SmartVested:F2}");
+            TestOutputHelper.WriteLine($"      READY VestedPercent: {diff.ReadyVesting:F4} | VestedBalance: ${diff.ReadyVested:F2}");
+            TestOutputHelper.WriteLine($"      Difference: {diff.SmartVesting - diff.ReadyVesting:F4}");
+            TestOutputHelper.WriteLine("");
+        }
+
+        // Analyze patterns
+        var patternAnalysis = employeesWithVestingDifferences
+            .GroupBy(x => new { Smart = x.SmartVesting, Ready = x.ReadyVesting })
+            .OrderByDescending(g => g.Count())
+            .ToList();
+
+        TestOutputHelper.WriteLine("📊 VESTED PERCENT PATTERN ANALYSIS:");
+        foreach (var pattern in patternAnalysis.Take(5))
+        {
+            TestOutputHelper.WriteLine($"   Pattern: SMART={pattern.Key.Smart:F2} vs READY={pattern.Key.Ready:F2} → {pattern.Count()} employees");
+        }
+
+        TestOutputHelper.WriteLine("");
+        TestOutputHelper.WriteLine($"🔍 KEY FINDINGS:");
+        if (employeesWithVestingDifferences.Any())
+        {
+            TestOutputHelper.WriteLine($"   • Found {employeesWithVestingDifferences.Count} employees with VestedPercent calculation differences");
+            TestOutputHelper.WriteLine($"   • Most common pattern: {patternAnalysis[0].Key.Smart:F2} vs {patternAnalysis[0].Key.Ready:F2}");
+            
+            // Check if this is the Expected='0', Actual='0.4' pattern we saw earlier
+            var zeroVsFourtyPattern = patternAnalysis.FirstOrDefault(p => 
+                Math.Abs(p.Key.Smart - 0.4m) < 0.01m && Math.Abs(p.Key.Ready - 0.0m) < 0.01m);
+            
+            if (zeroVsFourtyPattern != null)
+            {
+                TestOutputHelper.WriteLine($"   • ✅ CONFIRMED: Found Expected='0' vs Actual='0.4' pattern in {zeroVsFourtyPattern.Count()} employees");
+                TestOutputHelper.WriteLine($"   • This suggests READY may treat some partially vested employees differently than SMART");
+            }
+        }
+        else
+        {
+            TestOutputHelper.WriteLine("   • No VestedPercent calculation differences found in sample data");
+        }
+
+        // Success criteria
+        smartEmployees.Count.ShouldBeGreaterThan(400, "Should have substantial SMART employee data");
+        employeesWithVestingDifferences.Count.ShouldBeGreaterThan(0, "Should find some VestedPercent calculation differences to analyze");
+    }
+
+    [Fact]
     [Description("PS-1623 : Diagnose BadgePSn formatting differences")]
     public async Task DiagnoseBadgePSnFormattingIssues()
     {
@@ -4098,6 +4236,84 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         
         // Assert for test completion
         problematicBadges.ShouldNotBeEmpty("Should have badge numbers to investigate");
+    }
+
+    [Fact(DisplayName = "Debug age parsing field positions")]
+    [Description("PS-1721 : Investigate exact field positions for age parsing in READY data")]
+    public void DebugAgeParsingFieldPositions()
+    {
+        TestOutputHelper.WriteLine("=== DEBUGGING AGE PARSING FIELD POSITIONS ===");
+        
+        string goldenFileText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R3-QPAY066");
+        var lines = goldenFileText.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        
+        // Find the problematic line for employee 707319
+        foreach (var line in lines)
+        {
+            if (line.Contains("707319"))
+            {
+                TestOutputHelper.WriteLine($"\nRAW LINE: '{line}'");
+                TestOutputHelper.WriteLine($"LINE LENGTH: {line.Length}");
+                
+                // Print each character position for debugging
+                TestOutputHelper.WriteLine("\nCHARACTER POSITIONS:");
+                for (int i = 0; i < line.Length && i < 140; i++)
+                {
+                    char c = line[i];
+                    string display = c == ' ' ? "·" : c.ToString(); // Use middle dot for spaces
+                    TestOutputHelper.WriteLine($"  Pos {i:000}: '{display}' (char: {(int)c})");
+                }
+                
+                // Show the last 20 characters clearly
+                TestOutputHelper.WriteLine($"\nLAST 20 CHARACTERS:");
+                int start = Math.Max(0, line.Length - 20);
+                for (int i = start; i < line.Length; i++)
+                {
+                    char c = line[i];
+                    string display = c == ' ' ? "·" : c.ToString();
+                    TestOutputHelper.WriteLine($"  Pos {i:000}: '{display}' (char: {(int)c})");
+                }
+                
+                // Parse different potential age positions
+                TestOutputHelper.WriteLine($"\nTESTING DIFFERENT AGE POSITIONS:");
+                
+                // Current position (131-132)
+                if (line.Length > 132)
+                {
+                    var age131 = SafeSubstring(line, 131, 2).Trim();
+                    TestOutputHelper.WriteLine($"  Age at pos 131-132: '{age131}'");
+                }
+                
+                // Last 2 characters
+                if (line.Length >= 2)
+                {
+                    var ageLast2 = line.Substring(line.Length - 2).Trim();
+                    TestOutputHelper.WriteLine($"  Age at last 2 chars: '{ageLast2}'");
+                }
+                
+                // Last 3 characters (in case there's padding)
+                if (line.Length >= 3)
+                {
+                    var ageLast3 = line.Substring(line.Length - 3).Trim();
+                    TestOutputHelper.WriteLine($"  Age at last 3 chars: '{ageLast3}'");
+                }
+                
+                // Try parsing at different positions around the expected area
+                for (int pos = 125; pos < Math.Min(line.Length - 1, 140); pos++)
+                {
+                    var testAge = SafeSubstring(line, pos, 2).Trim();
+                    if (testAge == "36" || testAge == "6" || (!string.IsNullOrEmpty(testAge) && int.TryParse(testAge, out int result) && result > 0 && result < 100))
+                    {
+                        TestOutputHelper.WriteLine($"  POTENTIAL AGE MATCH at pos {pos}: '{testAge}'");
+                    }
+                }
+                
+                break;
+            }
+        }
+        
+        // Simple assertion to satisfy analyzer
+        lines.ShouldNotBeEmpty("Should have lines in golden file");
     }
 
 
