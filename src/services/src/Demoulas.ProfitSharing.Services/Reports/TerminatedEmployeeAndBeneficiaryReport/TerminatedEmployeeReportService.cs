@@ -51,7 +51,7 @@ public sealed class TerminatedEmployeeReportService
     {
         var terminatedEmployees = await GetTerminatedEmployees(ctx, request);
         var terminatedWithContributions = GetEmployeesAsMembers(ctx, request, terminatedEmployees, request.EndingDate);
-        var beneficiaries = GetBeneficiaries(ctx);
+        var beneficiaries = GetBeneficiaries(ctx, request);
         return await CombineEmployeeAndBeneficiarySlices(terminatedWithContributions, beneficiaries, cancellationToken);
     }
 
@@ -113,7 +113,7 @@ public sealed class TerminatedEmployeeReportService
     }
 
 #pragma warning disable S1172
-    private IQueryable<MemberSlice> GetBeneficiaries(IProfitSharingDbContext ctx)
+    private IQueryable<MemberSlice> GetBeneficiaries(IProfitSharingDbContext ctx, StartAndEndDateRequest request)
     {
         // This query loads the Beneficiary and then the employee they are related to
         var query = ctx.Beneficiaries
@@ -121,12 +121,15 @@ public sealed class TerminatedEmployeeReportService
             .ThenInclude(c => c!.ContactInfo)
             .Include(b => b.Demographic)
             .Select(b => new { Beneficiary = b, b.Demographic })
-            // BUSINESS RULE ALIGNMENT WITH READY SYSTEM:
-            // Exclude beneficiaries who have matching SSNs with active employees.
-            // READY system treats active employees as employees only, not as beneficiaries.
-            // This prevents active employees from appearing as beneficiaries with PSN suffixes.
+            // BUSINESS RULE ALIGNMENT WITH COBOL QPAY066:
+            // Exclude beneficiaries who have matching SSNs with terminated employees in the date range.
+            // COBOL logic: Skip beneficiaries if their demographics show termination date within range.
+            // This prevents terminated employees from appearing as both employees and beneficiaries.
             .Where(x => !(x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn &&
-                         x.Demographic.EmploymentStatusId == EmploymentStatus.Constants.Active))
+                         x.Demographic.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
+                         x.Demographic.TerminationDate != null &&
+                         x.Demographic.TerminationDate >= request.BeginningDate &&
+                         x.Demographic.TerminationDate <= request.EndingDate))
             .Select(x => new MemberSlice
             {
                 PsnSuffix = x.Beneficiary.PsnSuffix,

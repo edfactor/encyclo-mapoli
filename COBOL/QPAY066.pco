@@ -133,8 +133,6 @@
       ** 6/20/2024  N.Ferrin MAIN-2061  Create a csv file but   */ 
       **            use a switch in PROF-TERM.ksh to determine  */
       **            when it is printed                          */
-      ** 4/21/2025  N.F.Alvarado MAIN-2177 add badge/PSN and    */
-      **            terminated date to csv                      */
       ***********************************************************/
        IDENTIFICATION DIVISION.
        PROGRAM-ID. QPAY066.
@@ -1302,19 +1300,16 @@
            COMPUTE WS-START = WS-SPACES + 1
            MOVE WS-AMOUNT(WS-START:WS-SIZE) TO WS-EDITED-AMT.
            MOVE SPACES To CSV-REC.
-           STRING R2-BADGE-PSN-NP delimited by '  ',  
-                  ',A,' delimited by size,
+           STRING 'A,' delimited by size,
                   WS-SSN-FULL delimited by size, ',"' delimited by size,
                   R2-FNAME delimited by '  ', '",' delimited by size,
                   R2-MINIT delimited by size, ',"' delimited by size,
                   R2-LNAME delimited by '  ', 
                   '",A,A,0.00,"' delimited by size,
-               WS-EDITED-AMT delimited by '  ', '",' delimited by size,
-                  WS-D-O-TERM delimited by '  ' 
+                  WS-EDITED-AMT delimited by '  ', '"' delimited by size
                                into CSV-REC.
            WRITE CSV-REC.
            ADD 1 TO WS-CSV-WRITTEN.
 
        5000-EXIT.
             EXIT.
-

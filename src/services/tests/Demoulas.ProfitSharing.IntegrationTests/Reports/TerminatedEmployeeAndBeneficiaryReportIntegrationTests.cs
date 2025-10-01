@@ -4542,9 +4542,9 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
                         TestOutputHelper.WriteLine($"  - Has PayProfit 2025: YES");
                         TestOutputHelper.WriteLine($"  - YTD Hours: {payProfit.CurrentHoursYear}");
                         TestOutputHelper.WriteLine($"  - YTD Income: {payProfit.CurrentIncomeYear}");
-                        TestOutputHelper.WriteLine($"  - PS Amount: {payProfit.PsAmount}");
+                        TestOutputHelper.WriteLine($"  - ETVA: {payProfit.Etva}");
                         TestOutputHelper.WriteLine($"  - Enrollment: {payProfit.EnrollmentId}");
-                        TestOutputHelper.WriteLine($"  - PS Years: {payProfit.PsYears}");
+                        TestOutputHelper.WriteLine($"  - Points Earned: {payProfit.PointsEarned}");
                     }
                     else
                     {
@@ -4557,7 +4557,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
                         TestOutputHelper.WriteLine($"  - PayProfit records for other years: {allPayProfits.Count}");
                         foreach (var pp in allPayProfits.OrderByDescending(p => p.ProfitYear))
                         {
-                            TestOutputHelper.WriteLine($"    - Year {pp.ProfitYear}: Hours={pp.CurrentHoursYear}, Amount={pp.PsAmount}");
+                            TestOutputHelper.WriteLine($"    - Year {pp.ProfitYear}: Hours={pp.CurrentHoursYear}, ETVA={pp.Etva}");
                         }
                     }
                 }
