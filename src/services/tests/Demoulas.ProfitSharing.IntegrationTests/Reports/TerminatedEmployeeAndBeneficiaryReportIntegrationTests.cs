@@ -840,7 +840,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
 
         // For very large numbers that can't be parsed as int, 
         // treat the whole string as BadgePSn but extract a reasonable badge number
-        if (long.TryParse(badgePsnStr, out long fullNumber))
+        if (long.TryParse(badgePsnStr, out _))
         {
             // For display purposes, use the first 6-7 digits as badge number
             string badgeStr = badgePsnStr.Length > 7 ? badgePsnStr.Substring(0, 6) : badgePsnStr;
@@ -3459,7 +3459,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
             }
             TestOutputHelper.WriteLine($"  Resulting BadgePSn: '{actualBadgePsn}' (Expected: '{testCase}')");
             TestOutputHelper.WriteLine($"  Match: {actualBadgePsn == testCase}");
-            TestOutputHelper.WriteLine();
+            TestOutputHelper.WriteLine("");
         }
 
         // Test parsing of large numbers that should be treated as complete identifiers
