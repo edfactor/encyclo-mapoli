@@ -12,7 +12,7 @@ export const transformSearchParams = (data: MasterInquirySearch, profitYear: num
       skip: data.pagination?.skip || 0,
       take: data.pagination?.take || 5,
       sortBy: data.pagination?.sortBy || "badgeNumber",
-      isSortDescending: data.pagination?.isSortDescending || true
+      isSortDescending: data.pagination?.isSortDescending ?? true
     },
     endProfitYear: data.endProfitYear ?? profitYear,
     ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),

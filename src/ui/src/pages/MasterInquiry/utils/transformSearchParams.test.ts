@@ -164,12 +164,11 @@ describe("transformSearchParams", () => {
     };
     const result = transformSearchParams(data, 2024);
 
-    // Note: isSortDescending uses || operator, so false becomes true (implementation bug)
     expect(result.pagination).toEqual({
       skip: 10,
       take: 25,
       sortBy: "name",
-      isSortDescending: true
+      isSortDescending: false
     });
   });
 
@@ -198,7 +197,6 @@ describe("transformSearchParams", () => {
 
     const result = transformSearchParams(data, 2024);
 
-    // Note: isSortDescending uses || operator, so false becomes true (implementation bug)
     expect(result).toMatchObject({
       endProfitYear: 2024,
       startProfitMonth: "1",
@@ -217,7 +215,7 @@ describe("transformSearchParams", () => {
         skip: 20,
         take: 50,
         sortBy: "ssn",
-        isSortDescending: true
+        isSortDescending: false
       }
     });
     expect(result._timestamp).toBeDefined();
