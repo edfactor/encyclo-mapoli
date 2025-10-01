@@ -299,7 +299,7 @@ public sealed class TerminatedEmployeeReportService
                 DateTerm = member.TerminationDate,
                 YtdPsHours = member.HoursCurrentYear,
                 IsExecutive = member.IsExecutive,
-                VestedPercent = vestingPercent * 100,
+                VestedPercent = vestingPercent,
                 Age = age,
                 HasForfeited = enrollmentId == /*3*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords || enrollmentId == /*4*/ Enrollment.Constants.NewVestingPlanHasForfeitureRecords,
                 SuggestedForfeit = member.ProfitYear == req.ProfitYear ? member.EndingBalance - vestedBalance : null

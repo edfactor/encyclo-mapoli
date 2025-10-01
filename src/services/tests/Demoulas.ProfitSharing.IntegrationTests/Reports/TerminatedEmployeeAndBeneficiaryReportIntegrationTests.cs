@@ -2877,5 +2877,82 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         return expectedData.Response.Results.ToList();
     }
 
+    [Fact]
+    [Description("PS-XXXX : Verify vesting percentage bug fix - should show 0.20 instead of 2000%")]
+    public async Task VerifyVestingPercentageBugFix()
+    {
+        // 🎯 PURPOSE: Verify that the vesting percentage calculation bug is fixed
+        // Expected: 0.20 (20%), 0.40 (40%), 0.60 (60%), 0.80 (80%), 1.00 (100%)
+        // Bug was: 20.00 (2000%), 40.00 (4000%), etc.
+
+        TestOutputHelper.WriteLine("🔧 VESTING PERCENTAGE BUG FIX VERIFICATION");
+        TestOutputHelper.WriteLine("==========================================");
+        TestOutputHelper.WriteLine("Testing fix for decimal-to-percentage conversion bug");
+        TestOutputHelper.WriteLine("");
+
+        // Setup services
+        var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
+        var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
+        var totalService = new TotalService(DbFactory,
+            calendarService, new EmbeddedSqlService(),
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
+        var demographicReaderService = new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+        var terminatedEmployeeService = new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService);
+
+        var request = new StartAndEndDateRequest 
+        { 
+            BeginningDate = new DateOnly(2025, 01, 4), 
+            EndingDate = new DateOnly(2025, 12, 27), 
+            Take = int.MaxValue 
+        };
+
+        // Get results after the bug fix
+        var smartData = await terminatedEmployeeService.GetReportAsync(request, CancellationToken.None);
+        var smartEmployees = smartData.Response.Results.ToList();
+
+        TestOutputHelper.WriteLine($"📊 VESTING PERCENTAGE ANALYSIS (AFTER FIX):");
+        TestOutputHelper.WriteLine($"   • Total employees: {smartEmployees.Count}");
+
+        // Analyze vesting distribution
+        var vestingGroups = smartEmployees
+            .Where(e => e.YearDetails.Any())
+            .GroupBy(e => e.YearDetails[0].VestedPercent)
+            .OrderBy(g => g.Key)
+            .ToList();
+
+        TestOutputHelper.WriteLine("📊 VESTING PERCENTAGE DISTRIBUTION:");
+        foreach (var group in vestingGroups)
+        {
+            var vestingPct = group.Key;
+            var count = group.Count();
+            TestOutputHelper.WriteLine($"   • {vestingPct:F2} ({vestingPct:P0}): {count} employees");
+        }
+
+        // Verify correct ranges
+        var correctVestingCount = smartEmployees.Count(e => 
+            e.YearDetails.Any() && e.YearDetails[0].VestedPercent <= 1.0m);
+        var incorrectVestingCount = smartEmployees.Count(e => 
+            e.YearDetails.Any() && e.YearDetails[0].VestedPercent > 1.5m);
+
+        TestOutputHelper.WriteLine("");
+        TestOutputHelper.WriteLine($"🎯 VERIFICATION RESULTS:");
+        TestOutputHelper.WriteLine($"   • Employees with correct vesting (≤ 1.00): {correctVestingCount}");
+        TestOutputHelper.WriteLine($"   • Employees with incorrect vesting (> 1.50): {incorrectVestingCount}");
+
+        if (incorrectVestingCount == 0)
+        {
+            TestOutputHelper.WriteLine("   ✅ SUCCESS: All vesting percentages are in correct range!");
+        }
+        else
+        {
+            TestOutputHelper.WriteLine("   ❌ ISSUE: Still have incorrect vesting percentages");
+        }
+
+        // Success criteria
+        smartEmployees.Count.ShouldBeGreaterThan(400, "Should have substantial employee data");
+        correctVestingCount.ShouldBeGreaterThan(400, "Most employees should have correct vesting percentages");
+        incorrectVestingCount.ShouldBeLessThan(10, "Should have very few or no incorrect vesting percentages");
+    }
+
 
 }
