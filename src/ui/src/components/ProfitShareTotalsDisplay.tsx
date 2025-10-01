@@ -112,39 +112,6 @@ const ProfitShareTotalsDisplay = ({ totalsData }: ProfitShareTotalsDisplayProps)
           </TableBody>
         </Table>
       </TableContainer>
-
-      <TableContainer sx={tableStyles}>
-        <Table size="small">
-          <TableBody>
-            <TableRow>
-              <TableCell
-                sx={firstHeaderCellStyles}
-                width="25%"></TableCell>
-              <TableCell
-                sx={headerCellStyles}
-                width="25%">
-                Wages
-              </TableCell>
-              <TableCell
-                sx={headerCellStyles}
-                width="25%">
-                Hours
-              </TableCell>
-              <TableCell
-                sx={headerCellStyles}
-                width="25%">
-                Points
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell sx={labelCellStyles}>Terminated Section Total</TableCell>
-              <TableCell sx={dataCellStyles}>{numberToCurrency(totalsData?.terminatedWagesTotal || 0)}</TableCell>
-              <TableCell sx={dataCellStyles}>{totalsData?.terminatedHoursTotal?.toLocaleString() || "0"}</TableCell>
-              <TableCell sx={dataCellStyles}>{totalsData?.terminatedPointsTotal?.toLocaleString() || "0"}</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </TableContainer>
     </Box>
   );
 };
