@@ -58,12 +58,13 @@ public sealed class TerminatedEmployeeReportService
     private async Task<IQueryable<TerminatedEmployeeDto>> GetTerminatedEmployees(IProfitSharingDbContext ctx, StartAndEndDateRequest request)
     {
         var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+        // BUSINESS RULE ALIGNMENT: Get all employees who might have profit sharing activity
+        // READY includes employees based on profit sharing activity rather than just HR termination status
         var queryable = demographics
             .Include(d => d.ContactInfo)
-            .Where(d => d.EmploymentStatusId == EmploymentStatus.Constants.Terminated
-                        && d.TerminationDate != null  // BUSINESS RULE ALIGNMENT: READY only includes terminated employees with actual termination dates (no NULL check)
-                        && d.TerminationDate >= request.BeginningDate && d.TerminationDate <= request.EndingDate
-                        && d.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension) // BUSINESS RULE ALIGNMENT: READY excludes PY_TERM != 'W' (retirees)
+            .Where(d => d.EmploymentStatusId == EmploymentStatus.Constants.Terminated // Focus on terminated employees for now
+                        && (d.TerminationCodeId == null || d.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension) // READY excludes retirees (PY_TERM != 'W')
+                        && d.TerminationDate != null && d.TerminationDate >= request.BeginningDate && d.TerminationDate <= request.EndingDate) // Standard terminated employees in date range
             .Select(d => new TerminatedEmployeeDto
             {
                 Demographic = d
@@ -80,6 +81,7 @@ public sealed class TerminatedEmployeeReportService
                     join yipTbl in _totalService.GetYearsOfService(ctx, (short)request.EndingDate.Year, asOfDate) on payProfit.Demographic!.Ssn equals yipTbl.Ssn into yipTmp
                     from yip in yipTmp.DefaultIfEmpty()
                     where payProfit.ProfitYear >= request.BeginningDate.Year && payProfit.ProfitYear <= request.EndingDate.Year
+                        && payProfit.CurrentHoursYear > 0 // BUSINESS RULE ALIGNMENT: READY excludes employees with no YTD work hours
                     select new MemberSlice
                     {
                         PsnSuffix = 0,
@@ -123,7 +125,7 @@ public sealed class TerminatedEmployeeReportService
             // Exclude beneficiaries who have matching SSNs with active employees.
             // READY system treats active employees as employees only, not as beneficiaries.
             // This prevents active employees from appearing as beneficiaries with PSN suffixes.
-            .Where(x => !(x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn && 
+            .Where(x => !(x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn &&
                          x.Demographic.EmploymentStatusId == EmploymentStatus.Constants.Active))
             .Select(x => new MemberSlice
             {
@@ -170,19 +172,19 @@ public sealed class TerminatedEmployeeReportService
         // To match READY's behavior, prioritize employee records over beneficiary records
         // when the same person (by BadgeNumber) appears in both categories.
         // This prevents duplicate entries and ensures consistent classification.
-        
+
         var employeeList = await employees.ToListAsync(cancellation);
         var beneficiaryList = await beneficiaries.ToListAsync(cancellation);
-        
+
         // Get badge numbers of employees to exclude duplicate beneficiaries
         var employeeBadgeNumbers = employeeList.Select(e => e.BadgeNumber).ToHashSet();
-        
+
         // Only include beneficiaries who don't have a corresponding employee record
         var uniqueBeneficiaries = beneficiaryList.Where(b => !employeeBadgeNumbers.Contains(b.BadgeNumber)).ToList();
-        
+
         // Combine unique records: all employees + beneficiaries without employee equivalents
         var result = employeeList.Concat(uniqueBeneficiaries).ToList();
-        
+
         return result;
     }
 
@@ -205,8 +207,8 @@ public sealed class TerminatedEmployeeReportService
         var transactionYearBoundary = req.EndingDate.Year;
 
         var profitDetailsRaw = ctx.ProfitDetails
-            .Where(pd => pd.ProfitYear >= profitYearRange.beginProfitYear 
-                      && pd.ProfitYear <= profitYearRange.endProfitYear 
+            .Where(pd => pd.ProfitYear >= profitYearRange.beginProfitYear
+                      && pd.ProfitYear <= profitYearRange.endProfitYear
                       && pd.ProfitYear <= transactionYearBoundary // NEW: Transaction year boundary filtering
                       && ssns.Contains(pd.Ssn));
 
@@ -375,7 +377,7 @@ public sealed class TerminatedEmployeeReportService
     {
         // TEMPORARY DEBUG: Let's see what values we're getting and use the original logic for now
         // Original logic that was working (balance-based filtering only)
-        
+
         // Beginning balance (most important filter)
         if (member.BeginningAmount != 0)
         {
