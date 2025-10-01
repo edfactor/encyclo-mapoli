@@ -62,6 +62,8 @@ definitions:
         - volta
       artifacts:
         - dist\**
+        - src\ui\coverage\**
+        - src\ui\FE_Tests\**
       script:
         - $env:NPM = "npm"
         - ${env:ENV} = "qa"
@@ -71,15 +73,16 @@ definitions:
             registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
             //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
             "@ | Out-File -FilePath .npmrc -Encoding ASCII
-        - if (Test-Path -Path "node_modules") { Remove-Item -Recurse -Force "node_modules" }        
-        
+        - if (Test-Path -Path "node_modules") { Remove-Item -Recurse -Force "node_modules" }
+
         - dotnet tool update --global Demoulas.Common.Build.Cli
         - dotnet tool update --global --all
-        
+
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
         - Copy-Item -Path ".buildinfo.json" -Destination ".\public" -Force
-        
+
         - npm ci;
+        - npm run test
         - npm run build:${env:ENV}
    
     
