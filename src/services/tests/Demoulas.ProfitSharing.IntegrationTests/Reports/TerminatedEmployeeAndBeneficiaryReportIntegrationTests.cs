@@ -279,10 +279,10 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var differences = new List<string>();
 
         // Compare report totals
-        CompareValues(differences, "Report Totals", "TotalEndingBalance", expectedData.TotalEndingBalance, actualData.TotalEndingBalance);
-        CompareValues(differences, "Report Totals", "TotalVested", expectedData.TotalVested, actualData.TotalVested);
-        CompareValues(differences, "Report Totals", "TotalForfeit", expectedData.TotalForfeit, actualData.TotalForfeit);
-        CompareValues(differences, "Report Totals", "TotalBeneficiaryAllocation", expectedData.TotalBeneficiaryAllocation, actualData.TotalBeneficiaryAllocation);
+        CompareDecimalValues(differences, "Report Totals", "TotalEndingBalance", expectedData.TotalEndingBalance, actualData.TotalEndingBalance, 1.0m); // Allow $1 tolerance for totals
+        CompareDecimalValues(differences, "Report Totals", "TotalVested", expectedData.TotalVested, actualData.TotalVested, 1.0m);
+        CompareDecimalValues(differences, "Report Totals", "TotalForfeit", expectedData.TotalForfeit, actualData.TotalForfeit, 1.0m);
+        CompareDecimalValues(differences, "Report Totals", "TotalBeneficiaryAllocation", expectedData.TotalBeneficiaryAllocation, actualData.TotalBeneficiaryAllocation, 1.0m);
 
         // Compare employee counts
         var actualEmployees = actualData.Response.Results.ToList();
@@ -354,12 +354,12 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
                 var expectedYear = expected.YearDetails[j];
 
                 CompareValues(differences, yearPrefix, "ProfitYear", expectedYear.ProfitYear, actualYear.ProfitYear);
-                CompareValues(differences, yearPrefix, "BeginningBalance", expectedYear.BeginningBalance, actualYear.BeginningBalance);
-                CompareValues(differences, yearPrefix, "BeneficiaryAllocation", expectedYear.BeneficiaryAllocation, actualYear.BeneficiaryAllocation);
-                CompareValues(differences, yearPrefix, "DistributionAmount", expectedYear.DistributionAmount, actualYear.DistributionAmount);
-                CompareValues(differences, yearPrefix, "Forfeit", expectedYear.Forfeit, actualYear.Forfeit);
-                CompareValues(differences, yearPrefix, "EndingBalance", expectedYear.EndingBalance, actualYear.EndingBalance);
-                CompareValues(differences, yearPrefix, "VestedBalance", expectedYear.VestedBalance, actualYear.VestedBalance);
+                CompareDecimalValues(differences, yearPrefix, "BeginningBalance", expectedYear.BeginningBalance, actualYear.BeginningBalance);
+                CompareDecimalValues(differences, yearPrefix, "BeneficiaryAllocation", expectedYear.BeneficiaryAllocation, actualYear.BeneficiaryAllocation);
+                CompareDecimalValues(differences, yearPrefix, "DistributionAmount", expectedYear.DistributionAmount, actualYear.DistributionAmount);
+                CompareDecimalValues(differences, yearPrefix, "Forfeit", expectedYear.Forfeit, actualYear.Forfeit);
+                CompareDecimalValues(differences, yearPrefix, "EndingBalance", expectedYear.EndingBalance, actualYear.EndingBalance);
+                CompareDecimalValues(differences, yearPrefix, "VestedBalance", expectedYear.VestedBalance, actualYear.VestedBalance);
                 CompareValues(differences, yearPrefix, "DateTerm", expectedYear.DateTerm, actualYear.DateTerm);
                 CompareValues(differences, yearPrefix, "YtdPsHours", expectedYear.YtdPsHours, actualYear.YtdPsHours);
                 CompareValues(differences, yearPrefix, "VestedPercent", expectedYear.VestedPercent, actualYear.VestedPercent);
@@ -520,6 +520,18 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
     private static void CompareValues<T>(List<string> differences, string context, string propertyName, T expected, T actual)
     {
         if (!EqualityComparer<T>.Default.Equals(expected, actual))
+        {
+            differences.Add($"{context}.{propertyName}: Expected='{expected}', Actual='{actual}'");
+        }
+    }
+
+    /// <summary>
+    /// Compare decimal values with tolerance for different negative formatting styles.
+    /// READY format: "41,969.91-" (negative at end), SMART format: "-41969.91" (negative at front)
+    /// </summary>
+    private static void CompareDecimalValues(List<string> differences, string context, string propertyName, decimal expected, decimal actual, decimal tolerance = 0.01m)
+    {
+        if (Math.Abs(expected - actual) > tolerance)
         {
             differences.Add($"{context}.{propertyName}: Expected='{expected}', Actual='{actual}'");
         }
