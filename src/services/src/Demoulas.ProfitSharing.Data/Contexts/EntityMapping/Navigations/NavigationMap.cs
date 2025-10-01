@@ -145,6 +145,18 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
             // Inquiries sub-menu items
             new Navigation
             {
+                Id = Navigation.Constants.Adjustments,
+                ParentId = Navigation.Constants.Inquiries,
+                Title = "ADJUSTMENTS",
+                SubTitle = "",
+                Url = "adjustments",
+                StatusId = 1,
+                OrderNumber = 1,
+                Icon = "",
+                Disabled = false
+            },
+            new Navigation
+            {
                 Id = Navigation.Constants.MasterInquiry,
                 ParentId = Navigation.Constants.Inquiries,
                 Title = "MASTER INQUIRY",

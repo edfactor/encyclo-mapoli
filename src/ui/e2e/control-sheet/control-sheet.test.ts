@@ -1,18 +1,18 @@
 import { test, expect } from "@playwright/test";
-import { baseUrl } from "../env.setup";
+import { baseUrl, impersonateRole } from "../env.setup";
 
 
 test.describe("Control Sheet: ", () => {
     test.beforeEach(async ({ page }) => {
         await page.goto(baseUrl);
         await page.waitForLoadState("networkidle");
-        await page.getByRole("combobox", { name: "roles" }).click();
-        await page.getByRole('option', { name: 'Finance-Manager' }).getByRole('checkbox').check();
-        await page.locator("body").click();
-        await page.reload();
-        await page.waitForLoadState("networkidle");
-        await page.getByRole('button').filter({ hasText: /^$/ }).click();
-        await page.getByRole('button', { name: 'Fiscal Close' }).click();
+    await impersonateRole(page, 'Finance-Manager');
+    // Open the side drawer / navigation by clicking the icon button (no accessible name)
+    // This targets the MUI icon button used for the drawer toggle.
+    await page.locator('button.MuiIconButton-root').first().click();
+    // Ensure the Fiscal Close button is present before interacting
+    await page.getByRole('button', { name: 'Fiscal Close' }).waitFor({ state: 'visible', timeout: 10000 });
+    await page.getByRole('button', { name: 'Fiscal Close' }).click();
         await page.getByRole('button', { name: 'Prof Control Sheet' }).click();
     });
 

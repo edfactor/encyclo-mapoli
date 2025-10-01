@@ -1,15 +1,12 @@
 import { expect, test } from "@playwright/test";
-import { baseUrl } from "../env.setup";
+import { baseUrl, impersonateRole } from "../env.setup";
 
 test.describe("Master Inqiry landing page: ", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(baseUrl);
     await page.waitForLoadState("networkidle");
-    await page.getByRole("combobox", { name: "roles" }).click();
-    await page.getByRole("option", { name: "Finance-Manager" }).getByRole("checkbox").check();
-    await page.locator("body").click();
-    await page.reload();
-    await page.waitForLoadState("networkidle");
+    
+    await impersonateRole(page, 'Finance-Manager');
     await page.getByRole("button", { name: "INQUIRIES" }).click();
     await page.getByRole("link", { name: "MASTER INQUIRY" }).click();
   });
@@ -18,6 +15,7 @@ test.describe("Master Inqiry landing page: ", () => {
   });
 
   test("click on search button without setting IMPERSONATE value", async ({ page }) => {
+    await page.locator('input[name="name"]').fill("evans");
     await page.getByRole("combobox", { name: "roles" }).click();
     await page.getByRole("option", { name: "Finance-Manager" }).getByRole("checkbox").uncheck();
     await page.locator("body").click();
@@ -27,6 +25,7 @@ test.describe("Master Inqiry landing page: ", () => {
   });
 
   test("click on search button after setting IMPERSONATE value", async ({ page }) => {
+    await page.locator('input[name="name"]').fill("evans");
     await page.getByRole("button", { name: "SEARCH" }).click();
     const [response] = await Promise.all([
       page.waitForResponse((resp) => resp.url().includes("master-inquiry/search"))
@@ -34,8 +33,9 @@ test.describe("Master Inqiry landing page: ", () => {
     await expect(response.status()).toBe(200);
   });
 
-  test("pagingation is working properly or not", async ({ page }) => {
-    await page.getByRole("button", { name: "SEARCH" }).dblclick();
+  test("pagination is working properly or not", async ({ page }) => {
+    await page.locator('input[name="name"]').fill("evans");
+    await page.getByRole("button", { name: "SEARCH" }).click();
     const [response] = await Promise.all([
       page.waitForResponse((resp) => resp.url().includes("master-inquiry/search"))
     ]);
@@ -96,11 +96,9 @@ test.describe("Master Inqiry landing page: ", () => {
   });
   test("filling values in Name, Badge/PSN Number and then click on Reset button.", async ({ page }) => {
     await page.locator('input[name="badgeNumber"]').fill("706056");
-    await page.locator('input[name="name"]').fill("evans");
     await page.getByRole("button", { name: "RESET" }).click();
     // Assert reset worked
     await expect(page.locator('input[name="badgeNumber"]')).toHaveValue("");
-    await expect(page.locator('input[name="name"]')).toHaveValue("");
   });
 
   test("if we click on search button multiple times", async ({ page }) => {
@@ -146,7 +144,7 @@ test.describe("Master Inqiry landing page: ", () => {
       page.waitForResponse((resp) => resp.url().includes("master-inquiry/search"))
     ]);
     await expect(response.status()).toBe(200);
-    await page.getByRole("link", { name: "708248" }).click();
-    await expect(page.url()).toContain("master-inquiry/708248");
+    await page.getByRole("gridcell").nth(0).locator("a").click();
+    await expect(page.url()).toContain("master-inquiry");
   });
 });

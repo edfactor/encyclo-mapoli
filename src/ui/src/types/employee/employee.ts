@@ -48,6 +48,7 @@ export interface EmployeeDetails {
   missives: number[] | null;
   allocationFromAmount: number;
   allocationToAmount: number;
+  badgesOfDuplicateSsns: number[];
 }
 
 export interface EligibleEmployeesRequestDto extends ProfitYearRequest {
