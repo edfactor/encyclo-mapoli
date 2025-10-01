@@ -314,7 +314,7 @@ public sealed class TerminatedEmployeeReportService
                 ProfitYear = member.ProfitYear,
                 BeginningBalance = member.BeginningAmount,
                 BeneficiaryAllocation = member.BeneficiaryAllocation,
-                DistributionAmount = member.DistributionAmount,
+                DistributionAmount = Math.Abs(member.DistributionAmount), // Display as positive to match READY format
                 Forfeit = member.ForfeitAmount,
                 EndingBalance = member.EndingBalance,
                 VestedBalance = vestedBalance,

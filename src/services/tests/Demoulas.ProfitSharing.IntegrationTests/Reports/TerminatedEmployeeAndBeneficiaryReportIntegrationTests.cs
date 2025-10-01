@@ -454,7 +454,48 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
                 }
             }
 
-            TestOutputHelper.WriteLine($"Test temporarily disabled - Found {differences.Count} differences for analysis.");
+            // ANALYZE YEAR DETAILS DIFFERENCES - Focus on the 1442 year detail issues
+            TestOutputHelper.WriteLine($"\n=== YEAR DETAILS DIFFERENCE ANALYSIS ===");
+            
+            var yearDetailDiffs = differences.Where(d => d.Contains("YearDetails")).Take(50).ToList();
+            TestOutputHelper.WriteLine($"Sample of first 50 year detail differences:");
+            
+            var vestedBalanceDiffs = yearDetailDiffs.Where(d => d.Contains("VestedBalance")).ToList();
+            var dateTermDiffs = yearDetailDiffs.Where(d => d.Contains("DateTerm")).ToList();
+            var ageDiffs = yearDetailDiffs.Where(d => d.Contains("Age")).ToList();
+            var distributionDiffs = yearDetailDiffs.Where(d => d.Contains("DistributionAmount")).ToList();
+            
+            TestOutputHelper.WriteLine($"\nYEAR DETAILS BREAKDOWN:");
+            TestOutputHelper.WriteLine($"- VestedBalance differences: {vestedBalanceDiffs.Count}");
+            TestOutputHelper.WriteLine($"- DateTerm differences: {dateTermDiffs.Count}");
+            TestOutputHelper.WriteLine($"- Age differences: {ageDiffs.Count}");
+            TestOutputHelper.WriteLine($"- DistributionAmount differences: {distributionDiffs.Count}");
+            
+            TestOutputHelper.WriteLine($"\nSAMPLE VESTED BALANCE DIFFERENCES:");
+            foreach (var diff in vestedBalanceDiffs.Take(10))
+            {
+                TestOutputHelper.WriteLine($"  {diff}");
+            }
+            
+            TestOutputHelper.WriteLine($"\nSAMPLE DATE TERM DIFFERENCES:");
+            foreach (var diff in dateTermDiffs.Take(10))
+            {
+                TestOutputHelper.WriteLine($"  {diff}");
+            }
+            
+            TestOutputHelper.WriteLine($"\nSAMPLE AGE DIFFERENCES:");
+            foreach (var diff in ageDiffs.Take(10))
+            {
+                TestOutputHelper.WriteLine($"  {diff}");
+            }
+            
+            TestOutputHelper.WriteLine($"\nSAMPLE DISTRIBUTION AMOUNT DIFFERENCES:");
+            foreach (var diff in distributionDiffs.Take(10))
+            {
+                TestOutputHelper.WriteLine($"  {diff}");
+            }
+
+            TestOutputHelper.WriteLine($"\nTest temporarily disabled - Found {differences.Count} differences for analysis.");
 
             // Let's analyze the missing employees specifically
             TestOutputHelper.WriteLine($"\n=== DETAILED MISSING EMPLOYEE INVESTIGATION ===");
