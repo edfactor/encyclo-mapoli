@@ -2954,5 +2954,103 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         incorrectVestingCount.ShouldBeLessThan(10, "Should have very few or no incorrect vesting percentages");
     }
 
+    [Fact]
+    [Description("PS-1623 : Diagnose BadgePSn formatting differences")]
+    public async Task DiagnoseBadgePSnFormattingIssues()
+    {
+        // Generate SMART system data
+        DateOnly startDate = new DateOnly(2025, 01, 4);
+        DateOnly endDate = new DateOnly(2025, 12, 27);
+
+        var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
+        var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
+        var totalService = new TotalService(DbFactory,
+            calendarService, new EmbeddedSqlService(),
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+        TerminatedEmployeeService smartService = new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService);
+
+        var smartData = await smartService.GetReportAsync(new StartAndEndDateRequest { BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue, SortBy = "name" }, CancellationToken.None);
+
+        // Parse READY system data
+        string expectedText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.R3-QPAY066");
+        var readyData = ParseGoldenFileToDto(expectedText);
+
+        var smartEmployees = smartData.Response.Results.ToList();
+        var readyEmployees = readyData.Response.Results.ToList();
+
+        TestOutputHelper.WriteLine($"SMART employees: {smartEmployees.Count}, READY employees: {readyEmployees.Count}");
+
+        // Analyze BadgePSn patterns
+        var smartBadgeNumbers = smartEmployees.Select(e => new { e.BadgeNumber, e.PsnSuffix, e.BadgePSn }).ToList();
+        var readyBadgeNumbers = readyEmployees.Select(e => new { e.BadgeNumber, e.PsnSuffix, e.BadgePSn }).ToList();
+
+        TestOutputHelper.WriteLine("\n=== SMART BadgePSn Analysis (first 10) ===");
+        foreach (var item in smartBadgeNumbers.Take(10))
+        {
+            TestOutputHelper.WriteLine($"Badge: {item.BadgeNumber}, PsnSuffix: {item.PsnSuffix}, BadgePSn: '{item.BadgePSn}'");
+        }
+
+        TestOutputHelper.WriteLine("\n=== READY BadgePSn Analysis (first 10) ===");
+        foreach (var item in readyBadgeNumbers.Take(10))
+        {
+            TestOutputHelper.WriteLine($"Badge: {item.BadgeNumber}, PsnSuffix: {item.PsnSuffix}, BadgePSn: '{item.BadgePSn}'");
+        }
+
+        // Look for specific pattern where READY has badge like '7039171' and SMART might have '7039171000'
+        var smartDict = smartEmployees.ToDictionary(e => e.BadgePSn, e => e);
+        var readyDict = readyEmployees.ToDictionary(e => e.BadgePSn, e => e);
+
+        // Find potential matches where badge numbers are the same but BadgePSn format differs
+        var potentialMatches = new List<(string readyBadgePsn, string smartBadgePsn, int badgeNumber)>();
+
+        foreach (var readyEmployee in readyEmployees)
+        {
+            if (!smartDict.ContainsKey(readyEmployee.BadgePSn))
+            {
+                // Check if there's a SMART employee with the same badge number but different BadgePSn format
+                var matchingSmartEmployee = smartEmployees
+                    .FirstOrDefault(s => s.BadgeNumber == readyEmployee.BadgeNumber && !readyDict.ContainsKey(s.BadgePSn));
+
+                if (matchingSmartEmployee != null)
+                {
+                    potentialMatches.Add((readyEmployee.BadgePSn, matchingSmartEmployee.BadgePSn, readyEmployee.BadgeNumber));
+                }
+            }
+        }
+
+        TestOutputHelper.WriteLine($"\n=== Potential BadgePSn Format Mismatches (first 10) ===");
+        foreach (var match in potentialMatches.Take(10))
+        {
+            TestOutputHelper.WriteLine($"Badge {match.badgeNumber}: READY '{match.readyBadgePsn}' vs SMART '{match.smartBadgePsn}'");
+        }
+
+        TestOutputHelper.WriteLine($"\nTotal potential format mismatches: {potentialMatches.Count}");
+
+        // Analyze PsnSuffix patterns
+        var smartPsnSuffixes = smartEmployees.Select(e => e.PsnSuffix).Distinct().OrderBy(x => x).ToList();
+        var readyPsnSuffixes = readyEmployees.Select(e => e.PsnSuffix).Distinct().OrderBy(x => x).ToList();
+
+        TestOutputHelper.WriteLine($"\nSMART PsnSuffix values: {string.Join(", ", smartPsnSuffixes)}");
+        TestOutputHelper.WriteLine($"READY PsnSuffix values: {string.Join(", ", readyPsnSuffixes)}");
+
+        // Check if SMART is creating PsnSuffix values that should be 0
+        var smartNonZeroPsnSuffixes = smartEmployees.Where(e => e.PsnSuffix != 0).ToList();
+        TestOutputHelper.WriteLine($"\nSMART employees with non-zero PsnSuffix: {smartNonZeroPsnSuffixes.Count}");
+        
+        if (smartNonZeroPsnSuffixes.Any())
+        {
+            TestOutputHelper.WriteLine("First 5 SMART employees with non-zero PsnSuffix:");
+            foreach (var emp in smartNonZeroPsnSuffixes.Take(5))
+            {
+                TestOutputHelper.WriteLine($"  Badge: {emp.BadgeNumber}, PsnSuffix: {emp.PsnSuffix}, BadgePSn: '{emp.BadgePSn}', Name: {emp.Name}");
+            }
+        }
+
+        // Assertion to satisfy analyzer - this test is diagnostic in nature
+        smartEmployees.ShouldNotBeEmpty("Should have SMART employee data to diagnose");
+        readyEmployees.ShouldNotBeEmpty("Should have READY employee data to compare");
+    }
+
 
 }
