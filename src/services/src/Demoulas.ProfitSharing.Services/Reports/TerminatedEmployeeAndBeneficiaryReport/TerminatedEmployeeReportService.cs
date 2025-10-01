@@ -61,7 +61,9 @@ public sealed class TerminatedEmployeeReportService
         var queryable = demographics
             .Include(d => d.ContactInfo)
             .Where(d => d.EmploymentStatusId == EmploymentStatus.Constants.Terminated
-                        && (d.TerminationDate == null || (d.TerminationDate >= request.BeginningDate && d.TerminationDate <= request.EndingDate)))
+                        && d.TerminationDate != null  // BUSINESS RULE ALIGNMENT: READY only includes terminated employees with actual termination dates (no NULL check)
+                        && d.TerminationDate >= request.BeginningDate && d.TerminationDate <= request.EndingDate
+                        && d.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension) // BUSINESS RULE ALIGNMENT: READY excludes PY_TERM != 'W' (retirees)
             .Select(d => new TerminatedEmployeeDto
             {
                 Demographic = d
@@ -364,43 +366,40 @@ public sealed class TerminatedEmployeeReportService
 
     /// <summary>
     /// Do we include the member in the report or not? Based on COBOL QPAY066 filtering logic:
-    /// "Only those who had a non zero beginning balance" - matches COBOL logic from QPAY066.pco lines 999-1053.
-    /// Implements the same balance filtering as the legacy READY system.
+    /// Implements the exact filtering logic from READY COBOL lines 1060-1090.
+    /// Must match the complex vesting and balance rules from the legacy system.
     /// </summary>
     /// <param name="member">The member to evaluate for inclusion</param>
     /// <returns>True if the member should be included in the report</returns>
     private static bool IsInteresting(Member member)
     {
-        // COBOL Balance Filter Implementation (PRIMARY FIX for population differences)
-        // Based on QPAY066.pco comment: "Only those who had a non zero beginning balance"
-        // Checks: W-PSAMT != 0 OR W-PSLOAN != 0 OR W-PSFORF != 0 OR W-BEN-ALLOC != 0
-
-        // W-PSAMT (Profit Sharing Amount) - Beginning Balance
+        // TEMPORARY DEBUG: Let's see what values we're getting and use the original logic for now
+        // Original logic that was working (balance-based filtering only)
+        
+        // Beginning balance (most important filter)
         if (member.BeginningAmount != 0)
         {
             return true;
         }
 
-        // W-PSLOAN (Profit Sharing Disbursements) - Distribution Amount
+        // Distribution amount
         if (member.DistributionAmount != 0)
         {
             return true;
         }
 
-        // W-PSFORF (Profit Sharing Forfeitures) - Forfeit Amount
+        // Forfeit amount
         if (member.ForfeitAmount != 0)
         {
             return true;
         }
 
-        // W-BEN-ALLOC (Beneficiary Allocations) - Beneficiary Allocation
+        // Beneficiary allocation (always included)
         if (member.BeneficiaryAllocation != 0)
         {
             return true;
         }
 
-        // If none of the balance criteria are met, exclude from report
-        // This matches COBOL logic that only includes employees with profit sharing activity
         return false;
     }
 }

@@ -1,0 +1,1320 @@
+      *@ @(#) MetaWare Technologies GCOS7 IQS-Translater Ver:0.1 . 
+      **********************************************************/
+      ** QPAY066                     PAY-PROFIT-VIEW           */
+      ** WRITTEN BY : T. SCANLON                               */
+      ** REWRITTEN  : R. MAISON                                */
+      ** WRITTEN FOR: D. MULLIGAN                              */
+      ** WRITTEN ON : 911104                                   */
+      ** REWRITTEN  : 961230                                   */
+      ** OBJECTIVE  : TO PRINT THE PROFIT SHARING INFORMATION  */
+      **              FOR THOSE EMPLOYEES THAT HAVE RECENTLY   */
+      **              LEFT THE COMPANY.  THIS QRY READS THE    */
+      **              PAYROLL MASTER FILE FOR ALL EMPLOYEES    */
+      **              THAT WERE TERMINATED WITH THE SELECTED   */
+      **              DATES.  IT PRINT THEIR PROFIT SHARING    */
+      **              DATA AS WELL AS THEIR AGE.               */
+      **              REPORTED ARE THOSE TERMINATED WITHIN THE */
+      **              SPECIFIED START/END DATES THAT DO NOT    */
+      **              HAVE A TERM CODE = TO W                  */
+      **                                                       */
+      **  REWRITTEN BY PETER FARRAR ON 10/27/94 TO ADD THE     */
+      **  THE PROFIT SHARING DATA BASE PROFT-A1                */
+      **                                                       */
+      **  12-30-96  B MAISON - CHANGED TO PERMIT ACCURATE AGE  */
+      **                       CALCULATION AFTER THEY YEAR 2000*/
+      ** 05/07/97  B MAISON  THIS PROGRAM WAS CHANGED AS PART OF*/
+      **                      THE YEAR 2000 CONVERSION PROJECT. */
+      **                     DATE HANDLING HAS BEEN ALTERED     */
+      **                     WHERE APPROPRIATE TO INSERT A      */
+      **                     FORCED CENTURY OF 20 FOR YEARS < 17*/
+      **                     AND 19 FOR YEARS > 16. MASTER PAY- */
+      **                     ROLL BIRTH DATE CHANGED TO INCLUDE */
+      **                     A CENTURY IN PY-BCC, FULL BIRTH    */
+      **                     DATE IS PY-BCC PY-BIRTH            */
+      **                     (PY-FULL-BIRTH-DATEN) REFERENCE TO */
+      **                     CLIENTS OTHER THAN 01 AND 31 HAS   */
+      **                     BEEN REMOVED AND CODE HANDLING     */
+      **                     MAINE HAS EITHER BEEN ACTIVATED OR */
+      **                     ADDED.                             */
+      **                                                        */
+      ** 02-15-99 B MAISON   ADDED CODE TO ADD CONTRIBUTIONS AND*/
+      **                     EARNINGS FOR PROFIT-CODE 2         */
+      ** 02/18/03  DPRUGH   ADDED NEW VESTING PROCEDURE FOR 65+ */
+      **                    EMPLOYEES WITH MORE THAN 5 YRS SINCE*/
+      **                    THEIR INITIAL CONTRIBUTION OR TERM  */
+      **                    CODE = "Z"                          */
+      **                                                        */
+      ** 06-02-2004  B.BRADY   PROJ --> 8165                    */
+      **                       CORRECT PROGRAM VESTED AMT ON RPT*/
+      **                       IF PERSON IS OVER 65 AND 100%    */
+      **                       VESTED.                          */
+      **                                                        */
+      ** 11/09/05    DPrugh    Proj #10312                      */
+      **             Correct the program to extract  the correct*/
+      **             people. All Terminated employees except    */
+      **             retirees (code 'W') who had a termination  */
+      **             date between the 2 dates entered, should be*/
+      **             on the report. Only those who had a non zero*/
+      **             beginning balance.                         */
+      **             Anyone not vested (less than 3 years) will */
+      **             be on the QPAY066A report.                 */
+      **             Removed Contributions, Earnings and any    */
+      **             Forfeiture Contributions from the totals.  */    
+      **             Documented some of the sections for future */
+      **             debugging.                                 */
+      **             ** Do not process any transactions after   */
+      **             the year that was entered. This change will*/
+      **             enable the program to run early in the year*/
+      **             and not pick up recent transactions for the*/
+      **             new year that should not be processed.     */
+      **                                                        */
+      ** DPrugh      Military Profit Sharing Entries will now be*/
+      ** 11/30/05    indicated as CCYY.1 records.               */
+      ** PROJ #9492  These entries will be entered with specific*/
+      **             entry dates corresponding to when they are */
+      **             to be calculated.                          */
+      **             (PROFIT-MDTE and PROFIT-YDTE)              */
+      **             If the entry date is 2004 it is a 2004.0   */
+      **             record and should be counted as a year of  */
+      **             vesting. If the entry date is 1204 it is an*/
+      **             additional (supplemental) record for 2004  */
+      **             and  should not be counted as a year of    */
+      **             vesting.                                   */
+      ** R Maison    Modified existing code to conform to new   */
+      ** 10/09/07    profit sharing rules and vesting schedules */
+      ** PROJ #12548                                            */
+      ** Task                                                   */
+      **                                                                       *
+      ** DPrugh      Made changes to mask the SSN with zeroes leaving          *
+      ** 03/24/08    only the last 4 digits. a SSN that was 123456789          *
+      ** P#13152     will now show as 000006789                                *
+      **                                                                       *
+      ** Ken Heavey  Project #13991  - Missing END-IF where     */
+      **                             W-ENROLLED is being set.   */
+      **                                                        */
+      ** DPrugh   p#34834 changed disbursements to ETVA ("9" records) 
+      ** 01/13/09         to be subtracted instead of added. they are payments.
+      **                                                        */
+      ** 09/18/09  DPrugh      P#14096 Added PAYBEN file SQL    */
+      **                       section to process beneficiaries */
+      **                                                        */
+      ** 12/23/2009 Diane Sawyer P#14096  fixed bug when closing*/
+      **              temp-file twice without opening it;       */
+      **              forced non-employees to print on report   */
+      **              no matter what their balance is;          */
+      **              added py_cln = 1 to cursors where it was  */
+      **              missing.
+      ** 05/26/10 Diane Sawyer P#15226 changed W-PSCONT PIC S9(2)*/
+      **              to  W-PSCONT  PIC  S9(8)V9(2) to correct  */
+      **              calculation truncation problem.           */
+      **              Increased the following fields to         */
+      **              pic S9(7)V9(2) to accomodate database     */
+      **              field size increases:                     */
+      **              W-PSFORF R2-PSFORF W-PSEARN.              */
+      **              Also commented code to get SSN from       */
+      **              SOC_SEC_REC because it's too inefficient. */
+      **              Oracle allows access directly to          */
+      **              PROFIT_DETAIL & PROFIT_SS_DETAIL and added*/
+      **              year to where clause cursors.             */
+      **              Also added code to split out beneficiary  */
+      **              transactions on the report; and expanded  */
+      **              and renamed emp # on extract files for    */
+      **              handling PSN                              */
+      ** 10/04/10 DPrugh  P#15226 Added py-ps-amt to pyben-psamt*/
+      **              if the beneficiary if an employee with a  */
+      **              ps balance                                */
+      ** 3/8/2016  N.Ferrin Project #19651                      */
+      **              Use 50 for century cutoff                 */
+      ** 6/22/2021 D.Sawyer MAIN-1280 replaced payr with        */                     */
+      **              payprofit and demographics; replaced emp  */
+      **              with 7 digit badge; removed client        */
+      ** 12/2/2021 D.Sawyer MAIN-1479  fix term date on report  */
+      ** 10/23/2023 N.Ferrin MAIN-1956 Add executive hrs and dol*/
+      ** 6/20/2024  N.Ferrin MAIN-2061  Create a csv file but   */ 
+      **            use a switch in PROF-TERM.ksh to determine  */
+      **            when it is printed                          */
+      ** 4/21/2025  N.F.Alvarado MAIN-2177 add badge/PSN and    */
+      **            terminated date to csv                      */
+      ***********************************************************/
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. QPAY066.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT TEMP-FILE ASSIGN TO "TEMPFILE1"
+                  ORGANIZATION LINE SEQUENTIAL.
+           SELECT NEXT-FILE ASSIGN TO "TEMPFILE2"
+                  ORGANIZATION LINE SEQUENTIAL.
+           SELECT impr ASSIGN TO "PRINTER"
+                  ORGANIZATION LINE SEQUENTIAL.
+           SELECT S-TEMP-FILE ASSIGN TO "S_TEMP_FILE".
+
+           SELECT CSV-FILE ASSIGN To "CSVFL"
+                  ORGANIZATION LINE SEQUENTIAL.
+
+       DATA DIVISION.
+       FILE SECTION.
+
+       FD  TEMP-FILE
+            DATA RECORD IS TEMPFILE-REC.
+
+       01  TEMP-FILE-REC. 
+           02 R1-BADGE-PSN-NP    PIC  9(11).
+           02 R1-SSN             PIC  9(9) .
+           02 R1-D-O-BIRTH       PIC  9(8) .
+           02 R1-PHOURS          PIC  S9(4)V9(2) .
+           02 R1-PS-AMT          PIC  S9(7)V9(2) . 
+           02 R1-PS-VAMT         PIC  S9(7)V9(2) .
+           02 R1-ST-CD           PIC  X(1).
+           02 R1-EMPLOYEE-NAME   PIC  X(25).
+      ******** adding
+           02 R1-FNAME           PIC  X(25).
+           02 R1-MINIT           PIC  X.
+           02 R1-LNAME           PIC  X(25).
+      *********
+           02 R1-PS-YEARS        PIC  9(2). 
+           02 R1-D-O-TERM        PIC  9(8) .
+           02 R1-PDOLLARS        PIC  S9(6)V9(2) . 
+           02 R1-TERM            PIC  X(1).
+           02 R1-Y2K-BIRTH       PIC  9(8).
+           02 R1-PROF-ZEROCONT   PIC  9(2) .
+           02 R1-PS-ENROLLED     PIC 9(2).
+           02 R1-PS-ETVA      PIC S9(08)V99.
+           02 R1-BEN-ALLOC    PIC S9(7)V99.
+       
+       FD  NEXT-FILE
+            DATA RECORD IS NEXT-FILE-REC.
+
+       01  NEXT-FILE-REC. 
+           02 R2-BADGE-PSN-NP    PIC  9(11).
+           02 R2-EMPLOYEE-NAME   PIC  X(25).
+      ******** adding
+           02 R2-FNAME           PIC  X(25).
+           02 R2-MINIT           PIC  X.
+           02 R2-LNAME           PIC  X(25).
+      *********
+           02 R2-Y2K-BIRTH       PIC  9(8).
+           02 R2-PSHRS           PIC  S9(4)V9(2) .
+           02 R2-PSDOLLARS       PIC  S9(6)V9(2) .
+           02 R2-SSN             PIC  9(9) .
+           02 R2-D-O-TERM        PIC  9(8) .
+           02 R2-TERM            PIC  X(1).
+           02 R2-PSLOAN          PIC  S9(7)V9(2).
+           02 R2-PSAMT           PIC  S9(7)V9(2) .             
+           02 R2-PSVAMT          PIC  S9(7)V9(2) .
+           02 R2-PSFORF          PIC  S9(8)V9(2).
+           02 R2-PSDOL           PIC  S9(7)V9(2).
+           02 R2-PS-YEARS        PIC  9(2) .
+           02 R2-VEST            PIC  S9(7)V9(2).
+           02 R2-PROF-ZEROCONT   PIC  9(2) .
+           02 R2-PS-ENROLLED     PIC 9(2).
+           02 R2-PS-ETVA      PIC S9(08)V99.
+      * P#15226
+           02 R2-BEN-ALLOC       PIC S9(7)V99.
+           
+       SD  S-TEMP-FILE
+           DATA RECORD IS S-TEMP-FILE-REC.
+
+       01  S-TEMP-FILE-REC.
+           02 S-BADGE-PSN-NP    PIC  9(11).
+           02 S-SSN             PIC  9(9) .
+           02 S-D-O-BIRTH       PIC  9(8) .
+           02 S-PHOURS          PIC  S9(4)V9(2) .
+           02 S-PS-AMT          PIC  S9(7)V9(2) .  
+           02 S-PS-VAMT         PIC  S9(7)V9(2) .
+           02 S-ST-CD           PIC  X(1).
+           02 S-EMPLOYEE-NAME   PIC  X(25).
+      ******** adding
+           02 S-FNAME           PIC  X(25).
+           02 S-MINIT           PIC  X.
+           02 S-LNAME           PIC  X(25).
+      *********
+           02 S-PS-YEARS        PIC  9(2).
+           02 S-D-O-TERM        PIC  9(8) .
+           02 S-PDOLLARS        PIC  S9(6)V9(2) .  
+           02 S-TERM            PIC  X(1).
+           02 S-Y2K-BIRTH       PIC  9(8).
+           02 S-PROF-ZEROCONT   PIC  9(2) .           
+           02 S-PS-ENROLLED     PIC 9(2).
+           02 S-PS-ETVA         PIC S9(08)V99.
+           02 S-BEN-ALLOC       PIC S9(7)V99.
+       
+       FD  impr
+            REPORT IS REP-QPAY066.
+
+       FD  CSV-FILE
+           LABEL RECORDS ARE STANDARD.
+       01  CSV-REC          PIC X(200).
+
+       WORKING-STORAGE SECTION.
+
+       01 ssn-mask.
+           03  ssn-first-5  pic 9(5) value zero.
+           03  ssn-last-4   pic 9(4) value zero.
+       01 ssn-masked redefines ssn-mask pic 9(9).
+       01 ssn-masked-x redefines ssn-mask pic x(9).
+
+       01  WS-LNAME           PIC X(25).
+       01  WS-FNAME           PIC X(25).
+       01  WS-MINIT           PIC X.
+       01  WS-FNAME-INIT      PIC X(30).
+       01  WS-SSN-FULL        PIC 9(9).
+       01  WS-TOT-VESTED      PIC ---,---,--9.99.
+       01  WS-AMOUNT redefines WS-TOT-VESTED  PIC X(14).
+       01  WS-EDITED-AMT      PIC X(14).
+       01  WS-SPACES          PIC 99.
+       01  WS-SIZE            PIC 99.
+       01  WS-START           PIC 99.
+       01  WS-CSV-WRITTEN     PIC 9(6) VALUE 0.
+ 
+       01  W-DATEPRINT PIC X(12).
+       01  W-DATE PIC X(6).
+       01  W-CHOICE PIC 9.
+       01  W-FDLY PIC 9(8).
+       01  W-FDLYX PIC X(8) REDEFINES W-FDLY.
+       01  W-FDLY-FRMT PIC X(10).
+       01  W-YDATEX.
+           02  W-YDATE PIC 9(4)V9(1).
+       01  w-ydate-split redefines w-ydatex.
+           02  w-ydate-first-4    pic 9999.
+           02  w-ydate-extension  pic 9.
+       01  Ws-profit-year PIC 9(4)V9(1).
+       01  ws-profit-year-split redefines ws-profit-year.
+           02  ws-profit-year-first-4    pic 9999.
+           02  ws-profit-year-extension  pic 9.
+       01  W-CHECKDATE PIC 9(8). 
+       01  W-CHAR4  PIC X(6).    
+       01  W-CHAR   PIC X(6).
+       01  W-SSNX.
+           02 W-SSN PIC 9(9).
+       01  W-SSNX0  PIC X(9) VALUE SPACE .
+       01  W-LDLY PIC 9(8).
+       01  W-LDLYX PIC X(8) REDEFINES W-LDLY.
+       01  W-LDLY-FRMT PIC X(10).
+       01  W-PSAMT  PIC  S9(7)V9(2).
+       01  W-PSVAMT  PIC  S9(7)V9(2).
+       01  W-PSFORF PIC  S9(8)V9(2).
+       01  W-PSDOL PIC  S9(7)V9(2).
+       01  W-VEST PIC  S9(7)V9(2).
+       01  W-VESTPERT PIC Z9(2).
+       01  W-ENROLLED PIC Z.
+       01  W-MONTH PIC 9(2).
+       01  W-YEAR PIC  9(2).
+       01  W-PSLOAN  PIC  S9(7)V9(2).
+       01  W-PSCONT  PIC  S9(8)V9(2).
+       01  W-PSDOLLARS PIC S9(6)V9(2) .
+       01  W-PSHRS PIC S9(4)V9(2) . 
+       01  W-PSEARN  PIC  S9(8)V9(2).
+       01  W-BEN-ALLOC PIC S9(7)V99.
+       01  WS-D-O-TERM  PIC X(8).
+       01  W-SYSDATE  PIC 9(8).
+       01  W-TERMDATE PIC 9(8).
+       01  W-Y2K-BIRTH PIC 9(8). 
+       01  W-WKYR  PIC 9(4).
+       01  W-WKMO  PIC 9(2).
+       01  W-WKDA  PIC 9(2).
+       01  W-BWKYR PIC 9(4).
+       01  W-BWKMO PIC 9(2).
+       01  W-BWKDA PIC 9(2).
+       01  W-AGE   PIC 9(4).
+
+       01  W-8-EARN          PIC S9(8)V9(2).
+       01  W-9-FORF          PIC S9(8)V9(2).
+       01  INCNT             PIC 9(8) VALUE 0.
+
+ 
+      *
+       01  W-DISPLAY-CNT PIC 9(10).
+       01  W-TOT-VESTINGS PIC S9(8)V9(2).
+       01  W-TOT-LOANS PIC  S9(8)V9(2).
+       01  W-TOT-FORF PIC  S9(8)V9(2).
+       01  W-TOT-PROF PIC  S9(8)V9(2).
+       01  W-TOT-BALLOC PIC S9(8)V9(2).
+      
+       01  PARAGRAPH-ABORT PIC X(50).
+
+      * 10/09/07 #12548
+      *  PY-PS-ENROLLED VALUE 1 = ENROLLED     = OLD-VESTING-SCHEDULE
+      *  PY-PS-ENROLLED VALUE 2 = NEW ENROLLED = NEW-VESTING-SCHEDULE
+      *  PY-PS-ENROLLED VALUE 3 = FORFEIT      = OLD FORFEIT RULES
+      *  PY-PS-ENROLLED VALUE 4 = FORFEIT      = NEW FORFEIT RULES
+
+       01  VST-IDX                 PIC 9(01) VALUE 0.
+       01  OLD-VESTING-SCHEDULE.
+           03  OV-1YRS             PIC 9(03) VALUE 0.
+           03  OV-2YRS             PIC 9(03) VALUE 0.
+           03  OV-3YRS             PIC 9(03) VALUE 020.
+           03  OV-4YRS             PIC 9(03) VALUE 040.
+           03  OV-5YRS             PIC 9(03) VALUE 060.
+           03  OV-6YRS             PIC 9(03) VALUE 080.
+           03  OV-7PLUSYRS         PIC 9(03) VALUE 100.
+       01  OV-PRCT-TABLE REDEFINES OLD-VESTING-SCHEDULE.
+           03  OV-PRCT OCCURS 7 TIMES  PIC 9(03).
+
+       01  NEW-VESTING-SCHEDULE.
+           03  NV-1YRS             PIC 9(03) VALUE 0.
+           03  NV-2YRS             PIC 9(03) VALUE 020.
+           03  NV-3YRS             PIC 9(03) VALUE 040.
+           03  NV-4YRS             PIC 9(03) VALUE 060.
+           03  NV-5YRS             PIC 9(03) VALUE 080.
+           03  NV-6PLUSYRS         PIC 9(03) VALUE 100.
+       01  NV-PRCT-TABLE REDEFINES NEW-VESTING-SCHEDULE.
+           03  NV-PRCT OCCURS 6 TIMES  PIC 9(03).
+
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+           COPY "SQLCODE.cpy".
+           EXEC SQL BEGIN DECLARE SECTION END-EXEC.
+           EXEC SQL INCLUDE "HOST-RECORD-PROF-DET.COB" END-EXEC.
+           EXEC SQL INCLUDE "INDICATOR-RECORD-PROF-DET.COB" END-EXEC.
+           EXEC SQL INCLUDE "HOST-RECORD-PROF-SS-DET.COB" END-EXEC.
+           EXEC SQL INCLUDE "INDICATOR-RECORD-PROF-SS-DET.COB" END-EXEC.
+           EXEC SQL INCLUDE "HOST-RECORD-PAYBEN.COB" END-EXEC.
+           EXEC SQL INCLUDE "INDICATOR-RECORD-PAYBEN.COB" END-EXEC.
+
+       01  WSSN           PIC 9(9).
+       01  H-YDATE-1ST-4  PIC 9(4). 
+       01  H-PAYBEN-BADGE PIC 9(7).
+       01  H-TEDAT        PIC 9(8).
+       01  H-STA-CD       PIC X(1).
+       01  H-FIRST-DAY    PIC 9(8).
+       01  H-LAST-DAY     PIC 9(8).
+       01  H-PS-AMT       PIC S9(7)V99.
+
+       01  H-DEMOGRAPHICS.
+           03 H-DEM-BADGE       PIC 9(7).           
+           03 H-DEM-SSN         PIC 9(9).
+           03 H-PY-NAM          PIC X(40).
+           03 H-PY-FNAME        PIC X(25).
+           03 H-PY-MNAME        PIC X(25).
+           03 H-PY-LNAME        PIC X(25).
+           03 H-PY-SCOD         PIC X.
+           03 H-PY-STOR         PIC 9(3).
+           03 H-PY-TERM         PIC X.
+           03 H-PY-DP           PIC 9.
+           03 H-PY-CLA          PIC 9(3).
+           03 H-PY-ADD          PIC X(30).
+           03 H-PY-CITY         PIC X(25).
+           03 H-PY-STATE        PIC X(2).
+           03 H-PY-ZIP          PIC 9(5).
+           03 H-PY-FULL-DT      PIC 9(8).
+           03 H-PY-NEW-EMP      PIC X.
+           03 H-PY-DOB          PIC 9(8).
+           03 H-PY-HIRE-DT      PIC 9(8).
+           03 H-PY-TERM-DT      PIC 9(8).
+           03 H-PY-REHIRE-DT    PIC 9(8).
+           03 H-PY-FREQ         PIC X.
+ 
+       01  H-PAYPROFIT.
+           03 H-PY-PH            PIC  9(4)V99.
+           03 H-PY-PD            PIC S9(6)V99. 
+           03 H-PY-PS-ENROLLED   PIC  9(2).
+           03 H-PY-PS-YEARS      PIC  9(2).
+           03 H-PY-PS-AMT        PIC S9(7)V99.
+           03 H-PY-PH-LASTYR     PIC  9(5)V99.
+           03 H-PY-PROF-NEWEMP   PIC  9(2).
+           03 H-PY-PS-VAMT       PIC S9(7)V99.
+           03 H-PY-PROF-ZEROCONT PIC 9(2).
+           03 H-PY-PS-ETVA       PIC S9(8)V99.
+           03 H-PY-PH-EXEC       PIC S9(4)V99.
+           03 H-PY-PD-EXEC       PIC S9(6)V99.
+
+       
+           EXEC SQL END   DECLARE SECTION END-EXEC.
+
+       REPORT SECTION.
+       RD REP-QPAY066
+           COPY REP-QPAY066.
+
+       PROCEDURE DIVISION.
+           ready trace.
+       MAIN-QPAY066.
+      *====================== MAIN ============================*
+           PERFORM INIT THRU END-INIT.
+           PERFORM RETRIEVE-PAYPROFIT-REC THRU
+                   END-RETRIEVE-PAYPROFIT-REC. 
+           PERFORM SORT-TEMP-FILE   THRU END-SORT-TEMP-FILE. 
+           PERFORM READ-NEXT-FILE   THRU END-READ-NEXT-FILE.
+           PERFORM ENDP THRU END-ENDP.
+      *========================================================*
+       INIT SECTION.
+       INIT-STEP.
+           MOVE 1 TO W-CHOICE.
+           CALL "IQS-DATE" USING W-DATEPRINT W-CHOICE.
+           
+           MOVE 0 TO W-DISPLAY-CNT 
+           
+           DISPLAY "ENTER FIRST DAY OF LAST YEAR - CCYYMMDD"
+           ACCEPT W-FDLY  
+           IF W-FDLY > 0 THEN
+              IF W-FDLY < 19000000 THEN
+               IF W-FDLY > 500000 THEN
+                   COMPUTE W-FDLY = W-FDLY + 19000000
+               ELSE
+                   COMPUTE W-FDLY = W-FDLY + 20000000
+               END-IF
+              END-IF
+           ELSE
+               MOVE 0 TO W-FDLY 
+           END-IF
+
+           DISPLAY "W-FDLY = " W-FDLY.
+           
+           DISPLAY "ENTER LAST  DAY OF LAST YEAR - CCYYMMDD"
+           ACCEPT W-LDLY  
+           IF W-LDLY > 0 THEN
+              IF W-LDLY < 19000000 THEN
+               IF W-LDLY > 500000 THEN
+                   COMPUTE W-LDLY = W-LDLY + 19000000
+               ELSE
+                   COMPUTE W-LDLY = W-LDLY + 20000000
+               END-IF
+              END-IF
+           ELSE
+               MOVE 0 TO W-LDLY 
+           END-IF
+           DISPLAY "W-FDLY = " W-LDLY.
+           MOVE W-FDLYX(1:4) TO W-FDLY-FRMT(7:4).
+           MOVE W-FDLYX(5:2) TO W-FDLY-FRMT(1:2).
+           MOVE W-FDLYX(7:2) TO W-FDLY-FRMT(4:2).
+           MOVE "/" TO W-FDLY-FRMT(3:1) W-FDLY-FRMT(6:1).
+           MOVE W-LDLYX(1:4) TO W-LDLY-FRMT(7:4).
+           MOVE W-LDLYX(5:2) TO W-LDLY-FRMT(1:2).
+           MOVE W-LDLYX(7:2) TO W-LDLY-FRMT(4:2).
+           MOVE "/" TO W-LDLY-FRMT(3:1) W-LDLY-FRMT(6:1).
+           DISPLAY W-FDLY-FRMT. 
+           DISPLAY W-LDLY-FRMT.
+      *
+
+           DISPLAY "ENTER PROFIT SHARING YEAR - EX. 2000.0 "
+           ACCEPT W-YDATE 
+
+           DISPLAY "W-YDATE = " W-YDATE
+
+           ACCEPT W-DATE FROM DATE
+           MOVE W-DATE(3:2) TO W-MONTH
+           MOVE W-DATE(1:2) TO W-YEAR
+           IF W-YDATE = 9999.9 THEN
+              IF W-MONTH < 4 THEN
+                 COMPUTE W-YDATE = W-YEAR - 1
+              ELSE
+                 MOVE W-YEAR TO W-YDATE 
+              END-IF
+           END-IF
+           
+           MOVE W-YDATEX(1:4) TO W-CHAR(1:4).
+           MOVE "." TO  W-CHAR(5:1).
+           MOVE W-YDATE(5:1) TO W-CHAR(6:1).
+           MOVE W-YDATE-FIRST-4 TO H-YDATE-1ST-4.
+
+       END-INIT.    
+           EXIT.
+      ** --------------------------------------------------------------- */
+      ** Extract all terminated (not 'W') employees from client 1
+      **
+           
+       RETRIEVE-PAYPROFIT-REC SECTION.
+       INIT-RETRIEVE-PAYPROFIT-REC.
+           OPEN OUTPUT TEMP-FILE
+           MOVE W-FDLY TO H-FIRST-DAY.
+           MOVE W-LDLY TO H-LAST-DAY.
+           EXEC SQL
+              DECLARE  DEMOGRAPHICS_curs CURSOR FOR
+              SELECT  
+                   NVL(DEM_BADGE,0)
+                 , NVL(DEM_SSN,0)
+                 , NVL(PY_NAM,' ')
+                 , NVL(PY_FNAME,' ')
+                 , NVL(PY_MNAME,' ')
+                 , NVL(PY_LNAME,' ')
+                 , NVL(PY_SCOD,' ')
+                 , NVL(PY_STOR,0)
+                 , NVL(PY_TERM,' ')
+                 , NVL(PY_DP,0)
+                 , NVL(PY_CLA,0)
+                 , NVL(PY_ADD,' ')
+                 , NVL(PY_CITY,' ')
+                 , NVL(PY_STATE,' ')
+                 , NVL(PY_ZIP,0)
+                 , NVL(PY_FREQ,' ')
+                 , NVL(PY_FULL_DT,0)
+                 , NVL(PY_NEW_EMP,' ')
+                 , NVL(PY_DOB,0)
+                 , NVL(PY_HIRE_DT,0)
+                 , NVL(PY_TERM_DT,0)
+                 , NVL(PY_REHIRE_DT,0)
+              FROM  DEMOGRAPHICS 
+              WHERE PY_SCOD = 'T' AND PY_TERM != 'W' 
+                AND PY_TERM_DT BETWEEN  :H-FIRST-DAY AND :H-LAST-DAY                                
+           END-EXEC.
+
+           EXEC SQL
+             OPEN DEMOGRAPHICS_curs          
+           END-EXEC.
+
+           IF SQLCODE < 0
+            MOVE "open-du-cursor-DEMOGRAPHICS-curs" 
+            TO PARAGRAPH-ABORT
+            GO TO ABORT-SQL
+           END-IF.
+
+       ITER-RETRIEVE-PAYPROFIT-REC.
+           INITIALIZE H-DEMOGRAPHICS
+                      H-PAYPROFIT.
+
+           EXEC SQL
+            FETCH  DEMOGRAPHICS_curs INTO
+                 :H-DEM-BADGE                 
+                ,:H-DEM-SSN         
+                ,:H-PY-NAM          
+                ,:H-PY-FNAME
+                ,:H-PY-MNAME
+                ,:H-PY-LNAME
+                ,:H-PY-SCOD         
+                ,:H-PY-STOR         
+                ,:H-PY-TERM         
+                ,:H-PY-DP           
+                ,:H-PY-CLA          
+                ,:H-PY-ADD          
+                ,:H-PY-CITY         
+                ,:H-PY-STATE        
+                ,:H-PY-ZIP  
+                ,:H-PY-FREQ        
+                ,:H-PY-FULL-DT      
+                ,:H-PY-NEW-EMP      
+                ,:H-PY-DOB          
+                ,:H-PY-HIRE-DT      
+                ,:H-PY-TERM-DT    
+                ,:H-PY-REHIRE-DT  
+           END-EXEC.
+
+           IF SQLCODE < 0
+              MOVE "fetch-du-cursor-DEMOGRAPHICS-curs" 
+              TO PARAGRAPH-ABORT
+              GO TO ABORT-SQL
+           END-IF.
+
+           IF SQLCODE = SQL-NO-ROWS-FOUND
+              GO TO E-RETRIEVE-PAYPROFIT-REC
+           END-IF.
+
+    **DS       MOVE  H-PY-TERM-DT TO W-TERMDATE.
+
+      ** ----------------------------------------------------------
+      ** Make sure the termination date was within the dates entered.
+      **  Also check for termination code Z (Deceased) 
+      **
+
+           EXEC SQL
+              SELECT
+                  NVL(PY_PH,0)
+                , NVL(PY_PD,0)
+                , NVL(PY_PS_ENROLLED,0)
+                , NVL(PY_PS_YEARS,0)
+                , NVL(PY_PS_AMT,0)
+                , NVL(PY_PH_LASTYR,0)    
+                , NVL(PY_PROF_NEWEMP,0)  
+                , NVL(PY_PS_VAMT,0)
+                , NVL(PY_PROF_ZEROCONT,0)
+                , NVL(PY_PROF_ETVA,0)
+                , NVL(PY_PH_EXEC,0)
+                , NVL(PY_PD_EXEC,0)
+              INTO 
+                 :H-PY-PH 
+                ,:H-PY-PD          
+                ,:H-PY-PS-ENROLLED  
+                ,:H-PY-PS-YEARS     
+                ,:H-PY-PS-AMT       
+                ,:H-PY-PH-LASTYR    
+                ,:H-PY-PROF-NEWEMP  
+                ,:H-PY-PS-VAMT  
+                ,:H-PY-PROF-ZEROCONT    
+                ,:H-PY-PS-ETVA      
+                ,:H-PY-PH-EXEC
+                ,:H-PY-PD-EXEC
+              FROM PAYPROFIT
+                 WHERE PAYPROF_BADGE = :H-DEM-BADGE
+           END-EXEC.
+ 
+           IF SQLCODE = SQL-NO-ROWS-FOUND
+              DISPLAY " NO PAYPROFIT RECORD FOUND FOR DEM-BADGE " 
+                    H-DEM-BADGE
+           ELSE 
+              IF SQLCODE NOT = 0
+                DISPLAY "SELECT PAYPROFIT FOR DEM-BADGE " H-DEM-BADGE
+                  " SQLCODE " SQLCODE
+                 MOVE "SELECT PAYPROFIT FOR DEM-BADGE "  
+                    TO PARAGRAPH-ABORT
+                 GO TO ABORT-SQL
+              END-IF
+           END-IF.
+
+           MOVE H-PY-DOB TO W-Y2K-BIRTH.
+      ** ----------------------------------------------------------
+      **  check for termination code Z (Deceased) 
+           IF H-PY-TERM = "Z" THEN 
+              MOVE 6 TO H-PY-PROF-ZEROCONT
+           END-IF. 
+           MOVE H-DEM-BADGE TO R1-BADGE-PSN-NP.
+           MOVE H-DEM-SSN TO R1-SSN.
+           MOVE H-PY-DOB TO R1-D-O-BIRTH.
+      **           MOVE H-PY-PH TO R1-PHOURS.
+           COMPUTE R1-PHOURS = H-PY-PH + H-PY-PH-EXEC.
+           MOVE H-PY-PS-AMT TO R1-PS-AMT.
+           MOVE H-PY-PS-VAMT TO R1-PS-VAMT.
+           MOVE H-PY-SCOD TO R1-ST-CD.
+           MOVE H-PY-NAM TO R1-EMPLOYEE-NAME.
+      ******** adding
+           MOVE H-PY-FNAME To R1-FNAME.
+           MOVE H-PY-MNAME(1:1) TO R1-MINIT
+           MOVE H-PY-LNAME To R1-LNAME
+      *******    
+           MOVE H-PY-PS-YEARS TO R1-PS-YEARS.
+           MOVE H-PY-TERM-DT TO R1-D-O-TERM.
+      **           MOVE H-PY-PD TO R1-PDOLLARS.
+           COMPUTE R1-PDOLLARS = H-PY-PD + H-PY-PD-EXEC.
+           MOVE H-PY-TERM TO R1-TERM.
+           MOVE W-Y2K-BIRTH TO R1-Y2K-BIRTH.
+           MOVE H-PY-PROF-ZEROCONT TO R1-PROF-ZEROCONT.
+           MOVE H-PY-PS-ENROLLED TO R1-PS-ENROLLED.
+           MOVE H-PY-PS-ETVA  TO R1-PS-ETVA.
+           WRITE TEMP-FILE-REC.
+           COMPUTE INCNT= INCNT + 1. 
+             
+           GO TO ITER-RETRIEVE-PAYPROFIT-REC.
+
+
+       E-RETRIEVE-PAYPROFIT-REC.
+           EXEC SQL
+                CLOSE DEMOGRAPHICS_curs
+           END-EXEC.
+
+           IF SQLCODE < 0
+              MOVE "close-du-cursor-DEMOGRAPHICS-curs"
+                    TO PARAGRAPH-ABORT
+              GO TO ABORT-SQL
+           END-IF.
+
+       GET-PAYBEN.
+      **  P#15226   Original code will not get beneficiaries that are employees
+      **            Don wants to get all beneficiaries - not just  non-employee
+      **            beneficiaries.
+      **     EXEC SQL
+      **        DECLARE  TEMP_PAYBEN_curs CURSOR FOR
+      **        SELECT * FROM PAYBEN P 
+      **        WHERE PYBEN_PAYSSN IN  
+      **       (SELECT Q.PYBEN_PAYSSN FROM PAYBEN Q 
+      **        MINUS 
+      **       SELECT PR.PY_SSN FROM PAYR PR
+      **        WHERE PR.PY_CLN = 01)
+      **     END-EXEC.
+           EXEC SQL
+              DECLARE  TEMP_PAYBEN_curs CURSOR FOR
+              SELECT * FROM PAYBEN P 
+           END-EXEC.
+
+           EXEC SQL
+             OPEN TEMP_PAYBEN_curs
+           END-EXEC.
+
+           IF SQLCODE < 0
+            MOVE "open-du-cursor-TEMP-PAYBEN-curs" TO PARAGRAPH-ABORT
+            GO TO ABORT-SQL
+           END-IF.
+
+       ITER-WRITE-PAYBEN-TEMP-FILE.
+
+            EXEC SQL
+             FETCH  TEMP_PAYBEN_curs INTO
+               :HOST-PAYBEN-REC
+               :IND-PAYBEN-REC
+            END-EXEC.
+
+            IF SQLCODE < 0
+               MOVE "fetch-du-cursor-TEMP-PAYBEN-curs"
+                  TO PARAGRAPH-ABORT
+                GO TO ABORT-SQL
+            END-IF.
+
+            IF SQLCODE = SQL-NO-ROWS-FOUND
+               GO TO E-WRITE-PAYBEN-TEMP-FILE
+            END-IF. 
+
+            COPY "INITIALIZE-HOST-REC-PAYBEN.cpy". 
+ 
+      **  check DEMOGRAPHICS to see if beneficiary is
+      **  an employee.  Use BADGE # if beneficiary is 
+      **  an employee regardless of emp status.
+      **  Also check that the emp was not terminated
+      **  within the requested time period, so their
+      **  DEMOGRAPHICS info is not overlaid with payben info.
+            INITIALIZE H-PAYBEN-BADGE
+                       H-TEDAT
+                       H-STA-CD
+                       H-PS-AMT.
+            MOVE H-PYBEN-PAYSSN TO WSSN.
+            EXEC SQL
+                SELECT NVL(DEM_BADGE,0) 
+                     , NVL(PY_TERM_DT,0)
+                     , NVL(PY_SCOD,' ')
+                     , NVL(PY_PS_AMT,0)
+                  INTO :H-PAYBEN-BADGE
+                     , :H-TEDAT
+                     , :H-STA-CD
+                     , :H-PS-AMT
+                  FROM  DEMOGRAPHICS
+                       ,PAYPROFIT
+                 WHERE  DEM_SSN = :WSSN
+                   AND  DEM_SSN = PAYPROF_SSN(+)
+            END-EXEC.
+            
+            IF SQLCODE = 0
+               IF  H-TEDAT >= W-FDLY 
+               AND H-TEDAT <= W-LDLY THEN
+                  GO TO ITER-WRITE-PAYBEN-TEMP-FILE
+               ELSE
+                  IF H-PYBEN-PSAMT = 0 
+                     MOVE H-PS-AMT    TO H-PYBEN-PSAMT
+                  END-IF
+                  MOVE H-PAYBEN-BADGE TO R1-BADGE-PSN-NP
+                  MOVE H-TEDAT        TO R1-D-O-TERM
+                  MOVE H-STA-CD       TO R1-ST-CD
+               END-IF
+            ELSE 
+               MOVE H-PYBEN-PSN TO R1-BADGE-PSN-NP
+               MOVE 0 TO R1-D-O-TERM
+               MOVE "T" TO R1-ST-CD
+            END-IF.
+            MOVE H-PYBEN-PAYSSN TO R1-SSN.
+            MOVE H-PYBEN-DOBIRTH TO R1-D-O-BIRTH.
+            MOVE 0 TO R1-PHOURS.
+            MOVE H-PYBEN-PSAMT TO R1-PS-AMT.
+            MOVE H-PYBEN-PSAMT TO R1-PS-VAMT.
+            MOVE H-PYBEN-NAME TO R1-EMPLOYEE-NAME.
+
+            MOVE SPACES To WS-LNAME WS-FNAME-INIT WS-FNAME WS-MINIT.
+            UNSTRING H-PYBEN-NAME DELIMITED BY ', '
+                INTO WS-LNAME WS-FNAME-INIT
+            UNSTRING WS-FNAME-INIT delimited by ' '
+                INTO WS-FNAME WS-MINIT.
+            MOVE WS-LNAME To R1-LNAME.
+            MOVE WS-FNAME TO R1-FNAME.
+            MOVE WS-MINIT TO R1-MINIT. 
+
+            MOVE 10 TO R1-PS-YEARS.
+            MOVE 0 TO R1-PDOLLARS.
+            MOVE H-PYBEN-DOBIRTH TO R1-Y2K-BIRTH.
+            MOVE 6 TO R1-PROF-ZEROCONT.
+            MOVE 0 TO R1-PS-ENROLLED.
+            MOVE H-PYBEN-PSAMT  TO R1-PS-ETVA.
+            WRITE TEMP-FILE-REC.
+            COMPUTE INCNT= INCNT + 1 .
+
+           GO TO ITER-WRITE-PAYBEN-TEMP-FILE.
+      *
+
+       E-WRITE-PAYBEN-TEMP-FILE.
+
+           EXEC SQL
+                CLOSE TEMP_PAYBEN_curs
+           END-EXEC.
+
+           IF SQLCODE < 0
+             MOVE "close-du-cursor-TEMP-PB-FILE-curs" TO PARAGRAPH-ABORT
+              GO TO ABORT-SQL
+           END-IF.
+
+
+       END-WRITE-TEMP-FILE.
+           EXIT.
+
+       END-RETRIEVE-PAYPROFIT-REC.    
+           CLOSE TEMP-FILE. 
+           DISPLAY "TOTAL RECORDS WRITTEN TO TEMP-FILE = " INCNT.
+           MOVE 0 TO INCNT.
+           EXIT.
+      ** --------------------------------------------------------------- */
+           
+       SORT-TEMP-FILE SECTION.
+ 
+            SORT S-TEMP-FILE ON ASCENDING KEY S-EMPLOYEE-NAME
+            INPUT PROCEDURE IS PRE-SORT
+            OUTPUT PROCEDURE IS OUT-SORT.
+       END-SORT-TEMP-FILE.
+           EXIT. 
+           
+       PRE-SORT SECTION.           
+        
+           OPEN INPUT TEMP-FILE.
+            
+       READ-INPUT-ROUTINE. 
+       
+           READ TEMP-FILE ,AT END GO TO END-PRE-SORT.
+           MOVE TEMP-FILE-REC TO S-TEMP-FILE-REC.
+           RELEASE S-TEMP-FILE-REC.
+           
+           GO TO READ-INPUT-ROUTINE.
+           
+
+       END-PRE-SORT.
+           CLOSE TEMP-FILE.
+           EXIT. 
+           
+       OUT-SORT SECTION.
+       
+       OPEN OUTPUT NEXT-FILE.
+       MOVE LOW-VALUE TO W-SSNX.
+       
+       OUT-SORT-ROUTINE.
+
+            RETURN S-TEMP-FILE AT END
+            MOVE W-SSNX TO W-SSNX0    
+            MOVE HIGH-VALUE TO W-SSNX.
+                     
+            IF ((S-SSN NOT = W-SSN AND W-SSNX NOT = LOW-VALUE) OR
+               (W-SSNX = HIGH-VALUE)) AND (W-SSNX0 NOT = LOW-VALUE)
+            THEN 
+               PERFORM RETRIEVE-PROFIT-DETAIL 
+	              THRU END-RETRIEVE-PROFIT-SS-DET 
+
+      ** ---------------------------------------------------------------
+      ** If one of the following is NOT zero, they go on to the next step
+      ** W-PSAMT or Profit Sharing amount on the PayPROFIT
+      ** W-PSLOAN or Profit Sharing Disbursements (code 1 and 3)
+      ** W-PSFORF or Profit Sharing Forfeitures   (code 2)
+      ** 
+      
+      **   added beneficiary allocations to calculations for
+      **          w-vest and w-psdol
+                 IF W-PSAMT NOT = 0 OR 
+                    W-BEN-ALLOC NOT = 0 OR
+                    W-PSLOAN NOT = 0 OR
+                    W-PSFORF NOT = 0 THEN
+                    COMPUTE W-VEST  = W-PSVAMT + W-PSLOAN
+                                      + W-BEN-ALLOC
+                    COMPUTE W-PSDOL = W-PSAMT + W-PSFORF + W-PSLOAN
+                                      + W-BEN-ALLOC
+                    MOVE W-PSDOL TO R2-PSDOL 
+                    MOVE W-PSLOAN TO R2-PSLOAN
+                    MOVE W-PSFORF TO R2-PSFORF
+                    MOVE W-VEST TO R2-VEST
+                    MOVE W-BEN-ALLOC TO R2-BEN-ALLOC
+                    WRITE NEXT-FILE-REC
+                    COMPUTE INCNT = INCNT + 1
+                 END-IF
+                    
+                 MOVE 0  TO W-PSDOL       
+                 MOVE 0  TO W-VEST 
+                 MOVE 0  TO W-PSVAMT      
+                 MOVE 0  TO W-PSFORF 
+                 MOVE 0  TO W-PSCONT      
+                 MOVE 0  TO W-PSEARN 
+                 MOVE 0  TO W-PSLOAN      
+                 MOVE 0  TO W-PSAMT 
+                 MOVE 0  TO W-PSDOLLARS  
+                 MOVE 0  TO W-PSHRS 
+                 MOVE 0  TO W-8-EARN
+                 MOVE 0  TO W-9-FORF
+                 MOVE 0 TO W-BEN-ALLOC
+             END-IF  
+             
+              IF W-SSNX = HIGH-VALUE THEN
+                 GO TO END-OUT-SORT
+              END-IF
+
+              COMPUTE W-PSHRS = W-PSHRS + S-PHOURS
+              COMPUTE W-PSAMT = W-PSAMT + S-PS-AMT
+              COMPUTE W-PSVAMT = W-PSVAMT + S-PS-VAMT
+              COMPUTE W-PSDOLLARS = W-PSDOLLARS + S-PDOLLARS                         
+              COMPUTE W-BEN-ALLOC = W-BEN-ALLOC + S-BEN-ALLOC
+              
+              MOVE S-SSN TO W-SSN
+              MOVE S-BADGE-PSN-NP TO R2-BADGE-PSN-NP
+              MOVE S-EMPLOYEE-NAME TO R2-EMPLOYEE-NAME
+        
+              MOVE S-FNAME To R2-FNAME
+              MOVE S-LNAME To R2-LNAME
+              MOVE S-MINIT TO R2-MINIT
+
+              MOVE S-Y2K-BIRTH TO R2-Y2K-BIRTH
+              MOVE W-PSHRS TO R2-PSHRS
+              MOVE W-PSDOLLARS TO R2-PSDOLLARS
+              MOVE S-SSN TO R2-SSN
+              MOVE S-D-O-TERM TO R2-D-O-TERM
+              MOVE S-TERM TO R2-TERM
+              MOVE W-PSAMT TO R2-PSAMT
+              MOVE W-PSVAMT TO R2-PSVAMT
+              MOVE S-PS-YEARS TO R2-PS-YEARS
+              MOVE S-PROF-ZEROCONT TO R2-PROF-ZEROCONT
+
+              MOVE S-PS-ENROLLED TO R2-PS-ENROLLED
+              MOVE S-PS-ETVA  TO R2-PS-ETVA
+              MOVE W-BEN-ALLOC TO R2-BEN-ALLOC
+              GO TO OUT-SORT-ROUTINE.
+
+       END-OUT-SORT.
+           CLOSE NEXT-FILE.
+           DISPLAY "TOTAL RECORDS WRITTEN TO NEXT-FILE = " INCNT.
+           MOVE 0 TO INCNT.
+           EXIT.                               
+                 
+      ** --------------------------------------------------------------- */
+           
+       READ-NEXT-FILE SECTION.
+       INIT-READ-NEXT-FILE.
+
+           OPEN INPUT NEXT-FILE.
+           OPEN OUTPUT impr.
+           OPEN OUTPUT CSV-FILE.
+
+           INITIATE REP-QPAY066.
+
+           ACCEPT W-SYSDATE FROM DATE. 
+           IF W-SYSDATE > 0 AND
+              W-SYSDATE < 19000000 THEN
+              IF W-SYSDATE > 500000 THEN
+                 COMPUTE W-SYSDATE = W-SYSDATE + 19000000
+              ELSE
+                 COMPUTE W-SYSDATE = W-SYSDATE + 20000000
+              END-IF
+           END-IF.
+           IF W-SYSDATE < 19000000 THEN 
+           MOVE W-FDLY  TO W-SYSDATE 
+           END-IF.
+           
+           MOVE W-SYSDATE TO W-CHECKDATE.
+           MOVE W-CHECKDATE(1:4) TO W-WKYR.
+           MOVE W-CHECKDATE(5:2) TO W-WKMO.
+           MOVE W-CHECKDATE(7:2) TO W-WKDA.
+
+
+       ITER-READ-NEXT-FILE.       
+           
+           READ NEXT-FILE AT END
+            GO TO END-READ-NEXT-FILE.
+  
+      *                   PS-ENROLLED = 1 OLD VESTING SCHEDULE
+      *                   PS-ENROLLED = 2 NEW VESTING SCHEDULE
+      *                   PS-ENROLLED = 3 OLD FORFEIT RULES - 100% VEST
+      *                   PS-ENROLLED = 4 NEW FORFEIT RULES - 100% VEST
+
+              IF R2-PS-ENROLLED > 2
+              OR R2-PROF-ZEROCONT = 6 
+                 MOVE 100 TO W-VESTPERT
+              ELSE
+                  IF R2-PS-ENROLLED < 2
+                     IF R2-PS-YEARS <= 1
+                         MOVE 1 TO VST-IDX
+                      ELSE
+                         IF R2-PS-YEARS > 6
+                             MOVE 7 TO VST-IDX
+                         ELSE
+                             MOVE R2-PS-YEARS TO VST-IDX
+                         END-IF
+                      END-IF
+                      MOVE OV-PRCT (VST-IDX) TO W-VESTPERT
+                  ELSE
+                      IF R2-PS-YEARS <= 1
+                           MOVE 1 TO VST-IDX
+                      ELSE
+                          IF R2-PS-YEARS > 5
+                              MOVE 6 TO VST-IDX
+                          ELSE
+                              MOVE R2-PS-YEARS TO VST-IDX
+                          END-IF
+                      END-IF
+                      MOVE NV-PRCT (VST-IDX) TO W-VESTPERT
+                  END-IF
+              END-IF
+              IF R2-PS-ENROLLED = 2
+                  MOVE 0 TO W-ENROLLED
+              ELSE
+                  MOVE R2-PS-ENROLLED TO W-ENROLLED
+              END-IF
+		       
+              IF R2-PROF-ZEROCONT = 6 THEN  
+               MOVE R2-PSDOL TO R2-VEST
+              END-IF
+              IF  R2-PSDOL = 0
+              AND R2-VEST  = 0
+                  MOVE 0 TO W-VESTPERT
+              END-IF
+
+              MOVE R2-Y2K-BIRTH TO W-CHECKDATE
+              MOVE W-CHECKDATE(1:4) TO W-BWKYR
+              MOVE W-CHECKDATE(5:2) TO W-BWKMO
+              MOVE W-CHECKDATE(7:2) TO W-BWKDA
+              COMPUTE W-AGE = W-WKYR - W-BWKYR
+              IF W-BWKMO > W-WKMO THEN
+                 COMPUTE W-AGE = W-AGE - 1
+              END-IF
+              IF W-BWKMO = W-WKMO AND W-BWKDA > W-WKDA THEN
+                 COMPUTE W-AGE = W-AGE - 1
+              END-IF
+
+      ** ----------------------------------------------------------
+      ** If Beginning Balance not = 0 print
+      ** Changed  R2-VEST to R2-PSAMT to get the correct people
+      **
+      *   ADDED R2-BEN-ALLOC TO IF STATEMENT SO BENEFICIARIES
+      *   WITH A BALANCE WILL PRINT ON THE REPORT.
+      *
+              IF  ((R2-PS-ENROLLED = 0 OR  
+                    R2-PS-ENROLLED = 1 OR
+                    R2-PS-ENROLLED = 3)  AND
+	            R2-PS-YEARS > 2      AND
+                    R2-PSAMT <> 0)
+              OR  ((R2-PS-ENROLLED = 2 OR
+                    R2-PS-ENROLLED = 4)  AND
+                    R2-PS-YEARS > 1      AND
+                    R2-PSAMT <> 0)
+              OR  (R2-BEN-ALLOC NOT = 0)
+              THEN
+
+                 move R2-ssn to ssn-mask  WS-SSN-FULL
+                 move zero to ssn-first-5
+                 move ssn-masked to r2-ssn
+                 IF R2-D-O-TERM > 0
+                    MOVE R2-D-O-TERM(3:6) TO WS-D-O-TERM
+                 ELSE
+                    MOVE SPACES TO WS-D-O-TERM
+                 END-IF
+
+                 GENERATE DETAIL1
+
+                 PERFORM 5000-WRITE-TO-CSV THRU 5000-EXIT
+                 COMPUTE W-TOT-VESTINGS = W-TOT-VESTINGS + R2-VEST
+                 COMPUTE W-TOT-LOANS = W-TOT-LOANS + R2-PSLOAN
+                 COMPUTE W-TOT-FORF = W-TOT-FORF + R2-PSFORF
+                 COMPUTE W-TOT-PROF = W-TOT-PROF + R2-PSDOL
+                 COMPUTE W-TOT-BALLOC = W-TOT-BALLOC + R2-BEN-ALLOC
+              END-IF.
+           GO TO ITER-READ-NEXT-FILE.
+       END-READ-NEXT-FILE.           
+           GENERATE DETAIL2.
+           GENERATE DETAIL3.
+           GENERATE DETAIL4.
+           GENERATE DETAIL5.
+           GENERATE DETAIL6.
+
+           DISPLAY "written to CSV-FILE: " WS-CSV-WRITTEN.
+           CLOSE NEXT-FILE .
+           TERMINATE REP-QPAY066.
+           CLOSE impr.
+           CLOSE CSV-FILE.
+           EXIT.
+           
+
+       ENDP SECTION.
+           EXIT PROGRAM.
+
+       END-ENDP.
+           EXIT.
+
+       RETRIEVE-PROFIT-DETAIL SECTION.
+       INIT-RETRIEVE-PROFIT-DETAIL.
+      ** P#15226  added AND SUBSTR(PROFIT_YEAR,1,4) = :H-YDATE-1ST-4
+      **          to the cursor to eliminate reading all rows for just
+      **          the requested year.  H-YDATE-1ST-4 = w-ydate-first-4
+          MOVE R2-SSN TO WSSN.
+           EXEC SQL
+              DECLARE  PROFIT_DETAIL_curs CURSOR FOR
+              SELECT *
+              FROM  PROFIT_DETAIL
+              WHERE PR_DET_S_SEC_NUMBER = :WSSN 
+                AND SUBSTR(PROFIT_YEAR,1,4) = :H-YDATE-1ST-4
+           END-EXEC.
+
+           EXEC SQL
+             OPEN PROFIT_DETAIL_curs
+           END-EXEC.
+
+           IF SQLCODE < 0
+            MOVE "open-du-cursor-PROFIT-DETAIL-curs" 
+            TO PARAGRAPH-ABORT
+            GO TO ABORT-SQL
+           END-IF.
+
+       ITER-RETRIEVE-PROFIT-DETAIL.
+           EXEC SQL
+            FETCH  PROFIT_DETAIL_curs INTO
+              :HOST-RECORD-PROF-DET
+              :INDICATOR-RECORD-PROF-DET
+           END-EXEC.
+
+           IF SQLCODE < 0
+              MOVE "fetch-du-cursor-PROFIT-DETAIL-curs" 
+              TO PARAGRAPH-ABORT
+              GO TO ABORT-SQL
+           END-IF.
+
+           IF SQLCODE = SQL-NO-ROWS-FOUND
+              GO TO E-RETRIEVE-PROFIT-DETAIL
+           END-IF.
+
+                COPY "INITIALIZE-HOST-PROFIT-DETAIL.cpy".
+
+      ** ----------------------------------------------------------
+                   IF H-PROFIT-CODE = "1" 
+                   OR H-PROFIT-CODE = "3" THEN
+                      COMPUTE W-PSLOAN = W-PSLOAN - H-PROFIT-FORT
+                   END-IF
+                   IF H-PROFIT-CODE = "2" THEN
+                      COMPUTE W-PSFORF = W-PSFORF - H-PROFIT-FORT
+                   END-IF
+                   IF H-PROFIT-CODE = "0" THEN
+                      COMPUTE W-PSFORF = W-PSFORF + H-PROFIT-FORT
+                      COMPUTE W-PSCONT = W-PSCONT + H-PROFIT-CONT
+                      COMPUTE W-PSEARN = W-PSEARN + H-PROFIT-EARN
+                   END-IF
+                  IF H-PROFIT-CODE = "8" THEN
+                     COMPUTE W-8-EARN = W-8-EARN + H-PROFIT-EARN
+                     COMPUTE W-PSEARN = W-PSEARN + H-PROFIT-EARN
+                  END-IF
+                  IF H-PROFIT-CODE = "9" THEN
+                      COMPUTE W-PSLOAN = W-PSLOAN - H-PROFIT-FORT
+                  END-IF
+
+      *DEP add "5" and "6" for beneficiaries
+      *  NEED TO SPLIT OUT "5" & "6" for reporting seperately
+                  IF (H-PROFIT-CODE = "5") THEN
+                     COMPUTE W-BEN-ALLOC = W-BEN-ALLOC - H-PROFIT-FORT
+                  END-IF
+                  IF (H-PROFIT-CODE = "6") THEN
+                    COMPUTE W-BEN-ALLOC = W-BEN-ALLOC + H-PROFIT-CONT
+                  END-IF
+
+           GO TO ITER-RETRIEVE-PROFIT-DETAIL.
+
+       E-RETRIEVE-PROFIT-DETAIL.
+           EXEC SQL
+                CLOSE PROFIT_DETAIL_curs
+           END-EXEC.
+
+           IF SQLCODE < 0
+              MOVE "close-du-cursor-PROFIT-DETAIL-curs"
+                    TO PARAGRAPH-ABORT
+              GO TO ABORT-SQL
+           END-IF.
+       END-RETRIEVE-PROFIT-DETAIL.
+           EXIT. 
+       RETRIEVE-PROFIT-SS-DET SECTION.
+       INIT-RETRIEVE-PROFIT-SS-DET.
+           
+      ** P#15226  added AND SUBSTR(PROFIT_SS_YEAR,1,4) = :H-YDATE-1ST-4
+      **          to the cursor to eliminate reading all rows for just
+      **          the requested year.  H-YDATE-1ST-4 = w-ydate-first-4
+           EXEC SQL
+              DECLARE  PROFIT_SS_DETAIL_curs CURSOR FOR
+              SELECT *
+              FROM  PROFIT_SS_DETAIL
+              WHERE PR_SS_D_S_SEC_NUMBER = :WSSN
+                AND SUBSTR(PROFIT_SS_YEAR,1,4) = :H-YDATE-1ST-4
+           END-EXEC.
+
+           EXEC SQL
+             OPEN PROFIT_SS_DETAIL_curs
+           END-EXEC.
+
+           IF SQLCODE < 0
+            MOVE "open-du-cursor-PROFIT-SS-DETAIL-curs" 
+            TO PARAGRAPH-ABORT
+            GO TO ABORT-SQL
+           END-IF.
+
+       ITER-RETRIEVE-PROFIT-SS-DET.
+           EXEC SQL
+            FETCH  PROFIT_SS_DETAIL_curs INTO
+              :HOST-RECORD-PROF-SS-DET
+              :INDICATOR-RECORD-PROF-SS-DET
+           END-EXEC.
+
+           IF SQLCODE < 0
+              MOVE "fetch-du-cursor-PROFIT-SS-DETAIL-curs"
+              TO PARAGRAPH-ABORT
+              GO TO ABORT-SQL
+           END-IF.
+
+           IF SQLCODE = SQL-NO-ROWS-FOUND
+              GO TO E-RETRIEVE-PROFIT-SS-DET
+           END-IF.
+
+
+           COPY "INITIALIZE-HOST-PROFIT-SS-DETAIL.cpy".
+          
+            IF H-PROFIT-SS-CODE = "1" 
+            OR H-PROFIT-SS-CODE = "3" THEN
+               COMPUTE W-PSLOAN = W-PSLOAN - H-PROFIT-SS-FORT
+            END-IF
+            IF H-PROFIT-SS-CODE = "2" THEN
+               COMPUTE W-PSFORF = W-PSFORF - H-PROFIT-SS-FORT
+            END-IF
+            IF H-PROFIT-SS-CODE = "0" THEN
+               COMPUTE W-PSFORF = W-PSFORF + H-PROFIT-SS-FORT
+               COMPUTE W-PSCONT = W-PSCONT + H-PROFIT-SS-CONT
+               COMPUTE W-PSEARN = W-PSEARN + H-PROFIT-SS-EARN
+            END-IF
+            IF H-PROFIT-SS-CODE = "8" THEN
+               COMPUTE W-8-EARN = W-8-EARN + H-PROFIT-SS-EARN
+               COMPUTE W-PSEARN = W-PSEARN + H-PROFIT-SS-EARN
+            END-IF
+            IF H-PROFIT-SS-CODE = "9" THEN
+                COMPUTE W-PSLOAN = W-PSLOAN - H-PROFIT-SS-FORT
+            END-IF
+      *
+
+      *DEP add "5" and "6" for beneficiaries
+      *  NEED TO SPLIT OUT "5" & "6" for reporting seperately
+            IF (H-PROFIT-SS-CODE = "5") THEN
+               COMPUTE W-BEN-ALLOC = 
+                       W-BEN-ALLOC - H-PROFIT-SS-FORT
+
+            END-IF
+            IF (H-PROFIT-SS-CODE = "6") THEN
+               COMPUTE W-BEN-ALLOC = 
+                       W-BEN-ALLOC + H-PROFIT-SS-CONT
+            END-IF
+           GO TO ITER-RETRIEVE-PROFIT-SS-DET.
+
+       E-RETRIEVE-PROFIT-SS-DET.
+           EXEC SQL
+                CLOSE PROFIT_SS_DETAIL_curs
+           END-EXEC.
+
+           IF SQLCODE < 0
+              MOVE "close-du-cursor-PROFIT-SS-DETAIL-curs"
+                    TO PARAGRAPH-ABORT
+              GO TO ABORT-SQL
+           END-IF.
+       END-RETRIEVE-PROFIT-SS-DET. 
+           EXIT. 
+       
+       ABORT-SQL.
+           display PARAGRAPH-ABORT.
+           display SQLERRMC.
+           CALL "ABORT".
+
+       5000-WRITE-TO-CSV.
+           MOVE SPACES To WS-AMOUNT WS-EDITED-AMT.
+           MOVE 0 TO WS-SIZE WS-SPACES WS-START.
+           MOVE R2-VEST TO WS-TOT-VESTED
+           INSPECT WS-AMOUNT TALLYING WS-SPACES FOR LEADING SPACES.
+           COMPUTE WS-SIZE = 14 - WS-SPACES
+           COMPUTE WS-START = WS-SPACES + 1
+           MOVE WS-AMOUNT(WS-START:WS-SIZE) TO WS-EDITED-AMT.
+           MOVE SPACES To CSV-REC.
+           STRING R2-BADGE-PSN-NP delimited by '  ',  
+                  ',A,' delimited by size,
+                  WS-SSN-FULL delimited by size, ',"' delimited by size,
+                  R2-FNAME delimited by '  ', '",' delimited by size,
+                  R2-MINIT delimited by size, ',"' delimited by size,
+                  R2-LNAME delimited by '  ', 
+                  '",A,A,0.00,"' delimited by size,
+               WS-EDITED-AMT delimited by '  ', '",' delimited by size,
+                  WS-D-O-TERM delimited by '  ' 
+                               into CSV-REC.
+           WRITE CSV-REC.
+           ADD 1 TO WS-CSV-WRITTEN.
+
+       5000-EXIT.
+            EXIT.
+
