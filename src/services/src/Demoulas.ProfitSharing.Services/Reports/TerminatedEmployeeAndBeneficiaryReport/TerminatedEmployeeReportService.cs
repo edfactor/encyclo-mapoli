@@ -81,7 +81,7 @@ public sealed class TerminatedEmployeeReportService
                     join yipTbl in _totalService.GetYearsOfService(ctx, (short)request.EndingDate.Year, asOfDate) on payProfit.Demographic!.Ssn equals yipTbl.Ssn into yipTmp
                     from yip in yipTmp.DefaultIfEmpty()
                     where payProfit.ProfitYear >= request.BeginningDate.Year && payProfit.ProfitYear <= request.EndingDate.Year
-                        // COBOL ANALYSIS: READY does NOT filter by YTD work hours - processes all terminated employees regardless of hours
+                    // COBOL ANALYSIS: READY does NOT filter by YTD work hours - processes all terminated employees regardless of hours
                     select new MemberSlice
                     {
                         PsnSuffix = 0,
@@ -132,7 +132,12 @@ public sealed class TerminatedEmployeeReportService
                          x.Demographic.TerminationDate <= request.EndingDate))
             .Select(x => new MemberSlice
             {
-                PsnSuffix = x.Beneficiary.PsnSuffix,
+                // COBOL BUSINESS RULE: When beneficiary matches demographics AND termination date is NOT in range,
+                // use badge number with PSN=0 (appears as primary employee), otherwise use PSN suffix
+                PsnSuffix = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn &&
+                           x.Demographic.EmploymentStatusId != EmploymentStatus.Constants.Terminated)
+                           ? (short)0 // Active employees processed as beneficiaries appear as primary (PSN=0)
+                           : x.Beneficiary.PsnSuffix,
                 Id = x.Beneficiary.BeneficiaryContactId,
                 BadgeNumber = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn) ? x.Demographic.BadgeNumber : x.Beneficiary!.BadgeNumber,
                 Ssn = x.Beneficiary.Contact!.Ssn,
@@ -150,7 +155,8 @@ public sealed class TerminatedEmployeeReportService
                 EnrollmentId = 0, // default for beneficiaries
                 Etva = 0, // default for beneficiaries
                 ProfitYear = 0, // default for beneficiaries
-                IsOnlyBeneficiary = true,
+                IsOnlyBeneficiary = !((x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn &&
+                                     x.Demographic.EmploymentStatusId != EmploymentStatus.Constants.Terminated)), // Active employees appear as primary
                 IsBeneficiaryAndEmployee = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn),
                 IsExecutive = false,
             });

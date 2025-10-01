@@ -4535,7 +4535,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
                     TestOutputHelper.WriteLine($"  - Employment Status: {employee.EmploymentStatusId}");
                     TestOutputHelper.WriteLine($"  - Termination Date: {employee.TerminationDate?.ToString() ?? "null"}");
                     TestOutputHelper.WriteLine($"  - Termination Code: {employee.TerminationCodeId?.ToString() ?? "null"}");
-                    
+
                     var payProfit = employee.PayProfits.FirstOrDefault();
                     if (payProfit != null)
                     {
@@ -4549,7 +4549,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
                     else
                     {
                         TestOutputHelper.WriteLine($"  - Has PayProfit 2025: NO - This might explain why COBOL includes but C# excludes!");
-                        
+
                         // Check if they have PayProfit for other years
                         var allPayProfits = await ctx.PayProfits
                             .Where(p => p.DemographicId == employee.Id)
