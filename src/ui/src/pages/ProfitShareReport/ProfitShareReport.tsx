@@ -4,32 +4,27 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useFinalizeReportMutation, useLazyGetYearEndProfitSharingReportTotalsQuery } from "reduxstore/api/YearsEndApi";
 import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { FilterParams } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import ProfitSummary from "../PAY426Reports/ProfitSummary/ProfitSummary";
-import CommitModal from "./CommitModal";
 import ProfitShareReportGrid from "./ProfitShareReportGrid";
 import ProfitShareReportSearchFilters from "./ProfitShareReportSearchFilters";
+import { useLazyGetYearEndProfitSharingReportTotalsQuery } from "../../reduxstore/api/YearsEndApi.ts";
 
 const ProfitShareReport = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPresetParams, setSelectedPresetParams] = useState<FilterParams | null>(null);
   const [isLoadingTotals, setIsLoadingTotals] = useState(false);
   const [currentSearchParams, setCurrentSearchParams] = useState<any>(null);
   const [isInitialSearchLoaded, setIsInitialSearchLoaded] = useState(false);
 
-  const { yearEndProfitSharingReportTotals } = useSelector(
-    (state: RootState) => state.yearsEnd
-  );
+  const { yearEndProfitSharingReportTotals } = useSelector((state: RootState) => state.yearsEnd);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
-  const profitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
   const [triggerSearch] = useLazyGetYearEndProfitSharingReportTotalsQuery();
-  const [finalizeReport, { isLoading: isFinalizing }] = useFinalizeReportMutation();
+  const profitYear = useFiscalCloseProfitYear();
 
   // Load both tables when page loads - this is consistent with other pages which only display data and do not take input.
   useEffect(() => {
@@ -55,21 +50,6 @@ const ProfitShareReport = () => {
     }
   }, [hasToken, profitYear, triggerSearch, dispatch]);
 
-  const handleCommit = async () => {
-    if (profitYear) {
-      try {
-        await finalizeReport({ profitYear });
-        setIsModalOpen(false);
-      } catch (error) {
-        console.error("Failed to finalize report:", error);
-      }
-    }
-  };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
-
   const handlePresetParamsChange = (params: FilterParams | null) => {
     setSelectedPresetParams(params);
     setCurrentSearchParams(null);
@@ -88,7 +68,7 @@ const ProfitShareReport = () => {
 
       const totalsRequest = {
         profitYear: profitYear,
-        useFrozenData: true,
+        useFrozenData: false,
         badgeNumber: null,
         archive: true
       };
@@ -134,12 +114,6 @@ const ProfitShareReport = () => {
 
     return (
       <div className="flex h-10 items-center gap-2">
-        <Button
-          onClick={() => setIsModalOpen(true)}
-          variant="outlined"
-          className="h-10 min-w-fit whitespace-nowrap">
-          Commit
-        </Button>
         <StatusDropdownActionNode onStatusChange={handleStatusChange} />
       </div>
     );
@@ -209,13 +183,6 @@ const ProfitShareReport = () => {
           </Grid>
         )}
       </Grid>
-
-      <CommitModal
-        open={isModalOpen}
-        onClose={handleCancel}
-        onCommit={handleCommit}
-        isFinalizing={isFinalizing}
-      />
     </Page>
   );
 };
