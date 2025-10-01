@@ -309,10 +309,6 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 HoursTotal = totals.HoursTotal,
                 PointsTotal = totals.PointsTotal,
                 BalanceTotal = totals.BalanceTotal,
-                TerminatedWagesTotal = totals.TerminatedWagesTotal,
-                TerminatedHoursTotal = totals.TerminatedHoursTotal,
-                TerminatedPointsTotal = totals.TerminatedPointsTotal,
-                TerminatedBalanceTotal = totals.TerminatedBalanceTotal,
                 NumberOfEmployees = totals.NumberOfEmployees,
                 NumberOfNewEmployees = totals.NumberOfNewEmployees,
                 NumberOfEmployeesInPlan = totals.NumberOfEmployees - totals.NumberOfEmployeesUnder21 - totals.NumberOfNewEmployees,
@@ -330,7 +326,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
         var birthday18 = calInfo.FiscalEndDate.AddYears(-18);
         var birthday21 = calInfo.FiscalEndDate.AddYears(-21);
-        var birthday65 = calInfo.FiscalEndDate.AddYears(-65);
+        var birthday64 = calInfo.FiscalEndDate.AddYears(-64);
         var fiscalBeginDate = calInfo.FiscalBeginDate;
         var fiscalEndDate = calInfo.FiscalEndDate;
         
@@ -340,9 +336,10 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             // Always fetch all details for the year
             IQueryable<YearEndProfitSharingReportDetail> allDetails = await ActiveSummary(ctx, req, calInfo.FiscalEndDate);
 
+            // Include employees with >= 1000 hours and age >= 18, OR age >= 64 (regardless of hours)
             allDetails = allDetails.Where(x =>
                 ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > fiscalEndDate)) &&
-                x.Hours >= _hoursThreshold && x.DateOfBirth <= birthday18);
+                ((x.Hours >= _hoursThreshold && x.DateOfBirth <= birthday18) || (x.DateOfBirth <= birthday64)));
 
             var totals = await (
                 from a in allDetails
@@ -350,12 +347,13 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 into g
                 select new
                 {
-                    NumberOfEmployees = g.Count(),
+                    NumberOfEmployees = g.Count(x => x.DateOfBirth > birthday21 || x.Hours >= _hoursThreshold),
                     NumberOfNewEmployees = g.Count(x => ((x.FirstContributionYear == null) && x.DateOfBirth <= birthday21)),
                     NumberOfEmployeesUnder21 = g.Count(x => x.DateOfBirth > birthday21),
-                    WagesTotal = g.Where(x => x.DateOfBirth < birthday21).Sum(x => x.Wages),
-                    HoursTotal = g.Where(x => x.DateOfBirth < birthday21).Sum(x => x.Hours),
-                    PointsTotal = g.Where(x => x.DateOfBirth <= birthday21 && x.DateOfBirth > birthday65).Sum(x => x.Wages / 100),
+                    // Exclude age < 21 and age 64+ with < 1000 hours from totals
+                    WagesTotal = g.Where(x => x.DateOfBirth <= birthday21 && !(x.DateOfBirth <= birthday64 && x.Hours < _hoursThreshold)).Sum(x => x.Wages),
+                    HoursTotal = g.Where(x => x.DateOfBirth <= birthday21 && !(x.DateOfBirth <= birthday64 && x.Hours < _hoursThreshold)).Sum(x => Math.Truncate(x.Hours)),
+                    PointsTotal = g.Where(x => x.DateOfBirth <= birthday21 && !(x.DateOfBirth <= birthday64 && x.Hours < _hoursThreshold)).Sum(x => Math.Round(x.Wages / 100)),
                 }
             ).FirstOrDefaultAsync(cancellationToken);
 
@@ -363,21 +361,6 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             {
                 return new YearEndProfitSharingReportTotals();
             }
-
-            IQueryable<YearEndProfitSharingReportDetail> terminatedDetails = (await ActiveSummary(ctx, req, calInfo.FiscalEndDate))
-                .Where(x => x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate >= fiscalBeginDate && x.TerminationDate <= fiscalEndDate);
-
-            var terminatedTotals = await (
-                from t in terminatedDetails
-                group t by true
-                into g
-                select new
-                {
-                    TerminatedWagesTotal = g.Sum(x => x.Wages),
-                    TerminatedHoursTotal = g.Sum(x => x.Hours),
-                    TerminatedPointsTotal = g.Where(x => x.DateOfBirth <= birthday21 && x.DateOfBirth > birthday65).Sum(x => x.Wages / 100),
-                }
-            ).FirstOrDefaultAsync(cancellationToken);
 
             var rslt = new YearEndProfitSharingReportTotals
             {
@@ -387,9 +370,6 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 WagesTotal = totals.WagesTotal,
                 HoursTotal = totals.HoursTotal,
                 PointsTotal = totals.PointsTotal,
-                TerminatedHoursTotal = terminatedTotals?.TerminatedHoursTotal ?? 0,
-                TerminatedWagesTotal = terminatedTotals?.TerminatedWagesTotal ?? 0,
-                TerminatedPointsTotal = terminatedTotals?.TerminatedPointsTotal ?? 0,
             };
 
             return rslt;

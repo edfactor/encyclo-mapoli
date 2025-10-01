@@ -1,16 +1,12 @@
 import { test, expect } from "@playwright/test";
-import { baseUrl } from "../env.setup";
+import { baseUrl, impersonateRole } from "../env.setup";
 
 
 test.describe("Manage Executive Hours: ", () => {
     test.beforeEach(async ({ page }) => {
         await page.goto(baseUrl);
         await page.waitForLoadState("networkidle");
-        await page.getByRole("combobox", { name: "roles" }).click();
-        await page.getByRole('option', { name: 'Finance-Manager' }).getByRole('checkbox').check();
-        await page.locator("body").click();
-        await page.reload();
-        await page.waitForLoadState("networkidle");
+    await impersonateRole(page, 'Finance-Manager');
         await page.getByRole('button').filter({ hasText: /^$/ }).click();
         await page.getByRole('button', { name: 'Fiscal Close' }).click();
         await page.getByRole('button', { name: 'Get Eligible Employees' }).click();
@@ -64,7 +60,7 @@ test.describe("Manage Executive Hours: ", () => {
     });
 
     test('click on badge number', async ({ page }) => {
-        await page.locator('#cell-badgeNumber-100 a').click();
+        await page.getByRole('gridcell').nth(0).locator('a').click();
         await expect(page.url()).toContain('master-inquiry');
     });
 });

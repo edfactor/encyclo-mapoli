@@ -76,6 +76,9 @@ public sealed class Navigation
         public const short PROFALL = 46;
         public const short QNEWPROFLBL = 47;
         public const short PROFNEW = 48;
+
+        // Adjustments
+        public const short Adjustments = 79;
     }
 
     public short Id { get; set; }

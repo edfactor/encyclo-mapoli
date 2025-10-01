@@ -31,7 +31,7 @@ const useMasterInquiry = () => {
   const [triggerProfitDetails] = useLazyGetProfitMasterInquiryMemberDetailsQuery();
 
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
-  const missives = useSelector((state: RootState) => state.lookups.missives);
+  const missives: MissiveResponse[] = useSelector((state: RootState) => state.lookups.missives);
 
   const { addAlert, addAlerts, clearAlerts } = useMissiveAlerts();
 
@@ -152,7 +152,7 @@ const useMasterInquiry = () => {
 
           const isSimple = isSimpleSearch(searchFormData);
           const isBeneficiarySearch = masterInquiryRequestParams?.memberType === "beneficiaries";
-          
+
           let alertMessage;
           if (isSimple && isBeneficiarySearch) {
             alertMessage = MASTER_INQUIRY_MESSAGES.BENEFICIARY_NOT_FOUND;
@@ -161,7 +161,7 @@ const useMasterInquiry = () => {
           } else {
             alertMessage = MASTER_INQUIRY_MESSAGES.NO_RESULTS_FOUND;
           }
-          
+
           addAlert(alertMessage);
         }
       } catch (error) {
@@ -197,9 +197,10 @@ const useMasterInquiry = () => {
         .then((details) => {
           dispatch({ type: "MEMBER_DETAILS_FETCH_SUCCESS", payload: { details } });
 
-          if (details.missives && missives) {
+          // We cannot cross references missives unless we have some in the redux store
+          if (details.missives && Array.isArray(missives) && missives.length > 0) {
             const localMissives: MissiveResponse[] = details.missives
-              .map((id: number) => missives.items.find((m: MissiveResponse) => m.id === id))
+              .map((id: number) => missives.find((m: MissiveResponse) => m.id === id))
               .filter(Boolean) as MissiveResponse[];
 
             if (localMissives.length > 0) {
