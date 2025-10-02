@@ -30,10 +30,10 @@ var cliRunner = builder.AddExecutable("Database-Cli",
     .WithCommand(
         name: "upgrade-db",
         displayName: "Upgrade database",
-        executeCommand: (c) =>
+        executeCommand: async (c) =>
         {
             var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
-            return Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "upgrade-db", logger, "Upgrade Database", interactionService));
+            return await CommandHelper.RunConsoleAppAsync(projectPath!, "upgrade-db", logger, "Upgrade Database", interactionService);
         },
         commandOptions: new CommandOptions { IconName = "ArrowUp", IconVariant = IconVariant.Filled })
     .WithCommand(
@@ -64,25 +64,25 @@ var cliRunner = builder.AddExecutable("Database-Cli",
                 }
             }
 
-            return CommandHelper.RunConsoleApp(projectPath!, "drop-recreate-db", logger, "Drop & Recreate Database", interactionService);
+            return await CommandHelper.RunConsoleAppAsync(projectPath!, "drop-recreate-db", logger, "Drop & Recreate Database", interactionService);
         },
         commandOptions: new CommandOptions { IconName = "DatabaseWarning", IconVariant = IconVariant.Filled })
     .WithCommand(
         name: "import-from-ready",
         displayName: "Import from READY",
-        executeCommand: (c) =>
+        executeCommand: async (c) =>
         {
             var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
-            return Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "import-from-ready", logger, "Import from READY", interactionService));
+            return await CommandHelper.RunConsoleAppAsync(projectPath!, "import-from-ready", logger, "Import from READY", interactionService);
         },
         commandOptions: new CommandOptions { IconName = "ArrowDownload", IconVariant = IconVariant.Filled })
     .WithCommand(
         name: "import-from-navigation",
         displayName: "Import from navigation",
-        executeCommand: (c) =>
+        executeCommand: async (c) =>
         {
             var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
-            return Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "import-from-navigation", logger, "Import Navigation", interactionService));
+            return await CommandHelper.RunConsoleAppAsync(projectPath!, "import-from-navigation", logger, "Import Navigation", interactionService);
         },
         commandOptions: new CommandOptions { IconName = "Navigation", IconVariant = IconVariant.Filled })
     .WithCommand(
@@ -132,7 +132,7 @@ var cliRunner = builder.AddExecutable("Database-Cli",
                 }
 
                 // Show starting notification
-                await interactionService.PromptNotificationAsync(
+                _ = interactionService.PromptNotificationAsync(
                     title: "🚀 Starting Nuclear Option",
                     message: "Beginning full database reset. This may take several minutes...",
                     options: new NotificationInteractionOptions
@@ -142,21 +142,21 @@ var cliRunner = builder.AddExecutable("Database-Cli",
             }
 
             // Step 1: Drop and recreate
-            var step1 = CommandHelper.RunConsoleApp(projectPath!, "drop-recreate-db", logger, "Step 1/3: Drop & Recreate Database", interactionService);
+            var step1 = await CommandHelper.RunConsoleAppAsync(projectPath!, "drop-recreate-db", logger, "Step 1/3: Drop & Recreate Database", interactionService);
             if (!step1.Success)
             {
                 return CommandResults.Failure($"Nuclear Option failed at step 1: {step1.ErrorMessage}");
             }
 
             // Step 2: Import from READY
-            var step2 = CommandHelper.RunConsoleApp(projectPath!, "import-from-ready", logger, "Step 2/3: Import from READY", interactionService);
+            var step2 = await CommandHelper.RunConsoleAppAsync(projectPath!, "import-from-ready", logger, "Step 2/3: Import from READY", interactionService);
             if (!step2.Success)
             {
                 return CommandResults.Failure($"Nuclear Option failed at step 2: {step2.ErrorMessage}");
             }
 
             // Step 3: Import navigation
-            var step3 = CommandHelper.RunConsoleApp(projectPath!, "import-from-navigation", logger, "Step 3/3: Import Navigation", interactionService);
+            var step3 = await CommandHelper.RunConsoleAppAsync(projectPath!, "import-from-navigation", logger, "Step 3/3: Import Navigation", interactionService);
             if (!step3.Success)
             {
                 return CommandResults.Failure($"Nuclear Option failed at step 3: {step3.ErrorMessage}");
@@ -165,7 +165,7 @@ var cliRunner = builder.AddExecutable("Database-Cli",
             // Show final success notification
             if (interactionService.IsAvailable)
             {
-                await interactionService.PromptNotificationAsync(
+                _ = interactionService.PromptNotificationAsync(
                     title: "✅ Nuclear Option Complete!",
                     message: "Database has been successfully reset. All steps completed.",
                     options: new NotificationInteractionOptions
