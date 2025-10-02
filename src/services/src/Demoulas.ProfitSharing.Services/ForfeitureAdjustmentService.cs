@@ -193,7 +193,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 var profitCodeTotals = await _totalService.GetTotalComputedEtva(context, (short)req.ProfitYear).Where(x=>x.Ssn == payProfit.Demographic!.Ssn)
                     .FirstOrDefaultAsync(cancellationToken);
 
-                // Calculate ETVA per COBOL formula
+                // Default to zero if no totals found
                 var calculatedEtva = profitCodeTotals != default ? profitCodeTotals.TotalAmount : 0m;
 
                 // Prevent negative ETVA
@@ -242,8 +242,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 else
                 {
                     // For un-forfeit: Recalculate PY_PS_ETVA and decrement enrollment by 2
-                    // @Russ/Phil - any insights to recalculate ETVA?
-                                        byte newEnrollmentId;
+                    byte newEnrollmentId;
 
                     // Enrollment ID math based on known constants to prevent magic numbers
                     if (payProfit.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords)
