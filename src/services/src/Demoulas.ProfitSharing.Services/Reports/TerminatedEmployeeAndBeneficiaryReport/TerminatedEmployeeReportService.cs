@@ -3,6 +3,7 @@ using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
@@ -249,15 +250,6 @@ public sealed class TerminatedEmployeeReportService
             "After filtering duplicates: {UniqueBeneficiaryCount} unique beneficiaries (filtered {FilteredCount})",
             uniqueBeneficiaries.Count, beneficiaryList.Count - uniqueBeneficiaries.Count);
 
-        // Log sample beneficiary details for debugging
-        var beneficiariesWith1000Suffix = uniqueBeneficiaries.Where(b => b.PsnSuffix == -1000).Take(5).ToList();
-        if (beneficiariesWith1000Suffix.Any())
-        {
-            _logger.LogInformation(
-                "Sample beneficiaries with -1000 suffix: {Beneficiaries}",
-                string.Join(", ", beneficiariesWith1000Suffix.Select(b => $"{b.BadgeNumber}{b.PsnSuffix} ({b.FullName})")));
-        }
-
         // Combine: all employees + beneficiaries without employee equivalents
         var result = employeeList.Concat(uniqueBeneficiaries).ToList();
 
@@ -277,7 +269,7 @@ public sealed class TerminatedEmployeeReportService
     /// Orchestrates the loading of profit details, balances, and the construction of year detail records.
     /// </summary>
     private async Task<TerminatedEmployeeAndBeneficiaryResponse> MergeAndCreateDataset(
-        IProfitSharingDbContext ctx,
+        ProfitSharingReadOnlyDbContext ctx,
         StartAndEndDateRequest req,
         List<MemberSlice> memberSliceUnion,
         CancellationToken cancellationToken)
