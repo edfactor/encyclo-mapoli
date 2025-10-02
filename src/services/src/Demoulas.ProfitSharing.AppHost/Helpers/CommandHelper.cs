@@ -6,12 +6,12 @@ namespace Demoulas.ProfitSharing.AppHost.Helpers;
 
 public static class CommandHelper
 {
-    public static ExecuteCommandResult RunConsoleApp(string projectPath, string launchProfile, ILogger logger, string? operationName = null, IInteractionService? interactionService = null)
+    public static async Task<ExecuteCommandResult> RunConsoleAppAsync(string projectPath, string launchProfile, ILogger logger, string? operationName = null, IInteractionService? interactionService = null)
     {
         // Show starting notification if interaction service is available
         if (interactionService?.IsAvailable == true && !string.IsNullOrWhiteSpace(operationName))
         {
-            _ = interactionService.PromptNotificationAsync(
+            await interactionService.PromptNotificationAsync(
                 title: $"Starting: {operationName}",
                 message: $"Beginning database operation: {operationName}",
                 options: new NotificationInteractionOptions
@@ -83,10 +83,10 @@ public static class CommandHelper
             var timeoutError = $"Operation timed out after {timeoutMinutes} minutes. Process was terminated.\n\n" +
                              $"Last output:\n{string.Join("\n", outputLines.TakeLast(10))}\n\n" +
                              $"Check console logs for full output.";
-            
+
             if (interactionService?.IsAvailable == true && !string.IsNullOrWhiteSpace(operationName))
             {
-                _ = interactionService.PromptNotificationAsync(
+                await interactionService.PromptNotificationAsync(
                     title: $"⏱️ Timeout: {operationName}",
                     message: $"**Operation timed out**: {operationName}\n\n{timeoutError}",
                     options: new NotificationInteractionOptions
@@ -136,7 +136,7 @@ public static class CommandHelper
                 // Show success notification if interaction service is available
                 if (interactionService?.IsAvailable == true)
                 {
-                    _ = interactionService.PromptNotificationAsync(
+                    await interactionService.PromptNotificationAsync(
                         title: $"Completed: {operationName}",
                         message: $"Database operation completed successfully: {operationName}",
                         options: new NotificationInteractionOptions
@@ -152,7 +152,7 @@ public static class CommandHelper
                 // Show error notification if interaction service is available
                 if (interactionService?.IsAvailable == true)
                 {
-                    _ = interactionService.PromptNotificationAsync(
+                    await interactionService.PromptNotificationAsync(
                         title: $"❌ Failed: {operationName}",
                         message: $"**Database operation failed**: {operationName}\n\n**Error Details:**\n```\n{result.ErrorMessage}\n```\n\nCheck console logs for more information.",
                         options: new NotificationInteractionOptions
