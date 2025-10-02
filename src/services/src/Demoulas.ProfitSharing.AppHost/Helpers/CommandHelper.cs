@@ -20,6 +20,9 @@ public static class CommandHelper
                 });
         }
 
+        var outputLines = new List<string>();
+        var errorLines = new List<string>();
+
         using var process = new Process
         {
             StartInfo = new ProcessStartInfo
@@ -34,26 +37,80 @@ public static class CommandHelper
             }
         };
 
-        process.Start();
-        string output = process.StandardOutput.ReadToEnd();
-        string error = process.StandardError.ReadToEnd();
-        process.WaitForExit();
-
-        // Log output for debugging
-        if (!string.IsNullOrWhiteSpace(output))
+        // Capture output in real-time as it's produced
+        process.OutputDataReceived += (sender, e) =>
         {
-            logger.LogInformation(output);
+            if (!string.IsNullOrEmpty(e.Data))
+            {
+                outputLines.Add(e.Data);
+                logger.LogInformation("[{Operation}] {Output}", operationName ?? "CLI", e.Data);
+            }
+        };
+
+        process.ErrorDataReceived += (sender, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.Data))
+            {
+                errorLines.Add(e.Data);
+                logger.LogError("[{Operation}] {Error}", operationName ?? "CLI", e.Data);
+            }
+        };
+
+        process.Start();
+        
+        // Begin asynchronous read operations
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
+        
+        // Wait for the process to exit (with timeout to prevent infinite hangs)
+        const int timeoutMinutes = 30; // Adjust based on expected operation duration
+        bool exited = process.WaitForExit(timeoutMinutes * 60 * 1000);
+        
+        if (!exited)
+        {
+            logger.LogError("[{Operation}] Process did not complete within {Timeout} minutes. Terminating...", 
+                operationName, timeoutMinutes);
+            
+            try
+            {
+                process.Kill(entireProcessTree: true);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to kill hung process");
+            }
+
+            var timeoutError = $"Operation timed out after {timeoutMinutes} minutes. Process was terminated.\n\n" +
+                             $"Last output:\n{string.Join("\n", outputLines.TakeLast(10))}\n\n" +
+                             $"Check console logs for full output.";
+            
+            if (interactionService?.IsAvailable == true && !string.IsNullOrWhiteSpace(operationName))
+            {
+                _ = interactionService.PromptNotificationAsync(
+                    title: $"⏱️ Timeout: {operationName}",
+                    message: $"**Operation timed out**: {operationName}\n\n{timeoutError}",
+                    options: new NotificationInteractionOptions
+                    {
+                        Intent = MessageIntent.Error
+                    });
+            }
+
+            return new ExecuteCommandResult { Success = false, ErrorMessage = timeoutError };
         }
+
+        // Combine output for result
+        string output = string.Join("\n", outputLines);
+        string error = string.Join("\n", errorLines);
 
         // Determine success based on exit code (most reliable indicator)
         ExecuteCommandResult result;
         if (process.ExitCode != 0)
         {
             // Operation failed - collect error details
-            var errorMessage = !string.IsNullOrWhiteSpace(error) 
-                ? error 
+            var errorMessage = !string.IsNullOrWhiteSpace(error)
+                ? error
                 : $"Process exited with code {process.ExitCode}. Check console logs for details.";
-            
+
             logger.LogError("Process failed with exit code {ExitCode}: {ErrorMessage}", process.ExitCode, errorMessage);
             result = new ExecuteCommandResult { Success = false, ErrorMessage = errorMessage };
         }
