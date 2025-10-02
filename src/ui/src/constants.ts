@@ -45,6 +45,7 @@ export const ROUTES = {
 
   FROZEN_SUMMARY: "frozen-summary",
   MASTER_INQUIRY: "master-inquiry",
+  ADJUSTMENTS: "adjustments",
   BENEFICIARY_INQUIRY: "beneficiary",
   PAY_BE_NEXT: "adhoc-beneficiaries-report",
   FORFEITURES_ADJUSTMENT: "forfeitures-adjustment",
