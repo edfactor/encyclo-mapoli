@@ -1,12 +1,25 @@
 ﻿using System.Diagnostics;
+using Aspire.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.AppHost.Helpers;
 
 public static class CommandHelper
 {
-    public static ExecuteCommandResult RunConsoleApp(string projectPath, string launchProfile, ILogger logger, string? operationName = null)
+    public static ExecuteCommandResult RunConsoleApp(string projectPath, string launchProfile, ILogger logger, string? operationName = null, IInteractionService? interactionService = null)
     {
+        // Show starting notification if interaction service is available
+        if (interactionService?.IsAvailable == true && !string.IsNullOrWhiteSpace(operationName))
+        {
+            _ = interactionService.PromptNotificationAsync(
+                title: $"Starting: {operationName}",
+                message: $"Beginning database operation: {operationName}",
+                options: new NotificationInteractionOptions
+                {
+                    Intent = MessageIntent.Information
+                });
+        }
+
         using var process = new Process
         {
             StartInfo = new ProcessStartInfo
@@ -44,10 +57,34 @@ public static class CommandHelper
             if (result.Success)
             {
                 logger.LogInformation("[{Operation}] completed successfully.", operationName);
+
+                // Show success notification if interaction service is available
+                if (interactionService?.IsAvailable == true)
+                {
+                    _ = interactionService.PromptNotificationAsync(
+                        title: $"Completed: {operationName}",
+                        message: $"Database operation completed successfully: {operationName}",
+                        options: new NotificationInteractionOptions
+                        {
+                            Intent = MessageIntent.Success
+                        });
+                }
             }
             else
             {
                 logger.LogError("[{Operation}] failed: {ErrorMessage}", operationName, result.ErrorMessage);
+
+                // Show error notification if interaction service is available
+                if (interactionService?.IsAvailable == true)
+                {
+                    _ = interactionService.PromptNotificationAsync(
+                        title: $"Failed: {operationName}",
+                        message: $"Database operation failed: {operationName}\n{result.ErrorMessage}",
+                        options: new NotificationInteractionOptions
+                        {
+                            Intent = MessageIntent.Error
+                        });
+                }
             }
         }
         return result;
