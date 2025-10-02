@@ -1,6 +1,7 @@
 import { Description as DescriptionIcon } from "@mui/icons-material";
 import { Box, Divider, List, ListItem, ListItemButton, ListItemText, Paper, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { Page } from "smart-ui-library";
 
 // Documentation files metadata
@@ -115,6 +116,13 @@ const documentationFiles = [
     filename: "TERMINATED_EMPLOYEE_REPORT_ANALYSIS.md",
     description:
       "Detailed analysis comparing SMART vs READY implementations, documenting known discrepancies, root causes, financial impacts, and investigation priorities for QA and stakeholders"
+  },
+  {
+    key: "terminations-business-guide",
+    title: "Terminations Business Guide",
+    filename: "TERMINATIONS_BUSINESS_GUIDE.md",
+    description:
+      "Comprehensive business guide for stakeholders and QA teams explaining termination processing, vesting calculations, beneficiary handling, filtering rules, and common scenarios"
   }
 ];
 
@@ -122,6 +130,16 @@ const Documentation: React.FC = () => {
   const [selectedDoc, setSelectedDoc] = useState<string | null>(null);
   const [documentContent, setDocumentContent] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const location = useLocation();
+
+  // Check for URL query parameter to pre-select a document
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const docKey = params.get("doc");
+    if (docKey && documentationFiles.some((d) => d.key === docKey)) {
+      setSelectedDoc(docKey);
+    }
+  }, [location.search]);
 
   // Load document content
   const loadDocument = async (filename: string) => {
