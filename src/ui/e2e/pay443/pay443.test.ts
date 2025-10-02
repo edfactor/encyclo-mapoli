@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { baseUrl, impersonateRole } from "../env.setup";
 
 
-test.describe("Pay 443: ", () => {
+test.describe.serial("Pay 443: ", () => {
     test.beforeEach(async ({ page }) => {
         await page.goto(baseUrl);
         await page.waitForLoadState("networkidle");
