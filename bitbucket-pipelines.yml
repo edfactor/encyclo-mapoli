@@ -626,6 +626,7 @@ pipelines:
     release:
       - parallel:
           - step: *build-and-test-backend
+          - step: *test-frontend
           - step: *audit-frontend
           - step: *audit-backend
       - parallel:
@@ -787,6 +788,7 @@ pipelines:
     develop:
       - parallel:
           - step: *build-and-test-backend
+          - step: *test-frontend
           - step: *audit-frontend
           - step: *audit-backend
 
@@ -795,6 +797,7 @@ pipelines:
     '**':
       - parallel:
           - step: *build-and-test-backend
+          - step: *test-frontend
           - step: *audit-frontend
           - step: *audit-backend
           - step: *secret-scan
