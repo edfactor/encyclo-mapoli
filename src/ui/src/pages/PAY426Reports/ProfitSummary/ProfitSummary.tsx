@@ -1,4 +1,4 @@
-import { Divider, Grid, Typography } from "@mui/material";
+import { Button, Divider, Grid, Typography } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useMemo, useState } from "react";
@@ -9,6 +9,8 @@ import { DSMGrid, Page } from "smart-ui-library";
 import { RootState } from "../../../reduxstore/store";
 import presets from "../PAY426N/presets";
 import { GetProfitSummaryGridColumns } from "./ProfitSummaryGridColumns";
+import CommitModal from "../../ProfitShareReport/CommitModal.tsx";
+import { useFinalizeReportMutation } from "reduxstore/api/YearsEndApi";
 
 /**
  * Default rows for "Active and Inactive" section - these will display with zero values
@@ -66,12 +68,29 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, fro
   const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingSummaryReportQuery();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedLineItem, setSelectedLineItem] = useState<string | null>(null);
-  const [isStatusCompleted, setIsStatusCompleted] = useState(false);
+  const [shouldArchive, setShouldArchive] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
   const navigationList = useSelector((state: RootState) => state.navigation.navigationData);
   const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
+  const [finalizeReport, { isLoading: isFinalizing }] = useFinalizeReportMutation();
+
+  const handleCommit = async () => {
+    if (profitYear) {
+      try {
+        await finalizeReport({ profitYear });
+        setIsModalOpen(false);
+      } catch (error) {
+        console.error("Failed to finalize report:", error);
+      }
+    }
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
 
   // Get the current navigation object to check its status
   const getCurrentNavigationObject = () => {
@@ -98,13 +117,12 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, fro
   };
 
   // Check if current status is "Completed"
-  useEffect(() => {
-    const currentNav = getCurrentNavigationObject();
-    if (currentNav) {
-      setIsStatusCompleted(currentNav.statusName === "Complete");
+  const handleStatusChange = (newStatus: string, statusName?: string) => {
+    // Only set shouldArchive to true when transitioning TO "Complete" status
+    if (statusName === "Complete") {
+      setShouldArchive(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigationList, currentNavigationId]);
+  };
 
   const getPresetForLineItem = (lineItemPrefix: string): FilterParams | null => {
     const presetMap: { [key: string]: string } = {
@@ -145,13 +163,40 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, fro
       trigger({
         useFrozenData: frozenData,
         profitYear: profitYear,
-        badgeNumber: null
+        badgeNumber: null,
+        archive: false
       });
     }
-  }, [trigger, profitYear, hasToken, isStatusCompleted]);
+  }, [trigger, profitYear, hasToken, frozenData]);
+
+  // Reload with archive=true when status changes to Complete
+  useEffect(() => {
+    if (shouldArchive && hasToken) {
+      trigger({
+        useFrozenData: frozenData,
+        profitYear: profitYear,
+        badgeNumber: null,
+        archive: true
+      });
+      setShouldArchive(false);
+    }
+  }, [shouldArchive, hasToken, frozenData, profitYear, trigger]);
 
   const renderActionNode = () => {
-    return <StatusDropdownActionNode />;
+    if (!frozenData) return null;
+
+    return (
+      <div className="flex h-10 items-center gap-2">
+        <Button
+          onClick={() => setIsModalOpen(true)}
+          variant="outlined"
+          className="h-10 min-w-fit whitespace-nowrap">
+          Commit
+        </Button>
+
+        <StatusDropdownActionNode onStatusChange={handleStatusChange} />
+      </div>
+    );
   };
 
   const columnDefs = useMemo(() => GetProfitSummaryGridColumns(), []);
@@ -250,6 +295,13 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, fro
             />
           </Grid>
         </Grid>
+
+        <CommitModal
+          open={isModalOpen}
+          onClose={handleCancel}
+          onCommit={handleCommit}
+          isFinalizing={isFinalizing}
+        />
       </Page>
     </>
   );

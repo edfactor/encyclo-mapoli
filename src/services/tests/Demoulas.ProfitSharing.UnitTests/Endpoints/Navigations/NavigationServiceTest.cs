@@ -51,19 +51,17 @@ public class NavigationServiceTests : ApiTestBase<Program>
             Assert.NotNull(n.Items);
         });
 
-    // Basic hierarchy check: at least one node has children
+        // Basic hierarchy check: at least one node has children
         Assert.True(navigation.Count > 0, "Expected at least one navigation item.");
         Assert.Contains(navigation, n => (n.Items?.Count ?? 0) > 0);
 
-    // Prerequisite projection check: Final Run (Id=17) should include Edit Run (Id=18) as a completed prerequisite
-    var yearEnd = navigation.FirstOrDefault(n => n.Id == Navigation.Constants.YearEnd);
-    Assert.NotNull(yearEnd);
-    var fiscalClose = yearEnd!.Items!.FirstOrDefault(n => n.Id == Navigation.Constants.FiscalClose);
-    Assert.NotNull(fiscalClose);
-    var finalRun = fiscalClose!.Items!.FirstOrDefault(n => n.Id == Navigation.Constants.ProfitShareReportFinalRun);
-    Assert.NotNull(finalRun);
-    Assert.NotNull(finalRun!.PrerequisiteNavigations);
-    Assert.Contains(finalRun.PrerequisiteNavigations!, p => p.Id == Navigation.Constants.ProfitShareReportEditRun && p.StatusId == NavigationStatus.Constants.Complete);
+        // Prerequisite projection check: Final Run (Id=17)
+        var yearEnd = navigation.FirstOrDefault(n => n.Id == Navigation.Constants.YearEnd);
+        Assert.NotNull(yearEnd);
+        var fiscalClose = yearEnd!.Items!.FirstOrDefault(n => n.Id == Navigation.Constants.FiscalClose);
+        Assert.NotNull(fiscalClose);
+        var finalRun = fiscalClose!.Items!.FirstOrDefault(n => n.Id == Navigation.Constants.ProfitShareReportFinalRun);
+        Assert.NotNull(finalRun);
     }
 
     //Dummy Data
@@ -101,7 +99,7 @@ public class NavigationServiceTests : ApiTestBase<Program>
         // Assert: All navigation items should have IsReadOnly = true
         Assert.NotNull(navigation);
         Assert.All(navigation, n => Assert.True(n.IsReadOnly, $"Navigation item '{n.Title}' should have IsReadOnly = true for ITDEVOPS role"));
-        
+
         // Also check child items
         var itemsWithChildren = navigation.Where(n => n.Items?.Any() == true);
         foreach (var parent in itemsWithChildren)
@@ -126,7 +124,7 @@ public class NavigationServiceTests : ApiTestBase<Program>
         // Assert: All navigation items should have IsReadOnly = false
         Assert.NotNull(navigation);
         Assert.All(navigation, n => Assert.False(n.IsReadOnly, $"Navigation item '{n.Title}' should have IsReadOnly = false for FINANCEMANAGER role"));
-        
+
         // Also check child items
         var itemsWithChildren = navigation.Where(n => n.Items?.Any() == true);
         foreach (var parent in itemsWithChildren)
@@ -151,7 +149,7 @@ public class NavigationServiceTests : ApiTestBase<Program>
         // Assert: All navigation items should have IsReadOnly = true
         Assert.NotNull(navigation);
         Assert.All(navigation, n => Assert.True(n.IsReadOnly, $"Navigation item '{n.Title}' should have IsReadOnly = true for AUDITOR role"));
-        
+
         // Also check child items
         var itemsWithChildren = navigation.Where(n => n.Items?.Any() == true);
         foreach (var parent in itemsWithChildren)

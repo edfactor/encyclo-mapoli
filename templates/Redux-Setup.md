@@ -1,1 +1,0 @@
-This document describes how to set up redux and rtk for a new front-end service.
