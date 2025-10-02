@@ -61,7 +61,7 @@ export const GetProfitShareGrossReportColumns = (navFunction: (badgeNumber: stri
       valueFormatter: (params) => numberToCurrency(params.value)
     },
     {
-      headerName: "Loans",
+      headerName: "Distrubutions",
       field: "loans",
       colId: "loans",
       minWidth: 120,
