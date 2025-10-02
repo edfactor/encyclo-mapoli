@@ -101,6 +101,20 @@ const documentationFiles = [
     filename: "MILITARY_CONTRIBUTION_QA_GUIDE.md",
     description:
       "Comprehensive QA testing guide for military contribution business logic, validation rules, test scenarios, and expected behaviors"
+  },
+  {
+    key: "terminated-employee-developer-guide",
+    title: "Terminated Employee Report - Developer Guide",
+    filename: "TERMINATED_EMPLOYEE_REPORT_DEVELOPER_GUIDE.md",
+    description:
+      "Complete developer guide for the Terminated Employee & Beneficiary Report implementation including data flow, calculation logic, vesting schedules, transaction processing, and code examples"
+  },
+  {
+    key: "terminated-employee-analysis",
+    title: "Terminated Employee Report - Discrepancy Analysis",
+    filename: "TERMINATED_EMPLOYEE_REPORT_ANALYSIS.md",
+    description:
+      "Detailed analysis comparing SMART vs READY implementations, documenting known discrepancies, root causes, financial impacts, and investigation priorities for QA and stakeholders"
   }
 ];
 
