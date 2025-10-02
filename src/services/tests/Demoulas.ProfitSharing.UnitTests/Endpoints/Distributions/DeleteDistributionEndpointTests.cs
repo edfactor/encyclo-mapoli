@@ -128,32 +128,32 @@ public class DeleteDistributionEndpointTests : ApiTestBase<Api.Program>
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
-        var request = new IdRequest { Id = 999999 }; // Non-existent ID
+        var request = new IdRequest { Id = 999999 }; // Non-existent ID (valid format, but doesn't exist)
 
         // Act
         var httpResponse = await ApiClient.DELETEAsync<DeleteDistributionEndpoint, IdRequest, bool>(request);
 
         // Assert
         httpResponse.ShouldNotBeNull();
-        // Note: The endpoint currently returns 500 instead of NotFound for non-existent IDs
-        // This should be fixed in the service layer
-        httpResponse.Response.StatusCode.ShouldBeOneOf(HttpStatusCode.NotFound, HttpStatusCode.InternalServerError);
+        httpResponse.Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
 
-    [Fact(DisplayName = "DeleteDistribution - Should return bad request for invalid ID")]
-    public async Task DeleteDistribution_WithInvalidId_ShouldReturnBadRequest()
+    [Theory(DisplayName = "DeleteDistribution - Should return bad request for invalid IDs")]
+    [InlineData(-1, "negative ID")]
+    [InlineData(-999, "large negative ID")]
+    [InlineData(int.MinValue, "minimum integer value")]
+    public async Task DeleteDistribution_WithInvalidId_ShouldReturnBadRequest(int invalidId, string description)
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
-        var request = new IdRequest { Id = -1 }; // Invalid negative ID
+        var request = new IdRequest { Id = invalidId };
 
         // Act
         var httpResponse = await ApiClient.DELETEAsync<DeleteDistributionEndpoint, IdRequest, bool>(request);
 
         // Assert
-        // Note: The endpoint currently returns 500 instead of proper error handling for invalid IDs
-        // This should be fixed in the service layer to return BadRequest/NotFound instead
-        httpResponse.Response.StatusCode.ShouldBeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.NotFound, HttpStatusCode.InternalServerError);
+        httpResponse.ShouldNotBeNull();
+        httpResponse.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest, $"Should return BadRequest for {description}");
     }
 
     [Fact(DisplayName = "DeleteDistribution - Should return bad request for zero ID")]
@@ -167,9 +167,8 @@ public class DeleteDistributionEndpointTests : ApiTestBase<Api.Program>
         var httpResponse = await ApiClient.DELETEAsync<DeleteDistributionEndpoint, IdRequest, bool>(request);
 
         // Assert
-        // Note: The endpoint currently returns 500 instead of proper error handling for invalid IDs
-        // This should be fixed in the service layer to return BadRequest/NotFound instead
-        httpResponse.Response.StatusCode.ShouldBeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.NotFound, HttpStatusCode.InternalServerError);
+        httpResponse.ShouldNotBeNull();
+        httpResponse.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
     [Theory(DisplayName = "DeleteDistribution - Should successfully delete distributions with different statuses")]
@@ -489,17 +488,16 @@ public class DeleteDistributionEndpointTests : ApiTestBase<Api.Program>
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
 
-        // Create a request that might cause service-level issues
-        var request = new IdRequest { Id = int.MaxValue }; // Very large ID that might cause issues
+        // Create a request with a valid format ID that doesn't exist (to test NotFound handling)
+        var request = new IdRequest { Id = int.MaxValue }; // Very large but valid ID
 
         // Act
         var response = await ApiClient.DELETEAsync<DeleteDistributionEndpoint, IdRequest, bool>(request);
         
         // Assert
-        // The response should handle any service errors appropriately
+        // The response should handle the case where the distribution doesn't exist
         response.ShouldNotBeNull();
-        // The exact status code depends on how the service layer handles edge cases
-        response.Response.StatusCode.ShouldBeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.InternalServerError, HttpStatusCode.NotFound);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
 
     [Fact(DisplayName = "DeleteDistribution - Endpoint configuration should be correct")]
@@ -524,17 +522,15 @@ public class DeleteDistributionEndpointTests : ApiTestBase<Api.Program>
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
-        var request = new IdRequest { Id = int.MaxValue }; // Maximum possible ID
+        var request = new IdRequest { Id = int.MaxValue }; // Maximum possible ID (valid format, but likely doesn't exist)
 
         // Act
         var httpResponse = await ApiClient.DELETEAsync<DeleteDistributionEndpoint, IdRequest, bool>(request);
 
         // Assert
-        // Should return not found for non-existent large ID
+        // Should return not found for non-existent large ID (valid format, but doesn't exist in database)
         httpResponse.ShouldNotBeNull();
-        // Note: The endpoint currently returns 500 instead of proper error handling for large IDs
-        // This should be fixed in the service layer
-        httpResponse.Response.StatusCode.ShouldBeOneOf(HttpStatusCode.NotFound, HttpStatusCode.BadRequest, HttpStatusCode.InternalServerError);
+        httpResponse.Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
 
     [Fact(DisplayName = "DeleteDistribution - Should verify business metrics are recorded")]

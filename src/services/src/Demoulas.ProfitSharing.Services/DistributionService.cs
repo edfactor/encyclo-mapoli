@@ -435,6 +435,16 @@ public sealed class DistributionService : IDistributionService
 
     public async Task<Result<bool>> DeleteDistribution(int distributionId, CancellationToken cancellationToken)
     {
+        // Validate input parameters
+        if (distributionId <= 0)
+        {
+            var validationErrors = new Dictionary<string, string[]>
+            {
+                [nameof(distributionId)] = ["Distribution ID must be a positive integer."]
+            };
+            return Result<bool>.ValidationFailure(validationErrors);
+        }
+
         return await _dataContextFactory.UseWritableContext(async ctx =>
         {
             var distribution = await ctx.Distributions.Where(d => d.Id == distributionId).FirstOrDefaultAsync(cancellationToken);

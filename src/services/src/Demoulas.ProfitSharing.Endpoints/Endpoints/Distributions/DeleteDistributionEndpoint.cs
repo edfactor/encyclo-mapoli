@@ -1,6 +1,8 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
+using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
@@ -11,7 +13,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Distributions;
 
-public sealed class DeleteDistributionEndpoint : ProfitSharingEndpoint<IdRequest, Results<Ok<bool>, NotFound, ProblemHttpResult>>
+public sealed class DeleteDistributionEndpoint : ProfitSharingEndpoint<IdRequest, Results<Ok<bool>, NotFound, BadRequest, ProblemHttpResult>>
 {
     private readonly IDistributionService _distributionService;
     private readonly ILogger<DeleteDistributionEndpoint> _logger;
@@ -36,7 +38,7 @@ public sealed class DeleteDistributionEndpoint : ProfitSharingEndpoint<IdRequest
         });
     }
 
-    public override Task<Results<Ok<bool>, NotFound, ProblemHttpResult>> ExecuteAsync(IdRequest req, CancellationToken ct)
+    public override Task<Results<Ok<bool>, NotFound, BadRequest, ProblemHttpResult>> ExecuteAsync(IdRequest req, CancellationToken ct)
     {
         return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
@@ -47,7 +49,7 @@ public sealed class DeleteDistributionEndpoint : ProfitSharingEndpoint<IdRequest
                 new("operation", "distribution-deletion"),
                 new("endpoint", nameof(DeleteDistributionEndpoint)));
 
-            return result.ToHttpResult();
+            return result.ToHttpResultWithValidation(Error.DistributionNotFound);
         });
     }
 }
