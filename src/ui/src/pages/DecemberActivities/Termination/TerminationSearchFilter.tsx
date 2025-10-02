@@ -1,14 +1,15 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Button, FormHelperText, Grid } from "@mui/material";
-import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { clearTermination } from "reduxstore/slices/yearsEndSlice";
-import { RootState } from "reduxstore/store";
 import { SearchAndReset, SmartModal } from "smart-ui-library";
 import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
+import DuplicateSsnGuard from "../../../components/DuplicateSsnGuard";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { clearTermination } from "../../../reduxstore/slices/yearsEndSlice";
+import { RootState } from "../../../reduxstore/store";
 import { CalendarResponseDto } from "../../../reduxstore/types";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
 import { TerminationSearchRequest } from "./Termination";
@@ -67,7 +68,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
       beginningDate: termination?.startDate || (fiscalData ? fiscalData.fiscalBeginDate : "") || "",
       endingDate: termination?.endDate || (fiscalData ? fiscalData.fiscalEndDate : "") || "",
       forfeitureStatus: "showAll",
-      pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true },
+      pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: false },
       profitYear: selectedProfitYear
     }
   });
@@ -93,15 +94,17 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
 
   const validateAndSearch = handleSubmit(validateAndSubmit);
 
-  const handleReset = () => {
+  const handleReset = async () => {
     setInitialSearchLoaded(false);
     reset({
       beginningDate: fiscalData ? fiscalData.fiscalBeginDate : "",
       endingDate: fiscalData ? fiscalData.fiscalEndDate : "",
       forfeitureStatus: "showAll",
-      pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
+      pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: false },
+      profitYear: selectedProfitYear
     });
-    trigger();
+    // Trigger validation after reset to ensure form validity is updated
+    await trigger();
     dispatch(clearTermination());
   };
 
@@ -180,12 +183,16 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
       <Grid
         width="100%"
         paddingX="24px">
-        <SearchAndReset
-          handleReset={handleReset}
-          handleSearch={validateAndSearch}
-          isFetching={false}
-          disabled={!isValid}
-        />
+        <DuplicateSsnGuard>
+          {({ prerequisitesComplete }) => (
+            <SearchAndReset
+              handleReset={handleReset}
+              handleSearch={validateAndSearch}
+              isFetching={false}
+              disabled={!isValid || !prerequisitesComplete}
+            />
+          )}
+        </DuplicateSsnGuard>
       </Grid>
     </form>
   );

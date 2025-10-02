@@ -37,7 +37,33 @@ public sealed class DemographicFaker : Faker<Demographic>
             .RuleFor(d => d.FullTimeDate, f => f.Date.Past(10, new DateTime(2024, 12, 01, 01, 01, 01, DateTimeKind.Local)).ToDateOnly())
             .RuleFor(d => d.HireDate, f => f.Date.Past(15, new DateTime(2024, 12, 01, 01, 01, 01, DateTimeKind.Local)).ToDateOnly())
             .RuleFor(d => d.ReHireDate, f => f.Date.Past(5, new DateTime(2024, 12, 01, 01, 01, 01, DateTimeKind.Local)).ToDateOnly())
-            .RuleFor(d => d.TerminationCodeId, f => f.PickRandom('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'))
+            .RuleFor(d => d.TerminationCodeId, f => f.PickRandom(
+                TerminationCode.Constants.LeftOnOwn,
+                TerminationCode.Constants.PersonalOrFamilyReason,
+                TerminationCode.Constants.CouldNotWorkAvailableHours,
+                TerminationCode.Constants.Stealing,
+                TerminationCode.Constants.NotFollowingCompanyPolicy,
+                TerminationCode.Constants.FmlaExpired,
+                TerminationCode.Constants.TerminatedPrivate,
+                TerminationCode.Constants.JobAbandonment,
+                TerminationCode.Constants.HealthReasonsNonFmla,
+                TerminationCode.Constants.LayoffNoWork,
+                TerminationCode.Constants.SchoolOrSports,
+                TerminationCode.Constants.MoveOutOfArea,
+                TerminationCode.Constants.PoorPerformance,
+                TerminationCode.Constants.OffForSummer,
+                TerminationCode.Constants.WorkmansCompensation,
+                TerminationCode.Constants.Injured,
+                TerminationCode.Constants.Transferred,
+                TerminationCode.Constants.Retired,
+                TerminationCode.Constants.Competition,
+                TerminationCode.Constants.AnotherJob,
+                TerminationCode.Constants.WouldNotRehire,
+                TerminationCode.Constants.NeverReported,
+                TerminationCode.Constants.RetiredReceivingPension,
+                TerminationCode.Constants.Military,
+                TerminationCode.Constants.FmlaApproved,
+                TerminationCode.Constants.Deceased))
             .RuleFor(d => d.TerminationDate, f => f.Date.Past(5, new DateTime(2024, 12, 01, 01, 01, 01, DateTimeKind.Local)).ToDateOnly())
             .RuleFor(d => d.EmploymentTypeId, f => f.PickRandom<char>('P', 'H', 'G', 'F'))
             .RuleFor(d => d.EmploymentType, f => employeeTypeFaker.Generate())

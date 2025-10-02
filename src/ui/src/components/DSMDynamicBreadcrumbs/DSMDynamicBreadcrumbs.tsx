@@ -33,7 +33,19 @@ const DSMDynamicBreadcrumbs: React.FC<DSMDynamicBreadcrumbsProps> = ({ separator
   const handleClick = (path: string, index: number) => {
     if (path !== location.pathname) {
       // Sanitize path to prevent open redirect - only allow internal paths
-      const sanitizedPath = path.startsWith("/") && !path.startsWith("//") && !path.includes("://") ? path : "/";
+      let sanitizedPath = "/";
+      if (
+        typeof path === "string" &&
+        path.startsWith("/") &&
+        !path.startsWith("//") &&
+        !path.includes("://") &&
+        !path.includes("\\") &&
+        !path.includes("..") &&
+        !path.includes("%2f") &&
+        !path.includes("%5c")
+      ) {
+        sanitizedPath = path;
+      }
 
       const newHistory = navigationHistory.slice(0, index + 1);
       setNavigationHistory(newHistory);

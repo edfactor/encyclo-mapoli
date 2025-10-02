@@ -176,10 +176,6 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.NavigationRoles).Returns(mockNavigationRoles.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.NavigationRoles).Returns(mockNavigationRoles.Object);
 
-
-
-
-
         List<PayClassification>? payClassifications = new PayClassificationFaker().Generate(500);
         Mock<DbSet<PayClassification>> mockPayClassifications = payClassifications.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.PayClassifications).Returns(mockPayClassifications.Object);

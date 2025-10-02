@@ -1,7 +1,7 @@
 import { IHeaderParams } from "ag-grid-community";
-import { SelectableGridHeader } from "components/SelectableGridHeader";
-import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
-import { ForfeitureAdjustmentUpdateRequest } from "types";
+import { SelectableGridHeader } from "../../../components/SelectableGridHeader";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { ForfeitureAdjustmentUpdateRequest } from "../../../types";
 
 interface HeaderComponentProps extends IHeaderParams {
   addRowToSelectedRows: (id: number) => void;
