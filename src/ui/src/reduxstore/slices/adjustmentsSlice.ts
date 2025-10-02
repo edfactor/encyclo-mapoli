@@ -1,31 +1,12 @@
 
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-// Types for merge operations
-export interface MergeProfitsDetailRequest {
-  sourceEmployeeId: number;
-  destinationEmployeeId: number;
-  profitYear: number;
-  notes?: string;
-}
-
-export interface MergeProfitsDetailResponse {
-  success: boolean;
-  message: string;
-  mergedRecordsCount: number;
-  sourceEmployeeId: number;
-  destinationEmployeeId: number;
-  transactionId?: string;
-}
-
 export interface AdjustmentsState {
   // Merge operation state
   isMerging: boolean;
   mergeError: string | null;
   mergeSuccess: boolean;
-  mergeResult: MergeProfitsDetailResponse | null;
   
-  // UI state
   selectedProfitYear: number;
   mergeNotes: string;
 }
@@ -36,7 +17,6 @@ const initialState: AdjustmentsState = {
   isMerging: false,
   mergeError: null,
   mergeSuccess: false,
-  mergeResult: null,
   selectedProfitYear: currentYear,
   mergeNotes: ""
 };
@@ -57,7 +37,6 @@ const adjustmentsSlice = createSlice({
     setMergeSuccess: (state, action: PayloadAction<MergeProfitsDetailResponse>) => {
       state.isMerging = false;
       state.mergeSuccess = true;
-      state.mergeResult = action.payload;
       state.mergeError = null;
     },
     
@@ -81,7 +60,6 @@ const adjustmentsSlice = createSlice({
       state.isMerging = false;
       state.mergeError = null;
       state.mergeSuccess = false;
-      state.mergeResult = null;
       state.mergeNotes = "";
     },
     

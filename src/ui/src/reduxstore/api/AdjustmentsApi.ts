@@ -10,7 +10,7 @@ export const AdjustmentsApi = createApi({
   endpoints: (builder) => ({
     mergeProfitsDetail: builder.mutation<void, MergeProfitsDetailRequest>({
       query: (mergeRequest) => ({
-        url: "adjustments/merge-profits-details",
+        url: "adjustments/merge-profit-details",
         method: "PUT",
         body: mergeRequest
       }),
