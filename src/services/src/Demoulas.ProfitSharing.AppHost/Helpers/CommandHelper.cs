@@ -39,12 +39,30 @@ public static class CommandHelper
         string error = process.StandardError.ReadToEnd();
         process.WaitForExit();
 
-        logger.LogError(output);
-        ExecuteCommandResult result;
-        if (!string.IsNullOrWhiteSpace(error))
+        // Log output for debugging
+        if (!string.IsNullOrWhiteSpace(output))
         {
-            logger.LogError(error);
-            result = new ExecuteCommandResult { Success = false, ErrorMessage = error };
+            logger.LogInformation(output);
+        }
+
+        // Determine success based on exit code (most reliable indicator)
+        ExecuteCommandResult result;
+        if (process.ExitCode != 0)
+        {
+            // Operation failed - collect error details
+            var errorMessage = !string.IsNullOrWhiteSpace(error) 
+                ? error 
+                : $"Process exited with code {process.ExitCode}. Check console logs for details.";
+            
+            logger.LogError("Process failed with exit code {ExitCode}: {ErrorMessage}", process.ExitCode, errorMessage);
+            result = new ExecuteCommandResult { Success = false, ErrorMessage = errorMessage };
+        }
+        else if (!string.IsNullOrWhiteSpace(error))
+        {
+            // Exit code 0 but stderr has content - log as warning but treat as success
+            // (some tools write non-error info to stderr)
+            logger.LogWarning("Process succeeded but wrote to stderr: {StdErr}", error);
+            result = CommandResults.Success();
         }
         else
         {
@@ -78,8 +96,8 @@ public static class CommandHelper
                 if (interactionService?.IsAvailable == true)
                 {
                     _ = interactionService.PromptNotificationAsync(
-                        title: $"Failed: {operationName}",
-                        message: $"Database operation failed: {operationName}\n{result.ErrorMessage}",
+                        title: $"❌ Failed: {operationName}",
+                        message: $"**Database operation failed**: {operationName}\n\n**Error Details:**\n```\n{result.ErrorMessage}\n```\n\nCheck console logs for more information.",
                         options: new NotificationInteractionOptions
                         {
                             Intent = MessageIntent.Error
