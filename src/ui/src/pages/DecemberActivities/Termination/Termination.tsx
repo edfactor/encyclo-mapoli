@@ -1,8 +1,10 @@
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { useEffect, useRef, useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { ApiMessageAlert, DSMAccordion, Page } from "smart-ui-library";
+import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
 
-import { CircularProgress, Divider, Grid } from "@mui/material";
+import { HelpOutline } from "@mui/icons-material";
+import { Box, CircularProgress, Divider, Grid, IconButton, Tooltip } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 import { CAPTIONS } from "../../../constants";
 import { useLazyGetAccountingRangeToCurrent } from "../../../hooks/useFiscalCalendarYear";
@@ -20,19 +22,37 @@ export interface TerminationSearchRequest extends StartAndEndDateRequest {
 const Termination = () => {
   const [fetchAccountingRange, { data: fiscalData, isLoading: isRangeLoading }] = useLazyGetAccountingRangeToCurrent(6);
   const { state, actions } = useTerminationState();
-  
+  const navigate = useNavigate();
+
   // Function to scroll to top - only used for error cases
   const scrollToTop = useCallback(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   // Use the navigation guard hook
   useUnsavedChangesGuard(state.hasUnsavedChanges);
 
-  // Modify renderActionNode to NOT automatically scroll to top
-  const renderActionNode = () => {
+  // Navigate to documentation page with terminations guide selected
+  const handleHelpClick = () => {
+    navigate("/documentation?doc=terminations-business-guide");
+  };
 
-    return <StatusDropdownActionNode onStatusChange={actions.handleStatusChange} />;
+  // Modify renderActionNode to include both status dropdown and help button
+  const renderActionNode = () => {
+    return (
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <Tooltip title="View Terminations Documentation">
+          <IconButton
+            onClick={handleHelpClick}
+            color="primary"
+            size="medium"
+            aria-label="help documentation">
+            <HelpOutline />
+          </IconButton>
+        </Tooltip>
+        <StatusDropdownActionNode onStatusChange={actions.handleStatusChange} />
+      </Box>
+    );
   };
 
   useEffect(() => {
@@ -45,18 +65,15 @@ const Termination = () => {
   useEffect(() => {
     const handleMessageEvent = (event: CustomEvent) => {
       // Check if the message is an error related to Termination
-      if (
-        event.detail?.key === 'TerminationSave' &&
-        event.detail?.message?.type === 'error'
-      ) {
+      if (event.detail?.key === "TerminationSave" && event.detail?.message?.type === "error") {
         scrollToTop();
       }
     };
 
-    window.addEventListener('dsmMessage' as any, handleMessageEvent);
+    window.addEventListener("dsmMessage" as any, handleMessageEvent);
 
     return () => {
-      window.removeEventListener('dsmMessage' as any, handleMessageEvent);
+      window.removeEventListener("dsmMessage" as any, handleMessageEvent);
     };
   }, [scrollToTop]);
 
@@ -64,7 +81,6 @@ const Termination = () => {
     <Page
       label={CAPTIONS.TERMINATIONS}
       actionNode={renderActionNode()}>
-
       <div>
         <ApiMessageAlert commonKey="TerminationSave" />
         <Grid

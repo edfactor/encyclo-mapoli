@@ -115,7 +115,13 @@ const RouterSubAssembly: React.FC = () => {
       const newSearch = params.toString();
 
       // Validate pathname to prevent open redirect attacks
-      const isValidPath = location.pathname.startsWith("/") && !location.pathname.includes("://");
+      // Only allow navigation to known routes, otherwise redirect to "/"
+      const knownRoutes = Object.values(ROUTES) as string[];
+      const isValidPath =
+        location.pathname.startsWith("/") &&
+        !location.pathname.includes("://") &&
+        (knownRoutes.map(String).includes(location.pathname) || location.pathname === "/");
+
       const safePath = isValidPath ? location.pathname : "/";
 
       navigate(`${safePath}${newSearch ? `?${newSearch}` : ""}`, { replace: true });

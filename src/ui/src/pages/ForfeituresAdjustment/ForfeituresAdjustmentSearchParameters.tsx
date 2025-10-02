@@ -1,6 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, Grid, TextField, Typography } from "@mui/material";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
@@ -130,6 +129,7 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
 
     setPageReset(true);
     dispatch(setForfeitureAdjustmentQueryParams(searchParams));
+    dispatch(clearForfeitureAdjustmentData());
 
     const result = await triggerSearch(searchParams);
 
