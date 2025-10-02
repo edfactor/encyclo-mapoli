@@ -1,1 +1,0 @@
-This document describes how to set up front end unit tests.
