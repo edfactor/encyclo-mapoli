@@ -132,7 +132,7 @@ var cliRunner = builder.AddExecutable("Database-Cli",
                 }
 
                 // Show starting notification
-                await interactionService.PromptNotificationAsync(
+                _ = interactionService.PromptNotificationAsync(
                     title: "🚀 Starting Nuclear Option",
                     message: "Beginning full database reset. This may take several minutes...",
                     options: new NotificationInteractionOptions
@@ -165,7 +165,7 @@ var cliRunner = builder.AddExecutable("Database-Cli",
             // Show final success notification
             if (interactionService.IsAvailable)
             {
-                await interactionService.PromptNotificationAsync(
+                _ = interactionService.PromptNotificationAsync(
                     title: "✅ Nuclear Option Complete!",
                     message: "Database has been successfully reset. All steps completed.",
                     options: new NotificationInteractionOptions
