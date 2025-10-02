@@ -1,13 +1,6 @@
 import { CellClickedEvent, ColDef, ICellRendererParams } from "ag-grid-community";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  useLazyGetTerminationReportQuery,
-  useUpdateForfeitureAdjustmentBulkMutation,
-  useUpdateForfeitureAdjustmentMutation
-} from "reduxstore/api/YearsEndApi";
-import { RootState } from "reduxstore/store";
-import { CalendarResponseDto, ForfeitureAdjustmentUpdateRequest, StartAndEndDateRequest } from "reduxstore/types";
 import { DSMGrid, formatNumberWithComma, numberToCurrency, Pagination, setMessage } from "smart-ui-library";
 import { ReportSummary } from "../../../components/ReportSummary";
 import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
@@ -17,6 +10,17 @@ import { useEditState } from "../../../hooks/useEditState";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
 import { useRowSelection } from "../../../hooks/useRowSelection";
+import {
+  useLazyGetTerminationReportQuery,
+  useUpdateForfeitureAdjustmentBulkMutation,
+  useUpdateForfeitureAdjustmentMutation
+} from "../../../reduxstore/api/YearsEndApi";
+import { RootState } from "../../../reduxstore/store";
+import {
+  CalendarResponseDto,
+  ForfeitureAdjustmentUpdateRequest,
+  StartAndEndDateRequest
+} from "../../../reduxstore/types";
 import { Messages } from "../../../utils/messageDictonary";
 import { TerminationSearchRequest } from "./Termination";
 import { GetDetailColumns } from "./TerminationDetailsGridColumns";
@@ -100,8 +104,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
     useGridPagination({
       initialPageSize: 25,
-      initialSortBy: "badgeNumber",
-      initialSortDescending: true,
+      initialSortBy: "name",
+      initialSortDescending: false,
       onPaginationChange: useCallback(
         async (pageNum: number, pageSz: number, sortPrms: any) => {
           if (initialSearchLoaded && searchParams) {
