@@ -57,20 +57,20 @@ public static class CommandHelper
         };
 
         process.Start();
-        
+
         // Begin asynchronous read operations
         process.BeginOutputReadLine();
         process.BeginErrorReadLine();
-        
+
         // Wait for the process to exit (with timeout to prevent infinite hangs)
         const int timeoutMinutes = 30; // Adjust based on expected operation duration
         bool exited = process.WaitForExit(timeoutMinutes * 60 * 1000);
-        
+
         if (!exited)
         {
-            logger.LogError("[{Operation}] Process did not complete within {Timeout} minutes. Terminating...", 
+            logger.LogError("[{Operation}] Process did not complete within {Timeout} minutes. Terminating...",
                 operationName, timeoutMinutes);
-            
+
             try
             {
                 process.Kill(entireProcessTree: true);
