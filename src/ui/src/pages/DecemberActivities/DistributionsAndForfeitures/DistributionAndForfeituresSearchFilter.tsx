@@ -127,7 +127,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
         container
         paddingX="24px"
         gap="24px">
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 4, md: 2 }}>
           <Controller
             name="startDate"
             control={control}
@@ -140,15 +140,16 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                 }}
                 value={field.value}
                 required={false}
-                label="Start Date (Day is not used)"
+                label="Start Date"
                 disableFuture
                 error={errors.startDate?.message}
+                views={["year", "month"]}
               />
             )}
           />
           {errors.startDate && <FormHelperText error>{errors.startDate.message}</FormHelperText>}
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 4, md: 2 }}>
           <Controller
             name="endDate"
             control={control}
@@ -161,9 +162,10 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                 }}
                 value={field.value}
                 required={false}
-                label="End Date (Day is not used)"
+                label="End Date"
                 disableFuture
                 error={errors.endDate?.message}
+                views={["year", "month"]}
               />
             )}
           />
