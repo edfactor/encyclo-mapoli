@@ -369,13 +369,13 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
                       Sets accounting calendar year
                     </Alert>
                   )}
-                  <div style={{ padding: "24px" }}>
+                  {/* <div style={{ padding: "24px" }}>
                     <ProfitYearSelector
                       selectedProfitYear={selectedProfitYearForDecemberActivities}
                       handleChange={handleDecemberProfitYearChange}
                       defaultValue={profitYear?.toString()}
                     />
-                  </div>
+                  </div> */}
                 </div>
               )}
 
@@ -396,13 +396,13 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
                       Sets accounting calendar year
                     </Alert>
                   )}
-                  <div style={{ padding: "24px" }}>
+                  {/* <div style={{ padding: "24px" }}>
                     <ProfitYearSelector
                       selectedProfitYear={selectedProfitYearForFiscalClose}
                       handleChange={handleFiscalCloseProfitYearChange}
                       defaultValue={fiscalFlowProfitYear?.toString()}
                     />
-                  </div>
+                  </div> */}
                 </div>
               )}
               <List>
