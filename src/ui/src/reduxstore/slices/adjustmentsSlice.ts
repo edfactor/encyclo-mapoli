@@ -1,4 +1,3 @@
-
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface AdjustmentsState {
@@ -6,19 +5,12 @@ export interface AdjustmentsState {
   isMerging: boolean;
   mergeError: string | null;
   mergeSuccess: boolean;
-  
-  selectedProfitYear: number;
-  mergeNotes: string;
 }
-
-const currentYear = new Date().getFullYear();
 
 const initialState: AdjustmentsState = {
   isMerging: false,
   mergeError: null,
   mergeSuccess: false,
-  selectedProfitYear: currentYear,
-  mergeNotes: ""
 };
 
 const adjustmentsSlice = createSlice({
@@ -34,7 +26,7 @@ const adjustmentsSlice = createSlice({
       }
     },
     
-    setMergeSuccess: (state, action: PayloadAction<MergeProfitsDetailResponse>) => {
+    setMergeSuccess: (state) => {
       state.isMerging = false;
       state.mergeSuccess = true;
       state.mergeError = null;
@@ -46,21 +38,11 @@ const adjustmentsSlice = createSlice({
       state.mergeSuccess = false;
     },
     
-    // UI state actions
-    setProfitYear: (state, action: PayloadAction<number>) => {
-      state.selectedProfitYear = action.payload;
-    },
-    
-    setMergeNotes: (state, action: PayloadAction<string>) => {
-      state.mergeNotes = action.payload;
-    },
-    
     // Reset actions
     resetMerge: (state) => {
       state.isMerging = false;
       state.mergeError = null;
       state.mergeSuccess = false;
-      state.mergeNotes = "";
     },
     
     resetAll: () => initialState
@@ -71,8 +53,6 @@ export const {
   setMerging,
   setMergeSuccess,
   setMergeError,
-  setProfitYear,
-  setMergeNotes,
   resetMerge,
   resetAll
 } = adjustmentsSlice.actions;
