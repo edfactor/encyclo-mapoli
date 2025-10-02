@@ -1,0 +1,1 @@
+The interfaces that define the types in the front-end are in ./src/ui/src/types. For the type you are creating, if there is a filename with a similar word, put the type in there. If not, put it in another new directory in types. Make sure that new file is exported in ./src/ui/src/types/index.ts so that the components can access it.
