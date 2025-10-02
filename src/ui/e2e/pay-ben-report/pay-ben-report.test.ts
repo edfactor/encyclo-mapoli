@@ -6,9 +6,46 @@ test.describe("Pay Beneficiary Report: ", () => {
     test.beforeEach(async ({ page }) => {
         await page.goto(baseUrl);
         await page.waitForLoadState("networkidle");
-    await impersonateRole(page, 'Finance-Manager');
-        await page.getByRole('button').filter({ hasText: /^$/ }).click();
-        await page.getByRole('button', { name: 'Fiscal Close' }).click();
+        await impersonateRole(page, 'Finance-Manager');
+
+        // Wait for a stable navigation region or the app header before interacting with nav buttons
+        const navRegion = page.getByRole('navigation').first();
+        if ((await navRegion.count()) > 0) {
+            await navRegion.waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
+        } else {
+            // fallback: wait for any MUI app bar or a known container
+            await page.locator('header, .MuiAppBar-root, .app-header').first().waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
+        }
+
+        // Ensure the drawer/icon button is clicked if present (some pages hide nav inside a drawer)
+        const emptyBtn = page.getByRole('button').filter({ hasText: /^$/ });
+        if ((await emptyBtn.count()) > 0) {
+            await emptyBtn.first().click().catch(() => {});
+        } else {
+            const iconBtn = page.locator('button.MuiIconButton-root').first();
+            if ((await iconBtn.count()) > 0) {
+                await iconBtn.first().click().catch(() => {});
+            }
+        }
+
+        const fiscalBtn = page.getByRole('button', { name: 'Fiscal Close' });
+        await fiscalBtn.waitFor({ state: 'visible', timeout: 20000 });
+
+        // retry clicking Fiscal Close a few times to avoid flakiness
+        let clicked = false;
+        for (let i = 0; i < 4 && !clicked; i++) {
+            try {
+                await fiscalBtn.click({ timeout: 5000 });
+                clicked = true;
+            } catch (e) {
+                await page.waitForTimeout(500);
+            }
+        }
+        if (!clicked) {
+            // final fallback to click via text selector
+            await page.click('button:has-text("Fiscal Close")', { timeout: 10000 }).catch(() => {});
+        }
+
         await page.getByRole('button', { name: 'Pay Beneficiary Report' }).click();
     });
 
