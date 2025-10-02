@@ -1,6 +1,8 @@
-﻿using Demoulas.ProfitSharing.AppHost;
+﻿using Aspire.Hosting;
+using Demoulas.ProfitSharing.AppHost;
 using Demoulas.ProfitSharing.AppHost.Helpers;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Projects;
 
@@ -28,33 +30,155 @@ var cliRunner = builder.AddExecutable("Database-Cli",
     .WithCommand(
         name: "upgrade-db",
         displayName: "Upgrade database",
-        executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "upgrade-db", logger, "upgrade-db")),
-        commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled })
+        executeCommand: (c) =>
+        {
+            var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
+            return Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "upgrade-db", logger, "Upgrade Database", interactionService));
+        },
+        commandOptions: new CommandOptions { IconName = "ArrowUp", IconVariant = IconVariant.Filled })
     .WithCommand(
         name: "drop-recreate-db",
         displayName: "Drop and recreate database",
-        executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "drop-recreate-db", logger, "drop-recreate-db")),
-        commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled })
+        executeCommand: async (c) =>
+        {
+            var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
+
+            // Show confirmation for destructive operation
+            if (interactionService.IsAvailable)
+            {
+                var confirmation = await interactionService.PromptConfirmationAsync(
+                    title: "⚠️ Confirm Database Drop",
+                    message: "Are you sure you want to **drop and recreate** the database? All data will be lost!",
+                    options: new MessageBoxInteractionOptions
+                    {
+                        Intent = MessageIntent.Warning,
+                        PrimaryButtonText = "Yes, Drop Database",
+                        SecondaryButtonText = "Cancel",
+                        ShowSecondaryButton = true,
+                        EnableMessageMarkdown = true
+                    });
+
+                if (!confirmation.Data)
+                {
+                    return CommandResults.Failure("User cancelled the operation.");
+                }
+            }
+
+            return CommandHelper.RunConsoleApp(projectPath!, "drop-recreate-db", logger, "Drop & Recreate Database", interactionService);
+        },
+        commandOptions: new CommandOptions { IconName = "DatabaseWarning", IconVariant = IconVariant.Filled })
     .WithCommand(
         name: "import-from-ready",
         displayName: "Import from READY",
-        executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "import-from-ready", logger, "import-from-ready")),
-        commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled })
+        executeCommand: (c) =>
+        {
+            var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
+            return Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "import-from-ready", logger, "Import from READY", interactionService));
+        },
+        commandOptions: new CommandOptions { IconName = "ArrowDownload", IconVariant = IconVariant.Filled })
     .WithCommand(
         name: "import-from-navigation",
         displayName: "Import from navigation",
-        executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "import-from-navigation", logger, "import-from-navigation")),
-        commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled })
+        executeCommand: (c) =>
+        {
+            var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
+            return Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "import-from-navigation", logger, "Import Navigation", interactionService));
+        },
+        commandOptions: new CommandOptions { IconName = "Navigation", IconVariant = IconVariant.Filled })
     .WithCommand(
         name: "Nuclear-Option",
         displayName: "Full Nuclear Reset",
-        executeCommand: (c) =>
+        executeCommand: async (c) =>
         {
-            CommandHelper.RunConsoleApp(projectPath!, "drop-recreate-db", logger, "drop-recreate-db");
-            CommandHelper.RunConsoleApp(projectPath!, "import-from-ready", logger, "import-from-ready");
-            return Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "import-from-navigation", logger, "import-from-navigation"));
+            var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
+
+            // Show initial confirmation dialog
+            if (interactionService.IsAvailable)
+            {
+                var confirmation = await interactionService.PromptConfirmationAsync(
+                    title: "⚠️ Nuclear Option - Confirm Destructive Action",
+                    message: """
+                    # WARNING: This will completely destroy and recreate the database!
+                    
+                    **This operation will:**
+                    1. **Drop the entire database** (all data will be permanently lost)
+                    2. **Recreate the database schema** from migrations
+                    3. **Import data from READY system**
+                    4. **Import navigation data**
+                    
+                    ⚠️ **This action cannot be undone!**
+                    
+                    Are you absolutely sure you want to proceed?
+                    """,
+                    options: new MessageBoxInteractionOptions
+                    {
+                        Intent = MessageIntent.Warning,
+                        PrimaryButtonText = "Yes, Destroy and Recreate",
+                        SecondaryButtonText = "Cancel",
+                        ShowSecondaryButton = true,
+                        EnableMessageMarkdown = true
+                    });
+
+                if (!confirmation.Data)
+                {
+                    await interactionService.PromptNotificationAsync(
+                        title: "Operation Cancelled",
+                        message: "Nuclear Option was cancelled by user.",
+                        options: new NotificationInteractionOptions
+                        {
+                            Intent = MessageIntent.Information
+                        });
+                    return CommandResults.Failure("User cancelled the nuclear option.");
+                }
+
+                // Show starting notification
+                await interactionService.PromptNotificationAsync(
+                    title: "🚀 Starting Nuclear Option",
+                    message: "Beginning full database reset. This may take several minutes...",
+                    options: new NotificationInteractionOptions
+                    {
+                        Intent = MessageIntent.Information
+                    });
+            }
+
+            // Step 1: Drop and recreate
+            var step1 = CommandHelper.RunConsoleApp(projectPath!, "drop-recreate-db", logger, "Step 1/3: Drop & Recreate Database", interactionService);
+            if (!step1.Success)
+            {
+                return CommandResults.Failure($"Nuclear Option failed at step 1: {step1.ErrorMessage}");
+            }
+
+            // Step 2: Import from READY
+            var step2 = CommandHelper.RunConsoleApp(projectPath!, "import-from-ready", logger, "Step 2/3: Import from READY", interactionService);
+            if (!step2.Success)
+            {
+                return CommandResults.Failure($"Nuclear Option failed at step 2: {step2.ErrorMessage}");
+            }
+
+            // Step 3: Import navigation
+            var step3 = CommandHelper.RunConsoleApp(projectPath!, "import-from-navigation", logger, "Step 3/3: Import Navigation", interactionService);
+            if (!step3.Success)
+            {
+                return CommandResults.Failure($"Nuclear Option failed at step 3: {step3.ErrorMessage}");
+            }
+
+            // Show final success notification
+            if (interactionService.IsAvailable)
+            {
+                await interactionService.PromptNotificationAsync(
+                    title: "✅ Nuclear Option Complete!",
+                    message: "Database has been successfully reset. All steps completed.",
+                    options: new NotificationInteractionOptions
+                    {
+                        Intent = MessageIntent.Success,
+                        LinkText = "View Logs",
+                        LinkUrl = "/console/Database-Cli"
+                    });
+            }
+
+            return CommandResults.Success();
         },
-        commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled });
+        commandOptions: new CommandOptions { IconName = "Fire", IconVariant = IconVariant.Filled });
 
 var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: true)
