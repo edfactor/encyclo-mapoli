@@ -433,6 +433,23 @@ public sealed class DistributionService : IDistributionService
         }, cancellationToken);
     }
 
+    public async Task<Result<bool>> DeleteDistribution(int distributionId, CancellationToken cancellationToken)
+    {
+        return await _dataContextFactory.UseWritableContext(async ctx =>
+        {
+            var distribution = await ctx.Distributions.Where(d => d.Id == distributionId).FirstOrDefaultAsync(cancellationToken);
+            if (distribution == null)
+            {
+                return Result<bool>.Failure(Error.DistributionNotFound);
+            }
+            
+            distribution.StatusId = DistributionStatus.Constants.PurgeRecord;
+
+            await ctx.SaveChangesAsync(cancellationToken);
+            return Result<bool>.Success(true);
+        }, cancellationToken);
+    }
+
     private Result<bool> ValidateDistributionRequest(CreateDistributionRequest request)
     {
         var validationErrors = new Dictionary<string, string[]>();
