@@ -68,7 +68,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
       beginningDate: termination?.startDate || (fiscalData ? fiscalData.fiscalBeginDate : "") || "",
       endingDate: termination?.endDate || (fiscalData ? fiscalData.fiscalEndDate : "") || "",
       forfeitureStatus: "showAll",
-      pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true },
+      pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: false },
       profitYear: selectedProfitYear
     }
   });
@@ -94,15 +94,17 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
 
   const validateAndSearch = handleSubmit(validateAndSubmit);
 
-  const handleReset = () => {
+  const handleReset = async () => {
     setInitialSearchLoaded(false);
     reset({
       beginningDate: fiscalData ? fiscalData.fiscalBeginDate : "",
       endingDate: fiscalData ? fiscalData.fiscalEndDate : "",
       forfeitureStatus: "showAll",
-      pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
+      pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: false },
+      profitYear: selectedProfitYear
     });
-    trigger();
+    // Trigger validation after reset to ensure form validity is updated
+    await trigger();
     dispatch(clearTermination());
   };
 

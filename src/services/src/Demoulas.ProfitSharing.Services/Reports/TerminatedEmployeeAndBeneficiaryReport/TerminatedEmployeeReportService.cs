@@ -420,7 +420,7 @@ public sealed class TerminatedEmployeeReportService
                 DateTerm = member.TerminationDate,
                 YtdPsHours = member.HoursCurrentYear,
                 IsExecutive = member.IsExecutive,
-                VestedPercent = vestingPercent,
+                VestedPercent = vestingPercent * 100,
                 Age = age,
                 HasForfeited = enrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords ||
                                enrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords,
