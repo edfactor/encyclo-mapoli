@@ -1,6 +1,6 @@
 import { useCallback, useReducer, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLazySearchProfitMasterInquiryQuery } from "../../../reduxstore/api/InquiryApi";
+import { useLazyGetProfitMasterInquiryMemberDetailsQuery, useLazySearchProfitMasterInquiryQuery } from "../../../reduxstore/api/InquiryApi";
 import { useMergeProfitsDetailMutation } from "../../../reduxstore/api/AdjustmentsApi";
 import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
 import { MasterInquiryRequest, MissiveResponse } from "../../../types";
@@ -14,10 +14,53 @@ interface SearchFormData {
 
 export const useAdjustments = () => {
   const [triggerSearch] = useLazySearchProfitMasterInquiryQuery();
+  const [triggerProfitDetails] = useLazyGetProfitMasterInquiryMemberDetailsQuery();
   const [mergeProfitsDetail, { isLoading: isMerging }] = useMergeProfitsDetailMutation();
   const reduxDispatch = useDispatch();
   const { masterInquiryMemberDetails, masterInquiryMemberDetailsSecondary } = useSelector((state: RootState) => state.inquiry);
   const { clearAlerts, addAlert } = useMissiveAlerts();
+  const profitDetailsResponseSource = useRef<any>(null);
+  const profitDetailsResponseDestination = useRef<any>(null);
+
+  const fetchProfitDetailsForMember = useCallback(
+    async (member: any, profitYear: number, isSecondary: boolean = false) => {
+      try {
+        console.log(`Fetching profit details for ${isSecondary ? 'secondary' : 'primary'} member:`, member);
+        
+        const profitDetailsResponse = await triggerProfitDetails({
+          id: member.id,
+          memberType: member.isEmployee ? 1 : 2
+        }).unwrap();
+
+        console.log(`Profit details response for ${isSecondary ? 'secondary' : 'primary'} member:`, profitDetailsResponse);
+
+        // Limit to 5 records for display
+        const limitedResponse = {
+          ...profitDetailsResponse,
+          results: profitDetailsResponse?.results ? profitDetailsResponse.results.slice(0, 5) : [],
+          totalRecords: profitDetailsResponse?.results?.length || 0
+        };
+
+        if (isSecondary) {
+          profitDetailsResponseDestination.current = limitedResponse;
+        } else {
+          profitDetailsResponseSource.current = limitedResponse;
+        }
+
+        return limitedResponse;
+      } catch (error) {
+        console.error(`Error fetching profit details for ${isSecondary ? 'secondary' : 'primary'} member:`, error);
+        addAlert({
+          id: Date.now(),
+          message: `Failed to fetch profit details`,
+          description: `Could not retrieve profit details for ${isSecondary ? 'destination' : 'source'} employee.`,
+          severity: "warning"
+        } as MissiveResponse);
+        return null;
+      }
+    },
+    [triggerProfitDetails, addAlert]
+  );
 
   const executeSearch = useCallback(
     async (params: number [], profitYear: number) => {
@@ -38,21 +81,28 @@ export const useAdjustments = () => {
           memberType: 1 // Active employees only
         };
 
-        // source 
+        // Search for source member
         const responseSource = await triggerSearch(searchParamsSource).unwrap();
         if (responseSource?.results && responseSource.results.length > 0) {
-          reduxDispatch(setMasterInquiryData(responseSource.results[0]));
+          const sourceMember = responseSource.results[0];
+          reduxDispatch(setMasterInquiryData(sourceMember));
+          
+          // Fetch profit details for source member
+          await fetchProfitDetailsForMember(sourceMember, profitYear, false);
         }
 
         if (responseSource.results.length === 0){
             addSsnDoesNotExistAlert(params[0]);
         }
 
-        // destination
+        // Search for destination member
         const responseDestination = await triggerSearch(searchParamsDestination).unwrap();
-
         if (responseDestination?.results && responseDestination.results.length > 0) {
-          reduxDispatch(setMasterInquiryDataSecondary(responseDestination.results[0]));
+          const destinationMember = responseDestination.results[0];
+          reduxDispatch(setMasterInquiryDataSecondary(destinationMember));
+          
+          // Fetch profit details for destination member
+          await fetchProfitDetailsForMember(destinationMember, profitYear, true);
         }
 
         if (responseDestination.results.length === 0){
@@ -69,7 +119,7 @@ export const useAdjustments = () => {
         console.error("Error during search:", error);
       }
     },
-    [triggerSearch, reduxDispatch, addAlert, clearAlerts]
+    [triggerSearch, reduxDispatch, addAlert, clearAlerts, fetchProfitDetailsForMember]
   );
 
   const executeMerge = useCallback(
@@ -196,7 +246,10 @@ export const useAdjustments = () => {
     canMerge,
     executeSearch, 
     executeMerge,
-    resetSearch 
+    resetSearch,
+    fetchProfitDetailsForMember,
+    profitDetailsResponseSource: profitDetailsResponseSource.current,
+    profitDetailsResponseDestination: profitDetailsResponseDestination.current
   };
 };
 

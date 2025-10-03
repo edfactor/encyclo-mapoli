@@ -27,7 +27,6 @@ import militarySlice from "./slices/militarySlice";
 import navigationSlice from "./slices/navigationSlice";
 import securitySlice from "./slices/securitySlice";
 import yearsEndSlice from "./slices/yearsEndSlice";
-import adjustmentsSlice from "./slices/adjustmentsSlice";
 import { AdjustmentsApi } from "./api/AdjustmentsApi";
 
 export const store = configureStore({
@@ -46,7 +45,6 @@ export const store = configureStore({
     navigationStatus: navigationStatusSlice,
     forfeituresAdjustment: forfeituresAdjustmentSlice,
     beneficiaries: beneficiarySlice,
-    adjustments: adjustmentsSlice,
 
     [SecurityApi.reducerPath]: SecurityApi.reducer,
     [YearsEndApi.reducerPath]: YearsEndApi.reducer,
