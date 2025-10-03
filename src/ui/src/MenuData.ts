@@ -104,8 +104,8 @@ export const menuLevels = (data: NavigationResponseDto | undefined): MenuLevel[]
     return [];
   }
 
-  // Find the Year End navigation item (ID 54)
-  const yearEndList = data.navigation.find((m) => m.id === YEAR_END_MENU_ID);
+  // Find the Year End navigation item
+  const yearEndList = data.navigation.find((m) => m.title === "YEAR END");
   if (!yearEndList || !yearEndList.items) {
     return [];
   }
