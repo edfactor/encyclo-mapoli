@@ -84,6 +84,11 @@ DECLARE
     MILITARY_CONTRIBUTIONS CONSTANT NUMBER := 147;
     UNFORFEIT CONSTANT NUMBER := 148;
 
+    PROFIT_SHARE_REPORT_FINAL_RUN CONSTANT NUMBER := 149;
+    PRINT_PROFIT_CERTS CONSTANT NUMBER := 150;
+    PROFIT_SHARE_REPORT_EDIT_RUN CONSTANT NUMBER := 151;
+    PAY_BEN_REPORT CONSTANT NUMBER := 152;
+
 
     --- These are the role IDs from the ROLES table
     SYSTEM_ADMINISTRATOR CONSTANT NUMBER := 1;
@@ -247,6 +252,13 @@ BEGIN
     insert_navigation_item(PROF_SHARE_BY_STORE, FISCAL_CLOSE, 'Prof Share by Store', 'QPAY066TA', 'profit-share-by-store', STATUS_NORMAL, ORDER_FOURTEENTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(REPRINT_CERTIFICATES, FISCAL_CLOSE, 'Reprint Certificates / Print Profit Certs', 'PAYCERT', 'reprint-certificates', STATUS_NORMAL, ORDER_FIFTEENTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(SAVE_PROF_PAYMSTR, FISCAL_CLOSE, 'Save Prof Paymstr', '', 'save-prof-paymstr', STATUS_NORMAL, ORDER_SIXTEENTH, '', ENABLED, IS_NAVIGABLE);
+    
+    insert_navigation_item(PROFIT_SHARE_REPORT_FINAL_RUN, FISCAL_CLOSE, 'Profit Share Report Final Run', '', 'profit-share-report-final-run', STATUS_NORMAL, ORDER_SEVENTEENTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROFIT_SHARE_REPORT_EDIT_RUN, FISCAL_CLOSE, 'Profit Share Report Edit Run', '', 'profit-share-report-edit-run', STATUS_NORMAL, ORDER_EIGHTEENTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PAY_BEN_REPORT, BENEFICIARIES_MENU, 'Pay Ben Report', '', 'payben-report', STATUS_NORMAL, ORDER_NINETEENTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PRINT_PROFIT_CERTS, FISCAL_CLOSE, 'Reprint Certificates / Print Profit Certs', 'PAYCERT', 'reprint-certificates', STATUS_NORMAL, ORDER_TWENTIETH, '', ENABLED, IS_NAVIGABLE);
+
+
 
 --sub values for Report by Age - updated per requirements
     insert_navigation_item(DISTRIBUTIONS_BY_AGE, PROF_SHARE_REPORT_BY_AGE, 'DISTRIBUTIONS BY AGE', 'PROF130', 'distributions-by-age', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -328,6 +340,13 @@ BEGIN
     assign_navigation_role(DISTRIBUTIONS_AND_FORFEITURES, FINANCE_MANAGER);
     assign_navigation_role(PROFIT_SHARE_REPORT, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(PROFIT_SHARE_REPORT, FINANCE_MANAGER);
+
+    assign_navigation_role(PROFIT_SHARE_REPORT_FINAL_RUN, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(PROFIT_SHARE_REPORT_FINAL_RUN, FINANCE_MANAGER);
+    assign_navigation_role(PROFIT_SHARE_REPORT_EDIT_RUN, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(PROFIT_SHARE_REPORT_EDIT_RUN, FINANCE_MANAGER);
+    assign_navigation_role(PRINT_PROFIT_CERTS, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(PRINT_PROFIT_CERTS, FINANCE_MANAGER);
 
 
     assign_navigation_role(FISCAL_CLOSE, SYSTEM_ADMINISTRATOR);
