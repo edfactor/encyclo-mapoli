@@ -57,20 +57,20 @@ public sealed class UnforfeitService : IUnforfeitService
                     // transactions
                     from pd in context.ProfitDetails
 
-                    // the employee definition in the "profit year"
+                        // the employee definition in the "profit year"
                     join d in demo on pd.Ssn equals d.Ssn
                     join ppYE in context.PayProfits.Include(p => p.Enrollment)
                         on new { d.Id, req.ProfitYear } equals new { Id = ppYE.DemographicId, ppYE.ProfitYear }
 
-                    // Years of service as of "profit year"
+                        // Years of service as of "profit year"
                     join yos in yearsOfServiceQuery on d.Ssn equals yos.Ssn into yosTmp
                     from yos in yosTmp.DefaultIfEmpty()
 
-                    // Vesting on req.EndingDate
+                        // Vesting on req.EndingDate
                     join vest in vestingServiceQuery on d.Ssn equals vest.Ssn into vestTmp
                     from vest in vestTmp.DefaultIfEmpty()
 
-                    // employee data at the time of the PROFIT_DETAIL transaction - ie. hours/wages (in transaction year)
+                        // employee data at the time of the PROFIT_DETAIL transaction - ie. hours/wages (in transaction year)
                     join pp in context.PayProfits.Include(p => p.Enrollment)
                         on new { d.Id, pd.ProfitYear } equals new { Id = pp.DemographicId, pp.ProfitYear } into ppTmp
                     from pp in ppTmp.DefaultIfEmpty()
@@ -127,14 +127,14 @@ public sealed class UnforfeitService : IUnforfeitService
                         WagesProfitYear = g.Key.WagesProfitYear,
                         IsExecutive = g.Key.PayFrequencyId == PayFrequency.Constants.Monthly,
                         Details = g.Select(x => new RehireTransactionDetailResponse
-                            {
-                                ProfitYear = x.pd.ProfitYear,
-                                HoursTransactionYear = x.pp != null ? x.pp.CurrentHoursYear : null,
-                                Forfeiture = x.pd.Forfeiture,
-                                Remark = x.pd.Remark,
-                                ProfitCodeId = x.pd.ProfitCodeId,
-                                WagesTransactionYear = x.pp != null ? x.pp.CurrentIncomeYear + x.pp.IncomeExecutive : null,
-                                SuggestedUnforfeiture =
+                        {
+                            ProfitYear = x.pd.ProfitYear,
+                            HoursTransactionYear = x.pp != null ? x.pp.CurrentHoursYear : null,
+                            Forfeiture = x.pd.Forfeiture,
+                            Remark = x.pd.Remark,
+                            ProfitCodeId = x.pd.ProfitCodeId,
+                            WagesTransactionYear = x.pp != null ? x.pp.CurrentIncomeYear + x.pp.IncomeExecutive : null,
+                            SuggestedUnforfeiture =
                                     // we only care about the latest forf/unforf transaction 
                                     x.pd.Id == g.Max(item => item.pd.Id) &&
                                     // check if this row is a forfeit
@@ -145,8 +145,8 @@ public sealed class UnforfeitService : IUnforfeitService
                                      || g.Key.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords)
                                         ? x.pd.Forfeiture
                                         : null,
-                                ProfitDetailId = x.pd.Id
-                            })
+                            ProfitDetailId = x.pd.Id
+                        })
                             .OrderByDescending(x => x.ProfitDetailId)
                             .ToList()
                     };

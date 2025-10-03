@@ -1,8 +1,10 @@
-﻿using Demoulas.Common.Contracts.Interfaces;
+﻿using System.Text.Json;
+using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Navigations;
@@ -12,11 +14,14 @@ public class NavigationService : INavigationService
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IAppUser _appUser;
     private readonly ILogger<NavigationService>? _logger;
+    private readonly IDistributedCache _distributedCache;
+    private const string NavigationStatusCacheKey = "navigation-status-all";
 
-    public NavigationService(IProfitSharingDataContextFactory dataContextFactory, IAppUser appUser, ILogger<NavigationService>? logger = null)
+    public NavigationService(IProfitSharingDataContextFactory dataContextFactory, IAppUser appUser, IDistributedCache distributedCache, ILogger<NavigationService>? logger = null)
     {
         _dataContextFactory = dataContextFactory;
         _appUser = appUser;
+        _distributedCache = distributedCache;
         _logger = logger;
     }
 
@@ -172,9 +177,33 @@ public class NavigationService : INavigationService
 
     public async Task<List<NavigationStatusDto>> GetNavigationStatus(CancellationToken cancellationToken)
     {
+        // Try to get from distributed cache first
+        var cachedBytes = await _distributedCache.GetAsync(NavigationStatusCacheKey, cancellationToken);
+        if (cachedBytes != null)
+        {
+            var cachedList = JsonSerializer.Deserialize<List<NavigationStatusDto>>(cachedBytes);
+            if (cachedList != null)
+            {
+                _logger?.LogDebug("Navigation status loaded from distributed cache");
+                return cachedList;
+            }
+        }
+
+        // Cache miss - load from database
         var navigationStatusList = await _dataContextFactory.UseReadOnlyContext(context =>
             context.NavigationStatuses.Select(x => new NavigationStatusDto { Id = x.Id, Name = x.Name }).ToListAsync(cancellationToken)
         );
+
+        // Store in distributed cache for 30 minutes (reference data that changes rarely)
+        var serialized = JsonSerializer.SerializeToUtf8Bytes(navigationStatusList);
+        var cacheOptions = new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30),
+            SlidingExpiration = TimeSpan.FromMinutes(15)
+        };
+        await _distributedCache.SetAsync(NavigationStatusCacheKey, serialized, cacheOptions, cancellationToken);
+
+        _logger?.LogInformation("Navigation status loaded from database and cached ({Count} statuses)", navigationStatusList.Count);
         return navigationStatusList;
     }
 
@@ -203,6 +232,14 @@ public class NavigationService : INavigationService
                 }, cancellationToken);
             return await context.SaveChangesAsync(cancellationToken);
         }, cancellationToken);
+
+        // Invalidate navigation status cache after successful update
+        if (success > 0)
+        {
+            await _distributedCache.RemoveAsync(NavigationStatusCacheKey, cancellationToken);
+            _logger?.LogInformation("Navigation status cache invalidated after navigation {NavigationId} update", navigationId);
+        }
+
         return success > 0;
     }
 }

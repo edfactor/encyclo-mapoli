@@ -8,8 +8,10 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
-using Microsoft.Extensions.Logging;
+using Demoulas.Util.Extensions;
 using FastEndpoints;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
 
@@ -52,6 +54,14 @@ public class GetFrozenDemographicsEndpoint : ProfitSharingEndpoint<SortedPaginat
             };
         });
         Group<ItDevOpsAllUsersGroup>();
+
+        // Output caching: Frozen demographics are immutable snapshots - excellent caching candidate  
+        // Cache disabled in test environments to ensure test data freshness
+        if (!Env.IsTestEnvironment())
+        {
+            TimeSpan cacheDuration = TimeSpan.FromMinutes(15); // Long duration - frozen data never changes
+            Options(x => x.CacheOutput(p => p.Expire(cacheDuration)));
+        }
     }
 
     public override Task<PaginatedResponseDto<FrozenStateResponse>> ExecuteAsync(SortedPaginationRequestDto req, CancellationToken ct)
@@ -59,6 +69,21 @@ public class GetFrozenDemographicsEndpoint : ProfitSharingEndpoint<SortedPaginat
         return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
             var response = await _frozenService.GetFrozenDemographics(req, ct);
+
+            // Record cache metrics
+            var cacheStatus = HttpContext.Response.Headers.ContainsKey("X-Cache") ? "hit" : "miss";
+            if (cacheStatus == "hit")
+            {
+                EndpointTelemetry.CacheHitsTotal.Add(1,
+                    new("cache_type", "output-cache"),
+                    new("endpoint", "GetFrozenDemographicsEndpoint"));
+            }
+            else
+            {
+                EndpointTelemetry.CacheMissesTotal.Add(1,
+                    new("cache_type", "output-cache"),
+                    new("endpoint", "GetFrozenDemographicsEndpoint"));
+            }
 
             // Business metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,
@@ -70,8 +95,8 @@ public class GetFrozenDemographicsEndpoint : ProfitSharingEndpoint<SortedPaginat
                 new("record_type", "frozen-demographics"),
                 new("endpoint", "GetFrozenDemographicsEndpoint"));
 
-            _logger.LogInformation("Frozen demographics query completed, returned {ResultCount} records (correlation: {CorrelationId})",
-                resultCount, HttpContext.TraceIdentifier);
+            _logger.LogInformation("Frozen demographics query completed, returned {ResultCount} records, cache status: {CacheStatus} (correlation: {CorrelationId})",
+                resultCount, cacheStatus, HttpContext.TraceIdentifier);
 
             return response ?? new PaginatedResponseDto<FrozenStateResponse>();
         });
