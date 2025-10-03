@@ -207,6 +207,26 @@
   .frozen-year-warning-content {
     flex: 1;
   }
+
+  .status-readonly-info {
+    margin-bottom: 16px;
+  }
+
+  .status-readonly-info-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .status-readonly-info-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .status-readonly-info p {
+    margin: 8px 0 0 0;
+    font-size: 0.875rem;
+  }
 }
 /*
 @font-face {

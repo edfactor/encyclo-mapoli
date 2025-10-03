@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogTitle, Grid } from "@mui/material";
 import FrozenYearWarning from "components/FrozenYearWarning";
 import MissiveAlerts from "components/MissiveAlerts/MissiveAlerts";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import StatusReadOnlyInfo from "components/StatusReadOnlyInfo";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
@@ -10,6 +11,7 @@ import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveA
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useIsProfitYearFrozen } from "../../../hooks/useIsProfitYearFrozen";
+import { useIsReadOnlyByStatus } from "../../../hooks/useIsReadOnlyByStatus";
 import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
 import { InquiryApi } from "../../../reduxstore/api/InquiryApi";
@@ -28,6 +30,7 @@ const MilitaryContributionContent = () => {
   const dispatch = useDispatch();
   const { missiveAlerts } = useMissiveAlerts();
   const isReadOnly = useReadOnlyNavigation();
+  const isReadOnlyByStatus = useIsReadOnlyByStatus();
   const isFrozen = useIsProfitYearFrozen(profitYear);
 
   const {
@@ -108,6 +111,7 @@ const MilitaryContributionContent = () => {
       container
       rowSpacing="24px">
       {isFrozen && <FrozenYearWarning profitYear={profitYear} />}
+      {isReadOnlyByStatus && <StatusReadOnlyInfo />}
       <Grid width={"100%"}>
         <ApiMessageAlert commonKey={MessageKeys.MilitaryContribution} />
       </Grid>

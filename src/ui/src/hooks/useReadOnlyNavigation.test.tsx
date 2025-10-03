@@ -6,7 +6,12 @@ import { NavigationDto } from "../types/navigation/navigation";
 import { useReadOnlyNavigation } from "./useReadOnlyNavigation";
 
 describe("useReadOnlyNavigation", () => {
-  const createMockNavigation = (id: number, isReadOnly: boolean = false): NavigationDto => ({
+  const createMockNavigation = (
+    id: number,
+    isReadOnly: boolean = false,
+    statusId?: number,
+    statusName?: string
+  ): NavigationDto => ({
     id,
     parentId: 0,
     title: `Navigation ${id}`,
@@ -17,6 +22,8 @@ describe("useReadOnlyNavigation", () => {
     requiredRoles: [],
     disabled: false,
     isReadOnly,
+    statusId,
+    statusName,
     items: []
   });
 
@@ -176,5 +183,92 @@ describe("useReadOnlyNavigation", () => {
     });
 
     expect(result.current).toBe(false);
+  });
+
+  // Status-based read-only tests
+  describe("status-based read-only logic", () => {
+    it("should return false when statusId is InProgress (2)", () => {
+      localStorage.setItem("navigationId", "1");
+      const navigation = createMockNavigation(1, false, 2, "In Progress");
+      const mockStore = createMockStore({ navigation: [navigation] });
+
+      const { result } = renderHook(() => useReadOnlyNavigation(), {
+        wrapper: wrapper(mockStore)
+      });
+
+      expect(result.current).toBe(false);
+    });
+
+    it("should return true when statusId is NotStarted (1)", () => {
+      localStorage.setItem("navigationId", "1");
+      const navigation = createMockNavigation(1, false, 1, "Not Started");
+      const mockStore = createMockStore({ navigation: [navigation] });
+
+      const { result } = renderHook(() => useReadOnlyNavigation(), {
+        wrapper: wrapper(mockStore)
+      });
+
+      expect(result.current).toBe(true);
+    });
+
+    it("should return true when statusId is OnHold (3)", () => {
+      localStorage.setItem("navigationId", "1");
+      const navigation = createMockNavigation(1, false, 3, "On Hold");
+      const mockStore = createMockStore({ navigation: [navigation] });
+
+      const { result } = renderHook(() => useReadOnlyNavigation(), {
+        wrapper: wrapper(mockStore)
+      });
+
+      expect(result.current).toBe(true);
+    });
+
+    it("should return true when statusId is Complete (4)", () => {
+      localStorage.setItem("navigationId", "1");
+      const navigation = createMockNavigation(1, false, 4, "Complete");
+      const mockStore = createMockStore({ navigation: [navigation] });
+
+      const { result } = renderHook(() => useReadOnlyNavigation(), {
+        wrapper: wrapper(mockStore)
+      });
+
+      expect(result.current).toBe(true);
+    });
+
+    it("should return true when both isReadOnly is true and statusId is InProgress", () => {
+      localStorage.setItem("navigationId", "1");
+      const navigation = createMockNavigation(1, true, 2, "In Progress");
+      const mockStore = createMockStore({ navigation: [navigation] });
+
+      const { result } = renderHook(() => useReadOnlyNavigation(), {
+        wrapper: wrapper(mockStore)
+      });
+
+      expect(result.current).toBe(true);
+    });
+
+    it("should return true when both isReadOnly is true and statusId is Complete", () => {
+      localStorage.setItem("navigationId", "1");
+      const navigation = createMockNavigation(1, true, 4, "Complete");
+      const mockStore = createMockStore({ navigation: [navigation] });
+
+      const { result } = renderHook(() => useReadOnlyNavigation(), {
+        wrapper: wrapper(mockStore)
+      });
+
+      expect(result.current).toBe(true);
+    });
+
+    it("should return false when statusId is undefined and isReadOnly is false", () => {
+      localStorage.setItem("navigationId", "1");
+      const navigation = createMockNavigation(1, false, undefined, undefined);
+      const mockStore = createMockStore({ navigation: [navigation] });
+
+      const { result } = renderHook(() => useReadOnlyNavigation(), {
+        wrapper: wrapper(mockStore)
+      });
+
+      expect(result.current).toBe(false);
+    });
   });
 });

@@ -2,10 +2,12 @@ import { SaveOutlined } from "@mui/icons-material";
 import { Button, Divider, Grid, Tooltip } from "@mui/material";
 import FrozenYearWarning from "components/FrozenYearWarning";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import StatusReadOnlyInfo from "components/StatusReadOnlyInfo";
 import { memo, useState } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import { useIsProfitYearFrozen } from "../../../hooks/useIsProfitYearFrozen";
+import { useIsReadOnlyByStatus } from "../../../hooks/useIsReadOnlyByStatus";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
 import useManageExecutiveHoursAndDollars from "./hooks/useManageExecutiveHoursAndDollars";
 import ManageExecutiveHoursAndDollarsGrid from "./ManageExecutiveHoursAndDollarsGrid";
@@ -78,6 +80,7 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
   } = hookData;
 
   const isReadOnly = useReadOnlyNavigation();
+  const isReadOnlyByStatus = useIsReadOnlyByStatus();
   const isFrozen = useIsProfitYearFrozen(profitYear);
   const [currentStatus, setCurrentStatus] = useState<string | null>(null);
 
@@ -99,6 +102,7 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
       container
       rowSpacing="24px">
       {isFrozen && <FrozenYearWarning profitYear={profitYear} />}
+      {isReadOnlyByStatus && <StatusReadOnlyInfo />}
       <Grid width={"100%"}>
         <Divider />
       </Grid>
