@@ -122,10 +122,10 @@ public class ProfitMasterService : IProfitMasterService
                 // Earnings can be negative but still has bounds
                 pd.Earnings is < -maxAmount or > maxAmount
             ).ToList();
-            
+
             if (outOfBounds.Count != 0)
             {
-                throw new InvalidOperationException($"Found {outOfBounds.Count} records with values out of bounds with precision or negative"); 
+                throw new InvalidOperationException($"Found {outOfBounds.Count} records with values out of bounds with precision or negative");
             }
 
             // Insert them in bulk.
@@ -253,7 +253,7 @@ public class ProfitMasterService : IProfitMasterService
     private static List<ProfitDetail> CreateProfitDetailRecords(Dictionary<byte, ProfitCode> id2ProfitCode, short profitYear,
         IEnumerable<ProfitShareEditMemberRecord> rec)
     {
-        
+
         return rec.Select(r => new ProfitDetail
         {
             ProfitCode = id2ProfitCode[r.ProfitCode],
@@ -267,7 +267,7 @@ public class ProfitMasterService : IProfitMasterService
             Remark = r.Remark,
             ZeroContributionReasonId = r.ZeroContStatus,
             CommentTypeId = r.CommentTypeId,
-            YearsOfServiceCredit = (r.ProfitCode == 0 && ( r.ContributionAmount != 0  || r.ZeroContStatus is 1 or 2 )) ? (byte)1 : (byte)0
+            YearsOfServiceCredit = (r.ProfitCode == 0 && (r.ContributionAmount != 0 || r.ZeroContStatus is 1 or 2)) ? (byte)1 : (byte)0
         }).ToList();
     }
 

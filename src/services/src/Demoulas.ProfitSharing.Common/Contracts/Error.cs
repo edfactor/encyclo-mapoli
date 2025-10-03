@@ -26,14 +26,14 @@ public sealed record Error
     // Generic entity not found (dynamic description) - use only when a more specific constant does not exist
     public static Error EntityNotFound(string entityName) => new(104, $"{entityName} not found");
     public static Error NoPayProfitsDataAvailable => new(105, "No PayProfits data available in the system");
-    
+
     // Merge operation errors
     public static Error SourceDemographicNotFound => new(106, "Source demographic not found");
     public static Error DestinationDemographicNotFound => new(107, "Destination demographic not found");
     public static Error BothDemographicsNotFound => new(108, "Both source and destination demographics not found");
     public static Error SameDemographicMerge => new(109, "Cannot merge demographic with itself");
     public static Error MergeOperationFailed(string message) => new(110, $"Merge operation failed: {message}");
-    
+
     // Unexpected error wrapper (message captured). Prefer logging full exception separately.
     public static Error Unexpected(string message) => new(900, message);
 

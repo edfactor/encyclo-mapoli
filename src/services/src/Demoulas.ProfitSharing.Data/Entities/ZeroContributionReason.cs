@@ -11,7 +11,7 @@ public sealed class ZeroContributionReason : ILookupTable<byte>
         /// Normal Participant in Plan
         /// </summary>
         public const byte Normal = 0;
-        
+
         /// <summary>
         /// 18, 19, OR 20 WITH > 1000 HOURS
         /// </summary>

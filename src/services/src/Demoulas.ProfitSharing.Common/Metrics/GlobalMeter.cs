@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.Metrics;
 using Demoulas.Common.Contracts.Interfaces;
-using Microsoft.Extensions.DependencyInjection; 
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Common.Metrics;
 
@@ -44,7 +44,7 @@ public static class GlobalMeter
 
     // Deployment / build metrics
     public static Counter<long> DeploymentsTotal { get; private set; } = null!;
-    
+
     // in-flight gauge implemented via an observable gauge
     private static int _jobRunsInflight;
 
@@ -75,10 +75,10 @@ public static class GlobalMeter
 
     public static void InitializeFromServices(IServiceProvider serviceProvider)
     {
-        if (_initialized) {return;}
+        if (_initialized) { return; }
         lock (_initLock)
         {
-            if (_initialized) {return;}
+            if (_initialized) { return; }
             try
             {
                 _appVersionInfo = serviceProvider.GetService<IAppVersionInfo>();
@@ -94,10 +94,10 @@ public static class GlobalMeter
 
     private static void EnsureInitializedLazy()
     {
-        if (_initialized) {return;}
+        if (_initialized) { return; }
         lock (_initLock)
         {
-            if (_initialized) {return;}
+            if (_initialized) { return; }
             InitializeCore("0.0.0");
         }
     }
@@ -149,7 +149,7 @@ public static class GlobalMeter
         string? gitHash = _appVersionInfo?.GitHash ?? "unknown";
         string? environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "unknown";
 
-        
+
         DeploymentsTotal.Add(1,
             new KeyValuePair<string, object?>("git.commit", gitHash),
             new KeyValuePair<string, object?>("build.version", buildVersion),

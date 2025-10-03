@@ -20,10 +20,11 @@ public sealed record DistributionsAndForfeitureResponse : IIsExecutive
     public string? OtherSsn { get; set; }
     public required bool HasForfeited { get; set; }
     public bool IsExecutive { get; set; }
-    
+
     public static DistributionsAndForfeitureResponse ResponseExample()
     {
-        return new DistributionsAndForfeitureResponse() {
+        return new DistributionsAndForfeitureResponse()
+        {
             BadgeNumber = 123,
             PsnSuffix = 1,
             EmployeeName = "Doe, John",

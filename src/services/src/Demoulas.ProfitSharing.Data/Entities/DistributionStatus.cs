@@ -2,7 +2,7 @@
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 
-public class DistributionStatus: ILookupTable<char>
+public class DistributionStatus : ILookupTable<char>
 {
     public static class Constants
     {
@@ -18,5 +18,5 @@ public class DistributionStatus: ILookupTable<char>
 
     public required char Id { get; set; }
     public required string Name { get; set; }
-    
+
 }

@@ -304,7 +304,7 @@ public sealed class DistributionService : IDistributionService
         {
             var distribution = await ctx.Distributions
                 .Include(d => d.ThirdPartyPayee)
-                .ThenInclude(tp => tp!.Address) 
+                .ThenInclude(tp => tp!.Address)
                 .Where(d => d.Id == request.Id)
                 .FirstOrDefaultAsync(cancellationToken);
             if (distribution == null)
@@ -452,7 +452,7 @@ public sealed class DistributionService : IDistributionService
             {
                 return Result<bool>.Failure(Error.DistributionNotFound);
             }
-            
+
             distribution.StatusId = DistributionStatus.Constants.PurgeRecord;
 
             await ctx.SaveChangesAsync(cancellationToken);
@@ -485,8 +485,8 @@ public sealed class DistributionService : IDistributionService
             validationErrors[nameof(request.ThirdPartyPayee)] = ["Third party payee can only be set for Rollover Direct frequency."];
         }
 
-        return validationErrors.Count > 0 
-            ? Result<bool>.ValidationFailure(validationErrors) 
+        return validationErrors.Count > 0
+            ? Result<bool>.ValidationFailure(validationErrors)
             : Result<bool>.Success(true);
     }
 }

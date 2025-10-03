@@ -9,7 +9,7 @@ internal sealed class ParticipantTotalMap : IEntityTypeConfiguration<Participant
     public void Configure(EntityTypeBuilder<ParticipantTotal> builder)
     {
         builder.Metadata.SetIsTableExcludedFromMigrations(true);
-        
+
         builder.HasKey(x => x.Ssn);
         builder.Property(x => x.Ssn)
             .HasColumnName("SSN")

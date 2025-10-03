@@ -11,12 +11,12 @@ internal sealed class EmployeeFullSyncService : OracleHcmHostedServiceBase
 {
     public EmployeeFullSyncService(ISchedulerFactory schedulerFactory,
         IJobFactory jobFactory,
-        OracleHcmConfig oracleHcmConfig, 
+        OracleHcmConfig oracleHcmConfig,
         ILogger<EmployeeFullSyncService> logger) : base(schedulerFactory, jobFactory, oracleHcmConfig, logger)
     {
-       
+
     }
-    
+
     protected override Task ConfigureJob(CancellationToken cancellationToken)
     {
         return ScheduleJob<EmployeeFullSyncJob>(

@@ -2,5 +2,5 @@
 public record BeneficiaryKindDto
 {
     public char Id { get; set; }
-    public  string? Name { get; set; }
+    public string? Name { get; set; }
 }

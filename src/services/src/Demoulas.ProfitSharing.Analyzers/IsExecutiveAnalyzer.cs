@@ -45,7 +45,7 @@ public sealed class IsExecutiveAnalyzer : DiagnosticAnalyzer
         {
             return;
         }
-        
+
         // Quick exit if the class doesn't derive from any FastEndpoints base type.
         if (!Utils.DerivesFromFastEndpoints(typeSymbol))
         {
@@ -77,8 +77,8 @@ public sealed class IsExecutiveAnalyzer : DiagnosticAnalyzer
 
         //If we're here, the class doesn't have the attribute, nor any property named IsExecutive
         var diagnostic = Diagnostic.Create(
-            _rule, 
-            typeSymbol.Locations[0], 
+            _rule,
+            typeSymbol.Locations[0],
             responseType.ToDisplayString());
 
         context.ReportDiagnostic(diagnostic);

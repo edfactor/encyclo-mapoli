@@ -7,8 +7,8 @@ public sealed class ParticipantTotalFaker : Faker<ParticipantTotal>
 {
     public ParticipantTotalFaker(IList<Demographic> demographicFakes, IList<Beneficiary> beneficiaryFakes)
     {
-        var demoSsns = demographicFakes.Select(x=>x.Ssn).ToList();
-        var beneSsns = beneficiaryFakes.Where(z=>!demoSsns.Contains(z.Contact!.Ssn)).Select(x => x.Contact!.Ssn).ToList();
+        var demoSsns = demographicFakes.Select(x => x.Ssn).ToList();
+        var beneSsns = beneficiaryFakes.Where(z => !demoSsns.Contains(z.Contact!.Ssn)).Select(x => x.Contact!.Ssn).ToList();
         var ssnQueue = new Queue<int>(demoSsns.Union(beneSsns));
 
         RuleFor(x => x.Ssn, (f, o) =>
@@ -20,6 +20,6 @@ public sealed class ParticipantTotalFaker : Faker<ParticipantTotal>
 
             return ssnQueue.Dequeue();
         })
-        .RuleFor(x=>x.TotalAmount, f=>f.Random.Decimal(0,500000));
+        .RuleFor(x => x.TotalAmount, f => f.Random.Decimal(0, 500000));
     }
 }

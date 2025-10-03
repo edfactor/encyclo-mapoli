@@ -14,15 +14,15 @@ public sealed record InternalProfitDetailDto
     public decimal CurrentAmount { get; set; }
     public decimal Distribution { get; set; }
     public decimal BeneficiaryAllocation { get; set; }
-    
+
     // NOTE: The following totals are used in PAY443 and PAY444.    They look similar to the totals above, but they are not the same.
     public decimal DistributionsTotal { get; set; }
     public decimal ForfeitsTotal { get; set; }
-    
+
     public decimal AllocationsTotal { get; set; }
     public decimal PaidAllocationsTotal { get; set; }
     public decimal MilitaryTotal { get; set; }
     public decimal ClassActionFundTotal { get; set; }
-    
+
     public short ProfitYear { get; set; }
 }

@@ -39,6 +39,6 @@ public class GoldenExpressRun : Runnable
             "P24", // Create PAY450 report on READY does enrollment update on SMART
             "P24B" // Updates the YEARS, and enrollment on READY, NOP on SMART
         ));
-        
+
     }
 }

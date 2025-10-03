@@ -38,7 +38,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         Assert.Equal("application/problem+json", response.Response.Content.Headers.ContentType!.MediaType);
         var pd = await response.Response.Content.ReadFromJsonAsync<ProblemDetails>();
         Assert.NotNull(pd);
-        Assert.Contains("Badge Numbers must be unique.", pd!.Errors.Select(e=> e.Reason));
+        Assert.Contains("Badge Numbers must be unique.", pd!.Errors.Select(e => e.Reason));
     }
 
     [Fact]

@@ -1,5 +1,6 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
-using Demoulas.ProfitSharing.Common.Contracts; // Result, Error, ListResponseDto
+﻿using Demoulas.ProfitSharing.Common.Contracts; // Result, Error, ListResponseDto
+using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -12,7 +13,6 @@ using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 

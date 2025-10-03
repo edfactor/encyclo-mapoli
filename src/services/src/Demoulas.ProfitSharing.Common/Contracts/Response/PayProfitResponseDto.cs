@@ -42,5 +42,5 @@ public sealed record PayProfitResponseDto
     /// Total number of years a member was in the plan.
     /// </summary>
     public byte YearsInPlan { get; set; }
-   
+
 }

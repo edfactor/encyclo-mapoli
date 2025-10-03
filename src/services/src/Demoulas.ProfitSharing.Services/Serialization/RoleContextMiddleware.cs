@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Security;
+﻿using Demoulas.ProfitSharing.Security;
 using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Services.Serialization;

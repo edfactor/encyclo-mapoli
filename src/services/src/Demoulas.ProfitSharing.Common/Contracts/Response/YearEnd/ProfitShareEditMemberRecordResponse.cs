@@ -6,7 +6,7 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 /// <summary>
 /// Represents a year end Transaction (aka row in PROFIT_DETAIL) as shown to the user
 /// </summary>
-public record ProfitShareEditMemberRecordResponse: IIsExecutive
+public record ProfitShareEditMemberRecordResponse : IIsExecutive
 {
     public bool IsEmployee { get; init; }
     public int BadgeNumber { get; set; }
@@ -22,7 +22,7 @@ public record ProfitShareEditMemberRecordResponse: IIsExecutive
     public byte? DisplayedZeroContStatus { get; set; }
     public byte YearExtension { get; set; }
     public required bool IsExecutive { get; set; }
-    
+
     public static ProfitShareEditMemberRecordResponse ResponseExample()
     {
         return new ProfitShareEditMemberRecordResponse()

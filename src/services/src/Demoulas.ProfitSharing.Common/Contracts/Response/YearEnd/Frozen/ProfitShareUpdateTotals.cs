@@ -16,13 +16,13 @@ public record ProfitShareUpdateTotals
     public decimal Allocations { get; set; }
     public decimal PaidAllocations { get; set; }
     public decimal ClassActionFund { get; set; }
-    
+
     public long ContributionPoints { get; set; }
     public long EarningPoints { get; set; }
 
     public decimal MaxOverTotal { get; set; }
     public long MaxPointsTotal { get; set; }
-    
+
     public long TotalEmployees { get; set; }
     public long TotalBeneficaries { get; set; }
 }

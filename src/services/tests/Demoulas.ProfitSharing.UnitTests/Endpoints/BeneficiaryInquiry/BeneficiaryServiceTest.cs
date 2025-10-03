@@ -92,11 +92,11 @@ public class BeneficiaryServiceTest : ApiTestBase<Program>
         {
             new BeneficiarySearchFilterResponse()
             {
-                Age = 41, 
+                Age = 41,
                 BadgeNumber = 703244,
                 City = "PEPPERELL",
                 Name= "DELAROSA, ZOE",
-                PsnSuffix= 1000, 
+                PsnSuffix= 1000,
                 Ssn ="XXX-XX-0692",
                 State = "MA",
                 Street = "243 SECOND COURT",
@@ -123,7 +123,7 @@ public class BeneficiaryServiceTest : ApiTestBase<Program>
     [Fact(DisplayName = "Beneficiary Search Filter")]
     public async Task BeneficiarySearchFilter()
     {
-        var res = await _beneficiaryService.BeneficiarySearchFilter(new BeneficiarySearchFilterRequest() { MemberType = 2, BadgeNumber = 703244, PsnSuffix = 1000},CancellationToken.None);
+        var res = await _beneficiaryService.BeneficiarySearchFilter(new BeneficiarySearchFilterRequest() { MemberType = 2, BadgeNumber = 703244, PsnSuffix = 1000 }, CancellationToken.None);
         Assert.NotNull(res);
         res.Results.ShouldBeEquivalentTo(_beneficiarySearchResponse);
     }

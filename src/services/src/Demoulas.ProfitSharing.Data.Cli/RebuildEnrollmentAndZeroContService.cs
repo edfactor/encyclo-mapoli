@@ -43,7 +43,7 @@ internal sealed class RebuildEnrollmentAndZeroContService
 
             // Check if rebuild is actually needed
             short profitYear = await IsRebuildNeededAsync(stoppingToken).ConfigureAwait(false);
-            
+
             if (profitYear == 0)
             {
                 _logger.LogInformation("Rebuild is not needed - this is typical.");
@@ -56,7 +56,7 @@ internal sealed class RebuildEnrollmentAndZeroContService
             await _yearEndService.RunFinalYearEndUpdates(profitYear, true, stoppingToken).ConfigureAwait(false);
             // Rebuilds the Enrollment Ids
             await _payProfitUpdateService.SetEnrollmentId(profitYear, stoppingToken).ConfigureAwait(false);
-            
+
             _logger.LogInformation("RebuildEnrollmentAndZeroCont completed successfully");
         }
         catch (Exception ex)
@@ -66,7 +66,7 @@ internal sealed class RebuildEnrollmentAndZeroContService
             throw new InvalidOperationException("RebuildEnrollmentAndZeroCont failed during execution", ex);
         }
     }
-    
+
     private Task<short> IsRebuildNeededAsync(CancellationToken cancellationToken)
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>

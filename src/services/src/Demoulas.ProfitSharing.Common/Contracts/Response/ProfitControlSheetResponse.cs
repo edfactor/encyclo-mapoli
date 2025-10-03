@@ -8,12 +8,12 @@ public sealed record ProfitControlSheetResponse
     public decimal EmployeeContributionProfitSharingAmount { get; set; }
     public decimal NonEmployeeProfitSharingAmount { get; set; }
     public decimal EmployeeBeneficiaryAmount { get; set; }
-    public decimal ProfitSharingAmount 
-    {   
+    public decimal ProfitSharingAmount
+    {
         get
         {
             return EmployeeContributionProfitSharingAmount + NonEmployeeProfitSharingAmount + EmployeeBeneficiaryAmount;
-        } 
+        }
     }
 
     public static ProfitControlSheetResponse ResponseExample()

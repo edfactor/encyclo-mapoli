@@ -3,7 +3,7 @@
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
 public record BeneficiaryContactDto : IdRequest
 {
-    public required  string Ssn { get; set; }
+    public required string Ssn { get; set; }
 
     public DateOnly DateOfBirth { get; set; }
 

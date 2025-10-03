@@ -9,7 +9,7 @@ internal sealed class DistributionPayeeMap : IEntityTypeConfiguration<Distributi
     {
         _ = builder.ToTable("DISTRIBUTION_PAYEE");
         _ = builder.HasKey(d => d.Id);
-        
+
         _ = builder.Property(d => d.Id).ValueGeneratedOnAdd();
 
         _ = builder.HasIndex(d => d.Ssn, "IX_SSN");

@@ -30,8 +30,8 @@ public record OracleEmployee(
 
     [JsonIgnore]
     public NameItem Name => Names.Items[0];
-    
-    [JsonIgnore] 
+
+    [JsonIgnore]
     public PhoneItem? Phone => Phones?.Items.FirstOrDefault(a => a.PrimaryFlag ?? false);
 
     [JsonIgnore]

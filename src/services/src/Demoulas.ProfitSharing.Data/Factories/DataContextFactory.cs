@@ -12,7 +12,7 @@ public sealed class DataContextFactory : DataContextFactoryBase<ProfitSharingDbC
 {
     private DataContextFactory(IServiceProvider serviceProvider) : base(serviceProvider)
     {
-       
+
     }
 
     public static IProfitSharingDataContextFactory Initialize(IHostApplicationBuilder builder, IEnumerable<ContextFactoryRequest> contextFactoryRequests)

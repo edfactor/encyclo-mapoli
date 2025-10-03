@@ -24,7 +24,7 @@ public class ProfitSharingUnder21InactiveNoBalanceTests : ApiTestBase<Program>
         response.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
 
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-            
+
         response = await ApiClient.GETAsync<ProfitSharingUnder21InactiveNoBalanceEndpoint, ProfitYearRequest, PaginatedResponseDto<ProfitSharingUnder21InactiveNoBalanceResponse>>(request);
         response.ShouldNotBeNull();
         response.Response.StatusCode.ShouldBe(HttpStatusCode.OK);

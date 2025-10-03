@@ -136,7 +136,7 @@ public static class CommandHelper
                 // Show success notification if interaction service is available
                 if (interactionService?.IsAvailable == true)
                 {
-                    _ =  interactionService.PromptNotificationAsync(
+                    _ = interactionService.PromptNotificationAsync(
                         title: $"Completed: {operationName}",
                         message: $"Database operation completed successfully: {operationName}",
                         options: new NotificationInteractionOptions
@@ -152,7 +152,7 @@ public static class CommandHelper
                 // Show error notification if interaction service is available
                 if (interactionService?.IsAvailable == true)
                 {
-                    _ =  interactionService.PromptNotificationAsync(
+                    _ = interactionService.PromptNotificationAsync(
                         title: $"❌ Failed: {operationName}",
                         message: $"**Database operation failed**: {operationName}\n\n**Error Details:**\n```\n{result.ErrorMessage}\n```\n\nCheck console logs for more information.",
                         options: new NotificationInteractionOptions

@@ -4,8 +4,8 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
-using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 using FluentValidation;
 
@@ -39,7 +39,7 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
             s.ExampleRequest = ProfitShareUpdateRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object> { { 200, ProfitMasterUpdateResponse.Example() } };
         });
-        
+
         Group<YearEndGroup>();
         Policies(Security.Policy.CanViewYearEndReports, Security.Policy.CanRunYearEndProcesses);
     }

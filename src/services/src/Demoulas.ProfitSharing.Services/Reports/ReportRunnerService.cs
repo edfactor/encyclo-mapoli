@@ -2,13 +2,13 @@
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
-using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
-using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 

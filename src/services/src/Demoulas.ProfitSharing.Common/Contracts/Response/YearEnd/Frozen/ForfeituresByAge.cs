@@ -18,7 +18,7 @@ public sealed record ForfeituresByAge : ReportResponseBase<ForfeituresByAgeDetai
 
     public required short TotalEmployees { get; init; }
     public required decimal TotalAmount { get; init; }
-    
+
 
 
     public static ForfeituresByAge ResponseExample()

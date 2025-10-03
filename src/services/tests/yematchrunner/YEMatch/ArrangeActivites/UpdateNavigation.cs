@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
+﻿using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Shouldly;
 using YEMatch.YEMatch.SmartActivities;
 

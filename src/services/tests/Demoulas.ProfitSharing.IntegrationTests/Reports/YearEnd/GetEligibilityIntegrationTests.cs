@@ -15,12 +15,12 @@ public class GetEligibilityIntegrationTests : PristineBaseTest
     public GetEligibilityIntegrationTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
     }
-    
+
 
     [Fact]
     public async Task BasicTest()
     {
-        GetEligibleEmployeesService es = new(DbFactory, CalendarService, new DemographicReaderService(new FrozenService(DbFactory,  new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
+        GetEligibleEmployeesService es = new(DbFactory, CalendarService, new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
         GetEligibleEmployeesResponse empls = await es.GetEligibleEmployeesAsync(new ProfitYearRequest { ProfitYear = 2024, Take = int.MaxValue }, CancellationToken.None);
 
         TestOutputHelper.WriteLine("On Frozen: " + empls.NumberReadOnFrozen);

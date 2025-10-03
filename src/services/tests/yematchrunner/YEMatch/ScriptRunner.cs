@@ -25,7 +25,7 @@ public static class ScriptRunner
             }
         };
 
-       // Event handlers for real-time output
+        // Event handlers for real-time output
         process.OutputDataReceived += (sender, e) =>
         {
             if (!string.IsNullOrEmpty(e.Data) && chatty)
@@ -36,7 +36,7 @@ public static class ScriptRunner
 
         process.ErrorDataReceived += (sender, e) =>
         {
-                Console.Error.WriteLine(e.Data);
+            Console.Error.WriteLine(e.Data);
         };
 
         process.Start();
@@ -69,7 +69,7 @@ public static class ScriptRunner
                 Console.Error.WriteLine(e.Data);
             }
         };
-        
+
         process.WaitForExit();
 
         string stdout = stdoutBuilder.ToString();

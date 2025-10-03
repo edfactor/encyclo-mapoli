@@ -17,7 +17,7 @@ public sealed class AuditService : IAuditService
     private readonly IAppUser? _appUser;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public AuditService(IProfitSharingDataContextFactory dataContextFactory, 
+    public AuditService(IProfitSharingDataContextFactory dataContextFactory,
         IAppUser? appUser,
         IHttpContextAccessor httpContextAccessor)
     {
@@ -100,10 +100,10 @@ public sealed class AuditService : IAuditService
     {
         var result = new List<KeyValuePair<string, decimal>>();
         var type = obj.GetType();
-        
+
         // Check if the class itself has the YearEndArchivePropertyAttribute
         bool classHasAttribute = Attribute.IsDefined(type, typeof(YearEndArchivePropertyAttribute));
-        
+
         IEnumerable<PropertyInfo> properties;
         if (classHasAttribute)
         {
@@ -118,7 +118,7 @@ public sealed class AuditService : IAuditService
                 .Where(p => Attribute.IsDefined(p, typeof(YearEndArchivePropertyAttribute))
                             && p.PropertyType == typeof(decimal));
         }
-        
+
         foreach (var prop in properties)
         {
             var value = (decimal)(prop.GetValue(obj) ?? 0);

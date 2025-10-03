@@ -11,7 +11,7 @@ internal sealed class DistributionRequestMap : ModifiedBaseMap<DistributionReque
     public override void Configure(EntityTypeBuilder<DistributionRequest> builder)
     {
         base.Configure(builder);
-        
+
         builder.ToTable("DISTRIBUTION_REQUEST");
         builder.HasKey(d => d.Id);
         builder.Property(d => d.Id).HasPrecision(9).HasColumnName("ID").ValueGeneratedOnAdd();
@@ -30,6 +30,6 @@ internal sealed class DistributionRequestMap : ModifiedBaseMap<DistributionReque
         builder.HasOne(e => e.Reason).WithMany().HasForeignKey(p => p.ReasonId);
         builder.HasOne(e => e.Status).WithMany().HasForeignKey(p => p.StatusId);
         builder.HasOne(e => e.Type).WithMany().HasForeignKey(p => p.TypeId);
-        builder.HasOne(e => e.TaxCode).WithMany().HasForeignKey(p=> p.TaxCodeId);
+        builder.HasOne(e => e.TaxCode).WithMany().HasForeignKey(p => p.TaxCodeId);
     }
 }

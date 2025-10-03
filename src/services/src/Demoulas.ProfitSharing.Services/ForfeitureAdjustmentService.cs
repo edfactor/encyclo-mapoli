@@ -184,13 +184,13 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
             context.ProfitDetails.Add(profitDetail);
 
-            var payProfit = await context.PayProfits.Include(p=>p.Demographic)
+            var payProfit = await context.PayProfits.Include(p => p.Demographic)
                 .FirstOrDefaultAsync(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == req.ProfitYear, cancellationToken);
 
             if (payProfit != null)
             {
                 // Get Calculated ETVA amount
-                var profitCodeTotals = await _totalService.GetTotalComputedEtva(context, (short)req.ProfitYear).Where(x=>x.Ssn == payProfit.Demographic!.Ssn)
+                var profitCodeTotals = await _totalService.GetTotalComputedEtva(context, (short)req.ProfitYear).Where(x => x.Ssn == payProfit.Demographic!.Ssn)
                     .FirstOrDefaultAsync(cancellationToken);
 
                 // Default to zero if no totals found

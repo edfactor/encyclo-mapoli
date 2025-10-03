@@ -1,13 +1,13 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
-public record MasterInquiryMemberDetailsRequest : SortedPaginationRequestDto 
+public record MasterInquiryMemberDetailsRequest : SortedPaginationRequestDto
 {
     public required byte? MemberType { get; set; }
     public int? Id { get; set; }
     public short? ProfitYear { get; set; }
     public byte? MonthToDate { get; set; }
-    
+
     public int? BadgeNumber { get; set; }
     public short? PsnSuffix { get; set; }
     public string? Ssn { get; set; }

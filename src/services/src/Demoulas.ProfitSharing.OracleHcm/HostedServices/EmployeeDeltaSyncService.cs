@@ -14,9 +14,9 @@ internal sealed class EmployeeDeltaSyncService : OracleHcmHostedServiceBase
         OracleHcmConfig oracleHcmConfig,
         ILogger<EmployeeDeltaSyncService> logger) : base(schedulerFactory, jobFactory, oracleHcmConfig, logger)
     {
-       
+
     }
-    
+
     protected override Task ConfigureJob(CancellationToken cancellationToken)
     {
         return ScheduleJob<EmployeeDeltaSyncJob>(

@@ -22,18 +22,15 @@ public sealed class UnforfeitService : IUnforfeitService
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly TotalService _totalService;
-    private readonly ILogger<UnforfeitService> _logger;
 
     public UnforfeitService(
         IProfitSharingDataContextFactory dataContextFactory,
         IDemographicReaderService demographicReaderService,
-        TotalService totalService,
-        ILogger<UnforfeitService> logger)
+        TotalService totalService)
     {
         _dataContextFactory = dataContextFactory;
         _demographicReaderService = demographicReaderService;
         _totalService = totalService;
-        _logger = logger;
     }
 
     public async Task<ReportResponseBase<UnforfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(StartAndEndDateRequest req,

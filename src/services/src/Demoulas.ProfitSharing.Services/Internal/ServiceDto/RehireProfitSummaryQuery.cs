@@ -9,7 +9,7 @@ internal sealed record RehireProfitSummaryQuery
     internal required DateOnly? TerminationDate { get; set; }
     internal required DateOnly ReHiredDate { get; set; }
     internal required byte CompanyContributionYears { get; set; }
-    
+
     internal decimal NetBalanceLastYear { get; set; }
     internal decimal VestedBalanceLastYear { get; set; }
     internal char EmploymentStatusId { get; set; }

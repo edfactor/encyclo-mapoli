@@ -1,5 +1,5 @@
-﻿using Demoulas.ProfitSharing.Data.Entities.Navigations;
-using System.Linq;
+﻿using System.Linq;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 

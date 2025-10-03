@@ -1,4 +1,6 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Lookups;
+﻿using System.ComponentModel;
+using System.Net;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Lookups;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -10,21 +12,19 @@ using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
-using System.ComponentModel;
-using System.Net;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Lookups;
 
 public class StateTaxEndpointTests : ApiTestBase<Api.Program>
 {
- 
+
     [Fact(DisplayName = "StateTax - Should handle case insensitive state lookup")]
     [Description("PS-#### : Returns tax rate regardless of case in state abbreviation")]
     public async Task Get_ReturnsStateTaxRate_WhenLowercaseStateProvided()
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
-        
+
         var request = new StateTaxLookupRequest { State = "nh" };
 
         // Act
@@ -44,11 +44,11 @@ public class StateTaxEndpointTests : ApiTestBase<Api.Program>
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
-        
+
         // Act - California
         var caResponse = await ApiClient.GETAsync<StateTaxEndpoint, StateTaxLookupRequest, StateTaxLookupResponse>(
             new StateTaxLookupRequest { State = "CA" });
-        
+
         // Act - Texas
         var txResponse = await ApiClient.GETAsync<StateTaxEndpoint, StateTaxLookupRequest, StateTaxLookupResponse>(
             new StateTaxLookupRequest { State = "TX" });
@@ -56,7 +56,7 @@ public class StateTaxEndpointTests : ApiTestBase<Api.Program>
         // Assert
         caResponse.Result.State.ShouldBe("CA");
         caResponse.Result.StateTaxRate.ShouldBe(13.3m);
-        
+
         txResponse.Result.State.ShouldBe("TX");
         txResponse.Result.StateTaxRate.ShouldBe(0m);
     }
@@ -118,7 +118,7 @@ public class StateTaxEndpointTests : ApiTestBase<Api.Program>
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
-        
+
         var request = new StateTaxLookupRequest { State = "NY" };
 
         // Act
@@ -137,7 +137,7 @@ public class StateTaxEndpointTests : ApiTestBase<Api.Program>
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        
+
         var request = new StateTaxLookupRequest { State = "NY" };
 
         // Act
@@ -160,7 +160,7 @@ public class StateTaxEndpointTests : ApiTestBase<Api.Program>
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
-        
+
         var request = new StateTaxLookupRequest { State = stateCode };
 
         // Act
@@ -179,7 +179,7 @@ public class StateTaxEndpointTests : ApiTestBase<Api.Program>
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
-        
+
         var request = new StateTaxLookupRequest { State = "NH" };
 
         // Act
@@ -198,7 +198,7 @@ public class StateTaxEndpointTests : ApiTestBase<Api.Program>
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
-        
+
         var request = new StateTaxLookupRequest { State = "NH" };
 
         // Act

@@ -51,7 +51,7 @@ public class SanityCheckEmployeeAndBenes : BaseSqlActivity
                     order by system, ssn
                     """
             );
-            
+
             var readyRehire = await RdyQuery(
                 """
                         select * from (
@@ -68,7 +68,7 @@ public class SanityCheckEmployeeAndBenes : BaseSqlActivity
             }
             smrtRehire.ShouldBeEquivalentTo(readyRehire);
         }
-        
+
 
         return new Outcome(Name(), Name(), "", OutcomeStatus.Ok, "", null, false);
     }

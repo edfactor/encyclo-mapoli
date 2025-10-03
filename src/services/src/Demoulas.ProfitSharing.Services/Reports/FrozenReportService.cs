@@ -37,7 +37,7 @@ public class FrozenReportService : IFrozenReportService
         _demographicReaderService = demographicReaderService;
         _logger = loggerFactory.CreateLogger<FrozenReportService>();
     }
-    
+
     /// <summary>
     /// Retrieves the profit-sharing distributions grouped by age and year.
     /// </summary>
@@ -503,7 +503,7 @@ public class FrozenReportService : IFrozenReportService
         {
             var query = _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalEndDate);
             var demo = await _demographicReaderService.BuildDemographicQuery(ctx);
-            
+
             var joinedQuery = from q in query
                               join d in demo on q.Ssn equals d.Ssn into demographics
                               from demographic in demographics.DefaultIfEmpty()
@@ -642,7 +642,7 @@ public class FrozenReportService : IFrozenReportService
             var query = _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalEndDate);
             var yearsInPlanQuery = _totalService.GetYearsOfService(ctx, req.ProfitYear, startEnd.FiscalEndDate);
             var demo = await _demographicReaderService.BuildDemographicQuery(ctx);
-            
+
             var joinedQuery = from q in query
                               join yip in yearsInPlanQuery on q.Ssn equals yip.Ssn
                               join d in demo
@@ -673,7 +673,7 @@ public class FrozenReportService : IFrozenReportService
             };
 
             return await joinedQuery.ToListAsync(cancellationToken);
-               
+
         });
 
         var details = detailList
@@ -734,9 +734,9 @@ public class FrozenReportService : IFrozenReportService
             }
         };
     }
-    
-     public async Task<UpdateSummaryReportResponse> GetUpdateSummaryReport(ProfitYearRequest req,
-        CancellationToken cancellationToken = default)
+
+    public async Task<UpdateSummaryReportResponse> GetUpdateSummaryReport(ProfitYearRequest req,
+       CancellationToken cancellationToken = default)
     {
         var lastYear = (short)(req.ProfitYear - 1);
         var startEnd = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
@@ -751,7 +751,7 @@ public class FrozenReportService : IFrozenReportService
                     x.Ssn,
                     x.ContactInfo.FirstName,
                     x.ContactInfo.LastName,
-                    BadgeNumber = (long) x.BadgeNumber,
+                    BadgeNumber = (long)x.BadgeNumber,
                     DemographicId = x.Id,
                     IsEmployee = true,
                     x.StoreNumber,
@@ -761,13 +761,13 @@ public class FrozenReportService : IFrozenReportService
 #pragma warning disable DSMPS001
                 .Where(x => !ctx.Demographics.Any(d => d.Ssn == x.Ssn))
 #pragma warning restore DSMPS001
-                .Join(ctx.Beneficiaries, bc=>bc.Id, b=>b.BeneficiaryContactId, (bc, b)=>new {bc, b})
+                .Join(ctx.Beneficiaries, bc => bc.Id, b => b.BeneficiaryContactId, (bc, b) => new { bc, b })
                 .Select(x => new
                 {
                     x.bc.Ssn,
                     FirstName = x.bc.ContactInfo.FirstName.Trim(),
                     x.bc.ContactInfo.LastName,
-                    BadgeNumber = (long)(x.b.BadgeNumber*10000 + x.b.PsnSuffix),
+                    BadgeNumber = (long)(x.b.BadgeNumber * 10000 + x.b.PsnSuffix),
                     DemographicId = 0,
                     IsEmployee = false,
                     StoreNumber = (short)0,
@@ -776,15 +776,15 @@ public class FrozenReportService : IFrozenReportService
             var
                 members = demoBase.Union(
                     beneficiaryBase); //UnionBy throws an error, so beneficiaries that are also employees are filtered out, and the regular Union can be used since we've filtered out possible duplicates.
-            
+
             var baseQuery = await (
                 from m in members
-                
+
                 join bal in _totalService.TotalVestingBalance(ctx, req.ProfitYear /*Employee*/, startEnd.FiscalEndDate)
                     on m.Ssn equals bal.Ssn into balTmp
                 from bal in balTmp.DefaultIfEmpty()
 
-                // ToBeDone: This should be using the frozen for year "lastYear"
+                    // ToBeDone: This should be using the frozen for year "lastYear"
                 join lyBalTbl in _totalService.TotalVestingBalance(ctx, lastYear /*Transactions Up To*/, lyStartEnd.FiscalBeginDate)
                     on m.Ssn equals lyBalTbl.Ssn into lyBalTmp
                 from lyBal in lyBalTmp.DefaultIfEmpty()
@@ -792,11 +792,11 @@ public class FrozenReportService : IFrozenReportService
                 join lyPpTbl in ctx.PayProfits.Where(x => x.ProfitYear == lastYear)
                     on m.DemographicId equals lyPpTbl.DemographicId into lyPpTmp
                 from lyPp in lyPpTmp.DefaultIfEmpty()
-                
+
                 join ppTbl in ctx.PayProfits.Where(x => x.ProfitYear == req.ProfitYear)
                     on m.DemographicId equals ppTbl.DemographicId into ppTmp
                 from pp in ppTmp.DefaultIfEmpty()
-                
+
                 select new
                 {
                     m.BadgeNumber,
@@ -810,15 +810,15 @@ public class FrozenReportService : IFrozenReportService
                     BeforeProfitSharingAmount = lyBal != null ? lyBal.CurrentBalance : 0,
                     BeforeVestedProfitSharingAmount = lyBal != null ? lyBal.VestedBalance : 0,
                     BeforeYearsInPlan = lyBal != null ? lyBal.YearsInPlan : (byte)0,
-                    
+
                     AfterEnrollmentId = pp != null ? pp.EnrollmentId : 0,
                     AfterProfitSharingAmount = bal.CurrentBalance,
                     AfterVestedProfitSharingAmount = bal.VestedBalance,
-                    AfterYearsInPlan = bal.YearsInPlan 
+                    AfterYearsInPlan = bal.YearsInPlan
                 }
             ).ToListAsync(
                 cancellationToken); //Have to materialize. Something in this query seems to be unable to render as an expression with the current version of the oracle provider.
-            
+
             var totals = baseQuery.GroupBy(x => true).Select(x => new
             {
                 TotalBeforeProfitSharing = x.Sum(c => c.BeforeProfitSharingAmount),
@@ -888,39 +888,39 @@ public class FrozenReportService : IFrozenReportService
                 short lastProfitYear = (short)(req.ProfitYear - 1);
                 var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, true);
                 var baseQuery = (from d in demographics
-                                       join lyPP in ctx.PayProfits on new { d.Id, Year = lastProfitYear } equals new
-                                       {
-                                           Id = lyPP.DemographicId,
-                                           Year = lyPP.ProfitYear
-                                       }
-                                       join pp in ctx.PayProfits on new { d.Id, Year = req.ProfitYear } equals new
-                                       {
-                                           Id = pp.DemographicId,
-                                           Year = pp.ProfitYear
-                                       }
-                                       join psBal in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear) on d.Ssn equals psBal.Ssn
-                                       join fBal in _totalService.GetForfeitures(ctx, req.ProfitYear) on d.Ssn equals fBal.Ssn into
-                                           fBal_tmp
-                                       from fBal_lj in fBal_tmp.DefaultIfEmpty()
-                                       join lBal in _totalService.GetQuoteLoansUnQuote(ctx, req.ProfitYear) on d.Ssn equals lBal.Ssn into
-                                           lBal_tmp
-                                       from lBal_lj in lBal_tmp.DefaultIfEmpty()
-                                       where pp.CurrentIncomeYear + pp.IncomeExecutive > req.MinGrossAmount
-                                       orderby d.ContactInfo.FullName
-                                       select new
-                                       {
-                                           d.BadgeNumber,
-                                           EmployeeName = d.ContactInfo.FullName ?? "",
-                                           d.DateOfBirth,
-                                           d.Ssn,
-                                           Forfeitures = fBal_lj.TotalAmount,
-                                           Loans = lBal_lj.TotalAmount,
-                                           ProfitSharingAmount = psBal.TotalAmount,
-                                           GrossWages = pp.CurrentIncomeYear + pp.IncomeExecutive,
-                                           pp.EnrollmentId,
-                                           d.PayFrequencyId,
-                                       });
-                
+                                 join lyPP in ctx.PayProfits on new { d.Id, Year = lastProfitYear } equals new
+                                 {
+                                     Id = lyPP.DemographicId,
+                                     Year = lyPP.ProfitYear
+                                 }
+                                 join pp in ctx.PayProfits on new { d.Id, Year = req.ProfitYear } equals new
+                                 {
+                                     Id = pp.DemographicId,
+                                     Year = pp.ProfitYear
+                                 }
+                                 join psBal in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear) on d.Ssn equals psBal.Ssn
+                                 join fBal in _totalService.GetForfeitures(ctx, req.ProfitYear) on d.Ssn equals fBal.Ssn into
+                                     fBal_tmp
+                                 from fBal_lj in fBal_tmp.DefaultIfEmpty()
+                                 join lBal in _totalService.GetQuoteLoansUnQuote(ctx, req.ProfitYear) on d.Ssn equals lBal.Ssn into
+                                     lBal_tmp
+                                 from lBal_lj in lBal_tmp.DefaultIfEmpty()
+                                 where pp.CurrentIncomeYear + pp.IncomeExecutive > req.MinGrossAmount
+                                 orderby d.ContactInfo.FullName
+                                 select new
+                                 {
+                                     d.BadgeNumber,
+                                     EmployeeName = d.ContactInfo.FullName ?? "",
+                                     d.DateOfBirth,
+                                     d.Ssn,
+                                     Forfeitures = fBal_lj.TotalAmount,
+                                     Loans = lBal_lj.TotalAmount,
+                                     ProfitSharingAmount = psBal.TotalAmount,
+                                     GrossWages = pp.CurrentIncomeYear + pp.IncomeExecutive,
+                                     pp.EnrollmentId,
+                                     d.PayFrequencyId,
+                                 });
+
                 var totals = await baseQuery.GroupBy(x => true).Select(x => new
                 {
                     TotalForfeitures = x.Sum(c => c.Forfeitures),
@@ -946,7 +946,7 @@ public class FrozenReportService : IFrozenReportService
                     }).ToList(),
                     Total = pagedData.Total
                 };
-                return new { reportDemographics, totals};
+                return new { reportDemographics, totals };
             });
 
             var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);

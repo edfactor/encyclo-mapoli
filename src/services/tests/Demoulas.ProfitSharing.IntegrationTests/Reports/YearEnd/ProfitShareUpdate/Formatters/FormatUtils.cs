@@ -155,7 +155,7 @@ public static class FormatUtils
             formattedValue = ".00 ";
         }
         else
-            // Handle negative values with trailing minus.
+        // Handle negative values with trailing minus.
         {
             formattedValue = value < 0
                 ? $"{Math.Abs(value).ToString(format, CultureInfo.InvariantCulture)}-"
@@ -173,7 +173,7 @@ public static class FormatUtils
         formattedValue = value.ToString(format, CultureInfo.InvariantCulture);
 
         if (value != 0)
-            // Replace leading zeros with spaces.
+        // Replace leading zeros with spaces.
         {
             formattedValue = Regex.Replace(formattedValue, @"(?<!\S)0+", m => new string(' ', m.Length));
         }

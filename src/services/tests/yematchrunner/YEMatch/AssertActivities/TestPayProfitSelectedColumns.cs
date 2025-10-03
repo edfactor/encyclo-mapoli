@@ -16,7 +16,7 @@ public record YearEndChange
 [SuppressMessage("Usage", "VSTHRD103:Call async methods when in an async method")]
 public class TestPayProfitSelectedColumns : BaseSqlActivity
 {
-    
+
     public override Task<Outcome> Execute()
     {
         const short profitYear = 2024;
@@ -25,7 +25,7 @@ public class TestPayProfitSelectedColumns : BaseSqlActivity
         Dictionary<int, YearEndChange> readyRowsBySsn = GetReadyPayProfit().GetAwaiter().GetResult();
         // Get the results by reading all the pay_profit rows
         Dictionary<int, YearEndChange> smartRowsBySsn = GetSmartRowsBySsn(profitYear).GetAwaiter().GetResult();
-        
+
         // ensure number of rows match 
         if (readyRowsBySsn.Count != smartRowsBySsn.Count)
         {
@@ -86,7 +86,11 @@ public class TestPayProfitSelectedColumns : BaseSqlActivity
             int ssn = reader.GetInt32(0);
             YearEndChange pp = new()
             {
-                IsNew = reader.GetInt32(1), ZeroCont = reader.GetByte(2), EarnPoints = reader.GetDecimal(3), PsCertificateIssuedDate = !await reader.IsDBNullAsync(4), Enrolled = reader.GetByte(5)
+                IsNew = reader.GetInt32(1),
+                ZeroCont = reader.GetByte(2),
+                EarnPoints = reader.GetDecimal(3),
+                PsCertificateIssuedDate = !await reader.IsDBNullAsync(4),
+                Enrolled = reader.GetByte(5)
             };
             data.Add(ssn, pp);
         }
@@ -124,5 +128,5 @@ public class TestPayProfitSelectedColumns : BaseSqlActivity
 
         return data;
     }
-    
+
 }

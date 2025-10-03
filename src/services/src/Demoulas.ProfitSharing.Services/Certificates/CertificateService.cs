@@ -43,7 +43,7 @@ public sealed class CertificateService : ICertificateService
         var spaces_60 = new string(' ', 60);
         var linefeeds_2 = new string('\n', 2);
         var linefeeds_4 = new string('\n', 4);
-        var linefeeds_5 = new string('\n', 5);
+        _ = new string('\n', 5);
         var linefeeds_6 = new string('\n', 6);
 
         //Add xerox header
@@ -191,7 +191,7 @@ public sealed class CertificateService : ICertificateService
             if (age < 67)
             {
                 age = (byte)67;
-            }   
+            }
 
             annuityRates.TryGetValue(age, out var annuityRate);
             if (annuityRate != null)
@@ -202,17 +202,17 @@ public sealed class CertificateService : ICertificateService
                 pmtJoint = (cert.BeginningBalance + cert.Contributions + cert.Forfeitures) / annuityRate.JointRate / 12;
             }
 
-            rslt.Add(new CertificateReprintResponse() 
-            { 
-                BadgeNumber = cert.BadgeNumber, 
-                FullName = cert.FullName, 
-                StoreNumber = cert.StoreNumber, 
-                DateOfBirth = cert.DateOfBirth, 
-                BeginningBalance = cert.BeginningBalance, 
-                Contributions = cert.Contributions, 
-                Forfeitures = cert.Forfeitures, 
-                VestedAmount = cert.VestedAmount, 
-                EndingBalance = cert.EndingBalance, 
+            rslt.Add(new CertificateReprintResponse()
+            {
+                BadgeNumber = cert.BadgeNumber,
+                FullName = cert.FullName,
+                StoreNumber = cert.StoreNumber,
+                DateOfBirth = cert.DateOfBirth,
+                BeginningBalance = cert.BeginningBalance,
+                Contributions = cert.Contributions,
+                Forfeitures = cert.Forfeitures,
+                VestedAmount = cert.VestedAmount,
+                EndingBalance = cert.EndingBalance,
                 Distributions = cert.Distributions,
                 AnnuityJointRate = jointRate,
                 AnnuitySingleRate = singleRate,
@@ -235,7 +235,8 @@ public sealed class CertificateService : ICertificateService
             });
         }
 
-        return new ReportResponseBase<CertificateReprintResponse>() { 
+        return new ReportResponseBase<CertificateReprintResponse>()
+        {
             ReportDate = rawData.ReportDate,
             ReportName = rawData.ReportName,
             Response = new PaginatedResponseDto<CertificateReprintResponse>

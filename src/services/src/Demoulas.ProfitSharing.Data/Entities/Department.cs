@@ -19,5 +19,5 @@ public sealed class Department : ILookupTable<byte>
     public required string Name { get; set; }
 
     public ICollection<Demographic>? Demographics { get; set; }
-   
+
 }

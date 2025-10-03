@@ -18,7 +18,7 @@ namespace Demoulas.ProfitSharing.OracleHcm.Clients;
 internal class PayrollSyncClient
 {
     // Define constants for balance type IDs
-   
+
 
     private readonly HttpClient _httpClient;
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
@@ -29,7 +29,7 @@ internal class PayrollSyncClient
     private readonly Channel<MessageRequest<PayrollItem[]>> _payrollSyncBus;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
 
-   
+
     public PayrollSyncClient(HttpClient httpClient,
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
         IEmployeeSyncService employeeSyncService,
@@ -195,7 +195,7 @@ internal class PayrollSyncClient
         }
     }
 
-   
+
     /// <summary>
     /// Constructs a URL for retrieving payroll data from the Oracle HCM system.
     /// </summary>

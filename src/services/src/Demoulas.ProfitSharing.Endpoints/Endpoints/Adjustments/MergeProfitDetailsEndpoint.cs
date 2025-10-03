@@ -13,10 +13,10 @@ public sealed class MergeProfitDetailsEndpoint : ProfitSharingRequestEndpoint<Me
     private readonly IMergeProfitDetailsService _mergeProfitDetailsService;
     private readonly ILogger<MergeProfitDetailsEndpoint> _logger;
 
-    public MergeProfitDetailsEndpoint(IMergeProfitDetailsService mergeProfitDetailsService, ILogger<MergeProfitDetailsEndpoint> logger) 
+    public MergeProfitDetailsEndpoint(IMergeProfitDetailsService mergeProfitDetailsService, ILogger<MergeProfitDetailsEndpoint> logger)
         : base(Navigation.Constants.Adjustments)
     {
-        _mergeProfitDetailsService = mergeProfitDetailsService ;
+        _mergeProfitDetailsService = mergeProfitDetailsService;
         _logger = logger;
     }
 

@@ -37,11 +37,11 @@ public static class DatabaseServicesExtension
             throw new InvalidOperationException($"Service type {typeof(IProfitSharingDataContextFactory).FullName} is already registered.");
         }
 
-        _ = builder.Services.AddSingleton<DataConfig>(s=>
+        _ = builder.Services.AddSingleton<DataConfig>(s =>
         {
             var config = s.GetRequiredService<IConfiguration>();
             DataConfig dataConfig = new DataConfig();
-            config.Bind("DataConfig",  dataConfig);
+            config.Bind("DataConfig", dataConfig);
             return dataConfig;
         });
         _ = builder.Services.AddScoped<AuditSaveChangesInterceptor>(provider =>

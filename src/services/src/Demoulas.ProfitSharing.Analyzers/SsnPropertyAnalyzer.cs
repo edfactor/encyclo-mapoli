@@ -34,7 +34,7 @@ public class SsnPropertyAnalyzer : DiagnosticAnalyzer
         // Register a syntax node action to analyze properties.
         context.RegisterSyntaxNodeAction(AnalyzeProperty, SyntaxKind.PropertyDeclaration);
     }
-    
+
     private static void AnalyzeProperty(SyntaxNodeAnalysisContext context)
     {
         // Check if the node is a property declaration.

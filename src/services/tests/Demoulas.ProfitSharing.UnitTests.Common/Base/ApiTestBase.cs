@@ -32,7 +32,7 @@ public class ApiTestBase<TStartup> where TStartup : class
 
 
     public ServiceProvider? ServiceProvider { get; private set; }
-    
+
     /// <summary>
     ///   Initializes a default instance of <c>ApiTestBase</c>
     /// </summary>

@@ -1,7 +1,7 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
-public sealed record GrossWagesReportResponse:ReportResponseBase<GrossWagesReportDetail>
+public sealed record GrossWagesReportResponse : ReportResponseBase<GrossWagesReportDetail>
 {
     public static readonly string REPORT_NAME = "PROFIT SHARING GROSS WAGES";
     public GrossWagesReportResponse()

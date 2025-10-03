@@ -26,17 +26,17 @@ public class GoldenDecemberRun : Runnable
             "R3", // PROF-TERM
             "R4", // QRY-PSLOAN
             "R5", // PROF-DOLLAR-EXEC-EXTRACT
-            // "R6", // PAYPROFIT-CLEAR-EXEC
+                  // "R6", // PAYPROFIT-CLEAR-EXEC
             "R7", // !Ready-Screen-008-09
             "R8", // PROF-SHARE
             "R9", // !YE-Oracle-Payroll-Processing
             "R10", // Load-Oracle-PAYPROFIT(weekly job)
             "R11", // PROF-DOLLAR-EXTRACT 
             "R12" //  PROF-LOAD-YREND-DEMO-PROFSHARE
-            // "R13A", // PAYPROFIT-SHIFT
-            // "R13B", // PAYPROFIT-SHIFT
-            // "R14" // ZERO-PY-PD-PAYPROFIT
+                  // "R13A", // PAYPROFIT-SHIFT
+                  // "R13B", // PAYPROFIT-SHIFT
+                  // "R14" // ZERO-PY-PD-PAYPROFIT
         ));
-        
+
     }
 }
