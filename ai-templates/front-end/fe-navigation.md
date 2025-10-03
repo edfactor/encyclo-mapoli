@@ -53,7 +53,7 @@ interface NavigationDto {
 ## Top Navigation Bar (MenuBar)
 
 ### Location
-`src/components/MenuBar/MenuBar.tsx`
+`./src/ui/src/components/MenuBar/MenuBar.tsx`
 
 ### Menu Structure
 
@@ -137,7 +137,7 @@ export type RouteData = {
 ## Left Drawer (PSDrawer)
 
 ### Location
-`src/components/Drawer/PSDrawer.tsx`
+`./src/ui/src/components/Drawer/PSDrawer.tsx`
 
 ### Purpose
 The drawer provides hierarchical navigation for **Year End** workflows, specifically:
@@ -243,7 +243,7 @@ interface SubPages {
 
 ### Route Definition
 
-Routes are defined in `src/constants.ts`:
+Routes are defined in `./src/ui/src/constants.ts`:
 
 ```typescript
 export const ROUTES = {
@@ -277,20 +277,7 @@ Routes are mapped to components in `RouterSubAssembly.tsx`:
 </Routes>
 ```
 
-### Protected Routes
 
-Some routes require specific roles:
-
-```typescript
-<Route
-  path={ROUTES.DEMO_FREEZE}
-  element={
-    <ProtectedRoute requiredRoles={ImpersonationRoles.ItDevOps}>
-      <DemographicFreeze />
-    </ProtectedRoute>
-  }
-/>
-```
 
 ### Route Access Control
 
@@ -314,186 +301,6 @@ useEffect(() => {
 }, [isSuccess, data, location.pathname, navigate, token]);
 ```
 
-## Adding a New Page
-
-### Step 1: Create the Page Component
-
-Create your page component in `src/pages/`:
-
-```typescript
-// src/pages/MyNewFeature/MyNewPage.tsx
-import React from "react";
-
-const MyNewPage: React.FC = () => {
-  return (
-    <div>
-      <h1>My New Page</h1>
-      <p>Page content here</p>
-    </div>
-  );
-};
-
-export default MyNewPage;
-```
-
-### Step 2: Add Route Constant
-
-Add to `src/constants.ts`:
-
-```typescript
-export const ROUTES = {
-  // ... existing routes
-  MY_NEW_PAGE: "my-new-page"
-} as const;
-```
-
-### Step 3: Register Route
-
-Add to `src/components/router/RouterSubAssembly.tsx`:
-
-```typescript
-// Add import
-import MyNewPage from "../../pages/MyNewFeature/MyNewPage";
-
-// Add route in <Routes>
-<Route
-  path={ROUTES.MY_NEW_PAGE}
-  element={<MyNewPage />}
-/>
-```
-
-### Step 4A: Add to Top Navigation (MenuBar)
-
-**Backend Configuration:**
-
-The navigation structure comes from the backend database. To add a menu item to the top navigation:
-
-1. Insert a new `NavigationDto` record in the backend database with:
-   - `parentId = null` (for top-level menu)
-   - `title = "My Menu Category"`
-   - `url = "my-menu-category"` (or empty if it has dropdown items)
-   - `orderNumber = <desired position>`
-   - `requiredRoles = []` (or specific roles)
-   - `isNavigable = true`
-
-2. For dropdown items, insert child records with:
-   - `parentId = <parent navigation ID>`
-   - `title = "My New Page"`
-   - `url = "my-new-page"`
-   - `orderNumber = <position in dropdown>`
-
-**Example Backend Structure:**
-
-```sql
--- Top-level category (shows in MenuBar)
-INSERT INTO Navigation (id, parentId, title, url, orderNumber, isNavigable)
-VALUES (100, NULL, 'My Category', 'my-category', 5, 1);
-
--- Dropdown item (child of category)
-INSERT INTO Navigation (id, parentId, title, url, orderNumber, isNavigable)
-VALUES (101, 100, 'My New Page', 'my-new-page', 1, 1);
-```
-
-The frontend `MenuData()` function automatically processes this structure.
-
-### Step 4B: Add to Left Drawer (Year End)
-
-**Backend Configuration:**
-
-To add a page to the Year End drawer:
-
-1. Find the Year End navigation item (ID 55)
-
-2. For a new Main Level (like "December Activities"):
-   ```sql
-   INSERT INTO Navigation (id, parentId, title, url, orderNumber, isNavigable)
-   VALUES (200, 55, 'My New Main Level', '', 3, 1);
-   ```
-
-3. For a Top Page (second level):
-   ```sql
-   -- With sub-pages
-   INSERT INTO Navigation (id, parentId, title, url, orderNumber, isNavigable)
-   VALUES (201, 200, 'My Top Page', 'my-top-page', 1, 1);
-
-   -- Or standalone (no sub-pages)
-   INSERT INTO Navigation (id, parentId, title, url, orderNumber, isNavigable)
-   VALUES (202, 200, 'Another Page', 'another-page', 2, 1);
-   ```
-
-4. For Sub Pages (third level):
-   ```sql
-   INSERT INTO Navigation (id, parentId, title, url, orderNumber, isNavigable)
-   VALUES (203, 201, 'My Sub Page', 'my-sub-page', 1, 1);
-   ```
-
-**Example Structure:**
-
-```sql
--- Year End (ID 55) already exists
-
--- Add to December Activities (assume ID 56)
-INSERT INTO Navigation (id, parentId, title, url, orderNumber, isNavigable, statusId)
-VALUES (300, 56, 'My New Report', 'my-new-report', 10, 1, 1);
-
--- Add sub-page under Clean Up Reports (assume ID 57)
-INSERT INTO Navigation (id, parentId, title, subTitle, url, orderNumber, isNavigable)
-VALUES (301, 57, 'My Cleanup Item', 'LEGACY_NAME', 'my-cleanup-item', 5, 1);
-```
-
-### Step 5: Role-Based Access (Optional)
-
-**Backend Configuration:**
-
-Add role requirements to navigation items:
-
-```sql
-UPDATE Navigation
-SET requiredRoles = '["ProfitSharingAdministrator", "FinanceManager"]'
-WHERE id = 101;
-```
-
-**Frontend Protection:**
-
-For additional protection, wrap route in ProtectedRoute:
-
-```typescript
-<Route
-  path={ROUTES.MY_NEW_PAGE}
-  element={
-    <ProtectedRoute requiredRoles={ImpersonationRoles.ProfitSharingAdministrator}>
-      <MyNewPage />
-    </ProtectedRoute>
-  }
-/>
-```
-
-
-### Popup Menu Behavior
-
-`PopupMenu.tsx` handles dropdown menus in the top navigation:
-
-```typescript
-const handleClose = (event, route, caption) => {
-  // Check if clicking opens the drawer
-  if (caption && isTitleInMainMenuLevels(caption)) {
-    dispatch(openDrawer());
-    dispatch(setActiveSubMenu(caption));
-  }
-
-  // Navigate to route
-  if (route) {
-    const absolutePath = route.startsWith("/") ? route : `/${route}`;
-    navigate(absolutePath, { replace: false });
-  }
-
-  setOpen(false);
-};
-```
-
-**Special Behavior:**
-- If a menu item matches a drawer main level title, it opens the drawer instead of navigating
-- Example: Clicking "December Activities" in top menu opens the drawer and sets active submenu
 
 ### Legacy Name Display
 
@@ -526,96 +333,4 @@ Display in drawer:
 />
 ```
 
-## Common Navigation Patterns
 
-### Programmatic Navigation
-
-```typescript
-import { useNavigate } from "react-router-dom";
-
-const navigate = useNavigate();
-
-// Navigate to route
-navigate("/master-inquiry");
-
-// Navigate with parameters
-navigate(`/master-inquiry/${badgeNumber}`);
-
-// Navigate with replace (no history entry)
-navigate("/unauthorized", { replace: true });
-```
-
-### Check Current Route
-
-```typescript
-import { useLocation } from "react-router-dom";
-
-const location = useLocation();
-const currentPath = location.pathname;
-
-const isActive = currentPath === "/master-inquiry";
-```
-
-### Navigation with State
-
-```typescript
-navigate("/my-page", {
-  state: { fromPage: "dashboard", data: someData }
-});
-
-// In destination page
-const location = useLocation();
-const state = location.state; // { fromPage: "dashboard", data: ... }
-```
-
-
-### File Locations
-
-| Component | Location |
-|-----------|----------|
-| Top Menu | `src/components/MenuBar/MenuBar.tsx` |
-| Drawer | `src/components/Drawer/PSDrawer.tsx` |
-| Route Constants | `src/constants.ts` |
-| Route Mapping | `src/components/router/RouterSubAssembly.tsx` |
-| Menu Data Processing | `src/MenuData.ts` |
-| Navigation Types | `src/types/navigation/navigation.ts` |
-
-### Key Redux State
-
-```typescript
-// Drawer state
-state.general.isDrawerOpen: boolean
-state.general.activeSubmenu: string | null
-
-// Profit year state
-state.yearsEnd.selectedProfitYearForDecemberActivities: number
-state.yearsEnd.selectedProfitYearForFiscalClose: number
-
-// Navigation data
-useGetNavigationQuery() -> NavigationResponseDto
-```
-
-### Navigation IDs
-
-- **Year End Main Menu**: ID 55
-- **December Activities**: Child of 55
-- **Fiscal Close**: Child of 55
-
-### Key Functions
-
-```typescript
-// Transform navigation data
-MenuData(navigationData) -> RouteCategory[]      // Top menu
-menuLevels(navigationData) -> MenuLevel[]        // Drawer
-
-// Navigation utilities
-isPathAllowedInNavigation(path, navigation) -> boolean
-createUnauthorizedParams(path) -> string
-```
-
-## Best Practices
-
-1. **Always use ROUTES constants** - Never hardcode route strings
-2. **Match backend URLs exactly** - Frontend routes must match navigation `url` fields
-3. **Test role-based access** - Verify navigation items appear/hide based on user roles
-4. **Use descriptive route names** - Make routes self-documenting
