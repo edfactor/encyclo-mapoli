@@ -229,10 +229,39 @@ _ = builder.AddProject<Demoulas_ProfitSharing_EmployeeDelta_Sync>(name: "ProfitS
     .WithExplicitStart();
 
 // Playwright E2E test runner as an executable resource
-var uiRelativePath = "../../../ui/"; // relative to the AppHost project directory
-var uiFullPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), uiRelativePath));
+// Find solution root by looking for the .slnx file, then navigate to ui folder
+var appHostBinDir = AppContext.BaseDirectory;
+var currentDir = new DirectoryInfo(appHostBinDir);
+
+// Navigate up to find the services directory (where .slnx file exists)
+while (currentDir != null && !File.Exists(Path.Combine(currentDir.FullName, "Demoulas.ProfitSharing.slnx")))
+{
+    currentDir = currentDir.Parent;
+}
+
+if (currentDir == null)
+{
+    throw new InvalidOperationException("Could not find services directory with .slnx file");
+}
+
+// currentDir is now at src/services/, go up one level to src/, then into ui/
+var srcDir = currentDir.Parent;
+if (srcDir == null)
+{
+    throw new InvalidOperationException("Could not navigate to src directory");
+}
+
+var uiFullPath = Path.Combine(srcDir.FullName, "ui");
+
+if (!Directory.Exists(uiFullPath))
+{
+    throw new DirectoryNotFoundException($"UI directory not found at: {uiFullPath}");
+}
+
+logger.LogInformation("Playwright tests working directory: {WorkingDirectory}", uiFullPath);
+
 var playwrightTests = builder.AddExecutable("Playwright-Tests",
-    command: "npm",
+    command: OperatingSystem.IsWindows() ? "npm.cmd" : "npm",
     workingDirectory: uiFullPath,
     "run", "e2e")
     .WithReference(api)
@@ -253,10 +282,10 @@ var playwrightTests = builder.AddExecutable("Playwright-Tests",
 
 // Continuous watch mode resource (does not auto-exit). Explicit start to avoid consuming resources by default.
 var playwrightWatch = builder.AddExecutable("Playwright-Tests-Watch",
-        command: OperatingSystem.IsWindows() ? "cmd.exe" : "bash",
+        command: OperatingSystem.IsWindows() ? "npm.cmd" : "npm",
         workingDirectory: uiFullPath,
-        OperatingSystem.IsWindows() ? "/c" : "-lc",
-    "npm run e2e:watch")
+        "run",
+    "e2e:watch")
     .WithReference(api)
     .WaitFor(api)
     .WaitFor(ui)
@@ -276,11 +305,10 @@ var playwrightWatch = builder.AddExecutable("Playwright-Tests-Watch",
 // Playwright report server (serves existing latest report). Explicit start; depends on tests having generated a report.
 int reportPort = 4321;
 var playwrightReport = builder.AddExecutable("Playwright-Report",
-        command: OperatingSystem.IsWindows() ? "cmd.exe" : "bash",
+        command: OperatingSystem.IsWindows() ? "npx.cmd" : "npx",
         workingDirectory: uiFullPath,
-        OperatingSystem.IsWindows() ? "/c" : "-lc",
         // Host on all interfaces so Aspire can proxy/expose it
-        $"npx playwright show-report --host 0.0.0.0 --port {reportPort}")
+        "playwright", "show-report", "--host", "0.0.0.0", "--port", reportPort.ToString())
     .WaitFor(playwrightTests)
     .WithParentRelationship(playwrightTests)
     .WithHttpEndpoint(port: reportPort, isProxied: false, name: "report")

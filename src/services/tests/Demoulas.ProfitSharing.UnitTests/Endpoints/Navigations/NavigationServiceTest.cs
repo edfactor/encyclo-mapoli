@@ -7,7 +7,10 @@ using Demoulas.ProfitSharing.Services.Navigations;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Demoulas.ProfitSharing.Security;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Navigations;
@@ -39,7 +42,9 @@ public class NavigationServiceTests : ApiTestBase<Program>
         appUser.Setup(u => u.GetUserAllRoles(It.IsAny<List<string>?>()))
             .Returns(new List<string> { Role.FINANCEMANAGER, Role.ITDEVOPS, Role.ADMINISTRATOR });
 
-        var svc = new NavigationService(MockDbContextFactory, appUser.Object);
+        // Use MemoryDistributedCache which implements IDistributedCache for testing
+        var distributedCache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
+        var svc = new NavigationService(MockDbContextFactory, appUser.Object, distributedCache);
         var navigation = await svc.GetNavigation(CancellationToken.None);
 
         Assert.NotNull(navigation);
@@ -79,7 +84,8 @@ public class NavigationServiceTests : ApiTestBase<Program>
     public async Task UpdateNavigationStatus()
     {
         IAppUser iAppUser = new Mock<IAppUser>().Object;
-        var success = await new NavigationService(MockDbContextFactory, iAppUser).UpdateNavigation(navigationId: 3, statusId: 1, cancellationToken: CancellationToken.None);
+        var distributedCache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
+        var success = await new NavigationService(MockDbContextFactory, iAppUser, distributedCache).UpdateNavigation(navigationId: 3, statusId: 1, cancellationToken: CancellationToken.None);
         Assert.True(success);
     }
 
@@ -91,7 +97,8 @@ public class NavigationServiceTests : ApiTestBase<Program>
         appUser.Setup(u => u.GetUserAllRoles(It.IsAny<List<string>?>()))
             .Returns(new List<string> { Role.ITDEVOPS });
 
-        var svc = new NavigationService(MockDbContextFactory, appUser.Object);
+        var distributedCache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
+        var svc = new NavigationService(MockDbContextFactory, appUser.Object, distributedCache);
 
         // Act: Get navigation items
         var navigation = await svc.GetNavigation(CancellationToken.None);
@@ -116,7 +123,8 @@ public class NavigationServiceTests : ApiTestBase<Program>
         appUser.Setup(u => u.GetUserAllRoles(It.IsAny<List<string>?>()))
             .Returns(new List<string> { Role.FINANCEMANAGER });
 
-        var svc = new NavigationService(MockDbContextFactory, appUser.Object);
+        var distributedCache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
+        var svc = new NavigationService(MockDbContextFactory, appUser.Object, distributedCache);
 
         // Act: Get navigation items
         var navigation = await svc.GetNavigation(CancellationToken.None);
@@ -141,7 +149,8 @@ public class NavigationServiceTests : ApiTestBase<Program>
         appUser.Setup(u => u.GetUserAllRoles(It.IsAny<List<string>?>()))
             .Returns(new List<string> { Role.AUDITOR });
 
-        var svc = new NavigationService(MockDbContextFactory, appUser.Object);
+        var distributedCache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
+        var svc = new NavigationService(MockDbContextFactory, appUser.Object, distributedCache);
 
         // Act: Get navigation items
         var navigation = await svc.GetNavigation(CancellationToken.None);

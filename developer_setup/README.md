@@ -31,6 +31,9 @@ git lfs install
 
 # EF Core tooling (global)
 dotnet tool update --global dotnet-ef
+
+# Install git hooks (pre-commit hook runs dotnet format on staged C# files)
+.\scripts\Install-GitHooks.ps1
 ```
 
 ## 3) Restore and build

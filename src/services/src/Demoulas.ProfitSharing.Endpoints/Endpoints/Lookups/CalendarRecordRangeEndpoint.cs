@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
@@ -9,6 +10,7 @@ using Demoulas.Util.Extensions;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
@@ -49,7 +51,13 @@ public class CalendarRecordRangeEndpoint : ProfitSharingEndpoint<YearRangeReques
         });
         Group<LookupGroup>();
 
-        // Removed output caching configuration pending standardized caching extension availability for route handlers.
+        // Output caching: Accounting calendar dates are stable reference data - excellent caching candidate
+        // Cache disabled in test environments to ensure test data freshness
+        if (!Env.IsTestEnvironment())
+        {
+            TimeSpan cacheDuration = TimeSpan.FromMinutes(10); // Moderate duration - reference data changes infrequently
+            Options(x => x.CacheOutput(p => p.Expire(cacheDuration)));
+        }
     }
 
     public override Task<Results<Ok<CalendarResponseDto>, NotFound, ProblemHttpResult>> ExecuteAsync(YearRangeRequest req, CancellationToken ct)
@@ -64,6 +72,21 @@ public class CalendarRecordRangeEndpoint : ProfitSharingEndpoint<YearRangeReques
             var start = await startTask;
             var end = await endTask;
 
+            // Record cache metrics
+            var cacheStatus = HttpContext.Response.Headers.ContainsKey("X-Cache") ? "hit" : "miss";
+            if (cacheStatus == "hit")
+            {
+                EndpointTelemetry.CacheHitsTotal.Add(1,
+                    new KeyValuePair<string, object?>("cache_type", "output-cache"),
+                    new KeyValuePair<string, object?>("endpoint", "CalendarRecordRangeEndpoint"));
+            }
+            else
+            {
+                EndpointTelemetry.CacheMissesTotal.Add(1,
+                    new KeyValuePair<string, object?>("cache_type", "output-cache"),
+                    new KeyValuePair<string, object?>("endpoint", "CalendarRecordRangeEndpoint"));
+            }
+
             // Record business metrics
             Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.BusinessOperationsTotal.Add(1,
                 new KeyValuePair<string, object?>("operation", "calendar-range-lookup"),
@@ -72,15 +95,15 @@ public class CalendarRecordRangeEndpoint : ProfitSharingEndpoint<YearRangeReques
             // Basic not-found semantics: if either side returns default dates (00/00) treat as not found.
             if (start.FiscalBeginDate == default || end.FiscalEndDate == default)
             {
-                _logger.LogWarning("Calendar year range lookup failed for years {BeginYear}-{EndYear} (correlation: {CorrelationId})",
-                    req.BeginProfitYear, req.EndProfitYear, HttpContext.TraceIdentifier);
+                _logger.LogWarning("Calendar year range lookup failed for years {BeginYear}-{EndYear}, cache status: {CacheStatus} (correlation: {CorrelationId})",
+                    req.BeginProfitYear, req.EndProfitYear, cacheStatus, HttpContext.TraceIdentifier);
 
                 return Result<CalendarResponseDto>.Failure(Error.CalendarYearNotFound)
                     .ToHttpResult(Error.CalendarYearNotFound);
             }
 
-            _logger.LogInformation("Calendar range lookup completed for years {BeginYear}-{EndYear} (correlation: {CorrelationId})",
-                req.BeginProfitYear, req.EndProfitYear, HttpContext.TraceIdentifier);
+            _logger.LogInformation("Calendar range lookup completed for years {BeginYear}-{EndYear}, cache status: {CacheStatus} (correlation: {CorrelationId})",
+                req.BeginProfitYear, req.EndProfitYear, cacheStatus, HttpContext.TraceIdentifier);
 
             var dto = new CalendarResponseDto { FiscalBeginDate = start.FiscalBeginDate, FiscalEndDate = end.FiscalEndDate };
             return Result<CalendarResponseDto>.Success(dto).ToHttpResult();
