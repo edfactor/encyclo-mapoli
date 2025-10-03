@@ -1,6 +1,8 @@
-﻿using Demoulas.ProfitSharing.AppHost;
+﻿using Aspire.Hosting;
+using Demoulas.ProfitSharing.AppHost;
 using Demoulas.ProfitSharing.AppHost.Helpers;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Projects;
 
@@ -28,33 +30,155 @@ var cliRunner = builder.AddExecutable("Database-Cli",
     .WithCommand(
         name: "upgrade-db",
         displayName: "Upgrade database",
-        executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "upgrade-db", logger, "upgrade-db")),
-        commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled })
+        executeCommand: async (c) =>
+        {
+            var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
+            return await CommandHelper.RunConsoleAppAsync(projectPath!, "upgrade-db", logger, "Upgrade Database", interactionService);
+        },
+        commandOptions: new CommandOptions { IconName = "ArrowUp", IconVariant = IconVariant.Filled })
     .WithCommand(
         name: "drop-recreate-db",
         displayName: "Drop and recreate database",
-        executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "drop-recreate-db", logger, "drop-recreate-db")),
-        commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled })
+        executeCommand: async (c) =>
+        {
+            var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
+
+            // Show confirmation for destructive operation
+            if (interactionService.IsAvailable)
+            {
+                var confirmation = await interactionService.PromptConfirmationAsync(
+                    title: "⚠️ Confirm Database Drop",
+                    message: "Are you sure you want to **drop and recreate** the database? All data will be lost!",
+                    options: new MessageBoxInteractionOptions
+                    {
+                        Intent = MessageIntent.Warning,
+                        PrimaryButtonText = "Yes, Drop Database",
+                        SecondaryButtonText = "Cancel",
+                        ShowSecondaryButton = true,
+                        EnableMessageMarkdown = true
+                    });
+
+                if (!confirmation.Data)
+                {
+                    return CommandResults.Failure("User cancelled the operation.");
+                }
+            }
+
+            return await CommandHelper.RunConsoleAppAsync(projectPath!, "drop-recreate-db", logger, "Drop & Recreate Database", interactionService);
+        },
+        commandOptions: new CommandOptions { IconName = "DatabaseWarning", IconVariant = IconVariant.Filled })
     .WithCommand(
         name: "import-from-ready",
         displayName: "Import from READY",
-        executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "import-from-ready", logger, "import-from-ready")),
-        commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled })
+        executeCommand: async (c) =>
+        {
+            var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
+            return await CommandHelper.RunConsoleAppAsync(projectPath!, "import-from-ready", logger, "Import from READY", interactionService);
+        },
+        commandOptions: new CommandOptions { IconName = "ArrowDownload", IconVariant = IconVariant.Filled })
     .WithCommand(
         name: "import-from-navigation",
         displayName: "Import from navigation",
-        executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "import-from-navigation", logger, "import-from-navigation")),
-        commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled })
+        executeCommand: async (c) =>
+        {
+            var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
+            return await CommandHelper.RunConsoleAppAsync(projectPath!, "import-from-navigation", logger, "Import Navigation", interactionService);
+        },
+        commandOptions: new CommandOptions { IconName = "Navigation", IconVariant = IconVariant.Filled })
     .WithCommand(
         name: "Nuclear-Option",
         displayName: "Full Nuclear Reset",
-        executeCommand: (c) =>
+        executeCommand: async (c) =>
         {
-            CommandHelper.RunConsoleApp(projectPath!, "drop-recreate-db", logger, "drop-recreate-db");
-            CommandHelper.RunConsoleApp(projectPath!, "import-from-ready", logger, "import-from-ready");
-            return Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "import-from-navigation", logger, "import-from-navigation"));
+            var interactionService = c.ServiceProvider.GetRequiredService<IInteractionService>();
+
+            // Show initial confirmation dialog
+            if (interactionService.IsAvailable)
+            {
+                var confirmation = await interactionService.PromptConfirmationAsync(
+                    title: "⚠️ Nuclear Option - Confirm Destructive Action",
+                    message: """
+                    # WARNING: This will completely destroy and recreate the database!
+                    
+                    **This operation will:**
+                    1. **Drop the entire database** (all data will be permanently lost)
+                    2. **Recreate the database schema** from migrations
+                    3. **Import data from READY system**
+                    4. **Import navigation data**
+                    
+                    ⚠️ **This action cannot be undone!**
+                    
+                    Are you absolutely sure you want to proceed?
+                    """,
+                    options: new MessageBoxInteractionOptions
+                    {
+                        Intent = MessageIntent.Warning,
+                        PrimaryButtonText = "Yes, Destroy and Recreate",
+                        SecondaryButtonText = "Cancel",
+                        ShowSecondaryButton = true,
+                        EnableMessageMarkdown = true
+                    });
+
+                if (!confirmation.Data)
+                {
+                    await interactionService.PromptNotificationAsync(
+                        title: "Operation Cancelled",
+                        message: "Nuclear Option was cancelled by user.",
+                        options: new NotificationInteractionOptions
+                        {
+                            Intent = MessageIntent.Information
+                        });
+                    return CommandResults.Failure("User cancelled the nuclear option.");
+                }
+
+                // Show starting notification
+                _ = interactionService.PromptNotificationAsync(
+                    title: "🚀 Starting Nuclear Option",
+                    message: "Beginning full database reset. This may take several minutes...",
+                    options: new NotificationInteractionOptions
+                    {
+                        Intent = MessageIntent.Information
+                    });
+            }
+
+            // Step 1: Drop and recreate
+            var step1 = await CommandHelper.RunConsoleAppAsync(projectPath!, "drop-recreate-db", logger, "Step 1/3: Drop & Recreate Database", interactionService);
+            if (!step1.Success)
+            {
+                return CommandResults.Failure($"Nuclear Option failed at step 1: {step1.ErrorMessage}");
+            }
+
+            // Step 2: Import from READY
+            var step2 = await CommandHelper.RunConsoleAppAsync(projectPath!, "import-from-ready", logger, "Step 2/3: Import from READY", interactionService);
+            if (!step2.Success)
+            {
+                return CommandResults.Failure($"Nuclear Option failed at step 2: {step2.ErrorMessage}");
+            }
+
+            // Step 3: Import navigation
+            var step3 = await CommandHelper.RunConsoleAppAsync(projectPath!, "import-from-navigation", logger, "Step 3/3: Import Navigation", interactionService);
+            if (!step3.Success)
+            {
+                return CommandResults.Failure($"Nuclear Option failed at step 3: {step3.ErrorMessage}");
+            }
+
+            // Show final success notification
+            if (interactionService.IsAvailable)
+            {
+                _ = interactionService.PromptNotificationAsync(
+                    title: "✅ Nuclear Option Complete!",
+                    message: "Database has been successfully reset. All steps completed.",
+                    options: new NotificationInteractionOptions
+                    {
+                        Intent = MessageIntent.Success,
+                        LinkText = "View Logs",
+                        LinkUrl = "/console/Database-Cli"
+                    });
+            }
+
+            return CommandResults.Success();
         },
-        commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled });
+        commandOptions: new CommandOptions { IconName = "Fire", IconVariant = IconVariant.Filled });
 
 var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: true)
@@ -105,10 +229,39 @@ _ = builder.AddProject<Demoulas_ProfitSharing_EmployeeDelta_Sync>(name: "ProfitS
     .WithExplicitStart();
 
 // Playwright E2E test runner as an executable resource
-var uiRelativePath = "../../../ui/"; // relative to the AppHost project directory
-var uiFullPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), uiRelativePath));
+// Find solution root by looking for the .slnx file, then navigate to ui folder
+var appHostBinDir = AppContext.BaseDirectory;
+var currentDir = new DirectoryInfo(appHostBinDir);
+
+// Navigate up to find the services directory (where .slnx file exists)
+while (currentDir != null && !File.Exists(Path.Combine(currentDir.FullName, "Demoulas.ProfitSharing.slnx")))
+{
+    currentDir = currentDir.Parent;
+}
+
+if (currentDir == null)
+{
+    throw new InvalidOperationException("Could not find services directory with .slnx file");
+}
+
+// currentDir is now at src/services/, go up one level to src/, then into ui/
+var srcDir = currentDir.Parent;
+if (srcDir == null)
+{
+    throw new InvalidOperationException("Could not navigate to src directory");
+}
+
+var uiFullPath = Path.Combine(srcDir.FullName, "ui");
+
+if (!Directory.Exists(uiFullPath))
+{
+    throw new DirectoryNotFoundException($"UI directory not found at: {uiFullPath}");
+}
+
+logger.LogInformation("Playwright tests working directory: {WorkingDirectory}", uiFullPath);
+
 var playwrightTests = builder.AddExecutable("Playwright-Tests",
-    command: "npm",
+    command: OperatingSystem.IsWindows() ? "npm.cmd" : "npm",
     workingDirectory: uiFullPath,
     "run", "e2e")
     .WithReference(api)
@@ -129,10 +282,10 @@ var playwrightTests = builder.AddExecutable("Playwright-Tests",
 
 // Continuous watch mode resource (does not auto-exit). Explicit start to avoid consuming resources by default.
 var playwrightWatch = builder.AddExecutable("Playwright-Tests-Watch",
-        command: OperatingSystem.IsWindows() ? "cmd.exe" : "bash",
+        command: OperatingSystem.IsWindows() ? "npm.cmd" : "npm",
         workingDirectory: uiFullPath,
-        OperatingSystem.IsWindows() ? "/c" : "-lc",
-    "npm run e2e:watch")
+        "run",
+    "e2e:watch")
     .WithReference(api)
     .WaitFor(api)
     .WaitFor(ui)
@@ -152,11 +305,10 @@ var playwrightWatch = builder.AddExecutable("Playwright-Tests-Watch",
 // Playwright report server (serves existing latest report). Explicit start; depends on tests having generated a report.
 int reportPort = 4321;
 var playwrightReport = builder.AddExecutable("Playwright-Report",
-        command: OperatingSystem.IsWindows() ? "cmd.exe" : "bash",
+        command: OperatingSystem.IsWindows() ? "npx.cmd" : "npx",
         workingDirectory: uiFullPath,
-        OperatingSystem.IsWindows() ? "/c" : "-lc",
         // Host on all interfaces so Aspire can proxy/expose it
-        $"npx playwright show-report --host 0.0.0.0 --port {reportPort}")
+        "playwright", "show-report", "--host", "0.0.0.0", "--port", reportPort.ToString())
     .WaitFor(playwrightTests)
     .WithParentRelationship(playwrightTests)
     .WithHttpEndpoint(port: reportPort, isProxied: false, name: "report")

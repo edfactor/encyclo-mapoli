@@ -25,7 +25,7 @@ internal sealed class MissiveService : IMissiveService
         ILoggerFactory loggerFactory,
         ICalendarService calendarService,
         IDemographicReaderService demographicReaderService
-    ) 
+    )
     {
         _dataContextFactory = dataContextFactory;
         _totalService = totalService;
@@ -50,15 +50,15 @@ internal sealed class MissiveService : IMissiveService
             {
                 // Pre-fetch demographics for all SSNs
                 var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
-                var employeeList = await demographics.Join(ctx.PayProfits, d=>d.Id, pp=>pp.DemographicId, (d,pp)=>new {d,pp})
+                var employeeList = await demographics.Join(ctx.PayProfits, d => d.Id, pp => pp.DemographicId, (d, pp) => new { d, pp })
                     .Where(empl => ssnSet.Contains(empl.d.Ssn))
-                    .Where(emp=>emp.pp.ProfitYear == profitYear)
+                    .Where(emp => emp.pp.ProfitYear == profitYear)
                     .ToListAsync(cancellation);
                 var demoIds = employeeList.Select(empl => empl.d.Id).ToList();
 
                 // Pre-fetch balances for all SSNs
                 var balances = await _totalService.GetVestingBalanceForMembersAsync(Common.Contracts.Request.SearchBy.Ssn, ssnSet, profitYear, cancellation);
-                Dictionary<int, BalanceEndpointResponse> balanceMap = new ();
+                Dictionary<int, BalanceEndpointResponse> balanceMap = new();
                 try
                 {
                     balanceMap = balances.ToDictionary(b => b.Id, b => b);
@@ -72,21 +72,21 @@ internal sealed class MissiveService : IMissiveService
                 var beneficiaryContacts = await ctx.BeneficiaryContacts.Where(bc => ssnSet.Contains(bc.Ssn)).Select(bc => bc.Ssn).Distinct().ToListAsync(cancellation);
 
                 var mayBe100Percent = employeeList
-                    .Where(empl=>empl.pp.ZeroContributionReasonId == /*7*/ ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay)
-                    .Select(empl=>empl.d.Ssn).ToHashSet();
+                    .Where(empl => empl.pp.ZeroContributionReasonId == /*7*/ ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay)
+                    .Select(empl => empl.d.Ssn).ToHashSet();
 
                 var vestingNow100 = employeeList
-                    .Where(empl=>empl.pp.ZeroContributionReasonId ==  /*6*/ ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested)
-                    .Select(empl=>empl.d.Ssn).ToHashSet();
+                    .Where(empl => empl.pp.ZeroContributionReasonId ==  /*6*/ ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested)
+                    .Select(empl => empl.d.Ssn).ToHashSet();
 
                 var minHours = ReferenceData.MinimumHoursForContribution();
                 var vestingIncreased = new HashSet<int>();
-                
+
                 foreach (var empl in employeeList)
                 {
                     if (balanceMap.TryGetValue(empl.d.Ssn, out var memberBalance) && memberBalance is { YearsInPlan: >= 2 and <= 7 })
                     {
-                        var hasVesting =  empl.pp.CurrentHoursYear + empl.pp.HoursExecutive > minHours &&
+                        var hasVesting = empl.pp.CurrentHoursYear + empl.pp.HoursExecutive > minHours &&
                                           empl.pp.EnrollmentId == /*2*/ Enrollment.Constants.NewVestingPlanHasContributions;
                         if (hasVesting)
                         {
@@ -131,7 +131,7 @@ internal sealed class MissiveService : IMissiveService
     {
         return _dataContextFactory.UseReadOnlyContext(ctx =>
         {
-            return ctx.Missives.Select(x => new MissiveResponse() { Id = x.Id, Message = x.Message, Description = x.Description, Severity = x.Severity}).ToListAsync(token);
+            return ctx.Missives.Select(x => new MissiveResponse() { Id = x.Id, Message = x.Message, Description = x.Description, Severity = x.Severity }).ToListAsync(token);
         });
     }
 }

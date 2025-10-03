@@ -11,7 +11,7 @@ internal sealed class ParticipantTotalVestingBalanceMap : IEntityTypeConfigurati
         builder.Metadata.SetIsTableExcludedFromMigrations(true);
 
         builder.Ignore(x => x.CheckSum);
-        
+
         builder.HasKey(x => x.Ssn);
         builder.Property(x => x.Ssn)
             .HasColumnName("SSN")
@@ -32,11 +32,11 @@ internal sealed class ParticipantTotalVestingBalanceMap : IEntityTypeConfigurati
 
         builder.Property(x => x.YearsInPlan)
             .HasColumnName("YEARS");
-        
-        builder.Property(x=>x.AllocationsToBeneficiary)
+
+        builder.Property(x => x.AllocationsToBeneficiary)
             .HasColumnName("ALLOCTOBENE")
             .HasPrecision(18, 2);
-        builder.Property(x=>x.AllocationsFromBeneficiary)
+        builder.Property(x => x.AllocationsFromBeneficiary)
             .HasColumnName("ALLOCFROMBENE")
             .HasPrecision(18, 2);
     }

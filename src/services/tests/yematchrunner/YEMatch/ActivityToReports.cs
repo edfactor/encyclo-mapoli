@@ -1,4 +1,4 @@
-namespace YEMatch.YEMatch;
+﻿namespace YEMatch.YEMatch;
 
 public static class ActivityToReports
 {
@@ -12,7 +12,7 @@ public static class ActivityToReports
         ["R5"] = "18007", // EJR PROF-DOLLAR-EXEC-EXTRACT
         // ["R6"] Clear EXEC hours dollars
         // ["R7"] Ready Screen
-        ["R8"] =  "18182", // PROF-SHARE PAY426 ...
+        ["R8"] = "18182", // PROF-SHARE PAY426 ...
         // ["R9"] YE-Oracle-Payroll-Processing
         // ["R10"] Load-Oracle-PAYPROFIT(weekly job)
         ["R11"] = "564", // A11: Profit sharing YTD Wages Extract (PROF-DOLLAR-EXTRACT)
@@ -33,7 +33,7 @@ public static class ActivityToReports
         ["R27"] = "12201",
         ["R28"] = "19155"
     };
-    
+
     private static readonly List<string> _referenceLogfiles =
     [
         // These are names of generated reports.  Then end with a unix process id.  This keeps the reports
@@ -65,7 +65,7 @@ public static class ActivityToReports
         "PAY426N-3-18182",
         "PAY426N-5-18182",
         "PAY426N-4-18182",
-        "PAY426N-9-18182",  
+        "PAY426N-9-18182",
         "PROF-HOURS-DOLLARS-564.CSV",
         "PROFIT-ELIGIBLE-3719.csv",
         "PAY443-7670",

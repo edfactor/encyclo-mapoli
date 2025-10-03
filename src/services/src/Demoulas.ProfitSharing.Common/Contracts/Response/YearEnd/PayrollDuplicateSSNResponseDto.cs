@@ -3,7 +3,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.Util.Extensions;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-public sealed record PayrollDuplicateSsnResponseDto: IIsExecutive
+public sealed record PayrollDuplicateSsnResponseDto : IIsExecutive
 {
     public required int BadgeNumber { get; set; }
     public required string Ssn { get; set; }

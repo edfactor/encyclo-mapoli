@@ -11,5 +11,5 @@ public sealed class BeneficiaryType : ILookupTable<byte>
 
     public byte Id { get; set; }
     public required string Name { get; set; }
-    
+
 }

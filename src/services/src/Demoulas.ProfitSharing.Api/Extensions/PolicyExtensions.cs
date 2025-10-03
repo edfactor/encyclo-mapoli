@@ -1,5 +1,5 @@
-﻿using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.Api.Security;
+﻿using Demoulas.ProfitSharing.Api.Security;
+using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Api.Extensions;
 

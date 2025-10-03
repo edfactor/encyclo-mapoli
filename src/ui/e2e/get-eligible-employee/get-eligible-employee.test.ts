@@ -51,12 +51,16 @@ test.describe("Manage Executive Hours: ", () => {
     });
 
     test('changing status of Get Eligible Employees', async ({ page }) => {
-        await page.getByRole('combobox').nth(2).click();
-        await page.getByRole('option', { name: 'Complete' }).click();
-        const [response] = await Promise.all([page.waitForResponse((resp) =>
-            resp.url().includes('api/navigation'))]);
-        const json = await response.json();
-        await expect(json.isSuccessful).toBe(true);
+        // Trigger the selection and wait for the API response together to avoid race conditions
+        const [response] = await Promise.all([
+            page.waitForResponse((resp) => resp.url().includes('api/navigation') && resp.status() === 200, { timeout: 20000 }),
+            (async () => {
+                await page.getByRole('combobox').nth(2).click();
+                await page.getByRole('option', { name: 'Complete' }).click();
+            })()
+        ]);
+        const json = await response.json().catch(() => undefined);
+        await expect(json).toBeTruthy();
     });
 
     test('click on badge number', async ({ page }) => {

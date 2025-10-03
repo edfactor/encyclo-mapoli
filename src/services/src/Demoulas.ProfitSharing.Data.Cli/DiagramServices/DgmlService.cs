@@ -73,7 +73,7 @@ internal static class DgmlService
                 group => new
                 {
                     EntityPropertyName = group.First().Name ?? group.Key,
-                    DataType =  group.First().Category == navProperty ? group.First().Category : group.First().Type ?? "N/A",
+                    DataType = group.First().Category == navProperty ? group.First().Category : group.First().Type ?? "N/A",
                     Precision = ExtractPrecision(group.First()),
                     Explanation = group.First().Annotations ?? "N/A",
                     IsPrimaryKey = group.First().IsPrimaryKey,
@@ -113,8 +113,8 @@ internal static class DgmlService
                     if (columns.TryGetValue(columnId, out var column))
                     {
                         // Add to PK, FK, and Index lists for separate summary
-                        if (column.IsPrimaryKey) {primaryKeys.Add(column.ColumnName);}
-                        if (column.IsForeignKey) {foreignKeys.Add(column.ColumnName);}
+                        if (column.IsPrimaryKey) { primaryKeys.Add(column.ColumnName); }
+                        if (column.IsForeignKey) { foreignKeys.Add(column.ColumnName); }
 
                         markdown.AppendLine(
                             $"| {column.EntityPropertyName} | {column.ColumnName} | {column.DataType} | {column.Precision} | {column.IsPrimaryKey} | {column.IsForeignKey} | {column.IsRequired} | {column.IsIndexed} |");

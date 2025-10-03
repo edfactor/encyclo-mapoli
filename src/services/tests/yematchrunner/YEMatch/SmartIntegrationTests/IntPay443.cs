@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using YEMatch.YEMatch.AssertActivities;
 
 namespace YEMatch.YEMatch.SmartIntegrationTests;
@@ -34,7 +34,7 @@ public class IntPay443 : BaseActivity
         string stderr = await process.StandardError.ReadToEndAsync();
         await process.WaitForExitAsync();
         sw.Stop();
-        
+
         Console.WriteLine(stdout);
 
         var status = process.ExitCode == 0 ? OutcomeStatus.Ok : OutcomeStatus.Error;

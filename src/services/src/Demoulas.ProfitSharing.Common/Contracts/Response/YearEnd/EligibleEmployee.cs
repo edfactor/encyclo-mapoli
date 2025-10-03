@@ -5,7 +5,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
-public sealed record  EligibleEmployee : IFullNameProperty, IIsExecutive
+public sealed record EligibleEmployee : IFullNameProperty, IIsExecutive
 {
     public required long OracleHcmId { get; set; }
     public required int BadgeNumber { get; set; }

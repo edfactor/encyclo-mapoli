@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -56,6 +56,7 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
 
         // Seed data based on add-navigation-data.sql
         builder.HasData(
+             // Top level menus
              // Main menu items
              new Navigation
              {
@@ -79,7 +80,8 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 1,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
             new Navigation
             {
@@ -91,7 +93,8 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 2,
                 Icon = "",
-                Disabled = true
+                Disabled = true,
+                IsNavigable = true
             },
             new Navigation
             {
@@ -103,7 +106,8 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 3,
                 Icon = "",
-                Disabled = true
+                Disabled = true,
+                IsNavigable = true
             },
             new Navigation
             {
@@ -115,7 +119,8 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 4,
                 Icon = "",
-                Disabled = true
+                Disabled = true,
+                IsNavigable = true
             },
             new Navigation
             {
@@ -127,7 +132,8 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 5,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
             new Navigation
             {
@@ -139,22 +145,11 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 6,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
 
-            // Inquiries sub-menu items
-            new Navigation
-            {
-                Id = Navigation.Constants.Adjustments,
-                ParentId = Navigation.Constants.Inquiries,
-                Title = "ADJUSTMENTS",
-                SubTitle = "",
-                Url = "adjustments",
-                StatusId = 1,
-                OrderNumber = 1,
-                Icon = "",
-                Disabled = false
-            },
+            // Sub values for INQUIRIES
             new Navigation
             {
                 Id = Navigation.Constants.MasterInquiry,
@@ -165,10 +160,39 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 1,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
+            },
+            new Navigation
+            {
+                Id = Navigation.Constants.Adjustments,
+                ParentId = Navigation.Constants.Inquiries,
+                Title = "ADJUSTMENTS",
+                SubTitle = "",
+                Url = "adjustments",
+                StatusId = 1,
+                OrderNumber = 1,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
             },
 
-            // IT Operations sub-menu items
+            // Distribution items
+            new Navigation
+            {
+                Id = Navigation.Constants.DistributionInquiry,
+                ParentId = Navigation.Constants.Distributions,
+                Title = "DISTRIBUTIONS INQUIRY",
+                SubTitle = "",
+                Url = "distributions-inquiry",
+                StatusId = 1,
+                OrderNumber = 1,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
+            },
+
+            // IT Operations
             new Navigation
             {
                 Id = Navigation.Constants.DemographicFreeze,
@@ -179,10 +203,11 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 1,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
 
-            // Year End sub-menu items
+            // December Activities
             new Navigation
             {
                 Id = Navigation.Constants.DecemberActivities,
@@ -193,22 +218,9 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 1,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
-            new Navigation
-            {
-                Id = Navigation.Constants.FiscalClose,
-                ParentId = Navigation.Constants.YearEnd,
-                Title = "Fiscal Close",
-                SubTitle = "",
-                Url = "fiscal-close",
-                StatusId = 1,
-                OrderNumber = 2,
-                Icon = "",
-                Disabled = false
-            },
-
-            // December Activities sub-menu items
             new Navigation
             {
                 Id = Navigation.Constants.CleanupReports,
@@ -219,82 +231,11 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 1,
                 Icon = "",
-                Disabled = false
-            },
-            new Navigation
-            {
-                Id = Navigation.Constants.Unforfeit,
-                ParentId = Navigation.Constants.DecemberActivities,
-                Title = "Unforfeit",
-                SubTitle = "QPREV-PROF",
-                Url = "unforfeitures",
-                StatusId = 1,
-                OrderNumber = 2,
-                Icon = "",
-                Disabled = false
-            },
-            new Navigation
-            {
-                Id = Navigation.Constants.MilitaryContributions,
-                ParentId = Navigation.Constants.DecemberActivities,
-                Title = "Military Contributions",
-                SubTitle = "008-13",
-                Url = "military-entry-and-modification",
-                StatusId = 1,
-                OrderNumber = 3,
-                Icon = "",
-                Disabled = false
-            },
-            new Navigation
-            {
-                Id = Navigation.Constants.Terminations,
-                ParentId = Navigation.Constants.DecemberActivities,
-                Title = "Terminations",
-                SubTitle = "QPAY066",
-                Url = "prof-term",
-                StatusId = 1,
-                OrderNumber = 4,
-                Icon = "",
-                Disabled = false
-            },
-            new Navigation
-            {
-                Id = Navigation.Constants.Forfeitures,
-                ParentId = Navigation.Constants.DecemberActivities,
-                Title = "Forfeitures",
-                SubTitle = "008-12",
-                Url = "forfeitures-adjustment",
-                StatusId = 1,
-                OrderNumber = 5,
-                Icon = "",
-                Disabled = false
-            },
-            new Navigation
-            {
-                Id = Navigation.Constants.DistributionsAndForfeitures,
-                ParentId = Navigation.Constants.DecemberActivities,
-                Title = "Distributions and Forfeitures",
-                SubTitle = "QPAY129",
-                Url = "distributions-and-forfeitures",
-                StatusId = 1,
-                OrderNumber = 6,
-                Icon = "",
-                Disabled = false
-            },
-            new Navigation
-            {
-                Id = Navigation.Constants.ProfitShareReport,
-                ParentId = Navigation.Constants.DecemberActivities,
-                Title = "Profit Share Report",
-                SubTitle = "PAY426",
-                Url = "profit-share-report",
-                StatusId = 1,
-                OrderNumber = 9,
-                Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
 
-            // Clean up Reports sub-menu items
+            // Sub values for Clean up Reports
             new Navigation
             {
                 Id = Navigation.Constants.DemographicBadgesNotInPayProfit,
@@ -305,7 +246,8 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 1,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
             new Navigation
             {
@@ -317,7 +259,8 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 2,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
             new Navigation
             {
@@ -329,7 +272,8 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 3,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
             new Navigation
             {
@@ -341,10 +285,106 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 4,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
 
-            // Fiscal Close sub-menu items
+            // Sub values for December Activities
+            new Navigation
+            {
+                Id = Navigation.Constants.MilitaryContributions,
+                ParentId = Navigation.Constants.DecemberActivities,
+                Title = "Military Contributions",
+                SubTitle = "008-13",
+                Url = "military-contribution",
+                StatusId = 1,
+                OrderNumber = 3,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
+            },
+            new Navigation
+            {
+                Id = Navigation.Constants.Unforfeit,
+                ParentId = Navigation.Constants.DecemberActivities,
+                Title = "Unforfeit",
+                SubTitle = "QPREV-PROF",
+                Url = "unforfeitures",
+                StatusId = 1,
+                OrderNumber = 2,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
+            },
+            new Navigation
+            {
+                Id = Navigation.Constants.Terminations,
+                ParentId = Navigation.Constants.DecemberActivities,
+                Title = "Terminations",
+                SubTitle = "QPAY066",
+                Url = "prof-term",
+                StatusId = 1,
+                OrderNumber = 4,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
+            },
+            new Navigation
+            {
+                Id = Navigation.Constants.Forfeitures,
+                ParentId = Navigation.Constants.DecemberActivities,
+                Title = "Forfeitures",
+                SubTitle = "008-12",
+                Url = "forfeitures-adjustment",
+                StatusId = 1,
+                OrderNumber = 5,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
+            },
+            new Navigation
+            {
+                Id = Navigation.Constants.DistributionsAndForfeitures,
+                ParentId = Navigation.Constants.DecemberActivities,
+                Title = "Distributions and Forfeitures",
+                SubTitle = "QPAY129",
+                Url = "distributions-and-forfeitures",
+                StatusId = 1,
+                OrderNumber = 6,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
+            },
+            new Navigation
+            {
+                Id = Navigation.Constants.ProfitShareReport,
+                ParentId = Navigation.Constants.DecemberActivities,
+                Title = "Profit Share Report",
+                SubTitle = "PAY426",
+                Url = "profit-share-report",
+                StatusId = 1,
+                OrderNumber = 9,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
+            },
+
+            // Profit Share Totals (Year End)
+            new Navigation
+            {
+                Id = Navigation.Constants.FiscalClose,
+                ParentId = Navigation.Constants.YearEnd,
+                Title = "Fiscal Close",
+                SubTitle = "",
+                Url = "fiscal-close",
+                StatusId = 1,
+                OrderNumber = 2,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
+            },
+
+            // Fiscal Close menu items
             new Navigation
             {
                 Id = Navigation.Constants.ManageExecutiveHours,
@@ -355,7 +395,8 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 1,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
             new Navigation
             {
@@ -367,164 +408,66 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 2,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
+
+            // Dev-only: PAY426N entries
             new Navigation
             {
-                Id = Navigation.Constants.ProfitShareReportEditRun,
+                Id = Navigation.Constants.PAY426N,
                 ParentId = Navigation.Constants.FiscalClose,
-                Title = "Profit Share Report (Edit Run)",
-                SubTitle = "PAY426",
+                Title = "PAY426N",
+                SubTitle = "",
                 Url = "pay426n",
                 StatusId = 1,
-                OrderNumber = 3,
+                OrderNumber = 99,
                 Icon = "",
-                Disabled = false
+                Disabled = true,
+                IsNavigable = true
             },
             new Navigation
             {
-                Id = Navigation.Constants.ProfitShareReportFinalRun,
+                Id = Navigation.Constants.PAY426_2,
                 ParentId = Navigation.Constants.FiscalClose,
-                Title = "Profit Share Report (Final Run)",
-                SubTitle = "PAY426",
-                Url = "profit-share-report",
-                StatusId = 1,
-                OrderNumber = 4,
-                Icon = "",
-                Disabled = false
-            },
-            new Navigation
-            {
-                Id = Navigation.Constants.GetEligibleEmployees,
-                ParentId = Navigation.Constants.FiscalClose,
-                Title = "Get Eligible Employees",
-                SubTitle = "GET-ELIGIBLE-EMPS",
-                Url = "eligible-employees",
-                StatusId = 1,
-                OrderNumber = 5,
-                Icon = "",
-                Disabled = false
-            },
-            new Navigation
-            {
-                Id = Navigation.Constants.ProfitShareForfeit,
-                ParentId = Navigation.Constants.FiscalClose,
-                Title = "Profit Share Forfeit",
-                SubTitle = "PAY443",
-                Url = "forfeit",
-                StatusId = 1,
-                OrderNumber = 6,
-                Icon = "",
-                Disabled = false
-            },
-            new Navigation
-            {
-                Id = Navigation.Constants.MasterUpdate,
-                ParentId = Navigation.Constants.FiscalClose,
-                Title = "Master Update",
-                SubTitle = "PAY444|PAY447",
-                Url = "profit-share-update",
-                StatusId = 1,
-                OrderNumber = 7,
-                Icon = "",
-                Disabled = false
-            },
-            new Navigation
-            {
-                Id = Navigation.Constants.ProfitMasterUpdate,
-                ParentId = Navigation.Constants.FiscalClose,
-                Title = "Profit Master Update",
-                SubTitle = "PAY460, PROFTLD",
-                Url = "profit-master-update",
-                StatusId = 1,
-                OrderNumber = 8,
-                Icon = "",
-                Disabled = true
-            },
-            new Navigation
-            {
-                Id = Navigation.Constants.ProfPayMasterUpdate,
-                ParentId = Navigation.Constants.FiscalClose,
-                Title = "Prof PayMaster Update",
-                SubTitle = "PAY450",
-                Url = "pay450-summary",
-                StatusId = 1,
-                OrderNumber = 10,
-                Icon = "",
-                Disabled = false
-            },
-            new Navigation
-            {
-                Id = Navigation.Constants.ProfControlSheet,
-                ParentId = Navigation.Constants.FiscalClose,
-                Title = "Prof Control Sheet",
-                SubTitle = "PROF-CNTRL-SHEET",
-                Url = "prof-control-sheet",
-                StatusId = 1,
-                OrderNumber = 11,
-                Icon = "",
-                Disabled = false
-            },
-            new Navigation
-            {
-                Id = Navigation.Constants.ProfShareReportByAge,
-                ParentId = Navigation.Constants.FiscalClose,
-                Title = "Prof Share Report By Age",
-                SubTitle = "Prof130",
-                Url = "",
-                StatusId = 1,
-                OrderNumber = 12,
-                Icon = "",
-                Disabled = false
-            },
-            new Navigation
-            {
-                Id = Navigation.Constants.ProfShareGrossRpt,
-                ParentId = Navigation.Constants.FiscalClose,
-                Title = "Prof Share Gross Rpt",
-                SubTitle = "QPAY501",
-                Url = "profit-share-gross-report",
-                StatusId = 1,
-                OrderNumber = 13,
-                Icon = "",
-                Disabled = false
-            },
-            new Navigation
-            {
-                Id = Navigation.Constants.ProfShareByStore,
-                ParentId = Navigation.Constants.FiscalClose,
-                Title = "Prof Share by Store",
-                SubTitle = "QPAY066TA",
-                Url = "",
-                StatusId = 1,
-                OrderNumber = 14,
-                Icon = "",
-                Disabled = false
-            },
-            new Navigation
-            {
-                Id = Navigation.Constants.PrintProfitCerts,
-                ParentId = Navigation.Constants.FiscalClose,
-                Title = "Print Profit Certs",
-                SubTitle = "PAYCERT",
-                Url = "print-profit-certs",
-                StatusId = 1,
-                OrderNumber = 15,
-                Icon = "",
-                Disabled = false
-            },
-            new Navigation
-            {
-                Id = Navigation.Constants.SaveProfPaymstr,
-                ParentId = Navigation.Constants.FiscalClose,
-                Title = "Save Prof Paymstr",
+                Title = "PAY426-2",
                 SubTitle = "",
-                Url = "save-prof-paymstr",
+                Url = "pay426-2",
                 StatusId = 1,
-                OrderNumber = 16,
+                OrderNumber = 2,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = false
             },
+            new Navigation
+            {
+                Id = Navigation.Constants.PAY426_3,
+                ParentId = Navigation.Constants.FiscalClose,
+                Title = "PAY426-3",
+                SubTitle = "",
+                Url = "pay426-3",
+                StatusId = 1,
+                OrderNumber = 2,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = false
+            },
+
+            // Profit Summary (PAY426 summary)
+            new Navigation
+            {
+                Id = Navigation.Constants.ProfitSummary,
+                ParentId = Navigation.Constants.FiscalClose,
+                Title = "Profit Summary (PAY426 summary)",
+                SubTitle = "",
+                Url = "pay426-9",
+                StatusId = 1,
+                OrderNumber = 2,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
+            },
+
             new Navigation
             {
                 Id = Navigation.Constants.QPAY066AdHocReports,
@@ -535,7 +478,8 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 17,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
             new Navigation
             {
@@ -547,7 +491,8 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 18,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
             new Navigation
             {
@@ -559,10 +504,199 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 19,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
 
-            // Prof Share Report By Age sub-menu items
+            // Pay Beneficiary Report
+            new Navigation
+            {
+                Id = Navigation.Constants.PayBeneficiaryReport,
+                ParentId = Navigation.Constants.FiscalClose,
+                Title = "Pay Beneficiary Report",
+                SubTitle = "",
+                Url = "payben-report",
+                StatusId = 1,
+                OrderNumber = 10,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
+            },
+
+            // Adhoc Beneficiaries Report (Pay Be Next)
+            new Navigation
+            {
+                Id = Navigation.Constants.AdhocBeneficiariesReport,
+                ParentId = Navigation.Constants.FiscalClose,
+                Title = "Adhoc Beneficiaries Report (Pay Be Next)",
+                SubTitle = "",
+                Url = "adhoc-beneficiaries-report",
+                StatusId = 1,
+                OrderNumber = 19,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
+            },
+
+            // QPAY600
+            new Navigation
+            {
+                Id = Navigation.Constants.QPAY600,
+                ParentId = Navigation.Constants.FiscalClose,
+                Title = "QPAY600",
+                SubTitle = "",
+                Url = "qpay600",
+                StatusId = 1,
+                OrderNumber = 20,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
+            },
+            new Navigation
+            {
+                Id = Navigation.Constants.GetEligibleEmployees,
+                ParentId = Navigation.Constants.FiscalClose,
+                Title = "Get Eligible Employees",
+                SubTitle = "GET-ELIGIBLE-EMPS",
+                Url = "eligible-employees",
+                StatusId = 1,
+                OrderNumber = 5,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
+            },
+            new Navigation
+            {
+                Id = Navigation.Constants.ProfitShareForfeit,
+                ParentId = Navigation.Constants.FiscalClose,
+                Title = "Profit Share Forfeit",
+                SubTitle = "PAY443",
+                Url = "forfeit",
+                StatusId = 1,
+                OrderNumber = 6,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
+            },
+            new Navigation
+            {
+                Id = Navigation.Constants.MasterUpdate,
+                ParentId = Navigation.Constants.FiscalClose,
+                Title = "Master Update",
+                SubTitle = "PAY444|PAY447",
+                Url = "profit-share-update",
+                StatusId = 1,
+                OrderNumber = 7,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
+            },
+            new Navigation
+            {
+                Id = Navigation.Constants.ProfitMasterUpdate,
+                ParentId = Navigation.Constants.FiscalClose,
+                Title = "Profit Master Update",
+                SubTitle = "PAY460, PROFTLD",
+                Url = "profit-master-update",
+                StatusId = 1,
+                OrderNumber = 8,
+                Icon = "",
+                Disabled = true,
+                IsNavigable = true
+            },
+            new Navigation
+            {
+                Id = Navigation.Constants.PaymasterUpdate,
+                ParentId = Navigation.Constants.FiscalClose,
+                Title = "Paymaster Update",
+                SubTitle = "PAY450",
+                Url = "pay450-summary",
+                StatusId = 1,
+                OrderNumber = 9,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
+            },
+            new Navigation
+            {
+                Id = Navigation.Constants.ProfControlSheet,
+                ParentId = Navigation.Constants.FiscalClose,
+                Title = "Prof Control Sheet",
+                SubTitle = "PROF-CNTRL-SHEET",
+                Url = "prof-control-sheet",
+                StatusId = 1,
+                OrderNumber = 11,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
+            },
+            new Navigation
+            {
+                Id = Navigation.Constants.ProfShareReportByAge,
+                ParentId = Navigation.Constants.FiscalClose,
+                Title = "Prof Share Report By Age",
+                SubTitle = "Prof130",
+                Url = "",
+                StatusId = 1,
+                OrderNumber = 12,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
+            },
+            new Navigation
+            {
+                Id = Navigation.Constants.ProfShareGrossRpt,
+                ParentId = Navigation.Constants.FiscalClose,
+                Title = "Prof Share Gross Rpt",
+                SubTitle = "QPAY501",
+                Url = "profit-share-gross-report",
+                StatusId = 1,
+                OrderNumber = 13,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
+            },
+            new Navigation
+            {
+                Id = Navigation.Constants.ProfShareByStore,
+                ParentId = Navigation.Constants.FiscalClose,
+                Title = "Prof Share by Store",
+                SubTitle = "QPAY066TA",
+                Url = "profit-share-by-store",
+                StatusId = 1,
+                OrderNumber = 14,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
+            },
+            new Navigation
+            {
+                Id = Navigation.Constants.ReprintCertificates,
+                ParentId = Navigation.Constants.FiscalClose,
+                Title = "Reprint Certificates / Print Profit Certs",
+                SubTitle = "PAYCERT",
+                Url = "reprint-certificates",
+                StatusId = 1,
+                OrderNumber = 15,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
+            },
+            new Navigation
+            {
+                Id = Navigation.Constants.SaveProfPaymstr,
+                ParentId = Navigation.Constants.FiscalClose,
+                Title = "Save Prof Paymstr",
+                SubTitle = "",
+                Url = "save-prof-paymstr",
+                StatusId = 1,
+                OrderNumber = 16,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
+            },
+
+            // Sub values for Report by Age
             new Navigation
             {
                 Id = Navigation.Constants.DistributionsByAge,
@@ -573,7 +707,8 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 1,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
             new Navigation
             {
@@ -585,7 +720,8 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 2,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
             new Navigation
             {
@@ -597,7 +733,8 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 3,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
             new Navigation
             {
@@ -609,7 +746,8 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 4,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
             new Navigation
             {
@@ -621,7 +759,8 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 5,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
             new Navigation
             {
@@ -633,33 +772,65 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 6,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
 
-            // Prof Share by Store sub-menu items
+            // Sub values of Profit Share by Store
+            // Under-21 Report container for Profit Share by Store
+            new Navigation
+            {
+                Id = Navigation.Constants.Under21Report,
+                ParentId = Navigation.Constants.ProfShareByStore,
+                Title = "Under-21 Report",
+                SubTitle = "",
+                Url = "under-21-report",
+                StatusId = 1,
+                OrderNumber = 1,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
+            },
             new Navigation
             {
                 Id = Navigation.Constants.QPAY066Under21,
-                ParentId = Navigation.Constants.ProfShareByStore,
+                ParentId = Navigation.Constants.Under21Report,
                 Title = "QPAY066-UNDR21",
                 SubTitle = "",
                 Url = "qpay066-under21",
                 StatusId = 1,
                 OrderNumber = 1,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
             new Navigation
             {
                 Id = Navigation.Constants.QPAY066TAUnder21,
-                ParentId = Navigation.Constants.ProfShareByStore,
+                ParentId = Navigation.Constants.Under21Report,
                 Title = "QPAY066TA-UNDR21",
                 SubTitle = "",
                 Url = "qpay066ta-under21",
                 StatusId = 1,
                 OrderNumber = 2,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
+            },
+
+            // QPAY066B (child of Prof Share by Store)
+            new Navigation
+            {
+                Id = Navigation.Constants.QPAY066B,
+                ParentId = Navigation.Constants.ProfShareByStore,
+                Title = "QPAY066B",
+                SubTitle = "",
+                Url = "qpay066b",
+                StatusId = 1,
+                OrderNumber = 7,
+                Icon = "",
+                Disabled = false,
+                IsNavigable = true
             },
             new Navigation
             {
@@ -671,7 +842,8 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 3,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
             new Navigation
             {
@@ -683,7 +855,8 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 4,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
             new Navigation
             {
@@ -695,7 +868,8 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 5,
                 Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             },
             new Navigation
             {
@@ -707,31 +881,8 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
                 StatusId = 1,
                 OrderNumber = 6,
                 Icon = "",
-                Disabled = false
-            },
-            new Navigation
-            {
-                Id = Navigation.Constants.PayBenReport,
-                ParentId = Navigation.Constants.DecemberActivities,
-                Title = "Pay Beneficiary Report",
-                SubTitle = "",
-                Url = "payben-report",
-                StatusId = 1,
-                OrderNumber = 10,
-                Icon = "",
-                Disabled = false
-            },
-            new Navigation
-            {
-                Id = Navigation.Constants.Adhocbeneficiariesreport,
-                ParentId = Navigation.Constants.FiscalClose,
-                Title = "Adhoc Beneficiaries Report",
-                SubTitle = "",
-                Url = "adhoc-beneficiaries-report",
-                StatusId = 1,
-                OrderNumber = 18,
-                Icon = "",
-                Disabled = false
+                Disabled = false,
+                IsNavigable = true
             }
         );
     }

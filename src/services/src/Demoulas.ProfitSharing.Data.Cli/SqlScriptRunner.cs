@@ -87,7 +87,7 @@ internal sealed class SqlScriptRunner
 
     private static string DecodeToUtf8String(byte[] bytes)
     {
-        if (bytes == null || bytes.Length == 0) {return string.Empty;}
+        if (bytes == null || bytes.Length == 0) { return string.Empty; }
 
         // Detect BOMs for UTF-8, UTF-16 (LE/BE) and UTF-32
         // UTF-8 BOM: EF BB BF

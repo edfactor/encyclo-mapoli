@@ -21,7 +21,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
     private readonly Demographic _d;
     private readonly DemographicHistory _dh;
     private readonly PayProfit _pp;
-    
+
     private readonly short _testProfitYear;
     private readonly ProfitYearRequest _requestDto;
     private readonly ScenarioFactory _scenarioFactory;
@@ -31,12 +31,12 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
         _scenarioFactory = new ScenarioFactory().EmployeeWithHistory(); // Sets up a single employee with demographic history
         MockDbContextFactory = _scenarioFactory.BuildMocks();
         _testProfitYear = _scenarioFactory.ProfitYear;
-        _requestDto = new ProfitYearRequest { ProfitYear = _testProfitYear};
+        _requestDto = new ProfitYearRequest { ProfitYear = _testProfitYear };
         _d = _scenarioFactory.Demographics[0];
         _pp = _scenarioFactory.PayProfits[0];
         _dh = _scenarioFactory.DemographicHistories[0];
     }
-    
+
     [Fact]
     public async Task Unauthorized()
     {

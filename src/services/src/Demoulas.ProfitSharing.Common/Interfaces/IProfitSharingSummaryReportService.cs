@@ -13,6 +13,6 @@ public interface IProfitSharingSummaryReportService
         CancellationToken cancellationToken = default);
 
     Task<YearEndProfitSharingReportTotals> GetYearEndProfitSharingTotalsAsync(
-        BadgeNumberRequest req, 
+        BadgeNumberRequest req,
         CancellationToken cancellationToken = default);
 }

@@ -6,12 +6,13 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
+using Demoulas.ProfitSharing.Common.Telemetry;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Endpoints.TypeConverters;
 using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.Data.Entities.Navigations;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ForfeitureAdjustment;
@@ -66,13 +67,13 @@ public class UnforfeituresEndpoint :
 
     public override string ReportFileName => "REHIRE'S PROFIT SHARING DATA";
 
+#pragma warning disable AsyncFixer01 // The method does use async/await inside ExecuteWithTelemetry lambda
     public override async Task<ReportResponseBase<UnforfeituresResponse>> GetResponse(StartAndEndDateRequest req, CancellationToken ct)
+#pragma warning restore AsyncFixer01
     {
-        using var activity = this.StartEndpointActivity(HttpContext, "year-end-unforfeitures-report");
-        this.RecordRequestMetrics(HttpContext, _logger, req, "operation:year-end-unforfeitures-report", $"date_range:{req.BeginningDate:yyyy-MM-dd}_to_{req.EndingDate:yyyy-MM-dd}", $"ending_year:{req.EndingDate.Year}", $"profit_year:{req.ProfitYear}");
-
-        try
+        return await this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
+            // Database queries and business logic are timed inside the service layer
             var result = await _auditService.ArchiveCompletedReportAsync(
                 "Rehire Forfeiture Adjustments Endpoint",
                 (short)req.EndingDate.Year,
@@ -80,15 +81,21 @@ public class UnforfeituresEndpoint :
                 (archiveReq, _, cancellationToken) => _reportService.FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(archiveReq, cancellationToken),
                 ct);
 
-            this.RecordResponseMetrics(HttpContext, _logger, result, true);
+            // Record business operation for year-end unforfeitures report
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "year-end-unforfeitures-report"),
+                new("endpoint", nameof(UnforfeituresEndpoint)),
+                new("profit_year", req.ProfitYear.ToString()),
+                new("date_range", $"{req.BeginningDate:yyyy-MM-dd}_to_{req.EndingDate:yyyy-MM-dd}"));
+
+            _logger.LogInformation(
+                "Unforfeitures endpoint completed: {RecordCount} records for year {Year} (correlation: {CorrelationId})",
+                result.Response?.Results?.Count() ?? 0,
+                req.EndingDate.Year,
+                HttpContext?.TraceIdentifier ?? "unknown");
 
             return result;
-        }
-        catch (Exception ex)
-        {
-            this.RecordException(HttpContext, _logger, ex, activity);
-            throw;
-        }
+        }, "Ssn", "BadgeNumber"); // Declare sensitive fields accessed
     }
 
     protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, ReportResponseBase<UnforfeituresResponse> report, CancellationToken cancellationToken)

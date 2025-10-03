@@ -55,7 +55,7 @@ public class ProfitShareEditService : IInternalProfitShareEditService
 
 
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(profitShareUpdateRequest.ProfitYear, cancellationToken);
-        
+
         return new ProfitShareEditResponse
         {
             ReportName = "Profit Sharing Edit",
@@ -68,7 +68,8 @@ public class ProfitShareEditService : IInternalProfitShareEditService
             EarningsGrandTotal = earningsGrandTotal,
             Response = new PaginatedResponseDto<ProfitShareEditMemberRecordResponse>(profitShareUpdateRequest)
             {
-                Total = records.Count, Results = HandleInMemorySortAndPaging(profitShareUpdateRequest, responseRecords)
+                Total = records.Count,
+                Results = HandleInMemorySortAndPaging(profitShareUpdateRequest, responseRecords)
             }
         };
     }

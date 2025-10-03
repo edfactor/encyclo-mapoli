@@ -14,9 +14,9 @@ internal sealed class EmployeePayrollSyncService : OracleHcmHostedServiceBase
         OracleHcmConfig oracleHcmConfig,
         ILogger<EmployeePayrollSyncService> logger) : base(schedulerFactory, jobFactory, oracleHcmConfig, logger)
     {
-       
+
     }
-    
+
     protected override Task ConfigureJob(CancellationToken cancellationToken)
     {
         return ScheduleJob<PayrollSyncJob>(

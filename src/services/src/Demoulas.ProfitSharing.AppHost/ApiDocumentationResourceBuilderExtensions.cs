@@ -103,7 +103,7 @@ public static class ApiDocumentationResourceBuilderExtensions
                 IconName = "Document",
                 IconVariant = IconVariant.Filled
             });
-            
+
     }
 
 }

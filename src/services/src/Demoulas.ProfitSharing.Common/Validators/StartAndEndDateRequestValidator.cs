@@ -10,7 +10,7 @@ public class StartAndEndDateRequestValidator : PaginationValidatorBase<StartAndE
     {
         RuleFor(x => x.BeginningDate)
             .NotEmpty().WithMessage("Beginning date is required.");
-  
+
 
         RuleFor(x => x.EndingDate)
             .NotEmpty().WithMessage("Ending date is required.")

@@ -10,7 +10,7 @@ internal sealed class BeneficiaryMap : ModifiedBaseMap<Beneficiary>
     public override void Configure(EntityTypeBuilder<Beneficiary> builder)
     {
         base.Configure(builder);
-        
+
         _ = builder.ToTable("BENEFICIARY");
         _ = builder.HasKey(c => c.Id);
 
@@ -33,7 +33,7 @@ internal sealed class BeneficiaryMap : ModifiedBaseMap<Beneficiary>
 
         _ = builder.Property(b => b.KindId).HasColumnName("KIND_ID");
         _ = builder.Property(b => b.BeneficiaryContactId).HasColumnName("BENEFICIARY_CONTACT_ID");
-        
+
         _ = builder.Property(e => e.Percent).HasColumnName("PERCENT")
             .HasColumnType("numeric(3,0)")
             .HasPrecision(3)

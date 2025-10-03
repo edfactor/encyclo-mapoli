@@ -25,7 +25,7 @@ public class BeneficiarySaveChangesInterceptor : SaveChangesInterceptor
 
         var archiveEntries = context.ChangeTracker.Entries<Beneficiary>()
                 .Where(e => e.State is EntityState.Deleted)
-                .Select(x=>new BeneficiaryArchive()
+                .Select(x => new BeneficiaryArchive()
                 {
                     Id = x.Entity.Id,
                     PsnSuffix = x.Entity.PsnSuffix,
@@ -36,10 +36,10 @@ public class BeneficiarySaveChangesInterceptor : SaveChangesInterceptor
                     Percent = x.Entity.Percent,
                     Relationship = x.Entity.Relationship,
                     DeletedBy = context.GetService<IAppUser>()?.UserName ?? "",
-                    DeleteDate = DateTime.UtcNow.ToDateOnly()   
+                    DeleteDate = DateTime.UtcNow.ToDateOnly()
                 });
         context.Set<BeneficiaryArchive>().AddRange(archiveEntries);
-          
-        
+
+
     }
 }

@@ -1,7 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Entities;
 public class Missive
 {
-    public static class Constants 
+    public static class Constants
     {
         public const int VestingIncreasedOnCurrentBalance = 1;
         public const int VestingIsNow100Percent = 2;

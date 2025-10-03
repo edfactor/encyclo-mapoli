@@ -55,11 +55,11 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             // → Suggest UNFORFEIT (negative amount to reverse it)
             if (lastForfeitureTransaction != null && lastForfeitureTransaction.Forfeiture > 0)
             {
-                return new SuggestedForfeitureAdjustmentResponse 
-                { 
+                return new SuggestedForfeitureAdjustmentResponse
+                {
                     SuggestedForfeitAmount = -lastForfeitureTransaction.Forfeiture, // Negative = unforfeit
-                    DemographicId = demographic.Id, 
-                    BadgeNumber = demographic.BadgeNumber 
+                    DemographicId = demographic.Id,
+                    BadgeNumber = demographic.BadgeNumber
                 };
             }
 
@@ -76,7 +76,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
             // Calculate unvested amount that should be forfeited
             var unvestedAmount = (totalVestingBalance.CurrentBalance ?? 0m) - (totalVestingBalance.VestedBalance ?? 0m);
-            
+
             return new SuggestedForfeitureAdjustmentResponse
             {
                 SuggestedForfeitAmount = Math.Round(unvestedAmount, 2, MidpointRounding.AwayFromZero), // Positive = forfeit
@@ -184,11 +184,24 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
             context.ProfitDetails.Add(profitDetail);
 
-            var payProfit = await context.PayProfits
+            var payProfit = await context.PayProfits.Include(p => p.Demographic)
                 .FirstOrDefaultAsync(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == req.ProfitYear, cancellationToken);
 
             if (payProfit != null)
             {
+                // Get Calculated ETVA amount
+                var profitCodeTotals = await _totalService.GetTotalComputedEtva(context, (short)req.ProfitYear).Where(x => x.Ssn == payProfit.Demographic!.Ssn)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                // Default to zero if no totals found
+                var calculatedEtva = profitCodeTotals != default ? profitCodeTotals.TotalAmount : 0m;
+
+                // Prevent negative ETVA
+                if (calculatedEtva < 0)
+                {
+                    calculatedEtva = 0m;
+                }
+
                 // From docs: "When this profit detail record is created, the PAYPROFIT record will also be updated.
                 // If the record is FORFEIT then the field PY_PS_ETVA will be updated to zero and the PY_PS_ENROLLED value will added to by 2.
                 // So 1 goes to 3 and 2 goes to 4. When the UN-FORFEIT gets created the opposite happens to PAYPROFIT.
@@ -222,14 +235,13 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                         .Where(pp => pp.DemographicId == employeeData.Id && liveYearSet.Contains(pp.ProfitYear))
                         .ExecuteUpdateAsync(p => p
                                 .SetProperty(pp => pp.EnrollmentId, newEnrollmentId)
-                                .SetProperty(pp => pp.Etva, 0) // TBD If you have Allocation Money, then EVTA moves to that value not zero
+                                .SetProperty(pp => pp.Etva, calculatedEtva) // Set recalculated ETVA
                                 .SetProperty(pp => pp.ModifiedAtUtc, DateTimeOffset.UtcNow),
                             cancellationToken);
                 }
                 else
                 {
                     // For un-forfeit: Recalculate PY_PS_ETVA and decrement enrollment by 2
-                    // @Russ/Phil - any insights to recalculate ETVA?
                     byte newEnrollmentId;
 
                     // Enrollment ID math based on known constants to prevent magic numbers
@@ -251,6 +263,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                         .Where(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == req.ProfitYear)
                         .ExecuteUpdateAsync(p => p
                                 .SetProperty(pp => pp.EnrollmentId, newEnrollmentId)
+                                .SetProperty(pp => pp.Etva, calculatedEtva) // Set recalculated ETVA
                                 .SetProperty(pp => pp.ModifiedAtUtc, DateTimeOffset.UtcNow),
                             cancellationToken);
                 }

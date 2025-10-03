@@ -11,7 +11,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
 public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
 {
-    
+
     private readonly ProfitYearRequest _requestDto = new ProfitYearRequest()
     {
         ProfitYear = 2023

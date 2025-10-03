@@ -27,7 +27,7 @@ public sealed class TableMetadataService : ITableMetadataService
 
 
             var entityTypes = designTimeModel.GetEntityTypes()
-                .Where(t => !t.IsOwned() 
+                .Where(t => !t.IsOwned()
                             && !t.IsTableExcludedFromMigrations()
                             && t.ClrType != typeof(Dictionary<string, object>))
                 .ToList();

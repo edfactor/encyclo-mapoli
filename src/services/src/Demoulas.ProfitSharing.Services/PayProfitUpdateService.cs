@@ -131,7 +131,7 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
                     await BulkUpdateEnrollmentIds(oracleConnection, profitYear, enrollmentUpdates, ct);
                     bulkStopwatch.Stop();
 
-                    _logger.LogInformation( "Bulk updated {UpdateCount} enrollment status in {BulkTime:mm\\:ss}", enrollmentUpdates.Count, bulkStopwatch.Elapsed);
+                    _logger.LogInformation("Bulk updated {UpdateCount} enrollment status in {BulkTime:mm\\:ss}", enrollmentUpdates.Count, bulkStopwatch.Elapsed);
                 }
                 else
                 {

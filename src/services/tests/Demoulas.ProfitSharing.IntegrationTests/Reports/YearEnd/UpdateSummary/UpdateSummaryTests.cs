@@ -36,10 +36,10 @@ public class UpdateSummaryTests : PristineBaseTest
         {
             var employeeData = await (await DemographicReaderService.BuildDemographicQuery(ctx))
                 .Join(ctx.PayProfits, d => d.Id, pp => pp.DemographicId, (d, pp) => new { d, pp })
-                .Join(TotalService.GetYearsOfService(ctx, profitYear, calendarInfo.FiscalEndDate), b=>b.d.Ssn, yos=>yos.Ssn, (b, pty ) => new {b.d, b.pp,pty.Years})
+                .Join(TotalService.GetYearsOfService(ctx, profitYear, calendarInfo.FiscalEndDate), b => b.d.Ssn, yos => yos.Ssn, (b, pty) => new { b.d, b.pp, pty.Years })
                 .Where(b => b.pp.ProfitYear == profitYear && b.d.BadgeNumber == 700036)
                 .SingleAsync(CancellationToken.None);
-            
+
             int age = calendarInfo.FiscalEndDate.Year - employeeData.d.DateOfBirth.Year;
             if (calendarInfo.FiscalEndDate < employeeData.d.DateOfBirth)
             {
@@ -51,16 +51,16 @@ public class UpdateSummaryTests : PristineBaseTest
 
             TestOutputHelper.WriteLine($"Enrollment Id: {employeeData.pp.EnrollmentId}");
             TestOutputHelper.WriteLine($"ZeroContributionReasonId: {employeeData.pp.ZeroContributionReasonId}");
-            TestOutputHelper.WriteLine($"Total Hours {employeeData.pp.CurrentHoursYear+employeeData.pp.HoursExecutive}");
+            TestOutputHelper.WriteLine($"Total Hours {employeeData.pp.CurrentHoursYear + employeeData.pp.HoursExecutive}");
 
             TestOutputHelper.WriteLine($"YEARS = " + employeeData.Years);
 
-            var rslt =  await TotalService.TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate)
-                .Where(d => d.Ssn == employeeData.d.Ssn )
+            var rslt = await TotalService.TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate)
+                .Where(d => d.Ssn == employeeData.d.Ssn)
                 .FirstOrDefaultAsync();
             TestOutputHelper.WriteLine($"Current Balance {rslt!.CurrentBalance}");
             TestOutputHelper.WriteLine($"Vested  Balance {rslt.VestedBalance}");
-            
+
             // When everything is correctly arranged... aka 2023 Enrollment and ZeroContribution Rebuilt.
             rslt.CurrentBalance.ShouldBe(3817.03m);
             rslt.VestedBalance.ShouldBe(763.406m);
@@ -70,7 +70,7 @@ public class UpdateSummaryTests : PristineBaseTest
 
         "".ShouldBe("");
     }
-    
+
 
     [Fact]
     public async Task ValidateReport2()

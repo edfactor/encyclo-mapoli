@@ -33,11 +33,11 @@ namespace Demoulas.ProfitSharing.Services.Reports
         {
             return _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-              
+
                 IQueryable<Demographic> demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
 
                 return await getDuplicateSsnQuery(demographics).AnyAsync(ct);
-               
+
             });
         }
 
@@ -51,7 +51,7 @@ namespace Demoulas.ProfitSharing.Services.Reports
 
                 var dupSsns = await getDuplicateSsnQuery(demographics).ToHashSetAsync(ct);
 
-                var sortTmp = req.SortBy?.ToLowerInvariant() switch 
+                var sortTmp = req.SortBy?.ToLowerInvariant() switch
                 {
                     "address" => "street,city,state,postalcode",
                     _ => req.SortBy,
@@ -96,8 +96,8 @@ namespace Demoulas.ProfitSharing.Services.Reports
                             }).ToList()
                     })
                     .ToPaginationResultsAsync(sortReq, ct);
-                                
-                
+
+
 
                 DateTimeOffset endDate = DateTimeOffset.UtcNow;
                 if (data.Results.Any())

@@ -1,9 +1,9 @@
-using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using Microsoft.EntityFrameworkCore;
-using Xunit;
 using Shouldly;
+using Xunit;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services;
 
@@ -14,7 +14,7 @@ public class MockDistributionTests
     {
         // Arrange
         var factory = MockDataContextFactory.InitializeForTesting();
-        
+
         // Act - Create a distribution
         var distributionId = 0L;
         await factory.UseWritableContext(async ctx =>
@@ -40,7 +40,7 @@ public class MockDistributionTests
 
         // Assert - Verify the distribution was created and can be found
         distributionId.ShouldBeGreaterThan(0);
-        
+
         var foundDistribution = await factory.UseReadOnlyContext(async ctx =>
         {
             return await ctx.Distributions

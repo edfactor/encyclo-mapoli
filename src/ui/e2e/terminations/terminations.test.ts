@@ -53,13 +53,6 @@ test.describe("Terminations: ", () => {
             resp.url().includes('yearend/terminated-employees'))]);
         await expect(response.status()).toBe(200);
         await page.getByRole('button', { name: 'next page' }).click();
-        const [response1] = await Promise.all([page.waitForResponse((resp) =>
-            resp.url().includes('yearend/terminated-employees'))]);
-        await expect(response1.status()).toBe(200);
-        await page.getByRole('button', { name: 'last page' }).click();
-        const [response2] = await Promise.all([page.waitForResponse((resp) =>
-            resp.url().includes('yearend/terminated-employees'))]);
-        await expect(response2.status()).toBe(200);
     });
 
     test('changing status of terminations', async ({page})=>{

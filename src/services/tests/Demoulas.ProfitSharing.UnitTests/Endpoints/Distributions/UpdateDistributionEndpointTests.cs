@@ -1,4 +1,6 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
+﻿using System.ComponentModel;
+using System.Net;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -12,8 +14,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
-using System.ComponentModel;
-using System.Net;
 using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Distributions;
@@ -50,7 +50,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
                 // Use a deterministic badge number within validation range
                 newDemographic.BadgeNumber = 555555; // Valid 6-digit badge number
                 newDemographic.Ssn = 123456789; // Ensure unique SSN
-                
+
                 // Add the demographic and associated pay profits for vesting balance calculation
                 ctx.Demographics.Add(newDemographic);
                 foreach (var payProfit in payProfits)
@@ -58,7 +58,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
                     payProfit.DemographicId = newDemographic.Id;
                     ctx.PayProfits.Add(payProfit);
                 }
-                
+
                 await ctx.SaveChangesAsync();
                 badgeNumber = newDemographic.BadgeNumber;
             }
@@ -132,6 +132,12 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         // Act
         var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        // If we get a 400, log the error for debugging
+        if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
+        }
 
         // Assert
         response.ShouldNotBeNull();
@@ -179,6 +185,12 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         // Act
         var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        // If we get a 400, log the error for debugging
+        if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
+        }
 
         // Assert
         response.ShouldNotBeNull();
@@ -225,6 +237,12 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         // Act
         var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        // If we get a 400, log the error for debugging
+        if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
+        }
 
         // Assert
         response.ShouldNotBeNull();
@@ -270,14 +288,14 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         // Assert
         response.ShouldNotBeNull();
-        
+
         // If we get a 400, log the error for debugging
         if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
         {
             var errorContent = await response.Response.Content.ReadAsStringAsync();
             throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
         }
-        
+
         response.Response.EnsureSuccessStatusCode();
         response.Result.ShouldNotBeNull();
         response.Result.Id.ShouldBe(request.Id);
@@ -316,7 +334,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         // Act
         var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
-        
+
         // If we get a 400, log the error for debugging
         if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
         {
@@ -362,6 +380,12 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         // Act
         var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        // If we get a 400, log the error for debugging
+        if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
+        }
 
         // Assert
         response.ShouldNotBeNull();
@@ -400,6 +424,12 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         // Act
         var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        // If we get a 400, log the error for debugging
+        if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
+        }
 
         // Assert
         response.ShouldNotBeNull();
@@ -433,6 +463,12 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         // Act
         var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        // If we get a 400, log the error for debugging
+        if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
+        }
 
         // Assert
         response.ShouldNotBeNull();
@@ -495,6 +531,12 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         // Act
         var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        // If we get a 400, log the error for debugging
+        if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
+        }
 
         // Assert
         response.ShouldNotBeNull();
@@ -534,6 +576,12 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         // Act
         var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        // If we get a 400, log the error for debugging
+        if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
+        }
 
         // Assert
         response.ShouldNotBeNull();
@@ -674,6 +722,12 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         foreach (var response in responses)
         {
+            // If we get a 400, log the error for debugging
+            if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                var errorContent = await response.Response.Content.ReadAsStringAsync();
+                throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
+            }
             response.ShouldNotBeNull();
             response.Response.EnsureSuccessStatusCode();
             response.Result.ShouldNotBeNull();
@@ -713,6 +767,12 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         // Act
         var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        // If we get a 400, log the error for debugging
+        if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
+        }
 
         // Assert
         response.ShouldNotBeNull();

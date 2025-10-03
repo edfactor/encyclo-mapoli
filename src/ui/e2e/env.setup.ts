@@ -39,12 +39,12 @@ export async function impersonateRole(page: Page, roleName: string) {
 
   // Try to find the combobox, retrying a few times and attempting to open the side drawer
   let combo: any = null;
-  const maxAttempts = 3;
+  const maxAttempts = 6; // increase attempts for slower or loaded environments
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     for (const loc of candidateLocators) {
       try {
-        // short wait to discover the element
-        await loc.waitFor({ state: "visible", timeout: 1500 });
+        // increased wait to discover the element under load
+        await loc.waitFor({ state: "visible", timeout: 3000 });
         combo = loc;
         break;
       } catch (e) {
@@ -56,10 +56,22 @@ export async function impersonateRole(page: Page, roleName: string) {
 
     // If not found, try opening the side drawer (many pages hide the roles combobox inside it)
     try {
-      // click the first MUI icon button (drawer toggle) - short timeout
-      await page.locator("button.MuiIconButton-root").first().click({ timeout: 1500 }).catch(() => {});
+      // prefer a specific drawer toggle if present
+      const drawerSelectors = [
+        'button[aria-label="Open Navigation"]',
+        'button[data-testid="drawer-toggle"]',
+        'button.MuiIconButton-root'
+      ];
+      for (const sel of drawerSelectors) {
+        const btn = page.locator(sel).first();
+        if ((await btn.count()) > 0) {
+          await btn.click({ timeout: 2500 }).catch(() => {});
+          break;
+        }
+      }
+
       // small backoff to allow DOM to update
-      await page.waitForTimeout(400);
+      await page.waitForTimeout(700);
     } catch (e) {
       // swallow and continue attempts
     }

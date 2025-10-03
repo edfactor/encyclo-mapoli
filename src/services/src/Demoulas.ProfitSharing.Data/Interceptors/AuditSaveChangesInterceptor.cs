@@ -85,7 +85,7 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
             var columnName = property.GetColumnName();
             var propertyEntry = entry.Property(property.Name);
             var value = propertyEntry.CurrentValue;
-            
+
             // Format the key-value pair, handling null values appropriately
             var formattedValue = value?.ToString() ?? "null";
             keyPairs.Add($"{columnName}={formattedValue}");

@@ -16,8 +16,8 @@ public static class OutFLComparer
             OUT_ERR_MESG = string.Empty,
             OUT_HRS = Math.Round(record.OUT_HRS, 2),
             OUT_ENROLLED = record.OUT_ENROLLED.Trim(),
-            OUT_BEGIN_BAL = Math.Round(record.OUT_BEGIN_BAL,2),
-            OUT_BEGIN_VEST = Math.Round(record.OUT_BEGIN_VEST,2),
+            OUT_BEGIN_BAL = Math.Round(record.OUT_BEGIN_BAL, 2),
+            OUT_BEGIN_VEST = Math.Round(record.OUT_BEGIN_VEST, 2),
             OUT_CURRENT_BAL = Math.Round(record.OUT_CURRENT_BAL, 2),
             OUT_VESTING_PCT = Math.Round(record.OUT_VESTING_PCT, 2),
             OUT_VESTING_AMT = Math.Round(record.OUT_VESTING_AMT, 2)

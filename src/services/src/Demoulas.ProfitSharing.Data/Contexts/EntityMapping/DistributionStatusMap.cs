@@ -16,7 +16,7 @@ internal sealed class DistributionStatusMap : IEntityTypeConfiguration<Distribut
             new DistributionStatus { Id = DistributionStatus.Constants.PurgeRecord, Name = "Purge this Record" },
             new DistributionStatus { Id = DistributionStatus.Constants.RequestOnHold, Name = "Request is on hold" },
             new DistributionStatus { Id = DistributionStatus.Constants.Override, Name = "Override vested amount in check (death or > 64 and 5 years vested" },
-            new DistributionStatus { Id = DistributionStatus.Constants.PaymentMade, Name  = "Payment as been made" },
+            new DistributionStatus { Id = DistributionStatus.Constants.PaymentMade, Name = "Payment as been made" },
             new DistributionStatus { Id = DistributionStatus.Constants.OkayToPay, Name = "Request is OK to pay" },
             new DistributionStatus { Id = DistributionStatus.Constants.PurgeAllRecordsForSsn, Name = "Purge all records for the SSN" },
             new DistributionStatus { Id = DistributionStatus.Constants.PurgeAllRecordsForSsn2, Name = "Purge all records for the SSN" }

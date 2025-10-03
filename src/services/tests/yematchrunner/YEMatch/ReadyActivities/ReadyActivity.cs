@@ -13,8 +13,8 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
 {
     public const string OptionalLocalResourceBase = "/Users/robertherrmann/prj/smart-profit-sharing/src/services/tests/Demoulas.ProfitSharing.IntegrationTests/Resources/";
     private const bool UpdateIntegrationTestResources = false;
-    public string Args = _args; 
-    
+    public string Args = _args;
+
     public string Name()
     {
         return AName.Substring(0, 1).Replace("A", "R") + AName.Substring(1);
@@ -52,7 +52,7 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
         if (chatty)
         {
             foreach (string line in lines)
-                // Printing this line stops the JRider console cold.  Probably a special character in the line?
+            // Printing this line stops the JRider console cold.  Probably a special character in the line?
             {
                 if (!line.StartsWith("runb param ="))
                 {

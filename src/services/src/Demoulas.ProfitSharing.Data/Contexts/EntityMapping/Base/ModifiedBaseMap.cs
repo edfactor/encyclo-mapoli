@@ -9,10 +9,10 @@ internal abstract class ModifiedBaseMap<TType> : IEntityTypeConfiguration<TType>
     public virtual void Configure(EntityTypeBuilder<TType> builder)
     {
 
-       _ = builder.Property(e => e.UserName)
-            .HasMaxLength(96)
-            .HasColumnName("USER_NAME")
-            .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
+        _ = builder.Property(e => e.UserName)
+             .HasMaxLength(96)
+             .HasColumnName("USER_NAME")
+             .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
 
 
         _ = builder.Property(e => e.CreatedAtUtc)

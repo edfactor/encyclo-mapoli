@@ -21,7 +21,7 @@ public record CreateDistributionRequest
     public required char TaxCodeId { get; set; }
     public bool IsDeceased { get; set; }
     public char? GenderId { get; set; }
-    public bool IsQdro {get;set;}
+    public bool IsQdro { get; set; }
     public string? Memo { get; set; }
     public bool IsRothIra { get; set; }
 

@@ -8,17 +8,17 @@ namespace Demoulas.ProfitSharing.Data.Entities;
 [DebuggerDisplay("Id={Id} EmployeeName={EmployeeName} CheckAmount={CheckAmount}")]
 public sealed class Distribution : ModifiedBase
 {
-    public long Id { get; set; } 
-    
+    public long Id { get; set; }
+
     public required int Ssn { get; set; }
-    public required byte PaymentSequence{ get; set; }
-    
+    public required byte PaymentSequence { get; set; }
+
     public required string EmployeeName { get; set; }
     public required char FrequencyId { get; set; }
     public DistributionFrequency? Frequency { get; set; }
     public required char StatusId { get; set; }
     public DistributionStatus? Status { get; set; }
-    
+
     public DistributionPayee? Payee { get; set; }
     public int? PayeeId { get; set; }
 

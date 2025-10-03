@@ -1,4 +1,4 @@
-using Demoulas.Common.Contracts.Contracts.Request;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Attributes;
 
@@ -17,7 +17,7 @@ public sealed record YearEndProfitSharingReportResponse : ReportResponseBase<Yea
     public int NumberOfNewEmployees { get; set; }
     public int NumberOfEmployeesUnder21 { get; set; }
     public long NumberOfEmployeesInPlan { get; set; }
-    
+
     [YearEndArchiveProperty]
     public decimal BalanceTotal { get; set; }
 
@@ -37,8 +37,8 @@ public sealed record YearEndProfitSharingReportResponse : ReportResponseBase<Yea
             StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
             EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
             Response = new PaginatedResponseDto<YearEndProfitSharingReportDetail>(new PaginationRequestDto())
-                { Total = 1, Results = new List<YearEndProfitSharingReportDetail>() { YearEndProfitSharingReportDetail.ResponseExample() } }
-                
+            { Total = 1, Results = new List<YearEndProfitSharingReportDetail>() { YearEndProfitSharingReportDetail.ResponseExample() } }
+
         };
     }
 }

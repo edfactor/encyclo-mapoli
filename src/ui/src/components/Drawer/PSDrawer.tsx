@@ -16,24 +16,24 @@ import {
   SvgIconProps,
   Typography
 } from "@mui/material";
-import ProfitYearSelector from "components/ProfitYearSelector/ProfitYearSelector";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import React, { FC, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { clearActiveSubMenu, closeDrawer, openDrawer, setActiveSubMenu } from "reduxstore/slices/generalSlice";
+import { ICommon } from "smart-ui-library";
+import { drawerTitle, menuLevels } from "../../MenuData";
+import ProfitYearSelector from "../../components/ProfitYearSelector/ProfitYearSelector";
+import { drawerClosedWidth, drawerOpenWidth, MENU_LABELS } from "../../constants";
+import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
+import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
+import { clearActiveSubMenu, closeDrawer, openDrawer, setActiveSubMenu } from "../../reduxstore/slices/generalSlice";
 import {
   checkDecemberParamsAndGridsProfitYears,
   checkFiscalCloseParamsAndGridsProfitYears,
   setSelectedProfitYearForDecemberActivities,
   setSelectedProfitYearForFiscalClose
-} from "reduxstore/slices/yearsEndSlice";
-import { RootState } from "reduxstore/store";
-import { NavigationResponseDto } from "reduxstore/types";
-import { ICommon } from "smart-ui-library";
-import { drawerTitle, menuLevels } from "../../MenuData";
-import { drawerClosedWidth, drawerOpenWidth, MENU_LABELS } from "../../constants";
-import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
+} from "../../reduxstore/slices/yearsEndSlice";
+import { RootState } from "../../reduxstore/store";
+import { NavigationResponseDto } from "../../reduxstore/types";
 
 // Define the highlight color as a constant
 const HIGHLIGHT_COLOR = "#0258A5";
@@ -369,13 +369,13 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
                       Sets accounting calendar year
                     </Alert>
                   )}
-                  <div style={{ padding: "24px" }}>
+                  {/* <div style={{ padding: "24px" }}>
                     <ProfitYearSelector
                       selectedProfitYear={selectedProfitYearForDecemberActivities}
                       handleChange={handleDecemberProfitYearChange}
                       defaultValue={profitYear?.toString()}
                     />
-                  </div>
+                  </div> */}
                 </div>
               )}
 
@@ -396,13 +396,13 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
                       Sets accounting calendar year
                     </Alert>
                   )}
-                  <div style={{ padding: "24px" }}>
+                  {/* <div style={{ padding: "24px" }}>
                     <ProfitYearSelector
                       selectedProfitYear={selectedProfitYearForFiscalClose}
                       handleChange={handleFiscalCloseProfitYearChange}
                       defaultValue={fiscalFlowProfitYear?.toString()}
                     />
-                  </div>
+                  </div> */}
                 </div>
               )}
               <List>

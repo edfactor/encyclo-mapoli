@@ -25,7 +25,7 @@ public sealed class PayProfit : ModifiedBase
     /// </summary>
     public decimal CurrentHoursYear { get; set; }
 
-    
+
     /// <summary>
     /// Income (Wage) accumulated so far in the current year (updated weekly)
     /// </summary>
@@ -48,7 +48,7 @@ public sealed class PayProfit : ModifiedBase
     /// </summary>
     public DateOnly? PsCertificateIssuedDate { get; set; }
 
-   
+
     /// <summary>
     /// Employee enrollment status
     /// </summary>
@@ -68,7 +68,7 @@ public sealed class PayProfit : ModifiedBase
     public byte EmployeeTypeId { get; set; }
     public EmployeeType? EmployeeType { get; set; }
 
-    
+
     public byte? ZeroContributionReasonId { get; set; }
     public ZeroContributionReason? ZeroContributionReason { get; set; }
 
@@ -86,6 +86,6 @@ public sealed class PayProfit : ModifiedBase
     /// Points Earned (for the ProfitYear).
     /// </summary>
     public decimal? PointsEarned { get; set; }
-    
+
     public Demographic? Demographic { get; set; }
 }

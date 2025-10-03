@@ -10,7 +10,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-         
+
             migrationBuilder.DropColumn(
                 name: "CHECK_AMOUNT",
                 table: "DISTRIBUTION");

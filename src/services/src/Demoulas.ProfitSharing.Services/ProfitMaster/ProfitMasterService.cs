@@ -103,13 +103,30 @@ public class ProfitMasterService : IProfitMasterService
 
             if (fs.ProfitYear != profitShareUpdateRequest.ProfitYear)
             {
-                throw new BadHttpRequestException($"The requested year must match the frozen year.");
+                throw new BadHttpRequestException($"The requested year, {profitShareUpdateRequest.ProfitYear}, must match the frozen year, {fs.ProfitYear}");
             }
 
             Dictionary<byte, ProfitCode> code2ProfitCode = await ctx.ProfitCodes.ToDictionaryAsync(pc => pc.Id, pc => pc, cancellationToken);
 
             // Get the records to be created
             List<ProfitDetail> profitDetailRecords = CreateProfitDetailRecords(code2ProfitCode, profitShareUpdateRequest.ProfitYear, records);
+
+            const decimal maxAmount = 9999999.99m;
+
+            var outOfBounds = profitDetailRecords.Where(pd =>
+                // These fields must be non-negative
+                pd.Contribution is < 0 or > maxAmount ||
+                pd.Forfeiture is < 0 or > maxAmount ||
+                pd.FederalTaxes is < 0 or > maxAmount ||
+                pd.StateTaxes is < 0 or > maxAmount ||
+                // Earnings can be negative but still has bounds
+                pd.Earnings is < -maxAmount or > maxAmount
+            ).ToList();
+
+            if (outOfBounds.Count != 0)
+            {
+                throw new InvalidOperationException($"Found {outOfBounds.Count} records with values out of bounds with precision or negative");
+            }
 
             // Insert them in bulk.
             // ctx.ProfitDetails.AddRange(profitDetailRecords); <--- 7 minutes for obfuscated database
@@ -236,7 +253,7 @@ public class ProfitMasterService : IProfitMasterService
     private static List<ProfitDetail> CreateProfitDetailRecords(Dictionary<byte, ProfitCode> id2ProfitCode, short profitYear,
         IEnumerable<ProfitShareEditMemberRecord> rec)
     {
-        
+
         return rec.Select(r => new ProfitDetail
         {
             ProfitCode = id2ProfitCode[r.ProfitCode],
@@ -250,7 +267,7 @@ public class ProfitMasterService : IProfitMasterService
             Remark = r.Remark,
             ZeroContributionReasonId = r.ZeroContStatus,
             CommentTypeId = r.CommentTypeId,
-            YearsOfServiceCredit = (r.ProfitCode == 0 && ( r.ContributionAmount != 0  || r.ZeroContStatus is 1 or 2 )) ? (byte)1 : (byte)0
+            YearsOfServiceCredit = (r.ProfitCode == 0 && (r.ContributionAmount != 0 || r.ZeroContStatus is 1 or 2)) ? (byte)1 : (byte)0
         }).ToList();
     }
 
@@ -309,21 +326,16 @@ public class ProfitMasterService : IProfitMasterService
             var deleteTransactionsSql =
                 $@"DELETE FROM profit_detail WHERE 
                 PROFIT_YEAR = {profitYear} AND (                
-                   PROFIT_CODE_id = /*0*/ {ProfitCode.Constants.IncomingContributions.Id} AND (
-                    -- Mostly this is to avoid changes to MILITARY rows
+                   PROFIT_CODE_id = {ProfitCode.Constants.IncomingContributions.Id} AND (
                     comment_type_id is null OR 
-                    comment_type_id = /*23*/ {CommentType.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested.Id} OR
-                    comment_type_id = /*5*/ {CommentType.Constants.VOnly.Id} OR
-                    comment_type_id = /*23*/ {CommentType.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested.Id} 
+                    comment_type_id =  {CommentType.Constants.VOnly.Id} OR
+                    comment_type_id = {CommentType.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested.Id} 
                     )                 
                 OR
-               (PROFIT_CODE_id = /*8*/  {ProfitCode.Constants.Incoming100PercentVestedEarnings.Id} AND comment_type_id = /*23*/ {CommentType.Constants.OneHundredPercentEarnings.Id}))";
+               (PROFIT_CODE_id = {ProfitCode.Constants.Incoming100PercentVestedEarnings.Id} AND comment_type_id = {CommentType.Constants.OneHundredPercentEarnings.Id}))";
             var transactionsDeleted = await ctx.Database.ExecuteSqlRawAsync(deleteTransactionsSql, cancellationToken);
 
-            if (yearEndUpdateStatus != null)
-            {
-                ctx.YearEndUpdateStatuses.Remove(yearEndUpdateStatus);
-            }
+            ctx.YearEndUpdateStatuses.Remove(yearEndUpdateStatus);
 
             await ctx.SaveChangesAsync(cancellationToken);
 

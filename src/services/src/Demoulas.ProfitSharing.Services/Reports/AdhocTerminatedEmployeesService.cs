@@ -151,10 +151,10 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
 
         var letter = new System.Text.StringBuilder();
         var space_7 = new string(' ', 7);
-        var space_11 = new string(' ', 11);
-        var space_24 = new string(' ', 24);
+        _ = new string(' ', 11);
+        _ = new string(' ', 24);
         var space_25 = new string(' ', 25);
-        var space_27 = new string(' ', 27);
+        _ = new string(' ', 27);
 
         foreach (var emp in report.Response.Results)
         {

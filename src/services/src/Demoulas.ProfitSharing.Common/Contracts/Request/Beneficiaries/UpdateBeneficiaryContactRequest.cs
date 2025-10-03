@@ -1,6 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 using Shared;
-public record UpdateBeneficiaryContactRequest:IdRequest, INameParts, IPhoneNumber, IEmailAddress, ICity
+public record UpdateBeneficiaryContactRequest : IdRequest, INameParts, IPhoneNumber, IEmailAddress, ICity
 {
     public int? ContactSsn { get; set; }
     public DateOnly? DateOfBirth { get; set; }

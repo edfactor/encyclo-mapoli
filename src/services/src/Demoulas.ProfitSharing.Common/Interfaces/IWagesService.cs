@@ -13,6 +13,6 @@ public interface IWagesService
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the report response for the current year's wages.</returns>
     Task<ReportResponseBase<WagesCurrentYearResponse>> GetWagesReportAsync(ProfitYearRequest request, CancellationToken cancellationToken);
-    
-    
+
+
 }

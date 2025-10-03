@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using Demoulas.ProfitSharing.Common.Metrics;
 
@@ -28,6 +28,13 @@ public static class EndpointTelemetry
     public static Counter<long> BusinessOperationsTotal { get; private set; } = null!;
     public static Histogram<long> RecordCountsProcessed { get; private set; } = null!;
     public static Counter<long> ValidationFailuresTotal { get; private set; } = null!;
+
+    // Enhanced telemetry metrics for database and cache performance
+    public static Histogram<double> DatabaseQueryDurationMs { get; private set; } = null!;
+    public static Histogram<double> BusinessLogicDurationMs { get; private set; } = null!;
+    public static Counter<long> CacheHitsTotal { get; private set; } = null!;
+    public static Counter<long> CacheMissesTotal { get; private set; } = null!;
+    public static Counter<long> DatabaseOperationsTotal { get; private set; } = null!;
 
     private static bool _initialized;
     private static readonly object _initLock = new();
@@ -83,6 +90,27 @@ public static class EndpointTelemetry
             ValidationFailuresTotal = Meter.CreateCounter<long>(
                 "ps_validation_failures_total",
                 "Request validation failures by type");
+
+            // Enhanced telemetry metrics for performance analysis
+            DatabaseQueryDurationMs = Meter.CreateHistogram<double>(
+                "ps_database_query_duration_ms",
+                "Database query execution duration in milliseconds (excluding business logic)");
+
+            BusinessLogicDurationMs = Meter.CreateHistogram<double>(
+                "ps_business_logic_duration_ms",
+                "Business logic execution duration in milliseconds (excluding database queries)");
+
+            CacheHitsTotal = Meter.CreateCounter<long>(
+                "ps_cache_hits_total",
+                "Total count of successful cache hits by cache type");
+
+            CacheMissesTotal = Meter.CreateCounter<long>(
+                "ps_cache_misses_total",
+                "Total count of cache misses requiring database lookup");
+
+            DatabaseOperationsTotal = Meter.CreateCounter<long>(
+                "ps_database_operations_total",
+                "Total count of database operations by type (read/write)");
 
             _initialized = true;
         }

@@ -20,7 +20,7 @@ public sealed class GrossWagesReportDetail : IIsExecutive
         {
             BadgeNumber = 123456,
             EmployeeName = "Sam Hughes",
-            DateOfBirth = new DateOnly(1993,4,28),
+            DateOfBirth = new DateOnly(1993, 4, 28),
             Ssn = "xxx-xx-1942",
             GrossWages = 52005.15m,
             ProfitSharingAmount = 150023.55m,

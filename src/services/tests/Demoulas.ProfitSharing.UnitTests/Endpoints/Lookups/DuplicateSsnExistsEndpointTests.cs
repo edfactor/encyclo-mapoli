@@ -1,9 +1,9 @@
-﻿using Demoulas.ProfitSharing.UnitTests.Common.Base;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
-using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
-using Shouldly;
+﻿using Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.UnitTests.Common.Base;
+using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Lookups;
 

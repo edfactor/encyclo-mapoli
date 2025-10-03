@@ -37,7 +37,7 @@ public class NegativeEtvaReportService : INegativeEtvaReportService
             var data = await _dataContextFactory.UseReadOnlyContext(async c =>
             {
                 var demographics = await _demographicReaderService.BuildDemographicQuery(c);
-                
+
                 var ssnUnion = demographics.Select(d => d.Ssn)
                     .Union(c.Beneficiaries.Include(b => b.Contact).Select(b => b.Contact!.Ssn));
 

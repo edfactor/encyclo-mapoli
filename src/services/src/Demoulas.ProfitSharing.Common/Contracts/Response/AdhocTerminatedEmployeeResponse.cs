@@ -15,7 +15,7 @@ public sealed record AdhocTerminatedEmployeeResponse : IFullNameProperty, IIsExe
     public required DateOnly TerminationDate { get; set; }
     public required char? TerminationCodeId { get; set; }
     [MaskSensitive] public string Address { get; set; } = string.Empty;
-    [MaskSensitive ]public string Address2 { get; set; } = string.Empty;
+    [MaskSensitive] public string Address2 { get; set; } = string.Empty;
     [MaskSensitive] public string City { get; set; } = string.Empty;
     [MaskSensitive] public string State { get; set; } = string.Empty;
     [MaskSensitive] public string PostalCode { get; set; } = string.Empty;

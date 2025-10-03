@@ -27,6 +27,6 @@ public class DistributionRequestReasonMap : IEntityTypeConfiguration<Distributio
             new DistributionRequestReason { Id = DistributionRequestReason.Constants.MEDICAL_DENTAL, Name = "MEDICAL_DENTAL" },
             new DistributionRequestReason { Id = DistributionRequestReason.Constants.OTHER, Name = "OTHER" }
         );
-        
+
     }
 }
