@@ -20,7 +20,7 @@ public class SwaggerImpersonationHeader : IOperationProcessor
             Schema = new JsonSchema
             {
                 Type = JsonObjectType.String,
-                Enumeration = {Role.BENEFICIARY_ADMINISTRATOR, Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.HARDSHIPADMINISTRATOR, Role.ADMINISTRATOR, Role.ITDEVOPS, Role.EXECUTIVEADMIN, Role.ITOPERATIONS, Role.AUDITOR }
+                Enumeration = { Role.BENEFICIARY_ADMINISTRATOR, Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.HARDSHIPADMINISTRATOR, Role.ADMINISTRATOR, Role.ITDEVOPS, Role.EXECUTIVEADMIN, Role.ITOPERATIONS, Role.AUDITOR }
             },
         };
 

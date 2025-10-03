@@ -15,7 +15,7 @@ public class DistributionRequest : ModifiedBase
 
     public byte TypeId { get; set; }
     public required DistributionRequestType Type { get; set; }
-    
+
     public string? ReasonText { get; set; }
 
     public string? ReasonOtherText { get; set; }

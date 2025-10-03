@@ -16,7 +16,8 @@ internal sealed class CommentTypeMap : IEntityTypeConfiguration<CommentType>
         builder.HasData(GetPredefinedCommentTypes());
     }
 
-    private static List<CommentType> GetPredefinedCommentTypes() {
+    private static List<CommentType> GetPredefinedCommentTypes()
+    {
         return [
             CommentType.Constants.TransferOut,
             CommentType.Constants.TransferIn,

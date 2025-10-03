@@ -6,7 +6,7 @@ public sealed record UpdateSummaryReportResponse : ReportResponseBase<UpdateSumm
 {
     [YearEndArchiveProperty]
     public int TotalNumberOfEmployees { get; set; }
-    
+
     [YearEndArchiveProperty]
     public int TotalNumberOfBeneficiaries { get; set; }
     [YearEndArchiveProperty]
@@ -34,7 +34,7 @@ public sealed record UpdateSummaryReportResponse : ReportResponseBase<UpdateSumm
             EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
             Response = new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<UpdateSummaryReportDetail>(new PaginationRequestDto())
             {
-                Results = new List<UpdateSummaryReportDetail>() { UpdateSummaryReportDetail.ResponseExample()}
+                Results = new List<UpdateSummaryReportDetail>() { UpdateSummaryReportDetail.ResponseExample() }
             }
         };
     }

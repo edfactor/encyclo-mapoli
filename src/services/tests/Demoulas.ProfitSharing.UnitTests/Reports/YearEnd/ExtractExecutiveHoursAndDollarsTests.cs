@@ -13,7 +13,6 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Audit;
-using Microsoft.Extensions.Logging;
 using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
@@ -22,6 +21,7 @@ using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
 

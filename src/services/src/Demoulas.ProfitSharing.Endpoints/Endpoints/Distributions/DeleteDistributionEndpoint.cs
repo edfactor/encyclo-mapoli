@@ -1,8 +1,8 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Common.Contracts;
-using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
@@ -18,7 +18,7 @@ public sealed class DeleteDistributionEndpoint : ProfitSharingEndpoint<IdRequest
     private readonly IDistributionService _distributionService;
     private readonly ILogger<DeleteDistributionEndpoint> _logger;
 
-    public DeleteDistributionEndpoint(IDistributionService distributionService, ILogger<DeleteDistributionEndpoint> logger):base(Navigation.Constants.Distributions)
+    public DeleteDistributionEndpoint(IDistributionService distributionService, ILogger<DeleteDistributionEndpoint> logger) : base(Navigation.Constants.Distributions)
     {
         _distributionService = distributionService;
         _logger = logger;

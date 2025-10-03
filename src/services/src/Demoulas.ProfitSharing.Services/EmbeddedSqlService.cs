@@ -26,7 +26,7 @@ public sealed class EmbeddedSqlService : IEmbeddedSqlService
     public IQueryable<ParticipantTotalRatio> GetVestingRatioAlt(IProfitSharingDbContext ctx, short profitYear,
         DateOnly asOfDate)
     {
-        
+
         var query = GetVestingRatioQuery(profitYear, asOfDate);
 
         return ctx.ParticipantTotalRatios.FromSqlRaw(query);
@@ -47,7 +47,7 @@ public sealed class EmbeddedSqlService : IEmbeddedSqlService
         return ctx.ParticipantEvtaTotals.FromSqlInterpolated(query);
     }
 
-    public IQueryable<ParticipantTotalVestingBalance>  TotalVestingBalanceAlt(IProfitSharingDbContext ctx,
+    public IQueryable<ParticipantTotalVestingBalance> TotalVestingBalanceAlt(IProfitSharingDbContext ctx,
         short employeeYear, short profitYear, DateOnly asOfDate)
     {
         var totalBalanceQuery = GetTotalBalanceQuery(profitYear);
@@ -215,7 +215,7 @@ FROM PROFIT_DETAIL pd
 WHERE pd.PROFIT_YEAR= {profitYear}
 GROUP BY pd.SSN";
 
-      return ctx.ProfitDetailRollups.FromSqlInterpolated(query);
+        return ctx.ProfitDetailRollups.FromSqlInterpolated(query);
     }
 
     private static FormattableString GetTotalBalanceQuery(short profitYear)
@@ -292,10 +292,10 @@ FROM (
 ";
         return query;
     }
-    
+
     public static string GetYearsOfServiceQuery(short profitYear, DateOnly asOfDate)
     {
-        var aged18Date = asOfDate.AddYears(-18); 
+        var aged18Date = asOfDate.AddYears(-18);
         string query = @$"
 SELECT pd.SSN, SUM(pd.YEARS_OF_SERVICE_CREDIT)
                + CASE WHEN NOT EXISTS (SELECT 1 FROM PROFIT_DETAIL pd0 WHERE pd0.PROFIT_YEAR = {profitYear} AND pd0.PROFIT_CODE_ID = {ProfitCode.Constants.IncomingContributions.Id} AND pd.SSN  = pd0.SSN AND pd0.PROFIT_YEAR_ITERATION = 0)
@@ -311,7 +311,7 @@ SELECT pd.SSN, SUM(pd.YEARS_OF_SERVICE_CREDIT)
 ";
         return query;
     }
-    
+
     public static FormattableString GetInitialContributionYearQuery()
     {
         FormattableString query = @$"

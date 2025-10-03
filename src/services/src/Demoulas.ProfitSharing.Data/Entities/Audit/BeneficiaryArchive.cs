@@ -1,5 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Entities.Audit;
-public sealed class BeneficiaryArchive 
+public sealed class BeneficiaryArchive
 {
     public int ArchiveId { get; set; }
     public required int Id { get; set; }

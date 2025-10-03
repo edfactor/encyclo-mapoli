@@ -22,7 +22,7 @@ public class BeneficiaryTests : ApiTestBase<Program>
         // create mock database with just 1 bene
         _beneficiary = StockFactory.CreateBeneficiary();
         _profitDetail = StockFactory.CreateAllocation(1901, _beneficiary.Contact!.Ssn, _beneficiaryBalance);
-        MockDbContextFactory = new ScenarioFactory { Beneficiaries = [_beneficiary], ProfitDetails = [_profitDetail]}.BuildMocks();
+        MockDbContextFactory = new ScenarioFactory { Beneficiaries = [_beneficiary], ProfitDetails = [_profitDetail] }.BuildMocks();
 
         _service = ServiceProvider?.GetRequiredService<IProfitShareEditService>()!;
     }
@@ -38,6 +38,6 @@ public class BeneficiaryTests : ApiTestBase<Program>
 
         // Assert
         response.Response.ShouldNotBeNull();
-        
+
     }
 }

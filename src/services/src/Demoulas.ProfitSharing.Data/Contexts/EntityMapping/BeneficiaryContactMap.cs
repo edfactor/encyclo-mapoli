@@ -11,7 +11,7 @@ internal sealed class BeneficiaryContactMap : ModifiedBaseMap<BeneficiaryContact
     public override void Configure(EntityTypeBuilder<BeneficiaryContact> builder)
     {
         base.Configure(builder);
-        
+
         _ = builder.ToTable("BENEFICIARY_CONTACT");
         _ = builder.HasKey(c => c.Id);
 

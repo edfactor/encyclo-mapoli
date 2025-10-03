@@ -1,14 +1,14 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Distributions;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
-using Shouldly;
 using FastEndpoints;
-using Demoulas.Common.Contracts.Contracts.Response;
 using Microsoft.EntityFrameworkCore;
-using Demoulas.ProfitSharing.Data.Entities;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services;
 public sealed class DistributionServiceTests : ApiTestBase<Api.Program>
@@ -31,8 +31,8 @@ public sealed class DistributionServiceTests : ApiTestBase<Api.Program>
 
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
         var response = await ApiClient.POSTAsync<
-            DistributionSearchEndpoint, 
-            DistributionSearchRequest, 
+            DistributionSearchEndpoint,
+            DistributionSearchRequest,
             PaginatedResponseDto<DistributionSearchResponse>>(request);
 
         response.ShouldNotBeNull();

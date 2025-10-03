@@ -46,7 +46,7 @@ public class YearEndServiceTests : PristineBaseTest
             DbTransaction transaction = await c.BeginTransactionAsync(ct);
             await yearEndService.RunFinalYearEndUpdates(profitYear, false, ct);
             await transaction.CommitAsync(ct);
-            
+
             return 7;
         }, ct);
 

@@ -1,411 +1,109 @@
 # AI Assistant Project Instructions
 
-Concise, project-specific guidance for AI coding agents working in this repository. Focus on THESE patterns; avoid generic advice.
+**Quick navigation guide for AI coding agents** working in this repository. Detailed patterns are in separate documents (see references below).
 
 ## Architecture Overview
-- Monorepo with two primary roots:
-  - `src/services/` (.NET 9) multi-project solution `Demoulas.ProfitSharing.slnx` (FastEndpoints, EF Core 9 + Oracle, Aspire, Serilog, Feature Flags, RabbitMQ, Mapperly, Shouldly).
-    - Note: this solution is hosted using .NET Aspire (see the Aspire host `Demoulas.ProfitSharing.AppHost`). The Aspire host provides lifecycle and configuration patterns that should be followed (do not create ad-hoc hosts). Aspire also provides first-class support for built-in database retry/resilience which should be used in preference to rolling your own retry logic at ad-hoc call sites.
-    - **To start the entire application (API + UI), run `aspire run` from the project root directory.**
-      - Aspire docs: https://github.com/dotnet/docs-aspire/blob/main/docs/cli/overview.md
-      - Aspire repo: https://github.com/dotnet/docs-aspire
-  - `src/ui/` (Vite + React + TypeScript + Tailwind + Redux Toolkit + internal `smart-ui-library`).
-- Database: Oracle 19. EF Core migrations via `ProfitSharingDbContext`; CLI utility project `Demoulas.ProfitSharing.Data.Cli` performs schema ops & imports from legacy READY system.
-- Cross-cutting: Central package mgmt (`Directory.Packages.props`), shared build config (`Directory.Build.props`), global SDK pin (`global.json`).
+- **Monorepo** with two primary roots:
+  - `src/services/` - .NET 9 multi-project solution `Demoulas.ProfitSharing.slnx` (FastEndpoints, EF Core 9 + Oracle, Aspire, Serilog, RabbitMQ, Mapperly, Shouldly)
+    - Hosted using **.NET Aspire** (`Demoulas.ProfitSharing.AppHost`) - do not create ad-hoc hosts
+    - **Start app**: `aspire run` from project root
+    - [Aspire docs](https://github.com/dotnet/docs-aspire/blob/main/docs/cli/overview.md)
+  - `src/ui/` - Vite + React + TypeScript + Tailwind + Redux Toolkit + `smart-ui-library`
+- **Database**: Oracle 19. EF Core migrations via `ProfitSharingDbContext`; CLI utility `Demoulas.ProfitSharing.Data.Cli` for schema ops
+- **Cross-cutting**: Central package mgmt (`Directory.Packages.props`), shared build config (`Directory.Build.props`), global SDK pin (`global.json`)
 
 ## Key Backend Conventions
-- Startup/entrypoint: run/debug `Demoulas.ProfitSharing.AppHost` (Aspire host). Avoid creating new ad-hoc hosts.
-- Use FastEndpoints; group endpoint files logically. Prefer minimal API style. Return typed results + proper status codes.
-- Mapping: Prefer `Mapperly` for DTO<->entity; follow existing mapper classes (see `*Mapper.cs`). Don't hand-write repetitive mapping unless customization is needed.
-- Data access (service layer ONLY): All EF Core usage (DbContext/`IProfitSharingDataContextFactory`, LINQ queries, transactions) lives in dedicated domain/application services (e.g., `...Services` projects). Endpoints MUST NOT directly query the database nor reference DbSets. They invoke injected services that return `Result<T>` (or domain objects) and perform only request validation, orchestration, and HTTP result translation.
-  - Bulk maintenance still uses `ExecuteUpdate/ExecuteDelete` inside services where safe.
-  - For dynamic filters build expressions in services (see `DemographicsService`).
-  - Avoid raw SQL; if performance requires it, encapsulate in the service layer, parameterize, and unit test.
-- Distributed Caching (IDistributedCache patterns): Use `IDistributedCache` (NOT `IMemoryCache`) for all application caching. Redis is configured via Aspire; unit tests use `MemoryDistributedCache`.
-  - **Storage**: Serialize data to JSON via `System.Text.Json` (use `JsonSerializer.SerializeToUtf8Bytes` for writes, `JsonSerializer.Deserialize` for reads).
-  - **Cache keys**: Use descriptive prefixes (e.g., `navigation-status-all`, `frozen-demographics-v{year}`). For user-specific data, include sorted role names (e.g., `navigation-tree-v{version}-ROLE1|ROLE2`).
-  - **Expiration**: Set both `AbsoluteExpirationRelativeToNow` (e.g., 30 min) and `SlidingExpiration` (e.g., 15 min) via `DistributedCacheEntryOptions`.
-  - **Cache invalidation patterns**:
-    - **Simple removal**: Use `await _distributedCache.RemoveAsync(cacheKey)` for single-key invalidation (e.g., navigation status cache).
-    - **Version-based invalidation** (PREFERRED for multi-key scenarios): Store an integer version counter in the cache (e.g., `navigation-tree-version`), include version in all cache keys (e.g., `navigation-tree-v{version}-{roles}`), and increment the version on updates. This invalidates all related caches instantly without needing pattern-based deletion. Use `BitConverter.GetBytes(version)` / `BitConverter.ToInt32(bytes)` for version storage.
-    - **Why version-based?**: IDistributedCache has no pattern-matching delete (no `RemoveByPrefix`). Version bumps make old keys unreachable; they expire naturally. Works with any IDistributedCache provider (Redis, SQL Server, in-memory).
-  - **Example - version-based invalidation**:
-    ```csharp
-    // Get or create version
-    var versionBytes = await _distributedCache.GetAsync("my-cache-version", ct);
-    var version = versionBytes != null ? BitConverter.ToInt32(versionBytes) : 0;
-    
-    // Build cache key with version
-    var cacheKey = $"my-data-v{version}-{identifier}";
-    
-    // Try cache lookup
-    var cachedBytes = await _distributedCache.GetAsync(cacheKey, ct);
-    if (cachedBytes != null)
-    {
-        var cachedData = JsonSerializer.Deserialize<MyDto>(cachedBytes);
-        _logger?.LogDebug("Data loaded from cache (version {Version})", version);
-        return cachedData;
-    }
-    
-    // Load from database, serialize, cache
-    var data = await LoadFromDatabaseAsync(ct);
-    var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(data);
-    var options = new DistributedCacheEntryOptions
-    {
-        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30),
-        SlidingExpiration = TimeSpan.FromMinutes(15)
-    };
-    await _distributedCache.SetAsync(cacheKey, jsonBytes, options, ct);
-    return data;
-    
-    // To invalidate all versions: increment version counter
-    public async Task BustAllCachesAsync(CancellationToken ct)
-    {
-        var oldVersionBytes = await _distributedCache.GetAsync("my-cache-version", ct);
-        var oldVersion = oldVersionBytes != null ? BitConverter.ToInt32(oldVersionBytes) : 0;
-        var newVersion = oldVersion + 1;
-        await _distributedCache.SetAsync("my-cache-version", BitConverter.GetBytes(newVersion), ct);
-        _logger?.LogInformation("Cache version incremented from {Old} to {New}", oldVersion, newVersion);
-    }
-    ```
-  - **Unit testing**: Use `MemoryDistributedCache` from `Microsoft.Extensions.Caching.Memory`. Register as: `services.AddSingleton<IDistributedCache, MemoryDistributedCache>()`. No changes needed to service code—tests work transparently.
-  - **Logging**: Log cache hits (`LogDebug`), misses (`LogInformation` with count), and invalidations (`LogInformation` with reason/ID).
-  - **Error handling**: Cache failures should degrade gracefully—log errors but don't fail operations. Wrap cache reads/writes in try-catch if cache availability is uncertain.
-  - **Reference implementations**: See `NavigationService.GetNavigation()` (version-based invalidation with role-based keys), `NavigationService.GetNavigationStatus()` (simple key), `FrozenService` (year-based keys with simple removal).
-- Auditing & History: When updating mutable domain entities with historical tracking (example: `DemographicsService` creating `DemographicHistory` with `ValidFrom/ValidTo`), replicate the pattern: close current record (`ValidTo = now`), insert new history row. NEVER overwrite historical rows.
-- Identifiers: `OracleHcmId` is authoritative when present; fall back to composite `(Ssn,BadgeNumber)` only when Oracle id missing. Mirror guard logic (skip ambiguous BadgeNumber == 0 cases) if extending.
-- Entity updates: Keep helper methods like `UpdateEntityValues` cohesive; prefer adding fields there instead of scattering manual per-field assignments.
-- Validation errors & audits: Use `DemographicSyncAudit` pattern—batch add + save once. When adding new audit types, follow existing property naming.
+- **Startup**: Run/debug `Demoulas.ProfitSharing.AppHost` (Aspire host) - avoid ad-hoc hosts
+- **Endpoints**: FastEndpoints; group logically, use minimal API style, return typed results
+- **Mapping**: Prefer `Mapperly` for DTO<->entity (see `*Mapper.cs`)
+- **Data Access** (service layer ONLY): All EF Core usage lives in services (e.g., `...Services` projects). Endpoints invoke services returning `Result<T>`—NO direct DbContext/DbSet access in endpoints.
+  - Bulk maintenance uses `ExecuteUpdate/ExecuteDelete` inside services
+  - Dynamic filters build expressions in services (see `DemographicsService`)
+  - Avoid raw SQL; if needed, encapsulate in service layer
+- **Distributed Caching**: Use `IDistributedCache` (NOT `IMemoryCache`). See **[DISTRIBUTED_CACHING_PATTERNS.md](DISTRIBUTED_CACHING_PATTERNS.md)** for complete patterns including version-based invalidation
+- **Auditing & History**: Close current record (`ValidTo = now`), insert new history row. NEVER overwrite historical rows.
+- **Identifiers**: `OracleHcmId` is authoritative; fall back to `(Ssn,BadgeNumber)` only when Oracle id missing
+- **Entity updates**: Use helper methods like `UpdateEntityValues`; avoid scattered per-field assignments
 
 ## Endpoint Results Pattern (MANDATORY)
-All FastEndpoints MUST return typed minimal API union results AND internally use the domain `Result<T>` record (`Demoulas.ProfitSharing.Common.Contracts.Result<T>`) for service-layer outcomes.
+All FastEndpoints MUST return typed minimal API union results AND use domain `Result<T>` record (`Demoulas.ProfitSharing.Common.Contracts.Result<T>`) for service outcomes.
 
-Patterns:
-- Service layer returns/constructs `Result<T>` (Success, Failure, ValidationFailure).
-- Endpoint converts domain result via `Match` (or helper) to: `Results<Ok<T>, NotFound, ProblemHttpResult>` (queries) or `Results<Ok, ProblemHttpResult>` (commands). Include `NotFound` for resource-missing semantics; add `ValidationProblem` only if you propagate structured validation errors directly.
-- Helpers: Use `ResultHttpExtensions.ToResultOrNotFound()` + `ToHttpResult()` to reduce boilerplate (e.g., `dto.ToResultOrNotFound(Error.CalendarYearNotFound).ToHttpResult(Error.CalendarYearNotFound)`).
-- Implicit: `Result<T>` has an implicit conversion to `Results<Ok<T>, NotFound, ProblemHttpResult>` but ONLY use it when you do not need to distinguish specific not-found errors (otherwise call `ToHttpResult(Error.SomeNotFound)`).
-- Errors: Use specific not-found codes (e.g., `Error.CalendarYearNotFound`). Avoid reusing unrelated error descriptions to trigger NotFound.
-- Map: `Success => TypedResults.Ok(value)`, not-found error => `TypedResults.NotFound()`, other errors/validation => `TypedResults.Problem(problem.Detail)`.
-- Example (explicit mapping):
-  ```csharp
-  var result = await _svc.GetAsync(req.Id, ct);
-  return result.ToHttpResult(Error.SomeEntityNotFound);
-  ```
-- Avoid returning raw DTOs or nulls; always wrap service outcomes in `Result<T>` before translating to HTTP.
-- Catch unexpected exceptions and map to `TypedResults.Problem(ex.Message)` (logging appropriately) unless a global handler already standardizes this.
+**Quick Pattern**:
+- Service returns `Result<T>` (Success, Failure, ValidationFailure)
+- Endpoint converts via `Match` or helpers to: `Results<Ok<T>, NotFound, ProblemHttpResult>`
+- Use `ResultHttpExtensions.ToResultOrNotFound()` + `ToHttpResult()` to reduce boilerplate
+- Specific error codes for NotFound (e.g., `Error.CalendarYearNotFound`)
 
-## Telemetry & Observability Patterns (MANDATORY)
-
-All FastEndpoints MUST implement comprehensive telemetry using the established `TelemetryExtensions` patterns. Telemetry provides critical visibility into application usage, performance, security, and business operations for development, QA, and production support teams.
-
-### Required Implementation (Choose One Pattern)
-
-**Automatic Pattern (Recommended)**: Use the `ExecuteWithTelemetry` wrapper for comprehensive telemetry with minimal code:
-
+**Example**:
 ```csharp
-using Demoulas.ProfitSharing.Common.Telemetry;
+var result = await _svc.GetAsync(req.Id, ct);
+return result.ToHttpResult(Error.SomeEntityNotFound);
+```
 
+## Telemetry & Observability (MANDATORY)
+
+All FastEndpoints MUST implement comprehensive telemetry. **See [TELEMETRY_GUIDE.md](../src/ui/public/docs/TELEMETRY_GUIDE.md)** for complete reference.
+
+**Quick Pattern** (recommended):
+```csharp
 public override async Task<MyResponse> ExecuteAsync(MyRequest req, CancellationToken ct)
 {
     return await this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
     {
-        // Your business logic here
         var result = await _service.ProcessAsync(req, ct);
         
-        // Add business metrics (required for business operations)
+        // Add business metrics
         EndpointTelemetry.BusinessOperationsTotal.Add(1,
             new("operation", "year-end-processing"),
             new("endpoint", nameof(MyEndpoint)));
             
         return result;
-    }, "Ssn", "OracleHcmId"); // List all sensitive fields accessed
+    }, "Ssn", "OracleHcmId"); // List sensitive fields accessed
 }
 ```
 
-**Manual Pattern (Advanced Control)**: Use individual telemetry methods for fine-grained control:
+**Required**:
+- Inject `ILogger<TEndpoint>` for correlation
+- Use `TelemetryExtensions` patterns (`ExecuteWithTelemetry` or manual methods)
+- Include business metrics appropriate to endpoint category
+- Declare sensitive fields in telemetry calls
 
+**Documentation**:
+- **[TELEMETRY_GUIDE.md](../src/ui/public/docs/TELEMETRY_GUIDE.md)** - Comprehensive 75+ page reference for developers, QA, DevOps
+- **[TELEMETRY_QUICK_REFERENCE.md](../src/ui/public/docs/TELEMETRY_QUICK_REFERENCE.md)** - Developer cheat sheet with copy-paste examples
+- **[TELEMETRY_DEVOPS_GUIDE.md](../src/ui/public/docs/TELEMETRY_DEVOPS_GUIDE.md)** - Production operations guide
+- **[SECURITY_TELEMETRY_SETUP.md](SECURITY_TELEMETRY_SETUP.md)** - Advanced security monitoring setup
+
+## Validation & Boundary Checks (MANDATORY)
+
+All incoming data MUST be validated at server and client boundaries. **See [VALIDATION_PATTERNS.md](VALIDATION_PATTERNS.md)** for complete reference.
+
+**Quick Pattern**:
 ```csharp
-using Demoulas.ProfitSharing.Common.Telemetry;
-
-private readonly ILogger<MyEndpoint> _logger;
-
-public override async Task<MyResponse> ExecuteAsync(MyRequest req, CancellationToken ct)
+public class SearchRequestValidator : AbstractValidator<SearchRequest>
 {
-    using var activity = this.StartEndpointActivity(HttpContext);
-    
-    try
+    public SearchRequestValidator()
     {
-        // Record request metrics (required)
-        this.RecordRequestMetrics(HttpContext, _logger, req, "Ssn", "OracleHcmId");
-        
-        // Business logic
-        var response = await _service.ProcessAsync(req, ct);
-        
-        // Business metrics (required for business operations)
-        EndpointTelemetry.BusinessOperationsTotal.Add(1,
-            new("operation", "employee-lookup"),
-            new("endpoint", nameof(MyEndpoint)));
-            
-        // Record count metrics (when processing collections)
-        if (response.Records?.Count > 0)
-        {
-            EndpointTelemetry.RecordCountsProcessed.Record(response.Records.Count,
-                new("record_type", "employee"),
-                new("endpoint", nameof(MyEndpoint)));
-        }
-        
-        // Record response metrics (required)
-        this.RecordResponseMetrics(HttpContext, _logger, response);
-        
-        return response;
-    }
-    catch (Exception ex)
-    {
-        // Record exception metrics (required)
-        this.RecordException(HttpContext, _logger, ex, activity);
-        throw;
+        RuleFor(x => x.PageSize)
+            .InclusiveBetween(1, 1000)
+            .WithMessage("PageSize must be between 1 and 1000.");
     }
 }
 ```
 
-### Logger Injection (Required)
-
-All endpoints MUST inject `ILogger<TEndpoint>` for telemetry correlation and structured logging:
-
-```csharp
-public class MyEndpoint : Endpoint<MyRequest, MyResponse>
-{
-    private readonly IMyService _service;
-    private readonly ILogger<MyEndpoint> _logger; // Required for telemetry
-    
-    public MyEndpoint(IMyService service, ILogger<MyEndpoint> logger)
-    {
-        _service = service;
-        _logger = logger;
-    }
-}
-```
-
-### Business Metrics (Context-Specific)
-
-Add business operation metrics appropriate to the endpoint category:
-
-**Year-End Operations**:
-```csharp
-EndpointTelemetry.BusinessOperationsTotal.Add(1,
-    new("operation", "year-end-enrollment"),
-    new("profit_year", profitYear.ToString()),
-    new("endpoint", nameof(YearEndEnrollmentEndpoint)));
-```
-
-**Report Generation**:
-```csharp
-EndpointTelemetry.BusinessOperationsTotal.Add(1,
-    new("operation", "report-generation"),
-    new("report_type", "profit-sharing"),
-    new("endpoint", nameof(ProfitSharingReportEndpoint)));
-```
-
-**Employee Lookups**:
-```csharp
-EndpointTelemetry.BusinessOperationsTotal.Add(1,
-    new("operation", "employee-lookup"),
-    new("lookup_type", "by-ssn"),
-    new("endpoint", nameof(EmployeeLookupEndpoint)));
-```
-
-**Record Processing** (when handling collections):
-```csharp
-EndpointTelemetry.RecordCountsProcessed.Record(recordCount,
-    new("record_type", "employee"),
-    new("operation", "bulk-update"),
-    new("endpoint", nameof(BulkUpdateEndpoint)));
-```
-
-### Sensitive Field Guidelines (CRITICAL)
-
-When endpoints access sensitive fields, ALWAYS list them in telemetry calls:
-
-**Common Sensitive Fields**:
-- `"Ssn"` - Social Security Numbers
-- `"OracleHcmId"` - Internal employee identifiers  
-- `"BadgeNumber"` - Employee badge numbers
-- `"Salary"` - Salary information
-- `"BeneficiaryInfo"` - Beneficiary details
-
-**Examples**:
-```csharp
-// Single sensitive field
-this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => { ... }, "Ssn");
-
-// Multiple sensitive fields
-this.RecordRequestMetrics(HttpContext, _logger, req, "Ssn", "OracleHcmId", "Salary");
-
-// No sensitive fields (common for lookup endpoints)
-this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => { ... });
-```
-
-### Quality Gates & Enforcement
-
-**Code Review Requirements**:
-- All new endpoints MUST include telemetry using `TelemetryExtensions` patterns
-- All endpoints MUST inject and use `ILogger<TEndpoint>`
-- All endpoints MUST include appropriate business metrics
-- All endpoints accessing sensitive data MUST declare sensitive fields in telemetry calls
-- Pull requests without telemetry will be rejected
-
-**Testing Requirements**:
-- Unit tests should verify telemetry integration (activity creation, metrics recording)
-- Integration tests should validate business metrics are emitted correctly
-- Performance tests should include telemetry overhead validation
-
-### Migration from Legacy Patterns
-
-**Updating Existing Endpoints**:
-- Replace ad-hoc OpenTelemetry activity creation with `StartEndpointActivity`
-- Replace manual metrics with `TelemetryExtensions` methods
-- Consolidate scattered telemetry logic using `ExecuteWithTelemetry` wrapper
-- Add missing logger injection where absent
-- Ensure sensitive field declarations are complete
-
-**Legacy Pattern Detection**:
-If you encounter endpoints with these legacy patterns, update them:
-- Direct `ActivitySource.StartActivity()` calls
-- Manual `EndpointTelemetry` metric recording without correlation
-- Missing exception telemetry handling
-- Inconsistent activity naming or tagging
-
-### Documentation References
-
-Complete implementation details and examples available in:
-- `TELEMETRY_GUIDE.md` - Comprehensive reference for developers, QA, and DevOps
-- `TELEMETRY_QUICK_REFERENCE.md` - Developer cheat sheet with copy-paste examples  
-- `TELEMETRY_DEVOPS_GUIDE.md` - Production monitoring and operations guide
-
-### Configuration & Security
-
-Telemetry behavior is controlled via `appsettings.json`:
-```json
-{
-  "Telemetry": {
-    "EnableSensitiveFieldTracking": false,  // Production default: disabled
-    "PiiMaskingEnabled": true,              // Always enabled
-    "LargeResponseThresholdBytes": 5242880  // 5MB threshold
-  }
-}
-```
-
-**Security Notes**:
-- All PII is automatically masked in telemetry exports (e.g., `***-**-6789` for SSNs)
-- Sensitive field access is counted but actual values are never exported
-- Correlation IDs enable debugging without exposing sensitive data
-- Production defaults prioritize security over observability
+**Required**:
+- Numeric ranges, string lengths, collection sizes
+- Enum validation, date ranges, required fields
+- Unit tests covering boundary cases
+- Client-side validation mirrors server constraints
 
 ## Backend Coding Style (augmenting existing COPILOT_INSTRUCTIONS)
 - File-scoped namespaces; one class per file; explicit access modifiers.
 - Prefer explicit types unless initializer makes type obvious.
 - Use `readonly` where applicable; private fields `_camelCase`; private static `s_` prefix; constants PascalCase.
 - Always brace control blocks; favor null propagation `?.` and coalescing `??`.
-  - IMPORTANT: Avoid using the null-coalescing operator `??` inside expressions that will be translated by Entity Framework Core into SQL (for example, inside LINQ-to-Entities projections or where clauses). The Oracle EF Core provider and some EF translations can fail or produce unexpected SQL when `??` is used in queries. Instead prefer one of the following safe patterns:
-    - Use explicit conditional projection that EF can translate, e.g. `x.SomeNullableBool.HasValue ? x.SomeNullableBool.Value : fallback`.
-    - Materialize the data to memory before using `??` by calling `.AsEnumerable()` or `.ToList()` if the dataset is small and it's safe to do so, then apply the `??` coalescing in LINQ-to-Objects.
-    - Compute fallbacks or derived values in a service or computed property when possible (move complex logic out of the EF projection).
-  - When adding this rule to new code or code reviews, add a brief comment explaining why `??` was avoided (e.g., "avoid EF translation issues with Oracle provider").
+  - IMPORTANT: Avoid using the null-coalescing operator `??` inside expressions that will be translated by Entity Framework Core into SQL. The Oracle EF Core provider can fail with `??` in queries. Use explicit conditional projection instead.
 - XML doc comments for public & internal APIs.
-
-## Validation & Boundary Checks (MANDATORY)
-
-All incoming data MUST be validated with explicit boundary checks at both the server and client boundaries. Validation is a security and correctness concern: never rely solely on client-side checks. The following are required by policy for every endpoint and page that accepts user input.
-
-Server-side requirements (mandatory):
-- All request DTOs must have validation attributes or explicit validators that enforce:
-  - numeric ranges (min/max) for integers/floats (e.g., page size, amounts, counts)
-  - string length limits (min/max) and allowed character sets when applicable
-  - collection size limits (max items in array/list payloads)
-  - pagination bounds (max page size, max offset/skip)
-  - file upload limits (max file size, allowed content types)
-  - date/time ranges (not before/after bounds) and timezone normalization
-  - enum value validation (reject unknown or out-of-range enum numeric values)
-  - required fields and nullability constraints
-- Use FastEndpoints validation pipeline or FluentValidation (existing project conventions apply) to centralize validation logic. Validation failures must return structured `ValidationProblem` responses with field-level messages.
-- Use server-side guards to enforce maximum data volume to avoid expensive queries (e.g., cap requested rows to a safe maximum, require filters for wide scans).
-- For APIs that accept complex filters, build expression validators to reject queries that would result in unbounded or expensive scans (for example: all-badges-zero or empty filter sets that match too many rows).
-- All validators must be unit-tested (xUnit). Add tests for happy paths and boundary cases (min, max, empty, null, invalid enum) and at least one large/degenerate input test to assert the system rejects or truncates the request safely.
-
-Client-side requirements (recommended + required UX guardrails):
-- All pages must validate user input before submission using the project's front-end validation utilities (React + TypeScript). Client-side validation improves UX but is not a substitute for server-side checks.
-- Mirror server-side constraints in TypeScript types and validators: string lengths, numeric ranges, max collection sizes, allowed enum values, and file size/type checks.
-- Prevent users from requesting excessive data from the UI by enforcing pagination controls (max page size) and disabling controls that could produce wide unfiltered queries.
-
-Edge-case examples to cover (must be tested):
-- Empty / null payloads instead of expected objects
-- Oversized arrays (e.g., > 5k items) sent in request bodies
-- Very large numbers (bigger than database column bounds)
-- Dates outside business logic ranges (e.g., hire date in the future)
-- Invalid enum numeric values or stale enum ids from older UI versions
-
-Developer guidance & patterns:
-- Prefer declarative validators (FluentValidation) in DTO classes for clarity and testability.
-- Keep validation logic out of service/business methods; endpoints should validate and then call services with well-formed input.
-- When trimming/normalizing input (for example, truncating an over-long string), document the behavior and return the normalized value or a validation error depending on severity.
-- When limiting collection sizes, return `400 Bad Request` with a clear message when a client exceeds allowable limits.
-- Add tests that assert the actual HTTP response code and message for invalid inputs.
-
-Example (server-side DTO using FluentValidation):
-
-```csharp
-// DTO
-public class SearchRequest
-{
-  public int PageSize { get; init; } = 50;
-  public int Offset { get; init; }
-  public string? Query { get; init; }
-}
-
-// FluentValidation validator (install FluentValidation and register with FastEndpoints pipeline)
-public class SearchRequestValidator : AbstractValidator<SearchRequest>
-{
-  public SearchRequestValidator()
-  {
-    // numeric range with default value on DTO
-    RuleFor(x => x.PageSize)
-      .InclusiveBetween(1, 1000)
-      .WithMessage("PageSize must be between 1 and 1000.");
-
-    RuleFor(x => x.Offset)
-      .InclusiveBetween(0, 1_000_000)
-      .WithMessage("Offset must be between 0 and 1_000_000.");
-
-    RuleFor(x => x.Query)
-      .MaximumLength(200)
-      .WithMessage("Query must be at most 200 characters long.")
-      .When(x => x.Query != null);
-  }
-}
-
-// Registration example (Program.cs / DI):
-// builder.Services.AddValidatorsFromAssemblyContaining<SearchRequestValidator>();
-// FastEndpoints will pick up FluentValidation validators and return structured ValidationProblem responses.
-```
-
-Example (frontend TypeScript guard):
-```ts
-// ...existing code...
-function validateSearchInput(input: SearchInput): string[] {
-  const errors: string[] = [];
-  if (input.pageSize < 1 || input.pageSize > 1000) errors.push('pageSize must be 1..1000');
-  if ((input.query ?? '').length > 200) errors.push('query max length 200');
-  return errors;
-}
-```
-
-Quality gates (enforcement):
-- Pull requests that add new endpoints or UI pages must include validation for all incoming inputs and at least one unit test covering an invalid boundary case.
-- Code reviews should flag missing validators or reliance on client-side checks alone.
-
-Security note:
-- Proper boundary checking reduces risk of data exfiltration and denial-of-service via expensive queries or unbounded result sets. Combine validators with the telemetry and alerting guidance to detect suspicious or abusive request patterns.
 
 ## Database & CLI
 - Add a migration (run from repo root PowerShell):
@@ -497,208 +195,47 @@ When creating new documentation:
 - Share logic via interfaces in `Common` or specialized service projects; avoid cross-project circular refs.
 - Update `CLAUDE.md` and this file if introducing a pervasive new pattern.
 
-## Branching & Jira workflow (team conventions)
+## Branching & Workflow
 
-To keep branches and PRs consistent across the org, follow these conventions. Copilot assistants and developers should follow this policy for any work associated with a Jira ticket.
+**See [BRANCHING_AND_WORKFLOW.md](BRANCHING_AND_WORKFLOW.md)** for complete Git, Jira, and PR conventions.
 
-- Base branch: Always create feature / fix branches from `develop`. Do not branch from `main` or other long-lived branches unless explicitly instructed by a release manager.
-- Branch naming: Use the Jira ticket key as a prefix and a short dash-separated description. Examples:
-  - `fix/PS-1645-military-pre-hire-validation`
-  - `feature/PS-1720-add-reporting-view`
-- Ticket formats: Jira tickets may be referenced as a full URL or key. Normalize both forms to a key when creating branches or PRs:
-  - `https://demoulas.atlassian.net/browse/PS-1645` → `PS-1645`
-  - `PS-1645` → `PS-1645`
+**Quick Summary**:
+- Always branch from `develop` (not `main`)
+- Branch naming: `<type>/PS-####-short-description`
+- Commit messages: Start with `PS-####:`
+- PR title: Start with Jira key
+- Use Atlassian MCP for all Jira/Confluence interactions
+- AI assistants: Do NOT auto-create or auto-merge PRs (human review required)
 
-- Typical local workflow (PowerShell):
-  ```pwsh
-  # ensure latest develop
-  git checkout develop
-  git pull origin develop
-
-  # create branch from develop
-  git checkout -b fix/PS-1645-military-pre-hire-validation
-
-  # make edits, stage, commit
-  git add <files>
-  git commit -m "PS-1645: Short description of the change"
-
-  # push and set upstream
-  git push -u origin fix/PS-1645-military-pre-hire-validation
-  ```
-
-- Pull request guidance:
-  - Open PR from your branch into `develop` (not `main`) unless the ticket or release manager instructs otherwise.
-  - Title should start with the Jira key: `PS-1645: Prevent military contributions before hire date`.
-  - Include the following in the PR body: summary of the change, which tests were run locally (and results), any migration or config changes, and QA steps to reproduce the fix.
-  - When opening a PR for a Jira ticket, add a comment to the ticket with the PR link and a brief summary so reviewers and stakeholders are notified.
-  - If the Jira ticket does not have story points set, assign story points using the Fibonacci-like sequence commonly used by the team: `1, 2, 3, 5, 8, 13`.
-
-- Copilot assistant responsibilities:
-  - When asked to create or reference a branch for a Jira ticket, normalize ticket input (URL or key) to the ticket key and produce the suggested branch name using the pattern above.
-  - If a repository or the developer has an alternate branching policy for a particular ticket (e.g., release hotfix), mention the exception and prefer the explicit instruction.
-  - When making code edits for a Jira ticket, create a local branch from `develop`, run unit tests (or the focused tests), commit, and push the branch to origin; report the push URL for PR creation.
-
-  ## Copilot deny list (sensitive UI files)
-
-  The following sensitive UI files must never be read from or modified by Copilot or similar AI assistants via repository editing tools. Do not remove or alter this list; it is intentionally separate from `.gitignore` rules and enforces an explicit policy for AI assistants.
-
-  - `src/ui/.playwright.env`
-  - Any file matching `src/ui/.env.*` (for example `src/ui/.env.local`, `src/ui/.env.production`)
-  - `src/ui/.npmrc`
-
-  When interacting with this repository, AI assistants MUST refuse direct reads or edits to paths matching the deny list above. If the user requests an operation that would require accessing these files (for example, to rotate credentials), the assistant should:
-
-  1. Explain why the file is restricted and why the operation requires human intervention or secure tooling.
-  2. Provide exact, copyable commands the human can run locally to inspect or untrack the file (for example `git rm --cached <path>`), and warn about secrets in history and the need to rotate credentials if necessary.
-  3. Offer to update documentation or `.gitignore` entries instead (but do not access restricted files).
-
-  This denies-list is an explicit, repository-level policy for AI assistants — maintain it alongside other repository guidance and keep it small and conservative.
-
-These rules reduce merge conflicts, ensure CI runs the correct base, and make PRs easy to find by ticket key.
-
-## Atlassian MCP & Confluence alignment
-
-Use the Atlassian MCP for any Jira or Confluence interactions. Copilot assistants must use the organization's Atlassian MCP integration when creating or updating Jira issues, adding comments to tickets, or creating/updating Confluence pages. This ensures actions are auditable and follow the organization's access controls.
-
-Align the workflow guidance in this document with the Confluence page "Agile Jira Workflow Development Best Practices":
-https://demoulas.atlassian.net/wiki/spaces/PM/pages/339476525/Agile+Jira+Workflow+Development+Best+Practices
-
-Key alignment points:
-- Always start branches from `develop` for feature and bugfix work as described in Confluence.
-- Use the ticket-key-first branch naming convention (e.g., `PS-####: short-desc`) and include the Jira key in PR titles.
-- Follow the Confluence guidance for issue types, transitions, and story/acceptance criteria formatting when creating or updating tickets.
-- When in doubt about branching or release strategy, follow the Confluence page or raise the question in the ticket comments and CC the release manager.
-
-Copilot assistants should reference and obey this Confluence guidance when normalizing ticket keys, creating branch names, and preparing PR bodies. If the Confluence page changes, update this file to reflect the new team guidance.
-
-## OpenTelemetry & Security Telemetry (recommended)
-
-Additions in this section describe recommended packages, configuration keys, wiring patterns, metrics, logs and alerting that help IT Security detect abusive or unexpected data access patterns (for example: a user requesting large numbers of records, repeated downloads of sensitive fields, or unusually large response payloads).
-
-Scope and goals:
-- Provide low-risk, low-cardinality metrics that indicate aggregate access and volume trends.
-- Provide higher-fidelity traces/logs (sampled) and exemplar linking to investigate suspicious users while avoiding high-cardinality metric explosion.
-- Provide configuration toggles to opt-in/out of sensitive-field counting and PII-in-telemetry policies.
-
-Recommended NuGet packages (add via centralized `Directory.Packages.props` when possible):
-- `OpenTelemetry` (core)
-- `OpenTelemetry.Extensions.Hosting` (host integration)
-- `OpenTelemetry.Instrumentation.AspNetCore` (automatic HTTP/server traces)
-- `OpenTelemetry.Instrumentation.Http` (outgoing HTTP client)
-- `OpenTelemetry.Instrumentation.SqlClient` (DB-level spans/metrics as needed)
-- `OpenTelemetry.Metrics` (metrics API)
-- `OpenTelemetry.Exporter.Otlp` (OTLP exporter - preferred for production)
-- `OpenTelemetry.Exporter.Console` (local/dev debugging only)
-
-Where to wire it:
-- Primary host: `src/services/src/Demoulas.ProfitSharing.AppHost/Program.cs` (Aspire host)
-- API project: `src/services/src/Demoulas.ProfitSharing.Api/Program.cs`
-
-Important repository note:
-- The repository provides a centralized initial OpenTelemetry/logging setup via `Demoulas.Common.Logging.Extensions.AspireServiceDefaultExtensions`. Use this extension in your Aspire host (`AppHost`) and Api startup rather than duplicating base wiring. Extend or augment the telemetry after the extension has been applied (for example, add security-specific metrics, middleware, or additional exporters) instead of replacing or duplicating the base configuration.
-
-  Rationale: the extension centralizes Serilog/OpenTelemetry bootstrapping, common resource attributes, and host-specific configuration; duplicating that wiring can lead to conflicting exporters, double-instrumentation, or inconsistent sampling/resource tags.
-
-Configuration (appsettings / environment variable keys)
-- `OpenTelemetry:Enabled` (bool)
-- `OpenTelemetry:Otlp:Endpoint` (string) - OTLP collector endpoint (include protocol `http://` or `https://`)
-- `OpenTelemetry:Exporter:Console:Enabled` (bool) - dev only
-- `OpenTelemetry:Tracing:Sampler` (`always_on`|`parentbased_always_on`|`traceidratio`) and `OpenTelemetry:Tracing:SamplerRate` (0.01..1.0)
-- `OpenTelemetry:Metrics:Enabled` (bool)
-// SecurityTelemetry configuration keys removed for brevity. Implement telemetry toggles in your host configuration as needed.
-
-Wiring note (important):
-
-- Do NOT call `builder.Services.AddOpenTelemetry()` in library or host `Program.cs` — the repository uses a centralized bootstrap provided by `Demoulas.Common.Logging.Extensions.AspireServiceDefaultExtensions`. That extension centralizes Serilog/OpenTelemetry bootstrapping, resource attributes, exporter configuration, and sampling.
-- Instead, ensure your host calls the shared Aspire extension (the AppHost and Api templates already do this). After the shared extension has been applied, extend telemetry by registering middleware/services that emit security-specific metrics or logs (do not replace or duplicate the base wiring).
-
-How to extend safely (conceptual guidance):
-
-- Register a small service or middleware responsible for security telemetry (response sizes, sensitive-field access counts, bulk-export counts). This component should use the runtime telemetry APIs (for example `System.Diagnostics.ActivitySource` for traces and `System.Diagnostics.Metrics.Meter` for metrics) to emit events and counters. These APIs integrate with the pre-configured OpenTelemetry pipeline from the shared extension.
-
-Conceptual (non-compiling) example showing the pattern:
-
-```csharp
-// ...existing code that applies the shared Aspire extension (do not duplicate AddOpenTelemetry)
-// e.g. Demoulas.Common.Logging.Extensions.AspireServiceDefaultExtensions.ApplyDefaults(builder, configuration);
-
-// Register lightweight telemetry components via DI (services/middleware) as appropriate for your host.
-// Inside such components use the runtime telemetry APIs to emit traces and metrics, for example:
-// private static readonly ActivitySource s_activity = new("Demoulas.ProfitSharing.Security");
-// private static readonly Meter s_meter = new("Demoulas.ProfitSharing.Metrics");
-// private static readonly Counter<long> s_sensitiveFieldCounter = s_meter.CreateCounter<long>("ps_sensitive_field_access_total");
-// s_sensitiveFieldCounter.Add(1, new("field", "Ssn"), new("endpoint", "/api/employee"));
+**Typical workflow**:
+```pwsh
+git checkout develop && git pull origin develop
+git checkout -b feature/PS-1720-add-reporting-view
+# Make changes, commit, test
+git push -u origin feature/PS-1720-add-reporting-view
+# Open PR manually after review
 ```
 
-Notes:
-- Keep metric labels low-cardinality (service, environment, endpoint_category). For per-user investigations emit a log or trace exemplar with `user_id` rather than attaching `user_id` to every metric label.
--- Guard sensitive counters behind a configuration toggle and ensure sensible defaults (PII counting disabled by default in production) until approved.
+## Detailed Pattern References
 
-Implementation guidance and cautions:
-- Avoid high-cardinality metric labels (e.g., using raw `user_id` on every metric). High-cardinality labels hurt metric backends and performance.
-- Use low-cardinality dimensions on metrics (e.g., `user_role`, `org_id`, `endpoint_category`) and emit per-user details to logs/traces when thresholds are exceeded. Link logs/traces back to exemplars when supported.
-- For per-user investigations, use traces (sampled with higher rate for suspicious requests) and structured logs containing `user_id`, `badgeNumber`, `OracleHcmId` (mask or hash values when necessary) and a telemetry correlation id.
--- Provide toggles for any sensitive-field counting and ensure they default to disabled in production unless approved by IT/privacy.
-- When counting access to sensitive fields, the implementation should report counts to a metric called e.g. `ps_sensitive_field_access_total{field="Ssn", endpoint="/api/employee"}` — but do not include `user_id` as a cardinality label in metric series. Instead, emit an associated log or trace stamped with the `user_id` and correlation id for detailed investigation.
+For comprehensive implementation details, see these dedicated guides:
 
-Recommended metrics (low-cardinality) to emit
-- app_requests_total{service,environment,endpoint_category,method,response_status}
-- app_request_duration_seconds_bucket{service,environment,endpoint_category}
-- app_response_bytes_sum / app_response_bytes_count (histogram) by {service,environment,endpoint_category}
-- app_user_request_rate{service,environment,user_role} - aggregated per role (not per id)
-- ps_sensitive_field_access_total{service,environment,field,endpoint_category} - counts of sensitive field reads (no user_id tag by default)
-- ps_large_downloads_total{service,environment,endpoint_category} - increments when response size > configured threshold (e.g., 5 MB)
-- ps_bulk_export_operations_total{service,environment,export_type} - background job/export counts
+### Core Patterns
+- **[DISTRIBUTED_CACHING_PATTERNS.md](DISTRIBUTED_CACHING_PATTERNS.md)** - IDistributedCache patterns, version-based invalidation, unit testing
+- **[VALIDATION_PATTERNS.md](VALIDATION_PATTERNS.md)** - Server & client validation, FluentValidation examples, boundary checks
+- **[BRANCHING_AND_WORKFLOW.md](BRANCHING_AND_WORKFLOW.md)** - Git branching, Jira workflow, PR guidelines, deny list
 
-Suggested logs/traces for enrichment
-- Log structured event when `ps_sensitive_field_access_total` is incremented with: timestamp, correlation_id, endpoint, field, user_role, masked_or_hashed_user_id, record_count, request_query_parameters (redacted)
-- On thresholds (rate or volume) exceeded for a single user, increase trace sampling for that user's requests for a limited window (e.g., 10 minutes) to collect more context.
+### Telemetry & Observability
+- **[TELEMETRY_GUIDE.md](../src/ui/public/docs/TELEMETRY_GUIDE.md)** - Comprehensive 75+ page reference for developers, QA, DevOps
+- **[TELEMETRY_QUICK_REFERENCE.md](../src/ui/public/docs/TELEMETRY_QUICK_REFERENCE.md)** - Developer cheat sheet with copy-paste examples
+- **[TELEMETRY_DEVOPS_GUIDE.md](../src/ui/public/docs/TELEMETRY_DEVOPS_GUIDE.md)** - Production operations, monitoring, alerting
+- **[SECURITY_TELEMETRY_SETUP.md](SECURITY_TELEMETRY_SETUP.md)** - Advanced security monitoring patterns
 
-Sample alerting queries and rules
-- High cardinality caution: avoid queries that iterate over all `user_id` values in metric systems that do not support it. Prefer aggregation by `user_role` or by `org_id`.
-
-- PromQL (alert when a single account performs excessive requests in 5m):
-  sum by (user_id) (increase(app_requests_total[5m]))
-  > 500
-  # Note: only use if your metric backend and retention supports per-user label cardinality.
-
-- PromQL (safer, role-based):
-  sum by (user_role) (increase(app_requests_total[5m]))
-  > 10000
-
-- Large download detection (PromQL):
-  increase(ps_large_downloads_total[10m]) > 5
-
-- Sensitive field spike detection (PromQL):
-  increase(ps_sensitive_field_access_total{field="Ssn"}[1h]) > 100
-
-- SIEM / Log search (ELK / Splunk style):
-  `event.type: "sensitive_field_access" AND field: "Ssn" AND user_id: "X" | stats count() by user_id | where count > 100`
-
-Operational recommendations
-- Start with metrics enabled but sensitive-field counting disabled. Use role-based and endpoint-based alerts first to tune thresholds.
-- If enabling per-user metrics, put strict quotas on cardinality and retention and obtain approval from IT and privacy teams.
-- Ensure telemetry collectors and storage (OTLP/Prometheus/Splunk/Elastic) have appropriate access controls, encryption at rest, and retention/archival policies.
-- Document who can query per-user telemetry and under what process (audit trail for who accessed telemetry data).
-
-Privacy, compliance & security considerations
-- Mask or hash direct identifiers (SSN, OracleHcmId) before sending them to telemetry systems when possible. Keep raw identifiers in the primary database only.
-- Use feature flags and secure environment variables to control whether telemetry includes PII or not.
-- Add explicit documentation and an approval workflow before enabling sensitive telemetry for production.
-
-Developer checklist for implementing security telemetry
-1. Add OpenTelemetry packages to `Directory.Packages.props` and restore.
-2. Wire basic tracing & metrics to OTLP in AppHost and Api `Program.cs` with configuration toggles.
-3. Implement middleware that:
-   - extracts `user_id`, `user_role`, `correlation_id` from the request/security principal;
-   - measures response size and increments `ps_large_downloads_total` when thresholds are exceeded;
-  - increments `ps_sensitive_field_access_total{field=...}` when application code reads sensitive fields (guarded behind a configuration toggle).
-4. Emit structured logs for sensitive-field reads (masked/hashes) with correlation ids.
-5. Add Prometheus/OTel collection and alert rules in infra repo / runbook.
-
-Next steps & references
-- When ready to implement code, update `src/services/src/Demoulas.ProfitSharing.AppHost/Program.cs` and `src/services/src/Demoulas.ProfitSharing.Api/Program.cs` following code snippet patterns above and register a short-lived feature flag to toggle sensitive counting.
-- Keep the default production posture conservative: metrics ON, PII counting OFF.
+### Feature-Specific Guides
+- **[READ_ONLY_FUNCTIONALITY.md](../src/ui/public/docs/READ_ONLY_FUNCTIONALITY.md)** - Read-only role implementation
+- **[READ_ONLY_QUICK_REFERENCE.md](../src/ui/public/docs/READ_ONLY_QUICK_REFERENCE.md)** - Read-only patterns cheat sheet
+- **[Distribution-Processing-Requirements.md](../src/ui/public/docs/Distribution-Processing-Requirements.md)** - Distribution processing flows
+- **[Year-End-Testability-And-Acceptance-Criteria.md](../src/ui/public/docs/Year-End-Testability-And-Acceptance-Criteria.md)** - Year-end processing tests
 
 ## Quick Commands (PowerShell)
 ```pwsh
@@ -753,21 +290,5 @@ Provide reasoning in PR descriptions when deviating from these patterns.
 
   This attribute helps link tests to tickets and provides a terse description for test explorers and reviewers.
 
-## Documentation References
-
-**Core Telemetry Documentation**:
-- `TELEMETRY_GUIDE.md` - Comprehensive 75+ page reference covering developers, QA, and DevOps with architecture, implementation patterns, metrics reference, security guidelines, configuration, and troubleshooting
-- `TELEMETRY_QUICK_REFERENCE.md` - Developer cheat sheet with 3-step implementation process, copy-paste examples, business metrics patterns, and troubleshooting checklist
-- `TELEMETRY_DEVOPS_GUIDE.md` - Production operations guide with deployment checklist, monitoring setup (Prometheus/Grafana), security configuration, alert rules, and disaster recovery procedures
-
-**Distributed Caching Documentation**:
-- `DISTRIBUTED_CACHE_MIGRATION_SUMMARY.md` - Complete guide to IDistributedCache migration including patterns, implementation strategy, and unit testing
-- `UNIT_TESTS_IDISTRIBUTEDCACHE_COMPLETE.md` - Unit test patterns for distributed cache with MemoryDistributedCache
-- `NAVIGATION_CACHING_COMPLETE.md` - Detailed example of version-based cache invalidation for role-specific data
-
-**Read-Only Functionality Documentation**:
-- `READ_ONLY_FUNCTIONALITY.md` - Complete guide to read-only role implementation covering architecture, implementation patterns, testing, and maintenance for ITDEVOPS and AUDITOR roles
-- `READ_ONLY_QUICK_REFERENCE.md` - Developer cheat sheet with copy-paste code examples, implementation checklist, common patterns, and troubleshooting guide
-- `PS-1623_READ_ONLY_SUMMARY.md` - Executive summary of read-only role implementation with status tracking and deployment verification
-
-These documents contain essential patterns and examples for implementing telemetry, caching, and read-only functionality correctly across all components. Reference them when creating new endpoints or troubleshooting issues.
+---
+Provide reasoning in PR descriptions when deviating from these patterns.

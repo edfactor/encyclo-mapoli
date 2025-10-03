@@ -1,16 +1,16 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
-using Demoulas.ProfitSharing.Common.Contracts; // Result, Error, ListResponseDto
+﻿using Demoulas.ProfitSharing.Common.Contracts; // Result, Error, ListResponseDto
+using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.Util.Extensions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;

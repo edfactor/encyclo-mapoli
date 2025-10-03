@@ -14,7 +14,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Reports.PostFrozen;
 
 public class ProfitSharingUnder21BreakdownByStoreTests : ApiTestBase<Program>
 {
-    [Fact(DisplayName ="PS-759 - Profit Sharing under 21 Breakdown by Store")]
+    [Fact(DisplayName = "PS-759 - Profit Sharing under 21 Breakdown by Store")]
     public async Task CheckUnder21BreakdownByStoreReport()
     {
         var request = new ProfitYearRequest() { ProfitYear = 2024, Skip = 0, Take = 255 };

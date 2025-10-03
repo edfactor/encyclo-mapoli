@@ -2,7 +2,7 @@
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 
-public class DistributionFrequency  : ILookupTable<char>
+public class DistributionFrequency : ILookupTable<char>
 {
     public static class Constants
     {

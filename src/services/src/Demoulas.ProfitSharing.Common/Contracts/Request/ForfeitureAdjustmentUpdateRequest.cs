@@ -7,7 +7,7 @@
 public record ForfeitureAdjustmentUpdateRequest
 {
     public required int BadgeNumber { get; init; }
-    public required decimal ForfeitureAmount { get; init; } 
+    public required decimal ForfeitureAmount { get; init; }
     public bool ClassAction { get; init; }
     public int ProfitYear { get; init; }
     public int? OffsettingProfitDetailId { get; set; } // This states which profit detail record the user is trying to offset against.

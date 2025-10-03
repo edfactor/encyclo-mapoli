@@ -11,7 +11,7 @@ using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.PostFrozen;
 
-public sealed class ProfitSharingUnder21TotalsTests:ApiTestBase<Program>
+public sealed class ProfitSharingUnder21TotalsTests : ApiTestBase<Program>
 {
     [Fact(DisplayName = "PS-759 - Profit Sharing under 21 ProfitShareUpdateTotals")]
     public async Task CheckUnder21Totals()

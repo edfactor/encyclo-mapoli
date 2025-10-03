@@ -60,7 +60,7 @@ public sealed class FakeSsnService : IFakeSsnService
         int batchSize, CancellationToken cancellationToken)
     {
 
-        if ( batchSize == 0)
+        if (batchSize == 0)
         {
             return [];
         }

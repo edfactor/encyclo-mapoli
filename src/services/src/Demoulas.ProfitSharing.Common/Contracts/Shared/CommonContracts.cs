@@ -5,7 +5,7 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Shared;
 // Granular interfaces so DTOs can opt-in without altering existing property names/shapes.
 // Note: FirstName/LastName modeled as non-nullable to satisfy DTOs that mark them 'required'.
 // DTOs that truly allow null can still implement by permitting null assignment (compiler will warn if misused).
-public interface IFirstName { [MaskSensitive]string FirstName { get; } }
+public interface IFirstName { [MaskSensitive] string FirstName { get; } }
 public interface ILastName { [MaskSensitive] string LastName { get; } }
 public interface IMiddleName { [MaskSensitive] string? MiddleName { get; } }
 public interface IFullNameProperty { [MaskSensitive] string? FullName { get; } }

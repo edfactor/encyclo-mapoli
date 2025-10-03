@@ -31,13 +31,13 @@ public sealed class ImpersonationAndEnvironmentAwareClaimsTransformation : IClai
             }
         }
 
-        if (string.Compare(GetEnvironment(),"Prod", StringComparison.OrdinalIgnoreCase) != 0 && roles.Contains(Role.IMPERSONATION))
+        if (string.Compare(GetEnvironment(), "Prod", StringComparison.OrdinalIgnoreCase) != 0 && roles.Contains(Role.IMPERSONATION))
         {
             roles = roles.Union(GetImpersonationRoles()).ToList();
         }
 
         principal.AddIdentity(new(roles.Select(p => new Claim(oktaRoleClaimType, p))));
-        
+
 
         return Task.FromResult(principal);
     }
@@ -86,7 +86,7 @@ public sealed class ImpersonationAndEnvironmentAwareClaimsTransformation : IClai
     private List<string> GetImpersonationRoles()
     {
         var roles = new List<string>();
-        
+
         string? headerValue = _httpContextAccessor.HttpContext?.Request.Headers[Role.IMPERSONATION];
         if (!string.IsNullOrEmpty(headerValue))
         {

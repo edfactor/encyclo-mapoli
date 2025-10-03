@@ -22,10 +22,10 @@ internal sealed class ParticipantTotalVestingBalanceFaker : Faker<ParticipantTot
 
             return ssnQueue.Dequeue();
         })
-        .RuleFor(x=>x.YearsInPlan, f=>f.Random.Byte(0,40))
-        .RuleFor(x=>x.VestingPercent, f => f.Random.Decimal(0,1))
+        .RuleFor(x => x.YearsInPlan, f => f.Random.Byte(0, 40))
+        .RuleFor(x => x.VestingPercent, f => f.Random.Decimal(0, 1))
         .RuleFor(x => x.CurrentBalance, f => f.Random.Decimal(0, 500000))
         .RuleFor(x => x.VestedBalance, f => f.Random.Decimal(0, 500000));
-        
+
     }
 }

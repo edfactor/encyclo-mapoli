@@ -35,7 +35,7 @@ public sealed class ActivityFactory
         for (int i = 0; i < _readyActivities.Count; i++)
         {
             if (_smartActivities[i].Name().Substring(1) != _readyActivities[i].Name().Substring(1))
-                // We always expect Ready short name to be the same as Smart short name (ie.  A7 and A7 should match.)
+            // We always expect Ready short name to be the same as Smart short name (ie.  A7 and A7 should match.)
             {
                 throw new InvalidOperationException(
                     $"READY and SMART activities are different at index {i}  s={_smartActivities[i].Name()} r={_readyActivities[i].Name()}");
@@ -60,7 +60,7 @@ public sealed class ActivityFactory
 
         _instance = new ActivityFactory(dataDirectory);
     }
-    
+
     public static Dictionary<string, IActivity> AllActivtiesByName()
     {
         return inst._smartActivities
@@ -75,13 +75,13 @@ public sealed class ActivityFactory
     {
         // This is a hack to reach into a class and fiddle with it, but we are still thinking
         // about how to dynamicaly switch between "classic" and "new" scramble choices.
-        ReadyActivity ra = (ReadyActivity) ActivityFactory.AllActivtiesByName()["R0"];
+        ReadyActivity ra = (ReadyActivity)ActivityFactory.AllActivtiesByName()["R0"];
         ra.Args = "profitshare"; // lock this Runner to the latest schema.
     }
 
     public static bool isNewScramble()
     {
-        ReadyActivity ra = (ReadyActivity) ActivityFactory.AllActivtiesByName()["R0"];
+        ReadyActivity ra = (ReadyActivity)ActivityFactory.AllActivtiesByName()["R0"];
         return ra.Args == "profitshare";
     }
 }

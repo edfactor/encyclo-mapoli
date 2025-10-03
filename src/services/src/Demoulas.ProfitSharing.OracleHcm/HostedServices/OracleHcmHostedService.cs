@@ -9,7 +9,7 @@ namespace Demoulas.ProfitSharing.OracleHcm.HostedServices;
 internal abstract class OracleHcmHostedServiceBase : IHostedService
 {
     protected OracleHcmConfig OracleHcmConfig { get; }
-    
+
     private readonly ISchedulerFactory _schedulerFactory;
     private readonly IJobFactory _jobFactory;
     private readonly ILogger _logger;

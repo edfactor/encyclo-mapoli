@@ -1,4 +1,6 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using System.Net;
+using System.Net.Http.Json;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Distributions;
@@ -11,8 +13,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
-using System.Net;
-using System.Net.Http.Json;
 using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Distributions;
@@ -117,7 +117,7 @@ public class DeleteDistributionEndpointTests : ApiTestBase<Api.Program>
             var deletedDistribution = await ctx.Distributions
                 .Where(d => d.Id == distributionId)
                 .FirstAsync();
-            
+
             deletedDistribution.StatusId.ShouldBe('D');
             return true;
         });
@@ -493,7 +493,7 @@ public class DeleteDistributionEndpointTests : ApiTestBase<Api.Program>
 
         // Act
         var response = await ApiClient.DELETEAsync<DeleteDistributionEndpoint, IdRequest, bool>(request);
-        
+
         // Assert
         // The response should handle the case where the distribution doesn't exist
         response.ShouldNotBeNull();

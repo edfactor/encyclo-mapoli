@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.UpdateSummary;
+﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.UpdateSummary;
 
 // Represents a row of the PAY450 report
 public sealed record Pay450Record

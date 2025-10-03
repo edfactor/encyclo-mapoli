@@ -26,8 +26,8 @@ public class PayBenReportService : IPayBenReportService
             .Include(x => x.Contact)
             .ThenInclude(x => x!.ContactInfo)
             .Include(x => x.Demographic)
-            .ThenInclude(x => x!.ContactInfo).Where(x=>request.Id==null || x.Id == request.Id);
-            
+            .ThenInclude(x => x!.ContactInfo).Where(x => request.Id == null || x.Id == request.Id);
+
 
             var res = query.Select(x => new PayBenReportResponse()
             {
@@ -44,8 +44,8 @@ public class PayBenReportService : IPayBenReportService
         // Post-process only the results
         foreach (var item in result.Results)
         {
-            
-                item.Ssn = Convert.ToInt32(item.Ssn).MaskSsn();
+
+            item.Ssn = Convert.ToInt32(item.Ssn).MaskSsn();
         }
         return result;
     }

@@ -22,7 +22,7 @@ public class MemoryMonitoringService : BackgroundService
 
             if (memoryUsed > MemoryLimitBytes)
             {
-                _logger.LogCritical("Memory limit exceeded: {MemoryUsed} MB. Shutting down..." , (memoryUsed / (1024 * 1024)));
+                _logger.LogCritical("Memory limit exceeded: {MemoryUsed} MB. Shutting down...", (memoryUsed / (1024 * 1024)));
 
                 // Initiate shutdown
                 Environment.Exit(1);

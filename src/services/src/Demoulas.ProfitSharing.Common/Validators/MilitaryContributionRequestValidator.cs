@@ -1,9 +1,9 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
+﻿using System.Diagnostics.Metrics;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.Util.Extensions;
 using FastEndpoints;
 using FluentValidation;
-using System.Diagnostics.Metrics;
 
 namespace Demoulas.ProfitSharing.Common.Validators;
 
@@ -107,7 +107,7 @@ public class MilitaryContributionRequestValidator : Validator<CreateMilitaryCont
         {
             return TrackFailure("ServiceError");
         }
-        var records = results.Value!.Results.Where(x=> x.ProfitYear == (short)req.ContributionDate.Year);
+        var records = results.Value!.Results.Where(x => x.ProfitYear == (short)req.ContributionDate.Year);
 
         var ok = records.All(x => x.IsSupplementalContribution || x.ContributionDate.Year != req.ContributionDate.Year);
         return ok || TrackFailure("DuplicateRegularContribution");

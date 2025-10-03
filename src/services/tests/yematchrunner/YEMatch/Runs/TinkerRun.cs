@@ -15,9 +15,9 @@ public class TinkerRun : Runnable
     public override async Task Exec()
     {
         await Run(Specify(
-            
+
             // Test the Enrollment change issue.
-            
+
             "R0", // import obfuscated
             nameof(DropBadBenesReady),
             nameof(FixFrozenReady),
@@ -38,6 +38,6 @@ public class TinkerRun : Runnable
             "R28"
             ));
 
-       // use sql to compare proftitshare2 vs tbherrmann for py_enrollment
+        // use sql to compare proftitshare2 vs tbherrmann for py_enrollment
     }
 }

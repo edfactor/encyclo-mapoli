@@ -1,14 +1,14 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Http;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Beneficiaries;

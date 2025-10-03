@@ -23,8 +23,8 @@ public sealed class BalanceGroup : GroupBase
                 .WithRequestTimeout(TimeSpan.FromMinutes(1))
                 .WithTags(RouteName));
             ep.Policies(Policy.CanViewBalances);
-            
-            
+
+
         });
     }
 }

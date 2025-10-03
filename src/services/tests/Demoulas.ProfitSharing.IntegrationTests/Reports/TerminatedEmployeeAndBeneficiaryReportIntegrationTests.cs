@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
@@ -3214,14 +3214,20 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
 
         foreach (var smartEmployee in smartEmployees.Take(100)) // Sample first 100
         {
-            if (!smartEmployee.YearDetails.Any()) continue;
+            if (!smartEmployee.YearDetails.Any())
+            {
+                continue;
+            }
 
             // Find matching READY employee
             var readyMatch = readyEmployees.FirstOrDefault(r =>
                 r.BadgeNumber == smartEmployee.BadgeNumber &&
                 r.PsnSuffix == smartEmployee.PsnSuffix);
 
-            if (readyMatch?.YearDetails?.Any() != true) continue;
+            if (readyMatch?.YearDetails?.Any() != true)
+            {
+                continue;
+            }
 
             var smartDetail = smartEmployee.YearDetails[0];
             var readyDetail = readyMatch.YearDetails[0];
@@ -4612,7 +4618,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
             calendarService, new EmbeddedSqlService(),
             new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
         DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
-        
+
         var terminatedService = new TerminatedEmployeeReportService(DbFactory, totalService, demographicReaderService, new Microsoft.Extensions.Logging.Abstractions.NullLogger<TerminatedEmployeeReportService>());
 
         var smartData = await terminatedService.CreateDataAsync(new StartAndEndDateRequest { BeginningDate = startDate, EndingDate = endDate }, CancellationToken.None);
@@ -4626,67 +4632,76 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         TestOutputHelper.WriteLine("� ANALYZING ALL SMART EMPLOYEES:");
         TestOutputHelper.WriteLine("Looking for patterns that might indicate over-inclusion.\n");
 
-            await DbFactory.UseReadOnlyContext<object>(async ctx =>
+        await DbFactory.UseReadOnlyContext<object>(async ctx =>
+        {
+            // Let's analyze patterns in the first 30 employees 
+            var sampleEmployees = smartEmployees.Take(30).ToList();
+            var sampleBadges = sampleEmployees.Select(e => e.BadgeNumber).ToList();
+
+            var demographics = await ctx.Demographics
+                .Include(d => d.ContactInfo)
+                .Include(d => d.PayProfits.Where(p => p.ProfitYear >= 2023 && p.ProfitYear <= 2024))
+                .Where(d => sampleBadges.Contains(d.BadgeNumber))
+                .ToListAsync();
+
+            TestOutputHelper.WriteLine("🔬 ANALYZING FIRST 30 EMPLOYEES (SAMPLE):");
+
+            var activeCounts = 0;
+            var terminatedCounts = 0;
+            var activeAsbeneficiaryCounts = 0;
+            var retiredCounts = 0;
+
+            foreach (var emp in sampleEmployees.OrderBy(e => e.BadgeNumber))
             {
-                // Let's analyze patterns in the first 30 employees 
-                var sampleEmployees = smartEmployees.Take(30).ToList();
-                var sampleBadges = sampleEmployees.Select(e => e.BadgeNumber).ToList();
-                
-                var demographics = await ctx.Demographics
-                    .Include(d => d.ContactInfo)
-                    .Include(d => d.PayProfits.Where(p => p.ProfitYear >= 2023 && p.ProfitYear <= 2024))
-                    .Where(d => sampleBadges.Contains(d.BadgeNumber))
-                    .ToListAsync();
+                var demo = demographics.FirstOrDefault(d => d.BadgeNumber == emp.BadgeNumber);
+                TestOutputHelper.WriteLine($"Badge {emp.BadgeNumber} PSN={emp.PsnSuffix} ({emp.Name}):");
 
-                TestOutputHelper.WriteLine("🔬 ANALYZING FIRST 30 EMPLOYEES (SAMPLE):");
-                
-                var activeCounts = 0;
-                var terminatedCounts = 0;
-                var activeAsbeneficiaryCounts = 0;
-                var retiredCounts = 0;
-
-                foreach (var emp in sampleEmployees.OrderBy(e => e.BadgeNumber))
+                if (demo != null)
                 {
-                    var demo = demographics.FirstOrDefault(d => d.BadgeNumber == emp.BadgeNumber);
-                    TestOutputHelper.WriteLine($"Badge {emp.BadgeNumber} PSN={emp.PsnSuffix} ({emp.Name}):");
-                    
-                    if (demo != null)
+                    TestOutputHelper.WriteLine($"  Status: {demo.EmploymentStatusId}, Term Date: {demo.TerminationDate?.ToString() ?? "null"}, Term Code: {demo.TerminationCodeId?.ToString() ?? "null"}");
+
+                    if (demo.EmploymentStatusId == 't')
                     {
-                        TestOutputHelper.WriteLine($"  Status: {demo.EmploymentStatusId}, Term Date: {demo.TerminationDate?.ToString() ?? "null"}, Term Code: {demo.TerminationCodeId?.ToString() ?? "null"}");
-                        
-                        if (demo.EmploymentStatusId == 't') terminatedCounts++;
-                        else if (demo.EmploymentStatusId == 'a') activeCounts++;
-                        else if (demo.EmploymentStatusId == 'r') retiredCounts++;
-
-                        // Check if this is an active employee processed as beneficiary (PSN=0)
-                        if (demo.EmploymentStatusId == 'a' && emp.PsnSuffix == 0)
-                        {
-                            activeAsbeneficiaryCounts++;
-                            TestOutputHelper.WriteLine($"  ⚠️  ACTIVE EMPLOYEE with PSN=0 - processed through beneficiary logic");
-                        }
-
-                        var payProfit2024 = demo.PayProfits.FirstOrDefault(p => p.ProfitYear == 2024);
-                        if (payProfit2024 != null)
-                        {
-                            TestOutputHelper.WriteLine($"  2024 PayProfit: Hours={payProfit2024.CurrentHoursYear}, Income={payProfit2024.CurrentIncomeYear:C}, ETVA={payProfit2024.Etva}");
-                        }
-                        else
-                        {
-                            TestOutputHelper.WriteLine($"  2024 PayProfit: NOT FOUND - might explain inclusion pattern");
-                        }
+                        terminatedCounts++;
                     }
-                    TestOutputHelper.WriteLine("");
+                    else if (demo.EmploymentStatusId == 'a')
+                    {
+                        activeCounts++;
+                    }
+                    else if (demo.EmploymentStatusId == 'r')
+                    {
+                        retiredCounts++;
+                    }
+
+                    // Check if this is an active employee processed as beneficiary (PSN=0)
+                    if (demo.EmploymentStatusId == 'a' && emp.PsnSuffix == 0)
+                    {
+                        activeAsbeneficiaryCounts++;
+                        TestOutputHelper.WriteLine($"  ⚠️  ACTIVE EMPLOYEE with PSN=0 - processed through beneficiary logic");
+                    }
+
+                    var payProfit2024 = demo.PayProfits.FirstOrDefault(p => p.ProfitYear == 2024);
+                    if (payProfit2024 != null)
+                    {
+                        TestOutputHelper.WriteLine($"  2024 PayProfit: Hours={payProfit2024.CurrentHoursYear}, Income={payProfit2024.CurrentIncomeYear:C}, ETVA={payProfit2024.Etva}");
+                    }
+                    else
+                    {
+                        TestOutputHelper.WriteLine($"  2024 PayProfit: NOT FOUND - might explain inclusion pattern");
+                    }
                 }
-                
-                TestOutputHelper.WriteLine("📊 SAMPLE ANALYSIS SUMMARY:");
-                TestOutputHelper.WriteLine($"  - Terminated employees: {terminatedCounts}");
-                TestOutputHelper.WriteLine($"  - Active employees: {activeCounts}");
-                TestOutputHelper.WriteLine($"  - Retired employees: {retiredCounts}");
-                TestOutputHelper.WriteLine($"  - Active employees with PSN=0: {activeAsbeneficiaryCounts}");
                 TestOutputHelper.WriteLine("");
-                
-                return null!;
-            });
+            }
+
+            TestOutputHelper.WriteLine("📊 SAMPLE ANALYSIS SUMMARY:");
+            TestOutputHelper.WriteLine($"  - Terminated employees: {terminatedCounts}");
+            TestOutputHelper.WriteLine($"  - Active employees: {activeCounts}");
+            TestOutputHelper.WriteLine($"  - Retired employees: {retiredCounts}");
+            TestOutputHelper.WriteLine($"  - Active employees with PSN=0: {activeAsbeneficiaryCounts}");
+            TestOutputHelper.WriteLine("");
+
+            return null!;
+        });
 
         // Assertion for test completion
         Assert.True(true, $"Analysis complete. SMART Results: {smartEmployees.Count} employees");

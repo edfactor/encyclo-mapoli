@@ -68,7 +68,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         try
         {
             await demographicsService.CleanAuditError(cancellationToken).ConfigureAwait(false);
-            await foreach (OracleEmployee[] oracleHcmEmployees in _oracleEmployeeDataSyncClient.GetAllEmployees(cancellationToken).ConfigureAwait(false) )
+            await foreach (OracleEmployee[] oracleHcmEmployees in _oracleEmployeeDataSyncClient.GetAllEmployees(cancellationToken).ConfigureAwait(false))
             {
                 await QueueEmployee(requestedBy, oracleHcmEmployees, cancellationToken).ConfigureAwait(false);
             }
@@ -178,10 +178,12 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
     {
         MessageRequest<OracleEmployee[]> message = new MessageRequest<OracleEmployee[]>
         {
-            ApplicationName = nameof(EmployeeSyncService), Body = employees, UserId = requestedBy
+            ApplicationName = nameof(EmployeeSyncService),
+            Body = employees,
+            UserId = requestedBy
         };
 
-       return _employeeChannel.Writer.WriteAsync(message, cancellationToken);
+        return _employeeChannel.Writer.WriteAsync(message, cancellationToken);
     }
 
 

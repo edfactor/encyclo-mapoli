@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 
 #pragma warning disable DSM001
 

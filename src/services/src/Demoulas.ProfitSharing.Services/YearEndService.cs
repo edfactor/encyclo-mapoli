@@ -197,7 +197,7 @@ public sealed class YearEndService : IYearEndService
         DateOnly? certificationDate = null;
         DateOnly today = DateOnly.FromDateTime(DateTime.Now);
 
-        byte? zeroContributionReason = null; 
+        byte? zeroContributionReason = null;
         if (firstContributionYear == null && age >= ReferenceData.MinimumAgeForContribution())
         {
             newEmpl = /*1*/ EmployeeType.Constants.NewLastYear;

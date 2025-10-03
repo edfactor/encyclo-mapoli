@@ -251,7 +251,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
             return await query
                 .GroupBy(x => new
                 {
-                    ProfitYear = x.ProfitDetail != null ? x.ProfitDetail.ProfitYear : (short)0, MonthToDate = x.ProfitDetail != null ? x.ProfitDetail.MonthToDate : (byte)0
+                    ProfitYear = x.ProfitDetail != null ? x.ProfitDetail.ProfitYear : (short)0,
+                    MonthToDate = x.ProfitDetail != null ? x.ProfitDetail.MonthToDate : (byte)0
                 })
                 .Select(g => new GroupedProfitSummaryDto
                 {
@@ -449,7 +450,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                         PayFrequencyId = d.PayFrequencyId,
                         Ssn = d.Ssn,
                         PsnSuffix = 0,
-                        IsExecutive = d.PayFrequencyId ==PayFrequency.Constants.Monthly,
+                        IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
                         CurrentIncomeYear = d.PayProfits.Where(x => x.ProfitYear == pd.ProfitYear)
                             .Select(x => x.CurrentIncomeYear)
                             .FirstOrDefault(),
@@ -497,7 +498,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
         return query;
     }
-    
+
     private async Task<(int ssn, MemberDetails? memberDetails)> GetDemographicDetails(ProfitSharingReadOnlyDbContext ctx,
        int id, short currentYear, short previousYear, CancellationToken cancellationToken)
     {
@@ -537,9 +538,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 TerminationReason = d.TerminationCode != null ? d.TerminationCode.Name : "N/A",
                 Gender = d.Gender != null ? d.Gender.Name : "N/A",
                 PayClassification = d.PayClassification != null ? d.PayClassification.Name : "N/A",
-                
+
                 CurrentPayProfit = d.PayProfits
-                    .Select(x=>
+                    .Select(x =>
                         new
                         {
                             x.ProfitYear,
@@ -612,9 +613,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
             IsExecutive = memberData.IsExecutive,
             CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
             PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
-            
+
             EmploymentStatus = memberData.EmploymentStatus?.Name,
-            
+
             Department = memberData.Department,
             TerminationReason = memberData.TerminationReason,
             Gender = memberData.Gender,
@@ -652,10 +653,10 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
         if (memberData == null)
         {
-            return (0, new MemberDetails{ Id = 0 });
+            return (0, new MemberDetails { Id = 0 });
         }
 
-       
+
         return (memberData.Ssn, new MemberDetails
         {
             IsEmployee = false,
@@ -677,8 +678,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
     }
 
     private async Task<IEnumerable<MemberProfitPlanDetails>> GetVestingDetails(Dictionary<int, MemberDetails> memberDetailsMap,
-        short currentYear, 
-        short previousYear, 
+        short currentYear,
+        short previousYear,
         CancellationToken cancellationToken)
     {
         // Here we recognize 2024 as the transition year to relying on the SMART YE Process
@@ -689,7 +690,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             await ctx.YearEndUpdateStatuses
                 .AnyAsync(x => x.ProfitYear == currentYear && x.IsYearEndCompleted, cancellationToken));
         bool isWallClockYear = currentYear == DateTime.Now.Year;
-        
+
         var ssnCollection = memberDetailsMap.Keys.ToHashSet();
         List<BalanceEndpointResponse> currentBalance = [];
         List<BalanceEndpointResponse> previousBalance = [];
@@ -718,7 +719,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         foreach (var kvp in memberDetailsMap)
         {
             var memberData = kvp.Value;
-            var balance = currentBalance.FirstOrDefault(b => b.Id == kvp.Key, new BalanceEndpointResponse { Id = kvp.Key, Ssn = memberData.Ssn});
+            var balance = currentBalance.FirstOrDefault(b => b.Id == kvp.Key, new BalanceEndpointResponse { Id = kvp.Key, Ssn = memberData.Ssn });
             var previousBalanceItem = previousBalance.FirstOrDefault(b => b.Id == kvp.Key);
 
             detailsList.Add(new MemberProfitPlanDetails
@@ -754,7 +755,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 PayFrequencyId = 0,
                 BeginPSAmount = isPreviousYearEndComplete ? (previousBalanceItem?.CurrentBalance ?? 0) : null,
                 // "Current" is really "Now" or "At end of Year End"
-                CurrentPSAmount =  isWallClockYear || isProfitYearYearEndComplete ? (balance?.CurrentBalance ?? 0) : null,
+                CurrentPSAmount = isWallClockYear || isProfitYearYearEndComplete ? (balance?.CurrentBalance ?? 0) : null,
                 BeginVestedAmount = isPreviousYearEndComplete ? (previousBalanceItem?.VestedBalance ?? 0) : null,
                 // "Current" is really "Now" or "At end of Year End"
                 CurrentVestedAmount = isWallClockYear || isProfitYearYearEndComplete ? (balance?.VestedBalance ?? 0) : null,
@@ -764,7 +765,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 TerminationReason = memberData.TerminationReason,
                 Gender = memberData.Gender,
                 PayClassification = memberData.PayClassification,
-                
+
                 AllocationToAmount = balance?.AllocationsToBeneficiary ?? 0,
                 AllocationFromAmount = balance?.AllocationsFromBeneficiary ?? 0,
                 ReceivedContributionsLastYear = isPreviousYearEndComplete ? memberData.ReceivedContributionsLastYear : null
@@ -790,45 +791,45 @@ public sealed class MasterInquiryService : IMasterInquiryService
         var members = await query
             .Select(d => new
             {
-            d.Id,
-            d.ContactInfo.FullName,
-            d.ContactInfo.FirstName,
-            d.ContactInfo.LastName,
-            d.Address.City,
-            d.Address.State,
-            Address = d.Address.Street,
-            d.Address.PostalCode,
-            d.DateOfBirth,
-            d.Ssn,
-            d.BadgeNumber,
-            d.PayFrequencyId,
-            d.ReHireDate,
-            d.HireDate,
-            d.TerminationDate,
-            d.StoreNumber,
-            DemographicId = d.Id,
-            d.EmploymentStatusId,
-            d.EmploymentStatus,
-            IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
-            CurrentPayProfit = d.PayProfits.Select(x =>
-                new
-                {
-                x.ProfitYear,
-                x.CurrentHoursYear,
-                x.Etva,
-                x.EnrollmentId,
-                x.Enrollment
-                }).FirstOrDefault(x => x.ProfitYear == currentYear),
-            PreviousPayProfit = d.PayProfits.Select(x =>
-                new
-                {
-                x.ProfitYear,
-                x.CurrentHoursYear,
-                x.Etva,
-                x.EnrollmentId,
-                x.Enrollment,
-                x.PsCertificateIssuedDate
-                }).FirstOrDefault(x => x.ProfitYear == previousYear)
+                d.Id,
+                d.ContactInfo.FullName,
+                d.ContactInfo.FirstName,
+                d.ContactInfo.LastName,
+                d.Address.City,
+                d.Address.State,
+                Address = d.Address.Street,
+                d.Address.PostalCode,
+                d.DateOfBirth,
+                d.Ssn,
+                d.BadgeNumber,
+                d.PayFrequencyId,
+                d.ReHireDate,
+                d.HireDate,
+                d.TerminationDate,
+                d.StoreNumber,
+                DemographicId = d.Id,
+                d.EmploymentStatusId,
+                d.EmploymentStatus,
+                IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
+                CurrentPayProfit = d.PayProfits.Select(x =>
+                    new
+                    {
+                        x.ProfitYear,
+                        x.CurrentHoursYear,
+                        x.Etva,
+                        x.EnrollmentId,
+                        x.Enrollment
+                    }).FirstOrDefault(x => x.ProfitYear == currentYear),
+                PreviousPayProfit = d.PayProfits.Select(x =>
+                    new
+                    {
+                        x.ProfitYear,
+                        x.CurrentHoursYear,
+                        x.Etva,
+                        x.EnrollmentId,
+                        x.Enrollment,
+                        x.PsCertificateIssuedDate
+                    }).FirstOrDefault(x => x.ProfitYear == previousYear)
             })
             .ToPaginationResultsAsync(req, cancellationToken);
 
@@ -903,45 +904,45 @@ public sealed class MasterInquiryService : IMasterInquiryService
         var members = membersQuery
             .Select(b => new
             {
-            b.Id,
-            b.Contact!.ContactInfo.FullName,
-            b.Contact!.ContactInfo.FirstName,
-            b.Contact.ContactInfo.LastName,
-            b.Contact.Address.City,
-            b.Contact.Address.State,
-            Address = b.Contact.Address.Street,
-            b.Contact.Address.PostalCode,
-            b.Contact.DateOfBirth,
-            b.Contact.Ssn,
-            b.BadgeNumber,
-            b.PsnSuffix,
-            DemographicId = b.Id
+                b.Id,
+                b.Contact!.ContactInfo.FullName,
+                b.Contact!.ContactInfo.FirstName,
+                b.Contact.ContactInfo.LastName,
+                b.Contact.Address.City,
+                b.Contact.Address.State,
+                Address = b.Contact.Address.Street,
+                b.Contact.Address.PostalCode,
+                b.Contact.DateOfBirth,
+                b.Contact.Ssn,
+                b.BadgeNumber,
+                b.PsnSuffix,
+                DemographicId = b.Id
             });
 
 
         return members.Select(memberData => new MemberDetails
-            {
-                Id = memberData.Id,
-                IsEmployee = false,
-                FirstName = memberData.FirstName,
-                LastName = memberData.LastName,
-                AddressCity = memberData.City!,
-                AddressState = memberData.State!,
-                Address = memberData.Address,
-                AddressZipCode = memberData.PostalCode!,
-                DateOfBirth = memberData.DateOfBirth,
-                Ssn = memberData.Ssn.MaskSsn(),
-                BadgeNumber = memberData.BadgeNumber,
-                PsnSuffix = memberData.PsnSuffix,
-                PayFrequencyId = 0,
-                IsExecutive = false,
-            })
+        {
+            Id = memberData.Id,
+            IsEmployee = false,
+            FirstName = memberData.FirstName,
+            LastName = memberData.LastName,
+            AddressCity = memberData.City!,
+            AddressState = memberData.State!,
+            Address = memberData.Address,
+            AddressZipCode = memberData.PostalCode!,
+            DateOfBirth = memberData.DateOfBirth,
+            Ssn = memberData.Ssn.MaskSsn(),
+            BadgeNumber = memberData.BadgeNumber,
+            PsnSuffix = memberData.PsnSuffix,
+            PayFrequencyId = 0,
+            IsExecutive = false,
+        })
             .ToPaginationResultsAsync(req, cancellationToken);
     }
 
     private static IQueryable<MasterInquiryItem> FilterMemberQuery(MasterInquiryRequest req, IQueryable<MasterInquiryItem> query)
     {
-        if (req.BadgeNumber.HasValue && req.BadgeNumber > 0 )
+        if (req.BadgeNumber.HasValue && req.BadgeNumber > 0)
         {
             query = query.Where(x => x.Member.BadgeNumber == req.BadgeNumber);
         }
@@ -1039,44 +1040,44 @@ public sealed class MasterInquiryService : IMasterInquiryService
         var members = await query
             .Select(d => new
             {
-            d.Id,
-            d.ContactInfo.FirstName,
-            d.ContactInfo.LastName,
-            d.Address.City,
-            d.Address.State,
-            Address = d.Address.Street,
-            d.Address.PostalCode,
-            d.DateOfBirth,
-            d.Ssn,
-            d.BadgeNumber,
-            d.PayFrequencyId,
-            d.ReHireDate,
-            d.HireDate,
-            d.TerminationDate,
-            d.StoreNumber,
-            DemographicId = d.Id,
-            d.EmploymentStatusId,
-            d.EmploymentStatus,
-            IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
-            CurrentPayProfit = d.PayProfits.Select(x =>
-                new
-                {
-                x.ProfitYear,
-                x.CurrentHoursYear,
-                x.Etva,
-                x.EnrollmentId,
-                x.Enrollment
-                }).FirstOrDefault(x => x.ProfitYear == currentYear),
-            PreviousPayProfit = d.PayProfits.Select(x =>
-                new
-                {
-                x.ProfitYear,
-                x.CurrentHoursYear,
-                x.Etva,
-                x.EnrollmentId,
-                x.Enrollment,
-                x.PsCertificateIssuedDate
-                }).FirstOrDefault(x => x.ProfitYear == previousYear)
+                d.Id,
+                d.ContactInfo.FirstName,
+                d.ContactInfo.LastName,
+                d.Address.City,
+                d.Address.State,
+                Address = d.Address.Street,
+                d.Address.PostalCode,
+                d.DateOfBirth,
+                d.Ssn,
+                d.BadgeNumber,
+                d.PayFrequencyId,
+                d.ReHireDate,
+                d.HireDate,
+                d.TerminationDate,
+                d.StoreNumber,
+                DemographicId = d.Id,
+                d.EmploymentStatusId,
+                d.EmploymentStatus,
+                IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
+                CurrentPayProfit = d.PayProfits.Select(x =>
+                    new
+                    {
+                        x.ProfitYear,
+                        x.CurrentHoursYear,
+                        x.Etva,
+                        x.EnrollmentId,
+                        x.Enrollment
+                    }).FirstOrDefault(x => x.ProfitYear == currentYear),
+                PreviousPayProfit = d.PayProfits.Select(x =>
+                    new
+                    {
+                        x.ProfitYear,
+                        x.CurrentHoursYear,
+                        x.Etva,
+                        x.EnrollmentId,
+                        x.Enrollment,
+                        x.PsCertificateIssuedDate
+                    }).FirstOrDefault(x => x.ProfitYear == previousYear)
             })
             .ToListAsync(cancellationToken);
 
@@ -1139,18 +1140,18 @@ public sealed class MasterInquiryService : IMasterInquiryService
             .Where(b => b.Contact != null && ssns.Contains(b.Contact.Ssn))
             .Select(b => new
             {
-            b.Id,
-            b.Contact!.ContactInfo.FirstName,
-            b.Contact.ContactInfo.LastName,
-            b.Contact.Address.City,
-            b.Contact.Address.State,
-            Address = b.Contact.Address.Street,
-            b.Contact.Address.PostalCode,
-            b.Contact.DateOfBirth,
-            b.Contact.Ssn,
-            b.BadgeNumber,
-            b.PsnSuffix,
-            DemographicId = b.Id
+                b.Id,
+                b.Contact!.ContactInfo.FirstName,
+                b.Contact.ContactInfo.LastName,
+                b.Contact.Address.City,
+                b.Contact.Address.State,
+                Address = b.Contact.Address.Street,
+                b.Contact.Address.PostalCode,
+                b.Contact.DateOfBirth,
+                b.Contact.Ssn,
+                b.BadgeNumber,
+                b.PsnSuffix,
+                DemographicId = b.Id
             })
             .ToListAsync(cancellationToken);
 

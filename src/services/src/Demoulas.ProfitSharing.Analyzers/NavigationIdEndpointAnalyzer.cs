@@ -48,8 +48,8 @@ public sealed class NavigationIdEndpointAnalyzer : DiagnosticAnalyzer
         }
 
         // Only consider types in the Endpoints assembly/namespaces to reduce noise
-    var ns = typeSymbol.ContainingNamespace?.ToDisplayString() ?? string.Empty;
-    if (!ns.Contains("Demoulas.ProfitSharing.Endpoints"))
+        var ns = typeSymbol.ContainingNamespace?.ToDisplayString() ?? string.Empty;
+        if (!ns.Contains("Demoulas.ProfitSharing.Endpoints"))
         {
             return;
         }

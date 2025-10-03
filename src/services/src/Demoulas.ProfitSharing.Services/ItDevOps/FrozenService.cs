@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Contracts.Contracts.Request;
+﻿using System.Linq.Expressions;
+using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.Common.Data.Contexts.Interceptor;
@@ -15,7 +16,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Linq.Expressions;
 
 namespace Demoulas.ProfitSharing.Services.ItDevOps;
 

@@ -19,11 +19,11 @@ public class ProfitShareCheck
     public DateOnly? ClearDate { get; set; }
     public DateOnly? ClearDateLoaded { get; set; }
     public int? RefNumber { get; set; }
-    
+
     public short? FloatDays { get; set; }
     public DateOnly? CheckRunDate { get; set; }
     public DateOnly? DateLoaded { get; set; }
-    public bool? OtherBeneficiary{ get; set; }
+    public bool? OtherBeneficiary { get; set; }
 
     public bool? IsManualCheck { get; set; }
     public string? ReplaceCheck { get; set; }

@@ -1,14 +1,14 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
+﻿using System.Diagnostics;
+using Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
-using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Common.Extensions;
-using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
+using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.Extensions.Logging;
-using System.Diagnostics;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.BeneficiaryInquiry;
 

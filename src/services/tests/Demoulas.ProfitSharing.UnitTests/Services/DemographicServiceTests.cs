@@ -198,7 +198,7 @@ public class DemographicsServiceTests
         demographics[0].DateOfBirth = DateOnly.FromDateTime(DateTime.Today.AddYears(-25));
         demographics[0].StoreNumber = 1;
         demographics[0].DepartmentId = 1;
-    demographics[0].PayClassificationId = "1";
+        demographics[0].PayClassificationId = "1";
         demographics[0].HireDate = DateOnly.FromDateTime(DateTime.Today.AddYears(-5));
         demographics[0].EmploymentTypeId = 'F';
         demographics[0].PayFrequencyId = 1;
@@ -226,7 +226,7 @@ public class DemographicsServiceTests
         demographics[1].DateOfBirth = DateOnly.FromDateTime(DateTime.Today.AddYears(-25));
         demographics[1].StoreNumber = 1;
         demographics[1].DepartmentId = 1;
-    demographics[1].PayClassificationId = "1";
+        demographics[1].PayClassificationId = "1";
         demographics[1].HireDate = DateOnly.FromDateTime(DateTime.Today.AddYears(-5));
         demographics[1].EmploymentTypeId = 'F';
         demographics[1].PayFrequencyId = 1;
@@ -262,7 +262,7 @@ public class DemographicsServiceTests
         // beneficiary contacts setup
         beneficiaryContacts = new List<BeneficiaryContact>();
         beneficiaryContacts.AddRange(
-        
+
             new BeneficiaryContact
             {
                 Id = 1,

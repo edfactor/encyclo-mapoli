@@ -78,7 +78,7 @@ public class MergeProfitDetailsEndpointTests
 
         // Act - Should not throw due to try-catch in endpoint
         await endpoint.HandleAsync(request, CancellationToken.None);
-        
+
         // Assert - Should have logged the error
         VerifyLoggerCalled(LogLevel.Error, "MergeProfitDetailsToDemographic failed");
     }
@@ -124,7 +124,7 @@ public class MergeProfitDetailsEndpointTests
     [InlineData(123456789, 987654321)]
     [InlineData(100000001, 999999999)]
     [InlineData(0, 999999999)]
-    
+
     public async Task HandleAsync_WithVariousValidSSNCombinations_ShouldCallServiceCorrectly(int sourceSsn, int destinationSsn)
     {
         // Arrange
@@ -318,7 +318,7 @@ public class MergeProfitDetailsEndpointTests
             Times.Once);
     }
 
-    
+
     #endregion
 
     #region Performance and Stress Tests

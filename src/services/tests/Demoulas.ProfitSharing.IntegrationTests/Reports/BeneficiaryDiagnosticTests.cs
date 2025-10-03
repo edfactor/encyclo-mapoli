@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
@@ -51,7 +51,7 @@ public class BeneficiaryDiagnosticTests : PristineBaseTest
                 var demoMatch = ben.Demographic != null ? "YES" : "NO";
                 var demoStatus = ben.Demographic?.EmploymentStatusId.ToString() ?? "N/A";
                 var demoTermDate = ben.Demographic?.TerminationDate?.ToString("yyyy-MM-dd") ?? "N/A";
-                
+
                 TestOutputHelper.WriteLine($"  Badge: {badge}, PSN: {ben.PsnSuffix}, Name: {name}");
                 TestOutputHelper.WriteLine($"    SSN: {ssn}, Demo Match: {demoMatch}, Status: {demoStatus}, TermDate: {demoTermDate}");
             }
@@ -61,7 +61,7 @@ public class BeneficiaryDiagnosticTests : PristineBaseTest
             }
 
             // Check for specific beneficiaries from READY report
-            var expectedMissingBadges = new[] { 
+            var expectedMissingBadges = new[] {
                 7039171000, // ALLEN, RAYMOND (from READY line 18)
                 7026461000, // AVILA, SAVANNAH (from READY line 29)
                 7024451000, // BARTLETT, ATLAS
@@ -74,10 +74,10 @@ public class BeneficiaryDiagnosticTests : PristineBaseTest
             {
                 var badge = (int)(badgeWithSuffix / 10000); // Extract badge number
                 var psn = (short)(badgeWithSuffix % 10000 * -1); // Extract PSN as negative
-                
-                var found = allBeneficiaries.FirstOrDefault(b => 
+
+                var found = allBeneficiaries.FirstOrDefault(b =>
                     b.BadgeNumber == badge && Math.Abs(b.PsnSuffix) == Math.Abs(psn));
-                
+
                 if (found != null)
                 {
                     var name = found.Contact?.ContactInfo?.FullName ?? "N/A";
@@ -122,20 +122,21 @@ public class BeneficiaryDiagnosticTests : PristineBaseTest
 
             TestOutputHelper.WriteLine($"\n=== BENEFICIARIES THAT SHOULD BE INCLUDED (After Filter) ===");
             TestOutputHelper.WriteLine($"Count: {beneficiariesShouldBeIncluded.Count}");
-            
+
             var includedBy1000 = beneficiariesShouldBeIncluded.Count(b => b.PsnSuffix == -1000);
             TestOutputHelper.WriteLine($"  With -1000 suffix: {includedBy1000}");
 
             // Check if there are beneficiaries with transactions
             var beneficiarySSNs = allBeneficiaries.Select(b => b.Contact?.Ssn).Where(s => s != null).Distinct().ToHashSet();
-            
+
             var beneficiariesWithCode5or6 = await ctx.ProfitDetails
-                .Where(pd => pd.ProfitYear == 2025 && 
+                .Where(pd => pd.ProfitYear == 2025 &&
                             (pd.ProfitCodeId == 5 || pd.ProfitCodeId == 6) &&
                             beneficiarySSNs.Contains(pd.Ssn))
                 .GroupBy(pd => pd.Ssn)
-                .Select(g => new { 
-                    Ssn = g.Key, 
+                .Select(g => new
+                {
+                    Ssn = g.Key,
                     Code5Count = g.Count(x => x.ProfitCodeId == 5),
                     Code6Count = g.Count(x => x.ProfitCodeId == 6),
                     Code5Total = g.Where(x => x.ProfitCodeId == 5).Sum(x => x.Forfeiture),

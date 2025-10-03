@@ -73,7 +73,7 @@ public static class OracleHcmExtension
         builder.AddOracleHcmSynchronization(oracleHcmConfig);
 
 #if DEBUG
-        builder.Services.AddTransient((_)=> debugOracleHcmIdSet ?? new HashSet<long>());
+        builder.Services.AddTransient((_) => debugOracleHcmIdSet ?? new HashSet<long>());
 #endif
 
         builder.Services.AddHostedService<EmployeeDeltaSyncService>();
@@ -146,7 +146,7 @@ public static class OracleHcmExtension
     public static IHostApplicationBuilder AddOracleHcmSynchronization(this IHostApplicationBuilder builder,
         OracleHcmConfig oracleHcmConfig)
     {
-        builder.Services.AddTransient((_)=> oracleHcmConfig);
+        builder.Services.AddTransient((_) => oracleHcmConfig);
 
         RegisterOracleHcmServices(builder.Services);
         ConfigureHttpClients(builder.Services);
@@ -165,7 +165,7 @@ public static class OracleHcmExtension
         {
             builder.Services.AddHostedService<MemoryMonitoringService>();
         }
-        
+
         return builder;
     }
 
@@ -187,12 +187,12 @@ public static class OracleHcmExtension
         services.AddTransient<EmployeeDeltaSyncJob>();
         services.AddTransient<PayrollSyncJob>();
         services.AddTransient<DemographicsService>();
-        
+
         // Mappers
         services.AddTransient<DemographicMapper>();
         services.AddTransient<AddressMapper>();
         services.AddTransient<ContactInfoMapper>();
-        
+
 
         // Internal services
         services.AddTransient<IDemographicsServiceInternal, DemographicsService>();
@@ -201,7 +201,7 @@ public static class OracleHcmExtension
         services.AddTransient<ISchedulerFactory, StdSchedulerFactory>();
 
         services.AddSingleton<IFakeSsnService, FakeSsnService>();
-        
+
     }
 
     /// <summary>

@@ -2,7 +2,7 @@
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Fakes;
-internal sealed class NavigationTrackingFaker: Faker<NavigationTracking>
+internal sealed class NavigationTrackingFaker : Faker<NavigationTracking>
 {
     internal NavigationTrackingFaker()
     {

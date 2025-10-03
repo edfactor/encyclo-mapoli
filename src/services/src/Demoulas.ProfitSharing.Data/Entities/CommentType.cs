@@ -19,7 +19,7 @@ public sealed class CommentType : ILookupTable<byte>
         public static CommentType Voided => new() { Id = 9, Name = "Voided" };
         public static CommentType Hardship => new() { Id = 10, Name = "Hardship" };
         public static CommentType Distribution => new() { Id = 11, Name = "Distribution" };
-        public static CommentType Payoff  => new() { Id = 12, Name = "Payoff" };
+        public static CommentType Payoff => new() { Id = 12, Name = "Payoff" };
         public static CommentType Dirpay => new() { Id = 13, Name = "Dirpay" };
         public static CommentType Rollover => new() { Id = 14, Name = "Rollover" };
         public static CommentType RothIra => new() { Id = 15, Name = "Roth IRA" };

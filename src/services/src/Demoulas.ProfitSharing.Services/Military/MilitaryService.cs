@@ -82,7 +82,7 @@ public class MilitaryService : IMilitaryService
                 .WithMessage($"{nameof(GetMilitaryContributionRequest.BadgeNumber)} must be greater than zero.");
         }
 
-    
+
         var validationResult = await validator.ValidateAsync(req, cancellationToken);
 
         if (!validationResult.IsValid)
