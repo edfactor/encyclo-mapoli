@@ -1,4 +1,5 @@
 import { Dialog, DialogContent, DialogTitle, Grid } from "@mui/material";
+import FrozenYearWarning from "components/FrozenYearWarning";
 import MissiveAlerts from "components/MissiveAlerts/MissiveAlerts";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useEffect, useState } from "react";
@@ -8,6 +9,7 @@ import { ApiMessageAlert, DSMAccordion, formatNumberWithComma, Page, setMessage 
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { useIsProfitYearFrozen } from "../../../hooks/useIsProfitYearFrozen";
 import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
 import { InquiryApi } from "../../../reduxstore/api/InquiryApi";
@@ -26,6 +28,7 @@ const MilitaryContributionContent = () => {
   const dispatch = useDispatch();
   const { missiveAlerts } = useMissiveAlerts();
   const isReadOnly = useReadOnlyNavigation();
+  const isFrozen = useIsProfitYearFrozen(profitYear);
 
   const {
     contributionsData,
@@ -104,6 +107,7 @@ const MilitaryContributionContent = () => {
     <Grid
       container
       rowSpacing="24px">
+      {isFrozen && <FrozenYearWarning profitYear={profitYear} />}
       <Grid width={"100%"}>
         <ApiMessageAlert commonKey={MessageKeys.MilitaryContribution} />
       </Grid>

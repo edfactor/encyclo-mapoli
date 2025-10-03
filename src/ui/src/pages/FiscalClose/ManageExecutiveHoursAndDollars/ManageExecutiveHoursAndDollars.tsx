@@ -1,9 +1,11 @@
 import { SaveOutlined } from "@mui/icons-material";
 import { Button, Divider, Grid, Tooltip } from "@mui/material";
+import FrozenYearWarning from "components/FrozenYearWarning";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { memo, useState } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
+import { useIsProfitYearFrozen } from "../../../hooks/useIsProfitYearFrozen";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
 import useManageExecutiveHoursAndDollars from "./hooks/useManageExecutiveHoursAndDollars";
 import ManageExecutiveHoursAndDollarsGrid from "./ManageExecutiveHoursAndDollarsGrid";
@@ -53,6 +55,7 @@ interface ManageExecutiveHoursAndDollarsContentProps {
 
 const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiveHoursAndDollarsContentProps) => {
   const {
+    profitYear,
     executeSearch,
     resetSearch,
     isSearching,
@@ -75,6 +78,7 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
   } = hookData;
 
   const isReadOnly = useReadOnlyNavigation();
+  const isFrozen = useIsProfitYearFrozen(profitYear);
   const [currentStatus, setCurrentStatus] = useState<string | null>(null);
 
   const handleStatusChange = (newStatus: string, statusName?: string) => {
@@ -94,6 +98,7 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
     <Grid
       container
       rowSpacing="24px">
+      {isFrozen && <FrozenYearWarning profitYear={profitYear} />}
       <Grid width={"100%"}>
         <Divider />
       </Grid>

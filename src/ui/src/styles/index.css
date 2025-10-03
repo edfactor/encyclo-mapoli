@@ -197,6 +197,16 @@
     text-align: center;
     color: #888;
   }
+
+  .frozen-year-warning {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .frozen-year-warning-content {
+    flex: 1;
+  }
 }
 /*
 @font-face {
