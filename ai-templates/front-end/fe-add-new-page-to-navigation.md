@@ -12,7 +12,7 @@ Put it under the ROUTES variable with an ALL_CAPS name with underscores and set 
 Add it in a new element as a child of the <Routes> component in ./src/ui/src/components/router/RouterSubAssembly.tsx
 
 
-## Step 3: Adding page to back end
+## Step 3: Adding page to back end navigation
 
 The page must be added through an Oracle PL/SQL script in ./src/database/ready_import/Navigations/add-navigation-data.sql
 
@@ -34,4 +34,19 @@ Then, make a call to the insert_navigation_item using the appopriate parent page
 Then, add permissions for whatever roles are desired with a call to assign_navigation_role. Here is an example:
 
 assign_navigation_role(MANAGE_EXECUTIVE_HOURS_PAGE, SYSTEM_ADMINISTRATOR);
+
+The last steps are to update three files: 
+
+./src/services/src/Demoulas.ProfitSharing.Data/Entities/Navigations/Navigation.cs
+./src/services/src/Demoulas.ProfitSharing.Data/Contexts.EntityMapping/Navigations/NavigationMap.cs
+./src/services/tests/Demoulas.ProfitSharing.UnitTests.Common/Fakes/NavigationFaker.cs
+
+In Navigation.cs, using the name of your page, add a constant to the end of the Constants class.
+
+In NavigationMap.cs, add a new Navigation object that has the new constant from Navigation.cs file, along with the same properties that were use in the call to insert_navigation_item in add-navigation-data.sql for that page.
+
+In NavigationFaker.cs, add a new Navigation object to the List that starts on line 49.
+
+
+
 
