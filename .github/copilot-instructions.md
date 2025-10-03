@@ -21,6 +21,57 @@ Concise, project-specific guidance for AI coding agents working in this reposito
   - Bulk maintenance still uses `ExecuteUpdate/ExecuteDelete` inside services where safe.
   - For dynamic filters build expressions in services (see `DemographicsService`).
   - Avoid raw SQL; if performance requires it, encapsulate in the service layer, parameterize, and unit test.
+- Distributed Caching (IDistributedCache patterns): Use `IDistributedCache` (NOT `IMemoryCache`) for all application caching. Redis is configured via Aspire; unit tests use `MemoryDistributedCache`.
+  - **Storage**: Serialize data to JSON via `System.Text.Json` (use `JsonSerializer.SerializeToUtf8Bytes` for writes, `JsonSerializer.Deserialize` for reads).
+  - **Cache keys**: Use descriptive prefixes (e.g., `navigation-status-all`, `frozen-demographics-v{year}`). For user-specific data, include sorted role names (e.g., `navigation-tree-v{version}-ROLE1|ROLE2`).
+  - **Expiration**: Set both `AbsoluteExpirationRelativeToNow` (e.g., 30 min) and `SlidingExpiration` (e.g., 15 min) via `DistributedCacheEntryOptions`.
+  - **Cache invalidation patterns**:
+    - **Simple removal**: Use `await _distributedCache.RemoveAsync(cacheKey)` for single-key invalidation (e.g., navigation status cache).
+    - **Version-based invalidation** (PREFERRED for multi-key scenarios): Store an integer version counter in the cache (e.g., `navigation-tree-version`), include version in all cache keys (e.g., `navigation-tree-v{version}-{roles}`), and increment the version on updates. This invalidates all related caches instantly without needing pattern-based deletion. Use `BitConverter.GetBytes(version)` / `BitConverter.ToInt32(bytes)` for version storage.
+    - **Why version-based?**: IDistributedCache has no pattern-matching delete (no `RemoveByPrefix`). Version bumps make old keys unreachable; they expire naturally. Works with any IDistributedCache provider (Redis, SQL Server, in-memory).
+  - **Example - version-based invalidation**:
+    ```csharp
+    // Get or create version
+    var versionBytes = await _distributedCache.GetAsync("my-cache-version", ct);
+    var version = versionBytes != null ? BitConverter.ToInt32(versionBytes) : 0;
+    
+    // Build cache key with version
+    var cacheKey = $"my-data-v{version}-{identifier}";
+    
+    // Try cache lookup
+    var cachedBytes = await _distributedCache.GetAsync(cacheKey, ct);
+    if (cachedBytes != null)
+    {
+        var cachedData = JsonSerializer.Deserialize<MyDto>(cachedBytes);
+        _logger?.LogDebug("Data loaded from cache (version {Version})", version);
+        return cachedData;
+    }
+    
+    // Load from database, serialize, cache
+    var data = await LoadFromDatabaseAsync(ct);
+    var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(data);
+    var options = new DistributedCacheEntryOptions
+    {
+        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30),
+        SlidingExpiration = TimeSpan.FromMinutes(15)
+    };
+    await _distributedCache.SetAsync(cacheKey, jsonBytes, options, ct);
+    return data;
+    
+    // To invalidate all versions: increment version counter
+    public async Task BustAllCachesAsync(CancellationToken ct)
+    {
+        var oldVersionBytes = await _distributedCache.GetAsync("my-cache-version", ct);
+        var oldVersion = oldVersionBytes != null ? BitConverter.ToInt32(oldVersionBytes) : 0;
+        var newVersion = oldVersion + 1;
+        await _distributedCache.SetAsync("my-cache-version", BitConverter.GetBytes(newVersion), ct);
+        _logger?.LogInformation("Cache version incremented from {Old} to {New}", oldVersion, newVersion);
+    }
+    ```
+  - **Unit testing**: Use `MemoryDistributedCache` from `Microsoft.Extensions.Caching.Memory`. Register as: `services.AddSingleton<IDistributedCache, MemoryDistributedCache>()`. No changes needed to service code—tests work transparently.
+  - **Logging**: Log cache hits (`LogDebug`), misses (`LogInformation` with count), and invalidations (`LogInformation` with reason/ID).
+  - **Error handling**: Cache failures should degrade gracefully—log errors but don't fail operations. Wrap cache reads/writes in try-catch if cache availability is uncertain.
+  - **Reference implementations**: See `NavigationService.GetNavigation()` (version-based invalidation with role-based keys), `NavigationService.GetNavigationStatus()` (simple key), `FrozenService` (year-based keys with simple removal).
 - Auditing & History: When updating mutable domain entities with historical tracking (example: `DemographicsService` creating `DemographicHistory` with `ValidFrom/ValidTo`), replicate the pattern: close current record (`ValidTo = now`), insert new history row. NEVER overwrite historical rows.
 - Identifiers: `OracleHcmId` is authoritative when present; fall back to composite `(Ssn,BadgeNumber)` only when Oracle id missing. Mirror guard logic (skip ambiguous BadgeNumber == 0 cases) if extending.
 - Entity updates: Keep helper methods like `UpdateEntityValues` cohesive; prefer adding fields there instead of scattering manual per-field assignments.
@@ -669,6 +720,11 @@ dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitS
 - Use legacy telemetry patterns instead of `ExecuteWithTelemetry` or manual `TelemetryExtensions` methods.
 - Access sensitive fields without declaring them in telemetry calls (security requirement).
 - Skip logger injection in endpoint constructors (required for telemetry correlation).
+- Use `IMemoryCache` for application caching—use `IDistributedCache` instead for Redis/distributed cache support.
+- Attempt pattern-based cache deletion with `IDistributedCache` (no `RemoveByPrefix` support)—use version-based invalidation instead.
+- Store cache version counters with expiration—version counters should persist indefinitely.
+- Include high-cardinality data in cache keys (e.g., individual user IDs)—use role combinations or other low-cardinality identifiers.
+- Fail operations when cache operations fail—degrade gracefully and log errors.
 
 ---
 Provide reasoning in PR descriptions when deviating from these patterns.
@@ -704,9 +760,14 @@ Provide reasoning in PR descriptions when deviating from these patterns.
 - `TELEMETRY_QUICK_REFERENCE.md` - Developer cheat sheet with 3-step implementation process, copy-paste examples, business metrics patterns, and troubleshooting checklist
 - `TELEMETRY_DEVOPS_GUIDE.md` - Production operations guide with deployment checklist, monitoring setup (Prometheus/Grafana), security configuration, alert rules, and disaster recovery procedures
 
+**Distributed Caching Documentation**:
+- `DISTRIBUTED_CACHE_MIGRATION_SUMMARY.md` - Complete guide to IDistributedCache migration including patterns, implementation strategy, and unit testing
+- `UNIT_TESTS_IDISTRIBUTEDCACHE_COMPLETE.md` - Unit test patterns for distributed cache with MemoryDistributedCache
+- `NAVIGATION_CACHING_COMPLETE.md` - Detailed example of version-based cache invalidation for role-specific data
+
 **Read-Only Functionality Documentation**:
 - `READ_ONLY_FUNCTIONALITY.md` - Complete guide to read-only role implementation covering architecture, implementation patterns, testing, and maintenance for ITDEVOPS and AUDITOR roles
 - `READ_ONLY_QUICK_REFERENCE.md` - Developer cheat sheet with copy-paste code examples, implementation checklist, common patterns, and troubleshooting guide
 - `PS-1623_READ_ONLY_SUMMARY.md` - Executive summary of read-only role implementation with status tracking and deployment verification
 
-These documents contain essential patterns and examples for implementing telemetry and read-only functionality correctly across all components. Reference them when creating new endpoints or troubleshooting issues.
+These documents contain essential patterns and examples for implementing telemetry, caching, and read-only functionality correctly across all components. Reference them when creating new endpoints or troubleshooting issues.
