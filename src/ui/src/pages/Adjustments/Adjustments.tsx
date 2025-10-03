@@ -231,22 +231,22 @@ const Adjustments = memo(() => {
                             <CircularProgress />
                             <FormLabel sx={{ ml: 2 }}>Loading profit details...</FormLabel>
                           </Box>
-                        ) : profitDetailsResponseSource?.results && profitDetailsResponseSource?.results.length > 0 ? (
+                        ) : profitDetailsResponseSource?.results && profitDetailsResponseSource.results.length > 0 ? (
                           <Box sx={{ height: '350px' }}>
                             <MasterInquiryDetailsGrid
                               profitData={{
                                 ...profitDetailsResponseSource,
                                 results: profitDetailsResponseSource.results.slice(0, 5),
-                                total: profitDetailsResponseSource.results.length > 0 ? Math.min(5, profitDetailsResponseSource.results.length) : 0
+                                total: Math.min(5, profitDetailsResponseSource.results.length)
                               }}
                               isLoading={isLoadingProfitDetails || isLoading || isSearching}
                             />
                           </Box>
-                        ) : (
+                        ) : masterInquiryMemberDetails ? (
                           <Box sx={{ p: 2, textAlign: 'center' }}>
                             <FormLabel>No profit details found for this employee</FormLabel>
                           </Box>
-                        )}
+                        ) : null}
                         {profitDetailsResponseSource?.totalRecords && profitDetailsResponseSource.totalRecords > 5 && (
                           <Box sx={{ p: 1, textAlign: 'center', borderTop: '1px solid #e0e0e0' }}>
                             <FormLabel sx={{ fontSize: '0.875rem', color: 'text.secondary' }}>
@@ -290,16 +290,16 @@ const Adjustments = memo(() => {
                               profitData={{
                                 ...profitDetailsResponseDestination,
                                 results: profitDetailsResponseDestination.results.slice(0, 5),
-                                total: profitDetailsResponseDestination.results.length > 0 ? Math.min(5, profitDetailsResponseDestination.results.length) : 0
+                                total: Math.min(5, profitDetailsResponseDestination.results.length)
                               }}
                               isLoading={isLoadingProfitDetailsSecondary || isLoading || isSearching}
                             />
                           </Box>
-                        ) : (
+                        ) : masterInquiryMemberDetailsSecondary ? (
                           <Box sx={{ p: 2, textAlign: 'center' }}>
                             <FormLabel>No profit details found for this employee</FormLabel>
                           </Box>
-                        )}
+                        ) : null}
                         {profitDetailsResponseDestination?.totalRecords && profitDetailsResponseDestination.totalRecords > 5 && (
                           <Box sx={{ p: 1, textAlign: 'center', borderTop: '1px solid #e0e0e0' }}>
                             <FormLabel sx={{ fontSize: '0.875rem', color: 'text.secondary' }}>

@@ -23,7 +23,7 @@ export const useAdjustments = () => {
   const profitDetailsResponseDestination = useRef<any>(null);
 
   const fetchProfitDetailsForMember = useCallback(
-    async (member: any, profitYear: number, isSecondary: boolean = false) => {
+    async (member: any, isSecondary: boolean = false) => {
       try {
         console.log(`Fetching profit details for ${isSecondary ? 'secondary' : 'primary'} member:`, member);
         
@@ -34,11 +34,25 @@ export const useAdjustments = () => {
 
         console.log(`Profit details response for ${isSecondary ? 'secondary' : 'primary'} member:`, profitDetailsResponse);
 
-        // Limit to 5 records for display
+        // Handle empty results properly
+        const hasResults = profitDetailsResponse?.results && profitDetailsResponse.results.length > 0;
+        
+        if (!hasResults) {
+          // Don't store anything if there are no results
+          if (isSecondary) {
+            profitDetailsResponseDestination.current = null;
+          } else {
+            profitDetailsResponseSource.current = null;
+          }
+          return null;
+        }
+        
+        // Limit to 5 records for display (only when we have results)
         const limitedResponse = {
           ...profitDetailsResponse,
-          results: profitDetailsResponse?.results ? profitDetailsResponse.results.slice(0, 5) : [],
-          totalRecords: profitDetailsResponse?.results?.length || 0
+          results: profitDetailsResponse.results.slice(0, 5),
+          total: Math.min(5, profitDetailsResponse.results.length),
+          totalRecords: profitDetailsResponse.results.length
         };
 
         if (isSecondary) {
@@ -88,7 +102,10 @@ export const useAdjustments = () => {
           reduxDispatch(setMasterInquiryData(sourceMember));
           
           // Fetch profit details for source member
-          await fetchProfitDetailsForMember(sourceMember, profitYear, false);
+          await fetchProfitDetailsForMember(sourceMember, false);
+        } else {
+          // Clear profit details if no source member found
+          profitDetailsResponseSource.current = null;
         }
 
         if (responseSource.results.length === 0){
@@ -102,7 +119,10 @@ export const useAdjustments = () => {
           reduxDispatch(setMasterInquiryDataSecondary(destinationMember));
           
           // Fetch profit details for destination member
-          await fetchProfitDetailsForMember(destinationMember, profitYear, true);
+          await fetchProfitDetailsForMember(destinationMember, true);
+        } else {
+          // Clear profit details if no destination member found
+          profitDetailsResponseDestination.current = null;
         }
 
         if (responseDestination.results.length === 0){
