@@ -47,6 +47,7 @@ import { RootState } from "../../reduxstore/store";
 import { ImpersonationRoles } from "../../reduxstore/types";
 import EnvironmentUtils from "../../utils/environmentUtils";
 import { createUnauthorizedParams, isPathAllowedInNavigation } from "../../utils/navigationAccessUtils";
+import { validateImpersonationRoles, validateRoleRemoval } from "../../utils/roleUtils";
 
 import { ImpersonationMultiSelect } from "smart-ui-library";
 import { MenuBar } from "../../components/MenuBar/MenuBar";
@@ -149,14 +150,43 @@ const RouterSubAssembly: React.FC = () => {
                 ]}
                 currentRoles={impersonating || []}
                 setCurrentRoles={(value: string[]) => {
-                  if (value.length > 0) {
-                    localStorage.setItem("impersonatingRoles", JSON.stringify(value));
-                    const selectedRoles = value.map((role) => role as ImpersonationRoles);
-                    dispatch(setImpersonating(selectedRoles));
-                  } else {
+                  if (value.length === 0) {
+                    // Clear all roles
                     localStorage.removeItem("impersonatingRoles");
                     dispatch(setImpersonating([]));
+                    return;
                   }
+
+                  const currentRoles = (impersonating || []) as ImpersonationRoles[];
+                  const newRoles = value.map((role) => role as ImpersonationRoles);
+
+                  // Determine if roles were added or removed
+                  let validatedRoles: ImpersonationRoles[];
+
+                  if (newRoles.length > currentRoles.length) {
+                    // Role was added - find which one and validate
+                    const addedRole = newRoles.find((role) => !currentRoles.includes(role));
+                    if (addedRole) {
+                      validatedRoles = validateImpersonationRoles(currentRoles, addedRole);
+                    } else {
+                      validatedRoles = newRoles;
+                    }
+                  } else if (newRoles.length < currentRoles.length) {
+                    // Role was removed - find which one and validate
+                    const removedRole = currentRoles.find((role) => !newRoles.includes(role));
+                    if (removedRole) {
+                      validatedRoles = validateRoleRemoval(currentRoles, removedRole);
+                    } else {
+                      validatedRoles = newRoles;
+                    }
+                  } else {
+                    // Same length but different roles (shouldn't happen with multi-select, but handle it)
+                    validatedRoles = newRoles;
+                  }
+
+                  // Update state and localStorage with validated roles
+                  localStorage.setItem("impersonatingRoles", JSON.stringify(validatedRoles));
+                  dispatch(setImpersonating(validatedRoles));
                 }}
               />
             ) : (
