@@ -38,7 +38,7 @@ public class NavigationService : INavigationService
         // Get current cache version to ensure cache is busted when navigation status is updated
         const string versionKey = "navigation-tree-version";
         var versionBytes = await _distributedCache.GetAsync(versionKey, cancellationToken);
-        var version = versionBytes != null && versionBytes.Length > 0
+        var version = versionBytes is { Length: > 0 }
             ? BitConverter.ToInt32(versionBytes, 0)
             : 0;
 
@@ -204,7 +204,7 @@ public class NavigationService : INavigationService
         await _distributedCache.SetAsync(cacheKey, serialized, cacheOptions, cancellationToken);
 
         _logger?.LogInformation("Navigation tree loaded from database and cached (version {Version}) for roles: {Roles} ({Count} root items)", version, roleKey, navigationTree.Count);
-        
+
         return navigationTree;
     }
 
@@ -276,7 +276,7 @@ public class NavigationService : INavigationService
         if (success > 0)
         {
             await _distributedCache.RemoveAsync(NavigationStatusCacheKey, cancellationToken);
-            
+
             // Note: We cannot efficiently remove all navigation tree caches (since they're keyed by role combinations)
             // without pattern-based cache invalidation. Options:
             // 1. Use cache tags (if Redis supports it)
@@ -287,9 +287,9 @@ public class NavigationService : INavigationService
             // For now, we'll implement a simple version key approach.
             // When UpdateNavigation is called, we increment a version counter stored in cache.
             // GetNavigation includes this version in the cache key, so any version bump invalidates all cached navigation trees.
-            
+
             await BustAllNavigationTreeCaches(cancellationToken);
-            
+
             _logger?.LogInformation("Navigation caches invalidated after navigation {NavigationId} update to status {StatusId}", navigationId, statusId);
         }
 
@@ -303,7 +303,7 @@ public class NavigationService : INavigationService
     private async Task BustAllNavigationTreeCaches(CancellationToken cancellationToken)
     {
         const string versionKey = "navigation-tree-version";
-        
+
         try
         {
             // Get current version (default to 0 if not exists)
@@ -311,17 +311,17 @@ public class NavigationService : INavigationService
             var currentVersion = currentVersionBytes != null && currentVersionBytes.Length > 0
                 ? BitConverter.ToInt32(currentVersionBytes, 0)
                 : 0;
-            
+
             // Increment version
             var newVersion = currentVersion + 1;
             var newVersionBytes = BitConverter.GetBytes(newVersion);
-            
+
             // Store new version (never expires - small 4-byte value)
             await _distributedCache.SetAsync(versionKey, newVersionBytes, new DistributedCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = null // No expiration
             }, cancellationToken);
-            
+
             _logger?.LogDebug("Navigation tree cache version incremented from {OldVersion} to {NewVersion}", currentVersion, newVersion);
         }
         catch (Exception ex)
