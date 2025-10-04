@@ -29,7 +29,7 @@ public abstract class PristineBaseTest
         DbFactory = new PristineDataContextFactory();
         DistributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
         CalendarService = new CalendarService(DbFactory, Aps, DistributedCache);
-        FrozenService = new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object);
+        FrozenService = new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, DistributedCache);
         EmbeddedSqlService = new EmbeddedSqlService();
         DemographicReaderService = new DemographicReaderService(FrozenService, HttpContextAccessor);
         TotalService = new TotalService(DbFactory, CalendarService, EmbeddedSqlService, DemographicReaderService);

@@ -9,6 +9,8 @@ using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.ItDevOps;
 using Demoulas.ProfitSharing.Services.ProfitShareEdit;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 using Moq;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
@@ -36,7 +38,8 @@ internal sealed class ProfitShareUpdateReport
 
     public async Task ProfitSharingUpdatePaginated(ProfitShareUpdateRequest profitShareUpdateRequest, IDemographicReaderService demographicReaderService)
     {
-        FrozenService frozenService = new FrozenService(_dbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object);
+        var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
+        FrozenService frozenService = new FrozenService(_dbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache);
         TotalService totalService = new TotalService(_dbFactory, _calendarService, new EmbeddedSqlService(), demographicReaderService);
         ProfitShareUpdateService psu = new(_dbFactory, totalService, _calendarService, demographicReaderService);
         _profitYear = profitShareUpdateRequest.ProfitYear;
