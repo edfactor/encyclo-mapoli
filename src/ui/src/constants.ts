@@ -49,6 +49,7 @@ export const ROUTES = {
   PAY_BE_NEXT: "adhoc-beneficiaries-report",
   FORFEITURES_ADJUSTMENT: "forfeitures-adjustment",
   PAY_BEN_REPORT: "payben-report",
+  DISTRIBUTIONS_INQUIRY: "distributions-inquiry",
 
   PAY426_ACTIVE_18_20: "pay426-1",
   PAY426_ACTIVE_21_PLUS: "pay426-2",
@@ -103,6 +104,7 @@ export const CAPTIONS = {
   POST_FROZEN: "Post Frozen",
   DISTRIBUTIONS_AND_FORFEITURES: "Distributions and Forfeitures (QPAY129)",
   DISTRIBUTIONS_BY_AGE: "Get Distributions by Age (PROF130)",
+  DISTRIBUTIONS_INQUIRY: "Distribution Inquiry (008-14l)",
   DUPLICATE_NAMES: "Duplicate Names and Birthdays",
   DUPLICATE_SSNS: "Duplicate SSNs in Demographics",
   ELIGIBLE_EMPLOYEES: "Get Eligible Employees (GET-ELIGIBLE-EMPS)",

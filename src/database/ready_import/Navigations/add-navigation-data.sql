@@ -37,7 +37,7 @@ DECLARE
     MASTER_INQUIRY_PAGE CONSTANT NUMBER := 100;
     ADJUSTMENTS_PAGE CONSTANT NUMBER := 101;
     DEMOGRAPHIC_FREEZE_PAGE CONSTANT NUMBER := 102;
-    
+    DISTRIBUTION_INQUIRY_PAGE CONSTANT NUMBER := 103;
     MANAGE_EXECUTIVE_HOURS_PAGE CONSTANT NUMBER := 104;
     YTD_WAGES_EXTRACT CONSTANT NUMBER := 105;
     FORFEITURES CONSTANT NUMBER := 106;
@@ -192,7 +192,7 @@ BEGIN
 
 
 --distribution items
-    
+    insert_navigation_item(DISTRIBUTION_INQUIRY_PAGE, DISTRIBUTIONS_MENU, 'Distribution Inquiry (008-14l)', '', 'distributions-inquiry', STATUS_NORMAL, ORDER_ELEVENTH, '', ENABLED, IS_NAVIGABLE);
 
 --It Operations
     insert_navigation_item(DEMOGRAPHIC_FREEZE_PAGE, IT_DEVOPS_MENU, 'Demographic Freeze', '', 'demographic-freeze', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -287,9 +287,13 @@ BEGIN
     assign_navigation_role(IT_DEVOPS_MENU, IT_DEVOPS);
 
 -- Distribution Inquiry
-    assign_navigation_role(DISTRIBUTIONS_MENU, SYSTEM_ADMINISTRATOR); 
+    assign_navigation_role(DISTRIBUTIONS_MENU, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(DISTRIBUTIONS_MENU, FINANCE_MANAGER);
     assign_navigation_role(DISTRIBUTIONS_MENU, DISTRIBUTIONS_CLERK);
+
+    assign_navigation_role(DISTRIBUTION_INQUIRY_PAGE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(DISTRIBUTION_INQUIRY_PAGE, FINANCE_MANAGER);
+    assign_navigation_role(DISTRIBUTION_INQUIRY_PAGE, DISTRIBUTIONS_CLERK);
 
 -- Assign roles for INQUIRIES (Master Inquiry endpoints -> CanRunMasterInquiry)
     assign_navigation_role(INQUIRIES_MENU, SYSTEM_ADMINISTRATOR);
@@ -430,6 +434,7 @@ BEGIN
     assign_navigation_role(MASTER_INQUIRY_PAGE, IT_DEVOPS);
     assign_navigation_role(BENEFICIARIES_MENU, IT_DEVOPS);
     assign_navigation_role(DISTRIBUTIONS_MENU, IT_DEVOPS);
+    assign_navigation_role(DISTRIBUTION_INQUIRY_PAGE, IT_DEVOPS);
     assign_navigation_role(RECONCILIATION_MENU, IT_DEVOPS);
     assign_navigation_role(YEAR_END_MENU, IT_DEVOPS);
     assign_navigation_role(DECEMBER_ACTIVITIES, IT_DEVOPS);
