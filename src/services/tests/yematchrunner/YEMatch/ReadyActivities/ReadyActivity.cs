@@ -34,10 +34,12 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
 
         Stopwatch stopwatch = Stopwatch.StartNew();
         SshCommand? result = null;
+        // Translates the production paths to safe development paths
+       string rawCommand =
+            $". ~/setyematch;sed -e's|/production/|/dsmdev/data/PAYROLL/tmp-yematch/|g' jcl/{ksh}.ksh > jcl/YE-{ksh}.ksh;chmod +x jcl/YE-{ksh}.ksh;EJR YE-{ksh} {Args}";
         try
         {
-            result = client.RunCommand(
-                $". ~/setyematch;sed -e's|/production/|/dsmdev/data/PAYROLL/tmp-yematch/|g' jcl/{ksh}.ksh > jcl/YE-{ksh}.ksh;chmod +x jcl/YE-{ksh}.ksh;EJR YE-{ksh} {Args}");
+            result = client.RunCommand(rawCommand);
         }
         catch (Exception e)
         {

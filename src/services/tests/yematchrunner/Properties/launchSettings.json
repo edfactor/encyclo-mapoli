@@ -4,9 +4,9 @@
             "commandName": "Project",
             "commandLineArgs": "--run baseline"
         },
-        "Golden Run": {
+        "Golden Year End Run": {
             "commandName": "Project",
-            "commandLineArgs": "--run golden"
+            "commandLineArgs": "--run goldenyearend"
         },
         "Golden Express Run": {
             "commandName": "Project",
