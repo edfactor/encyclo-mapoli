@@ -67,6 +67,7 @@ import PayBeNext from "../../pages/Reports/PayBeNext/PayBeNext";
 import PayBenReport from "../../pages/Reports/PayBenReport/PayBenReport";
 import ReprintCertificates from "../../pages/ReprintCertificates/ReprintCertificates";
 import LandingPage from "./LandingPage";
+import Adjustments from "../../pages/Adjustments/Adjustments";
 
 const RouterSubAssembly: React.FC = () => {
   const isProductionOrUAT = EnvironmentUtils.isProduction || EnvironmentUtils.isUAT;
@@ -239,6 +240,9 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={`${ROUTES.MASTER_INQUIRY}/:badgeNumber?`}
                   element={<MasterInquiry />}></Route>
+                <Route
+                  path={`${ROUTES.ADJUSTMENTS}`}
+                  element={<Adjustments />}></Route>
                 <Route
                   path={ROUTES.DISTRIBUTIONS_BY_AGE}
                   element={<DistributionByAge />}></Route>
