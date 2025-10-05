@@ -74,16 +74,11 @@ const MilitaryContributionForm = ({
         };
 
         await createMilitaryContribution(request).unwrap();
-
-        console.log("Contribution created successfully:", contribution);
-
         onSubmit({
           ...contribution,
           contributionYear: data.contributionDate.getFullYear()
         });
       } catch (error) {
-        console.log("Error creating contribution:", error);
-        // Backend now returns ServiceProblemDetails format after Result<T> pattern refactoring
         const serviceError = error as ServiceErrorResponse;
         if (serviceError?.data) {
           let errorMessages: string[] = [];
