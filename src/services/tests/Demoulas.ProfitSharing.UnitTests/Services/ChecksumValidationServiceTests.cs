@@ -1,7 +1,8 @@
 using System.ComponentModel;
+using System.Security.Cryptography;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Validation;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
@@ -17,17 +18,15 @@ namespace Demoulas.ProfitSharing.UnitTests.Services;
 [Description("PS-XXXX: Unit tests for ChecksumValidationService")]
 public class ChecksumValidationServiceTests
 {
-    private readonly Mock<IProfitSharingDataContextFactory> _mockContextFactory;
+    private readonly ScenarioDataContextFactory _scenarioFactory;
     private readonly Mock<ILogger<ChecksumValidationService>> _mockLogger;
     private readonly ChecksumValidationService _service;
-    private readonly ScenarioDataContextFactory _scenarioFactory;
 
     public ChecksumValidationServiceTests()
     {
         _scenarioFactory = new ScenarioDataContextFactory();
-        _mockContextFactory = _scenarioFactory.DataContextFactory;
         _mockLogger = new Mock<ILogger<ChecksumValidationService>>();
-        _service = new ChecksumValidationService(_mockContextFactory.Object, _mockLogger.Object);
+        _service = new ChecksumValidationService(_scenarioFactory, _mockLogger.Object);
     }
 
     [Fact]
@@ -37,19 +36,32 @@ public class ChecksumValidationServiceTests
         // Arrange
         short profitYear = 2024;
         string reportType = "YearEndBreakdown";
-        
-        var keyFieldsChecksum = new Dictionary<string, KeyValuePair<decimal, byte[]>>
-        {
-            { "TotalAmount", new KeyValuePair<decimal, byte[]>(12345.67m, new byte[] { 1, 2, 3 }) },
-            { "ParticipantCount", new KeyValuePair<decimal, byte[]>(100, new byte[] { 4, 5, 6 }) }
-        };
-        
+
+        // Create test data
         var reportData = new
         {
             TotalAmount = 12345.67m,
-            ParticipantCount = 100m,
-            OtherData = "some-string"
+            ParticipantCount = 100m
         };
+
+        var reportJson = JsonSerializer.Serialize(reportData);
+
+        // Build KeyFieldsChecksumJson to match what the service will extract
+        // The service will extract all decimal properties and hash them
+        var keyFieldsChecksum = new List<KeyValuePair<string, KeyValuePair<decimal, byte[]>>>();
+
+        // Manually build what the service would extract (TotalAmount and ParticipantCount)
+        var totalAmountHash = SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(12345.67m));
+        keyFieldsChecksum.Add(new KeyValuePair<string, KeyValuePair<decimal, byte[]>>(
+            "TotalAmount",
+            new KeyValuePair<decimal, byte[]>(12345.67m, totalAmountHash)
+        ));
+
+        var participantCountHash = SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(100m));
+        keyFieldsChecksum.Add(new KeyValuePair<string, KeyValuePair<decimal, byte[]>>(
+            "ParticipantCount",
+            new KeyValuePair<decimal, byte[]>(100m, participantCountHash)
+        ));
 
         var archivedReport = new ReportChecksum
         {
@@ -57,16 +69,16 @@ public class ChecksumValidationServiceTests
             ProfitYear = profitYear,
             ReportType = reportType,
             RequestJson = "{}",
-            ReportJson = JsonSerializer.Serialize(reportData),
-            KeyFieldsChecksumJson = JsonSerializer.Serialize(keyFieldsChecksum),
-            CreatedAtUtc = DateTime.UtcNow.AddDays(-1),
-            CreatedByUsername = "test-user"
+            ReportJson = reportJson,
+            KeyFieldsChecksumJson = keyFieldsChecksum,
+            CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1),
+            UserName = "test-user"
         };
 
         var reportChecksums = new List<ReportChecksum> { archivedReport };
         var mockDbSet = reportChecksums.BuildMockDbSet();
-        
-        _scenarioFactory.ProfitSharingDbContext
+
+        _scenarioFactory.ProfitSharingReadOnlyDbContext
             .Setup(c => c.ReportChecksums)
             .Returns(mockDbSet.Object);
 
@@ -74,6 +86,14 @@ public class ChecksumValidationServiceTests
         var result = await _service.ValidateReportChecksumAsync(profitYear, reportType, CancellationToken.None);
 
         // Assert
+        if (!result.IsSuccess)
+        {
+            // Debug output to see what went wrong
+            var errorMsg = result.Error?.Description ?? "null";
+            var errorCode = result.Error?.Code.ToString() ?? "null";
+            throw new Exception($"Test failed: IsSuccess={result.IsSuccess}, Error={errorMsg}, ErrorCode={errorCode}");
+        }
+
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldNotBeNull();
         result.Value.ProfitYear.ShouldBe(profitYear);
@@ -92,13 +112,13 @@ public class ChecksumValidationServiceTests
         // Arrange
         short profitYear = 2024;
         string reportType = "YearEndBreakdown";
-        
+
         // Archived checksum with different values
-        var archivedKeyFieldsChecksum = new Dictionary<string, KeyValuePair<decimal, byte[]>>
+        var archivedKeyFieldsChecksum = new List<KeyValuePair<string, KeyValuePair<decimal, byte[]>>>
         {
-            { "TotalAmount", new KeyValuePair<decimal, byte[]>(12345.67m, new byte[] { 1, 2, 3 }) }
+            new("TotalAmount", new KeyValuePair<decimal, byte[]>(12345.67m, new byte[] { 1, 2, 3 }))
         };
-        
+
         // Current data has different values (data drift!)
         var reportData = new
         {
@@ -112,15 +132,15 @@ public class ChecksumValidationServiceTests
             ReportType = reportType,
             RequestJson = "{}",
             ReportJson = JsonSerializer.Serialize(reportData),
-            KeyFieldsChecksumJson = JsonSerializer.Serialize(archivedKeyFieldsChecksum),
-            CreatedAtUtc = DateTime.UtcNow.AddDays(-1),
-            CreatedByUsername = "test-user"
+            KeyFieldsChecksumJson = archivedKeyFieldsChecksum,
+            CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1),
+            UserName = "test-user"
         };
 
         var reportChecksums = new List<ReportChecksum> { archivedReport };
         var mockDbSet = reportChecksums.BuildMockDbSet();
-        
-        _scenarioFactory.ProfitSharingDbContext
+
+        _scenarioFactory.ProfitSharingReadOnlyDbContext
             .Setup(c => c.ReportChecksums)
             .Returns(mockDbSet.Object);
 
@@ -142,11 +162,11 @@ public class ChecksumValidationServiceTests
         // Arrange
         short profitYear = 2024;
         string reportType = "NonExistentReport";
-        
+
         var reportChecksums = new List<ReportChecksum>(); // Empty list
         var mockDbSet = reportChecksums.BuildMockDbSet();
-        
-        _scenarioFactory.ProfitSharingDbContext
+
+        _scenarioFactory.ProfitSharingReadOnlyDbContext
             .Setup(c => c.ReportChecksums)
             .Returns(mockDbSet.Object);
 
@@ -166,12 +186,12 @@ public class ChecksumValidationServiceTests
         // Arrange
         short profitYear = 2024;
         string reportType = "YearEndBreakdown";
-        
-        var keyFieldsChecksum = new Dictionary<string, KeyValuePair<decimal, byte[]>>
+
+        var keyFieldsChecksum = new List<KeyValuePair<string, KeyValuePair<decimal, byte[]>>>
         {
-            { "TotalAmount", new KeyValuePair<decimal, byte[]>(12345.67m, new byte[] { 1, 2, 3 }) }
+            new("TotalAmount", new KeyValuePair<decimal, byte[]>(12345.67m, new byte[] { 1, 2, 3 }))
         };
-        
+
         var reportData = new { TotalAmount = 12345.67m };
 
         var olderReport = new ReportChecksum
@@ -181,9 +201,9 @@ public class ChecksumValidationServiceTests
             ReportType = reportType,
             RequestJson = "{}",
             ReportJson = JsonSerializer.Serialize(reportData),
-            KeyFieldsChecksumJson = JsonSerializer.Serialize(keyFieldsChecksum),
-            CreatedAtUtc = DateTime.UtcNow.AddDays(-10), // Older
-            CreatedByUsername = "test-user"
+            KeyFieldsChecksumJson = keyFieldsChecksum,
+            CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-10), // Older
+            UserName = "test-user"
         };
 
         var newerReport = new ReportChecksum
@@ -193,15 +213,15 @@ public class ChecksumValidationServiceTests
             ReportType = reportType,
             RequestJson = "{}",
             ReportJson = JsonSerializer.Serialize(reportData),
-            KeyFieldsChecksumJson = JsonSerializer.Serialize(keyFieldsChecksum),
-            CreatedAtUtc = DateTime.UtcNow.AddDays(-1), // Newer - should be used
-            CreatedByUsername = "test-user"
+            KeyFieldsChecksumJson = keyFieldsChecksum,
+            CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1), // Newer - should be used
+            UserName = "test-user"
         };
 
         var reportChecksums = new List<ReportChecksum> { olderReport, newerReport };
         var mockDbSet = reportChecksums.BuildMockDbSet();
-        
-        _scenarioFactory.ProfitSharingDbContext
+
+        _scenarioFactory.ProfitSharingReadOnlyDbContext
             .Setup(c => c.ReportChecksums)
             .Returns(mockDbSet.Object);
 
@@ -219,11 +239,11 @@ public class ChecksumValidationServiceTests
     public async Task ValidateAllReportsAsync_MultipleReports_ReturnsAllResults()
     {
         // Arrange
-        var validChecksum = new Dictionary<string, KeyValuePair<decimal, byte[]>>
+        var validChecksum = new List<KeyValuePair<string, KeyValuePair<decimal, byte[]>>>
         {
-            { "Amount", new KeyValuePair<decimal, byte[]>(100m, new byte[] { 1, 2, 3 }) }
+            new("Amount", new KeyValuePair<decimal, byte[]>(100m, new byte[] { 1, 2, 3 }))
         };
-        
+
         var report1 = new ReportChecksum
         {
             Id = 1,
@@ -231,9 +251,9 @@ public class ChecksumValidationServiceTests
             ReportType = "Report1",
             RequestJson = "{}",
             ReportJson = JsonSerializer.Serialize(new { Amount = 100m }),
-            KeyFieldsChecksumJson = JsonSerializer.Serialize(validChecksum),
-            CreatedAtUtc = DateTime.UtcNow.AddDays(-1),
-            CreatedByUsername = "test-user"
+            KeyFieldsChecksumJson = validChecksum,
+            CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1),
+            UserName = "test-user"
         };
 
         var report2 = new ReportChecksum
@@ -243,15 +263,15 @@ public class ChecksumValidationServiceTests
             ReportType = "Report2",
             RequestJson = "{}",
             ReportJson = JsonSerializer.Serialize(new { Amount = 100m }),
-            KeyFieldsChecksumJson = JsonSerializer.Serialize(validChecksum),
-            CreatedAtUtc = DateTime.UtcNow.AddDays(-1),
-            CreatedByUsername = "test-user"
+            KeyFieldsChecksumJson = validChecksum,
+            CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1),
+            UserName = "test-user"
         };
 
         var reportChecksums = new List<ReportChecksum> { report1, report2 };
         var mockDbSet = reportChecksums.BuildMockDbSet();
-        
-        _scenarioFactory.ProfitSharingDbContext
+
+        _scenarioFactory.ProfitSharingReadOnlyDbContext
             .Setup(c => c.ReportChecksums)
             .Returns(mockDbSet.Object);
 
@@ -270,11 +290,11 @@ public class ChecksumValidationServiceTests
     public async Task ValidateAllReportsAsync_WithYearFilter_OnlyValidatesSpecifiedYear()
     {
         // Arrange
-        var validChecksum = new Dictionary<string, KeyValuePair<decimal, byte[]>>
+        var validChecksum = new List<KeyValuePair<string, KeyValuePair<decimal, byte[]>>>
         {
-            { "Amount", new KeyValuePair<decimal, byte[]>(100m, new byte[] { 1, 2, 3 }) }
+            new("Amount", new KeyValuePair<decimal, byte[]>(100m, new byte[] { 1, 2, 3 }))
         };
-        
+
         var report2024 = new ReportChecksum
         {
             Id = 1,
@@ -282,9 +302,9 @@ public class ChecksumValidationServiceTests
             ReportType = "Report1",
             RequestJson = "{}",
             ReportJson = JsonSerializer.Serialize(new { Amount = 100m }),
-            KeyFieldsChecksumJson = JsonSerializer.Serialize(validChecksum),
-            CreatedAtUtc = DateTime.UtcNow.AddDays(-1),
-            CreatedByUsername = "test-user"
+            KeyFieldsChecksumJson = validChecksum,
+            CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1),
+            UserName = "test-user"
         };
 
         var report2023 = new ReportChecksum
@@ -294,15 +314,15 @@ public class ChecksumValidationServiceTests
             ReportType = "Report2",
             RequestJson = "{}",
             ReportJson = JsonSerializer.Serialize(new { Amount = 100m }),
-            KeyFieldsChecksumJson = JsonSerializer.Serialize(validChecksum),
-            CreatedAtUtc = DateTime.UtcNow.AddDays(-1),
-            CreatedByUsername = "test-user"
+            KeyFieldsChecksumJson = validChecksum,
+            CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1),
+            UserName = "test-user"
         };
 
         var reportChecksums = new List<ReportChecksum> { report2024, report2023 };
         var mockDbSet = reportChecksums.BuildMockDbSet();
-        
-        _scenarioFactory.ProfitSharingDbContext
+
+        _scenarioFactory.ProfitSharingReadOnlyDbContext
             .Setup(c => c.ReportChecksums)
             .Returns(mockDbSet.Object);
 
@@ -321,11 +341,11 @@ public class ChecksumValidationServiceTests
     public async Task ValidateAllReportsAsync_IndividualError_ContinuesProcessing()
     {
         // Arrange
-        var validChecksum = new Dictionary<string, KeyValuePair<decimal, byte[]>>
+        var validChecksum = new List<KeyValuePair<string, KeyValuePair<decimal, byte[]>>>
         {
-            { "Amount", new KeyValuePair<decimal, byte[]>(100m, new byte[] { 1, 2, 3 }) }
+            new("Amount", new KeyValuePair<decimal, byte[]>(100m, new byte[] { 1, 2, 3 }))
         };
-        
+
         var validReport = new ReportChecksum
         {
             Id = 1,
@@ -333,9 +353,9 @@ public class ChecksumValidationServiceTests
             ReportType = "ValidReport",
             RequestJson = "{}",
             ReportJson = JsonSerializer.Serialize(new { Amount = 100m }),
-            KeyFieldsChecksumJson = JsonSerializer.Serialize(validChecksum),
-            CreatedAtUtc = DateTime.UtcNow.AddDays(-1),
-            CreatedByUsername = "test-user"
+            KeyFieldsChecksumJson = validChecksum,
+            CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1),
+            UserName = "test-user"
         };
 
         // Invalid JSON that will cause deserialization error
@@ -346,15 +366,15 @@ public class ChecksumValidationServiceTests
             ReportType = "InvalidReport",
             RequestJson = "{}",
             ReportJson = "invalid-json{", // Invalid JSON
-            KeyFieldsChecksumJson = JsonSerializer.Serialize(validChecksum),
-            CreatedAtUtc = DateTime.UtcNow.AddDays(-1),
-            CreatedByUsername = "test-user"
+            KeyFieldsChecksumJson = validChecksum,
+            CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1),
+            UserName = "test-user"
         };
 
         var reportChecksums = new List<ReportChecksum> { validReport, invalidReport };
         var mockDbSet = reportChecksums.BuildMockDbSet();
-        
-        _scenarioFactory.ProfitSharingDbContext
+
+        _scenarioFactory.ProfitSharingReadOnlyDbContext
             .Setup(c => c.ReportChecksums)
             .Returns(mockDbSet.Object);
 
@@ -375,8 +395,8 @@ public class ChecksumValidationServiceTests
         // Arrange
         var reportChecksums = new List<ReportChecksum>(); // Empty
         var mockDbSet = reportChecksums.BuildMockDbSet();
-        
-        _scenarioFactory.ProfitSharingDbContext
+
+        _scenarioFactory.ProfitSharingReadOnlyDbContext
             .Setup(c => c.ReportChecksums)
             .Returns(mockDbSet.Object);
 
@@ -396,13 +416,13 @@ public class ChecksumValidationServiceTests
         // Arrange
         short profitYear = 2024;
         string reportType = "ComplexReport";
-        
-        var keyFieldsChecksum = new Dictionary<string, KeyValuePair<decimal, byte[]>>
+
+        var keyFieldsChecksum = new List<KeyValuePair<string, KeyValuePair<decimal, byte[]>>>
         {
-            { "Level1.Amount", new KeyValuePair<decimal, byte[]>(100m, new byte[] { 1, 2, 3 }) },
-            { "Level1.Nested.Total", new KeyValuePair<decimal, byte[]>(250.50m, new byte[] { 4, 5, 6 }) }
+            new("Level1.Amount", new KeyValuePair<decimal, byte[]>(100m, new byte[] { 1, 2, 3 })),
+            new("Level1.Nested.Total", new KeyValuePair<decimal, byte[]>(250.50m, new byte[] { 4, 5, 6 }))
         };
-        
+
         var complexReportData = new
         {
             Level1 = new
@@ -424,15 +444,15 @@ public class ChecksumValidationServiceTests
             ReportType = reportType,
             RequestJson = "{}",
             ReportJson = JsonSerializer.Serialize(complexReportData),
-            KeyFieldsChecksumJson = JsonSerializer.Serialize(keyFieldsChecksum),
-            CreatedAtUtc = DateTime.UtcNow.AddDays(-1),
-            CreatedByUsername = "test-user"
+            KeyFieldsChecksumJson = keyFieldsChecksum,
+            CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1),
+            UserName = "test-user"
         };
 
         var reportChecksums = new List<ReportChecksum> { archivedReport };
         var mockDbSet = reportChecksums.BuildMockDbSet();
-        
-        _scenarioFactory.ProfitSharingDbContext
+
+        _scenarioFactory.ProfitSharingReadOnlyDbContext
             .Setup(c => c.ReportChecksums)
             .Returns(mockDbSet.Object);
 
@@ -469,7 +489,7 @@ public class ChecksumValidationServiceTests
         short profitYear = 2024;
         string reportType = "TestReport";
 
-        _scenarioFactory.ProfitSharingDbContext
+        _scenarioFactory.ProfitSharingReadOnlyDbContext
             .Setup(c => c.ReportChecksums)
             .Throws(new Exception("Database connection failed"));
 
