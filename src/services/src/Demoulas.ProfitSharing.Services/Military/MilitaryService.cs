@@ -9,6 +9,7 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Military;
 
@@ -16,12 +17,16 @@ public class MilitaryService : IMilitaryService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
+    private readonly ILogger<MilitaryService> _logger;
 
-    public MilitaryService(IProfitSharingDataContextFactory dataContextFactory,
-        IDemographicReaderService demographicReaderService)
+    public MilitaryService(
+        IProfitSharingDataContextFactory dataContextFactory,
+        IDemographicReaderService demographicReaderService,
+        ILogger<MilitaryService> logger)
     {
         _dataContextFactory = dataContextFactory;
         _demographicReaderService = demographicReaderService;
+        _logger = logger;
     }
 
     public Task<Result<MilitaryContributionResponse>> CreateMilitaryServiceRecordAsync(
@@ -29,105 +34,136 @@ public class MilitaryService : IMilitaryService
     {
         return _dataContextFactory.UseWritableContext(async c =>
         {
+            try
+            {
 #pragma warning disable DSMPS001
-            var d = await c.Demographics.FirstOrDefaultAsync(d => d.BadgeNumber == req.BadgeNumber,
+                var d = await c.Demographics.FirstOrDefaultAsync(d => d.BadgeNumber == req.BadgeNumber,
 #pragma warning restore DSMPS001
-                cancellationToken);
+                    cancellationToken);
 
-            if (d == null)
-            {
-                return Result<MilitaryContributionResponse>.Failure(Error.EmployeeNotFound);
+                if (d == null)
+                {
+                    return Result<MilitaryContributionResponse>.Failure(Error.EmployeeNotFound);
+                }
+
+                var pd = new ProfitDetail
+                {
+                    ProfitCodeId = /* 0 */ProfitCode.Constants.IncomingContributions,
+                    ProfitYear = req.ProfitYear,
+                    ProfitYearIteration = 1,
+                    CommentTypeId = /* 19 */CommentType.Constants.Military.Id,
+                    Remark = /* 19 */CommentType.Constants.Military.Name,
+                    Contribution = req.ContributionAmount,
+                    Ssn = d.Ssn,
+                    YearsOfServiceCredit = (byte)(req.IsSupplementalContribution ? 0 : 1),
+                    MonthToDate = 12,
+                    YearToDate = (short)req.ContributionDate.Year
+                };
+                c.ProfitDetails.Add(pd);
+
+                await c.SaveChangesAsync(cancellationToken);
+
+                return Result<MilitaryContributionResponse>.Success(new MilitaryContributionResponse
+                {
+                    BadgeNumber = req.BadgeNumber,
+                    CommentTypeId = /* 19 */CommentType.Constants.Military,
+                    ProfitYear = req.ProfitYear,
+                    ContributionDate = new DateOnly(pd.YearToDate, pd.MonthToDate, 31),
+                    Amount = pd.Contribution,
+                    IsSupplementalContribution = pd.YearsOfServiceCredit == 0
+                });
             }
-
-            var pd = new ProfitDetail
+            catch (DbUpdateException ex)
             {
-                ProfitCodeId = /* 0 */ProfitCode.Constants.IncomingContributions,
-                ProfitYear = req.ProfitYear,
-                ProfitYearIteration = 1,
-                CommentTypeId = /* 19 */CommentType.Constants.Military.Id,
-                Remark = /* 19 */CommentType.Constants.Military.Name,
-                Contribution = req.ContributionAmount,
-                Ssn = d.Ssn,
-                YearsOfServiceCredit = (byte)(req.IsSupplementalContribution ? 0 : 1),
-                MonthToDate = 12,
-                YearToDate = (short)req.ContributionDate.Year
-            };
-            c.ProfitDetails.Add(pd);
+                _logger.LogError(ex, "Database error creating military contribution for Badge: {BadgeNumber}, ProfitYear: {ProfitYear}",
+                    req.BadgeNumber, req.ProfitYear);
 
-            await c.SaveChangesAsync(cancellationToken);
+                // Check if it's a duplicate key/constraint violation
+                if (ex.InnerException?.Message.Contains("unique", StringComparison.OrdinalIgnoreCase) == true ||
+                    ex.InnerException?.Message.Contains("duplicate", StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    return Result<MilitaryContributionResponse>.Failure(Error.MilitaryContributionDuplicate);
+                }
 
-            return Result<MilitaryContributionResponse>.Success(new MilitaryContributionResponse
+                return Result<MilitaryContributionResponse>.Failure(Error.Unexpected("Failed to save military contribution record"));
+            }
+            catch (Exception ex)
             {
-                BadgeNumber = req.BadgeNumber,
-                CommentTypeId = /* 19 */CommentType.Constants.Military,
-                ProfitYear = req.ProfitYear,
-                ContributionDate = new DateOnly(pd.YearToDate, pd.MonthToDate, 31),
-                Amount = pd.Contribution,
-                IsSupplementalContribution = pd.YearsOfServiceCredit == 0
-            });
+                _logger.LogError(ex, "Unexpected error creating military contribution for Badge: {BadgeNumber}, ProfitYear: {ProfitYear}",
+                    req.BadgeNumber, req.ProfitYear);
+                return Result<MilitaryContributionResponse>.Failure(Error.Unexpected(ex.Message));
+            }
         }, cancellationToken);
     }
 
     public async Task<Result<PaginatedResponseDto<MilitaryContributionResponse>>> GetMilitaryServiceRecordAsync(GetMilitaryContributionRequest req, bool isArchiveRequest,
         CancellationToken cancellationToken = default)
     {
-        #region Validation
-
-        var validator = new InlineValidator<GetMilitaryContributionRequest>();
-
-        if (!isArchiveRequest)
+        try
         {
-            validator.RuleFor(r => r.BadgeNumber)
-                .GreaterThan(0)
-                .WithMessage($"{nameof(GetMilitaryContributionRequest.BadgeNumber)} must be greater than zero.");
-        }
+            #region Validation
 
-
-        var validationResult = await validator.ValidateAsync(req, cancellationToken);
-
-        if (!validationResult.IsValid)
-        {
-            var errors = validationResult.Errors
-                .GroupBy(e => e.PropertyName)
-                .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
-
-            return Result<PaginatedResponseDto<MilitaryContributionResponse>>.ValidationFailure(errors);
-        }
-
-        #endregion
-
-        var result = await _dataContextFactory.UseReadOnlyContext(async ctx =>
-        {
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
-            var query = ctx.ProfitDetails
-                .Include(pd => pd.CommentType)
-                .Join(demographics,
-                    c => c.Ssn,
-                    cm => cm.Ssn,
-                    (pd, d) => new { pd, d })
-                .Where(x => x.pd.CommentTypeId == CommentType.Constants.Military.Id)
-                .OrderByDescending(x => x.pd.ProfitYear)
-                .ThenByDescending(x => x.pd.CreatedAtUtc)
-                .ThenByDescending(x => x.pd.Id)
-                .Select(x => new MilitaryContributionResponse
-                {
-                    BadgeNumber = x.d.BadgeNumber,
-                    ProfitYear = x.pd.ProfitYear,
-                    CommentTypeId = x.pd.CommentTypeId,
-                    ContributionDate = new DateOnly(x.pd.YearToDate == 0 ? x.pd.ProfitYear : x.pd.YearToDate, x.pd.MonthToDate == 0 ? 12 : x.pd.MonthToDate, 31),
-                    Amount = x.pd.Contribution,
-                    IsSupplementalContribution = x.pd.YearsOfServiceCredit == 0,
-                    IsExecutive = x.d.PayFrequencyId == Demoulas.ProfitSharing.Data.Entities.PayFrequency.Constants.Monthly
-                });
+            var validator = new InlineValidator<GetMilitaryContributionRequest>();
 
             if (!isArchiveRequest)
             {
-                query = query.Where(x => x.BadgeNumber == req.BadgeNumber);
+                validator.RuleFor(r => r.BadgeNumber)
+                    .GreaterThan(0)
+                    .WithMessage($"{nameof(GetMilitaryContributionRequest.BadgeNumber)} must be greater than zero.");
             }
 
-            return await query.ToPaginationResultsAsync(req, cancellationToken);
-        });
+            var validationResult = await validator.ValidateAsync(req, cancellationToken);
 
-        return Result<PaginatedResponseDto<MilitaryContributionResponse>>.Success(result);
+            if (!validationResult.IsValid)
+            {
+                var errors = validationResult.Errors
+                    .GroupBy(e => e.PropertyName)
+                    .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
+
+                return Result<PaginatedResponseDto<MilitaryContributionResponse>>.ValidationFailure(errors);
+            }
+
+            #endregion
+
+            var result = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+            {
+                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var query = ctx.ProfitDetails
+                    .Include(pd => pd.CommentType)
+                    .Join(demographics,
+                        c => c.Ssn,
+                        cm => cm.Ssn,
+                        (pd, d) => new { pd, d })
+                    .Where(x => x.pd.CommentTypeId == CommentType.Constants.Military.Id)
+                    .OrderByDescending(x => x.pd.ProfitYear)
+                    .ThenByDescending(x => x.pd.CreatedAtUtc)
+                    .ThenByDescending(x => x.pd.Id)
+                    .Select(x => new MilitaryContributionResponse
+                    {
+                        BadgeNumber = x.d.BadgeNumber,
+                        ProfitYear = x.pd.ProfitYear,
+                        CommentTypeId = x.pd.CommentTypeId,
+                        ContributionDate = new DateOnly(x.pd.YearToDate == 0 ? x.pd.ProfitYear : x.pd.YearToDate, x.pd.MonthToDate == 0 ? 12 : x.pd.MonthToDate, 31),
+                        Amount = x.pd.Contribution,
+                        IsSupplementalContribution = x.pd.YearsOfServiceCredit == 0,
+                        IsExecutive = x.d.PayFrequencyId == Demoulas.ProfitSharing.Data.Entities.PayFrequency.Constants.Monthly
+                    });
+
+                if (!isArchiveRequest)
+                {
+                    query = query.Where(x => x.BadgeNumber == req.BadgeNumber);
+                }
+
+                return await query.ToPaginationResultsAsync(req, cancellationToken);
+            });
+
+            return Result<PaginatedResponseDto<MilitaryContributionResponse>>.Success(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving military contribution records for Badge: {BadgeNumber}, IsArchiveRequest: {IsArchiveRequest}",
+                req.BadgeNumber, isArchiveRequest);
+            return Result<PaginatedResponseDto<MilitaryContributionResponse>>.Failure(Error.Unexpected("Failed to retrieve military contribution records"));
+        }
     }
 }
