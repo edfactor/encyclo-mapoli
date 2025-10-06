@@ -32,7 +32,9 @@ import {
   ProfitYearRequest
 } from "../../reduxstore/types";
 // usePrerequisiteNavigations now encapsulated by PrerequisiteGuard
+import CrossReferenceValidationDisplay from "../../components/CrossReferenceValidationDisplay/CrossReferenceValidationDisplay";
 import PrerequisiteGuard from "../../components/PrerequisiteGuard";
+import { MasterUpdateCrossReferenceValidationResponse } from "../../types/validation/cross-reference-validation";
 import { MessageKeys, Messages } from "../../utils/messageDictonary";
 import ChangesList from "./ChangesList";
 import ProfitShareEditConfirmation from "./ProfitShareEditConfirmation";
@@ -106,7 +108,8 @@ const useRevertAction = (
 const useSaveAction = (
   setEmployeesReverted: (count: number) => void,
   setBeneficiariesReverted: (count: number) => void,
-  setEtvasReverted: (count: number) => void
+  setEtvasReverted: (count: number) => void,
+  setValidationResponse: (response: MasterUpdateCrossReferenceValidationResponse | null) => void
 ) => {
   const { profitSharingEditQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const [applyMaster] = useGetMasterApplyMutation();
@@ -138,6 +141,13 @@ const useSaveAction = (
 
         console.log("Successfully applied changes to year end: ", payload);
         console.log("Employees affected: ", payload?.employeesEffected);
+
+        // Capture cross-reference validation if present
+        if (payload.crossReferenceValidation) {
+          setValidationResponse(payload.crossReferenceValidation);
+          console.log("Cross-reference validation:", payload.crossReferenceValidation);
+        }
+
         setEmployeesReverted(payload?.employeesEffected ?? 0);
         setBeneficiariesReverted(payload?.beneficiariesEffected ?? 0);
         setEtvasReverted(payload?.etvasEffected ?? 0);
@@ -359,6 +369,11 @@ const ProfitShareEditUpdate = () => {
   const [updatedBy, setUpdatedBy] = useState<string | null>(null);
   const [updatedTime, setUpdatedTime] = useState<string | null>(null);
 
+  // State for cross-reference validation response
+  const [validationResponse, setValidationResponse] = useState<MasterUpdateCrossReferenceValidationResponse | null>(
+    null
+  );
+
   // This is a flag used to indicate that the year end change have been made
   // and a banner should be shown indicating this
   const [changesApplied, setChangesApplied] = useState<boolean>(false);
@@ -369,7 +384,12 @@ const ProfitShareEditUpdate = () => {
     setEtvasReverted,
     setChangesApplied
   );
-  const saveAction = useSaveAction(setEmployeesAffected, setBeneficiariesAffected, setEtvasAffected);
+  const saveAction = useSaveAction(
+    setEmployeesAffected,
+    setBeneficiariesAffected,
+    setEtvasAffected,
+    setValidationResponse
+  );
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [pageNumberReset, setPageNumberReset] = useState(false);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
@@ -507,6 +527,14 @@ const ProfitShareEditUpdate = () => {
               </div>
             )
           }
+
+          {/* Cross-Reference Validation Display */}
+          {validationResponse && (
+            <div className="w-full px-[24px]">
+              <CrossReferenceValidationDisplay validation={validationResponse} />
+            </div>
+          )}
+
           <Grid
             container
             rowSpacing="24px"

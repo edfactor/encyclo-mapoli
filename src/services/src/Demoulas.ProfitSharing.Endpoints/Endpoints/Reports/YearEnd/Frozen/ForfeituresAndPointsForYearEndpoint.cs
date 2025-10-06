@@ -71,10 +71,7 @@ public class ForfeituresAndPointsForYearEndpoint : EndpointWithCsvTotalsBase<Fro
                     "PAY443",
                     req.ProfitYear,
                     req,
-                    async (request, _, cancellationToken) =>
-                    {
-                        return await _forfeituresAndPointsForYearService.GetForfeituresAndPointsForYearAsync(request, cancellationToken);
-                    },
+                    async (request, _, cancellationToken) => await _forfeituresAndPointsForYearService.GetForfeituresAndPointsForYearAsync(request, cancellationToken),
                     ct);
             }
             else
