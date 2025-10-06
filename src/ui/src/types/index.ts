@@ -22,6 +22,9 @@ export * from "./december-activities/forfeitures";
 export * from "./december-activities/military";
 export * from "./december-activities/termination";
 
+// Distribution Inquiry types
+export * from "./distributions";
+
 // Fiscal types
 export * from "./fiscal/executive";
 

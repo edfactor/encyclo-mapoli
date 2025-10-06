@@ -33,8 +33,8 @@ public class BreakdownReportByStoreTests
         _calendarService = new CalendarService(_dataContextFactory, _aps, distributedCache);
         _embeddedSqlService = new EmbeddedSqlService();
         _totalService = new TotalService(_dataContextFactory, _calendarService, _embeddedSqlService,
-            new DemographicReaderService(new FrozenService(_dataContextFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        var frozenService = new FrozenService(_dataContextFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object);
+            new DemographicReaderService(new FrozenService(_dataContextFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        var frozenService = new FrozenService(_dataContextFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache);
         IHttpContextAccessor httpCtxAcc = Mock.Of<IHttpContextAccessor>();
         _breakdownService = new BreakdownReportService(_dataContextFactory, _calendarService, _totalService, new DemographicReaderService(frozenService, httpCtxAcc), new Mock<IPayrollDuplicateSsnReportService>().Object);
     }

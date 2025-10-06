@@ -41,8 +41,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
         TerminatedEmployeeService mockService =
             new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService, new Microsoft.Extensions.Logging.Abstractions.NullLogger<TerminatedEmployeeReportService>());
 
@@ -112,8 +112,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
         TerminatedEmployeeService mockService =
             new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService, new Microsoft.Extensions.Logging.Abstractions.NullLogger<TerminatedEmployeeReportService>());
 
@@ -258,8 +258,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
         TerminatedEmployeeService mockService =
             new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService, new Microsoft.Extensions.Logging.Abstractions.NullLogger<TerminatedEmployeeReportService>());
 
@@ -1154,8 +1154,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
         TerminatedEmployeeService mockService =
             new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService, new Microsoft.Extensions.Logging.Abstractions.NullLogger<TerminatedEmployeeReportService>());
 
@@ -1257,8 +1257,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
         TerminatedEmployeeService service =
             new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService, new Microsoft.Extensions.Logging.Abstractions.NullLogger<TerminatedEmployeeReportService>());
 
@@ -1303,8 +1303,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
         TerminatedEmployeeService service =
             new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService, new Microsoft.Extensions.Logging.Abstractions.NullLogger<TerminatedEmployeeReportService>());
 
@@ -1406,8 +1406,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
         TerminatedEmployeeService service = new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService, new Microsoft.Extensions.Logging.Abstractions.NullLogger<TerminatedEmployeeReportService>());
 
         var request = new StartAndEndDateRequest
@@ -1571,8 +1571,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        var demographicReaderService = new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        var demographicReaderService = new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
         var terminatedEmployeeService = new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService, new Microsoft.Extensions.Logging.Abstractions.NullLogger<TerminatedEmployeeReportService>());
 
         // Act
@@ -1706,8 +1706,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        var demographicReaderService = new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        var demographicReaderService = new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
         var terminatedEmployeeService = new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService, new Microsoft.Extensions.Logging.Abstractions.NullLogger<TerminatedEmployeeReportService>());
 
         // Act
@@ -1913,8 +1913,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        var demographicReaderService = new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        var demographicReaderService = new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
         var terminatedEmployeeService = new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService, new Microsoft.Extensions.Logging.Abstractions.NullLogger<TerminatedEmployeeReportService>());
 
         // Act - Get SMART data with new balance filtering
@@ -2133,8 +2133,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        var demographicReaderService = new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        var demographicReaderService = new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
         var terminatedEmployeeService = new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService, new Microsoft.Extensions.Logging.Abstractions.NullLogger<TerminatedEmployeeReportService>());
 
         // Act - Get SMART data
@@ -2377,8 +2377,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        var demographicReaderService = new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        var demographicReaderService = new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
         var terminatedEmployeeService = new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService, new Microsoft.Extensions.Logging.Abstractions.NullLogger<TerminatedEmployeeReportService>());
 
         // Act - Get current SMART data with balance filtering
@@ -2673,8 +2673,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        var demographicReaderService = new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        var demographicReaderService = new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
         var terminatedEmployeeService = new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService, new Microsoft.Extensions.Logging.Abstractions.NullLogger<TerminatedEmployeeReportService>());
 
         var beforeFiltering = await terminatedEmployeeService.GetReportAsync(request, CancellationToken.None);
@@ -2842,8 +2842,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        var demographicReaderService = new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        var demographicReaderService = new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
         var terminatedEmployeeService = new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService, new Microsoft.Extensions.Logging.Abstractions.NullLogger<TerminatedEmployeeReportService>());
 
         // Act - Get SMART data with new transaction year boundary filtering
@@ -3009,8 +3009,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        var demographicReaderService = new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        var demographicReaderService = new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
         var terminatedEmployeeService = new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService, new Microsoft.Extensions.Logging.Abstractions.NullLogger<TerminatedEmployeeReportService>());
 
         var request = new StartAndEndDateRequest
@@ -3109,8 +3109,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        var demographicReaderService = new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        var demographicReaderService = new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
         var terminatedEmployeeService = new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService, new Microsoft.Extensions.Logging.Abstractions.NullLogger<TerminatedEmployeeReportService>());
 
         var request = new StartAndEndDateRequest
@@ -3185,8 +3185,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory, calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        var demographicReaderService = new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        var demographicReaderService = new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
         var service = new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService, new Microsoft.Extensions.Logging.Abstractions.NullLogger<TerminatedEmployeeReportService>());
 
         // Get SMART system data
@@ -3312,8 +3312,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
         TerminatedEmployeeService smartService = new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService, new Microsoft.Extensions.Logging.Abstractions.NullLogger<TerminatedEmployeeReportService>());
 
         var smartData = await smartService.GetReportAsync(new StartAndEndDateRequest { BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue, SortBy = "name" }, CancellationToken.None);
@@ -3410,8 +3410,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
         TerminatedEmployeeService smartService = new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService, new Microsoft.Extensions.Logging.Abstractions.NullLogger<TerminatedEmployeeReportService>());
 
         var smartData = await smartService.GetReportAsync(new StartAndEndDateRequest { BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue, SortBy = "name" }, CancellationToken.None);
@@ -3506,8 +3506,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
 
         // Let's investigate the database directly to understand why certain employees are missing
         var investigationResults = await DbFactory.UseReadOnlyContext(async ctx =>
@@ -3625,8 +3625,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
         TerminatedEmployeeService smartService = new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService, new Microsoft.Extensions.Logging.Abstractions.NullLogger<TerminatedEmployeeReportService>());
 
         var smartData = await smartService.GetReportAsync(new StartAndEndDateRequest { BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue, SortBy = "name" }, CancellationToken.None);
@@ -3927,8 +3927,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
 
         TestOutputHelper.WriteLine($"=== INVESTIGATING EMPLOYEE INCLUSION CRITERIA ===");
 
@@ -4017,8 +4017,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
         TerminatedEmployeeService smartService = new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService, new Microsoft.Extensions.Logging.Abstractions.NullLogger<TerminatedEmployeeReportService>());
 
         var smartData = await smartService.GetReportAsync(new StartAndEndDateRequest { BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue, SortBy = "name" }, CancellationToken.None);
@@ -4080,8 +4080,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
         TerminatedEmployeeService smartService = new TerminatedEmployeeService(DbFactory, totalService, demographicReaderService, new Microsoft.Extensions.Logging.Abstractions.NullLogger<TerminatedEmployeeReportService>());
 
         var smartData = await smartService.GetReportAsync(new StartAndEndDateRequest { BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue, SortBy = "name" }, CancellationToken.None);
@@ -4616,8 +4616,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
             calendarService, new EmbeddedSqlService(),
-            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor()));
-        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object), new HttpContextAccessor());
+            new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor());
 
         var terminatedService = new TerminatedEmployeeReportService(DbFactory, totalService, demographicReaderService, new Microsoft.Extensions.Logging.Abstractions.NullLogger<TerminatedEmployeeReportService>());
 
