@@ -119,19 +119,26 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     triggerSearch
   ]);
 
-  // Need a useEffect on a change in distributionsAndForfeitures to reset the page number
-  const prevDistributionsAndForfeitures = useRef<any>(null);
+  // Reset pagination when search filters change (not when paginating through results)
+  const prevQueryParams = useRef<any>(null);
   useEffect(() => {
+    const currentQueryParams = {
+      startDate: distributionsAndForfeituresQueryParams?.startDate,
+      endDate: distributionsAndForfeituresQueryParams?.endDate,
+      profitYear
+    };
+
     if (
-      distributionsAndForfeitures !== prevDistributionsAndForfeitures.current &&
-      distributionsAndForfeitures?.response?.results &&
-      distributionsAndForfeitures.response.results.length !==
-        prevDistributionsAndForfeitures.current?.response?.results?.length
+      prevQueryParams.current &&
+      (prevQueryParams.current.startDate !== currentQueryParams.startDate ||
+        prevQueryParams.current.endDate !== currentQueryParams.endDate ||
+        prevQueryParams.current.profitYear !== currentQueryParams.profitYear)
     ) {
       resetPagination();
     }
-    prevDistributionsAndForfeitures.current = distributionsAndForfeitures;
-  }, [distributionsAndForfeitures, resetPagination]);
+
+    prevQueryParams.current = currentQueryParams;
+  }, [distributionsAndForfeituresQueryParams?.startDate, distributionsAndForfeituresQueryParams?.endDate, profitYear, resetPagination]);
 
   useEffect(() => {
     if (hasToken && initialSearchLoaded) {
