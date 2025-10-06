@@ -136,20 +136,25 @@ test.describe("Master Inqiry landing page: ", () => {
     await page.getByRole("combobox", { name: "roles" }).click();
     await page.getByRole("option", { name: "IT-DevOps" }).getByRole("checkbox").check();
     await page.locator("body").click();
-    await page.locator('input[name="badgeNumber"]').fill("706056");
-    await page.getByRole("button", { name: "SEARCH" }).click();
     const [response] = await Promise.all([
-      page.waitForResponse((resp) => resp.url().includes("master-inquiry/search"))
+      page.waitForResponse((resp) => resp.url().includes("master-inquiry/search")),
+      (async () => {
+        await page.locator('input[name="badgeNumber"]').fill("706056");
+        await page.getByRole("button", { name: "SEARCH" }).click();
+      })()
     ]);
     const json = await response.json();
     await expect(json.results[0].firstName).toContain("X");
   });
 
   test("If we enter Name as Evans and click on Badge Number link in the Grid", async ({ page }) => {
-    await page.locator('input[name="name"]').fill("evans");
-    await page.getByRole("button", { name: "SEARCH" }).click();
+   
     const [response] = await Promise.all([
-      page.waitForResponse((resp) => resp.url().includes("master-inquiry/search"))
+      page.waitForResponse((resp) => resp.url().includes("master-inquiry/search")),
+      (async () => {
+        await page.locator('input[name="name"]').fill("evans");
+        await page.getByRole("button", { name: "SEARCH" }).click();
+      })()
     ]);
     await expect(response.status()).toBe(200);
     await page.getByRole("gridcell").nth(0).locator("a").click();
