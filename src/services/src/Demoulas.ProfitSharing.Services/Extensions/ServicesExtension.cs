@@ -83,6 +83,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IPostFrozenService, PostFrozenService>();
 
         _ = builder.Services.AddScoped<IPayProfitUpdateService, PayProfitUpdateService>();
+        _ = builder.Services.AddScoped<IProfitDetailReversalsService, ProfitDetailReversalsService>();
         _ = builder.Services.AddScoped<IBreakdownService, BreakdownReportService>();
         _ = builder.Services.AddScoped<INavigationService, NavigationService>();
         _ = builder.Services.AddScoped<IBeneficiaryInquiryService, BeneficiaryInquiryService>();

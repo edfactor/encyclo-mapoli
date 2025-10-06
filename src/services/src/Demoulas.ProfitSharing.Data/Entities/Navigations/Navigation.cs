@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Data.Entities.Navigations;
+﻿namespace Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 public sealed class Navigation
 {
@@ -80,6 +80,7 @@ public sealed class Navigation
         public const short ProfitShareReportEditRun = 151;
 
         public const short PayBenReport = 152;
+        public const short ProfitDetailReversals = 153;
 
     }
 

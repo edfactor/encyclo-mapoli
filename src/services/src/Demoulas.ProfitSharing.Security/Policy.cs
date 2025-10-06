@@ -39,4 +39,9 @@ public static class Policy
     /// View member distributions (read-only).
     /// </summary>
     public static readonly string CanViewDistributions = "CAN_VIEW_DISTRIBUTIONS";
+
+    /// <summary>
+    /// Can reverse profit detail entries (corrections).
+    /// </summary>
+    public static readonly string CanReverseProfitDetails = "CAN_REVERSE_PROFIT_DETAILS";
 }
