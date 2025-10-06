@@ -491,17 +491,17 @@ public sealed class ChecksumValidationService : IChecksumValidationService
                     ReportCode = reportCode,
                     IsValid = false,
                     CurrentValue = currentValue,
-                    Message = $"Validation failed: {validationResult.Error?.Message}",
+                    Message = $"Validation failed: {validationResult.Error?.Description ?? "Unknown error"}",
                     Notes = "Error during validation"
                 };
             }
 
             var checksumResponse = validationResult.Value;
-            bool fieldIsValid = checksumResponse.IsValid;
+            bool fieldIsValid = checksumResponse?.IsValid ?? false;
 
             // Get expected value from archived data if validation failed
             decimal? expectedValue = null;
-            if (!fieldIsValid && checksumResponse.FieldResults.ContainsKey(fieldName))
+            if (!fieldIsValid && checksumResponse?.FieldResults.ContainsKey(fieldName) == true)
             {
                 // We don't have the actual archived value, but we know it doesn't match
                 expectedValue = null; // Could enhance this by storing actual values in checksum table
@@ -524,7 +524,7 @@ public sealed class ChecksumValidationService : IChecksumValidationService
                 ExpectedValue = expectedValue,
                 Variance = variance,
                 Message = message,
-                ArchivedAt = checksumResponse.ArchivedAt
+                ArchivedAt = checksumResponse?.ArchivedAt
             };
         }
         catch (Exception ex)

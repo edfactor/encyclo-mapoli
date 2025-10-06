@@ -52,9 +52,9 @@ public sealed class YearEndProfitSharingReportTotalsEndpoint : ProfitSharingEndp
         Group<YearEndGroup>();
     }
 
-    public override async Task<Results<Ok<YearEndProfitSharingReportTotals>, NotFound, ProblemHttpResult>> ExecuteAsync(BadgeNumberRequest req, CancellationToken ct)
+    public override Task<Results<Ok<YearEndProfitSharingReportTotals>, NotFound, ProblemHttpResult>> ExecuteAsync(BadgeNumberRequest req, CancellationToken ct)
     {
-        return await this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
+        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
             var data = await _auditService.ArchiveCompletedReportAsync(
                 ReportName,

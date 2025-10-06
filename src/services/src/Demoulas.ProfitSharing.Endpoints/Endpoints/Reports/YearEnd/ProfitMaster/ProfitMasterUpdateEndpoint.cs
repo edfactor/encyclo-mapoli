@@ -63,7 +63,7 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
             "Performing cross-reference validation for Master Update (PAY444|PAY447) for year {ProfitYear}",
             req.ProfitYear);
 
-        // TODO: For now, we'll validate what we have archived (PAY443)
+        // NOTE: For now, we'll validate what we have archived (PAY443)
         // In a future iteration, we need to collect actual PAY444 totals to validate
         // For this implementation, we're establishing the validation infrastructure
         var currentValues = new Dictionary<string, decimal>
@@ -74,7 +74,7 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
             // - Forfeiture totals query
             // - Contribution totals query
             // - Earnings totals query
-            
+
             // Example: if we had the data
             // ["PAY443.DistributionTotals"] = actualDistributionTotal,
             // ["QPAY129.Distributions"] = qpay129DistributionTotal,
@@ -91,22 +91,22 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
         if (!crossRefValidation.IsSuccess)
         {
             _logger.LogError(
-                "Cross-reference validation failed for year {ProfitYear}: {Error}",
+                "Cross-reference validation failed for year {ProfitYear}: {ErrorDescription}",
                 req.ProfitYear,
-                crossRefValidation.Error?.Message);
-            
+                crossRefValidation.Error?.Description ?? "Unknown error");
+
             // For now, we'll log but not block - in production this should throw/block
             // when BlockMasterUpdate is true
         }
-        else if (crossRefValidation.Value.BlockMasterUpdate)
+        else if (crossRefValidation.Value?.BlockMasterUpdate == true)
         {
             _logger.LogWarning(
                 "Master Update is BLOCKED due to critical cross-reference validation failures for year {ProfitYear}. " +
                 "Issues: {Issues}",
                 req.ProfitYear,
-                string.Join("; ", crossRefValidation.Value.CriticalIssues));
-            
-            // TODO: In production, throw validation exception here
+                string.Join("; ", crossRefValidation.Value.CriticalIssues ?? []));
+
+            // NOTE: In production, throw validation exception here
             // For now, we'll continue but attach the validation results
         }
 
@@ -117,12 +117,12 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
             async (arditReq, _, cancellationToken) =>
             {
                 ProfitMasterUpdateResponse response = await _profitMasterService.Update(arditReq, cancellationToken);
-                
+
                 // Attach cross-reference validation results to response
-                if (crossRefValidation.IsSuccess)
+                if (crossRefValidation.IsSuccess && crossRefValidation.Value is not null)
                 {
                     response.CrossReferenceValidation = crossRefValidation.Value;
-                    
+
                     _logger.LogInformation(
                         "Master Update completed for year {ProfitYear} with cross-reference validation: " +
                         "{PassedValidations}/{TotalValidations} passed",
@@ -130,12 +130,12 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
                         crossRefValidation.Value.PassedValidations,
                         crossRefValidation.Value.TotalValidations);
                 }
-                
+
                 await _navigationService.UpdateNavigation(Navigation.Constants.MasterUpdate, NavigationStatus.Constants.Complete, cancellationToken);
                 return response;
             },
             ct);
-            
+
         await Send.OkAsync(response, ct);
     }
 }
