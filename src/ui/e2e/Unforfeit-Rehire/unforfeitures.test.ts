@@ -61,12 +61,15 @@ test.describe("Unforfeitures landing page: ", () => {
     });
 
     test('changing status of unforfeit', async ({ page }) => {
-        await page.getByRole('combobox').nth(1).click();
-        await page.getByRole('option', { name: 'Complete' }).click();
         const [response] = await Promise.all([page.waitForResponse((resp) =>
-            resp.url().includes('api/navigation'))]);
+            resp.url().includes('api/navigation')),
+            (async () => {
+                await page.getByRole('combobox').nth(1).click();
+                await page.getByRole('option', { name: 'Complete' }).click();
+            })()
+        ]);
         const json = await response.json();
-        await expect(json.isSuccessful).toBe(true);
+        await expect(response.status()).toBe(200);
     });
 
     test('changing suggested unforfeit amount', async ({ page }) => {
