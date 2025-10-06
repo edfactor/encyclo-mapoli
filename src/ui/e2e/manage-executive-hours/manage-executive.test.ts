@@ -83,15 +83,15 @@ test.describe("Manage Executive Hours: ", () => {
     });
 
     test('update executive hours from the grid', async ({ page }) => {
-        await page.locator('input[name="badgeNumber"]').fill('706056');
-        await page.getByTestId('searchButton').click();
+
         const [response] = await Promise.all([page.waitForResponse((resp) =>
             resp.url().includes('yearend/executive-hours-and-dollars')),
-        
+
         (async () => {
-            
+            await page.locator('input[name="badgeNumber"]').fill('706056');
+            await page.getByTestId('searchButton').click();
         })()
-    ]);
+        ]);
         await expect(response.status()).toBe(200);
 
         const [response1] = await Promise.all([page.waitForResponse((resp) =>
