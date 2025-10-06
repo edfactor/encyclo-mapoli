@@ -292,6 +292,7 @@ const useManageExecutiveHoursAndDollars = () => {
   const isRowStagedToSave = useMemo(() => selectIsRowStagedToSave(state), [state]);
 
   return {
+    profitYear, // Expose profit year for components to use (e.g., frozen year warnings)
     searchParams: state.search.params,
     searchResults: state.search.results,
     isSearching: isSearching || state.search.isSearching,

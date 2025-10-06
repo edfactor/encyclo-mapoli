@@ -149,8 +149,9 @@ import {
   setForfeitureAdjustmentData
 } from "reduxstore/slices/forfeituresAdjustmentSlice";
 
-/* Use the centralized data source aware base query */
-const baseQuery = createDataSourceAwareBaseQuery();
+/* Use the centralized data source aware base query 
+   2-minute timeout for year-end reports (after database index optimization) */
+const baseQuery = createDataSourceAwareBaseQuery(120000); // 2 minutes in milliseconds
 /* ------------------------------------------------------------------------- */
 
 export const YearsEndApi = createApi({
@@ -1093,7 +1094,10 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getYearEndProfitSharingSummaryReport: builder.query<YearEndProfitSharingReportSummaryResponse, BadgeNumberRequest & { archive?: boolean }>({
+    getYearEndProfitSharingSummaryReport: builder.query<
+      YearEndProfitSharingReportSummaryResponse,
+      BadgeNumberRequest & { archive?: boolean }
+    >({
       query: (params) => ({
         url: `yearend/yearend-profit-sharing-summary-report${params.archive === true ? "?archive=true" : ""}`,
         method: "POST",

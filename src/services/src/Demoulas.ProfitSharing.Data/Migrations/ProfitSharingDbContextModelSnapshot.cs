@@ -25789,6 +25789,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasKey("Id")
                         .HasName("PK_REPORT_CHECKSUM");
 
+                    b.HasIndex("ProfitYear", "ReportType", "CreatedAtUtc")
+                        .IsDescending(false, false, true)
+                        .HasDatabaseName("IDX_REPORT_CHECKSUM_LOOKUP");
+
                     b.ToTable("REPORT_CHECKSUM", (string)null);
                 });
 
@@ -27750,6 +27754,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasIndex(new[] { "EmploymentStatusId" }, "IX_EMPLOYMENT_STATUS")
                         .HasDatabaseName("IX_DEMOGRAPHIC_EMPLOYMENTSTATUSID");
 
+                    b.HasIndex(new[] { "EmploymentStatusId", "HireDate", "TerminationDate" }, "IX_EMPLOYMENT_STATUS_HIRE_TERMINATION")
+                        .HasDatabaseName("IX_DEMOGRAPHIC_EMPLOYMENTSTATUSID_HIREDATE_TERMINATIONDATE");
+
+                    b.HasIndex(new[] { "HireDate" }, "IX_HIRE_DATE")
+                        .HasDatabaseName("IX_DEMOGRAPHIC_HIREDATE");
+
                     b.HasIndex(new[] { "OracleHcmId" }, "IX_ORACLE_HCM_ID")
                         .IsUnique()
                         .HasDatabaseName("IX_DEMOGRAPHIC_ORACLEHCMID");
@@ -29110,9 +29120,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         },
                         new
                         {
-                            Id = (short)50,
+                            Id = (short)2,
                             Disabled = false,
                             Icon = "",
+                            IsNavigable = true,
                             OrderNumber = (byte)1,
                             StatusId = (byte)1,
                             SubTitle = "",
@@ -29121,9 +29132,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         },
                         new
                         {
-                            Id = (short)52,
+                            Id = (short)3,
                             Disabled = true,
                             Icon = "",
+                            IsNavigable = true,
                             OrderNumber = (byte)2,
                             StatusId = (byte)1,
                             SubTitle = "",
@@ -29132,9 +29144,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         },
                         new
                         {
-                            Id = (short)53,
+                            Id = (short)4,
                             Disabled = true,
                             Icon = "",
+                            IsNavigable = true,
                             OrderNumber = (byte)3,
                             StatusId = (byte)1,
                             SubTitle = "",
@@ -29143,9 +29156,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         },
                         new
                         {
-                            Id = (short)54,
+                            Id = (short)5,
                             Disabled = true,
                             Icon = "",
+                            IsNavigable = true,
                             OrderNumber = (byte)4,
                             StatusId = (byte)1,
                             SubTitle = "",
@@ -29154,9 +29168,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         },
                         new
                         {
-                            Id = (short)55,
+                            Id = (short)6,
                             Disabled = false,
                             Icon = "",
+                            IsNavigable = true,
                             OrderNumber = (byte)5,
                             StatusId = (byte)1,
                             SubTitle = "",
@@ -29165,9 +29180,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         },
                         new
                         {
-                            Id = (short)56,
+                            Id = (short)7,
                             Disabled = false,
                             Icon = "",
+                            IsNavigable = true,
                             OrderNumber = (byte)6,
                             StatusId = (byte)1,
                             SubTitle = "",
@@ -29176,11 +29192,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         },
                         new
                         {
-                            Id = (short)51,
+                            Id = (short)100,
                             Disabled = false,
                             Icon = "",
+                            IsNavigable = true,
                             OrderNumber = (byte)1,
-                            ParentId = (short)50,
+                            ParentId = (short)2,
                             StatusId = (byte)1,
                             SubTitle = "",
                             Title = "MASTER INQUIRY",
@@ -29188,11 +29205,38 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         },
                         new
                         {
-                            Id = (short)57,
+                            Id = (short)101,
                             Disabled = false,
                             Icon = "",
+                            IsNavigable = true,
                             OrderNumber = (byte)1,
-                            ParentId = (short)56,
+                            ParentId = (short)2,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "ADJUSTMENTS",
+                            Url = "adjustments"
+                        },
+                        new
+                        {
+                            Id = (short)103,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)1,
+                            ParentId = (short)4,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "DISTRIBUTIONS INQUIRY",
+                            Url = "distributions-inquiry"
+                        },
+                        new
+                        {
+                            Id = (short)102,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)1,
+                            ParentId = (short)7,
                             StatusId = (byte)1,
                             SubTitle = "",
                             Title = "Demographic Freeze",
@@ -29200,11 +29244,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         },
                         new
                         {
-                            Id = (short)1,
+                            Id = (short)9,
                             Disabled = false,
                             Icon = "",
+                            IsNavigable = true,
                             OrderNumber = (byte)1,
-                            ParentId = (short)55,
+                            ParentId = (short)6,
                             StatusId = (byte)1,
                             SubTitle = "",
                             Title = "December Activities",
@@ -29212,23 +29257,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         },
                         new
                         {
-                            Id = (short)14,
+                            Id = (short)10,
                             Disabled = false,
                             Icon = "",
-                            OrderNumber = (byte)2,
-                            ParentId = (short)55,
-                            StatusId = (byte)1,
-                            SubTitle = "",
-                            Title = "Fiscal Close",
-                            Url = "fiscal-close"
-                        },
-                        new
-                        {
-                            Id = (short)2,
-                            Disabled = false,
-                            Icon = "",
+                            IsNavigable = true,
                             OrderNumber = (byte)1,
-                            ParentId = (short)1,
+                            ParentId = (short)9,
                             StatusId = (byte)1,
                             SubTitle = "",
                             Title = "Clean up Reports",
@@ -29236,83 +29270,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         },
                         new
                         {
-                            Id = (short)8,
+                            Id = (short)142,
                             Disabled = false,
                             Icon = "",
-                            OrderNumber = (byte)2,
-                            ParentId = (short)1,
-                            StatusId = (byte)1,
-                            SubTitle = "QPREV-PROF",
-                            Title = "Unforfeit",
-                            Url = "unforfeitures"
-                        },
-                        new
-                        {
-                            Id = (short)7,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)3,
-                            ParentId = (short)1,
-                            StatusId = (byte)1,
-                            SubTitle = "008-13",
-                            Title = "Military Contributions",
-                            Url = "military-entry-and-modification"
-                        },
-                        new
-                        {
-                            Id = (short)9,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)4,
-                            ParentId = (short)1,
-                            StatusId = (byte)1,
-                            SubTitle = "QPAY066",
-                            Title = "Terminations",
-                            Url = "prof-term"
-                        },
-                        new
-                        {
-                            Id = (short)10,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)5,
-                            ParentId = (short)1,
-                            StatusId = (byte)1,
-                            SubTitle = "008-12",
-                            Title = "Forfeitures",
-                            Url = "forfeitures-adjustment"
-                        },
-                        new
-                        {
-                            Id = (short)11,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)6,
-                            ParentId = (short)1,
-                            StatusId = (byte)1,
-                            SubTitle = "QPAY129",
-                            Title = "Distributions and Forfeitures",
-                            Url = "distributions-and-forfeitures"
-                        },
-                        new
-                        {
-                            Id = (short)13,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)9,
-                            ParentId = (short)1,
-                            StatusId = (byte)1,
-                            SubTitle = "PAY426",
-                            Title = "Profit Share Report",
-                            Url = "profit-share-report"
-                        },
-                        new
-                        {
-                            Id = (short)3,
-                            Disabled = false,
-                            Icon = "",
+                            IsNavigable = true,
                             OrderNumber = (byte)1,
-                            ParentId = (short)2,
+                            ParentId = (short)10,
                             StatusId = (byte)1,
                             SubTitle = "",
                             Title = "Demographic Badges Not In PayProfit",
@@ -29320,11 +29283,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         },
                         new
                         {
-                            Id = (short)4,
+                            Id = (short)143,
                             Disabled = false,
                             Icon = "",
+                            IsNavigable = true,
                             OrderNumber = (byte)2,
-                            ParentId = (short)2,
+                            ParentId = (short)10,
                             StatusId = (byte)1,
                             SubTitle = "",
                             Title = "Duplicate SSNs in Demographics",
@@ -29332,11 +29296,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         },
                         new
                         {
-                            Id = (short)5,
+                            Id = (short)144,
                             Disabled = false,
                             Icon = "",
+                            IsNavigable = true,
                             OrderNumber = (byte)3,
-                            ParentId = (short)2,
+                            ParentId = (short)10,
                             StatusId = (byte)1,
                             SubTitle = "",
                             Title = "Negative ETVA",
@@ -29344,11 +29309,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         },
                         new
                         {
-                            Id = (short)6,
+                            Id = (short)146,
                             Disabled = false,
                             Icon = "",
+                            IsNavigable = true,
                             OrderNumber = (byte)4,
-                            ParentId = (short)2,
+                            ParentId = (short)10,
                             StatusId = (byte)1,
                             SubTitle = "",
                             Title = "Duplicate Names and Birthdays",
@@ -29356,11 +29322,103 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         },
                         new
                         {
-                            Id = (short)15,
+                            Id = (short)147,
                             Disabled = false,
                             Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)3,
+                            ParentId = (short)9,
+                            StatusId = (byte)1,
+                            SubTitle = "008-13",
+                            Title = "Military Contributions",
+                            Url = "military-contribution"
+                        },
+                        new
+                        {
+                            Id = (short)148,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)2,
+                            ParentId = (short)9,
+                            StatusId = (byte)1,
+                            SubTitle = "QPREV-PROF",
+                            Title = "Unforfeit",
+                            Url = "unforfeitures"
+                        },
+                        new
+                        {
+                            Id = (short)145,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)4,
+                            ParentId = (short)9,
+                            StatusId = (byte)1,
+                            SubTitle = "QPAY066",
+                            Title = "Terminations",
+                            Url = "prof-term"
+                        },
+                        new
+                        {
+                            Id = (short)106,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)5,
+                            ParentId = (short)9,
+                            StatusId = (byte)1,
+                            SubTitle = "008-12",
+                            Title = "Forfeitures",
+                            Url = "forfeitures-adjustment"
+                        },
+                        new
+                        {
+                            Id = (short)107,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)6,
+                            ParentId = (short)9,
+                            StatusId = (byte)1,
+                            SubTitle = "QPAY129",
+                            Title = "Distributions and Forfeitures",
+                            Url = "distributions-and-forfeitures"
+                        },
+                        new
+                        {
+                            Id = (short)108,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)9,
+                            ParentId = (short)9,
+                            StatusId = (byte)1,
+                            SubTitle = "PAY426",
+                            Title = "Profit Share Report",
+                            Url = "profit-share-report"
+                        },
+                        new
+                        {
+                            Id = (short)8,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)2,
+                            ParentId = (short)6,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "Fiscal Close",
+                            Url = "fiscal-close"
+                        },
+                        new
+                        {
+                            Id = (short)104,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
                             OrderNumber = (byte)1,
-                            ParentId = (short)14,
+                            ParentId = (short)8,
                             StatusId = (byte)1,
                             SubTitle = "PROF-DOLLAR-EXEC-EXTRACT, TPR008-09",
                             Title = "Manage Executive Hours",
@@ -29368,11 +29426,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         },
                         new
                         {
-                            Id = (short)16,
+                            Id = (short)105,
                             Disabled = false,
                             Icon = "",
+                            IsNavigable = true,
                             OrderNumber = (byte)2,
-                            ParentId = (short)14,
+                            ParentId = (short)8,
                             StatusId = (byte)1,
                             SubTitle = "PROF-DOLLAR-EXTRACT",
                             Title = "YTD Wages Extract",
@@ -29380,167 +29439,64 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         },
                         new
                         {
-                            Id = (short)18,
-                            Disabled = false,
+                            Id = (short)138,
+                            Disabled = true,
                             Icon = "",
-                            OrderNumber = (byte)3,
-                            ParentId = (short)14,
+                            IsNavigable = true,
+                            OrderNumber = (byte)99,
+                            ParentId = (short)8,
                             StatusId = (byte)1,
-                            SubTitle = "PAY426",
-                            Title = "Profit Share Report (Edit Run)",
+                            SubTitle = "",
+                            Title = "PAY426N",
                             Url = "pay426n"
                         },
                         new
                         {
-                            Id = (short)17,
+                            Id = (short)140,
                             Disabled = false,
                             Icon = "",
-                            OrderNumber = (byte)4,
-                            ParentId = (short)14,
-                            StatusId = (byte)1,
-                            SubTitle = "PAY426",
-                            Title = "Profit Share Report (Final Run)",
-                            Url = "profit-share-report"
-                        },
-                        new
-                        {
-                            Id = (short)30,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)5,
-                            ParentId = (short)14,
-                            StatusId = (byte)1,
-                            SubTitle = "GET-ELIGIBLE-EMPS",
-                            Title = "Get Eligible Employees",
-                            Url = "eligible-employees"
-                        },
-                        new
-                        {
-                            Id = (short)31,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)6,
-                            ParentId = (short)14,
-                            StatusId = (byte)1,
-                            SubTitle = "PAY443",
-                            Title = "Profit Share Forfeit",
-                            Url = "forfeit"
-                        },
-                        new
-                        {
-                            Id = (short)60,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)7,
-                            ParentId = (short)14,
-                            StatusId = (byte)1,
-                            SubTitle = "PAY444|PAY447",
-                            Title = "Master Update",
-                            Url = "profit-share-update"
-                        },
-                        new
-                        {
-                            Id = (short)62,
-                            Disabled = true,
-                            Icon = "",
-                            OrderNumber = (byte)8,
-                            ParentId = (short)14,
-                            StatusId = (byte)1,
-                            SubTitle = "PAY460, PROFTLD",
-                            Title = "Profit Master Update",
-                            Url = "profit-master-update"
-                        },
-                        new
-                        {
-                            Id = (short)33,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)10,
-                            ParentId = (short)14,
-                            StatusId = (byte)1,
-                            SubTitle = "PAY450",
-                            Title = "Prof PayMaster Update",
-                            Url = "pay450-summary"
-                        },
-                        new
-                        {
-                            Id = (short)64,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)11,
-                            ParentId = (short)14,
-                            StatusId = (byte)1,
-                            SubTitle = "PROF-CNTRL-SHEET",
-                            Title = "Prof Control Sheet",
-                            Url = "prof-control-sheet"
-                        },
-                        new
-                        {
-                            Id = (short)34,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)12,
-                            ParentId = (short)14,
-                            StatusId = (byte)1,
-                            SubTitle = "Prof130",
-                            Title = "Prof Share Report By Age",
-                            Url = ""
-                        },
-                        new
-                        {
-                            Id = (short)41,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)13,
-                            ParentId = (short)14,
-                            StatusId = (byte)1,
-                            SubTitle = "QPAY501",
-                            Title = "Prof Share Gross Rpt",
-                            Url = "profit-share-gross-report"
-                        },
-                        new
-                        {
-                            Id = (short)42,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)14,
-                            ParentId = (short)14,
-                            StatusId = (byte)1,
-                            SubTitle = "QPAY066TA",
-                            Title = "Prof Share by Store",
-                            Url = ""
-                        },
-                        new
-                        {
-                            Id = (short)49,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)15,
-                            ParentId = (short)14,
-                            StatusId = (byte)1,
-                            SubTitle = "PAYCERT",
-                            Title = "Print Profit Certs",
-                            Url = "print-profit-certs"
-                        },
-                        new
-                        {
-                            Id = (short)63,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)16,
-                            ParentId = (short)14,
+                            IsNavigable = false,
+                            OrderNumber = (byte)2,
+                            ParentId = (short)8,
                             StatusId = (byte)1,
                             SubTitle = "",
-                            Title = "Save Prof Paymstr",
-                            Url = "save-prof-paymstr"
+                            Title = "PAY426-2",
+                            Url = "pay426-2"
                         },
                         new
                         {
-                            Id = (short)65,
+                            Id = (short)141,
                             Disabled = false,
                             Icon = "",
+                            IsNavigable = false,
+                            OrderNumber = (byte)2,
+                            ParentId = (short)8,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "PAY426-3",
+                            Url = "pay426-3"
+                        },
+                        new
+                        {
+                            Id = (short)139,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)2,
+                            ParentId = (short)8,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "Profit Summary (PAY426 summary)",
+                            Url = "pay426-9"
+                        },
+                        new
+                        {
+                            Id = (short)132,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
                             OrderNumber = (byte)17,
-                            ParentId = (short)14,
+                            ParentId = (short)8,
                             StatusId = (byte)1,
                             SubTitle = "QPAY066*",
                             Title = "QPAY066* Ad Hoc Reports",
@@ -29548,11 +29504,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         },
                         new
                         {
-                            Id = (short)66,
+                            Id = (short)133,
                             Disabled = false,
                             Icon = "",
+                            IsNavigable = true,
                             OrderNumber = (byte)18,
-                            ParentId = (short)14,
+                            ParentId = (short)8,
                             StatusId = (byte)1,
                             SubTitle = "PROF-VESTED|PAY508",
                             Title = "Recently Terminated",
@@ -29560,11 +29517,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         },
                         new
                         {
-                            Id = (short)69,
+                            Id = (short)136,
                             Disabled = false,
                             Icon = "",
+                            IsNavigable = true,
                             OrderNumber = (byte)19,
-                            ParentId = (short)14,
+                            ParentId = (short)8,
                             StatusId = (byte)1,
                             SubTitle = "QPROF003-1",
                             Title = "Terminated Letters",
@@ -29572,155 +29530,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         },
                         new
                         {
-                            Id = (short)36,
+                            Id = (short)134,
                             Disabled = false,
                             Icon = "",
-                            OrderNumber = (byte)1,
-                            ParentId = (short)34,
-                            StatusId = (byte)1,
-                            SubTitle = "PROF130",
-                            Title = "DISTRIBUTIONS BY AGE",
-                            Url = "distributions-by-age"
-                        },
-                        new
-                        {
-                            Id = (short)35,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)2,
-                            ParentId = (short)34,
-                            StatusId = (byte)1,
-                            SubTitle = "PROF130",
-                            Title = "CONTRIBUTIONS BY AGE",
-                            Url = "contributions-by-age"
-                        },
-                        new
-                        {
-                            Id = (short)37,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)3,
-                            ParentId = (short)34,
-                            StatusId = (byte)1,
-                            SubTitle = "PROF130",
-                            Title = "FORFEITURES BY AGE",
-                            Url = "forfeitures-by-age"
-                        },
-                        new
-                        {
-                            Id = (short)38,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)4,
-                            ParentId = (short)34,
-                            StatusId = (byte)1,
-                            SubTitle = "PROF130B",
-                            Title = "BALANCE BY AGE",
-                            Url = "balance-by-age"
-                        },
-                        new
-                        {
-                            Id = (short)39,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)5,
-                            ParentId = (short)34,
-                            StatusId = (byte)1,
-                            SubTitle = "PROF130V",
-                            Title = "VESTED AMOUNTS BY AGE",
-                            Url = "vested-amounts-by-age"
-                        },
-                        new
-                        {
-                            Id = (short)40,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)6,
-                            ParentId = (short)34,
-                            StatusId = (byte)1,
-                            SubTitle = "PROF130Y",
-                            Title = "BALANCE BY YEARS",
-                            Url = "balance-by-years"
-                        },
-                        new
-                        {
-                            Id = (short)43,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)1,
-                            ParentId = (short)42,
-                            StatusId = (byte)1,
-                            SubTitle = "",
-                            Title = "QPAY066-UNDR21",
-                            Url = "qpay066-under21"
-                        },
-                        new
-                        {
-                            Id = (short)44,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)2,
-                            ParentId = (short)42,
-                            StatusId = (byte)1,
-                            SubTitle = "",
-                            Title = "QPAY066TA-UNDR21",
-                            Url = "qpay066ta-under21"
-                        },
-                        new
-                        {
-                            Id = (short)45,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)3,
-                            ParentId = (short)42,
-                            StatusId = (byte)1,
-                            SubTitle = "",
-                            Title = "QPAY066TA",
-                            Url = "qpay066ta"
-                        },
-                        new
-                        {
-                            Id = (short)47,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)4,
-                            ParentId = (short)42,
-                            StatusId = (byte)1,
-                            SubTitle = "",
-                            Title = "QNEWPROFLBL",
-                            Url = "new-ps-labels"
-                        },
-                        new
-                        {
-                            Id = (short)48,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)5,
-                            ParentId = (short)42,
-                            StatusId = (byte)1,
-                            SubTitle = "",
-                            Title = "PROFNEW",
-                            Url = "profnew"
-                        },
-                        new
-                        {
-                            Id = (short)46,
-                            Disabled = false,
-                            Icon = "",
-                            OrderNumber = (byte)6,
-                            ParentId = (short)42,
-                            StatusId = (byte)1,
-                            SubTitle = "",
-                            Title = "PROFALL",
-                            Url = "profall"
-                        },
-                        new
-                        {
-                            Id = (short)67,
-                            Disabled = false,
-                            Icon = "",
+                            IsNavigable = true,
                             OrderNumber = (byte)10,
-                            ParentId = (short)1,
+                            ParentId = (short)8,
                             StatusId = (byte)1,
                             SubTitle = "",
                             Title = "Pay Beneficiary Report",
@@ -29728,15 +29543,354 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         },
                         new
                         {
-                            Id = (short)68,
+                            Id = (short)135,
                             Disabled = false,
                             Icon = "",
-                            OrderNumber = (byte)18,
-                            ParentId = (short)14,
+                            IsNavigable = true,
+                            OrderNumber = (byte)19,
+                            ParentId = (short)8,
                             StatusId = (byte)1,
                             SubTitle = "",
-                            Title = "Adhoc Beneficiaries Report",
+                            Title = "Adhoc Beneficiaries Report (Pay Be Next)",
                             Url = "adhoc-beneficiaries-report"
+                        },
+                        new
+                        {
+                            Id = (short)137,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)20,
+                            ParentId = (short)8,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "QPAY600",
+                            Url = "qpay600"
+                        },
+                        new
+                        {
+                            Id = (short)109,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)5,
+                            ParentId = (short)8,
+                            StatusId = (byte)1,
+                            SubTitle = "GET-ELIGIBLE-EMPS",
+                            Title = "Get Eligible Employees",
+                            Url = "eligible-employees"
+                        },
+                        new
+                        {
+                            Id = (short)110,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)6,
+                            ParentId = (short)8,
+                            StatusId = (byte)1,
+                            SubTitle = "PAY443",
+                            Title = "Profit Share Forfeit",
+                            Url = "forfeit"
+                        },
+                        new
+                        {
+                            Id = (short)111,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)7,
+                            ParentId = (short)8,
+                            StatusId = (byte)1,
+                            SubTitle = "PAY444|PAY447",
+                            Title = "Master Update",
+                            Url = "profit-share-update"
+                        },
+                        new
+                        {
+                            Id = (short)112,
+                            Disabled = true,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)8,
+                            ParentId = (short)8,
+                            StatusId = (byte)1,
+                            SubTitle = "PAY460, PROFTLD",
+                            Title = "Profit Master Update",
+                            Url = "profit-master-update"
+                        },
+                        new
+                        {
+                            Id = (short)113,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)9,
+                            ParentId = (short)8,
+                            StatusId = (byte)1,
+                            SubTitle = "PAY450",
+                            Title = "Paymaster Update",
+                            Url = "pay450-summary"
+                        },
+                        new
+                        {
+                            Id = (short)114,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)11,
+                            ParentId = (short)8,
+                            StatusId = (byte)1,
+                            SubTitle = "PROF-CNTRL-SHEET",
+                            Title = "Prof Control Sheet",
+                            Url = "prof-control-sheet"
+                        },
+                        new
+                        {
+                            Id = (short)11,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)12,
+                            ParentId = (short)8,
+                            StatusId = (byte)1,
+                            SubTitle = "Prof130",
+                            Title = "Prof Share Report By Age",
+                            Url = ""
+                        },
+                        new
+                        {
+                            Id = (short)121,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)13,
+                            ParentId = (short)8,
+                            StatusId = (byte)1,
+                            SubTitle = "QPAY501",
+                            Title = "Prof Share Gross Rpt",
+                            Url = "profit-share-gross-report"
+                        },
+                        new
+                        {
+                            Id = (short)12,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)14,
+                            ParentId = (short)8,
+                            StatusId = (byte)1,
+                            SubTitle = "QPAY066TA",
+                            Title = "Prof Share by Store",
+                            Url = "profit-share-by-store"
+                        },
+                        new
+                        {
+                            Id = (short)130,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)15,
+                            ParentId = (short)8,
+                            StatusId = (byte)1,
+                            SubTitle = "PAYCERT",
+                            Title = "Reprint Certificates / Print Profit Certs",
+                            Url = "reprint-certificates"
+                        },
+                        new
+                        {
+                            Id = (short)131,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)16,
+                            ParentId = (short)8,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "Save Prof Paymstr",
+                            Url = "save-prof-paymstr"
+                        },
+                        new
+                        {
+                            Id = (short)115,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)1,
+                            ParentId = (short)11,
+                            StatusId = (byte)1,
+                            SubTitle = "PROF130",
+                            Title = "DISTRIBUTIONS BY AGE",
+                            Url = "distributions-by-age"
+                        },
+                        new
+                        {
+                            Id = (short)116,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)2,
+                            ParentId = (short)11,
+                            StatusId = (byte)1,
+                            SubTitle = "PROF130",
+                            Title = "CONTRIBUTIONS BY AGE",
+                            Url = "contributions-by-age"
+                        },
+                        new
+                        {
+                            Id = (short)117,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)3,
+                            ParentId = (short)11,
+                            StatusId = (byte)1,
+                            SubTitle = "PROF130",
+                            Title = "FORFEITURES BY AGE",
+                            Url = "forfeitures-by-age"
+                        },
+                        new
+                        {
+                            Id = (short)118,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)4,
+                            ParentId = (short)11,
+                            StatusId = (byte)1,
+                            SubTitle = "PROF130B",
+                            Title = "BALANCE BY AGE",
+                            Url = "balance-by-age"
+                        },
+                        new
+                        {
+                            Id = (short)119,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)5,
+                            ParentId = (short)11,
+                            StatusId = (byte)1,
+                            SubTitle = "PROF130V",
+                            Title = "VESTED AMOUNTS BY AGE",
+                            Url = "vested-amounts-by-age"
+                        },
+                        new
+                        {
+                            Id = (short)120,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)6,
+                            ParentId = (short)11,
+                            StatusId = (byte)1,
+                            SubTitle = "PROF130Y",
+                            Title = "BALANCE BY YEARS",
+                            Url = "balance-by-years"
+                        },
+                        new
+                        {
+                            Id = (short)122,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)1,
+                            ParentId = (short)12,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "Under-21 Report",
+                            Url = "under-21-report"
+                        },
+                        new
+                        {
+                            Id = (short)123,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)1,
+                            ParentId = (short)122,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "QPAY066-UNDR21",
+                            Url = "qpay066-under21"
+                        },
+                        new
+                        {
+                            Id = (short)124,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)2,
+                            ParentId = (short)122,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "QPAY066TA-UNDR21",
+                            Url = "qpay066ta-under21"
+                        },
+                        new
+                        {
+                            Id = (short)125,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)7,
+                            ParentId = (short)12,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "QPAY066B",
+                            Url = "qpay066b"
+                        },
+                        new
+                        {
+                            Id = (short)126,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)3,
+                            ParentId = (short)12,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "QPAY066TA",
+                            Url = "qpay066ta"
+                        },
+                        new
+                        {
+                            Id = (short)127,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)4,
+                            ParentId = (short)12,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "QNEWPROFLBL",
+                            Url = "new-ps-labels"
+                        },
+                        new
+                        {
+                            Id = (short)128,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)5,
+                            ParentId = (short)12,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "PROFNEW",
+                            Url = "profnew"
+                        },
+                        new
+                        {
+                            Id = (short)129,
+                            Disabled = false,
+                            Icon = "",
+                            IsNavigable = true,
+                            OrderNumber = (byte)6,
+                            ParentId = (short)12,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "PROFALL",
+                            Url = "profall"
                         });
                 });
 
@@ -31770,26 +31924,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("DECIMAL(18,2)")
                         .HasColumnName("POINTS_TOTAL");
-
-                    b.Property<decimal>("TerminatedBalanceTotal")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("DECIMAL(18,2)")
-                        .HasColumnName("TERMINATED_BALANCE_TOTAL");
-
-                    b.Property<decimal>("TerminatedHoursTotal")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("DECIMAL(18,2)")
-                        .HasColumnName("TERMINATED_HOURS_TOTAL");
-
-                    b.Property<decimal>("TerminatedPointsTotal")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("DECIMAL(18,2)")
-                        .HasColumnName("TERMINATED_POINTS_TOTAL");
-
-                    b.Property<decimal>("TerminatedWagesTotal")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("DECIMAL(18,2)")
-                        .HasColumnName("TERMINATED_WAGES_TOTAL");
 
                     b.Property<decimal>("WagesTotal")
                         .HasPrecision(18, 2)

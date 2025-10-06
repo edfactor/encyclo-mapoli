@@ -329,5 +329,31 @@ public class NavigationService : INavigationService
             _logger?.LogError(ex, "Failed to bust navigation tree caches");
         }
     }
+
+    /// <summary>
+    /// Resets all navigation statuses to 'Not Started' and invalidates all navigation tree caches.
+    /// This is typically called when a new demographics freeze point is created to restart workflows.
+    /// </summary>
+    public async Task ResetAllStatusesToNotStartedAsync(CancellationToken cancellationToken = default)
+    {
+        await _dataContextFactory.UseWritableContext(async (context) =>
+        {
+            // Reset all navigation statuses to 'Not Started' using ExecuteUpdateAsync for efficiency
+            // Filter: Only update statuses that are currently set and not already 'Not Started'
+            var rowsUpdated = await context.Navigations
+                .Where(n => n.StatusId != null && n.StatusId != Data.Entities.Navigations.NavigationStatus.Constants.NotStarted)
+                .ExecuteUpdateAsync(
+                    setters => setters.SetProperty(n => n.StatusId, Data.Entities.Navigations.NavigationStatus.Constants.NotStarted),
+                    cancellationToken);
+
+            _logger?.LogInformation("Reset {RowCount} navigation statuses to 'Not Started'", rowsUpdated);
+            return rowsUpdated;
+        }, cancellationToken);
+
+        // Invalidate all navigation tree caches so status changes are immediately visible
+        await BustAllNavigationTreeCaches(cancellationToken);
+
+        _logger?.LogInformation("All navigation statuses reset to 'Not Started' and caches invalidated");
+    }
 }
 
