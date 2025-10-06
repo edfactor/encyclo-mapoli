@@ -1,14 +1,17 @@
 import { Replay } from "@mui/icons-material";
 import { Alert, AlertTitle, Button, CircularProgress, Grid, Tooltip, Typography } from "@mui/material";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { DSMAccordion, numberToCurrency, Page, setMessage, SmartModal } from "smart-ui-library";
+import StatusDropdownActionNode from "../../components/StatusDropdownActionNode";
+import { TotalsGrid } from "../../components/TotalsGrid/TotalsGrid";
+import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
+import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
 import {
   useGetMasterApplyMutation,
   useLazyGetMasterRevertQuery,
   useLazyGetProfitMasterStatusQuery
-} from "reduxstore/api/YearsEndApi";
+} from "../../reduxstore/api/YearsEndApi";
 import {
   clearProfitSharingEdit,
   clearProfitSharingEditQueryParams,
@@ -19,18 +22,15 @@ import {
   setProfitShareApplyOrRevertLoading,
   setProfitShareEditUpdateShowSearch,
   setResetYearEndPage
-} from "reduxstore/slices/yearsEndSlice";
-import { RootState } from "reduxstore/store";
+} from "../../reduxstore/slices/yearsEndSlice";
+import { RootState } from "../../reduxstore/store";
 import {
   ProfitMasterStatus,
   ProfitShareEditUpdateQueryParams,
   ProfitShareMasterApplyRequest,
   ProfitShareMasterResponse,
   ProfitYearRequest
-} from "reduxstore/types";
-import { DSMAccordion, numberToCurrency, Page, setMessage, SmartModal } from "smart-ui-library";
-import { TotalsGrid } from "../../components/TotalsGrid/TotalsGrid";
-import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
+} from "../../reduxstore/types";
 // usePrerequisiteNavigations now encapsulated by PrerequisiteGuard
 import PrerequisiteGuard from "../../components/PrerequisiteGuard";
 import { MessageKeys, Messages } from "../../utils/messageDictonary";

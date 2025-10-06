@@ -123,6 +123,20 @@ const documentationFiles = [
     filename: "TERMINATIONS_BUSINESS_GUIDE.md",
     description:
       "Comprehensive business guide for stakeholders and QA teams explaining termination processing, vesting calculations, beneficiary handling, filtering rules, and common scenarios"
+  },
+  {
+    key: "report-crossreference-matrix",
+    title: "Report Cross-Reference Matrix",
+    filename: "REPORT_CROSSREFERENCE_MATRIX.md",
+    description:
+      "Comprehensive matrix documenting which values across different Profit Sharing reports should match for data integrity validation, including PAY444, PAY443, QPAY129, QPAY066, and PAY426 series reports with implementation guidelines for checksum validation"
+  },
+  {
+    key: "report-crossreference-quick",
+    title: "Report Cross-Reference Quick Guide",
+    filename: "REPORT_CROSSREFERENCE_QUICK.md",
+    description:
+      "Visual quick reference guide showing report value matching patterns, validation priority order, and field names for API validation - ideal for developers implementing cross-report validation"
   }
 ];
 

@@ -24,7 +24,7 @@ public class ForfeituresAndPointsForYearEndpoint : EndpointWithCsvTotalsBase<Fro
         _forfeituresAndPointsForYearService = forfeituresAndPointsForYearService;
         _logger = logger;
     }
-    public override string ReportFileName => "Forfeitures and Points for Year";
+    public override string ReportFileName => "Forfeitures and Points for Year ( PAY443 )";
 
     public override void Configure()
     {
