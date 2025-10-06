@@ -82,18 +82,22 @@ const TotalsContent: React.FC<TotalsContentProps> = ({ store, onLoadingChange })
       container
       direction="column"
       width="100%">
-      <Grid paddingX="24px">
-        <Typography
-          variant="h2"
-          sx={{ color: "#0258A5", marginBottom: "16px" }}>
-          {store && store > 0 ? `Totals for Store ${store}` : 'Totals For All Stores'}
-        </Typography>
-      </Grid>
-      <Grid
-        width="100%"
-        paddingX="24px">
-        <LabelValueSection data={data} />
-      </Grid>
+      {breakdownByStoreTotals && (
+        <>
+          <Grid paddingX="24px">
+            <Typography
+              variant="h2"
+              sx={{ color: "#0258A5", marginBottom: "16px" }}>
+              {store && store > 0 ? `Totals for Store ${store}` : 'Totals For All Stores'}
+            </Typography>
+          </Grid>
+          <Grid
+            width="100%"
+            paddingX="24px">
+            <LabelValueSection data={data} />
+          </Grid>
+        </>
+      )}
     </Grid>
   );
 };
