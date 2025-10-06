@@ -176,7 +176,7 @@ BEGIN
 
     insert_navigation_item(BENEFICIARIES_MENU, TOP_LEVEL_MENU, 'BENEFICIARIES', '', '', STATUS_NORMAL, ORDER_SECOND, '', DISABLED, IS_NAVIGABLE);
     insert_navigation_item(DISTRIBUTIONS_MENU, TOP_LEVEL_MENU, 'DISTRIBUTIONS', '', '', STATUS_NORMAL, ORDER_THIRD, '', DISABLED, IS_NAVIGABLE);
-   insert_navigation_item(YEAR_END_MENU, TOP_LEVEL_MENU, 'YEAR END', '', '', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(YEAR_END_MENU, TOP_LEVEL_MENU, 'YEAR END', '', '', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(IT_DEVOPS_MENU, TOP_LEVEL_MENU, 'IT DEVOPS', '', '', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
 
 --Sub values for INQUIRIES
@@ -300,10 +300,10 @@ BEGIN
     
 
     -- Define prerequisites: Master Update
-    add_navigation_prerequisite(MASTER_UPDATE, MILITARY_CONTRIBUTIONS);
-    add_navigation_prerequisite(MASTER_UPDATE, PROFIT_SHARE_REPORT);
-    add_navigation_prerequisite(MASTER_UPDATE, UNFORFEIT);
-    add_navigation_prerequisite(MASTER_UPDATE, FORFEITURES);
+    --add_navigation_prerequisite(MASTER_UPDATE, MILITARY_CONTRIBUTIONS);
+    --add_navigation_prerequisite(MASTER_UPDATE, PROFIT_SHARE_REPORT);
+    --add_navigation_prerequisite(MASTER_UPDATE, UNFORFEIT);
+    --add_navigation_prerequisite(MASTER_UPDATE, FORFEITURES);
 
     -- MAKE THESE ROLES READ-ONLY 
     UPDATE NAVIGATION_ROLE SET IS_READ_ONLY=1 where ID IN ( IT_DEVOPS, AUDITOR );
