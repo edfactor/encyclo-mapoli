@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { ApiMessageAlert, DSMAccordion, Page } from "smart-ui-library";
 import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
 
@@ -23,16 +23,10 @@ const Termination = () => {
   const [fetchAccountingRange, { data: fiscalData, isLoading: isRangeLoading }] = useLazyGetAccountingRangeToCurrent(6);
   const { state, actions } = useTerminationState();
   const navigate = useNavigate();
-  const [isDataFetching, setIsDataFetching] = useState(false);
 
   // Function to scroll to top - only used for error cases
   const scrollToTop = useCallback(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
-
-  // Handle loading state changes from TerminationGrid
-  const handleLoadingChange = useCallback((isLoading: boolean) => {
-    setIsDataFetching(isLoading);
   }, []);
 
   // Use the navigation guard hook
@@ -112,7 +106,6 @@ const Termination = () => {
                     onSearch={actions.handleSearch}
                     setInitialSearchLoaded={actions.setInitialSearchLoaded}
                     hasUnsavedChanges={state.hasUnsavedChanges}
-                    isFetching={isDataFetching}
                   />
                 </DSMAccordion>
               </Grid>
@@ -128,7 +121,6 @@ const Termination = () => {
                   shouldArchive={state.shouldArchive}
                   onArchiveHandled={actions.handleArchiveHandled}
                   onErrorOccurred={scrollToTop} // Pass down the error handler
-                  onLoadingChange={handleLoadingChange}
                 />
               </Grid>
             </>

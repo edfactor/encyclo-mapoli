@@ -44,15 +44,13 @@ interface TerminationSearchFilterProps {
   fiscalData: CalendarResponseDto | null;
   onSearch: (params: TerminationSearchRequest) => void;
   hasUnsavedChanges?: boolean;
-  isFetching?: boolean;
 }
 
 const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   setInitialSearchLoaded,
   fiscalData,
   onSearch,
-  hasUnsavedChanges,
-  isFetching = false
+  hasUnsavedChanges
 }) => {
   const [openErrorModal, setOpenErrorModal] = useState(!fiscalData === false);
   const dispatch = useDispatch();
@@ -190,7 +188,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
             <SearchAndReset
               handleReset={handleReset}
               handleSearch={validateAndSearch}
-              isFetching={isFetching}
+              isFetching={false}
               disabled={!isValid || !prerequisitesComplete}
             />
           )}

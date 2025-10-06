@@ -179,7 +179,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
     }, [memberDetails]);
 
     // Early returns after all hooks are called
-    if (isLoading) return null;
+    if (isLoading) return <Typography>Loading...</Typography>;
     if (!memberDetails) return <Typography>No details found.</Typography>;
 
     return (
