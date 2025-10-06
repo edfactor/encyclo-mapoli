@@ -333,44 +333,43 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         {
             // Build optimized query that aggregates at database level without materializing individual records
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, req.UseFrozenData);
-            
+
             // Get first contribution year lookup
             var firstContributionYearQuery = TotalService.GetFirstContributionYear(ctx, req.ProfitYear);
-            
+
             // Build aggregation query directly from PayProfit + Demographics
             // Note: We materialize to a simple DTO first to avoid complex EF translation issues
             var totalsData = await (
                 from pp in ctx.PayProfits
-                    .AsNoTracking()
                     .Where(p => p.ProfitYear == req.ProfitYear)
                 join d in demographicQuery on pp.DemographicId equals d.Id
                 join fc in firstContributionYearQuery on d.Ssn equals fc.Ssn into fcTmp
                 from fc in fcTmp.DefaultIfEmpty()
-                where ((d.EmploymentStatusId == EmploymentStatus.Constants.Active || 
-                        d.EmploymentStatusId == EmploymentStatus.Constants.Inactive) || 
-                       (d.TerminationDate > fiscalEndDate)) &&
-                      (((pp.CurrentHoursYear + pp.HoursExecutive) >= _hoursThreshold && d.DateOfBirth <= birthday18) || 
+                where ((d.EmploymentStatusId == EmploymentStatus.Constants.Active ||
+                        d.EmploymentStatusId == EmploymentStatus.Constants.Inactive) ||
+                       (d.TerminationDate.HasValue && d.TerminationDate.Value > fiscalEndDate)) &&
+                      (((pp.CurrentHoursYear + pp.HoursExecutive) >= _hoursThreshold && d.DateOfBirth <= birthday18) ||
                        (d.DateOfBirth <= birthday64))
-                select new 
+                select new
                 {
                     Hours = pp.CurrentHoursYear + pp.HoursExecutive,
                     Wages = pp.CurrentIncomeYear + pp.IncomeExecutive,
                     DateOfBirth = d.DateOfBirth,
-                    HasFirstContribution = fc != null,
+                    FirstContributionYear = fc != null ? fc.FirstContributionYear : (short?)null,
                     Ssn = d.Ssn
                 })
                 .ToListAsync(cancellationToken);
 
             // Aggregate in memory (much faster than old approach since we skip balance calculations)
             var numberOfEmployees = totalsData.Count(x => x.DateOfBirth > birthday21 || x.Hours >= _hoursThreshold);
-            var numberOfNewEmployees = totalsData.Count(x => !x.HasFirstContribution && x.DateOfBirth <= birthday21);
+            var numberOfNewEmployees = totalsData.Count(x => !x.FirstContributionYear.HasValue && x.DateOfBirth <= birthday21);
             var numberOfEmployeesUnder21 = totalsData.Count(x => x.DateOfBirth > birthday21);
-            
+
             // Exclude age < 21 and age 64+ with < 1000 hours from wage/hour totals
-            var eligibleForTotals = totalsData.Where(x => 
-                x.DateOfBirth <= birthday21 && 
-                !(x.DateOfBirth <= birthday64 && x.Hours < _hoursThreshold));
-            
+            var eligibleForTotals = totalsData.Where(x =>
+                x.DateOfBirth <= birthday21 &&
+                !(x.DateOfBirth <= birthday64 && x.Hours < _hoursThreshold)).ToList();
+
             var wagesTotal = eligibleForTotals.Sum(x => x.Wages);
             var hoursTotal = eligibleForTotals.Sum(x => x.Hours);
 
