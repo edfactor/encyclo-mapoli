@@ -26,7 +26,6 @@ import VestedAmountsByAge from "../../pages/PROF130/VestedAmountsByAge/VestedAmo
 import Profall from "../../pages/Profall/Profall";
 import ProfitShareGrossReport from "../../pages/ProfitShareGrossReport/ProfitShareGrossReport";
 import ProfitShareReport from "../../pages/ProfitShareReport/ProfitShareReport";
-import ProfitShareTotals426 from "../../pages/ProfitShareTotals426/ProfitShareTotals426";
 
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -305,9 +304,6 @@ const RouterSubAssembly: React.FC = () => {
                   path={ROUTES.PROFIT_SHARE_REPORT}
                   element={<ProfitShareReport />}></Route>
                 <Route
-                  path={ROUTES.PROFIT_SHARE_TOTALS}
-                  element={<ProfitShareTotals426 />}></Route>
-                <Route
                   path="forfeit/:badgeNumber?"
                   element={<Forfeit />}></Route>
                 <Route
@@ -387,8 +383,12 @@ const RouterSubAssembly: React.FC = () => {
                   element={<Documentation />}
                 />
                 <Route
-                  path={`${ROUTES.PAY426N}/:presetNumber?`}
-                  element={<PAY426N />}
+                  path={`${ROUTES.PAY426N_LIVE}/:presetNumber?`}
+                  element={<PAY426N isFrozen={false} />}
+                />
+                <Route
+                  path={`${ROUTES.PAY426N_FROZEN}/:presetNumber?`}
+                  element={<PAY426N isFrozen={true} />}
                 />
 
                 <Route

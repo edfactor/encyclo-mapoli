@@ -71,7 +71,7 @@ DECLARE
     ADHOC_BENEFICIARIES_REPORT CONSTANT NUMBER := 138;
     TERMINATED_LETTERS CONSTANT NUMBER := 139;
     QPAY600 CONSTANT NUMBER := 140;
-    PAY426N CONSTANT NUMBER := 141;
+    PAY426N_LIVE CONSTANT NUMBER := 141;
     PROFIT_SUMMARY CONSTANT NUMBER := 142;
     PAY426_2 CONSTANT NUMBER := 143;
     PAY426_3 CONSTANT NUMBER := 144;
@@ -82,6 +82,7 @@ DECLARE
     DUPLICATE_NAMES_BIRTHDAYS CONSTANT NUMBER := 149;
     MILITARY_CONTRIBUTIONS CONSTANT NUMBER := 150;
     UNFORFEIT CONSTANT NUMBER := 151;
+    PAY426N_FROZEN CONSTANT NUMBER := 152;
 
 
     --- These are the role IDs from the ROLES table
@@ -206,14 +207,19 @@ BEGIN
     insert_navigation_item(FORFEITURES, DECEMBER_ACTIVITIES, 'Forfeitures', '008-12', 'forfeitures-adjustment', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(DISTRIBUTIONS_AND_FORFEITURES, DECEMBER_ACTIVITIES, 'Distributions and Forfeitures', 'QPAY129', 'distributions-and-forfeitures', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(PROFIT_SHARE_REPORT, DECEMBER_ACTIVITIES, 'Profit Share Report', 'PAY426', 'profit-share-report', STATUS_NORMAL, ORDER_NINTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PAY426N_LIVE, DECEMBER_ACTIVITIES, 'Profit Sharing Report', 'PAY426N', 'pay426n_live', STATUS_NORMAL, ORDER_TENTH, '', ENABLED, IS_NAVIGABLE);
+
 -- Profit Share Totals (Year End)
-   
+    insert_navigation_item(FISCAL_CLOSE, YEAR_END_MENU, 'Fiscal Close', '', 'fiscal-close', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
+
 -- Fiscal Close menu items updated according to ticket requirements
 
 
 -- Dev-only: PAY426N entries (not assigned to roles in SQL)
 
 -- Profit Summary (PAY426 summary)
+    insert_navigation_item(PROFIT_SUMMARY, FISCAL_CLOSE, 'Profit Summary (PAY426 summary)', '', 'pay426-9', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PAY426N_FROZEN, FISCAL_CLOSE, 'Profit Sharing Report', 'PAY426N', 'pay426n_frozen', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
 
 
 -- Pay Beneficiary Report (Year End / Fiscal Close)
@@ -278,6 +284,12 @@ BEGIN
     assign_navigation_role(DISTRIBUTIONS_AND_FORFEITURES, FINANCE_MANAGER);
     assign_navigation_role(PROFIT_SHARE_REPORT, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(PROFIT_SHARE_REPORT, FINANCE_MANAGER);
+    assign_navigation_role(PAY426N_LIVE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(PAY426N_LIVE, FINANCE_MANAGER);
+    assign_navigation_role(PAY426N_FROZEN, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(PAY426N_FROZEN, FINANCE_MANAGER);
+    assign_navigation_role(PROFIT_SUMMARY, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(PROFIT_SUMMARY, FINANCE_MANAGER);
 
     -- IT Devops role assignments
     assign_navigation_role(INQUIRIES_MENU, IT_DEVOPS);

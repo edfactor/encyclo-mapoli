@@ -3,7 +3,10 @@ import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { Path, useNavigate } from "react-router-dom";
-import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
+import {
+  useLazyGetYearEndProfitSharingReportLiveQuery,
+  useLazyGetYearEndProfitSharingReportFrozenQuery
+} from "reduxstore/api/YearsEndApi";
 import { FilterParams } from "reduxstore/types";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import { useGridPagination } from "../../../hooks/useGridPagination";
@@ -14,14 +17,20 @@ import presets from "./presets";
 interface ReportGridProps {
   params: FilterParams;
   onLoadingChange?: (isLoading: boolean) => void;
+  isFrozen: boolean;
 }
 
-const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
+const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFrozen }) => {
   const navigate = useNavigate();
-  const [trigger, { isFetching }] = useLazyGetYearEndProfitSharingReportQuery();
+  const [triggerLive, { isFetching: isFetchingLive }] = useLazyGetYearEndProfitSharingReportLiveQuery();
+  const [triggerFrozen, { isFetching: isFetchingFrozen }] = useLazyGetYearEndProfitSharingReportFrozenQuery();
+  const trigger = isFrozen ? triggerFrozen : triggerLive;
+  const isFetching = isFrozen ? isFetchingFrozen : isFetchingLive;
   const hasToken = useSelector((state: RootState) => !!state.security.token);
   const profitYear = useFiscalCloseProfitYear();
-  const data = useSelector((state: RootState) => state.yearsEnd.yearEndProfitSharingReport);
+  const liveData = useSelector((state: RootState) => state.yearsEnd.yearEndProfitSharingReportLive);
+  const frozenData = useSelector((state: RootState) => state.yearsEnd.yearEndProfitSharingReportFrozen);
+  const data = isFrozen ? frozenData : liveData;
 
   const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
     initialPageSize: 25,
@@ -32,6 +41,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
         if (hasToken && params) {
           const matchingPreset = presets.find((preset) => JSON.stringify(preset.params) === JSON.stringify(params));
           trigger({
+            ...params,
             profitYear: profitYear,
             pagination: {
               skip: pageNum * pageSz,
@@ -39,7 +49,6 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
               sortBy: sortPrms.sortBy,
               isSortDescending: sortPrms.isSortDescending
             },
-            ...params,
             reportId: matchingPreset ? Number(matchingPreset.id) : 0
           });
         }
@@ -73,6 +82,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
       const matchingPreset = presets.find((preset) => JSON.stringify(preset.params) === JSON.stringify(params));
 
       trigger({
+        ...params,
         profitYear: profitYear,
         pagination: {
           skip: pageNumber * pageSize,
@@ -80,7 +90,6 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
           sortBy: "employeeName",
           isSortDescending: false
         },
-        ...params,
         reportId: matchingPreset ? Number(matchingPreset.id) : 0
       });
     }
