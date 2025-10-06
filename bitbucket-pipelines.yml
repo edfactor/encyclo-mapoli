@@ -602,7 +602,7 @@ definitions:
           if (!(Test-Path $bbPlaywrightDir)) { New-Item -ItemType Directory -Path $bbPlaywrightDir -Force | Out-Null }
           # Locate a junit xml (reporter names can vary). Prefer explicit junit.xml if present.
           $junitCandidate = @(
-            Get-ChildItem -Path test-results -Recurse -Filter junit*.xml -ErrorAction SilentlyContinue,
+            Get-ChildItem -Path test-results -Recurse -Filter junit*.xml -ErrorAction SilentlyContinue
             Get-ChildItem -Path test-results -Recurse -Filter *.xml -ErrorAction SilentlyContinue | Where-Object { (Get-Content $_.FullName -TotalCount 5) -match '<testsuite' }
           ) | Where-Object { $_ } | Select-Object -First 1
           if ($junitCandidate) {
