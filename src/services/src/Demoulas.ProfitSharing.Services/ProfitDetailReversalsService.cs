@@ -60,7 +60,7 @@ public sealed class ProfitDetailReversalsService: IProfitDetailReversalsService
                     YearToDate = (short)currentDate.Year,
                     YearsOfServiceCredit = (sbyte)-pd.YearsOfServiceCredit,
                     TaxCodeId = pd.TaxCodeId,
-                    CommentTypeId = pd.Remark?.StartsWith("REV") == true ? CommentType.Constants.Unrev : CommentType.Constants.Rev,
+                    CommentTypeId = pd.Remark?.StartsWith("REV") == true ? CommentType.Constants.UndoReversal : CommentType.Constants.Reversal,
                     Remark = pd.Remark?.StartsWith("REV") == true 
                         ? $"UN-REV {currentDate:MM/yy}" 
                         : $"REV {currentDate:MM/yy}",
