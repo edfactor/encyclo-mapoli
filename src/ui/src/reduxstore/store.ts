@@ -2,9 +2,11 @@ import { configureStore } from "@reduxjs/toolkit";
 import { apiLoggerMiddleware } from "../middleware/apiLoggerMiddleware";
 import { rtkQueryErrorToastMiddleware } from "../redux/rtkQueryErrorToastMiddleware";
 import EnvironmentUtils from "../utils/environmentUtils";
+import { AdjustmentsApi } from "./api/AdjustmentsApi";
 import { AppSupportApi } from "./api/AppSupportApi";
 import { BeneficiariesApi } from "./api/BeneficiariesApi";
 import { CommonApi } from "./api/CommonApi";
+import { DistributionApi } from "./api/DistributionApi";
 import { InquiryApi } from "./api/InquiryApi";
 import { ItOperationsApi } from "./api/ItOperationsApi";
 import { LookupsApi } from "./api/LookupsApi";
@@ -27,6 +29,8 @@ import militarySlice from "./slices/militarySlice";
 import navigationSlice from "./slices/navigationSlice";
 import securitySlice from "./slices/securitySlice";
 import yearsEndSlice from "./slices/yearsEndSlice";
+
+// Create the store with the slices and the APIs
 
 export const store = configureStore({
   reducer: {
@@ -55,7 +59,9 @@ export const store = configureStore({
     [NavigationApi.reducerPath]: NavigationApi.reducer,
     [AppSupportApi.reducerPath]: AppSupportApi.reducer,
     [NavigationStatusApi.reducerPath]: NavigationStatusApi.reducer,
-    [BeneficiariesApi.reducerPath]: BeneficiariesApi.reducer
+    [BeneficiariesApi.reducerPath]: BeneficiariesApi.reducer,
+    [AdjustmentsApi.reducerPath]: AdjustmentsApi.reducer,
+    [DistributionApi.reducerPath]: DistributionApi.reducer
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -74,6 +80,8 @@ export const store = configureStore({
       .concat(AppSupportApi.middleware)
       .concat(NavigationStatusApi.middleware)
       .concat(BeneficiariesApi.middleware)
+      .concat(AdjustmentsApi.middleware)
+      .concat(DistributionApi.middleware)
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

@@ -11,9 +11,6 @@ public class GoldenYearEndRun : Runnable
 {
     public override async Task Exec()
     {
-        // The database needs to be in the right state for this to work.
-        throw new NotImplementedException();
-
         // Generate the Golden files.  Run READY from Frozen to the YE Completed.
         await Run(Specify(
             "R0", // import obfuscated
@@ -35,7 +32,7 @@ public class GoldenYearEndRun : Runnable
             "R15",
             "R16",
             "R17",
-            "R18",
+            "R18", // Profit Share Report - Final Run
             "R19",
             "R20",
             "R21",

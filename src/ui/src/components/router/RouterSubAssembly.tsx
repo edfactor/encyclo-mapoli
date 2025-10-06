@@ -53,6 +53,7 @@ import { MenuBar } from "../../components/MenuBar/MenuBar";
 import BeneficiaryInquiry from "../../pages/BeneficiaryInquiry/BeneficiaryInquiry";
 import MilitaryContribution from "../../pages/DecemberActivities/MilitaryContribution/MilitaryContribution";
 import DevDebug from "../../pages/Dev/DevDebug";
+import DistributionInquiry from "../../pages/DistributionInquiry/DistributionInquiry";
 import Documentation from "../../pages/Documentation/Documentation";
 import RecentlyTerminated from "../../pages/FiscalClose/RecentlyTerminated/RecentlyTerminated";
 import TerminatedLetters from "../../pages/FiscalClose/TerminatedLetters/TerminatedLetters";
@@ -66,6 +67,7 @@ import PayBeNext from "../../pages/Reports/PayBeNext/PayBeNext";
 import PayBenReport from "../../pages/Reports/PayBenReport/PayBenReport";
 import ReprintCertificates from "../../pages/ReprintCertificates/ReprintCertificates";
 import LandingPage from "./LandingPage";
+import Adjustments from "../../pages/Adjustments/Adjustments";
 
 const RouterSubAssembly: React.FC = () => {
   const isProductionOrUAT = EnvironmentUtils.isProduction || EnvironmentUtils.isUAT;
@@ -200,6 +202,9 @@ const RouterSubAssembly: React.FC = () => {
                   path={ROUTES.BENEFICIARY_INQUIRY}
                   element={<BeneficiaryInquiry />}></Route>
                 <Route
+                  path={ROUTES.DISTRIBUTIONS_INQUIRY}
+                  element={<DistributionInquiry />}></Route>
+                <Route
                   path={ROUTES.PAY_BEN_REPORT}
                   element={<PayBenReport />}></Route>
                 <Route
@@ -235,6 +240,9 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={`${ROUTES.MASTER_INQUIRY}/:badgeNumber?`}
                   element={<MasterInquiry />}></Route>
+                <Route
+                  path={`${ROUTES.ADJUSTMENTS}`}
+                  element={<Adjustments />}></Route>
                 <Route
                   path={ROUTES.DISTRIBUTIONS_BY_AGE}
                   element={<DistributionByAge />}></Route>

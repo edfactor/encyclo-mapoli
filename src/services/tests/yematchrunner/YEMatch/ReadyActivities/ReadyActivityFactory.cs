@@ -14,8 +14,8 @@ public static class ReadyActivityFactory
         IConfigurationRoot secretConfig = new ConfigurationBuilder().AddUserSecrets<ReadyActivity>().Build();
         string? username = secretConfig["YEMatchHost:Username"];
         string? password = secretConfig["YEMatchHost:Password"];
-        string host = "tduapp01";
-        bool chatty = true;
+        string host = "appt07d"; // was "tduapp01"
+        bool chatty = false; // set to true to enable debugging chatter
 
         if (username == null || password == null)
         {
@@ -28,7 +28,7 @@ public static class ReadyActivityFactory
         SftpClient = new SftpClient(host, username, password);
         SftpClient.Connect();
 
-        // Appropriate for December of 2025
+        // Appropriate for December 2025
         var firstSaturday = "250104"; // 240106
         var lastSaturday = "251227"; // 241228
         var cutOffSaturday = "260103";

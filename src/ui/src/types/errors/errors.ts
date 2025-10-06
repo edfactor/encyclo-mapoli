@@ -13,6 +13,10 @@ export interface ServiceValidationErrors {
   [field: string]: string[];
 }
 
+// Note: This is a generic error format for unhandled exceptions from the backend
+// that can come from the common library. It is not currently used by the UI but
+// is defined here for future use.
+
 export interface UnhandledErrorResponse {
   data: UnhandledErrrorDetails;
 }
