@@ -1,4 +1,5 @@
-import type { SortedPaginationRequestDto, ProfitYearRequest, PagedReportResponse } from "../common/api";
+import type { PagedReportResponse, ProfitYearRequest, SortedPaginationRequestDto } from "../common/api";
+import type { MasterUpdateCrossReferenceValidationResponse } from "../validation/cross-reference-validation";
 
 export interface ProfitShareUpdateRequest {
   profitYear: number;
@@ -124,6 +125,7 @@ export interface ProfitShareMasterResponse {
   beneficiariesEffected?: number;
   employeesEffected?: number;
   etvasEffected?: number;
+  crossReferenceValidation?: MasterUpdateCrossReferenceValidationResponse;
 }
 
 export interface ProfitMasterParams {

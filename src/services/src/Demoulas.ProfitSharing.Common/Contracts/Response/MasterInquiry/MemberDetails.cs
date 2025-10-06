@@ -23,6 +23,8 @@ public record MemberDetails : IdRequest, INameParts, IFullNameProperty, IPhoneNu
     public string AddressState { get; init; } = string.Empty;
     [MaskSensitive] public string AddressZipCode { get; init; } = string.Empty;
     public short Age { get; set; }
+
+    [MaskSensitive]
     public DateOnly DateOfBirth { get; init; }
     public DateOnly? HireDate { get; init; }
     public DateOnly? TerminationDate { get; init; } = null;

@@ -49,6 +49,12 @@ internal sealed class ReportChecksumMap : ModifiedBaseMap<ReportChecksum>
                  c => c == null ? 0 : c.Aggregate(0, (a, v) => HashCode.Combine(a, v.Key.GetHashCode(), v.Value.Key.GetHashCode(), v.Value.Value.GetHashCode())),
                  c => c.ToList()));
 
+        // Index for efficient lookup of most recent archived version by profit year and report type
+        // Descending order on CreatedAtUtc for "ORDER BY CreatedAtUtc DESC" queries
+        builder.HasIndex(e => new { e.ProfitYear, e.ReportType, e.CreatedAtUtc })
+            .HasDatabaseName("IDX_REPORT_CHECKSUM_LOOKUP")
+            .IsDescending(false, false, true); // CreatedAtUtc DESC for most recent first
+
         base.Configure(builder);
     }
 }

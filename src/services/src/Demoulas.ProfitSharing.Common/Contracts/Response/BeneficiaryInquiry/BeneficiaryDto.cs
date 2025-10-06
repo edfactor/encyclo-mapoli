@@ -1,9 +1,11 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Contracts.Shared;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
 
-using Demoulas.ProfitSharing.Common.Interfaces;
-using Shared;
+
 public partial record BeneficiaryDto : IdRequest, INameParts, IFullNameProperty, IPhoneNumber, IEmailAddress, ICity, IIsExecutive
 {
     public required short PsnSuffix { get; set; } // Suffix for hierarchy (1000, 2000, etc.)
@@ -13,7 +15,7 @@ public partial record BeneficiaryDto : IdRequest, INameParts, IFullNameProperty,
 
     public required string Ssn { get; set; }
 
-    public DateOnly DateOfBirth { get; set; }
+    [MaskSensitive] public DateOnly DateOfBirth { get; set; }
 
     public required string Street { get; init; }
     public string? Street2 { get; init; }

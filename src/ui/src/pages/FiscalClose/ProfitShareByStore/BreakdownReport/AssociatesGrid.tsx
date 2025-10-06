@@ -14,9 +14,10 @@ interface AssociatesGridProps {
   store: number;
   pageNumberReset: boolean;
   setPageNumberReset: (reset: boolean) => void;
+  onLoadingChange?: (isLoading: boolean) => void;
 }
 
-const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store, pageNumberReset, setPageNumberReset }) => {
+const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store, pageNumberReset, setPageNumberReset, onLoadingChange }) => {
   const [fetchBreakdownByStore, { isFetching }] = useLazyGetBreakdownByStoreQuery();
   const breakdownByStore = useSelector((state: RootState) => state.yearsEnd.breakdownByStore);
   const queryParams = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreQueryParams);
@@ -96,6 +97,11 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store, pageNumberReset,
       setPageNumberReset(false);
     }
   }, [pageNumberReset, setPageNumberReset, resetPagination]);
+
+  // Notify parent component about loading state changes
+  useEffect(() => {
+    onLoadingChange?.(isFetching);
+  }, [isFetching, onLoadingChange]);
 
   const columnDefs = useMemo(() => GetAssociatesColumns(handleNavigation), [handleNavigation]);
 

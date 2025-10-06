@@ -42,6 +42,12 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Update="Roslynator.Analyzers">
+      <IncludeAssets>build; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Update="Roslynator.Formatting.Analyzers">
+      <IncludeAssets>build; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Update="SonarAnalyzer.CSharp">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

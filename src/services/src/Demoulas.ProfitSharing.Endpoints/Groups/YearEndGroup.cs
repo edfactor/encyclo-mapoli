@@ -22,7 +22,11 @@ public sealed class YearEndGroup : GroupBase
                 .ProducesProblemFE<ProblemDetails>(StatusCodes.Status401Unauthorized)
                 .ProducesProblemFE<ProblemDetails>(StatusCodes.Status403Forbidden)
                 .ProducesProblemFE<ProblemDetails>(StatusCodes.Status500InternalServerError)
-                .WithRequestTimeout(TimeSpan.FromMinutes(1))
+                // 2-minute timeout for year-end reports (target: 95% complete in < 90 seconds)
+                // CRITICAL: Requires AddYearEndPerformanceIndexes migration deployed FIRST
+                // Without indexes: queries will timeout (5-19 minutes observed in UAT)
+                // With indexes: < 2 minutes expected for 10,000+ employee datasets
+                .WithRequestTimeout(TimeSpan.FromMinutes(2))
                 .WithTags(RouteName));
             ep.Policies(Policy.CanViewYearEndReports);
         });

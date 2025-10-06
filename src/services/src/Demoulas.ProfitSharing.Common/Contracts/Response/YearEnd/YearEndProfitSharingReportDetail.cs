@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Interfaces;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
@@ -7,11 +8,11 @@ public sealed record YearEndProfitSharingReportDetail : IIsExecutive
     public required int BadgeNumber { get; set; }
     public required short ProfitYear { get; set; }
     public required short PriorProfitYear { get; set; }
-    public required string EmployeeName { get; set; }
+    [MaskSensitive] public required string EmployeeName { get; set; }
     public required short StoreNumber { get; set; }
     public required char EmployeeTypeCode { get; set; }
     public required string EmployeeTypeName { get; set; }
-    public required DateOnly DateOfBirth { get; set; }
+    [MaskSensitive] public required DateOnly DateOfBirth { get; set; }
     public required byte Age { get; set; }
     public required string Ssn { get; set; }
     public required decimal Wages { get; set; }

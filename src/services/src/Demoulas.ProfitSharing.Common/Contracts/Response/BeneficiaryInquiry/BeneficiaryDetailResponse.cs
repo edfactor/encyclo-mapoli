@@ -13,7 +13,7 @@ public record BeneficiaryDetailResponse : IIsExecutive
     [MaskSensitive] public string? City { get; set; }
     public string? State { get; set; }
     public string? Zip { get; set; }
-    public DateOnly? DateOfBirth { get; set; }
+    [MaskSensitive] public DateOnly? DateOfBirth { get; set; }
     public decimal? CurrentBalance { get; set; }
     public bool IsExecutive { get; set; }
 }

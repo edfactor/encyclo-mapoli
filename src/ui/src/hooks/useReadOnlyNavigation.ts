@@ -2,9 +2,19 @@ import { useSelector } from "react-redux";
 import { RootState } from "../reduxstore/store";
 import { NavigationDto } from "../types/navigation/navigation";
 
+// Navigation status constants (from backend NavigationStatus.Constants)
+const NavigationStatus = {
+  NotStarted: 1,
+  InProgress: 2,
+  OnHold: 3,
+  Complete: 4
+} as const;
+
 /**
  * Hook to determine if the current navigation page is read-only
- * Returns true if the current user has read-only access to the current page
+ * Returns true if:
+ * - The current user has read-only role access (ITDEVOPS, AUDITOR), OR
+ * - The page status is NOT "In Progress" (preventing modifications to completed/not-started pages)
  */
 export const useReadOnlyNavigation = (): boolean => {
   const navigationList = useSelector((state: RootState) => state.navigation.navigationData);
@@ -28,5 +38,14 @@ export const useReadOnlyNavigation = (): boolean => {
   };
 
   const currentNavigation = getNavigationObjectBasedOnId(navigationList?.navigation, currentNavigationId);
-  return currentNavigation?.isReadOnly ?? false;
+
+  // Read-only if user role restricts access
+  const isReadOnlyByRole = currentNavigation?.isReadOnly ?? false;
+
+  // Read-only if page status is not "In Progress"
+  // This prevents modifications to completed reports without first reverting to In Progress
+  const isReadOnlyByStatus =
+    currentNavigation?.statusId !== undefined && currentNavigation?.statusId !== NavigationStatus.InProgress;
+
+  return isReadOnlyByRole || isReadOnlyByStatus;
 };

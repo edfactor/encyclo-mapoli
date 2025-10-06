@@ -1,5 +1,7 @@
 import { Divider, Grid } from "@mui/material";
+import FrozenYearWarning from "components/FrozenYearWarning";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import StatusReadOnlyInfo from "components/StatusReadOnlyInfo";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -7,6 +9,9 @@ import { clearYearEndProfitSharingReport } from "reduxstore/slices/yearsEndSlice
 import { ReportPreset } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { useIsProfitYearFrozen } from "../../../hooks/useIsProfitYearFrozen";
+import { useIsReadOnlyByStatus } from "../../../hooks/useIsReadOnlyByStatus";
 import ProfitSummary from "../ProfitSummary/ProfitSummary";
 import FilterSection from "./FilterSection";
 import presets from "./presets";
@@ -17,6 +22,9 @@ const PAY426N: React.FC = () => {
   const [showSummaryReport, setShowSummaryReport] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
+  const profitYear = useDecemberFlowProfitYear();
+  const isFrozen = useIsProfitYearFrozen(profitYear);
+  const isReadOnlyByStatus = useIsReadOnlyByStatus();
 
   const { presetNumber } = useParams<{
     presetNumber: string;
@@ -60,6 +68,8 @@ const PAY426N: React.FC = () => {
       <Grid
         container
         rowSpacing="24px">
+        {isFrozen && <FrozenYearWarning profitYear={profitYear} />}
+        {isReadOnlyByStatus && <StatusReadOnlyInfo />}
         <Grid width={"100%"}>
           <Divider />
         </Grid>
