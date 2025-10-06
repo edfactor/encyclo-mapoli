@@ -26,7 +26,7 @@ public sealed class DeleteDistributionEndpoint : ProfitSharingEndpoint<IdRequest
 
     public override void Configure()
     {
-        Delete("s/{Id}");
+        Delete("{Id}");
         Group<DistributionGroup>();
         Summary(s =>
         {
