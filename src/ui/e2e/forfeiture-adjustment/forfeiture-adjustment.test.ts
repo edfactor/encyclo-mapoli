@@ -6,7 +6,7 @@ test.describe("Forfeiture Adjustment (008-12): ", () => {
     test.beforeEach(async ({ page }) => {
         await page.goto(baseUrl);
         await page.waitForLoadState("networkidle");
-    await impersonateRole(page, 'Finance-Manager');
+        await impersonateRole(page, 'Finance-Manager');
         await page.getByRole('button').filter({ hasText: /^$/ }).click();
         await page.getByRole('button', { name: 'December Activities' }).click();
         await page.getByRole('button', { name: 'Forfeitures 008-12' }).click();
@@ -26,12 +26,12 @@ test.describe("Forfeiture Adjustment (008-12): ", () => {
         await expect(page.getByText('Access Denied').nth(1)).toBeVisible();
     });
 
-    test('changing status of forfeiture adjustment', async ({page})=>{
-        await page.getByRole('combobox').nth(2).click();
+    test('changing status of forfeiture adjustment', async ({ page }) => {
+        await page.getByRole('combobox').nth(1).click();
         await page.getByRole('option', { name: 'Complete' }).click();
         const [response] = await Promise.all([page.waitForResponse((resp) =>
             resp.url().includes('api/navigation'))]);
-        const json  = await response.json();
+        const json = await response.json();
         await expect(json.isSuccessful).toBe(true);
     });
 
@@ -41,31 +41,40 @@ test.describe("Forfeiture Adjustment (008-12): ", () => {
         const [response] = await Promise.all([page.waitForResponse((resp) =>
             resp.url().includes('yearend/forfeiture-adjustments'))]);
         await expect(response.status()).toBe(200);
-        
+
 
     });
 
 
-    
+
 
     test('Add Forfeiture', async ({ page }) => {
-        await page.getByRole('textbox', { name: 'Badge' }).fill('706222');
-        await page.getByTestId('searchButton').click();
         const [response0] = await Promise.all([page.waitForResponse((resp) =>
-            resp.url().includes('yearend/forfeiture-adjustments'))]);
+            resp.url().includes('yearend/forfeiture-adjustments')),
+        (async () => {
+            await page.getByRole('textbox', { name: 'Badge' }).fill('706222');
+            await page.getByTestId('searchButton').click();
+        })()
+
+        ]);
         await expect(response0.status()).toBe(200);
-        await page.getByRole('button', { name: 'ADD FORFEITURE' }).click();
-        await page.getByRole('checkbox', { name: 'Class Action' }).check();
-        await page.getByRole('spinbutton').fill('10');
-        await page.getByRole('button', { name: 'SAVE' }).click();
+
         const [response] = await Promise.all([page.waitForResponse((resp) =>
-            resp.url().includes('yearend/forfeiture-adjustments/update'))]);
+            resp.url().includes('yearend/forfeiture-adjustments/update')),
+        (async () => {
+            await page.getByRole('button', { name: 'ADD FORFEITURE' }).click();
+            await page.getByRole('checkbox', { name: 'Class Action' }).check();
+            await page.getByRole('spinbutton').fill('10');
+            await page.getByRole('button', { name: 'SAVE' }).click();
+        })()
+
+        ]);
         await expect(response.status()).toBe(204);
         const [response1] = await Promise.all([page.waitForResponse((resp) =>
             resp.url().includes('yearend/forfeiture-adjustments'))]);
         await expect(response1.status()).toBe(200);
     });
 
-    
+
 
 });

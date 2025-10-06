@@ -592,7 +592,7 @@ definitions:
           # Use direct CLI to avoid potential global 'playwright' package ambiguity
           $playwrightCli = Join-Path (Resolve-Path ./node_modules/@playwright/test).Path "cli.js"
           if (-not (Test-Path $playwrightCli)) { Write-Error "Playwright CLI not found at $playwrightCli"; Get-ChildItem node_modules/@playwright/test -Recurse -Depth 2; exit 1 }
-          node $playwrightCli test --reporter "list,junit" --config=playwright.config.ts --output=test-results --workers=4
+          node $playwrightCli test --reporter "list,junit" --config=playwright.config.ts --output=test-results --workers=1
           $pwExit = $LASTEXITCODE
 
           Write-Host "[6] Prepare Bitbucket test-reports ingestion" -ForegroundColor Cyan
@@ -602,7 +602,7 @@ definitions:
           if (!(Test-Path $bbPlaywrightDir)) { New-Item -ItemType Directory -Path $bbPlaywrightDir -Force | Out-Null }
           # Locate a junit xml (reporter names can vary). Prefer explicit junit.xml if present.
           $junitCandidate = @(
-            Get-ChildItem -Path test-results -Recurse -Filter junit*.xml -ErrorAction SilentlyContinue,
+            Get-ChildItem -Path test-results -Recurse -Filter junit*.xml -ErrorAction SilentlyContinue
             Get-ChildItem -Path test-results -Recurse -Filter *.xml -ErrorAction SilentlyContinue | Where-Object { (Get-Content $_.FullName -TotalCount 5) -match '<testsuite' }
           ) | Where-Object { $_ } | Select-Object -First 1
           if ($junitCandidate) {

@@ -96,7 +96,7 @@ test.describe("Distribution and Forfeitures: ", () => {
     });
 
     test('changing status of distribution and forfeitures', async ({ page }) => {
-        await page.getByRole('combobox').nth(2).click();
+        await page.getByRole('combobox').nth(1).click();
         await page.getByRole('option', { name: 'Complete' }).click();
         const [response] = await Promise.all([page.waitForResponse((resp) =>
             resp.url().includes('api/navigation'))]);

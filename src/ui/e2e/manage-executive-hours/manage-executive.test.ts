@@ -6,7 +6,7 @@ test.describe("Manage Executive Hours: ", () => {
     test.beforeEach(async ({ page }) => {
         await page.goto(baseUrl);
         await page.waitForLoadState("networkidle");
-    await impersonateRole(page, 'Finance-Manager');
+        await impersonateRole(page, 'Finance-Manager');
         await page.getByRole('button').filter({ hasText: /^$/ }).click();
         await page.getByRole('button', { name: 'Fiscal Close' }).click();
         await page.getByRole('button', { name: 'Manage Executive Hours' }).click();
@@ -83,18 +83,28 @@ test.describe("Manage Executive Hours: ", () => {
     });
 
     test('update executive hours from the grid', async ({ page }) => {
-        await page.locator('input[name="badgeNumber"]').fill('706056');
-        await page.getByTestId('searchButton').click();
+
         const [response] = await Promise.all([page.waitForResponse((resp) =>
-            resp.url().includes('yearend/executive-hours-and-dollars'))]);
+            resp.url().includes('yearend/executive-hours-and-dollars')),
+
+        (async () => {
+            await page.locator('input[name="badgeNumber"]').fill('706056');
+            await page.getByTestId('searchButton').click();
+        })()
+        ]);
         await expect(response.status()).toBe(200);
-        await page.getByRole('gridcell').nth(4).dblclick();
-        await page.getByRole('textbox', { name: 'Input Editor' }).fill('10');
-        await page.getByRole('gridcell').nth(5).click();
-        await page.getByRole('button', { name: 'Save', exact: true }).click();
+
         const [response1] = await Promise.all([page.waitForResponse((resp) =>
-            resp.url().includes('yearend/executive-hours-and-dollars'))]);
-        await expect(response.status()).toBe(200);
+            resp.url().includes('yearend/executive-hours-and-dollars')),
+        (async () => {
+            await page.getByRole('gridcell').nth(4).dblclick();
+            const randomValue = String(Math.floor(Math.random() * 100) + 1);
+            await page.getByRole('textbox', { name: 'Input Editor' }).fill(randomValue);
+            await page.getByRole('gridcell').nth(5).click();
+            await page.getByRole('button', { name: 'Save', exact: true }).click();
+        })()
+        ]);
+        await expect(response1.status()).toBe(204);
     });
 
 
