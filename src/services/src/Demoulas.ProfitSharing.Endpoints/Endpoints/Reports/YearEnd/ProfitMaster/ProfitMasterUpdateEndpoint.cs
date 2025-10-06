@@ -74,7 +74,7 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
             // - Forfeiture totals query
             // - Contribution totals query
             // - Earnings totals query
-
+            
             // Example: if we had the data
             // ["PAY443.DistributionTotals"] = actualDistributionTotal,
             // ["QPAY129.Distributions"] = qpay129DistributionTotal,
@@ -94,7 +94,7 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
                 "Cross-reference validation failed for year {ProfitYear}: {Error}",
                 req.ProfitYear,
                 crossRefValidation.Error?.Message);
-
+            
             // For now, we'll log but not block - in production this should throw/block
             // when BlockMasterUpdate is true
         }
@@ -105,7 +105,7 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
                 "Issues: {Issues}",
                 req.ProfitYear,
                 string.Join("; ", crossRefValidation.Value.CriticalIssues));
-
+            
             // TODO: In production, throw validation exception here
             // For now, we'll continue but attach the validation results
         }
@@ -117,12 +117,12 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
             async (arditReq, _, cancellationToken) =>
             {
                 ProfitMasterUpdateResponse response = await _profitMasterService.Update(arditReq, cancellationToken);
-
+                
                 // Attach cross-reference validation results to response
                 if (crossRefValidation.IsSuccess)
                 {
                     response.CrossReferenceValidation = crossRefValidation.Value;
-
+                    
                     _logger.LogInformation(
                         "Master Update completed for year {ProfitYear} with cross-reference validation: " +
                         "{PassedValidations}/{TotalValidations} passed",
@@ -130,12 +130,12 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
                         crossRefValidation.Value.PassedValidations,
                         crossRefValidation.Value.TotalValidations);
                 }
-
+                
                 await _navigationService.UpdateNavigation(Navigation.Constants.MasterUpdate, NavigationStatus.Constants.Complete, cancellationToken);
                 return response;
             },
             ct);
-
+            
         await Send.OkAsync(response, ct);
     }
 }
