@@ -27,7 +27,7 @@ test.describe("Forfeiture Adjustment (008-12): ", () => {
     });
 
     test('changing status of forfeiture adjustment', async ({page})=>{
-        await page.getByRole('combobox').nth(2).click();
+        await page.getByRole('combobox').nth(1).click();
         await page.getByRole('option', { name: 'Complete' }).click();
         const [response] = await Promise.all([page.waitForResponse((resp) =>
             resp.url().includes('api/navigation'))]);

@@ -55,7 +55,7 @@ test.describe("Manage Executive Hours: ", () => {
         const [response] = await Promise.all([
             page.waitForResponse((resp) => resp.url().includes('api/navigation') && resp.status() === 200, { timeout: 20000 }),
             (async () => {
-                await page.getByRole('combobox').nth(2).click();
+                await page.getByRole('combobox').nth(1).click();
                 await page.getByRole('option', { name: 'Complete' }).click();
             })()
         ]);

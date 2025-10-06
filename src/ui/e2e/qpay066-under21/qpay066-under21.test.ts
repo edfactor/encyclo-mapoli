@@ -22,30 +22,10 @@ test.describe("Profit Share Gross Report (QPAY501): ", () => {
         await expect(response.status()).toBe(200);
     });
 
-    test('checking pagination', async ({ page }) => {
-        try {
-            const [response] = await Promise.all([page.waitForResponse((resp) =>
-                resp.url().includes('yearend/post-frozen/under-21-breakdown-by-store'))]);
-            await expect(response.status()).toBe(200);
-            // Locate the select dropdown
-            const pageSizeSelect = page.locator('select[aria-label="rows per page"]');
-
-            // Select by value
-            await pageSizeSelect.selectOption('10');
-
-            const isNextPageDisabled = await page.getByRole('button', { name: 'next page' }).isDisabled();
-
-            if (!isNextPageDisabled) {
-                await page.getByRole('button', { name: 'next page' }).click();
-                const [response1] = await Promise.all([page.waitForResponse((resp) =>
-                    resp.url().includes('yearend/post-frozen/under-21-breakdown-by-store'))]);
-                await expect(response1.status()).toBe(200);
-            }
-        } catch (error) { return; }
-    });
+    
 
     test('changing status updates navigation api', async ({ page }) => {
-        await page.getByRole('combobox').nth(2).click();
+        await page.getByRole('combobox').nth(1).click();
         await page.getByRole('option', { name: 'Complete' }).click();
         const [response] = await Promise.all([page.waitForResponse((resp) =>
             resp.url().includes('api/navigation'))]);

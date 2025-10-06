@@ -13,9 +13,14 @@ test.describe("Clean-up Reports: ", () => {
     });
 
     test('Demographic Badges Not In PayProfit', async ({ page }) => {
-        await page.getByRole('button', { name: 'Demographic Badges Not In PayProfit' }).click();
+        
         const [response] = await Promise.all([page.waitForResponse((resp) =>
-            resp.url().includes('yearend/demographic-badges-not-in-payprofit'))]);
+            resp.url().includes('yearend/demographic-badges-not-in-payprofit')),
+            (async () => {
+                await page.getByRole('button', { name: 'Demographic Badges Not In PayProfit' }).click();
+            })()
+        
+        ]);
         await expect(response.status()).toBe(200);
     });
 
