@@ -242,7 +242,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, storeNumber, onLoadingC
                         <Typography
                           variant="body2"
                           color="text.secondary">
-                          Loading...
+                          
                         </Typography>
                       </Box>
                     </TableCell>

@@ -37,6 +37,7 @@ interface TerminationGridSearchProps {
   shouldArchive?: boolean;
   onArchiveHandled?: () => void;
   onErrorOccurred?: () => void; // Add this prop
+  onLoadingChange?: (isLoading: boolean) => void;
 }
 
 const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
@@ -49,7 +50,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   fiscalData,
   shouldArchive,
   onArchiveHandled,
-  onErrorOccurred
+  onErrorOccurred,
+  onLoadingChange
 }) => {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
@@ -144,6 +146,11 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       setIsPendingBulkMessage(false);
     }
   }, [isFetching, pendingSuccessMessage, isPendingBulkMessage, dispatch]);
+
+  // Notify parent component about loading state changes
+  useEffect(() => {
+    onLoadingChange?.(isFetching);
+  }, [isFetching, onLoadingChange]);
 
   // Reusable function to refresh grid after save operations
   const refreshGridAfterSave = useCallback(
@@ -725,7 +732,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
           <div
             className="spinner-border h-12 w-12"
             role="status">
-            <span className="visually-hidden">Loading...</span>
+            <span className="visually-hidden"></span>
           </div>
         </div>
       )}
