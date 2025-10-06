@@ -15,7 +15,7 @@ using Xunit;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services;
 
-[Description("PS-XXXX: Unit tests for ChecksumValidationService")]
+[Description("Unit tests for ChecksumValidationService - caller-driven field validation")]
 public class ChecksumValidationServiceTests
 {
     private readonly ScenarioDataContextFactory _scenarioFactory;
@@ -30,38 +30,30 @@ public class ChecksumValidationServiceTests
     }
 
     [Fact]
-    [Description("PS-XXXX: Valid checksum - returns IsValid true when archived and recalculated checksums match")]
-    public async Task ValidateReportChecksumAsync_ValidChecksum_ReturnsIsValidTrue()
+    [Description("All provided fields match archived checksums - returns IsValid true")]
+    public async Task ValidateReportFieldsAsync_AllFieldsMatch_ReturnsIsValidTrue()
     {
         // Arrange
         short profitYear = 2024;
         string reportType = "YearEndBreakdown";
 
-        // Create test data
-        var reportData = new
+        // Caller-provided field values (what they're seeing in their UI/report)
+        var fieldsToValidate = new Dictionary<string, decimal>
         {
-            TotalAmount = 12345.67m,
-            ParticipantCount = 100m
+            ["TotalAmount"] = 12345.67m,
+            ["ParticipantCount"] = 100m
         };
 
-        var reportJson = JsonSerializer.Serialize(reportData);
-
-        // Build KeyFieldsChecksumJson to match what the service will extract
-        // The service will extract all decimal properties and hash them
-        var keyFieldsChecksum = new List<KeyValuePair<string, KeyValuePair<decimal, byte[]>>>();
-
-        // Manually build what the service would extract (TotalAmount and ParticipantCount)
-        var totalAmountHash = SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(12345.67m));
-        keyFieldsChecksum.Add(new KeyValuePair<string, KeyValuePair<decimal, byte[]>>(
-            "TotalAmount",
-            new KeyValuePair<decimal, byte[]>(12345.67m, totalAmountHash)
-        ));
-
-        var participantCountHash = SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(100m));
-        keyFieldsChecksum.Add(new KeyValuePair<string, KeyValuePair<decimal, byte[]>>(
-            "ParticipantCount",
-            new KeyValuePair<decimal, byte[]>(100m, participantCountHash)
-        ));
+        // Create archived checksum with matching hashes
+        var keyFieldsChecksum = new List<KeyValuePair<string, KeyValuePair<decimal, byte[]>>>
+        {
+            new("TotalAmount", new KeyValuePair<decimal, byte[]>(
+                12345.67m,
+                SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(12345.67m)))),
+            new("ParticipantCount", new KeyValuePair<decimal, byte[]>(
+                100m,
+                SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(100m))))
+        };
 
         var archivedReport = new ReportChecksum
         {
@@ -69,7 +61,7 @@ public class ChecksumValidationServiceTests
             ProfitYear = profitYear,
             ReportType = reportType,
             RequestJson = "{}",
-            ReportJson = reportJson,
+            ReportJson = "{}",
             KeyFieldsChecksumJson = keyFieldsChecksum,
             CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1),
             UserName = "test-user"
@@ -83,46 +75,49 @@ public class ChecksumValidationServiceTests
             .Returns(mockDbSet.Object);
 
         // Act
-        var result = await _service.ValidateReportChecksumAsync(profitYear, reportType, CancellationToken.None);
+        var result = await _service.ValidateReportFieldsAsync(
+            profitYear,
+            reportType,
+            fieldsToValidate,
+            CancellationToken.None);
 
         // Assert
-        if (!result.IsSuccess)
-        {
-            // Debug output to see what went wrong
-            var errorMsg = result.Error?.Description ?? "null";
-            var errorCode = result.Error?.Code.ToString() ?? "null";
-            throw new Exception($"Test failed: IsSuccess={result.IsSuccess}, Error={errorMsg}, ErrorCode={errorCode}");
-        }
-
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldNotBeNull();
+        result.Value.IsValid.ShouldBeTrue();
         result.Value.ProfitYear.ShouldBe(profitYear);
         result.Value.ReportType.ShouldBe(reportType);
-        result.Value.IsValid.ShouldBeTrue();
-        result.Value.Message.ShouldContain("match");
-        result.Value.ArchivedChecksum.ShouldNotBeNullOrEmpty();
-        result.Value.CurrentChecksum.ShouldNotBeNullOrEmpty();
-        result.Value.ArchivedChecksum.ShouldBe(result.Value.CurrentChecksum);
+        result.Value.FieldResults.Count.ShouldBe(2);
+        result.Value.FieldResults["TotalAmount"].Matches.ShouldBeTrue();
+        result.Value.FieldResults["ParticipantCount"].Matches.ShouldBeTrue();
+        result.Value.MismatchedFields.ShouldBeEmpty();
+        result.Value.Message.ShouldContain("All 2 field(s) match");
     }
 
     [Fact]
-    [Description("PS-XXXX: Data drift detected - returns IsValid false when checksums don't match")]
-    public async Task ValidateReportChecksumAsync_DataDrift_ReturnsIsValidFalse()
+    [Description("One field doesn't match - returns IsValid false with mismatched field enumerated")]
+    public async Task ValidateReportFieldsAsync_OneFieldMismatch_ReturnsIsValidFalse()
     {
         // Arrange
         short profitYear = 2024;
         string reportType = "YearEndBreakdown";
 
-        // Archived checksum with different values
-        var archivedKeyFieldsChecksum = new List<KeyValuePair<string, KeyValuePair<decimal, byte[]>>>
+        // Caller provides values - one doesn't match archived
+        var fieldsToValidate = new Dictionary<string, decimal>
         {
-            new("TotalAmount", new KeyValuePair<decimal, byte[]>(12345.67m, new byte[] { 1, 2, 3 }))
+            ["TotalAmount"] = 12345.67m,    // Matches
+            ["ParticipantCount"] = 150m     // DOESN'T match (archived is 100)
         };
 
-        // Current data has different values (data drift!)
-        var reportData = new
+        // Archived checksums
+        var keyFieldsChecksum = new List<KeyValuePair<string, KeyValuePair<decimal, byte[]>>>
         {
-            TotalAmount = 99999.99m, // Changed!
+            new("TotalAmount", new KeyValuePair<decimal, byte[]>(
+                12345.67m,
+                SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(12345.67m)))),
+            new("ParticipantCount", new KeyValuePair<decimal, byte[]>(
+                100m,  // Archived value
+                SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(100m))))
         };
 
         var archivedReport = new ReportChecksum
@@ -131,8 +126,8 @@ public class ChecksumValidationServiceTests
             ProfitYear = profitYear,
             ReportType = reportType,
             RequestJson = "{}",
-            ReportJson = JsonSerializer.Serialize(reportData),
-            KeyFieldsChecksumJson = archivedKeyFieldsChecksum,
+            ReportJson = "{}",
+            KeyFieldsChecksumJson = keyFieldsChecksum,
             CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1),
             UserName = "test-user"
         };
@@ -145,296 +140,45 @@ public class ChecksumValidationServiceTests
             .Returns(mockDbSet.Object);
 
         // Act
-        var result = await _service.ValidateReportChecksumAsync(profitYear, reportType, CancellationToken.None);
+        var result = await _service.ValidateReportFieldsAsync(
+            profitYear,
+            reportType,
+            fieldsToValidate,
+            CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldNotBeNull();
         result.Value.IsValid.ShouldBeFalse();
-        result.Value.Message.ShouldContain("do not match");
-        result.Value.ArchivedChecksum.ShouldNotBe(result.Value.CurrentChecksum);
+        result.Value.FieldResults.Count.ShouldBe(2);
+        result.Value.FieldResults["TotalAmount"].Matches.ShouldBeTrue();
+        result.Value.FieldResults["ParticipantCount"].Matches.ShouldBeFalse();
+        result.Value.MismatchedFields.Count.ShouldBe(1);
+        result.Value.MismatchedFields.ShouldContain("ParticipantCount");
+        result.Value.Message.ShouldContain("1 of 2 field(s) do not match");
     }
 
     [Fact]
-    [Description("PS-XXXX: No archived report - returns EntityNotFound error")]
-    public async Task ValidateReportChecksumAsync_NoArchivedReport_ReturnsNotFoundError()
-    {
-        // Arrange
-        short profitYear = 2024;
-        string reportType = "NonExistentReport";
-
-        var reportChecksums = new List<ReportChecksum>(); // Empty list
-        var mockDbSet = reportChecksums.BuildMockDbSet();
-
-        _scenarioFactory.ProfitSharingReadOnlyDbContext
-            .Setup(c => c.ReportChecksums)
-            .Returns(mockDbSet.Object);
-
-        // Act
-        var result = await _service.ValidateReportChecksumAsync(profitYear, reportType, CancellationToken.None);
-
-        // Assert
-        result.IsError.ShouldBeTrue();
-        result.Error.ShouldNotBeNull();
-        result.Error.Description.ShouldContain("not found");
-    }
-
-    [Fact]
-    [Description("PS-XXXX: Multiple archived reports - uses most recent by CreatedAtUtc")]
-    public async Task ValidateReportChecksumAsync_MultipleReports_UsesMostRecent()
+    [Description("Field not found in archive - returns IsValid false with appropriate message")]
+    public async Task ValidateReportFieldsAsync_FieldNotInArchive_ReturnsIsValidFalse()
     {
         // Arrange
         short profitYear = 2024;
         string reportType = "YearEndBreakdown";
 
+        // Caller provides field that doesn't exist in archive
+        var fieldsToValidate = new Dictionary<string, decimal>
+        {
+            ["TotalAmount"] = 12345.67m,
+            ["NewField"] = 999m  // Not in archive
+        };
+
+        // Archived checksums (only has TotalAmount)
         var keyFieldsChecksum = new List<KeyValuePair<string, KeyValuePair<decimal, byte[]>>>
         {
-            new("TotalAmount", new KeyValuePair<decimal, byte[]>(12345.67m, new byte[] { 1, 2, 3 }))
-        };
-
-        var reportData = new { TotalAmount = 12345.67m };
-
-        var olderReport = new ReportChecksum
-        {
-            Id = 1,
-            ProfitYear = profitYear,
-            ReportType = reportType,
-            RequestJson = "{}",
-            ReportJson = JsonSerializer.Serialize(reportData),
-            KeyFieldsChecksumJson = keyFieldsChecksum,
-            CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-10), // Older
-            UserName = "test-user"
-        };
-
-        var newerReport = new ReportChecksum
-        {
-            Id = 2,
-            ProfitYear = profitYear,
-            ReportType = reportType,
-            RequestJson = "{}",
-            ReportJson = JsonSerializer.Serialize(reportData),
-            KeyFieldsChecksumJson = keyFieldsChecksum,
-            CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1), // Newer - should be used
-            UserName = "test-user"
-        };
-
-        var reportChecksums = new List<ReportChecksum> { olderReport, newerReport };
-        var mockDbSet = reportChecksums.BuildMockDbSet();
-
-        _scenarioFactory.ProfitSharingReadOnlyDbContext
-            .Setup(c => c.ReportChecksums)
-            .Returns(mockDbSet.Object);
-
-        // Act
-        var result = await _service.ValidateReportChecksumAsync(profitYear, reportType, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        result.Value.ShouldNotBeNull();
-        result.Value.ArchivedAt.ShouldBe(newerReport.CreatedAtUtc);
-    }
-
-    [Fact]
-    [Description("PS-XXXX: Batch validation - validates all reports and returns results list")]
-    public async Task ValidateAllReportsAsync_MultipleReports_ReturnsAllResults()
-    {
-        // Arrange
-        var validChecksum = new List<KeyValuePair<string, KeyValuePair<decimal, byte[]>>>
-        {
-            new("Amount", new KeyValuePair<decimal, byte[]>(100m, new byte[] { 1, 2, 3 }))
-        };
-
-        var report1 = new ReportChecksum
-        {
-            Id = 1,
-            ProfitYear = 2024,
-            ReportType = "Report1",
-            RequestJson = "{}",
-            ReportJson = JsonSerializer.Serialize(new { Amount = 100m }),
-            KeyFieldsChecksumJson = validChecksum,
-            CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1),
-            UserName = "test-user"
-        };
-
-        var report2 = new ReportChecksum
-        {
-            Id = 2,
-            ProfitYear = 2024,
-            ReportType = "Report2",
-            RequestJson = "{}",
-            ReportJson = JsonSerializer.Serialize(new { Amount = 100m }),
-            KeyFieldsChecksumJson = validChecksum,
-            CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1),
-            UserName = "test-user"
-        };
-
-        var reportChecksums = new List<ReportChecksum> { report1, report2 };
-        var mockDbSet = reportChecksums.BuildMockDbSet();
-
-        _scenarioFactory.ProfitSharingReadOnlyDbContext
-            .Setup(c => c.ReportChecksums)
-            .Returns(mockDbSet.Object);
-
-        // Act
-        var result = await _service.ValidateAllReportsAsync(profitYear: null, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        result.Value.ShouldNotBeNull();
-        result.Value.Count.ShouldBe(2);
-        result.Value.All(r => r.IsValid).ShouldBeTrue();
-    }
-
-    [Fact]
-    [Description("PS-XXXX: Batch validation with year filter - only validates specified year")]
-    public async Task ValidateAllReportsAsync_WithYearFilter_OnlyValidatesSpecifiedYear()
-    {
-        // Arrange
-        var validChecksum = new List<KeyValuePair<string, KeyValuePair<decimal, byte[]>>>
-        {
-            new("Amount", new KeyValuePair<decimal, byte[]>(100m, new byte[] { 1, 2, 3 }))
-        };
-
-        var report2024 = new ReportChecksum
-        {
-            Id = 1,
-            ProfitYear = 2024,
-            ReportType = "Report1",
-            RequestJson = "{}",
-            ReportJson = JsonSerializer.Serialize(new { Amount = 100m }),
-            KeyFieldsChecksumJson = validChecksum,
-            CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1),
-            UserName = "test-user"
-        };
-
-        var report2023 = new ReportChecksum
-        {
-            Id = 2,
-            ProfitYear = 2023,
-            ReportType = "Report2",
-            RequestJson = "{}",
-            ReportJson = JsonSerializer.Serialize(new { Amount = 100m }),
-            KeyFieldsChecksumJson = validChecksum,
-            CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1),
-            UserName = "test-user"
-        };
-
-        var reportChecksums = new List<ReportChecksum> { report2024, report2023 };
-        var mockDbSet = reportChecksums.BuildMockDbSet();
-
-        _scenarioFactory.ProfitSharingReadOnlyDbContext
-            .Setup(c => c.ReportChecksums)
-            .Returns(mockDbSet.Object);
-
-        // Act
-        var result = await _service.ValidateAllReportsAsync(profitYear: 2024, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        result.Value.ShouldNotBeNull();
-        result.Value.Count.ShouldBe(1);
-        result.Value[0].ProfitYear.ShouldBe((short)2024);
-    }
-
-    [Fact]
-    [Description("PS-XXXX: Batch validation continues on individual errors")]
-    public async Task ValidateAllReportsAsync_IndividualError_ContinuesProcessing()
-    {
-        // Arrange
-        var validChecksum = new List<KeyValuePair<string, KeyValuePair<decimal, byte[]>>>
-        {
-            new("Amount", new KeyValuePair<decimal, byte[]>(100m, new byte[] { 1, 2, 3 }))
-        };
-
-        var validReport = new ReportChecksum
-        {
-            Id = 1,
-            ProfitYear = 2024,
-            ReportType = "ValidReport",
-            RequestJson = "{}",
-            ReportJson = JsonSerializer.Serialize(new { Amount = 100m }),
-            KeyFieldsChecksumJson = validChecksum,
-            CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1),
-            UserName = "test-user"
-        };
-
-        // Invalid JSON that will cause deserialization error
-        var invalidReport = new ReportChecksum
-        {
-            Id = 2,
-            ProfitYear = 2024,
-            ReportType = "InvalidReport",
-            RequestJson = "{}",
-            ReportJson = "invalid-json{", // Invalid JSON
-            KeyFieldsChecksumJson = validChecksum,
-            CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1),
-            UserName = "test-user"
-        };
-
-        var reportChecksums = new List<ReportChecksum> { validReport, invalidReport };
-        var mockDbSet = reportChecksums.BuildMockDbSet();
-
-        _scenarioFactory.ProfitSharingReadOnlyDbContext
-            .Setup(c => c.ReportChecksums)
-            .Returns(mockDbSet.Object);
-
-        // Act
-        var result = await _service.ValidateAllReportsAsync(profitYear: null, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        result.Value.ShouldNotBeNull();
-        result.Value.Count.ShouldBeGreaterThanOrEqualTo(1); // At least the valid report
-        result.Value.Any(r => r.ReportType == "ValidReport").ShouldBeTrue();
-    }
-
-    [Fact]
-    [Description("PS-XXXX: Empty database - returns empty list")]
-    public async Task ValidateAllReportsAsync_NoReports_ReturnsEmptyList()
-    {
-        // Arrange
-        var reportChecksums = new List<ReportChecksum>(); // Empty
-        var mockDbSet = reportChecksums.BuildMockDbSet();
-
-        _scenarioFactory.ProfitSharingReadOnlyDbContext
-            .Setup(c => c.ReportChecksums)
-            .Returns(mockDbSet.Object);
-
-        // Act
-        var result = await _service.ValidateAllReportsAsync(profitYear: null, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        result.Value.ShouldNotBeNull();
-        result.Value.Count.ShouldBe(0);
-    }
-
-    [Fact]
-    [Description("PS-XXXX: Complex nested JSON - extracts decimal properties correctly")]
-    public async Task ValidateReportChecksumAsync_ComplexNestedJson_ExtractsDecimalsCorrectly()
-    {
-        // Arrange
-        short profitYear = 2024;
-        string reportType = "ComplexReport";
-
-        var keyFieldsChecksum = new List<KeyValuePair<string, KeyValuePair<decimal, byte[]>>>
-        {
-            new("Level1.Amount", new KeyValuePair<decimal, byte[]>(100m, new byte[] { 1, 2, 3 })),
-            new("Level1.Nested.Total", new KeyValuePair<decimal, byte[]>(250.50m, new byte[] { 4, 5, 6 }))
-        };
-
-        var complexReportData = new
-        {
-            Level1 = new
-            {
-                Amount = 100m,
-                Name = "Test",
-                Nested = new
-                {
-                    Total = 250.50m,
-                    Description = "Nested total"
-                }
-            }
+            new("TotalAmount", new KeyValuePair<decimal, byte[]>(
+                12345.67m,
+                SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(12345.67m))))
         };
 
         var archivedReport = new ReportChecksum
@@ -443,7 +187,7 @@ public class ChecksumValidationServiceTests
             ProfitYear = profitYear,
             ReportType = reportType,
             RequestJson = "{}",
-            ReportJson = JsonSerializer.Serialize(complexReportData),
+            ReportJson = "{}",
             KeyFieldsChecksumJson = keyFieldsChecksum,
             CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1),
             UserName = "test-user"
@@ -457,48 +201,222 @@ public class ChecksumValidationServiceTests
             .Returns(mockDbSet.Object);
 
         // Act
-        var result = await _service.ValidateReportChecksumAsync(profitYear, reportType, CancellationToken.None);
+        var result = await _service.ValidateReportFieldsAsync(
+            profitYear,
+            reportType,
+            fieldsToValidate,
+            CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldNotBeNull();
-        result.Value.IsValid.ShouldBeTrue();
+        result.Value.IsValid.ShouldBeFalse();
+        result.Value.FieldResults["NewField"].Matches.ShouldBeFalse();
+        result.Value.FieldResults["NewField"].ArchivedChecksum.ShouldBeNull();
+        result.Value.FieldResults["NewField"].Message.ShouldContain("not found in archived report");
+        result.Value.MismatchedFields.ShouldContain("NewField");
     }
 
     [Fact]
-    [Description("PS-XXXX: Null or empty report type - returns validation error")]
-    public async Task ValidateReportChecksumAsync_NullReportType_ReturnsValidationError()
+    [Description("No archived report exists - returns EntityNotFound error")]
+    public async Task ValidateReportFieldsAsync_NoArchivedReport_ReturnsEntityNotFound()
+    {
+        // Arrange
+        short profitYear = 2024;
+        string reportType = "YearEndBreakdown";
+
+        var fieldsToValidate = new Dictionary<string, decimal>
+        {
+            ["TotalAmount"] = 12345.67m
+        };
+
+        // No archived reports
+        var reportChecksums = new List<ReportChecksum>();
+        var mockDbSet = reportChecksums.BuildMockDbSet();
+
+        _scenarioFactory.ProfitSharingReadOnlyDbContext
+            .Setup(c => c.ReportChecksums)
+            .Returns(mockDbSet.Object);
+
+        // Act
+        var result = await _service.ValidateReportFieldsAsync(
+            profitYear,
+            reportType,
+            fieldsToValidate,
+            CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeFalse();
+        result.Error.ShouldNotBeNull();
+        result.Error!.Code.ShouldBe(104);  // EntityNotFound uses code 104
+        result.Error.Description.ShouldContain("not found");
+    }
+
+    [Fact]
+    [Description("Empty fields dictionary - returns validation error")]
+    public async Task ValidateReportFieldsAsync_EmptyFields_ReturnsValidationError()
+    {
+        // Arrange
+        short profitYear = 2024;
+        string reportType = "YearEndBreakdown";
+        var fieldsToValidate = new Dictionary<string, decimal>();  // Empty
+
+        // Act
+        var result = await _service.ValidateReportFieldsAsync(
+            profitYear,
+            reportType,
+            fieldsToValidate,
+            CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeFalse();
+        result.Error.ShouldNotBeNull();
+        result.Error!.Code.ShouldBe(400);  // Validation error code
+        result.Error.ValidationErrors.ShouldNotBeNull();
+        result.Error.ValidationErrors.ShouldContainKey(nameof(fieldsToValidate));
+        var errorMessage = result.Error.ValidationErrors[nameof(fieldsToValidate)][0];
+        errorMessage.ShouldContain("At least one field must be provided");
+    }
+
+    [Fact]
+    [Description("Null report type - returns validation error")]
+    public async Task ValidateReportFieldsAsync_NullReportType_ReturnsValidationError()
     {
         // Arrange
         short profitYear = 2024;
         string reportType = null!;
+        var fieldsToValidate = new Dictionary<string, decimal>
+        {
+            ["TotalAmount"] = 12345.67m
+        };
 
         // Act
-        var result = await _service.ValidateReportChecksumAsync(profitYear, reportType, CancellationToken.None);
+        var result = await _service.ValidateReportFieldsAsync(
+            profitYear,
+            reportType,
+            fieldsToValidate,
+            CancellationToken.None);
 
         // Assert
-        result.IsError.ShouldBeTrue();
+        result.IsSuccess.ShouldBeFalse();
         result.Error.ShouldNotBeNull();
+        result.Error!.Code.ShouldBe(400);  // Validation error code
+        result.Error.ValidationErrors.ShouldNotBeNull();
+        result.Error.ValidationErrors.ShouldContainKey(nameof(reportType));
+        var errorMessage = result.Error.ValidationErrors[nameof(reportType)][0];
+        errorMessage.ShouldContain("Report type cannot be null or empty");
     }
 
     [Fact]
-    [Description("PS-XXXX: Database exception - returns unexpected error")]
-    public async Task ValidateReportChecksumAsync_DatabaseException_ReturnsUnexpectedError()
+    [Description("Multiple fields with mixed results - returns detailed per-field validation")]
+    public async Task ValidateReportFieldsAsync_MixedResults_ReturnsDetailedResults()
     {
         // Arrange
         short profitYear = 2024;
-        string reportType = "TestReport";
+        string reportType = "YearEndBreakdown";
+
+        var fieldsToValidate = new Dictionary<string, decimal>
+        {
+            ["TotalAmount"] = 12345.67m,        // Matches
+            ["ParticipantCount"] = 150m,        // Doesn't match (archived is 100)
+            ["AverageDistribution"] = 123.45m,  // Matches
+            ["NewField"] = 999m,                // Not in archive
+            ["TotalHours"] = 2000m              // Matches
+        };
+
+        // Archived checksums (4 of 5 fields)
+        var keyFieldsChecksum = new List<KeyValuePair<string, KeyValuePair<decimal, byte[]>>>
+        {
+            new("TotalAmount", new KeyValuePair<decimal, byte[]>(
+                12345.67m,
+                SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(12345.67m)))),
+            new("ParticipantCount", new KeyValuePair<decimal, byte[]>(
+                100m,  // Different from provided value
+                SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(100m)))),
+            new("AverageDistribution", new KeyValuePair<decimal, byte[]>(
+                123.45m,
+                SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(123.45m)))),
+            new("TotalHours", new KeyValuePair<decimal, byte[]>(
+                2000m,
+                SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(2000m))))
+            // NewField intentionally missing
+        };
+
+        var archivedReport = new ReportChecksum
+        {
+            Id = 1,
+            ProfitYear = profitYear,
+            ReportType = reportType,
+            RequestJson = "{}",
+            ReportJson = "{}",
+            KeyFieldsChecksumJson = keyFieldsChecksum,
+            CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1),
+            UserName = "test-user"
+        };
+
+        var reportChecksums = new List<ReportChecksum> { archivedReport };
+        var mockDbSet = reportChecksums.BuildMockDbSet();
 
         _scenarioFactory.ProfitSharingReadOnlyDbContext
             .Setup(c => c.ReportChecksums)
-            .Throws(new Exception("Database connection failed"));
+            .Returns(mockDbSet.Object);
 
         // Act
-        var result = await _service.ValidateReportChecksumAsync(profitYear, reportType, CancellationToken.None);
+        var result = await _service.ValidateReportFieldsAsync(
+            profitYear,
+            reportType,
+            fieldsToValidate,
+            CancellationToken.None);
 
         // Assert
-        result.IsError.ShouldBeTrue();
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldNotBeNull();
+        result.Value.IsValid.ShouldBeFalse();
+        result.Value.FieldResults.Count.ShouldBe(5);
+
+        // Check individual field results
+        result.Value.FieldResults["TotalAmount"].Matches.ShouldBeTrue();
+        result.Value.FieldResults["ParticipantCount"].Matches.ShouldBeFalse();
+        result.Value.FieldResults["AverageDistribution"].Matches.ShouldBeTrue();
+        result.Value.FieldResults["NewField"].Matches.ShouldBeFalse();
+        result.Value.FieldResults["NewField"].ArchivedChecksum.ShouldBeNull();
+        result.Value.FieldResults["TotalHours"].Matches.ShouldBeTrue();
+
+        // Check mismatched fields list
+        result.Value.MismatchedFields.Count.ShouldBe(2);
+        result.Value.MismatchedFields.ShouldContain("ParticipantCount");
+        result.Value.MismatchedFields.ShouldContain("NewField");
+        result.Value.Message.ShouldContain("2 of 5 field(s) do not match");
+    }
+
+    [Fact]
+    [Description("Database exception - returns unexpected error")]
+    public async Task ValidateReportFieldsAsync_DatabaseException_ReturnsUnexpectedError()
+    {
+        // Arrange
+        short profitYear = 2024;
+        string reportType = "YearEndBreakdown";
+        var fieldsToValidate = new Dictionary<string, decimal>
+        {
+            ["TotalAmount"] = 12345.67m
+        };
+
+        // Setup mock to throw exception
+        _scenarioFactory.ProfitSharingReadOnlyDbContext
+            .Setup(c => c.ReportChecksums)
+            .Throws(new InvalidOperationException("Database connection failed"));
+
+        // Act
+        var result = await _service.ValidateReportFieldsAsync(
+            profitYear,
+            reportType,
+            fieldsToValidate,
+            CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeFalse();
         result.Error.ShouldNotBeNull();
-        result.Error.Description.ShouldContain("Database connection failed");
+        result.Error!.Code.ShouldBe(900);
+        result.Error.Description.ShouldContain("Failed to validate checksums");
     }
 }

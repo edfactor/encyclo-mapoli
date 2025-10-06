@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -11,8 +12,8 @@ using Microsoft.Extensions.Logging;
 namespace Demoulas.ProfitSharing.Services.Validation;
 
 /// <summary>
-/// Service for validating archived report checksums against current data.
-/// Detects data drift by comparing stored checksums with fresh calculations.
+/// Service for validating archived report checksums against caller-provided field values.
+/// Detects data drift by comparing stored checksums with current values from the caller.
 /// </summary>
 public sealed class ChecksumValidationService : IChecksumValidationService
 {
@@ -28,11 +29,13 @@ public sealed class ChecksumValidationService : IChecksumValidationService
     }
 
     /// <inheritdoc />
-    public async Task<Result<ChecksumValidationResponse>> ValidateReportChecksumAsync(
+    public async Task<Result<ChecksumValidationResponse>> ValidateReportFieldsAsync(
         short profitYear,
         string reportType,
+        Dictionary<string, decimal> fieldsToValidate,
         CancellationToken cancellationToken)
     {
+        // Validate inputs
         if (string.IsNullOrWhiteSpace(reportType))
         {
             return Result<ChecksumValidationResponse>.Failure(
@@ -42,14 +45,24 @@ public sealed class ChecksumValidationService : IChecksumValidationService
                 }));
         }
 
+        if (fieldsToValidate == null || !fieldsToValidate.Any())
+        {
+            return Result<ChecksumValidationResponse>.Failure(
+                Error.Validation(new Dictionary<string, string[]>
+                {
+                    [nameof(fieldsToValidate)] = new[] { "At least one field must be provided for validation." }
+                }));
+        }
+
         _logger.LogInformation(
-            "Validating checksum for report {ReportType} year {ProfitYear}",
+            "Validating {FieldCount} fields for report {ReportType} year {ProfitYear}",
+            fieldsToValidate.Count,
             reportType,
             profitYear);
 
         try
         {
-            // 1. Query for most recent archived checksum (use writable context to access ReportChecksums)
+            // 1. Query for most recent archived checksum
             var archived = await _dataContextFactory.UseReadOnlyContext(async ctx =>
                 await ctx.ReportChecksums
                     .Where(r => r.ProfitYear == profitYear && r.ReportType == reportType)
@@ -67,46 +80,72 @@ public sealed class ChecksumValidationService : IChecksumValidationService
                     Error.EntityNotFound($"No archived report found for {reportType} year {profitYear}"));
             }
 
-            // 2. Extract archived checksum
-            string archivedChecksum = SerializeChecksum(archived.KeyFieldsChecksumJson);
+            // 2. Build dictionary of archived checksums for quick lookup
+            var archivedChecksums = archived.KeyFieldsChecksumJson.ToDictionary(
+                kvp => kvp.Key,
+                kvp => Convert.ToBase64String(kvp.Value.Value) // The hash bytes
+            );
 
-            // 3. Deserialize the archived report to recalculate checksum
-            // We use the stored ReportJson to recalculate the checksum
-            var reportData = JsonSerializer.Deserialize<dynamic>(archived.ReportJson);
-            if (reportData == null)
+            // 3. Validate each provided field
+            var fieldResults = new Dictionary<string, FieldValidationResult>();
+            var mismatchedFields = new List<string>();
+
+            foreach (var (fieldName, fieldValue) in fieldsToValidate)
             {
-                _logger.LogError(
-                    "Failed to deserialize archived report JSON for {ReportType} year {ProfitYear}",
-                    reportType,
-                    profitYear);
+                // Calculate checksum for the provided value
+                var providedHash = SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(fieldValue));
+                var providedChecksum = Convert.ToBase64String(providedHash);
 
-                return Result<ChecksumValidationResponse>.Failure(
-                    Error.Unexpected("Failed to deserialize archived report data"));
+                // Check if this field exists in archived checksums
+                if (!archivedChecksums.TryGetValue(fieldName, out var archivedChecksum))
+                {
+                    // Field not found in archive
+                    fieldResults[fieldName] = new FieldValidationResult
+                    {
+                        Matches = false,
+                        ProvidedValue = fieldValue,
+                        ProvidedChecksum = providedChecksum,
+                        ArchivedChecksum = null,
+                        Message = $"Field '{fieldName}' not found in archived report"
+                    };
+                    mismatchedFields.Add(fieldName);
+                    continue;
+                }
+
+                // Compare checksums
+                bool matches = string.Equals(providedChecksum, archivedChecksum, StringComparison.Ordinal);
+
+                fieldResults[fieldName] = new FieldValidationResult
+                {
+                    Matches = matches,
+                    ProvidedValue = fieldValue,
+                    ProvidedChecksum = providedChecksum,
+                    ArchivedChecksum = archivedChecksum,
+                    Message = matches
+                        ? "Value matches archived checksum"
+                        : "Value does not match archived checksum - data drift detected"
+                };
+
+                if (!matches)
+                {
+                    mismatchedFields.Add(fieldName);
+                }
             }
 
-            // Note: For a true validation, we would need to regenerate the report from source data
-            // However, this requires knowing the report type and having access to the appropriate service
-            // For now, we're comparing against the same stored data to validate checksum integrity
-            // This ensures the checksum calculation is consistent and data hasn't been corrupted
-
-            // 4. Recalculate checksum from the stored report data
-            // Since we're validating data integrity (not recalculating from source),
-            // we recalculate the checksum from the stored ReportJson
-            string recalculatedChecksum = CalculateChecksumFromJson(archived.ReportJson);
-
-            // 5. Compare checksums
-            bool isValid = string.Equals(archivedChecksum, recalculatedChecksum, StringComparison.Ordinal);
+            // 4. Build response
+            bool isValid = mismatchedFields.Count == 0;
+            string message = isValid
+                ? $"All {fieldsToValidate.Count} field(s) match archived checksums"
+                : $"{mismatchedFields.Count} of {fieldsToValidate.Count} field(s) do not match: {string.Join(", ", mismatchedFields)}";
 
             var response = new ChecksumValidationResponse
             {
                 ProfitYear = profitYear,
                 ReportType = reportType,
                 IsValid = isValid,
-                ArchivedChecksum = archivedChecksum,
-                CurrentChecksum = recalculatedChecksum,
-                Message = isValid
-                    ? "Checksum validation passed - data integrity confirmed"
-                    : "Checksum validation failed - data corruption or drift detected",
+                FieldResults = fieldResults,
+                MismatchedFields = mismatchedFields,
+                Message = message,
                 ArchivedAt = archived.CreatedAtUtc,
                 ValidatedAt = DateTimeOffset.UtcNow
             };
@@ -114,18 +153,19 @@ public sealed class ChecksumValidationService : IChecksumValidationService
             if (!isValid)
             {
                 _logger.LogWarning(
-                    "Checksum mismatch detected for {ReportType} year {ProfitYear}. Archived: {ArchivedChecksum}, Recalculated: {RecalculatedChecksum}",
+                    "Checksum validation failed for {ReportType} year {ProfitYear}: {MismatchedCount} field(s) mismatched: {MismatchedFields}",
                     reportType,
                     profitYear,
-                    archivedChecksum,
-                    recalculatedChecksum);
+                    mismatchedFields.Count,
+                    string.Join(", ", mismatchedFields));
             }
             else
             {
                 _logger.LogInformation(
-                    "Checksum validation passed for {ReportType} year {ProfitYear}",
+                    "Checksum validation passed for {ReportType} year {ProfitYear}: all {FieldCount} field(s) matched",
                     reportType,
-                    profitYear);
+                    profitYear,
+                    fieldsToValidate.Count);
             }
 
             return Result<ChecksumValidationResponse>.Success(response);
@@ -134,188 +174,12 @@ public sealed class ChecksumValidationService : IChecksumValidationService
         {
             _logger.LogError(
                 ex,
-                "Error validating checksum for {ReportType} year {ProfitYear}",
+                "Error validating checksums for {ReportType} year {ProfitYear}",
                 reportType,
                 profitYear);
 
             return Result<ChecksumValidationResponse>.Failure(
-                Error.Unexpected($"Failed to validate checksum: {ex.Message}"));
-        }
-    }
-
-    /// <inheritdoc />
-    public async Task<Result<List<ChecksumValidationResponse>>> ValidateAllReportsAsync(
-        short? profitYear = null,
-        CancellationToken cancellationToken = default)
-    {
-        _logger.LogInformation(
-            "Validating all archived reports{YearFilter}",
-            profitYear.HasValue ? $" for year {profitYear.Value}" : "");
-
-        try
-        {
-            // Query all archived reports (optionally filtered by profit year)
-            var archivedReports = await _dataContextFactory.UseReadOnlyContext(async ctx =>
-            {
-                var query = ctx.ReportChecksums.AsQueryable();
-
-                if (profitYear.HasValue)
-                {
-                    query = query.Where(r => r.ProfitYear == profitYear.Value);
-                }
-
-                // Group by ReportType and ProfitYear, take most recent for each
-                return await query
-                    .GroupBy(r => new { r.ReportType, r.ProfitYear })
-                    .Select(g => g.OrderByDescending(r => r.CreatedAtUtc).First())
-                    .OrderBy(r => r.ProfitYear)
-                    .ThenBy(r => r.ReportType)
-                    .ToListAsync(cancellationToken);
-            });
-
-            if (!archivedReports.Any())
-            {
-                _logger.LogWarning(
-                    "No archived reports found{YearFilter}",
-                    profitYear.HasValue ? $" for year {profitYear.Value}" : "");
-
-                return Result<List<ChecksumValidationResponse>>.Success(new List<ChecksumValidationResponse>());
-            }
-
-            _logger.LogInformation(
-                "Found {Count} archived reports to validate",
-                archivedReports.Count);
-
-            // Validate each report
-            var results = new List<ChecksumValidationResponse>();
-
-            foreach (var archived in archivedReports)
-            {
-                var validationResult = await ValidateReportChecksumAsync(
-                    archived.ProfitYear,
-                    archived.ReportType,
-                    cancellationToken);
-
-                if (validationResult.IsSuccess)
-                {
-                    results.Add(validationResult.Value!);
-                }
-                else
-                {
-                    // Even if individual validation fails, continue with others
-                    _logger.LogWarning(
-                        "Failed to validate {ReportType} year {ProfitYear}: {Error}",
-                        archived.ReportType,
-                        archived.ProfitYear,
-                        validationResult.Error?.Description ?? "Unknown error");
-
-                    // Add a failed validation response
-                    results.Add(new ChecksumValidationResponse
-                    {
-                        ProfitYear = archived.ProfitYear,
-                        ReportType = archived.ReportType,
-                        IsValid = false,
-                        Message = validationResult.Error?.Description ?? "Validation failed",
-                        ArchivedAt = archived.CreatedAtUtc,
-                        ValidatedAt = DateTimeOffset.UtcNow
-                    });
-                }
-            }
-
-            int passedCount = results.Count(r => r.IsValid);
-            int failedCount = results.Count(r => !r.IsValid);
-
-            _logger.LogInformation(
-                "Batch validation complete: {PassedCount} passed, {FailedCount} failed",
-                passedCount,
-                failedCount);
-
-            return Result<List<ChecksumValidationResponse>>.Success(results);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(
-                ex,
-                "Error validating all reports{YearFilter}",
-                profitYear.HasValue ? $" for year {profitYear.Value}" : "");
-
-            return Result<List<ChecksumValidationResponse>>.Failure(
-                Error.Unexpected($"Failed to validate reports: {ex.Message}"));
-        }
-    }
-
-    /// <summary>
-    /// Serializes KeyFieldsChecksumJson into a readable string format for comparison.
-    /// </summary>
-    private static string SerializeChecksum(IEnumerable<KeyValuePair<string, KeyValuePair<decimal, byte[]>>> checksumData)
-    {
-        if (checksumData == null || !checksumData.Any())
-        {
-            return string.Empty;
-        }
-
-        var checksumDict = checksumData.ToDictionary(
-            kvp => kvp.Key,
-            kvp => new { Value = kvp.Value.Key, Hash = Convert.ToBase64String(kvp.Value.Value) });
-
-        return JsonSerializer.Serialize(checksumDict, new JsonSerializerOptions { WriteIndented = false });
-    }
-
-    /// <summary>
-    /// Calculates a checksum from stored JSON report data by extracting decimal properties
-    /// marked with YearEndArchivePropertyAttribute and computing SHA256 hashes.
-    /// </summary>
-    private static string CalculateChecksumFromJson(string reportJson)
-    {
-        // This is a simplified version - in reality we'd need to know the report type
-        // to deserialize to the correct type and use the YearEndArchivePropertyAttribute
-        // For data integrity validation, we're comparing stored checksum against itself
-        // This ensures the checksum hasn't been corrupted in storage
-
-        // Parse JSON to extract all numeric values
-        using var doc = JsonDocument.Parse(reportJson);
-        var root = doc.RootElement;
-
-        var checksums = new Dictionary<string, object>();
-        ExtractDecimalProperties(root, "", checksums);
-
-        return JsonSerializer.Serialize(checksums, new JsonSerializerOptions { WriteIndented = false });
-    }
-
-    /// <summary>
-    /// Recursively extracts decimal/numeric properties from JSON for checksum calculation.
-    /// </summary>
-    private static void ExtractDecimalProperties(JsonElement element, string prefix, Dictionary<string, object> result)
-    {
-        switch (element.ValueKind)
-        {
-            case JsonValueKind.Object:
-                foreach (var property in element.EnumerateObject())
-                {
-                    string propertyPath = string.IsNullOrEmpty(prefix)
-                        ? property.Name
-                        : $"{prefix}.{property.Name}";
-                    ExtractDecimalProperties(property.Value, propertyPath, result);
-                }
-                break;
-
-            case JsonValueKind.Array:
-                int index = 0;
-                foreach (var item in element.EnumerateArray())
-                {
-                    string arrayPath = $"{prefix}[{index}]";
-                    ExtractDecimalProperties(item, arrayPath, result);
-                    index++;
-                }
-                break;
-
-            case JsonValueKind.Number:
-                if (element.TryGetDecimal(out var decimalValue))
-                {
-                    var hash = SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(decimalValue));
-                    result[prefix] = new { Value = decimalValue, Hash = Convert.ToBase64String(hash) };
-                }
-                break;
+                Error.Unexpected($"Failed to validate checksums: {ex.Message}"));
         }
     }
 }
