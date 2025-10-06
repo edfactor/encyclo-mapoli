@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class initialMigrations : Migration
+    public partial class initialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -463,7 +463,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 columns: table => new
                 {
                     ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
-                    NAME = table.Column<string>(type: "NVARCHAR2(65)", maxLength: 65, nullable: false)
+                    NAME = table.Column<string>(type: "NVARCHAR2(65)", maxLength: 65, nullable: false),
+                    IS_READ_ONLY = table.Column<bool>(type: "NUMBER(1)", nullable: false, defaultValue: false)
                 },
                 constraints: table =>
                 {
@@ -732,7 +733,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     PAYEE = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: true),
                     NAME = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: true),
-                    ACCOUNT = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true),
                     STREET = table.Column<string>(type: "NVARCHAR2(56)", maxLength: 56, nullable: false),
                     STREET2 = table.Column<string>(type: "NVARCHAR2(56)", maxLength: 56, nullable: true),
                     STREET3 = table.Column<string>(type: "NVARCHAR2(56)", maxLength: 56, nullable: true),
@@ -817,6 +817,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     STATUS_ID = table.Column<byte>(type: "NUMBER(3)", nullable: true),
                     ORDER_NUMBER = table.Column<byte>(type: "NUMBER(3)", nullable: false),
                     DISABLED = table.Column<bool>(type: "NUMBER(1)", nullable: true),
+                    IS_NAVIGABLE = table.Column<bool>(type: "NUMBER(1)", nullable: true),
                     ICON = table.Column<string>(type: "NVARCHAR2(200)", maxLength: 200, nullable: true)
                 },
                 constraints: table =>
@@ -1017,18 +1018,16 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     FORTHEBENEFITOF_ACCOUNT_TYPE = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true),
                     TAX1099_FOR_EMPLOYEE = table.Column<bool>(type: "NUMBER(1)", nullable: false),
                     TAX1099_FOR_BENEFICIARY = table.Column<bool>(type: "NUMBER(1)", nullable: false),
-                    FEDERAL_TAX_PERCENTAGE = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    STATE_TAX_PERCENTAGE = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     GROSS_AMOUNT = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     FEDERAL_TAX_AMOUNT = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     STATE_TAX_AMOUNT = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    CHECK_AMOUNT = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     TAX_CODE_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
                     DECEASED = table.Column<bool>(type: "NUMBER(1)", nullable: false),
                     GENDER_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: true),
                     QDRO = table.Column<bool>(type: "NUMBER(1)", nullable: false, comment: "Qualified Domestic Relations Order"),
                     MEMO = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: true),
                     ROTH_IRA = table.Column<bool>(type: "NUMBER(1)", nullable: false),
+                    THIRD_PARTY_PAYEE_ACCOUNT = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true),
                     CREATED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: false, defaultValueSql: "SYSTIMESTAMP"),
                     USER_NAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true, defaultValueSql: "SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')"),
                     MODIFIED_AT_UTC = table.Column<DateTimeOffset>(type: "TIMESTAMP WITH TIME ZONE", nullable: true, defaultValueSql: "SYSTIMESTAMP")
@@ -3208,13 +3207,32 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     { (byte)2, "Finance-Manager" },
                     { (byte)3, "Distributions-Clerk" },
                     { (byte)4, "Hardship-Administrator" },
-                    { (byte)5, "Impersonation" },
-                    { (byte)6, "IT-DevOps" },
-                    { (byte)7, "IT-Operations" },
-                    { (byte)8, "Executive-Administrator" },
-                    { (byte)9, "Auditor" },
-                    { (byte)10, "Beneficiary-Administrator" }
+                    { (byte)5, "Impersonation" }
                 });
+
+            migrationBuilder.InsertData(
+                table: "NAVIGATION_ROLE",
+                columns: new[] { "ID", "IS_READ_ONLY", "NAME" },
+                values: new object[] { (byte)6, true, "IT-DevOps" });
+
+            migrationBuilder.InsertData(
+                table: "NAVIGATION_ROLE",
+                columns: new[] { "ID", "NAME" },
+                values: new object[,]
+                {
+                    { (byte)7, "IT-Operations" },
+                    { (byte)8, "Executive-Administrator" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "NAVIGATION_ROLE",
+                columns: new[] { "ID", "IS_READ_ONLY", "NAME" },
+                values: new object[] { (byte)9, true, "Auditor" });
+
+            migrationBuilder.InsertData(
+                table: "NAVIGATION_ROLE",
+                columns: new[] { "ID", "NAME" },
+                values: new object[] { (byte)10, "Beneficiary-Administrator" });
 
             migrationBuilder.InsertData(
                 table: "NAVIGATION_STATUS",
@@ -3465,67 +3483,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     { (byte)8, "Unknown" }
                 });
 
-            migrationBuilder.InsertData(
-                table: "NAVIGATION",
-                columns: new[] { "ID", "DISABLED", "ICON", "ORDER_NUMBER", "PARENT_ID", "STATUS_ID", "SUB_TITLE", "TITLE", "URL" },
-                values: new object[,]
-                {
-                    { (short)50, false, "", (byte)1, null, (byte)1, "", "INQUIRIES", "" },
-                    { (short)52, true, "", (byte)2, null, (byte)1, "", "BENEFICIARIES", "" },
-                    { (short)53, true, "", (byte)3, null, (byte)1, "", "DISTRIBUTIONS", "" },
-                    { (short)54, true, "", (byte)4, null, (byte)1, "", "RECONCILIATION", "" },
-                    { (short)55, false, "", (byte)5, null, (byte)1, "", "YEAR END", "" },
-                    { (short)56, false, "", (byte)6, null, (byte)1, "", "IT DEVOPS", "" },
-                    { (short)32767, false, "", (byte)1, null, (byte)1, "", "Unknown", "" },
-                    { (short)1, false, "", (byte)1, (short)55, (byte)1, "", "December Activities", "december-process-accordion" },
-                    { (short)14, false, "", (byte)2, (short)55, (byte)1, "", "Fiscal Close", "fiscal-close" },
-                    { (short)51, false, "", (byte)1, (short)50, (byte)1, "", "MASTER INQUIRY", "master-inquiry" },
-                    { (short)57, false, "", (byte)1, (short)56, (byte)1, "", "Demographic Freeze", "demographic-freeze" },
-                    { (short)2, false, "", (byte)1, (short)1, (byte)1, "", "Clean up Reports", "" },
-                    { (short)7, false, "", (byte)3, (short)1, (byte)1, "008-13", "Military Contributions", "military-entry-and-modification" },
-                    { (short)8, false, "", (byte)2, (short)1, (byte)1, "QPREV-PROF", "Unforfeit", "unforfeitures" },
-                    { (short)9, false, "", (byte)4, (short)1, (byte)1, "QPAY066", "Terminations", "prof-term" },
-                    { (short)10, false, "", (byte)5, (short)1, (byte)1, "008-12", "Forfeitures", "forfeitures-adjustment" },
-                    { (short)11, false, "", (byte)6, (short)1, (byte)1, "QPAY129", "Distributions and Forfeitures", "distributions-and-forfeitures" },
-                    { (short)13, false, "", (byte)9, (short)1, (byte)1, "PAY426", "Profit Share Report", "profit-share-report" },
-                    { (short)15, false, "", (byte)1, (short)14, (byte)1, "PROF-DOLLAR-EXEC-EXTRACT, TPR008-09", "Manage Executive Hours", "manage-executive-hours-and-dollars" },
-                    { (short)16, false, "", (byte)2, (short)14, (byte)1, "PROF-DOLLAR-EXTRACT", "YTD Wages Extract", "ytd-wages-extract" },
-                    { (short)17, false, "", (byte)4, (short)14, (byte)1, "PAY426", "Profit Share Report (Final Run)", "profit-share-report" },
-                    { (short)18, false, "", (byte)3, (short)14, (byte)1, "PAY426", "Profit Share Report (Edit Run)", "pay426n" },
-                    { (short)30, false, "", (byte)5, (short)14, (byte)1, "GET-ELIGIBLE-EMPS", "Get Eligible Employees", "eligible-employees" },
-                    { (short)31, false, "", (byte)6, (short)14, (byte)1, "PAY443", "Profit Share Forfeit", "forfeit" },
-                    { (short)33, false, "", (byte)10, (short)14, (byte)1, "PAY450", "Prof PayMaster Update", "pay450-summary" },
-                    { (short)34, false, "", (byte)12, (short)14, (byte)1, "Prof130", "Prof Share Report By Age", "" },
-                    { (short)41, false, "", (byte)13, (short)14, (byte)1, "QPAY501", "Prof Share Gross Rpt", "profit-share-gross-report" },
-                    { (short)42, false, "", (byte)14, (short)14, (byte)1, "QPAY066TA", "Prof Share by Store", "" },
-                    { (short)49, false, "", (byte)15, (short)14, (byte)1, "PAYCERT", "Print Profit Certs", "print-profit-certs" },
-                    { (short)60, false, "", (byte)7, (short)14, (byte)1, "PAY444|PAY447", "Master Update", "profit-share-update" },
-                    { (short)62, true, "", (byte)8, (short)14, (byte)1, "PAY460, PROFTLD", "Profit Master Update", "profit-master-update" },
-                    { (short)63, false, "", (byte)16, (short)14, (byte)1, "", "Save Prof Paymstr", "save-prof-paymstr" },
-                    { (short)64, false, "", (byte)11, (short)14, (byte)1, "PROF-CNTRL-SHEET", "Prof Control Sheet", "prof-control-sheet" },
-                    { (short)65, false, "", (byte)17, (short)14, (byte)1, "QPAY066*", "QPAY066* Ad Hoc Reports", "qpay066-adhoc" },
-                    { (short)66, false, "", (byte)18, (short)14, (byte)1, "PROF-VESTED|PAY508", "Recently Terminated", "recently-terminated" },
-                    { (short)67, false, "", (byte)10, (short)1, (byte)1, "", "Pay Beneficiary Report", "payben-report" },
-                    { (short)68, false, "", (byte)18, (short)14, (byte)1, "", "Adhoc Beneficiaries Report", "adhoc-beneficiaries-report" },
-                    { (short)69, false, "", (byte)19, (short)14, (byte)1, "QPROF003-1", "Terminated Letters", "terminated-letters" },
-                    { (short)3, false, "", (byte)1, (short)2, (byte)1, "", "Demographic Badges Not In PayProfit", "demographic-badges-not-in-payprofit" },
-                    { (short)4, false, "", (byte)2, (short)2, (byte)1, "", "Duplicate SSNs in Demographics", "duplicate-ssns-demographics" },
-                    { (short)5, false, "", (byte)3, (short)2, (byte)1, "", "Negative ETVA", "negative-etva-for-ssns-on-payprofit" },
-                    { (short)6, false, "", (byte)4, (short)2, (byte)1, "", "Duplicate Names and Birthdays", "duplicate-names-and-birthdays" },
-                    { (short)35, false, "", (byte)2, (short)34, (byte)1, "PROF130", "CONTRIBUTIONS BY AGE", "contributions-by-age" },
-                    { (short)36, false, "", (byte)1, (short)34, (byte)1, "PROF130", "DISTRIBUTIONS BY AGE", "distributions-by-age" },
-                    { (short)37, false, "", (byte)3, (short)34, (byte)1, "PROF130", "FORFEITURES BY AGE", "forfeitures-by-age" },
-                    { (short)38, false, "", (byte)4, (short)34, (byte)1, "PROF130B", "BALANCE BY AGE", "balance-by-age" },
-                    { (short)39, false, "", (byte)5, (short)34, (byte)1, "PROF130V", "VESTED AMOUNTS BY AGE", "vested-amounts-by-age" },
-                    { (short)40, false, "", (byte)6, (short)34, (byte)1, "PROF130Y", "BALANCE BY YEARS", "balance-by-years" },
-                    { (short)43, false, "", (byte)1, (short)42, (byte)1, "", "QPAY066-UNDR21", "qpay066-under21" },
-                    { (short)44, false, "", (byte)2, (short)42, (byte)1, "", "QPAY066TA-UNDR21", "qpay066ta-under21" },
-                    { (short)45, false, "", (byte)3, (short)42, (byte)1, "", "QPAY066TA", "qpay066ta" },
-                    { (short)46, false, "", (byte)6, (short)42, (byte)1, "", "PROFALL", "profall" },
-                    { (short)47, false, "", (byte)4, (short)42, (byte)1, "", "QNEWPROFLBL", "new-ps-labels" },
-                    { (short)48, false, "", (byte)5, (short)42, (byte)1, "", "PROFNEW", "profnew" }
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_ANNUITY_RATE_YEAR_AGE",
                 table: "ANNUITY_RATE",
@@ -3614,6 +3571,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "EMPLOYMENT_STATUS_ID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DEMOGRAPHIC_EMPLOYMENTSTATUSID_HIREDATE_TERMINATIONDATE",
+                table: "DEMOGRAPHIC",
+                columns: new[] { "EMPLOYMENT_STATUS_ID", "HIRE_DATE", "TERMINATION_DATE" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DEMOGRAPHIC_EMPLOYMENTSTATUSID_TERMINATIONDATE",
                 table: "DEMOGRAPHIC",
                 columns: new[] { "EMPLOYMENT_STATUS_ID", "TERMINATION_DATE" });
@@ -3632,6 +3594,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "IX_DEMOGRAPHIC_GENDERID",
                 table: "DEMOGRAPHIC",
                 column: "GENDER_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DEMOGRAPHIC_HIREDATE",
+                table: "DEMOGRAPHIC",
+                column: "HIRE_DATE");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DEMOGRAPHIC_ORACLEHCMID",
@@ -3926,6 +3893,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "IX_PROFIT_SHARE_CHECK_TAXCODEID",
                 table: "PROFIT_SHARE_CHECK",
                 column: "TAX_CODE_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IDX_REPORT_CHECKSUM_LOOKUP",
+                table: "REPORT_CHECKSUM",
+                columns: new[] { "PROFIT_YEAR", "REPORT_TYPE", "CREATED_AT_UTC" },
+                descending: new[] { false, false, true });
 
             migrationBuilder.CreateIndex(
                 name: "IX_YE_UPDATE_STATUS_PROFIT_YEAR",
