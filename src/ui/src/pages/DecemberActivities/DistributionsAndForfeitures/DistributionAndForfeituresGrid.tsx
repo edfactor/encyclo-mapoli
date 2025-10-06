@@ -245,7 +245,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
           <ReportSummary report={distributionsAndForfeitures} />
           <DSMGrid
             preferenceKey={CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES}
-            isLoading={isFetching}
+            isLoading={false}
             handleSortChanged={sortEventHandler}
             maxHeight={gridMaxHeight}
             providedOptions={{
