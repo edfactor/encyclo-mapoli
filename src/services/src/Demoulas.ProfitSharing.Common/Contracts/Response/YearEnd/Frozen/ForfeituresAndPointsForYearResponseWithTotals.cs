@@ -1,15 +1,28 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 
 public sealed record ForfeituresAndPointsForYearResponseWithTotals : ReportResponseBase<ForfeituresAndPointsForYearResponse>
 {
+    [YearEndArchiveProperty]
     public decimal TotalForfeitures { get; set; }
+
     public int TotalForfeitPoints { get; set; }
     public int TotalEarningPoints { get; set; }
-    public decimal? TotalProfitSharingBalance { get; set; }
-    
 
+    [YearEndArchiveProperty]
+    public decimal? TotalProfitSharingBalance { get; set; }
+
+    /// <summary>
+    /// Total distributions for the year (matches PAY444.DISTRIB, QPAY129.Distributions, QPAY066TA.TotalDisbursements)
+    /// </summary>
+    [YearEndArchiveProperty]
     public decimal? DistributionTotals { get; set; }
+
+    [YearEndArchiveProperty]
     public decimal? AllocationToTotals { get; set; }
+
+    [YearEndArchiveProperty]
     public decimal? AllocationsFromTotals { get; set; }
 
     public static ForfeituresAndPointsForYearResponseWithTotals ResponseExample()

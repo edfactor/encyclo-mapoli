@@ -3,6 +3,7 @@ using CsvHelper.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
@@ -16,12 +17,17 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 public class ForfeituresAndPointsForYearEndpoint : EndpointWithCsvTotalsBase<FrozenProfitYearRequest, ForfeituresAndPointsForYearResponseWithTotals, ForfeituresAndPointsForYearResponse, ForfeituresAndPointsForYearEndpoint.ForfeituresAndPointsForYearEndpointMapper>
 {
     private readonly IForfeituresAndPointsForYearService _forfeituresAndPointsForYearService;
+    private readonly IAuditService _auditService;
     private readonly ILogger<ForfeituresAndPointsForYearEndpoint> _logger;
 
-    public ForfeituresAndPointsForYearEndpoint(IForfeituresAndPointsForYearService forfeituresAndPointsForYearService, ILogger<ForfeituresAndPointsForYearEndpoint> logger)
+    public ForfeituresAndPointsForYearEndpoint(
+        IForfeituresAndPointsForYearService forfeituresAndPointsForYearService,
+        IAuditService auditService,
+        ILogger<ForfeituresAndPointsForYearEndpoint> logger)
         : base(Navigation.Constants.Forfeitures)
     {
         _forfeituresAndPointsForYearService = forfeituresAndPointsForYearService;
+        _auditService = auditService;
         _logger = logger;
     }
     public override string ReportFileName => "Forfeitures and Points for Year ( PAY443 )";
@@ -56,7 +62,26 @@ public class ForfeituresAndPointsForYearEndpoint : EndpointWithCsvTotalsBase<Fro
 
         try
         {
-            var result = await _forfeituresAndPointsForYearService.GetForfeituresAndPointsForYearAsync(req, ct);
+            ForfeituresAndPointsForYearResponseWithTotals result;
+
+            // When using frozen data, wrap in audit service to archive checksums for cross-report validation
+            if (req.UseFrozenData)
+            {
+                result = await _auditService.ArchiveCompletedReportAsync(
+                    "PAY443",
+                    req.ProfitYear,
+                    req,
+                    async (request, _, cancellationToken) =>
+                    {
+                        return await _forfeituresAndPointsForYearService.GetForfeituresAndPointsForYearAsync(request, cancellationToken);
+                    },
+                    ct);
+            }
+            else
+            {
+                // Non-frozen data: retrieve directly without archiving
+                result = await _forfeituresAndPointsForYearService.GetForfeituresAndPointsForYearAsync(req, ct);
+            }
 
             // Record business operation metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,
@@ -83,8 +108,8 @@ public class ForfeituresAndPointsForYearEndpoint : EndpointWithCsvTotalsBase<Fro
                     new("metric_type", "total_earning_points"));
             }
 
-            _logger.LogInformation("Year-end frozen forfeitures and points report generated, returned {Count} records (correlation: {CorrelationId})",
-                resultCount, HttpContext.TraceIdentifier);
+            _logger.LogInformation("Year-end frozen forfeitures and points report (PAY443) generated, returned {Count} records, archived={Archived} (correlation: {CorrelationId})",
+                resultCount, req.UseFrozenData, HttpContext.TraceIdentifier);
 
             if (result != null)
             {

@@ -21,9 +21,6 @@ public class MilitaryContributionRequestValidatorTests
         employeeLookupMock
             .Setup(x => x.GetDateOfBirthAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new DateOnly((short)DateTime.Today.Year - 30, 1, 1));
-        employeeLookupMock
-            .Setup(x => x.IsActiveAsOfAsync(It.IsAny<int>(), It.IsAny<DateOnly>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
 
         var militaryServiceMock = new Mock<IMilitaryService>(MockBehavior.Strict);
         // Default: return success with empty results for GetMilitaryServiceRecordAsync
@@ -186,58 +183,6 @@ public class MilitaryContributionRequestValidatorTests
         var result = await validator.ValidateAsync(req);
         Assert.False(result.IsValid);
         Assert.Contains(result.Errors, e => e.ErrorMessage.Contains("at least 21 years old", StringComparison.OrdinalIgnoreCase));
-    }
-
-    [Fact]
-    [Description("PS-1721 : Employment status must be Active as-of contribution date")]
-    public async Task Employment_status_not_active_is_rejected()
-    {
-        var (validator, employeeLookupMock, _) = CreateValidator();
-        var today = DateTime.Today;
-        employeeLookupMock.Reset();
-        employeeLookupMock
-            .Setup(x => x.BadgeExistsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-        employeeLookupMock
-            .Setup(x => x.GetEarliestHireDateAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new DateOnly(today.Year - 5, 1, 1));
-        employeeLookupMock
-            .Setup(x => x.GetDateOfBirthAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new DateOnly(today.Year - 30, 1, 1));
-        employeeLookupMock
-            .Setup(x => x.IsActiveAsOfAsync(It.IsAny<int>(), It.IsAny<DateOnly>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(false); // terminated/not active
-
-        var req = ValidRequest((short)today.Year, new DateTime(today.Year, today.Month, Math.Min(15, DateTime.DaysInMonth(today.Year, today.Month)), 0, 0, 0, DateTimeKind.Utc)) with { IsSupplementalContribution = true };
-        var result = await validator.ValidateAsync(req);
-        Assert.False(result.IsValid);
-        Assert.Contains(result.Errors, e => e.ErrorMessage.Contains("employment status is not eligible", StringComparison.OrdinalIgnoreCase));
-    }
-
-    [Fact]
-    [Description("PS-1721 : Employment status missing is rejected")]
-    public async Task Employment_status_missing_is_rejected()
-    {
-        var (validator, employeeLookupMock, _) = CreateValidator();
-        var today = DateTime.Today;
-        employeeLookupMock.Reset();
-        employeeLookupMock
-            .Setup(x => x.BadgeExistsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-        employeeLookupMock
-            .Setup(x => x.GetEarliestHireDateAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new DateOnly(today.Year - 5, 1, 1));
-        employeeLookupMock
-            .Setup(x => x.GetDateOfBirthAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new DateOnly(today.Year - 30, 1, 1));
-        employeeLookupMock
-            .Setup(x => x.IsActiveAsOfAsync(It.IsAny<int>(), It.IsAny<DateOnly>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((bool?)null);
-
-        var req = ValidRequest((short)today.Year, new DateTime(today.Year, today.Month, Math.Min(15, DateTime.DaysInMonth(today.Year, today.Month)), 0, 0, 0, DateTimeKind.Utc)) with { IsSupplementalContribution = true };
-        var result = await validator.ValidateAsync(req);
-        Assert.False(result.IsValid);
-        Assert.Contains(result.Errors, e => e.ErrorMessage.Contains("employment status is not eligible", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]

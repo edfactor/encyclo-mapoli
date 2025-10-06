@@ -93,32 +93,11 @@ const MilitaryContributionForm = ({
                 );
               } else if (error.reason.includes("profit year differs from contribution year")) {
                 errorMessages.push("- When profit year differs from contribution year, it must be supplemental.");
-              } else if (error.reason.includes("not eligible")) {
-                errorMessages.push(`- ${error.reason}`);
-              } else if (error.reason.includes("not active")) {
-                errorMessages.push(`- ${error.reason}`);
               } else {
-                console.warn("Unhandled backend error message:", error.reason);
+                console.warn("Backend error message:", error.reason);
                 errorMessages.push(`- ${error.reason}`);
               }
             });
-          }
-
-          // If we have an error message that includes "Employee employment status is not eligible" then
-          // remove all other error messages to avoid confusion, except the first line "Errors:"
-          let savedMessage = "";
-          const ineligibilityMessage = "Employee employment status is not eligible";
-
-          errorMessages.forEach((msg) => {
-            if (msg.includes(ineligibilityMessage)) {
-              savedMessage = msg;
-            }
-          });
-
-          if (savedMessage) {
-            errorMessages = [];
-            errorMessages.push("Errors:");
-            errorMessages.push(savedMessage);
           }
 
           if (errorMessages.length > 0) {

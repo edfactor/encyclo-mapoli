@@ -29,11 +29,6 @@ The system enforces strict business rules to ensure data integrity and complianc
 - **Supplemental Contributions**: Award 0 years of service credit (`YearsOfServiceCredit = 0`)
 - YOS credit affects vesting percentages and profit-sharing calculations
 
-### Employment Status Requirements
-- **Active**: Employee can receive both regular and supplemental contributions
-- **Terminated/Inactive**: Employee CANNOT receive any military contributions
-- Status is checked as of the contribution date, not the current date
-
 ### Contribution vs. Profit Year
 - **Contribution Date**: The actual date the military service occurred
 - **Profit Year**: The profit-sharing year the contribution is posted to
@@ -100,22 +95,7 @@ The system enforces strict business rules to ensure data integrity and complianc
 
 ---
 
-### 6. Employment Status Validation (CRITICAL)
-**Rule**: Employee must be Active as of the contribution date.
-
-**QA Test Scenarios**:
-- ✅ Valid: Employee is Active on contribution date
-- ❌ Invalid: Employee is Terminated on contribution date
-- ❌ Invalid: Employee is Inactive on contribution date
-- ❌ Invalid: Employment status is missing/unknown
-
-**Error Message**: "Employee employment status is not eligible for contributions as of YYYY-MM-DD."
-
-**⚠️ QA Note**: This is the primary rule preventing contributions for terminated/inactive employees.
-
----
-
-### 7. Hire Date Validation
+### 6. Hire Date Validation
 **Rule**: Contribution year must be >= employee's earliest hire year.
 
 **QA Test**:
@@ -175,7 +155,7 @@ Expected: ✅ SUCCESS - Creates supplemental contribution without YOS credit
 
 ### Scenario 3: Cross-Year Posting (Must be Supplemental)
 ```
-Badge Number: 12345 (Active employee)
+Badge Number: 12345
 Contribution Date: 2023-06-15
 Contribution Amount: $750.00
 Profit Year: 2024
@@ -183,24 +163,14 @@ Is Supplemental: false
 Expected: ❌ FAIL - Must be marked supplemental for cross-year posting
 ```
 
-### Scenario 4: Terminated Employee
-```
-Badge Number: 67890 (Terminated employee)
-Contribution Date: 2024-01-15
-Contribution Amount: $1000.00
-Profit Year: 2024
-Is Supplemental: false
-Expected: ❌ FAIL - Terminated employees cannot receive contributions
-```
-
-### Scenario 5: Duplicate Regular Contribution
+### Scenario 4: Duplicate Regular Contribution
 ```
 Step 1: Create regular contribution for badge 12345, year 2024 ✅
 Step 2: Try to create another regular contribution for badge 12345, year 2024
 Expected: ❌ FAIL - Only one regular contribution per year allowed
 ```
 
-### Scenario 6: Under-Age Employee
+### Scenario 5: Under-Age Employee
 ```
 Badge Number: 11111 (Employee born 2004-01-01)
 Contribution Date: 2024-01-01 (employee is 20)
@@ -210,9 +180,9 @@ Is Supplemental: false
 Expected: ❌ FAIL - Employee not yet 21
 ```
 
-### Scenario 7: Future Date
+### Scenario 6: Future Date
 ```
-Badge Number: 12345 (Active employee)
+Badge Number: 12345
 Contribution Date: 2026-01-01 (future date)
 Contribution Amount: $1000.00
 Profit Year: 2025
@@ -241,19 +211,13 @@ Expected: ❌ FAIL - Cannot contribute for service before hire
 | Non-existent Employee | "Employee with the given badge number was not found." |
 | Future Date | "ContributionDate cannot be in the future." |
 | Under Age | "Employee must be at least 21 years old on the contribution date YYYY-MM-DD." |
-| Employment Status | "Employee employment status is not eligible for contributions as of YYYY-MM-DD." |
 | Pre-Hire Service | "Contribution year YYYY is before the employee's earliest known hire year." |
 | Duplicate Regular | "Regular Contribution already recorded for year YYYY. Duplicates are not allowed." |
 | Cross-Year Must be Supplemental | "When profit year (YYYY) differs from contribution year (YYYY), the contribution must be marked Supplemental." |
 
 ## Edge Cases & Special Situations
 
-### Edge Case 1: Same-Day Termination
-**Situation**: Employee terminated on the same date as military contribution.
-**Expected Behavior**: Contribution should be rejected (employment status check fails).
-**Test**: Create contribution with contribution date = termination date.
-
-### Edge Case 2: Leap Year Dates
+### Edge Case 1: Leap Year Dates
 **Situation**: Contribution date of February 29th in leap years.
 **Expected Behavior**: Should be handled correctly by date validation.
 **Test**: Use 2024-02-29 as contribution date.
@@ -276,7 +240,7 @@ Expected: ❌ FAIL - Cannot contribute for service before hire
 ## Testing Checklist
 
 ### Pre-Test Setup
-- [ ] Verify test employees exist with known employment statuses
+- [ ] Verify test employees exist in the system
 - [ ] Confirm test employees' birth dates and hire dates
 - [ ] Clear any existing military contributions for test employees
 - [ ] Verify current system date for year validation tests
@@ -284,7 +248,6 @@ Expected: ❌ FAIL - Cannot contribute for service before hire
 ### Basic Validation Tests
 - [ ] Test all numeric field boundaries (amount, year, badge)
 - [ ] Test all date validations (future, past, leap year)
-- [ ] Test employment status for all statuses (Active, Terminated, Inactive)
 - [ ] Test age validation (under 21, exactly 21, over 21)
 - [ ] Test hire date validation (before hire, after hire)
 
@@ -314,9 +277,9 @@ Expected: ❌ FAIL - Cannot contribute for service before hire
 ## QA Automation Recommendations
 
 ### High-Priority Automated Tests
-1. **Employment Status Validation**: Most critical business rule
-2. **Cross-Year Posting Rule**: Complex logic, easy to break
-3. **Duplicate Prevention**: Data integrity protection
+1. **Cross-Year Posting Rule**: Complex logic, easy to break
+2. **Duplicate Prevention**: Data integrity protection
+3. **Age & Hire Date Validation**: Critical business rules
 4. **Basic Field Validation**: High-volume, low-risk tests
 
 ### Manual Testing Focus
@@ -326,10 +289,6 @@ Expected: ❌ FAIL - Cannot contribute for service before hire
 4. **Business Rule Changes**: When requirements evolve
 
 ## Troubleshooting Common Issues
-
-### Issue: "Employment status not eligible"
-**Cause**: Employee is not Active on contribution date
-**Solution**: Verify employee status in system, check contribution date
 
 ### Issue: "Must be marked Supplemental"
 **Cause**: Profit year ≠ contribution date year, but marked as regular
