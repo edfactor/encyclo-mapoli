@@ -722,8 +722,7 @@ pipelines:
             - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
             - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.QA.zip"
             - pwsh .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_QA $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
-
-            - echo "Deploying background service..."            
+            - echo "Deploying background service..."
             - pwsh .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_QA
       - step: *upgrade-database
   
@@ -787,8 +786,7 @@ pipelines:
                 - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
                 - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.UAT.zip"
                 - pwsh .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_UAT $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
-
-                - echo "Deploying background service..."            
+                - echo "Deploying background service..."
                 - pwsh .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_UAT
       # Stage 6: UAT Database Import (must run AFTER drop-recreate completes)
       - step: *uat-import-from-ready
