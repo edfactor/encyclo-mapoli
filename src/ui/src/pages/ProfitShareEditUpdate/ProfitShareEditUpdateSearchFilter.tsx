@@ -8,7 +8,7 @@ import * as yup from "yup";
 
 import SearchAndReset from "components/SearchAndReset/SearchAndReset";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { profitYearDateValidator } from "../../utils/FormValidators";
+import { positiveNumberValidator, profitYearDateValidator } from "../../utils/FormValidators";
 import { useEffect, useState } from "react";
 import {
   addBadgeNumberToUpdateAdjustmentSummary,
@@ -46,50 +46,17 @@ interface ProfitShareEditUpdateSearch {
 
 const schema = yup.object().shape({
   profitYear: profitYearDateValidator,
-  contributionPercent: yup
-    .number()
-    .typeError("Contribution must be a number")
-    .min(0, "Contribution must be positive")
-    .nullable()
-    .optional(),
-  earningsPercent: yup
-    .number()
-    .typeError("Earnings must be a number")
-    .min(0, "Earnings must be positive")
-    .nullable()
-    .optional(),
-  secondaryEarningsPercent: yup
-    .number()
-    .typeError("Secondary Earnings must be a number")
-    .min(0, "Secondary Earnings must be positive")
-    .nullable()
-    .optional(),
-  incomingForfeitPercent: yup
-    .number()
-    .typeError("Incoming Forfeiture must be a number")
-    .min(0, "Forfeiture must be positive")
-    .nullable()
-    .optional(),
-  maxAllowedContributions: yup
-    .number()
+  contributionPercent: positiveNumberValidator("Contribution").optional(),
+  earningsPercent: positiveNumberValidator("Earnings").optional(),
+  secondaryEarningsPercent: positiveNumberValidator("Secondary Earnings").optional(),
+  incomingForfeitPercent: positiveNumberValidator("Incoming Forfeiture").optional(),
+  maxAllowedContributions: positiveNumberValidator("Max Allowed Contributions")
     .default(maxContributionsDefault)
-    .typeError("Max Allowed Contributions must be a number")
-    .min(0, "Max Allowed Contributions must be positive")
     .required("Max Contributions is required"),
   badgeToAdjust: badgeNumberValidator.optional(),
-  adjustContributionAmount: yup
-    .number()
-    .typeError("Contribution must be a number")
-    .min(0, "Contribution must be positive")
-    .nullable()
-    .optional(),
+  adjustContributionAmount: positiveNumberValidator("Contribution").optional(),
   adjustEarningsAmount: yup.number().typeError("Earnings must be a number").nullable().optional(),
-  adjustIncomingForfeitAmount: yup
-    .number()
-    .typeError("Adjusted Incoming Forfeiture must be a number")
-    .min(0, "Adjusted Incoming Forfeiture must be positive")
-    .nullable()
-    .optional(),
+  adjustIncomingForfeitAmount: positiveNumberValidator("Adjusted Incoming Forfeiture").optional(),
   badgeToAdjust2: badgeNumberValidator.optional(),
   adjustEarningsSecondaryAmount: yup.number().typeError("Earnings must be a number").nullable().optional()
 });
