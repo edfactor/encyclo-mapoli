@@ -5,18 +5,12 @@ import { Controller, Resolver, useForm } from "react-hook-form";
 import { BeneficiarySearchFilterRequest, BeneficiaryTypeDto, MasterInquiryRequest } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import { ssnValidator } from "../../utils/FormValidators";
 
 const schema = yup.object().shape({
   badgePsn: yup.string().notRequired(),
   name: yup.string().notRequired(),
-
-  socialSecurity: yup
-    .string()
-    .nullable()
-    .test("is-9-digits", "SSN must be exactly 9 digits", function (value) {
-      if (!value) return true;
-      return /^\d{9}$/.test(value);
-    }),
+  socialSecurity: ssnValidator,
   memberType: yup.string().notRequired()
 });
 interface beneficiaryRequest {
