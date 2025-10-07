@@ -78,3 +78,38 @@ export const profitYearDateValidator = yup
   .min(new Date(2020, 0, 1), "Year must be 2020 or later")
   .max(new Date(2100, 11, 31), "Year must be 2100 or earlier")
   .required("Profit Year is required");
+
+/**
+ * Handler for SSN input that only allows numeric characters up to 9 digits
+ * @param value - The input value from the TextField
+ * @returns The validated value or null if invalid
+ */
+export const handleSsnInput = (value: string): string | null => {
+  // Only allow numeric input
+  if (value !== "" && !/^\d*$/.test(value)) {
+    return null;
+  }
+  // Prevent input beyond 9 characters
+  if (value.length > 9) {
+    return null;
+  }
+  return value === "" ? "" : value;
+};
+
+/**
+ * Handler for badge number input that only allows numeric values
+ * @param value - The input value from the TextField
+ * @returns The validated numeric value, empty string, or null if invalid
+ */
+export const handleBadgeNumberInput = (value: string): number | string | null => {
+  // Allow empty string or numeric values
+  if (value === "" || !isNaN(Number(value))) {
+    return value === "" ? "" : Number(value);
+  }
+
+  // Prevent input beyond 7 characters
+  if (value.length > 7) {
+    return null;
+  }
+  return null;
+};

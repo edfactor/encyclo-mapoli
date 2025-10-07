@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import { badgeNumberValidator, ssnValidator } from "../../../utils/FormValidators";
+import { badgeNumberValidator, handleBadgeNumberInput, handleSsnInput, ssnValidator } from "../../../utils/FormValidators";
 import useMilitaryContribution from "./hooks/useMilitaryContribution";
 
 interface SearchFormData {
@@ -94,17 +94,11 @@ const MilitaryContributionSearchFilter: React.FC = () => {
                 error={!!errors.socialSecurity}
                 helperText={errors.socialSecurity?.message}
                 onChange={(e) => {
-                  const value = e.target.value;
-                  // Only allow numeric input
-                  if (value !== "" && !/^\d*$/.test(value)) {
-                    return;
+                  const validatedValue = handleSsnInput(e.target.value);
+                  if (validatedValue !== null) {
+                    field.onChange(validatedValue);
+                    if (validatedValue) setActiveField("socialSecurity");
                   }
-                  // Prevent input beyond 9 characters
-                  if (value.length > 9) {
-                    return;
-                  }
-                  field.onChange(e);
-                  if (value) setActiveField("socialSecurity");
                 }}
               />
             )}
@@ -126,8 +120,11 @@ const MilitaryContributionSearchFilter: React.FC = () => {
                 error={!!errors.badgeNumber}
                 helperText={errors.badgeNumber?.message}
                 onChange={(e) => {
-                  field.onChange(e);
-                  if (e.target.value) setActiveField("badgeNumber");
+                  const validatedValue = handleBadgeNumberInput(e.target.value);
+                  if (validatedValue !== null) {
+                    field.onChange(validatedValue);
+                    if (e.target.value) setActiveField("badgeNumber");
+                  }
                 }}
               />
             )}

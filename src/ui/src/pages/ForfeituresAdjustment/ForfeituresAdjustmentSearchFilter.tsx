@@ -15,7 +15,7 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { FORFEITURES_ADJUSTMENT_MESSAGES } from "../../components/MissiveAlerts/MissiveMessages";
 import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
-import { badgeNumberValidator, ssnValidator } from "../../utils/FormValidators";
+import { badgeNumberValidator, handleBadgeNumberInput, handleSsnInput, ssnValidator } from "../../utils/FormValidators";
 
 // Define the search parameters interface
 interface ForfeituresAdjustmentSearchParams {
@@ -182,21 +182,10 @@ const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFil
                   error={!!errors.ssn || !!errors.root?.message}
                   placeholder="SSN"
                   onChange={(e) => {
-                    const value = e.target.value;
-                    // Only allow numeric input
-                    if (value !== "" && !/^\d*$/.test(value)) {
-                      return;
-                    }
-                    // Prevent input beyond 9 characters
-                    if (value.length > 9) {
-                      return;
-                    }
-                    const parsedValue = value === "" ? "" : value;
-                    field.onChange(parsedValue);
-                    if (value !== "") {
-                      toggleSearchFieldEntered(true, "ssn");
-                    } else {
-                      toggleSearchFieldEntered(false, "ssn");
+                    const validatedValue = handleSsnInput(e.target.value);
+                    if (validatedValue !== null) {
+                      field.onChange(validatedValue);
+                      toggleSearchFieldEntered(validatedValue !== "", "ssn");
                     }
                   }}
                 />
@@ -220,16 +209,10 @@ const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFil
                   placeholder="Badge"
                   disabled={activeField === "ssn"}
                   onChange={(e) => {
-                    const value = e.target.value;
-                    // Allow empty string or numeric values
-                    if (value === "" || !isNaN(Number(value))) {
-                      const parsedValue = value === "" ? "" : Number(value);
-                      field.onChange(parsedValue);
-                      if (value !== "") {
-                        toggleSearchFieldEntered(true, "badge");
-                      } else {
-                        toggleSearchFieldEntered(false, "badge");
-                      }
+                    const validatedValue = handleBadgeNumberInput(e.target.value);
+                    if (validatedValue !== null) {
+                      field.onChange(validatedValue);
+                      toggleSearchFieldEntered(e.target.value !== "", "badge");
                     }
                   }}
                 />
