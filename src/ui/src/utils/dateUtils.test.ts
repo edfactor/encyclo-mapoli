@@ -3,6 +3,9 @@ import {
   DATE_FORMAT_YYYYMMDD,
   DATE_TIME_FORMAT_MMDDYYYY_HHMMSS,
   dateMMDDYYYY,
+  getMaskedDateDisplay,
+  isMaskedDate,
+  MASKED_DATE_PATTERN,
   mmDDYYFormat,
   mmDDYYYY_HHMMSS_Format,
   tryddmmyyyyToDate
@@ -177,11 +180,7 @@ describe("dateUtils", () => {
     });
 
     it("should return start of day for all valid formats", () => {
-      const formats = [
-        "2024-06-20",
-        "06/20/2024",
-        new Date(2024, 5, 20, 14, 30, 45)
-      ];
+      const formats = ["2024-06-20", "06/20/2024", new Date(2024, 5, 20, 14, 30, 45)];
 
       formats.forEach((format) => {
         const result = tryddmmyyyyToDate(format);
@@ -200,6 +199,115 @@ describe("dateUtils", () => {
 
     it("should export DATE_FORMAT_YYYYMMDD constant", () => {
       expect(DATE_FORMAT_YYYYMMDD).toBe("yyyy-MM-dd");
+    });
+
+    it("should export MASKED_DATE_PATTERN constant", () => {
+      expect(MASKED_DATE_PATTERN).toBe("XXXX-XX-XX");
+    });
+  });
+
+  describe("isMaskedDate", () => {
+    it("should return true for XXXX-XX-XX pattern", () => {
+      expect(isMaskedDate("XXXX-XX-XX")).toBe(true);
+    });
+
+    it("should return true for dates containing XXXX", () => {
+      expect(isMaskedDate("XXXX-12-25")).toBe(true);
+      expect(isMaskedDate("2024-XX-XX")).toBe(true);
+    });
+
+    it("should return true for dates containing XX-XX", () => {
+      expect(isMaskedDate("2024-XX-XX")).toBe(true);
+    });
+
+    it("should return false for valid date strings", () => {
+      expect(isMaskedDate("2024-01-15")).toBe(false);
+      expect(isMaskedDate("01/15/2024")).toBe(false);
+    });
+
+    it("should return false for Date objects", () => {
+      const date = new Date(2024, 0, 15);
+      expect(isMaskedDate(date)).toBe(false);
+    });
+
+    it("should return false for null, undefined, or empty strings", () => {
+      expect(isMaskedDate(null)).toBe(false);
+      expect(isMaskedDate(undefined)).toBe(false);
+      expect(isMaskedDate("")).toBe(false);
+    });
+  });
+
+  describe("getMaskedDateDisplay", () => {
+    it("should return XX/XX/XXXX pattern by default", () => {
+      expect(getMaskedDateDisplay()).toBe("XX/XX/XXXX");
+    });
+
+    it("should return XX/XX/XXXX pattern when useXPattern is true", () => {
+      expect(getMaskedDateDisplay(true)).toBe("XX/XX/XXXX");
+    });
+
+    it("should return N/A when useXPattern is false", () => {
+      expect(getMaskedDateDisplay(false)).toBe("N/A");
+    });
+  });
+
+  describe("masked date handling integration", () => {
+    describe("mmDDYYFormat with masked dates", () => {
+      it("should return masked display for XXXX-XX-XX", () => {
+        expect(mmDDYYFormat("XXXX-XX-XX")).toBe("XX/XX/XXXX");
+      });
+
+      it("should return masked display for partially masked dates", () => {
+        expect(mmDDYYFormat("2024-XX-XX")).toBe("XX/XX/XXXX");
+      });
+
+      it("should still format valid dates correctly", () => {
+        expect(mmDDYYFormat("2024-03-15")).toBe("03/15/2024");
+      });
+    });
+
+    describe("dateMMDDYYYY with masked dates", () => {
+      it("should return masked display for XXXX-XX-XX", () => {
+        expect(dateMMDDYYYY("XXXX-XX-XX")).toBe("XX/XX/XXXX");
+      });
+
+      it("should still format Date objects correctly", () => {
+        const date = new Date(2024, 0, 15);
+        expect(dateMMDDYYYY(date)).toBe("01/15/2024");
+      });
+
+      it("should still format valid date strings correctly", () => {
+        expect(dateMMDDYYYY("2024-03-15")).toBe("03/15/2024");
+      });
+    });
+
+    describe("mmDDYYYY_HHMMSS_Format with masked dates", () => {
+      it("should return masked display for XXXX-XX-XX", () => {
+        expect(mmDDYYYY_HHMMSS_Format("XXXX-XX-XX")).toBe("XX/XX/XXXX");
+      });
+
+      it("should still format valid dates correctly", () => {
+        const result = mmDDYYYY_HHMMSS_Format("2024-03-15T14:30:45");
+        expect(result).toContain("03/15/2024");
+      });
+    });
+
+    describe("tryddmmyyyyToDate with masked dates", () => {
+      it("should return null for XXXX-XX-XX", () => {
+        expect(tryddmmyyyyToDate("XXXX-XX-XX")).toBe(null);
+      });
+
+      it("should return null for partially masked dates", () => {
+        expect(tryddmmyyyyToDate("2024-XX-XX")).toBe(null);
+      });
+
+      it("should still parse valid dates correctly", () => {
+        const result = tryddmmyyyyToDate("2024-03-15");
+        expect(result).not.toBe(null);
+        expect(result?.getFullYear()).toBe(2024);
+        expect(result?.getMonth()).toBe(2); // March (0-indexed)
+        expect(result?.getDate()).toBe(15);
+      });
     });
   });
 });
