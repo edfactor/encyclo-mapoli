@@ -18,12 +18,9 @@ const validationSchema = yup
     socialSecurity: yup
       .string()
       .nullable()
-      .test("ssn-length", "SSN must be 7, 8, or 9 digits", function (value) {
-        if (value === undefined || value === null) return true;
-        return (
-          // 7 - 9 digits are valid
-          Number(value) >= 1000000 && Number(value) <= 999999999
-        );
+      .test("is-9-digits", "SSN must be exactly 9 digits", function (value) {
+        if (!value) return true;
+        return /^\d{9}$/.test(value);
       })
       .transform((value) => value || undefined),
     badgeNumber: yup
@@ -55,7 +52,7 @@ const MilitaryContributionSearchFilter: React.FC = () => {
     formState: { errors, isValid }
   } = useForm<SearchFormData>({
     resolver: yupResolver(validationSchema) as Resolver<SearchFormData>,
-    mode: "onChange"
+    mode: "onBlur"
   });
 
   const socialSecurity = watch("socialSecurity");
@@ -113,8 +110,17 @@ const MilitaryContributionSearchFilter: React.FC = () => {
                 error={!!errors.socialSecurity}
                 helperText={errors.socialSecurity?.message}
                 onChange={(e) => {
+                  const value = e.target.value;
+                  // Only allow numeric input
+                  if (value !== "" && !/^\d*$/.test(value)) {
+                    return;
+                  }
+                  // Prevent input beyond 9 characters
+                  if (value.length > 9) {
+                    return;
+                  }
                   field.onChange(e);
-                  if (e.target.value) setActiveField("socialSecurity");
+                  if (value) setActiveField("socialSecurity");
                 }}
               />
             )}

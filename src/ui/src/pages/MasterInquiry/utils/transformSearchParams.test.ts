@@ -44,7 +44,7 @@ describe("transformSearchParams", () => {
     const data = { ...baseSearchData, socialSecurity: "123456789" };
     const result = transformSearchParams(data, 2024);
 
-    expect(result.ssn).toBe("123456789");
+    expect(result.ssn).toBe(123456789);
   });
 
   it("should include name when provided", () => {
@@ -201,7 +201,7 @@ describe("transformSearchParams", () => {
       endProfitYear: 2024,
       startProfitMonth: "1",
       endProfitMonth: "12",
-      ssn: "987654321",
+      ssn: 987654321,
       name: "Jane Smith",
       badgeNumber: 1234567,
       psnSuffix: 2,
