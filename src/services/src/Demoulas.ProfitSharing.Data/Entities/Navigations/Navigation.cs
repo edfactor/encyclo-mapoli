@@ -80,7 +80,7 @@ public sealed class Navigation
         public const short ProfitShareReportEditRun = 151;
 
         public const short PayBenReport = 152;
-        public const short ProfitDetailReversals = 153;
+        public const short ProfitDetailReversals = 154;
 
     }
 
