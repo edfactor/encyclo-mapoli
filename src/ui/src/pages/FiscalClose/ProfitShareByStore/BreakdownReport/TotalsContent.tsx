@@ -88,7 +88,7 @@ const TotalsContent: React.FC<TotalsContentProps> = ({ store, onLoadingChange })
             <Typography
               variant="h2"
               sx={{ color: "#0258A5", marginBottom: "16px" }}>
-              {store && store > 0 ? `Totals for Store ${store}` : 'Totals For All Stores'}
+              {store && store > 0 ? `Totals for Store ${store}` : "Totals For All Stores"}
             </Typography>
           </Grid>
           <Grid

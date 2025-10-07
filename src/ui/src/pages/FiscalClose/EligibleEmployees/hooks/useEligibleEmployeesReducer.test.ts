@@ -66,9 +66,7 @@ describe("useEligibleEmployeesReducer", () => {
         endDate: "2024-12-31",
         dataSource: "test",
         response: {
-          results: [
-            { badgeNumber: 12345, fullName: "John Doe" }
-          ],
+          results: [{ badgeNumber: 12345, fullName: "John Doe" }],
           total: 1
         }
       };

@@ -17,7 +17,11 @@ import { TerminationSearchRequest } from "./Termination";
 
 const schema = yup.object().shape({
   beginningDate: yup.string().required("Begin Date is required"),
-  endingDate: endDateStringAfterStartDateValidator("beginningDate", tryddmmyyyyToDate, "End Date must be after Begin Date").required("End Date is required"),
+  endingDate: endDateStringAfterStartDateValidator(
+    "beginningDate",
+    tryddmmyyyyToDate,
+    "End Date must be after Begin Date"
+  ).required("End Date is required"),
   forfeitureStatus: yup.string().required("Forfeiture Status is required"),
   pagination: yup
     .object({

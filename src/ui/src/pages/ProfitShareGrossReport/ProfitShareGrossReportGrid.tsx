@@ -33,26 +33,35 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
   const [triggerSearch, { isFetching }] = useLazyGetGrossWagesReportQuery();
   const navigate = useNavigate();
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } = useGridPagination({
-    initialPageSize: 25,
-    initialSortBy: "badgeNumber",
-    initialSortDescending: false,
-    onPaginationChange: useCallback(async (pageNum: number, pageSz: number, sortPrms: any) => {
-      if (initialSearchLoaded) {
-        const request: GrossWagesReportDto = {
-          profitYear: grossWagesReportQueryParams?.profitYear ?? 0,
-          pagination: {
-            skip: pageNum * pageSz,
-            take: pageSz,
-            sortBy: sortPrms.sortBy,
-            isSortDescending: sortPrms.isSortDescending
-          },
-          minGrossAmount: grossWagesReportQueryParams?.minGrossAmount ?? 0
-        };
-        await triggerSearch(request, false);
-      }
-    }, [initialSearchLoaded, grossWagesReportQueryParams?.profitYear, grossWagesReportQueryParams?.minGrossAmount, triggerSearch])
-  });
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
+    useGridPagination({
+      initialPageSize: 25,
+      initialSortBy: "badgeNumber",
+      initialSortDescending: false,
+      onPaginationChange: useCallback(
+        async (pageNum: number, pageSz: number, sortPrms: any) => {
+          if (initialSearchLoaded) {
+            const request: GrossWagesReportDto = {
+              profitYear: grossWagesReportQueryParams?.profitYear ?? 0,
+              pagination: {
+                skip: pageNum * pageSz,
+                take: pageSz,
+                sortBy: sortPrms.sortBy,
+                isSortDescending: sortPrms.isSortDescending
+              },
+              minGrossAmount: grossWagesReportQueryParams?.minGrossAmount ?? 0
+            };
+            await triggerSearch(request, false);
+          }
+        },
+        [
+          initialSearchLoaded,
+          grossWagesReportQueryParams?.profitYear,
+          grossWagesReportQueryParams?.minGrossAmount,
+          triggerSearch
+        ]
+      )
+    });
 
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {

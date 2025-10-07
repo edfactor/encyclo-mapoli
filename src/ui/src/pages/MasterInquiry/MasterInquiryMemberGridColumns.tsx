@@ -14,7 +14,7 @@ export const GetMasterInquiryMemberGridColumns = (): ColDef[] => {
       psnSuffix: true
     }),
     createNameColumn({ field: "fullName" }),
-    createSSNColumn({ 
+    createSSNColumn({
       maxWidth: 250,
       valueFormatter: (params: ValueFormatterParams) => {
         const value = params.value;

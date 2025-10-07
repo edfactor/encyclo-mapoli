@@ -726,7 +726,7 @@ export const createStatusColumn = (options: FormattableColumnOptions = {}): ColD
     colId,
     minWidth,
     resizable,
-    sortable,
+    sortable
   };
 
   if (alignment === "right") {

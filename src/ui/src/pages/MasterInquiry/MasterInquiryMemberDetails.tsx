@@ -85,13 +85,17 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         dateOfBirth,
         ssn: ssnValue,
         allocationToAmount,
-        badgesOfDuplicateSsns,
+        badgesOfDuplicateSsns
       } = memberDetails;
 
       const duplicateBadgeLink = [];
       if (badgesOfDuplicateSsns && badgesOfDuplicateSsns.length) {
         for (let badge of badgesOfDuplicateSsns) {
-          duplicateBadgeLink.push({label:'Duplicate SSN with', value: viewBadgeLinkRenderer(badge), labelColor: 'error' });
+          duplicateBadgeLink.push({
+            label: "Duplicate SSN with",
+            value: viewBadgeLinkRenderer(badge),
+            labelColor: "error"
+          });
         }
       }
 

@@ -49,8 +49,8 @@ const CommitModal: React.FC<CommitModalProps> = ({ open, onClose, onCommit, isFi
             <td>ZeroContributionReason</td>
             <td>
               {" "}
-              Why did an employee get a zero contribution? Normal, Under21, Terminated (Vest Only), Retired, Soon to
-              be Retired
+              Why did an employee get a zero contribution? Normal, Under21, Terminated (Vest Only), Retired, Soon to be
+              Retired
             </td>
           </tr>
 

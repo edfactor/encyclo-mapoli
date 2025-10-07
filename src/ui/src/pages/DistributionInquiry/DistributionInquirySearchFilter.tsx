@@ -24,25 +24,17 @@ const schema = yup.object().shape({
   paymentFlag: yup.string().nullable(),
   taxCode: yup.string().nullable(),
   minGrossAmount: mustBeNumberValidator(),
-  maxGrossAmount: mustBeNumberValidator().test(
-    "greater-than-min",
-    "Max must be greater than Min",
-    function (value) {
-      const { minGrossAmount } = this.parent;
-      if (!value || !minGrossAmount) return true;
-      return Number(value) >= Number(minGrossAmount);
-    }
-  ),
+  maxGrossAmount: mustBeNumberValidator().test("greater-than-min", "Max must be greater than Min", function (value) {
+    const { minGrossAmount } = this.parent;
+    if (!value || !minGrossAmount) return true;
+    return Number(value) >= Number(minGrossAmount);
+  }),
   minCheckAmount: mustBeNumberValidator(),
-  maxCheckAmount: mustBeNumberValidator().test(
-    "greater-than-min",
-    "Max must be greater than Min",
-    function (value) {
-      const { minCheckAmount } = this.parent;
-      if (!value || !minCheckAmount) return true;
-      return Number(value) >= Number(minCheckAmount);
-    }
-  )
+  maxCheckAmount: mustBeNumberValidator().test("greater-than-min", "Max must be greater than Min", function (value) {
+    const { minCheckAmount } = this.parent;
+    if (!value || !minCheckAmount) return true;
+    return Number(value) >= Number(minCheckAmount);
+  })
 });
 
 const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterProps> = ({
@@ -90,7 +82,10 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)}>
-      <Grid container paddingX="24px" gap="24px">
+      <Grid
+        container
+        paddingX="24px"
+        gap="24px">
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <FormLabel>SSN/Member #</FormLabel>
           <Controller
@@ -260,7 +255,9 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
         </Grid>
       </Grid>
 
-      <Grid width="100%" paddingX="24px">
+      <Grid
+        width="100%"
+        paddingX="24px">
         <SearchAndReset
           handleReset={handleFormReset}
           handleSearch={handleSubmit(handleFormSubmit)}

@@ -9,14 +9,7 @@ import YTDWagesSearchFilter from "./YTDWagesSearchFilter";
 
 const YTDWages: React.FC = () => {
   const componentRef = useRef<HTMLDivElement>(null);
-  const {
-    searchResults,
-    isSearching,
-    pagination,
-    showData,
-    hasResults,
-    executeSearch
-  } = useYTDWages();
+  const { searchResults, isSearching, pagination, showData, hasResults, executeSearch } = useYTDWages();
 
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;

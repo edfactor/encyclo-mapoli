@@ -37,26 +37,29 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
     initialPageSize: 25,
     initialSortBy: "psnSuffix",
     initialSortDescending: true,
-    onPaginationChange: useCallback((pageNum: number, pageSz: number, sortPrms: any) => {
-      if (selectedMember?.badgeNumber && selectedMember?.psnSuffix) {
-        const request = createBeneficiaryInquiryRequest(
-          pageNum * pageSz,
-          sortPrms.sortBy,
-          sortPrms.isSortDescending,
-          pageSz,
-          selectedMember?.badgeNumber,
-          selectedMember?.psnSuffix
-        );
-        if (request) {
-          triggerSearch(request, false)
-            .unwrap()
-            .then((res) => {
-              setBeneficiaryList(res.beneficiaries);
-              setBeneficiaryOfList(res.beneficiaryOf);
-            });
+    onPaginationChange: useCallback(
+      (pageNum: number, pageSz: number, sortPrms: any) => {
+        if (selectedMember?.badgeNumber && selectedMember?.psnSuffix) {
+          const request = createBeneficiaryInquiryRequest(
+            pageNum * pageSz,
+            sortPrms.sortBy,
+            sortPrms.isSortDescending,
+            pageSz,
+            selectedMember?.badgeNumber,
+            selectedMember?.psnSuffix
+          );
+          if (request) {
+            triggerSearch(request, false)
+              .unwrap()
+              .then((res) => {
+                setBeneficiaryList(res.beneficiaries);
+                setBeneficiaryOfList(res.beneficiaryOf);
+              });
+          }
         }
-      }
-    }, [selectedMember])
+      },
+      [selectedMember]
+    )
   });
 
   const createBeneficiaryInquiryRequest = (

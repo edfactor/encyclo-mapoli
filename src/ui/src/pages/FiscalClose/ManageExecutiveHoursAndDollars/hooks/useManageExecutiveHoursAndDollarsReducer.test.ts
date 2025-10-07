@@ -279,9 +279,7 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
 
   describe("additional executives", () => {
     it("should add additional executives", () => {
-      const executives = [
-        { badgeNumber: 12345, fullName: "John Doe", hoursExecutive: 40, incomeExecutive: 1000 }
-      ];
+      const executives = [{ badgeNumber: 12345, fullName: "John Doe", hoursExecutive: 40, incomeExecutive: 1000 }];
 
       const action = { type: "ADD_ADDITIONAL_EXECUTIVES" as const, payload: { executives } };
       const newState = manageExecutiveHoursAndDollarsReducer(initialState, action);
@@ -290,9 +288,7 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
     });
 
     it("should append to existing additional executives", () => {
-      const existing = [
-        { badgeNumber: 11111, fullName: "Jane Smith", hoursExecutive: 35, incomeExecutive: 900 }
-      ];
+      const existing = [{ badgeNumber: 11111, fullName: "Jane Smith", hoursExecutive: 35, incomeExecutive: 900 }];
 
       const stateWithExecutives: ManageExecutiveHoursAndDollarsState = {
         ...initialState,
@@ -394,9 +390,7 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
     });
 
     it("should select executives in modal", () => {
-      const executives = [
-        { badgeNumber: 12345, fullName: "John Doe", hoursExecutive: 40, incomeExecutive: 1000 }
-      ];
+      const executives = [{ badgeNumber: 12345, fullName: "John Doe", hoursExecutive: 40, incomeExecutive: 1000 }];
 
       const action = { type: "MODAL_SELECT_EXECUTIVES" as const, payload: { executives } };
       const newState = manageExecutiveHoursAndDollarsReducer(initialState, action);

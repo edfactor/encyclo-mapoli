@@ -78,12 +78,15 @@ describe("useGridPagination", () => {
         result.current.handlePaginationChange(1, 50);
       });
 
-      await waitFor(() => {
-        expect(mockCallback).toHaveBeenCalledWith(1, 50, {
-          sortBy: "name",
-          isSortDescending: false
-        });
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          expect(mockCallback).toHaveBeenCalledWith(1, 50, {
+            sortBy: "name",
+            isSortDescending: false
+          });
+        },
+        { timeout: 1000 }
+      );
     });
 
     it("should prevent re-entrant calls", () => {
@@ -201,9 +204,12 @@ describe("useGridPagination", () => {
         result.current.handlePaginationChange(1, 25);
       });
 
-      await waitFor(() => {
-        expect(mockCallback1).toHaveBeenCalled();
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          expect(mockCallback1).toHaveBeenCalled();
+        },
+        { timeout: 1000 }
+      );
 
       mockCallback1.mockClear();
 
@@ -213,10 +219,13 @@ describe("useGridPagination", () => {
         result.current.handlePaginationChange(2, 25);
       });
 
-      await waitFor(() => {
-        expect(mockCallback1).not.toHaveBeenCalled();
-        expect(mockCallback2).toHaveBeenCalled();
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          expect(mockCallback1).not.toHaveBeenCalled();
+          expect(mockCallback2).toHaveBeenCalled();
+        },
+        { timeout: 1000 }
+      );
     });
   });
 

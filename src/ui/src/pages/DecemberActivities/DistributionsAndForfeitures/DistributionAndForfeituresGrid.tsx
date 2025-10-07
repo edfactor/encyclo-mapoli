@@ -138,7 +138,12 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     }
 
     prevQueryParams.current = currentQueryParams;
-  }, [distributionsAndForfeituresQueryParams?.startDate, distributionsAndForfeituresQueryParams?.endDate, profitYear, resetPagination]);
+  }, [
+    distributionsAndForfeituresQueryParams?.startDate,
+    distributionsAndForfeituresQueryParams?.endDate,
+    profitYear,
+    resetPagination
+  ]);
 
   useEffect(() => {
     if (hasToken && initialSearchLoaded) {
