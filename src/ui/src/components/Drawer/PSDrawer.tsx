@@ -1,6 +1,5 @@
-import { ChevronLeft, Close, ExpandLess, ExpandMore } from "@mui/icons-material";
+import { ChevronLeft, ExpandLess, ExpandMore } from "@mui/icons-material";
 import {
-  Alert,
   Box,
   Chip,
   Collapse,
@@ -22,7 +21,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ICommon } from "smart-ui-library";
 import { drawerTitle, menuLevels } from "../../MenuData";
 import ProfitYearSelector from "../../components/ProfitYearSelector/ProfitYearSelector";
-import { drawerClosedWidth, drawerOpenWidth, MENU_LABELS } from "../../constants";
+import { drawerClosedWidth, drawerOpenWidth } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
 import { clearActiveSubMenu, closeDrawer, openDrawer, setActiveSubMenu } from "../../reduxstore/slices/generalSlice";
@@ -81,8 +80,6 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
 
   const [expandedLevels, setExpandedLevels] = useState<{ [key: string]: boolean }>(getStoredExpandedLevels());
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
-  const [showDecemberBanner, setShowDecemberBanner] = useState(true);
-  const [showFiscalCloseBanner, setShowFiscalCloseBanner] = useState(true);
   const currentPath = location.pathname; // Directly use location.pathname instead of state
   const pathRef = useRef(currentPath); // Use ref to track previous path
   const dispatch = useDispatch();
@@ -351,60 +348,6 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
                   {activeSubmenu}
                 </Typography>
               </ListItemButton>
-              {activeSubmenu === MENU_LABELS.DECEMBER_ACTIVITIES && (
-                <div>
-                  {showDecemberBanner && (
-                    <Alert
-                      severity="info"
-                      sx={{ fontSize: "0.8rem" }} // Shrink font size
-                      action={
-                        <IconButton
-                          aria-label="close"
-                          color="inherit"
-                          size="small"
-                          onClick={() => setShowDecemberBanner(false)}>
-                          <Close fontSize="inherit" />
-                        </IconButton>
-                      }>
-                      Sets accounting calendar year
-                    </Alert>
-                  )}
-                  {/* <div style={{ padding: "24px" }}>
-                    <ProfitYearSelector
-                      selectedProfitYear={selectedProfitYearForDecemberActivities}
-                      handleChange={handleDecemberProfitYearChange}
-                      defaultValue={profitYear?.toString()}
-                    />
-                  </div> */}
-                </div>
-              )}
-
-              {activeSubmenu === MENU_LABELS.FISCAL_CLOSE && (
-                <div>
-                  {showFiscalCloseBanner && (
-                    <Alert
-                      severity="info"
-                      action={
-                        <IconButton
-                          aria-label="close"
-                          color="inherit"
-                          size="small"
-                          onClick={() => setShowFiscalCloseBanner(false)}>
-                          <Close fontSize="inherit" />
-                        </IconButton>
-                      }>
-                      Sets accounting calendar year
-                    </Alert>
-                  )}
-                  {/* <div style={{ padding: "24px" }}>
-                    <ProfitYearSelector
-                      selectedProfitYear={selectedProfitYearForFiscalClose}
-                      handleChange={handleFiscalCloseProfitYearChange}
-                      defaultValue={fiscalFlowProfitYear?.toString()}
-                    />
-                  </div> */}
-                </div>
-              )}
               <List>
                 {menuLevels(navigationData)
                   .find((l) => l.mainTitle === activeSubmenu)
