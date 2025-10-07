@@ -29,21 +29,15 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
-import { monthValidator, ssnValidator } from "../../utils/FormValidators";
+import { monthValidator, profitYearNullableValidator, ssnValidator } from "../../utils/FormValidators";
 import { transformSearchParams } from "./utils/transformSearchParams";
 
 const schema = yup.object().shape({
-  endProfitYear: yup
-    .number()
-    .min(2020, "Year must be 2020 or later")
-    .max(2100, "Year must be 2100 or earlier")
-    .typeError("Invalid date")
-    .test("greater-than-start", "End year must be after start year", function (endYear) {
-      const startYear = this.parent.startProfitYear;
-      // Only validate if both values are present
-      return !startYear || !endYear || endYear >= startYear;
-    })
-    .nullable(),
+  endProfitYear: profitYearNullableValidator.test("greater-than-start", "End year must be after start year", function (endYear) {
+    const startYear = this.parent.startProfitYear;
+    // Only validate if both values are present
+    return !startYear || !endYear || endYear >= startYear;
+  }),
   startProfitMonth: monthValidator,
   endProfitMonth: monthValidator.min(yup.ref("startProfitMonth"), "End month must be after start month"),
   socialSecurity: ssnValidator,

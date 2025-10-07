@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import { badgeNumberValidator, ssnValidator } from "../../../utils/FormValidators";
+import { badgeNumberValidator, profitYearValidator, ssnValidator } from "../../../utils/FormValidators";
 
 interface ExecutiveHoursAndDollarsSearch {
   profitYear: number;
@@ -18,7 +18,7 @@ interface ExecutiveHoursAndDollarsSearch {
 
 const validationSchema = yup
   .object({
-    profitYear: yup.number().required("Profit Year is required").typeError("Profit Year must be a number"),
+    profitYear: profitYearValidator,
     socialSecurity: ssnValidator,
     badgeNumber: badgeNumberValidator,
     fullNameContains: yup

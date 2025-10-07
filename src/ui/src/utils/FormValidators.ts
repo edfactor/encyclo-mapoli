@@ -46,3 +46,35 @@ export const psnValidator = yup
   .max(99999999999, "PSN must be 11 digits or less")
   .nullable()
   .transform((value) => value || undefined);
+
+/**
+ * Validates that a profit year is a number between 2020 and 2100 (required)
+ */
+export const profitYearValidator = yup
+  .number()
+  .typeError("Year must be a number")
+  .integer("Year must be an integer")
+  .min(2020, "Year must be 2020 or later")
+  .max(2100, "Year must be 2100 or earlier")
+  .required("Year is required");
+
+/**
+ * Validates that a profit year is a number between 2020 and 2100 (nullable)
+ */
+export const profitYearNullableValidator = yup
+  .number()
+  .typeError("Year must be a number")
+  .integer("Year must be an integer")
+  .min(2020, "Year must be 2020 or later")
+  .max(2100, "Year must be 2100 or earlier")
+  .nullable();
+
+/**
+ * Validates that a profit year is a date between 2020 and 2100 (required)
+ */
+export const profitYearDateValidator = yup
+  .date()
+  .typeError("Invalid date")
+  .min(new Date(2020, 0, 1), "Year must be 2020 or later")
+  .max(new Date(2100, 11, 31), "Year must be 2100 or earlier")
+  .required("Profit Year is required");
