@@ -66,6 +66,9 @@ definitions:
         - cd src/ui
         - echo "Running frontend tests on cloud runner..."
         
+        # Update npm to latest version
+        - npm install -g npm@latest
+        
         # Create .npmrc for JFrog access (uses pipeline variable)
         - |
           cat > .npmrc << EOF
@@ -165,8 +168,9 @@ definitions:
         # Navigate to UI directory
         - cd src/ui
         
-        # Install zip utility (not included in alpine base image)
+        # Install zip utility and update npm
         - apk add --no-cache zip
+        - npm install -g npm@latest
         
         # Create .npmrc for JFrog access (using bash heredoc syntax)
         - |
@@ -210,8 +214,9 @@ definitions:
         # Navigate to UI directory
         - cd src/ui
         
-        # Install zip utility (not included in alpine base image)
+        # Install zip utility and update npm
         - apk add --no-cache zip
+        - npm install -g npm@latest
         
         # Create .npmrc for JFrog access (using bash heredoc syntax)
         - |
@@ -255,8 +260,9 @@ definitions:
         # Navigate to UI directory
         - cd src/ui
         
-        # Install zip utility (not included in alpine base image)
+        # Install zip utility and update npm
         - apk add --no-cache zip
+        - npm install -g npm@latest
         
         # Create .npmrc for JFrog access (using bash heredoc syntax)
         - |
