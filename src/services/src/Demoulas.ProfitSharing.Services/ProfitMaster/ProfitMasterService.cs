@@ -267,7 +267,7 @@ public class ProfitMasterService : IProfitMasterService
             Remark = r.Remark,
             ZeroContributionReasonId = r.ZeroContStatus,
             CommentTypeId = r.CommentTypeId,
-            YearsOfServiceCredit = (r.ProfitCode == 0 && (r.ContributionAmount != 0 || r.ZeroContStatus is 1 or 2)) ? (byte)1 : (byte)0
+            YearsOfServiceCredit = (r.ProfitCode == 0 && (r.ContributionAmount != 0 || r.ZeroContStatus is 1 or 2)) ? (sbyte)1 : (sbyte)0
         }).ToList();
     }
 

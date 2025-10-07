@@ -14,6 +14,7 @@ import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
+import { profitYearValidator } from "../../../utils/FormValidators";
 import { CalendarResponseDto, StartAndEndDateRequest } from "../../../reduxstore/types";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
 
@@ -65,7 +66,7 @@ const schema = yup.object().shape({
     })
     .required(),
   // Hidden field: not shown in search filter, but required in data
-  profitYear: yup.number().required("Profit year is required")
+  profitYear: profitYearValidator
 });
 
 interface UnForfeitSearchFilterProps {

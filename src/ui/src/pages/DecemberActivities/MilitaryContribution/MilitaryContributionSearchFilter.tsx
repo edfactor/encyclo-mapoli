@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import { badgeNumberValidator, handleBadgeNumberInput, handleSsnInput, ssnValidator } from "../../../utils/FormValidators";
 import useMilitaryContribution from "./hooks/useMilitaryContribution";
 
 interface SearchFormData {
@@ -15,25 +16,8 @@ interface SearchFormData {
 // Define schema with proper typing for our form
 const validationSchema = yup
   .object({
-    socialSecurity: yup
-      .string()
-      .nullable()
-      .test("is-9-digits", "SSN must be exactly 9 digits", function (value) {
-        if (!value) return true;
-        return /^\d{9}$/.test(value);
-      })
-      .transform((value) => value || undefined),
-    badgeNumber: yup
-      .string()
-      .nullable()
-      .test("badge-length", "Badge must be 5, 6, or 7 digits", function (value) {
-        if (value === undefined || value === null) return true;
-        return (
-          // 5 - 7 digits are valid
-          Number(value) >= 10000 && Number(value) <= 9999999
-        );
-      })
-      .transform((value) => value || undefined)
+    socialSecurity: ssnValidator,
+    badgeNumber: badgeNumberValidator
   })
   .test("at-least-one-required", "At least one field must be provided", (values) =>
     Boolean(values.socialSecurity || values.badgeNumber)
@@ -110,17 +94,11 @@ const MilitaryContributionSearchFilter: React.FC = () => {
                 error={!!errors.socialSecurity}
                 helperText={errors.socialSecurity?.message}
                 onChange={(e) => {
-                  const value = e.target.value;
-                  // Only allow numeric input
-                  if (value !== "" && !/^\d*$/.test(value)) {
-                    return;
+                  const validatedValue = handleSsnInput(e.target.value);
+                  if (validatedValue !== null) {
+                    field.onChange(validatedValue);
+                    if (validatedValue) setActiveField("socialSecurity");
                   }
-                  // Prevent input beyond 9 characters
-                  if (value.length > 9) {
-                    return;
-                  }
-                  field.onChange(e);
-                  if (value) setActiveField("socialSecurity");
                 }}
               />
             )}
@@ -142,8 +120,11 @@ const MilitaryContributionSearchFilter: React.FC = () => {
                 error={!!errors.badgeNumber}
                 helperText={errors.badgeNumber?.message}
                 onChange={(e) => {
-                  field.onChange(e);
-                  if (e.target.value) setActiveField("badgeNumber");
+                  const validatedValue = handleBadgeNumberInput(e.target.value);
+                  if (validatedValue !== null) {
+                    field.onChange(validatedValue);
+                    if (e.target.value) setActiveField("badgeNumber");
+                  }
                 }}
               />
             )}
