@@ -37,5 +37,5 @@ public class ProfitDetail : ModifiedBase
     public long? CommentRelatedOracleHcmId { get; set; }
     public short? CommentRelatedPsnSuffix { get; set; }
     public bool? CommentIsPartialTransaction { get; set; }
-    public byte YearsOfServiceCredit { get; set; }
+    public sbyte YearsOfServiceCredit { get; set; }
 }

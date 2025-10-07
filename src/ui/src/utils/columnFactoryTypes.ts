@@ -9,6 +9,10 @@ export interface BaseColumnOptions {
   maxWidth?: number;
   sortable?: boolean;
   resizable?: boolean;
+  tooltip?: string; // Static tooltip text
+  tooltipField?: string; // Field name containing tooltip data
+  tooltipValueGetter?: (params: any) => string; // Dynamic tooltip generator
+  headerTooltip?: string; // Header tooltip text
 }
 
 // Extended base interfaces

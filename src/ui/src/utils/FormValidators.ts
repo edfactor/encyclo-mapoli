@@ -24,6 +24,15 @@ export const badgeNumberValidator = yup
   .nullable()
   .transform((value) => value || undefined);
 
+export const badgeNumberOrPSNValidator = yup
+  .number()
+  .typeError("Badge Number or PSN must be a number")
+  .integer("Badge Number or PSN must be an integer")
+  .min(10000, "Badge Number or PSN must be at least 5 digits")
+  .max(99999999999, "Badge Number or PSN must be 11 digits or less")
+  .nullable()
+  .transform((value) => value || undefined);
+
 /**
  * Validates that a month number is between 1 and 12
  */
@@ -78,6 +87,18 @@ export const profitYearDateValidator = yup
   .min(new Date(2020, 0, 1), "Year must be 2020 or later")
   .max(new Date(2100, 11, 31), "Year must be 2100 or earlier")
   .required("Profit Year is required");
+
+/**
+ * Returns a validator for a positive number, with custom field name in error messages.
+ * @param fieldName - The name of the field to use in error messages
+ */
+export const positiveNumberValidator = (fieldName: string) =>
+  yup
+    .number()
+    .typeError(`${fieldName} must be a number`)
+    .min(0, `${fieldName} must be a positive number`)
+    .nullable()
+    .transform((value) => (isNaN(value) ? null : value));
 
 /**
  * Handler for SSN input that only allows numeric characters up to 9 digits
