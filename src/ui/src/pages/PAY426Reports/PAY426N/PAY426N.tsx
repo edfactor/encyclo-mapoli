@@ -5,7 +5,10 @@ import StatusReadOnlyInfo from "components/StatusReadOnlyInfo";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
-import { clearYearEndProfitSharingReport } from "reduxstore/slices/yearsEndSlice";
+import {
+  clearYearEndProfitSharingReportLive,
+  clearYearEndProfitSharingReportFrozen
+} from "reduxstore/slices/yearsEndSlice";
 import { ReportPreset } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
@@ -17,7 +20,7 @@ import FilterSection from "./FilterSection";
 import presets from "./presets";
 import ReportGrid from "./ReportGrid";
 
-const PAY426N: React.FC = () => {
+const PAY426N: React.FC<{ isFrozen: boolean }> = () => {
   const [currentPreset, setCurrentPreset] = useState<ReportPreset | null>(null);
   const [showSummaryReport, setShowSummaryReport] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -39,7 +42,11 @@ const PAY426N: React.FC = () => {
   }
 
   const handlePresetChange = (preset: ReportPreset | null) => {
-    dispatch(clearYearEndProfitSharingReport());
+    if (isFrozen) {
+      dispatch(clearYearEndProfitSharingReportFrozen());
+    } else {
+      dispatch(clearYearEndProfitSharingReportLive());
+    }
     setCurrentPreset(preset);
     if (preset) {
       setShowSummaryReport(preset.id === "9");
@@ -90,10 +97,11 @@ const PAY426N: React.FC = () => {
             <ReportGrid
               params={currentPreset.params}
               onLoadingChange={handleLoadingChange}
+              isFrozen={isFrozen}
             />
           )}
 
-          {showSummaryReport && <ProfitSummary />}
+          {showSummaryReport && <ProfitSummary frozenData={isFrozen} />}
         </Grid>
       </Grid>
     </Page>

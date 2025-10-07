@@ -14,7 +14,8 @@ import {
   clearUnder21BreakdownByStore,
   clearUnder21Inactive,
   clearUnder21Totals,
-  clearYearEndProfitSharingReport,
+  clearYearEndProfitSharingReportLive,
+  clearYearEndProfitSharingReportFrozen,
   clearYearEndProfitSharingReportTotals,
   setAdditionalExecutivesGrid,
   setBalanceByAge,
@@ -55,7 +56,8 @@ import {
   setUnForfeitsDetails,
   setUpdateSummary,
   setVestedAmountsByAge,
-  setYearEndProfitSharingReport,
+  setYearEndProfitSharingReportLive,
+  setYearEndProfitSharingReportFrozen,
   setYearEndProfitSharingReportTotals
 } from "reduxstore/slices/yearsEndSlice";
 import {
@@ -1046,29 +1048,63 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getYearEndProfitSharingReport: builder.query<
+    getYearEndProfitSharingReportLive: builder.query<
       YearEndProfitSharingReportResponse,
       YearEndProfitSharingReportRequest & { archive?: boolean }
     >({
-      query: (params) => ({
-        url: `yearend/yearend-profit-sharing-report${params.archive === true ? "/?archive=true" : ""}`,
-        method: "POST",
-        body: {
-          ...params,
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
-        }
-      }),
+      query: (params) => {
+        const { pagination, archive, ...rest } = params;
+        return {
+          url: `yearend/yearend-profit-sharing-report${archive === true ? "/?archive=true" : ""}`,
+          method: "POST",
+          body: {
+            ...rest,
+            useFrozenData: false,
+            take: pagination.take,
+            skip: pagination.skip,
+            sortBy: pagination.sortBy,
+            isSortDescending: pagination.isSortDescending
+          }
+        };
+      },
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
-          dispatch(clearYearEndProfitSharingReport());
+          dispatch(clearYearEndProfitSharingReportLive());
           const { data } = await queryFulfilled;
-          dispatch(setYearEndProfitSharingReport(data));
+          dispatch(setYearEndProfitSharingReportLive(data));
         } catch (err) {
           console.log("Err: " + err);
-          dispatch(clearYearEndProfitSharingReport());
+          dispatch(clearYearEndProfitSharingReportLive());
+        }
+      }
+    }),
+    getYearEndProfitSharingReportFrozen: builder.query<
+      YearEndProfitSharingReportResponse,
+      YearEndProfitSharingReportRequest & { archive?: boolean }
+    >({
+      query: (params) => {
+        const { pagination, archive, ...rest } = params;
+        return {
+          url: `yearend/yearend-profit-sharing-report${archive === true ? "/?archive=true" : ""}`,
+          method: "POST",
+          body: {
+            ...rest,
+            useFrozenData: true,
+            take: pagination.take,
+            skip: pagination.skip,
+            sortBy: pagination.sortBy,
+            isSortDescending: pagination.isSortDescending
+          }
+        };
+      },
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          dispatch(clearYearEndProfitSharingReportFrozen());
+          const { data } = await queryFulfilled;
+          dispatch(setYearEndProfitSharingReportFrozen(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearYearEndProfitSharingReportFrozen());
         }
       }
     }),
@@ -1369,7 +1405,8 @@ export const {
   useLazyGetUnder21InactiveQuery,
   useLazyGetUnder21TotalsQuery,
   useLazyGetVestingAmountByAgeQuery,
-  useLazyGetYearEndProfitSharingReportQuery,
+  useLazyGetYearEndProfitSharingReportLiveQuery,
+  useLazyGetYearEndProfitSharingReportFrozenQuery,
   useLazyGetYearEndProfitSharingReportTotalsQuery,
   useUpdateExecutiveHoursAndDollarsMutation,
   useLazyGetYearEndProfitSharingSummaryReportQuery,
