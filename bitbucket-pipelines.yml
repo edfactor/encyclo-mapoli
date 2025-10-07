@@ -513,7 +513,7 @@ definitions:
           registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
           //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
           EOF
-        - npm audit --audit-level=moderate --production
+        - npm audit --audit-level=high --production
     
     secret-scan: &secret-scan
       name: "Secret scan (Gitleaks)"
