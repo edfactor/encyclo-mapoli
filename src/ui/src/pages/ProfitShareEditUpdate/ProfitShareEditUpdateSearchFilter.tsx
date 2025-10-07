@@ -8,6 +8,7 @@ import * as yup from "yup";
 
 import SearchAndReset from "components/SearchAndReset/SearchAndReset";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { profitYearDateValidator } from "../../utils/FormValidators";
 import { useEffect, useState } from "react";
 import {
   addBadgeNumberToUpdateAdjustmentSummary,
@@ -24,6 +25,7 @@ import {
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { ProfitShareUpdateRequest } from "reduxstore/types";
+import { badgeNumberValidator } from "../../utils/FormValidators";
 
 const maxContributionsDefault: number = 76000;
 
@@ -43,12 +45,7 @@ interface ProfitShareEditUpdateSearch {
 }
 
 const schema = yup.object().shape({
-  profitYear: yup
-    .date()
-    .required("Profit Year is required")
-    .min(new Date(2020, 0, 1), "Year must be 2020 or later")
-    .max(new Date(2100, 11, 31), "Year must be 2100 or earlier")
-    .typeError("Invalid date"),
+  profitYear: profitYearDateValidator,
   contributionPercent: yup
     .number()
     .typeError("Contribution must be a number")
@@ -79,12 +76,7 @@ const schema = yup.object().shape({
     .typeError("Max Allowed Contributions must be a number")
     .min(0, "Max Allowed Contributions must be positive")
     .required("Max Contributions is required"),
-  badgeToAdjust: yup
-    .number()
-    .typeError("Badge must be a number")
-    .integer("Badge must be an integer")
-    .nullable()
-    .optional(),
+  badgeToAdjust: badgeNumberValidator.optional(),
   adjustContributionAmount: yup
     .number()
     .typeError("Contribution must be a number")
@@ -98,12 +90,7 @@ const schema = yup.object().shape({
     .min(0, "Adjusted Incoming Forfeiture must be positive")
     .nullable()
     .optional(),
-  badgeToAdjust2: yup
-    .number()
-    .typeError("Badge must be a number")
-    .integer("Badge must be an integer")
-    .nullable()
-    .optional(),
+  badgeToAdjust2: badgeNumberValidator.optional(),
   adjustEarningsSecondaryAmount: yup.number().typeError("Earnings must be a number").nullable().optional()
 });
 

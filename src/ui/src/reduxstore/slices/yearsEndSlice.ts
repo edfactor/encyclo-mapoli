@@ -160,10 +160,10 @@ export interface YearsEndState {
 const initialState: YearsEndState = {
   selectedProfitYearForDecemberActivities: localStorage.getItem("selectedProfitYearForDecemberActivities")
     ? Number(localStorage.getItem("selectedProfitYearForDecemberActivities"))
-    : 2024,
+    : new Date().getFullYear(),
   selectedProfitYearForFiscalClose: localStorage.getItem("selectedProfitYearForFiscalClose")
     ? Number(localStorage.getItem("selectedProfitYearForFiscalClose"))
-    : 2024,
+    : new Date().getFullYear(),
   invalidProfitShareEditYear: false,
   totalForfeituresGreaterThanZero: false,
   profitShareEditUpdateShowSearch: true,
@@ -211,7 +211,6 @@ const initialState: YearsEndState = {
   forfeituresAndPointsQueryParams: null,
   grossWagesReport: null,
   grossWagesReportQueryParams: null,
-  rehire: null,
   rehireQueryParams: null,
   militaryEntryAndModification: null,
   recentlyTerminated: null,
@@ -221,7 +220,6 @@ const initialState: YearsEndState = {
   unForfeits: null,
   unForfeitsQueryParams: null,
   rehireProfitSummaryQueryParams: null,
-  missingCommaInPYName: null,
   negativeEtvaForSSNsOnPayprofit: null,
   negativeEtvaForSSNsOnPayprofitParams: null,
   profitSharingUpdate: null,

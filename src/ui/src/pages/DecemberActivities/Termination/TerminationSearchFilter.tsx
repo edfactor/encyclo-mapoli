@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { SearchAndReset, SmartModal } from "smart-ui-library";
 import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
+import { profitYearValidator } from "../../../utils/FormValidators";
 import DuplicateSsnGuard from "../../../components/DuplicateSsnGuard";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { clearTermination } from "../../../reduxstore/slices/yearsEndSlice";
@@ -36,7 +37,7 @@ const schema = yup.object().shape({
       isSortDescending: yup.boolean().required()
     })
     .required(),
-  profitYear: yup.number().required("Profit year is required")
+  profitYear: profitYearValidator
 });
 
 interface TerminationSearchFilterProps {

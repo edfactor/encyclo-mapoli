@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import { badgeNumberValidator, handleBadgeNumberInput, handleSsnInput, profitYearValidator, ssnValidator } from "../../../utils/FormValidators";
 
 interface ExecutiveHoursAndDollarsSearch {
   profitYear: number;
@@ -17,22 +18,9 @@ interface ExecutiveHoursAndDollarsSearch {
 
 const validationSchema = yup
   .object({
-    profitYear: yup.number().required("Profit Year is required").typeError("Profit Year must be a number"),
-    socialSecurity: yup
-      .string()
-      .nullable()
-      .test("is-9-digits", "SSN must be exactly 9 digits", function (value) {
-        if (!value) return true;
-        return /^\d{9}$/.test(value);
-      })
-      .transform((value) => value || undefined),
-    badgeNumber: yup
-      .number()
-      .typeError("Badge Number must be a number")
-      .integer("Badge Number must be an integer")
-      .min(0, "Badge must be positive")
-      .max(9999999, "Badge must be 7 digits or less")
-      .transform((value) => value || undefined),
+    profitYear: profitYearValidator,
+    socialSecurity: ssnValidator,
+    badgeNumber: badgeNumberValidator,
     fullNameContains: yup
       .string()
       .typeError("Full Name must be a string")
@@ -261,21 +249,11 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                   value={field.value ?? ""}
                   error={!!errors.socialSecurity}
                   onChange={(e) => {
-                    const value = e.target.value;
-                    // Only allow numeric input
-                    if (value !== "" && !/^\d*$/.test(value)) {
-                      return;
-                    }
-                    // Prevent input beyond 9 characters
-                    if (value.length > 9) {
-                      return;
-                    }
-                    const parsedValue = value === "" ? null : value;
-                    field.onChange(parsedValue);
-                    if (value !== "") {
-                      toggleSearchFieldEntered(true, "socialSecurity");
-                    } else {
-                      toggleSearchFieldEntered(false, "socialSecurity");
+                    const validatedValue = handleSsnInput(e.target.value);
+                    if (validatedValue !== null) {
+                      const parsedValue = validatedValue === "" ? null : validatedValue;
+                      field.onChange(parsedValue);
+                      toggleSearchFieldEntered(validatedValue !== "", "socialSecurity");
                     }
                   }}
                 />
@@ -297,14 +275,11 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                   error={!!errors.badgeNumber}
                   disabled={activeField === "socialSecurity" || activeField === "fullNameContains"}
                   onChange={(e) => {
-                    if (!isNaN(Number(e.target.value))) {
-                      const parsedValue = e.target.value === "" ? null : Number(e.target.value);
+                    const validatedValue = handleBadgeNumberInput(e.target.value);
+                    if (validatedValue !== null) {
+                      const parsedValue = validatedValue === "" ? null : validatedValue;
                       field.onChange(parsedValue);
-                      if (e.target.value !== "") {
-                        toggleSearchFieldEntered(true, "badgeNumber");
-                      } else {
-                        toggleSearchFieldEntered(false, "badgeNumber");
-                      }
+                      toggleSearchFieldEntered(e.target.value !== "", "badgeNumber");
                     }
                   }}
                   type="number"
