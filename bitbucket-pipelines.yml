@@ -713,35 +713,10 @@ pipelines:
           script:
             - $env:ENV = "QA"
             - $env:API_SERVER_QA = "appt23d"
-
-            - pwsh -File ./scripts/credsettings.ps1 `
-              -Environment ${env:ENV} `
-              -FilePath './src/services/configuration/credsettings.json' `
-              -OutputPath './src/services/configuration/credsettings.qa.json' `
-              -RemoteServer $env:API_SERVER_QA `
-              -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
-
-            - pwsh -File ./scripts/credsettings.ps1 `
-              -Environment ${env:ENV} `
-              -FilePath './src/services/configuration/credsettings.json' `
-              -OutputPath './src/services/configuration/credsettings.qa.json' `
-              -RemoteServer $env:API_SERVER_QA `
-              -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
-
-            - pwsh -File ./scripts/credsettings.ps1 `
-              -Environment ${env:ENV} `
-              -FilePath './src/services/configuration/credsettings.json' `
-              -OutputPath './src/services/configuration/credsettings.qa.json' `
-              -RemoteServer $env:API_SERVER_QA `
-              -RemotePath 'C:/NextGenApplications/ps/Payroll'
-
-            - pwsh -File ./scripts/credsettings.ps1 `
-              -Environment ${env:ENV} `
-              -FilePath './src/services/configuration/credsettings.json' `
-              -OutputPath './src/services/configuration/credsettings.qa.json' `
-              -RemoteServer $env:API_SERVER_QA `
-              -RemotePath 'C:/inetpub/wwwroot/api'
-
+            - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
+            - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
+            - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/NextGenApplications/ps/Payroll'
+            - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/inetpub/wwwroot/api'
             - echo "Deploying web application..."
             # Reuse the same API artifact built once in Stage 2
             - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
@@ -802,36 +777,11 @@ pipelines:
               script:
                 - echo "Deploying application to UAT (reusing API artifact from Stage 2)..."
                 - $env:API_SERVER_UAT = "appt24d"
-                - $env:ENV = "UAT"            
-
-                - pwsh -File ./scripts/credsettings.ps1 `
-                  -Environment ${env:ENV} `
-                  -FilePath './src/services/configuration/credsettings.json' `
-                  -OutputPath './src/services/configuration/credsettings.uat.json' `
-                  -RemoteServer $env:API_SERVER_UAT `
-                  -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
-
-                - pwsh -File ./scripts/credsettings.ps1 `
-                  -Environment ${env:ENV} `
-                  -FilePath './src/services/configuration/credsettings.json' `
-                  -OutputPath './src/services/configuration/credsettings.uat.json' `
-                  -RemoteServer $env:API_SERVER_UAT `
-                  -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
-
-                - pwsh -File ./scripts/credsettings.ps1 `
-                  -Environment ${env:ENV} `
-                  -FilePath './src/services/configuration/credsettings.json' `
-                  -OutputPath './src/services/configuration/credsettings.uat.json' `
-                  -RemoteServer $env:API_SERVER_UAT `
-                  -RemotePath 'C:/NextGenApplications/ps/Payroll'
-
-                - pwsh -File ./scripts/credsettings.ps1 `
-                  -Environment ${env:ENV} `
-                  -FilePath './src/services/configuration/credsettings.json' `
-                  -OutputPath './src/services/configuration/credsettings.uat.json' `
-                  -RemoteServer $env:API_SERVER_UAT `
-                  -RemotePath 'C:/inetpub/wwwroot/api'
-
+                - $env:ENV = "UAT"
+                - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
+                - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
+                - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/NextGenApplications/ps/Payroll'
+                - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/inetpub/wwwroot/api'
                 - echo "Deploying web application..."
                 # Reuse the same API artifact built once in Stage 2
                 - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
