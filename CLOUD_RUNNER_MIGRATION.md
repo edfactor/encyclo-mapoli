@@ -7,35 +7,18 @@
 
 ### Steps Moved to Cloud Runners
 
-#### 1. ✅ `audit-backend` - Backend Vulnerability Scanning
+#### 1. ❌ `audit-backend` - Backend Vulnerability Scanning
 
-**Before**: Windows self-hosted runner  
-**After**: Bitbucket Cloud with `mcr.microsoft.com/dotnet/sdk:9.0` Docker image
+**Status**: NOT MIGRATED - Reverted to Windows self-hosted  
+**Reason**: Requires access to custom NuGet sources (JFrog Artifactory) that need internal authentication
 
-**Why Safe to Move**:
-- Only checks for NuGet package vulnerabilities
-- Doesn't require access to internal build artifacts
-- Only needs public NuGet.org access
-- No Windows-specific dependencies
+**Why It Can't Move**:
+- dotnet restore requires internal JFrog credentials
+- Custom NuGet packages not available on public cloud runners
+- Would need secure credential injection that's not configured
+- Windows runner has pre-configured access to internal sources
 
-**Changes Made**:
-```yaml
-# Before
-runs-on:
-  - windows
-  - self.hosted
-
-# After  
-image: mcr.microsoft.com/dotnet/sdk:9.0
-max-time: 10
-```
-
-**Script Changes**:
-- Converted from PowerShell to bash syntax
-- Paths changed from Windows (`.\src\services`) to Linux (`src/services`)
-- Logic remains identical
-
-**Resource Savings**: 1 Windows runner freed per audit (runs on every PR + develop)
+**Remains On**: Windows self-hosted runner with internal network access
 
 ---
 
@@ -101,31 +84,33 @@ max-time: 5
 
 **Per PR Pipeline**:
 - **Before**: 2 builds + 3 audits/scans = 5 parallel Windows runners (Stage 1-2)
-- **After**: 2 builds + 0 cloud audits = 2 parallel Windows runners (Stage 1), 3 cloud runners (Stage 2)
-- **Savings**: 3 Windows runners freed in Stage 2
+- **After**: 2 builds + 1 Windows audit = 3 parallel Windows runners, 2 cloud runners (Stage 2)
+- **Savings**: 2 Windows runners freed in Stage 2 (frontend audit + secret scan moved to cloud)
 
 **Per Develop Push**:
 - **Before**: 2 builds + 3 audits/scans = 5 parallel Windows runners
-- **After**: 2 builds + 0 cloud audits = 2 parallel Windows runners + 3 cloud runners
-- **Savings**: 3 Windows runners freed
+- **After**: 2 builds + 1 Windows audit = 3 parallel Windows runners + 2 cloud runners
+- **Savings**: 2 Windows runners freed (frontend audit + secret scan moved to cloud)
 
 **Per Release Pipeline**:
 - **Before**: 2 builds + 3 audits/scans = 5 parallel Windows runners in initial stages
-- **After**: 2 builds + 0 cloud audits = 2 parallel Windows runners + 3 cloud runners
-- **Savings**: 3 Windows runners freed
+- **After**: 2 builds + 1 Windows audit = 3 parallel Windows runners + 2 cloud runners
+- **Savings**: 2 Windows runners freed (frontend audit + secret scan moved to cloud)
+
+**Note**: Backend audit remains on Windows due to internal JFrog NuGet authentication requirements
 
 ### Cloud Runner Usage (Free Minutes)
 
 Bitbucket Cloud provides **500 free build minutes/month** for pipelines.
 
 **Estimated Cloud Usage Per Pipeline**:
-- `audit-backend`: ~3-5 minutes (dotnet restore + vulnerability check)
+- `audit-backend`: REVERTED - Stays on Windows (needs internal NuGet sources)
 - `audit-frontend`: ~1-2 minutes (npm audit only, no install)
 - `secret-scan`: ~1-2 minutes (Gitleaks scan)
-- **Total per pipeline**: ~5-9 minutes
+- **Total per pipeline**: ~2-4 minutes
 
 **Monthly Estimate** (assuming 40 PRs + 20 develop pushes + 10 releases):
-- 70 total pipeline runs × 7 minutes average = **490 minutes/month**
+- 70 total pipeline runs × 3 minutes average = **210 minutes/month**
 - Well within the 500 free minutes limit
 
 ---
@@ -140,6 +125,11 @@ Bitbucket Cloud provides **500 free build minutes/month** for pipelines.
 - `create-frontend-artifact-*` - Needs access to internal JFrog
 
 **Why**: These steps require authenticated access to internal JFrog Artifactory for private packages (`Demoulas.*`, `smart-ui-library`, etc.)
+
+### Audit Steps (Backend Only)
+- `audit-backend` - **REVERTED TO WINDOWS** - Requires access to internal JFrog NuGet sources for dotnet restore
+
+**Why**: Custom NuGet packages require internal authentication that cloud runners don't have configured
 
 ### Deployment Steps
 - All `Application Deployment` steps
@@ -159,15 +149,16 @@ Bitbucket Cloud provides **500 free build minutes/month** for pipelines.
 
 | Step | Risk Level | Mitigation |
 |------|-----------|------------|
-| audit-backend | **Very Low** | Only checks public NuGet vulnerabilities |
+| audit-backend | **N/A - Reverted** | Stays on Windows due to internal NuGet dependencies |
 | audit-frontend | **Very Low** | Only runs npm audit, no build/deploy |
 | secret-scan | **Very Low** | Already Linux-based, no Windows deps |
 
 **Security Considerations**:
 - ✅ No secrets exposed (uses Bitbucket pipeline variables)
-- ✅ No internal network access required
+- ✅ No internal network access required for cloud steps
 - ✅ No artifacts or credentials leave cloud environment
 - ✅ JFrog token used only for npm audit (read-only operation)
+- ✅ Backend audit stays on Windows with internal network access for JFrog
 
 ---
 
@@ -176,18 +167,18 @@ Bitbucket Cloud provides **500 free build minutes/month** for pipelines.
 ### Before Merging
 
 - [ ] PR pipeline completes successfully with cloud audits
-- [ ] Backend audit detects vulnerabilities correctly (test with known vulnerable package)
-- [ ] Frontend audit detects vulnerabilities correctly
+- [ ] Backend audit runs on Windows (not cloud) and completes successfully
+- [ ] Frontend audit runs on cloud and detects vulnerabilities correctly
 - [ ] Secret scan still catches secrets in test files
 - [ ] Cloud minute usage is within free tier limits
-- [ ] No on-premises runner usage for audit steps
+- [ ] Only frontend audit and secret scan use cloud runners (not backend)
 
 ### Validation Commands
 
 **Check runner usage in pipeline logs**:
 ```bash
 # audit-backend should show:
-# "Running on Bitbucket Cloud with Docker image mcr.microsoft.com/dotnet/sdk:9.0"
+# "Running on Windows self-hosted runner"
 
 # audit-frontend should show:
 # "Running on Bitbucket Cloud with Docker image node:22-alpine"

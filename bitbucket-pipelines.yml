@@ -414,27 +414,31 @@ definitions:
 
     audit-backend: &audit-backend
       name: "Check Backend API for vulnerabilities"
-      # Run on Bitbucket Cloud to free on-premises resources
-      image: mcr.microsoft.com/dotnet/sdk:9.0
-      max-time: 10
+      runs-on:
+        - windows
+        - self.hosted
       script:
-        - cd src/services
-        - echo "Checking dotnet vulnerabilities on cloud runner..."
+        - $env:SolutionDir = ".\src\services"
+        - echo "Checking dotnet vulnerabilities"
+        - cd $env:SolutionDir
+
         - dotnet --info
         - dotnet nuget list source
         - dotnet workload update --source https://api.nuget.org/v3/index.json
         - dotnet workload install aspire --source https://api.nuget.org/v3/index.json
         - dotnet restore Demoulas.ProfitSharing.slnx -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
+
+
         - |
-          output=$(dotnet list Demoulas.ProfitSharing.slnx package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json)
-          if echo "$output" | grep -q "has the following vulnerable packages"; then
-            echo "Vulnerabilities found!"
-            echo "$output"
+          $output = dotnet list Demoulas.ProfitSharing.slnx package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
+          if ($output -match "has the following vulnerable packages") {
+            Write-Host "Vulnerabilities found!"
+            Write-Host $output
             exit 1
-          else
-            echo "No vulnerabilities found."
+          } else {
+            Write-Host "No vulnerabilities found."
             exit 0
-          fi        
+          }        
 
 
     audit-frontend: &audit-frontend
