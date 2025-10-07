@@ -22,7 +22,7 @@ interface ForfeituresAdjustmentSearchParams {
   badge?: string;
 }
 
-interface ForfeituresAdjustmentSearchParametersProps {
+interface ForfeituresAdjustmentSearchFilterProps {
   setInitialSearchLoaded: (loaded: boolean) => void;
   setPageReset: (reset: boolean) => void;
 }
@@ -57,7 +57,7 @@ const schema = yup
   })
   .test("at-least-one-required", "Either SSN or Badge is required", (values) => Boolean(values.ssn || values.badge));
 
-const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearchParametersProps> = ({
+const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFilterProps> = ({
   setInitialSearchLoaded,
   setPageReset
 }) => {
@@ -253,7 +253,6 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
             />
             {errors.badge && <FormHelperText error>{errors.badge.message}</FormHelperText>}
           </Grid>
-
         </Grid>
       </Grid>
       <Grid
@@ -270,4 +269,4 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
   );
 };
 
-export default ForfeituresAdjustmentSearchParameters;
+export default ForfeituresAdjustmentSearchFilter;
