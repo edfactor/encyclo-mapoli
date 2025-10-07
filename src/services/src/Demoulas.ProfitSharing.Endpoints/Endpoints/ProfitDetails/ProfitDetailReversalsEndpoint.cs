@@ -19,7 +19,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ProfitDetails;
-public sealed class ProfitDetailReversalsEndpoint: ProfitSharingEndpoint<IdsRequest, Results<Ok<IdsResponse>, ProblemHttpResult>>
+public sealed class ProfitDetailReversalsEndpoint: ProfitSharingEndpoint<IdsRequest, Results<Ok<IdsResponse>, NotFound, ProblemHttpResult>>
 {
     private readonly IProfitDetailReversalsService _profitDetailReversalsService;
     private readonly ILogger<ProfitDetailReversalsEndpoint> _logger;
@@ -52,7 +52,7 @@ public sealed class ProfitDetailReversalsEndpoint: ProfitSharingEndpoint<IdsRequ
         });
     }
 
-    public override Task<Results<Ok<IdsResponse>, ProblemHttpResult>> ExecuteAsync(IdsRequest req, CancellationToken ct)
+    public override Task<Results<Ok<IdsResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(IdsRequest req, CancellationToken ct)
     {
         return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
@@ -65,9 +65,11 @@ public sealed class ProfitDetailReversalsEndpoint: ProfitSharingEndpoint<IdsRequ
                 new("batch_size", req.Ids?.Length.ToString() ?? "0"));
             
             // Convert Result<bool> to proper HTTP response
-            return result.Match<Results<Ok<IdsResponse>, ProblemHttpResult>>(
+            return result.Match<Results<Ok<IdsResponse>, NotFound, ProblemHttpResult>>(
                 success => TypedResults.Ok(new IdsResponse { Ids = req.Ids ?? Array.Empty<int>()}),
-                error => TypedResults.Problem(error.Detail));
+                error => error.Detail == Error.EntityNotFound("Profit details").Description 
+                    ? TypedResults.NotFound() 
+                    : TypedResults.Problem(error.Detail));
         });
     }
 }
