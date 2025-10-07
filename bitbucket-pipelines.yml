@@ -414,49 +414,50 @@ definitions:
 
     audit-backend: &audit-backend
       name: "Check Backend API for vulnerabilities"
-      runs-on:
-        - windows
-        - self.hosted
+      # Run on Bitbucket Cloud to free on-premises resources
+      image: mcr.microsoft.com/dotnet/sdk:9.0
+      max-time: 10
       script:
-        - $env:SolutionDir = ".\src\services"        
-        - echo "Checking dotnet vulnerabilities"
-        - cd $env:SolutionDir
-
+        - cd src/services
+        - echo "Checking dotnet vulnerabilities on cloud runner..."
         - dotnet --info
         - dotnet nuget list source
         - dotnet workload update --source https://api.nuget.org/v3/index.json
         - dotnet workload install aspire --source https://api.nuget.org/v3/index.json
         - dotnet restore Demoulas.ProfitSharing.slnx -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
-
-
         - |
-          $output = dotnet list Demoulas.ProfitSharing.slnx package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
-          if ($output -match "has the following vulnerable packages") {
-            Write-Host "Vulnerabilities found!"
-            $output | Out-String | Write-Host
+          output=$(dotnet list Demoulas.ProfitSharing.slnx package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json)
+          if echo "$output" | grep -q "has the following vulnerable packages"; then
+            echo "Vulnerabilities found!"
+            echo "$output"
             exit 1
-          } else {
-            Write-Host "No vulnerabilities found."
+          else
+            echo "No vulnerabilities found."
             exit 0
-          }        
+          fi        
 
 
     audit-frontend: &audit-frontend
       name: "Check frontend for vulnerabilities"
-      runs-on:
-        - windows
-        - self.hosted
-        - volta
+      # Run on Bitbucket Cloud to free on-premises resources
+      image: node:22-alpine
+      max-time: 10
       script:
-      # Set the following variable to your react project directory that houses your package.json file
-        - $env:ReactDir = ".\src\UI"
-        - echo "Checking npm vulnerabilities"
-        - cd $env:ReactDir
+        - cd src/ui
+        - echo "Checking npm vulnerabilities on cloud runner..."
+        # Create .npmrc for JFrog access (uses pipeline variable)
+        - |
+          cat > .npmrc << EOF
+          registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
+          //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
+          EOF
         - npm audit --audit-level=moderate --production
     
     secret-scan: &secret-scan
       name: "Secret scan (Gitleaks)"
+      # Runs on Bitbucket Cloud by default (Docker image)
       image: zricethezav/gitleaks:latest
+      max-time: 5
       artifacts:
         - reports/**
       script:
