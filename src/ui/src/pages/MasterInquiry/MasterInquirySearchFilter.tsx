@@ -30,10 +30,10 @@ import * as yup from "yup";
 import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import {
+  badgeNumberOrPSNValidator,
   monthValidator,
   positiveNumberValidator,
   profitYearNullableValidator,
-  psnValidator,
   ssnValidator
 } from "../../utils/FormValidators";
 import { transformSearchParams } from "./utils/transformSearchParams";
@@ -52,7 +52,7 @@ const schema = yup.object().shape({
   endProfitMonth: monthValidator.min(yup.ref("startProfitMonth"), "End month must be after start month"),
   socialSecurity: ssnValidator,
   name: yup.string().nullable(),
-  badgeNumber: psnValidator,
+  badgeNumber: badgeNumberOrPSNValidator,
   comment: yup.string().nullable(),
   paymentType: yup.string().oneOf(["all", "hardship", "payoffs", "rollovers"]).default("all").required(),
   memberType: yup.string().oneOf(["all", "employees", "beneficiaries", "none"]).default("all").required(),
