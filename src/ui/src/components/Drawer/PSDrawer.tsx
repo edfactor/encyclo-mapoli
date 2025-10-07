@@ -20,7 +20,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ICommon } from "smart-ui-library";
 import { drawerTitle, menuLevels } from "../../MenuData";
-import ProfitYearSelector from "../../components/ProfitYearSelector/ProfitYearSelector";
 import { drawerClosedWidth, drawerOpenWidth } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
