@@ -3,8 +3,6 @@ import { MENU_LABELS } from "./constants";
 import { NavigationDto, NavigationResponseDto } from "./reduxstore/types";
 import { RouteCategory } from "./types/MenuTypes";
 
-const localStorageImpersonating: string[] = JSON.parse(localStorage.getItem("impersonatingRoles") || "[]");
-
 // Navigation menu ID constants
 const YEAR_END_MENU_ID = 55;
 
@@ -16,20 +14,14 @@ export const MenuData = (data: NavigationResponseDto | undefined): RouteCategory
   const finalData: RouteCategory[] = [];
 
   // Get top-level navigation items (parentId is null)
+  // Backend has already filtered by user roles, so we don't need to filter again
   const topLevelItems = data.navigation
     .filter((m) => m.parentId === null && (m.isNavigable ?? true))
     .sort((a, b) => a.orderNumber - b.orderNumber);
 
   // Process each top-level item
   topLevelItems.forEach((values: NavigationDto) => {
-    // Create menu item if:
-    // 1. User has the required role OR
-    // 2. No roles required for this menu item
-    const hasRequiredRole =
-      values.requiredRoles.length > 0 && values.requiredRoles.some((role) => localStorageImpersonating.includes(role));
-    const noRolesRequired = values.requiredRoles.length === 0;
-
-    if ((hasRequiredRole || noRolesRequired) && (values.isNavigable ?? true)) {
+    if (values.isNavigable ?? true) {
       finalData.push(createRouteCategory(values));
     }
   });

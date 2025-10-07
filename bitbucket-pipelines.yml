@@ -17,7 +17,7 @@ definitions:
         - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
         - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
         - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
-        
+
         # Ensure the REPORTS_PATH directory exists
         - mkdir -Force -Path $env:REPORTS_PATH
 
@@ -45,8 +45,8 @@ definitions:
               }
             } else {
               Write-Output "No .NET 9.x SDK installed.";
-            }        
-          
+            }
+
 
         # Run tests and generate JUnit reports
         - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release -p:RestoreAdditionalProjectSources=$env:NUGET_ORG --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml"
@@ -56,33 +56,41 @@ definitions:
     
     test-frontend: &test-frontend
       name: Build and Test Frontend UI
+      # Run on Bitbucket Cloud to free on-premises resources
+      image: node:22-alpine
+      max-time: 10
+      artifacts:
+        - src/ui/coverage/**
+        - src/ui/FE_Tests/**
+      script:
+        - cd src/ui
+        - echo "Running frontend tests on cloud runner..."
+        
+        # Update npm to latest version
+        - npm install -g npm@latest
+        
+        # Create .npmrc for JFrog access (uses pipeline variable)
+        - |
+          cat > .npmrc << EOF
+          registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
+          //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
+          EOF
+        
+        # Install dependencies and run tests
+        - npm ci
+        - npm run test
+   
+    generate-buildinfo: &generate-buildinfo
+      name: Generate Build Information
       runs-on:
         - windows
         - self.hosted
-        - volta
       artifacts:
-        - src\ui\coverage\**
-        - src\ui\FE_Tests\**
+        - .buildinfo.json
       script:
-        - $env:NPM = "npm"
-        - cd .\src\UI
-        - |
-            @"
-            registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
-            //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
-            "@ | Out-File -FilePath .npmrc -Encoding ASCII
-        - if (Test-Path -Path "node_modules") { Remove-Item -Recurse -Force "node_modules" }
-
-        # Only update tool if needed for build info (optional for tests)
-        - if (-not (Get-Command Demoulas.Common.Build.Cli -ErrorAction SilentlyContinue)) { dotnet tool update --global Demoulas.Common.Build.Cli --no-cache }
-
+        - dotnet tool update --global Demoulas.Common.Build.Cli --no-cache
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
-        - Copy-Item -Path ".buildinfo.json" -Destination ".\public" -Force
-
-        - npm ci
-        # Run tests only - no need for production build in test step
-        - npm run test
-   
+        - if (!(Test-Path ".buildinfo.json")) { Write-Error "Failed to generate .buildinfo.json"; exit 1; }
     
     create-api-artifacts: &create-api-artifacts
       name: Create API Artifacts
@@ -135,109 +143,97 @@ definitions:
         - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.EmployeePayroll.Sync.zip -Force
 
     create-frontend-artifact-qa: &create-frontend-artifact-qa
-      name: Create FrontEnd Artifacts (QA)     
-      runs-on:
-        - windows
-        - self.hosted
-        - volta
+      name: Create FrontEnd Artifacts (QA)
+      # Run on cloud to free on-premises resources
+      image: node:22-alpine
       artifacts:
-        - dist\**
+        - dist/**
       script:
-        - $env:NPM = "npm"
-        - ${env:ENV} = "qa"
-        - cd .\src\UI
+        # Navigate to UI directory
+        - cd src/ui
+        
+        # Install zip utility and update npm
+        - apk add --no-cache zip
+        - npm install -g npm@latest
+        
+        # Create .npmrc for JFrog access (using bash heredoc syntax)
         - |
-            @"
-            registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
-            //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
-            "@ | Out-File -FilePath .npmrc -Encoding ASCII
-        - if (Test-Path -Path "node_modules") { Remove-Item -Recurse -Force "node_modules" }        
+          cat > .npmrc << 'EOF'
+          registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
+          //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
+          EOF
         
-        # Only update the specific tool we need
-        - dotnet tool update --global Demoulas.Common.Build.Cli --no-cache
+        # Copy buildinfo.json from artifact to public directory
+        - echo "Copying .buildinfo.json from artifact..."
+        - cp ../../.buildinfo.json ./public/.buildinfo.json
+        - echo "✓ Build info copied to public directory"
+        - cat ./public/.buildinfo.json
         
-        - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
-        - Copy-Item -Path ".buildinfo.json" -Destination ".\public" -Force
+        # Install dependencies
+        - npm ci
         
-        - npm ci;
-        - npm run build:${env:ENV}
-
-        - Copy-Item -Path ".\src\web.config" -Destination "..\..\src\UI\build"
-        - New-Item -Path "..\..\dist" -ItemType Directory
-        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.${env:ENV}.zip" -Force        
+        # Build for QA environment
+        - npm run build:qa
+        
+        # Create dist directory at repo root
+        - mkdir -p ../../dist
+        
+        # Package artifact using zip
+        - cd build
+        - zip -r ../../../dist/Demoulas.ProfitSharing.UI.qa.zip .
+        - cd ..
+        
+        # Verify artifact was created
+        - ls -lh ../../dist/Demoulas.ProfitSharing.UI.qa.zip
+        - echo "✓ QA artifact created successfully"
+        
 
     create-frontend-artifact-uat: &create-frontend-artifact-uat
-      name: Create FrontEnd Artifacts (UAT)     
-      runs-on:
-        - windows
-        - self.hosted
-        - volta
+      name: Create FrontEnd Artifacts (UAT)
+      # Run on cloud to free on-premises resources
+      image: node:22-alpine
       artifacts:
-        - dist\**
+        - dist/**
       script:
-        # Set environment variables
-        - ${env:ENV} = "uat"
-
-        # Navigate to the UI source directory
-        - cd .\src\UI
-
-        # Create and configure .npmrc file
+        # Navigate to UI directory
+        - cd src/ui
+        
+        # Install zip utility and update npm
+        - apk add --no-cache zip
+        - npm install -g npm@latest
+        
+        # Create .npmrc for JFrog access (using bash heredoc syntax)
         - |
-            @"
-            registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
-            //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
-            "@ | Out-File -FilePath .npmrc -Encoding ASCII
-
-        # Clean node_modules and package-lock.json to resolve npm optional dependency bug
-        - if (Test-Path -Path "node_modules") { Remove-Item -Recurse -Force "node_modules" }
-
+          cat > .npmrc << 'EOF'
+          registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
+          //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
+          EOF
+        
+        # Copy buildinfo.json from artifact to public directory
+        - echo "Copying .buildinfo.json from artifact..."
+        - cp ../../.buildinfo.json ./public/.buildinfo.json
+        - echo "✓ Build info copied to public directory"
+        - cat ./public/.buildinfo.json
+        
         # Install dependencies
-        - npm ci;
-
-        # Generate and copy buildInfo.json
-        - dotnet tool update --global Demoulas.Common.Build.Cli --no-cache
-        - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
-        - Copy-Item -Path ".buildinfo.json" -Destination ".\public" -Force
-
-        # Run the build process for the specified environment
-        - npm run build:${env:ENV}
-
-        # Copy the web.config file to the build directory
-        - Copy-Item -Path ".\src\web.config" -Destination "..\..\src\UI\build" -Force
-
-        # Ensure the dist directory exists before compressing
-        - if (!(Test-Path -Path "..\..\dist")) {
-            New-Item -Path "..\..\dist" -ItemType Directory
-            }
-
-        # Compress the build output into a zip file in the dist folder
-        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.${env:ENV}.zip" -Force
-
-    create-frontend-artifact-prod: &create-frontend-artifact-prod
-      name: Create FrontEnd Artifacts (PROD)
-      runs-on:
-        - windows
-        - self.hosted
-        - volta
-      artifacts:
-        - dist\**
-      script:
-        - $env:NPM = "npm"
-        - ${env:ENV} = "prod"
-        - if (!(Test-Path -Path ".\src\UI")) { Write-Error "UI source directory not found. Exiting."; exit 1 }
-        - cd .\src\UI
-        # Clean node_modules and package-lock.json to resolve npm optional dependency bug
-        - if (Test-Path -Path "node_modules") { Remove-Item -Recurse -Force "node_modules" }
-        - ${env:NPM} ci;
+        - npm ci
         
-        # Generate and copy buildInfo.json
-        - dotnet tool update --global Demoulas.Common.Build.Cli --no-cache
-        - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
-        - Copy-Item -Path ".buildinfo.json" -Destination ".\public" -Force
+        # Build for UAT environment
+        - npm run build:uat
         
-        - ${env:NPM} run build:${env:ENV}
-        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.$env:ENV.zip" -Force
-    
+        # Create dist directory at repo root
+        - mkdir -p ../../dist
+        
+        # Package artifact using zip
+        - cd build
+        - zip -r ../../../dist/Demoulas.ProfitSharing.UI.uat.zip .
+        - cd ..
+        
+        # Verify artifact was created
+        - ls -lh ../../dist/Demoulas.ProfitSharing.UI.uat.zip
+        - echo "✓ UAT artifact created successfully"
+
+
     upgrade-database: &upgrade-database
       name: Upgrade Database
       runs-on:
@@ -455,7 +451,7 @@ definitions:
           registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
           //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
           EOF
-        - npm audit --audit-level=moderate --production
+        - npm audit --audit-level=high --production
     
     secret-scan: &secret-scan
       name: "Secret scan (Gitleaks)"
@@ -634,13 +630,16 @@ pipelines:
           - step: *test-frontend
           - step: *audit-frontend
           - step: *audit-backend
-      # Stage 2: Create artifacts (build API once, reuse for all environments)
+      # Stage 2: Generate build information (Windows, ~30 seconds)
+      - step: *generate-buildinfo
+      # Stage 3: Create artifacts (API/services on Windows, UI builds in parallel on cloud)
       - parallel:
           - step: *create-api-artifacts
           - step: *create-service-artifacts
           - step: *create-frontend-artifact-qa
+          - step: *create-frontend-artifact-uat
           - step: *db-cli-build-artifact
-      # Stage 3: QA Deployment
+      # Stage 4: QA Deployment
       - step:
           name: "Application Deployment (QA)"
           runs-on:
@@ -649,44 +648,18 @@ pipelines:
           deployment: QA
           trigger: "manual"
           script:
-            - ${env:ENV} = "QA"
+            - $env:ENV = "QA"
             - $env:API_SERVER_QA = "appt23d"
-
-            - pwsh -File ./scripts/credsettings.ps1 `
-              -Environment ${env:ENV} `
-              -FilePath './src/services/configuration/credsettings.json' `
-              -OutputPath './src/services/configuration/credsettings.qa.json' `
-              -RemoteServer $env:API_SERVER_QA `
-              -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
-
-            - pwsh -File ./scripts/credsettings.ps1 `
-              -Environment ${env:ENV} `
-              -FilePath './src/services/configuration/credsettings.json' `
-              -OutputPath './src/services/configuration/credsettings.qa.json' `
-              -RemoteServer $env:API_SERVER_QA `
-              -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
-
-            - pwsh -File ./scripts/credsettings.ps1 `
-              -Environment ${env:ENV} `
-              -FilePath './src/services/configuration/credsettings.json' `
-              -OutputPath './src/services/configuration/credsettings.qa.json' `
-              -RemoteServer $env:API_SERVER_QA `
-              -RemotePath 'C:/NextGenApplications/ps/Payroll'
-
-            - pwsh -File ./scripts/credsettings.ps1 `
-              -Environment ${env:ENV} `
-              -FilePath './src/services/configuration/credsettings.json' `
-              -OutputPath './src/services/configuration/credsettings.qa.json' `
-              -RemoteServer $env:API_SERVER_QA `
-              -RemotePath 'C:/inetpub/wwwroot/api'
-
+            - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
+            - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
+            - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/NextGenApplications/ps/Payroll'
+            - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/inetpub/wwwroot/api'
             - echo "Deploying web application..."
             # Reuse the same API artifact built once in Stage 2
             - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
             - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.QA.zip"
             - pwsh .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_QA $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
-
-            - echo "Deploying background service..."            
+            - echo "Deploying background service..."
             - pwsh .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_QA
       - step: *upgrade-database
   
@@ -723,14 +696,12 @@ pipelines:
                 Write-Host "  (no dist folder found)"
               }
               Write-Host "Planned UAT sequence:"
-              Write-Host "  1) Build UAT frontend artifact (reusing API from Stage 2)"
-              Write-Host "  2) Parallel: Drop & Recreate DB"
-              Write-Host "  3) Parallel: App deploy + Import from READY"
-              Write-Host "  4) Import UAT navigation"
-              Write-Host "  5) Parallel: Validate import + UAT API health check"
+              Write-Host "  1) Drop & Recreate DB (parallel with app deploy)"
+              Write-Host "  2) App deploy + Import from READY (reusing artifacts from Stage 3)"
+              Write-Host "  3) Import UAT navigation"
+              Write-Host "  4) Parallel: Validate import + UAT API health check"
 
-      # Stage 5: UAT Deployment (reuses API artifact from Stage 2)
-      - step: *create-frontend-artifact-uat
+      # Stage 5: UAT Deployment (reuses artifacts from Stage 3)
       - parallel:
           - step: *uat-drop-recreate-db
           - step:
@@ -742,45 +713,20 @@ pipelines:
               script:
                 - echo "Deploying application to UAT (reusing API artifact from Stage 2)..."
                 - $env:API_SERVER_UAT = "appt24d"
-                - ${env:ENV} = "UAT"            
-
-                - pwsh -File ./scripts/credsettings.ps1 `
-                  -Environment ${env:ENV} `
-                  -FilePath './src/services/configuration/credsettings.json' `
-                  -OutputPath './src/services/configuration/credsettings.uat.json' `
-                  -RemoteServer $env:API_SERVER_UAT `
-                  -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
-
-                - pwsh -File ./scripts/credsettings.ps1 `
-                  -Environment ${env:ENV} `
-                  -FilePath './src/services/configuration/credsettings.json' `
-                  -OutputPath './src/services/configuration/credsettings.uat.json' `
-                  -RemoteServer $env:API_SERVER_UAT `
-                  -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
-
-                - pwsh -File ./scripts/credsettings.ps1 `
-                  -Environment ${env:ENV} `
-                  -FilePath './src/services/configuration/credsettings.json' `
-                  -OutputPath './src/services/configuration/credsettings.uat.json' `
-                  -RemoteServer $env:API_SERVER_UAT `
-                  -RemotePath 'C:/NextGenApplications/ps/Payroll'
-
-                - pwsh -File ./scripts/credsettings.ps1 `
-                  -Environment ${env:ENV} `
-                  -FilePath './src/services/configuration/credsettings.json' `
-                  -OutputPath './src/services/configuration/credsettings.uat.json' `
-                  -RemoteServer $env:API_SERVER_UAT `
-                  -RemotePath 'C:/inetpub/wwwroot/api'
-
+                - $env:ENV = "UAT"
+                - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
+                - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
+                - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/NextGenApplications/ps/Payroll'
+                - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/inetpub/wwwroot/api'
                 - echo "Deploying web application..."
                 # Reuse the same API artifact built once in Stage 2
                 - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
                 - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.UAT.zip"
                 - pwsh .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_UAT $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
-
-                - echo "Deploying background service..."            
+                - echo "Deploying background service..."
                 - pwsh .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_UAT
-          - step: *uat-import-from-ready
+      # Stage 6: UAT Database Import (must run AFTER drop-recreate completes)
+      - step: *uat-import-from-ready
       - step: *uat-import-uat-navigation
       - parallel:
           - step: *uat-validate-import

@@ -31,7 +31,8 @@ public class NavigationService : INavigationService
     {
         var roleNamesUpper = _appUser.GetUserAllRoles()
             .Where(r => !string.IsNullOrWhiteSpace(r))
-            .Select(r => r!.ToUpper())
+            .Select(r => r!.Trim().ToUpper()) // Trim whitespace to ensure consistency
+            .Distinct() // Remove any duplicate roles
             .OrderBy(r => r) // Sort for consistent cache key
             .ToList();
 
@@ -43,8 +44,11 @@ public class NavigationService : INavigationService
             : 0;
 
         // Create cache key based on sorted role names and version for consistent caching
+        // Use pipe separator to clearly delimit roles and avoid ambiguity
         var roleKey = string.Join("|", roleNamesUpper);
         var cacheKey = $"{NavigationCacheKeyPrefix}v{version}-{roleKey}";
+
+        _logger?.LogDebug("Navigation cache key generated: {CacheKey} (roles: {Roles})", cacheKey, roleKey);
 
         // Try to get from distributed cache first
         var cachedBytes = await _distributedCache.GetAsync(cacheKey, cancellationToken);
@@ -194,12 +198,13 @@ public class NavigationService : INavigationService
 
         var navigationTree = BuildTree(null); // root level
 
-        // Store in distributed cache for 30 minutes (reference data that changes when navigation status is updated)
+        // Store in distributed cache for 15 minutes (half of previous 30 min) with 7.5 min sliding
+        // This ensures navigation changes propagate faster to users
         var serialized = JsonSerializer.SerializeToUtf8Bytes(navigationTree);
         var cacheOptions = new DistributedCacheEntryOptions
         {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30),
-            SlidingExpiration = TimeSpan.FromMinutes(15)
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15), // Reduced from 30
+            SlidingExpiration = TimeSpan.FromMinutes(7.5) // Reduced from 15
         };
         await _distributedCache.SetAsync(cacheKey, serialized, cacheOptions, cancellationToken);
 
@@ -233,12 +238,13 @@ public class NavigationService : INavigationService
             context.NavigationStatuses.Select(x => new NavigationStatusDto { Id = x.Id, Name = x.Name }).ToListAsync(cancellationToken)
         );
 
-        // Store in distributed cache for 30 minutes (reference data that changes rarely)
+        // Store in distributed cache for 15 minutes (half of previous 30 min) with 7.5 min sliding
+        // This ensures navigation status changes propagate faster
         var serialized = JsonSerializer.SerializeToUtf8Bytes(navigationStatusList);
         var cacheOptions = new DistributedCacheEntryOptions
         {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30),
-            SlidingExpiration = TimeSpan.FromMinutes(15)
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15), // Reduced from 30
+            SlidingExpiration = TimeSpan.FromMinutes(7.5) // Reduced from 15
         };
         await _distributedCache.SetAsync(NavigationStatusCacheKey, serialized, cacheOptions, cancellationToken);
 
