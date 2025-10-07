@@ -1,15 +1,13 @@
 import { test, expect } from "@playwright/test";
-import { baseUrl, impersonateRole } from "../env.setup";
+import { baseUrl, impersonateRole, navigateToPage } from "../env.setup";
 
 
 test.describe("Distributions By Age (PROF130): ", () => {
     test.beforeEach(async ({ page }) => {
         await page.goto(baseUrl);
         await page.waitForLoadState("networkidle");
-    await impersonateRole(page, 'Finance-Manager');
-        await page.getByRole('button').filter({ hasText: /^$/ }).click();
-        await page.getByRole('button', { name: 'Fiscal Close' }).click();
-        await page.getByRole('button', { name: 'Prof Share Report By Age' }).click();
+        await impersonateRole(page, 'Finance-Manager');
+        await navigateToPage(page, 'Fiscal Close', 'Prof Share Report By Age');
         await page.getByRole('button', { name: 'Distributions By Age' }).click();
     });
 

@@ -1,18 +1,12 @@
 import { expect, test } from "@playwright/test";
-import { baseUrl, impersonateRole } from "../env.setup";
+import { baseUrl, impersonateRole, navigateToPage } from "../env.setup";
 
 test.describe("Master Update page: ", () => {
     test.beforeEach(async ({ page }) => {
         await page.goto(baseUrl);
         await page.waitForLoadState("networkidle");
         await impersonateRole(page, 'Finance-Manager');
-        // Open the side drawer / navigation by clicking the icon button (no accessible name)
-        // This targets the MUI icon button used for the drawer toggle.
-        await page.locator('button.MuiIconButton-root').first().click();
-        // Ensure the Fiscal Close button is present before interacting
-        await page.getByRole('button', { name: 'Fiscal Close' }).waitFor({ state: 'visible', timeout: 10000 });
-        await page.getByRole('button', { name: 'Fiscal Close' }).click();
-        await page.getByRole('button', { name: 'Master Update' }).nth(0).click();
+        await navigateToPage(page, 'Fiscal Close', 'Master Update');
     });
 
     test("page should load properly and show heading Master Update", async ({ page }) => {

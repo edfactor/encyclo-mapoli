@@ -1,29 +1,13 @@
 import { test, expect } from "@playwright/test";
-import { baseUrl, impersonateRole } from "../env.setup";
+import { baseUrl, impersonateRole, navigateToPage } from "../env.setup";
 
 
 test.describe("Terminations: ", () => {
     test.beforeEach(async ({ page }) => {
         await page.goto(baseUrl);
         await page.waitForLoadState("networkidle");
-    await impersonateRole(page, 'Finance-Manager');
-        // Open the navigation drawer robustly. Try the standard empty-icon button first,
-        // then the first MUI icon button as a fallback. Wait for the December Activities
-        // button to appear before clicking it, to avoid intermittent timing issues.
-        const emptyBtn = page.getByRole('button').filter({ hasText: /^$/ });
-        if ((await emptyBtn.count()) > 0) {
-            await emptyBtn.first().click();
-        } else {
-            // fallback: click the first icon button on the page
-            const iconBtn = page.locator('button.MuiIconButton-root').first();
-            if ((await iconBtn.count()) > 0) {
-                await iconBtn.click();
-            }
-        }
-        // wait for the December Activities button to be visible and clickable
-        const decBtn = page.getByRole('button', { name: 'December Activities' });
-        await decBtn.click();
-        await page.getByRole('button', { name: 'Terminations' }).click();
+        await impersonateRole(page, 'Finance-Manager');
+        await navigateToPage(page, 'December Activities', 'Terminations');
     });
 
     test('Page render successfully',async ({page})=>{

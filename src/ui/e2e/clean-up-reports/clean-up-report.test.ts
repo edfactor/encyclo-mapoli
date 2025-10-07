@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { baseUrl, impersonateRole } from "../env.setup";
+import { baseUrl, impersonateRole, navigateToPage } from "../env.setup";
 
 
 test.describe("Clean-up Reports: ", () => {
@@ -7,9 +7,7 @@ test.describe("Clean-up Reports: ", () => {
         await page.goto(baseUrl);
         await page.waitForLoadState("networkidle");
         await impersonateRole(page, 'Finance-Manager');
-        await page.getByRole('button').filter({ hasText: /^$/ }).click();
-        await page.getByRole('button', { name: 'December Activities' }).click();
-        await page.getByRole('button', { name: 'Clean up Reports' }).click();
+        await navigateToPage(page, 'December Activities', 'Clean up Reports');
     });
 
     test('Demographic Badges Not In PayProfit', async ({ page }) => {

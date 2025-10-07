@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { baseUrl, impersonateRole } from "../env.setup";
+import { baseUrl, impersonateRole, navigateToPage } from "../env.setup";
 
 
 test.describe("Unforfeitures landing page: ", () => {
@@ -7,20 +7,7 @@ test.describe("Unforfeitures landing page: ", () => {
         await page.goto(baseUrl);
         await page.waitForLoadState("networkidle");
         await impersonateRole(page, 'Finance-Manager');
-        const emptyBtn = page.getByRole('button').filter({ hasText: /^$/ });
-        if ((await emptyBtn.count()) > 0) {
-            await emptyBtn.first().click();
-        } else {
-            // fallback: click the first icon button on the page
-            const iconBtn = page.locator('button.MuiIconButton-root').first();
-            if ((await iconBtn.count()) > 0) {
-                await iconBtn.click();
-            }
-        }
-        // wait for the December Activities button to be visible and clickable
-        const decBtn = page.getByRole('button', { name: 'December Activities' });
-        await decBtn.click();
-        await page.getByRole('button', { name: 'Unforfeit' }).click();
+        await navigateToPage(page, 'December Activities', 'Unforfeit');
     });
 
 
