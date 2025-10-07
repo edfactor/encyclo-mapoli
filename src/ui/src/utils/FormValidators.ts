@@ -24,6 +24,15 @@ export const badgeNumberValidator = yup
   .nullable()
   .transform((value) => value || undefined);
 
+export const badgeNumberOrPSNValidator = yup
+  .number()
+  .typeError("Badge Number or PSN must be a number")
+  .integer("Badge Number or PSN must be an integer")
+  .min(10000, "Badge Number or PSN must be at least 5 digits")
+  .max(99999999999, "Badge Number or PSN must be 11 digits or less")
+  .nullable()
+  .transform((value) => value || undefined);
+
 /**
  * Validates that a month number is between 1 and 12
  */
