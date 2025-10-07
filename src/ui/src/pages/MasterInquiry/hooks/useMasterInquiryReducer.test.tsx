@@ -117,9 +117,7 @@ describe("useMasterInquiryReducer", () => {
 
     it("should differentiate between employee and beneficiary", () => {
       const results = {
-        results: [
-          { id: "1", ssn: "123", badgeNumber: "111", psnSuffix: "0", isEmployee: false }
-        ],
+        results: [{ id: "1", ssn: "123", badgeNumber: "111", psnSuffix: "0", isEmployee: false }],
         total: 1
       };
 

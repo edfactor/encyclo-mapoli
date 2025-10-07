@@ -7,7 +7,7 @@ test.describe("Manage Executive Hours: Read-Only Role", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(baseUrl);
     await page.waitForLoadState("networkidle");
-    await impersonateRole(page, 'Finance-Manager');
+    await impersonateRole(page, "Finance-Manager");
     await page.getByRole("button").filter({ hasText: /^$/ }).click();
     await page.getByRole("button", { name: "Fiscal Close" }).click();
     await page.getByRole("button", { name: "Manage Executive Hours" }).click();

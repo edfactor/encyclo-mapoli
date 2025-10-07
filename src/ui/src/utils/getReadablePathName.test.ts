@@ -97,9 +97,7 @@ describe("getReadablePathName", () => {
 
   it("should handle fiscal close sub-paths", () => {
     expect(getReadablePathName("/eligible-employees")).toBe("Eligible Employees");
-    expect(getReadablePathName("/manage-executive-hours-and-dollars")).toBe(
-      "Manage Executive Hours and Dollars"
-    );
+    expect(getReadablePathName("/manage-executive-hours-and-dollars")).toBe("Manage Executive Hours and Dollars");
   });
 
   it("should handle demographic paths", () => {

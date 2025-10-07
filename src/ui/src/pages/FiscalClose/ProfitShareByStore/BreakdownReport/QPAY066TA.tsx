@@ -54,15 +54,31 @@ const QPAY066TA = () => {
             width="100%"
             direction="column"
             spacing={4}>
-            <StoreContent store={store} onLoadingChange={handleLoadingChange} />
-            <TotalsContent store={store} onLoadingChange={handleLoadingChange} />
+            <StoreContent
+              store={store}
+              onLoadingChange={handleLoadingChange}
+            />
+            <TotalsContent
+              store={store}
+              onLoadingChange={handleLoadingChange}
+            />
             <SummariesContent />
           </Grid>
         );
       case 1:
-        return <StoreContent store={store} onLoadingChange={handleLoadingChange} />;
+        return (
+          <StoreContent
+            store={store}
+            onLoadingChange={handleLoadingChange}
+          />
+        );
       case 2:
-        return <TotalsContent store={store} onLoadingChange={handleLoadingChange} />;
+        return (
+          <TotalsContent
+            store={store}
+            onLoadingChange={handleLoadingChange}
+          />
+        );
       case 3:
         return <SummariesContent />;
       default:

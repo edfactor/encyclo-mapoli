@@ -25,19 +25,25 @@ const ForfeituresTransactionGrid: React.FC<ForfeituresTransactionGridProps> = me
       initialPageSize: 25,
       initialSortBy: "transactionDate",
       initialSortDescending: true,
-      onPaginationChange: useCallback((pageNum: number, pageSz: number, sortPrms: any) => {
-        if (onPaginationChange) {
-          onPaginationChange(pageNum, pageSz, sortPrms);
-        }
-      }, [onPaginationChange])
+      onPaginationChange: useCallback(
+        (pageNum: number, pageSz: number, sortPrms: any) => {
+          if (onPaginationChange) {
+            onPaginationChange(pageNum, pageSz, sortPrms);
+          }
+        },
+        [onPaginationChange]
+      )
     });
 
-    const handleSortChangeInternal = useCallback((sortParams: any) => {
-      handleSortChange(sortParams);
-      if (onSortChange) {
-        onSortChange(sortParams);
-      }
-    }, [handleSortChange, onSortChange]);
+    const handleSortChangeInternal = useCallback(
+      (sortParams: any) => {
+        handleSortChange(sortParams);
+        if (onSortChange) {
+          onSortChange(sortParams);
+        }
+      },
+      [handleSortChange, onSortChange]
+    );
 
     if (isLoading) {
       return <CircularProgress />;

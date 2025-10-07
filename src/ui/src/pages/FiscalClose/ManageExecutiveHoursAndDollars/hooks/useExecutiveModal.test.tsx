@@ -149,10 +149,7 @@ describe("useExecutiveModal", () => {
         })
       );
 
-      const executives = [
-        mockExecutive,
-        { ...mockExecutive, badgeNumber: 22222, fullName: "Jane Doe" }
-      ];
+      const executives = [mockExecutive, { ...mockExecutive, badgeNumber: 22222, fullName: "Jane Doe" }];
 
       act(() => {
         result.current.handleExecutiveSelection(executives);
@@ -243,10 +240,7 @@ describe("useExecutiveModal", () => {
       const { result } = renderHook(() =>
         useExecutiveModal({
           ...defaultProps,
-          selectedExecutives: [
-            mockExecutive,
-            { ...mockExecutive, badgeNumber: 22222 }
-          ]
+          selectedExecutives: [mockExecutive, { ...mockExecutive, badgeNumber: 22222 }]
         })
       );
 

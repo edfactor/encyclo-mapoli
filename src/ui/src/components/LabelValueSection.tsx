@@ -6,8 +6,31 @@ import { Grid } from "@mui/material";
 interface LabelValueItem {
   label: string;
   value: React.ReactNode;
-  labelColor?: "primary" | "secondary" | "error" | "warning" | "info" | "success" | "text.primary" | "text.secondary" | "text.disabled" | "inherit";
-  labelVariant?: "body1" | "body2" | "caption" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "inherit" | "subtitle1" | "subtitle2" | "overline";
+  labelColor?:
+    | "primary"
+    | "secondary"
+    | "error"
+    | "warning"
+    | "info"
+    | "success"
+    | "text.primary"
+    | "text.secondary"
+    | "text.disabled"
+    | "inherit";
+  labelVariant?:
+    | "body1"
+    | "body2"
+    | "caption"
+    | "h1"
+    | "h2"
+    | "h3"
+    | "h4"
+    | "h5"
+    | "h6"
+    | "inherit"
+    | "subtitle1"
+    | "subtitle2"
+    | "overline";
   labelWeight?: "normal" | "bold" | "lighter" | "bolder" | number;
 }
 

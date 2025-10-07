@@ -22,27 +22,31 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
   const [getProfitSharingLabels, { isFetching }] = useLazyGetProfitSharingLabelsQuery();
   const profitYear = useFiscalCloseProfitYear();
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } = useGridPagination({
-    initialPageSize: 25,
-    initialSortBy: "badgeNumber",
-    initialSortDescending: false,
-    onPaginationChange: useCallback((pageNum: number, pageSz: number, sortPrms: any) => {
-      if (profitYear && securityState.token) {
-        const yearToUse = profitYear || new Date().getFullYear();
-        const skip = pageNum * pageSz;
-        getProfitSharingLabels({
-          profitYear: yearToUse,
-          useFrozenData: true,
-          pagination: {
-            take: pageSz,
-            skip: skip,
-            sortBy: sortPrms.sortBy || "badgeNumber",
-            isSortDescending: sortPrms.isSortDescending
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
+    useGridPagination({
+      initialPageSize: 25,
+      initialSortBy: "badgeNumber",
+      initialSortDescending: false,
+      onPaginationChange: useCallback(
+        (pageNum: number, pageSz: number, sortPrms: any) => {
+          if (profitYear && securityState.token) {
+            const yearToUse = profitYear || new Date().getFullYear();
+            const skip = pageNum * pageSz;
+            getProfitSharingLabels({
+              profitYear: yearToUse,
+              useFrozenData: true,
+              pagination: {
+                take: pageSz,
+                skip: skip,
+                sortBy: sortPrms.sortBy || "badgeNumber",
+                isSortDescending: sortPrms.isSortDescending
+              }
+            });
           }
-        });
-      }
-    }, [profitYear, securityState.token, getProfitSharingLabels])
-  });
+        },
+        [profitYear, securityState.token, getProfitSharingLabels]
+      )
+    });
 
   const fetchData = useCallback(() => {
     const yearToUse = profitYear || new Date().getFullYear();

@@ -20,7 +20,7 @@ const MasterInquiryGroupingGrid = ({ searchParams }: { searchParams: MasterInqui
     useLazyGetProfitMasterInquiryFilteredDetailsQuery();
   const [expandedRowIds, setExpandedRowIds] = useState<Set<string>>(new Set());
   const [expandedRowDataMap, setExpandedRowDataMap] = useState<Record<string, MasterInquiryResponseDto[]>>({});
-  
+
   // Use dynamic grid height for detail grids with smaller percentage
   const detailGridMaxHeight = useDynamicGridHeight({
     heightPercentage: 0.25, // 25% for detail grids

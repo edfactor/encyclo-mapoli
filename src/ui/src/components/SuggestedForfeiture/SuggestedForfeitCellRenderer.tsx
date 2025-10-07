@@ -21,7 +21,7 @@ export function SuggestedForfeitCellRenderer(
   let currentValue;
   if (isTerminations) {
     // Handle non-numeric values (e.g., permission-restricted)
-    if (typeof params.data.suggestedForfeit === 'string' && isNaN(Number(params.data.suggestedForfeit))) {
+    if (typeof params.data.suggestedForfeit === "string" && isNaN(Number(params.data.suggestedForfeit))) {
       return <span>{params.data.suggestedForfeit}</span>;
     }
     rowKey = `${params.data.badgeNumber}-${params.data.profitYear}${params.data.enrollmentId ? `-${params.data.enrollmentId}` : ""}-${params.node?.id || "unknown"}`;
@@ -38,7 +38,7 @@ export function SuggestedForfeitCellRenderer(
       return null;
     }
     // Handle non-numeric values (e.g., permission-restricted)
-    if (typeof params.data.suggestedUnforfeiture === 'string' && isNaN(Number(params.data.suggestedUnforfeiture))) {
+    if (typeof params.data.suggestedUnforfeiture === "string" && isNaN(Number(params.data.suggestedUnforfeiture))) {
       return <span>{params.data.suggestedUnforfeiture}</span>;
     }
     rowKey = params.data.profitDetailId;

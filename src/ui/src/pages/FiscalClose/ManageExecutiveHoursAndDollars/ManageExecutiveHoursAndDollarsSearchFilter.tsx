@@ -5,7 +5,13 @@ import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import { badgeNumberValidator, handleBadgeNumberInput, handleSsnInput, profitYearValidator, ssnValidator } from "../../../utils/FormValidators";
+import {
+  badgeNumberValidator,
+  handleBadgeNumberInput,
+  handleSsnInput,
+  profitYearValidator,
+  ssnValidator
+} from "../../../utils/FormValidators";
 
 interface ExecutiveHoursAndDollarsSearch {
   profitYear: number;

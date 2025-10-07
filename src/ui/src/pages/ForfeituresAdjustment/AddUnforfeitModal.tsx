@@ -136,7 +136,9 @@ const AddUnforfeitModal: React.FC<AddUnforfeitModalProps> = ({ open, onClose, on
       <Grid
         container
         spacing={2}>
-        <Grid size={{ xs: 12 }}>Suggested Unforfeit Amount: {formData.suggestedForfeitAmount ? Math.abs(formData.suggestedForfeitAmount) : 0}</Grid>
+        <Grid size={{ xs: 12 }}>
+          Suggested Unforfeit Amount: {formData.suggestedForfeitAmount ? Math.abs(formData.suggestedForfeitAmount) : 0}
+        </Grid>
         <Grid size={{ xs: 12 }}>
           <FormControlLabel
             control={

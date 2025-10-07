@@ -6,7 +6,7 @@ test.describe("Master Inqiry landing page: ", () => {
     await page.goto(baseUrl);
     await page.waitForLoadState("networkidle");
 
-    await impersonateRole(page, 'Finance-Manager');
+    await impersonateRole(page, "Finance-Manager");
     await page.getByRole("button", { name: "INQUIRIES" }).click();
     await page.getByRole("link", { name: "MASTER INQUIRY" }).click();
   });
@@ -102,7 +102,6 @@ test.describe("Master Inqiry landing page: ", () => {
   });
 
   test("if we click on search button multiple times", async ({ page }) => {
-
     const [response] = await Promise.all([
       page.waitForResponse((resp) => resp.url().includes("master-inquiry/search")),
       (async () => {
@@ -148,7 +147,6 @@ test.describe("Master Inqiry landing page: ", () => {
   });
 
   test("If we enter Name as Evans and click on Badge Number link in the Grid", async ({ page }) => {
-   
     const [response] = await Promise.all([
       page.waitForResponse((resp) => resp.url().includes("master-inquiry/search")),
       (async () => {

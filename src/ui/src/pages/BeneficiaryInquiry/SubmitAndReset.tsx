@@ -21,7 +21,7 @@ export const SubmitAndReset: FC<ISubmitAndResetProps> = ({
     <Grid
       size={12}
       {...props}>
-      <div className="flex justify-start mt-4 [&>button]:mr-5">
+      <div className="mt-4 flex justify-start [&>button]:mr-5">
         <Button
           variant="contained"
           disabled={disabled || isFetching}

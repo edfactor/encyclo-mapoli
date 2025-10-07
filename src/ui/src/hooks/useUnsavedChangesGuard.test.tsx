@@ -82,9 +82,7 @@ describe("useUnsavedChangesGuard", () => {
       const event = new PopStateEvent("popstate");
       window.dispatchEvent(event);
 
-      expect(confirmSpy).toHaveBeenCalledWith(
-        "Please save your changes. Do you want to leave without saving?"
-      );
+      expect(confirmSpy).toHaveBeenCalledWith("Please save your changes. Do you want to leave without saving?");
     });
 
     it("should push state to history when hasUnsavedChanges is true", () => {

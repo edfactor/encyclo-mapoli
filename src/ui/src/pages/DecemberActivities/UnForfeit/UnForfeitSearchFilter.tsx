@@ -14,7 +14,7 @@ import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
-import { profitYearValidator } from "../../../utils/FormValidators";
+import { endDateStringAfterStartDateValidator, profitYearValidator } from "../../../utils/FormValidators";
 import { CalendarResponseDto, StartAndEndDateRequest } from "../../../reduxstore/types";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
 
@@ -32,9 +32,11 @@ const schema = yup.object().shape({
       const year = parseInt(match[1]);
       return year >= 2000;
     }),
-  endingDate: yup
-    .string()
-    .typeError("Invalid date")
+  endingDate: endDateStringAfterStartDateValidator(
+    "beginningDate",
+    tryddmmyyyyToDate,
+    "Ending date must be the same or after the beginning date"
+  )
     .required("Ending Date is required")
     .test("is-valid-year", "Year must be 2000 or later", function (value) {
       if (!value) return true;
@@ -42,17 +44,6 @@ const schema = yup.object().shape({
       if (!match) return true;
       const year = parseInt(match[1]);
       return year >= 2000;
-    })
-    .test("date-range", "Ending date must be the same or after the beginning date", function (value) {
-      const { beginningDate } = this.parent;
-      if (!beginningDate || !value) return true;
-
-      const beginDate = tryddmmyyyyToDate(beginningDate);
-      const endDate = tryddmmyyyyToDate(value);
-
-      if (!beginDate || !endDate) return true;
-
-      return endDate >= beginDate;
     })
     .test("is-too-early", "Insuffient data for dates before 2024", function (value) {
       return new Date(value) > new Date(2024, 1, 1);

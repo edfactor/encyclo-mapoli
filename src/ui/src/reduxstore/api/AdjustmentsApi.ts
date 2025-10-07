@@ -9,7 +9,6 @@ export const AdjustmentsApi = createApi({
   reducerPath: "adjustmentsApi",
   tagTypes: ["MergeOperation"],
   endpoints: (builder) => ({
-    
     mergeProfitsDetail: builder.mutation<void, MergeProfitsDetailRequest>({
       query: (mergeRequest) => ({
         url: "adjustments/merge-profit-details",
@@ -31,6 +30,4 @@ export const AdjustmentsApi = createApi({
   })
 });
 
-export const {
-  useMergeProfitsDetailMutation
-} = AdjustmentsApi;
+export const { useMergeProfitsDetailMutation } = AdjustmentsApi;

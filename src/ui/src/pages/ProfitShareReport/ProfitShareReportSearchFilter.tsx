@@ -28,7 +28,7 @@ interface ProfitShareReportSearchFilterProps {
   onSearchParamsUpdate?: (searchParams: any) => void;
 }
 
-const ProfitShareReportSearchFilters: React.FC<ProfitShareReportSearchFilterProps> = ({
+const ProfitShareReportSearchFilter: React.FC<ProfitShareReportSearchFilterProps> = ({
   profitYear,
   presetParams,
   onSearchParamsUpdate
@@ -129,4 +129,4 @@ const ProfitShareReportSearchFilters: React.FC<ProfitShareReportSearchFilterProp
   );
 };
 
-export default ProfitShareReportSearchFilters;
+export default ProfitShareReportSearchFilter;

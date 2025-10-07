@@ -1,14 +1,14 @@
-import { FormHelperText, TextField, FormLabel } from "@mui/material";
-import { Grid } from "@mui/material";
-import { useForm, Controller } from "react-hook-form";
-import { useDispatch } from "react-redux";
-import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+import { FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { Controller, useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
 import { useLazyGetGrossWagesReportQuery } from "reduxstore/api/YearsEndApi";
-import DsmDatePicker from "../../components/DsmDatePicker/DsmDatePicker";
 import { setGrossWagesReportQueryParams } from "reduxstore/slices/yearsEndSlice";
+import { SearchAndReset } from "smart-ui-library";
+import * as yup from "yup";
+import DsmDatePicker from "../../components/DsmDatePicker/DsmDatePicker";
+import { profitYearValidator } from "../../utils/FormValidators";
 
 interface GrossReportParams {
   profitYear: number;
@@ -16,13 +16,7 @@ interface GrossReportParams {
 }
 
 const schema = yup.object().shape({
-  profitYear: yup
-    .number()
-    .typeError("Year must be a number")
-    .integer("Year must be an integer")
-    .min(2020, "Year must be 2020 or later")
-    .max(2100, "Year must be 2100 or earlier")
-    .required("Year is required"),
+  profitYear: profitYearValidator,
   gross: yup.number().optional()
 });
 
