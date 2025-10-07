@@ -15,6 +15,7 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { FORFEITURES_ADJUSTMENT_MESSAGES } from "../../components/MissiveAlerts/MissiveMessages";
 import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
+import { badgeNumberValidator, handleBadgeNumberInput, handleSsnInput, ssnValidator } from "../../utils/FormValidators";
 
 // Define the search parameters interface
 interface ForfeituresAdjustmentSearchParams {
@@ -22,7 +23,7 @@ interface ForfeituresAdjustmentSearchParams {
   badge?: string;
 }
 
-interface ForfeituresAdjustmentSearchParametersProps {
+interface ForfeituresAdjustmentSearchFilterProps {
   setInitialSearchLoaded: (loaded: boolean) => void;
   setPageReset: (reset: boolean) => void;
 }
@@ -30,34 +31,12 @@ interface ForfeituresAdjustmentSearchParametersProps {
 // Define schema for validation without circular references
 const schema = yup
   .object({
-    ssn: yup
-      .number()
-      .typeError("SSN must be a number")
-      .integer("SSN must be an integer")
-      .test("ssn-length", "SSN must be 7, 8, or 9 digits", function (value) {
-        if (value === undefined || value === null) return true;
-        return (
-          // 7 - 9 digits are valid
-          value >= 1000000 && value <= 999999999
-        );
-      })
-      .transform((value) => value || undefined),
-    badge: yup
-      .number()
-      .typeError("Badge Number must be a number")
-      .integer("Badge Number must be an integer")
-      .test("badge-length", "Badge must be 5, 6, or 7 digits", function (value) {
-        if (value === undefined || value === null) return true;
-        return (
-          // 5 - 7 digits are valid
-          value >= 10000 && value <= 9999999
-        );
-      })
-      .transform((value) => value || undefined)
+    ssn: ssnValidator,
+    badge: badgeNumberValidator
   })
   .test("at-least-one-required", "Either SSN or Badge is required", (values) => Boolean(values.ssn || values.badge));
 
-const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearchParametersProps> = ({
+const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFilterProps> = ({
   setInitialSearchLoaded,
   setPageReset
 }) => {
@@ -117,7 +96,7 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
     clearAlerts(); // Clear any existing alerts
 
     const searchParams = {
-      ssn: data.ssn,
+      ssn: data.ssn ? Number(data.ssn) : undefined,
       badge: data.badge,
       profitYear: new Date().getFullYear(), // Use current wall clock year
       skip: 0,
@@ -203,16 +182,10 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
                   error={!!errors.ssn || !!errors.root?.message}
                   placeholder="SSN"
                   onChange={(e) => {
-                    const value = e.target.value;
-                    // Allow empty string or numeric values
-                    if (value === "" || !isNaN(Number(value))) {
-                      const parsedValue = value === "" ? "" : Number(value);
-                      field.onChange(parsedValue);
-                      if (value !== "") {
-                        toggleSearchFieldEntered(true, "ssn");
-                      } else {
-                        toggleSearchFieldEntered(false, "ssn");
-                      }
+                    const validatedValue = handleSsnInput(e.target.value);
+                    if (validatedValue !== null) {
+                      field.onChange(validatedValue);
+                      toggleSearchFieldEntered(validatedValue !== "", "ssn");
                     }
                   }}
                 />
@@ -236,16 +209,10 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
                   placeholder="Badge"
                   disabled={activeField === "ssn"}
                   onChange={(e) => {
-                    const value = e.target.value;
-                    // Allow empty string or numeric values
-                    if (value === "" || !isNaN(Number(value))) {
-                      const parsedValue = value === "" ? "" : Number(value);
-                      field.onChange(parsedValue);
-                      if (value !== "") {
-                        toggleSearchFieldEntered(true, "badge");
-                      } else {
-                        toggleSearchFieldEntered(false, "badge");
-                      }
+                    const validatedValue = handleBadgeNumberInput(e.target.value);
+                    if (validatedValue !== null) {
+                      field.onChange(validatedValue);
+                      toggleSearchFieldEntered(e.target.value !== "", "badge");
                     }
                   }}
                 />
@@ -253,7 +220,6 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
             />
             {errors.badge && <FormHelperText error>{errors.badge.message}</FormHelperText>}
           </Grid>
-
         </Grid>
       </Grid>
       <Grid
@@ -270,4 +236,4 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
   );
 };
 
-export default ForfeituresAdjustmentSearchParameters;
+export default ForfeituresAdjustmentSearchFilter;

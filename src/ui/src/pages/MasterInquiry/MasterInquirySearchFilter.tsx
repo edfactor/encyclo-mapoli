@@ -29,42 +29,18 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
+import { monthValidator, profitYearNullableValidator, ssnValidator } from "../../utils/FormValidators";
 import { transformSearchParams } from "./utils/transformSearchParams";
 
 const schema = yup.object().shape({
-  endProfitYear: yup
-    .number()
-    .min(2020, "Year must be 2020 or later")
-    .max(2100, "Year must be 2100 or earlier")
-    .typeError("Invalid date")
-    .test("greater-than-start", "End year must be after start year", function (endYear) {
-      const startYear = this.parent.startProfitYear;
-      // Only validate if both values are present
-      return !startYear || !endYear || endYear >= startYear;
-    })
-    .nullable(),
-  startProfitMonth: yup
-    .number()
-    .typeError("Beginning Month must be a number")
-    .integer("Beginning Month must be an integer")
-    .min(1, "Beginning Month must be between 1 and 12")
-    .max(12, "Beginning Month must be between 1 and 12")
-    .nullable(),
-  endProfitMonth: yup
-    .number()
-    .typeError("Ending Month must be a number")
-    .integer("Ending Month must be an integer")
-    .min(1, "Ending Month must be between 1 and 12")
-    .max(12, "Ending Month must be between 1 and 12")
-    .min(yup.ref("startProfitMonth"), "End month must be after start month")
-    .nullable(),
-  socialSecurity: yup
-    .number()
-    .typeError("SSN must be a number")
-    .integer("SSN must be an integer")
-    .min(0, "SSN must be positive")
-    .max(999999999, "SSN must be 9 digits or less")
-    .nullable(),
+  endProfitYear: profitYearNullableValidator.test("greater-than-start", "End year must be after start year", function (endYear) {
+    const startYear = this.parent.startProfitYear;
+    // Only validate if both values are present
+    return !startYear || !endYear || endYear >= startYear;
+  }),
+  startProfitMonth: monthValidator,
+  endProfitMonth: monthValidator.min(yup.ref("startProfitMonth"), "End month must be after start month"),
+  socialSecurity: ssnValidator,
   name: yup.string().nullable(),
   badgeNumber: yup
     .number()
@@ -118,6 +94,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       setValue
     } = useForm<MasterInquirySearch>({
       resolver: yupResolver(schema) as any,
+      mode: "onBlur",
       defaultValues: {
         endProfitYear: profitYear,
         startProfitMonth: masterInquiryRequestParams?.startProfitMonth || undefined,
@@ -328,16 +305,29 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
                 error={!!errors[name]}
                 disabled={disabled}
                 onChange={(e) => {
+                  const value = e.target.value;
+
+                  // For SSN and badge fields, only allow numeric input
+                  if (name === "socialSecurity" || name === "badgeNumber") {
+                    if (value !== "" && !/^\d*$/.test(value)) {
+                      return;
+                    }
+                  }
+
                   // Prevent input beyond 11 characters for badgeNumber
-                  if (name === "badgeNumber" && e.target.value.length > 11) {
+                  if (name === "badgeNumber" && value.length > 11) {
+                    return;
+                  }
+                  // Prevent input beyond 9 characters for socialSecurity
+                  if (name === "socialSecurity" && value.length > 9) {
                     return;
                   }
                   const parsedValue =
-                    type === "number" && e.target.value !== ""
-                      ? Number(e.target.value)
-                      : e.target.value === ""
+                    type === "number" && value !== ""
+                      ? Number(value)
+                      : value === ""
                         ? null
-                        : e.target.value;
+                        : value;
                   field.onChange(parsedValue);
 
                   // Auto-update memberType when badgeNumber changes
@@ -543,7 +533,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
             <TextInputField
               name="socialSecurity"
               label="Social Security Number"
-              type="number"
+              type="text"
               disabled={isSocialSecurityDisabled}
             />
             <TextInputField

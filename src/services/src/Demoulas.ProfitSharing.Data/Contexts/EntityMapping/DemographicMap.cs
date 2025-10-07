@@ -22,9 +22,12 @@ internal sealed class DemographicMap : ModifiedBaseMap<Demographic>
         _ = builder.HasIndex(e => e.Ssn, "IX_SSN");
         _ = builder.HasIndex(e => e.DateOfBirth, "IX_DOB");
         _ = builder.HasIndex(e => e.TerminationDate, "IX_TERMINATION_DATE");
+        _ = builder.HasIndex(e => e.HireDate, "IX_HIRE_DATE"); // Performance: year-end service date calculations
         // Supports report filters on employment status and termination window
         _ = builder.HasIndex(e => e.EmploymentStatusId, "IX_EMPLOYMENT_STATUS");
         _ = builder.HasIndex(e => new { e.EmploymentStatusId, e.TerminationDate }, "IX_STATUS_TERMINATION_DATE");
+        // Performance: Composite index for year-end report filtering (employment status + hire/termination date ranges)
+        _ = builder.HasIndex(e => new { e.EmploymentStatusId, e.HireDate, e.TerminationDate }, "IX_EMPLOYMENT_STATUS_HIRE_TERMINATION");
         _ = builder.HasIndex(e => new { e.Ssn, e.OracleHcmId }, "IX_SSN_ORACLE_HCM_ID");
         _ = builder.HasIndex(e => new { e.Ssn, e.BadgeNumber }, "IX_SSN_BADGE_NUMBER");
 

@@ -72,7 +72,7 @@ DECLARE
     ADHOC_BENEFICIARIES_REPORT CONSTANT NUMBER := 135;
     TERMINATED_LETTERS CONSTANT NUMBER := 136;
     QPAY600 CONSTANT NUMBER := 137;
-    PAY426N CONSTANT NUMBER := 138;
+    PAY426N_LIVE CONSTANT NUMBER := 138;
     PROFIT_SUMMARY CONSTANT NUMBER := 139;
     PAY426_2 CONSTANT NUMBER := 140;
     PAY426_3 CONSTANT NUMBER := 141;
@@ -88,6 +88,8 @@ DECLARE
     PRINT_PROFIT_CERTS CONSTANT NUMBER := 150;
     PROFIT_SHARE_REPORT_EDIT_RUN CONSTANT NUMBER := 151;
     PAY_BEN_REPORT CONSTANT NUMBER := 152;
+    PAY426N_FROZEN CONSTANT NUMBER := 153;
+    PROFIT_DETAILS_REVERSAL CONSTANT NUMBER := 154;
 
 
     --- These are the role IDs from the ROLES table
@@ -213,8 +215,10 @@ BEGIN
     insert_navigation_item(FORFEITURES, DECEMBER_ACTIVITIES, 'Forfeitures', '008-12', 'forfeitures-adjustment', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(DISTRIBUTIONS_AND_FORFEITURES, DECEMBER_ACTIVITIES, 'Distributions and Forfeitures', 'QPAY129', 'distributions-and-forfeitures', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(PROFIT_SHARE_REPORT, DECEMBER_ACTIVITIES, 'Profit Share Report', 'PAY426', 'profit-share-report', STATUS_NORMAL, ORDER_NINTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PAY426N_LIVE, DECEMBER_ACTIVITIES, 'Profit Sharing Report', 'PAY426N', 'pay426n_live', STATUS_NORMAL, ORDER_TENTH, '', ENABLED, IS_NAVIGABLE);
+                          
 -- Profit Share Totals (Year End)
-    insert_navigation_item(FISCAL_CLOSE, YEAR_END_MENU, 'Fiscal Close', '', 'fiscal-close', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(FISCAL_CLOSE, YEAR_END_MENU, 'Fiscal Close', '', 'fiscal-close', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);           
 
 -- Fiscal Close menu items updated according to ticket requirements
     insert_navigation_item(MANAGE_EXECUTIVE_HOURS_PAGE, FISCAL_CLOSE, 'Manage Executive Hours', 'PROF-DOLLAR-EXEC-EXTRACT, TPR008-09', 'manage-executive-hours-and-dollars', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -222,12 +226,12 @@ BEGIN
 
 
 -- Dev-only: PAY426N entries (not assigned to roles in SQL)
-    insert_navigation_item(PAY426N, FISCAL_CLOSE, 'PAY426N', '', 'pay426n', STATUS_NORMAL, ORDER_NINETY_NINTH, '', DISABLED, IS_NAVIGABLE);
     insert_navigation_item(PAY426_2, FISCAL_CLOSE, 'PAY426-2', '', 'pay426-2', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, NOT_NAVIGABLE);
     insert_navigation_item(PAY426_3, FISCAL_CLOSE, 'PAY426-3', '', 'pay426-3', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, NOT_NAVIGABLE);
 
 -- Profit Summary (PAY426 summary)
     insert_navigation_item(PROFIT_SUMMARY, FISCAL_CLOSE, 'Profit Summary (PAY426 summary)', '', 'pay426-9', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PAY426N_FROZEN, FISCAL_CLOSE, 'Profit Sharing Report', 'PAY426N', 'pay426n_frozen', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
 
     insert_navigation_item(QPAY066_AD_HOC_REPORTS, FISCAL_CLOSE, 'QPAY066* Ad Hoc Reports', 'QPAY066*', 'qpay066-adhoc', STATUS_NORMAL, ORDER_SEVENTEENTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(RECENTLY_TERMINATED, FISCAL_CLOSE, 'Recently Terminated', 'PROF-VESTED|PAY508', 'recently-terminated', STATUS_NORMAL, ORDER_EIGHTEENTH, '', ENABLED, IS_NAVIGABLE);
@@ -420,8 +424,10 @@ BEGIN
     assign_navigation_role(PROFIT_SUMMARY, FINANCE_MANAGER);
     assign_navigation_role(QPAY600, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(QPAY600, FINANCE_MANAGER);
-    assign_navigation_role(PAY426N, SYSTEM_ADMINISTRATOR);
-    assign_navigation_role(PAY426N, FINANCE_MANAGER);
+    assign_navigation_role(PAY426N_LIVE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(PAY426N_LIVE, FINANCE_MANAGER);
+    assign_navigation_role(PAY426N_FROZEN, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(PAY426N_FROZEN, FINANCE_MANAGER);
     assign_navigation_role(PAY426_2, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(PAY426_2, FINANCE_MANAGER);
     assign_navigation_role(PAY426_3, SYSTEM_ADMINISTRATOR);

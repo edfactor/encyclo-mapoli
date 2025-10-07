@@ -5,7 +5,7 @@ public static class ReferenceData
     public static readonly List<byte> OlderVestingSchedule = [0, 0, 20, 40, 60, 80, 100];
     public static readonly List<byte> NewerVestingSchedule = [0, 20, 40, 60, 80, 100];
 
-    public static readonly short SmartTransitionYear = 2024;
+    public static readonly short SmartTransitionYear = 2025;
 
 #pragma warning disable S3400
 

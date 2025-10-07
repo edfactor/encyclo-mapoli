@@ -203,7 +203,10 @@ public sealed class BreakdownReportService : IBreakdownService
             var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
             // ── Query ------------------------------------------------------------------
             var employeesBase = await BuildEmployeesBaseQuery(ctx, request.ProfitYear, calInfo.FiscalEndDate);
-            employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber);
+
+            if ( request.StoreNumber != null && request.StoreNumber != -1 )
+                employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber);
+            
             var employeeSsns = await employeesBase.Select(e => e.Ssn).ToHashSetAsync(cancellationToken);
 
             ThrowIfInvalidSsns(employeeSsns);
@@ -497,7 +500,7 @@ public sealed class BreakdownReportService : IBreakdownService
 
     private static void ValidateStoreNumber(BreakdownByStoreRequest request)
     {
-        if (request.StoreNumber <= 0)
+        if (request.StoreNumber < -1)
         {
             throw new InvalidOperationException(
                 $"Invalid {nameof(request.StoreNumber)} {request.StoreNumber}.");

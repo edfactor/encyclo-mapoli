@@ -134,7 +134,8 @@ export interface YearsEndState {
   terminationQueryParams: ProfitYearRequest | null;
   vestedAmountsByAge: VestedAmountsByAge | null;
   vestedAmountsByAgeQueryParams: ProfitYearRequest | null;
-  yearEndProfitSharingReport: YearEndProfitSharingReportResponse | null;
+  yearEndProfitSharingReportLive: YearEndProfitSharingReportResponse | null;
+  yearEndProfitSharingReportFrozen: YearEndProfitSharingReportResponse | null;
   yearEndProfitSharingReportQueryParams: ProfitYearRequest | null;
   yearEndProfitSharingReportTotals: YearEndProfitSharingReportTotalsResponse | null;
   breakdownByStore: BreakdownByStoreResponse | null;
@@ -236,7 +237,8 @@ const initialState: YearsEndState = {
   terminationQueryParams: null,
   vestedAmountsByAge: null,
   vestedAmountsByAgeQueryParams: null,
-  yearEndProfitSharingReport: null,
+  yearEndProfitSharingReportLive: null,
+  yearEndProfitSharingReportFrozen: null,
   yearEndProfitSharingReportQueryParams: null,
   yearEndProfitSharingReportTotals: null,
   breakdownByStore: null,
@@ -923,11 +925,17 @@ export const yearsEndSlice = createSlice({
     setGrossWagesReportQueryParams: (state, action: PayloadAction<GrossWagesReportRequest>) => {
       state.grossWagesReportQueryParams = action.payload;
     },
-    setYearEndProfitSharingReport: (state, action: PayloadAction<YearEndProfitSharingReportResponse>) => {
-      state.yearEndProfitSharingReport = action.payload;
+    setYearEndProfitSharingReportLive: (state, action: PayloadAction<YearEndProfitSharingReportResponse>) => {
+      state.yearEndProfitSharingReportLive = action.payload;
     },
-    clearYearEndProfitSharingReport: (state) => {
-      state.yearEndProfitSharingReport = null;
+    setYearEndProfitSharingReportFrozen: (state, action: PayloadAction<YearEndProfitSharingReportResponse>) => {
+      state.yearEndProfitSharingReportFrozen = action.payload;
+    },
+    clearYearEndProfitSharingReportLive: (state) => {
+      state.yearEndProfitSharingReportLive = null;
+    },
+    clearYearEndProfitSharingReportFrozen: (state) => {
+      state.yearEndProfitSharingReportFrozen = null;
     },
     setYearEndProfitSharingReportQueryParams: (state, action: PayloadAction<number>) => {
       state.yearEndProfitSharingReportQueryParams = { profitYear: action.payload };
@@ -1061,7 +1069,8 @@ export const {
   clearForfeituresAndPointsQueryParams,
   clearUnForfeitsDetails,
   clearUnForfeitsQueryParams,
-  clearYearEndProfitSharingReport,
+  clearYearEndProfitSharingReportLive,
+  clearYearEndProfitSharingReportFrozen,
   clearYearEndProfitSharingReportTotals,
   removeExecutiveHoursAndDollarsGridRow,
   setAdditionalExecutivesChosen,
@@ -1103,7 +1112,8 @@ export const {
   setTermination,
   setVestedAmountsByAge,
   setVestedAmountsByAgeQueryParams,
-  setYearEndProfitSharingReport,
+  setYearEndProfitSharingReportLive,
+  setYearEndProfitSharingReportFrozen,
   setYearEndProfitSharingReportQueryParams,
   setYearEndProfitSharingReportTotals,
   updateExecutiveHoursAndDollarsGridRow,

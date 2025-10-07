@@ -61,12 +61,10 @@ definitions:
         - self.hosted
         - volta
       artifacts:
-        - dist\**
         - src\ui\coverage\**
         - src\ui\FE_Tests\**
       script:
         - $env:NPM = "npm"
-        - ${env:ENV} = "qa"
         - cd .\src\UI
         - |
             @"
@@ -75,15 +73,15 @@ definitions:
             "@ | Out-File -FilePath .npmrc -Encoding ASCII
         - if (Test-Path -Path "node_modules") { Remove-Item -Recurse -Force "node_modules" }
 
-        - dotnet tool update --global Demoulas.Common.Build.Cli
-        - dotnet tool update --global --all
+        # Only update tool if needed for build info (optional for tests)
+        - if (-not (Get-Command Demoulas.Common.Build.Cli -ErrorAction SilentlyContinue)) { dotnet tool update --global Demoulas.Common.Build.Cli --no-cache }
 
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
         - Copy-Item -Path ".buildinfo.json" -Destination ".\public" -Force
 
-        - npm ci;
+        - npm ci
+        # Run tests only - no need for production build in test step
         - npm run test
-        - npm run build:${env:ENV}
    
     
     create-api-artifacts: &create-api-artifacts
@@ -94,8 +92,8 @@ definitions:
       artifacts:
         - dist\**
       script:
-        - dotnet tool update --global Demoulas.Common.Build.Cli
-        - dotnet tool update --global --all
+        # Only update the specific tool we need, not all tools globally
+        - dotnet tool update --global Demoulas.Common.Build.Cli --no-cache
         - Write-Host ${env:BITBUCKET_BUILD_NUMBER}
         - Write-Host ${env:BITBUCKET_BRANCH}
         - Write-Host ${env:BITBUCKET_COMMIT}
@@ -123,8 +121,9 @@ definitions:
         - Write-Host $(Get-ChildItem)
         - New-Item -ItemType Directory -Path "dist"
         
-        - dotnet tool update --global Demoulas.Common.Build.Cli
-        - dotnet tool update --global --all
+        # Tool already updated in create-api-artifacts step (runs in parallel)
+        # Only update if not already present
+        - if (-not (Get-Command Demoulas.Common.Build.Cli -ErrorAction SilentlyContinue)) { dotnet tool update --global Demoulas.Common.Build.Cli --no-cache }
 
         - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.EmployeeFull.Sync -c Release -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -p:PublishProfile=FolderProfile -o .\publishOutput
         - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.EmployeeFull.Sync.zip -Force
@@ -154,8 +153,8 @@ definitions:
             "@ | Out-File -FilePath .npmrc -Encoding ASCII
         - if (Test-Path -Path "node_modules") { Remove-Item -Recurse -Force "node_modules" }        
         
-        - dotnet tool update --global Demoulas.Common.Build.Cli
-        - dotnet tool update --global --all
+        # Only update the specific tool we need
+        - dotnet tool update --global Demoulas.Common.Build.Cli --no-cache
         
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
         - Copy-Item -Path ".buildinfo.json" -Destination ".\public" -Force
@@ -196,7 +195,7 @@ definitions:
         - npm ci;
 
         # Generate and copy buildInfo.json
-        - dotnet tool update --global Demoulas.Common.Build.Cli
+        - dotnet tool update --global Demoulas.Common.Build.Cli --no-cache
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
         - Copy-Item -Path ".buildinfo.json" -Destination ".\public" -Force
 
@@ -232,7 +231,7 @@ definitions:
         - ${env:NPM} ci;
         
         # Generate and copy buildInfo.json
-        - dotnet tool update --global Demoulas.Common.Build.Cli
+        - dotnet tool update --global Demoulas.Common.Build.Cli --no-cache
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
         - Copy-Item -Path ".buildinfo.json" -Destination ".\public" -Force
         
@@ -592,7 +591,7 @@ definitions:
           # Use direct CLI to avoid potential global 'playwright' package ambiguity
           $playwrightCli = Join-Path (Resolve-Path ./node_modules/@playwright/test).Path "cli.js"
           if (-not (Test-Path $playwrightCli)) { Write-Error "Playwright CLI not found at $playwrightCli"; Get-ChildItem node_modules/@playwright/test -Recurse -Depth 2; exit 1 }
-          node $playwrightCli test --reporter "list,junit" --config=playwright.config.ts --output=test-results --workers=4
+          node $playwrightCli test --reporter "list,junit" --config=playwright.config.ts --output=test-results --workers=1
           $pwExit = $LASTEXITCODE
 
           Write-Host "[6] Prepare Bitbucket test-reports ingestion" -ForegroundColor Cyan
@@ -602,7 +601,7 @@ definitions:
           if (!(Test-Path $bbPlaywrightDir)) { New-Item -ItemType Directory -Path $bbPlaywrightDir -Force | Out-Null }
           # Locate a junit xml (reporter names can vary). Prefer explicit junit.xml if present.
           $junitCandidate = @(
-            Get-ChildItem -Path test-results -Recurse -Filter junit*.xml -ErrorAction SilentlyContinue,
+            Get-ChildItem -Path test-results -Recurse -Filter junit*.xml -ErrorAction SilentlyContinue
             Get-ChildItem -Path test-results -Recurse -Filter *.xml -ErrorAction SilentlyContinue | Where-Object { (Get-Content $_.FullName -TotalCount 5) -match '<testsuite' }
           ) | Where-Object { $_ } | Select-Object -First 1
           if ($junitCandidate) {
@@ -624,18 +623,21 @@ definitions:
 pipelines:
   branches:
     release:
+      # Stage 1: Build and test
       - parallel:
           - step: *build-and-test-backend
           - step: *test-frontend
           - step: *audit-frontend
           - step: *audit-backend
+      # Stage 2: Create artifacts (build API once, reuse for all environments)
       - parallel:
           - step: *create-api-artifacts
           - step: *create-service-artifacts
           - step: *create-frontend-artifact-qa
           - step: *db-cli-build-artifact
+      # Stage 3: QA Deployment
       - step:
-          name: "Application Deployment"
+          name: "Application Deployment (QA)"
           runs-on:
             - windows
             - self.hosted
@@ -674,6 +676,7 @@ pipelines:
               -RemotePath 'C:/inetpub/wwwroot/api'
 
             - echo "Deploying web application..."
+            # Reuse the same API artifact built once in Stage 2
             - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
             - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.QA.zip"
             - pwsh .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_QA $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
@@ -691,6 +694,7 @@ pipelines:
             - $env:API_SERVER_QA = "appt23d"
             - pwsh -File ./scripts/Check-Health.ps1 -Url $env:QA_BASE_URL -envServerName $env:API_SERVER_QA
 
+      # Stage 4: UAT Promotion Gate
       - step:
           name: "Gate: Promote to UAT"
           runs-on:
@@ -714,17 +718,16 @@ pipelines:
                 Write-Host "  (no dist folder found)"
               }
               Write-Host "Planned UAT sequence:"
-              Write-Host "  1) Build DB CLI artifact"
-              Write-Host "  2) Parallel: Drop & Recreate DB + Frontend build (UAT)"
+              Write-Host "  1) Build UAT frontend artifact (reusing API from Stage 2)"
+              Write-Host "  2) Parallel: Drop & Recreate DB"
               Write-Host "  3) Parallel: App deploy + Import from READY"
               Write-Host "  4) Import UAT navigation"
               Write-Host "  5) Parallel: Validate import + UAT API health check"
 
-      - step: *db-cli-build-artifact
+      # Stage 5: UAT Deployment (reuses API artifact from Stage 2)
+      - step: *create-frontend-artifact-uat
       - parallel:
           - step: *uat-drop-recreate-db
-          - step: *create-frontend-artifact-uat
-      - parallel:
           - step:
               name: "Application Deployment UAT"
               runs-on:
@@ -732,7 +735,7 @@ pipelines:
                 - self.hosted
               deployment: UAT
               script:
-                - echo "Deploying application..."
+                - echo "Deploying application to UAT (reusing API artifact from Stage 2)..."
                 - $env:API_SERVER_UAT = "appt24d"
                 - ${env:ENV} = "UAT"            
 
@@ -765,6 +768,7 @@ pipelines:
                   -RemotePath 'C:/inetpub/wwwroot/api'
 
                 - echo "Deploying web application..."
+                # Reuse the same API artifact built once in Stage 2
                 - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
                 - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.UAT.zip"
                 - pwsh .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_UAT $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
@@ -795,9 +799,12 @@ pipelines:
 
   pull-requests:
     '**':
+      # Stage 1: Fast fail on build/test errors
       - parallel:
           - step: *build-and-test-backend
           - step: *test-frontend
+      # Stage 2: Run audits and security scans only if build succeeds
+      - parallel:
           - step: *audit-frontend
           - step: *audit-backend
           - step: *secret-scan

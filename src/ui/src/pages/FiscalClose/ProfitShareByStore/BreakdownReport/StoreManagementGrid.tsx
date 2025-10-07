@@ -14,9 +14,10 @@ interface StoreManagementGridProps {
   store: number;
   pageNumberReset: boolean;
   setPageNumberReset: (reset: boolean) => void;
+  onLoadingChange?: (isLoading: boolean) => void;
 }
 
-const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store, pageNumberReset, setPageNumberReset }) => {
+const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store, pageNumberReset, setPageNumberReset, onLoadingChange }) => {
   const [fetchStoreManagement, { isFetching }] = useLazyGetBreakdownByStoreQuery();
   const storeManagement = useSelector((state: RootState) => state.yearsEnd.storeManagementBreakdown);
   const queryParams = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreQueryParams);
@@ -96,6 +97,11 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store, pageNu
       setPageNumberReset(false);
     }
   }, [pageNumberReset, setPageNumberReset, resetPagination]);
+
+  // Notify parent component about loading state changes
+  useEffect(() => {
+    onLoadingChange?.(isFetching);
+  }, [isFetching, onLoadingChange]);
 
   const columnDefs = useCallback(() => GetStoreManagementGridColumns(handleNavigation), [handleNavigation])();
 

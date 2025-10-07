@@ -26,7 +26,6 @@ import VestedAmountsByAge from "../../pages/PROF130/VestedAmountsByAge/VestedAmo
 import Profall from "../../pages/Profall/Profall";
 import ProfitShareGrossReport from "../../pages/ProfitShareGrossReport/ProfitShareGrossReport";
 import ProfitShareReport from "../../pages/ProfitShareReport/ProfitShareReport";
-import ProfitShareTotals426 from "../../pages/ProfitShareTotals426/ProfitShareTotals426";
 
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -47,6 +46,7 @@ import { RootState } from "../../reduxstore/store";
 import { ImpersonationRoles } from "../../reduxstore/types";
 import EnvironmentUtils from "../../utils/environmentUtils";
 import { createUnauthorizedParams, isPathAllowedInNavigation } from "../../utils/navigationAccessUtils";
+import { validateImpersonationRoles, validateRoleRemoval } from "../../utils/roleUtils";
 
 import { ImpersonationMultiSelect } from "smart-ui-library";
 import { MenuBar } from "../../components/MenuBar/MenuBar";
@@ -151,14 +151,43 @@ const RouterSubAssembly: React.FC = () => {
                 ]}
                 currentRoles={impersonating || []}
                 setCurrentRoles={(value: string[]) => {
-                  if (value.length > 0) {
-                    localStorage.setItem("impersonatingRoles", JSON.stringify(value));
-                    const selectedRoles = value.map((role) => role as ImpersonationRoles);
-                    dispatch(setImpersonating(selectedRoles));
-                  } else {
+                  if (value.length === 0) {
+                    // Clear all roles
                     localStorage.removeItem("impersonatingRoles");
                     dispatch(setImpersonating([]));
+                    return;
                   }
+
+                  const currentRoles = (impersonating || []) as ImpersonationRoles[];
+                  const newRoles = value.map((role) => role as ImpersonationRoles);
+
+                  // Determine if roles were added or removed
+                  let validatedRoles: ImpersonationRoles[];
+
+                  if (newRoles.length > currentRoles.length) {
+                    // Role was added - find which one and validate
+                    const addedRole = newRoles.find((role) => !currentRoles.includes(role));
+                    if (addedRole) {
+                      validatedRoles = validateImpersonationRoles(currentRoles, addedRole);
+                    } else {
+                      validatedRoles = newRoles;
+                    }
+                  } else if (newRoles.length < currentRoles.length) {
+                    // Role was removed - find which one and validate
+                    const removedRole = currentRoles.find((role) => !newRoles.includes(role));
+                    if (removedRole) {
+                      validatedRoles = validateRoleRemoval(currentRoles, removedRole);
+                    } else {
+                      validatedRoles = newRoles;
+                    }
+                  } else {
+                    // Same length but different roles (shouldn't happen with multi-select, but handle it)
+                    validatedRoles = newRoles;
+                  }
+
+                  // Update state and localStorage with validated roles
+                  localStorage.setItem("impersonatingRoles", JSON.stringify(validatedRoles));
+                  dispatch(setImpersonating(validatedRoles));
                 }}
               />
             ) : (
@@ -275,9 +304,6 @@ const RouterSubAssembly: React.FC = () => {
                   path={ROUTES.PROFIT_SHARE_REPORT}
                   element={<ProfitShareReport />}></Route>
                 <Route
-                  path={ROUTES.PROFIT_SHARE_TOTALS}
-                  element={<ProfitShareTotals426 />}></Route>
-                <Route
                   path="forfeit/:badgeNumber?"
                   element={<Forfeit />}></Route>
                 <Route
@@ -357,8 +383,12 @@ const RouterSubAssembly: React.FC = () => {
                   element={<Documentation />}
                 />
                 <Route
-                  path={`${ROUTES.PAY426N}/:presetNumber?`}
-                  element={<PAY426N />}
+                  path={`${ROUTES.PAY426N_LIVE}/:presetNumber?`}
+                  element={<PAY426N isFrozen={false} />}
+                />
+                <Route
+                  path={`${ROUTES.PAY426N_FROZEN}/:presetNumber?`}
+                  element={<PAY426N isFrozen={true} />}
                 />
 
                 <Route

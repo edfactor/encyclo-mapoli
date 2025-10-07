@@ -32,6 +32,10 @@ internal sealed class SqlScriptRunner
             throw new ArgumentNullException(nameof(sqlFile));
         }
 
+        if (Directory.GetCurrentDirectory().EndsWith("/net9.0"))
+        {
+            sqlFile = Path.GetFullPath("../../../" + sqlFile);
+        }
         if (!File.Exists(sqlFile))
         {
             throw new FileNotFoundException("SQL file not found", sqlFile);

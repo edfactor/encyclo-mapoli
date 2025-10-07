@@ -27,10 +27,13 @@ export const prepareHeaders = (headers: Headers, context: { getState: () => unkn
 /* -------------------------------------------------------------------------
    Automatic x-demographic-data-source header copier
    ------------------------------------------------------------------------- */
-export const createDataSourceAwareBaseQuery = (): BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> => {
+export const createDataSourceAwareBaseQuery = (
+  timeout?: number
+): BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> => {
   const rawBaseQuery = fetchBaseQuery({
     baseUrl: `${url}/api/`,
     mode: "cors",
+    timeout: timeout ?? 100000, // Default 100 seconds, allow override for long-running operations
     prepareHeaders: (headers, { getState }) => {
       const root = getState() as any;
       const token = root.security.token;

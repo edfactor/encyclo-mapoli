@@ -5,24 +5,18 @@ import { Controller, Resolver, useForm } from "react-hook-form";
 import { BeneficiarySearchFilterRequest, BeneficiaryTypeDto, MasterInquiryRequest } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import { ssnValidator } from "../../utils/FormValidators";
 
 const schema = yup.object().shape({
   badgePsn: yup.string().notRequired(),
   name: yup.string().notRequired(),
-
-  socialSecurity: yup
-    .number()
-    .typeError("SSN must be a number")
-    .integer("SSN must be an integer")
-    .min(0, "SSN must be positive")
-    .max(999999999, "SSN must be 9 digits or less")
-    .nullable(),
+  socialSecurity: ssnValidator,
   memberType: yup.string().notRequired()
 });
 interface beneficiaryRequest {
   badgePsn?: string;
   name: string;
-  socialSecurity: number;
+  socialSecurity: string;
   memberType: string;
 }
 // Define the type of props
@@ -41,7 +35,8 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
     setFocus,
     watch
   } = useForm<beneficiaryRequest>({
-    resolver: yupResolver(schema) as Resolver<beneficiaryRequest>
+    resolver: yupResolver(schema) as Resolver<beneficiaryRequest>,
+    mode: "onBlur"
   });
 
   const onSubmit = (data: any) => {
@@ -63,7 +58,7 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
         psnSuffix: psn,
         memberType: Number(memberType),
         name: name,
-        ssn: ssn,
+        ssn: ssn ? Number(ssn) : undefined,
         skip: data.pagination?.skip || 0,
         take: data.pagination?.take || 5,
         sortBy: data.pagination?.sortBy || "name",
@@ -145,7 +140,16 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
                   value={field.value ?? ""}
                   error={!!errors.socialSecurity}
                   onChange={(e) => {
-                    const parsedValue = e.target.value === "" ? null : Number(e.target.value);
+                    const value = e.target.value;
+                    // Only allow numeric input
+                    if (value !== "" && !/^\d*$/.test(value)) {
+                      return;
+                    }
+                    // Prevent input beyond 9 characters
+                    if (value.length > 9) {
+                      return;
+                    }
+                    const parsedValue = value === "" ? null : value;
                     field.onChange(parsedValue);
                   }}
                 />

@@ -7,6 +7,7 @@ using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Security;
@@ -28,6 +29,7 @@ public class FrozenService : IFrozenService
     private readonly ICommitGuardOverride _guardOverride;
     private readonly IServiceProvider _serviceProvider;
     private readonly IDistributedCache _distributedCache;
+    private readonly INavigationService _navigationService;
     private readonly ILogger<FrozenService>? _logger;
 
     // Cache key pattern for frozen demographics endpoint - matches FastEndpoints output cache
@@ -37,12 +39,14 @@ public class FrozenService : IFrozenService
         ICommitGuardOverride guardOverride,
         IServiceProvider serviceProvider,
         IDistributedCache distributedCache,
+        INavigationService navigationService,
         ILogger<FrozenService>? logger = null)
     {
         _dataContextFactory = dataContextFactory;
         _guardOverride = guardOverride;
         _serviceProvider = serviceProvider;
         _distributedCache = distributedCache;
+        _navigationService = navigationService;
         _logger = logger;
     }
 
@@ -185,6 +189,11 @@ public class FrozenService : IFrozenService
             // Bust the GetFrozenDemographicsEndpoint output cache after successful freeze
             // FastEndpoints uses a prefix pattern for output cache keys
             await BustGetFrozenDemographicsCacheAsync(cancellationToken);
+
+            // Reset all navigation statuses to "Not Started" when creating a new freeze point
+            // This ensures year-end workflows restart cleanly after demographics are frozen
+            // Delegates to NavigationService for proper separation of concerns
+            await _navigationService.ResetAllStatusesToNotStartedAsync(cancellationToken);
 
             return result;
         }

@@ -55,7 +55,7 @@ public class MilitaryService : IMilitaryService
                     Remark = /* 19 */CommentType.Constants.Military.Name,
                     Contribution = req.ContributionAmount,
                     Ssn = d.Ssn,
-                    YearsOfServiceCredit = (byte)(req.IsSupplementalContribution ? 0 : 1),
+                    YearsOfServiceCredit = (sbyte)(req.IsSupplementalContribution ? 0 : 1),
                     MonthToDate = 12,
                     YearToDate = (short)req.ContributionDate.Year
                 };

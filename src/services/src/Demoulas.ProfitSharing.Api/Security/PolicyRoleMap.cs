@@ -29,6 +29,8 @@ public static class PolicyRoleMap
 
         // Distribution views are read-only; allow Finance, Clerks, Admin, and Auditor.
         [Policy.CanViewDistributions] = [Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR, Role.AUDITOR],
+
+        [Policy.CanReverseProfitDetails] = [Role.FINANCEMANAGER, Role.ADMINISTRATOR],
     };
 
     public static string[] GetRoles(string policyName) => Map.TryGetValue(policyName, out var roles) ? roles : [];

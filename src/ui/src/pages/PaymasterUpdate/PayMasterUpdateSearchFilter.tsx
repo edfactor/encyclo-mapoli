@@ -7,18 +7,14 @@ import { useDispatch } from "react-redux";
 import { setUpdateSummary } from "reduxstore/slices/yearsEndSlice";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import { profitYearValidator } from "../../utils/FormValidators";
 
 interface ProfitYearSearch {
   profitYear: number;
 }
 
 const schema = yup.object().shape({
-  profitYear: yup
-    .number()
-    .required("Profit Year is required")
-    .typeError("Please enter a valid year")
-    .min(2000, "Year must be 2000 or later")
-    .max(2100, "Year must be 2100 or earlier")
+  profitYear: profitYearValidator
 });
 
 interface ProfitYearSearchFilterProps {

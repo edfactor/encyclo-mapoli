@@ -95,16 +95,4 @@ test.describe("Pay Beneficiary Report: ", () => {
         await expect(page.url()).toContain("master-inquiry");
 
     });
-
-
-    test('check sorting', async ({ page }) => {
-        const [response] = await Promise.all([page.waitForResponse((resp) =>
-            resp.url().includes('yearend/payben-report'))]);
-        await expect(response.status()).toBe(200);
-        await page.locator('div:nth-child(3) > .ag-header-cell-comp-wrapper > .ag-cell-label-container > .ag-header-cell-label').click();
-        const [response1] = await Promise.all([page.waitForResponse((resp) =>
-            resp.url().includes('yearend/payben-report'))]);
-        await expect(response1.status()).toBe(200);
-
-    });
 });

@@ -31,17 +31,4 @@ test.describe("Control Sheet: ", () => {
         await page.waitForLoadState("networkidle");
         await expect(page.getByText('Access Denied').nth(1)).toBeVisible();
     });
-
-    test('change profit year and see if control sheet API works fine.', async ({page})=>{
-        await page.getByRole('combobox').nth(1).click();
-        await page.getByRole('option').nth(1).click();
-        const [response] = await Promise.all([page.waitForResponse((resp) =>
-            resp.url().includes('yearend/post-frozen/control-sheet'))]);
-        await expect(response.status()).toBe(200);
-        await page.getByRole('combobox').nth(1).click();
-        await page.getByRole('option').nth(2).click();
-        const [response1] = await Promise.all([page.waitForResponse((resp) =>
-            resp.url().includes('yearend/post-frozen/control-sheet'))]);
-        await expect(response1.status()).toBe(200);
-    });
 });

@@ -127,7 +127,7 @@ const useManageExecutiveHoursAndDollars = () => {
       const searchParams: ExecutiveHoursAndDollarsRequestDto = {
         profitYear: profitYear || 0,
         ...(searchForm.badgeNumber && { badgeNumber: searchForm.badgeNumber }),
-        ...(searchForm.socialSecurity && { socialSecurity: searchForm.socialSecurity }),
+        ...(searchForm.socialSecurity && { socialSecurity: Number(searchForm.socialSecurity) }),
         ...(searchForm.fullNameContains && { fullNameContains: searchForm.fullNameContains }),
         hasExecutiveHoursAndDollars: searchForm.hasExecutiveHoursAndDollars ?? false,
         isMonthlyPayroll: searchForm.isMonthlyPayroll ?? false,
@@ -159,7 +159,7 @@ const useManageExecutiveHoursAndDollars = () => {
       const searchParams: ExecutiveHoursAndDollarsRequestDto = {
         profitYear: profitYear || 0,
         ...(searchForm.badgeNumber && { badgeNumber: searchForm.badgeNumber }),
-        ...(searchForm.socialSecurity && { socialSecurity: searchForm.socialSecurity }),
+        ...(searchForm.socialSecurity && { socialSecurity: Number(searchForm.socialSecurity) }),
         ...(searchForm.fullNameContains && { fullNameContains: searchForm.fullNameContains }),
         hasExecutiveHoursAndDollars: false,
         isMonthlyPayroll: searchForm.isMonthlyPayroll ?? false,
@@ -292,6 +292,7 @@ const useManageExecutiveHoursAndDollars = () => {
   const isRowStagedToSave = useMemo(() => selectIsRowStagedToSave(state), [state]);
 
   return {
+    profitYear, // Expose profit year for components to use (e.g., frozen year warnings)
     searchParams: state.search.params,
     searchResults: state.search.results,
     isSearching: isSearching || state.search.isSearching,
