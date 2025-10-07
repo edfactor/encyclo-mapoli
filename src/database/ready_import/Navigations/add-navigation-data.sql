@@ -90,6 +90,7 @@ DECLARE
     PAY_BEN_REPORT CONSTANT NUMBER := 152;
     PAY426N_FROZEN CONSTANT NUMBER := 153;
     PROFIT_DETAILS_REVERSAL CONSTANT NUMBER := 154;
+    PRINT_PS_JOBS CONSTANT NUMBER :=155;
 
 
     --- These are the role IDs from the ROLES table
@@ -285,10 +286,18 @@ BEGIN
     insert_navigation_item(PROFNEW, PROF_SHARE_BY_STORE, 'PROFNEW', '', 'profnew', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(PROFALL, PROF_SHARE_BY_STORE, 'PROFALL', '', 'profall', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
 
+-- Print PS Jobs
+insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print-ps-jobs', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+
 -- Inserting value for IT Operation for role management
 --  NOTE: IT-DevOps navigation should be accessible only to members of the IT-DevOps role (role id 6).
 --  Remove other role assignments so the IT menu is exclusive to IT-DevOps.
     assign_navigation_role(IT_DEVOPS_MENU, IT_DEVOPS);
+
+-- Print PS Jobs
+    assign_navigation_role(PRINT_PS_JOBS, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(PRINT_PS_JOBS, FINANCE_MANAGER);
+    assign_navigation_role(PRINT_PS_JOBS, DISTRIBUTIONS_CLERK);
 
 -- Distribution Inquiry
     assign_navigation_role(DISTRIBUTIONS_MENU, SYSTEM_ADMINISTRATOR);
