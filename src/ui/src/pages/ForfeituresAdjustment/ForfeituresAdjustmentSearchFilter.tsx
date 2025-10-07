@@ -31,15 +31,11 @@ interface ForfeituresAdjustmentSearchFilterProps {
 const schema = yup
   .object({
     ssn: yup
-      .number()
-      .typeError("SSN must be a number")
-      .integer("SSN must be an integer")
-      .test("ssn-length", "SSN must be 7, 8, or 9 digits", function (value) {
-        if (value === undefined || value === null) return true;
-        return (
-          // 7 - 9 digits are valid
-          value >= 1000000 && value <= 999999999
-        );
+      .string()
+      .nullable()
+      .test("is-9-digits", "SSN must be exactly 9 digits", function (value) {
+        if (!value) return true;
+        return /^\d{9}$/.test(value);
       })
       .transform((value) => value || undefined),
     badge: yup
@@ -117,7 +113,7 @@ const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFil
     clearAlerts(); // Clear any existing alerts
 
     const searchParams = {
-      ssn: data.ssn,
+      ssn: data.ssn ? Number(data.ssn) : undefined,
       badge: data.badge,
       profitYear: new Date().getFullYear(), // Use current wall clock year
       skip: 0,
@@ -204,15 +200,20 @@ const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFil
                   placeholder="SSN"
                   onChange={(e) => {
                     const value = e.target.value;
-                    // Allow empty string or numeric values
-                    if (value === "" || !isNaN(Number(value))) {
-                      const parsedValue = value === "" ? "" : Number(value);
-                      field.onChange(parsedValue);
-                      if (value !== "") {
-                        toggleSearchFieldEntered(true, "ssn");
-                      } else {
-                        toggleSearchFieldEntered(false, "ssn");
-                      }
+                    // Only allow numeric input
+                    if (value !== "" && !/^\d*$/.test(value)) {
+                      return;
+                    }
+                    // Prevent input beyond 9 characters
+                    if (value.length > 9) {
+                      return;
+                    }
+                    const parsedValue = value === "" ? "" : value;
+                    field.onChange(parsedValue);
+                    if (value !== "") {
+                      toggleSearchFieldEntered(true, "ssn");
+                    } else {
+                      toggleSearchFieldEntered(false, "ssn");
                     }
                   }}
                 />
