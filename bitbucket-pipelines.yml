@@ -258,7 +258,7 @@ definitions:
           if (-not $environment) { $environment = "QA" }
           if (-not $action) { $action = "upgrade-db" }
           if (-not $sourceSchema) { $sourceSchema = "PROFITSHARE" }
-          if (-not $currentYear) { $currentYear = "2023" }
+          if (-not $currentYear) { $currentYear = "2024" }
 
           if ($environment -eq "QA") {
             $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_QA            
