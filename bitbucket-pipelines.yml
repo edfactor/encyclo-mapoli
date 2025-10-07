@@ -234,52 +234,6 @@ definitions:
         - echo "✓ UAT artifact created successfully"
 
 
-    create-frontend-artifact-prod: &create-frontend-artifact-prod
-      name: Create FrontEnd Artifacts (PROD)
-      # Run on cloud to free on-premises resources
-      image: node:22-alpine
-      artifacts:
-        - dist/**
-      script:
-        # Navigate to UI directory
-        - cd src/ui
-        
-        # Install zip utility and update npm
-        - apk add --no-cache zip
-        - npm install -g npm@latest
-        
-        # Create .npmrc for JFrog access (using bash heredoc syntax)
-        - |
-          cat > .npmrc << 'EOF'
-          registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
-          //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
-          EOF
-        
-        # Copy buildinfo.json from artifact to public directory
-        - echo "Copying .buildinfo.json from artifact..."
-        - cp ../../.buildinfo.json ./public/.buildinfo.json
-        - echo "✓ Build info copied to public directory"
-        - cat ./public/.buildinfo.json
-        
-        # Install dependencies
-        - npm ci
-        
-        # Build for PROD environment
-        - npm run build:prod
-        
-        # Create dist directory at repo root
-        - mkdir -p ../../dist
-        
-        # Package artifact using zip
-        - cd build
-        - zip -r ../../../dist/Demoulas.ProfitSharing.UI.prod.zip .
-        - cd ..
-        
-        # Verify artifact was created
-        - ls -lh ../../dist/Demoulas.ProfitSharing.UI.prod.zip
-        - echo "✓ PROD artifact created successfully"
-
-    
     upgrade-database: &upgrade-database
       name: Upgrade Database
       runs-on:
@@ -684,7 +638,6 @@ pipelines:
           - step: *create-service-artifacts
           - step: *create-frontend-artifact-qa
           - step: *create-frontend-artifact-uat
-          - step: *create-frontend-artifact-prod
           - step: *db-cli-build-artifact
       # Stage 4: QA Deployment
       - step:
