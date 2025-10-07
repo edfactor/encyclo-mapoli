@@ -17,10 +17,8 @@ definitions:
         - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
         - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
         - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
-        
         # Ensure the REPORTS_PATH directory exists
         - mkdir -Force -Path $env:REPORTS_PATH
-
         # Check if .NET 9 SDK is installed
         - echo "Checking installed .NET SDK versions..."
         - $dotnetSdkInstalled = dotnet --list-sdks | Select-String "^9\.(\d+)\.(\d+)"
