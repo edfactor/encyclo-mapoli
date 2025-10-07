@@ -5,7 +5,7 @@ import React from "react";
 import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import { endDateStringAfterStartDateValidator } from "../../utils/FormValidators";
+import { endDateAfterStartDateValidator } from "../../utils/FormValidators";
 
 export interface QPAY600FilterParams {
   startDate?: Date | null;
@@ -16,11 +16,7 @@ export interface QPAY600FilterParams {
 
 const schema = yup.object().shape({
   startDate: yup.date().nullable(),
-  endDate: endDateStringAfterStartDateValidator(
-    "startDate",
-    (date) => date,
-    "End Date must be the same or after Start Date"
-  ).nullable(),
+  endDate: endDateAfterStartDateValidator("startDate").nullable(),
   employeeStatus: yup.string().oneOf(["Full time", "Part time"]).default("Full time"),
   employeeType: yup.string().oneOf(["", "Hourly", "Salary"]).default("")
 });
