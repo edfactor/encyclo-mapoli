@@ -4,6 +4,7 @@ import { Controller, Resolver, useForm } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { DistributionSearchFormData } from "../../types";
+import { mustBeNumberValidator } from "../../utils/FormValidators";
 
 interface DistributionInquirySearchFilterProps {
   onSearch: (data: DistributionSearchFormData) => void;
@@ -22,44 +23,26 @@ const schema = yup.object().shape({
   frequency: yup.string().nullable(),
   paymentFlag: yup.string().nullable(),
   taxCode: yup.string().nullable(),
-  minGrossAmount: yup
-    .string()
-    .nullable()
-    .test("is-number", "Must be a valid number", function (value) {
-      if (!value) return true;
-      return !isNaN(Number(value));
-    }),
-  maxGrossAmount: yup
-    .string()
-    .nullable()
-    .test("is-number", "Must be a valid number", function (value) {
-      if (!value) return true;
-      return !isNaN(Number(value));
-    })
-    .test("greater-than-min", "Max must be greater than Min", function (value) {
+  minGrossAmount: mustBeNumberValidator(),
+  maxGrossAmount: mustBeNumberValidator().test(
+    "greater-than-min",
+    "Max must be greater than Min",
+    function (value) {
       const { minGrossAmount } = this.parent;
       if (!value || !minGrossAmount) return true;
       return Number(value) >= Number(minGrossAmount);
-    }),
-  minCheckAmount: yup
-    .string()
-    .nullable()
-    .test("is-number", "Must be a valid number", function (value) {
-      if (!value) return true;
-      return !isNaN(Number(value));
-    }),
-  maxCheckAmount: yup
-    .string()
-    .nullable()
-    .test("is-number", "Must be a valid number", function (value) {
-      if (!value) return true;
-      return !isNaN(Number(value));
-    })
-    .test("greater-than-min", "Max must be greater than Min", function (value) {
+    }
+  ),
+  minCheckAmount: mustBeNumberValidator(),
+  maxCheckAmount: mustBeNumberValidator().test(
+    "greater-than-min",
+    "Max must be greater than Min",
+    function (value) {
       const { minCheckAmount } = this.parent;
       if (!value || !minCheckAmount) return true;
       return Number(value) >= Number(minCheckAmount);
-    })
+    }
+  )
 });
 
 const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterProps> = ({

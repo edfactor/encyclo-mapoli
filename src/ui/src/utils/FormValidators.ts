@@ -101,6 +101,19 @@ export const positiveNumberValidator = (fieldName: string) =>
     .transform((value) => (isNaN(value) ? null : value));
 
 /**
+ * Returns a validator that checks if a string value is a valid number
+ * @param fieldName - Optional field name to use in error message (defaults to "Must be a valid number")
+ */
+export const mustBeNumberValidator = (fieldName?: string) =>
+  yup
+    .string()
+    .nullable()
+    .test("is-number", fieldName ? `${fieldName} must be a valid number` : "Must be a valid number", function (value) {
+      if (!value) return true;
+      return !isNaN(Number(value));
+    });
+
+/**
  * Handler for SSN input that only allows numeric characters up to 9 digits
  * @param value - The input value from the TextField
  * @returns The validated value or null if invalid
