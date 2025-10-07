@@ -94,7 +94,7 @@ definitions:
         - Write-Host "  Branch: ${env:BITBUCKET_BRANCH}"
         - Write-Host "  Commit Hash: ${env:BITBUCKET_COMMIT}"
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
-        - if (Test-Path ".buildinfo.json") { Write-Host "✓ .buildinfo.json generated successfully"; Get-Content ".buildinfo.json" | Write-Host; } else { Write-Error "✗ Failed to generate .buildinfo.json"; exit 1; }
+        - if (Test-Path ".buildinfo.json") { Write-Host "[OK] .buildinfo.json generated successfully"; Get-Content ".buildinfo.json" | Write-Host; } else { Write-Error "[ERROR] Failed to generate .buildinfo.json"; exit 1; }
     
     create-api-artifacts: &create-api-artifacts
       name: Create API Artifacts
