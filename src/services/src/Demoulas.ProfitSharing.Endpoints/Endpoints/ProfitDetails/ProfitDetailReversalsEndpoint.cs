@@ -3,42 +3,71 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Endpoints.Validation;
+using FastEndpoints;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ProfitDetails;
-public sealed class ProfitDetailReversalsEndpoint: ProfitSharingRequestEndpoint<IdsRequest>
+public sealed class ProfitDetailReversalsEndpoint: ProfitSharingEndpoint<IdsRequest, Results<Ok<IdsResponse>, ProblemHttpResult>>
 {
     private readonly IProfitDetailReversalsService _profitDetailReversalsService;
+    private readonly ILogger<ProfitDetailReversalsEndpoint> _logger;
 
-    public ProfitDetailReversalsEndpoint(IProfitDetailReversalsService profitDetailReversalsService) : base(Navigation.Constants.ProfitDetailReversals)
+    public ProfitDetailReversalsEndpoint(
+        IProfitDetailReversalsService profitDetailReversalsService,
+        ILogger<ProfitDetailReversalsEndpoint> logger) : base(Navigation.Constants.ProfitDetailReversals)
     {
         _profitDetailReversalsService = profitDetailReversalsService;
+        _logger = logger;
     }
 
     public override void Configure()
     {
         Post("/reversals");
         Group<ProfitDetailsGroup>();
-        Policies(Security.Policy.CanReverseProfitDetails); // <-- This line is incorrect usage
+        Policies(Security.Policy.CanReverseProfitDetails);
+        Validator<IdsRequestValidator>();
         Summary(s =>
         {
-            s.Description = "Reverses profit detail entries based on provided IDs.";
+            s.Description = "Reverses profit detail entries based on provided IDs. Creates reversal entries for eligible profit codes and updates ETVA balances where applicable.";
             s.Summary = "Reverse Profit Detail Entries";
             s.ExampleRequest = IdsRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object>
             {
-                { 204, "success" }
+                { 200, IdsResponse.ResponseExample() },
+                { 400, new { detail = "Validation error", title = "Validation Failed" } },
+                { 404, new { detail = "Profit details not found" } }
             };
         });
     }
 
-    public async override Task HandleAsync(IdsRequest req, CancellationToken ct)
+    public override Task<Results<Ok<IdsResponse>, ProblemHttpResult>> ExecuteAsync(IdsRequest req, CancellationToken ct)
     {
-        await _profitDetailReversalsService.ReverseProfitDetailsAsync(req.Ids, ct);
-        await Send.NoContentAsync(ct);
+        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
+        {
+            var result = await _profitDetailReversalsService.ReverseProfitDetailsAsync(req.Ids, ct);
+            
+            // Record business operation metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "profit-detail-reversal"),
+                new("endpoint", nameof(ProfitDetailReversalsEndpoint)),
+                new("batch_size", req.Ids?.Length.ToString() ?? "0"));
+            
+            // Convert Result<bool> to proper HTTP response
+            return result.Match<Results<Ok<IdsResponse>, ProblemHttpResult>>(
+                success => TypedResults.Ok(new IdsResponse { Ids = req.Ids ?? Array.Empty<int>()}),
+                error => TypedResults.Problem(error.Detail));
+        });
     }
 }

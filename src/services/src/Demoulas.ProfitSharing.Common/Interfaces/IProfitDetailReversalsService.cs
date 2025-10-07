@@ -1,6 +1,8 @@
-﻿namespace Demoulas.ProfitSharing.Common.Interfaces;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
+
+namespace Demoulas.ProfitSharing.Common.Interfaces;
 
 public interface IProfitDetailReversalsService
 {
-    Task ReverseProfitDetailsAsync(int[] profitDetailIds, CancellationToken cancellationToken);
+    Task<Result<bool>> ReverseProfitDetailsAsync(int[] profitDetailIds, CancellationToken cancellationToken);
 }
