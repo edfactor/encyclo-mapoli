@@ -834,7 +834,8 @@ pipelines:
 
                 - echo "Deploying background service..."            
                 - pwsh .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_UAT
-          - step: *uat-import-from-ready
+      # Stage 6: UAT Database Import (must run AFTER drop-recreate completes)
+      - step: *uat-import-from-ready
       - step: *uat-import-uat-navigation
       - parallel:
           - step: *uat-validate-import
