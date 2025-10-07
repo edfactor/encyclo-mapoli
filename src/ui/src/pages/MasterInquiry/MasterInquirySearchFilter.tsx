@@ -29,37 +29,37 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
-import { monthValidator, profitYearNullableValidator, ssnValidator } from "../../utils/FormValidators";
+import {
+  monthValidator,
+  positiveNumberValidator,
+  profitYearNullableValidator,
+  psnValidator,
+  ssnValidator
+} from "../../utils/FormValidators";
 import { transformSearchParams } from "./utils/transformSearchParams";
 
 const schema = yup.object().shape({
-  endProfitYear: profitYearNullableValidator.test("greater-than-start", "End year must be after start year", function (endYear) {
-    const startYear = this.parent.startProfitYear;
-    // Only validate if both values are present
-    return !startYear || !endYear || endYear >= startYear;
-  }),
+  endProfitYear: profitYearNullableValidator.test(
+    "greater-than-start",
+    "End year must be after start year",
+    function (endYear) {
+      const startYear = this.parent.startProfitYear;
+      // Only validate if both values are present
+      return !startYear || !endYear || endYear >= startYear;
+    }
+  ),
   startProfitMonth: monthValidator,
   endProfitMonth: monthValidator.min(yup.ref("startProfitMonth"), "End month must be after start month"),
   socialSecurity: ssnValidator,
   name: yup.string().nullable(),
-  badgeNumber: yup
-    .number()
-    .typeError("Badge number must be a number")
-    .integer("Badge number must be an integer")
-    .min(0, "Badge number must be positive")
-    .max(99999999999, "Badge number must be 11 digits or less")
-    .nullable(),
+  badgeNumber: psnValidator,
   comment: yup.string().nullable(),
   paymentType: yup.string().oneOf(["all", "hardship", "payoffs", "rollovers"]).default("all").required(),
   memberType: yup.string().oneOf(["all", "employees", "beneficiaries", "none"]).default("all").required(),
-  contribution: yup
-    .number()
-    .typeError("Contribution must be a number")
-    .min(0, "Contribution must be positive")
-    .nullable(),
-  earnings: yup.number().typeError("Earnings must be a number").min(0, "Earnings must be positive").nullable(),
-  forfeiture: yup.number().typeError("Forfeiture must be a number").min(0, "Forfeiture must be positive").nullable(),
-  payment: yup.number().typeError("Payment must be a number").min(0, "Payment must be positive").nullable(),
+  contribution: positiveNumberValidator("Contribution"),
+  earnings: positiveNumberValidator("Earnings"),
+  forfeiture: positiveNumberValidator("Forfeiture"),
+  payment: positiveNumberValidator("Payment"),
   voids: yup.boolean().default(false).required()
 });
 
@@ -78,6 +78,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       badgeNumber: string;
     }>();
 
+    // profitYear should always start with this year
     const profitYear = useDecemberFlowProfitYear();
 
     const determineCorrectMemberType = (badgeNum: string | undefined) => {
@@ -322,12 +323,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
                   if (name === "socialSecurity" && value.length > 9) {
                     return;
                   }
-                  const parsedValue =
-                    type === "number" && value !== ""
-                      ? Number(value)
-                      : value === ""
-                        ? null
-                        : value;
+                  const parsedValue = type === "number" && value !== "" ? Number(value) : value === "" ? null : value;
                   field.onChange(parsedValue);
 
                   // Auto-update memberType when badgeNumber changes
@@ -544,7 +540,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
             <TextInputField
               name="badgeNumber"
               label="Badge/PSN Number"
-              type="number"
+              type="text"
               disabled={isBadgeNumberDisabled}
             />
             <RadioGroupField

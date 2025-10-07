@@ -80,6 +80,18 @@ export const profitYearDateValidator = yup
   .required("Profit Year is required");
 
 /**
+ * Returns a validator for a positive number, with custom field name in error messages.
+ * @param fieldName - The name of the field to use in error messages
+ */
+export const positiveNumberValidator = (fieldName: string) =>
+  yup
+    .number()
+    .typeError(`${fieldName} must be a number`)
+    .min(0, `${fieldName} must be a positive number`)
+    .nullable()
+    .transform((value) => (isNaN(value) ? null : value));
+
+/**
  * Handler for SSN input that only allows numeric characters up to 9 digits
  * @param value - The input value from the TextField
  * @returns The validated value or null if invalid
