@@ -89,7 +89,8 @@ export const createStateColumn = (options: StateColumnOptions = {}): ColDef => {
     valueGetter,
     tooltip,
     tooltipField,
-    tooltipValueGetter
+    tooltipValueGetter,
+    headerTooltip
   } = options;
 
   const alignmentClass = alignment === "center" ? "center-align" : "left-align";
@@ -125,6 +126,11 @@ export const createStateColumn = (options: StateColumnOptions = {}): ColDef => {
     column.tooltipField = tooltipField;
   } else if (tooltipValueGetter) {
     column.tooltipValueGetter = tooltipValueGetter;
+  }
+
+  // Add header tooltip support
+  if (headerTooltip) {
+    column.headerTooltip = headerTooltip;
   }
 
   return column;
@@ -218,7 +224,8 @@ export const createSSNColumn = (options: SSNColumnOptions = {}): ColDef => {
     valueFormatter,
     tooltip,
     tooltipField,
-    tooltipValueGetter
+    tooltipValueGetter,
+    headerTooltip
   } = options;
 
   const alignmentClass = alignment === "center" ? "center-align" : "left-align";
@@ -251,6 +258,11 @@ export const createSSNColumn = (options: SSNColumnOptions = {}): ColDef => {
     column.tooltipValueGetter = tooltipValueGetter;
   }
 
+  // Add header tooltip support
+  if (headerTooltip) {
+    column.headerTooltip = headerTooltip;
+  }
+
   return column;
 };
 
@@ -268,7 +280,8 @@ export const createBadgeColumn = (options: BadgeColumnOptions = {}): ColDef => {
     navigateFunction,
     tooltip,
     tooltipField,
-    tooltipValueGetter
+    tooltipValueGetter,
+    headerTooltip
   } = options;
 
   const alignmentClass = alignment === "center" ? "center-align" : "left-align";
@@ -313,6 +326,11 @@ export const createBadgeColumn = (options: BadgeColumnOptions = {}): ColDef => {
     column.tooltipValueGetter = tooltipValueGetter;
   }
 
+  // Add header tooltip support
+  if (headerTooltip) {
+    column.headerTooltip = headerTooltip;
+  }
+
   return column;
 };
 
@@ -330,7 +348,8 @@ export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => 
     cellStyle,
     tooltip,
     tooltipField,
-    tooltipValueGetter
+    tooltipValueGetter,
+    headerTooltip
   } = options;
 
   const column: ColDef = {
@@ -374,6 +393,11 @@ export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => 
     column.tooltipValueGetter = tooltipValueGetter;
   }
 
+  // Add header tooltip support
+  if (headerTooltip) {
+    column.headerTooltip = headerTooltip;
+  }
+
   return column;
 };
 
@@ -388,7 +412,8 @@ export const createAgeColumn = (options: BaseColumnOptions = {}): ColDef => {
     resizable = true,
     tooltip,
     tooltipField,
-    tooltipValueGetter
+    tooltipValueGetter,
+    headerTooltip
   } = options;
 
   const column: ColDef = {
@@ -412,6 +437,11 @@ export const createAgeColumn = (options: BaseColumnOptions = {}): ColDef => {
     column.tooltipField = tooltipField;
   } else if (tooltipValueGetter) {
     column.tooltipValueGetter = tooltipValueGetter;
+  }
+
+  // Add header tooltip support
+  if (headerTooltip) {
+    column.headerTooltip = headerTooltip;
   }
 
   return column;
@@ -446,7 +476,8 @@ export const createDateColumn = (options: DateColumnOptions): ColDef => {
     },
     tooltip,
     tooltipField,
-    tooltipValueGetter
+    tooltipValueGetter,
+    headerTooltip
   } = options;
 
   const alignmentClass = alignment === "center" ? "center-align" : "left-align";
@@ -474,6 +505,11 @@ export const createDateColumn = (options: DateColumnOptions): ColDef => {
     column.tooltipField = tooltipField;
   } else if (tooltipValueGetter) {
     column.tooltipValueGetter = tooltipValueGetter;
+  }
+
+  // Add header tooltip support
+  if (headerTooltip) {
+    column.headerTooltip = headerTooltip;
   }
 
   return column;
@@ -528,7 +564,8 @@ export const createNameColumn = (options: NameColumnOptions = {}): ColDef => {
     valueFormatter,
     tooltip,
     tooltipField,
-    tooltipValueGetter
+    tooltipValueGetter,
+    headerTooltip
   } = options;
 
   const alignmentClass = alignment === "center" ? "center-align" : "left-align";
@@ -559,6 +596,11 @@ export const createNameColumn = (options: NameColumnOptions = {}): ColDef => {
     column.tooltipField = tooltipField;
   } else if (tooltipValueGetter) {
     column.tooltipValueGetter = tooltipValueGetter;
+  }
+
+  // Add header tooltip support
+  if (headerTooltip) {
+    column.headerTooltip = headerTooltip;
   }
 
   return column;
@@ -941,7 +983,11 @@ export const createTaxCodeColumn = (options: TaxCodeColumnOptions = {}): ColDef 
     showBrackets = true,
     idField,
     nameField,
-    valueFormatter
+    valueFormatter,
+    tooltip,
+    tooltipField,
+    tooltipValueGetter,
+    headerTooltip
   } = options;
 
   const alignmentClass = alignment === "center" ? "center-align" : alignment === "right" ? "right-align" : "left-align";
@@ -980,6 +1026,20 @@ export const createTaxCodeColumn = (options: TaxCodeColumnOptions = {}): ColDef 
         }
       };
     }
+  }
+
+  // Add tooltip support
+  if (tooltip) {
+    column.tooltipValueGetter = () => tooltip;
+  } else if (tooltipField) {
+    column.tooltipField = tooltipField;
+  } else if (tooltipValueGetter) {
+    column.tooltipValueGetter = tooltipValueGetter;
+  }
+
+  // Add header tooltip support
+  if (headerTooltip) {
+    column.headerTooltip = headerTooltip;
   }
 
   return column;

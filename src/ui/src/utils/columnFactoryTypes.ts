@@ -12,6 +12,7 @@ export interface BaseColumnOptions {
   tooltip?: string; // Static tooltip text
   tooltipField?: string; // Field name containing tooltip data
   tooltipValueGetter?: (params: any) => string; // Dynamic tooltip generator
+  headerTooltip?: string; // Header tooltip text
 }
 
 // Extended base interfaces
