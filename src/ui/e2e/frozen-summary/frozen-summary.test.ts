@@ -8,7 +8,7 @@ import { baseUrl, impersonateRole, navigateToPage } from "../env.setup";
  * - Tab navigation is straightforward UI interaction
  * - Frozen Summary is a read-only view (no edit operations)
  * - Tests focus on visibility and basic data display
- * - Located in IT Operations → Demographics page
+ * - Located in IT Operations → Demographic Freeze page
  */
 test.describe("Frozen Summary Tab", () => {
   test.beforeEach(async ({ page }) => {
@@ -18,13 +18,13 @@ test.describe("Frozen Summary Tab", () => {
     // Use IT Operations role which should have access
     await impersonateRole(page, "Finance-Manager");
 
-    // Navigate to Demographics page where Frozen Summary tab exists
-    await navigateToPage(page, "IT Operations", "Demographics");
+    // Navigate to Demographic Freeze page where Frozen Summary tab exists
+    await navigateToPage(page, "IT Operations", "Demographic Freeze");
   });
 
-  test("Demographics page loads successfully", async ({ page }) => {
-    // Verify we're on the Demographics page
-    await expect(page.getByRole("heading", { name: /demographics/i })).toBeVisible();
+  test("Demographic Freeze page loads successfully", async ({ page }) => {
+    // Verify we're on the Demographic Freeze page
+    await expect(page.getByRole("heading", { name: /demographic|freeze/i })).toBeVisible();
   });
 
   test("Frozen Summary tab is present", async ({ page }) => {
@@ -162,7 +162,7 @@ test.describe("Frozen Summary Tab", () => {
     // Switch to read-only role
     await page.getByRole("combobox", { name: "roles" }).click();
     await page.getByRole("option", { name: "Finance-Manager" }).getByRole("checkbox").uncheck();
-    await page.getByRole("option", { name: "READONLY" }).getByRole("checkbox").check();
+    await page.getByRole("option", { name: "IT-DevOps" }).getByRole("checkbox").check();
     await page.locator("body").click();
 
     // Reload page

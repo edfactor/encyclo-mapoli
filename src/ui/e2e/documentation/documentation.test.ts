@@ -82,7 +82,7 @@ test.describe("Documentation Page", () => {
     // Switch to read-only role
     await page.getByRole("combobox", { name: "roles" }).click();
     await page.getByRole("option", { name: "Finance-Manager" }).getByRole("checkbox").uncheck();
-    await page.getByRole("option", { name: "READONLY" }).getByRole("checkbox").check();
+    await page.getByRole("option", { name: "IT-DevOps" }).getByRole("checkbox").check();
     await page.locator("body").click();
 
     // Reload to apply role change

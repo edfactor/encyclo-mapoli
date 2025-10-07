@@ -30,7 +30,7 @@ test.describe("Unauthorized Access", () => {
     await page.waitForLoadState("networkidle");
 
     // Use read-only role
-    await impersonateRole(page, "READONLY");
+    await impersonateRole(page, "IT-DevOps");
 
     // Try to access Manage Executive Hours (requires higher permissions)
     await navigateToPage(page, "Fiscal Close", "Manage Executive Hours");
@@ -101,7 +101,7 @@ test.describe("Unauthorized Access", () => {
     await page.goto(baseUrl);
     await page.waitForLoadState("networkidle");
 
-    await impersonateRole(page, "READONLY");
+    await impersonateRole(page, "IT-DevOps");
     await navigateToPage(page, "December Activities", /^Forfeitures 008-12/);
 
     // Should see Access Denied
@@ -124,7 +124,7 @@ test.describe("Unauthorized Access", () => {
     await page.goto(baseUrl);
     await page.waitForLoadState("networkidle");
 
-    await impersonateRole(page, "READONLY");
+    await impersonateRole(page, "IT-DevOps");
 
     // Test first unauthorized page
     await navigateToPage(page, "December Activities", /^Forfeitures 008-12/);
@@ -174,7 +174,7 @@ test.describe("Unauthorized Access", () => {
     await page.goto(baseUrl);
     await page.waitForLoadState("networkidle");
 
-    await impersonateRole(page, "READONLY");
+    await impersonateRole(page, "IT-DevOps");
     await navigateToPage(page, "December Activities", /^Forfeitures 008-12/);
 
     // Should see Access Denied
@@ -202,7 +202,7 @@ test.describe("Unauthorized Access", () => {
     // Start on home/dashboard
     const initialUrl = page.url();
 
-    await impersonateRole(page, "READONLY");
+    await impersonateRole(page, "IT-DevOps");
 
     // Navigate to unauthorized page
     await navigateToPage(page, "December Activities", /^Forfeitures 008-12/);
@@ -231,7 +231,7 @@ test.describe("Unauthorized Access", () => {
     await page.goto(baseUrl);
     await page.waitForLoadState("networkidle");
 
-    await impersonateRole(page, "READONLY");
+    await impersonateRole(page, "IT-DevOps");
     await navigateToPage(page, "December Activities", /^Forfeitures 008-12/);
 
     await expect(page.getByText("Access Denied").nth(1)).toBeVisible();
