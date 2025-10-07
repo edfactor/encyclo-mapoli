@@ -29,6 +29,7 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
+import { monthValidator, ssnValidator } from "../../utils/FormValidators";
 import { transformSearchParams } from "./utils/transformSearchParams";
 
 const schema = yup.object().shape({
@@ -43,28 +44,9 @@ const schema = yup.object().shape({
       return !startYear || !endYear || endYear >= startYear;
     })
     .nullable(),
-  startProfitMonth: yup
-    .number()
-    .typeError("Beginning Month must be a number")
-    .integer("Beginning Month must be an integer")
-    .min(1, "Beginning Month must be between 1 and 12")
-    .max(12, "Beginning Month must be between 1 and 12")
-    .nullable(),
-  endProfitMonth: yup
-    .number()
-    .typeError("Ending Month must be a number")
-    .integer("Ending Month must be an integer")
-    .min(1, "Ending Month must be between 1 and 12")
-    .max(12, "Ending Month must be between 1 and 12")
-    .min(yup.ref("startProfitMonth"), "End month must be after start month")
-    .nullable(),
-  socialSecurity: yup
-    .string()
-    .nullable()
-    .test("is-9-digits", "SSN must be exactly 9 digits", function (value) {
-      if (!value) return true;
-      return /^\d{9}$/.test(value);
-    }),
+  startProfitMonth: monthValidator,
+  endProfitMonth: monthValidator.min(yup.ref("startProfitMonth"), "End month must be after start month"),
+  socialSecurity: ssnValidator,
   name: yup.string().nullable(),
   badgeNumber: yup
     .number()

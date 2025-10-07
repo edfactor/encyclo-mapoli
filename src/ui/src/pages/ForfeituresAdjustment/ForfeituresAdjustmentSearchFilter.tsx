@@ -15,6 +15,7 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { FORFEITURES_ADJUSTMENT_MESSAGES } from "../../components/MissiveAlerts/MissiveMessages";
 import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
+import { badgeNumberValidator, ssnValidator } from "../../utils/FormValidators";
 
 // Define the search parameters interface
 interface ForfeituresAdjustmentSearchParams {
@@ -30,26 +31,8 @@ interface ForfeituresAdjustmentSearchFilterProps {
 // Define schema for validation without circular references
 const schema = yup
   .object({
-    ssn: yup
-      .string()
-      .nullable()
-      .test("is-9-digits", "SSN must be exactly 9 digits", function (value) {
-        if (!value) return true;
-        return /^\d{9}$/.test(value);
-      })
-      .transform((value) => value || undefined),
-    badge: yup
-      .number()
-      .typeError("Badge Number must be a number")
-      .integer("Badge Number must be an integer")
-      .test("badge-length", "Badge must be 5, 6, or 7 digits", function (value) {
-        if (value === undefined || value === null) return true;
-        return (
-          // 5 - 7 digits are valid
-          value >= 10000 && value <= 9999999
-        );
-      })
-      .transform((value) => value || undefined)
+    ssn: ssnValidator,
+    badge: badgeNumberValidator
   })
   .test("at-least-one-required", "Either SSN or Badge is required", (values) => Boolean(values.ssn || values.badge));
 

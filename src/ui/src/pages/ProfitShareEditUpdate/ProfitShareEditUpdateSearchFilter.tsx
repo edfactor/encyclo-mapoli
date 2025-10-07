@@ -24,6 +24,7 @@ import {
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { ProfitShareUpdateRequest } from "reduxstore/types";
+import { badgeNumberValidator } from "../../utils/FormValidators";
 
 const maxContributionsDefault: number = 76000;
 
@@ -79,12 +80,7 @@ const schema = yup.object().shape({
     .typeError("Max Allowed Contributions must be a number")
     .min(0, "Max Allowed Contributions must be positive")
     .required("Max Contributions is required"),
-  badgeToAdjust: yup
-    .number()
-    .typeError("Badge must be a number")
-    .integer("Badge must be an integer")
-    .nullable()
-    .optional(),
+  badgeToAdjust: badgeNumberValidator.optional(),
   adjustContributionAmount: yup
     .number()
     .typeError("Contribution must be a number")
@@ -98,12 +94,7 @@ const schema = yup.object().shape({
     .min(0, "Adjusted Incoming Forfeiture must be positive")
     .nullable()
     .optional(),
-  badgeToAdjust2: yup
-    .number()
-    .typeError("Badge must be a number")
-    .integer("Badge must be an integer")
-    .nullable()
-    .optional(),
+  badgeToAdjust2: badgeNumberValidator.optional(),
   adjustEarningsSecondaryAmount: yup.number().typeError("Earnings must be a number").nullable().optional()
 });
 

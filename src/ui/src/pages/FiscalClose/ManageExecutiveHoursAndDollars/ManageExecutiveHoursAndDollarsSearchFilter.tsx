@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import { badgeNumberValidator, ssnValidator } from "../../../utils/FormValidators";
 
 interface ExecutiveHoursAndDollarsSearch {
   profitYear: number;
@@ -18,21 +19,8 @@ interface ExecutiveHoursAndDollarsSearch {
 const validationSchema = yup
   .object({
     profitYear: yup.number().required("Profit Year is required").typeError("Profit Year must be a number"),
-    socialSecurity: yup
-      .string()
-      .nullable()
-      .test("is-9-digits", "SSN must be exactly 9 digits", function (value) {
-        if (!value) return true;
-        return /^\d{9}$/.test(value);
-      })
-      .transform((value) => value || undefined),
-    badgeNumber: yup
-      .number()
-      .typeError("Badge Number must be a number")
-      .integer("Badge Number must be an integer")
-      .min(0, "Badge must be positive")
-      .max(9999999, "Badge must be 7 digits or less")
-      .transform((value) => value || undefined),
+    socialSecurity: ssnValidator,
+    badgeNumber: badgeNumberValidator,
     fullNameContains: yup
       .string()
       .typeError("Full Name must be a string")

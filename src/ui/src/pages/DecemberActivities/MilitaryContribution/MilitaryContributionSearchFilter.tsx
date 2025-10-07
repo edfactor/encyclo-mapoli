@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import { badgeNumberValidator, ssnValidator } from "../../../utils/FormValidators";
 import useMilitaryContribution from "./hooks/useMilitaryContribution";
 
 interface SearchFormData {
@@ -15,25 +16,8 @@ interface SearchFormData {
 // Define schema with proper typing for our form
 const validationSchema = yup
   .object({
-    socialSecurity: yup
-      .string()
-      .nullable()
-      .test("is-9-digits", "SSN must be exactly 9 digits", function (value) {
-        if (!value) return true;
-        return /^\d{9}$/.test(value);
-      })
-      .transform((value) => value || undefined),
-    badgeNumber: yup
-      .string()
-      .nullable()
-      .test("badge-length", "Badge must be 5, 6, or 7 digits", function (value) {
-        if (value === undefined || value === null) return true;
-        return (
-          // 5 - 7 digits are valid
-          Number(value) >= 10000 && Number(value) <= 9999999
-        );
-      })
-      .transform((value) => value || undefined)
+    socialSecurity: ssnValidator,
+    badgeNumber: badgeNumberValidator
   })
   .test("at-least-one-required", "At least one field must be provided", (values) =>
     Boolean(values.socialSecurity || values.badgeNumber)
