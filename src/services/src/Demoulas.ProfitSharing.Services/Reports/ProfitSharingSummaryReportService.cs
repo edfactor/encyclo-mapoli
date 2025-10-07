@@ -97,7 +97,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         {
             // OPTIMIZATION: Fetch minimal employee data once with a lightweight DTO
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, req.UseFrozenData);
-            
+
             // Get balance data once (instead of via ActiveSummary which builds full EmployeeWithBalance objects)
             var beginningBalanceYear = (short)(req.ProfitYear - 1);
             var balances = _totalService.GetTotalBalanceSet(ctx, beginningBalanceYear);
@@ -126,14 +126,14 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
             // Helper to create line items from in-memory data
             YearEndProfitSharingReportSummaryLineItem CreateLineFromData(
-                string subgroup, 
-                string prefix, 
+                string subgroup,
+                string prefix,
                 string title,
                 Func<dynamic, bool> mainFilter,
                 Func<dynamic, bool>? totalsFilter = null)
             {
                 var mainGroup = summaryData.Where(mainFilter).ToList();
-                
+
                 var lineItem = new YearEndProfitSharingReportSummaryLineItem
                 {
                     Subgroup = subgroup,
@@ -157,12 +157,12 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             }
 
             // Helper predicates matching GetReportFilter logic
-            bool IsActiveOrInactive(dynamic x) => 
-                x.EmploymentStatus == EmploymentStatus.Constants.Active || 
+            bool IsActiveOrInactive(dynamic x) =>
+                x.EmploymentStatus == EmploymentStatus.Constants.Active ||
                 x.EmploymentStatus == EmploymentStatus.Constants.Inactive;
 
-            bool IsTerminatedAfterFiscalEnd(dynamic x) => 
-                x.EmploymentStatus == EmploymentStatus.Constants.Terminated && 
+            bool IsTerminatedAfterFiscalEnd(dynamic x) =>
+                x.EmploymentStatus == EmploymentStatus.Constants.Terminated &&
                 x.TerminationDate != null && x.TerminationDate > fiscalEndDate;
 
             bool IsTerminatedInFiscalYear(dynamic x) =>
@@ -185,8 +185,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     ((int)YearEndProfitSharingReportId.Age18To20With1000Hours).ToString(),
                     GetEnumDescription(YearEndProfitSharingReportId.Age18To20With1000Hours),
                     x => (IsActiveOrInactive(x) || IsTerminatedAfterFiscalEnd(x)) &&
-                         x.Hours >= _hoursThreshold && 
-                         x.DateOfBirth <= birthday18 && 
+                         x.Hours >= _hoursThreshold &&
+                         x.DateOfBirth <= birthday18 &&
                          x.DateOfBirth > birthday21),
 
                 // Line 2: Age 21+ with 1000+ hours
@@ -195,7 +195,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     ((int)YearEndProfitSharingReportId.Age21OrOlderWith1000Hours).ToString(),
                     GetEnumDescription(YearEndProfitSharingReportId.Age21OrOlderWith1000Hours),
                     x => (IsActiveOrInactive(x) || IsTerminatedAfterFiscalEnd(x)) &&
-                         x.Hours >= _hoursThreshold && 
+                         x.Hours >= _hoursThreshold &&
                          x.DateOfBirth <= birthday21),
 
                 // Line 3: Under 18
@@ -212,8 +212,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     ((int)YearEndProfitSharingReportId.Age18OrOlderWithLessThan1000HoursAndPriorAmount).ToString(),
                     GetEnumDescription(YearEndProfitSharingReportId.Age18OrOlderWithLessThan1000HoursAndPriorAmount),
                     x => (IsActiveOrInactive(x) || IsTerminatedAfterFiscalEnd(x)) &&
-                         x.Hours < _hoursThreshold && 
-                         x.DateOfBirth <= birthday18 && 
+                         x.Hours < _hoursThreshold &&
+                         x.DateOfBirth <= birthday18 &&
                          x.PriorBalance > 0),
 
                 // Line 5: Age 18+ with <1000 hours and no prior balance
@@ -222,8 +222,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     ((int)YearEndProfitSharingReportId.Age18OrOlderWithLessThan1000HoursAndNoPriorAmount).ToString(),
                     GetEnumDescription(YearEndProfitSharingReportId.Age18OrOlderWithLessThan1000HoursAndNoPriorAmount),
                     x => (IsActiveOrInactive(x) || IsTerminatedAfterFiscalEnd(x)) &&
-                         x.Hours < _hoursThreshold && 
-                         x.DateOfBirth <= birthday18 && 
+                         x.Hours < _hoursThreshold &&
+                         x.DateOfBirth <= birthday18 &&
                          x.PriorBalance == 0),
 
                 // Line 6: Terminated age 18+ with 1000+ hours
@@ -232,7 +232,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     ((int)YearEndProfitSharingReportId.TerminatedAge18OrOlderWith1000Hours).ToString(),
                     GetEnumDescription(YearEndProfitSharingReportId.TerminatedAge18OrOlderWith1000Hours),
                     x => IsTerminatedBeforeFiscalEnd(x) &&
-                         x.Hours >= _hoursThreshold && 
+                         x.Hours >= _hoursThreshold &&
                          x.DateOfBirth <= birthday18),
 
                 // Line 7: Terminated age 18+ with <1000 hours and no prior balance
@@ -241,8 +241,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     ((int)YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndNoPriorAmount).ToString(),
                     GetEnumDescription(YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndNoPriorAmount),
                     x => IsTerminatedInFiscalYear(x) &&
-                         x.Hours < _hoursThreshold && 
-                         x.DateOfBirth <= birthday18 && 
+                         x.Hours < _hoursThreshold &&
+                         x.DateOfBirth <= birthday18 &&
                          x.PriorBalance == 0),
 
                 // Line 8: Terminated age 18+ with <1000 hours and prior balance
@@ -252,13 +252,13 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     ((int)YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndPriorAmount).ToString(),
                     GetEnumDescription(YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndPriorAmount),
                     x => IsTerminatedInFiscalYear(x) &&
-                         x.Hours < _hoursThreshold && 
-                         x.DateOfBirth <= birthday18 && 
+                         x.Hours < _hoursThreshold &&
+                         x.DateOfBirth <= birthday18 &&
                          x.PriorBalance > 0,
                     // Totals filter: count all matching the pattern
-                    x => x.Hours >= 0 && 
-                         x.Hours < _hoursThreshold && 
-                         x.DateOfBirth <= birthday18 && 
+                    x => x.Hours >= 0 &&
+                         x.Hours < _hoursThreshold &&
+                         x.DateOfBirth <= birthday18 &&
                          x.PriorBalance > 0),
 
                 // Line 10: Terminated under 18 with no wages
@@ -267,7 +267,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     ((int)YearEndProfitSharingReportId.TerminatedUnder18NoWages).ToString(),
                     GetEnumDescription(YearEndProfitSharingReportId.TerminatedUnder18NoWages),
                     x => IsTerminatedInFiscalYear(x) &&
-                         x.Wages == 0 && 
+                         x.Wages == 0 &&
                          x.DateOfBirth > birthday18)
             };
 
