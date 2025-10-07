@@ -705,7 +705,7 @@ pipelines:
           deployment: QA
           trigger: "manual"
           script:
-            - ${env:ENV} = "QA"
+            - $env:ENV = "QA"
             - $env:API_SERVER_QA = "appt23d"
 
             - pwsh -File ./scripts/credsettings.ps1 `
@@ -796,7 +796,7 @@ pipelines:
               script:
                 - echo "Deploying application to UAT (reusing API artifact from Stage 2)..."
                 - $env:API_SERVER_UAT = "appt24d"
-                - ${env:ENV} = "UAT"            
+                - $env:ENV = "UAT"            
 
                 - pwsh -File ./scripts/credsettings.ps1 `
                   -Environment ${env:ENV} `
