@@ -20,10 +20,10 @@ interface ProfitShareReportSearch {
 const schema = yup.object().shape({
   badgeNumber: yup
     .number()
-    .typeError("Badge Number must be a number")
-    .integer("Badge Number must be an integer")
-    .min(0, "Badge must be positive")
-    .max(9999999, "Badge must be 7 digits or less")
+    .typeError("Profit Sharing Number must be a number")
+    .integer("Profit Sharing Number must be an integer")
+    .min(0, "Profit Sharing Number must be positive")
+    .max(9999999999, "Profit Sharing Number must be 10 digits or less")
     .nullable()
 });
 
@@ -101,7 +101,7 @@ const ProfitShareReportSearchFilters: React.FC<ProfitShareReportSearchFilterProp
         container
         paddingX="24px">
         <Grid size={{ xs: 12, sm: 3, md: 3 }}>
-          <FormLabel>Badge Number</FormLabel>
+          <FormLabel>Profit Sharing Number</FormLabel>
           <Controller
             name="badgeNumber"
             control={control}
