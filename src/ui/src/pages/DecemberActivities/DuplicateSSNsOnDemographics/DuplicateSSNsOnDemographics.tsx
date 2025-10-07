@@ -7,13 +7,7 @@ import useDuplicateSSNsOnDemographics from "./hooks/useDuplicateSSNsOnDemographi
 
 const DuplicateSSNsOnDemographics = () => {
   const componentRef = useRef<HTMLDivElement>(null);
-  const {
-    searchResults,
-    isSearching,
-    pagination,
-    showData,
-    hasResults
-  } = useDuplicateSSNsOnDemographics();
+  const { searchResults, isSearching, pagination, showData, hasResults } = useDuplicateSSNsOnDemographics();
 
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;

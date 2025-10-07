@@ -12,10 +12,7 @@ vi.mock("smart-ui-library", () => ({
 }));
 
 describe("usePrerequisiteNavigations", () => {
-  const createMockNavigation = (
-    id: number,
-    prerequisiteNavigations: NavigationDto[] = []
-  ): NavigationDto => ({
+  const createMockNavigation = (id: number, prerequisiteNavigations: NavigationDto[] = []): NavigationDto => ({
     id,
     parentId: 0,
     title: `Navigation ${id}`,

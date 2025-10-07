@@ -8,5 +8,6 @@
   "printWidth": 120,
   "arrowParens": "always",
   "singleAttributePerLine": true,
-  "bracketSameLine": true
+  "bracketSameLine": true,
+  "objectWrap": "preserve"
 }

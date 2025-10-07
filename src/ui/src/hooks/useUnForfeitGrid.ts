@@ -85,21 +85,25 @@ export const useUnForfeitGrid = ({
     ]
   );
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } = useGridPagination({
-    initialPageSize: 25,
-    initialSortBy: "fullName",
-    initialSortDescending: false,
-    onPaginationChange: useCallback(async (pageNum: number, pageSz: number, sortPrms: any) => {
-      if (initialSearchLoaded) {
-        const request = createRequest(pageNum * pageSz, sortPrms.sortBy, sortPrms.isSortDescending);
-        if (request && request.pagination) {
-          // Update the pageSize in the request
-          request.pagination.take = pageSz;
-          await triggerSearch(request, false);
-        }
-      }
-    }, [initialSearchLoaded, createRequest, triggerSearch])
-  });
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
+    useGridPagination({
+      initialPageSize: 25,
+      initialSortBy: "fullName",
+      initialSortDescending: false,
+      onPaginationChange: useCallback(
+        async (pageNum: number, pageSz: number, sortPrms: any) => {
+          if (initialSearchLoaded) {
+            const request = createRequest(pageNum * pageSz, sortPrms.sortBy, sortPrms.isSortDescending);
+            if (request && request.pagination) {
+              // Update the pageSize in the request
+              request.pagination.take = pageSz;
+              await triggerSearch(request, false);
+            }
+          }
+        },
+        [initialSearchLoaded, createRequest, triggerSearch]
+      )
+    });
 
   const onGridReady = useCallback((params: { api: GridApi }) => {
     setGridApi(params.api);
@@ -130,7 +134,8 @@ export const useUnForfeitGrid = ({
     const currentTotal = unForfeits?.response?.total;
 
     // Skip if this is the initial load (previous was undefined/null OR transitioning from 0 to non-zero)
-    const isInitialLoad = !prevUnForfeits.current || (prevTotal === 0 && currentTotal !== undefined && currentTotal > 0);
+    const isInitialLoad =
+      !prevUnForfeits.current || (prevTotal === 0 && currentTotal !== undefined && currentTotal > 0);
 
     if (
       !isBulkSaveInProgress &&

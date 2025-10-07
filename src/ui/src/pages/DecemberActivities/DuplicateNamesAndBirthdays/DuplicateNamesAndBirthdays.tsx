@@ -7,8 +7,7 @@ import useDuplicateNamesAndBirthdays from "./hooks/useDuplicateNamesAndBirthdays
 
 const DuplicateNamesAndBirthdays = () => {
   const componentRef = useRef<HTMLDivElement>(null);
-  const { searchResults, isSearching, pagination, showData, hasResults } =
-    useDuplicateNamesAndBirthdays();
+  const { searchResults, isSearching, pagination, showData, hasResults } = useDuplicateNamesAndBirthdays();
 
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;

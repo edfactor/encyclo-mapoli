@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { MasterInquirySearch } from "reduxstore/types";
-import { isSimpleSearch, memberTypeGetNumberMap, paymentTypeGetNumberMap, splitFullPSN } from "./MasterInquiryFunctions";
+import {
+  isSimpleSearch,
+  memberTypeGetNumberMap,
+  paymentTypeGetNumberMap,
+  splitFullPSN
+} from "./MasterInquiryFunctions";
 
 describe("MasterInquiryFunctions", () => {
   describe("paymentTypeGetNumberMap", () => {

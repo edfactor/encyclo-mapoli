@@ -13,21 +13,27 @@ const StoreContent: React.FC<StoreContentProps> = ({ store, onLoadingChange }) =
   // Note: this is the correct pattern, but probably does not apply to this component
   // as there are two different grids that need to reset their page number
   const [pageNumberReset, setPageNumberReset] = useState(false);
-  
+
   // Track loading state from both grids
   const [managementLoading, setManagementLoading] = useState(false);
   const [associatesLoading, setAssociatesLoading] = useState(false);
 
   // Notify parent when any grid is loading
-  const handleManagementLoadingChange = useCallback((isLoading: boolean) => {
-    setManagementLoading(isLoading);
-    onLoadingChange?.(isLoading || associatesLoading);
-  }, [associatesLoading, onLoadingChange]);
+  const handleManagementLoadingChange = useCallback(
+    (isLoading: boolean) => {
+      setManagementLoading(isLoading);
+      onLoadingChange?.(isLoading || associatesLoading);
+    },
+    [associatesLoading, onLoadingChange]
+  );
 
-  const handleAssociatesLoadingChange = useCallback((isLoading: boolean) => {
-    setAssociatesLoading(isLoading);
-    onLoadingChange?.(isLoading || managementLoading);
-  }, [managementLoading, onLoadingChange]);
+  const handleAssociatesLoadingChange = useCallback(
+    (isLoading: boolean) => {
+      setAssociatesLoading(isLoading);
+      onLoadingChange?.(isLoading || managementLoading);
+    },
+    [managementLoading, onLoadingChange]
+  );
 
   return (
     <Grid
@@ -38,7 +44,7 @@ const StoreContent: React.FC<StoreContentProps> = ({ store, onLoadingChange }) =
         <Typography
           variant="h2"
           sx={{ color: "#0258A5", marginBottom: "16px" }}>
-          {store ? `Store ${store}` : 'No Store Selected'}
+          {store ? `Store ${store}` : "No Store Selected"}
         </Typography>
       </Grid>
 

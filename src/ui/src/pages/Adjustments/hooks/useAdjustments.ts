@@ -1,10 +1,18 @@
 import { useCallback, useReducer, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetProfitMasterInquiryMemberDetailsQuery, useLazySearchProfitMasterInquiryQuery } from "../../../reduxstore/api/InquiryApi";
+import {
+  useLazyGetProfitMasterInquiryMemberDetailsQuery,
+  useLazySearchProfitMasterInquiryQuery
+} from "../../../reduxstore/api/InquiryApi";
 import { useMergeProfitsDetailMutation } from "../../../reduxstore/api/AdjustmentsApi";
 import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
 import { MasterInquiryRequest, MissiveResponse } from "../../../types";
-import { clearMasterInquiryData, clearMasterInquiryDataSecondary, setMasterInquiryData, setMasterInquiryDataSecondary } from "../../../reduxstore/slices/inquirySlice";
+import {
+  clearMasterInquiryData,
+  clearMasterInquiryDataSecondary,
+  setMasterInquiryData,
+  setMasterInquiryDataSecondary
+} from "../../../reduxstore/slices/inquirySlice";
 import { RootState } from "../../../reduxstore/store";
 
 interface SearchFormData {
@@ -17,7 +25,9 @@ export const useAdjustments = () => {
   const [triggerProfitDetails] = useLazyGetProfitMasterInquiryMemberDetailsQuery();
   const [mergeProfitsDetail, { isLoading: isMerging }] = useMergeProfitsDetailMutation();
   const reduxDispatch = useDispatch();
-  const { masterInquiryMemberDetails, masterInquiryMemberDetailsSecondary } = useSelector((state: RootState) => state.inquiry);
+  const { masterInquiryMemberDetails, masterInquiryMemberDetailsSecondary } = useSelector(
+    (state: RootState) => state.inquiry
+  );
   const { clearAlerts, addAlert } = useMissiveAlerts();
   const profitDetailsResponseSource = useRef<any>(null);
   const profitDetailsResponseDestination = useRef<any>(null);
@@ -25,18 +35,21 @@ export const useAdjustments = () => {
   const fetchProfitDetailsForMember = useCallback(
     async (member: any, isSecondary: boolean = false) => {
       try {
-        console.log(`Fetching profit details for ${isSecondary ? 'secondary' : 'primary'} member:`, member);
-        
+        console.log(`Fetching profit details for ${isSecondary ? "secondary" : "primary"} member:`, member);
+
         const profitDetailsResponse = await triggerProfitDetails({
           id: member.id,
           memberType: member.isEmployee ? 1 : 2
         }).unwrap();
 
-        console.log(`Profit details response for ${isSecondary ? 'secondary' : 'primary'} member:`, profitDetailsResponse);
+        console.log(
+          `Profit details response for ${isSecondary ? "secondary" : "primary"} member:`,
+          profitDetailsResponse
+        );
 
         // Handle empty results properly
         const hasResults = profitDetailsResponse?.results && profitDetailsResponse.results.length > 0;
-        
+
         if (!hasResults) {
           // Don't store anything if there are no results
           if (isSecondary) {
@@ -46,7 +59,7 @@ export const useAdjustments = () => {
           }
           return null;
         }
-        
+
         // Limit to 5 records for display (only when we have results)
         const limitedResponse = {
           ...profitDetailsResponse,
@@ -63,11 +76,11 @@ export const useAdjustments = () => {
 
         return limitedResponse;
       } catch (error) {
-        console.error(`Error fetching profit details for ${isSecondary ? 'secondary' : 'primary'} member:`, error);
+        console.error(`Error fetching profit details for ${isSecondary ? "secondary" : "primary"} member:`, error);
         addAlert({
           id: Date.now(),
           message: `Failed to fetch profit details`,
-          description: `Could not retrieve profit details for ${isSecondary ? 'destination' : 'source'} employee.`,
+          description: `Could not retrieve profit details for ${isSecondary ? "destination" : "source"} employee.`,
           severity: "warning"
         } as MissiveResponse);
         return null;
@@ -77,7 +90,7 @@ export const useAdjustments = () => {
   );
 
   const executeSearch = useCallback(
-    async (params: number [], profitYear: number) => {
+    async (params: number[], profitYear: number) => {
       try {
         clearAlerts();
 
@@ -100,7 +113,7 @@ export const useAdjustments = () => {
         if (responseSource?.results && responseSource.results.length > 0) {
           const sourceMember = responseSource.results[0];
           reduxDispatch(setMasterInquiryData(sourceMember));
-          
+
           // Fetch profit details for source member
           await fetchProfitDetailsForMember(sourceMember, false);
         } else {
@@ -108,8 +121,8 @@ export const useAdjustments = () => {
           profitDetailsResponseSource.current = null;
         }
 
-        if (responseSource.results.length === 0){
-            addSsnDoesNotExistAlert(params[0]);
+        if (responseSource.results.length === 0) {
+          addSsnDoesNotExistAlert(params[0]);
         }
 
         // Search for destination member
@@ -117,7 +130,7 @@ export const useAdjustments = () => {
         if (responseDestination?.results && responseDestination.results.length > 0) {
           const destinationMember = responseDestination.results[0];
           reduxDispatch(setMasterInquiryDataSecondary(destinationMember));
-          
+
           // Fetch profit details for destination member
           await fetchProfitDetailsForMember(destinationMember, true);
         } else {
@@ -125,15 +138,16 @@ export const useAdjustments = () => {
           profitDetailsResponseDestination.current = null;
         }
 
-        if (responseDestination.results.length === 0){
-           addSsnDoesNotExistAlert(params[1]);
+        if (responseDestination.results.length === 0) {
+          addSsnDoesNotExistAlert(params[1]);
         }
-      }
-      catch (error) {
+      } catch (error) {
         addAlert({
           id: Date.now(),
-          message: error instanceof Error ? error.message : `Generic retrieval failure ssns: ${params[0]} or ${params[1]}`,
-          description: error instanceof Error ? error.message : `Generic retrieval failure ssns: ${params[0]} or ${params[1]}`,
+          message:
+            error instanceof Error ? error.message : `Generic retrieval failure ssns: ${params[0]} or ${params[1]}`,
+          description:
+            error instanceof Error ? error.message : `Generic retrieval failure ssns: ${params[0]} or ${params[1]}`,
           severity: "error"
         } as MissiveResponse);
         console.error("Error during search:", error);
@@ -207,7 +221,7 @@ export const useAdjustments = () => {
         // Call the merge API with converted numbers
         const mergeRequest = {
           sourceSsn: sourceSSNNumber,
-          destinationSsn: destinationSSNNumber,
+          destinationSsn: destinationSSNNumber
         };
 
         console.log("Executing merge with request:", mergeRequest);
@@ -224,12 +238,11 @@ export const useAdjustments = () => {
 
         console.log("Merge response:", response);
         return true;
-
       } catch (error) {
         console.error("Merge failed:", error);
-        
+
         const errorMessage = error instanceof Error ? error.message : "Unknown error occurred during merge";
-        
+
         addAlert({
           id: Date.now(),
           message: "Merge failed",
@@ -243,14 +256,17 @@ export const useAdjustments = () => {
     [mergeProfitsDetail, masterInquiryMemberDetails, masterInquiryMemberDetailsSecondary, addAlert, clearAlerts]
   );
 
-  const addSsnDoesNotExistAlert = useCallback((ssn: number) => {
-    addAlert({
-      id: Date.now(),
-      message: `No member found with SSN: ${ssn}`,
-      description: `No member found with SSN: ${ssn}`,
-      severity: "warning"
-    } as MissiveResponse);
-  }, [addAlert]);
+  const addSsnDoesNotExistAlert = useCallback(
+    (ssn: number) => {
+      addAlert({
+        id: Date.now(),
+        message: `No member found with SSN: ${ssn}`,
+        description: `No member found with SSN: ${ssn}`,
+        severity: "warning"
+      } as MissiveResponse);
+    },
+    [addAlert]
+  );
 
   const resetSearch = useCallback(() => {
     reduxDispatch(clearMasterInquiryData());
@@ -260,11 +276,11 @@ export const useAdjustments = () => {
 
   const canMerge = masterInquiryMemberDetails && masterInquiryMemberDetailsSecondary;
 
-  return { 
-    isSearching: false, 
+  return {
+    isSearching: false,
     isMerging,
     canMerge,
-    executeSearch, 
+    executeSearch,
     executeMerge,
     resetSearch,
     fetchProfitDetailsForMember,

@@ -18,8 +18,9 @@ const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLo
     isSortDescending: false
   });
 
-  const { balanceByYearsTotal, balanceByYearsFullTime, balanceByYearsPartTime } =
-    useSelector((state: RootState) => state.yearsEnd);
+  const { balanceByYearsTotal, balanceByYearsFullTime, balanceByYearsPartTime } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 

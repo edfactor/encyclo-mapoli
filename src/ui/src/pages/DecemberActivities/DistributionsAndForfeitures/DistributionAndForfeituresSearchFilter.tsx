@@ -17,6 +17,7 @@ import useFiscalCalendarYear from "hooks/useFiscalCalendarYear";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { format } from "date-fns";
 import { tryddmmyyyyToDate } from "../../../utils/dateUtils";
+import { endDateAfterStartDateValidator } from "../../../utils/FormValidators";
 
 const formatDateOnly = (date: Date | null): string | undefined => {
   if (!date) return undefined;
@@ -30,14 +31,7 @@ interface DistributionsAndForfeituresSearch {
 
 const schema = yup.object().shape({
   startDate: yup.date().nullable(),
-  endDate: yup
-    .date()
-    .nullable()
-    .test("is-after-start", "End Date must be after Start Date", function (value) {
-      const { startDate } = this.parent;
-      if (!startDate || !value) return true;
-      return value > startDate;
-    })
+  endDate: endDateAfterStartDateValidator("startDate")
 });
 
 interface DistributionsAndForfeituresSearchFilterProps {

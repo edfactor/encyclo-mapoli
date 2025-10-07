@@ -13,11 +13,9 @@ interface DistributionByAgeGridProps {
 }
 
 const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSearchLoaded }) => {
-  const {
-    distributionsByAgeTotal,
-    distributionsByAgeFullTime,
-    distributionsByAgePartTime
-  } = useSelector((state: RootState) => state.yearsEnd);
+  const { distributionsByAgeTotal, distributionsByAgeFullTime, distributionsByAgePartTime } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
 
   const { handleSortChange } = useGridPagination({
     initialPageSize: 255,

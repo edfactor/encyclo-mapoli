@@ -17,7 +17,12 @@ interface StoreManagementGridProps {
   onLoadingChange?: (isLoading: boolean) => void;
 }
 
-const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store, pageNumberReset, setPageNumberReset, onLoadingChange }) => {
+const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({
+  store,
+  pageNumberReset,
+  setPageNumberReset,
+  onLoadingChange
+}) => {
   const [fetchStoreManagement, { isFetching }] = useLazyGetBreakdownByStoreQuery();
   const storeManagement = useSelector((state: RootState) => state.yearsEnd.storeManagementBreakdown);
   const queryParams = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreQueryParams);
@@ -25,29 +30,41 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store, pageNu
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useDecemberFlowProfitYear();
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } = useGridPagination({
-    initialPageSize: 10,
-    initialSortBy: "badgeNumber",
-    initialSortDescending: false,
-    onPaginationChange: useCallback(async (pageNum: number, pageSz: number, sortPrms: any) => {
-      if (hasToken) {
-        const params = {
-          profitYear: queryParams?.profitYear || profitYear,
-          storeNumber: store,
-          storeManagement: true,
-          badgeNumber: queryParams?.badgeNumber,
-          employeeName: queryParams?.employeeName,
-          pagination: {
-            skip: pageNum * pageSz,
-            take: pageSz,
-            sortBy: sortPrms.sortBy,
-            isSortDescending: sortPrms.isSortDescending
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
+    useGridPagination({
+      initialPageSize: 10,
+      initialSortBy: "badgeNumber",
+      initialSortDescending: false,
+      onPaginationChange: useCallback(
+        async (pageNum: number, pageSz: number, sortPrms: any) => {
+          if (hasToken) {
+            const params = {
+              profitYear: queryParams?.profitYear || profitYear,
+              storeNumber: store,
+              storeManagement: true,
+              badgeNumber: queryParams?.badgeNumber,
+              employeeName: queryParams?.employeeName,
+              pagination: {
+                skip: pageNum * pageSz,
+                take: pageSz,
+                sortBy: sortPrms.sortBy,
+                isSortDescending: sortPrms.isSortDescending
+              }
+            };
+            await fetchStoreManagement(params);
           }
-        };
-        await fetchStoreManagement(params);
-      }
-    }, [hasToken, queryParams?.profitYear, profitYear, store, queryParams?.badgeNumber, queryParams?.employeeName, fetchStoreManagement])
-  });
+        },
+        [
+          hasToken,
+          queryParams?.profitYear,
+          profitYear,
+          store,
+          queryParams?.badgeNumber,
+          queryParams?.employeeName,
+          fetchStoreManagement
+        ]
+      )
+    });
 
   const handleNavigation = useCallback(
     (path: string) => {

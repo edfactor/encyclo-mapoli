@@ -51,7 +51,8 @@ const TerminatedLettersSearchFilter: React.FC<TerminatedLettersSearchFilterProps
     resolver: yupResolver(schema) as Resolver<TerminatedLettersSearch>,
     defaultValues: {
       profitYear: profitYear || terminatedLettersQueryParams?.profitYear || undefined,
-      beginningDate: terminatedLettersQueryParams?.beginningDate || (fiscalData ? fiscalData.fiscalBeginDate : "") || "",
+      beginningDate:
+        terminatedLettersQueryParams?.beginningDate || (fiscalData ? fiscalData.fiscalBeginDate : "") || "",
       endingDate: terminatedLettersQueryParams?.endingDate || (fiscalData ? fiscalData.fiscalEndDate : "") || ""
     }
   });

@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Divider, Grid, Typography } from "@mui/material";
+import { Box, CircularProgress, Divider, Grid, Typography } from "@mui/material";
 import ProfitShareTotalsDisplay from "components/ProfitShareTotalsDisplay";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
@@ -9,10 +9,10 @@ import { RootState } from "reduxstore/store";
 import { FilterParams } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
+import { useLazyGetYearEndProfitSharingReportTotalsQuery } from "../../reduxstore/api/YearsEndApi.ts";
 import ProfitSummary from "../PAY426Reports/ProfitSummary/ProfitSummary";
 import ProfitShareReportGrid from "./ProfitShareReportGrid";
-import ProfitShareReportSearchFilters from "./ProfitShareReportSearchFilters";
-import { useLazyGetYearEndProfitSharingReportTotalsQuery } from "../../reduxstore/api/YearsEndApi.ts";
+import ProfitShareReportSearchFilter from "./ProfitShareReportSearchFilter.tsx";
 
 const ProfitShareReport = () => {
   const [selectedPresetParams, setSelectedPresetParams] = useState<FilterParams | null>(null);
@@ -163,7 +163,7 @@ const ProfitShareReport = () => {
             width="100%"
             data-testid="filter-section">
             <DSMAccordion title="Filter">
-              <ProfitShareReportSearchFilters
+              <ProfitShareReportSearchFilter
                 profitYear={profitYear}
                 presetParams={selectedPresetParams}
                 onSearchParamsUpdate={handleSearchParamsUpdate}

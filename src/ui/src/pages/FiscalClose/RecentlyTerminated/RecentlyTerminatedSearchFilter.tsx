@@ -18,7 +18,6 @@ import { mmDDYYFormat, tryddmmyyyyToDate } from "utils/dateUtils";
 import * as yup from "yup";
 import { profitYearValidator } from "../../../utils/FormValidators";
 
-
 interface RecentlyTerminatedSearch {
   profitYear: number;
   beginningDate: string;
@@ -52,7 +51,8 @@ const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterPro
     resolver: yupResolver(schema) as Resolver<RecentlyTerminatedSearch>,
     defaultValues: {
       profitYear: profitYear || recentlyTerminatedQueryParams?.profitYear || undefined,
-      beginningDate: recentlyTerminatedQueryParams?.beginningDate || (fiscalData ? fiscalData.fiscalBeginDate : "") || "",
+      beginningDate:
+        recentlyTerminatedQueryParams?.beginningDate || (fiscalData ? fiscalData.fiscalBeginDate : "") || "",
       endingDate: recentlyTerminatedQueryParams?.endingDate || (fiscalData ? fiscalData.fiscalEndDate : "") || ""
     }
   });

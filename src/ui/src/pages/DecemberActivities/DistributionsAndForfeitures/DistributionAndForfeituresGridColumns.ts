@@ -39,11 +39,11 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       headerName: "Forfeit Amount",
       field: "forfeitAmount"
     }),
-    createAgeColumn({ 
+    createAgeColumn({
       headerName: "Age @ Txn",
       headerTooltip: "The age is for the member at the time of the transaction, rather than the current age.",
       tooltip: "The age is for the member at the time of the transaction, rather than the current age."
-     }),
+    }),
     createTaxCodeColumn({
       field: "taxCode",
 

@@ -24,19 +24,22 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ _filterParams, onLoadingCha
     initialPageSize: 25,
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
-    onPaginationChange: useCallback((pageNum: number, pageSz: number, sortPrms: any) => {
-      if (hasToken) {
-        getQPAY066BData({
-          profitYear: 2024,
-          pagination: {
-            take: pageSz,
-            skip: pageNum * pageSz,
-            sortBy: sortPrms.sortBy,
-            isSortDescending: sortPrms.isSortDescending
-          }
-        });
-      }
-    }, [hasToken, getQPAY066BData])
+    onPaginationChange: useCallback(
+      (pageNum: number, pageSz: number, sortPrms: any) => {
+        if (hasToken) {
+          getQPAY066BData({
+            profitYear: 2024,
+            pagination: {
+              take: pageSz,
+              skip: pageNum * pageSz,
+              sortBy: sortPrms.sortBy,
+              isSortDescending: sortPrms.isSortDescending
+            }
+          });
+        }
+      },
+      [hasToken, getQPAY066BData]
+    )
   });
 
   useEffect(() => {

@@ -27,28 +27,32 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const columnDefs = useMemo(() => GetProfitShareForfeitColumns(), []);
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } = useGridPagination({
-    initialPageSize: 25,
-    initialSortBy: "badgeNumber",
-    initialSortDescending: false,
-    onPaginationChange: useCallback(async (pageNum: number, pageSz: number, sortPrms: any) => {
-      if (initialSearchLoaded) {
-        await triggerSearch(
-          {
-            profitYear: fiscalCloseProfitYear,
-            useFrozenData: true,
-            pagination: {
-              skip: pageNum * pageSz,
-              take: pageSz,
-              sortBy: sortPrms.sortBy,
-              isSortDescending: sortPrms.isSortDescending
-            }
-          },
-          false
-        ).unwrap();
-      }
-    }, [initialSearchLoaded, fiscalCloseProfitYear, triggerSearch])
-  });
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
+    useGridPagination({
+      initialPageSize: 25,
+      initialSortBy: "badgeNumber",
+      initialSortDescending: false,
+      onPaginationChange: useCallback(
+        async (pageNum: number, pageSz: number, sortPrms: any) => {
+          if (initialSearchLoaded) {
+            await triggerSearch(
+              {
+                profitYear: fiscalCloseProfitYear,
+                useFrozenData: true,
+                pagination: {
+                  skip: pageNum * pageSz,
+                  take: pageSz,
+                  sortBy: sortPrms.sortBy,
+                  isSortDescending: sortPrms.isSortDescending
+                }
+              },
+              false
+            ).unwrap();
+          }
+        },
+        [initialSearchLoaded, fiscalCloseProfitYear, triggerSearch]
+      )
+    });
 
   const onSearch = useCallback(async () => {
     await triggerSearch(
