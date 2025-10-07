@@ -198,8 +198,7 @@ public class NavigationService : INavigationService
         var serialized = JsonSerializer.SerializeToUtf8Bytes(navigationTree);
         var cacheOptions = new DistributedCacheEntryOptions
         {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30),
-            SlidingExpiration = TimeSpan.FromMinutes(15)
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
         };
         await _distributedCache.SetAsync(cacheKey, serialized, cacheOptions, cancellationToken);
 
