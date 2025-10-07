@@ -27,7 +27,7 @@ const initialState: TerminationState = {
   resetPageFlag: false,
   currentStatus: null,
   archiveMode: false,
-  shouldArchive: false,
+  shouldArchive: false
 };
 
 function terminationReducer(state: TerminationState, action: TerminationAction): TerminationState {
@@ -37,25 +37,25 @@ function terminationReducer(state: TerminationState, action: TerminationAction):
         ...state,
         searchParams: action.payload,
         initialSearchLoaded: true,
-        resetPageFlag: !state.resetPageFlag,
+        resetPageFlag: !state.resetPageFlag
       };
 
     case "SET_INITIAL_SEARCH_LOADED":
       return {
         ...state,
-        initialSearchLoaded: action.payload,
+        initialSearchLoaded: action.payload
       };
 
     case "SET_UNSAVED_CHANGES":
       return {
         ...state,
-        hasUnsavedChanges: action.payload,
+        hasUnsavedChanges: action.payload
       };
 
     case "TOGGLE_RESET_PAGE_FLAG":
       return {
         ...state,
-        resetPageFlag: !state.resetPageFlag,
+        resetPageFlag: !state.resetPageFlag
       };
 
     case "SET_STATUS_CHANGE": {
@@ -64,9 +64,7 @@ function terminationReducer(state: TerminationState, action: TerminationAction):
       const isChangingToComplete = isCompleteLike && state.currentStatus !== statusName;
 
       if (isChangingToComplete) {
-        const updatedSearchParams = state.searchParams
-          ? { ...state.searchParams, archive: true }
-          : null;
+        const updatedSearchParams = state.searchParams ? { ...state.searchParams, archive: true } : null;
 
         return {
           ...state,
@@ -74,7 +72,7 @@ function terminationReducer(state: TerminationState, action: TerminationAction):
           archiveMode: true,
           shouldArchive: true,
           searchParams: updatedSearchParams,
-          resetPageFlag: !state.resetPageFlag,
+          resetPageFlag: !state.resetPageFlag
         };
       } else {
         const shouldResetArchive = !isCompleteLike;
@@ -90,7 +88,7 @@ function terminationReducer(state: TerminationState, action: TerminationAction):
           currentStatus: statusName || null,
           archiveMode: shouldResetArchive ? false : state.archiveMode,
           searchParams: shouldResetArchive ? updatedSearchParams : state.searchParams,
-          resetPageFlag: shouldResetArchive ? !state.resetPageFlag : state.resetPageFlag,
+          resetPageFlag: shouldResetArchive ? !state.resetPageFlag : state.resetPageFlag
         };
       }
     }
@@ -98,7 +96,7 @@ function terminationReducer(state: TerminationState, action: TerminationAction):
     case "SET_ARCHIVE_HANDLED":
       return {
         ...state,
-        shouldArchive: false,
+        shouldArchive: false
       };
 
     case "RESET_STATE":
@@ -112,13 +110,16 @@ function terminationReducer(state: TerminationState, action: TerminationAction):
 export const useTerminationState = () => {
   const [state, dispatch] = useReducer(terminationReducer, initialState);
 
-  const handleSearch = useCallback((params: TerminationSearchRequest) => {
-    const searchParamsWithArchive = {
-      ...params,
-      ...(state.archiveMode && { archive: true }),
-    };
-    dispatch({ type: "SET_SEARCH_PARAMS", payload: searchParamsWithArchive });
-  }, [state.archiveMode]);
+  const handleSearch = useCallback(
+    (params: TerminationSearchRequest) => {
+      const searchParamsWithArchive = {
+        ...params,
+        ...(state.archiveMode && { archive: true })
+      };
+      dispatch({ type: "SET_SEARCH_PARAMS", payload: searchParamsWithArchive });
+    },
+    [state.archiveMode]
+  );
 
   const handleUnsavedChanges = useCallback((hasChanges: boolean) => {
     dispatch({ type: "SET_UNSAVED_CHANGES", payload: hasChanges });
@@ -143,7 +144,7 @@ export const useTerminationState = () => {
       handleUnsavedChanges,
       handleStatusChange,
       handleArchiveHandled,
-      setInitialSearchLoaded,
-    },
+      setInitialSearchLoaded
+    }
   };
 };
