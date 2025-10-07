@@ -9,7 +9,7 @@ import * as yup from "yup";
 interface ExecutiveHoursAndDollarsSearch {
   profitYear: number;
   badgeNumber?: number | null | undefined;
-  socialSecurity?: number | undefined;
+  socialSecurity?: string | undefined;
   fullNameContains?: string | null;
   hasExecutiveHoursAndDollars: NonNullable<boolean>;
   isMonthlyPayroll: NonNullable<boolean>;
@@ -19,11 +19,12 @@ const validationSchema = yup
   .object({
     profitYear: yup.number().required("Profit Year is required").typeError("Profit Year must be a number"),
     socialSecurity: yup
-      .number()
-      .typeError("SSN must be a number")
-      .integer("SSN must be an integer")
-      .min(0, "SSN must be positive")
-      .max(999999999, "SSN must be 9 digits or less")
+      .string()
+      .nullable()
+      .test("is-9-digits", "SSN must be exactly 9 digits", function (value) {
+        if (!value) return true;
+        return /^\d{9}$/.test(value);
+      })
       .transform((value) => value || undefined),
     badgeNumber: yup
       .number()
@@ -111,7 +112,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     trigger // need this unused param to prevent console errors. No idea why - EL
   } = useForm<ExecutiveHoursAndDollarsSearch>({
     resolver: yupResolver(validationSchema) as Resolver<ExecutiveHoursAndDollarsSearch>,
-    mode: "onChange",
+    mode: "onBlur",
     defaultValues: {
       profitYear: profitYear,
       badgeNumber: undefined,
@@ -260,14 +261,21 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                   value={field.value ?? ""}
                   error={!!errors.socialSecurity}
                   onChange={(e) => {
-                    if (!isNaN(Number(e.target.value))) {
-                      const parsedValue = e.target.value === "" ? null : Number(e.target.value);
-                      field.onChange(parsedValue);
-                      if (e.target.value !== "") {
-                        toggleSearchFieldEntered(true, "socialSecurity");
-                      } else {
-                        toggleSearchFieldEntered(false, "socialSecurity");
-                      }
+                    const value = e.target.value;
+                    // Only allow numeric input
+                    if (value !== "" && !/^\d*$/.test(value)) {
+                      return;
+                    }
+                    // Prevent input beyond 9 characters
+                    if (value.length > 9) {
+                      return;
+                    }
+                    const parsedValue = value === "" ? null : value;
+                    field.onChange(parsedValue);
+                    if (value !== "") {
+                      toggleSearchFieldEntered(true, "socialSecurity");
+                    } else {
+                      toggleSearchFieldEntered(false, "socialSecurity");
                     }
                   }}
                 />

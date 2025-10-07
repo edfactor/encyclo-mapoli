@@ -59,12 +59,12 @@ const schema = yup.object().shape({
     .min(yup.ref("startProfitMonth"), "End month must be after start month")
     .nullable(),
   socialSecurity: yup
-    .number()
-    .typeError("SSN must be a number")
-    .integer("SSN must be an integer")
-    .min(0, "SSN must be positive")
-    .max(999999999, "SSN must be 9 digits or less")
-    .nullable(),
+    .string()
+    .nullable()
+    .test("is-9-digits", "SSN must be exactly 9 digits", function (value) {
+      if (!value) return true;
+      return /^\d{9}$/.test(value);
+    }),
   name: yup.string().nullable(),
   badgeNumber: yup
     .number()
@@ -118,6 +118,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       setValue
     } = useForm<MasterInquirySearch>({
       resolver: yupResolver(schema) as any,
+      mode: "onBlur",
       defaultValues: {
         endProfitYear: profitYear,
         startProfitMonth: masterInquiryRequestParams?.startProfitMonth || undefined,
@@ -328,16 +329,29 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
                 error={!!errors[name]}
                 disabled={disabled}
                 onChange={(e) => {
+                  const value = e.target.value;
+
+                  // For SSN and badge fields, only allow numeric input
+                  if (name === "socialSecurity" || name === "badgeNumber") {
+                    if (value !== "" && !/^\d*$/.test(value)) {
+                      return;
+                    }
+                  }
+
                   // Prevent input beyond 11 characters for badgeNumber
-                  if (name === "badgeNumber" && e.target.value.length > 11) {
+                  if (name === "badgeNumber" && value.length > 11) {
+                    return;
+                  }
+                  // Prevent input beyond 9 characters for socialSecurity
+                  if (name === "socialSecurity" && value.length > 9) {
                     return;
                   }
                   const parsedValue =
-                    type === "number" && e.target.value !== ""
-                      ? Number(e.target.value)
-                      : e.target.value === ""
+                    type === "number" && value !== ""
+                      ? Number(value)
+                      : value === ""
                         ? null
-                        : e.target.value;
+                        : value;
                   field.onChange(parsedValue);
 
                   // Auto-update memberType when badgeNumber changes
@@ -543,7 +557,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
             <TextInputField
               name="socialSecurity"
               label="Social Security Number"
-              type="number"
+              type="text"
               disabled={isSocialSecurityDisabled}
             />
             <TextInputField

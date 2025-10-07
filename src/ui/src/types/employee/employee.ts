@@ -87,6 +87,7 @@ export interface EligibleEmployeeResponseDto extends PagedReportResponse<Eligibl
 
 export interface YearEndProfitSharingReportRequest extends FilterParams {
   profitYear: number;
+  useFrozenData?: boolean;
   pagination: SortedPaginationRequestDto;
 }
 

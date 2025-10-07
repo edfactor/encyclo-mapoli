@@ -2,8 +2,6 @@ import { Divider } from "@mui/material";
 import { Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
-import { clearYearEndProfitSharingReport } from "reduxstore/slices/yearsEndSlice";
 import { ReportPreset } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
@@ -15,10 +13,8 @@ const QPAY066AdHocReports: React.FC = () => {
   const [currentPreset, setCurrentPreset] = useState<ReportPreset | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [storeNumber, setStoreNumber] = useState<string>("");
-  const dispatch = useDispatch();
 
   const handlePresetChange = (preset: ReportPreset | null) => {
-    dispatch(clearYearEndProfitSharingReport());
     setCurrentPreset(preset);
   };
 

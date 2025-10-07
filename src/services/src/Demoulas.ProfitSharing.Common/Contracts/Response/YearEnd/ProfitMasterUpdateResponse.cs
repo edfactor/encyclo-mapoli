@@ -1,4 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
@@ -30,6 +31,12 @@ public sealed record ProfitMasterUpdateResponse
     public required decimal AdjustIncomingForfeitAmount { get; set; }
     public required decimal AdjustEarningsSecondaryAmount { get; set; }
     public int TransactionsCreated { get; set; }
+
+    /// <summary>
+    /// Cross-reference validation results showing which prerequisite report values match/don't match.
+    /// Includes validations for PAY443 (Forfeitures and Points), QPAY129, QPAY066TA, etc.
+    /// </summary>
+    public MasterUpdateCrossReferenceValidationResponse? CrossReferenceValidation { get; set; }
 
 
     public static ProfitMasterUpdateResponse Example()

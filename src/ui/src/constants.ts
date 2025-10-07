@@ -39,7 +39,6 @@ export const ROUTES = {
   MISSING_COMMA: "missing-comma-in-py-name",
   REHIRE_FORFEITURES: "unforfeitures",
   PROFIT_SHARE_REPORT: "profit-share-report",
-  PROFIT_SHARE_TOTALS: "profit-share-totals",
   PROFIT_SHARE_UPDATE: "profit-share-update",
   PROFNEW: "/",
 
@@ -62,7 +61,8 @@ export const ROUTES = {
   PAY426_TERMINATED_PRIOR: "pay426-8",
   PAY426_SUMMARY: "pay426-9",
   PAY426_NON_EMPLOYEE: "pay426-10",
-  PAY426N: "pay426n",
+  PAY426N_LIVE: "pay426n_live",
+  PAY426N_FROZEN: "pay426n_frozen",
   QPAY066_ADHOC: "qpay066-adhoc",
   QPAY066B: "qpay066b",
   QPAY600: "qpay600",

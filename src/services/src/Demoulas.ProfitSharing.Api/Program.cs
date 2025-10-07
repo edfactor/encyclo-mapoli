@@ -30,6 +30,18 @@ using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder();
 
+// Note: Kestrel configuration only applies to dev environment
+// Production uses IIS with its own timeout configuration in web.config
+if (builder.Environment.IsDevelopment())
+{
+    builder.WebHost.ConfigureKestrel(options =>
+    {
+        // 3-minute timeout for dev (provides buffer for 2-minute endpoint timeout)
+        options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(3);
+        options.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(30);
+    });
+}
+
 if (!builder.Environment.IsTestEnvironment())
 {
     builder.Configuration

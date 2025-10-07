@@ -4,7 +4,7 @@ export interface MasterInquirySearch {
   endProfitYear?: number | null;
   startProfitMonth?: number | null;
   endProfitMonth?: number | null;
-  socialSecurity?: number | null;
+  socialSecurity?: string | null;
   name?: string | null;
   badgeNumber?: number | null;
   comment?: string | null;

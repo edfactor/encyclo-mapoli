@@ -10,14 +10,15 @@ import { RootState } from "../../../../reduxstore/store";
 
 interface TotalsContentProps {
   store: number | null;
+  onLoadingChange?: (isLoading: boolean) => void;
 }
 
-const TotalsContent: React.FC<TotalsContentProps> = ({ store }) => {
+const TotalsContent: React.FC<TotalsContentProps> = ({ store, onLoadingChange }) => {
   const { breakdownByStoreTotals } = useSelector((state: RootState) => state.yearsEnd);
   const profitYear = useDecemberFlowProfitYear();
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   // Use the API hook to fetch data
-  const [getBreakdownByStoreTotals] = useLazyGetBreakdownByStoreTotalsQuery();
+  const [getBreakdownByStoreTotals, { isFetching }] = useLazyGetBreakdownByStoreTotalsQuery();
 
   useEffect(() => {
     if (hasToken && store) {
@@ -34,6 +35,11 @@ const TotalsContent: React.FC<TotalsContentProps> = ({ store }) => {
       });
     }
   }, [store, profitYear, getBreakdownByStoreTotals, hasToken]);
+
+  // Notify parent component about loading state changes
+  useEffect(() => {
+    onLoadingChange?.(isFetching);
+  }, [isFetching, onLoadingChange]);
 
   // Prepare data for display, using actual values when available
   const data = [
@@ -76,18 +82,22 @@ const TotalsContent: React.FC<TotalsContentProps> = ({ store }) => {
       container
       direction="column"
       width="100%">
-      <Grid paddingX="24px">
-        <Typography
-          variant="h2"
-          sx={{ color: "#0258A5", marginBottom: "16px" }}>
-          {store ? `Totals for Store ${store}` : 'Totals'}
-        </Typography>
-      </Grid>
-      <Grid
-        width="100%"
-        paddingX="24px">
-        <LabelValueSection data={data} />
-      </Grid>
+      {breakdownByStoreTotals && (
+        <>
+          <Grid paddingX="24px">
+            <Typography
+              variant="h2"
+              sx={{ color: "#0258A5", marginBottom: "16px" }}>
+              {store && store > 0 ? `Totals for Store ${store}` : 'Totals For All Stores'}
+            </Typography>
+          </Grid>
+          <Grid
+            width="100%"
+            paddingX="24px">
+            <LabelValueSection data={data} />
+          </Grid>
+        </>
+      )}
     </Grid>
   );
 };
