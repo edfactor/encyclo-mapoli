@@ -16,7 +16,7 @@ import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "utils/dateUtils";
 import * as yup from "yup";
-import { profitYearValidator } from "../../../utils/FormValidators";
+import { endDateStringAfterStartDateValidator, profitYearValidator } from "../../../utils/FormValidators";
 
 interface RecentlyTerminatedSearch {
   profitYear: number;
@@ -27,7 +27,11 @@ interface RecentlyTerminatedSearch {
 const schema = yup.object().shape({
   profitYear: profitYearValidator,
   beginningDate: yup.string().required("Begin Date is required"),
-  endingDate: yup.string().required("End Date is required")
+  endingDate: endDateStringAfterStartDateValidator(
+    "beginningDate",
+    tryddmmyyyyToDate,
+    "Ending date must be the same or after the beginning date"
+  )
 });
 
 interface RecentlyTerminatedSearchFilterProps {
