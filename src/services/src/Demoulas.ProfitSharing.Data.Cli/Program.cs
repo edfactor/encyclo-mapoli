@@ -381,6 +381,28 @@ public sealed class Program
 
         await context.Database.ExecuteSqlRawAsync(gatherStats);
         Console.WriteLine("Gathered schema stats");
+
+        // Log Demographics table count
+        var demographicsCount = await context.Demographics.CountAsync();
+        Console.WriteLine($"Demographics table count: {demographicsCount:N0}");
+        if (demographicsCount == 0)
+        {
+            throw new InvalidOperationException("Demographics table is empty. Import validation failed.");
+        }
+
+        var payProfitsCount = await context.PayProfits.CountAsync();
+        Console.WriteLine($"PayProfits table count: {payProfitsCount:N0}");
+        if (payProfitsCount == 0)
+        {
+            throw new InvalidOperationException("PayProfits table is empty. Import validation failed.");
+        }
+
+        var profitDetailsCount = await context.ProfitDetails.CountAsync();
+        Console.WriteLine($"Details table count: {profitDetailsCount:N0}");
+        if (profitDetailsCount == 0)
+        {
+            throw new InvalidOperationException("ProfitDetails table is empty. Import validation failed.");
+        }
     }
 
     private static void ValidateRequired(string? value, string optionName)
