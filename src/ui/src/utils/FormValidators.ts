@@ -153,6 +153,28 @@ export const endDateStringAfterStartDateValidator = (
     });
 
 /**
+ * Returns a validator for a date string in MM/DD/YYYY format with year range validation
+ * @param minYear - Minimum allowed year (default: 2000)
+ * @param maxYear - Maximum allowed year (default: 2099)
+ * @param fieldName - Optional field name for error messages (default: "Date")
+ */
+export const dateStringValidator = (minYear: number = 2000, maxYear: number = 2099, fieldName: string = "Date") =>
+  yup
+    .string()
+    .nullable()
+    .test("is-valid-format", `${fieldName} must be in MM/DD/YYYY format`, function (value) {
+      if (!value) return true;
+      return /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(value);
+    })
+    .test("is-valid-year", `Year must be between ${minYear} and ${maxYear}`, function (value) {
+      if (!value) return true;
+      const match = value.match(/^\d{1,2}\/\d{1,2}\/(\d{4})$/);
+      if (!match) return true;
+      const year = parseInt(match[1]);
+      return year >= minYear && year <= maxYear;
+    });
+
+/**
  * Handler for SSN input that only allows numeric characters up to 9 digits
  * @param value - The input value from the TextField
  * @returns The validated value or null if invalid

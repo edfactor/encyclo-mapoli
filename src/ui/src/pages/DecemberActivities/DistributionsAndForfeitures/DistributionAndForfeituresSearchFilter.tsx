@@ -1,9 +1,11 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { CircularProgress, FormHelperText } from "@mui/material";
-import { Grid } from "@mui/material";
+import { CircularProgress, FormHelperText, Grid } from "@mui/material";
+import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
+import { format } from "date-fns";
+import useFiscalCalendarYear from "hooks/useFiscalCalendarYear";
+import { useEffect } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
 import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import {
   clearDistributionsAndForfeitures,
@@ -13,9 +15,6 @@ import {
 import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import useFiscalCalendarYear from "hooks/useFiscalCalendarYear";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
-import { format } from "date-fns";
 import { tryddmmyyyyToDate } from "../../../utils/dateUtils";
 import { endDateAfterStartDateValidator } from "../../../utils/FormValidators";
 
@@ -44,7 +43,6 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
   const dispatch = useDispatch();
-  const { distributionsAndForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const fiscalData = useFiscalCalendarYear();
   const {
     control,

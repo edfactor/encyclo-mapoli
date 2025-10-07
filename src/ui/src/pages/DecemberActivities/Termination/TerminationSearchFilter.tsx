@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { SearchAndReset, SmartModal } from "smart-ui-library";
 import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
-import { endDateStringAfterStartDateValidator, profitYearValidator } from "../../../utils/FormValidators";
+import { dateStringValidator, endDateStringAfterStartDateValidator, profitYearValidator } from "../../../utils/FormValidators";
 import DuplicateSsnGuard from "../../../components/DuplicateSsnGuard";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { clearTermination } from "../../../reduxstore/slices/yearsEndSlice";
@@ -16,7 +16,7 @@ import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
 import { TerminationSearchRequest } from "./Termination";
 
 const schema = yup.object().shape({
-  beginningDate: yup.string().required("Begin Date is required"),
+  beginningDate: dateStringValidator(2000, 2099, "Beginning Date").required("Begin Date is required"),
   endingDate: endDateStringAfterStartDateValidator(
     "beginningDate",
     tryddmmyyyyToDate,

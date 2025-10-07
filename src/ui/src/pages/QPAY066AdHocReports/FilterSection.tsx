@@ -5,6 +5,7 @@ import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import { ReportPreset } from "reduxstore/types";
 import * as yup from "yup";
+import { positiveNumberValidator } from "../../utils/FormValidators";
 
 interface FilterSectionProps {
   presets: ReportPreset[];
@@ -25,7 +26,7 @@ interface FilterFormData {
 }
 
 const schema = yup.object().shape({
-  storeNumber: yup.string().required("Store Number is required"),
+  storeNumber: positiveNumberValidator("Store Number is required"),
   startDate: yup.date().nullable().default(null),
   endDate: yup.date().nullable().default(null),
   vestedPercentage: yup.string().default(""),
