@@ -79,7 +79,7 @@ test.describe("Layout Components", () => {
   test("Application title/logo is present in header", async ({ page }) => {
     // The app uses a drawer-based navigation, not a traditional header/AppBar
     // Check for the navigation drawer button and year/role selectors as proxy for "header" presence
-    const drawerButton = page.locator('button.MuiIconButton-root').first();
+    const drawerButton = page.locator("button.MuiIconButton-root").first();
     const yearSelector = page.getByRole("combobox").nth(1);
     const roleSelector = page.getByRole("combobox").nth(0);
 
@@ -196,7 +196,7 @@ test.describe("Layout Components", () => {
 
   test("Header remains visible when scrolling (if applicable)", async ({ page }) => {
     // The app uses drawer navigation, check if drawer button remains visible
-    const drawerButton = page.locator('button.MuiIconButton-root').first();
+    const drawerButton = page.locator("button.MuiIconButton-root").first();
 
     await expect(drawerButton).toBeVisible();
 
