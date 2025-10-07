@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { SearchAndReset, SmartModal } from "smart-ui-library";
 import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
-import { profitYearValidator } from "../../../utils/FormValidators";
+import { endDateStringAfterStartDateValidator, profitYearValidator } from "../../../utils/FormValidators";
 import DuplicateSsnGuard from "../../../components/DuplicateSsnGuard";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { clearTermination } from "../../../reduxstore/slices/yearsEndSlice";
@@ -17,17 +17,7 @@ import { TerminationSearchRequest } from "./Termination";
 
 const schema = yup.object().shape({
   beginningDate: yup.string().required("Begin Date is required"),
-  endingDate: yup
-    .string()
-    .required("End Date is required")
-    .test("is-after-start", "End Date must be after Begin Date", function (value) {
-      const { beginningDate } = this.parent;
-      if (!beginningDate || !value) return true;
-      const startDate = tryddmmyyyyToDate(beginningDate);
-      const endDate = tryddmmyyyyToDate(value);
-      if (!startDate || !endDate) return true;
-      return endDate > startDate;
-    }),
+  endingDate: endDateStringAfterStartDateValidator("beginningDate", tryddmmyyyyToDate, "End Date must be after Begin Date").required("End Date is required"),
   forfeitureStatus: yup.string().required("Forfeiture Status is required"),
   pagination: yup
     .object({

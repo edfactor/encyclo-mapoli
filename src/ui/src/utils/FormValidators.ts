@@ -114,6 +114,53 @@ export const mustBeNumberValidator = (fieldName?: string) =>
     });
 
 /**
+ * Returns a validator for an end date (Date object) that must be after a start date
+ * @param startFieldName - The name of the start date field in the parent schema
+ * @param errorMessage - Optional custom error message
+ */
+export const endDateAfterStartDateValidator = (startFieldName: string, errorMessage?: string) =>
+  yup
+    .date()
+    .nullable()
+    .test(
+      "is-after-start",
+      errorMessage || "End Date must be after Start Date",
+      function (value) {
+        const startDate = this.parent[startFieldName];
+        if (!startDate || !value) return true;
+        return value > startDate;
+      }
+    );
+
+/**
+ * Returns a validator for an end date string that must be after a start date string
+ * Requires a date conversion function to convert string to Date
+ * @param startFieldName - The name of the start date field in the parent schema
+ * @param convertToDate - Function to convert date string to Date object
+ * @param errorMessage - Optional custom error message
+ */
+export const endDateStringAfterStartDateValidator = (
+  startFieldName: string,
+  convertToDate: (dateString: string) => Date | null,
+  errorMessage?: string
+) =>
+  yup
+    .string()
+    .nullable()
+    .test(
+      "is-after-start",
+      errorMessage || "End Date must be after Start Date",
+      function (value) {
+        const startDateString = this.parent[startFieldName];
+        if (!startDateString || !value) return true;
+        const startDate = convertToDate(startDateString);
+        const endDate = convertToDate(value);
+        if (!startDate || !endDate) return true;
+        return endDate >= startDate;
+      }
+    );
+
+/**
  * Handler for SSN input that only allows numeric characters up to 9 digits
  * @param value - The input value from the TextField
  * @returns The validated value or null if invalid

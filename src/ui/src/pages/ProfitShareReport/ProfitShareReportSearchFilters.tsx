@@ -11,6 +11,7 @@ import {
 import { FilterParams } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import { psnValidator } from "../../utils/FormValidators";
 import presets from "../PAY426Reports/PAY426N/presets";
 
 interface ProfitShareReportSearch {
@@ -18,13 +19,7 @@ interface ProfitShareReportSearch {
 }
 
 const schema = yup.object().shape({
-  badgeNumber: yup
-    .number()
-    .typeError("Profit Sharing Number must be a number")
-    .integer("Profit Sharing Number must be an integer")
-    .min(0, "Profit Sharing Number must be positive")
-    .max(9999999999, "Profit Sharing Number must be 10 digits or less")
-    .nullable()
+  badgeNumber: psnValidator
 });
 
 interface ProfitShareReportSearchFilterProps {
@@ -33,7 +28,11 @@ interface ProfitShareReportSearchFilterProps {
   onSearchParamsUpdate?: (searchParams: any) => void;
 }
 
-const ProfitShareReportSearchFilters: React.FC<ProfitShareReportSearchFilterProps> = ({ profitYear, presetParams, onSearchParamsUpdate }) => {
+const ProfitShareReportSearchFilters: React.FC<ProfitShareReportSearchFilterProps> = ({
+  profitYear,
+  presetParams,
+  onSearchParamsUpdate
+}) => {
   const [triggerSearch, { isFetching }] = useLazyGetYearEndProfitSharingReportLiveQuery();
   const dispatch = useDispatch();
 

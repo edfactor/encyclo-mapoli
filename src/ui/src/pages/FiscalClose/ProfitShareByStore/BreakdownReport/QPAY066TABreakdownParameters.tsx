@@ -1,5 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormLabel, Grid, MenuItem, Select, TextField, Checkbox, FormControlLabel } from "@mui/material";
+import { Checkbox, FormControlLabel, FormLabel, Grid, MenuItem, Select, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useDispatch } from "react-redux";
@@ -14,6 +14,7 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import DuplicateSsnGuard from "../../../../components/DuplicateSsnGuard";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { mustBeNumberValidator } from "../../../../utils/FormValidators";
 
 interface BreakdownSearchParams {
   store?: number | null;
@@ -30,7 +31,7 @@ interface OptionItem {
 }
 
 const schema = yup.object().shape({
-  store: yup.number().positive("Store number must be a positive number").integer("Store number must be a whole number"),
+  store: mustBeNumberValidator().nullable(),
   employeeStatus: yup.string(),
   badgeId: yup.number(),
   employeeName: yup.string(),
@@ -191,24 +192,24 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                   }}
                   onChange={(e) => {
                     const inputValue = e.target.value;
-                    
+
                     // Allow empty string for clearing the field
                     if (inputValue === "") {
                       field.onChange("");
                       return;
                     }
-                    
+
                     const numericValue = Number(inputValue);
-                    
+
                     // Only allow positive numbers (greater than 0)
                     if (numericValue > 0 && Number.isInteger(numericValue)) {
                       field.onChange(numericValue);
-                      
+
                       // Clear the "View All Store Totals" checkbox when user enters a store number
                       if (viewAllStoreTotals) {
                         setViewAllStoreTotals(false);
                       }
-                      
+
                       if (onStoreChange) {
                         onStoreChange(numericValue);
                       }
@@ -216,7 +217,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                   }}
                   onKeyDown={(e) => {
                     // Prevent entering negative sign, decimal point, and 'e'
-                    if (e.key === '-' || e.key === '.' || e.key === 'e' || e.key === 'E') {
+                    if (e.key === "-" || e.key === "." || e.key === "e" || e.key === "E") {
                       e.preventDefault();
                     }
                   }}
@@ -229,7 +230,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                         onChange={(e) => {
                           const isChecked = e.target.checked;
                           setViewAllStoreTotals(isChecked);
-                          
+
                           if (isChecked) {
                             // Clear and disable store field when checkbox is checked
                             setValue("store", null);
@@ -333,8 +334,6 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
               isFetching={isLoading}
               disabled={!prerequisitesComplete}
             />
-
-            
           )}
         </DuplicateSsnGuard>
       </Grid>
