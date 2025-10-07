@@ -1,11 +1,11 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormControl, FormHelperText, FormLabel, MenuItem, Select } from "@mui/material";
-import { Grid } from "@mui/material";
+import { FormControl, FormHelperText, FormLabel, Grid, MenuItem, Select } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import React from "react";
 import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import { endDateStringAfterStartDateValidator } from "../../utils/FormValidators";
 
 export interface QPAY600FilterParams {
   startDate?: Date | null;
@@ -16,14 +16,11 @@ export interface QPAY600FilterParams {
 
 const schema = yup.object().shape({
   startDate: yup.date().nullable(),
-  endDate: yup
-    .date()
-    .nullable()
-    .test("is-after-start", "End Date must be after Start Date", function (value) {
-      const { startDate } = this.parent;
-      if (!startDate || !value) return true;
-      return value > startDate;
-    }),
+  endDate: endDateStringAfterStartDateValidator(
+    "startDate",
+    (date) => date,
+    "End Date must be the same or after Start Date"
+  ).nullable(),
   employeeStatus: yup.string().oneOf(["Full time", "Part time"]).default("Full time"),
   employeeType: yup.string().oneOf(["", "Hourly", "Salary"]).default("")
 });
