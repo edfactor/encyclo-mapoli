@@ -46,7 +46,7 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
     isFetching,
     unForfeits,
     selectedProfitYear,
-    editState,
+
     selectionState,
     handleSave,
     handleBulkSave,
