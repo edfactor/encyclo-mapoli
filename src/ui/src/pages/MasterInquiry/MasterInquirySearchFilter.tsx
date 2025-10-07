@@ -16,7 +16,7 @@ import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import React, { memo, useCallback, useEffect, useMemo } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   clearMasterInquiryData,
   clearMasterInquiryGroupingData,
@@ -27,7 +27,7 @@ import { RootState } from "reduxstore/store";
 import { MasterInquiryRequest, MasterInquirySearch } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../constants";
+import { MAX_EMPLOYEE_BADGE_LENGTH, ROUTES } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import {
   badgeNumberOrPSNValidator,
@@ -73,6 +73,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
   ({ onSearch, onReset, isSearching = false }) => {
     const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const { badgeNumber } = useParams<{
       badgeNumber: string;
@@ -140,8 +141,11 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
         // Transform form data to search params and execute search
         const searchParams = transformSearchParams(formData, profitYear);
         onSearch(searchParams);
+
+        // Remove badge number from URL after consuming it
+        navigate(`/${ROUTES.MASTER_INQUIRY}`, { replace: true });
       }
-    }, [badgeNumber, reset, profitYear, onSearch]);
+    }, [badgeNumber, reset, profitYear, onSearch, navigate]);
 
     const selectSx = useMemo(
       () => ({
@@ -517,15 +521,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
             container
             spacing={3}
             width="100%">
-            <ProfitYearField />
-            <MonthSelectField
-              name="startProfitMonth"
-              label="Beginning Month"
-            />
-            <MonthSelectField
-              name="endProfitMonth"
-              label="Ending Month"
-            />
             <TextInputField
               name="socialSecurity"
               label="Social Security Number"
