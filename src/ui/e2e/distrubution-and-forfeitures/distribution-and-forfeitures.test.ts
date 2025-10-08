@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { baseUrl, impersonateRole } from "../env.setup";
 
 test.describe("Distribution and Forfeitures: ", () => {
@@ -10,12 +10,12 @@ test.describe("Distribution and Forfeitures: ", () => {
     // Wait for nav to be visible
     const navRegion = page.getByRole("navigation").first();
     if ((await navRegion.count()) > 0) {
-      await navRegion.waitFor({ state: "visible", timeout: 10000 }).catch(() => {});
+      await navRegion.waitFor({ state: "visible", timeout: 5000 }).catch(() => {});
     } else {
       await page
         .locator("header, .MuiAppBar-root, .app-header")
         .first()
-        .waitFor({ state: "visible", timeout: 10000 })
+        .waitFor({ state: "visible", timeout: 1000 })
         .catch(() => {});
     }
 
@@ -37,20 +37,20 @@ test.describe("Distribution and Forfeitures: ", () => {
     }
 
     const decBtn = page.getByRole("button", { name: "December Activities" });
-    await decBtn.waitFor({ state: "visible", timeout: 20000 });
+    await decBtn.waitFor({ state: "visible", timeout: 10000 });
 
     // retry click with small backoff
     let clicked = false;
     for (let i = 0; i < 4 && !clicked; i++) {
       try {
-        await decBtn.click({ timeout: 5000 });
+        await decBtn.click({ timeout: 1000 });
         clicked = true;
       } catch (e) {
         await page.waitForTimeout(500);
       }
     }
     if (!clicked) {
-      await page.click('button:has-text("December Activities")', { timeout: 10000 }).catch(() => {});
+      await page.click('button:has-text("December Activities")', { timeout: 5000 }).catch(() => {});
     }
 
     await page.getByRole("button", { name: "Distributions and Forfeitures" }).click();
