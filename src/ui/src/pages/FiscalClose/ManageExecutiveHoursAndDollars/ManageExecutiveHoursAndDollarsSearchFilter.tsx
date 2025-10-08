@@ -6,8 +6,8 @@ import { Controller, Resolver, useForm } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import {
-  badgeNumberValidator,
-  handleBadgeNumberInput,
+  badgeNumberStringValidator,
+  handleBadgeNumberStringInput,
   handleSsnInput,
   profitYearValidator,
   ssnValidator
@@ -15,7 +15,7 @@ import {
 
 interface ExecutiveHoursAndDollarsSearch {
   profitYear: number;
-  badgeNumber?: number | null | undefined;
+  badgeNumber?: string;
   socialSecurity?: string | undefined;
   fullNameContains?: string | null;
   hasExecutiveHoursAndDollars: NonNullable<boolean>;
@@ -26,7 +26,7 @@ const validationSchema = yup
   .object({
     profitYear: profitYearValidator(),
     socialSecurity: ssnValidator,
-    badgeNumber: badgeNumberValidator,
+    badgeNumber: badgeNumberStringValidator,
     fullNameContains: yup
       .string()
       .typeError("Full Name must be a string")
@@ -144,7 +144,11 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
-      onSearch(data);
+      const searchData = {
+        ...data,
+        badgeNumber: data.badgeNumber ? Number(data.badgeNumber) : undefined
+      };
+      onSearch(searchData);
     }
   });
 
@@ -281,14 +285,12 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                   error={!!errors.badgeNumber}
                   disabled={activeField === "socialSecurity" || activeField === "fullNameContains"}
                   onChange={(e) => {
-                    const validatedValue = handleBadgeNumberInput(e.target.value);
+                    const validatedValue = handleBadgeNumberStringInput(e.target.value);
                     if (validatedValue !== null) {
-                      const parsedValue = validatedValue === "" ? null : validatedValue;
-                      field.onChange(parsedValue);
-                      toggleSearchFieldEntered(e.target.value !== "", "badgeNumber");
+                      field.onChange(validatedValue);
+                      toggleSearchFieldEntered(validatedValue !== "", "badgeNumber");
                     }
                   }}
-                  type="number"
                 />
               )}
             />

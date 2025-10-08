@@ -1,6 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, Grid, TextField, Typography } from "@mui/material";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,7 +14,12 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { FORFEITURES_ADJUSTMENT_MESSAGES } from "../../components/MissiveAlerts/MissiveMessages";
 import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
-import { badgeNumberValidator, handleBadgeNumberInput, handleSsnInput, ssnValidator } from "../../utils/FormValidators";
+import {
+  badgeNumberStringValidator,
+  handleBadgeNumberStringInput,
+  handleSsnInput,
+  ssnValidator
+} from "../../utils/FormValidators";
 
 // Define the search parameters interface
 interface ForfeituresAdjustmentSearchParams {
@@ -32,7 +36,7 @@ interface ForfeituresAdjustmentSearchFilterProps {
 const schema = yup
   .object({
     ssn: ssnValidator,
-    badge: badgeNumberValidator
+    badge: badgeNumberStringValidator
   })
   .test("at-least-one-required", "Either SSN or Badge is required", (values) => Boolean(values.ssn || values.badge));
 
@@ -43,7 +47,7 @@ const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFil
   const dispatch = useDispatch();
   const [triggerSearch, { isFetching }] = useLazyGetForfeitureAdjustmentsQuery();
   const { forfeitureAdjustmentQueryParams } = useSelector((state: RootState) => state.forfeituresAdjustment);
-  const profitYear = useFiscalCloseProfitYear();
+  //const profitYear = useFiscalCloseProfitYear();
   const { addAlert, clearAlerts } = useMissiveAlerts();
 
   const [activeField, setActiveField] = useState<"ssn" | "badge" | null>(null);
@@ -97,7 +101,7 @@ const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFil
 
     const searchParams = {
       ssn: data.ssn ? Number(data.ssn) : undefined,
-      badge: data.badge,
+      badge: data.badge ? Number(data.badge) : undefined,
       profitYear: new Date().getFullYear(), // Use current wall clock year
       skip: 0,
       take: 255,
@@ -209,7 +213,7 @@ const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFil
                   placeholder="Badge"
                   disabled={activeField === "ssn"}
                   onChange={(e) => {
-                    const validatedValue = handleBadgeNumberInput(e.target.value);
+                    const validatedValue = handleBadgeNumberStringInput(e.target.value);
                     if (validatedValue !== null) {
                       field.onChange(validatedValue);
                       toggleSearchFieldEntered(e.target.value !== "", "badge");
