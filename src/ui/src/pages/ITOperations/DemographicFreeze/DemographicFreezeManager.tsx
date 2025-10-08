@@ -17,13 +17,12 @@ interface DemographicFreezeSearch {
 
 // Update the schema to include validation for all fields
 const schema = yup.object().shape({
-  profitYear: profitYearValidator
+  profitYear: profitYearValidator()
     .test("valid-year", "Year must be current or previous year", (value) => {
       if (!value) return false;
       const currentYear = new Date().getFullYear();
       return value === currentYear || value === currentYear - 1;
     })
-    .required("Year is required")
     .defined(),
   asOfDate: yup
     .date()

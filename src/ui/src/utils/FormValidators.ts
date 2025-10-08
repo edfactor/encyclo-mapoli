@@ -57,16 +57,19 @@ export const psnValidator = yup
   .transform((value) => value || undefined);
 
 /**
- * Validates that a profit year is a number between 2020 and 2100 (required)
+ * Validates that a profit year is a number between specified years (required)
+ * @param minYear - Minimum allowed year (default: 2020)
+ * @param maxYear - Maximum allowed year (default: 2100)
  */
-export const profitYearValidator = yup
-  .number()
-  .typeError("Year must be a number")
-  .integer("Year must be an integer")
-  .min(2020, "Year must be 2020 or later")
-  .max(2100, "Year must be 2100 or earlier")
-  .required("Year is required");
-
+export const profitYearValidator = (minYear: number = 2015, maxYear: number = 2100) => {
+  return yup
+    .number()
+    .typeError("Year must be a number")
+    .integer("Year must be an integer")
+    .min(minYear, `Year must be ${minYear} or later`)
+    .max(maxYear, `Year must be ${maxYear} or earlier`)
+    .required("Year is required");
+};
 /**
  * Validates that a profit year is a number between 2020 and 2100 (nullable)
  */
@@ -158,8 +161,8 @@ export const endDateStringAfterStartDateValidator = (
  * @param maxYear - Maximum allowed year (default: 2099)
  * @param fieldName - Optional field name for error messages (default: "Date")
  */
-export const dateStringValidator = (minYear: number = 2000, maxYear: number = 2099, fieldName: string = "Date") =>
-  yup
+export const dateStringValidator = (minYear: number = 2000, maxYear: number = 2099, fieldName: string = "Date") => {
+  return yup
     .string()
     .nullable()
     .test("is-valid-format", `${fieldName} must be in MM/DD/YYYY format`, function (value) {
@@ -173,6 +176,7 @@ export const dateStringValidator = (minYear: number = 2000, maxYear: number = 20
       const year = parseInt(match[1]);
       return year >= minYear && year <= maxYear;
     });
+};
 
 /**
  * Handler for SSN input that only allows numeric characters up to 9 digits
@@ -208,3 +212,41 @@ export const handleBadgeNumberInput = (value: string): number | string | null =>
   }
   return null;
 };
+
+/**
+ * Handler for badge number string input that only allows numeric characters (preserves leading zeros)
+ * @param value - The input value from the TextField
+ * @returns The validated string value, empty string, or null if invalid
+ */
+export const handleBadgeNumberStringInput = (value: string): string | null => {
+  // Allow empty string
+  if (value === "") return "";
+
+  // Only allow numeric characters
+  if (!/^\d+$/.test(value)) {
+    return null;
+  }
+
+  // Prevent input beyond 7 characters
+  if (value.length > 7) {
+    return null;
+  }
+
+  return value;
+};
+
+/**
+ * Validates that a Badge Number string is 1 to 7 digits (preserves leading zeros)
+ */
+export const badgeNumberStringValidator = yup
+  .string()
+  .nullable()
+  .test("is-numeric", "Badge Number must contain only digits", function (value) {
+    if (!value) return true;
+    return /^\d+$/.test(value);
+  })
+  .test("is-valid-length", "Badge Number must be 1 to 7 digits", function (value) {
+    if (!value) return true;
+    return value.length >= 1 && value.length <= 7;
+  })
+  .transform((value) => value || undefined);

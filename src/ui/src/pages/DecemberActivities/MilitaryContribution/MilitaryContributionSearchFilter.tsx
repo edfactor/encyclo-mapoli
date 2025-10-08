@@ -6,8 +6,8 @@ import { Controller, Resolver, useForm } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import {
-  badgeNumberValidator,
-  handleBadgeNumberInput,
+  badgeNumberStringValidator,
+  handleBadgeNumberStringInput,
   handleSsnInput,
   ssnValidator
 } from "../../../utils/FormValidators";
@@ -22,7 +22,7 @@ interface SearchFormData {
 const validationSchema = yup
   .object({
     socialSecurity: ssnValidator,
-    badgeNumber: badgeNumberValidator
+    badgeNumber: badgeNumberStringValidator
   })
   .test("at-least-one-required", "At least one field must be provided", (values) =>
     Boolean(values.socialSecurity || values.badgeNumber)
@@ -59,7 +59,12 @@ const MilitaryContributionSearchFilter: React.FC = () => {
   }, [socialSecurity, badgeNumber]);
 
   const onSubmit = async (data: SearchFormData) => {
-    await executeSearch(data, defaultProfitYear);
+    // Convert badgeNumber string to number for API if it exists
+    const searchData = {
+      ...data,
+      badgeNumber: data.badgeNumber ? Number(data.badgeNumber) : undefined
+    };
+    await executeSearch(searchData as any, defaultProfitYear);
   };
 
   const handleReset = () => {
@@ -125,7 +130,7 @@ const MilitaryContributionSearchFilter: React.FC = () => {
                 error={!!errors.badgeNumber}
                 helperText={errors.badgeNumber?.message}
                 onChange={(e) => {
-                  const validatedValue = handleBadgeNumberInput(e.target.value);
+                  const validatedValue = handleBadgeNumberStringInput(e.target.value);
                   if (validatedValue !== null) {
                     field.onChange(validatedValue);
                     if (e.target.value) setActiveField("badgeNumber");
