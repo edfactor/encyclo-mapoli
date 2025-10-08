@@ -1,7 +1,8 @@
-import { Divider, Grid } from "@mui/material";
+import { CircularProgress, Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useRef } from "react";
 import { Page } from "smart-ui-library";
+import { CAPTIONS } from "../../../constants";
 import DuplicateNamesAndBirthdaysGrid from "./DuplicateNamesAndBirthdaysGrid";
 import useDuplicateNamesAndBirthdays from "./hooks/useDuplicateNamesAndBirthdays";
 
@@ -17,7 +18,7 @@ const DuplicateNamesAndBirthdays = () => {
 
   return (
     <Page
-      label={`Duplicate Names and Birthdays (${recordCount} records)`}
+      label={`${CAPTIONS.DUPLICATE_NAMES} (${recordCount} records)`}
       actionNode={renderActionNode()}>
       <Grid
         container
@@ -26,18 +27,28 @@ const DuplicateNamesAndBirthdays = () => {
           <Divider />
         </Grid>
 
-        <Grid width="100%">
-          <DuplicateNamesAndBirthdaysGrid
-            innerRef={componentRef}
-            data={searchResults}
-            isLoading={isSearching}
-            showData={showData}
-            hasResults={hasResults ?? false}
-            pagination={pagination}
-            onPaginationChange={pagination.handlePaginationChange}
-            onSortChange={pagination.handleSortChange}
-          />
-        </Grid>
+        {isSearching && !searchResults ? (
+          <Grid
+            width={"100%"}
+            container
+            justifyContent="center"
+            padding={4}>
+            <CircularProgress />
+          </Grid>
+        ) : (
+          <Grid width="100%">
+            <DuplicateNamesAndBirthdaysGrid
+              innerRef={componentRef}
+              data={searchResults}
+              isLoading={isSearching}
+              showData={showData}
+              hasResults={hasResults ?? false}
+              pagination={pagination}
+              onPaginationChange={pagination.handlePaginationChange}
+              onSortChange={pagination.handleSortChange}
+            />
+          </Grid>
+        )}
       </Grid>
     </Page>
   );
