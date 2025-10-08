@@ -2,9 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ApiMessageAlert, DSMAccordion, Page } from "smart-ui-library";
 import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
 
-import { HelpOutline } from "@mui/icons-material";
-import { Box, CircularProgress, Divider, Grid, IconButton, Tooltip } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { CircularProgress, Divider, Grid } from "@mui/material";
 
 import { CAPTIONS } from "../../../constants";
 import { useLazyGetAccountingRangeToCurrent } from "../../../hooks/useFiscalCalendarYear";
@@ -20,9 +18,8 @@ export interface TerminationSearchRequest extends StartAndEndDateRequest {
 }
 
 const Termination = () => {
-  const [fetchAccountingRange, { data: fiscalData, isLoading: isRangeLoading }] = useLazyGetAccountingRangeToCurrent(6);
+  const [fetchAccountingRange, { data: fiscalData }] = useLazyGetAccountingRangeToCurrent(6);
   const { state, actions } = useTerminationState();
-  const navigate = useNavigate();
   const [isDataFetching, setIsDataFetching] = useState(false);
 
   // Function to scroll to top - only used for error cases
@@ -38,27 +35,9 @@ const Termination = () => {
   // Use the navigation guard hook
   useUnsavedChangesGuard(state.hasUnsavedChanges);
 
-  // Navigate to documentation page with terminations guide selected
-  const handleHelpClick = () => {
-    navigate("/documentation?doc=terminations-business-guide");
-  };
-
-  // Modify renderActionNode to include both status dropdown and help button
+  // Render action node with status dropdown
   const renderActionNode = () => {
-    return (
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <Tooltip title="View Terminations Documentation">
-          <IconButton
-            onClick={handleHelpClick}
-            color="primary"
-            size="medium"
-            aria-label="help documentation">
-            <HelpOutline />
-          </IconButton>
-        </Tooltip>
-        <StatusDropdownActionNode onStatusChange={actions.handleStatusChange} />
-      </Box>
-    );
+    return <StatusDropdownActionNode onStatusChange={actions.handleStatusChange} />;
   };
 
   useEffect(() => {
