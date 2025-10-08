@@ -34,8 +34,8 @@ public record MemberDetails : IdRequest, INameParts, IFullNameProperty, IPhoneNu
     public byte? EnrollmentId { get; init; }
     public string? Enrollment { get; init; }
     public short StoreNumber { get; set; }
-    [UnmaskSensitive] public decimal CurrentEtva { get; set; }
-    [UnmaskSensitive] public decimal PreviousEtva { get; set; }
+    public decimal CurrentEtva { get; set; }
+    public decimal PreviousEtva { get; set; }
 
     public string? Department { get; set; }
     public string? PayClassification { get; set; }

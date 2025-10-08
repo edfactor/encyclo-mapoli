@@ -24,7 +24,8 @@ public class MasterInquiryEmployeeDetailsTests : ApiTestBase<Api.Program>
     [Fact(DisplayName = "PS-433: Employee Details - End Profit Year")]
     public async Task GetEmployeeDetailsWithEndProfitYear()
     {
-        ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
+        // Use FINANCEMANAGER and EXECUTIVEADMIN to get unmasked data for all employees including executives
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
         var request = new MasterInquiryRequest { EndProfitYear = 2023, Skip = 0, Take = 25 };
         var response = await ApiClient.POSTAsync<MasterInquirySearchEndpoint, MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>(request);
         response.ShouldNotBeNull();
@@ -34,7 +35,8 @@ public class MasterInquiryEmployeeDetailsTests : ApiTestBase<Api.Program>
     [Fact(DisplayName = "PS-433: Employee Details - Start Profit Month")]
     public async Task GetEmployeeDetailsWithStartProfitMonth()
     {
-        ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
+        // Use FINANCEMANAGER and EXECUTIVEADMIN to get unmasked data for all employees including executives
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
         var request = new MasterInquiryRequest { StartProfitMonth = 1, Skip = 0, Take = 25, ProfitYear = profitYear };
         var response = await ApiClient.POSTAsync<MasterInquirySearchEndpoint, MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>(request);
         response.ShouldNotBeNull();
@@ -44,7 +46,8 @@ public class MasterInquiryEmployeeDetailsTests : ApiTestBase<Api.Program>
     [Fact(DisplayName = "PS-433: Employee Details - End Profit Month")]
     public async Task GetEmployeeDetailsWithEndProfitMonth()
     {
-        ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
+        // Use FINANCEMANAGER and EXECUTIVEADMIN to get unmasked data for all employees including executives
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
         var request = new MasterInquiryRequest { EndProfitMonth = 12, Skip = 0, Take = 25, ProfitYear = profitYear };
         var response = await ApiClient.POSTAsync<MasterInquirySearchEndpoint, MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>(request);
         response.ShouldNotBeNull();
@@ -55,7 +58,8 @@ public class MasterInquiryEmployeeDetailsTests : ApiTestBase<Api.Program>
     [Fact(DisplayName = "PS-433: Employee Details - Profit Code")]
     public async Task GetEmployeeDetailsWithProfitCode()
     {
-        ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
+        // Use FINANCEMANAGER and EXECUTIVEADMIN to get unmasked data for all employees including executives
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
         var request = new MasterInquiryRequest { ProfitCode = 1, Skip = 0, Take = 25, ProfitYear = profitYear }; // Use a valid ProfitCode constant as needed
         var response = await ApiClient.POSTAsync<MasterInquirySearchEndpoint, MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>(request);
         response.ShouldNotBeNull();
