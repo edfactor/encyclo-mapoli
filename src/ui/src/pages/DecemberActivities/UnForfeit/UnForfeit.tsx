@@ -3,12 +3,10 @@ import { useEffect } from "react";
 import { ApiMessageAlert, DSMAccordion, Page } from "smart-ui-library";
 import FrozenYearWarning from "../../../components/FrozenYearWarning";
 import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
-import StatusReadOnlyInfo from "../../../components/StatusReadOnlyInfo";
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useLazyGetAccountingRangeToCurrent } from "../../../hooks/useFiscalCalendarYear";
 import { useIsProfitYearFrozen } from "../../../hooks/useIsProfitYearFrozen";
-import { useIsReadOnlyByStatus } from "../../../hooks/useIsReadOnlyByStatus";
 import { useUnForfeitState } from "../../../hooks/useUnForfeitState";
 import { useUnsavedChangesGuard } from "../../../hooks/useUnsavedChangesGuard";
 import UnForfeitGrid from "./UnForfeitGrid";
@@ -19,7 +17,6 @@ const UnForfeit = () => {
   const [fetchAccountingRange, { data: fiscalCalendarYear }] = useLazyGetAccountingRangeToCurrent(6);
   const profitYear = useDecemberFlowProfitYear();
   const isFrozen = useIsProfitYearFrozen(profitYear);
-  const isReadOnlyByStatus = useIsReadOnlyByStatus();
 
   // Use the navigation guard hook
   useUnsavedChangesGuard(state.hasUnsavedChanges);
@@ -53,7 +50,6 @@ const UnForfeit = () => {
         container
         rowSpacing="24px">
         {isFrozen && <FrozenYearWarning profitYear={profitYear} />}
-        {isReadOnlyByStatus && <StatusReadOnlyInfo />}
         <Grid width={"100%"}>
           <Divider />
         </Grid>
