@@ -6,13 +6,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { SearchAndReset, SmartModal } from "smart-ui-library";
 import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
-import { dateStringValidator, endDateStringAfterStartDateValidator, profitYearValidator } from "../../../utils/FormValidators";
 import DuplicateSsnGuard from "../../../components/DuplicateSsnGuard";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { clearTermination } from "../../../reduxstore/slices/yearsEndSlice";
 import { RootState } from "../../../reduxstore/store";
 import { CalendarResponseDto } from "../../../reduxstore/types";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
+import {
+  dateStringValidator,
+  endDateStringAfterStartDateValidator,
+  profitYearValidator
+} from "../../../utils/FormValidators";
 import { TerminationSearchRequest } from "./Termination";
 
 const schema = yup.object().shape({
@@ -31,7 +35,7 @@ const schema = yup.object().shape({
       isSortDescending: yup.boolean().required()
     })
     .required(),
-  profitYear: profitYearValidator
+  profitYear: profitYearValidator(2015, 2099)
 });
 
 interface TerminationSearchFilterProps {
@@ -62,8 +66,8 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   } = useForm<TerminationSearchRequest>({
     resolver: yupResolver(schema),
     defaultValues: {
-      beginningDate: termination?.startDate || (fiscalData ? fiscalData.fiscalBeginDate : "") || "",
-      endingDate: termination?.endDate || (fiscalData ? fiscalData.fiscalEndDate : "") || "",
+      beginningDate: termination?.startDate || (fiscalData ? mmDDYYFormat(fiscalData.fiscalBeginDate) : "") || "",
+      endingDate: termination?.endDate || (fiscalData ? mmDDYYFormat(fiscalData.fiscalEndDate) : "") || "",
       forfeitureStatus: "showAll",
       pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: false },
       profitYear: selectedProfitYear
@@ -94,8 +98,8 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   const handleReset = async () => {
     setInitialSearchLoaded(false);
     reset({
-      beginningDate: fiscalData ? fiscalData.fiscalBeginDate : "",
-      endingDate: fiscalData ? fiscalData.fiscalEndDate : "",
+      beginningDate: fiscalData ? mmDDYYFormat(fiscalData.fiscalBeginDate) : "",
+      endingDate: fiscalData ? mmDDYYFormat(fiscalData.fiscalEndDate) : "",
       forfeitureStatus: "showAll",
       pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: false },
       profitYear: selectedProfitYear

@@ -30,13 +30,6 @@ const schema = yup.object().shape({
     "Ending date must be the same or after the beginning date"
   )
     .required("Ending Date is required")
-    .test("is-valid-year", "Year must be 2000 or later", function (value) {
-      if (!value) return true;
-      const match = value.match(/^\d{1,2}\/\d{1,2}\/(\d{4})$/);
-      if (!match) return true;
-      const year = parseInt(match[1]);
-      return year >= 2000 && year <= 2099;
-    })
     .test("is-too-early", "Insuffient data for dates before 2024", function (value) {
       return new Date(value) > new Date(2024, 1, 1);
     }),
