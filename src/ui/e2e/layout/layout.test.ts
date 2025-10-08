@@ -115,7 +115,7 @@ test.describe("Layout Components", () => {
     await page.waitForTimeout(500);
 
     // Verify key navigation categories are present
-    const expectedCategories = ["December Activities", "Year End", "Fiscal Close", "Reports", "IT Operations"];
+    const expectedCategories = ["December Activities", "Year End", "Fiscal Close", "Reports", "IT DevOps"];
 
     let foundCategories = 0;
 

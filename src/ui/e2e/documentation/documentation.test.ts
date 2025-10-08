@@ -20,7 +20,7 @@ test.describe("Documentation Page", () => {
 
     // Navigate to Documentation page
     // Note: Adjust category name based on actual navigation structure
-    await navigateToPage(page, "IT Operations", "Documentation");
+    await navigateToPage(page, "IT DevOps", "Documentation");
   });
 
   test("Page loads successfully", async ({ page }) => {

@@ -637,7 +637,6 @@ pipelines:
           - step: *create-api-artifacts
           - step: *create-service-artifacts
           - step: *create-frontend-artifact-qa
-          - step: *create-frontend-artifact-uat
           - step: *db-cli-build-artifact
       # Stage 4: QA Deployment
       - step:
@@ -701,6 +700,7 @@ pipelines:
               Write-Host "  3) Import UAT navigation"
               Write-Host "  4) Parallel: Validate import + UAT API health check"
 
+      - step: *create-frontend-artifact-uat
       # Stage 5: UAT Deployment (reuses artifacts from Stage 3)
       - parallel:
           - step: *uat-drop-recreate-db

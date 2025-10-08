@@ -8,18 +8,18 @@ import { baseUrl, impersonateRole, navigateToPage } from "../env.setup";
  * - Tab navigation is straightforward UI interaction
  * - Frozen Summary is a read-only view (no edit operations)
  * - Tests focus on visibility and basic data display
- * - Located in IT Operations → Demographic Freeze page
+ * - Located in IT DevOps → Demographic Freeze page
  */
 test.describe("Frozen Summary Tab", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(baseUrl);
     await page.waitForLoadState("networkidle");
 
-    // Use IT Operations role which should have access
+    // Use IT DevOps role which should have access
     await impersonateRole(page, "Finance-Manager");
 
     // Navigate to Demographic Freeze page where Frozen Summary tab exists
-    await navigateToPage(page, "IT Operations", "Demographic Freeze");
+    await navigateToPage(page, "IT DevOps", "Demographic Freeze");
   });
 
   test("Demographic Freeze page loads successfully", async ({ page }) => {
