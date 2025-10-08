@@ -1,21 +1,30 @@
-import { Error as ErrorIcon } from "@mui/icons-material";
+import { Error as ErrorIcon, Warning as WarningIcon } from "@mui/icons-material";
 import React, { useEffect } from "react";
 import { useLazyGetDuplicateSsnExistsQuery } from "../reduxstore/api/LookupsApi";
 
 interface DuplicateSsnGuardProps {
   /** Show alert banner inline (default: true) */
   showAlert?: boolean;
-  children: (ctx: { prerequisitesComplete: boolean; refresh: () => void }) => React.ReactNode;
+  /**
+   * Mode determines behavior when duplicates are detected:
+   * - 'error': Blocks page usage (prerequisitesComplete = false) - default behavior
+   * - 'warning': Shows warning but allows page usage (prerequisitesComplete = true)
+   */
+  mode?: "error" | "warning";
+  children: (ctx: { prerequisitesComplete: boolean; hasDuplicates: boolean; refresh: () => void }) => React.ReactNode;
 }
 
 /**
  * DuplicateSsnGuard queries the lookup endpoint to see if duplicate SSNs exist.
- * - If duplicates exist it displays a persistent error banner (similar to "Page Locked for Modifications")
- * - The child render prop receives `prerequisitesComplete` which should be used to
- *   enable/disable buttons and a `refresh` callback to re-query the backend.
+ * - If duplicates exist and mode='error' (default): displays persistent error banner and blocks page usage
+ * - If duplicates exist and mode='warning': displays warning banner but allows page usage
+ * - The child render prop receives:
+ *   - `prerequisitesComplete`: false when duplicates exist in error mode, true otherwise
+ *   - `hasDuplicates`: true when duplicates are detected (regardless of mode)
+ *   - `refresh`: callback to re-query the backend
  */
-const DuplicateSsnGuard: React.FC<DuplicateSsnGuardProps> = ({ showAlert = true, children }) => {
-  const [trigger, { data, refetch }] = useLazyGetDuplicateSsnExistsQuery();
+const DuplicateSsnGuard: React.FC<DuplicateSsnGuardProps> = ({ showAlert = true, mode = "error", children }) => {
+  const [trigger, { data }] = useLazyGetDuplicateSsnExistsQuery();
 
   useEffect(() => {
     // initial call
@@ -23,24 +32,35 @@ const DuplicateSsnGuard: React.FC<DuplicateSsnGuardProps> = ({ showAlert = true,
   }, [trigger]);
 
   const hasDuplicates = data === true;
-  const prerequisitesComplete = !hasDuplicates;
+  // In error mode, block the page. In warning mode, allow page usage.
+  const prerequisitesComplete = mode === "warning" ? true : !hasDuplicates;
+
+  const isErrorMode = mode === "error";
+  const alertClassName = `missive-alert ${isErrorMode ? "missive-error" : "missive-warning"} duplicate-ssn-alert`;
+  const AlertIcon = isErrorMode ? ErrorIcon : WarningIcon;
+  const iconColor = isErrorMode ? "#d32f2f" : "#ed6c02";
+  const alertTitle = isErrorMode ? "Duplicate SSNs Detected" : "Duplicate SSNs Warning";
+  const alertText = isErrorMode
+    ? "There are duplicate SSNs in the system. These must be resolved before this page can be used."
+    : "There are duplicate SSNs in the system. Please be aware that this may cause issues. Consider resolving them when possible.";
 
   return (
     <>
       {showAlert && hasDuplicates && (
-        <div className="missive-alert missive-error duplicate-ssn-alert">
+        <div className={alertClassName}>
           <div className="duplicate-ssn-alert-content">
-            <ErrorIcon className="duplicate-ssn-alert-icon" />
+            <AlertIcon
+              className="duplicate-ssn-alert-icon"
+              style={{ color: iconColor }}
+            />
             <div>
-              <strong>Duplicate SSNs Detected</strong>
-              <p className="duplicate-ssn-alert-text">
-                There are duplicate SSNs in the system. These must be resolved before this page can be used.
-              </p>
+              <strong>{alertTitle}</strong>
+              <p className="duplicate-ssn-alert-text">{alertText}</p>
             </div>
           </div>
         </div>
       )}
-      {children({ prerequisitesComplete, refresh: () => refetch() })}
+      {children({ prerequisitesComplete, hasDuplicates, refresh: () => trigger() })}
     </>
   );
 };

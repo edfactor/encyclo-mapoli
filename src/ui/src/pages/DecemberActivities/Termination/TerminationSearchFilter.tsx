@@ -6,13 +6,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { SearchAndReset, SmartModal } from "smart-ui-library";
 import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
-import { dateStringValidator, endDateStringAfterStartDateValidator, profitYearValidator } from "../../../utils/FormValidators";
 import DuplicateSsnGuard from "../../../components/DuplicateSsnGuard";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { clearTermination } from "../../../reduxstore/slices/yearsEndSlice";
 import { RootState } from "../../../reduxstore/store";
 import { CalendarResponseDto } from "../../../reduxstore/types";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
+import {
+  dateStringValidator,
+  endDateStringAfterStartDateValidator,
+  profitYearValidator
+} from "../../../utils/FormValidators";
 import { TerminationSearchRequest } from "./Termination";
 
 const schema = yup.object().shape({
@@ -180,7 +184,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
       <Grid
         width="100%"
         paddingX="24px">
-        <DuplicateSsnGuard>
+        <DuplicateSsnGuard mode="warning">
           {({ prerequisitesComplete }) => (
             <SearchAndReset
               handleReset={handleReset}
