@@ -41,7 +41,7 @@ const DuplicateSsnGuard: React.FC<DuplicateSsnGuardProps> = ({ showAlert = true,
   const iconColor = isErrorMode ? "#d32f2f" : "#ed6c02";
   const alertTitle = isErrorMode ? "Duplicate SSNs Detected" : "Duplicate SSNs Warning";
   const alertText = isErrorMode
-    ? "There are duplicate SSNs in the system. These must be resolved before this page can be used."
+    ? "There are duplicate SSNs in the system. This page is disabled until they are resolved."
     : "There are duplicate SSNs in the system. Please be aware that this may cause issues. Consider resolving them when possible.";
 
   return (
