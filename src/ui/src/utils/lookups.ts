@@ -119,7 +119,7 @@ export const getPaymentFlagLabel = (paymentFlag: string): string => {
  * @param reasonCode - Single character reason code ("H", "P", "R", "M", "Q", or "A")
  * @returns Reason description or empty string if not found
  */
-export const getReasonLabel = (reasonCode: string): string => {
+export const getFrequencyCodeLabel = (reasonCode: string): string => {
   const reasons: Record<string, string> = {
     H: "Hardship",
     P: "Pay Direct",

@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  getFrequencyCodeLabel,
   getPayFrequencyLabel,
   getPaymentFlagLabel,
-  getReasonLabel,
   getStatusLabel,
   getTaxCodeLabel,
   getTerminationCodeLabel
@@ -323,60 +323,60 @@ describe("getPaymentFlagLabel", () => {
 
 describe("getReasonLabel", () => {
   it("should return label for reason code H", () => {
-    expect(getReasonLabel("H")).toBe("Hardship");
+    expect(getFrequencyCodeLabel("H")).toBe("Hardship");
   });
 
   it("should return label for reason code P", () => {
-    expect(getReasonLabel("P")).toBe("Pay Direct");
+    expect(getFrequencyCodeLabel("P")).toBe("Pay Direct");
   });
 
   it("should return label for reason code R", () => {
-    expect(getReasonLabel("R")).toBe("Rollover");
+    expect(getFrequencyCodeLabel("R")).toBe("Rollover");
   });
 
   it("should return label for reason code M", () => {
-    expect(getReasonLabel("M")).toBe("Monthly");
+    expect(getFrequencyCodeLabel("M")).toBe("Monthly");
   });
 
   it("should return label for reason code Q", () => {
-    expect(getReasonLabel("Q")).toBe("Quarterly");
+    expect(getFrequencyCodeLabel("Q")).toBe("Quarterly");
   });
 
   it("should return label for reason code A", () => {
-    expect(getReasonLabel("A")).toBe("Annually");
+    expect(getFrequencyCodeLabel("A")).toBe("Annually");
   });
 
   it("should return empty string for invalid reason code", () => {
-    expect(getReasonLabel("X")).toBe("");
-    expect(getReasonLabel("Z")).toBe("");
-    expect(getReasonLabel("1")).toBe("");
+    expect(getFrequencyCodeLabel("X")).toBe("");
+    expect(getFrequencyCodeLabel("Z")).toBe("");
+    expect(getFrequencyCodeLabel("1")).toBe("");
   });
 
   it("should return empty string for lowercase letters", () => {
-    expect(getReasonLabel("h")).toBe("");
-    expect(getReasonLabel("p")).toBe("");
-    expect(getReasonLabel("r")).toBe("");
+    expect(getFrequencyCodeLabel("h")).toBe("");
+    expect(getFrequencyCodeLabel("p")).toBe("");
+    expect(getFrequencyCodeLabel("r")).toBe("");
   });
 
   it("should return empty string for empty string", () => {
-    expect(getReasonLabel("")).toBe("");
+    expect(getFrequencyCodeLabel("")).toBe("");
   });
 
   it("should handle all valid reason codes", () => {
     const reasonCodes = ["H", "P", "R", "M", "Q", "A"];
     reasonCodes.forEach((code) => {
-      const result = getReasonLabel(code);
+      const result = getFrequencyCodeLabel(code);
       expect(result.length).toBeGreaterThan(0);
       expect(result).not.toBe("");
     });
   });
 
   it("should return specific labels for all reason codes", () => {
-    expect(getReasonLabel("H")).toBe("Hardship");
-    expect(getReasonLabel("P")).toBe("Pay Direct");
-    expect(getReasonLabel("R")).toBe("Rollover");
-    expect(getReasonLabel("M")).toBe("Monthly");
-    expect(getReasonLabel("Q")).toBe("Quarterly");
-    expect(getReasonLabel("A")).toBe("Annually");
+    expect(getFrequencyCodeLabel("H")).toBe("Hardship");
+    expect(getFrequencyCodeLabel("P")).toBe("Pay Direct");
+    expect(getFrequencyCodeLabel("R")).toBe("Rollover");
+    expect(getFrequencyCodeLabel("M")).toBe("Monthly");
+    expect(getFrequencyCodeLabel("Q")).toBe("Quarterly");
+    expect(getFrequencyCodeLabel("A")).toBe("Annually");
   });
 });
