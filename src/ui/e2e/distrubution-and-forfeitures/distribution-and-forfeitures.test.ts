@@ -7,53 +7,26 @@ test.describe("Distribution and Forfeitures: ", () => {
     await page.waitForLoadState("networkidle");
     await impersonateRole(page, "Finance-Manager");
 
-    // Wait for nav to be visible
+    // Wait for nav to be visible with reasonable timeout
     const navRegion = page.getByRole("navigation").first();
     if ((await navRegion.count()) > 0) {
       await navRegion.waitFor({ state: "visible", timeout: 5000 }).catch(() => {});
-    } else {
-      await page
-        .locator("header, .MuiAppBar-root, .app-header")
-        .first()
-        .waitFor({ state: "visible", timeout: 1000 })
-        .catch(() => {});
     }
 
-    // attempt to open drawer if necessary
-    const emptyBtn = page.getByRole("button").filter({ hasText: /^$/ });
-    if ((await emptyBtn.count()) > 0) {
-      await emptyBtn
-        .first()
-        .click()
-        .catch(() => {});
-    } else {
-      const iconBtn = page.locator("button.MuiIconButton-root").first();
-      if ((await iconBtn.count()) > 0) {
-        await iconBtn
-          .first()
-          .click()
-          .catch(() => {});
-      }
+    // Attempt to open drawer if necessary - simplified
+    const drawerButton = page.locator('button[aria-label*="menu"], button.MuiIconButton-root').first();
+    if ((await drawerButton.count()) > 0 && (await drawerButton.isVisible())) {
+      await drawerButton.click().catch(() => {});
     }
 
+    // Navigate to December Activities - direct click, no retry loop
     const decBtn = page.getByRole("button", { name: "December Activities" });
-    await decBtn.waitFor({ state: "visible", timeout: 10000 });
+    await decBtn.waitFor({ state: "visible", timeout: 5000 });
+    await decBtn.click();
 
-    // retry click with small backoff
-    let clicked = false;
-    for (let i = 0; i < 4 && !clicked; i++) {
-      try {
-        await decBtn.click({ timeout: 1000 });
-        clicked = true;
-      } catch (e) {
-        await page.waitForTimeout(500);
-      }
-    }
-    if (!clicked) {
-      await page.click('button:has-text("December Activities")', { timeout: 5000 }).catch(() => {});
-    }
-
+    // Navigate to Distributions and Forfeitures
     await page.getByRole("button", { name: "Distributions and Forfeitures" }).click();
+    await page.waitForLoadState("networkidle");
   });
 
   test("Page load successfully", async ({ page }) => {
