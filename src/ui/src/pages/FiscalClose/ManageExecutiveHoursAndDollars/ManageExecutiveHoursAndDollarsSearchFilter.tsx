@@ -24,7 +24,7 @@ interface ExecutiveHoursAndDollarsSearch {
 
 const validationSchema = yup
   .object({
-    profitYear: profitYearValidator,
+    profitYear: profitYearValidator(),
     socialSecurity: ssnValidator,
     badgeNumber: badgeNumberValidator,
     fullNameContains: yup

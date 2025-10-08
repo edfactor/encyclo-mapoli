@@ -49,7 +49,7 @@ const schema = yup.object().shape({
     })
     .required(),
   // Hidden field: not shown in search filter, but required in data
-  profitYear: profitYearValidator
+  profitYear: profitYearValidator()
 });
 
 interface UnForfeitSearchFilterProps {
