@@ -20,7 +20,7 @@
   - Bulk maintenance uses `ExecuteUpdate/ExecuteDelete` inside services
   - Dynamic filters build expressions in services (see `DemographicsService`)
   - Avoid raw SQL; if needed, encapsulate in service layer
-- **Distributed Caching**: Use `IDistributedCache` (NOT `IMemoryCache`). See **[DISTRIBUTED_CACHING_PATTERNS.md](DISTRIBUTED_CACHING_PATTERNS.md)** for complete patterns including version-based invalidation
+- **Distributed Caching**: Use `IDistributedCache` (NOT `IMemoryCache`). See DISTRIBUTED_CACHING_PATTERNS.md (`.github/`) for complete patterns including version-based invalidation
 - **Auditing & History**: Close current record (`ValidTo = now`), insert new history row. NEVER overwrite historical rows.
 - **Identifiers**: `OracleHcmId` is authoritative; fall back to `(Ssn,BadgeNumber)` only when Oracle id missing
 - **Entity updates**: Use helper methods like `UpdateEntityValues`; avoid scattered per-field assignments
@@ -68,15 +68,15 @@ public override async Task<MyResponse> ExecuteAsync(MyRequest req, CancellationT
 - Include business metrics appropriate to endpoint category
 - Declare sensitive fields in telemetry calls
 
-**Documentation**:
-- **[TELEMETRY_GUIDE.md](../src/ui/public/docs/TELEMETRY_GUIDE.md)** - Comprehensive 75+ page reference for developers, QA, DevOps
-- **[TELEMETRY_QUICK_REFERENCE.md](../src/ui/public/docs/TELEMETRY_QUICK_REFERENCE.md)** - Developer cheat sheet with copy-paste examples
-- **[TELEMETRY_DEVOPS_GUIDE.md](../src/ui/public/docs/TELEMETRY_DEVOPS_GUIDE.md)** - Production operations guide
-- **[SECURITY_TELEMETRY_SETUP.md](SECURITY_TELEMETRY_SETUP.md)** - Advanced security monitoring setup
+**Documentation** (read these files when needed, not loaded by default):
+- TELEMETRY_GUIDE.md (`src/ui/public/docs/`) - Comprehensive 75+ page reference for developers, QA, DevOps
+- TELEMETRY_QUICK_REFERENCE.md (`src/ui/public/docs/`) - Developer cheat sheet with copy-paste examples
+- TELEMETRY_DEVOPS_GUIDE.md (`src/ui/public/docs/`) - Production operations guide
+- SECURITY_TELEMETRY_SETUP.md (`.github/`) - Advanced security monitoring setup
 
 ## Validation & Boundary Checks (MANDATORY)
 
-All incoming data MUST be validated at server and client boundaries. **See [VALIDATION_PATTERNS.md](VALIDATION_PATTERNS.md)** for complete reference.
+All incoming data MUST be validated at server and client boundaries. See VALIDATION_PATTERNS.md (`.github/`) for complete reference when needed.
 
 **Quick Pattern**:
 ```csharp
@@ -197,7 +197,7 @@ When creating new documentation:
 
 ## Branching & Workflow
 
-**See [BRANCHING_AND_WORKFLOW.md](BRANCHING_AND_WORKFLOW.md)** for complete Git, Jira, and PR conventions.
+See BRANCHING_AND_WORKFLOW.md (`.github/`) for complete Git, Jira, and PR conventions when needed.
 
 **Quick Summary**:
 - Always branch from `develop` (not `main`)
@@ -220,22 +220,22 @@ git push -u origin feature/PS-1720-add-reporting-view
 
 For comprehensive implementation details, see these dedicated guides:
 
-### Core Patterns
-- **[DISTRIBUTED_CACHING_PATTERNS.md](DISTRIBUTED_CACHING_PATTERNS.md)** - IDistributedCache patterns, version-based invalidation, unit testing
-- **[VALIDATION_PATTERNS.md](VALIDATION_PATTERNS.md)** - Server & client validation, FluentValidation examples, boundary checks
-- **[BRANCHING_AND_WORKFLOW.md](BRANCHING_AND_WORKFLOW.md)** - Git branching, Jira workflow, PR guidelines, deny list
+### Core Patterns (read when needed)
+- DISTRIBUTED_CACHING_PATTERNS.md (`.github/`) - IDistributedCache patterns, version-based invalidation, unit testing
+- VALIDATION_PATTERNS.md (`.github/`) - Server & client validation, FluentValidation examples, boundary checks
+- BRANCHING_AND_WORKFLOW.md (`.github/`) - Git branching, Jira workflow, PR guidelines, deny list
 
-### Telemetry & Observability
-- **[TELEMETRY_GUIDE.md](../src/ui/public/docs/TELEMETRY_GUIDE.md)** - Comprehensive 75+ page reference for developers, QA, DevOps
-- **[TELEMETRY_QUICK_REFERENCE.md](../src/ui/public/docs/TELEMETRY_QUICK_REFERENCE.md)** - Developer cheat sheet with copy-paste examples
-- **[TELEMETRY_DEVOPS_GUIDE.md](../src/ui/public/docs/TELEMETRY_DEVOPS_GUIDE.md)** - Production operations, monitoring, alerting
-- **[SECURITY_TELEMETRY_SETUP.md](SECURITY_TELEMETRY_SETUP.md)** - Advanced security monitoring patterns
+### Telemetry & Observability (read when needed)
+- TELEMETRY_GUIDE.md (`src/ui/public/docs/`) - Comprehensive 75+ page reference for developers, QA, DevOps
+- TELEMETRY_QUICK_REFERENCE.md (`src/ui/public/docs/`) - Developer cheat sheet with copy-paste examples
+- TELEMETRY_DEVOPS_GUIDE.md (`src/ui/public/docs/`) - Production operations, monitoring, alerting
+- SECURITY_TELEMETRY_SETUP.md (`.github/`) - Advanced security monitoring patterns
 
-### Feature-Specific Guides
-- **[READ_ONLY_FUNCTIONALITY.md](../src/ui/public/docs/READ_ONLY_FUNCTIONALITY.md)** - Read-only role implementation
-- **[READ_ONLY_QUICK_REFERENCE.md](../src/ui/public/docs/READ_ONLY_QUICK_REFERENCE.md)** - Read-only patterns cheat sheet
-- **[Distribution-Processing-Requirements.md](../src/ui/public/docs/Distribution-Processing-Requirements.md)** - Distribution processing flows
-- **[Year-End-Testability-And-Acceptance-Criteria.md](../src/ui/public/docs/Year-End-Testability-And-Acceptance-Criteria.md)** - Year-end processing tests
+### Feature-Specific Guides (read when needed)
+- READ_ONLY_FUNCTIONALITY.md (`src/ui/public/docs/`) - Read-only role implementation
+- READ_ONLY_QUICK_REFERENCE.md (`src/ui/public/docs/`) - Read-only patterns cheat sheet
+- Distribution-Processing-Requirements.md (`src/ui/public/docs/`) - Distribution processing flows
+- Year-End-Testability-And-Acceptance-Criteria.md (`src/ui/public/docs/`) - Year-end processing tests
 
 ## Quick Commands (PowerShell)
 ```pwsh
