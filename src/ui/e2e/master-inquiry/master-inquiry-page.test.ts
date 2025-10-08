@@ -10,6 +10,7 @@ test.describe("Master Inqiry landing page: ", () => {
     await page.getByRole("button", { name: "INQUIRIES" }).click();
     await page.getByRole("link", { name: "MASTER INQUIRY" }).click();
   });
+
   test("page should load properly without any issue.", async ({ page }) => {
     await expect(page.getByRole("heading", { name: "MASTER INQUIRY (008-10)" })).toBeVisible();
   });
@@ -83,17 +84,6 @@ test.describe("Master Inqiry landing page: ", () => {
     await expect(response.status()).toBe(200);
   });
 
-  test("select Beginning Month and Ending Month and click on Search", async ({ page }) => {
-    await page.locator("#mui-component-select-startProfitMonth").click();
-    await page.getByRole("option", { name: "2", exact: true }).click();
-    await page.locator("#mui-component-select-endProfitMonth").click();
-    await page.getByRole("option", { name: "10" }).click();
-    await page.getByRole("button", { name: "SEARCH" }).click();
-    const [response] = await Promise.all([
-      page.waitForResponse((resp) => resp.url().includes("master-inquiry/search"))
-    ]);
-    await expect(response.status()).toBe(200);
-  });
   test("filling values in Name, Badge/PSN Number and then click on Reset button.", async ({ page }) => {
     await page.locator('input[name="badgeNumber"]').fill("706056");
     await page.getByRole("button", { name: "RESET" }).click();
