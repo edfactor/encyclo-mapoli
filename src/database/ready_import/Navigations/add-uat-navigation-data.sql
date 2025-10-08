@@ -209,7 +209,6 @@ BEGIN
     insert_navigation_item(FORFEITURES, DECEMBER_ACTIVITIES, 'Forfeitures', '008-12', 'forfeitures-adjustment', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(DISTRIBUTIONS_AND_FORFEITURES, DECEMBER_ACTIVITIES, 'Distributions and Forfeitures', 'QPAY129', 'distributions-and-forfeitures', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(PROFIT_SHARE_REPORT, DECEMBER_ACTIVITIES, 'Profit Share Report', 'PAY426', 'profit-share-report', STATUS_NORMAL, ORDER_NINTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(PAY426N_LIVE, DECEMBER_ACTIVITIES, 'Profit Sharing Report', 'PAY426N', 'pay426n_live', STATUS_NORMAL, ORDER_TENTH, '', ENABLED, IS_NAVIGABLE);
 
 -- Inserting value for IT Operation for role management
 --  NOTE: IT-DevOps navigation should be accessible only to members of the IT-DevOps role (role id 6).
@@ -262,8 +261,6 @@ BEGIN
     assign_navigation_role(DISTRIBUTIONS_AND_FORFEITURES, FINANCE_MANAGER);
     assign_navigation_role(PROFIT_SHARE_REPORT, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(PROFIT_SHARE_REPORT, FINANCE_MANAGER);
-    assign_navigation_role(PAY426N_LIVE, SYSTEM_ADMINISTRATOR);
-    assign_navigation_role(PAY426N_LIVE, FINANCE_MANAGER);
 
     -- IT Devops role assignments
     assign_navigation_role(INQUIRIES_MENU, IT_DEVOPS);
