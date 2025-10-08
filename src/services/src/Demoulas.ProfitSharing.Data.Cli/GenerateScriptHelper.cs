@@ -122,6 +122,7 @@ internal static class GenerateScriptHelper
     private static HostApplicationBuilder CreateHostBuilder(string[] args)
     {
         var builder = Host.CreateApplicationBuilder(args);
+        builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: false);
         builder.Configuration.AddUserSecrets<Program>();
         builder.Configuration.AddEnvironmentVariables();
         return builder;

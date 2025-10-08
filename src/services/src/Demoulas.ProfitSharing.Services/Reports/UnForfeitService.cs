@@ -50,45 +50,29 @@ public sealed class UnforfeitService : IUnforfeitService
                 IQueryable<ParticipantTotalVestingBalance>? vestingServiceQuery = _totalService.TotalVestingBalance(context, req.ProfitYear, req.EndingDate);
                 IQueryable<Demographic>? demo = await _demographicReaderService.BuildDemographicQuery(context);
 
-                IQueryable<UnforfeituresResponse>? query =
-                    // transactions
-                    from pd in context.ProfitDetails
+                // PERFORMANCE: Pre-filter demographics to reduce join volume
+                IQueryable<Demographic>? activeDemographics = demo
+                    .Where(d => d.EmploymentStatusId == EmploymentStatus.Constants.Active)
+                    .Where(d => d.ReHireDate >= req.BeginningDate && d.ReHireDate <= req.EndingDate);
 
-                        // the employee definition in the "profit year"
-                    join d in demo on pd.Ssn equals d.Ssn
-                    join ppYE in context.PayProfits.Include(p => p.Enrollment)
+                // PERFORMANCE: Pre-filter ProfitDetails to only forfeitures before joining
+                IQueryable<ProfitDetail>? forfeitureTransactions = context.ProfitDetails
+                    .Where(pd => pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id);
+
+                // PERFORMANCE: Phase 1 - Get main employee data WITHOUT Details (much faster)
+                var mainQuery =
+                    from pd in forfeitureTransactions
+                    join d in activeDemographics on pd.Ssn equals d.Ssn
+                    join ppYE in context.PayProfits
                         on new { d.Id, req.ProfitYear } equals new { Id = ppYE.DemographicId, ppYE.ProfitYear }
-
-                        // Years of service as of "profit year"
+                    join enrollment in context.Enrollments
+                        on ppYE.EnrollmentId equals enrollment.Id
                     join yos in yearsOfServiceQuery on d.Ssn equals yos.Ssn into yosTmp
                     from yos in yosTmp.DefaultIfEmpty()
-
-                        // Vesting on req.EndingDate
                     join vest in vestingServiceQuery on d.Ssn equals vest.Ssn into vestTmp
                     from vest in vestTmp.DefaultIfEmpty()
-
-                        // employee data at the time of the PROFIT_DETAIL transaction - ie. hours/wages (in transaction year)
-                    join pp in context.PayProfits.Include(p => p.Enrollment)
-                        on new { d.Id, pd.ProfitYear } equals new { Id = pp.DemographicId, pp.ProfitYear } into ppTmp
-                    from pp in ppTmp.DefaultIfEmpty()
-                    where
-                        // only get the forfeit/unforfeit transactions 
-                        pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id
-                        // active
-                        && d.EmploymentStatusId == EmploymentStatus.Constants.Active
-                        // rehire range that user wanted
-                        && d.ReHireDate >= req.BeginningDate && d.ReHireDate <= req.EndingDate
-                        // exclude zero current/vest balance if so desired.
-                        && (!req.ExcludeZeroBalance || vest != null && (vest.CurrentBalance != 0 || vest.VestedBalance != 0))
-                    group new
-                    {
-                        d,
-                        pp,
-                        ppYE,
-                        pd,
-                        yos,
-                        vest
-                    } by new
+                    where !req.ExcludeZeroBalance || vest != null && (vest.CurrentBalance != 0 || vest.VestedBalance != 0)
+                    select new
                     {
                         d.BadgeNumber,
                         d.ContactInfo.FullName,
@@ -96,63 +80,121 @@ public sealed class UnforfeitService : IUnforfeitService
                         d.HireDate,
                         d.ReHireDate,
                         d.StoreNumber,
+                        d.Id,
                         YearsOfService = yos != null ? yos.Years : (byte)0,
                         NetBalanceLastYear = vest != null ? vest.CurrentBalance ?? 0 : 0,
                         VestedBalanceLastYear = vest != null ? vest.VestedBalance ?? 0 : 0,
-                        d.EmploymentStatusId,
                         d.PayFrequencyId,
                         ppYE.EnrollmentId,
-                        EnrollmentName = ppYE.Enrollment!.Name,
+                        EnrollmentName = enrollment.Name,
                         HoursProfitYear = ppYE.HoursExecutive + ppYE.CurrentHoursYear,
                         WagesProfitYear = ppYE.IncomeExecutive + ppYE.CurrentIncomeYear
-                    }
-                    into g
-                    select new UnforfeituresResponse
+                    };
+
+                // Apply pagination to main query
+                var paginatedMain = await mainQuery
+                    .Distinct() // Remove duplicates from multiple ProfitDetail rows
+                    .OrderBy(x => x.BadgeNumber)
+                    .Skip(req.Skip ?? 0)
+                    .Take(req.Take ?? 10)
+                    .ToListAsync(cancellationToken);
+
+                if (!paginatedMain.Any())
+                {
+                    return new PaginatedResponseDto<UnforfeituresResponse>(req)
                     {
-                        BadgeNumber = g.Key.BadgeNumber,
-                        FullName = g.Key.FullName,
-                        Ssn = g.Key.Ssn.MaskSsn(),
-                        HireDate = g.Key.HireDate,
-                        ReHiredDate = g.Key.ReHireDate ?? default,
-                        StoreNumber = g.Key.StoreNumber,
-                        CompanyContributionYears = g.Key.YearsOfService,
-                        NetBalanceLastYear = g.Key.NetBalanceLastYear,
-                        VestedBalanceLastYear = g.Key.VestedBalanceLastYear,
-                        EnrollmentName = g.Key.EnrollmentName,
-                        EnrollmentId = g.Key.EnrollmentId,
-                        HoursProfitYear = g.Key.HoursProfitYear,
-                        WagesProfitYear = g.Key.WagesProfitYear,
-                        IsExecutive = g.Key.PayFrequencyId == PayFrequency.Constants.Monthly,
-                        Details = g.Select(x => new RehireTransactionDetailResponse
-                        {
-                            ProfitYear = x.pd.ProfitYear,
-                            HoursTransactionYear = x.pp != null ? x.pp.CurrentHoursYear : null,
-                            Forfeiture = x.pd.Forfeiture,
-                            Remark = x.pd.Remark,
-                            ProfitCodeId = x.pd.ProfitCodeId,
-                            WagesTransactionYear = x.pp != null ? x.pp.CurrentIncomeYear + x.pp.IncomeExecutive : null,
-                            SuggestedUnforfeiture =
-                                    // we only care about the latest forf/unforf transaction 
-                                    x.pd.Id == g.Max(item => item.pd.Id) &&
-                                    // check if this row is a forfeit
-                                    x.pd.CommentType != null && x.pd.CommentType == CommentType.Constants.Forfeit &&
-                                    // see if the employee qualifies for forfeiture
-                                    (g.Key.YearsOfService == 1 && g.Key.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions
-                                     || g.Key.EnrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords
-                                     || g.Key.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords)
-                                        ? x.pd.Forfeiture
+                        Results = new List<UnforfeituresResponse>(),
+                        Total = 0
+                    };
+                }
+
+                // Get total count for pagination
+                var totalCount = await mainQuery.Select(x => x.Ssn).Distinct().CountAsync(cancellationToken);
+
+                // PERFORMANCE: Phase 2 - Get Details for only the SSNs in the result set
+                var ssnList = paginatedMain.Select(x => x.Ssn).Distinct().ToList();
+
+                var detailsQuery =
+                    from pd in forfeitureTransactions
+                    where ssnList.Contains(pd.Ssn)
+                    join d in activeDemographics on pd.Ssn equals d.Ssn
+                    join pp in context.PayProfits
+                        on new { d.Id, pd.ProfitYear } equals new { Id = pp.DemographicId, pp.ProfitYear } into ppTmp
+                    from pp in ppTmp.DefaultIfEmpty()
+                    select new
+                    {
+                        pd.Ssn,
+                        pd.Id,
+                        pd.ProfitYear,
+                        pd.Forfeiture,
+                        pd.Remark,
+                        pd.ProfitCodeId,
+                        pd.CommentType,
+                        HoursTransactionYear = pp != null ? (decimal?)pp.CurrentHoursYear : null,
+                        WagesTransactionYear = pp != null ? (decimal?)(pp.CurrentIncomeYear + pp.IncomeExecutive) : null
+                    };
+
+                var allDetails = await detailsQuery.ToListAsync(cancellationToken);
+
+                // Group details by SSN for efficient lookup
+                var detailsBySsn = allDetails
+                    .GroupBy(x => x.Ssn)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+
+                // PERFORMANCE: Phase 3 - Combine in memory (fast for small result sets)
+                var responses = paginatedMain.Select(main =>
+                {
+                    detailsBySsn.TryGetValue(main.Ssn, out var details);
+                    var maxProfitDetailId = (details?.Any() ?? false) ? details.Max(d => (int)d.Id) : 0;
+
+                    return new UnforfeituresResponse
+                    {
+                        BadgeNumber = main.BadgeNumber,
+                        FullName = main.FullName,
+                        Ssn = main.Ssn.MaskSsn(),
+                        HireDate = main.HireDate,
+                        ReHiredDate = main.ReHireDate ?? default,
+                        StoreNumber = main.StoreNumber,
+                        CompanyContributionYears = main.YearsOfService,
+                        NetBalanceLastYear = main.NetBalanceLastYear,
+                        VestedBalanceLastYear = main.VestedBalanceLastYear,
+                        EnrollmentName = main.EnrollmentName,
+                        EnrollmentId = main.EnrollmentId,
+                        HoursProfitYear = main.HoursProfitYear,
+                        WagesProfitYear = main.WagesProfitYear,
+                        IsExecutive = main.PayFrequencyId == PayFrequency.Constants.Monthly,
+                        Details = (details ?? Enumerable.Empty<dynamic>())
+                            .Select(d => new RehireTransactionDetailResponse
+                            {
+                                ProfitYear = d.ProfitYear,
+                                HoursTransactionYear = d.HoursTransactionYear,
+                                Forfeiture = d.Forfeiture,
+                                Remark = d.Remark,
+                                ProfitCodeId = d.ProfitCodeId,
+                                WagesTransactionYear = d.WagesTransactionYear,
+                                SuggestedUnforfeiture =
+                                    d.Id == maxProfitDetailId &&
+                                    d.CommentType != null && d.CommentType == CommentType.Constants.Forfeit &&
+                                    (main.YearsOfService == 1 && main.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions
+                                     || main.EnrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords
+                                     || main.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords)
+                                        ? d.Forfeiture
                                         : null,
-                            ProfitDetailId = x.pd.Id
-                        })
+                                ProfitDetailId = d.Id
+                            })
                             .OrderByDescending(x => x.ProfitDetailId)
                             .ToList()
                     };
+                }).ToList();
 
-                var results = await query.ToPaginationResultsAsync(req, cancellationToken);
+                var results = new PaginatedResponseDto<UnforfeituresResponse>(req)
+                {
+                    Results = responses,
+                    Total = totalCount
+                };
 
                 // Record result count metric
-                var resultCount = results.Results.Count();
-                EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
+                EndpointTelemetry.RecordCountsProcessed.Record(results.Results.Count(),
                     new("record_type", "unforfeiture"),
                     new("service", nameof(UnforfeitService)));
 
