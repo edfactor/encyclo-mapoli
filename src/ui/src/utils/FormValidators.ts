@@ -57,16 +57,20 @@ export const psnValidator = yup
   .transform((value) => value || undefined);
 
 /**
- * Validates that a profit year is a number between 2020 and 2100 (required)
+ * Validates that a profit year is a number between specified years (required)
+ * @param minYear - Minimum allowed year (default: 2020)
+ * @param maxYear - Maximum allowed year (default: 2100)
  */
-export const profitYearValidator = yup
-  .number()
-  .typeError("Year must be a number")
-  .integer("Year must be an integer")
-  .min(2020, "Year must be 2020 or later")
-  .max(2100, "Year must be 2100 or earlier")
-  .required("Year is required");
-
+export const profitYearValidator = (minYear: number = 2015, maxYear: number = 2100) => {
+  console.log(`Validating profit year between ${minYear} and ${maxYear}`);
+  return yup
+    .number()
+    .typeError("Year must be a number")
+    .integer("Year must be an integer")
+    .min(minYear, `Year must be ${minYear} or later`)
+    .max(maxYear, `Year must be ${maxYear} or earlier`)
+    .required("Year is required");
+};
 /**
  * Validates that a profit year is a number between 2020 and 2100 (nullable)
  */
@@ -158,21 +162,26 @@ export const endDateStringAfterStartDateValidator = (
  * @param maxYear - Maximum allowed year (default: 2099)
  * @param fieldName - Optional field name for error messages (default: "Date")
  */
-export const dateStringValidator = (minYear: number = 2000, maxYear: number = 2099, fieldName: string = "Date") =>
-  yup
+export const dateStringValidator = (minYear: number = 2000, maxYear: number = 2099, fieldName: string = "Date") => {
+  console.log(`Validating ${fieldName} with year between ${minYear} and ${maxYear}`);
+
+  return yup
     .string()
     .nullable()
     .test("is-valid-format", `${fieldName} must be in MM/DD/YYYY format`, function (value) {
+      console.log(`FORMAT FORMAT Validating format of ${fieldName}:`, value);
       if (!value) return true;
       return /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(value);
     })
     .test("is-valid-year", `Year must be between ${minYear} and ${maxYear}`, function (value) {
+      console.log(`VALID VALID Validating year of ${fieldName}:`, value);
       if (!value) return true;
       const match = value.match(/^\d{1,2}\/\d{1,2}\/(\d{4})$/);
       if (!match) return true;
       const year = parseInt(match[1]);
       return year >= minYear && year <= maxYear;
     });
+};
 
 /**
  * Handler for SSN input that only allows numeric characters up to 9 digits
