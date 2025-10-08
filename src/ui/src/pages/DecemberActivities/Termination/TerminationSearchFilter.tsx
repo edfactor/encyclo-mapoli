@@ -12,20 +12,22 @@ import { clearTermination } from "../../../reduxstore/slices/yearsEndSlice";
 import { RootState } from "../../../reduxstore/store";
 import { CalendarResponseDto } from "../../../reduxstore/types";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
-import {
-  dateStringValidator,
-  endDateStringAfterStartDateValidator,
-  profitYearValidator
-} from "../../../utils/FormValidators";
+import { profitYearValidator } from "../../../utils/FormValidators";
 import { TerminationSearchRequest } from "./Termination";
 
 const schema = yup.object().shape({
-  beginningDate: dateStringValidator(2000, 2099, "Beginning Date").required("Begin Date is required"),
-  endingDate: endDateStringAfterStartDateValidator(
-    "beginningDate",
-    tryddmmyyyyToDate,
-    "End Date must be after Begin Date"
-  ).required("End Date is required"),
+  beginningDate: yup.string().required("Begin Date is required"),
+  endingDate: yup
+    .string()
+    .required("End Date is required")
+    .test("is-after-start", "End Date must be after Begin Date", function (value) {
+      const { beginningDate } = this.parent;
+      if (!beginningDate || !value) return true;
+      const startDate = tryddmmyyyyToDate(beginningDate);
+      const endDate = tryddmmyyyyToDate(value);
+      if (!startDate || !endDate) return true;
+      return endDate > startDate;
+    }),
   forfeitureStatus: yup.string().required("Forfeiture Status is required"),
   pagination: yup
     .object({
