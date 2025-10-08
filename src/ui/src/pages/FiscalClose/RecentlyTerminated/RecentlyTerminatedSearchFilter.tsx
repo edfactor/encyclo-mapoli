@@ -25,7 +25,7 @@ interface RecentlyTerminatedSearch {
 }
 
 const schema = yup.object().shape({
-  profitYear: profitYearValidator,
+  profitYear: profitYearValidator(),
   beginningDate: dateStringValidator(2000, 2099, "Beginning Date").required("Begin Date is required"),
   endingDate: endDateStringAfterStartDateValidator(
     "beginningDate",

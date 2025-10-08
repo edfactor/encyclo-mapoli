@@ -16,7 +16,7 @@ interface GrossReportParams {
 }
 
 const schema = yup.object().shape({
-  profitYear: profitYearValidator,
+  profitYear: profitYearValidator(),
   gross: yup.number().optional()
 });
 

@@ -25,7 +25,7 @@ interface ForfeitSearchParametersProps {
 }
 
 const schema = yup.object().shape({
-  profitYear: profitYearValidator
+  profitYear: profitYearValidator()
 });
 
 const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({ setInitialSearchLoaded, setPageReset }) => {

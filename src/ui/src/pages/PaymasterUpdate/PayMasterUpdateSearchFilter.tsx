@@ -14,7 +14,7 @@ interface ProfitYearSearch {
 }
 
 const schema = yup.object().shape({
-  profitYear: profitYearValidator
+  profitYear: profitYearValidator()
 });
 
 interface ProfitYearSearchFilterProps {

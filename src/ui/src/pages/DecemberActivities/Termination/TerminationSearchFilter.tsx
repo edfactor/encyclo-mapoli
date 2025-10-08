@@ -35,7 +35,7 @@ const schema = yup.object().shape({
       isSortDescending: yup.boolean().required()
     })
     .required(),
-  profitYear: profitYearValidator
+  profitYear: profitYearValidator(2015, 2099)
 });
 
 interface TerminationSearchFilterProps {
@@ -66,8 +66,8 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   } = useForm<TerminationSearchRequest>({
     resolver: yupResolver(schema),
     defaultValues: {
-      beginningDate: termination?.startDate || (fiscalData ? fiscalData.fiscalBeginDate : "") || "",
-      endingDate: termination?.endDate || (fiscalData ? fiscalData.fiscalEndDate : "") || "",
+      beginningDate: termination?.startDate || (fiscalData ? mmDDYYFormat(fiscalData.fiscalBeginDate) : "") || "",
+      endingDate: termination?.endDate || (fiscalData ? mmDDYYFormat(fiscalData.fiscalEndDate) : "") || "",
       forfeitureStatus: "showAll",
       pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: false },
       profitYear: selectedProfitYear
@@ -98,8 +98,8 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   const handleReset = async () => {
     setInitialSearchLoaded(false);
     reset({
-      beginningDate: fiscalData ? fiscalData.fiscalBeginDate : "",
-      endingDate: fiscalData ? fiscalData.fiscalEndDate : "",
+      beginningDate: fiscalData ? mmDDYYFormat(fiscalData.fiscalBeginDate) : "",
+      endingDate: fiscalData ? mmDDYYFormat(fiscalData.fiscalEndDate) : "",
       forfeitureStatus: "showAll",
       pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: false },
       profitYear: selectedProfitYear
