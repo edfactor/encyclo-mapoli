@@ -35,7 +35,7 @@ DECLARE
     -- AVAILABLE PAGES (ids starting at 100)
 
     MASTER_INQUIRY_PAGE CONSTANT NUMBER := 100;
-    ADJUSTMENTS_PAGE CONSTANT NUMBER := 101;
+    -- ADJUSTMENTS_PAGE CONSTANT NUMBER := 101;  -- Removed: Adjustments menu
     DEMOGRAPHIC_FREEZE_PAGE CONSTANT NUMBER := 102;
     DISTRIBUTION_INQUIRY_PAGE CONSTANT NUMBER := 103;
     MANAGE_EXECUTIVE_HOURS_PAGE CONSTANT NUMBER := 104;
@@ -187,7 +187,7 @@ BEGIN
 
 --Sub values for INQUIRIES
     insert_navigation_item(MASTER_INQUIRY_PAGE, INQUIRIES_MENU, 'MASTER INQUIRY', '', 'master-inquiry', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(ADJUSTMENTS_PAGE, INQUIRIES_MENU, 'ADJUSTMENTS', '', 'adjustments', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    -- Removed: insert_navigation_item(ADJUSTMENTS_PAGE, INQUIRIES_MENU, 'ADJUSTMENTS', '', 'adjustments', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
 
 
 --It Operations
@@ -233,10 +233,10 @@ BEGIN
     assign_navigation_role(MASTER_INQUIRY_PAGE, FINANCE_MANAGER); 
     assign_navigation_role(MASTER_INQUIRY_PAGE, DISTRIBUTIONS_CLERK); 
 
--- Assign roles for ADJUSTMENTS (Endpoints base -> Navigation.Constants.Adjustments; Policy -> CanRunMasterInquiry)
-    assign_navigation_role(ADJUSTMENTS_PAGE, SYSTEM_ADMINISTRATOR); 
-    assign_navigation_role(ADJUSTMENTS_PAGE, FINANCE_MANAGER);
-    assign_navigation_role(ADJUSTMENTS_PAGE, DISTRIBUTIONS_CLERK);
+-- Removed: Assign roles for ADJUSTMENTS (Endpoints base -> Navigation.Constants.Adjustments; Policy -> CanRunMasterInquiry)
+    -- assign_navigation_role(ADJUSTMENTS_PAGE, SYSTEM_ADMINISTRATOR); 
+    -- assign_navigation_role(ADJUSTMENTS_PAGE, FINANCE_MANAGER);
+    -- assign_navigation_role(ADJUSTMENTS_PAGE, DISTRIBUTIONS_CLERK);
 
     assign_navigation_role(DECEMBER_ACTIVITIES, SYSTEM_ADMINISTRATOR);  
     assign_navigation_role(DECEMBER_ACTIVITIES, FINANCE_MANAGER);
