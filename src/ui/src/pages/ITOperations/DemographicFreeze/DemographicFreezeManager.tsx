@@ -89,16 +89,19 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
           const asOfDateTime = combinedDate.toISOString();
 
           setPageReset(true);
+
+          // Wait for the mutation to complete
           await freezeDemographics({
             asOfDateTime,
             profitYear: data.profitYear
-          });
+          }).unwrap();
 
           // Clear the form fields after successful freeze so the As-of date/time
           // are removed and the Create button becomes disabled (form invalid).
           reset({ profitYear: profitYear || currentYear, asOfDate: null, asOfTime: null });
 
           setInitialSearchLoaded(true);
+          // The grid will automatically refetch due to RTK Query cache invalidation
           // Could add a success notification here
         }
       } catch (error) {
