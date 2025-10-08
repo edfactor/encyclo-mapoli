@@ -299,12 +299,12 @@ FROM (
         string query = @$"
 SELECT d.ID AS DEMOGRAPHIC_ID, pd.SSN, SUM(pd.YEARS_OF_SERVICE_CREDIT)
                + CASE WHEN NOT EXISTS (SELECT 1 FROM PROFIT_DETAIL pd0 WHERE pd0.PROFIT_YEAR = {profitYear} AND pd0.PROFIT_CODE_ID = {ProfitCode.Constants.IncomingContributions.Id} AND pd.SSN  = pd0.SSN AND pd0.PROFIT_YEAR_ITERATION = 0)
-                  AND ( pp.HOURS_EXECUTIVE  + pp.CURRENT_HOURS_YEAR >= {ReferenceData.MinimumHoursForContribution()} 
+                  AND ( NVL(pp.HOURS_EXECUTIVE, 0)  + NVL(pp.CURRENT_HOURS_YEAR, 0) >= {ReferenceData.MinimumHoursForContribution()} 
                         AND d.DATE_OF_BIRTH <= TO_DATE('{aged18Date.ToString("yyyy-MM-dd")}', 'yyyy-mm-dd'))
                THEN 1 ELSE 0 END
                  AS YEARS
             FROM PROFIT_DETAIL pd
-       LEFT JOIN DEMOGRAPHIC d ON pd.SSN = d.SSN
+           INNER JOIN DEMOGRAPHIC d ON pd.SSN = d.SSN
        LEFT JOIN PAY_PROFIT pp ON pp.DEMOGRAPHIC_ID = d.ID AND pp.PROFIT_YEAR = {profitYear}
            WHERE pd.PROFIT_YEAR <= {profitYear}
         GROUP BY d.ID, pd.SSN, pp.CURRENT_HOURS_YEAR, pp.HOURS_EXECUTIVE, d.DATE_OF_BIRTH
