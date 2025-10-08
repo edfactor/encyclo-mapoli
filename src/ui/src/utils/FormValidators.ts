@@ -28,7 +28,7 @@ export const badgeNumberOrPSNValidator = yup
   .number()
   .typeError("Badge Number or PSN must be a number")
   .integer("Badge Number or PSN must be an integer")
-  .min(10000, "Badge Number or PSN must be at least 5 digits")
+  .min(1, "Badge Number or PSN must be at least 1 digits")
   .max(99999999999, "Badge Number or PSN must be 11 digits or less")
   .nullable()
   .transform((value) => value || undefined);
