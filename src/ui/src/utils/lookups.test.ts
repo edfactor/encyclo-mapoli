@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { getPayFrequencyLabel, getStatusLabel, getTaxCodeLabel } from "./lookups";
+import {
+  getPayFrequencyLabel,
+  getPaymentFlagLabel,
+  getReasonLabel,
+  getStatusLabel,
+  getTaxCodeLabel,
+  getTerminationCodeLabel
+} from "./lookups";
 
 describe("getTaxCodeLabel", () => {
   it("should return label for tax code 0", () => {
@@ -184,5 +191,192 @@ describe("getStatusLabel", () => {
       expect(result.length).toBeGreaterThan(0);
       expect(["Active", "Inactive", "Deceased", "Terminated"]).toContain(result);
     });
+  });
+});
+
+describe("getTerminationCodeLabel", () => {
+  it("should return label for termination code A", () => {
+    expect(getTerminationCodeLabel("A")).toBe("LEFT ON OWN");
+  });
+
+  it("should return label for termination code B", () => {
+    expect(getTerminationCodeLabel("B")).toBe("PERSONAL OR FAMILY REASON");
+  });
+
+  it("should return label for termination code F", () => {
+    expect(getTerminationCodeLabel("F")).toBe("FMLA-EXPIRED");
+  });
+
+  it("should return label for termination code R", () => {
+    expect(getTerminationCodeLabel("R")).toBe("RETIRED");
+  });
+
+  it("should return label for termination code Z", () => {
+    expect(getTerminationCodeLabel("Z")).toBe("DECEASED");
+  });
+
+  it("should return empty string for invalid termination code", () => {
+    expect(getTerminationCodeLabel("0")).toBe("");
+    expect(getTerminationCodeLabel("1")).toBe("");
+  });
+
+  it("should return empty string for lowercase letters", () => {
+    expect(getTerminationCodeLabel("a")).toBe("");
+    expect(getTerminationCodeLabel("z")).toBe("");
+  });
+
+  it("should return empty string for empty string", () => {
+    expect(getTerminationCodeLabel("")).toBe("");
+  });
+
+  it("should handle all valid termination codes A-Z", () => {
+    const terminationCodes = [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "I",
+      "J",
+      "K",
+      "L",
+      "M",
+      "N",
+      "O",
+      "P",
+      "Q",
+      "R",
+      "S",
+      "T",
+      "U",
+      "V",
+      "W",
+      "X",
+      "Y",
+      "Z"
+    ];
+    terminationCodes.forEach((code) => {
+      const result = getTerminationCodeLabel(code);
+      expect(result.length).toBeGreaterThan(0);
+      expect(result).not.toBe("");
+    });
+  });
+
+  it("should return specific labels for key termination codes", () => {
+    expect(getTerminationCodeLabel("D")).toBe("STEALING");
+    expect(getTerminationCodeLabel("H")).toBe("JOB ABANDONMENT");
+    expect(getTerminationCodeLabel("M")).toBe("POOR PERFORMANCE");
+    expect(getTerminationCodeLabel("W")).toBe("RETIRED & RECEIVING PENSION");
+    expect(getTerminationCodeLabel("Y")).toBe("FMLA-APPROVED");
+  });
+});
+
+describe("getPaymentFlagLabel", () => {
+  it("should return label for payment flag Y", () => {
+    expect(getPaymentFlagLabel("Y")).toBe("Yes");
+  });
+
+  it("should return label for payment flag H", () => {
+    expect(getPaymentFlagLabel("H")).toBe("Hold");
+  });
+
+  it("should return label for payment flag D", () => {
+    expect(getPaymentFlagLabel("D")).toBe("Delete");
+  });
+
+  it("should return label for payment flag C", () => {
+    expect(getPaymentFlagLabel("C")).toBe("Manual Check");
+  });
+
+  it("should return label for payment flag O", () => {
+    expect(getPaymentFlagLabel("O")).toBe("Override");
+  });
+
+  it("should return empty string for invalid payment flag", () => {
+    expect(getPaymentFlagLabel("X")).toBe("");
+    expect(getPaymentFlagLabel("Z")).toBe("");
+    expect(getPaymentFlagLabel("1")).toBe("");
+  });
+
+  it("should return empty string for lowercase letters", () => {
+    expect(getPaymentFlagLabel("y")).toBe("");
+    expect(getPaymentFlagLabel("h")).toBe("");
+    expect(getPaymentFlagLabel("d")).toBe("");
+  });
+
+  it("should return empty string for empty string", () => {
+    expect(getPaymentFlagLabel("")).toBe("");
+  });
+
+  it("should handle all valid payment flags", () => {
+    const paymentFlags = ["Y", "H", "D", "C", "O"];
+    paymentFlags.forEach((flag) => {
+      const result = getPaymentFlagLabel(flag);
+      expect(result.length).toBeGreaterThan(0);
+      expect(result).not.toBe("");
+    });
+  });
+});
+
+describe("getReasonLabel", () => {
+  it("should return label for reason code H", () => {
+    expect(getReasonLabel("H")).toBe("Hardship");
+  });
+
+  it("should return label for reason code P", () => {
+    expect(getReasonLabel("P")).toBe("Pay Direct");
+  });
+
+  it("should return label for reason code R", () => {
+    expect(getReasonLabel("R")).toBe("Rollover");
+  });
+
+  it("should return label for reason code M", () => {
+    expect(getReasonLabel("M")).toBe("Monthly");
+  });
+
+  it("should return label for reason code Q", () => {
+    expect(getReasonLabel("Q")).toBe("Quarterly");
+  });
+
+  it("should return label for reason code A", () => {
+    expect(getReasonLabel("A")).toBe("Annually");
+  });
+
+  it("should return empty string for invalid reason code", () => {
+    expect(getReasonLabel("X")).toBe("");
+    expect(getReasonLabel("Z")).toBe("");
+    expect(getReasonLabel("1")).toBe("");
+  });
+
+  it("should return empty string for lowercase letters", () => {
+    expect(getReasonLabel("h")).toBe("");
+    expect(getReasonLabel("p")).toBe("");
+    expect(getReasonLabel("r")).toBe("");
+  });
+
+  it("should return empty string for empty string", () => {
+    expect(getReasonLabel("")).toBe("");
+  });
+
+  it("should handle all valid reason codes", () => {
+    const reasonCodes = ["H", "P", "R", "M", "Q", "A"];
+    reasonCodes.forEach((code) => {
+      const result = getReasonLabel(code);
+      expect(result.length).toBeGreaterThan(0);
+      expect(result).not.toBe("");
+    });
+  });
+
+  it("should return specific labels for all reason codes", () => {
+    expect(getReasonLabel("H")).toBe("Hardship");
+    expect(getReasonLabel("P")).toBe("Pay Direct");
+    expect(getReasonLabel("R")).toBe("Rollover");
+    expect(getReasonLabel("M")).toBe("Monthly");
+    expect(getReasonLabel("Q")).toBe("Quarterly");
+    expect(getReasonLabel("A")).toBe("Annually");
   });
 });

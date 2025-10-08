@@ -58,3 +58,76 @@ export const getStatusLabel = (statusId: string): string => {
 
   return statuses[statusId] ?? "";
 };
+
+/**
+ * Returns a label for a termination code
+ * @param terminationCode - Single character termination code
+ * @returns Termination reason description or empty string if not found
+ */
+export const getTerminationCodeLabel = (terminationCode: string): string => {
+  const terminationCodes: Record<string, string> = {
+    A: "LEFT ON OWN",
+    B: "PERSONAL OR FAMILY REASON",
+    C: "COULD NOT WORK AVAILABLE HOURS",
+    D: "STEALING",
+    E: "NOT FOLLOWING COMPANY POLICY",
+    F: "FMLA-EXPIRED",
+    G: "TERMINATED-PRIVATE",
+    H: "JOB ABANDONMENT",
+    I: "HEALTH REASONS – NON FMLA",
+    J: "LAYOFF NO WORK",
+    K: "SCHOOL OR SPORTS",
+    L: "MOVE OUT OF AREA",
+    M: "POOR PERFORMANCE",
+    N: "OFF FOR SUMMER",
+    O: "WORKMAN'S COMPENSATION",
+    P: "INJURED",
+    Q: "TRANSFERRED",
+    R: "RETIRED",
+    S: "COMPETITION",
+    T: "ANOTHER JOB",
+    U: "WOULD NOT REHIRE",
+    V: "NEVER REPORTED",
+    W: "RETIRED & RECEIVING PENSION",
+    X: "MILITARY",
+    Y: "FMLA-APPROVED",
+    Z: "DECEASED"
+  };
+
+  return terminationCodes[terminationCode] ?? "";
+};
+
+/**
+ * Returns a label for a payment flag
+ * @param paymentFlag - Single character payment flag ("Y", "H", "D", "C", or "O")
+ * @returns Payment flag description or empty string if not found
+ */
+export const getPaymentFlagLabel = (paymentFlag: string): string => {
+  const paymentFlags: Record<string, string> = {
+    Y: "Yes",
+    H: "Hold",
+    D: "Delete",
+    C: "Manual Check",
+    O: "Override"
+  };
+
+  return paymentFlags[paymentFlag] ?? "";
+};
+
+/**
+ * Returns a label for a reason code
+ * @param reasonCode - Single character reason code ("H", "P", "R", "M", "Q", or "A")
+ * @returns Reason description or empty string if not found
+ */
+export const getReasonLabel = (reasonCode: string): string => {
+  const reasons: Record<string, string> = {
+    H: "Hardship",
+    P: "Pay Direct",
+    R: "Rollover",
+    M: "Monthly",
+    Q: "Quarterly",
+    A: "Annually"
+  };
+
+  return reasons[reasonCode] ?? "";
+};
