@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Virtual;
 internal sealed class ParticipantTotalYearMap : IEntityTypeConfiguration<ParticipantTotalYear>
 {
     //This table is virtual in nature.  It uses the FromSql method to access data.
@@ -10,9 +10,13 @@ internal sealed class ParticipantTotalYearMap : IEntityTypeConfiguration<Partici
     {
         builder.Metadata.SetIsTableExcludedFromMigrations(true);
 
-        builder.HasKey(x => x.Ssn);
+        builder.HasKey(x => new {x.DemographicId, x.Ssn} );
         builder.Property(x => x.Ssn)
             .HasColumnName("SSN")
+            .IsRequired();
+
+        builder.Property(x => x.DemographicId)
+            .HasColumnName("DEMOGRAPHIC_ID")
             .IsRequired();
 
         builder.Property(x => x.Years)

@@ -1,30 +1,32 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 
+import { Paged } from "smart-ui-library";
 import {
   setFrozenStateCollectionResponse,
   setFrozenStateResponse,
   setProfitYearSelectorData
-} from "reduxstore/slices/frozenSlice";
+} from "../../reduxstore/slices/frozenSlice";
 import {
   CurrentUserResponseDto,
   FreezeDemographicsRequest,
   FrozenStateResponse,
   RowCountResult,
   SortedPaginationRequestDto
-} from "reduxstore/types";
-import { Paged } from "smart-ui-library";
+} from "../../reduxstore/types";
 import { createDataSourceAwareBaseQuery } from "./api";
 
 const baseQuery = createDataSourceAwareBaseQuery();
 export const ItOperationsApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "itOperationsApi",
+  tagTypes: ["FrozenState"],
   endpoints: (builder) => ({
     getFrozenStateResponse: builder.query<FrozenStateResponse, void>({
       query: () => ({
         url: `itdevops/frozen/active`,
         method: "GET"
       }),
+      providesTags: ["FrozenState"],
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
@@ -46,6 +48,7 @@ export const ItOperationsApi = createApi({
           isSortDescending: params.isSortDescending
         }
       }),
+      providesTags: ["FrozenState"],
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
@@ -82,7 +85,8 @@ export const ItOperationsApi = createApi({
         url: "itdevops/freeze",
         method: "POST",
         body: request
-      })
+      }),
+      invalidatesTags: ["FrozenState"]
     }),
     getMetadata: builder.query<RowCountResult[], void>({
       query: () => ({
