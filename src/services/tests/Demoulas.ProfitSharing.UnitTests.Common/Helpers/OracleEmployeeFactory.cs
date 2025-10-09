@@ -1,7 +1,7 @@
-using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
-using Demoulas.ProfitSharing.UnitTests.Common.Fakes;
-using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
+﻿using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
+using Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Helpers;
 

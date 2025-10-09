@@ -42,6 +42,7 @@ export const useUnForfeitGrid = ({
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
   const [pendingSuccessMessage, setPendingSuccessMessage] = useState<string | null>(null);
   const [isPendingBulkMessage, setIsPendingBulkMessage] = useState<boolean>(false);
+  const [isBulkSaveInProgress, setIsBulkSaveInProgress] = useState<boolean>(false);
 
   const selectedProfitYear = useDecemberFlowProfitYear();
   const { unForfeits, unForfeitsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
@@ -84,21 +85,25 @@ export const useUnForfeitGrid = ({
     ]
   );
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } = useGridPagination({
-    initialPageSize: 25,
-    initialSortBy: "fullName",
-    initialSortDescending: false,
-    onPaginationChange: useCallback(async (pageNum: number, pageSz: number, sortPrms: any) => {
-      if (initialSearchLoaded) {
-        const request = createRequest(pageNum * pageSz, sortPrms.sortBy, sortPrms.isSortDescending);
-        if (request && request.pagination) {
-          // Update the pageSize in the request
-          request.pagination.take = pageSz;
-          await triggerSearch(request, false);
-        }
-      }
-    }, [initialSearchLoaded, createRequest, triggerSearch])
-  });
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
+    useGridPagination({
+      initialPageSize: 25,
+      initialSortBy: "fullName",
+      initialSortDescending: false,
+      onPaginationChange: useCallback(
+        async (pageNum: number, pageSz: number, sortPrms: any) => {
+          if (initialSearchLoaded) {
+            const request = createRequest(pageNum * pageSz, sortPrms.sortBy, sortPrms.isSortDescending);
+            if (request && request.pagination) {
+              // Update the pageSize in the request
+              request.pagination.take = pageSz;
+              await triggerSearch(request, false);
+            }
+          }
+        },
+        [initialSearchLoaded, createRequest, triggerSearch]
+      )
+    });
 
   const onGridReady = useCallback((params: { api: GridApi }) => {
     setGridApi(params.api);
@@ -123,16 +128,26 @@ export const useUnForfeitGrid = ({
   }, [isFetching, pendingSuccessMessage, isPendingBulkMessage, dispatch]);
 
   // Need a useEffect to reset the page number when total count changes (new search, not pagination)
+  // Don't reset during or immediately after bulk save operations to preserve grid position
   useEffect(() => {
+    const prevTotal = prevUnForfeits.current?.response?.total;
+    const currentTotal = unForfeits?.response?.total;
+
+    // Skip if this is the initial load (previous was undefined/null OR transitioning from 0 to non-zero)
+    const isInitialLoad =
+      !prevUnForfeits.current || (prevTotal === 0 && currentTotal !== undefined && currentTotal > 0);
+
     if (
+      !isBulkSaveInProgress &&
+      !isInitialLoad &&
       unForfeits !== prevUnForfeits.current &&
-      unForfeits?.response?.total !== undefined &&
-      unForfeits.response.total !== prevUnForfeits.current?.response?.total
+      currentTotal !== undefined &&
+      currentTotal !== prevTotal
     ) {
       resetPagination();
     }
     prevUnForfeits.current = unForfeits;
-  }, [unForfeits, resetPagination]);
+  }, [unForfeits, resetPagination, isBulkSaveInProgress]);
 
   const performSearch = useCallback(
     async (skip: number, sortBy: string, isSortDescending: boolean) => {
@@ -202,10 +217,26 @@ export const useUnForfeitGrid = ({
     ]
   );
 
+  // Ref to preserve the page number during bulk save before any resets occur
+  const pageNumberAtBulkSaveRef = useRef<number | null>(null);
+
+  // Ref to always have current pageNumber (avoid stale closure)
+  const currentPageNumberRef = useRef(pageNumber);
+  useEffect(() => {
+    currentPageNumberRef.current = pageNumber;
+  }, [pageNumber]);
+
   const handleBulkSave = useCallback(
     async (requests: ForfeitureAdjustmentUpdateRequest[], names: string[]) => {
       const badgeNumbers = requests.map((request) => request.badgeNumber);
       editState.addLoadingRows(badgeNumbers);
+
+      // Capture the CURRENT page number from the ref (not the stale closure value)
+      // This is critical because the callback's pageNumber can be stale
+      const actualCurrentPage = currentPageNumberRef.current;
+      pageNumberAtBulkSaveRef.current = actualCurrentPage;
+
+      setIsBulkSaveInProgress(true);
 
       try {
         await updateForfeitureAdjustmentBulk(requests);
@@ -217,9 +248,16 @@ export const useUnForfeitGrid = ({
         const bulkSuccessMessage = `Members affected: ${employeeNames.join("; ")}`;
 
         if (unForfeitsQueryParams) {
-          const request = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);
+          // Use the captured page number, not the current one (which may have been reset)
+          const savedPageNumber = pageNumberAtBulkSaveRef.current ?? 0;
+          const skip = savedPageNumber * pageSize;
+          const request = createRequest(skip, sortParams.sortBy, sortParams.isSortDescending);
           if (request) {
             await triggerSearch(request, false);
+
+            // Restore the page number in pagination state
+            handlePaginationChange(savedPageNumber, pageSize);
+
             setPendingSuccessMessage(bulkSuccessMessage);
             setIsPendingBulkMessage(true);
           }
@@ -229,6 +267,9 @@ export const useUnForfeitGrid = ({
         alert("Failed to save one or more adjustments. Please try again.");
       } finally {
         editState.removeLoadingRows(badgeNumbers);
+        pageNumberAtBulkSaveRef.current = null;
+        // Reset the flag after a small delay to ensure the Redux state update completes first
+        setTimeout(() => setIsBulkSaveInProgress(false), 100);
       }
     },
     [
@@ -240,7 +281,8 @@ export const useUnForfeitGrid = ({
       pageSize,
       sortParams,
       createRequest,
-      triggerSearch
+      triggerSearch,
+      handlePaginationChange
     ]
   );
 
@@ -280,10 +322,19 @@ export const useUnForfeitGrid = ({
     onArchiveHandled
   ]);
 
-  // Reset page number to 0 when resetPageFlag changes
+  // Reset page number to 0 when resetPageFlag changes (from search button)
+  // Track the previous value to detect actual changes, not just re-renders
+  const prevResetPageFlag = useRef<boolean>(resetPageFlag);
   useEffect(() => {
-    resetPagination();
-  }, [resetPageFlag, resetPagination]);
+    // Only reset if the flag actually toggled (changed value)
+    const flagChanged = prevResetPageFlag.current !== resetPageFlag;
+
+    if (flagChanged && !isBulkSaveInProgress) {
+      resetPagination();
+    }
+
+    prevResetPageFlag.current = resetPageFlag;
+  }, [resetPageFlag, resetPagination, isBulkSaveInProgress]);
 
   useEffect(() => {
     const hasChanges = selectionState.selectedRowIds.length > 0 || Object.keys(editState.editedValues).length > 0;

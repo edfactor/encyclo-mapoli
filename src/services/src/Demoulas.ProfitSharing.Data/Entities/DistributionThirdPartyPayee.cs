@@ -3,7 +3,7 @@ namespace Demoulas.ProfitSharing.Data.Entities;
 
 public sealed class DistributionThirdPartyPayee
 {
-    public int Id { get; set; } 
+    public int Id { get; set; }
 
     public string? Payee { get; set; }
     public string? Name { get; set; }

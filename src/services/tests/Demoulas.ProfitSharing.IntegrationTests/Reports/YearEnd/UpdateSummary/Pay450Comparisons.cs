@@ -1,10 +1,10 @@
-namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.UpdateSummary;
+﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.UpdateSummary;
 
 public static class Pay450Comparisons
 {
     private const string Red = "\u001b[31m";
     private const string Reset = "\u001b[0m";
-    
+
     public static string ToComparisonString(Pay450Record a, Pay450Record b)
     {
         string FieldStr(string val, int width) => (val ?? "").PadRight(width);
@@ -42,7 +42,7 @@ public static class Pay450Comparisons
             DiffInt(a.AfterEnroll, b.AfterEnroll, 6)
         );
     }
-    
+
     public static string ToComparisonHeader()
     {
         string H(string label, int width) => label.PadRight(width);

@@ -48,6 +48,7 @@ export interface EmployeeDetails {
   missives: number[] | null;
   allocationFromAmount: number;
   allocationToAmount: number;
+  badgesOfDuplicateSsns: number[];
 }
 
 export interface EligibleEmployeesRequestDto extends ProfitYearRequest {
@@ -86,6 +87,7 @@ export interface EligibleEmployeeResponseDto extends PagedReportResponse<Eligibl
 
 export interface YearEndProfitSharingReportRequest extends FilterParams {
   profitYear: number;
+  useFrozenData?: boolean;
   pagination: SortedPaginationRequestDto;
 }
 
@@ -114,10 +116,6 @@ export interface YearEndProfitSharingReportResponse extends PagedReportResponse<
   hoursTotal: number;
   pointsTotal: number;
   balanceTotal: number;
-  terminatedWagesTotal: number;
-  terminatedHoursTotal: number;
-  terminatedPointsTotal: number;
-  terminatedBalanceTotal: number;
   numberOfEmployees: number;
   numberOfNewEmployees: number;
   numberOfEmployeesUnder21: number;
@@ -129,10 +127,6 @@ export interface YearEndProfitSharingReportTotalsResponse {
   hoursTotal: number;
   pointsTotal: number;
   balanceTotal: number;
-  terminatedWagesTotal: number;
-  terminatedHoursTotal: number;
-  terminatedPointsTotal: number;
-  terminatedBalanceTotal: number;
   numberOfEmployees: number;
   numberOfNewEmployees: number;
   numberOfEmployeesUnder21: number;

@@ -1,14 +1,14 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
+﻿using System.Diagnostics;
+using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Groups;
-using Demoulas.ProfitSharing.Common.Extensions;
-using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
-using Microsoft.Extensions.Logging;
-using System.Diagnostics;
+using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
 

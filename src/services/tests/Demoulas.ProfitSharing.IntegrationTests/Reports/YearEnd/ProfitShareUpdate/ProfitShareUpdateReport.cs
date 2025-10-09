@@ -9,6 +9,8 @@ using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.ItDevOps;
 using Demoulas.ProfitSharing.Services.ProfitShareEdit;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 using Moq;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
@@ -36,14 +38,15 @@ internal sealed class ProfitShareUpdateReport
 
     public async Task ProfitSharingUpdatePaginated(ProfitShareUpdateRequest profitShareUpdateRequest, IDemographicReaderService demographicReaderService)
     {
-        FrozenService frozenService = new FrozenService(_dbFactory,  new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object);
+        var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
+        FrozenService frozenService = new FrozenService(_dbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache);
         TotalService totalService = new TotalService(_dbFactory, _calendarService, new EmbeddedSqlService(), demographicReaderService);
         ProfitShareUpdateService psu = new(_dbFactory, totalService, _calendarService, demographicReaderService);
         _profitYear = profitShareUpdateRequest.ProfitYear;
 
         (List<MemberFinancials> members, AdjustmentsSummaryDto adjustmentsApplied, ProfitShareUpdateTotals totalsDto, bool _) =
             await psu.ProfitSharingUpdate(profitShareUpdateRequest, CancellationToken.None, false);
-        
+
         // Sort like READY sorts, meaning "Mc" comes after "ME" (aka it is doing a pure ascii sort - lowercase characters are higher.) 
         members = members
             .OrderBy(m => m.Name, StringComparer.Ordinal)
@@ -256,7 +259,7 @@ internal sealed class ProfitShareUpdateReport
         Header1 header_1 = new();
         Header4 header_4 = new();
         Header5 header_5 = new();
-        
+
         header_1.HDR1_PAGE = 1;
         header_1.HDR1_RPT = "PAY444A";
         WRITE2_afterPage(header_1);

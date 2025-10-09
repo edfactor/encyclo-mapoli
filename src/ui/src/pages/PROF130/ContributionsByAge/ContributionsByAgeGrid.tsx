@@ -14,11 +14,9 @@ interface ContributionsByAgeGridProps {
 }
 
 const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initialSearchLoaded }) => {
-  const {
-    contributionsByAgeTotal,
-    contributionsByAgeFullTime,
-    contributionsByAgePartTime
-  } = useSelector((state: RootState) => state.yearsEnd);
+  const { contributionsByAgeTotal, contributionsByAgeFullTime, contributionsByAgePartTime } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
 
   const { handleSortChange } = useGridPagination({
     initialPageSize: 255,
@@ -57,12 +55,12 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
                   ]}
                   leftColumnHeaders={["Amount"]}
                   topRowHeaders={["Total", "EMPS", "Amount"]}></TotalsGrid>
-        <DSMGrid
+                <DSMGrid
                   preferenceKey={"CONT_AGE_Total"}
                   isLoading={false}
                   handleSortChanged={handleSortChange}
                   providedOptions={{
-          rowData: contributionsByAgeTotal?.response?.results ?? [],
+                    rowData: contributionsByAgeTotal?.response?.results ?? [],
                     columnDefs: columnDefsTotal ?? []
                   }}
                 />
@@ -81,12 +79,12 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
                   ]}
                   leftColumnHeaders={["Amount"]}
                   topRowHeaders={["FullTime", "EMPS", "Amount"]}></TotalsGrid>
-        <DSMGrid
+                <DSMGrid
                   preferenceKey={"CONT_AGE_FullTime"}
                   isLoading={false}
                   handleSortChanged={handleSortChange}
                   providedOptions={{
-          rowData: contributionsByAgeFullTime?.response?.results ?? [],
+                    rowData: contributionsByAgeFullTime?.response?.results ?? [],
                     columnDefs: columnDefsTotal ?? []
                   }}
                 />
@@ -94,23 +92,23 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
 
               <Grid size={{ xs: 4 }}>
                 <h2 className="text-dsm-secondary">Part-time</h2>
-        <TotalsGrid
+                <TotalsGrid
                   breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
                   tablePadding="0px"
                   displayData={[
                     [
                       contributionsByAgePartTime?.totalEmployees || 0,
-          numberToCurrency(contributionsByAgePartTime?.totalAmount || 0)
+                      numberToCurrency(contributionsByAgePartTime?.totalAmount || 0)
                     ]
                   ]}
                   leftColumnHeaders={["Amount"]}
                   topRowHeaders={["Total", "EMPS", "Amount"]}></TotalsGrid>
-        <DSMGrid
+                <DSMGrid
                   preferenceKey={"CONT_AGE_PartTime"}
                   isLoading={false}
                   handleSortChanged={handleSortChange}
                   providedOptions={{
-        rowData: contributionsByAgePartTime?.response?.results ?? [],
+                    rowData: contributionsByAgePartTime?.response?.results ?? [],
                     columnDefs: columnDefsTotal ?? []
                   }}
                 />

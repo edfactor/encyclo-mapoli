@@ -25,7 +25,7 @@ public static class SsnExtensions
 
     public static string MaskSsn(this object ssn)
     {
-        string _ssn = ssn.ToString()??string.Empty;
+        string _ssn = ssn.ToString() ?? string.Empty;
         Span<char> ssnSpan = stackalloc char[9];
         _ssn.AsSpan().CopyTo(ssnSpan[(9 - _ssn.Length)..]);
         ssnSpan[..(9 - _ssn.Length)].Fill('0');

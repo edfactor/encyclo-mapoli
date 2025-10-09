@@ -20,18 +20,23 @@ const useExecutiveModal = ({
   onAddExecutives,
   isSearching
 }: UseExecutiveModalProps) => {
-  
-  const handleModalSearch = useCallback((searchForm: any) => {
-    onSearch(searchForm);
-  }, [onSearch]);
+  const handleModalSearch = useCallback(
+    (searchForm: any) => {
+      onSearch(searchForm);
+    },
+    [onSearch]
+  );
 
   const handleModalReset = useCallback(() => {
     onSelectExecutives([]);
   }, [onSelectExecutives]);
 
-  const handleExecutiveSelection = useCallback((executives: ExecutiveHoursAndDollars[]) => {
-    onSelectExecutives(executives);
-  }, [onSelectExecutives]);
+  const handleExecutiveSelection = useCallback(
+    (executives: ExecutiveHoursAndDollars[]) => {
+      onSelectExecutives(executives);
+    },
+    [onSelectExecutives]
+  );
 
   const handleAddToMainGrid = useCallback(() => {
     if (selectedExecutives.length > 0) {
@@ -46,7 +51,7 @@ const useExecutiveModal = ({
     selectedExecutives,
     isModalSearching: isSearching,
     canAddExecutives,
-    
+
     handleModalSearch,
     handleModalReset,
     handleExecutiveSelection,

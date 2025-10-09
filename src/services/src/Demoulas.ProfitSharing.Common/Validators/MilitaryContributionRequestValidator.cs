@@ -1,9 +1,9 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
+﻿using System.Diagnostics.Metrics;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.Util.Extensions;
 using FastEndpoints;
 using FluentValidation;
-using System.Diagnostics.Metrics;
 
 namespace Demoulas.ProfitSharing.Common.Validators;
 
@@ -11,8 +11,31 @@ namespace Demoulas.ProfitSharing.Common.Validators;
 /// Validates requests to create Military Contributions according to business rules.
 /// </summary>
 /// <remarks>
-/// Documentation: Military Contributions validation rules, temporal semantics, and QA plan are documented here:
-/// https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/537919492/Military+Contributions+Validation+Behavior+and+Operations
+/// <para><strong>Business Rules Summary (from TPR008-13.cbl):</strong></para>
+/// <list type="number">
+/// <item><description><strong>5-Year Lookback Window</strong>: Contributions allowed for current year OR up to 5 years prior (Proj 19567, expanded from 3 years on 12/31/2013)</description></item>
+/// <item><description><strong>Age Requirement</strong>: Employee must be at least 21 years old on contribution date (eligibility rule)</description></item>
+/// <item><description><strong>Hire Date Validation</strong>: Contribution year must be on or after employee's earliest hire year</description></item>
+/// <item><description><strong>Payroll Frequency Restriction (COBOL only)</strong>: Monthly employees (PY-FREQ=2) required special user authorization in COBOL (line 735-743). C# implementation simplifies this to general employment status validation.</description></item>
+/// <item><description><strong>Duplicate Prevention</strong>: No duplicate regular contributions allowed for same year (line 1530-1547). Supplemental contributions bypass this check.</description></item>
+/// <item><description><strong>Year/Date Consistency</strong>: When profit year differs from contribution date year, must be marked supplemental (no YOS credit)</description></item>
+/// <item><description><strong>Amount Validation</strong>: Contribution amount must be greater than zero</description></item>
+/// <item><description><strong>Date Format Validation</strong>: Month must be 1-12 or 20 (special code for year-only entry), year validated per lookback rule (line 1240-1253)</description></item>
+/// <item><description><strong>Screen Duplicate Check</strong>: Same date cannot appear multiple times on entry screen (line 1270-1398)</description></item>
+/// <item><description><strong>Original Entry Requirement</strong>: For month-specific entries (MMYY format), the year.0 record must exist first (line 1460-1489)</description></item>
+/// </list>
+/// <para><strong>COBOL Source References:</strong></para>
+/// <list type="bullet">
+/// <item><description>TPR008-13.cbl - Main military contribution entry program (MAIN-1286/MAIN-1280 Oracle HCM Integration)</description></item>
+/// <item><description>Line 37-38: Proj 19567 - 5-year lookback expansion</description></item>
+/// <item><description>Line 1256-1265: Year validation logic (410-CHECK-EACH)</description></item>
+/// <item><description>Line 1270-1398: Duplicate date detection (420-CHECK-SCREEN-DATE, 432-CHECK-SCREEN-YR)</description></item>
+/// <item><description>Line 1410-1557: Database duplicate checks (440-CHECK-FOR-DUP-PROFIT-DATES, 450/460-PROCESS-MONTH-CHECK)</description></item>
+/// <item><description>Line 735-743: PY-FREQ check for monthly associates (PY-FREQ=2 = monthly paid, restricted to authorized users in COBOL; PY-FREQ=1 = weekly paid, no restriction)</description></item>
+/// </list>
+/// <para><strong>Documentation:</strong></para>
+/// <para>Comprehensive validation rules, temporal semantics, and QA plan: https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/537919492</para>
+/// <para>See also: MILITARY_CONTRIBUTION_VALIDATION.md in src/ui/public/docs/</para>
 /// </remarks>
 public class MilitaryContributionRequestValidator : Validator<CreateMilitaryContributionRequest>
 {
@@ -33,9 +56,20 @@ public class MilitaryContributionRequestValidator : Validator<CreateMilitaryCont
 
         RuleFor(r => r.ProfitYear)
             .GreaterThanOrEqualTo((short)2020)
-            .WithMessage($"{nameof(MilitaryContributionRequest.ProfitYear)} must not less than 2020.")
+            .WithMessage($"{nameof(CreateMilitaryContributionRequest.ProfitYear)} must not less than 2020.")
             .LessThanOrEqualTo((short)DateTime.Today.Year)
-            .WithMessage($"{nameof(MilitaryContributionRequest.ProfitYear)} must not be greater than this year.");
+            .WithMessage($"{nameof(CreateMilitaryContributionRequest.ProfitYear)} must not be greater than this year.")
+            .Must((request, profitYear) =>
+            {
+                // COBOL Rule: Contribution year must be current year OR within 5 years prior
+                // Source: TPR008-13.cbl line 1256-1265 (Proj 19567 - expanded from 3 to 5 years)
+                var currentYear = DateTime.Today.Year;
+                var contributionYear = request.ContributionDate.Year;
+                var isValid = contributionYear == currentYear ||
+                             (contributionYear >= currentYear - 5 && contributionYear < currentYear);
+                return isValid || TrackFailure("ContributionYearOutsideLookbackWindow");
+            })
+            .WithMessage(request => $"Contribution year {request.ContributionDate.Year} must be current year or within 5 years prior (allowed: {DateTime.Today.Year - 5} to {DateTime.Today.Year}).");
 
         RuleFor(r => r.BadgeNumber)
             .GreaterThan(0)
@@ -65,28 +99,6 @@ public class MilitaryContributionRequestValidator : Validator<CreateMilitaryCont
                 return isSupp || TrackFailure("YosRequiresSupplementalWhenYearMismatch");
             })
             .WithMessage(r => $"When profit year ({r.ProfitYear}) differs from contribution year ({r.ContributionDate.Year}), the contribution must be marked Supplemental.");
-
-        // Employment status eligibility: only Active as-of contribution date
-        RuleFor(r => r.ContributionDate)
-            .MustAsync(async (request, _, ct) =>
-            {
-                // If badge is invalid, let the BadgeNumber rule handle it; avoid compounding errors
-                if (!await _employeeLookup.BadgeExistsAsync(request.BadgeNumber, ct))
-                {
-                    return true;
-                }
-                var isActive = await _employeeLookup.IsActiveAsOfAsync(request.BadgeNumber, DateOnly.FromDateTime(request.ContributionDate), ct);
-                if (!isActive.HasValue)
-                {
-                    return TrackFailure("EmploymentStatusMissing");
-                }
-                if (!isActive.Value)
-                {
-                    return TrackFailure("EmploymentStatusNotActive");
-                }
-                return true; // Active only
-            })
-            .WithMessage(request => $"Employee employment status is not eligible for contributions as of {DateOnly.FromDateTime(request.ContributionDate):yyyy-MM-dd}.");
     }
 
     private async Task<bool> ValidateContributionDate(CreateMilitaryContributionRequest req, CancellationToken token)
@@ -99,7 +111,7 @@ public class MilitaryContributionRequestValidator : Validator<CreateMilitaryCont
         // Query by the contribution date year rather than the selected ProfitYear so we detect
         // existing records for the actual contribution year (fixes PS-1721 where users may select
         // a different profit year in the UI than the contribution date year).
-        var results = await _militaryService.GetMilitaryServiceRecordAsync(new MilitaryContributionRequest { ProfitYear = (short)req.ContributionDate.Year, BadgeNumber = req.BadgeNumber, Take = short.MaxValue },
+        var results = await _militaryService.GetMilitaryServiceRecordAsync(new GetMilitaryContributionRequest { BadgeNumber = req.BadgeNumber, Take = short.MaxValue },
             isArchiveRequest: false,
             cancellationToken: token);
 
@@ -107,7 +119,7 @@ public class MilitaryContributionRequestValidator : Validator<CreateMilitaryCont
         {
             return TrackFailure("ServiceError");
         }
-        var records = results.Value!.Results;
+        var records = results.Value!.Results.Where(x => x.ProfitYear == (short)req.ContributionDate.Year);
 
         var ok = records.All(x => x.IsSupplementalContribution || x.ContributionDate.Year != req.ContributionDate.Year);
         return ok || TrackFailure("DuplicateRegularContribution");

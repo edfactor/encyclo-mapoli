@@ -7,7 +7,7 @@ public sealed class ParticipantEtvaTotalFaker : Faker<ParticipantTotal>
 {
     public ParticipantEtvaTotalFaker(IList<ProfitDetail> profitDetails)
     {
-        var demoSsns = profitDetails.Select(x=>x.Ssn).ToList();
+        var demoSsns = profitDetails.Select(x => x.Ssn).ToList();
         var ssnQueue = new Queue<int>(demoSsns);
 
         RuleFor(x => x.Ssn, (f, o) =>
@@ -19,6 +19,6 @@ public sealed class ParticipantEtvaTotalFaker : Faker<ParticipantTotal>
 
             return ssnQueue.Dequeue();
         })
-        .RuleFor(x=>x.TotalAmount, f=>f.Random.Decimal(0,50000));
+        .RuleFor(x => x.TotalAmount, f => f.Random.Decimal(0, 50000));
     }
 }

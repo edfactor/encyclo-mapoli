@@ -26,7 +26,7 @@ public sealed class EmbeddedSqlService : IEmbeddedSqlService
     public IQueryable<ParticipantTotalRatio> GetVestingRatioAlt(IProfitSharingDbContext ctx, short profitYear,
         DateOnly asOfDate)
     {
-        
+
         var query = GetVestingRatioQuery(profitYear, asOfDate);
 
         return ctx.ParticipantTotalRatios.FromSqlRaw(query);
@@ -47,7 +47,7 @@ public sealed class EmbeddedSqlService : IEmbeddedSqlService
         return ctx.ParticipantEvtaTotals.FromSqlInterpolated(query);
     }
 
-    public IQueryable<ParticipantTotalVestingBalance>  TotalVestingBalanceAlt(IProfitSharingDbContext ctx,
+    public IQueryable<ParticipantTotalVestingBalance> TotalVestingBalanceAlt(IProfitSharingDbContext ctx,
         short employeeYear, short profitYear, DateOnly asOfDate)
     {
         var totalBalanceQuery = GetTotalBalanceQuery(profitYear);
@@ -86,7 +86,7 @@ LEFT JOIN (
 ) vr ON bal.SSN = vr.SSN
 LEFT JOIN (
     {yearsOfServiceQuery}
-) yip ON bal.SSN  = yip.SSN
+) yip ON bal.SSN  = yip.SSN AND vr.DEMOGRAPHIC_ID = yip.DEMOGRAPHIC_ID
 LEFT JOIN (
     SELECT pd.SSN,
            SUM(CASE WHEN pd.PROFIT_CODE_ID IN (1,2,3,5) THEN pd.FORFEITURE ELSE 0 END) AS FORFEITURES,
@@ -215,7 +215,7 @@ FROM PROFIT_DETAIL pd
 WHERE pd.PROFIT_YEAR= {profitYear}
 GROUP BY pd.SSN";
 
-      return ctx.ProfitDetailRollups.FromSqlInterpolated(query);
+        return ctx.ProfitDetailRollups.FromSqlInterpolated(query);
     }
 
     private static FormattableString GetTotalBalanceQuery(short profitYear)
@@ -280,7 +280,7 @@ FROM (
     LEFT JOIN PAY_PROFIT pp ON d.ID = pp.DEMOGRAPHIC_ID AND pp.PROFIT_YEAR  = {profitYear}
     LEFT JOIN (
         {yearsOfCreditQuery}
-    ) yos ON d.SSN = yos.SSN
+    ) yos ON d.SSN = yos.SSN AND d.ID = yos.DEMOGRAPHIC_ID
     LEFT JOIN (
         {initialContributionYearQuery}
     ) initcontrib on d.ssn = initcontrib.ssn 
@@ -292,26 +292,26 @@ FROM (
 ";
         return query;
     }
-    
+
     public static string GetYearsOfServiceQuery(short profitYear, DateOnly asOfDate)
     {
-        var aged18Date = asOfDate.AddYears(-18); 
+        var aged18Date = asOfDate.AddYears(-18);
         string query = @$"
-SELECT pd.SSN, SUM(pd.YEARS_OF_SERVICE_CREDIT)
+SELECT d.ID AS DEMOGRAPHIC_ID, pd.SSN, SUM(pd.YEARS_OF_SERVICE_CREDIT)
                + CASE WHEN NOT EXISTS (SELECT 1 FROM PROFIT_DETAIL pd0 WHERE pd0.PROFIT_YEAR = {profitYear} AND pd0.PROFIT_CODE_ID = {ProfitCode.Constants.IncomingContributions.Id} AND pd.SSN  = pd0.SSN AND pd0.PROFIT_YEAR_ITERATION = 0)
-                  AND ( pp.HOURS_EXECUTIVE  + pp.CURRENT_HOURS_YEAR >= {ReferenceData.MinimumHoursForContribution()} 
+                  AND ( NVL(pp.HOURS_EXECUTIVE, 0)  + NVL(pp.CURRENT_HOURS_YEAR, 0) >= {ReferenceData.MinimumHoursForContribution()} 
                         AND d.DATE_OF_BIRTH <= TO_DATE('{aged18Date.ToString("yyyy-MM-dd")}', 'yyyy-mm-dd'))
                THEN 1 ELSE 0 END
                  AS YEARS
             FROM PROFIT_DETAIL pd
-       LEFT JOIN DEMOGRAPHIC d ON pd.SSN = d.SSN
+           INNER JOIN DEMOGRAPHIC d ON pd.SSN = d.SSN
        LEFT JOIN PAY_PROFIT pp ON pp.DEMOGRAPHIC_ID = d.ID AND pp.PROFIT_YEAR = {profitYear}
            WHERE pd.PROFIT_YEAR <= {profitYear}
-        GROUP BY pd.SSN, pp.CURRENT_HOURS_YEAR, pp.HOURS_EXECUTIVE, d.DATE_OF_BIRTH
+        GROUP BY d.ID, pd.SSN, pp.CURRENT_HOURS_YEAR, pp.HOURS_EXECUTIVE, d.DATE_OF_BIRTH
 ";
         return query;
     }
-    
+
     public static FormattableString GetInitialContributionYearQuery()
     {
         FormattableString query = @$"

@@ -16,7 +16,6 @@ import NewPSLabels from "../../pages/FiscalClose/ProfitShareByStore/NewPSLabels"
 import ProfitShareByStore from "../../pages/FiscalClose/ProfitShareByStore/ProfitShareByStore";
 import Under21TA from "../../pages/FiscalClose/ProfitShareByStore/Under21/Under21TA";
 import Under21Report from "../../pages/FiscalClose/ProfitShareByStore/Under21Report";
-import ProfitShareReportEditRun from "../../pages/FiscalFlow/ProfitShareReportEditRun/ProfitShareReportEditRun";
 import Forfeit from "../../pages/Forfeit/Forfeit";
 import FrozenSummary from "../../pages/FrozenSummary/FrozenSummary";
 import MasterInquiry from "../../pages/MasterInquiry/MasterInquiry";
@@ -27,7 +26,6 @@ import VestedAmountsByAge from "../../pages/PROF130/VestedAmountsByAge/VestedAmo
 import Profall from "../../pages/Profall/Profall";
 import ProfitShareGrossReport from "../../pages/ProfitShareGrossReport/ProfitShareGrossReport";
 import ProfitShareReport from "../../pages/ProfitShareReport/ProfitShareReport";
-import ProfitShareTotals426 from "../../pages/ProfitShareTotals426/ProfitShareTotals426";
 
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -48,12 +46,15 @@ import { RootState } from "../../reduxstore/store";
 import { ImpersonationRoles } from "../../reduxstore/types";
 import EnvironmentUtils from "../../utils/environmentUtils";
 import { createUnauthorizedParams, isPathAllowedInNavigation } from "../../utils/navigationAccessUtils";
+import { validateImpersonationRoles, validateRoleRemoval } from "../../utils/roleUtils";
 
 import { ImpersonationMultiSelect } from "smart-ui-library";
 import { MenuBar } from "../../components/MenuBar/MenuBar";
+import Adjustments from "../../pages/Adjustments/Adjustments";
 import BeneficiaryInquiry from "../../pages/BeneficiaryInquiry/BeneficiaryInquiry";
 import MilitaryContribution from "../../pages/DecemberActivities/MilitaryContribution/MilitaryContribution";
 import DevDebug from "../../pages/Dev/DevDebug";
+import DistributionInquiry from "../../pages/DistributionInquiry/DistributionInquiry";
 import Documentation from "../../pages/Documentation/Documentation";
 import RecentlyTerminated from "../../pages/FiscalClose/RecentlyTerminated/RecentlyTerminated";
 import TerminatedLetters from "../../pages/FiscalClose/TerminatedLetters/TerminatedLetters";
@@ -116,7 +117,13 @@ const RouterSubAssembly: React.FC = () => {
       const newSearch = params.toString();
 
       // Validate pathname to prevent open redirect attacks
-      const isValidPath = location.pathname.startsWith("/") && !location.pathname.includes("://");
+      // Only allow navigation to known routes, otherwise redirect to "/"
+      const knownRoutes = Object.values(ROUTES) as string[];
+      const isValidPath =
+        location.pathname.startsWith("/") &&
+        !location.pathname.includes("://") &&
+        (knownRoutes.map(String).includes(location.pathname) || location.pathname === "/");
+
       const safePath = isValidPath ? location.pathname : "/";
 
       navigate(`${safePath}${newSearch ? `?${newSearch}` : ""}`, { replace: true });
@@ -144,14 +151,43 @@ const RouterSubAssembly: React.FC = () => {
                 ]}
                 currentRoles={impersonating || []}
                 setCurrentRoles={(value: string[]) => {
-                  if (value.length > 0) {
-                    localStorage.setItem("impersonatingRoles", JSON.stringify(value));
-                    const selectedRoles = value.map((role) => role as ImpersonationRoles);
-                    dispatch(setImpersonating(selectedRoles));
-                  } else {
+                  if (value.length === 0) {
+                    // Clear all roles
                     localStorage.removeItem("impersonatingRoles");
                     dispatch(setImpersonating([]));
+                    return;
                   }
+
+                  const currentRoles = (impersonating || []) as ImpersonationRoles[];
+                  const newRoles = value.map((role) => role as ImpersonationRoles);
+
+                  // Determine if roles were added or removed
+                  let validatedRoles: ImpersonationRoles[];
+
+                  if (newRoles.length > currentRoles.length) {
+                    // Role was added - find which one and validate
+                    const addedRole = newRoles.find((role) => !currentRoles.includes(role));
+                    if (addedRole) {
+                      validatedRoles = validateImpersonationRoles(currentRoles, addedRole);
+                    } else {
+                      validatedRoles = newRoles;
+                    }
+                  } else if (newRoles.length < currentRoles.length) {
+                    // Role was removed - find which one and validate
+                    const removedRole = currentRoles.find((role) => !newRoles.includes(role));
+                    if (removedRole) {
+                      validatedRoles = validateRoleRemoval(currentRoles, removedRole);
+                    } else {
+                      validatedRoles = newRoles;
+                    }
+                  } else {
+                    // Same length but different roles (shouldn't happen with multi-select, but handle it)
+                    validatedRoles = newRoles;
+                  }
+
+                  // Update state and localStorage with validated roles
+                  localStorage.setItem("impersonatingRoles", JSON.stringify(validatedRoles));
+                  dispatch(setImpersonating(validatedRoles));
                 }}
               />
             ) : (
@@ -195,6 +231,9 @@ const RouterSubAssembly: React.FC = () => {
                   path={ROUTES.BENEFICIARY_INQUIRY}
                   element={<BeneficiaryInquiry />}></Route>
                 <Route
+                  path={ROUTES.DISTRIBUTIONS_INQUIRY}
+                  element={<DistributionInquiry />}></Route>
+                <Route
                   path={ROUTES.PAY_BEN_REPORT}
                   element={<PayBenReport />}></Route>
                 <Route
@@ -231,6 +270,9 @@ const RouterSubAssembly: React.FC = () => {
                   path={`${ROUTES.MASTER_INQUIRY}/:badgeNumber?`}
                   element={<MasterInquiry />}></Route>
                 <Route
+                  path={`${ROUTES.ADJUSTMENTS}`}
+                  element={<Adjustments />}></Route>
+                <Route
                   path={ROUTES.DISTRIBUTIONS_BY_AGE}
                   element={<DistributionByAge />}></Route>
                 <Route
@@ -262,9 +304,6 @@ const RouterSubAssembly: React.FC = () => {
                   path={ROUTES.PROFIT_SHARE_REPORT}
                   element={<ProfitShareReport />}></Route>
                 <Route
-                  path={ROUTES.PROFIT_SHARE_TOTALS}
-                  element={<ProfitShareTotals426 />}></Route>
-                <Route
                   path="forfeit/:badgeNumber?"
                   element={<Forfeit />}></Route>
                 <Route
@@ -273,9 +312,6 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={ROUTES.FISCAL_CLOSE}
                   element={<></>}></Route>
-                <Route
-                  path={ROUTES.PROFIT_SHARE_REPORT_EDIT_RUN}
-                  element={<ProfitShareReportEditRun />}></Route>
                 <Route
                   path={ROUTES.PROFIT_SHARE_UPDATE}
                   element={<ProfitShareEditUpdate />}></Route>
@@ -347,8 +383,12 @@ const RouterSubAssembly: React.FC = () => {
                   element={<Documentation />}
                 />
                 <Route
-                  path={`${ROUTES.PAY426N}/:presetNumber?`}
-                  element={<PAY426N />}
+                  path={`${ROUTES.PAY426N_LIVE}/:presetNumber?`}
+                  element={<PAY426N isFrozen={false} />}
+                />
+                <Route
+                  path={`${ROUTES.PAY426N_FROZEN}/:presetNumber?`}
+                  element={<PAY426N isFrozen={true} />}
                 />
 
                 <Route

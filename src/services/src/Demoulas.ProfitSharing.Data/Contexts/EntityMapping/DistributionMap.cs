@@ -14,7 +14,7 @@ internal sealed class DistributionMap : ModifiedBaseMap<Distribution>
         _ = builder.ToTable("DISTRIBUTION");
         _ = builder.HasKey(d => d.Id);
 
-        _ = builder.HasIndex(d => new {d.Ssn, d.PaymentSequence }, "IX_SSN_PAYMENT_SEQUENCE").IsUnique();
+        _ = builder.HasIndex(d => new { d.Ssn, d.PaymentSequence }, "IX_SSN_PAYMENT_SEQUENCE").IsUnique();
 
         _ = builder.Property(d => d.Id).HasColumnName("ID").ValueGeneratedOnAdd();
         _ = builder.Property(d => d.Ssn).HasColumnName("SSN").HasPrecision(9);
@@ -53,7 +53,7 @@ internal sealed class DistributionMap : ModifiedBaseMap<Distribution>
         _ = builder.HasOne(d => d.Status).WithMany().HasForeignKey(d => d.StatusId);
         _ = builder.HasOne(x => x.TaxCode).WithMany().HasForeignKey(t => t.TaxCodeId);
 
-        _ = builder.HasOne(x => x.Payee).WithMany(p=> p.Distributions).HasForeignKey(t => t.PayeeId);
+        _ = builder.HasOne(x => x.Payee).WithMany(p => p.Distributions).HasForeignKey(t => t.PayeeId);
         _ = builder.HasOne(x => x.ThirdPartyPayee).WithMany(p => p.Distributions).HasForeignKey(t => t.ThirdPartyPayeeId);
     }
 }

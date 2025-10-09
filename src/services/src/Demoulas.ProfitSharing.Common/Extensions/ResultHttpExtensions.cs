@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -28,7 +28,8 @@ public static class ResultHttpExtensions
     {
         return result.Match<Results<Ok<T>, NotFound, BadRequest, ProblemHttpResult>>(
             v => TypedResults.Ok(v),
-            pd => {
+            pd =>
+            {
                 if (notFoundErrors.Any(e => e.Description == pd.Detail))
                 {
                     return TypedResults.NotFound();

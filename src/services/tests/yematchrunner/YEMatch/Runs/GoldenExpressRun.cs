@@ -25,9 +25,6 @@ public class GoldenExpressRun : Runnable
             nameof(ImportReadyDbToSmartDb), // Import SMART database from READY   database
             "S12", // Freeze on Smart
             "SanityCheckEmployeeAndBenes",
-            "Give2023Hours",
-            "S18_Rebuild2023ZeroCont",
-            "S24_Rebuild2023Enrollment", // We use S24 as a tool to rebuild 2023
             "P18", // Run YearEndService on SMART and "PROF-SHARE sw[2]=1 CDATE=250104 YEAREND=Y" on READY
             "TestPayProfitSelectedColumns", // VERIFY: Test PayProfit Updates; EarnPoints, ZeroCont, New Employee, CertDate
             "R20", // PAY443    - Updates Earning points ?
@@ -39,9 +36,9 @@ public class GoldenExpressRun : Runnable
             "TestProfitDetailSelectedColumns", // TEST: PROFIT_DETAILS; code,cont,earn,fort,cmt,zercont,enrollment_id
             "TestEtvaNow", // Verify ETVA for 2025
             "TestEtvaPrior", // Verify correct ETVA for 2024
-            "P24", // Create PAY450 report on READY, does enrollment update on SMART
+            "P24", // Create PAY450 report on READY does enrollment update on SMART
             "P24B" // Updates the YEARS, and enrollment on READY, NOP on SMART
         ));
-        
+
     }
 }

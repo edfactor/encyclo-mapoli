@@ -24,19 +24,6 @@ internal sealed class ProfitShareTotalsMap : IEntityTypeConfiguration<ProfitShar
             .HasColumnName("POINTS_TOTAL")
             .HasPrecision(18, 2);
 
-        builder.Property(x => x.TerminatedWagesTotal)
-            .HasColumnName("TERMINATED_WAGES_TOTAL")
-            .HasPrecision(18, 2);
-
-        builder.Property(x => x.TerminatedHoursTotal)
-            .HasColumnName("TERMINATED_HOURS_TOTAL")
-            .HasPrecision(18, 2);
-
-        builder.Property(x => x.TerminatedPointsTotal)
-            .HasColumnName("TERMINATED_POINTS_TOTAL")
-            .HasPrecision(18, 2);
-        
-
         builder.Property(x => x.NumberOfEmployees)
             .HasColumnName("NUMBER_OF_EMPLOYEES");
 
@@ -48,10 +35,6 @@ internal sealed class ProfitShareTotalsMap : IEntityTypeConfiguration<ProfitShar
 
         builder.Property(x => x.BalanceTotal)
             .HasColumnName("BALANCE_TOTAL")
-            .HasPrecision(18, 2);
-
-        builder.Property(x => x.TerminatedBalanceTotal)
-            .HasColumnName("TERMINATED_BALANCE_TOTAL")
             .HasPrecision(18, 2);
     }
 }

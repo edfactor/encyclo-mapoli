@@ -11,7 +11,7 @@ public class YearEndUpdateStatus : ModifiedBase
 {
     public int Id { get; set; }
     public required short ProfitYear { get; set; }
-    
+
     public required int BeneficiariesEffected { get; set; }
     public required int EmployeesEffected { get; set; }
     public required int EtvasEffected { get; set; }

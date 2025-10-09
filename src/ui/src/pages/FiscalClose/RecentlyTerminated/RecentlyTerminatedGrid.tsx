@@ -22,33 +22,44 @@ const RecentlyTerminatedGrid: React.FC<RecentlyTerminatedGridSearchProps> = ({
   const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch, { isFetching }] = useLazyGetRecentlyTerminatedReportQuery();
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } = useGridPagination({
-    initialPageSize: 25,
-    initialSortBy: "fullName, terminationDate",
-    initialSortDescending: false,
-    onPaginationChange: useCallback(async (pageNum: number, pageSz: number, sortPrms: any) => {
-      if (hasToken && initialSearchLoaded) {
-        const request: any = {
-          profitYear: profitYear || 0,
-          pagination: {
-            skip: pageNum * pageSz,
-            take: pageSz,
-            sortBy: sortPrms.sortBy,
-            isSortDescending: sortPrms.isSortDescending
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
+    useGridPagination({
+      initialPageSize: 25,
+      initialSortBy: "fullName, terminationDate",
+      initialSortDescending: false,
+      onPaginationChange: useCallback(
+        async (pageNum: number, pageSz: number, sortPrms: any) => {
+          if (hasToken && initialSearchLoaded) {
+            const request: any = {
+              profitYear: profitYear || 0,
+              pagination: {
+                skip: pageNum * pageSz,
+                take: pageSz,
+                sortBy: sortPrms.sortBy,
+                isSortDescending: sortPrms.isSortDescending
+              }
+            };
+
+            if (recentlyTerminatedQueryParams?.beginningDate !== undefined) {
+              request.beginningDate = recentlyTerminatedQueryParams.beginningDate;
+            }
+            if (recentlyTerminatedQueryParams?.endingDate !== undefined) {
+              request.endingDate = recentlyTerminatedQueryParams.endingDate;
+            }
+
+            await triggerSearch(request, false);
           }
-        };
-
-        if (recentlyTerminatedQueryParams?.beginningDate !== undefined) {
-          request.beginningDate = recentlyTerminatedQueryParams.beginningDate;
-        }
-        if (recentlyTerminatedQueryParams?.endingDate !== undefined) {
-          request.endingDate = recentlyTerminatedQueryParams.endingDate;
-        }
-
-        await triggerSearch(request, false);
-      }
-    }, [hasToken, initialSearchLoaded, profitYear, recentlyTerminatedQueryParams?.beginningDate, recentlyTerminatedQueryParams?.endingDate, triggerSearch])
-  });
+        },
+        [
+          hasToken,
+          initialSearchLoaded,
+          profitYear,
+          recentlyTerminatedQueryParams?.beginningDate,
+          recentlyTerminatedQueryParams?.endingDate,
+          triggerSearch
+        ]
+      )
+    });
 
   const onSearch = useCallback(async () => {
     const request: any = {

@@ -6,7 +6,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 [YearEndArchiveProperty]
-public sealed record  ExecutiveHoursAndDollarsResponse : IFullNameProperty, IIsExecutive
+public sealed record ExecutiveHoursAndDollarsResponse : IFullNameProperty, IIsExecutive
 {
     public required int BadgeNumber { get; set; }
     public required string? FullName { get; set; }
@@ -23,9 +23,9 @@ public sealed record  ExecutiveHoursAndDollarsResponse : IFullNameProperty, IIsE
     public required bool IsExecutive { get; set; }
 
 
-    public static  ExecutiveHoursAndDollarsResponse ResponseExample()
+    public static ExecutiveHoursAndDollarsResponse ResponseExample()
     {
-        return new  ExecutiveHoursAndDollarsResponse
+        return new ExecutiveHoursAndDollarsResponse
         {
             BadgeNumber = 1,
             FullName = "John, Null E",

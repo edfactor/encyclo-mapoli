@@ -1,9 +1,11 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { CircularProgress, FormHelperText } from "@mui/material";
-import { Grid } from "@mui/material";
+import { CircularProgress, FormHelperText, Grid } from "@mui/material";
+import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
+import { format } from "date-fns";
+import useFiscalCalendarYear from "hooks/useFiscalCalendarYear";
+import { useEffect } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
 import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import {
   clearDistributionsAndForfeitures,
@@ -13,10 +15,8 @@ import {
 import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import useFiscalCalendarYear from "hooks/useFiscalCalendarYear";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
-import { format } from "date-fns";
 import { tryddmmyyyyToDate } from "../../../utils/dateUtils";
+import { endDateAfterStartDateValidator } from "../../../utils/FormValidators";
 
 const formatDateOnly = (date: Date | null): string | undefined => {
   if (!date) return undefined;
@@ -30,14 +30,7 @@ interface DistributionsAndForfeituresSearch {
 
 const schema = yup.object().shape({
   startDate: yup.date().nullable(),
-  endDate: yup
-    .date()
-    .nullable()
-    .test("is-after-start", "End Date must be after Start Date", function (value) {
-      const { startDate } = this.parent;
-      if (!startDate || !value) return true;
-      return value > startDate;
-    })
+  endDate: endDateAfterStartDateValidator("startDate")
 });
 
 interface DistributionsAndForfeituresSearchFilterProps {
@@ -50,7 +43,6 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
   const dispatch = useDispatch();
-  const { distributionsAndForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const fiscalData = useFiscalCalendarYear();
   const {
     control,
@@ -127,7 +119,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
         container
         paddingX="24px"
         gap="24px">
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 4, md: 2 }}>
           <Controller
             name="startDate"
             control={control}
@@ -140,15 +132,16 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                 }}
                 value={field.value}
                 required={false}
-                label="Start Date (Day is not used)"
+                label="Start Date"
                 disableFuture
                 error={errors.startDate?.message}
+                views={["year", "month"]}
               />
             )}
           />
           {errors.startDate && <FormHelperText error>{errors.startDate.message}</FormHelperText>}
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 4, md: 2 }}>
           <Controller
             name="endDate"
             control={control}
@@ -161,9 +154,10 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                 }}
                 value={field.value}
                 required={false}
-                label="End Date (Day is not used)"
+                label="End Date"
                 disableFuture
                 error={errors.endDate?.message}
+                views={["year", "month"]}
               />
             )}
           />

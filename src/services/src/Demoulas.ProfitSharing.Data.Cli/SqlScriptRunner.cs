@@ -32,6 +32,10 @@ internal sealed class SqlScriptRunner
             throw new ArgumentNullException(nameof(sqlFile));
         }
 
+        if (Directory.GetCurrentDirectory().EndsWith("/net9.0"))
+        {
+            sqlFile = Path.GetFullPath("../../../" + sqlFile);
+        }
         if (!File.Exists(sqlFile))
         {
             throw new FileNotFoundException("SQL file not found", sqlFile);
@@ -87,7 +91,7 @@ internal sealed class SqlScriptRunner
 
     private static string DecodeToUtf8String(byte[] bytes)
     {
-        if (bytes == null || bytes.Length == 0) {return string.Empty;}
+        if (bytes == null || bytes.Length == 0) { return string.Empty; }
 
         // Detect BOMs for UTF-8, UTF-16 (LE/BE) and UTF-32
         // UTF-8 BOM: EF BB BF

@@ -24,23 +24,27 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({
   const freezeResults = useSelector((state: RootState) => state.frozen.frozenStateCollectionData);
   const [triggerSearch, { isFetching }] = useLazyGetHistoricalFrozenStateResponseQuery();
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } = useGridPagination({
-    initialPageSize: 25,
-    initialSortBy: "createdDateTime",
-    initialSortDescending: true,
-    onPaginationChange: useCallback((pageNum: number, pageSz: number, sortPrms: any) => {
-      if (initialSearchLoaded) {
-        // Trigger search when pagination or sorting changes
-        const request = {
-          skip: pageNum * pageSz,
-          take: pageSz,
-          sortBy: sortPrms.sortBy,
-          isSortDescending: sortPrms.isSortDescending
-        };
-        triggerSearch(request, false);
-      }
-    }, [initialSearchLoaded, triggerSearch])
-  });
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
+    useGridPagination({
+      initialPageSize: 25,
+      initialSortBy: "createdDateTime",
+      initialSortDescending: true,
+      onPaginationChange: useCallback(
+        (pageNum: number, pageSz: number, sortPrms: any) => {
+          if (initialSearchLoaded) {
+            // Trigger search when pagination or sorting changes
+            const request = {
+              skip: pageNum * pageSz,
+              take: pageSz,
+              sortBy: sortPrms.sortBy,
+              isSortDescending: sortPrms.isSortDescending
+            };
+            triggerSearch(request, false);
+          }
+        },
+        [initialSearchLoaded, triggerSearch]
+      )
+    });
 
   const onSearch = useCallback(async () => {
     const request = {

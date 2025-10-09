@@ -1,15 +1,17 @@
-import { Divider, CircularProgress, Box } from "@mui/material";
-import { Grid } from "@mui/material";
-import { Page } from "smart-ui-library";
-import { CAPTIONS } from "../../../constants";
+import { Box, CircularProgress, Divider, Grid } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
-import { useLazyGetUnder21TotalsQuery, useLazyGetUnder21BreakdownByStoreQuery } from "reduxstore/api/YearsEndApi";
-import Under21Summary from "./Under21/Under21Summary";
-import Under21BreakdownGrid from "./Under21/Under21BreakdownGrid";
+import { Page } from "smart-ui-library";
+import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
+import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import {
+  useLazyGetUnder21BreakdownByStoreQuery,
+  useLazyGetUnder21TotalsQuery
+} from "../../../reduxstore/api/YearsEndApi";
+import { RootState } from "../../../reduxstore/store";
+import Under21BreakdownGrid from "./Under21/Under21BreakdownGrid";
+import Under21Summary from "./Under21/Under21Summary";
 
 const Under21Report = () => {
   const [fetchUnder21Totals, { isLoading: isTotalsLoading }] = useLazyGetUnder21TotalsQuery();
@@ -18,8 +20,8 @@ const Under21Report = () => {
   const under21Breakdown = useSelector((state: RootState) => state.yearsEnd.under21BreakdownByStore);
   const [initialLoad, setInitialLoad] = useState(true);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageNumber, setPageNumber] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(25);
   const [sortParams, setSortParams] = useState({
     sortBy: "badgeNumber",
     isSortDescending: false

@@ -75,7 +75,8 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             EndDate = calInfo.FiscalEndDate,
             Response = new PaginatedResponseDto<ProfitShareUpdateMemberResponse>(profitShareUpdateRequest)
             {
-                Total = members.Count, Results = ProfitShareEditService.HandleInMemorySortAndPaging(profitShareUpdateRequest, members)
+                Total = members.Count,
+                Results = ProfitShareEditService.HandleInMemorySortAndPaging(profitShareUpdateRequest, members)
             }
         };
     }
@@ -121,7 +122,7 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
     /// The "includeZeroAmounts" is because PAY444 doesnt show members with no financial change, PAY447 does include members with changes to ZeroContributions.
     /// </summary>
     public async Task<ProfitShareUpdateOutcome> ProfitSharingUpdate(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken, bool includeZeroAmounts)
-        {
+    {
         // Values collected for an "Adjustment Report" that we do not yet generate (see https://demoulas.atlassian.net/browse/PS-900)
         AdjustmentsSummaryDto adjustmentsSummaryData = new();
 
@@ -131,12 +132,12 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
 
         // Go get the Bene's.  NOTE: May modify some employees if they are both bene and employee (that's why "members" is passed in - to lookup loaded employees and see if they are also Bene's)
         await BeneficiariesProcessingHelper.ProcessBeneficiaries(_dbContextFactory, _totalService, members, profitShareUpdateRequest, cancellationToken);
-        
+
         members = members.OrderBy(m => m.Name).ToList();
         // The PAY444 Report/Page does not show the zero event individuals, but the PAY447 needs the ZeroContribution records for the PAY447 report/page. 
         if (!includeZeroAmounts)
         {
-            members = members.Where(m=>!m.IsAllZeros()).ToList();
+            members = members.Where(m => !m.IsAllZeros()).ToList();
         }
 
         ProfitShareUpdateTotals profitShareUpdateTotals = new();
@@ -157,7 +158,7 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             profitShareUpdateTotals.ClassActionFund += memberFinancials.Caf;
             profitShareUpdateTotals.MaxOverTotal += memberFinancials.MaxOver;
             profitShareUpdateTotals.MaxPointsTotal += memberFinancials.MaxPoints;
-            
+
             // members can be both employees and beneficiaries, but I presume that the employee count is the one that matters.
             if (memberFinancials.IsEmployee)
             {

@@ -12,7 +12,7 @@ public sealed record DistributionSearchRequest : SortedPaginationRequestDto
     public string? Ssn { get; set; }
     public int? BadgeNumber { get; set; }
     public short? PsnSuffix { get; set; }
-    public char? DistributionFrequencyId { get; set; } 
+    public char? DistributionFrequencyId { get; set; }
     public char? DistributionStatusId { get; set; }
     public char? TaxCodeId { get; set; }
     public decimal? MinGrossAmount { get; set; }

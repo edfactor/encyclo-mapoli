@@ -176,10 +176,6 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.NavigationRoles).Returns(mockNavigationRoles.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.NavigationRoles).Returns(mockNavigationRoles.Object);
 
-
-
-
-
         List<PayClassification>? payClassifications = new PayClassificationFaker().Generate(500);
         Mock<DbSet<PayClassification>> mockPayClassifications = payClassifications.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.PayClassifications).Returns(mockPayClassifications.Object);
@@ -285,6 +281,19 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         Mock<DbSet<NavigationTracking>> mockNavigationTrackings = navigationTrackings.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.NavigationTrackings).Returns(mockNavigationTrackings.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.NavigationTrackings).Returns(mockNavigationTrackings.Object);
+
+        // Setup Enrollments with all constant values
+        var enrollments = new List<Enrollment>
+        {
+            new() { Id = Enrollment.Constants.NotEnrolled, Name = "Not Enrolled" },
+            new() { Id = Enrollment.Constants.OldVestingPlanHasContributions, Name = "Old vesting plan has Contributions (7 years to full vesting)" },
+            new() { Id = Enrollment.Constants.NewVestingPlanHasContributions, Name = "New vesting plan has Contributions (6 years to full vesting)" },
+            new() { Id = Enrollment.Constants.OldVestingPlanHasForfeitureRecords, Name = "Old vesting plan has Forfeiture records" },
+            new() { Id = Enrollment.Constants.NewVestingPlanHasForfeitureRecords, Name = "New vesting plan has Forfeiture records" },
+            new() { Id = Enrollment.Constants.Import_Status_Unknown, Name = "Previous years enrollment is unknown. (History not previously tracked)" }
+        };
+        Mock<DbSet<Enrollment>> mockEnrollments = enrollments.BuildMockDbSet();
+        _profitSharingReadOnlyDbContext.Setup(m => m.Enrollments).Returns(mockEnrollments.Object);
 
         _profitSharingDbContext.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()));
         _profitSharingDbContext.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()))

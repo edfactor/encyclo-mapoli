@@ -7,7 +7,7 @@ internal sealed class TaxCodeMap : IEntityTypeConfiguration<TaxCode>
 {
     public void Configure(EntityTypeBuilder<TaxCode> builder)
     {
-        builder.HasKey(x=> x.Id);
+        builder.HasKey(x => x.Id);
         builder.ToTable("TAX_CODE");
 
         builder.Property(x => x.Id).IsRequired().ValueGeneratedNever().HasColumnName("ID");

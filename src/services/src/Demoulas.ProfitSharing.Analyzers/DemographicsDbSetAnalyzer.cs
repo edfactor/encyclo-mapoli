@@ -52,7 +52,7 @@ namespace Demoulas.ProfitSharing.Analyzers
 
             // Get the symbol for the property
             if (context.SemanticModel.GetSymbolInfo(memberAccess).Symbol is not IPropertySymbol propSymbol)
-            {return;}
+            { return; }
 
             // Confirm it's the DbSet<Demographic> on IProfitSharingDbContext
             if (propSymbol.Name != "Demographics")

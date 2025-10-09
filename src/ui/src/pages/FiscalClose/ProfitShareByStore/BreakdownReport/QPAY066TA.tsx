@@ -11,6 +11,7 @@ import TotalsContent from "./TotalsContent";
 const QPAY066TA = () => {
   const [tabValue, setTabValue] = useState(0);
   const [store, setStore] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const tabs = ["ALL", "STORE", "TOTALS", "SUMMARIES"];
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
@@ -20,6 +21,10 @@ const QPAY066TA = () => {
   const handleReset = useCallback(() => {
     setStore(null);
     setTabValue(0);
+  }, []);
+
+  const handleLoadingChange = useCallback((loading: boolean) => {
+    setIsLoading(loading);
   }, []);
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
@@ -49,15 +54,31 @@ const QPAY066TA = () => {
             width="100%"
             direction="column"
             spacing={4}>
-            <StoreContent store={store} />
-            <TotalsContent store={store} />
+            <StoreContent
+              store={store}
+              onLoadingChange={handleLoadingChange}
+            />
+            <TotalsContent
+              store={store}
+              onLoadingChange={handleLoadingChange}
+            />
             <SummariesContent />
           </Grid>
         );
       case 1:
-        return <StoreContent store={store} />;
+        return (
+          <StoreContent
+            store={store}
+            onLoadingChange={handleLoadingChange}
+          />
+        );
       case 2:
-        return <TotalsContent store={store} />;
+        return (
+          <TotalsContent
+            store={store}
+            onLoadingChange={handleLoadingChange}
+          />
+        );
       case 3:
         return <SummariesContent />;
       default:
@@ -82,6 +103,7 @@ const QPAY066TA = () => {
               activeTab={getActiveTab()}
               onStoreChange={(newStore) => setStore(newStore)}
               onReset={handleReset}
+              isLoading={isLoading}
             />
           </DSMAccordion>
         </Grid>

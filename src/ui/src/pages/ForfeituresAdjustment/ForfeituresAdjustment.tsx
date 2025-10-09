@@ -21,7 +21,7 @@ import { InquiryApi } from "../../reduxstore/api/InquiryApi";
 import { clearForfeitureAdjustmentData } from "../../reduxstore/slices/forfeituresAdjustmentSlice";
 import AddForfeitureModal from "./AddForfeitureModal";
 import ForfeituresAdjustmentPanel from "./ForfeituresAdjustmentPanel";
-import ForfeituresAdjustmentSearchParameters from "./ForfeituresAdjustmentSearchParameters";
+import ForfeituresAdjustmentSearchFilter from "./ForfeituresAdjustmentSearchFilter";
 import ForfeituresTransactionGrid from "./ForfeituresTransactionGrid";
 
 const ForfeituresAdjustment = () => {
@@ -183,7 +183,7 @@ const ForfeituresAdjustment = () => {
           </Grid>
           <Grid width={"100%"}>
             <DSMAccordion title="Filter">
-              <ForfeituresAdjustmentSearchParameters
+              <ForfeituresAdjustmentSearchFilter
                 setInitialSearchLoaded={handleSearchComplete}
                 setPageReset={setPageNumberReset}
               />

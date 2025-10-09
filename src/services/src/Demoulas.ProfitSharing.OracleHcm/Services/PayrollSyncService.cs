@@ -159,7 +159,7 @@ internal class PayrollSyncService
             {
                 // Create new PayProfit if it doesn't exist
                 // Question? shouldn't this be cloning all columns from the prior year (if it exists) to the new year?
-                payProfit = new PayProfit { ProfitYear = (short)year, DemographicId = demographic.Id, ModifiedAtUtc = DateTimeOffset.UtcNow, Etva = 0};
+                payProfit = new PayProfit { ProfitYear = (short)year, DemographicId = demographic.Id, ModifiedAtUtc = DateTimeOffset.UtcNow, Etva = 0 };
                 demographic.PayProfits.Add(payProfit);
             }
 

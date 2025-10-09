@@ -27,14 +27,14 @@ public class BeneficiaryService : IBeneficiaryService
     {
         var rslt = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
         {
-            var beneficiaryContact = await ctx.BeneficiaryContacts.FirstOrDefaultAsync(x=>x.Id == req.BeneficiaryContactId, cancellationToken);
+            var beneficiaryContact = await ctx.BeneficiaryContacts.FirstOrDefaultAsync(x => x.Id == req.BeneficiaryContactId, cancellationToken);
             if (beneficiaryContact == default)
             {
                 throw new InvalidOperationException("Beneficiary Contact does not exist");
             }
-            
+
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
-            var demographic = await demographicQuery.Where(x=>x.BadgeNumber == req.EmployeeBadgeNumber).SingleOrDefaultAsync(cancellationToken);
+            var demographic = await demographicQuery.Where(x => x.BadgeNumber == req.EmployeeBadgeNumber).SingleOrDefaultAsync(cancellationToken);
             if (demographic == default)
             {
                 throw new InvalidOperationException("Employee Badge does not exist");
@@ -60,7 +60,7 @@ public class BeneficiaryService : IBeneficiaryService
             }
 
             //await ValidatePercentages(ctx, req.EmployeeBadgeNumber, req.Percentage, cancellationToken);
-            
+
             var psnSuffix = await FindPsn(req, ctx, cancellationToken);
             var beneficiary = new Beneficiary
             {
@@ -93,7 +93,7 @@ public class BeneficiaryService : IBeneficiaryService
                 KindId = beneficiary.KindId,
                 Percent = beneficiary.Percent
             };
-            
+
             return resp;
         }, cancellationToken);
 
@@ -112,7 +112,8 @@ public class BeneficiaryService : IBeneficiaryService
             {
                 throw new InvalidOperationException("Contact Ssn already exists");
             }
-            var beneficiaryContact = new BeneficiaryContact() {
+            var beneficiaryContact = new BeneficiaryContact()
+            {
                 Id = 0,
                 Ssn = req.ContactSsn,
                 DateOfBirth = req.DateOfBirth,
@@ -218,8 +219,8 @@ public class BeneficiaryService : IBeneficiaryService
             response.Id = beneficiary.Id;
 
             await ctx.SaveChangesAsync(cancellationToken);
-            if (transaction != null) 
-            { 
+            if (transaction != null)
+            {
                 await transaction.CommitAsync(cancellationToken);
             }
 
@@ -245,11 +246,11 @@ public class BeneficiaryService : IBeneficiaryService
                 FullName = string.Empty,
                 FirstName = string.Empty,
                 LastName = string.Empty,
-                            };
+            };
             _ = await SetBeneficiaryContactColumns(req.Id, req, ctx, resp, cancellationToken);
 
             await ctx.SaveChangesAsync(cancellationToken);
-          
+
             return resp;
         }, cancellationToken);
         return response;
@@ -412,7 +413,7 @@ public class BeneficiaryService : IBeneficiaryService
     {
         _ = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
         {
-            var beneficiaryToDelete = await ctx.Beneficiaries.Include(x=>x.Contact).Include(x=>x.Contact!.ContactInfo).Include(x=>x.Contact!.Address).SingleAsync(x=>x.Id == id);
+            var beneficiaryToDelete = await ctx.Beneficiaries.Include(x => x.Contact).Include(x => x.Contact!.ContactInfo).Include(x => x.Contact!.Address).SingleAsync(x => x.Id == id);
             if (await CanIDeleteThisBeneficiary(beneficiaryToDelete, ctx, cancellationToken))
             {
                 var deleteContact = false;
@@ -481,7 +482,8 @@ public class BeneficiaryService : IBeneficiaryService
     private async Task<bool> CanIDeleteThisBeneficiary(Beneficiary beneficiary, ProfitSharingDbContext ctx, CancellationToken cancellationToken)
     {
         var balanceInfo = await _totalService.GetVestingBalanceForSingleMemberAsync(Common.Contracts.Request.SearchBy.Ssn, beneficiary.Contact!.Ssn, (short)DateTime.Now.Year, cancellationToken);
-        if (balanceInfo!=null && balanceInfo?.CurrentBalance != 0) {
+        if (balanceInfo != null && balanceInfo?.CurrentBalance != 0)
+        {
             throw new InvalidOperationException("Balance is not zero, cannot delete beneficiary.");
         }
 
@@ -499,7 +501,7 @@ public class BeneficiaryService : IBeneficiaryService
     }
     private async Task ValidatePercentages(ProfitSharingDbContext ctx, int badgeNumber, byte proposedPctOfNewBeneficiary, CancellationToken token)
     {
-        var beneficiaries = await ctx.Beneficiaries.Where(x=>x.DemographicId == badgeNumber).OrderBy(x=>x.Psn).ToListAsync(token);
+        var beneficiaries = await ctx.Beneficiaries.Where(x => x.DemographicId == badgeNumber).OrderBy(x => x.Psn).ToListAsync(token);
         var rootBeneficiaries = new List<Beneficiary>();
 
         foreach (var beneficiary in beneficiaries)
@@ -508,32 +510,33 @@ public class BeneficiaryService : IBeneficiaryService
             if (beneficiary.PsnSuffix % 100 == 0 && beneficiary.PsnSuffix % 1000 != 0)
             {
                 childMask = 100;
-            } else if (beneficiary.PsnSuffix % 1000 == 0)
+            }
+            else if (beneficiary.PsnSuffix % 1000 == 0)
             {
                 childMask = 1000;
             }
-            if (!beneficiaries.Any(x=>x.PsnSuffix > beneficiary.PsnSuffix && x.PsnSuffix < beneficiary.PsnSuffix + childMask))
+            if (!beneficiaries.Any(x => x.PsnSuffix > beneficiary.PsnSuffix && x.PsnSuffix < beneficiary.PsnSuffix + childMask))
             {
                 rootBeneficiaries.Add(beneficiary);
             }
         }
 
-        if (rootBeneficiaries.Sum(x=>x.Percent) + proposedPctOfNewBeneficiary > 100)
+        if (rootBeneficiaries.Sum(x => x.Percent) + proposedPctOfNewBeneficiary > 100)
         {
             throw new InvalidOperationException("Total percentage for employee would be more than 100%");
         }
-        
-        
+
+
 
     }
 
     private static async Task<short> FindPsn(CreateBeneficiaryRequest req, ProfitSharingDbContext ctx, CancellationToken token)
     {
         int minPsn = 0;
-        short psnRange = 10000; 
+        short psnRange = 10000;
         if (req.ThirdLevelBeneficiaryNumber.HasValue && req.ThirdLevelBeneficiaryNumber.Value > 0)
         {
-            minPsn = 
+            minPsn =
                 ((req.FirstLevelBeneficiaryNumber ?? 0) * 1000) +
                 ((req.SecondLevelBeneficiaryNumber ?? 0) * 100) +
                 ((req.ThirdLevelBeneficiaryNumber ?? 0) * 10);
@@ -548,7 +551,7 @@ public class BeneficiaryService : IBeneficiaryService
         }
         else if (req.FirstLevelBeneficiaryNumber.HasValue && req.FirstLevelBeneficiaryNumber.Value > 0)
         {
-            minPsn = 
+            minPsn =
                 (req.FirstLevelBeneficiaryNumber.Value * 1000);
             psnRange = 1000;
         }

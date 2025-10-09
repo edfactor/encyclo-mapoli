@@ -1,4 +1,4 @@
-import { Divider, Grid, Typography } from "@mui/material";
+import { Button, Divider, Grid, Typography } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useMemo, useState } from "react";
@@ -9,6 +9,8 @@ import { DSMGrid, Page } from "smart-ui-library";
 import { RootState } from "../../../reduxstore/store";
 import presets from "../PAY426N/presets";
 import { GetProfitSummaryGridColumns } from "./ProfitSummaryGridColumns";
+import CommitModal from "../../ProfitShareReport/CommitModal.tsx";
+import { useFinalizeReportMutation } from "reduxstore/api/YearsEndApi";
 
 /**
  * Default rows for "Active and Inactive" section - these will display with zero values
@@ -60,51 +62,45 @@ const activeInactivePlaceholders: YearEndProfitSharingReportSummaryLineItem[] = 
 interface ProfitSummaryProps {
   onPresetParamsChange?: (params: FilterParams | null) => void;
   frozenData: boolean;
+  showCommitButton?: boolean;
 }
 
-const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, frozenData }) => {
+const ProfitSummary: React.FC<ProfitSummaryProps> = ({
+  onPresetParamsChange,
+  frozenData,
+  showCommitButton = false
+}) => {
   const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingSummaryReportQuery();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedLineItem, setSelectedLineItem] = useState<string | null>(null);
-  const [isStatusCompleted, setIsStatusCompleted] = useState(false);
+  const [shouldArchive, setShouldArchive] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
-  const navigationList = useSelector((state: RootState) => state.navigation.navigationData);
-  const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
+  const [finalizeReport, { isLoading: isFinalizing }] = useFinalizeReportMutation();
 
-  // Get the current navigation object to check its status
-  const getCurrentNavigationObject = () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const findNavigationById = (navigationArray: any[], id: number): any => {
-      for (const item of navigationArray) {
-        if (item.id === id) {
-          return item;
-        }
-        if (item.items && item.items.length > 0) {
-          const found = findNavigationById(item.items, id);
-          if (found) {
-            return found;
-          }
-        }
+  const handleCommit = async () => {
+    if (profitYear) {
+      try {
+        await finalizeReport({ profitYear });
+        setIsModalOpen(false);
+      } catch (error) {
+        console.error("Failed to finalize report:", error);
       }
-      return null;
-    };
-
-    if (navigationList?.navigation && currentNavigationId) {
-      return findNavigationById(navigationList.navigation, currentNavigationId);
     }
-    return null;
   };
 
-  // Check if current status is "Completed"
-  useEffect(() => {
-    const currentNav = getCurrentNavigationObject();
-    if (currentNav) {
-      setIsStatusCompleted(currentNav.statusName === "Complete");
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleStatusChange = (newStatus: string, statusName?: string) => {
+    // Only set shouldArchive to true when transitioning TO "Complete" status
+    if (statusName === "Complete") {
+      setShouldArchive(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigationList, currentNavigationId]);
+  };
 
   const getPresetForLineItem = (lineItemPrefix: string): FilterParams | null => {
     const presetMap: { [key: string]: string } = {
@@ -145,13 +141,40 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, fro
       trigger({
         useFrozenData: frozenData,
         profitYear: profitYear,
-        badgeNumber: null
+        badgeNumber: null,
+        archive: false
       });
     }
-  }, [trigger, profitYear, hasToken, isStatusCompleted]);
+  }, [trigger, profitYear, hasToken, frozenData]);
+
+  // Reload with archive=true when status changes to Complete
+  useEffect(() => {
+    if (shouldArchive && hasToken) {
+      trigger({
+        useFrozenData: frozenData,
+        profitYear: profitYear,
+        badgeNumber: null,
+        archive: true
+      });
+      setShouldArchive(false);
+    }
+  }, [shouldArchive, hasToken, frozenData, profitYear, trigger]);
 
   const renderActionNode = () => {
-    return <StatusDropdownActionNode />;
+    if (!frozenData) return null;
+
+    return (
+      <div className="flex h-10 items-center gap-2">
+        <Button
+          onClick={() => setIsModalOpen(true)}
+          variant="outlined"
+          className="h-10 min-w-fit whitespace-nowrap">
+          Commit
+        </Button>
+
+        <StatusDropdownActionNode onStatusChange={handleStatusChange} />
+      </div>
+    );
   };
 
   const columnDefs = useMemo(() => GetProfitSummaryGridColumns(), []);
@@ -201,57 +224,62 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, fro
   //const shouldShowDetailGrid = selectedLineItem && getPresetForLineItem(selectedLineItem);
 
   return (
-    <>
-      <Page
-        label="Profit Summary"
-        actionNode={renderActionNode()}>
-        <Grid
-          container
-          rowSpacing="24px">
-          <Grid width={"100%"}>
-            <Divider />
-          </Grid>
-
-          <Grid width={"100%"}>
-            <Typography
-              variant="h6"
-              sx={{ mb: 2, px: 3 }}>
-              Active and Inactive
-            </Typography>
-            <DSMGrid
-              preferenceKey={"ACTIVE_INACTIVE_SUMMARY"}
-              isLoading={isFetching}
-              handleSortChanged={() => {}}
-              providedOptions={{
-                rowData: activeAndInactiveRowData,
-                pinnedTopRowData: getActiveAndInactiveTotals,
-                columnDefs: columnDefs,
-                onRowClicked: handleRowClick
-              }}
-            />
-          </Grid>
-
-          <Grid width={"100%"}>
-            <Typography
-              variant="h6"
-              sx={{ mb: 2, px: 3 }}>
-              Terminated
-            </Typography>
-            <DSMGrid
-              preferenceKey={"TERMINATED_SUMMARY"}
-              isLoading={isFetching}
-              handleSortChanged={() => {}}
-              providedOptions={{
-                rowData: terminatedRowData,
-                pinnedTopRowData: getTerminatedTotals,
-                columnDefs: columnDefs,
-                onRowClicked: handleRowClick
-              }}
-            />
-          </Grid>
+    <Page
+      label="Profit Summary"
+      actionNode={renderActionNode()}>
+      <Grid
+        container
+        rowSpacing="24px">
+        <Grid width={"100%"}>
+          <Divider />
         </Grid>
-      </Page>
-    </>
+
+        <Grid width={"100%"}>
+          <Typography
+            variant="h6"
+            sx={{ mb: 2, px: 3 }}>
+            Active and Inactive
+          </Typography>
+          <DSMGrid
+            preferenceKey={"ACTIVE_INACTIVE_SUMMARY"}
+            isLoading={isFetching}
+            handleSortChanged={() => {}}
+            providedOptions={{
+              rowData: activeAndInactiveRowData,
+              pinnedTopRowData: getActiveAndInactiveTotals,
+              columnDefs: columnDefs,
+              onRowClicked: handleRowClick
+            }}
+          />
+        </Grid>
+
+        <Grid width={"100%"}>
+          <Typography
+            variant="h6"
+            sx={{ mb: 2, px: 3 }}>
+            Terminated
+          </Typography>
+          <DSMGrid
+            preferenceKey={"TERMINATED_SUMMARY"}
+            isLoading={isFetching}
+            handleSortChanged={() => {}}
+            providedOptions={{
+              rowData: terminatedRowData,
+              pinnedTopRowData: getTerminatedTotals,
+              columnDefs: columnDefs,
+              onRowClicked: handleRowClick
+            }}
+          />
+        </Grid>
+      </Grid>
+
+      <CommitModal
+        open={isModalOpen}
+        onClose={handleCancel}
+        onCommit={handleCommit}
+        isFinalizing={isFinalizing}
+      />
+    </Page>
   );
 };
 

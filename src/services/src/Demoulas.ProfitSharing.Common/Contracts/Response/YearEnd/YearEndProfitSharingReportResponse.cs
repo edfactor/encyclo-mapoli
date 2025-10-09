@@ -11,19 +11,15 @@ public sealed record YearEndProfitSharingReportResponse : ReportResponseBase<Yea
     [YearEndArchiveProperty]
     public decimal HoursTotal { get; set; }
     public decimal PointsTotal { get; set; }
-    public decimal TerminatedWagesTotal { get; set; }
-    public decimal TerminatedHoursTotal { get; set; }
 
     [YearEndArchiveProperty]
     public long NumberOfEmployees { get; set; }
     public int NumberOfNewEmployees { get; set; }
     public int NumberOfEmployeesUnder21 { get; set; }
     public long NumberOfEmployeesInPlan { get; set; }
-    public decimal TerminatedPointsTotal { get; set; }
-    
+
     [YearEndArchiveProperty]
     public decimal BalanceTotal { get; set; }
-    public decimal TerminatedBalanceTotal { get; set; }
 
     public static YearEndProfitSharingReportResponse ResponseExample()
     {
@@ -34,8 +30,6 @@ public sealed record YearEndProfitSharingReportResponse : ReportResponseBase<Yea
             WagesTotal = 291941.55m,
             HoursTotal = 10052,
             PointsTotal = 2919m,
-            TerminatedWagesTotal = 2002.51m,
-            TerminatedHoursTotal = 205,
             NumberOfEmployees = 2051,
             NumberOfNewEmployees = 55,
             NumberOfEmployeesInPlan = 2044,
@@ -43,8 +37,8 @@ public sealed record YearEndProfitSharingReportResponse : ReportResponseBase<Yea
             StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
             EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
             Response = new PaginatedResponseDto<YearEndProfitSharingReportDetail>(new PaginationRequestDto())
-                { Total = 1, Results = new List<YearEndProfitSharingReportDetail>() { YearEndProfitSharingReportDetail.ResponseExample() } }
-                
+            { Total = 1, Results = new List<YearEndProfitSharingReportDetail>() { YearEndProfitSharingReportDetail.ResponseExample() } }
+
         };
     }
 }

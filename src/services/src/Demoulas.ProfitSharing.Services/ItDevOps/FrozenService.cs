@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Contracts.Contracts.Request;
+﻿using System.Linq.Expressions;
+using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.Common.Data.Contexts.Interceptor;
@@ -6,14 +7,16 @@ using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
-using System.Linq.Expressions;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.ItDevOps;
 
@@ -25,14 +28,26 @@ public class FrozenService : IFrozenService
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ICommitGuardOverride _guardOverride;
     private readonly IServiceProvider _serviceProvider;
+    private readonly IDistributedCache _distributedCache;
+    private readonly INavigationService _navigationService;
+    private readonly ILogger<FrozenService>? _logger;
+
+    // Cache key pattern for frozen demographics endpoint - matches FastEndpoints output cache
+    private const string FrozenDemographicsCacheKeyPrefix = "FEEndpointCache:";
 
     public FrozenService(IProfitSharingDataContextFactory dataContextFactory,
         ICommitGuardOverride guardOverride,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        IDistributedCache distributedCache,
+        INavigationService navigationService,
+        ILogger<FrozenService>? logger = null)
     {
         _dataContextFactory = dataContextFactory;
         _guardOverride = guardOverride;
         _serviceProvider = serviceProvider;
+        _distributedCache = distributedCache;
+        _navigationService = navigationService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -124,7 +139,7 @@ public class FrozenService : IFrozenService
 
         using (_guardOverride.AllowFor(roles: Role.ITDEVOPS))
         {
-            return await _dataContextFactory.UseWritableContext(async ctx =>
+            var result = await _dataContextFactory.UseWritableContext(async ctx =>
             {
                 //Inactivate any prior frozen states
                 await ctx.FrozenStates.Where(x => x.IsActive).ForEachAsync(x => x.IsActive = false, cancellationToken);
@@ -170,6 +185,17 @@ public class FrozenService : IFrozenService
                     CreatedDateTime = frozenState.CreatedDateTime
                 };
             }, cancellationToken);
+
+            // Bust the GetFrozenDemographicsEndpoint output cache after successful freeze
+            // FastEndpoints uses a prefix pattern for output cache keys
+            await BustGetFrozenDemographicsCacheAsync(cancellationToken);
+
+            // Reset all navigation statuses to "Not Started" when creating a new freeze point
+            // This ensures year-end workflows restart cleanly after demographics are frozen
+            // Delegates to NavigationService for proper separation of concerns
+            await _navigationService.ResetAllStatusesToNotStartedAsync(cancellationToken);
+
+            return result;
         }
     }
 
@@ -227,4 +253,62 @@ public class FrozenService : IFrozenService
         });
     }
 
+    /// <summary>
+    /// Busts the output cache for GetFrozenDemographicsEndpoint by removing all cached entries
+    /// that match the FastEndpoints cache key pattern for this endpoint.
+    /// </summary>
+    /// <remarks>
+    /// FastEndpoints output cache stores entries with keys that start with "FEEndpointCache:"
+    /// followed by the endpoint path and query parameters. Since IDistributedCache doesn't support
+    /// pattern-based removal, we need to target specific cache keys or use cache tags.
+    /// 
+    /// For now, we attempt to remove common cache key patterns. A more robust solution would be
+    /// to use cache tags (if supported by the distributed cache provider) or implement a cache
+    /// key tracking mechanism.
+    /// </remarks>
+    private async Task BustGetFrozenDemographicsCacheAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            // FastEndpoints generates cache keys like: "FEEndpointCache:/api/it-operations/frozen?page=1&pageSize=10&..."
+            // Since we can't pattern-match with IDistributedCache, we'll remove common pagination combinations
+            // This is a pragmatic approach - in production you may want to use cache tags or Redis pattern deletion
+
+            var endpointPath = "/api/it-operations/frozen";
+            var commonPageSizes = new[] { 10, 25, 50, 100 };
+            var maxPages = 5; // Bust first 5 pages of common page sizes
+
+            var cacheKeysToRemove = new List<string>();
+
+            // Generate cache keys for common pagination combinations
+            foreach (var pageSize in commonPageSizes)
+            {
+                for (var page = 1; page <= maxPages; page++)
+                {
+                    // FastEndpoints cache key format (simplified - actual format may include more parameters)
+                    var cacheKey = $"{FrozenDemographicsCacheKeyPrefix}{endpointPath}?page={page}&pageSize={pageSize}";
+                    cacheKeysToRemove.Add(cacheKey);
+                }
+            }
+
+            // Also bust the default/first page without explicit parameters
+            cacheKeysToRemove.Add($"{FrozenDemographicsCacheKeyPrefix}{endpointPath}");
+            cacheKeysToRemove.Add($"{FrozenDemographicsCacheKeyPrefix}{endpointPath}?");
+
+            // Remove all identified cache keys
+            foreach (var key in cacheKeysToRemove)
+            {
+                await _distributedCache.RemoveAsync(key, cancellationToken);
+            }
+
+            _logger?.LogInformation("Busted GetFrozenDemographicsEndpoint cache ({KeyCount} keys removed)", cacheKeysToRemove.Count);
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't fail the freeze operation if cache busting fails
+            _logger?.LogError(ex, "Failed to bust GetFrozenDemographicsEndpoint cache");
+        }
+    }
+
 }
+

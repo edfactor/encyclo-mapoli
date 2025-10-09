@@ -6,7 +6,7 @@ public class ProfitDetail : ModifiedBase
 {
     public static class Constants
     {
-        public const byte  ProfitYearIterationMilitary = 1;
+        public const byte ProfitYearIterationMilitary = 1;
         public const byte ProfitYearIterationClassActionFund = 2;
     }
 
@@ -26,8 +26,8 @@ public class ProfitDetail : ModifiedBase
     public string? Remark { get; set; }
     public byte? ZeroContributionReasonId { get; set; }
     public ZeroContributionReason? ZeroContributionReason { get; set; }
-    public decimal FederalTaxes {get; set;}
-    public decimal StateTaxes { get; set;}
+    public decimal FederalTaxes { get; set; }
+    public decimal StateTaxes { get; set; }
     public TaxCode? TaxCode { get; set; }
     public char? TaxCodeId { get; set; }
     public byte? CommentTypeId { get; set; }
@@ -37,5 +37,5 @@ public class ProfitDetail : ModifiedBase
     public long? CommentRelatedOracleHcmId { get; set; }
     public short? CommentRelatedPsnSuffix { get; set; }
     public bool? CommentIsPartialTransaction { get; set; }
-    public byte YearsOfServiceCredit { get; set; }
+    public sbyte YearsOfServiceCredit { get; set; }
 }

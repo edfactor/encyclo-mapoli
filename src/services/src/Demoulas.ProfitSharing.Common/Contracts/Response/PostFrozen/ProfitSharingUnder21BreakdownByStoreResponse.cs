@@ -16,7 +16,7 @@ public sealed record ProfitSharingUnder21BreakdownByStoreResponse : IIsExecutive
     public decimal? EndingBalance { get; set; } = 0;
     public decimal? VestedAmount { get; set; } = 0;
     public decimal? VestingPercentage { get; set; } = 0;
-    public DateOnly DateOfBirth { get; set; }
+    [MaskSensitive] public DateOnly DateOfBirth { get; set; }
     public byte Age { get; set; }
     public byte EnrollmentId { get; set; }
     public bool IsExecutive { get; set; }
@@ -37,7 +37,7 @@ public sealed record ProfitSharingUnder21BreakdownByStoreResponse : IIsExecutive
             VestedAmount = 20272.36m,
             EndingBalance = 20272.36m,
             VestingPercentage = 1,
-            DateOfBirth = new DateOnly(1971,5,11),
+            DateOfBirth = new DateOnly(1971, 5, 11),
             Age = 53,
             EnrollmentId = 1
         };

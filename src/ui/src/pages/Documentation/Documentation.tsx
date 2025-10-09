@@ -1,6 +1,7 @@
 import { Description as DescriptionIcon } from "@mui/icons-material";
 import { Box, Divider, List, ListItem, ListItemButton, ListItemText, Paper, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { Page } from "smart-ui-library";
 
 // Documentation files metadata
@@ -88,6 +89,54 @@ const documentationFiles = [
     filename: "PS-1623_READ_ONLY_SUMMARY.md",
     description:
       "Executive summary of PS-1623 read-only role implementation including status tracking, impact assessment, and deployment verification steps"
+  },
+  {
+    key: "duplicate-names-birthdays",
+    title: "Duplicate Names & Birthdays Report",
+    filename: "Duplicate-Names-And-Birthdays-Report.md",
+    description: "Implementation notes and operational guidance for the Duplicate Names and Birthdays cleanup report"
+  },
+  {
+    key: "military-contribution-qa-guide",
+    title: "Military Contribution QA Testing Guide",
+    filename: "MILITARY_CONTRIBUTION_QA_GUIDE.md",
+    description:
+      "Comprehensive QA testing guide for military contribution business logic, validation rules, test scenarios, and expected behaviors"
+  },
+  {
+    key: "terminated-employee-developer-guide",
+    title: "Terminated Employee Report - Developer Guide",
+    filename: "TERMINATED_EMPLOYEE_REPORT_DEVELOPER_GUIDE.md",
+    description:
+      "Complete developer guide for the Terminated Employee & Beneficiary Report implementation including data flow, calculation logic, vesting schedules, transaction processing, and code examples"
+  },
+  {
+    key: "terminated-employee-analysis",
+    title: "Terminated Employee Report - Discrepancy Analysis",
+    filename: "TERMINATED_EMPLOYEE_REPORT_ANALYSIS.md",
+    description:
+      "Detailed analysis comparing SMART vs READY implementations, documenting known discrepancies, root causes, financial impacts, and investigation priorities for QA and stakeholders"
+  },
+  {
+    key: "terminations-business-guide",
+    title: "Terminations Business Guide",
+    filename: "TERMINATIONS_BUSINESS_GUIDE.md",
+    description:
+      "Comprehensive business guide for stakeholders and QA teams explaining termination processing, vesting calculations, beneficiary handling, filtering rules, and common scenarios"
+  },
+  {
+    key: "report-crossreference-matrix",
+    title: "Report Cross-Reference Matrix",
+    filename: "REPORT_CROSSREFERENCE_MATRIX.md",
+    description:
+      "Comprehensive matrix documenting which values across different Profit Sharing reports should match for data integrity validation, including PAY444, PAY443, QPAY129, QPAY066, and PAY426 series reports with implementation guidelines for checksum validation"
+  },
+  {
+    key: "report-crossreference-quick",
+    title: "Report Cross-Reference Quick Guide",
+    filename: "REPORT_CROSSREFERENCE_QUICK.md",
+    description:
+      "Visual quick reference guide showing report value matching patterns, validation priority order, and field names for API validation - ideal for developers implementing cross-report validation"
   }
 ];
 
@@ -95,6 +144,16 @@ const Documentation: React.FC = () => {
   const [selectedDoc, setSelectedDoc] = useState<string | null>(null);
   const [documentContent, setDocumentContent] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const location = useLocation();
+
+  // Check for URL query parameter to pre-select a document
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const docKey = params.get("doc");
+    if (docKey && documentationFiles.some((d) => d.key === docKey)) {
+      setSelectedDoc(docKey);
+    }
+  }, [location.search]);
 
   // Load document content
   const loadDocument = async (filename: string) => {

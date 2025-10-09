@@ -40,13 +40,14 @@ internal static class Program
         return runType switch
         {
             "baseline" => new BaselineRun { DataDirectory = dataDirectory },
-            "golden" => new GoldenRun { DataDirectory = dataDirectory },
+            "goldenyearend" => new GoldenYearEndRun { DataDirectory = dataDirectory },
             "goldenexpress" => new GoldenExpressRun { DataDirectory = dataDirectory },
+            "goldendecemberexpress" => new GoldenDecemberRun() { DataDirectory = dataDirectory },
             "masterinquiry" => new MasterInquiryRun { DataDirectory = dataDirectory },
             "tinker" => new TinkerRun { DataDirectory = dataDirectory },
             "seven" => new SevenRun { DataDirectory = dataDirectory },
             "view" => new ViewRun { DataDirectory = dataDirectory },
-            _ => throw new ArgumentException($"Unknown run type: {runType}. Valid options are: baseline, golden, goldenexpress, masterinquiry, tinker, view")
+            _ => throw new ArgumentException($"Unknown run type: {runType}")
         };
     }
 }

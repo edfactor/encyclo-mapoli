@@ -8,7 +8,6 @@ import {
 
 export const GetMilitaryContributionColumns = (): ColDef[] => {
   const columns: ColDef[] = [
-    createBadgeColumn({}),
     createYearColumn({
       headerName: "Contribution Year",
       field: "contributionDate"

@@ -16,6 +16,7 @@ import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "utils/dateUtils";
 import * as yup from "yup";
+import { dateStringValidator, endDateStringAfterStartDateValidator, profitYearValidator } from "../../../utils/FormValidators";
 
 interface TerminatedLettersSearch {
   profitYear: number;
@@ -24,15 +25,13 @@ interface TerminatedLettersSearch {
 }
 
 const schema = yup.object().shape({
-  profitYear: yup
-    .number()
-    .typeError("Year must be a number")
-    .integer("Year must be an integer")
-    .min(2020, "Year must be 2020 or later")
-    .max(2100, "Year must be 2100 or earlier")
-    .required("Year is required"),
-  beginningDate: yup.string().required("Begin Date is required"),
-  endingDate: yup.string().required("End Date is required")
+  profitYear: profitYearValidator(),
+  beginningDate: dateStringValidator(2000, 2099, "Beginning Date").required("Begin Date is required"),
+  endingDate: endDateStringAfterStartDateValidator(
+    "beginningDate",
+    tryddmmyyyyToDate,
+    "Ending date must be the same or after the beginning date"
+  ).required("End Date is required")
 });
 
 interface TerminatedLettersSearchFilterProps {
@@ -56,7 +55,8 @@ const TerminatedLettersSearchFilter: React.FC<TerminatedLettersSearchFilterProps
     resolver: yupResolver(schema) as Resolver<TerminatedLettersSearch>,
     defaultValues: {
       profitYear: profitYear || terminatedLettersQueryParams?.profitYear || undefined,
-      beginningDate: terminatedLettersQueryParams?.beginningDate || (fiscalData ? fiscalData.fiscalBeginDate : "") || "",
+      beginningDate:
+        terminatedLettersQueryParams?.beginningDate || (fiscalData ? fiscalData.fiscalBeginDate : "") || "",
       endingDate: terminatedLettersQueryParams?.endingDate || (fiscalData ? fiscalData.fiscalEndDate : "") || ""
     }
   });

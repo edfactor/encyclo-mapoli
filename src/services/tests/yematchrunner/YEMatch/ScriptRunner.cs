@@ -1,28 +1,23 @@
 ﻿using System.Data;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace YEMatch.YEMatch;
 
 public static class ScriptRunner
 {
-    public static int Run(bool chatty, string scriptName)
+    public static int Run(bool chatty, string workingDir, string command, string args)
     {
-        string homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        string scriptExtension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".bat" : "";
-        string scriptPath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-            ? $@"{homeDirectory}\bin\{scriptName}{scriptExtension}"
-            : $@"{homeDirectory}/bin/{scriptName}{scriptExtension}";
-
-        string shell = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "cmd.exe" : "/bin/bash";
-        string arguments = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? $"/c \"{scriptPath}\"" : $"\"{scriptPath}\"";
+        Console.WriteLine($"cd {workingDir}; {command} {args}");
 
         Process process = new()
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = shell,
-                Arguments = arguments,
+                WorkingDirectory = workingDir,
+                FileName = command,
+                Arguments = args,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
@@ -30,16 +25,61 @@ public static class ScriptRunner
             }
         };
 
+        // Event handlers for real-time output
+        process.OutputDataReceived += (sender, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.Data) && chatty)
+            {
+                Console.WriteLine(e.Data);
+            }
+        };
+
+        process.ErrorDataReceived += (sender, e) =>
+        {
+            Console.Error.WriteLine(e.Data);
+        };
+
         process.Start();
-        string error = process.StandardError.ReadToEnd();
+
+        // Begin asynchronous reading
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
+
         process.WaitForExit();
+        StringBuilder stdoutBuilder = new();
+        StringBuilder stderrBuilder = new();
+
+        process.OutputDataReceived += (sender, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.Data))
+            {
+                stdoutBuilder.AppendLine(e.Data);
+                if (chatty)
+                {
+                    Console.WriteLine(e.Data);
+                }
+            }
+        };
+
+        process.ErrorDataReceived += (sender, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.Data))
+            {
+                stderrBuilder.AppendLine(e.Data);
+                Console.Error.WriteLine(e.Data);
+            }
+        };
+
+        process.WaitForExit();
+
+        string stdout = stdoutBuilder.ToString();
+        string error = stderrBuilder.ToString();
 
         if (!string.IsNullOrEmpty(error))
         {
             Console.WriteLine($"<ERROR-OUTPUT>: {error}</ERROR-OUTPUT>");
         }
 
-        string stdout = process.StandardOutput.ReadToEnd();
         if (chatty)
         {
             Console.WriteLine($"<STANDARD-OUT>{stdout}</STANDARD-OUT>");
@@ -48,7 +88,7 @@ public static class ScriptRunner
         if (stdout.Contains("error", StringComparison.CurrentCultureIgnoreCase))
         {
             Console.WriteLine($"<STANDARD-OUT>{stdout}</STANDARD-OUT>");
-            throw new EvaluateException($"Error running script - string 'error' found in output when running : {scriptName}");
+            throw new EvaluateException($"Error running script - string 'error' found in output when running, command: {command} with args: {args}");
         }
 
         return process.ExitCode;

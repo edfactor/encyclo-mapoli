@@ -8,13 +8,7 @@ import useDemographicBadgesNotInPayprofit from "./hooks/useDemographicBadgesNotI
 
 const DemographicBadgesNotInPayprofit = () => {
   const componentRef = useRef<HTMLDivElement>(null);
-  const {
-    searchResults,
-    isSearching,
-    pagination,
-    showData,
-    hasResults
-  } = useDemographicBadgesNotInPayprofit();
+  const { searchResults, isSearching, pagination, showData, hasResults } = useDemographicBadgesNotInPayprofit();
 
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;

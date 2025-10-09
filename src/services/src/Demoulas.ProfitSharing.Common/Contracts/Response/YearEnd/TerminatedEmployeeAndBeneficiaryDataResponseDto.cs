@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Interfaces;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
@@ -6,6 +7,8 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto : IIsExecut
 {
     public required int BadgeNumber { get; set; }
     public required short PsnSuffix { get; set; }
+
+    [MaskSensitive]
     public required string? Name { get; set; }
     public bool IsExecutive { get; set; }
 

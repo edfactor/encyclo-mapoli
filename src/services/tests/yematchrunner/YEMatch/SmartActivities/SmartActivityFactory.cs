@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -16,7 +16,7 @@ namespace YEMatch.YEMatch.SmartActivities;
 
 public static class SmartActivityFactory
 {
-    private static readonly short _profitYear = 2024;
+    private static readonly short _profitYear = 2025;
 
     public static ApiClient? Client;
 
@@ -65,13 +65,16 @@ public static class SmartActivityFactory
 
     private static async Task<Outcome> A0_Initialize_Database_with_Obfuscated_data(ApiClient apiClient, string aname, string name)
     {
+        // We now use the CLI ImportReadyToSmartDB to do the import, so it handles the 2023 rebuild 
+        throw new NotImplementedException();
+
+#if false
         // Quick authentication sanity check
         AppVersionInfo? r = await apiClient.DemoulasCommonApiEndpointsAppVersionInfoEndpointAsync(null);
         // Might be nice to also include the database version. What database is used.  Wall clock time.
         Console.WriteLine(" Connected to SMART build:" + r.BuildNumber + " git-hash:" + r.ShortGitHash);
 
         // Consider using CLI tool for reset the smart schema to stock 
-
         int res = ScriptRunner.Run(false, "import-bh"); // Good enough and fast
         if (res != 0)
         {
@@ -79,6 +82,7 @@ public static class SmartActivityFactory
         }
 
         return new Outcome(aname, name, "", OutcomeStatus.Ok, "Database setup complete.\n", null, true);
+#endif
     }
 
     private static async Task<Outcome> A1_Profit_Sharing_Clean_up_Reports(ApiClient apiClient, string aname, string name)
@@ -245,7 +249,7 @@ public static class SmartActivityFactory
         TestToken.CreateAndAssignTokenForClient(httpClient, "IT-DevOps");
         HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/itdevops/freeze")
         {
-            Content = new StringContent("{ \"ProfitYear\" : " + _profitYear + ", \"asOfDateTime\": \"2025-01-09T00:00:00-04:00\"}"
+            Content = new StringContent("{ \"ProfitYear\" : " + _profitYear + ", \"asOfDateTime\": \"2026-01-03T00:00:00-04:00\"}"
                 , Encoding.UTF8, "application/json")
         };
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
@@ -357,9 +361,17 @@ public static class SmartActivityFactory
         return Ok(aname, name, $"Records Loaded = {r.Response.Results.Count}");
     }
 
+    // Reference values from the 2022 run.
+    private const int RefMaxAllowedContribution = 57_000;
+    private const decimal RefContributionPercent = 15m;
+    private const decimal RefIncomingForfeitPercent = 0.876678m;
+    private const decimal RefEarningsPercent = 9.280136m;
+
     private static async Task<Outcome> A21_Profit_Share_Update_PAY444(ApiClient apiClient, string aname, string name)
     {
-        ProfitShareUpdateResponse? r = await apiClient.ReportsYearEndProfitShareUpdateProfitShareUpdateEndpointAsync(15, 4, 5, 0, 76_500, 0, 0, 0, 0, 0, 0, _profitYear, null, null,
+        ProfitShareUpdateResponse? r = await apiClient.ReportsYearEndProfitShareUpdateProfitShareUpdateEndpointAsync(RefContributionPercent, RefIncomingForfeitPercent,
+            RefEarningsPercent,
+            0, RefMaxAllowedContribution, 0, 0, 0, 0, 0, 0, _profitYear, null, null,
             0, int.MaxValue,
             null);
         return Ok(aname, name, $"Records Loaded = {r.Response.Results.Count}");
@@ -367,8 +379,8 @@ public static class SmartActivityFactory
 
     private static async Task<Outcome> A22_Profit_Share_Edit_PAY477(ApiClient apiClient, string aname, string name)
     {
-        ProfitShareEditResponse? r = await apiClient.ReportsYearEndProfitShareEditEndpointAsync(15, 4, 5, 0,
-            76_500, 0, 0, 0, 0, 0, 0, _profitYear, null, null, 0, int.MaxValue, null);
+        ProfitShareEditResponse? r = await apiClient.ReportsYearEndProfitShareEditEndpointAsync(RefContributionPercent, RefIncomingForfeitPercent, RefEarningsPercent, 0,
+            RefMaxAllowedContribution, 0, 0, 0, 0, 0, 0, _profitYear, null, null, 0, int.MaxValue, null);
         return Ok(aname, name, $"Records Loaded = {r.Response.Results.Count}");
     }
 
@@ -400,11 +412,11 @@ public static class SmartActivityFactory
 
         ProfitShareUpdateRequestLocal req = new();
         req.ProfitYear = _profitYear;
-        req.ContributionPercent = 15m;
-        req.IncomingForfeitPercent = 4m;
-        req.EarningsPercent = 5m;
+        req.ContributionPercent = RefContributionPercent;
+        req.IncomingForfeitPercent = RefIncomingForfeitPercent;
+        req.EarningsPercent = RefEarningsPercent;
         req.SecondaryEarningsPercent = 0m;
-        req.MaxAllowedContributions = 76_500;
+        req.MaxAllowedContributions = RefMaxAllowedContribution;
         req.Take = int.MaxValue;
         string postBody = JsonSerializer.Serialize(req);
 

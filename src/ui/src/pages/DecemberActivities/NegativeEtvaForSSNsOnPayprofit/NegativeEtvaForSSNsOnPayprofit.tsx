@@ -7,13 +7,7 @@ import useNegativeEtvaForSSNsOnPayprofit from "./hooks/useNegativeEtvaForSSNsOnP
 
 const NegativeEtvaForSSNsOnPayprofit = () => {
   const componentRef = useRef<HTMLDivElement>(null);
-  const {
-    searchResults,
-    isSearching,
-    pagination,
-    showData,
-    hasResults
-  } = useNegativeEtvaForSSNsOnPayprofit();
+  const { searchResults, isSearching, pagination, showData, hasResults } = useNegativeEtvaForSSNsOnPayprofit();
 
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;

@@ -1,4 +1,6 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
 public record DemographicResponseDto
 {
@@ -13,7 +15,7 @@ public record DemographicResponseDto
 
     public required ContactInfoResponseDto ContactInfo { get; set; }
     public AddressResponseDto? Address { get; set; }
-    public required DateOnly DateOfBirth { get; set; }
+    [MaskSensitive] public required DateOnly DateOfBirth { get; set; }
 
     /// <summary>
     /// Date of full-time status 

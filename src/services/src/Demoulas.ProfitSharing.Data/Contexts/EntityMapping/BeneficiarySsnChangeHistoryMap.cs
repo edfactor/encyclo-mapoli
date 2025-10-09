@@ -34,6 +34,6 @@ internal sealed class BeneficiarySsnChangeHistoryMap : ModifiedBaseMap<Beneficia
             .HasColumnName("NEW_SSN")
             .IsRequired();
 
-       base.Configure(builder);
+        base.Configure(builder);
     }
 }

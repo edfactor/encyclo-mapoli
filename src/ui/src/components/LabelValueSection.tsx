@@ -1,10 +1,37 @@
-import React from "react";
 import { Box, Typography } from "@mui/material";
+import React from "react";
 
 import { Grid } from "@mui/material";
+
 interface LabelValueItem {
   label: string;
   value: React.ReactNode;
+  labelColor?:
+    | "primary"
+    | "secondary"
+    | "error"
+    | "warning"
+    | "info"
+    | "success"
+    | "text.primary"
+    | "text.secondary"
+    | "text.disabled"
+    | "inherit";
+  labelVariant?:
+    | "body1"
+    | "body2"
+    | "caption"
+    | "h1"
+    | "h2"
+    | "h3"
+    | "h4"
+    | "h5"
+    | "h6"
+    | "inherit"
+    | "subtitle1"
+    | "subtitle2"
+    | "overline";
+  labelWeight?: "normal" | "bold" | "lighter" | "bolder" | number;
 }
 
 interface LabelValueSectionProps {
@@ -15,7 +42,7 @@ interface LabelValueSectionProps {
 const LabelValueSection: React.FC<LabelValueSectionProps> = ({ title, data }) => (
   <Box>
     {title && <Typography variant="overline">{title}</Typography>}
-    {data.map(({ label, value }, index) => (
+    {data.map(({ label, value, labelColor, labelVariant, labelWeight }, index) => (
       <Grid
         container
         key={index}
@@ -24,9 +51,10 @@ const LabelValueSection: React.FC<LabelValueSectionProps> = ({ title, data }) =>
         {!!label && label != "" && (
           <Grid>
             <Typography
-              variant="body2"
+              variant={labelVariant || "body2"}
               align="left"
-              fontWeight="bold">
+              fontWeight={labelWeight || "bold"}
+              color={labelColor}>
               {label}
             </Typography>
           </Grid>

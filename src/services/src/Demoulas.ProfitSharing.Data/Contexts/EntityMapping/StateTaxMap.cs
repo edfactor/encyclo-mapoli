@@ -11,7 +11,7 @@ internal sealed class StateTaxMap : IEntityTypeConfiguration<StateTax>
         builder.ToTable("STATE_TAX");
         builder.HasKey(x => x.Abbreviation);
         builder.Property(x => x.Abbreviation).HasMaxLength(2);
-        builder.Property(x=>x.Rate).HasPrecision(9, 2);
+        builder.Property(x => x.Rate).HasPrecision(9, 2);
         builder.Property(x => x.UserModified).HasColumnName("USER_MODIFIED").HasMaxLength(20);
         builder.Property(x => x.DateModified).HasColumnName("DATE_MODIFIED").HasColumnType("DATE").HasConversion<DateOnlyConverter>();
 

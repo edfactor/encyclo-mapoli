@@ -68,7 +68,7 @@ public sealed class SwaggerAuthorizationDetails : IOperationProcessor
                 rolesByPolicy[policyName!] = PolicyRoleMap.GetRoles(policyName!);
             }
         }
-       
+
 
         var op = context.OperationDescription.Operation;
 
@@ -95,7 +95,7 @@ public sealed class SwaggerAuthorizationDetails : IOperationProcessor
         }
         else
         {
-            foreach (var kvp in rolesByPolicy.Where(p=> p.Value.Any()))
+            foreach (var kvp in rolesByPolicy.Where(p => p.Value.Any()))
             {
                 var roles = kvp.Value;
                 var rolesText = roles.Length > 0 ? string.Join(", ", roles) : "none";

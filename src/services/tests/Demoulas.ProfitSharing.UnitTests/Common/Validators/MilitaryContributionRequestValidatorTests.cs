@@ -21,14 +21,11 @@ public class MilitaryContributionRequestValidatorTests
         employeeLookupMock
             .Setup(x => x.GetDateOfBirthAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new DateOnly((short)DateTime.Today.Year - 30, 1, 1));
-        employeeLookupMock
-            .Setup(x => x.IsActiveAsOfAsync(It.IsAny<int>(), It.IsAny<DateOnly>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
 
         var militaryServiceMock = new Mock<IMilitaryService>(MockBehavior.Strict);
         // Default: return success with empty results for GetMilitaryServiceRecordAsync
         militaryServiceMock
-            .Setup(m => m.GetMilitaryServiceRecordAsync(It.IsAny<Demoulas.ProfitSharing.Common.Contracts.Request.Military.MilitaryContributionRequest>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .Setup(m => m.GetMilitaryServiceRecordAsync(It.IsAny<Demoulas.ProfitSharing.Common.Contracts.Request.Military.GetMilitaryContributionRequest>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>>.Success(new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse> { Results = new List<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>() }));
 
         var validator = new MilitaryContributionRequestValidator(employeeLookupMock.Object, militaryServiceMock.Object);
@@ -189,58 +186,6 @@ public class MilitaryContributionRequestValidatorTests
     }
 
     [Fact]
-    [Description("PS-1721 : Employment status must be Active as-of contribution date")]
-    public async Task Employment_status_not_active_is_rejected()
-    {
-        var (validator, employeeLookupMock, _) = CreateValidator();
-        var today = DateTime.Today;
-        employeeLookupMock.Reset();
-        employeeLookupMock
-            .Setup(x => x.BadgeExistsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-        employeeLookupMock
-            .Setup(x => x.GetEarliestHireDateAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new DateOnly(today.Year - 5, 1, 1));
-        employeeLookupMock
-            .Setup(x => x.GetDateOfBirthAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new DateOnly(today.Year - 30, 1, 1));
-        employeeLookupMock
-            .Setup(x => x.IsActiveAsOfAsync(It.IsAny<int>(), It.IsAny<DateOnly>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(false); // terminated/not active
-
-        var req = ValidRequest((short)today.Year, new DateTime(today.Year, today.Month, Math.Min(15, DateTime.DaysInMonth(today.Year, today.Month)), 0, 0, 0, DateTimeKind.Utc)) with { IsSupplementalContribution = true };
-        var result = await validator.ValidateAsync(req);
-        Assert.False(result.IsValid);
-        Assert.Contains(result.Errors, e => e.ErrorMessage.Contains("employment status is not eligible", StringComparison.OrdinalIgnoreCase));
-    }
-
-    [Fact]
-    [Description("PS-1721 : Employment status missing is rejected")]
-    public async Task Employment_status_missing_is_rejected()
-    {
-        var (validator, employeeLookupMock, _) = CreateValidator();
-        var today = DateTime.Today;
-        employeeLookupMock.Reset();
-        employeeLookupMock
-            .Setup(x => x.BadgeExistsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-        employeeLookupMock
-            .Setup(x => x.GetEarliestHireDateAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new DateOnly(today.Year - 5, 1, 1));
-        employeeLookupMock
-            .Setup(x => x.GetDateOfBirthAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new DateOnly(today.Year - 30, 1, 1));
-        employeeLookupMock
-            .Setup(x => x.IsActiveAsOfAsync(It.IsAny<int>(), It.IsAny<DateOnly>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((bool?)null);
-
-        var req = ValidRequest((short)today.Year, new DateTime(today.Year, today.Month, Math.Min(15, DateTime.DaysInMonth(today.Year, today.Month)), 0, 0, 0, DateTimeKind.Utc)) with { IsSupplementalContribution = true };
-        var result = await validator.ValidateAsync(req);
-        Assert.False(result.IsValid);
-        Assert.Contains(result.Errors, e => e.ErrorMessage.Contains("employment status is not eligible", StringComparison.OrdinalIgnoreCase));
-    }
-
-    [Fact]
     [Description("PS-1721 : Duplicate detection by contribution year")]
     public async Task Duplicate_detection_by_contribution_year_rejects_regular_contribution_when_v_only_record_exists()
     {
@@ -269,7 +214,7 @@ public class MilitaryContributionRequestValidatorTests
         // Configure the military service mock to return an existing V-only record for contributionYear
         militaryServiceMock.Reset();
         militaryServiceMock
-            .Setup(m => m.GetMilitaryServiceRecordAsync(It.Is<Demoulas.ProfitSharing.Common.Contracts.Request.Military.MilitaryContributionRequest>(r => r.ProfitYear == contributionYear && r.BadgeNumber == req.BadgeNumber), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .Setup(m => m.GetMilitaryServiceRecordAsync(It.Is<Demoulas.ProfitSharing.Common.Contracts.Request.Military.GetMilitaryContributionRequest>(r => r.BadgeNumber == req.BadgeNumber), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>>.Success(new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>
             {
                 Results = new List<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>
@@ -318,7 +263,7 @@ public class MilitaryContributionRequestValidatorTests
         // No existing records needed for this rule
         militaryServiceMock.Reset();
         militaryServiceMock
-            .Setup(m => m.GetMilitaryServiceRecordAsync(It.IsAny<Demoulas.ProfitSharing.Common.Contracts.Request.Military.MilitaryContributionRequest>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .Setup(m => m.GetMilitaryServiceRecordAsync(It.IsAny<Demoulas.ProfitSharing.Common.Contracts.Request.Military.GetMilitaryContributionRequest>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Demoulas.ProfitSharing.Common.Contracts.Result<Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>>.Success(new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>
             {
                 Results = new List<Demoulas.ProfitSharing.Common.Contracts.Response.Military.MilitaryContributionResponse>()

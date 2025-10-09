@@ -1,14 +1,22 @@
-namespace YEMatch.YEMatch;
+﻿namespace YEMatch.YEMatch;
 
 public static class ActivityToReports
 {
     // This maps a Activty Name to a unix proccess id.   as orginally extracted from a YE Run.
     private static readonly Dictionary<string, string> _processIdByActivity = new()
     {
-        ["R0"] = "12180",
-        ["R2"] = "8888",
+        ["R1"] = "13604",
+        ["R2"] = "13694",
         ["R3"] = "7777",
         ["R4"] = "7217",
+        ["R5"] = "18007", // EJR PROF-DOLLAR-EXEC-EXTRACT
+        // ["R6"] Clear EXEC hours dollars
+        // ["R7"] Ready Screen
+        ["R8"] = "18182", // PROF-SHARE PAY426 ...
+        // ["R9"] YE-Oracle-Payroll-Processing
+        // ["R10"] Load-Oracle-PAYPROFIT(weekly job)
+        ["R11"] = "564", // A11: Profit sharing YTD Wages Extract (PROF-DOLLAR-EXTRACT)
+        // ["R12"] =  PROF-LOAD-YREND-DEMO-PROFSHARE
 
         ["R15"] = "12228",
         ["R17"] = "12278",
@@ -25,40 +33,40 @@ public static class ActivityToReports
         ["R27"] = "12201",
         ["R28"] = "19155"
     };
-    
+
     private static readonly List<string> _referenceLogfiles =
     [
         // These are names of generated reports.  Then end with a unix process id.  This keeps the reports
         // unique in a directory of reports.     We use this map to figure out for a given activity, like R22 which has
         // a single specific unix id assigned at run time, what file or files to go grab on the remote server.
-        "QPAY129-7217",
-        "PREVPROF-8888",
-        "PREVPROF-8888.csv",
-        "PROF-HOURS-DOLLARS-12228.CSV",
+        
+        "ETVA-LESS-THAN-ZERO-13604.csv",
+        "DUPLICATE-PAYPROF-SSNS-13604.csv",
+        "DUPLICATE-DEM-SSNS-13604.csv",
+        "MISMATCHED-PAYPROF-DEM-SSNS-13604.csv",
+        "MISSING-DEMOGRAPHICS-RECS-13604.csv",
+        "MISSING-PAYPROFIT-RECS-13604.csv",
+        "DUP-NAMES-DOB-13604.csv",
+        "MISS-COMMA-IN-NAM-13604.csv",
+        "QPAY511-13694",
+        "PREVPROF-13694",
+        "PREVPROF-13694.csv",
         "QPAY066-7777",
-        "PAY426-12278",
-        "PAY426-TOT-12278",
-        "PAY426N-3-12278",
-        "PAY426N-8-12278",
-        "PAY426N-7-12278",
-        "PAY426N-5-12278",
-        "PAY426N-10-12278",
-        "PAY426N-4-12278",
-        "PAY426N-6-12278",
-        "PAY426N-2-12278",
-        "PAY426N-1-12278",
-        "PAY426N-9-12278",
-        "PAY426-24515",
-        "PAY426N-7-24515",
-        "PAY426N-6-24515",
-        "PAY426N-5-24515",
-        "PAY426N-1-24515",
-        "PAY426N-3-24515",
-        "PAY426N-4-24515",
-        "PAY426N-2-24515",
-        "PAY426N-9-24515",
-        "PAY426N-10-24515",
-        "PAY426N-8-24515",
+        "QPAY129-7217",
+        "PROF-EXEC-HOURS-DOLLARS-18007.CSV",
+        "PAY426-TOT-18182",
+        "PAY426-18182",
+        "PAY426N-6-18182",
+        "PAY426N-2-18182",
+        "PAY426N-1-18182",
+        "PAY426N-10-18182",
+        "PAY426N-8-18182",
+        "PAY426N-7-18182",
+        "PAY426N-3-18182",
+        "PAY426N-5-18182",
+        "PAY426N-4-18182",
+        "PAY426N-9-18182",
+        "PROF-HOURS-DOLLARS-564.CSV",
         "PROFIT-ELIGIBLE-3719.csv",
         "PAY443-7670",
         "PAY444-12105",

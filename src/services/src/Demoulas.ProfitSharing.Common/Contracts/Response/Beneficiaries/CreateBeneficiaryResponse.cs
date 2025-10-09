@@ -23,5 +23,5 @@ public sealed record CreateBeneficiaryResponse
         Relationship = "Sibling",
         KindId = 'P',
         Percent = 50.0m
-    };    
+    };
 }

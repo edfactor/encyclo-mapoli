@@ -134,7 +134,8 @@ export interface YearsEndState {
   terminationQueryParams: ProfitYearRequest | null;
   vestedAmountsByAge: VestedAmountsByAge | null;
   vestedAmountsByAgeQueryParams: ProfitYearRequest | null;
-  yearEndProfitSharingReport: YearEndProfitSharingReportResponse | null;
+  yearEndProfitSharingReportLive: YearEndProfitSharingReportResponse | null;
+  yearEndProfitSharingReportFrozen: YearEndProfitSharingReportResponse | null;
   yearEndProfitSharingReportQueryParams: ProfitYearRequest | null;
   yearEndProfitSharingReportTotals: YearEndProfitSharingReportTotalsResponse | null;
   breakdownByStore: BreakdownByStoreResponse | null;
@@ -159,10 +160,10 @@ export interface YearsEndState {
 const initialState: YearsEndState = {
   selectedProfitYearForDecemberActivities: localStorage.getItem("selectedProfitYearForDecemberActivities")
     ? Number(localStorage.getItem("selectedProfitYearForDecemberActivities"))
-    : 2024,
+    : new Date().getFullYear(),
   selectedProfitYearForFiscalClose: localStorage.getItem("selectedProfitYearForFiscalClose")
     ? Number(localStorage.getItem("selectedProfitYearForFiscalClose"))
-    : 2024,
+    : new Date().getFullYear(),
   invalidProfitShareEditYear: false,
   totalForfeituresGreaterThanZero: false,
   profitShareEditUpdateShowSearch: true,
@@ -210,7 +211,6 @@ const initialState: YearsEndState = {
   forfeituresAndPointsQueryParams: null,
   grossWagesReport: null,
   grossWagesReportQueryParams: null,
-  rehire: null,
   rehireQueryParams: null,
   militaryEntryAndModification: null,
   recentlyTerminated: null,
@@ -220,7 +220,6 @@ const initialState: YearsEndState = {
   unForfeits: null,
   unForfeitsQueryParams: null,
   rehireProfitSummaryQueryParams: null,
-  missingCommaInPYName: null,
   negativeEtvaForSSNsOnPayprofit: null,
   negativeEtvaForSSNsOnPayprofitParams: null,
   profitSharingUpdate: null,
@@ -236,7 +235,8 @@ const initialState: YearsEndState = {
   terminationQueryParams: null,
   vestedAmountsByAge: null,
   vestedAmountsByAgeQueryParams: null,
-  yearEndProfitSharingReport: null,
+  yearEndProfitSharingReportLive: null,
+  yearEndProfitSharingReportFrozen: null,
   yearEndProfitSharingReportQueryParams: null,
   yearEndProfitSharingReportTotals: null,
   breakdownByStore: null,
@@ -923,11 +923,17 @@ export const yearsEndSlice = createSlice({
     setGrossWagesReportQueryParams: (state, action: PayloadAction<GrossWagesReportRequest>) => {
       state.grossWagesReportQueryParams = action.payload;
     },
-    setYearEndProfitSharingReport: (state, action: PayloadAction<YearEndProfitSharingReportResponse>) => {
-      state.yearEndProfitSharingReport = action.payload;
+    setYearEndProfitSharingReportLive: (state, action: PayloadAction<YearEndProfitSharingReportResponse>) => {
+      state.yearEndProfitSharingReportLive = action.payload;
     },
-    clearYearEndProfitSharingReport: (state) => {
-      state.yearEndProfitSharingReport = null;
+    setYearEndProfitSharingReportFrozen: (state, action: PayloadAction<YearEndProfitSharingReportResponse>) => {
+      state.yearEndProfitSharingReportFrozen = action.payload;
+    },
+    clearYearEndProfitSharingReportLive: (state) => {
+      state.yearEndProfitSharingReportLive = null;
+    },
+    clearYearEndProfitSharingReportFrozen: (state) => {
+      state.yearEndProfitSharingReportFrozen = null;
     },
     setYearEndProfitSharingReportQueryParams: (state, action: PayloadAction<number>) => {
       state.yearEndProfitSharingReportQueryParams = { profitYear: action.payload };
@@ -1061,7 +1067,8 @@ export const {
   clearForfeituresAndPointsQueryParams,
   clearUnForfeitsDetails,
   clearUnForfeitsQueryParams,
-  clearYearEndProfitSharingReport,
+  clearYearEndProfitSharingReportLive,
+  clearYearEndProfitSharingReportFrozen,
   clearYearEndProfitSharingReportTotals,
   removeExecutiveHoursAndDollarsGridRow,
   setAdditionalExecutivesChosen,
@@ -1103,7 +1110,8 @@ export const {
   setTermination,
   setVestedAmountsByAge,
   setVestedAmountsByAgeQueryParams,
-  setYearEndProfitSharingReport,
+  setYearEndProfitSharingReportLive,
+  setYearEndProfitSharingReportFrozen,
   setYearEndProfitSharingReportQueryParams,
   setYearEndProfitSharingReportTotals,
   updateExecutiveHoursAndDollarsGridRow,

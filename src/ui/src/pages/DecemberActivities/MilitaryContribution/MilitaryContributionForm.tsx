@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useCreateMilitaryContributionMutation } from "reduxstore/api/MilitaryApi";
 import { CreateMilitaryContributionRequest, MilitaryContribution } from "reduxstore/types";
-import { UnhandledErrorResponse } from "../../../types/errors/errors";
+import { ServiceErrorResponse } from "../../../types/errors/errors";
 
 interface FormData {
   contributionDate: Date | null;
@@ -54,8 +54,6 @@ const MilitaryContributionForm = ({
     // Clear any existing error messages
     setErrorMessages([]);
 
-    console.log("Form data on submit:", data);
-
     if (data.contributionDate && data.contributionAmount !== null) {
       const contribution: MilitaryContribution = {
         contributionDate: data.contributionDate,
@@ -75,36 +73,31 @@ const MilitaryContributionForm = ({
           onlyNetworkToastErrors: true // Suppress validation errors, only show network errors
         };
 
-        console.log("Submitting contribution:", request);
-
         await createMilitaryContribution(request).unwrap();
-
-        console.log("Contribution created successfully:", contribution);
-
         onSubmit({
           ...contribution,
           contributionYear: data.contributionDate.getFullYear()
         });
       } catch (error) {
-        console.log("Error creating contribution:", error);
-        // The unhandled response is when a 400 or 500 is caught at API level, not in middleware,
-        // so we need UnhandledErrorResponse here
-        const serviceError = error as UnhandledErrorResponse;
-        if (serviceError && serviceError.data.errors) {
-          const errorMessages: string[] = [];
+        const serviceError = error as ServiceErrorResponse;
+        if (serviceError?.data) {
+          let errorMessages: string[] = [];
 
-          for (const err of serviceError.data.errors) {
-            if (err.reason.includes("Duplicates are not allowed.")) {
-              errorMessages.push(
-                "- There is already a contribution for that year. Please check supplemental box and resubmit if applicable."
-              );
-            }
-            if (err.reason.includes("When profit year")) {
-              errorMessages.push("- When profit year differs from contribution year, it must be supplemental.");
-            }
-            if (err.reason.includes("Employee employment status is not eligible for contributions")) {
-              errorMessages.push(`- ` + err.reason);
-            }
+          if (Array.isArray(serviceError.data.errors)) {
+            errorMessages.push("Errors:");
+            serviceError.data.errors.forEach((error) => {
+              // Map backend error messages to user-friendly messages
+              if (error.reason.includes("already exists for this year")) {
+                errorMessages.push(
+                  "- There is already a contribution for that year. Please check supplemental box and resubmit if applicable."
+                );
+              } else if (error.reason.includes("profit year differs from contribution year")) {
+                errorMessages.push("- When profit year differs from contribution year, it must be supplemental.");
+              } else {
+                console.warn("Backend error message:", error.reason);
+                errorMessages.push(`- ${error.reason}`);
+              }
+            });
           }
 
           if (errorMessages.length > 0) {
@@ -112,6 +105,8 @@ const MilitaryContributionForm = ({
           } else {
             setErrorMessages(["An unexpected error occurred. Please try again."]);
           }
+        } else {
+          setErrorMessages(["An unexpected error occurred. Please try again."]);
         }
       }
     } else {
@@ -197,6 +192,7 @@ const MilitaryContributionForm = ({
         {errorMessages.length > 0 && (
           <Grid size={{ xs: 12 }}>
             <Typography
+              component="div"
               variant="body1"
               sx={{ color: "#db1532" }}>
               {errorMessages.map((msg, index) => (

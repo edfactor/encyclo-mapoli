@@ -14,13 +14,13 @@ public record AddressItem
     public string? AddressLine4 { get; init; }
     [JsonPropertyName("TownOrCity")]
     public required string TownOrCity { get; init; }
-    
+
     [JsonPropertyName("Region2")]
     public required string State { get; init; }
-    
+
     [JsonPropertyName("Country")]
     public string? Country { get; init; }
-    
+
     [JsonPropertyName("PostalCode")]
     public required string PostalCode { get; init; }
 

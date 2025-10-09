@@ -1,7 +1,7 @@
 import { Divider, Grid } from "@mui/material";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useState } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
+import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
 import DistributionsAndForfeituresGrid from "./DistributionAndForfeituresGrid";
 import DistributionsAndForfeituresSearchFilter from "./DistributionAndForfeituresSearchFilter";
 

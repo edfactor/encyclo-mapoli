@@ -14,9 +14,15 @@ interface AssociatesGridProps {
   store: number;
   pageNumberReset: boolean;
   setPageNumberReset: (reset: boolean) => void;
+  onLoadingChange?: (isLoading: boolean) => void;
 }
 
-const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store, pageNumberReset, setPageNumberReset }) => {
+const AssociatesGrid: React.FC<AssociatesGridProps> = ({
+  store,
+  pageNumberReset,
+  setPageNumberReset,
+  onLoadingChange
+}) => {
   const [fetchBreakdownByStore, { isFetching }] = useLazyGetBreakdownByStoreQuery();
   const breakdownByStore = useSelector((state: RootState) => state.yearsEnd.breakdownByStore);
   const queryParams = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreQueryParams);
@@ -24,29 +30,41 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store, pageNumberReset,
   const profitYear = useDecemberFlowProfitYear();
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } = useGridPagination({
-    initialPageSize: 10,
-    initialSortBy: "badgeNumber",
-    initialSortDescending: false,
-    onPaginationChange: useCallback(async (pageNum: number, pageSz: number, sortPrms: any) => {
-      if (hasToken) {
-        const params = {
-          profitYear: queryParams?.profitYear || profitYear,
-          storeNumber: store,
-          storeManagement: false,
-          badgeNumber: queryParams?.badgeNumber,
-          employeeName: queryParams?.employeeName,
-          pagination: {
-            skip: pageNum * pageSz,
-            take: pageSz,
-            sortBy: sortPrms.sortBy,
-            isSortDescending: sortPrms.isSortDescending
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
+    useGridPagination({
+      initialPageSize: 10,
+      initialSortBy: "badgeNumber",
+      initialSortDescending: false,
+      onPaginationChange: useCallback(
+        async (pageNum: number, pageSz: number, sortPrms: any) => {
+          if (hasToken) {
+            const params = {
+              profitYear: queryParams?.profitYear || profitYear,
+              storeNumber: store,
+              storeManagement: false,
+              badgeNumber: queryParams?.badgeNumber,
+              employeeName: queryParams?.employeeName,
+              pagination: {
+                skip: pageNum * pageSz,
+                take: pageSz,
+                sortBy: sortPrms.sortBy,
+                isSortDescending: sortPrms.isSortDescending
+              }
+            };
+            await fetchBreakdownByStore(params);
           }
-        };
-        await fetchBreakdownByStore(params);
-      }
-    }, [hasToken, queryParams?.profitYear, profitYear, store, queryParams?.badgeNumber, queryParams?.employeeName, fetchBreakdownByStore])
-  });
+        },
+        [
+          hasToken,
+          queryParams?.profitYear,
+          profitYear,
+          store,
+          queryParams?.badgeNumber,
+          queryParams?.employeeName,
+          fetchBreakdownByStore
+        ]
+      )
+    });
 
   const handleNavigation = useCallback(
     (path: string) => {
@@ -96,6 +114,11 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store, pageNumberReset,
       setPageNumberReset(false);
     }
   }, [pageNumberReset, setPageNumberReset, resetPagination]);
+
+  // Notify parent component about loading state changes
+  useEffect(() => {
+    onLoadingChange?.(isFetching);
+  }, [isFetching, onLoadingChange]);
 
   const columnDefs = useMemo(() => GetAssociatesColumns(handleNavigation), [handleNavigation]);
 

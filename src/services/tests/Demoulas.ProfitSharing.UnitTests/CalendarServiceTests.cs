@@ -140,7 +140,7 @@ public class CalendarServiceCacheTests
             .ReturnsAsync((byte[]?)null);
         var dataContextFactory = new Mock<IProfitSharingDataContextFactory>();
         var accountingPeriodsService = new Mock<IAccountingPeriodsService>();
-        dataContextFactory.Setup(f => f.UseReadOnlyContext(It.IsAny<Func<ProfitSharingReadOnlyDbContext, Task<CalendarResponseDto>>>() ))
+        dataContextFactory.Setup(f => f.UseReadOnlyContext(It.IsAny<Func<ProfitSharingReadOnlyDbContext, Task<CalendarResponseDto>>>()))
             .ReturnsAsync(expected);
         var service = new Demoulas.ProfitSharing.Services.CalendarService(dataContextFactory.Object, accountingPeriodsService.Object, distributedCache.Object);
 

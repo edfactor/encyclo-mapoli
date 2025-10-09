@@ -5,12 +5,7 @@ import { setEmployeeWagesForYearQueryParams } from "../../../reduxstore/slices/y
 import { RootState } from "../../../reduxstore/store";
 import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
 import { useGridPagination } from "../../../hooks/useGridPagination";
-import {
-  initialState,
-  ytdWagesReducer,
-  selectShowData,
-  selectHasResults
-} from "./useYTDWagesReducer";
+import { initialState, ytdWagesReducer, selectShowData, selectHasResults } from "./useYTDWagesReducer";
 
 export interface YTDWagesSearchParams {
   profitYear: number;

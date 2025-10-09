@@ -11,9 +11,10 @@ public sealed record BalanceEndpointResponse : IdRequest
     public short YearsInPlan { get; set; }
     public decimal AllocationsToBeneficiary { get; set; }
     public decimal AllocationsFromBeneficiary { get; set; }
-    
 
-    public static BalanceEndpointResponse ResponseExample() {
+
+    public static BalanceEndpointResponse ResponseExample()
+    {
         return new BalanceEndpointResponse
         {
             Id = 123456789,

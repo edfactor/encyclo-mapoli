@@ -6,7 +6,7 @@ public static class HttpRequestFields
     private static readonly HashSet<string> _root = ["PersonNumber", "PersonId", "DateOfBirth", "LastUpdateDate"];
 
     // ReSharper disable once InconsistentNaming
-    private static HashSet<string> addresses { get; }=
+    private static HashSet<string> addresses { get; } =
     [
         "AddressId",
         "AddressLine1",

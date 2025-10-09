@@ -2,7 +2,7 @@
 using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response;
-public record ReportResponseBase<TResponse>: IHasDateRange where TResponse : class
+public record ReportResponseBase<TResponse> : IHasDateRange where TResponse : class
 {
     public required string ReportName { get; init; }
     public DateTimeOffset ReportDate { get; init; } = DateTimeOffset.Now;

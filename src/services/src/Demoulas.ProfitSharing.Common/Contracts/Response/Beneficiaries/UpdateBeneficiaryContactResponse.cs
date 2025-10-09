@@ -8,7 +8,7 @@ public record UpdateBeneficiaryContactResponse : INameParts, IFullNameProperty, 
 {
     public int Id { get; set; }
     public required string Ssn { get; set; }
-    public DateOnly DateOfBirth { get; set; }
+    [MaskSensitive] public DateOnly DateOfBirth { get; set; }
     [MaskSensitive] public required string Street1 { get; set; }
     public string? Street2 { get; set; }
     public string? Street3 { get; set; }

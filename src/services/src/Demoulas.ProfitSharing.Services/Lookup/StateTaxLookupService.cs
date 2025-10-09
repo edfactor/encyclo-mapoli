@@ -17,7 +17,7 @@ public sealed class StateTaxLookupService : IStateTaxLookupService
     {
         _factory = factory;
     }
-    
+
     public async Task<StateTaxLookupResponse> LookupStateTaxRate(string state, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(state))

@@ -1,5 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormLabel, Grid, MenuItem, Select, TextField } from "@mui/material";
+import { Checkbox, FormControlLabel, FormLabel, Grid, MenuItem, Select, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useDispatch } from "react-redux";
@@ -14,6 +14,7 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import DuplicateSsnGuard from "../../../../components/DuplicateSsnGuard";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { mustBeNumberValidator } from "../../../../utils/FormValidators";
 
 interface BreakdownSearchParams {
   store?: number | null;
@@ -30,7 +31,7 @@ interface OptionItem {
 }
 
 const schema = yup.object().shape({
-  store: yup.number(),
+  store: mustBeNumberValidator().nullable(),
   employeeStatus: yup.string(),
   badgeId: yup.number(),
   employeeName: yup.string(),
@@ -42,12 +43,14 @@ interface QPAY066TABreakdownParametersProps {
   activeTab: "all" | "stores" | "summaries" | "totals";
   onStoreChange?: (store: number | null) => void;
   onReset?: () => void;
+  isLoading?: boolean;
 }
 
 const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> = ({
   activeTab,
   onStoreChange,
-  onReset
+  onReset,
+  isLoading = false
 }) => {
   const dispatch = useDispatch();
   const profitYear = useDecemberFlowProfitYear();
@@ -60,6 +63,8 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
     { id: 802, label: "802 - Terminated w/ Balance but No Vesting" },
     { id: 900, label: "900 - Monthly Payroll" }
   ]);
+
+  const [viewAllStoreTotals, setViewAllStoreTotals] = useState<boolean>(false);
 
   const {
     control,
@@ -180,14 +185,65 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                   fullWidth
                   type="number"
                   value={field.value || ""}
+                  disabled={activeTab === "summaries" && viewAllStoreTotals}
+                  inputProps={{
+                    min: 1,
+                    step: 1
+                  }}
                   onChange={(e) => {
-                    const value = e.target.value === "" ? "" : Number(e.target.value);
-                    field.onChange(value);
-                    if (onStoreChange && value !== "") {
-                      onStoreChange(Number(value));
+                    const inputValue = e.target.value;
+
+                    // Allow empty string for clearing the field
+                    if (inputValue === "") {
+                      field.onChange("");
+                      return;
+                    }
+
+                    const numericValue = Number(inputValue);
+
+                    // Only allow positive numbers (greater than 0)
+                    if (numericValue > 0 && Number.isInteger(numericValue)) {
+                      field.onChange(numericValue);
+
+                      // Clear the "View All Store Totals" checkbox when user enters a store number
+                      if (viewAllStoreTotals) {
+                        setViewAllStoreTotals(false);
+                      }
+
+                      if (onStoreChange) {
+                        onStoreChange(numericValue);
+                      }
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    // Prevent entering negative sign, decimal point, and 'e'
+                    if (e.key === "-" || e.key === "." || e.key === "e" || e.key === "E") {
+                      e.preventDefault();
                     }
                   }}
                 />
+                {activeTab === "summaries" && (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={viewAllStoreTotals}
+                        onChange={(e) => {
+                          const isChecked = e.target.checked;
+                          setViewAllStoreTotals(isChecked);
+
+                          if (isChecked) {
+                            // Clear and disable store field when checkbox is checked
+                            setValue("store", null);
+                            if (onStoreChange) {
+                              onStoreChange(-1);
+                            }
+                          }
+                        }}
+                      />
+                    }
+                    label="View All Store Totals"
+                  />
+                )}
               </>
             )}
           />
@@ -275,9 +331,8 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                 // Call validateAndSubmit which contains the handleSubmit logic
                 validateAndSubmit();
               }}
-              isFetching={false}
+              isFetching={isLoading}
               disabled={!prerequisitesComplete}
-              searchButtonText="Search"
             />
           )}
         </DuplicateSsnGuard>

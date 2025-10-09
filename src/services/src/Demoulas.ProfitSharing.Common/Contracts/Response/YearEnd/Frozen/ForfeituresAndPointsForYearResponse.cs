@@ -1,7 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
-public sealed record ForfeituresAndPointsForYearResponse: IIsExecutive
+public sealed record ForfeituresAndPointsForYearResponse : IIsExecutive
 {
     public required int BadgeNumber { get; set; }
     public string? EmployeeName { get; set; }

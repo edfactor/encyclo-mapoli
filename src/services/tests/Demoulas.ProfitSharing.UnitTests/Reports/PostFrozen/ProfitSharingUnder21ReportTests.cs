@@ -11,9 +11,9 @@ using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.PostFrozen;
 
-public sealed class ProfitSharingUnder21ReportTests: ApiTestBase<Program>
+public sealed class ProfitSharingUnder21ReportTests : ApiTestBase<Program>
 {
-    [Fact(DisplayName ="PS-419 Check Under 21 Report")]
+    [Fact(DisplayName = "PS-419 Check Under 21 Report")]
     public async Task CheckUnder21Report()
     {
         var request = new ProfitYearRequest() { ProfitYear = 2024, Skip = 0, Take = 255 };

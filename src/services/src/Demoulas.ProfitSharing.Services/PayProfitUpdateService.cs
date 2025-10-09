@@ -53,7 +53,7 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
                 // Load years of service
                 var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(profitYear, ct);
                 var yearsBySsn = await _totalService.GetYearsOfService(ctx, profitYear, calInfo.FiscalEndDate)
-                    .ToDictionaryAsync(t => t.Ssn, t => t.Years, ct);
+                    .ToDictionaryAsync(t => new { t.DemographicId, t.Ssn }, t => t.Years, ct);
 
                 var totalPayProfits = allPayProfits.Count;
                 var stopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -98,10 +98,11 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
                 foreach (var pp in allPayProfits)
                 {
                     int ssn = pp.Demographic!.Ssn;
+                    int demographicId = pp.DemographicId;
 
                     var pds = profitDetailBySsn.TryGetValue(ssn, out var list) ? list : [];
 
-                    byte years = yearsBySsn.GetValueOrDefault(ssn, (byte)0);
+                    byte years = yearsBySsn.GetValueOrDefault(new { DemographicId = demographicId, Ssn = ssn }, (byte)0);
 
                     byte newEnrollmentId = 0;
                     if (pds.Count > 0)
@@ -131,7 +132,7 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
                     await BulkUpdateEnrollmentIds(oracleConnection, profitYear, enrollmentUpdates, ct);
                     bulkStopwatch.Stop();
 
-                    _logger.LogInformation( "Bulk updated {UpdateCount} enrollment status in {BulkTime:mm\\:ss}", enrollmentUpdates.Count, bulkStopwatch.Elapsed);
+                    _logger.LogInformation("Bulk updated {UpdateCount} enrollment status in {BulkTime:mm\\:ss}", enrollmentUpdates.Count, bulkStopwatch.Elapsed);
                 }
                 else
                 {

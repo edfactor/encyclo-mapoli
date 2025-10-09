@@ -2,35 +2,59 @@
     "profiles": {
         "upgrade-db": {
             "commandName": "Project",
-            "commandLineArgs": "upgrade-db --connection-name ProfitSharing"
+            "commandLineArgs": "upgrade-db --connection-name ProfitSharing",
+            "environmentVariables": {
+                "Serilog__MinimumLevel__Override__Microsoft.EntityFrameworkCore.Database.Command": "Fatal"
+            }
         },
         "drop-recreate-db": {
             "commandName": "Project",
-            "commandLineArgs": "drop-recreate-db --connection-name ProfitSharing"
+            "commandLineArgs": "drop-recreate-db --connection-name ProfitSharing",
+            "environmentVariables": {
+                "Serilog__MinimumLevel__Override__Microsoft.EntityFrameworkCore.Database.Command": "Fatal"
+            }
         },
         "import-from-ready": {
             "commandName": "Project",
-            "commandLineArgs": "import-from-ready --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"../../../../src/database/ready_import/SQL copy all from ready to smart ps.sql\""
+            "commandLineArgs": "import-from-ready --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"../../../../src/database/ready_import/SQL copy all from ready to smart ps.sql\"",
+            "environmentVariables": {
+                "Serilog__MinimumLevel__Override__Microsoft.EntityFrameworkCore.Database.Command": "Fatal"
+            }
         },
         "import-from-navigation": {
             "commandName": "Project",
-            "commandLineArgs": "import-from-navigation --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"../../../../src/database/ready_import/Navigations/add-navigation-data.sql\""
+            "commandLineArgs": "import-from-navigation --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"../../../../src/database/ready_import/Navigations/add-navigation-data.sql\"",
+            "environmentVariables": {
+                "Serilog__MinimumLevel__Override__Microsoft.EntityFrameworkCore.Database.Command": "Fatal"
+            }
         },
         "import-uat-navigation": {
             "commandName": "Project",
-            "commandLineArgs": "import-uat-navigation --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"../../../../src/database/ready_import/Navigations/add-uat-navigation-data.sql\""
+            "commandLineArgs": "import-uat-navigation --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"../../../../src/database/ready_import/Navigations/add-uat-navigation-data.sql\"",
+            "environmentVariables": {
+                "Serilog__MinimumLevel__Override__Microsoft.EntityFrameworkCore.Database.Command": "Fatal"
+            }
         },
         "create-dgml": {
             "commandName": "Project",
-            "commandLineArgs": "generate-dgml --connection-name ProfitSharing --output-file \"output.dgml\""
+            "commandLineArgs": "generate-dgml --connection-name ProfitSharing --output-file \"output.dgml\"",
+            "environmentVariables": {
+                "Serilog__MinimumLevel__Override__Microsoft.EntityFrameworkCore.Database.Command": "Fatal"
+            }
         },
         "generate-markdown": {
             "commandName": "Project",
-            "commandLineArgs": "generate-markdown --connection-name ProfitSharing --output-file \"output.md\""
+            "commandLineArgs": "generate-markdown --connection-name ProfitSharing --output-file \"output.md\"",
+            "environmentVariables": {
+                "Serilog__MinimumLevel__Override__Microsoft.EntityFrameworkCore.Database.Command": "Fatal"
+            }
         },
         "generate-upgrade-script": {
             "commandName": "Project",
-            "commandLineArgs": "generate-upgrade-script --connection-name ProfitSharing --output-file \"migration.sql\""
+            "commandLineArgs": "generate-upgrade-script --connection-name ProfitSharing --output-file \"migration.sql\"",
+            "environmentVariables": {
+                "Serilog__MinimumLevel__Override__Microsoft.EntityFrameworkCore.Database.Command": "Fatal"
+            }
         }
     }
 }

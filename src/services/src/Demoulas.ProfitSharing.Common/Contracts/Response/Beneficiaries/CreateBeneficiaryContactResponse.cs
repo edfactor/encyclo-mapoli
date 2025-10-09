@@ -8,6 +8,8 @@ public sealed record CreateBeneficiaryContactResponse : INameParts, IEmailAddres
 {
     public required int Id { get; set; }
     public required string Ssn { get; set; }
+
+    [MaskSensitive]
     public required DateOnly DateOfBirth { get; set; }
     [MaskSensitive] public required string Street { get; set; }
     public string? Street2 { get; set; }

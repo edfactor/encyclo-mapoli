@@ -1,6 +1,6 @@
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { useEffect, useRef, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ApiMessageAlert, DSMAccordion, Page } from "smart-ui-library";
+import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
 
 import { CircularProgress, Divider, Grid } from "@mui/material";
 
@@ -18,20 +18,25 @@ export interface TerminationSearchRequest extends StartAndEndDateRequest {
 }
 
 const Termination = () => {
-  const [fetchAccountingRange, { data: fiscalData, isLoading: isRangeLoading }] = useLazyGetAccountingRangeToCurrent(6);
+  const [fetchAccountingRange, { data: fiscalData }] = useLazyGetAccountingRangeToCurrent(6);
   const { state, actions } = useTerminationState();
-  
+  const [isDataFetching, setIsDataFetching] = useState(false);
+
   // Function to scroll to top - only used for error cases
   const scrollToTop = useCallback(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
+  // Handle loading state changes from TerminationGrid
+  const handleLoadingChange = useCallback((isLoading: boolean) => {
+    setIsDataFetching(isLoading);
   }, []);
 
   // Use the navigation guard hook
   useUnsavedChangesGuard(state.hasUnsavedChanges);
 
-  // Modify renderActionNode to NOT automatically scroll to top
+  // Render action node with status dropdown
   const renderActionNode = () => {
-
     return <StatusDropdownActionNode onStatusChange={actions.handleStatusChange} />;
   };
 
@@ -45,18 +50,15 @@ const Termination = () => {
   useEffect(() => {
     const handleMessageEvent = (event: CustomEvent) => {
       // Check if the message is an error related to Termination
-      if (
-        event.detail?.key === 'TerminationSave' &&
-        event.detail?.message?.type === 'error'
-      ) {
+      if (event.detail?.key === "TerminationSave" && event.detail?.message?.type === "error") {
         scrollToTop();
       }
     };
 
-    window.addEventListener('dsmMessage' as any, handleMessageEvent);
+    window.addEventListener("dsmMessage" as any, handleMessageEvent);
 
     return () => {
-      window.removeEventListener('dsmMessage' as any, handleMessageEvent);
+      window.removeEventListener("dsmMessage" as any, handleMessageEvent);
     };
   }, [scrollToTop]);
 
@@ -64,7 +66,6 @@ const Termination = () => {
     <Page
       label={CAPTIONS.TERMINATIONS}
       actionNode={renderActionNode()}>
-
       <div>
         <ApiMessageAlert commonKey="TerminationSave" />
         <Grid
@@ -90,6 +91,7 @@ const Termination = () => {
                     onSearch={actions.handleSearch}
                     setInitialSearchLoaded={actions.setInitialSearchLoaded}
                     hasUnsavedChanges={state.hasUnsavedChanges}
+                    isFetching={isDataFetching}
                   />
                 </DSMAccordion>
               </Grid>
@@ -105,6 +107,7 @@ const Termination = () => {
                   shouldArchive={state.shouldArchive}
                   onArchiveHandled={actions.handleArchiveHandled}
                   onErrorOccurred={scrollToTop} // Pass down the error handler
+                  onLoadingChange={handleLoadingChange}
                 />
               </Grid>
             </>

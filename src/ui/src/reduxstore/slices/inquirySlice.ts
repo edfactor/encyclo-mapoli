@@ -5,6 +5,7 @@ import { EmployeeDetails, GroupedProfitSummaryDto, MasterInquiryDetail, MasterIn
 export interface InquiryState {
   masterInquiryData: EmployeeDetails | null;
   masterInquiryMemberDetails: EmployeeDetails | null;
+  masterInquiryMemberDetailsSecondary: EmployeeDetails | null;
   masterInquiryResults: MasterInquiryDetail[] | null;
   masterInquiryRequestParams: MasterInquirySearch | null;
   masterInquiryGroupingData: GroupedProfitSummaryDto[] | null;
@@ -13,6 +14,7 @@ export interface InquiryState {
 const initialState: InquiryState = {
   masterInquiryData: null,
   masterInquiryMemberDetails: null,
+  masterInquiryMemberDetailsSecondary: null,
   masterInquiryResults: null,
   masterInquiryRequestParams: null,
   masterInquiryGroupingData: null
@@ -38,9 +40,21 @@ export const inquirySlice = createSlice({
         state.masterInquiryMemberDetails = null;
       }
     },
+    setMasterInquiryDataSecondary: (state, action: PayloadAction<EmployeeDetails>) => {
+      state.masterInquiryData = action.payload;
+
+      if (action.payload) {
+        state.masterInquiryMemberDetailsSecondary = action.payload;
+      } else {
+        state.masterInquiryMemberDetailsSecondary = null;
+      }
+    },
     clearMasterInquiryData: (state) => {
       state.masterInquiryData = null;
       state.masterInquiryMemberDetails = null;
+    },
+    clearMasterInquiryDataSecondary: (state) => {
+      state.masterInquiryMemberDetailsSecondary = null;
     },
     setMasterInquiryResults: (state, action: PayloadAction<MasterInquiryDetail[]>) => {
       state.masterInquiryResults = action.payload;
@@ -59,8 +73,10 @@ export const inquirySlice = createSlice({
 
 export const {
   clearMasterInquiryData,
+  clearMasterInquiryDataSecondary,
   clearMasterInquiryRequestParams,
   setMasterInquiryData,
+  setMasterInquiryDataSecondary,
   setMasterInquiryRequestParams,
   setMasterInquiryResults,
   clearMasterInquiryResults,

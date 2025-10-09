@@ -17,7 +17,7 @@ public class AdhocBeneficiariesReport : IAdhocBeneficiariesReport
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly TotalService _totalService;
 
-    public AdhocBeneficiariesReport(IProfitSharingDataContextFactory dataContextFactory, 
+    public AdhocBeneficiariesReport(IProfitSharingDataContextFactory dataContextFactory,
         IDemographicReaderService demographicReaderService,
         TotalService totalService)
     {
@@ -48,8 +48,8 @@ public class AdhocBeneficiariesReport : IAdhocBeneficiariesReport
             var beneficiarySsns = pagedBeneficiaries.Results.Select(b => b.Contact!.Ssn).ToHashSet();
 
             var totalBalanceResult = await _totalService.GetTotalBalanceSet(ctx, req.ProfitYear)
-                .Where(x=> beneficiarySsns.Contains(x.Ssn))
-                .ToDictionaryAsync(x=> x.Ssn, cancellationToken);
+                .Where(x => beneficiarySsns.Contains(x.Ssn))
+                .ToDictionaryAsync(x => x.Ssn, cancellationToken);
 
             // Fetch all relevant profit details for paged beneficiaries
             var allProfitDetails = await ctx.ProfitDetails

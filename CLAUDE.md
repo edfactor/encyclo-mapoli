@@ -16,6 +16,7 @@ AI Assistant Project Instructions for Claude Code (claude.ai/code) when working 
 - Use FastEndpoints; group endpoint files logically. Prefer minimal API style. Return typed results + proper status codes
 - Mapping: Prefer `Mapperly` for DTO<->entity; follow existing mapper classes (see `*Mapper.cs`). Don't hand-write repetitive mapping unless customization is needed
 - Data access: Use async EF Core patterns. Bulk maintenance uses `ExecuteUpdate/ExecuteDelete` where safe. For dynamic filters, build expressions (see `DemographicsService`). Avoid raw SQL unless performance justified—then parameterize
+- Distributed Caching: Use `IDistributedCache` (NOT `IMemoryCache`). Serialize with `System.Text.Json`. For multi-key scenarios, use version-based invalidation (store version counter, increment on updates, include version in cache keys). Example: `navigation-tree-v{version}-{roles}`. Version bumps make old keys unreachable—no pattern deletion needed. Cache expiration: 30 min absolute + 15 min sliding. Unit tests: `MemoryDistributedCache`. Degrade gracefully on cache failures. See `NavigationService.GetNavigation()` for reference implementation. Read DISTRIBUTED_CACHING_PATTERNS.md (`.github/`) when needed for complete patterns
 - Auditing & History: When updating mutable domain entities with historical tracking (example: `DemographicsService` creating `DemographicHistory` with `ValidFrom/ValidTo`), replicate the pattern: close current record (`ValidTo = now`), insert new history row. NEVER overwrite historical rows
 - Identifiers: `OracleHcmId` is authoritative when present; fall back to composite `(Ssn,BadgeNumber)` only when Oracle id missing. Mirror guard logic (skip ambiguous BadgeNumber == 0 cases) if extending
 - Entity updates: Keep helper methods like `UpdateEntityValues` cohesive; prefer adding fields there instead of scattering manual per-field assignments
@@ -194,10 +195,10 @@ this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => { ... });
 
 ### Documentation References
 
-Complete implementation details and examples available in:
-- `TELEMETRY_GUIDE.md` - Comprehensive reference for developers, QA, and DevOps
-- `TELEMETRY_QUICK_REFERENCE.md` - Developer cheat sheet with copy-paste examples  
-- `TELEMETRY_DEVOPS_GUIDE.md` - Production monitoring and operations guide
+Complete implementation details and examples available in (read when needed):
+- TELEMETRY_GUIDE.md (`src/ui/public/docs/`) - Comprehensive reference for developers, QA, and DevOps
+- TELEMETRY_QUICK_REFERENCE.md (`src/ui/public/docs/`) - Developer cheat sheet with copy-paste examples  
+- TELEMETRY_DEVOPS_GUIDE.md (`src/ui/public/docs/`) - Production monitoring and operations guide
 
 ## Backend Coding Style
 
@@ -486,8 +487,14 @@ dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
 - Use legacy telemetry patterns instead of `ExecuteWithTelemetry` or manual `TelemetryExtensions` methods
 - Access sensitive fields without declaring them in telemetry calls (security requirement)
 - Skip logger injection in endpoint constructors (required for telemetry correlation)
+- Use `IMemoryCache` for application caching (use `IDistributedCache`)
+- Attempt pattern-based cache deletion (use version-based invalidation)
+- Store cache version counters with expiration (persist indefinitely)
+- Include high-cardinality data in cache keys (use role combinations)
+- Fail operations when cache operations fail (degrade gracefully)
 - Create files unless they're absolutely necessary for achieving your goal
 - Proactively create documentation files (*.md) or README files unless explicitly requested
+- Load large documentation files into context automatically (read them when needed using file tools)
 
 ## Important Notes
 
@@ -513,14 +520,19 @@ dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
 
 ## Documentation References
 
-**Core Telemetry Documentation**:
-- `TELEMETRY_GUIDE.md` - Comprehensive 75+ page reference covering developers, QA, and DevOps with architecture, implementation patterns, metrics reference, security guidelines, configuration, and troubleshooting
-- `TELEMETRY_QUICK_REFERENCE.md` - Developer cheat sheet with 3-step implementation process, copy-paste examples, business metrics patterns, and troubleshooting checklist
-- `TELEMETRY_DEVOPS_GUIDE.md` - Production operations guide with deployment checklist, monitoring setup (Prometheus/Grafana), security configuration, alert rules, and disaster recovery procedures
+**Core Telemetry Documentation** (read when needed):
+- TELEMETRY_GUIDE.md (`src/ui/public/docs/`) - Comprehensive 75+ page reference covering developers, QA, and DevOps
+- TELEMETRY_QUICK_REFERENCE.md (`src/ui/public/docs/`) - Developer cheat sheet with 3-step implementation process
+- TELEMETRY_DEVOPS_GUIDE.md (`src/ui/public/docs/`) - Production operations guide
 
-**Read-Only Functionality Documentation**:
-- `READ_ONLY_FUNCTIONALITY.md` - Complete guide to read-only role implementation covering architecture, implementation patterns, testing, and maintenance for ITDEVOPS and AUDITOR roles
-- `READ_ONLY_QUICK_REFERENCE.md` - Developer cheat sheet with copy-paste code examples, implementation checklist, common patterns, and troubleshooting guide
-- `PS-1623_READ_ONLY_SUMMARY.md` - Executive summary of read-only role implementation with status tracking and deployment verification
+**Distributed Caching Documentation** (read when needed):
+- DISTRIBUTED_CACHE_MIGRATION_SUMMARY.md - Complete guide to IDistributedCache migration
+- UNIT_TESTS_IDISTRIBUTEDCACHE_COMPLETE.md - Unit test patterns for distributed cache
+- NAVIGATION_CACHING_COMPLETE.md - Detailed example of version-based cache invalidation
 
-These documents contain essential patterns and examples for implementing telemetry and read-only functionality correctly across all components. Reference them when creating new endpoints or troubleshooting issues.
+**Read-Only Functionality Documentation** (read when needed):
+- READ_ONLY_FUNCTIONALITY.md (`src/ui/public/docs/`) - Complete guide to read-only role implementation
+- READ_ONLY_QUICK_REFERENCE.md (`src/ui/public/docs/`) - Developer cheat sheet with copy-paste code examples
+- PS-1623_READ_ONLY_SUMMARY.md - Executive summary of read-only role implementation
+
+These documents contain essential patterns and examples for implementing telemetry, caching, and read-only functionality correctly across all components. Reference them when creating new endpoints or troubleshooting issues.

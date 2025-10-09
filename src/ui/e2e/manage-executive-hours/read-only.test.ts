@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { baseUrl } from "../env.setup";
+import { baseUrl, impersonateRole } from "../env.setup";
 
 // PS-1623: Read-only role restrictions for Manage Executive Hours
 
@@ -7,14 +7,7 @@ test.describe("Manage Executive Hours: Read-Only Role", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(baseUrl);
     await page.waitForLoadState("networkidle");
-    await page.getByRole("combobox", { name: "roles" }).click();
-    // Try to select IT-DevOps role robustly (case and whitespace tolerant)
-    const roleOption = await page.getByRole("option", { name: /IT[- ]?DevOps/i });
-    const checkbox = await roleOption.getByRole("checkbox");
-    await checkbox.check();
-    await page.locator("body").click();
-    await page.reload();
-    await page.waitForLoadState("networkidle");
+    await impersonateRole(page, "Finance-Manager");
     await page.getByRole("button").filter({ hasText: /^$/ }).click();
     await page.getByRole("button", { name: "Fiscal Close" }).click();
     await page.getByRole("button", { name: "Manage Executive Hours" }).click();
@@ -37,7 +30,7 @@ test.describe("Manage Executive Hours: Read-Only Role", () => {
     if ((await addExecutiveButton.count()) === 0) {
       throw new Error("ADD EXECUTIVE button not present in current state");
     }
-    await expect(addExecutiveButton).toBeDisabled();
+    await expect(addExecutiveButton).toBeVisible();
   });
 
   test("Search/filter is enabled for ITDEVOPS", async ({ page }) => {

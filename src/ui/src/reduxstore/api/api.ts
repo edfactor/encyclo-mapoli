@@ -1,13 +1,14 @@
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError, FetchBaseQueryMeta } from "@reduxjs/toolkit/query";
 import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { RootState } from "../store";
 
 export const url = process.env.VITE_REACT_APP_PS_API as string;
 
 export const tagTypes = ["Get"];
 
-export const prepareHeaders = (headers: Headers, context: { getState: () => RootState }) => {
-  const state = context.getState() as RootState;
+export const prepareHeaders = (headers: Headers, context: { getState: () => unknown }) => {
+  // this must be any type below to solve circular type reference issues
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const state = context.getState() as any;
   const token = state.security.token;
   const impersonating = state.security.impersonating;
 
@@ -26,12 +27,15 @@ export const prepareHeaders = (headers: Headers, context: { getState: () => Root
 /* -------------------------------------------------------------------------
    Automatic x-demographic-data-source header copier
    ------------------------------------------------------------------------- */
-export const createDataSourceAwareBaseQuery = (): BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> => {
+export const createDataSourceAwareBaseQuery = (
+  timeout?: number
+): BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> => {
   const rawBaseQuery = fetchBaseQuery({
     baseUrl: `${url}/api/`,
     mode: "cors",
+    timeout: timeout ?? 100000, // Default 100 seconds, allow override for long-running operations
     prepareHeaders: (headers, { getState }) => {
-      const root = getState() as RootState;
+      const root = getState() as any;
       const token = root.security.token;
       const impersonating = root.security.impersonating;
       if (token) {

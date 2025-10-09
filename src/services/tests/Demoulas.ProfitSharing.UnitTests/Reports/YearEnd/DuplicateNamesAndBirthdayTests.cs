@@ -26,7 +26,7 @@ public class DuplicateNamesAndBirthdayTests : ApiTestBase<Program>
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR, Role.EXECUTIVEADMIN);
     }
 
-   
+
     [Fact(DisplayName = "PS-152 : Detects exact name and birthday matches")]
     public async Task GetDuplicateNamesAndBirthdays_ExactMatches_ReturnsResults()
     {

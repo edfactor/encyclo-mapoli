@@ -16,7 +16,8 @@ internal sealed class CommentTypeMap : IEntityTypeConfiguration<CommentType>
         builder.HasData(GetPredefinedCommentTypes());
     }
 
-    private static List<CommentType> GetPredefinedCommentTypes() {
+    private static List<CommentType> GetPredefinedCommentTypes()
+    {
         return [
             CommentType.Constants.TransferOut,
             CommentType.Constants.TransferIn,
@@ -38,8 +39,8 @@ internal sealed class CommentTypeMap : IEntityTypeConfiguration<CommentType>
             CommentType.Constants.Over64ThreeYearsVested,
             CommentType.Constants.Military,
             CommentType.Constants.Other,
-            CommentType.Constants.Rev,
-            CommentType.Constants.Unrev,
+            CommentType.Constants.Reversal,
+            CommentType.Constants.UndoReversal,
             CommentType.Constants.OneHundredPercentEarnings,
             CommentType.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
             CommentType.Constants.ForfeitClassAction

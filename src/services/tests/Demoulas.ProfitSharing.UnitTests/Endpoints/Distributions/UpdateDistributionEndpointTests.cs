@@ -1,4 +1,6 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
+﻿using System.ComponentModel;
+using System.Net;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -12,7 +14,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
-using System.Net;
 using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Distributions;
@@ -32,8 +33,10 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         var badgeNumber = 0;
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
+            // Look for demographics with valid badge numbers (between 9,999 and 9,999,999)
             var demographic = await ctx.Demographics
-                .Where(d => d.BadgeNumber > 0) // Ensure we get a valid badge number
+                .Where(d => d.BadgeNumber >= 9999 && d.BadgeNumber <= 9999999)
+                .OrderBy(d => d.BadgeNumber) // Ensure deterministic selection
                 .FirstOrDefaultAsync();
 
             if (demographic != null)
@@ -43,9 +46,19 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
             else
             {
                 // Fallback: use StockFactory to create a proper demographic with a valid badge number
-                var (newDemographic, _) = StockFactory.CreateEmployee(2024);
-                newDemographic.BadgeNumber = 12345; // Override with a specific badge number
+                var (newDemographic, payProfits) = StockFactory.CreateEmployee(2024);
+                // Use a deterministic badge number within validation range
+                newDemographic.BadgeNumber = 555555; // Valid 6-digit badge number
+                newDemographic.Ssn = 123456789; // Ensure unique SSN
+
+                // Add the demographic and associated pay profits for vesting balance calculation
                 ctx.Demographics.Add(newDemographic);
+                foreach (var payProfit in payProfits)
+                {
+                    payProfit.DemographicId = newDemographic.Id;
+                    ctx.PayProfits.Add(payProfit);
+                }
+
                 await ctx.SaveChangesAsync();
                 badgeNumber = newDemographic.BadgeNumber;
             }
@@ -71,13 +84,18 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
                 Ssn = demographic.Ssn, // Required field
                 PaymentSequence = 1, // Required field
                 EmployeeName = "Test Employee", // Required field
-                StatusId = 'A',
-                FrequencyId = 'M',
-                FederalTaxAmount = 100.00m,
-                StateTaxAmount = 50.00m,
-                GrossAmount = 1000.00m,
-                TaxCodeId = '1',
-                Memo = "Test distribution for update"
+                StatusId = 'A', // Active status
+                FrequencyId = 'M', // Monthly frequency
+                FederalTaxAmount = 50.00m, // Lower initial amounts
+                StateTaxAmount = 25.00m,
+                GrossAmount = 500.00m, // Conservative gross amount
+                TaxCodeId = '1', // Standard tax code
+                IsDeceased = false, // Start with living employee
+                Tax1099ForEmployee = true,
+                Tax1099ForBeneficiary = false,
+                Memo = "Test distribution for update",
+                CreatedAtUtc = DateTime.UtcNow,
+                ModifiedAtUtc = DateTime.UtcNow
             };
 
             ctx.Distributions.Add(distribution);
@@ -114,6 +132,12 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         // Act
         var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        // If we get a 400, log the error for debugging
+        if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
+        }
 
         // Assert
         response.ShouldNotBeNull();
@@ -161,6 +185,12 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         // Act
         var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        // If we get a 400, log the error for debugging
+        if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
+        }
 
         // Assert
         response.ShouldNotBeNull();
@@ -207,6 +237,12 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         // Act
         var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        // If we get a 400, log the error for debugging
+        if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
+        }
 
         // Assert
         response.ShouldNotBeNull();
@@ -235,14 +271,14 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
             StatusId = 'D', // Deceased
             FrequencyId = 'L',
             FederalTaxPercentage = 10.0m,
-            FederalTaxAmount = 100.00m,
+            FederalTaxAmount = 50.00m,
             StateTaxPercentage = 5.0m,
-            StateTaxAmount = 50.00m,
-            GrossAmount = 1000.00m,
-            CheckAmount = 850.00m,
+            StateTaxAmount = 25.00m,
+            GrossAmount = 500.00m,
+            CheckAmount = 425.00m,
             TaxCodeId = '2',
             IsDeceased = true,
-            GenderId = 'F', // Changed gender
+            GenderId = 'F', // Updated gender
             Tax1099ForBeneficiary = true,
             Memo = "Updated final distribution to beneficiary"
         };
@@ -252,6 +288,14 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         // Assert
         response.ShouldNotBeNull();
+
+        // If we get a 400, log the error for debugging
+        if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
+        }
+
         response.Response.EnsureSuccessStatusCode();
         response.Result.ShouldNotBeNull();
         response.Result.Id.ShouldBe(request.Id);
@@ -259,6 +303,8 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         response.Result.IsDeceased.ShouldBe(request.IsDeceased);
         response.Result.GenderId.ShouldBe(request.GenderId);
         response.Result.Tax1099ForBeneficiary.ShouldBe(request.Tax1099ForBeneficiary);
+        response.Result.GrossAmount.ShouldBe(request.GrossAmount);
+        response.Result.CheckAmount.ShouldBe(request.CheckAmount);
     }
 
     [Fact(DisplayName = "UpdateDistribution - Should handle QDRO distribution update")]
@@ -289,6 +335,12 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         // Act
         var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
 
+        // If we get a 400, log the error for debugging
+        if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
+        }
         // Assert
         response.ShouldNotBeNull();
         response.Response.EnsureSuccessStatusCode();
@@ -328,6 +380,12 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         // Act
         var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        // If we get a 400, log the error for debugging
+        if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
+        }
 
         // Assert
         response.ShouldNotBeNull();
@@ -366,6 +424,12 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         // Act
         var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        // If we get a 400, log the error for debugging
+        if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
+        }
 
         // Assert
         response.ShouldNotBeNull();
@@ -399,6 +463,12 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         // Act
         var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        // If we get a 400, log the error for debugging
+        if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
+        }
 
         // Assert
         response.ShouldNotBeNull();
@@ -461,6 +531,12 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         // Act
         var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        // If we get a 400, log the error for debugging
+        if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
+        }
 
         // Assert
         response.ShouldNotBeNull();
@@ -500,6 +576,12 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         // Act
         var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        // If we get a 400, log the error for debugging
+        if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
+        }
 
         // Assert
         response.ShouldNotBeNull();
@@ -640,6 +722,12 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         foreach (var response in responses)
         {
+            // If we get a 400, log the error for debugging
+            if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                var errorContent = await response.Response.Content.ReadAsStringAsync();
+                throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
+            }
             response.ShouldNotBeNull();
             response.Response.EnsureSuccessStatusCode();
             response.Result.ShouldNotBeNull();
@@ -679,6 +767,12 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
         // Act
         var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        // If we get a 400, log the error for debugging
+        if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
+        }
 
         // Assert
         response.ShouldNotBeNull();

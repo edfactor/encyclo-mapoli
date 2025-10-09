@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Sdk Name="Aspire.AppHost.Sdk" Version="9.5.0" />
+  <Sdk Name="Aspire.AppHost.Sdk" Version="9.5.1" />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -9,6 +9,8 @@
     <UserSecretsId>a3be1bce-4a9e-4da4-a908-5f315c147298</UserSecretsId>
     <Configurations>Debug;Release</Configurations>
     <ExcludeFromCodeCoverage>true</ExcludeFromCodeCoverage>
+    <!-- Suppress preview API warnings for Aspire Interaction Service (ASPIREINTERACTION001) -->
+    <NoWarn>$(NoWarn);ASPIREINTERACTION001</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

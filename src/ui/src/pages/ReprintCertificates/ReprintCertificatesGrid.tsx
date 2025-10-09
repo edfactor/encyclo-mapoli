@@ -1,11 +1,11 @@
 import { Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetCertificatesReportQuery } from "reduxstore/api/YearsEndApi";
-import { RootState } from "reduxstore/store";
-import { CertificatePrintRequest } from "reduxstore/types";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
+import { useLazyGetCertificatesReportQuery } from "../../reduxstore/api/YearsEndApi";
+import { RootState } from "../../reduxstore/store";
+import { CertificatePrintRequest } from "../../reduxstore/types";
 import { ReprintCertificatesFilterParams } from "./ReprintCertificatesFilterSection";
 import { GetReprintCertificatesGridColumns, ReprintCertificateEmployee } from "./ReprintCertificatesGridColumns";
 
@@ -15,15 +15,15 @@ interface ReprintCertificatesGridProps {
 }
 
 const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filterParams, onSelectionChange }) => {
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageNumber, setPageNumber] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "badgeNumber",
     isSortDescending: false
   });
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
-  
+
   // Use dynamic grid height utility hook
   const gridMaxHeight = useDynamicGridHeight();
 

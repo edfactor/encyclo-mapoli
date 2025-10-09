@@ -1,11 +1,12 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Box, Button, FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
-import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { Controller, Resolver, useForm } from "react-hook-form";
-import { useFreezeDemographicsMutation } from "reduxstore/api/ItOperationsApi";
 import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import DuplicateSsnGuard from "../../../components/DuplicateSsnGuard";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { useFreezeDemographicsMutation } from "../../../reduxstore/api/ItOperationsApi";
+import { profitYearValidator } from "../../../utils/FormValidators";
 
 // Update the interface to include new fields
 interface DemographicFreezeSearch {
@@ -16,16 +17,12 @@ interface DemographicFreezeSearch {
 
 // Update the schema to include validation for all fields
 const schema = yup.object().shape({
-  profitYear: yup
-    .number()
-    .typeError("Year must be a number")
-    .integer("Year must be an integer")
+  profitYear: profitYearValidator()
     .test("valid-year", "Year must be current or previous year", (value) => {
       if (!value) return false;
       const currentYear = new Date().getFullYear();
       return value === currentYear || value === currentYear - 1;
     })
-    .required("Year is required")
     .defined(),
   asOfDate: yup
     .date()
@@ -92,16 +89,19 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
           const asOfDateTime = combinedDate.toISOString();
 
           setPageReset(true);
+
+          // Wait for the mutation to complete
           await freezeDemographics({
             asOfDateTime,
             profitYear: data.profitYear
-          });
+          }).unwrap();
 
           // Clear the form fields after successful freeze so the As-of date/time
           // are removed and the Create button becomes disabled (form invalid).
           reset({ profitYear: profitYear || currentYear, asOfDate: null, asOfTime: null });
 
           setInitialSearchLoaded(true);
+          // The grid will automatically refetch due to RTK Query cache invalidation
           // Could add a success notification here
         }
       } catch (error) {

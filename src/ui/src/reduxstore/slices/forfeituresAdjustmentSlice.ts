@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { SuggestForfeitAmountResponse, SuggestForfeitureAdjustmentRequest } from "../types";
 
-interface ForfeituresAdjustmentState {
+export interface ForfeituresAdjustmentState {
   forfeitureAdjustmentData: SuggestForfeitAmountResponse | null;
   forfeitureAdjustmentQueryParams: SuggestForfeitureAdjustmentRequest | null;
 }

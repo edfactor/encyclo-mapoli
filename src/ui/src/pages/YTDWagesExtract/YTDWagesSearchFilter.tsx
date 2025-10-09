@@ -9,10 +9,7 @@ interface YTDWagesSearchFilterProps {
   isSearching?: boolean;
 }
 
-const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({
-  onSearch,
-  isSearching = false
-}) => {
+const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ onSearch, isSearching = false }) => {
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
 
   const { handleSubmit } = useForm({

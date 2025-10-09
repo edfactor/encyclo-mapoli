@@ -6,13 +6,7 @@ import usePayBenReport from "./hooks/usePayBenReport";
 
 const PayBenReport = () => {
   const componentRef = useRef<HTMLDivElement>(null);
-  const {
-    searchResults,
-    isSearching,
-    pagination,
-    showData,
-    hasResults
-  } = usePayBenReport();
+  const { searchResults, isSearching, pagination, showData, hasResults } = usePayBenReport();
 
   const recordCount = searchResults?.total || 0;
 

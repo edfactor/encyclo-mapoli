@@ -4,12 +4,7 @@ import { useLazyPayBenReportQuery } from "../../../../reduxstore/api/YearsEndApi
 import { RootState } from "../../../../reduxstore/store";
 import { PayBenReportRequest } from "../../../../types";
 import { useGridPagination } from "../../../../hooks/useGridPagination";
-import {
-  initialState,
-  payBenReportReducer,
-  selectShowData,
-  selectHasResults
-} from "./usePayBenReportReducer";
+import { initialState, payBenReportReducer, selectShowData, selectHasResults } from "./usePayBenReportReducer";
 
 const usePayBenReport = () => {
   const [state, dispatch] = useReducer(payBenReportReducer, initialState);

@@ -1,13 +1,16 @@
 ﻿
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+
 public sealed record DistributionsAndForfeitureTotalsResponse : ReportResponseBase<DistributionsAndForfeitureResponse>
 {
     public required decimal DistributionTotal { get; init; }
     public required decimal StateTaxTotal { get; init; }
     public required decimal FederalTaxTotal { get; init; }
     public required decimal ForfeitureTotal { get; init; }
+
     public required Dictionary<string, decimal> StateTaxTotals { get; init; }
 
     public static DistributionsAndForfeitureTotalsResponse ResponseExample()

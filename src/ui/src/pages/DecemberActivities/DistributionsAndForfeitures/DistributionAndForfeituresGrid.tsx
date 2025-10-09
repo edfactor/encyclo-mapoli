@@ -2,8 +2,6 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
-import { RootState } from "reduxstore/store";
 import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
@@ -11,6 +9,8 @@ import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { useGridPagination } from "../../../hooks/useGridPagination";
+import { useLazyGetDistributionsAndForfeituresQuery } from "../../../reduxstore/api/YearsEndApi";
+import { RootState } from "../../../reduxstore/store";
 import { GetDistributionsAndForfeituresColumns } from "./DistributionAndForfeituresGridColumns";
 
 interface DistributionsAndForfeituresGridSearchProps {
@@ -31,9 +31,12 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
 
+  // Make the initial page size configurable via state so it can be updated if needed
+  const [initialPageSize, setInitialPageSize] = useState<number>(25);
+
   const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
     useGridPagination({
-      initialPageSize: 25,
+      initialPageSize,
       initialSortBy: "employeeName, date",
       initialSortDescending: false,
       onPaginationChange: useCallback(
@@ -116,19 +119,31 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     triggerSearch
   ]);
 
-  // Need a useEffect on a change in distributionsAndForfeitures to reset the page number
-  const prevDistributionsAndForfeitures = useRef<any>(null);
+  // Reset pagination when search filters change (not when paginating through results)
+  const prevQueryParams = useRef<any>(null);
   useEffect(() => {
+    const currentQueryParams = {
+      startDate: distributionsAndForfeituresQueryParams?.startDate,
+      endDate: distributionsAndForfeituresQueryParams?.endDate,
+      profitYear
+    };
+
     if (
-      distributionsAndForfeitures !== prevDistributionsAndForfeitures.current &&
-      distributionsAndForfeitures?.response?.results &&
-      distributionsAndForfeitures.response.results.length !==
-        prevDistributionsAndForfeitures.current?.response?.results?.length
+      prevQueryParams.current &&
+      (prevQueryParams.current.startDate !== currentQueryParams.startDate ||
+        prevQueryParams.current.endDate !== currentQueryParams.endDate ||
+        prevQueryParams.current.profitYear !== currentQueryParams.profitYear)
     ) {
       resetPagination();
     }
-    prevDistributionsAndForfeitures.current = distributionsAndForfeitures;
-  }, [distributionsAndForfeitures, resetPagination]);
+
+    prevQueryParams.current = currentQueryParams;
+  }, [
+    distributionsAndForfeituresQueryParams?.startDate,
+    distributionsAndForfeituresQueryParams?.endDate,
+    profitYear,
+    resetPagination
+  ]);
 
   useEffect(() => {
     if (hasToken && initialSearchLoaded) {
@@ -235,7 +250,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
           <ReportSummary report={distributionsAndForfeitures} />
           <DSMGrid
             preferenceKey={CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES}
-            isLoading={isFetching}
+            isLoading={false}
             handleSortChanged={sortEventHandler}
             maxHeight={gridMaxHeight}
             providedOptions={{
@@ -255,6 +270,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
+            setInitialPageSize(value);
             handlePaginationChange(0, value);
             setInitialSearchLoaded(true);
           }}

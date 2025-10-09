@@ -18,7 +18,10 @@ export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
     createNameColumn({
       field: "name"
     }),
-    createAddressColumn({}),
+    createAddressColumn({
+      field1: "street",
+      field2: "street2"
+    }),
     createCityColumn({
       valueGetter: (params) => params.data.address?.city || ""
     }),
@@ -34,14 +37,13 @@ export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
       field: "rehireDate"
     }),
     createStoreColumn({}),
-    createStatusColumn({}),
-    {
+    createStatusColumn({
       valueFormatter: (params) => {
         const id = params.data.status; // assuming 'status' is in the row data
         const name = params.data.employmentStatusName; // assuming 'statusName' is in the row data
         //see if one is undefined or null then show other
         return `[${id}] ${name}`;
       }
-    }
+    })
   ];
 };

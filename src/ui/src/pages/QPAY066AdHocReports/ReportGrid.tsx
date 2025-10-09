@@ -241,9 +241,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, storeNumber, onLoadingC
                         <CircularProgress size={20} />
                         <Typography
                           variant="body2"
-                          color="text.secondary">
-                          Loading...
-                        </Typography>
+                          color="text.secondary"></Typography>
                       </Box>
                     </TableCell>
                   ) : (

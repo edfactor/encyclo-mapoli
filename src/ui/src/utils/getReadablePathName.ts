@@ -11,6 +11,7 @@ const pathToReadableName: Record<string, string> = {
   "manage-executive-hours-and-dollars": "Manage Executive Hours and Dollars",
   "eligible-employees": "Eligible Employees",
   "master-inquiry": "Master Inquiry",
+  adjustments: "Adjustments",
   "distributions-by-age": "Distributions by Age",
   "contributions-by-age": "Contributions by Age",
   "forfeitures-by-age": "Forfeitures by Age",

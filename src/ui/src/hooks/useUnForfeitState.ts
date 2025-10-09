@@ -29,7 +29,7 @@ const initialState: UnForfeitState = {
   hasUnsavedChanges: false,
   shouldBlock: false,
   previousStatus: null,
-  shouldArchive: false,
+  shouldArchive: false
 };
 
 function unForfeitReducer(state: UnForfeitState, action: UnForfeitAction): UnForfeitState {
@@ -37,26 +37,26 @@ function unForfeitReducer(state: UnForfeitState, action: UnForfeitAction): UnFor
     case "SET_INITIAL_SEARCH_LOADED":
       return {
         ...state,
-        initialSearchLoaded: action.payload,
+        initialSearchLoaded: action.payload
       };
 
     case "TOGGLE_RESET_PAGE_FLAG":
       return {
         ...state,
-        resetPageFlag: !state.resetPageFlag,
+        resetPageFlag: !state.resetPageFlag
       };
 
     case "SET_UNSAVED_CHANGES":
       return {
         ...state,
         hasUnsavedChanges: action.payload,
-        shouldBlock: action.payload,
+        shouldBlock: action.payload
       };
 
     case "SET_SHOULD_BLOCK":
       return {
         ...state,
-        shouldBlock: action.payload,
+        shouldBlock: action.payload
       };
 
     case "SET_STATUS_CHANGE": {
@@ -67,14 +67,14 @@ function unForfeitReducer(state: UnForfeitState, action: UnForfeitAction): UnFor
       return {
         ...state,
         previousStatus: status,
-        shouldArchive: isChangingToComplete,
+        shouldArchive: isChangingToComplete
       };
     }
 
     case "SET_ARCHIVE_HANDLED":
       return {
         ...state,
-        shouldArchive: false,
+        shouldArchive: false
       };
 
     case "RESET_STATE":
@@ -120,7 +120,7 @@ export const useUnForfeitState = () => {
       handleUnsavedChanges,
       setShouldBlock,
       handleStatusChange,
-      handleArchiveHandled,
-    },
+      handleArchiveHandled
+    }
   };
 };

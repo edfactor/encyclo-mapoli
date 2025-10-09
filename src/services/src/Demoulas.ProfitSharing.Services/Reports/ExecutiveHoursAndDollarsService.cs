@@ -31,12 +31,12 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
     /// <returns>A task that represents the asynchronous operation. The task result contains the report response with details of executive hours/dollars</returns>
     public async Task<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> GetExecutiveHoursAndDollarsReportAsync(ExecutiveHoursAndDollarsRequest request, CancellationToken cancellationToken)
     {
-        var result =  await _dataContextFactory.UseReadOnlyContext(async c =>
+        var result = await _dataContextFactory.UseReadOnlyContext(async c =>
         {
             var query = c.PayProfits
-                .Where(p=> p.ProfitYear == request.ProfitYear)
+                .Where(p => p.ProfitYear == request.ProfitYear)
                 .Include(p => p.Demographic)
-                .ThenInclude(d=> d!.PayFrequency)
+                .ThenInclude(d => d!.PayFrequency)
                 .Include(p => p.Demographic)
                 .ThenInclude(d => d!.EmploymentStatus)
                 .AsQueryable();
@@ -44,7 +44,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
             if (request.HasExecutiveHoursAndDollars.HasValue && request.HasExecutiveHoursAndDollars.Value && request.IsMonthlyPayroll.HasValue && request.IsMonthlyPayroll.Value)
             {
                 query = query.Where(p => (p.HoursExecutive > 0 || p.IncomeExecutive > 0) || (p.Demographic!.PayFrequencyId == PayFrequency.Constants.Monthly));
-            } 
+            }
             else
             {
                 if (request.HasExecutiveHoursAndDollars.HasValue && request.HasExecutiveHoursAndDollars.Value)
@@ -58,13 +58,13 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
                 }
             }
 
-            
+
             if (request.BadgeNumber.HasValue)
             {
                 query = query.Where(pp => pp.Demographic!.BadgeNumber == request.BadgeNumber);
             }
-            
-            if (request.Ssn!= null)
+
+            if (request.Ssn != null)
             {
                 query = query.Where(pp => pp.Demographic!.Ssn == request.Ssn);
             }
@@ -76,7 +76,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
                     pp.Demographic!.ContactInfo!.FullName!.ToLower().Contains(request.FullNameContains.ToLower()));
 #pragma warning restore RCS1155
             }
-            
+
             var paginatedResult = await query
                 .Select(p => new ExecutiveHoursAndDollarsResponse
                 {
@@ -97,25 +97,25 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
                 .OrderBy(p => p.StoreNumber)
                 .ThenBy(p => p.BadgeNumber)
                 .ToPaginationResultsAsync(request, cancellationToken);
-                
+
             // Now, fix the IsExecutive field in memory since Oracle's EF Driver doesnt handle the boolean projection
             foreach (var item in paginatedResult.Results)
             {
                 item.IsExecutive = item.PayFrequencyId == 2;
             }
-            
+
             return paginatedResult;
         });
 
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
-        
+
         return new ReportResponseBase<ExecutiveHoursAndDollarsResponse>
         {
             ReportName = $"Executive Hours and Dollars for Year {request.ProfitYear}",
             ReportDate = DateTimeOffset.UtcNow,
             StartDate = calInfo.FiscalBeginDate,
             EndDate = calInfo.FiscalEndDate,
-            Response =  result
+            Response = result
         };
 
     }

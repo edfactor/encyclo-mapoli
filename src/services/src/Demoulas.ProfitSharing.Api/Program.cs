@@ -8,7 +8,6 @@ using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Metrics;
 using Demoulas.ProfitSharing.Common.Telemetry;
-using Microsoft.Extensions.DependencyInjection;
 using Demoulas.ProfitSharing.Data;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
@@ -18,17 +17,30 @@ using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Security.Extensions;
-using Demoulas.ProfitSharing.Services.Serialization;
 using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.ProfitSharing.Services.LogMasking; // retains AddProjectServices & other extension methods
+using Demoulas.ProfitSharing.Services.Middleware;
+using Demoulas.ProfitSharing.Services.Serialization;
 using Demoulas.Security.Extensions;
 using Demoulas.Util.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using NSwag.Generation.AspNetCore;
 using Scalar.AspNetCore;
-using Demoulas.ProfitSharing.Services.Middleware;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder();
+
+// Note: Kestrel configuration only applies to dev environment
+// Production uses IIS with its own timeout configuration in web.config
+if (builder.Environment.IsDevelopment())
+{
+    builder.WebHost.ConfigureKestrel(options =>
+    {
+        // 3-minute timeout for dev (provides buffer for 2-minute endpoint timeout)
+        options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(3);
+        options.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(30);
+    });
+}
 
 if (!builder.Environment.IsTestEnvironment())
 {

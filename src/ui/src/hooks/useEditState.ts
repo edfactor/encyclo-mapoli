@@ -10,14 +10,14 @@ export const useEditState = () => {
   const [loadingRowIds, setLoadingRowIds] = useState<Set<number>>(new Set());
 
   const updateEditedValue = useCallback((rowKey: string, value: number, hasError: boolean) => {
-    setEditedValues(prev => ({
+    setEditedValues((prev) => ({
       ...prev,
       [rowKey]: { value, hasError }
     }));
   }, []);
 
   const removeEditedValue = useCallback((rowKey: string) => {
-    setEditedValues(prev => {
+    setEditedValues((prev) => {
       const updated = { ...prev };
       delete updated[rowKey];
       return updated;
@@ -25,9 +25,9 @@ export const useEditState = () => {
   }, []);
 
   const clearEditedValues = useCallback((rowKeys: string[]) => {
-    setEditedValues(prev => {
+    setEditedValues((prev) => {
       const updated = { ...prev };
-      rowKeys.forEach(key => delete updated[key]);
+      rowKeys.forEach((key) => delete updated[key]);
       return updated;
     });
   }, []);
@@ -37,11 +37,11 @@ export const useEditState = () => {
   }, []);
 
   const addLoadingRow = useCallback((rowId: number) => {
-    setLoadingRowIds(prev => new Set(Array.from(prev).concat(rowId)));
+    setLoadingRowIds((prev) => new Set(Array.from(prev).concat(rowId)));
   }, []);
 
   const removeLoadingRow = useCallback((rowId: number) => {
-    setLoadingRowIds(prev => {
+    setLoadingRowIds((prev) => {
       const newSet = new Set(Array.from(prev));
       newSet.delete(rowId);
       return newSet;
@@ -49,28 +49,34 @@ export const useEditState = () => {
   }, []);
 
   const addLoadingRows = useCallback((rowIds: number[]) => {
-    setLoadingRowIds(prev => {
+    setLoadingRowIds((prev) => {
       const newSet = new Set(Array.from(prev));
-      rowIds.forEach(id => newSet.add(id));
+      rowIds.forEach((id) => newSet.add(id));
       return newSet;
     });
   }, []);
 
   const removeLoadingRows = useCallback((rowIds: number[]) => {
-    setLoadingRowIds(prev => {
+    setLoadingRowIds((prev) => {
       const newSet = new Set(Array.from(prev));
-      rowIds.forEach(id => newSet.delete(id));
+      rowIds.forEach((id) => newSet.delete(id));
       return newSet;
     });
   }, []);
 
-  const getEditedValue = useCallback((rowKey: string, fallbackValue?: number) => {
-    return editedValues[rowKey]?.value ?? fallbackValue;
-  }, [editedValues]);
+  const getEditedValue = useCallback(
+    (rowKey: string, fallbackValue?: number) => {
+      return editedValues[rowKey]?.value ?? fallbackValue;
+    },
+    [editedValues]
+  );
 
-  const hasEditedValue = useCallback((rowKey: string) => {
-    return rowKey in editedValues;
-  }, [editedValues]);
+  const hasEditedValue = useCallback(
+    (rowKey: string) => {
+      return rowKey in editedValues;
+    },
+    [editedValues]
+  );
 
   const hasAnyEdits = Object.keys(editedValues).length > 0;
   const isRowLoading = useCallback((rowId: number) => loadingRowIds.has(rowId), [loadingRowIds]);
@@ -89,6 +95,6 @@ export const useEditState = () => {
     removeLoadingRow,
     addLoadingRows,
     removeLoadingRows,
-    isRowLoading,
+    isRowLoading
   };
 };

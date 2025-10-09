@@ -1,19 +1,21 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Military;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Groups;
-using Demoulas.ProfitSharing.Common.Extensions;
-using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
-using Microsoft.Extensions.Logging;
-using System.Diagnostics;
+using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Military;
 
-public class CreateMilitaryContributionRecord : ProfitSharingRequestEndpoint<CreateMilitaryContributionRequest>
+public class CreateMilitaryContributionRecord : ProfitSharingEndpoint<CreateMilitaryContributionRequest, Results<Created<MilitaryContributionResponse>, NotFound, ProblemHttpResult>>
 {
     private readonly IMilitaryService _militaryService;
     private readonly ILogger<CreateMilitaryContributionRecord> _logger;
@@ -32,64 +34,45 @@ public class CreateMilitaryContributionRecord : ProfitSharingRequestEndpoint<Cre
             s.Summary = "Create Military Contribution Record";
             s.ResponseExamples = new Dictionary<int, object>
             {
-                { 200, new MilitaryContributionResponse { ProfitYear = Convert.ToInt16(DateTime.Now.Year) } }
+                { 201, new MilitaryContributionResponse { ProfitYear = Convert.ToInt16(DateTime.Now.Year), BadgeNumber = 1234567 } }
             };
             s.ExampleRequest = CreateMilitaryContributionRequest.RequestExample();
+            s.Responses[404] = "Not Found. Employee not found.";
         });
         Group<MilitaryGroup>();
     }
 
-    public override async Task HandleAsync(CreateMilitaryContributionRequest req, CancellationToken ct)
+    public override Task<Results<Created<MilitaryContributionResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(CreateMilitaryContributionRequest req, CancellationToken ct)
     {
-        using var activity = this.StartEndpointActivity(HttpContext);
-
-        try
+        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
-            this.RecordRequestMetrics(HttpContext, _logger, req);
-
-            var response = await _militaryService.CreateMilitaryServiceRecordAsync(req, ct);
+            var result = await _militaryService.CreateMilitaryServiceRecordAsync(req, ct);
 
             // Business metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,
                 new("operation", "military-contribution-create"),
-                new("endpoint", "CreateMilitaryContributionRecord"));
+                new("endpoint", nameof(CreateMilitaryContributionRecord)));
 
-            await response.Match(
-                async success =>
-                {
-                    EndpointTelemetry.RecordCountsProcessed.Record(1,
-                        new("record_type", "military-contribution-created"),
-                        new("endpoint", "CreateMilitaryContributionRecord"));
+            if (result.IsSuccess)
+            {
+                EndpointTelemetry.RecordCountsProcessed.Record(1,
+                    new("record_type", "military-contribution"),
+                    new("endpoint", nameof(CreateMilitaryContributionRecord)));
 
-                    _logger.LogInformation("Military contribution record created for Badge: {BadgeNumber}, ProfitYear: {ProfitYear} (correlation: {CorrelationId})",
-                        req.BadgeNumber, req.ProfitYear, HttpContext.TraceIdentifier);
+                _logger.LogInformation("Military contribution record created for Badge: {BadgeNumber}, ProfitYear: {ProfitYear} (correlation: {CorrelationId})",
+                    req.BadgeNumber, req.ProfitYear, HttpContext.TraceIdentifier);
+            }
+            else
+            {
+                _logger.LogWarning("Military contribution record creation failed for Badge: {BadgeNumber}, ProfitYear: {ProfitYear} - {Error} (correlation: {CorrelationId})",
+                    req.BadgeNumber, req.ProfitYear, result.Error?.Description, HttpContext.TraceIdentifier);
+            }
 
-                    this.RecordResponseMetrics(HttpContext, _logger, success);
-
-                    await Send.CreatedAtAsync<GetMilitaryContributionRecords>(
-                        routeValues: new MilitaryContributionRequest
-                        {
-                            BadgeNumber = req.BadgeNumber,
-                            ProfitYear = req.ProfitYear,
-                        },
-                        responseBody: success,
-                        cancellation: ct
-                    );
-                },
-                async error =>
-                {
-                    _logger.LogWarning("Military contribution record creation failed for Badge: {BadgeNumber}, ProfitYear: {ProfitYear} - {Error} (correlation: {CorrelationId})",
-                        req.BadgeNumber, req.ProfitYear, error, HttpContext.TraceIdentifier);
-
-                    await Send.ResponseAsync(error, statusCode: 400, cancellation: ct);
-                }
-            );
-        }
-        catch (Exception ex)
-        {
-            this.RecordException(HttpContext, _logger, ex, activity);
-            throw;
-        }
+            return result.Match<Results<Created<MilitaryContributionResponse>, NotFound, ProblemHttpResult>>(
+                success => TypedResults.Created($"/military-contributions/{success.BadgeNumber}/{success.ProfitYear}", success),
+                error => error.Detail == Error.EmployeeNotFound.Description
+                    ? TypedResults.NotFound()
+                    : TypedResults.Problem(error.Detail));
+        }, "BadgeNumber");
     }
-
 }

@@ -79,6 +79,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
     /// <summary>
     /// Generates the year-end profit sharing summary report, grouped by eligibility and status.
+    /// OPTIMIZED: Single query with in-memory aggregation to eliminate multiple database roundtrips.
     /// </summary>
     /// <param name="req">The profit year request.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -89,123 +90,194 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
         var birthday18 = calInfo.FiscalEndDate.AddYears(-18);
         var birthday21 = calInfo.FiscalEndDate.AddYears(-21);
+        var fiscalEndDate = calInfo.FiscalEndDate;
+        var fiscalBeginDate = calInfo.FiscalBeginDate;
 
-        // Helper to aggregate a list of details into summary values
-        static (int Count, decimal TotalWages, decimal TotalHours, int TotalPoints, decimal TotalBalance, decimal TotalPriorBalance) AggregateDetails(
-            List<YearEndProfitSharingReportDetail> details)
-        {
-            return (
-                details.Count,
-                details.Sum(y => y.Wages),
-                details.Sum(y => y.Hours),
-                details.Sum(y => y.Points),
-                details.Sum(y => y.Balance),
-                details.Sum(y => y.PriorBalance)
-            );
-        }
-
-        /// <summary>
-        /// Creates a summary line item for a specific group of employees.
-        /// </summary>
-        /// <param name="subgroup">The subgroup label.</param>
-        /// <param name="prefix">The line item prefix.</param>
-        /// <param name="title">The line item title.</param>
-        /// <param name="details">Queryable of report details.</param>
-        /// <param name="mainFilter">Main filter for the group.</param>
-        /// <param name="totalsFilter">Optional filter for totals.</param>
-        /// <returns>Summary line item for the group.</returns>
-        async Task<YearEndProfitSharingReportSummaryLineItem?> CreateLine(
-            string subgroup, string prefix, string title,
-            IQueryable<YearEndProfitSharingReportDetail> details,
-            Expression<Func<YearEndProfitSharingReportDetail, bool>> mainFilter,
-            Expression<Func<YearEndProfitSharingReportDetail, bool>>? totalsFilter = null // optional
-        )
-        {
-            var mainGroup = await details.Where(mainFilter).ToListAsync(cancellationToken);
-
-            var mainAgg = AggregateDetails(mainGroup);
-            var response = new YearEndProfitSharingReportSummaryLineItem
-            {
-                Subgroup = subgroup,
-                LineItemPrefix = prefix,
-                LineItemTitle = title,
-                NumberOfMembers = mainAgg.Count,
-                TotalWages = mainAgg.TotalWages,
-                TotalHours = mainAgg.TotalHours,
-                TotalPoints = mainAgg.TotalPoints,
-                TotalBalance = mainAgg.TotalBalance,
-                TotalPriorBalance = mainAgg.TotalPriorBalance
-            };
-
-            if (totalsFilter != null)
-            {
-                List<YearEndProfitSharingReportDetail> totalsGroup = await details.Where(totalsFilter).ToListAsync(cancellationToken);
-                var totalsAgg = AggregateDetails(totalsGroup);
-                response.NumberOfMembers = totalsAgg.Count;
-            }
-
-            return response;
-        }
-
-
-
-        // Special query for non-employee beneficiaries (line N)
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var activeDetails = await ActiveSummary(ctx, req, calInfo.FiscalEndDate);
+            // OPTIMIZATION: Fetch minimal employee data once with a lightweight DTO
+            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, req.UseFrozenData);
 
-            var lineItems = new List<YearEndProfitSharingReportSummaryLineItem?>
+            // Get balance data once (instead of via ActiveSummary which builds full EmployeeWithBalance objects)
+            var beginningBalanceYear = (short)(req.ProfitYear - 1);
+            var balances = _totalService.GetTotalBalanceSet(ctx, beginningBalanceYear);
+            var priorBalances = _totalService.GetTotalBalanceSet(ctx, (short)(beginningBalanceYear - 1));
+
+            // Build lightweight summary DTO - fetch everything once
+            var summaryData = await (
+                from pp in ctx.PayProfits.Where(p => p.ProfitYear == req.ProfitYear)
+                join d in demographicQuery on pp.DemographicId equals d.Id
+                join bal in balances on d.Ssn equals bal.Ssn into balTmp
+                from bal in balTmp.DefaultIfEmpty()
+                join priorBal in priorBalances on d.Ssn equals priorBal.Ssn into priorBalTmp
+                from priorBal in priorBalTmp.DefaultIfEmpty()
+                select new
+                {
+                    Hours = pp.CurrentHoursYear + pp.HoursExecutive,
+                    Wages = pp.CurrentIncomeYear + pp.IncomeExecutive,
+                    Points = (int)Math.Round((pp.CurrentIncomeYear + pp.IncomeExecutive) / 100),
+                    DateOfBirth = d.DateOfBirth,
+                    EmploymentStatus = d.EmploymentStatusId,
+                    TerminationDate = d.TerminationDate,
+                    Balance = (decimal)(bal != null && bal.TotalAmount != null ? bal.TotalAmount : 0),
+                    PriorBalance = (decimal)(priorBal != null && priorBal.TotalAmount != null ? priorBal.TotalAmount : 0)
+                })
+                .ToListAsync(cancellationToken);
+
+            // Helper to create line items from in-memory data
+            YearEndProfitSharingReportSummaryLineItem CreateLineFromData(
+                string subgroup,
+                string prefix,
+                string title,
+                Func<dynamic, bool> mainFilter,
+                Func<dynamic, bool>? totalsFilter = null)
             {
-                await CreateLine("Active and Inactive", ((int)YearEndProfitSharingReportId.Age18To20With1000Hours).ToString(),
-                    GetEnumDescription(YearEndProfitSharingReportId.Age18To20With1000Hours), activeDetails,
-                    GetReportFilter((int)YearEndProfitSharingReportId.Age18To20With1000Hours, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)),
-                await CreateLine("Active and Inactive", ((int)YearEndProfitSharingReportId.Age21OrOlderWith1000Hours).ToString(),
-                    GetEnumDescription(YearEndProfitSharingReportId.Age21OrOlderWith1000Hours), activeDetails,
-                    GetReportFilter((int)YearEndProfitSharingReportId.Age21OrOlderWith1000Hours, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)),
-                await CreateLine("Active and Inactive", ((int)YearEndProfitSharingReportId.Under18).ToString(), GetEnumDescription(YearEndProfitSharingReportId.Under18),
-                    activeDetails, GetReportFilter((int)YearEndProfitSharingReportId.Under18, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)),
-                await CreateLine("Active and Inactive", ((int)YearEndProfitSharingReportId.Age18OrOlderWithLessThan1000HoursAndPriorAmount).ToString(),
-                    GetEnumDescription(YearEndProfitSharingReportId.Age18OrOlderWithLessThan1000HoursAndPriorAmount), activeDetails,
-                    GetReportFilter((int)YearEndProfitSharingReportId.Age18OrOlderWithLessThan1000HoursAndPriorAmount, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18,
-                        birthday21)),
-                await CreateLine("Active and Inactive", ((int)YearEndProfitSharingReportId.Age18OrOlderWithLessThan1000HoursAndNoPriorAmount).ToString(),
-                    GetEnumDescription(YearEndProfitSharingReportId.Age18OrOlderWithLessThan1000HoursAndNoPriorAmount), activeDetails,
-                    GetReportFilter((int)YearEndProfitSharingReportId.Age18OrOlderWithLessThan1000HoursAndNoPriorAmount, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18,
-                        birthday21)),
+                var mainGroup = summaryData.Where(mainFilter).ToList();
 
-                // Terminated lines
-                await CreateLine("TERMINATED", ((int)YearEndProfitSharingReportId.TerminatedAge18OrOlderWith1000Hours).ToString(),
-                    GetEnumDescription(YearEndProfitSharingReportId.TerminatedAge18OrOlderWith1000Hours), activeDetails,
-                    GetReportFilter((int)YearEndProfitSharingReportId.TerminatedAge18OrOlderWith1000Hours, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)),
-                await CreateLine(
+                var lineItem = new YearEndProfitSharingReportSummaryLineItem
+                {
+                    Subgroup = subgroup,
+                    LineItemPrefix = prefix,
+                    LineItemTitle = title,
+                    NumberOfMembers = mainGroup.Count,
+                    TotalWages = mainGroup.Sum(x => (decimal)x.Wages),
+                    TotalHours = mainGroup.Sum(x => (decimal)x.Hours),
+                    TotalPoints = mainGroup.Sum(x => (int)x.Points),
+                    TotalBalance = mainGroup.Sum(x => (decimal)x.Balance),
+                    TotalPriorBalance = mainGroup.Sum(x => (decimal)x.PriorBalance)
+                };
+
+                // If totalsFilter provided, override NumberOfMembers
+                if (totalsFilter != null)
+                {
+                    lineItem.NumberOfMembers = summaryData.Where(totalsFilter).Count();
+                }
+
+                return lineItem;
+            }
+
+            // Helper predicates matching GetReportFilter logic
+            bool IsActiveOrInactive(dynamic x) =>
+                x.EmploymentStatus == EmploymentStatus.Constants.Active ||
+                x.EmploymentStatus == EmploymentStatus.Constants.Inactive;
+
+            bool IsTerminatedAfterFiscalEnd(dynamic x) =>
+                x.EmploymentStatus == EmploymentStatus.Constants.Terminated &&
+                x.TerminationDate != null && x.TerminationDate > fiscalEndDate;
+
+            bool IsTerminatedInFiscalYear(dynamic x) =>
+                x.EmploymentStatus == EmploymentStatus.Constants.Terminated &&
+                x.TerminationDate != null &&
+                x.TerminationDate <= fiscalEndDate &&
+                x.TerminationDate >= fiscalBeginDate;
+
+            bool IsTerminatedBeforeFiscalEnd(dynamic x) =>
+                x.EmploymentStatus == EmploymentStatus.Constants.Terminated &&
+                x.TerminationDate != null &&
+                x.TerminationDate < fiscalEndDate;
+
+            // OPTIMIZATION: Build all line items in memory (no more database roundtrips)
+            var lineItems = new List<YearEndProfitSharingReportSummaryLineItem>
+            {
+                // Line 1: Age 18-20 with 1000+ hours (Active/Inactive or terminated after fiscal end)
+                CreateLineFromData(
+                    "Active and Inactive",
+                    ((int)YearEndProfitSharingReportId.Age18To20With1000Hours).ToString(),
+                    GetEnumDescription(YearEndProfitSharingReportId.Age18To20With1000Hours),
+                    x => (IsActiveOrInactive(x) || IsTerminatedAfterFiscalEnd(x)) &&
+                         x.Hours >= _hoursThreshold &&
+                         x.DateOfBirth <= birthday18 &&
+                         x.DateOfBirth > birthday21),
+
+                // Line 2: Age 21+ with 1000+ hours
+                CreateLineFromData(
+                    "Active and Inactive",
+                    ((int)YearEndProfitSharingReportId.Age21OrOlderWith1000Hours).ToString(),
+                    GetEnumDescription(YearEndProfitSharingReportId.Age21OrOlderWith1000Hours),
+                    x => (IsActiveOrInactive(x) || IsTerminatedAfterFiscalEnd(x)) &&
+                         x.Hours >= _hoursThreshold &&
+                         x.DateOfBirth <= birthday21),
+
+                // Line 3: Under 18
+                CreateLineFromData(
+                    "Active and Inactive",
+                    ((int)YearEndProfitSharingReportId.Under18).ToString(),
+                    GetEnumDescription(YearEndProfitSharingReportId.Under18),
+                    x => (IsActiveOrInactive(x) || IsTerminatedAfterFiscalEnd(x)) &&
+                         x.DateOfBirth > birthday18),
+
+                // Line 4: Age 18+ with <1000 hours and prior balance
+                CreateLineFromData(
+                    "Active and Inactive",
+                    ((int)YearEndProfitSharingReportId.Age18OrOlderWithLessThan1000HoursAndPriorAmount).ToString(),
+                    GetEnumDescription(YearEndProfitSharingReportId.Age18OrOlderWithLessThan1000HoursAndPriorAmount),
+                    x => (IsActiveOrInactive(x) || IsTerminatedAfterFiscalEnd(x)) &&
+                         x.Hours < _hoursThreshold &&
+                         x.DateOfBirth <= birthday18 &&
+                         x.PriorBalance > 0),
+
+                // Line 5: Age 18+ with <1000 hours and no prior balance
+                CreateLineFromData(
+                    "Active and Inactive",
+                    ((int)YearEndProfitSharingReportId.Age18OrOlderWithLessThan1000HoursAndNoPriorAmount).ToString(),
+                    GetEnumDescription(YearEndProfitSharingReportId.Age18OrOlderWithLessThan1000HoursAndNoPriorAmount),
+                    x => (IsActiveOrInactive(x) || IsTerminatedAfterFiscalEnd(x)) &&
+                         x.Hours < _hoursThreshold &&
+                         x.DateOfBirth <= birthday18 &&
+                         x.PriorBalance == 0),
+
+                // Line 6: Terminated age 18+ with 1000+ hours
+                CreateLineFromData(
+                    "TERMINATED",
+                    ((int)YearEndProfitSharingReportId.TerminatedAge18OrOlderWith1000Hours).ToString(),
+                    GetEnumDescription(YearEndProfitSharingReportId.TerminatedAge18OrOlderWith1000Hours),
+                    x => IsTerminatedBeforeFiscalEnd(x) &&
+                         x.Hours >= _hoursThreshold &&
+                         x.DateOfBirth <= birthday18),
+
+                // Line 7: Terminated age 18+ with <1000 hours and no prior balance
+                CreateLineFromData(
                     "TERMINATED",
                     ((int)YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndNoPriorAmount).ToString(),
                     GetEnumDescription(YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndNoPriorAmount),
-                    activeDetails,
-                    GetReportFilter((int)YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndNoPriorAmount, calInfo.FiscalBeginDate, calInfo.FiscalEndDate,
-                        birthday18, birthday21)
-                ),
-                await CreateLine(
+                    x => IsTerminatedInFiscalYear(x) &&
+                         x.Hours < _hoursThreshold &&
+                         x.DateOfBirth <= birthday18 &&
+                         x.PriorBalance == 0),
+
+                // Line 8: Terminated age 18+ with <1000 hours and prior balance
+                // Note: Uses totalsFilter to count differently
+                CreateLineFromData(
                     "TERMINATED",
                     ((int)YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndPriorAmount).ToString(),
                     GetEnumDescription(YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndPriorAmount),
-                    activeDetails,
-                    GetReportFilter((int)YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndPriorAmount, calInfo.FiscalBeginDate, calInfo.FiscalEndDate,
-                        birthday18, birthday21),
-                    x => x.Hours >= 0 && x.Hours < _hoursThreshold && x.DateOfBirth <= birthday18 && x.PriorBalance > 0
-                ),
-                await CreateLine("TERMINATED", ((int)YearEndProfitSharingReportId.TerminatedUnder18NoWages).ToString(),
-                    GetEnumDescription(YearEndProfitSharingReportId.TerminatedUnder18NoWages), activeDetails,
-                    GetReportFilter((int)YearEndProfitSharingReportId.TerminatedUnder18NoWages, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21))
+                    x => IsTerminatedInFiscalYear(x) &&
+                         x.Hours < _hoursThreshold &&
+                         x.DateOfBirth <= birthday18 &&
+                         x.PriorBalance > 0,
+                    // Totals filter: count all matching the pattern
+                    x => x.Hours >= 0 &&
+                         x.Hours < _hoursThreshold &&
+                         x.DateOfBirth <= birthday18 &&
+                         x.PriorBalance > 0),
+
+                // Line 10: Terminated under 18 with no wages
+                CreateLineFromData(
+                    "TERMINATED",
+                    ((int)YearEndProfitSharingReportId.TerminatedUnder18NoWages).ToString(),
+                    GetEnumDescription(YearEndProfitSharingReportId.TerminatedUnder18NoWages),
+                    x => IsTerminatedInFiscalYear(x) &&
+                         x.Wages == 0 &&
+                         x.DateOfBirth > birthday18)
             };
 
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, req.UseFrozenData);
+            // Line N: Non-employee beneficiaries (still needs separate query)
             var beneQry = ctx.BeneficiaryContacts
-                .Where(bc => !demographics.Any(x => x.Ssn == bc.Ssn))
+                .Where(bc => !demographicQuery.Any(x => x.Ssn == bc.Ssn))
                 .Join(_totalService.GetTotalBalanceSet(ctx, req.ProfitYear), x => x.Ssn, x => x.Ssn,
                     (pp, tot) => new { pp, tot });
 
-            var beneficiaryLineItem = await beneQry.GroupBy(x => true).Select(x => new YearEndProfitSharingReportSummaryLineItem()
+            var beneficiaryLineItem = await beneQry.GroupBy(x => true).Select(x => new YearEndProfitSharingReportSummaryLineItem
             {
                 Subgroup = "TERMINATED",
                 LineItemPrefix = "N",
@@ -218,13 +290,12 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 TotalPriorBalance = 0
             }).FirstOrDefaultAsync(cancellationToken);
 
-
             if (beneficiaryLineItem != null)
             {
                 lineItems.Add(beneficiaryLineItem);
             }
 
-            return new YearEndProfitSharingReportSummaryResponse { LineItems = lineItems.Where(li => li != null).ToList()! };
+            return new YearEndProfitSharingReportSummaryResponse { LineItems = lineItems };
         });
     }
 
@@ -309,10 +380,6 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 HoursTotal = totals.HoursTotal,
                 PointsTotal = totals.PointsTotal,
                 BalanceTotal = totals.BalanceTotal,
-                TerminatedWagesTotal = totals.TerminatedWagesTotal,
-                TerminatedHoursTotal = totals.TerminatedHoursTotal,
-                TerminatedPointsTotal = totals.TerminatedPointsTotal,
-                TerminatedBalanceTotal = totals.TerminatedBalanceTotal,
                 NumberOfEmployees = totals.NumberOfEmployees,
                 NumberOfNewEmployees = totals.NumberOfNewEmployees,
                 NumberOfEmployeesInPlan = totals.NumberOfEmployees - totals.NumberOfEmployeesUnder21 - totals.NumberOfNewEmployees,
@@ -330,71 +397,63 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
         var birthday18 = calInfo.FiscalEndDate.AddYears(-18);
         var birthday21 = calInfo.FiscalEndDate.AddYears(-21);
-        var birthday65 = calInfo.FiscalEndDate.AddYears(-65);
-        var fiscalBeginDate = calInfo.FiscalBeginDate;
+        var birthday64 = calInfo.FiscalEndDate.AddYears(-64);
         var fiscalEndDate = calInfo.FiscalEndDate;
-        
-        
+
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            // Always fetch all details for the year
-            IQueryable<YearEndProfitSharingReportDetail> allDetails = await ActiveSummary(ctx, req, calInfo.FiscalEndDate);
+            // Build optimized query that aggregates at database level without materializing individual records
+            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, req.UseFrozenData);
 
-            allDetails = allDetails.Where(x =>
-                ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > fiscalEndDate)) &&
-                x.Hours >= _hoursThreshold && x.DateOfBirth <= birthday18);
+            // Get first contribution year lookup
+            var firstContributionYearQuery = TotalService.GetFirstContributionYear(ctx, req.ProfitYear);
 
-            var totals = await (
-                from a in allDetails
-                group a by true
-                into g
+            // Build aggregation query directly from PayProfit + Demographics
+            // Note: We materialize to a simple DTO first to avoid complex EF translation issues
+            var totalsData = await (
+                from pp in ctx.PayProfits
+                    .Where(p => p.ProfitYear == req.ProfitYear)
+                join d in demographicQuery on pp.DemographicId equals d.Id
+                join fc in firstContributionYearQuery on d.Ssn equals fc.Ssn into fcTmp
+                from fc in fcTmp.DefaultIfEmpty()
+                where ((d.EmploymentStatusId == EmploymentStatus.Constants.Active ||
+                        d.EmploymentStatusId == EmploymentStatus.Constants.Inactive) ||
+                       (d.TerminationDate.HasValue && d.TerminationDate.Value > fiscalEndDate)) &&
+                      (((pp.CurrentHoursYear + pp.HoursExecutive) >= _hoursThreshold && d.DateOfBirth <= birthday18) ||
+                       (d.DateOfBirth <= birthday64))
                 select new
                 {
-                    NumberOfEmployees = g.Count(),
-                    NumberOfNewEmployees = g.Count(x => ((x.FirstContributionYear == null) && x.DateOfBirth <= birthday21)),
-                    NumberOfEmployeesUnder21 = g.Count(x => x.DateOfBirth > birthday21),
-                    WagesTotal = g.Where(x => x.DateOfBirth < birthday21).Sum(x => x.Wages),
-                    HoursTotal = g.Where(x => x.DateOfBirth < birthday21).Sum(x => x.Hours),
-                    PointsTotal = g.Where(x => x.DateOfBirth <= birthday21 && x.DateOfBirth > birthday65).Sum(x => x.Wages / 100),
-                }
-            ).FirstOrDefaultAsync(cancellationToken);
+                    Hours = pp.CurrentHoursYear + pp.HoursExecutive,
+                    Wages = pp.CurrentIncomeYear + pp.IncomeExecutive,
+                    DateOfBirth = d.DateOfBirth,
+                    FirstContributionYear = fc != null ? fc.FirstContributionYear : (short?)null,
+                    Ssn = d.Ssn
+                })
+                .ToListAsync(cancellationToken);
 
-            if (totals == null)
+            // Aggregate in memory (much faster than old approach since we skip balance calculations)
+            var numberOfEmployees = totalsData.Count(x => x.DateOfBirth > birthday21 || x.Hours >= _hoursThreshold);
+            var numberOfNewEmployees = totalsData.Count(x => !x.FirstContributionYear.HasValue && x.DateOfBirth <= birthday21);
+            var numberOfEmployeesUnder21 = totalsData.Count(x => x.DateOfBirth > birthday21);
+
+            // Exclude age < 21 and age 64+ with < 1000 hours from wage/hour totals
+            var eligibleForTotals = totalsData.Where(x =>
+                x.DateOfBirth <= birthday21 &&
+                !(x.DateOfBirth <= birthday64 && x.Hours < _hoursThreshold)).ToList();
+
+            var wagesTotal = eligibleForTotals.Sum(x => x.Wages);
+            var hoursTotal = eligibleForTotals.Sum(x => x.Hours);
+
+            return new YearEndProfitSharingReportTotals
             {
-                return new YearEndProfitSharingReportTotals();
-            }
-
-            IQueryable<YearEndProfitSharingReportDetail> terminatedDetails = (await ActiveSummary(ctx, req, calInfo.FiscalEndDate))
-                .Where(x => x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate >= fiscalBeginDate && x.TerminationDate <= fiscalEndDate);
-
-            var terminatedTotals = await (
-                from t in terminatedDetails
-                group t by true
-                into g
-                select new
-                {
-                    TerminatedWagesTotal = g.Sum(x => x.Wages),
-                    TerminatedHoursTotal = g.Sum(x => x.Hours),
-                    TerminatedPointsTotal = g.Where(x => x.DateOfBirth <= birthday21 && x.DateOfBirth > birthday65).Sum(x => x.Wages / 100),
-                }
-            ).FirstOrDefaultAsync(cancellationToken);
-
-            var rslt = new YearEndProfitSharingReportTotals
-            {
-                NumberOfEmployees = totals.NumberOfEmployees,
-                NumberOfNewEmployees = totals.NumberOfNewEmployees,
-                NumberOfEmployeesUnder21 = totals.NumberOfEmployeesUnder21,
-                WagesTotal = totals.WagesTotal,
-                HoursTotal = totals.HoursTotal,
-                PointsTotal = totals.PointsTotal,
-                TerminatedHoursTotal = terminatedTotals?.TerminatedHoursTotal ?? 0,
-                TerminatedWagesTotal = terminatedTotals?.TerminatedWagesTotal ?? 0,
-                TerminatedPointsTotal = terminatedTotals?.TerminatedPointsTotal ?? 0,
+                NumberOfEmployees = numberOfEmployees,
+                NumberOfNewEmployees = numberOfNewEmployees,
+                NumberOfEmployeesUnder21 = numberOfEmployeesUnder21,
+                WagesTotal = wagesTotal,
+                HoursTotal = Math.Truncate(hoursTotal),
+                PointsTotal = Math.Round(wagesTotal / 100),
             };
-
-            return rslt;
         });
-
     }
 
     /// <summary>

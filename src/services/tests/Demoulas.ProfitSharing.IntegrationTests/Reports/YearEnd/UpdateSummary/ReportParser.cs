@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.UpdateSummary;
+﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.UpdateSummary;
 
 // Parses a line of the READY Pay450 report
 public static class ReportParser

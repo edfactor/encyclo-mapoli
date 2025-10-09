@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Groups;
-public sealed class DistributionGroup: GroupBase
+public sealed class DistributionGroup : GroupBase
 {
     public DistributionGroup() : base()
     {
@@ -19,7 +19,7 @@ public sealed class DistributionGroup: GroupBase
                 .ProducesProblemFE<ProblemDetails>(StatusCodes.Status500InternalServerError)
                 .WithRequestTimeout(TimeSpan.FromMinutes(1))
                 .WithTags(RouteName));
-            
+
             ep.Policies(Policy.CanViewDistributions);
         });
     }

@@ -4,6 +4,7 @@ import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import { profitYearValidator } from "../../utils/FormValidators";
 import DuplicateSsnGuard from "../../components/DuplicateSsnGuard";
 import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
 import { useLazyGetForfeituresAndPointsQuery } from "../../reduxstore/api/YearsEndApi";
@@ -24,13 +25,7 @@ interface ForfeitSearchParametersProps {
 }
 
 const schema = yup.object().shape({
-  profitYear: yup
-    .number()
-    .typeError("Year must be a number")
-    .integer("Year must be an integer")
-    .min(2020, "Year must be 2020 or later")
-    .max(2100, "Year must be 2100 or earlier")
-    .required("Year is required")
+  profitYear: profitYearValidator()
 });
 
 const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({ setInitialSearchLoaded, setPageReset }) => {

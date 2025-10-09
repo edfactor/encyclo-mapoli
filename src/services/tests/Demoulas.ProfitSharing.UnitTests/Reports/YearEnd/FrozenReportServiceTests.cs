@@ -14,7 +14,7 @@ using Shouldly;
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 public class FrozenReportServiceTests : ApiTestBase<Program>
 {
-   [Fact(DisplayName ="PS-61 - Get Forfeitures and Points report.  PAY443")]
+    [Fact(DisplayName = "PS-61 - Get Forfeitures and Points report.  PAY443")]
     public async Task GetForfeituresAndPointsTests()
     {
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
@@ -61,7 +61,7 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
                 prof.StateTaxes = 0.25m;
             }
 
-            var ppArray = await ctx.PayProfits.Where(x=>x.DemographicId== demoTest.Id).ToArrayAsync(CancellationToken.None);
+            var ppArray = await ctx.PayProfits.Where(x => x.DemographicId == demoTest.Id).ToArrayAsync(CancellationToken.None);
             foreach (var pp in ppArray)
             {
                 pp.ProfitYear = 10000;
@@ -84,7 +84,7 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
             Take = 1000
         };
 
-        var response = await ApiClient.GETAsync<GrossWagesReportEndpoint, GrossWagesReportRequest,  GrossWagesReportResponse>(request);
+        var response = await ApiClient.GETAsync<GrossWagesReportEndpoint, GrossWagesReportRequest, GrossWagesReportResponse>(request);
         response.ShouldNotBeNull();
         response.Result.Response.Total.ShouldBeGreaterThan(0);
         var testRec = response.Result.Response.Results.First(x => x.BadgeNumber == demoBadgeNumber);
@@ -106,7 +106,8 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
             demoBadgeNumber = demoTest.BadgeNumber;
             var pdArray = await ctx.ProfitDetails.Where(x => x.Ssn == demoTest.Ssn).ToArrayAsync(CancellationToken.None);
 
-            foreach (var pd in pdArray) {
+            foreach (var pd in pdArray)
+            {
                 pd.Contribution = 2500;
                 pd.Earnings = 120;
                 pd.Forfeiture = 0;
@@ -116,7 +117,7 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
 
         //Check unauthorized
         var request = new ProfitYearRequest() { ProfitYear = 2023, Skip = 0, Take = 255 };
-    var response = await ApiClient.GETAsync<UpdateSummaryReportEndpoint, ProfitYearRequest, UpdateSummaryReportResponse>(request);
+        var response = await ApiClient.GETAsync<UpdateSummaryReportEndpoint, ProfitYearRequest, UpdateSummaryReportResponse>(request);
 
         response.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
 

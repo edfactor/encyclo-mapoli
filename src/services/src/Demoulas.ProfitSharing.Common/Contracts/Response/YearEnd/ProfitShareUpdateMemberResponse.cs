@@ -3,7 +3,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
-public record ProfitShareUpdateMemberResponse: IIsExecutive
+public record ProfitShareUpdateMemberResponse : IIsExecutive
 {
     public bool IsEmployee { get; init; }
     public long Badge { get; set; }

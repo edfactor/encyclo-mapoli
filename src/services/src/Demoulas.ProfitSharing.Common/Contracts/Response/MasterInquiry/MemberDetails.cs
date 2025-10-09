@@ -1,7 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Shared;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 
@@ -23,6 +23,8 @@ public record MemberDetails : IdRequest, INameParts, IFullNameProperty, IPhoneNu
     public string AddressState { get; init; } = string.Empty;
     [MaskSensitive] public string AddressZipCode { get; init; } = string.Empty;
     public short Age { get; set; }
+
+    [MaskSensitive]
     public DateOnly DateOfBirth { get; init; }
     public DateOnly? HireDate { get; init; }
     public DateOnly? TerminationDate { get; init; } = null;
@@ -32,8 +34,8 @@ public record MemberDetails : IdRequest, INameParts, IFullNameProperty, IPhoneNu
     public byte? EnrollmentId { get; init; }
     public string? Enrollment { get; init; }
     public short StoreNumber { get; set; }
-    [UnmaskSensitive] public decimal CurrentEtva { get; set; }
-    [UnmaskSensitive] public decimal PreviousEtva { get; set; }
+    public decimal CurrentEtva { get; set; }
+    public decimal PreviousEtva { get; set; }
 
     public string? Department { get; set; }
     public string? PayClassification { get; set; }
@@ -46,4 +48,5 @@ public record MemberDetails : IdRequest, INameParts, IFullNameProperty, IPhoneNu
     [MaskSensitive] public string? TerminationReason { get; set; }
 
     public List<int> Missives { get; set; } = [];
+    public List<int> BadgesOfDuplicateSsns { get; set; } = [];
 }

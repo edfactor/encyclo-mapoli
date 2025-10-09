@@ -40,7 +40,7 @@ public class TestMasterInquiry : BaseSqlActivity
     public override async Task<Outcome> Execute()
     {
         TestToken.CreateAndAssignTokenForClient(httpClient, "Finance-Manager");
-        
+
         string path; //  = Path.Combine(AppContext.BaseDirectory, "OUTFL");
         path = "/Users/robertherrmann/prj/yerunner/src/services/tests/yematchrunner/YEMatch/Resources/MTPR.OUTFL";
         string content = await File.ReadAllTextAsync(path);
@@ -166,7 +166,7 @@ public class TestMasterInquiry : BaseSqlActivity
     {
         ApiClient apiClient = SmartActivityFactory.Client!;
 
-        
+
         HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/master/master-inquiry/search")
         {
             Content = new StringContent($$"""{"Ssn": {{ssn}},"memberType":1,"profitYear":2024}""",
@@ -198,23 +198,23 @@ public class TestMasterInquiry : BaseSqlActivity
 
         MemberDetails memberDetails = jresponse1.Results.First();
 
-/*
-        curl -X 'POST' \
-        'https://localhost:7141/api/master/master-inquiry/member' \
-        -H 'accept: application/json' \
-        -H 'Impersonation: Finance-Manager' \
-        -H 'Authorization: Bearer eyJraWQiOiJkZUZKc3o3OTVsNU1wQ2RUdlVVY3JaOEFUbFdXM0t2NFFjZ0dLa0NPZU5RIiwiYWxnIjoiUlMyNTYifQ.eyJ2ZXIiOjEsImp0aSI6IkFULlN0ay1xcFZDTmswR2VPYk1sX19BbndKVkF6OTZPQ191bTBSb251QXpHdEkiLCJpc3MiOiJodHRwczovL21hcmtldGJhc2tldC5va3RhLmNvbS9vYXV0aDIvYXVzMTEzZWhjNWtrcVRlWEIxdDgiLCJhdWQiOiJhcGk6Ly9zbWFydC1wcyIsImlhdCI6MTc0ODkxMTU4MSwiZXhwIjoxNzQ4OTE1MTgxLCJjaWQiOiIwb2ExMTNlYWpqNEpUMWlrSjF0OCIsInVpZCI6IjAwdXd3dG1vcjhTdDNRbFlxMXQ3Iiwic2NwIjpbIm9wZW5pZCJdLCJhdXRoX3RpbWUiOjE3NDg5MTE1ODAsInN1YiI6ImJoZXJybWFubkBNYWlub2ZmaWNlLkRlbW91bGFzLkNvcnAiLCJncm91cHMiOlsiU01BUlQtUFMtUUEtSW1wZXJzb25hdGlvbiJdfQ.j9X3DTJLhHwFgovhEzvi9LuYjGjKvUTmJedFLo86AHMbFCw9Al8weBZsoIP3aZ01vA3SHmgjsOLW309CKXg4igx0C_8wgKox1OmIMDgi_50ln61q2Cb4uiEiFq7AT79QB4Uj4_y1YK0CGtuxRb0Ogwsupo3lYelYFZDm0MZpiUirCODnxdj0gGYhRcptL6eKbVf-SAp019HhSDFfRgvXqo5c6RfT_i7J0FROpcZjlxAmGGha--_v1fOUxLtttxeF-4JC58CKskQz0KJByKgA3Y6sX9gIEzlVy8Hh6Lsw6gloA-tWO_5SQpI6Ecd-fkTU4qNeyclpaUs-HS7FoR_GXg' \
-        -H 'Content-Type: application/json' \
-        -d '{
-        "memberType": 1,
-        "id": 357807,
-        "profitYear": 2023,
-        "sortBy": null,
-        "isSortDescending": null,
-        "skip": 0,
-        "take": 255
-    }'
-    */
+        /*
+                curl -X 'POST' \
+                'https://localhost:7141/api/master/master-inquiry/member' \
+                -H 'accept: application/json' \
+                -H 'Impersonation: Finance-Manager' \
+                -H 'Authorization: Bearer eyJraWQiOiJkZUZKc3o3OTVsNU1wQ2RUdlVVY3JaOEFUbFdXM0t2NFFjZ0dLa0NPZU5RIiwiYWxnIjoiUlMyNTYifQ.eyJ2ZXIiOjEsImp0aSI6IkFULlN0ay1xcFZDTmswR2VPYk1sX19BbndKVkF6OTZPQ191bTBSb251QXpHdEkiLCJpc3MiOiJodHRwczovL21hcmtldGJhc2tldC5va3RhLmNvbS9vYXV0aDIvYXVzMTEzZWhjNWtrcVRlWEIxdDgiLCJhdWQiOiJhcGk6Ly9zbWFydC1wcyIsImlhdCI6MTc0ODkxMTU4MSwiZXhwIjoxNzQ4OTE1MTgxLCJjaWQiOiIwb2ExMTNlYWpqNEpUMWlrSjF0OCIsInVpZCI6IjAwdXd3dG1vcjhTdDNRbFlxMXQ3Iiwic2NwIjpbIm9wZW5pZCJdLCJhdXRoX3RpbWUiOjE3NDg5MTE1ODAsInN1YiI6ImJoZXJybWFubkBNYWlub2ZmaWNlLkRlbW91bGFzLkNvcnAiLCJncm91cHMiOlsiU01BUlQtUFMtUUEtSW1wZXJzb25hdGlvbiJdfQ.j9X3DTJLhHwFgovhEzvi9LuYjGjKvUTmJedFLo86AHMbFCw9Al8weBZsoIP3aZ01vA3SHmgjsOLW309CKXg4igx0C_8wgKox1OmIMDgi_50ln61q2Cb4uiEiFq7AT79QB4Uj4_y1YK0CGtuxRb0Ogwsupo3lYelYFZDm0MZpiUirCODnxdj0gGYhRcptL6eKbVf-SAp019HhSDFfRgvXqo5c6RfT_i7J0FROpcZjlxAmGGha--_v1fOUxLtttxeF-4JC58CKskQz0KJByKgA3Y6sX9gIEzlVy8Hh6Lsw6gloA-tWO_5SQpI6Ecd-fkTU4qNeyclpaUs-HS7FoR_GXg' \
+                -H 'Content-Type: application/json' \
+                -d '{
+                "memberType": 1,
+                "id": 357807,
+                "profitYear": 2023,
+                "sortBy": null,
+                "isSortDescending": null,
+                "skip": 0,
+                "take": 255
+            }'
+            */
         int demographicsId = memberDetails.id;
         HttpRequestMessage request2 = new(HttpMethod.Post, apiClient.BaseUrl + "api/master/master-inquiry/member")
         {

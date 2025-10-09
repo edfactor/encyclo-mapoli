@@ -5,11 +5,18 @@ import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import {
+  badgeNumberStringValidator,
+  handleBadgeNumberStringInput,
+  handleSsnInput,
+  profitYearValidator,
+  ssnValidator
+} from "../../../utils/FormValidators";
 
 interface ExecutiveHoursAndDollarsSearch {
   profitYear: number;
-  badgeNumber?: number | null | undefined;
-  socialSecurity?: number | undefined;
+  badgeNumber?: string;
+  socialSecurity?: string | undefined;
   fullNameContains?: string | null;
   hasExecutiveHoursAndDollars: NonNullable<boolean>;
   isMonthlyPayroll: NonNullable<boolean>;
@@ -17,21 +24,9 @@ interface ExecutiveHoursAndDollarsSearch {
 
 const validationSchema = yup
   .object({
-    profitYear: yup.number().required("Profit Year is required").typeError("Profit Year must be a number"),
-    socialSecurity: yup
-      .number()
-      .typeError("SSN must be a number")
-      .integer("SSN must be an integer")
-      .min(0, "SSN must be positive")
-      .max(999999999, "SSN must be 9 digits or less")
-      .transform((value) => value || undefined),
-    badgeNumber: yup
-      .number()
-      .typeError("Badge Number must be a number")
-      .integer("Badge Number must be an integer")
-      .min(0, "Badge must be positive")
-      .max(9999999, "Badge must be 7 digits or less")
-      .transform((value) => value || undefined),
+    profitYear: profitYearValidator(),
+    socialSecurity: ssnValidator,
+    badgeNumber: badgeNumberStringValidator,
     fullNameContains: yup
       .string()
       .typeError("Full Name must be a string")
@@ -111,7 +106,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     trigger // need this unused param to prevent console errors. No idea why - EL
   } = useForm<ExecutiveHoursAndDollarsSearch>({
     resolver: yupResolver(validationSchema) as Resolver<ExecutiveHoursAndDollarsSearch>,
-    mode: "onChange",
+    mode: "onBlur",
     defaultValues: {
       profitYear: profitYear,
       badgeNumber: undefined,
@@ -149,7 +144,11 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
-      onSearch(data);
+      const searchData = {
+        ...data,
+        badgeNumber: data.badgeNumber ? Number(data.badgeNumber) : undefined
+      };
+      onSearch(searchData);
     }
   });
 
@@ -260,14 +259,11 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                   value={field.value ?? ""}
                   error={!!errors.socialSecurity}
                   onChange={(e) => {
-                    if (!isNaN(Number(e.target.value))) {
-                      const parsedValue = e.target.value === "" ? null : Number(e.target.value);
+                    const validatedValue = handleSsnInput(e.target.value);
+                    if (validatedValue !== null) {
+                      const parsedValue = validatedValue === "" ? null : validatedValue;
                       field.onChange(parsedValue);
-                      if (e.target.value !== "") {
-                        toggleSearchFieldEntered(true, "socialSecurity");
-                      } else {
-                        toggleSearchFieldEntered(false, "socialSecurity");
-                      }
+                      toggleSearchFieldEntered(validatedValue !== "", "socialSecurity");
                     }
                   }}
                 />
@@ -289,17 +285,12 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                   error={!!errors.badgeNumber}
                   disabled={activeField === "socialSecurity" || activeField === "fullNameContains"}
                   onChange={(e) => {
-                    if (!isNaN(Number(e.target.value))) {
-                      const parsedValue = e.target.value === "" ? null : Number(e.target.value);
-                      field.onChange(parsedValue);
-                      if (e.target.value !== "") {
-                        toggleSearchFieldEntered(true, "badgeNumber");
-                      } else {
-                        toggleSearchFieldEntered(false, "badgeNumber");
-                      }
+                    const validatedValue = handleBadgeNumberStringInput(e.target.value);
+                    if (validatedValue !== null) {
+                      field.onChange(validatedValue);
+                      toggleSearchFieldEntered(validatedValue !== "", "badgeNumber");
                     }
                   }}
-                  type="number"
                 />
               )}
             />

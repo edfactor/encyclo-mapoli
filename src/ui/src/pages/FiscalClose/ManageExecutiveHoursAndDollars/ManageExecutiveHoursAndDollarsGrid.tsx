@@ -2,10 +2,10 @@ import { AddOutlined } from "@mui/icons-material";
 import { Button, Tooltip, Typography } from "@mui/material";
 import { CellValueChangedEvent, IRowNode, SelectionChangedEvent } from "ag-grid-community";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ExecutiveHoursAndDollars, PagedReportResponse } from "reduxstore/types";
 import { DSMGrid, Pagination, SmartModal } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { CAPTIONS } from "../../../constants";
+import { ExecutiveHoursAndDollars, PagedReportResponse } from "../../../reduxstore/types";
 import { GetManageExecutiveHoursAndDollarsColumns } from "./ManageExecutiveHoursAndDollarsGridColumns";
 import SearchAndAddExecutive from "./SearchAndAddExecutive";
 

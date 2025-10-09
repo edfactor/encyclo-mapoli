@@ -71,6 +71,9 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
                                   underlying == typeof(byte) || underlying == typeof(sbyte) || underlying == typeof(double) || underlying == typeof(float);
             bool primitiveOrString = underlying.IsPrimitive || underlying == _stringType || underlying.IsEnum || isDecimal || isOtherNumeric;
 
+            // Check if property is a dictionary with decimal values
+            bool isDictionaryWithDecimalValues = CheckIsDictionaryWithDecimalValues(pi.PropertyType);
+
             MaskSensitiveAttribute? maskAttr = pi.GetCustomAttribute<MaskSensitiveAttribute>(inherit: true) ?? classMask;
             UnmaskSensitiveAttribute? unmaskAttr = pi.GetCustomAttribute<UnmaskSensitiveAttribute>(inherit: true) ?? classUnmask;
 
@@ -79,7 +82,7 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
             bool unmaskAll = unmaskAttr != null && (unmaskAttr.Roles.Length == 0);
             HashSet<string>? unmaskRoles = (unmaskAttr != null && !unmaskAll && unmaskAttr.Roles.Length > 0) ? new HashSet<string>(unmaskAttr.Roles, StringComparer.OrdinalIgnoreCase) : null;
 
-            bool potentiallyMaskable = maskAttr != null || unmaskAttr != null || isDecimal; // decimal default rule might apply
+            bool potentiallyMaskable = maskAttr != null || unmaskAttr != null || isDecimal || isDictionaryWithDecimalValues;
             if (potentiallyMaskable)
             {
                 hasMaskable = true;
@@ -87,9 +90,45 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
 
             // capture any explicit JsonPropertyName
             string? jsonName = pi.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name;
-            props.Add(new PropertyMetadata(pi, maskAll, maskRoles, unmaskAll, unmaskRoles, isDecimal, isOtherNumeric, primitiveOrString, jsonName));
+            props.Add(new PropertyMetadata(pi, maskAll, maskRoles, unmaskAll, unmaskRoles, isDecimal, isOtherNumeric, primitiveOrString, jsonName, isDictionaryWithDecimalValues));
         }
         return new TypeMetadata(t, props, hasMaskable);
+    }
+
+    private static bool CheckIsDictionaryWithDecimalValues(Type type)
+    {
+        // Check if type implements IDictionary<TKey, TValue> with TValue = decimal
+        if (type.IsGenericType)
+        {
+            Type genericTypeDef = type.GetGenericTypeDefinition();
+            if (genericTypeDef == typeof(Dictionary<,>) || genericTypeDef == typeof(IDictionary<,>))
+            {
+                Type[] genericArgs = type.GetGenericArguments();
+                if (genericArgs.Length == 2 && genericArgs[1] == typeof(decimal))
+                {
+                    return true;
+                }
+            }
+        }
+
+        // Check implemented interfaces
+        foreach (Type iface in type.GetInterfaces())
+        {
+            if (iface.IsGenericType)
+            {
+                Type ifaceGenericDef = iface.GetGenericTypeDefinition();
+                if (ifaceGenericDef == typeof(IDictionary<,>))
+                {
+                    Type[] genericArgs = iface.GetGenericArguments();
+                    if (genericArgs.Length == 2 && genericArgs[1] == typeof(decimal))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     private sealed class MaskingConverter<T> : JsonConverter<T> where T : class
@@ -154,6 +193,11 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
                         // Write primitive directly for performance where possible
                         WritePrimitive(writer, propVal, pm);
                     }
+                    else if (pm.IsDictionaryWithDecimalValues)
+                    {
+                        // Dictionary with decimal values - serialize without masking
+                        JsonSerializer.Serialize(writer, propVal, propVal.GetType(), _originalOptions);
+                    }
                     else
                     {
                         JsonSerializer.Serialize(writer, propVal, propVal.GetType(), _originalOptions);
@@ -161,7 +205,14 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
                 }
                 else
                 {
-                    WriteMasked(writer, propVal, pm);
+                    if (pm.IsDictionaryWithDecimalValues)
+                    {
+                        WriteMaskedDictionary(writer, propVal, isExecutiveRow, ctx);
+                    }
+                    else
+                    {
+                        WriteMasked(writer, propVal, pm);
+                    }
                 }
             }
             writer.WriteEndObject();
@@ -229,6 +280,67 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
             writer.WriteStringValue(MaskAlphaNumeric(serialized.Trim('"')));
         }
 
+        private static void WriteMaskedDictionary(Utf8JsonWriter writer, object? value, bool isExecutiveRow, RoleContextSnapshot? ctx)
+        {
+            if (value is null)
+            {
+                writer.WriteNullValue();
+                return;
+            }
+
+            bool privilegedContext = isExecutiveRow || (ctx?.IsItDevOps == true);
+
+            // Use reflection to access dictionary entries
+            Type valueType = value.GetType();
+            PropertyInfo? keysProperty = valueType.GetProperty("Keys");
+            PropertyInfo? valuesProperty = valueType.GetProperty("Values");
+            PropertyInfo? itemProperty = valueType.GetProperty("Item");
+
+            if (keysProperty == null || itemProperty == null)
+            {
+                // Fallback: serialize as-is if we can't introspect
+                JsonSerializer.Serialize(writer, value, valueType);
+                return;
+            }
+
+            object? keys = keysProperty.GetValue(value);
+            if (keys is System.Collections.IEnumerable enumerable)
+            {
+                writer.WriteStartObject();
+                foreach (object? key in enumerable)
+                {
+                    if (key is not null)
+                    {
+                        string keyStr = key.ToString() ?? string.Empty;
+                        writer.WritePropertyName(keyStr);
+
+                        object? dictValue = itemProperty.GetValue(value, new[] { key });
+
+                        // Mask decimal values in privileged contexts
+                        if (dictValue is decimal decValue && privilegedContext)
+                        {
+                            string raw = Convert.ToString(decValue, System.Globalization.CultureInfo.InvariantCulture) ?? string.Empty;
+                            writer.WriteStringValue(MaskDigits(raw));
+                        }
+                        else if (dictValue is null)
+                        {
+                            writer.WriteNullValue();
+                        }
+                        else
+                        {
+                            JsonSerializer.Serialize(writer, dictValue, dictValue.GetType());
+                        }
+                    }
+                }
+                writer.WriteEndObject();
+            }
+            else
+            {
+                // Fallback
+                JsonSerializer.Serialize(writer, value, valueType);
+            }
+        }
+
         private static bool ShouldMask(PropertyMetadata pm, object? value, bool isExecutiveRow, RoleContextSnapshot? ctx)
         {
             // 1. Unmask attribute (no roles) => always unmasked
@@ -252,7 +364,13 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
                 return privilegedContext; // attribute presence does not expand masking beyond privileged contexts per legacy middleware
             }
 
-            // 4. Non-decimal primitives/strings: only mask when attribute says mask AND context is privileged (IT or executive row)
+            // 4. Dictionary with decimal values: same masking rules as decimal properties
+            if (pm.IsDictionaryWithDecimalValues)
+            {
+                return privilegedContext;
+            }
+
+            // 5. Non-decimal primitives/strings: only mask when attribute says mask AND context is privileged (IT or executive row)
             if (maskedByAttribute && privilegedContext)
             {
                 return true;
@@ -301,7 +419,8 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
         bool IsDecimal,
         bool IsOtherNumeric,
         bool IsPrimitiveOrString,
-        string? JsonName);
+        string? JsonName,
+        bool IsDictionaryWithDecimalValues);
 
     private sealed record TypeMetadata(Type Type, IReadOnlyList<PropertyMetadata> Properties, bool HasMaskableProperties);
 }

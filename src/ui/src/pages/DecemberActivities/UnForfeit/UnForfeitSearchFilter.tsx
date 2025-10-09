@@ -16,43 +16,20 @@ import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import { CalendarResponseDto, StartAndEndDateRequest } from "../../../reduxstore/types";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
+import {
+  dateStringValidator,
+  endDateStringAfterStartDateValidator,
+  profitYearValidator
+} from "../../../utils/FormValidators";
 
 const schema = yup.object().shape({
-  beginningDate: yup
-    .string()
-    .required("Beginning Date is required")
-    .test("is-four-digits", "Beginning Date must be four digits", function (value) {
-      return /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(value || "");
-    })
-    .test("is-valid-year", "Year must be 2000 or later", function (value) {
-      if (!value) return true;
-      const match = value.match(/^\d{1,2}\/\d{1,2}\/(\d{4})$/);
-      if (!match) return true;
-      const year = parseInt(match[1]);
-      return year >= 2000;
-    }),
-  endingDate: yup
-    .string()
-    .typeError("Invalid date")
+  beginningDate: dateStringValidator(2000, 2099, "Beginning Date").required("Beginning Date is required"),
+  endingDate: endDateStringAfterStartDateValidator(
+    "beginningDate",
+    tryddmmyyyyToDate,
+    "Ending date must be the same or after the beginning date"
+  )
     .required("Ending Date is required")
-    .test("is-valid-year", "Year must be 2000 or later", function (value) {
-      if (!value) return true;
-      const match = value.match(/^\d{1,2}\/\d{1,2}\/(\d{4})$/);
-      if (!match) return true;
-      const year = parseInt(match[1]);
-      return year >= 2000;
-    })
-    .test("date-range", "Ending date must be the same or after the beginning date", function (value) {
-      const { beginningDate } = this.parent;
-      if (!beginningDate || !value) return true;
-
-      const beginDate = tryddmmyyyyToDate(beginningDate);
-      const endDate = tryddmmyyyyToDate(value);
-
-      if (!beginDate || !endDate) return true;
-
-      return endDate >= beginDate;
-    })
     .test("is-too-early", "Insuffient data for dates before 2024", function (value) {
       return new Date(value) > new Date(2024, 1, 1);
     }),
@@ -65,7 +42,7 @@ const schema = yup.object().shape({
     })
     .required(),
   // Hidden field: not shown in search filter, but required in data
-  profitYear: yup.number().required("Profit year is required")
+  profitYear: profitYearValidator()
 });
 
 interface UnForfeitSearchFilterProps {
