@@ -296,7 +296,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             }
 
             return new YearEndProfitSharingReportSummaryResponse { LineItems = lineItems };
-        });
+        }, cancellationToken);
     }
 
     /// <summary>
@@ -386,7 +386,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 NumberOfEmployeesUnder21 = totals.NumberOfEmployeesUnder21
             };
             return response;
-        });
+        }, cancellationToken);
     }
 
     public async Task<YearEndProfitSharingReportTotals> GetYearEndProfitSharingTotalsAsync(
@@ -453,7 +453,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 HoursTotal = Math.Truncate(hoursTotal),
                 PointsTotal = Math.Round(wagesTotal / 100),
             };
-        });
+        }, cancellationToken);
     }
 
     /// <summary>

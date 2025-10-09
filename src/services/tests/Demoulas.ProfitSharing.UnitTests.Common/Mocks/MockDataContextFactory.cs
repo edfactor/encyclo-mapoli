@@ -428,7 +428,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
     /// practice.
     /// More information can be found here: https://docs.microsoft.com/en-us/azure/azure-sql/database/read-scale-out
     /// </summary>
-    public async Task<T> UseReadOnlyContext<T>(Func<ProfitSharingReadOnlyDbContext, Task<T>> func)
+    public async Task<T> UseReadOnlyContext<T>(Func<ProfitSharingReadOnlyDbContext, Task<T>> func, CancellationToken cancellationToken = default)   
     {
         try
         {

@@ -131,7 +131,7 @@ public sealed class DistributionService : IDistributionService
             }
 
             return await query.ToPaginationResultsAsync(request, cancellationToken);
-        });
+        }, cancellationToken);
 
         var result = new PaginatedResponseDto<DistributionSearchResponse>(request)
         {

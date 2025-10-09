@@ -53,7 +53,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             startDate = calInfo.FiscalBeginDate;
             endDate = calInfo.FiscalEndDate;
             return await query;
-        });
+        }, cancellationToken);
 
         return new ReportResponseBase<AdhocTerminatedEmployeeResponse>()
         {
@@ -118,7 +118,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
                          }).ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
 
             return await query;
-        });
+        }, cancellationToken);
 
         return new ReportResponseBase<AdhocTerminatedEmployeeResponse>()
         {

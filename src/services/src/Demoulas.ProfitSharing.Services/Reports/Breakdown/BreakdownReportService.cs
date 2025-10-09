@@ -189,7 +189,7 @@ public sealed class BreakdownReportService : IBreakdownService
             }
 
             return new GrandTotalsByStoreResponseDto { Rows = rows };
-        });
+        }, cancellationToken);
     }
 
 
@@ -244,7 +244,7 @@ public sealed class BreakdownReportService : IBreakdownService
             });
 
             return totals;
-        });
+        }, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetActiveMembersByStore(
@@ -473,7 +473,7 @@ public sealed class BreakdownReportService : IBreakdownService
                     Total = paginated.Total
                 }
             };
-        });
+        }, cancellationToken);
     }
 
     private static async Task<PaginatedResponseDto<ActiveMemberDto>> GetPaginatedResults(BreakdownByStoreRequest request, IQueryable<ActiveMemberDto> employeesBase, CancellationToken cancellationToken)

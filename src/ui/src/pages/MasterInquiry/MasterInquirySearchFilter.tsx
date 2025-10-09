@@ -285,12 +285,14 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
         name,
         label,
         type = "text",
-        disabled = false
+        disabled = false,
+        helperText
       }: {
         name: keyof MasterInquirySearch;
         label: string;
         type?: string;
         disabled?: boolean;
+        helperText?: string;
       }) => (
         <Grid size={{ xs: 12, sm: 6, md: type === "number" ? 2 : 4 }}>
           <FormLabel>{label}</FormLabel>
@@ -335,10 +337,24 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
                     handleBadgeNumberChange(e);
                   }
                 }}
+                sx={
+                  disabled
+                    ? {
+                        "& .MuiOutlinedInput-root": {
+                          backgroundColor: "#f5f5f5"
+                        }
+                      }
+                    : undefined
+                }
               />
             )}
           />
           {errors[name] && <FormHelperText error>{errors[name]?.message}</FormHelperText>}
+          {!errors[name] && helperText && (
+            <FormHelperText sx={{ color: "info.main", fontSize: "0.75rem", marginTop: "4px" }}>
+              {helperText}
+            </FormHelperText>
+          )}
         </Grid>
       ),
       [control, errors, handleBadgeNumberChange]
@@ -477,6 +493,29 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
     const isNameDisabled = hasSocialSecurity || hasBadgeNumber;
     const isBadgeNumberDisabled = hasSocialSecurity || hasName;
 
+    // Helper text for mutual exclusion
+    const getExclusionHelperText = useCallback(
+      (fieldName: string, isDisabled: boolean) => {
+        if (!isDisabled) return undefined;
+
+        if (fieldName === "socialSecurity") {
+          if (hasName) return "Disabled: Name field is in use. Press Reset to clear and re-enable.";
+          if (hasBadgeNumber) return "Disabled: Badge/PSN field is in use. Press Reset to clear and re-enable.";
+        }
+        if (fieldName === "name") {
+          if (hasSocialSecurity) return "Disabled: SSN field is in use. Press Reset to clear and re-enable.";
+          if (hasBadgeNumber) return "Disabled: Badge/PSN field is in use. Press Reset to clear and re-enable.";
+        }
+        if (fieldName === "badgeNumber") {
+          if (hasSocialSecurity) return "Disabled: SSN field is in use. Press Reset to clear and re-enable.";
+          if (hasName) return "Disabled: Name field is in use. Press Reset to clear and re-enable.";
+        }
+
+        return undefined;
+      },
+      [hasSocialSecurity, hasName, hasBadgeNumber]
+    );
+
     const isMemberTypeDisabled = badgeNumberValue !== null && badgeNumberValue !== undefined;
 
     // Determine if search button should be enabled
@@ -526,17 +565,20 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
               label="Social Security Number"
               type="text"
               disabled={isSocialSecurityDisabled}
+              helperText={getExclusionHelperText("socialSecurity", isSocialSecurityDisabled)}
             />
             <TextInputField
               name="name"
               label="Name"
               disabled={isNameDisabled}
+              helperText={getExclusionHelperText("name", isNameDisabled)}
             />
             <TextInputField
               name="badgeNumber"
               label="Badge/PSN Number"
               type="text"
               disabled={isBadgeNumberDisabled}
+              helperText={getExclusionHelperText("badgeNumber", isBadgeNumberDisabled)}
             />
             <RadioGroupField
               name="paymentType"

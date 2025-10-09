@@ -86,7 +86,7 @@ public class ApiTestBase<TStartup> where TStartup : class
         return MockDbContextFactory.UseReadOnlyContext(async ctx =>
         {
             return await ctx.PayProfits.MaxAsync(pp => pp.ProfitYear, cancellationToken: cancellationToken);
-        });
+        }, cancellationToken);
     }
 
 }

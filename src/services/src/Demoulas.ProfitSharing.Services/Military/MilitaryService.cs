@@ -155,7 +155,7 @@ public class MilitaryService : IMilitaryService
                 }
 
                 return await query.ToPaginationResultsAsync(req, cancellationToken);
-            });
+            }, cancellationToken);
 
             return Result<PaginatedResponseDto<MilitaryContributionResponse>>.Success(result);
         }

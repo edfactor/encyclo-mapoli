@@ -72,7 +72,7 @@ public sealed class TaxCodeEndpoint : ProfitSharingResultResponseEndpoint<ListRe
             var items = await _dataContextFactor.UseReadOnlyContext(c => c.TaxCodes
                 .OrderBy(x => x.Name)
                 .Select(x => new TaxCodeResponse { Id = x.Id, Name = x.Name })
-                .ToListAsync(ct));
+                .ToListAsync(ct), ct);
 
             // Record business metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,

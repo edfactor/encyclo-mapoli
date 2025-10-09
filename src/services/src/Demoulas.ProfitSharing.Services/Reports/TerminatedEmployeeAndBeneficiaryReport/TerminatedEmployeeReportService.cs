@@ -41,7 +41,7 @@ public sealed class TerminatedEmployeeReportService
         {
             List<MemberSlice> memberSliceUnion = await RetrieveMemberSlices(ctx, req, cancellationToken);
             return await MergeAndCreateDataset(ctx, req, memberSliceUnion, cancellationToken);
-        });
+        }, cancellationToken);
     }
 
     #region Member Data Retrieval

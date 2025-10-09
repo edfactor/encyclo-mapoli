@@ -105,7 +105,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
             }
 
             return paginatedResult;
-        });
+        }, cancellationToken);
 
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
 

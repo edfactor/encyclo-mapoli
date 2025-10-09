@@ -77,7 +77,7 @@ internal sealed class RebuildEnrollmentAndZeroContService
 
             // Return the year if sum indicates rebuild needed, otherwise 0
             return enrollmentSum == 0 ? await ctx.PayProfits.MinAsync(x => x.ProfitYear, cancellationToken) : (short)0;
-        });
+        }, cancellationToken);
     }
 
 }
