@@ -46,6 +46,6 @@ public sealed class DepartmentHostedService : BaseCacheHostedService<LookupTable
             return await context.Departments
                 .Select(selector: c => new LookupTableCache<byte> { Id = c.Id, Name = c.Name })
                 .ToListAsync(cancellationToken: cancellationToken);
-        });
+        }, cancellationToken);
     }
 }

@@ -125,7 +125,9 @@ public class CalendarServiceCacheTests
         Assert.Equal(expected.FiscalBeginDate, result.FiscalBeginDate);
         Assert.Equal(expected.FiscalEndDate, result.FiscalEndDate);
         distributedCache.Verify(c => c.GetAsync(cacheKey, It.IsAny<CancellationToken>()), Times.Once);
-        dataContextFactory.VerifyNoOtherCalls();
+        // Note: Cannot use VerifyNoOtherCalls() when interface has methods with optional parameters
+        // as Moq's expression tree compilation fails with CS0854
+        dataContextFactory.Verify(f => f.UseReadOnlyContext(It.IsAny<Func<ProfitSharingReadOnlyDbContext, Task<CalendarResponseDto>>>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -140,7 +142,7 @@ public class CalendarServiceCacheTests
             .ReturnsAsync((byte[]?)null);
         var dataContextFactory = new Mock<IProfitSharingDataContextFactory>();
         var accountingPeriodsService = new Mock<IAccountingPeriodsService>();
-        dataContextFactory.Setup(f => f.UseReadOnlyContext(It.IsAny<Func<ProfitSharingReadOnlyDbContext, Task<CalendarResponseDto>>>()))
+        dataContextFactory.Setup(f => f.UseReadOnlyContext(It.IsAny<Func<ProfitSharingReadOnlyDbContext, Task<CalendarResponseDto>>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expected);
         var service = new Demoulas.ProfitSharing.Services.CalendarService(dataContextFactory.Object, accountingPeriodsService.Object, distributedCache.Object);
 
@@ -151,6 +153,6 @@ public class CalendarServiceCacheTests
         Assert.Equal(expected.FiscalBeginDate, result.FiscalBeginDate);
         Assert.Equal(expected.FiscalEndDate, result.FiscalEndDate);
         distributedCache.Verify(c => c.GetAsync(cacheKey, It.IsAny<CancellationToken>()), Times.Once);
-        dataContextFactory.Verify(f => f.UseReadOnlyContext(It.IsAny<Func<ProfitSharingReadOnlyDbContext, Task<CalendarResponseDto>>>()), Times.Once);
+        dataContextFactory.Verify(f => f.UseReadOnlyContext(It.IsAny<Func<ProfitSharingReadOnlyDbContext, Task<CalendarResponseDto>>>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }

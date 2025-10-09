@@ -71,7 +71,7 @@ internal class EmployeeSyncChannelConsumer : BackgroundService
                 return c.Demographics.Where(d => oracleHcmIds.Contains(d.OracleHcmId))
                     .Select(d => new { d.OracleHcmId, d.Ssn })
                     .ToDictionaryAsync(d => d.OracleHcmId, d => d.Ssn, cancellationToken);
-            }).ConfigureAwait(false);
+            }, cancellationToken).ConfigureAwait(false);
 
             var missingIds = oracleHcmIds.Where(id => !empSsnDic.ContainsKey(id)).ToList();
             var newSsns = await _fakeSsnService.GenerateFakeSsnBatchAsync(missingIds.Count, cancellationToken).ConfigureAwait(false);

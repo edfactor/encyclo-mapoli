@@ -83,7 +83,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 DemographicId = demographic.Id,
                 BadgeNumber = demographic.BadgeNumber
             };
-        });
+        }, cancellationToken);
     }
 
     public async Task UpdateForfeitureAdjustmentAsync(ForfeitureAdjustmentUpdateRequest req, CancellationToken cancellationToken = default)

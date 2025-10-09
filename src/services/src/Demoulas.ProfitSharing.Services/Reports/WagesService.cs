@@ -37,7 +37,7 @@ public class WagesService : IWagesService
                 })
                 .ToPaginationResultsAsync(request, cancellationToken);
 
-        });
+        }, cancellationToken);
 
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
         return new ReportResponseBase<WagesCurrentYearResponse>

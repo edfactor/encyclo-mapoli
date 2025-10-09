@@ -66,7 +66,7 @@ public class CommentTypeEndpoint : ProfitSharingResultResponseEndpoint<ListRespo
                 c.CommentTypes
                  .OrderBy(x => x.Name)
                  .Select(x => new CommentTypeResponse { Id = x.Id, Name = x.Name })
-                 .ToListAsync(ct));
+                 .ToListAsync(ct), ct);
 
             // Record business metrics
             Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.BusinessOperationsTotal.Add(1,

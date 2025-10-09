@@ -199,7 +199,7 @@ public sealed class UnforfeitService : IUnforfeitService
                     new("service", nameof(UnforfeitService)));
 
                 return results;
-            });
+            }, cancellationToken);
         }
 
         // Business logic: Build response wrapper (minimal processing)

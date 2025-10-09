@@ -76,7 +76,7 @@ public class NavigationService : INavigationService
                     .ThenInclude(p => p.RequiredRoles);
 
             return query.ToListAsync(cancellationToken);
-        });
+        }, cancellationToken);
 
         // Check if the current user has any read-only roles based on database configuration
         var userRoles = _appUser.GetUserAllRoles()?.Where(r => !string.IsNullOrWhiteSpace(r)).ToList() ?? new List<string>();
@@ -89,7 +89,7 @@ public class NavigationService : INavigationService
 
             return userRoles.Any(userRole =>
                 readOnlyRoleNames.Contains(userRole.ToUpper()));
-        });
+        }, cancellationToken);
 
         var lookup = flatList.ToLookup(x => x.ParentId);
         // helper to get raw required roles (uppercase) from entity
@@ -236,7 +236,7 @@ public class NavigationService : INavigationService
         // Cache miss - load from database
         var navigationStatusList = await _dataContextFactory.UseReadOnlyContext(context =>
             context.NavigationStatuses.Select(x => new NavigationStatusDto { Id = x.Id, Name = x.Name }).ToListAsync(cancellationToken)
-        );
+, cancellationToken);
 
         // Store in distributed cache for 15 minutes (half of previous 30 min) with 7.5 min sliding
         // This ensures navigation status changes propagate faster

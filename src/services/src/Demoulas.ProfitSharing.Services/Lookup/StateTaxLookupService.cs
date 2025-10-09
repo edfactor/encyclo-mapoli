@@ -31,7 +31,7 @@ public sealed class StateTaxLookupService : IStateTaxLookupService
                 .Where(st => st.Abbreviation == state.ToUpperInvariant())
                 .Select(st => new { st.Abbreviation, st.Rate })
                 .FirstOrDefaultAsync(cancellationToken);
-        });
+        }, cancellationToken);
 
         if (stateTax == null)
         {

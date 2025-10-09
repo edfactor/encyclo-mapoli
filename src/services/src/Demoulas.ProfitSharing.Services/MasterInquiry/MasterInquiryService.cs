@@ -186,7 +186,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             }
 
             return detailsList;
-        });
+        }, cancellationToken);
     }
 
     /* This handles the case where we are given an exact badge or ssn and there are no PROFIT_DETAIL rows */
@@ -269,7 +269,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 .OrderBy(x => x.ProfitYear)
                 .ThenBy(x => x.MonthToDate)
                 .ToPaginationResultsAsync(req, cancellationToken);
-        });
+        }, cancellationToken);
     }
 
 
@@ -285,7 +285,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 2 => GetBeneficiaryDetails(ctx, req.Id, cancellationToken),
                 _ => throw new ValidationException("Invalid MemberType provided")
             };
-        });
+        }, cancellationToken);
         Dictionary<int, MemberDetails> memberDetailsMap = new Dictionary<int, MemberDetails> { { members.ssn, members.memberDetails ?? new MemberDetails { Id = 0 } } };
 
         var details = await GetVestingDetails(memberDetailsMap, currentYear, previousYear, cancellationToken);
@@ -417,7 +417,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             });
 
             return new PaginatedResponseDto<MasterInquiryResponseDto>(req) { Results = formattedResults, Total = rawQuery.Total };
-        });
+        }, cancellationToken);
     }
 
     private async Task<IQueryable<MasterInquiryItem>> GetMasterInquiryDemographics(ProfitSharingReadOnlyDbContext ctx)
@@ -685,10 +685,10 @@ public sealed class MasterInquiryService : IMasterInquiryService
         // Here we recognize 2024 as the transition year to relying on the SMART YE Process
         bool isPreviousYearEndComplete = (previousYear < ReferenceData.SmartTransitionYear) || await _dataContextFactory.UseReadOnlyContext(async ctx =>
             await ctx.YearEndUpdateStatuses
-                .AnyAsync(x => x.ProfitYear == previousYear && x.IsYearEndCompleted, cancellationToken));
+                .AnyAsync(x => x.ProfitYear == previousYear && x.IsYearEndCompleted, cancellationToken), cancellationToken);
         bool isProfitYearYearEndComplete = (currentYear < ReferenceData.SmartTransitionYear) || await _dataContextFactory.UseReadOnlyContext(async ctx =>
             await ctx.YearEndUpdateStatuses
-                .AnyAsync(x => x.ProfitYear == currentYear && x.IsYearEndCompleted, cancellationToken));
+                .AnyAsync(x => x.ProfitYear == currentYear && x.IsYearEndCompleted, cancellationToken), cancellationToken);
         bool isWallClockYear = currentYear == DateTime.Now.Year;
 
         var ssnCollection = memberDetailsMap.Keys.ToHashSet();

@@ -14,7 +14,7 @@ public sealed class EmployeeLookupService(IProfitSharingDataContextFactory facto
 #pragma warning disable DSMPS001
             return await ctx.Demographics.AnyAsync(d => d.BadgeNumber == badgeNumber, cancellationToken);
 #pragma warning restore DSMPS001
-        });
+        }, cancellationToken);
     }
 
     public async Task<DateOnly?> GetEarliestHireDateAsync(int badgeNumber, CancellationToken cancellationToken = default)
@@ -42,7 +42,7 @@ public sealed class EmployeeLookupService(IProfitSharingDataContextFactory facto
             }
 
             return earliest;
-        });
+        }, cancellationToken);
     }
 
     public async Task<DateOnly?> GetDateOfBirthAsync(int badgeNumber, CancellationToken cancellationToken = default)
@@ -56,7 +56,7 @@ public sealed class EmployeeLookupService(IProfitSharingDataContextFactory facto
                 .FirstOrDefaultAsync(cancellationToken);
 #pragma warning restore DSMPS001
             return dob;
-        });
+        }, cancellationToken);
     }
 
     public async Task<char?> GetEmploymentStatusIdAsOfAsync(int badgeNumber, DateOnly asOfDate, CancellationToken cancellationToken = default)
@@ -81,7 +81,7 @@ public sealed class EmployeeLookupService(IProfitSharingDataContextFactory facto
             }
 
             return row.EmploymentStatusId;
-        });
+        }, cancellationToken);
     }
 
     public async Task<bool?> IsActiveAsOfAsync(int badgeNumber, DateOnly asOfDate, CancellationToken cancellationToken = default)

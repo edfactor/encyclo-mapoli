@@ -74,6 +74,6 @@ internal sealed class RebuildEnrollmentAndZeroContService
 
             // Return the year if sum indicates rebuild needed, otherwise 0
             return enrollmentSum == 0 ? minProfitYear :(short) 0;
-        });
+        }, cancellationToken);
     }
 }

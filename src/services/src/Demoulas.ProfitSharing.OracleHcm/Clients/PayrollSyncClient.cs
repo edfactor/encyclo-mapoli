@@ -186,7 +186,7 @@ internal class PayrollSyncClient
 
             // Find PersonIds that are in existsCollection but not in the database
             return existsCollection.Except(existingPersonIds).ToList();
-        }).ConfigureAwait(false);
+        }, cancellationToken).ConfigureAwait(false);
 
         foreach (long id in missingPersonIds)
         {

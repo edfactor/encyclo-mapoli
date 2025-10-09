@@ -38,7 +38,7 @@ namespace Demoulas.ProfitSharing.Services.Reports
 
                 return await getDuplicateSsnQuery(demographics).AnyAsync(ct);
 
-            });
+            }, ct);
         }
 
         public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsnAsync(SortedPaginationRequestDto req, CancellationToken ct)
@@ -138,7 +138,7 @@ namespace Demoulas.ProfitSharing.Services.Reports
                         }).ToList()
                     },
                 };
-            });
+            }, ct);
         }
 
 

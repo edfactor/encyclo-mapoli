@@ -269,6 +269,6 @@ public sealed class CertificateService : ICertificateService
         {
             return await ctx.AnnuityRates
                 .Where(x => x.Year == request.ProfitYear).ToDictionaryAsync(x => x.Age, x => x, token);
-        });
+        }, token);
     }
 }

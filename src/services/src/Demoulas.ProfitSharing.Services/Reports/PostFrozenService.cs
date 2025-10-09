@@ -168,7 +168,7 @@ public class PostFrozenService : IPostFrozenService
             };
 
             return response;
-        });
+        }, cancellationToken);
         return rslt;
     }
 
@@ -233,7 +233,7 @@ public class PostFrozenService : IPostFrozenService
                 row.Age = (byte)row.DateOfBirth.Age(fiscalEndDateTime);
             }
             return pagedResults;
-        });
+        }, cancellation);
 
         return new ReportResponseBase<ProfitSharingUnder21BreakdownByStoreResponse>()
         {
@@ -283,7 +283,7 @@ public class PostFrozenService : IPostFrozenService
                     IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
                 }
             ).ToPaginationResultsAsync(request, cancellationToken);
-        });
+        }, cancellationToken);
 
         var fiscalEndDateTime = calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Local);
         foreach (var row in rslt.Results)
@@ -467,7 +467,7 @@ public class PostFrozenService : IPostFrozenService
 
 
             return true;
-        });
+        }, cancellationToken);
 
         return rslt;
     }
@@ -562,7 +562,7 @@ public class PostFrozenService : IPostFrozenService
                         }
                     )
                 };
-            }));
+            }, cancellationToken));
 
             return rslt;
         }
@@ -654,7 +654,7 @@ public class PostFrozenService : IPostFrozenService
                         IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly
                     }
                 ).ToPaginationResultsAsync(request, ct);
-            }));
+            }, ct));
         }
     }
 

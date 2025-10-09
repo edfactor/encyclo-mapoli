@@ -165,7 +165,7 @@ public class MilitaryService : IMilitaryService
                 await GetCalendarProfitYearDateForResponses(query, cancellationToken);
 
                 return await query.ToPaginationResultsAsync(req, cancellationToken);
-            });
+            }, cancellationToken);
 
             return Result<PaginatedResponseDto<MilitaryContributionResponse>>.Success(result);
         }
