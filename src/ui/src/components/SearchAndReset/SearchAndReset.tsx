@@ -1,5 +1,4 @@
 import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
 import Grid from "@mui/material/Grid";
 import React, { FC } from "react";
 import { ICommon } from "../ICommon";
@@ -33,6 +32,7 @@ export const SearchAndReset: FC<ISearchAndResetProps> = ({
           data-testid="searchButton"
           type="submit"
           onClick={handleSearch}
+          loading={isFetching}
           sx={{
             borderRadius: "2px",
             background: "#2e7d32",
@@ -54,17 +54,7 @@ export const SearchAndReset: FC<ISearchAndResetProps> = ({
               color: "#c0c0c0"
             }
           }}>
-          {isFetching ? (
-            //Prevent loading spinner from shrinking button
-            <div className="min-w-[61px]">
-              <CircularProgress
-                color="inherit"
-                size="20px"
-              />
-            </div>
-          ) : (
-            searchButtonText || "Search"
-          )}
+          {searchButtonText || "Search"}
         </Button>
         <Button
           type="reset"
