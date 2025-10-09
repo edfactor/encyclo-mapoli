@@ -351,6 +351,9 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.DistributionStatuses).Returns(mockDistributionStatuses.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.DistributionStatuses).Returns(mockDistributionStatuses.Object);
 
+        // Setup generic Set<T>() method for LookupCache support
+        _profitSharingReadOnlyDbContext.Setup(m => m.Set<StateTax>()).Returns(mockStateTaxes.Object);
+
     }
 
     public static IProfitSharingDataContextFactory InitializeForTesting()
@@ -428,7 +431,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
     /// practice.
     /// More information can be found here: https://docs.microsoft.com/en-us/azure/azure-sql/database/read-scale-out
     /// </summary>
-    public async Task<T> UseReadOnlyContext<T>(Func<ProfitSharingReadOnlyDbContext, Task<T>> func, CancellationToken cancellationToken = default)   
+    public async Task<T> UseReadOnlyContext<T>(Func<ProfitSharingReadOnlyDbContext, Task<T>> func, CancellationToken cancellationToken = default)
     {
         try
         {

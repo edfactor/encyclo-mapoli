@@ -102,6 +102,10 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IMergeProfitDetailsService, MergeProfitDetailsService>();
         _ = builder.Services.AddScoped<IChecksumValidationService, ChecksumValidationService>();
 
+        // Register lookup caches as singletons (they manage their own distributed cache access)
+        _ = builder.Services.AddSingleton<Services.Caching.StateTaxCache>();
+        _ = builder.Services.AddSingleton<Services.Caching.ProfitCodeCache>();
+
         builder.AddProjectCachingServices();
 
         return builder;
