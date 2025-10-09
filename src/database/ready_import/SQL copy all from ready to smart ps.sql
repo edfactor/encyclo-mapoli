@@ -1,7 +1,6 @@
 DECLARE
     this_year NUMBER := 2025; -- <-------- ORACLE HCM loads data in this year.
     last_year NUMBER := 2024; -- <-------- active year end year for the scramble.   Scramble is frozen in 2024. 
-    last_last_year NUMBER := 2023; -- <--- last year for the scramble data
     demographic_cutoff TIMESTAMP; -- <-- Timestamp to use if we import DEMO_PROFSHARE
 BEGIN
 
@@ -357,57 +356,23 @@ BEGIN
     SELECT
         (SELECT ID FROM DEMOGRAPHIC WHERE BADGE_NUMBER = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
         last_year AS PROFIT_YEAR,
-        PY_PH_LASTYR as CURRENT_HOURS_YEAR, -- The scramble has 2024 hours as "last year"
-        PY_PD_LASTYR AS CURRENT_INCOME_YEAR, -- The scramble has 2024 hours as "last year"
+        PY_PH_LASTYR as CURRENT_HOURS_YEAR, -- Pull the prior year hours as "last year"
+        PY_PD_LASTYR AS CURRENT_INCOME_YEAR, -- Pull the prior year income as "last year"
         PY_WEEKS_WORK_LAST AS WEEKS_WORKED_YEAR,
         NULL AS PS_CERTIFICATE_ISSUED_DATE,
-        PY_PS_ENROLLED,
+        -- We will recompute this in RebuildEnrollmentAndZeroContService for most employees when we first run.
+        -- We leave it as a default as RebuildEnrollmentAndZeroContService might not recompute every employee
+        PY_PS_ENROLLED, 
         PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
         PY_PROF_NEWEMP as EMPLOYEE_TYPE_ID,
-        PY_PROF_ZEROCONT,
+        -- We will re-compute this in RebuildEnrollmentAndZeroContService for most employees when we first run. We intensionally leave the old value
+        -- because there is special logic for when someone gets to 6 (retired) that they never go back to an earlier value
+        -- so 6 is sticky.
+        PY_PROF_ZEROCONT, 
         NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE,
         NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE,
         0 AS POINTS_EARNED,
         PY_PRIOR_ETVA as ETVA 
-    FROM
-        {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT pp
-            LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.DEMOGRAPHICS d on d.DEM_BADGE = pp.PAYPROF_BADGE
-    WHERE
-        PAYPROF_BADGE IN (SELECT BADGE_NUMBER FROM DEMOGRAPHIC);
-
-    -- Insert the year before LAST YEARS data into the PAY_PROFIT table
-    INSERT INTO PAY_PROFIT
-    (DEMOGRAPHIC_ID,
-     PROFIT_YEAR,
-     CURRENT_HOURS_YEAR,
-     CURRENT_INCOME_YEAR,
-     WEEKS_WORKED_YEAR,
-     PS_CERTIFICATE_ISSUED_DATE,
-     ENROLLMENT_ID,
-     BENEFICIARY_TYPE_ID,
-     EMPLOYEE_TYPE_ID,
-     ZERO_CONTRIBUTION_REASON_ID,
-     HOURS_EXECUTIVE,
-     INCOME_EXECUTIVE,
-     POINTS_EARNED,
-     ETVA)
-    SELECT
-        (SELECT ID FROM DEMOGRAPHIC WHERE BADGE_NUMBER = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
-        last_last_year AS PROFIT_YEAR,
-        0 AS CURRENT_HOURS_YEAR,
-        0 AS CURRENT_INCOME_YEAR,
-        0 AS WEEKS_WORKED_YEAR,
-        CASE WHEN TRIM(PY_PROF_CERT) = '1' then
-                 TO_DATE(last_last_year || '-12-31', 'YYYY-MM-DD')
-            ELSE null END PS_CERTIFICATE_ISSUED_DATE,
-        0,
-        PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
-        0,
-        0,
-        NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE, -- from the scramble, these are correct exec hours for 2023
-        NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE, --  from the scramble, the income exec hours for 2023
-        PY_PROF_POINTS AS POINTS_EARNED, -- from the scramble, these are the correct points for 2023
-        0 as ETVA
     FROM
         {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT pp
             LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.DEMOGRAPHICS d on d.DEM_BADGE = pp.PAYPROF_BADGE

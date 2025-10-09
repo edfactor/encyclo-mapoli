@@ -17,12 +17,11 @@ export * from "./navigation/navigation";
 
 // December Activities types
 export * from "./december-activities/demographics";
-export * from "./december-activities/distributions";
 export * from "./december-activities/forfeitures";
 export * from "./december-activities/military";
 export * from "./december-activities/termination";
 
-// Distribution Inquiry types
+// Distribution types (includes Distribution Inquiry and December Activities)
 export * from "./distributions";
 
 // Fiscal types

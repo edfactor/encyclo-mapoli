@@ -13,7 +13,6 @@ namespace Demoulas.ProfitSharing.Data.Cli;
  * It checks to see if the lowest payprofit year has no enrollments, which indicates it is missing data.
  * if it is missing this data, it initiates a process to recreate the ZeroContribution and Enrollment data for the year.
  */
-
 internal sealed class RebuildEnrollmentAndZeroContService
 {
     private readonly ILogger<RebuildEnrollmentAndZeroContService> _logger;
@@ -26,7 +25,7 @@ internal sealed class RebuildEnrollmentAndZeroContService
         IPayProfitUpdateService payProfitUpdateService,
         IYearEndService yearEndService,
         IProfitSharingDataContextFactory dataContextFactory
-        )
+    )
     {
         _logger = logger;
         _payProfitUpdateService = payProfitUpdateService;
@@ -38,9 +37,6 @@ internal sealed class RebuildEnrollmentAndZeroContService
     {
         try
         {
-            // Add a small delay to allow the application to fully start
-            await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken).ConfigureAwait(false);
-
             // Check if rebuild is actually needed
             short profitYear = await IsRebuildNeededAsync(stoppingToken).ConfigureAwait(false);
 
@@ -71,13 +67,13 @@ internal sealed class RebuildEnrollmentAndZeroContService
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
+            var minProfitYear = await ctx.PayProfits.MinAsync(x => x.ProfitYear, cancellationToken);
             var enrollmentSum = await ctx.PayProfits
-                .Where(p => p.ProfitYear == ctx.PayProfits.Min(x => x.ProfitYear))
+                .Where(p => p.ProfitYear == minProfitYear)
                 .SumAsync(p => p.EnrollmentId, cancellationToken);
 
             // Return the year if sum indicates rebuild needed, otherwise 0
-            return enrollmentSum == 0 ? await ctx.PayProfits.MinAsync(x => x.ProfitYear, cancellationToken) : (short)0;
-        }, cancellationToken);
+            return enrollmentSum == 0 ? minProfitYear :(short) 0;
+        });
     }
-
 }
