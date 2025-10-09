@@ -12,22 +12,20 @@ import { clearTermination } from "../../../reduxstore/slices/yearsEndSlice";
 import { RootState } from "../../../reduxstore/store";
 import { CalendarResponseDto } from "../../../reduxstore/types";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
-import { profitYearValidator } from "../../../utils/FormValidators";
+import {
+  dateStringValidator,
+  endDateStringAfterStartDateValidator,
+  profitYearValidator
+} from "../../../utils/FormValidators";
 import { TerminationSearchRequest } from "./Termination";
 
 const schema = yup.object().shape({
-  beginningDate: yup.string().required("Begin Date is required"),
-  endingDate: yup
-    .string()
-    .required("End Date is required")
-    .test("is-after-start", "End Date must be after Begin Date", function (value) {
-      const { beginningDate } = this.parent;
-      if (!beginningDate || !value) return true;
-      const startDate = tryddmmyyyyToDate(beginningDate);
-      const endDate = tryddmmyyyyToDate(value);
-      if (!startDate || !endDate) return true;
-      return endDate > startDate;
-    }),
+  beginningDate: dateStringValidator(2000, 2099, "Beginning Date").required("Beginning Date is required"),
+  endingDate: endDateStringAfterStartDateValidator(
+    "beginningDate",
+    tryddmmyyyyToDate,
+    "Ending date must be the same or after the beginning date"
+  ).required("Ending Date is required"),
   forfeitureStatus: yup.string().required("Forfeiture Status is required"),
   pagination: yup
     .object({
@@ -144,8 +142,11 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
               <DsmDatePicker
                 id="beginningDate"
                 onChange={(value: Date | null) => {
-                  field.onChange(value || undefined);
-                  trigger("endingDate");
+                  field.onChange(value ? mmDDYYFormat(value) : undefined);
+                  trigger("beginningDate");
+                  if (value) {
+                    trigger("endingDate");
+                  }
                 }}
                 value={field.value ? tryddmmyyyyToDate(field.value) : null}
                 required={false}
