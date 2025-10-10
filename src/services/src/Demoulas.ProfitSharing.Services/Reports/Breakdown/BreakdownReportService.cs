@@ -114,7 +114,13 @@ public sealed class BreakdownReportService : IBreakdownService
         {
             var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
 
-            var memberStores = await (await BuildEmployeesBaseQuery(ctx, request.ProfitYear, calInfo.FiscalEndDate))
+            // Load pensioner SSNs ONCE - PERFORMANCE OPTIMIZATION
+            int[] pensionerSsns = await ctx.ExcludedIds
+                .Where(x => x.ExcludedIdTypeId == ExcludedIdType.Constants.QPay066TAExclusions)
+                .Select(x => x.ExcludedIdValue)
+                .ToArrayAsync(cancellationToken);
+
+            var memberStores = await (await BuildEmployeesBaseQuery(ctx, request.ProfitYear, calInfo.FiscalEndDate, pensionerSsns))
                 .Select(m => new { m.Ssn, m.StoreNumber })
                 .ToListAsync(cancellationToken);
 
@@ -201,12 +207,21 @@ public sealed class BreakdownReportService : IBreakdownService
         {
             ValidateStoreNumber(request);
             var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
-            // ── Query ------------------------------------------------------------------
-            var employeesBase = await BuildEmployeesBaseQuery(ctx, request.ProfitYear, calInfo.FiscalEndDate);
 
-            if ( request.StoreNumber != null && request.StoreNumber != -1 )
+            // Load pensioner SSNs ONCE - PERFORMANCE OPTIMIZATION
+            int[] pensionerSsns = await ctx.ExcludedIds
+                .Where(x => x.ExcludedIdTypeId == ExcludedIdType.Constants.QPay066TAExclusions)
+                .Select(x => x.ExcludedIdValue)
+                .ToArrayAsync(cancellationToken);
+
+            //  ── Query ------------------------------------------------------------------
+            var employeesBase = await BuildEmployeesBaseQuery(ctx, request.ProfitYear, calInfo.FiscalEndDate, pensionerSsns);
+
+            if (request.StoreNumber != null && request.StoreNumber != -1)
+            {
                 employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber);
-            
+            }
+
             var employeeSsns = await employeesBase.Select(e => e.Ssn).ToHashSetAsync(cancellationToken);
 
             ThrowIfInvalidSsns(employeeSsns);
@@ -329,10 +344,22 @@ public sealed class BreakdownReportService : IBreakdownService
                 ValidateStoreNumber(request);
             }
 
-            var employeesBase = await BuildEmployeesBaseQuery(ctx, request.ProfitYear, calInfo.FiscalEndDate);
+            // Load pensioner SSNs ONCE (not inside query builder) - PERFORMANCE OPTIMIZATION
+            int[] pensionerSsns = await ctx.ExcludedIds
+                .Where(x => x.ExcludedIdTypeId == ExcludedIdType.Constants.QPay066TAExclusions)
+                .Select(x => x.ExcludedIdValue)
+                .ToArrayAsync(cancellationToken);
+
+            // Get composable query - CRITICAL PERFORMANCE FIX
+            var employeesBase = await BuildEmployeesBaseQuery(ctx, request.ProfitYear, calInfo.FiscalEndDate, pensionerSsns);
             var startEndDateRequest = request as IStartEndDateRequest;
 
-            if (employeeStatusFilter == StatusFilterEnum.Inactive)
+            // Apply status filter BEFORE materialization - PERFORMANCE OPTIMIZATION
+            if (employeeStatusFilter == StatusFilterEnum.Active)
+            {
+                employeesBase = employeesBase.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Active);
+            }
+            else if (employeeStatusFilter == StatusFilterEnum.Inactive)
             {
                 employeesBase = employeesBase.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Inactive && e.TerminationCodeId != TerminationCode.Constants.Transferred);
             }
@@ -445,7 +472,7 @@ public sealed class BreakdownReportService : IBreakdownService
                 employeesBase = employeesBase.Where(x => EF.Functions.Like(x.FullName.ToUpper(), pattern));
             }
 
-            var paginated = await GetPaginatedResults(request, employeesBase, cancellationToken);
+            var paginated = await GetPaginatedResults(request, employeesBase, employeeStatusFilter, cancellationToken);
             var employeeSsns = paginated.Results.Select(r => r.Ssn).ToHashSet();
 
             ThrowIfInvalidSsns(employeeSsns);
@@ -454,11 +481,9 @@ public sealed class BreakdownReportService : IBreakdownService
                 ctx, request.ProfitYear, employeeSsns, cancellationToken);
             var snapshotBySsn = snapshots.ToDictionary(s => s.Ssn);
 
+            // Build final response (sorting already done by GetPaginatedResults in SQL)
             var members = paginated.Results
                 .Select(d => BuildMemberYearSummary(d, snapshotBySsn.GetValueOrDefault(d.Ssn)))
-                .OrderBy(m => m.StoreNumber)
-                .ThenBy(m => employeeStatusFilter == StatusFilterEnum.All ? m.CertificateSort : 0)
-                .ThenBy(m => m.FullName, StringComparer.Ordinal)
                 .ToList();
 
             return new ReportResponseBase<MemberYearSummaryDto>
@@ -476,26 +501,41 @@ public sealed class BreakdownReportService : IBreakdownService
         }, cancellationToken);
     }
 
-    private static async Task<PaginatedResponseDto<ActiveMemberDto>> GetPaginatedResults(BreakdownByStoreRequest request, IQueryable<ActiveMemberDto> employeesBase, CancellationToken cancellationToken)
+    private static async Task<PaginatedResponseDto<ActiveMemberDto>> GetPaginatedResults(
+        BreakdownByStoreRequest request,
+        IQueryable<ActiveMemberDto> employeesBase,
+        StatusFilterEnum employeeStatusFilter,
+        CancellationToken cancellationToken)
     {
+        // Apply sorting BEFORE pagination (in SQL) - PERFORMANCE OPTIMIZATION
+        IQueryable<ActiveMemberDto> orderedQuery;
+
         if (ReferenceData.CertificateSort.Equals(request.SortBy, StringComparison.InvariantCultureIgnoreCase))
         {
-            var total = await employeesBase.CountAsync(cancellationToken);
-            var paginatedQuery = employeesBase
+            orderedQuery = employeesBase
                 .OrderBy(e => e.StoreNumber)
                 .ThenBy(e => e.CertificateSort)
-                .ThenBy(e => e.FullName)
-                .Skip(request.Skip ?? 0)
-                .Take(request.Take ?? 25)
-                .ToListAsync(cancellationToken);
-
-            return new PaginatedResponseDto<ActiveMemberDto>
-            {
-                Results = await paginatedQuery,
-                Total = total
-            };
+                .ThenBy(e => e.FullName);
         }
-        return await employeesBase.ToPaginationResultsAsync(request, cancellationToken);
+        else
+        {
+            orderedQuery = employeesBase
+                .OrderBy(e => e.StoreNumber)
+                .ThenBy(e => employeeStatusFilter == StatusFilterEnum.All ? e.CertificateSort : 0)
+                .ThenBy(e => e.FullName);
+        }
+
+        var total = await orderedQuery.CountAsync(cancellationToken);
+        var results = await orderedQuery
+            .Skip(request.Skip ?? 0)
+            .Take(request.Take ?? 25)
+            .ToListAsync(cancellationToken);
+
+        return new PaginatedResponseDto<ActiveMemberDto>
+        {
+            Results = results,
+            Total = total
+        };
     }
 
     private static void ValidateStoreNumber(BreakdownByStoreRequest request)
@@ -516,13 +556,13 @@ public sealed class BreakdownReportService : IBreakdownService
     }
 
     /// <summary>
-    /// Base query for “active‐members” with ONE round-trip to Oracle.
+    /// Base query for "active‐members" with ONE round-trip to Oracle.
     /// – Joins year-end Profit-Sharing balances  *and*  ETVA balances  
     /// – Re-creates the legacy COBOL store-bucket logic (700, 701, 800, 801, 802, 900) **inside the SQL**  
     /// – Returns the sequence already filtered to the store requested by the UI
     /// </summary>
     private async Task<IQueryable<ActiveMemberDto>> BuildEmployeesBaseQuery(
-        ProfitSharingReadOnlyDbContext ctx, short profitYear, DateOnly fiscalEndDate)
+        ProfitSharingReadOnlyDbContext ctx, short profitYear, DateOnly fiscalEndDate, int[] pensionerSsns)
     {
         /*──────────────────────────── 1️⃣  inline sub-queries – still IQueryable */
         var balances =
@@ -553,9 +593,7 @@ public sealed class BreakdownReportService : IBreakdownService
            *                             SINCE THEY ARE ALREADY NOTED IN   *
            *                             THE COMMENT ABNVE THE SECTION  
          */
-        int[] pensionerSsns = await ctx.ExcludedIds.Where(x => x.ExcludedIdTypeId == ExcludedIdType.Constants.QPay066TAExclusions)
-            .Select(x => x.ExcludedIdValue)
-            .ToArrayAsync();
+        // pensionerSsns now passed as parameter instead of queried here
 
         /*
        
@@ -571,7 +609,7 @@ public sealed class BreakdownReportService : IBreakdownService
       In short
           Retiree vs. active-pensioner is keyed off the termination code (“W”) or an explicit SSN list.
           Terminated buckets (800–802) depend on pay-frequency plus the size/vesting of the participant’s profit-sharing balance.
-          Monthly payroll (900) is simply anyone with FREQ = 2.
+           Monthly payroll (900) is simply anyone with FREQ = 2.
        */
         var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
         var query =
