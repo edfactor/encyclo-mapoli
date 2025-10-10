@@ -622,36 +622,37 @@ public sealed class MasterInquiryService : IMasterInquiryService
             .Join(demographics,
                 pd => pd.Ssn,
                 d => d.Ssn,
-                (pd, d) => new { pd, d })
-            .GroupJoin(
-                ctx.PayProfits,
-                x => new { x.d.Id, x.pd.ProfitYear },
-                pp => new { Id = pp.DemographicId, pp.ProfitYear },
-                (x, payProfits) => new { x.pd, x.d, pp = payProfits.FirstOrDefault() })
-            .Select(x => new MasterInquiryItem
-            {
-                ProfitDetail = x.pd,
-                ProfitCode = x.pd.ProfitCode,
-                ZeroContributionReason = x.pd.ZeroContributionReason,
-                TaxCode = x.pd.TaxCode,
-                CommentType = x.pd.CommentType,
-                TransactionDate = x.pd.CreatedAtUtc,
-                Member = new InquiryDemographics
+                (pd, d) => new MasterInquiryItem
                 {
-                    Id = x.d.Id,
-                    BadgeNumber = x.d.BadgeNumber,
-                    FullName = x.d.ContactInfo.FullName != null ? x.d.ContactInfo.FullName : x.d.ContactInfo.LastName,
-                    FirstName = x.d.ContactInfo.FirstName,
-                    LastName = x.d.ContactInfo.LastName,
-                    PayFrequencyId = x.d.PayFrequencyId,
-                    Ssn = x.d.Ssn,
-                    PsnSuffix = 0,
-                    IsExecutive = x.d.PayFrequencyId == PayFrequency.Constants.Monthly,
-                    // Use LEFT JOIN result instead of correlated subqueries
-                    CurrentIncomeYear = x.pp != null ? x.pp.CurrentIncomeYear : 0,
-                    CurrentHoursYear = x.pp != null ? x.pp.CurrentHoursYear : 0
-                }
-            });
+                    ProfitDetail = pd,
+                    ProfitCode = pd.ProfitCode,
+                    ZeroContributionReason = pd.ZeroContributionReason,
+                    TaxCode = pd.TaxCode,
+                    CommentType = pd.CommentType,
+                    TransactionDate = pd.CreatedAtUtc,
+                    Member = new InquiryDemographics
+                    {
+                        Id = d.Id,
+                        BadgeNumber = d.BadgeNumber,
+                        FullName = d.ContactInfo.FullName != null ? d.ContactInfo.FullName : d.ContactInfo.LastName,
+                        FirstName = d.ContactInfo.FirstName,
+                        LastName = d.ContactInfo.LastName,
+                        PayFrequencyId = d.PayFrequencyId,
+                        Ssn = d.Ssn,
+                        PsnSuffix = 0,
+                        IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
+                        // Use correlated subqueries for PayProfits data
+                        // These will be optimized by Oracle when IX_PayProfits_Demographic_Year index exists
+                        CurrentIncomeYear = ctx.PayProfits
+                            .Where(pp => pp.DemographicId == d.Id && pp.ProfitYear == pd.ProfitYear)
+                            .Select(pp => pp.CurrentIncomeYear)
+                            .FirstOrDefault(),
+                        CurrentHoursYear = ctx.PayProfits
+                            .Where(pp => pp.DemographicId == d.Id && pp.ProfitYear == pd.ProfitYear)
+                            .Select(pp => pp.CurrentHoursYear)
+                            .FirstOrDefault()
+                    }
+                });
 
         return query;
     }
@@ -1324,7 +1325,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                         x.CurrentHoursYear,
                         x.Etva,
                         x.EnrollmentId,
-                        x.Enrollment.Name
+                        Name = x.Enrollment != null ? x.Enrollment.Name : null
                     }).FirstOrDefault(),
                 PreviousPayProfit = d.PayProfits
                     .Where(x => x.ProfitYear == previousYear)
@@ -1334,7 +1335,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                         x.CurrentHoursYear,
                         x.Etva,
                         x.EnrollmentId,
-                        x.Enrollment.Name,
+                        Name = x.Enrollment != null ? x.Enrollment.Name : null,
                         x.PsCertificateIssuedDate
                     }).FirstOrDefault()
             })

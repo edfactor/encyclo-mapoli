@@ -20,6 +20,8 @@ internal sealed class PayProfitMap : ModifiedBaseMap<PayProfit>
         _ = builder.HasIndex(e => e.ProfitYear, "IX_ProfitYear");
         // Composite index to support frequent filters by year and joins by demographic
         _ = builder.HasIndex(e => new { e.ProfitYear, e.DemographicId }, "IX_ProfitYear_DemographicId");
+        // Composite index optimized for correlated subqueries: WHERE DemographicId = ? AND ProfitYear = ?
+        _ = builder.HasIndex(e => new { e.DemographicId, e.ProfitYear }, "IX_DemographicId_ProfitYear");
 
         _ = builder.Property(e => e.DemographicId)
             .HasPrecision(9)
