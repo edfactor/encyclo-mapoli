@@ -1,10 +1,5 @@
 import { ColDef } from "ag-grid-community";
-import {
-  createBadgeColumn,
-  createCurrencyColumn,
-  createYearColumn,
-  createYesOrNoColumn
-} from "../../../utils/gridColumnFactory";
+import { createCurrencyColumn, createYearColumn, createYesOrNoColumn } from "../../../utils/gridColumnFactory";
 
 export const GetMilitaryContributionColumns = (): ColDef[] => {
   const columns: ColDef[] = [

@@ -2,9 +2,8 @@ import { Replay } from "@mui/icons-material";
 import { Alert, AlertTitle, Button, CircularProgress, Grid, Tooltip, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { DSMAccordion, numberToCurrency, Page, setMessage, SmartModal } from "smart-ui-library";
+import { DSMAccordion, numberToCurrency, Page, setMessage, SmartModal, TotalsGrid } from "smart-ui-library";
 import StatusDropdownActionNode from "../../components/StatusDropdownActionNode";
-import { TotalsGrid } from "../../components/TotalsGrid/TotalsGrid";
 import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
 import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
 import {

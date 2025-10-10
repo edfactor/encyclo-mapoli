@@ -1,9 +1,8 @@
 import { Grid } from "@mui/material";
-import { TotalsGrid } from "components/TotalsGrid/TotalsGrid";
 import { useCallback } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, numberToCurrency } from "smart-ui-library";
+import { DSMGrid, numberToCurrency, TotalsGrid } from "smart-ui-library";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { GetBalanceByAgeColumns } from "./BalanceByAgeGridColumns";
