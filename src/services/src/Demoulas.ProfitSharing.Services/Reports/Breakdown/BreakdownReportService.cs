@@ -59,6 +59,7 @@ public sealed class BreakdownReportService : IBreakdownService
         public decimal? VestedBalance { get; init; }
         public decimal? EtvaBalance { get; init; }
         public decimal? VestedPercent { get; init; }
+        public decimal? BeneficiaryAllocation { get; init; }
         public DateOnly HireDate { get; init; }
         public DateOnly? TerminationDate { get; init; }
         public byte EnrollmentId { get; init; }
@@ -73,6 +74,7 @@ public sealed class BreakdownReportService : IBreakdownService
         public decimal Earnings { get; internal set; }
         public decimal Contributions { get; internal set; }
         public decimal Forfeitures { get; internal set; }
+        public decimal? BeneficiaryAllocation2 => BeneficiaryAllocation; // preserve binary layout if any mapping expects this (no-op)
         public decimal Distributions { get; internal set; }
 
     }
@@ -120,75 +122,79 @@ public sealed class BreakdownReportService : IBreakdownService
                 .Select(x => x.ExcludedIdValue)
                 .ToArrayAsync(cancellationToken);
 
-            var memberStores = await (await BuildEmployeesBaseQuery(ctx, request.ProfitYear, calInfo.FiscalEndDate, pensionerSsns))
-                .Select(m => new { m.Ssn, m.StoreNumber })
-                .ToListAsync(cancellationToken);
+            // Aggregate per-store and per-vesting-bucket sums in a SINGLE database query
+            var baseQuery = await BuildEmployeesBaseQuery(ctx, request.ProfitYear, calInfo.FiscalEndDate, pensionerSsns);
 
-            var ssns = memberStores.Select(x => x.Ssn).ToHashSet();
+            // Single query that gets all aggregations needed
+            var aggregatedData = await baseQuery
+                .Select(m => new
+                {
+                    StoreNumber = m.StoreNumber,
+                    VestingRatio = (m.VestedPercent ?? 0m),
+                    EndBalance = (m.BeginningBalance ?? 0m)
+                                + m.Earnings
+                                + m.Contributions
+                                + m.Forfeitures
+                                + m.Distributions
+                                + (m.BeneficiaryAllocation ?? 0m),
+                    Ssn = m.Ssn,
+                    // Compute bucket in SQL to enable single-query aggregation
+                    VestingBucket = m.VestedPercent == 1m ? "100% Vested"
+                                  : (m.VestedPercent > 0m && m.VestedPercent < 1m) ? "Partially Vested"
+                                  : (m.VestedPercent == 0m || m.VestedPercent == null) ? "Not Vested"
+                                  : "Other"
+                })
+                .ToListAsync(cancellationToken); // Single DB roundtrip
+
+            // Validate SSNs (using in-memory data already loaded)
+            var ssns = aggregatedData.Select(x => x.Ssn).Distinct().ToHashSet();
             ThrowIfInvalidSsns(ssns);
 
-            var snapshots = await GetEmployeeFinancialSnapshotsAsync(
-                ctx, request.ProfitYear, ssns, cancellationToken);
+            // Group in memory (data is already loaded and small after aggregation)
+            var perStoreTotals = aggregatedData
+                .GroupBy(p => p.StoreNumber)
+                .ToDictionary(g => g.Key, g => g.Sum(x => x.EndBalance));
 
+            var perStoreBuckets = aggregatedData
+                .GroupBy(p => (p.StoreNumber, p.VestingBucket))
+                .ToDictionary(g => g.Key, g => g.Sum(x => x.EndBalance));
 
-            var combined = memberStores
-                .Join(
-                    snapshots,
-                    m => m.Ssn,
-                    s => s.Ssn,
-                    (m, s) => new CombinedTotals(
-                        m.StoreNumber,
-                        VestingRatio: s.VestingRatio,
-                        EndBalance: s.BeginningBalance
-                                     + s.Txn.TotalEarnings
-                                     + s.Txn.TotalContributions
-                                     + s.Txn.TotalForfeitures
-                                     + s.Txn.Distribution
-                                     + s.Txn.BeneficiaryAllocation))
-                .ToList(); // bring into memory once
+            var storeKeys = new HashSet<short>(new short[] { 700, 701, 800, 801, 802, 900 });
+            var categories = new[] { "Grand Total", "100% Vested", "Partially Vested", "Not Vested" };
 
-            HashSet<int> storeKeys = [700, 701, 800, 801, 802, 900];
-            var categories = new[]
+            var rows = new List<GrandTotalsByStoreRowDto>(categories.Length);
+
+            foreach (var label in categories)
             {
-            ("Grand Total",         (Func<CombinedTotals,bool>)(x => true)),
-            ("100% Vested",         x => x.VestingRatio == 1m),
-            ("Partially Vested",    x => x.VestingRatio is > 0m and < 1m),
-            ("Not Vested",          x => x.VestingRatio == 0m)
-        };
-
-            var rows = new List<GrandTotalsByStoreRowDto>();
-
-            foreach (var (label, predicate) in categories)
-            {
-                var subset = combined.Where(predicate);
-
-                decimal SumFor(short store) =>
-                    subset.Where(x => x.StoreNumber == store).Sum(x => x.EndBalance);
-
                 var row = new GrandTotalsByStoreRowDto
                 {
                     Category = label,
-                    Store700 = SumFor(700),
-                    Store701 = SumFor(701),
-                    Store800 = SumFor(800),
-                    Store801 = SumFor(801),
-                    Store802 = SumFor(802),
-                    Store900 = SumFor(900),
-                    StoreOther = subset
-                                    .Where(x => !storeKeys.Contains(x.StoreNumber))
-                                    .Sum(x => x.EndBalance)
+                    Store700 = label == "Grand Total"
+                        ? (perStoreTotals.TryGetValue(700, out var s700) ? s700 : 0m)
+                        : (perStoreBuckets.TryGetValue((700, label), out var b700) ? b700 : 0m),
+                    Store701 = label == "Grand Total"
+                        ? (perStoreTotals.TryGetValue(701, out var s701) ? s701 : 0m)
+                        : (perStoreBuckets.TryGetValue((701, label), out var b701) ? b701 : 0m),
+                    Store800 = label == "Grand Total"
+                        ? (perStoreTotals.TryGetValue(800, out var s800) ? s800 : 0m)
+                        : (perStoreBuckets.TryGetValue((800, label), out var b800) ? b800 : 0m),
+                    Store801 = label == "Grand Total"
+                        ? (perStoreTotals.TryGetValue(801, out var s801) ? s801 : 0m)
+                        : (perStoreBuckets.TryGetValue((801, label), out var b801) ? b801 : 0m),
+                    Store802 = label == "Grand Total"
+                        ? (perStoreTotals.TryGetValue(802, out var s802) ? s802 : 0m)
+                        : (perStoreBuckets.TryGetValue((802, label), out var b802) ? b802 : 0m),
+                    Store900 = label == "Grand Total"
+                        ? (perStoreTotals.TryGetValue(900, out var s900) ? s900 : 0m)
+                        : (perStoreBuckets.TryGetValue((900, label), out var b900) ? b900 : 0m),
+                    StoreOther = label == "Grand Total"
+                        ? perStoreTotals.Where(p => !storeKeys.Contains(p.Key)).Sum(p => p.Value)
+                        : perStoreBuckets.Where(p => !storeKeys.Contains(p.Key.StoreNumber) && p.Key.VestingBucket == label).Sum(p => p.Value)
                 };
 
-                // compute the total across all columns
                 row = row with
                 {
-                    RowTotal = row.Store700
-                             + row.Store701
-                             + row.Store800
-                             + row.Store801
-                             + row.Store802
-                             + row.Store900
-                             + row.StoreOther
+                    RowTotal = row.Store700 + row.Store701 + row.Store800 + row.Store801 + row.Store802 + row.Store900 + row.StoreOther
                 };
 
                 rows.Add(row);
@@ -730,6 +736,8 @@ public sealed class BreakdownReportService : IBreakdownService
                 Distributions = txn == null ? 0 : txn.Distribution,
                 Contributions = txn == null ? 0 : txn.TotalContributions,
                 Forfeitures = txn == null ? 0 : txn.TotalForfeitures
+                ,
+                BeneficiaryAllocation = txn == null ? 0 : txn.BeneficiaryAllocation
             };
 
         return query;
