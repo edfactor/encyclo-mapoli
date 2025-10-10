@@ -8,7 +8,7 @@ import {
   createZipColumn
 } from "../../utils/gridColumnFactory";
 
-export const BeneficiarySearchFilterColumns = (): ColDef[] => {
+export const BeneficiaryGridColumns = (): ColDef[] => {
   return [
     createBadgeColumn({ minWidth: 120 }),
     {

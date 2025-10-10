@@ -1,8 +1,7 @@
 import { CellClickedEvent, ColDef, ICellRendererParams } from "ag-grid-community";
 import { useMemo } from "react";
-import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
+import { DSMGrid, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import { ReportSummary } from "../../../components/ReportSummary";
-import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
 import { useTerminationGrid } from "../../../hooks/useTerminationGrid";

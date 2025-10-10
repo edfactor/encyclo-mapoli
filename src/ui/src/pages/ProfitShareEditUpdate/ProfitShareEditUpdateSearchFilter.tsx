@@ -1,15 +1,11 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetProfitShareEditQuery, useLazyGetProfitShareUpdateQuery } from "reduxstore/api/YearsEndApi";
-import * as yup from "yup";
-
-import SearchAndReset from "components/SearchAndReset/SearchAndReset";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { positiveNumberValidator, profitYearDateValidator } from "../../utils/FormValidators";
-import { useEffect, useState } from "react";
 import {
   addBadgeNumberToUpdateAdjustmentSummary,
   clearProfitSharingEdit,
@@ -25,7 +21,9 @@ import {
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { ProfitShareUpdateRequest } from "reduxstore/types";
-import { badgeNumberValidator } from "../../utils/FormValidators";
+import { SearchAndReset } from "smart-ui-library";
+import * as yup from "yup";
+import { badgeNumberValidator, positiveNumberValidator, profitYearDateValidator } from "../../utils/FormValidators";
 
 const maxContributionsDefault: number = 76000;
 

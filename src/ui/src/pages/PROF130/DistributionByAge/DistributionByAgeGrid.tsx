@@ -1,12 +1,11 @@
 import { Grid } from "@mui/material";
-import { TotalsGrid } from "components/TotalsGrid/TotalsGrid";
 import { useCallback, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, numberToCurrency } from "smart-ui-library";
+import { DSMGrid, TotalsGrid, numberToCurrency } from "smart-ui-library";
+import { useGridPagination } from "../../../hooks/useGridPagination";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { GetDistributionsByAgeColumns } from "./DistributionByAgeGridColumns";
-import { useGridPagination } from "../../../hooks/useGridPagination";
 
 interface DistributionByAgeGridProps {
   initialSearchLoaded: boolean;
