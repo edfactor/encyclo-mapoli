@@ -49,6 +49,8 @@ public sealed class DistributionService : IDistributionService
                         from ben in benGroup.DefaultIfEmpty()
                         select new
                         {
+                            dist.Id,
+                            dist.PaymentSequence,
                             dist.Ssn,
                             BadgeNumber = dem != null ? (int?)dem.BadgeNumber : null,
                             DemFullName = dem != null ? dem.ContactInfo.FullName : null,
@@ -138,6 +140,8 @@ public sealed class DistributionService : IDistributionService
             Total = data.Total,
             Results = data.Results.Select(d => new DistributionSearchResponse
             {
+                Id = d.Id,
+                PaymentSequence = d.PaymentSequence,
                 Ssn = d.Ssn.MaskSsn(),
                 BadgeNumber = d.BadgeNumber,
                 FullName = d.DemFullName ?? d.BeneFullName,
