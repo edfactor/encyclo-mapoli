@@ -50,8 +50,8 @@ const mockNavigationData: NavigationResponseDto = {
       id: 1,
       parentId: null,
       title: "YEAR END",
-      subTitle: "",
-      url: "year-end",
+      subTitle: "Year End",
+      url: "",
       orderNumber: 1,
       icon: "",
       requiredRoles: [],
@@ -104,8 +104,7 @@ const mockNavigationData: NavigationResponseDto = {
 };
 
 const mockDrawerConfig: DrawerConfig = {
-  rootNavigationId: 1,
-  title: "Year End",
+  rootNavigationTitle: "YEAR END",
   autoExpandDepth: 1,
   showStatus: true
 };
@@ -184,8 +183,8 @@ describe("useDrawerViewModel", () => {
         wrapper: createWrapper(store)
       });
 
-      // Current path from BrowserRouter will be "/"
-      expect(result.current.currentPath).not.toStartWith("/");
+      // Current path from BrowserRouter will be cleaned of leading slashes
+      expect(result.current.currentPath).not.toMatch(/^\//);
     });
   });
 
@@ -281,9 +280,6 @@ describe("useDrawerViewModel", () => {
         wrapper: createWrapper(store)
       });
 
-      const activeItem = mockNavigationData.navigation[0].items![0]; // December Activities
-      const inactiveItem = mockNavigationData.navigation[0].items![1]; // Fiscal Close
-
       // Mock current path would need router mocking for full test
       // This is a simplified version
       expect(typeof result.current.isItemActive).toBe("function");
@@ -295,7 +291,6 @@ describe("useDrawerViewModel", () => {
         wrapper: createWrapper(store)
       });
 
-      const parentItem = mockNavigationData.navigation[0].items![0]; // Has children
       const leafItem = mockNavigationData.navigation[0].items![1]; // No children
 
       expect(result.current.hasActiveChild(leafItem)).toBe(false);
