@@ -280,7 +280,7 @@ BEGIN
 
 -- QPAY066B (child of Prof Share by Store)
     insert_navigation_item(QPAY066B, PROF_SHARE_BY_STORE, 'QPAY066B', '', 'qpay066b', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(QPAY066TA, PROF_SHARE_BY_STORE, 'QPAY066TA', '', 'qpay066ta', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(QPAY066TA, PROF_SHARE_BY_STORE, 'Breakdown Report', 'QPAY066TA', 'qpay066ta', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(QNEWPROFLBL, PROF_SHARE_BY_STORE, 'QNEWPROFLBL', '', 'new-ps-labels', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(PROFNEW, PROF_SHARE_BY_STORE, 'PROFNEW', '', 'profnew', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(PROFALL, PROF_SHARE_BY_STORE, 'PROFALL', '', 'profall', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
