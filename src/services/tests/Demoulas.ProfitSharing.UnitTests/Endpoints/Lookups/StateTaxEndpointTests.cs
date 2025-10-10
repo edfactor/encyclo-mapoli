@@ -62,7 +62,7 @@ public class StateTaxEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "StateTax - Should return error for non-existent state")]
-    [Description("PS-#### : Returns error when state is not found in database")]
+    [Description("PS-#### : Returns error when state is not found")]
     public async Task Get_ReturnsError_WhenStateNotFound()
     {
         // Arrange

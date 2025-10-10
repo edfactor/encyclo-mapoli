@@ -88,7 +88,7 @@ public class FrozenReportService : IFrozenReportService
             };
 
             return await query.ToListAsync(cancellationToken: cancellationToken);
-        });
+        }, cancellationToken);
 
         var details = queryResult.Select(x => new
         {
@@ -237,7 +237,7 @@ public class FrozenReportService : IFrozenReportService
 
 
             return await query.ToListAsync(cancellationToken: cancellationToken);
-        });
+        }, cancellationToken);
 
         var asOfDate = await GetAsOfDate(req, cancellationToken);
         var details = queryResult.Select(x => new { Age = x.DateOfBirth.Age(asOfDate), x.BadgeNumber, x.Amount })
@@ -316,7 +316,7 @@ public class FrozenReportService : IFrozenReportService
 
 
             return await query.ToListAsync(cancellationToken: cancellationToken);
-        });
+        }, cancellationToken);
 
         var asOfDate = await GetAsOfDate(req, cancellationToken);
         var details = queryResult.Select(x => new { Age = x.DateOfBirth.Age(asOfDate), x.BadgeNumber, x.Amount })
@@ -424,7 +424,7 @@ public class FrozenReportService : IFrozenReportService
             };
 
             return await joinedQuery.ToListAsync(cancellationToken);
-        });
+        }, cancellationToken);
 
         // Client-side processing for grouping and filtering
         var asOfDate = await GetAsOfDate(req, cancellationToken);
@@ -527,7 +527,7 @@ public class FrozenReportService : IFrozenReportService
             return await joinedQuery
                 .Where(detail => (detail.CurrentBalance > 0 || detail.VestedBalance > 0))
                 .ToListAsync(cancellationToken);
-        });
+        }, cancellationToken);
 
         // Client-side grouping and aggregation
         var asOfDate = await GetAsOfDate(req, cancellationToken);
@@ -674,7 +674,7 @@ public class FrozenReportService : IFrozenReportService
 
             return await joinedQuery.ToListAsync(cancellationToken);
 
-        });
+        }, cancellationToken);
 
         var details = detailList
             .Where(detail => (detail.CurrentBalance > 0 || detail.VestedBalance > 0))
@@ -871,7 +871,7 @@ public class FrozenReportService : IFrozenReportService
                 TotalNumberOfBeneficiaries = totals.TotalBeneficiaries,
                 TotalNumberOfEmployees = totals.TotalEmployees
             };
-        });
+        }, cancellationToken);
 
 
         return rawResult;
@@ -947,7 +947,7 @@ public class FrozenReportService : IFrozenReportService
                     Total = pagedData.Total
                 };
                 return new { reportDemographics, totals };
-            });
+            }, cancellationToken);
 
             var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
             return new GrossWagesReportResponse()
@@ -1012,7 +1012,7 @@ public class FrozenReportService : IFrozenReportService
                     .Where(kvp => both.Contains(kvp.Key))
                     .Sum(kvp => kvp.Value);
                 return response;
-            });
+            }, cancellationToken);
         }
     }
 

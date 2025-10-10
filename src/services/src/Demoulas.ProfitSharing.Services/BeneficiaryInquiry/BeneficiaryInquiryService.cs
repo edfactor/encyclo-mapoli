@@ -100,7 +100,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             }
 
             return query.ToPaginationResultsAsync(request, cancellation);
-        });
+        }, cancellation);
 
         foreach (var item in result.Result.Results)
         {
@@ -327,7 +327,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             PaginatedResponseDto<BeneficiaryDto> final = await result.ToPaginationResultsAsync(request, cancellationToken);
             return new BeneficiaryResponse() { Beneficiaries = final, BeneficiaryOf = prevBeneficiaries };
         }
-        );
+, cancellationToken);
         //setting Current balance
         if (beneficiary.Beneficiaries?.Results != null)
         {
@@ -404,7 +404,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             }
 
             return query.ToList();
-        });
+        }, cancellationToken);
 
 
         ISet<int> badgeNumbers = new HashSet<int>(result.Select(x => x.BadgeNumber).ToList());
@@ -427,7 +427,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         var result = await _dataContextFactory.UseReadOnlyContext(context =>
         {
             return context.BeneficiaryTypes.Select(x => new BeneficiaryTypeDto { Id = x.Id, Name = x.Name }).ToListAsync(cancellation);
-        });
+        }, cancellation);
 
         return new BeneficiaryTypesResponseDto() { BeneficiaryTypeList = result };
     }
@@ -438,7 +438,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         var result = await _dataContextFactory.UseReadOnlyContext(context =>
         {
             return context.BeneficiaryKinds.Select(x => new BeneficiaryKindDto { Id = x.Id, Name = x.Name }).ToListAsync(cancellation);
-        });
+        }, cancellation);
 
         return new BeneficiaryKindResponseDto() { BeneficiaryKindList = result };
     }

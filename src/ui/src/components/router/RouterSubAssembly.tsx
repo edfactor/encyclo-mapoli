@@ -48,7 +48,7 @@ import EnvironmentUtils from "../../utils/environmentUtils";
 import { createUnauthorizedParams, isPathAllowedInNavigation } from "../../utils/navigationAccessUtils";
 import { validateImpersonationRoles, validateRoleRemoval } from "../../utils/roleUtils";
 
-import { ImpersonationMultiSelect } from "smart-ui-library";
+import { ImpersonationMultiSelect } from "../../components/MenuBar/ImpersonationMultiSelect";
 import { MenuBar } from "../../components/MenuBar/MenuBar";
 import Adjustments from "../../pages/Adjustments/Adjustments";
 import BeneficiaryInquiry from "../../pages/BeneficiaryInquiry/BeneficiaryInquiry";

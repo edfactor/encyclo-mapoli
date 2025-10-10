@@ -79,7 +79,7 @@ internal static class EmployeeProcessorHelper
                 });
 
             return await employeeWithBalances.ToListAsync(cancellationToken);
-        });
+        }, cancellationToken);
 
         List<MemberFinancials> members = new();
         foreach (EmployeeFinancials empl in employeeFinancialsList)

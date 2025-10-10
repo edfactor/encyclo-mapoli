@@ -3,14 +3,16 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetYearEndProfitSharingSummaryReportQuery } from "reduxstore/api/YearsEndApi";
+import {
+  useFinalizeReportMutation,
+  useLazyGetYearEndProfitSharingSummaryReportQuery
+} from "reduxstore/api/YearsEndApi";
 import { FilterParams, YearEndProfitSharingReportSummaryLineItem } from "reduxstore/types";
 import { DSMGrid, Page } from "smart-ui-library";
 import { RootState } from "../../../reduxstore/store";
+import CommitModal from "../../ProfitShareReport/CommitModal.tsx";
 import presets from "../PAY426N/presets";
 import { GetProfitSummaryGridColumns } from "./ProfitSummaryGridColumns";
-import CommitModal from "../../ProfitShareReport/CommitModal.tsx";
-import { useFinalizeReportMutation } from "reduxstore/api/YearsEndApi";
 
 /**
  * Default rows for "Active and Inactive" section - these will display with zero values
@@ -124,16 +126,17 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({
     const rowData = event.data;
     const clickedLineItem = rowData.lineItemPrefix;
 
-    setSelectedLineItem((prevSelected) => {
-      const newSelected = prevSelected === clickedLineItem ? null : clickedLineItem;
-      if (newSelected) {
-        const params = getPresetForLineItem(newSelected);
-        onPresetParamsChange?.(params);
-      } else {
-        onPresetParamsChange?.(null);
-      }
-      return newSelected;
-    });
+    // Toggle selection
+    const newSelected = selectedLineItem === clickedLineItem ? null : clickedLineItem;
+    setSelectedLineItem(newSelected);
+
+    // Update parent component's preset params based on new selection
+    if (newSelected) {
+      const params = getPresetForLineItem(newSelected);
+      onPresetParamsChange?.(params);
+    } else {
+      onPresetParamsChange?.(null);
+    }
   };
 
   useEffect(() => {

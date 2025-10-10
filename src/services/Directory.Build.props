@@ -31,6 +31,21 @@
     <Deterministic>true</Deterministic>
   <!-- Keep AssemblyVersion stable to avoid binding issues; vary FileVersion/InformationalVersion per build -->
   <AssemblyVersion>1.0.0.0</AssemblyVersion>
+
+    <!-- .NET 9 Performance Optimizations -->
+    <!-- Server GC is optimized for throughput in multi-core server environments -->
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+    
+    <!-- Tiered compilation with quick JIT for faster startup and steady-state performance -->
+    <TieredCompilation>true</TieredCompilation>
+    <TieredCompilationQuickJit>true</TieredCompilationQuickJit>
+    
+    <!-- Enable Dynamic PGO (Profile Guided Optimization) for runtime optimization -->
+    <TieredPGO>true</TieredPGO>
+    
+    <!-- Ready to Run compilation for faster startup -->
+    <PublishReadyToRun>true</PublishReadyToRun>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

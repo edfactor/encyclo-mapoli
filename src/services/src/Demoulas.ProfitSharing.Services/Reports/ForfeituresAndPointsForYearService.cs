@@ -56,7 +56,7 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
             PaginatedResponseDto<ForfeituresAndPointsForYearResponse> paginatedData = await members.AsQueryable().ToPaginationResultsAsync(request, cancellationToken);
 
             return response with { TotalEarningPoints = earningPoints, Response = paginatedData };
-        });
+        }, cancellationToken);
     }
 
 

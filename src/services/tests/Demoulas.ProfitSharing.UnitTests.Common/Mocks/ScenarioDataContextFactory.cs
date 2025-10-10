@@ -85,7 +85,7 @@ public class ScenarioDataContextFactory : IProfitSharingDataContextFactory
         }
     }
 
-    public async Task<T> UseReadOnlyContext<T>(Func<ProfitSharingReadOnlyDbContext, Task<T>> func)
+    public async Task<T> UseReadOnlyContext<T>(Func<ProfitSharingReadOnlyDbContext, Task<T>> func, CancellationToken cancellationToken = default)   
     {
         try
         {

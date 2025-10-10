@@ -146,16 +146,14 @@ const ManageExecutiveHoursAndDollars = () => {
   const { hasPendingChanges, saveChanges } = hookData;
   const isReadOnly = useReadOnlyNavigation();
 
+ const renderActionNode = () => {
+      return <StatusDropdownActionNode />;
+    };
+
   return (
     <Page
       label={CAPTIONS.MANAGE_EXECUTIVE_HOURS}
-      actionNode={
-        <RenderSaveButton
-          hasPendingChanges={hasPendingChanges}
-          onSave={saveChanges}
-          isReadOnly={isReadOnly}
-        />
-      }>
+      actionNode={renderActionNode()}>
       <ManageExecutiveHoursAndDollarsContent hookData={hookData} />
     </Page>
   );

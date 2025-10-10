@@ -29,7 +29,7 @@ public sealed class CalendarService : ICalendarService
     public Task<DateOnly> FindWeekendingDateFromDateAsync(DateOnly dateTime, CancellationToken cancellationToken = default)
     {
         // No caching for weekending date, but could be added if needed
-        return _dataContextFactory.UseReadOnlyContext(c => _accountingPeriodsService.FindWeekendingDateFromDateAsync(c, dateTime, cancellationToken));
+        return _dataContextFactory.UseReadOnlyContext(c => _accountingPeriodsService.FindWeekendingDateFromDateAsync(c, dateTime, cancellationToken), cancellationToken);
     }
 
     public async Task<CalendarResponseDto> GetYearStartAndEndAccountingDatesAsync(short calendarYear, CancellationToken cancellationToken = default)
@@ -84,7 +84,7 @@ public sealed class CalendarService : ICalendarService
             }
 
             return new CalendarResponseDto { FiscalBeginDate = fiscalDates.StartingDate, FiscalEndDate = fiscalDates.EndingDate };
-        });
+        }, cancellationToken);
 
         var serialized = JsonSerializer.SerializeToUtf8Bytes(returnValue);
         await _distributedCache.SetAsync(cacheKey, serialized, new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = _refreshInterval },

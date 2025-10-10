@@ -82,7 +82,7 @@ public class CleanupReportService : ICleanupReportService
                                 IsExecutive = dem.PayFrequencyId == PayFrequency.Constants.Monthly,
                             };
                 return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
-            });
+            }, cancellationToken);
 
             var results = new PaginatedResponseDto<DemographicBadgesNotInPayProfitResponse>
             {
@@ -209,7 +209,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                 var rslt = await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
 
                 return rslt;
-            });
+            }, cancellationToken);
             var projectedResults = results.Results.Select(r => new DuplicateNamesAndBirthdaysResponse
             {
                 BadgeNumber = r.BadgeNumber,
@@ -432,7 +432,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                 };
 
                 return Result<DistributionsAndForfeitureTotalsResponse>.Success(response);
-            });
+            }, cancellationToken);
 
             return results;
         }

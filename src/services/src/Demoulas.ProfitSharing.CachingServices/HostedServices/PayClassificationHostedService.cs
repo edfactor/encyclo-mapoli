@@ -46,6 +46,6 @@ public sealed class PayClassificationHostedService : BaseCacheHostedService<Look
             return await context.PayClassifications
                 .Select(selector: c => new LookupTableCache<string> { Id = c.Id, Name = c.Name })
                 .ToListAsync(cancellationToken: cancellationToken);
-        });
+        }, cancellationToken);
     }
 }

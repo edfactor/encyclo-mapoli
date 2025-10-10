@@ -23,7 +23,7 @@ import {
 } from "reduxstore/types";
 import { tryddmmyyyyToDate } from "utils/dateUtils";
 import * as yup from "yup";
-import SubmitAndReset from "./SubmitAndReset";
+import { SearchAndReset } from "smart-ui-library";
 
 const schema = yup.object().shape({
   beneficiarySsn: yup.number().required(),
@@ -480,11 +480,12 @@ const CreateBeneficiary: React.FC<Props> = ({
             justifyContent="flex-end"
             paddingY="16px">
             <Grid size={{ xs: 12 }}>
-              <SubmitAndReset
+              <SearchAndReset
                 handleReset={handleReset}
                 handleSearch={validateAndSubmit}
                 isFetching={isFetching}
                 disabled={!isValid}
+                searchButtonText="Submit"
               />
             </Grid>
           </Grid>

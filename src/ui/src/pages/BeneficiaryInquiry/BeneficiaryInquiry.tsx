@@ -27,9 +27,9 @@ import {
 import { DSMAccordion, DSMGrid, ISortParams, Page, Pagination } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
 import { CAPTIONS } from "../../constants";
+import { BeneficiaryGridColumns } from "./BeneficiaryGridColumns";
 import BeneficiaryInquiryGrid from "./BeneficiaryInquiryGrid";
 import BeneficiaryInquirySearchFilter from "./BeneficiaryInquirySearchFilter";
-import { BeneficiarySearchFilterColumns } from "./BeneficiarySearchFilterColumns";
 import CreateBeneficiary from "./CreateBeneficiary";
 
 interface SelectedMember {
@@ -109,7 +109,7 @@ const BeneficiaryInquiry = () => {
   };
 
   const columnDefs = useMemo(() => {
-    const columns = BeneficiarySearchFilterColumns();
+    const columns = BeneficiaryGridColumns();
     return columns;
   }, [beneficiarySearchFilterResponse]);
 

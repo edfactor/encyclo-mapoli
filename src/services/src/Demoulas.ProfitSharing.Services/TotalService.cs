@@ -296,7 +296,7 @@ public sealed class TotalService : ITotalService
                                           AllocationsFromBeneficiary = (t.AllocationsFromBeneficiary ?? 0)
                                       }).ToListAsync(cancellationToken);
                     return rslt;
-                });
+                }, cancellationToken);
 
             default: //SSN
                 return await _profitSharingDataContextFactory.UseReadOnlyContext(ctx =>
@@ -315,7 +315,7 @@ public sealed class TotalService : ITotalService
                                     AllocationsFromBeneficiary = (t.AllocationsFromBeneficiary ?? 0)
                                 }).ToListAsync(cancellationToken);
                     return rslt;
-                });
+                }, cancellationToken);
         }
     }
 
@@ -415,6 +415,6 @@ public sealed class TotalService : ITotalService
                     v.ClassActionFundTotal
                 )
                 , cancellationToken);
-        });
+        }, cancellationToken);
     }
 }

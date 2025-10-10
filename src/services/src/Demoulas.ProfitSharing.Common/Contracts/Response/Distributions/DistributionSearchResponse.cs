@@ -8,6 +8,8 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 public sealed record DistributionSearchResponse : IIsExecutive
 {
+    public required long Id { get; set; }
+    public required int PaymentSequence { get; set; }
     public required string Ssn { get; set; }
     public int? BadgeNumber { get; set; }
     public required string FullName { get; set; }
@@ -27,6 +29,8 @@ public sealed record DistributionSearchResponse : IIsExecutive
     {
         var response = new DistributionSearchResponse
         {
+            Id = 1001,
+            PaymentSequence = 1,
             Ssn = "XXX-XX-1234",
             BadgeNumber = 701001,
             FullName = "John Doe",

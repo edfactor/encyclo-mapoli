@@ -116,10 +116,15 @@ const App = () => {
     const fetchBuildInfo = async () => {
       try {
         const response = await fetch("/.buildinfo.json");
+        if (!response.ok) {
+          console.debug("buildinfo.json not available (expected in dev mode)");
+          return;
+        }
         const data = await response.json();
         setUiBuildInfo(data);
       } catch (e) {
-        console.warn("Error parsing buildinfo.json");
+        // Silently ignore buildinfo.json errors in development
+        console.debug("buildinfo.json not available (expected in dev mode)");
       }
     };
 

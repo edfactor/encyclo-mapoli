@@ -10,7 +10,7 @@ import { DSMGrid, Paged, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import { useGridPagination } from "../../hooks/useGridPagination";
 import { BeneficiaryInquiryGridColumns } from "./BeneficiaryInquiryGridColumns";
-import { BeneficiaryOfGridColumns } from "./BeneficiaryOfGridColumn";
+import { BeneficiaryOfGridColumns } from "./BeneficiaryOfGridColumns";
 interface BeneficiaryInquiryGridProps {
   selectedMember: any;
   count: number;

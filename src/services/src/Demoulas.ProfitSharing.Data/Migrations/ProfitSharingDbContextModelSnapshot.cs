@@ -30081,6 +30081,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasIndex("ZeroContributionReasonId")
                         .HasDatabaseName("IX_PAY_PROFIT_ZEROCONTRIBUTIONREASONID");
 
+                    b.HasIndex(new[] { "DemographicId", "ProfitYear" }, "IX_DemographicId_ProfitYear")
+                        .HasDatabaseName("IX_PAY_PROFIT_DEMOGRAPHICID_PROFITYEAR");
+
                     b.HasIndex(new[] { "EnrollmentId" }, "IX_EnrollmentId")
                         .HasDatabaseName("IX_PAY_PROFIT_ENROLLMENTID");
 
@@ -30311,6 +30314,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasIndex("ZeroContributionReasonId")
                         .HasDatabaseName("IX_PROFIT_DETAIL_ZEROCONTRIBUTIONREASONID");
+
+                    b.HasIndex(new[] { "ProfitYear", "Ssn" }, "IX_PROFITYEAR_SSN")
+                        .HasDatabaseName("IX_PROFIT_DETAIL_PROFITYEAR_SSN");
 
                     b.HasIndex(new[] { "ProfitYear", "MonthToDate" }, "IX_PROFIT_CODE_ID_MONTHTODATE")
                         .HasDatabaseName("IX_PROFIT_DETAIL_PROFITYEAR_MONTHTODATE");
@@ -30955,12 +30961,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Virtual.ParticipantTotalVestingBalance", b =>
                 {
+                    b.Property<int>("Id")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID");
+
                     b.Property<int>("Ssn")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("NUMBER(10)")
                         .HasColumnName("SSN");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Ssn"));
 
                     b.Property<decimal?>("AllocationsFromBeneficiary")
                         .HasPrecision(18, 2)
@@ -30977,10 +30984,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(18,2)")
                         .HasColumnName("CURRENTBALANCE");
 
-                    b.Property<int>("Id")
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("ID");
-
                     b.Property<decimal?>("VestedBalance")
                         .HasPrecision(18, 2)
                         .HasColumnType("DECIMAL(18,2)")
@@ -30995,7 +30998,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("YEARS");
 
-                    b.HasKey("Ssn")
+                    b.HasKey("Id", "Ssn")
                         .HasName("PK_PARTICIPANTTOTALVESTINGBALANCES");
 
                     b.ToTable("PARTICIPANTTOTALVESTINGBALANCES", null, t =>
@@ -31006,18 +31009,19 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Virtual.ParticipantTotalYear", b =>
                 {
+                    b.Property<int>("DemographicId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("DEMOGRAPHIC_ID");
+
                     b.Property<int>("Ssn")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("NUMBER(10)")
                         .HasColumnName("SSN");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Ssn"));
 
                     b.Property<byte>("Years")
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("YEARS");
 
-                    b.HasKey("Ssn")
+                    b.HasKey("DemographicId", "Ssn")
                         .HasName("PK_PARTICIPANTTOTALYEARS");
 
                     b.ToTable("PARTICIPANTTOTALYEARS", null, t =>

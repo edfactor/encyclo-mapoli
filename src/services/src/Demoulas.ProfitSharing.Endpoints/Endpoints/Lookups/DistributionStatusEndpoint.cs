@@ -64,7 +64,7 @@ public sealed class DistributionStatusEndpoint : ProfitSharingResultResponseEndp
             var items = await _dataContextFactory.UseReadOnlyContext(c => c.DistributionStatuses
                 .OrderBy(x => x.Name)
                 .Select(x => new DistributionStatusResponse { Id = x.Id, Name = x.Name })
-                .ToListAsync(ct));
+                .ToListAsync(ct), ct);
 
             // Business metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,

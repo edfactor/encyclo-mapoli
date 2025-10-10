@@ -67,7 +67,7 @@ public sealed class ChecksumValidationService : IChecksumValidationService
                 await ctx.ReportChecksums
                     .Where(r => r.ProfitYear == profitYear && r.ReportType == reportType)
                     .OrderByDescending(r => r.CreatedAtUtc)
-                    .FirstOrDefaultAsync(cancellationToken));
+                    .FirstOrDefaultAsync(cancellationToken), cancellationToken);
 
             if (archived == null)
             {

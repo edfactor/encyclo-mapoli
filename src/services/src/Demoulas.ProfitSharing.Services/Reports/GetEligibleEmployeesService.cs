@@ -90,6 +90,6 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
                 NumberNotSelected = numberNotSelected,
                 NumberWritten = result.Results.Count()
             };
-        });
+        }, cancellationToken);
     }
 }

@@ -99,6 +99,6 @@ public class AdhocBeneficiariesReport : IAdhocBeneficiariesReport
                 },
                 TotalEndingBalance = totalBalanceResult.Values.Sum(x => x.TotalAmount ?? 0)
             };
-        });
+        }, cancellationToken);
     }
 }

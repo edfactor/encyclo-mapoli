@@ -114,11 +114,15 @@ OracleHcmConfig oracleHcmConfig = builder.Configuration.GetSection("OracleHcm").
 
 builder.AddOracleHcmSynchronization(oracleHcmConfig);
 
-// Register masking converter (must be first so it can wrap others)
+// Configure JSON serialization with source generation for better performance
 builder.Services.ConfigureHttpJsonOptions(o =>
 {
-    // Insert at index 0 to ensure highest precedence
+    // Insert masking converter at index 0 to ensure highest precedence
     o.SerializerOptions.Converters.Insert(0, new MaskingJsonConverterFactory());
+
+    // Add source-generated JSON serializer context for compile-time serialization
+    // This reduces reflection overhead and improves startup time
+    o.SerializerOptions.TypeInfoResolverChain.Insert(0, Demoulas.ProfitSharing.Api.Serialization.ProfitSharingJsonSerializerContext.Default);
 });
 
 builder.AddDatabaseServices((services, factoryRequests) =>

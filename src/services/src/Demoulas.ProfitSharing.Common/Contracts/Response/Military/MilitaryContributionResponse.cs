@@ -11,6 +11,6 @@ public sealed record MilitaryContributionResponse : YearRequest, IIsExecutive
     public decimal Amount { get; init; }
     public byte? CommentTypeId { get; init; }
     public bool IsSupplementalContribution { get; init; }
-    public DateOnly ContributionDate { get; init; }
+    public DateOnly ContributionDate { get; set; }
     public bool IsExecutive { get; set; }
 }
