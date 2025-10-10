@@ -221,7 +221,8 @@ describe("useDrawerViewModel", () => {
       });
 
       expect(store.getState().general.isDrawerOpen).toBe(false);
-      expect(store.getState().general.activeSubmenu).toBeNull();
+      // Redux clearActiveSubMenu sets to empty string, not null
+      expect(store.getState().general.activeSubmenu).toBe("");
     });
 
     it("should select menu item and set active submenu", () => {
@@ -250,12 +251,14 @@ describe("useDrawerViewModel", () => {
         wrapper: createWrapper(store)
       });
 
+      const initialSubmenu = store.getState().general.activeSubmenu;
+
       act(() => {
         result.current.selectMenuItem(disabledItem);
       });
 
-      // Redux clearActiveSubMenu action sets activeSubmenu to empty string, not null
-      expect(store.getState().general.activeSubmenu).toBe("");
+      // Should not change activeSubmenu when item is disabled
+      expect(store.getState().general.activeSubmenu).toBe(initialSubmenu);
     });
 
     it("should go back to main menu from submenu view", () => {
