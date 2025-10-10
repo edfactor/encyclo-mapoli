@@ -91,6 +91,7 @@ DECLARE
     PAY426N_FROZEN CONSTANT NUMBER := 153;
     PROFIT_DETAILS_REVERSAL CONSTANT NUMBER := 154;
     PRINT_PS_JOBS CONSTANT NUMBER :=155;
+    ADHOC_REPORT CONSTANT NUMBER := 156;
 
 
     --- These are the role IDs from the ROLES table
@@ -134,6 +135,7 @@ DECLARE
     ORDER_NINETEENTH CONSTANT NUMBER := 19;
     ORDER_TWENTIETH CONSTANT NUMBER := 20;
     ORDER_NINETY_NINTH CONSTANT NUMBER := 99;
+    
 
     -- These are the helper functions to reduce boilerplate
     -- and reduce errors
@@ -181,7 +183,7 @@ BEGIN
     
 
 --Top level menus
-    insert_navigation_item(INQUIRIES_MENU, TOP_LEVEL_MENU, 'INQUIRIES', '', '', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(INQUIRIES_MENU, TOP_LEVEL_MENU, 'INQUIRIES AND ADJUSTMENTS', '', '', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
 
     insert_navigation_item(BENEFICIARIES_MENU, TOP_LEVEL_MENU, 'BENEFICIARIES', '', '', STATUS_NORMAL, ORDER_SECOND, '', DISABLED, IS_NAVIGABLE);
     insert_navigation_item(DISTRIBUTIONS_MENU, TOP_LEVEL_MENU, 'DISTRIBUTIONS', '', '', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
@@ -191,7 +193,9 @@ BEGIN
 
 --Sub values for INQUIRIES
     insert_navigation_item(MASTER_INQUIRY_PAGE, INQUIRIES_MENU, 'MASTER INQUIRY', '', 'master-inquiry', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(ADJUSTMENTS_PAGE, INQUIRIES_MENU, 'ADJUSTMENTS', '', 'adjustments', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(ADJUSTMENTS_PAGE, INQUIRIES_MENU, 'ADJUSTMENTS', '', 'adjustments', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(ADHOC_REPORT, INQUIRIES_MENU, 'ADHOC REPORT', '', 'adhoc-report', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PAY_BENEFICIARY_REPORT, INQUIRIES_MENU, 'PAY BENEFICIARY REPORT', '', 'payben-report', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
 
 
 --distribution items
@@ -237,8 +241,7 @@ BEGIN
     insert_navigation_item(RECENTLY_TERMINATED, FISCAL_CLOSE, 'Recently Terminated', 'PROF-VESTED|PAY508', 'recently-terminated', STATUS_NORMAL, ORDER_EIGHTEENTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(TERMINATED_LETTERS, FISCAL_CLOSE, 'Terminated Letters', 'QPROF003-1', 'terminated-letters', STATUS_NORMAL, ORDER_NINETEENTH, '', ENABLED, IS_NAVIGABLE);
 
--- Pay Beneficiary Report (Year End / Fiscal Close)
-    insert_navigation_item(PAY_BENEFICIARY_REPORT, FISCAL_CLOSE, 'Pay Beneficiary Report', '', 'payben-report', STATUS_NORMAL, ORDER_TENTH, '', ENABLED, IS_NAVIGABLE);
+
 
 -- Adhoc Beneficiaries Report (Pay Be Next) (Year End / Fiscal Close)
     insert_navigation_item(ADHOC_BENEFICIARIES_REPORT, FISCAL_CLOSE, 'Adhoc Beneficiaries Report (Pay Be Next)', '', 'adhoc-beneficiaries-report', STATUS_NORMAL, ORDER_NINETEENTH, '', ENABLED, IS_NAVIGABLE);
@@ -292,6 +295,13 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
 --  NOTE: IT-DevOps navigation should be accessible only to members of the IT-DevOps role (role id 6).
 --  Remove other role assignments so the IT menu is exclusive to IT-DevOps.
     assign_navigation_role(IT_DEVOPS_MENU, IT_DEVOPS);
+
+
+
+-- Adhoc Report  
+    assign_navigation_role(ADHOC_REPORT, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(ADHOC_REPORT, FINANCE_MANAGER);
+    assign_navigation_role(ADHOC_REPORT, DISTRIBUTIONS_CLERK);
 
 -- Print PS Jobs
     assign_navigation_role(PRINT_PS_JOBS, SYSTEM_ADMINISTRATOR);

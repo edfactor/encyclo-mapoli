@@ -97,7 +97,7 @@ export const menuLevels = (data: NavigationResponseDto | undefined): MenuLevel[]
   }
 
   // Find the Year End navigation item
-  const yearEndList = data.navigation.find((m) => m.title === "YEAR END");
+  const yearEndList = data.navigation.find((m) => m.parentId === null);
   if (!yearEndList || !yearEndList.items) {
     return [];
   }
