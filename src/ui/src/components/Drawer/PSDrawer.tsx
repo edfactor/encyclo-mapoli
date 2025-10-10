@@ -1,41 +1,38 @@
-import { ChevronLeft, ExpandLess, ExpandMore } from "@mui/icons-material";
+/**
+ * PSDrawer - Refactored with MVVM Pattern
+ *
+ * Pure presentation component that uses useDrawerViewModel for all business logic.
+ * This version replaces hardcoded "YEAR END" logic with configurable recursive approach.
+ *
+ * Key improvements from original:
+ * - Uses ViewModel hook for all logic (testable without rendering)
+ * - Supports arbitrary nesting depth via RecursiveNavItem
+ * - Configurable via DrawerConfig (not hardcoded to Year End)
+ * - Cleaner separation of concerns
+ */
+
+import { ChevronLeft } from "@mui/icons-material";
 import {
   Box,
-  Chip,
-  Collapse,
   Divider,
   Drawer,
   IconButton,
   List,
   ListItem,
   ListItemButton,
-  ListItemText,
-  SelectChangeEvent,
   SvgIcon,
   SvgIconProps,
   Typography
 } from "@mui/material";
-import React, { FC, useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
+import { FC } from "react";
 import { ICommon } from "smart-ui-library";
-import { drawerTitle, menuLevels } from "../../MenuData";
 import { drawerClosedWidth, drawerOpenWidth } from "../../constants";
-import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
-import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
-import { clearActiveSubMenu, closeDrawer, openDrawer, setActiveSubMenu } from "../../reduxstore/slices/generalSlice";
-import {
-  checkDecemberParamsAndGridsProfitYears,
-  checkFiscalCloseParamsAndGridsProfitYears,
-  setSelectedProfitYearForDecemberActivities,
-  setSelectedProfitYearForFiscalClose
-} from "../../reduxstore/slices/yearsEndSlice";
-import { RootState } from "../../reduxstore/store";
-import { NavigationResponseDto } from "../../reduxstore/types";
+import { NavigationDto, NavigationResponseDto } from "../../reduxstore/types";
+import { useDrawerViewModel } from "./hooks";
+import { DrawerConfig, getDefaultDrawerConfig } from "./models";
+import RecursiveNavItem from "./RecursiveNavItem";
 
-// Define the highlight color as a constant
-const HIGHLIGHT_COLOR = "#0258A5";
-
+// Drawer Icons
 const SidebarIcon = (props: SvgIconProps) => (
   <SvgIcon
     {...props}
@@ -58,210 +55,44 @@ const SidebarCloseIcon = (props: SvgIconProps) => (
 
 export interface PSDrawerProps extends ICommon {
   navigationData?: NavigationResponseDto;
+  drawerConfig?: DrawerConfig; // Optional: specify which nav section to display
 }
 
-const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { isDrawerOpen: drawerOpen, activeSubmenu } = useSelector((state: RootState) => state.general);
-  const { selectedProfitYearForDecemberActivities, selectedProfitYearForFiscalClose } = useSelector(
-    (state: RootState) => state.yearsEnd
-  );
-  const getStoredExpandedLevels = () => {
-    try {
-      const stored = localStorage.getItem("expandedLevels");
-      return stored ? JSON.parse(stored) : {};
-    } catch (error) {
-      console.error("Error loading expanded levels from localStorage:", error);
-      return {};
-    }
-  };
-
-  const [expandedLevels, setExpandedLevels] = useState<{ [key: string]: boolean }>(getStoredExpandedLevels());
-  const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
-  const currentPath = location.pathname; // Directly use location.pathname instead of state
-  const pathRef = useRef(currentPath); // Use ref to track previous path
-  const dispatch = useDispatch();
-  const profitYear = useDecemberFlowProfitYear();
-  const fiscalFlowProfitYear = useFiscalCloseProfitYear();
-  const expandedOnceRef = useRef<{ [key: string]: boolean }>({});
-
-  const hasThirdLevel = (level: string, secondLevel: string) => {
-    const hasSome = menuLevels(navigationData).some(
-      (l) => l.mainTitle === level && l.topPage.some((y) => y.topTitle === secondLevel && y.subPages.length > 0)
-    );
-    return hasSome;
-  };
-
-  // The format of the captions is New Report Name (Legacy Name)
-  const getNewReportName = (caption: string): string => {
-    if (!caption.includes("(")) {
-      return caption;
-    }
-    return caption.split(" (")[0];
-  };
-
-  // The format of the captions is New Report Name (Legacy Name)
-  const getLegacyReportName = (caption: string): string => {
-    const legacyReportName = caption.split(/[()]/)[1];
-    if (legacyReportName === caption) {
-      return "";
-    }
-    return legacyReportName;
-  };
-
-  const handleDrawerToggle = () => {
-    if (drawerOpen) {
-      dispatch(closeDrawer());
-    } else {
-      dispatch(openDrawer());
-    }
-    // Close all levels and clear active submenu when drawer closes
-    if (drawerOpen) {
-      setExpandedLevels({});
-      setSelectedLevel(null);
-      dispatch(clearActiveSubMenu());
-
-      try {
-        localStorage.setItem("expandedLevels", JSON.stringify({}));
-      } catch (error) {
-        console.error("Error clearing expanded levels in localStorage:", error);
-      }
-    }
-  };
-
-  const handleLevelClick = (level: string) => {
-    dispatch(setActiveSubMenu(level));
-  };
-
-  const handleBackToMain = () => {
-    dispatch(clearActiveSubMenu());
-    setExpandedLevels({});
-    setSelectedLevel(null);
-    try {
-      localStorage.setItem("expandedLevels", JSON.stringify({}));
-    } catch (error) {
-      console.error("Error clearing expanded levels in localStorage:", error);
-    }
-  };
-
-  const settingCurrentNavigation = (navigationId?: number) => {
-    if (navigationId) {
-      localStorage.setItem("navigationId", navigationId.toString());
-    }
-  };
-
-  const handlePageClick = (route: string, navigationId: number | null) => {
-    settingCurrentNavigation(navigationId ?? undefined);
-    navigate(`/${route}`);
-    console.log(`Top page Navigating to ${route}`);
-  };
-
-  const handleSubPageClick = (subRoute: string, navigationId: number | null) => {
-    settingCurrentNavigation(navigationId ?? undefined);
-    navigate(`/${subRoute}`);
-    console.log(`Sub page Navigating to ${subRoute}`);
-  };
-
-  const handleDecemberProfitYearChange = (event: SelectChangeEvent) => {
-    dispatch(setSelectedProfitYearForDecemberActivities(Number(event.target.value)));
-    dispatch(checkDecemberParamsAndGridsProfitYears(Number(event.target.value)));
-  };
-
-  const handleFiscalCloseProfitYearChange = (event: SelectChangeEvent) => {
-    dispatch(setSelectedProfitYearForFiscalClose(Number(event.target.value)));
-    dispatch(checkFiscalCloseParamsAndGridsProfitYears(Number(event.target.value)));
-  };
-
-  // Check if route is active
-  const isRouteActive = (route: string): boolean => {
-    if (!route) return false;
-    return currentPath === `/${route}`;
-  };
-
-  useEffect(() => {
-    if (activeSubmenu && drawerOpen) {
-      const currentRoute = currentPath.substring(1); // Remove leading slash
-
-      const menuLevel = menuLevels(navigationData).find((l) => l.mainTitle === activeSubmenu);
-      if (menuLevel) {
-        menuLevel.topPage.forEach((page) => {
-          if (
-            (page.topRoute && page.topRoute === currentRoute) ||
-            page.subPages.some((subPage) => subPage.subRoute === currentRoute)
-          ) {
-            if (!expandedOnceRef.current[page.topTitle]) {
-              const newExpandedLevels = { ...expandedLevels, [page.topTitle]: true };
-              setExpandedLevels(newExpandedLevels);
-              expandedOnceRef.current[page.topTitle] = true;
-
-              try {
-                localStorage.setItem("expandedLevels", JSON.stringify(newExpandedLevels));
-              } catch (error) {
-                console.error("Error saving expanded levels to localStorage:", error);
-              }
-            }
-          }
-        });
-      }
-    }
-  }, []);
-
-  // Auto-expand menu containing active route only when path changes
-  useEffect(() => {
-    // Only run this effect if the path has changed
-    if (pathRef.current !== currentPath) {
-      pathRef.current = currentPath; // Update ref to current path
-
-      if (activeSubmenu) {
-        const menuLevel = menuLevels(navigationData).find((l) => l.mainTitle === activeSubmenu);
-        if (menuLevel) {
-          // Find top-level page containing the current route
-          const activePage = menuLevel.topPage.find(
-            (page) =>
-              (page.topRoute && isRouteActive(page.topRoute)) ||
-              page.subPages.some((subPage) => subPage.subRoute && isRouteActive(subPage.subRoute))
-          );
-
-          if (activePage && !expandedOnceRef.current[activePage.topTitle]) {
-            // Only expand if we haven't expanded this section before
-            const newExpandedLevels = { ...expandedLevels, [activePage.topTitle]: true };
-            setExpandedLevels(newExpandedLevels);
-            expandedOnceRef.current[activePage.topTitle] = true;
-
-            try {
-              localStorage.setItem("expandedLevels", JSON.stringify(newExpandedLevels));
-            } catch (error) {
-              console.error("Error saving expanded levels to localStorage:", error);
-            }
-          }
-        }
-      }
-    }
-  }, [currentPath, activeSubmenu, navigationData, isRouteActive]);
+/**
+ * PSDrawer - Pure Presentation Component
+ *
+ * All business logic is in useDrawerViewModel hook.
+ * This component only handles rendering based on ViewModel state.
+ */
+const PSDrawer: FC<PSDrawerProps> = ({
+  navigationData,
+  drawerConfig = getDefaultDrawerConfig() // Defaults to Year End for backwards compatibility
+}) => {
+  // ViewModel provides all logic, state, and actions
+  const vm = useDrawerViewModel(navigationData, drawerConfig);
 
   return (
     <>
       {/* Toggle Button */}
       <Box
-        key={"TitleBarAboveDrawer"}
+        key="TitleBarAboveDrawer"
         sx={{
           position: "fixed",
-          left: drawerOpen ? "16px" : "12px",
+          left: vm.isOpen ? "16px" : "12px",
           top: "179px",
           zIndex: (theme) => theme.zIndex.drawer + 100,
           display: "flex",
           alignItems: "center",
           gap: 1,
           justifyContent: "space-between",
-          width: drawerOpen ? "338px" : "auto",
+          width: vm.isOpen ? "338px" : "auto",
           transition: (theme) =>
             theme.transitions.create("left", {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen
             })
         }}>
-        {drawerOpen && (
+        {vm.isOpen && (
           <Typography
             variant="h6"
             sx={{
@@ -269,31 +100,31 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
               whiteSpace: "nowrap",
               fontWeight: "bold"
             }}>
-            {drawerTitle}
+            {vm.drawerTitle}
           </Typography>
         )}
         <IconButton
-          onClick={handleDrawerToggle}
+          onClick={vm.toggleDrawer}
           sx={{
             backgroundColor: "transparent",
             "&:hover": {
               backgroundColor: (theme) => theme.palette.action.hover
             }
           }}>
-          {drawerOpen ? <SidebarCloseIcon /> : <SidebarIcon />}
+          {vm.isOpen ? <SidebarCloseIcon /> : <SidebarIcon />}
         </IconButton>
       </Box>
+
+      {/* Drawer */}
       <Drawer
         variant="permanent"
         id="DrawerItself"
         sx={{
-          width: drawerOpen ? drawerOpenWidth : drawerClosedWidth,
-          display: drawerOpen ? "block" : "none",
+          width: vm.isOpen ? drawerOpenWidth : drawerClosedWidth,
+          display: vm.isOpen ? "block" : "none",
           flexShrink: 0,
-
-          // THIS IS WHAT STYLES THE AQUAMARINE COLORED SPACE
           "& .MuiDrawer-paper": {
-            width: drawerOpen ? drawerOpenWidth : drawerClosedWidth,
+            width: vm.isOpen ? drawerOpenWidth : drawerClosedWidth,
             borderRight: "1px solid #BDBDBD",
             boxSizing: "border-box",
             overflowX: "hidden",
@@ -322,10 +153,11 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
               backgroundColor: (theme) => theme.palette.grey[300]
             }
           }}>
-          {activeSubmenu ? (
+          {vm.isInSubmenuView && vm.activeTopLevelItem ? (
+            /* Submenu View: Show children of selected top-level item */
             <>
               <ListItemButton
-                onClick={handleBackToMain}
+                onClick={vm.goBackToMainMenu}
                 sx={{
                   display: "flex",
                   alignItems: "center",
@@ -344,274 +176,73 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
                 <Typography
                   variant="body2"
                   sx={{ fontWeight: "bold" }}>
-                  {activeSubmenu}
+                  {vm.activeTopLevelItem.title}
                 </Typography>
               </ListItemButton>
+
               <List>
-                {menuLevels(navigationData)
-                  .find((l) => l.mainTitle === activeSubmenu)
-                  ?.topPage.filter((page) => !page.disabled)
-                  .map((page, index) => {
-                    const isTopPageActive = page.topRoute && isRouteActive(page.topRoute);
-                    const hasActiveSubPage = page.subPages.some(
-                      (subPage) => subPage.subRoute && isRouteActive(subPage.subRoute)
-                    );
-
-                    return (
-                      <React.Fragment key={page.topTitle + index}>
-                        {/* Need to decide if this is a link or set of menus */}
-                        {hasThirdLevel(activeSubmenu, page.topTitle) ? (
-                          <>
-                            <ListItemButton
-                              key={"" + index + page.topTitle}
-                              onClick={() => {
-                                const newExpandedLevels = { ...expandedLevels };
-                                newExpandedLevels[page.topTitle] = !expandedLevels[page.topTitle];
-                                setExpandedLevels(newExpandedLevels);
-                                try {
-                                  localStorage.setItem("expandedLevels", JSON.stringify(newExpandedLevels));
-                                } catch (error) {
-                                  console.error("Error saving expanded levels to localStorage:", error);
-                                }
-                              }}
-                              sx={{
-                                pl: 2,
-                                display: "flex",
-                                justifyContent: "space-between",
-                                py: 1.75,
-                                minHeight: 0,
-                                backgroundColor: isTopPageActive // Only check direct match
-                                  ? `${HIGHLIGHT_COLOR}15`
-                                  : "transparent",
-                                borderLeft: isTopPageActive // Only check direct match
-                                  ? `4px solid ${HIGHLIGHT_COLOR}`
-                                  : "4px solid transparent",
-                                "&:hover": {
-                                  backgroundColor: isTopPageActive
-                                    ? `${HIGHLIGHT_COLOR}25`
-                                    : (theme) => theme.palette.action.hover
-                                }
-                              }}>
-                              <Box sx={{ display: "flex", alignItems: "center" }}>
-                                <ListItemText
-                                  primary={getNewReportName(page.topTitle)}
-                                  secondary={getLegacyReportName(page.topTitle)}
-                                  primaryTypographyProps={{
-                                    sx: {
-                                      fontSize: "0.875rem",
-                                      fontWeight: hasActiveSubPage ? "bold" : "normal",
-                                      color: hasActiveSubPage ? HIGHLIGHT_COLOR : "inherit"
-                                    }
-                                  }}
-                                  secondaryTypographyProps={{
-                                    sx: {
-                                      fontSize: "0.75rem",
-                                      color: (theme) => theme.palette.text.secondary
-                                    }
-                                  }}
-                                  sx={{
-                                    margin: 0
-                                  }}
-                                />
-                              </Box>
-
-                              {expandedLevels[page.topTitle] ? <ExpandLess /> : <ExpandMore />}
-                            </ListItemButton>
-                            <Collapse
-                              in={expandedLevels[page.topTitle]}
-                              timeout="auto"
-                              unmountOnExit>
-                              <List
-                                component="div"
-                                disablePadding>
-                                {page.subPages
-                                  .filter((page) => !page.disabled)
-                                  .map((subPage) => {
-                                    const isSubPageActive = subPage.subRoute && isRouteActive(subPage.subRoute);
-
-                                    return (
-                                      <ListItemButton
-                                        key={page.topTitle + subPage.subTitle}
-                                        sx={{
-                                          pl: 4,
-                                          display: "flex",
-                                          justifyContent: "space-between",
-                                          py: 1,
-                                          minHeight: 0,
-                                          backgroundColor: isSubPageActive ? `${HIGHLIGHT_COLOR}15` : "transparent",
-                                          borderLeft: isSubPageActive
-                                            ? `4px solid ${HIGHLIGHT_COLOR}`
-                                            : "4px solid transparent",
-                                          "&:hover": {
-                                            backgroundColor: isSubPageActive
-                                              ? `${HIGHLIGHT_COLOR}25`
-                                              : (theme) => theme.palette.action.hover
-                                          }
-                                        }}
-                                        onClick={() =>
-                                          handleSubPageClick(subPage.subRoute ?? "", subPage.navigationId ?? null)
-                                        }>
-                                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                                          <ListItemText
-                                            primary={getNewReportName(subPage.subTitle || "")}
-                                            secondary={getLegacyReportName(subPage.subTitle || "")}
-                                            secondaryTypographyProps={{
-                                              sx: {
-                                                fontSize: "0.75rem",
-                                                color: (theme) => theme.palette.text.secondary
-                                              }
-                                            }}
-                                            primaryTypographyProps={{
-                                              variant: "body2",
-                                              sx: {
-                                                fontWeight: isSubPageActive ? "bold" : "normal",
-                                                color: isSubPageActive ? HIGHLIGHT_COLOR : "inherit"
-                                              }
-                                            }}
-                                            sx={{
-                                              margin: 0
-                                            }}
-                                          />
-                                        </Box>
-                                        <Box sx={{ display: "flex", alignItems: "right", gap: 1 }}>
-                                          <Chip
-                                            variant="outlined"
-                                            label={subPage.statusName}
-                                            className={` ${subPage.statusName === "In Progress" ? "bg-dsm-action-secondary-hover text-dsm-action" : ""} ${subPage.statusName === "On Hold" ? "bg-yellow-50 text-yellow-700" : ""} ${subPage.statusName === "Complete" ? "bg-dsm-action-secondary-hover text-dsm-action" : ""} ${!["In Progress", "On Hold", "Complete"].includes(subPage.statusName || "") ? "border-dsm-grey-secondary text-dsm-grey-secondary" : ""} font-medium`}
-                                            size="small"
-                                          />
-                                        </Box>
-                                      </ListItemButton>
-                                    );
-                                  })}
-                              </List>
-                            </Collapse>
-                          </>
-                        ) : (
-                          <>
-                            <ListItemButton
-                              key={page.topTitle}
-                              onClick={() => handlePageClick(page.topRoute ?? "", page.navigationId ?? null)}
-                              sx={{
-                                pl: 2,
-                                display: "flex",
-                                justifyContent: "space-between",
-                                py: 1,
-                                minHeight: 0,
-                                backgroundColor: isTopPageActive ? `${HIGHLIGHT_COLOR}15` : "transparent",
-                                borderLeft: isTopPageActive ? `4px solid ${HIGHLIGHT_COLOR}` : "4px solid transparent",
-                                "&:hover": {
-                                  backgroundColor: isTopPageActive
-                                    ? `${HIGHLIGHT_COLOR}25`
-                                    : (theme) => theme.palette.action.hover
-                                }
-                              }}>
-                              <Box sx={{ display: "flex", alignItems: "center" }}>
-                                <ListItemText
-                                  primary={getNewReportName(page.topTitle || "")}
-                                  secondary={getLegacyReportName(page.topTitle || "")}
-                                  primaryTypographyProps={{
-                                    sx: {
-                                      fontSize: "0.875rem",
-                                      fontWeight: isTopPageActive ? "bold" : "normal",
-                                      color: isTopPageActive ? HIGHLIGHT_COLOR : "inherit"
-                                    }
-                                  }}
-                                  secondaryTypographyProps={{
-                                    sx: {
-                                      fontSize: "0.75rem",
-                                      color: (theme) => theme.palette.text.secondary
-                                    }
-                                  }}
-                                  sx={{
-                                    margin: 0
-                                  }}
-                                />
-                              </Box>
-                              <Box sx={{ display: "flex", alignItems: "right", gap: 1 }}>
-                                <Chip
-                                  variant="outlined"
-                                  label={page.statusName}
-                                  className={` ${page.statusName === "In Progress" ? "bg-dsm-action-secondary-hover text-dsm-action" : ""} ${page.statusName === "On Hold" ? "bg-yellow-50 text-yellow-700" : ""} ${page.statusName === "Complete" ? "bg-dsm-action-secondary-hover text-dsm-action" : ""} ${!["In Progress", "On Hold", "Complete"].includes(page.statusName || "") ? "border-dsm-grey-secondary text-dsm-grey-secondary" : ""} font-medium`}
-                                  size="small"
-                                />
-                              </Box>
-                            </ListItemButton>
-                          </>
-                        )}
-                      </React.Fragment>
-                    );
-                  })}
+                {vm.activeTopLevelItem.items
+                  ?.filter((item: NavigationDto) => !item.disabled && (item.isNavigable ?? true))
+                  .map((item: NavigationDto) => (
+                    <RecursiveNavItem
+                      key={item.id}
+                      item={item}
+                      level={0}
+                      maxAutoExpandDepth={drawerConfig.autoExpandDepth}
+                      onNavigate={vm.navigateToItem}
+                    />
+                  ))}
               </List>
             </>
           ) : (
+            /* Main Menu View: Show top-level items */
             <>
               <Divider sx={{ mb: 1 }} />
               <List>
-                {menuLevels(navigationData).map((level, index) => {
-                  // Check if this top-level menu contains the active route
-                  const hasActiveRoute = level.topPage.some(
-                    (page) =>
-                      (page.topRoute && isRouteActive(page.topRoute)) ||
-                      page.subPages.some((subPage) => subPage.subRoute && isRouteActive(subPage.subRoute))
-                  );
+                {vm.drawerItems
+                  .filter((item) => item.isNavigable ?? true)
+                  .map((item) => {
+                    const hasChildren = item.items && item.items.length > 0;
+                    const isActive = vm.isItemActive(item);
+                    const hasActiveDescendant = vm.hasActiveChild(item);
 
-                  return (
-                    <React.Fragment key={level.mainTitle + index}>
-                      <ListItem disablePadding>
+                    return (
+                      <ListItem
+                        key={item.id}
+                        disablePadding>
                         <ListItemButton
-                          onClick={() => handleLevelClick(level.mainTitle)}
+                          onClick={() => (hasChildren ? vm.selectMenuItem(item) : vm.navigateToItem(item))}
+                          disabled={item.disabled}
                           sx={{
-                            backgroundColor: "transparent", // No highlighting based on children
-                            borderLeft: "4px solid transparent",
+                            backgroundColor: isActive ? "#0258A515" : "transparent",
+                            borderLeft: isActive || hasActiveDescendant ? "4px solid #0258A5" : "4px solid transparent",
                             "&:hover": {
                               backgroundColor: (theme) => theme.palette.action.hover
                             },
                             "& .MuiListItemText-primary": {
                               color: (theme) => theme.palette.text.primary,
-                              fontWeight: "normal"
+                              fontWeight: isActive || hasActiveDescendant ? 600 : "normal"
                             },
                             display: "flex",
                             justifyContent: "space-between",
-                            alignItems: "center"
+                            alignItems: "center",
+                            opacity: item.disabled ? 0.5 : 1
                           }}>
-                          {drawerOpen && (
-                            <>
-                              <ListItemText
-                                primary={level.mainTitle}
-                                secondary={`${level.topPage.filter((page) => page.statusName?.toLowerCase() === "complete").length} of ${level.topPage.length} completed`}
-                                slotProps={{
-                                  primary: {
-                                    variant: "h6"
-                                  },
-                                  secondary: {
-                                    variant: "body2",
-                                    sx: {
-                                      color: "text.secondary",
-                                      fontSize: "0.75rem"
-                                    }
-                                  }
-                                }}
-                              />
-                              {level.topPage.filter((page) => page.statusName?.toLowerCase() === "complete").length ===
-                                level.topPage.length && (
-                                <Chip
-                                  variant="outlined"
-                                  label="Complete"
-                                  size="small"
-                                  className="bg-dsm-action-secondary-hover font-medium text-dsm-action"
-                                  sx={{
-                                    fontWeight: 500
-                                  }}
-                                />
-                              )}
-                            </>
-                          )}
+                          <Box sx={{ display: "flex", flexDirection: "column", flex: 1 }}>
+                            <Typography variant="body2">{item.title}</Typography>
+                            {item.subTitle && (
+                              <Typography
+                                variant="caption"
+                                sx={{ fontStyle: "italic", color: "text.secondary" }}>
+                                {item.subTitle}
+                              </Typography>
+                            )}
+                          </Box>
+                          {hasChildren && <ChevronLeft sx={{ transform: "rotate(180deg)" }} />}
                         </ListItemButton>
                       </ListItem>
-                    </React.Fragment>
-                  );
-                })}
+                    );
+                  })}
               </List>
             </>
           )}

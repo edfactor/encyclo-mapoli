@@ -8,12 +8,12 @@ import MenuList from "@mui/material/MenuList";
 import Paper from "@mui/material/Paper";
 import Popper from "@mui/material/Popper";
 import { FC, useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { RouteData } from "../../types/MenuTypes";
 import { useDispatch } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
 import { openDrawer, setActiveSubMenu } from "reduxstore/slices/generalSlice";
-import { menuLevels } from "../../MenuData";
 import { NavigationResponseDto } from "reduxstore/types";
+import { RouteData } from "../../types/MenuTypes";
+import { getL0NavigationByTitle } from "../Drawer/utils/navigationStructureUtils";
 
 type myProps = {
   menuLabel: string;
@@ -54,7 +54,9 @@ const PopupMenu: FC<myProps> = ({ menuLabel, items, parentRoute, disabled, navig
   };
 
   const isTitleInMainMenuLevels = (caption: string) => {
-    return menuLevels(navigationData).some((level) => level.mainTitle === caption);
+    // Check if this caption corresponds to an L0 navigation item that has children (drawer items)
+    const l0Item = getL0NavigationByTitle(navigationData, caption);
+    return l0Item !== undefined && (l0Item.items?.length ?? 0) > 0;
   };
 
   const handleClose = (
