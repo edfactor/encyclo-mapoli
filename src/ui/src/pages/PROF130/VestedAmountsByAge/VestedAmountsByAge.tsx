@@ -1,13 +1,12 @@
 import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { TotalsGrid } from "components/TotalsGrid/TotalsGrid";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetVestingAmountByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { setVestedAmountsByAgeQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
-import { numberToCurrency, Page } from "smart-ui-library";
+import { numberToCurrency, Page, TotalsGrid } from "smart-ui-library";
 import VestedAmountsByAgeTabs from "./VestedAmountsByAgeTabs";
 
 const options: Intl.DateTimeFormatOptions = {

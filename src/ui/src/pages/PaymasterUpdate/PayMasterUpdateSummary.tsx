@@ -1,12 +1,11 @@
 import { Button, Grid, Stack, Tooltip } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import TotalsGrid from "components/TotalsGrid/TotalsGrid";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetUpdateSummaryQuery, useUpdateEnrollmentMutation } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMAccordion, numberToCurrency, Page, SmartModal } from "smart-ui-library";
+import { DSMAccordion, numberToCurrency, Page, SmartModal, TotalsGrid } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
 import PayMasterUpdateGrid from "./PayMasterUpdateGrid";

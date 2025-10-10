@@ -1,9 +1,9 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormControl, FormLabel, Grid, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material";
-import SearchAndReset from "components/SearchAndReset/SearchAndReset";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import { ReportPreset } from "reduxstore/types";
+import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { positiveNumberValidator } from "../../utils/FormValidators";
 
