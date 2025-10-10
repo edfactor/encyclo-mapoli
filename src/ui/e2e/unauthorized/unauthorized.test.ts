@@ -4,24 +4,37 @@ import { baseUrl, impersonateRole, navigateToPage } from "../env.setup";
 /**
  * E2E Tests for Unauthorized Access Page
  *
- * This is a simple test suite because:
- * - Tests static "Access Denied" page (no business logic)
- * - Verifies role-based access control is working
- * - Low risk - just checking that unauthorized users are blocked
- * - Simple validation of error messages and navigation
+ * Testing Strategy:
+ * - Access denied appears when a user navigates to a page with proper role access,
+ *   then changes to a role without access and refreshes
+ * - Navigation API filters out pages user doesn't have access to
+ * - Tests verify the access control mechanism and user experience when access is revoked
  */
 test.describe("Unauthorized Access", () => {
-  test("Unauthorized user sees Access Denied on protected page", async ({ page }) => {
+  test("User sees Access Denied after switching to unauthorized role", async ({ page }) => {
     await page.goto(baseUrl);
     await page.waitForLoadState("networkidle");
 
-    // Use a role with limited permissions
-    await impersonateRole(page, "Distributions-Clerk");
+    // Start with Finance-Manager role (has access to December Activities)
+    await impersonateRole(page, "Finance-Manager");
 
-    // Try to navigate to a page that requires Finance-Manager role
+    // Navigate to a page that requires Finance-Manager role
     await navigateToPage(page, "December Activities", /^Forfeitures 008-12/);
 
-    // Should see Access Denied message
+    // Should see the page content initially
+    await page.waitForTimeout(1000);
+
+    // Now switch to a role without access (Distributions-Clerk doesn't have access per navigation script)
+    await page.getByRole("combobox", { name: "roles" }).click();
+    await page.getByRole("option", { name: "Finance-Manager" }).getByRole("checkbox").uncheck();
+    await page.getByRole("option", { name: "Distributions-Clerk" }).getByRole("checkbox").check();
+    await page.locator("body").click();
+
+    // Refresh the page to apply new role permissions
+    await page.reload();
+    await page.waitForLoadState("networkidle");
+
+    // Should now see Access Denied message
     await expect(page.getByText("Access Denied").nth(1)).toBeVisible();
   });
 
@@ -29,11 +42,22 @@ test.describe("Unauthorized Access", () => {
     await page.goto(baseUrl);
     await page.waitForLoadState("networkidle");
 
-    // Use read-only role
-    await impersonateRole(page, "IT-DevOps");
+    // Start with System-Administrator role (has access to all pages)
+    await impersonateRole(page, "System-Administrator");
 
-    // Try to access Manage Executive Hours (requires higher permissions)
+    // Navigate to Manage Executive Hours
     await navigateToPage(page, "Fiscal Close", "Manage Executive Hours");
+    await page.waitForTimeout(1000);
+
+    // Switch to IT-DevOps role (only has access to IT DevOps menu per navigation script)
+    await page.getByRole("combobox", { name: "roles" }).click();
+    await page.getByRole("option", { name: "System-Administrator" }).getByRole("checkbox").uncheck();
+    await page.getByRole("option", { name: "IT-DevOps" }).getByRole("checkbox").check();
+    await page.locator("body").click();
+
+    // Refresh to apply role change
+    await page.reload();
+    await page.waitForLoadState("networkidle");
 
     // Verify Access Denied is shown
     const accessDeniedText = page.getByText("Access Denied");
@@ -52,8 +76,18 @@ test.describe("Unauthorized Access", () => {
     await page.goto(baseUrl);
     await page.waitForLoadState("networkidle");
 
-    await impersonateRole(page, "Distributions-Clerk");
+    // Start with authorized role
+    await impersonateRole(page, "Finance-Manager");
     await navigateToPage(page, "December Activities", /^Forfeitures 008-12/);
+    await page.waitForTimeout(1000);
+
+    // Switch to unauthorized role and refresh
+    await page.getByRole("combobox", { name: "roles" }).click();
+    await page.getByRole("option", { name: "Finance-Manager" }).getByRole("checkbox").uncheck();
+    await page.getByRole("option", { name: "Distributions-Clerk" }).getByRole("checkbox").check();
+    await page.locator("body").click();
+    await page.reload();
+    await page.waitForLoadState("networkidle");
 
     // Should see Access Denied
     await expect(page.getByText("Access Denied").nth(1)).toBeVisible();
@@ -66,22 +100,32 @@ test.describe("Unauthorized Access", () => {
     await drawerButton.click();
     await page.waitForTimeout(500);
 
-    const navItem = page.getByRole("button", { name: "December Activities" });
-    await expect(navItem).toBeVisible();
+    // Note: December Activities won't appear for Distributions-Clerk, so check for available menu
+    const navMenu = page.getByRole("button", { name: "INQUIRIES" });
+    await expect(navMenu).toBeVisible();
   });
 
-  test("User can change role from Access Denied page", async ({ page }) => {
+  test("User can regain access by switching back to authorized role", async ({ page }) => {
     await page.goto(baseUrl);
     await page.waitForLoadState("networkidle");
 
-    // Start with limited role
-    await impersonateRole(page, "Distributions-Clerk");
+    // Start with Finance-Manager (authorized for December Activities)
+    await impersonateRole(page, "Finance-Manager");
     await navigateToPage(page, "December Activities", /^Forfeitures 008-12/);
+    await page.waitForTimeout(1000);
+
+    // Switch to Distributions-Clerk (unauthorized)
+    await page.getByRole("combobox", { name: "roles" }).click();
+    await page.getByRole("option", { name: "Finance-Manager" }).getByRole("checkbox").uncheck();
+    await page.getByRole("option", { name: "Distributions-Clerk" }).getByRole("checkbox").check();
+    await page.locator("body").click();
+    await page.reload();
+    await page.waitForLoadState("networkidle");
 
     // Should see Access Denied
     await expect(page.getByText("Access Denied").nth(1)).toBeVisible();
 
-    // Now switch to authorized role
+    // Now switch back to Finance-Manager (authorized)
     await page.getByRole("combobox", { name: "roles" }).click();
     await page.getByRole("option", { name: "Distributions-Clerk" }).getByRole("checkbox").uncheck();
     await page.getByRole("option", { name: "Finance-Manager" }).getByRole("checkbox").check();
@@ -101,8 +145,18 @@ test.describe("Unauthorized Access", () => {
     await page.goto(baseUrl);
     await page.waitForLoadState("networkidle");
 
-    await impersonateRole(page, "IT-DevOps");
+    // Start with authorized role
+    await impersonateRole(page, "Finance-Manager");
     await navigateToPage(page, "December Activities", /^Forfeitures 008-12/);
+    await page.waitForTimeout(1000);
+
+    // Switch to unauthorized role
+    await page.getByRole("combobox", { name: "roles" }).click();
+    await page.getByRole("option", { name: "Finance-Manager" }).getByRole("checkbox").uncheck();
+    await page.getByRole("option", { name: "IT-DevOps" }).getByRole("checkbox").check();
+    await page.locator("body").click();
+    await page.reload();
+    await page.waitForLoadState("networkidle");
 
     // Should see Access Denied
     await expect(page.getByText("Access Denied").nth(1)).toBeVisible();
@@ -124,14 +178,41 @@ test.describe("Unauthorized Access", () => {
     await page.goto(baseUrl);
     await page.waitForLoadState("networkidle");
 
-    await impersonateRole(page, "IT-DevOps");
+    // Start with System-Administrator (has access to both pages)
+    await impersonateRole(page, "System-Administrator");
 
-    // Test first unauthorized page
+    // Navigate to first page
     await navigateToPage(page, "December Activities", /^Forfeitures 008-12/);
+    await page.waitForTimeout(1000);
+
+    // Switch to IT-DevOps (no access to December Activities per navigation script)
+    await page.getByRole("combobox", { name: "roles" }).click();
+    await page.getByRole("option", { name: "System-Administrator" }).getByRole("checkbox").uncheck();
+    await page.getByRole("option", { name: "IT-DevOps" }).getByRole("checkbox").check();
+    await page.locator("body").click();
+    await page.reload();
+    await page.waitForLoadState("networkidle");
+
     const firstAccessDenied = await page.getByText("Access Denied").textContent();
 
-    // Navigate to different unauthorized page
+    // Go back to System-Administrator to navigate to second page
+    await page.getByRole("combobox", { name: "roles" }).click();
+    await page.getByRole("option", { name: "IT-DevOps" }).getByRole("checkbox").uncheck();
+    await page.getByRole("option", { name: "System-Administrator" }).getByRole("checkbox").check();
+    await page.locator("body").click();
+
+    // Navigate to different page (Manage Executive Hours)
     await navigateToPage(page, "Fiscal Close", "Manage Executive Hours");
+    await page.waitForTimeout(1000);
+
+    // Switch back to IT-DevOps
+    await page.getByRole("combobox", { name: "roles" }).click();
+    await page.getByRole("option", { name: "System-Administrator" }).getByRole("checkbox").uncheck();
+    await page.getByRole("option", { name: "IT-DevOps" }).getByRole("checkbox").check();
+    await page.locator("body").click();
+    await page.reload();
+    await page.waitForLoadState("networkidle");
+
     const secondAccessDenied = await page.getByText("Access Denied").textContent();
 
     // Messages should be similar/consistent
@@ -147,35 +228,57 @@ test.describe("Unauthorized Access", () => {
     await page.goto(baseUrl);
     await page.waitForLoadState("networkidle");
 
-    await impersonateRole(page, "Distributions-Clerk");
-
-    // Hit unauthorized page
+    // Start with Finance-Manager
+    await impersonateRole(page, "Finance-Manager");
     await navigateToPage(page, "December Activities", /^Forfeitures 008-12/);
+    await page.waitForTimeout(1000);
+
+    // Switch to Distributions-Clerk and trigger Access Denied
+    await page.getByRole("combobox", { name: "roles" }).click();
+    await page.getByRole("option", { name: "Finance-Manager" }).getByRole("checkbox").uncheck();
+    await page.getByRole("option", { name: "Distributions-Clerk" }).getByRole("checkbox").check();
+    await page.locator("body").click();
+    await page.reload();
+    await page.waitForLoadState("networkidle");
+
+    // Should see Access Denied
     await expect(page.getByText("Access Denied").nth(1)).toBeVisible();
 
-    // Navigate to an authorized page (Terminations is usually accessible to Distributions-Clerk)
+    // Switch back to Finance-Manager to test navigation still works
+    await page.getByRole("combobox", { name: "roles" }).click();
+    await page.getByRole("option", { name: "Distributions-Clerk" }).getByRole("checkbox").uncheck();
+    await page.getByRole("option", { name: "Finance-Manager" }).getByRole("checkbox").check();
+    await page.locator("body").click();
+
+    // Navigate to another authorized page (Terminations under December Activities)
     await navigateToPage(page, "December Activities", "Termination");
+    await page.waitForTimeout(1000);
 
     // Should successfully navigate away from Access Denied
-    // Look for Termination page heading
-    const terminationHeading = page.getByRole("heading", { name: /termination/i });
-    const isVisible = await terminationHeading.isVisible().catch(() => false);
-
-    // If Termination is accessible, should see the heading
-    // If also denied, will see Access Denied again
+    // Termination page should be accessible to Finance-Manager
     const accessDenied = page.getByText("Access Denied");
     const isStillDenied = await accessDenied.isVisible().catch(() => false);
 
-    // One or the other should be true (navigated successfully OR hit another access denied)
-    expect(isVisible || isStillDenied).toBe(true);
+    // Should NOT see access denied on Terminations page with Finance-Manager role
+    expect(isStillDenied).toBe(false);
   });
 
   test("Access Denied page layout components still work", async ({ page }) => {
     await page.goto(baseUrl);
     await page.waitForLoadState("networkidle");
 
-    await impersonateRole(page, "IT-DevOps");
+    // Start with authorized role
+    await impersonateRole(page, "Finance-Manager");
     await navigateToPage(page, "December Activities", /^Forfeitures 008-12/);
+    await page.waitForTimeout(1000);
+
+    // Switch to IT-DevOps (unauthorized)
+    await page.getByRole("combobox", { name: "roles" }).click();
+    await page.getByRole("option", { name: "Finance-Manager" }).getByRole("checkbox").uncheck();
+    await page.getByRole("option", { name: "IT-DevOps" }).getByRole("checkbox").check();
+    await page.locator("body").click();
+    await page.reload();
+    await page.waitForLoadState("networkidle");
 
     // Should see Access Denied
     await expect(page.getByText("Access Denied").nth(1)).toBeVisible();
@@ -202,10 +305,22 @@ test.describe("Unauthorized Access", () => {
     // Start on home/dashboard
     const initialUrl = page.url();
 
-    await impersonateRole(page, "IT-DevOps");
-
-    // Navigate to unauthorized page
+    // Start with authorized role
+    await impersonateRole(page, "Finance-Manager");
     await navigateToPage(page, "December Activities", /^Forfeitures 008-12/);
+    await page.waitForTimeout(1000);
+
+    // Get URL before triggering Access Denied
+    const pageUrl = page.url();
+
+    // Switch to IT-DevOps (unauthorized) and trigger Access Denied
+    await page.getByRole("combobox", { name: "roles" }).click();
+    await page.getByRole("option", { name: "Finance-Manager" }).getByRole("checkbox").uncheck();
+    await page.getByRole("option", { name: "IT-DevOps" }).getByRole("checkbox").check();
+    await page.locator("body").click();
+    await page.reload();
+    await page.waitForLoadState("networkidle");
+
     await expect(page.getByText("Access Denied").nth(1)).toBeVisible();
 
     // Use browser back button
@@ -216,7 +331,7 @@ test.describe("Unauthorized Access", () => {
     const currentUrl = page.url();
 
     // URL should change (went back)
-    console.log("Navigated back from Access Denied:", initialUrl, "->", currentUrl);
+    console.log("Navigated back from Access Denied:", pageUrl, "->", currentUrl);
   });
 
   test("No JavaScript errors on Access Denied page", async ({ page }) => {
@@ -231,8 +346,18 @@ test.describe("Unauthorized Access", () => {
     await page.goto(baseUrl);
     await page.waitForLoadState("networkidle");
 
-    await impersonateRole(page, "IT-DevOps");
+    // Start with authorized role
+    await impersonateRole(page, "Finance-Manager");
     await navigateToPage(page, "December Activities", /^Forfeitures 008-12/);
+    await page.waitForTimeout(1000);
+
+    // Switch to unauthorized role
+    await page.getByRole("combobox", { name: "roles" }).click();
+    await page.getByRole("option", { name: "Finance-Manager" }).getByRole("checkbox").uncheck();
+    await page.getByRole("option", { name: "IT-DevOps" }).getByRole("checkbox").check();
+    await page.locator("body").click();
+    await page.reload();
+    await page.waitForLoadState("networkidle");
 
     await expect(page.getByText("Access Denied").nth(1)).toBeVisible();
 
