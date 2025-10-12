@@ -1,5 +1,5 @@
-import { CheckCircle, Error as ErrorIcon } from "@mui/icons-material";
-import { Box, Chip, Stack, Typography } from "@mui/material";
+import { CheckCircle, Warning } from "@mui/icons-material";
+import { Box, Stack, Typography } from "@mui/material";
 import { numberToCurrency } from "smart-ui-library";
 import { CrossReferenceValidation } from "../../types/validation/cross-reference-validation";
 
@@ -32,7 +32,7 @@ interface ValidationFieldRowProps {
  * />
  */
 export const ValidationFieldRow = ({ validation }: ValidationFieldRowProps) => {
-  const { reportCode, fieldName, isValid, currentValue, expectedValue, variance, message, archivedAt } = validation;
+  const { reportCode, isValid, currentValue, expectedValue, variance, message, archivedAt } = validation;
 
   // Format date for display
   const formattedDate = archivedAt
@@ -45,38 +45,42 @@ export const ValidationFieldRow = ({ validation }: ValidationFieldRowProps) => {
       })
     : "N/A";
 
+  // Determine the display value
+  const displayValue = isValid ? currentValue : expectedValue ?? currentValue;
+
   return (
     <Box
       sx={{
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        py: 1.5,
+        py: 2,
         px: 2,
         borderBottom: "1px solid",
         borderColor: "divider",
         "&:last-child": {
           borderBottom: "none"
         },
-        backgroundColor: isValid ? "transparent" : "error.light",
-        opacity: isValid ? 1 : 0.9
+        backgroundColor: isValid ? "transparent" : "warning.light",
+        borderLeft: isValid ? "none" : "4px solid",
+        borderLeftColor: isValid ? "transparent" : "error.main"
       }}>
-      {/* Left side: Status icon + Field info */}
+      {/* Left side: Report label + short message */}
       <Stack
         direction="row"
-        spacing={2}
+        spacing={1.5}
         alignItems="center"
         flex={1}>
         {/* Status Icon */}
         {isValid ? (
           <CheckCircle
             color="success"
-            sx={{ fontSize: 24 }}
+            sx={{ fontSize: 26 }}
           />
         ) : (
-          <ErrorIcon
+          <Warning
             color="error"
-            sx={{ fontSize: 24 }}
+            sx={{ fontSize: 28 }}
           />
         )}
 
@@ -84,73 +88,60 @@ export const ValidationFieldRow = ({ validation }: ValidationFieldRowProps) => {
         <Box>
           <Typography
             variant="body1"
-            fontWeight={600}>
-            {reportCode}.{fieldName}
+            fontWeight={600}
+            color="text.primary">
+            {reportCode}
           </Typography>
           {message && (
             <Typography
               variant="body2"
-              color="text.secondary">
+              color="text.secondary"
+              fontSize="0.875rem">
               {message}
             </Typography>
           )}
         </Box>
       </Stack>
 
-      {/* Right side: Values and metadata */}
+      {/* Right side: Prominent numeric value with details */}
       <Stack
         direction="row"
-        spacing={3}
+        spacing={4}
         alignItems="center">
-        {/* Current Value */}
-        {currentValue !== null && (
+        {/* Main Value (Current or Expected if valid) */}
+        {displayValue !== null && (
           <Box textAlign="right">
+            <Typography
+              variant="h5"
+              fontWeight={700}
+              color={isValid ? "success.main" : "error.main"}>
+              {numberToCurrency(displayValue)}
+            </Typography>
             <Typography
               variant="caption"
               color="text.secondary"
               display="block">
-              Current
-            </Typography>
-            <Typography
-              variant="body2"
-              fontWeight={600}>
-              {numberToCurrency(currentValue)}
+              {isValid ? "Current" : "Expected"}
             </Typography>
           </Box>
         )}
 
-        {/* Expected Value (only if mismatch) */}
-        {!isValid && expectedValue !== null && (
+        {/* Variance Display (only if mismatch) */}
+        {!isValid && variance !== null && Math.abs(variance) > 0.01 && (
           <Box textAlign="right">
             <Typography
-              variant="caption"
-              color="text.secondary"
-              display="block">
-              Expected
+              variant="h6"
+              fontWeight={600}
+              color="error.dark">
+              {variance > 0 ? "+" : ""}
+              {numberToCurrency(variance)}
             </Typography>
-            <Typography
-              variant="body2"
-              fontWeight={600}>
-              {numberToCurrency(expectedValue)}
-            </Typography>
-          </Box>
-        )}
-
-        {/* Variance (only if mismatch) */}
-        {!isValid && variance !== null && (
-          <Box textAlign="right">
             <Typography
               variant="caption"
               color="text.secondary"
               display="block">
               Variance
             </Typography>
-            <Chip
-              label={numberToCurrency(variance)}
-              color="error"
-              size="small"
-              sx={{ fontWeight: 600 }}
-            />
           </Box>
         )}
 
@@ -159,15 +150,16 @@ export const ValidationFieldRow = ({ validation }: ValidationFieldRowProps) => {
           textAlign="right"
           minWidth={140}>
           <Typography
+            variant="body2"
+            fontSize="0.8rem"
+            color="text.secondary">
+            {formattedDate}
+          </Typography>
+          <Typography
             variant="caption"
             color="text.secondary"
             display="block">
             Archived
-          </Typography>
-          <Typography
-            variant="body2"
-            fontSize="0.75rem">
-            {formattedDate}
           </Typography>
         </Box>
       </Stack>
