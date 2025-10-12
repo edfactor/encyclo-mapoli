@@ -14,8 +14,8 @@ import {
   clearUnder21BreakdownByStore,
   clearUnder21Inactive,
   clearUnder21Totals,
-  clearYearEndProfitSharingReportLive,
   clearYearEndProfitSharingReportFrozen,
+  clearYearEndProfitSharingReportLive,
   clearYearEndProfitSharingReportTotals,
   setAdditionalExecutivesGrid,
   setBalanceByAge,
@@ -56,8 +56,8 @@ import {
   setUnForfeitsDetails,
   setUpdateSummary,
   setVestedAmountsByAge,
-  setYearEndProfitSharingReportLive,
   setYearEndProfitSharingReportFrozen,
+  setYearEndProfitSharingReportLive,
   setYearEndProfitSharingReportTotals
 } from "reduxstore/slices/yearsEndSlice";
 import {
@@ -569,12 +569,16 @@ export const YearsEndApi = createApi({
     }),
     getForfeituresAndPoints: builder.query<
       ForfeituresAndPoints,
-      FrozenReportsForfeituresAndPointsRequest & { suppressAllToastErrors?: boolean; onlyNetworkToastErrors?: boolean }
+      FrozenReportsForfeituresAndPointsRequest & {
+        suppressAllToastErrors?: boolean;
+        onlyNetworkToastErrors?: boolean;
+        archive?: boolean;
+      }
     >({
       query: (params) => {
-        const { suppressAllToastErrors, onlyNetworkToastErrors } = params;
+        const { suppressAllToastErrors, onlyNetworkToastErrors, archive } = params;
         return {
-          url: "yearend/frozen/forfeitures-and-points",
+          url: `yearend/frozen/forfeitures-and-points${archive ? "?archive=true" : ""}`,
           method: "GET",
           params: {
             profitYear: params.profitYear,

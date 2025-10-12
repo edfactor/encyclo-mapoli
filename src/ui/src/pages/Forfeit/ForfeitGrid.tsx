@@ -14,13 +14,15 @@ interface ForfeitGridProps {
   setInitialSearchLoaded: (loaded: boolean) => void;
   pageNumberReset: boolean;
   setPageNumberReset: (reset: boolean) => void;
+  shouldArchive: boolean;
 }
 
 const ForfeitGrid: React.FC<ForfeitGridProps> = ({
   initialSearchLoaded,
   setInitialSearchLoaded,
   pageNumberReset,
-  setPageNumberReset
+  setPageNumberReset,
+  shouldArchive
 }) => {
   const { forfeituresAndPoints } = useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearch, { isFetching }] = useLazyGetForfeituresAndPointsQuery();
@@ -39,6 +41,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
               {
                 profitYear: fiscalCloseProfitYear,
                 useFrozenData: true,
+                archive: shouldArchive,
                 pagination: {
                   skip: pageNum * pageSz,
                   take: pageSz,
@@ -50,7 +53,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
             ).unwrap();
           }
         },
-        [initialSearchLoaded, fiscalCloseProfitYear, triggerSearch]
+        [initialSearchLoaded, fiscalCloseProfitYear, triggerSearch, shouldArchive]
       )
     });
 
@@ -59,6 +62,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
       {
         profitYear: fiscalCloseProfitYear,
         useFrozenData: true,
+        archive: shouldArchive,
         pagination: {
           skip: pageNumber * pageSize,
           take: pageSize,
@@ -68,7 +72,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
       },
       false
     ).unwrap();
-  }, [pageNumber, pageSize, sortParams, triggerSearch, fiscalCloseProfitYear]);
+  }, [pageNumber, pageSize, sortParams, triggerSearch, fiscalCloseProfitYear, shouldArchive]);
 
   useEffect(() => {
     if (initialSearchLoaded) {

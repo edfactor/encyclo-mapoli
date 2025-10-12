@@ -56,31 +56,29 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
         // Validate prerequisites for Master Update before proceeding
         await _navPrereqValidator.ValidateAllCompleteAsync(Navigation.Constants.MasterUpdate, ct);
 
-        // Perform cross-reference validation BEFORE executing Master Update
-        // This validates that all prerequisite reports (PAY443, QPAY129, QPAY066TA, etc.)
-        // have matching values in their archived checksums
+        // First, execute Master Update to persist the year-end changes
         _logger.LogInformation(
-            "Performing cross-reference validation for Master Update (PAY444|PAY447) for year {ProfitYear}",
+            "Executing Master Update (PAY444|PAY447) for year {ProfitYear}",
             req.ProfitYear);
 
-        // NOTE: For now, we'll validate what we have archived (PAY443)
-        // In a future iteration, we need to collect actual PAY444 totals to validate
-        // For this implementation, we're establishing the validation infrastructure
+        var updateResponse = await _profitMasterService.Update(req, ct);
+
+        // Now perform cross-reference validation
+        // Note: BeginningBalance validation will query PAY443 from previous year
+        // Other validations can be added as fields are identified
+        _logger.LogInformation(
+            "Performing cross-reference validation for Master Update year {ProfitYear}",
+            req.ProfitYear);
+
         var currentValues = new Dictionary<string, decimal>
         {
-            // These would come from PAY444 report data when we identify the correct source
-            // For now, placeholder - will need to get actual values from:
-            // - Distribution totals query
-            // - Forfeiture totals query
-            // - Contribution totals query
-            // - Earnings totals query
-
-            // Example: if we had the data
-            // ["PAY443.DistributionTotals"] = actualDistributionTotal,
-            // ["QPAY129.Distributions"] = qpay129DistributionTotal,
-            // ["QPAY066TA.TotalDisbursements"] = qpay066taTotalDisbursements,
-            // ["PAY443.TotalForfeitures"] = actualForfeitureTotal,
-            // ["QPAY129.ForfeitedAmount"] = qpay129ForfeitedAmount
+            // Beginning balance will be validated against PAY443.TotalProfitSharingBalance from previous year
+            // The validation service will handle looking up the previous year's value
+            // Other fields can be added here as they're identified:
+            // ["PAY444.Distributions"] = ...,
+            // ["PAY444.TotalForfeitures"] = ...,
+            // ["PAY444.TotalContributions"] = ...,
+            // ["PAY444.TotalEarnings"] = ...,
         };
 
         var crossRefValidation = await _checksumValidationService.ValidateMasterUpdateCrossReferencesAsync(
@@ -110,29 +108,29 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
             // For now, we'll continue but attach the validation results
         }
 
-        ProfitMasterUpdateResponse response = await _auditService.ArchiveCompletedReportAsync("PAY444|PAY447",
+        // Attach cross-reference validation results to response
+        if (crossRefValidation.IsSuccess && crossRefValidation.Value is not null)
+        {
+            updateResponse.CrossReferenceValidation = crossRefValidation.Value;
+
+            _logger.LogInformation(
+                "Master Update completed for year {ProfitYear} with cross-reference validation: " +
+                "{PassedValidations}/{TotalValidations} passed, BlockMasterUpdate: {BlockMasterUpdate}",
+                req.ProfitYear,
+                crossRefValidation.Value.PassedValidations,
+                crossRefValidation.Value.TotalValidations,
+                crossRefValidation.Value.BlockMasterUpdate);
+        }
+
+        // Archive the completed Master Update
+        var response = await _auditService.ArchiveCompletedReportAsync("PAY444|PAY447",
             req.ProfitYear,
             req,
             isArchiveRequest: true,
-            async (arditReq, _, cancellationToken) =>
+            async (_, __, cancellationToken) =>
             {
-                ProfitMasterUpdateResponse response = await _profitMasterService.Update(arditReq, cancellationToken);
-
-                // Attach cross-reference validation results to response
-                if (crossRefValidation.IsSuccess && crossRefValidation.Value is not null)
-                {
-                    response.CrossReferenceValidation = crossRefValidation.Value;
-
-                    _logger.LogInformation(
-                        "Master Update completed for year {ProfitYear} with cross-reference validation: " +
-                        "{PassedValidations}/{TotalValidations} passed",
-                        arditReq.ProfitYear,
-                        crossRefValidation.Value.PassedValidations,
-                        crossRefValidation.Value.TotalValidations);
-                }
-
                 await _navigationService.UpdateNavigation(Navigation.Constants.MasterUpdate, NavigationStatus.Constants.Complete, cancellationToken);
-                return response;
+                return updateResponse;
             },
             ct);
 

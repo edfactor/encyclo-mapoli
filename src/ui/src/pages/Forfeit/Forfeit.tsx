@@ -1,18 +1,23 @@
-import { Divider } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Divider, Grid } from "@mui/material";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useState } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import ForfeitGrid from "./ForfeitGrid";
 import ForfeitSearchFilter from "./ForfeitSearchFilter";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const Forfeit = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [pageNumberReset, setPageNumberReset] = useState(false);
+  const [shouldArchive, setShouldArchive] = useState(false);
+
+  const handleStatusChange = (_newStatus: string, statusName?: string) => {
+    // When status is set to "Complete" (statusId = 2), enable archiving
+    setShouldArchive(statusName === "Complete");
+  };
 
   const renderActionNode = () => {
-    return <StatusDropdownActionNode />;
+    return <StatusDropdownActionNode onStatusChange={handleStatusChange} />;
   };
 
   return (
@@ -40,6 +45,7 @@ const Forfeit = () => {
             setInitialSearchLoaded={setInitialSearchLoaded}
             pageNumberReset={pageNumberReset}
             setPageNumberReset={setPageNumberReset}
+            shouldArchive={shouldArchive}
           />
         </Grid>
       </Grid>
