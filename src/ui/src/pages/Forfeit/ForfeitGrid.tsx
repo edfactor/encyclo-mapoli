@@ -1,12 +1,12 @@
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetForfeituresAndPointsQuery } from "reduxstore/api/YearsEndApi";
-import { RootState } from "reduxstore/store";
 import { DSMGrid, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import ReportSummary from "../../components/ReportSummary";
 import { CAPTIONS } from "../../constants";
+import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
 import { useGridPagination } from "../../hooks/useGridPagination";
+import { useLazyGetForfeituresAndPointsQuery } from "../../reduxstore/api/YearsEndApi";
+import { RootState } from "../../reduxstore/store";
 import { GetProfitShareForfeitColumns } from "./ForfeitGridColumns";
 
 interface ForfeitGridProps {

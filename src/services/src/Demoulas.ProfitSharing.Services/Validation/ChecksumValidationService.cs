@@ -339,7 +339,7 @@ public sealed class ChecksumValidationService : IChecksumValidationService
             Validations = validations,
             Summary = summary,
             Priority = "Critical",
-            ValidationRule = $"PAY444.BeginningBalance should equal archived PAY443.TotalProfitSharingBalance (year {profitYear})"
+            ValidationRule = $"PAY444.BeginningBalance should equal archived PAY443.TotalProfitSharingBalance"
         };
     }
 
@@ -515,8 +515,8 @@ public sealed class ChecksumValidationService : IChecksumValidationService
         {
             // Look up current value using "ReportCode.FieldName" key
             string lookupKey = $"{reportCode}.{fieldName}";
-            decimal? currentValue = currentValues.ContainsKey(lookupKey)
-                ? currentValues[lookupKey]
+            decimal? currentValue = currentValues.TryGetValue(lookupKey, out decimal value)
+                ? value
                 : null;
 
             if (currentValue == null)
