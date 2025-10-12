@@ -46,7 +46,7 @@ export const ValidationFieldRow = ({ validation }: ValidationFieldRowProps) => {
     : "N/A";
 
   // Determine the display value
-  const displayValue = isValid ? currentValue : expectedValue ?? currentValue;
+  const displayValue = isValid ? currentValue : (expectedValue ?? currentValue);
 
   return (
     <Box

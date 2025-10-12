@@ -12,6 +12,7 @@ using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
@@ -24,7 +25,9 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
     public ProfitShareUpdateServiceEndpointTests()
     {
         IProfitShareUpdateService svc = ServiceProvider?.GetRequiredService<IProfitShareUpdateService>()!;
-        _endpoint = new ProfitShareUpdateEndpoint(svc);
+        IChecksumValidationService checksumSvc = ServiceProvider?.GetRequiredService<IChecksumValidationService>()!;
+        ILogger<ProfitShareUpdateEndpoint> logger = ServiceProvider?.GetRequiredService<ILogger<ProfitShareUpdateEndpoint>>()!;
+        _endpoint = new ProfitShareUpdateEndpoint(svc, checksumSvc, logger);
     }
 
     [Fact(DisplayName = "Unauthorized")]

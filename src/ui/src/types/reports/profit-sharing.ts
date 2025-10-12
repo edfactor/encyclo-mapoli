@@ -63,6 +63,7 @@ export interface ProfitShareUpdateResponse extends PagedReportResponse<ProfitSha
   hasExceededMaximumContributions: true;
   adjustmentsSummary: ProfitShareAdjustmentSummary;
   profitShareUpdateTotals: ProfitShareUpdateTotals;
+  crossReferenceValidation?: MasterUpdateCrossReferenceValidationResponse;
 }
 
 export interface ProfitShareUpdateTotals {

@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareUpdate;
 
@@ -17,11 +18,18 @@ public class ProfitShareUpdateEndpoint
         ProfitShareUpdateEndpoint.ProfitShareUpdateClassMap>
 {
     private readonly IProfitShareUpdateService _profitShareUpdateService;
+    private readonly IChecksumValidationService _checksumValidationService;
+    private readonly ILogger<ProfitShareUpdateEndpoint> _logger;
 
-    public ProfitShareUpdateEndpoint(IProfitShareUpdateService profitShareUpdateService)
+    public ProfitShareUpdateEndpoint(
+        IProfitShareUpdateService profitShareUpdateService,
+        IChecksumValidationService checksumValidationService,
+        ILogger<ProfitShareUpdateEndpoint> logger)
         : base(Navigation.Constants.ProfitShareReportEditRun)
     {
         _profitShareUpdateService = profitShareUpdateService;
+        _checksumValidationService = checksumValidationService;
+        _logger = logger;
     }
 
     public override string ReportFileName => "profit-sharing-update-report";
@@ -42,9 +50,52 @@ public class ProfitShareUpdateEndpoint
         base.Configure();
     }
 
-    public override Task<ProfitShareUpdateResponse> GetResponse(ProfitShareUpdateRequest req, CancellationToken ct)
+    public override async Task<ProfitShareUpdateResponse> GetResponse(ProfitShareUpdateRequest req, CancellationToken ct)
     {
-        return _profitShareUpdateService.ProfitShareUpdate(req, ct);
+        // Get the Master Update preview data with totals
+        var response = await _profitShareUpdateService.ProfitShareUpdate(req, ct);
+
+        // Perform cross-reference validation using the totals from the response
+        _logger.LogInformation(
+            "Performing cross-reference validation for Master Update preview year {ProfitYear}",
+            req.ProfitYear);
+
+        var currentValues = new Dictionary<string, decimal>
+        {
+            ["PAY444.BeginningBalance"] = response.ProfitShareUpdateTotals.BeginningBalance,
+            ["PAY444.Distributions"] = response.ProfitShareUpdateTotals.Distributions,
+            ["PAY444.TotalForfeitures"] = response.ProfitShareUpdateTotals.Forfeiture,
+            ["PAY444.TotalContributions"] = response.ProfitShareUpdateTotals.TotalContribution,
+            ["PAY444.TotalEarnings"] = response.ProfitShareUpdateTotals.Earnings + response.ProfitShareUpdateTotals.Earnings2
+        };
+
+        var crossRefValidation = await _checksumValidationService.ValidateMasterUpdateCrossReferencesAsync(
+            req.ProfitYear,
+            currentValues,
+            ct);
+
+        if (!crossRefValidation.IsSuccess)
+        {
+            _logger.LogWarning(
+                "Cross-reference validation failed for Master Update preview year {ProfitYear}: {ErrorDescription}",
+                req.ProfitYear,
+                crossRefValidation.Error?.Description ?? "Unknown error");
+        }
+        else if (crossRefValidation.Value is not null)
+        {
+            // Attach validation results to response so UI can display them
+            response.CrossReferenceValidation = crossRefValidation.Value;
+
+            _logger.LogInformation(
+                "Master Update preview validation completed for year {ProfitYear}: " +
+                "{PassedValidations}/{TotalValidations} passed, BlockMasterUpdate: {BlockMasterUpdate}",
+                req.ProfitYear,
+                crossRefValidation.Value.PassedValidations,
+                crossRefValidation.Value.TotalValidations,
+                crossRefValidation.Value.BlockMasterUpdate);
+        }
+
+        return response;
     }
 
     public class ProfitShareUpdateClassMap : ClassMap<ProfitShareUpdateMemberResponse>

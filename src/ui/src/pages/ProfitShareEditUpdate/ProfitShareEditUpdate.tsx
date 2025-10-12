@@ -1,4 +1,5 @@
 import { Replay } from "@mui/icons-material";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Alert, AlertTitle, Button, CircularProgress, Grid, Tooltip, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -31,7 +32,6 @@ import {
   ProfitYearRequest
 } from "../../reduxstore/types";
 // usePrerequisiteNavigations now encapsulated by PrerequisiteGuard
-import CrossReferenceValidationDisplay from "../../components/CrossReferenceValidationDisplay/CrossReferenceValidationDisplay";
 import PrerequisiteGuard from "../../components/PrerequisiteGuard";
 import { MasterUpdateCrossReferenceValidationResponse } from "../../types/validation/cross-reference-validation";
 import { MessageKeys, Messages } from "../../utils/messageDictonary";
@@ -373,6 +373,92 @@ const ProfitShareEditUpdate = () => {
     null
   );
 
+  // State for validation popup - track which field popup is open
+  const [openValidationField, setOpenValidationField] = useState<string | null>(null);
+
+  const handleValidationToggle = (fieldName: string) => {
+    setOpenValidationField(openValidationField === fieldName ? null : fieldName);
+  };
+
+  // Helper function to find validation for a specific field
+  const getFieldValidation = (fieldKey: string) => {
+    if (!validationResponse) return null;
+    
+    for (const group of validationResponse.validationGroups) {
+      const validation = group.validations.find(v => 
+        v.fieldName.includes(fieldKey) || v.fieldName === `PAY444.${fieldKey}`
+      );
+      if (validation) return validation;
+    }
+    return null;
+  };
+
+  // Helper to render validation icon with popup for a specific field
+  const renderValidationIcon = (fieldKey: string, fieldDisplayName: string) => {
+    const validation = getFieldValidation(fieldKey);
+    if (!validation) return null;
+
+    const isOpen = openValidationField === fieldKey;
+
+    return (
+      <div className="relative ml-1 inline-block">
+        <InfoOutlinedIcon
+          className={`cursor-pointer ${validation.isValid ? "text-green-500" : "text-orange-500"}`}
+          fontSize="small"
+          onClick={() => handleValidationToggle(fieldKey)}
+        />
+        {isOpen && (
+          <div className="absolute left-0 top-full z-[1000] mt-1 w-[350px] rounded border border-gray-300 bg-white shadow-lg">
+            <div className="p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <Typography
+                  variant="subtitle2"
+                  sx={{ fontWeight: "bold" }}>
+                  {fieldDisplayName}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{ 
+                    color: validation.isValid ? "success.main" : "warning.main",
+                    fontWeight: "bold"
+                  }}>
+                  {validation.isValid ? "✓ Match" : "⚠ Mismatch"}
+                </Typography>
+              </div>
+              <table className="w-full border-collapse text-sm">
+                <tbody>
+                  <tr>
+                    <td className="border-b border-gray-200 py-2 pr-2 font-semibold text-gray-700">Current (PAY444):</td>
+                    <td className="border-b border-gray-200 py-2 text-right">{numberToCurrency(validation.currentValue || 0)}</td>
+                  </tr>
+                  <tr>
+                    <td className="border-b border-gray-200 py-2 pr-2 font-semibold text-gray-700">Expected (PAY443):</td>
+                    <td className="border-b border-gray-200 py-2 text-right">{numberToCurrency(validation.expectedValue || 0)}</td>
+                  </tr>
+                  {!validation.isValid && (validation.variance || 0) !== 0 && (
+                    <tr className="bg-orange-50">
+                      <td className="py-2 pr-2 font-semibold text-orange-700">Variance:</td>
+                      <td className="py-2 text-right font-semibold text-orange-700">
+                        {(validation.variance || 0) > 0 ? "+" : ""}{numberToCurrency(validation.variance || 0)}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+              {validation.message && (
+                <Typography
+                  variant="caption"
+                  sx={{ display: "block", mt: 1, color: "text.secondary", fontStyle: "italic" }}>
+                  {validation.message}
+                </Typography>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // This is a flag used to indicate that the year end change have been made
   // and a banner should be shown indicating this
   const [changesApplied, setChangesApplied] = useState<boolean>(false);
@@ -418,6 +504,14 @@ const ProfitShareEditUpdate = () => {
   const dispatch = useDispatch();
   const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
   const isReadOnly = useReadOnlyNavigation();
+
+  // Extract cross-reference validation from profitSharingUpdate response
+  useEffect(() => {
+    if (profitSharingUpdate?.crossReferenceValidation) {
+      setValidationResponse(profitSharingUpdate.crossReferenceValidation);
+      console.log("Loaded cross-reference validation from GET response:", profitSharingUpdate.crossReferenceValidation);
+    }
+  }, [profitSharingUpdate]);
 
   useEffect(() => {
     const currentYear = new Date().getFullYear();
@@ -527,13 +621,6 @@ const ProfitShareEditUpdate = () => {
             )
           }
 
-          {/* Cross-Reference Validation Display */}
-          {validationResponse && (
-            <div className="w-full px-[24px]">
-              <CrossReferenceValidationDisplay validation={validationResponse} />
-            </div>
-          )}
-
           <Grid
             container
             rowSpacing="24px"
@@ -577,60 +664,154 @@ const ProfitShareEditUpdate = () => {
                   <Typography
                     fontWeight="bold"
                     variant="body2">
-                    {`Employees: ${profitSharingUpdate.profitShareUpdateTotals.totalEmployees} | Beneficiaries: ${profitSharingUpdate.profitShareUpdateTotals.totalBeneficaries}`}
+                    {`Employees: ${profitSharingUpdate.profitShareUpdateTotals.totalEmployees} | Beneficiaries: ${profitSharingUpdate.profitShareUpdateTotals.totalBeneficiaries}`}
                   </Typography>
                 </div>
 
-                <TotalsGrid
-                  displayData={[
-                    [
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.beginningBalance || 0),
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.totalContribution || 0),
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earnings || 0),
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earnings2 || 0),
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.forfeiture || 0),
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.distributions || 0),
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.military || 0),
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.endingBalance || 0)
-                    ],
-                    [
+                <div className="relative">
+                  <TotalsGrid
+                    displayData={[
+                      [
+                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.beginningBalance || 0),
+                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.totalContribution || 0),
+                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earnings || 0),
+                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earnings2 || 0),
+                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.forfeiture || 0),
+                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.distributions || 0),
+                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.military || 0),
+                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.endingBalance || 0)
+                      ],
+                      [
+                        "",
+                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.allocations || 0),
+                        "",
+                        "",
+                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.maxPointsTotal || 0),
+                        "",
+                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0),
+                        numberToCurrency(
+                          (profitSharingUpdate.profitShareUpdateTotals.allocations || 0) +
+                            (profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0)
+                        )
+                      ],
+                      [
+                        "",
+                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.contributionPoints || 0),
+                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earningPoints || 0),
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                      ]
+                    ]}
+                    leftColumnHeaders={["Total", "Allocation", "Point"]}
+                    topRowHeaders={[
                       "",
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.allocations || 0),
-                      "",
-                      "",
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.maxPointsTotal || 0),
-                      "",
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0),
-                      numberToCurrency(
-                        (profitSharingUpdate.profitShareUpdateTotals.allocations || 0) +
-                          (profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0)
-                      )
-                    ],
-                    [
-                      "",
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.contributionPoints || 0),
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earningPoints || 0),
-                      "",
-                      "",
-                      "",
-                      "",
-                      ""
-                    ]
-                  ]}
-                  leftColumnHeaders={["Total", "Allocation", "Point"]}
-                  topRowHeaders={[
-                    "",
-                    "Beginning Balance",
-                    "Contributions",
-                    "Earnings",
-                    "Earnings2",
-                    "Forfeitures",
-                    "Distributions",
-                    "Military/Paid Allocation",
-                    "Ending Balance"
-                  ]}
-                  tablePadding="12px"
-                />
+                      "Beginning Balance",
+                      "Contributions",
+                      "Earnings",
+                      "Earnings2",
+                      "Forfeitures",
+                      "Distributions",
+                      "Military/Paid Allocation",
+                      "Ending Balance"
+                    ]}
+                    tablePadding="12px"
+                  />
+                  {validationResponse &&
+                    validationResponse.validationGroups &&
+                    validationResponse.validationGroups.length > 0 && (
+                      <div
+                        className="absolute left-[180px] top-[30px] z-10"
+                        onMouseEnter={handleValidationPopoverOpen}
+                        onMouseLeave={handleValidationPopoverClose}>
+                        <InfoOutlinedIcon
+                          className={`cursor-pointer ${validationResponse.passedValidations === validationResponse.totalValidations ? "text-green-500" : "text-orange-500"}`}
+                          fontSize="small"
+                        />
+                        {validationPopupOpen && (
+                          <div className="absolute left-0 top-full z-[1000] mt-1 max-h-[400px] w-[400px] overflow-auto rounded border border-gray-300 bg-white shadow-lg">
+                            <div className="p-2 px-4 pb-4">
+                              <Typography
+                                variant="subtitle2"
+                                sx={{ p: 1, fontWeight: "bold" }}>
+                                Cross-Reference Validation
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                sx={{ px: 1, pb: 1, display: "block", color: "text.secondary" }}>
+                                {validationResponse.passedValidations} of {validationResponse.totalValidations} checks
+                                passed
+                              </Typography>
+                              {validationResponse.validationGroups.map((group, groupIndex) => (
+                                <div
+                                  key={groupIndex}
+                                  className="mb-2">
+                                  <Typography
+                                    variant="body2"
+                                    sx={{ px: 1, pb: 0.5, fontWeight: "600" }}>
+                                    {group.groupName}
+                                  </Typography>
+                                  <table className="w-full border-collapse text-[0.85rem]">
+                                    <thead>
+                                      <tr className="bg-gray-50">
+                                        <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">
+                                          Field
+                                        </th>
+                                        <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">
+                                          Current
+                                        </th>
+                                        <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">
+                                          Expected
+                                        </th>
+                                        <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">
+                                          Variance
+                                        </th>
+                                        <th className="border-b border-gray-300 px-2 py-1 text-center font-semibold">
+                                          Status
+                                        </th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {group.validations.map((field, fieldIndex) => (
+                                        <tr
+                                          key={fieldIndex}
+                                          className={!field.isValid ? "bg-orange-50" : ""}>
+                                          <td className="border-b border-gray-100 px-2 py-1 text-left text-xs">
+                                            {field.fieldName.replace("PAY444.", "")}
+                                          </td>
+                                          <td className="border-b border-gray-100 px-2 py-1 text-right">
+                                            {numberToCurrency(field.currentValue || 0)}
+                                          </td>
+                                          <td className="border-b border-gray-100 px-2 py-1 text-right">
+                                            {numberToCurrency(field.expectedValue || 0)}
+                                          </td>
+                                          <td
+                                            className={`border-b border-gray-100 px-2 py-1 text-right ${!field.isValid ? "font-semibold text-orange-700" : ""}`}>
+                                            {(field.variance || 0) !== 0
+                                              ? `${(field.variance || 0) > 0 ? "+" : ""}${numberToCurrency(field.variance || 0)}`
+                                              : "-"}
+                                          </td>
+                                          <td className="border-b border-gray-100 px-2 py-1 text-center">
+                                            {field.isValid ? (
+                                              <span className="text-green-600">✓</span>
+                                            ) : (
+                                              <span className="text-orange-600">⚠</span>
+                                            )}
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                </div>
                 <TotalsGrid
                   tablePadding="12px"
                   displayData={[
