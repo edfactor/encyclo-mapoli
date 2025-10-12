@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { DSMGrid, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import ReportSummary from "../../components/ReportSummary";
 import { CAPTIONS } from "../../constants";
+import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
 import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
 import { useGridPagination } from "../../hooks/useGridPagination";
 import { useLazyGetForfeituresAndPointsQuery } from "../../reduxstore/api/YearsEndApi";
@@ -28,6 +29,9 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
   const [triggerSearch, { isFetching }] = useLazyGetForfeituresAndPointsQuery();
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const columnDefs = useMemo(() => GetProfitShareForfeitColumns(), []);
+
+  // Use dynamic grid height utility hook
+  const gridMaxHeight = useDynamicGridHeight();
 
   const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
     useGridPagination({
@@ -103,7 +107,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
   };
 
   return (
-    <>
+    <div className="relative">
       {forfeituresAndPoints?.response && (
         <>
           <div className="sticky top-0 z-10 flex bg-white">
@@ -129,6 +133,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
           <DSMGrid
             preferenceKey={CAPTIONS.FORFEIT}
             isLoading={isFetching}
+            maxHeight={gridMaxHeight}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: forfeituresAndPoints.response.results,
@@ -153,7 +158,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
           )}
         </>
       )}
-    </>
+    </div>
   );
 };
 

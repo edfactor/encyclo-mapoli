@@ -2,6 +2,7 @@ import { Box, CircularProgress } from "@mui/material";
 import { useCallback, useEffect, useMemo } from "react";
 import { useLazyGetYearEndProfitSharingReportLiveQuery } from "reduxstore/api/YearsEndApi";
 import { DSMGrid, Pagination } from "smart-ui-library";
+import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
 import { useGridPagination } from "../../hooks/useGridPagination";
 import { GetProfitShareReportColumns } from "./ProfitShareReportGridColumns";
 
@@ -21,6 +22,9 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
   const data = searchResults?.response?.results || [];
   const recordCount = searchResults?.response?.total || 0;
   const columnDefs = useMemo(() => GetProfitShareReportColumns(), []);
+
+  // Use dynamic grid height utility hook
+  const gridMaxHeight = useDynamicGridHeight();
 
   const createRequest = useCallback(
     (skip: number, sortBy: string, isSortDescending: boolean, profitYear: number, pageSz: number) => {
@@ -102,10 +106,11 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
   }
 
   return (
-    <>
+    <div className="relative">
       <DSMGrid
         preferenceKey={"ProfitShareReportGrid"}
         isLoading={isFetching}
+        maxHeight={gridMaxHeight}
         handleSortChanged={handleSortChanged}
         providedOptions={{
           rowData: data,
@@ -126,7 +131,7 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
           rowsPerPageOptions={[5, 10, 25, 50, 100]}
         />
       )}
-    </>
+    </div>
   );
 };
 
