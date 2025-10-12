@@ -4,7 +4,6 @@ import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import { profitYearValidator } from "../../utils/FormValidators";
 import DuplicateSsnGuard from "../../components/DuplicateSsnGuard";
 import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
 import { useLazyGetForfeituresAndPointsQuery } from "../../reduxstore/api/YearsEndApi";
@@ -14,6 +13,7 @@ import {
   setForfeituresAndPointsQueryParams
 } from "../../reduxstore/slices/yearsEndSlice";
 import { RootState } from "../../reduxstore/store";
+import { profitYearValidator } from "../../utils/FormValidators";
 
 interface ForfeitSearchParams {
   profitYear: number;
@@ -22,13 +22,18 @@ interface ForfeitSearchParams {
 interface ForfeitSearchParametersProps {
   setInitialSearchLoaded: (loaded: boolean) => void;
   setPageReset: (reset: boolean) => void;
+  onSearchClicked?: () => void;
 }
 
 const schema = yup.object().shape({
   profitYear: profitYearValidator()
 });
 
-const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({ setInitialSearchLoaded, setPageReset }) => {
+const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({
+  setInitialSearchLoaded,
+  setPageReset,
+  onSearchClicked
+}) => {
   const [triggerSearch, { isFetching }] = useLazyGetForfeituresAndPointsQuery();
   const { forfeituresAndPointsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
@@ -48,11 +53,17 @@ const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({ setIn
 
   const validateAndSearch = handleSubmit((_data) => {
     if (isValid) {
+      // Call the parent callback to potentially change status
+      if (onSearchClicked) {
+        onSearchClicked();
+      }
+
       setPageReset(true);
       triggerSearch(
         {
           profitYear: fiscalCloseProfitYear,
           useFrozenData: true,
+          archive: false, // Always use archive=false for search button
           pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
         },
         false

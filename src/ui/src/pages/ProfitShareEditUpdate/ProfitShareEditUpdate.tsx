@@ -794,7 +794,7 @@ const ProfitShareEditUpdate = () => {
                     {(() => {
                       console.log("=== BEGINNING BALANCE ICON CHECK ===");
                       console.log("validationResponse exists?", !!validationResponse);
-                      const validation = getFieldValidation("PAY443.TotalProfitSharingBalance (Year 2023)");
+                      const validation = getFieldValidation("TotalProfitSharingBalance");
                       console.log("validation result:", validation);
                       console.log("Should show icon?", !!validationResponse && !!validation);
                       return (
@@ -802,12 +802,12 @@ const ProfitShareEditUpdate = () => {
                         validation && (
                           <div
                             className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
-                            onClick={() => handleValidationToggle("PAY443.TotalProfitSharingBalance (Year 2023)")}>
+                            onClick={() => handleValidationToggle("TotalProfitSharingBalance")}>
                             <InfoOutlinedIcon
                               className={`cursor-pointer ${validation.isValid ? "text-green-500" : "text-orange-500"}`}
                               fontSize="small"
                             />
-                            {openValidationField === "PAY443.TotalProfitSharingBalance (Year 2023)" && (
+                            {openValidationField === "TotalProfitSharingBalance" && (
                               <div className="absolute left-0 top-full z-[1000] mt-1 max-h-[300px] w-[350px] overflow-auto rounded border border-gray-300 bg-white shadow-lg">
                                 <div className="p-2 px-4 pb-4">
                                   <Typography
@@ -832,7 +832,15 @@ const ProfitShareEditUpdate = () => {
                                           PAY444 (Current)
                                         </td>
                                         <td className="border-b border-gray-100 px-2 py-1 text-right">
-                                          {numberToCurrency(validation.currentValue || 0)}
+                                          {(() => {
+                                            console.log("=== BEGINNING BALANCE VALUES ===");
+                                            console.log("validation object:", validation);
+                                            console.log("currentValue:", validation.currentValue);
+                                            console.log("expectedValue:", validation.expectedValue);
+                                            console.log("reportCode:", validation.reportCode);
+                                            console.log("fieldName:", validation.fieldName);
+                                            return numberToCurrency(validation.currentValue || 0);
+                                          })()}
                                         </td>
                                       </tr>
                                       <tr>

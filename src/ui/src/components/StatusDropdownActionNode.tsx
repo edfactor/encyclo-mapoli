@@ -13,9 +13,10 @@ interface StatusDropdownActionNodeProps {
   initialStatus?: string;
   navigationId?: number;
   onStatusChange?: (newStatus: string, statusName?: string) => void;
+  onSearchClicked?: () => void; // Callback when search is clicked - will auto-change from "Not Started" to "In Progress"
 }
 
-const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({ onStatusChange }) => {
+const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({ onStatusChange, onSearchClicked }) => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [currentStatus, setCurrentStatus] = useState("1");
   const [navigationObj, setNavigationObj] = useState<NavigationDto | null>(null);
@@ -26,6 +27,7 @@ const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({ onS
   const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
   const [triggerUpdate] = useLazyUpdateNavigationStatusQuery();
   const [triggerGetNavigation] = useLazyGetNavigationQuery();
+
   const handleStatusChange = async (newStatus: string) => {
     // Call the parent callback BEFORE the API call so we can detect the transition immediately
     if (onStatusChange) {
@@ -41,6 +43,18 @@ const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({ onS
       }
     }
   };
+
+  // Handle auto-change from "Not Started" to "In Progress" when search is clicked
+  useEffect(() => {
+    if (onSearchClicked && currentStatus === "1" && navigationObj) {
+      // Auto-transition to "In Progress" (status 2)
+      const autoChangeStatus = async () => {
+        console.log("=== AUTO-CHANGING STATUS FROM NOT STARTED TO IN PROGRESS ===");
+        await handleStatusChange("2");
+      };
+      autoChangeStatus();
+    }
+  }, [onSearchClicked]); // Only runs when onSearchClicked changes (i.e., when search button is clicked)
 
   const getNavigationObjectBasedOnId = (navigationArray?: NavigationDto[], id?: number): NavigationDto | undefined => {
     if (navigationArray) {

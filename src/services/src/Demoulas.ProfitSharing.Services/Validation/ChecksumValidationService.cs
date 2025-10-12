@@ -80,10 +80,15 @@ public sealed class ChecksumValidationService : IChecksumValidationService
                     Error.EntityNotFound($"No archived report found for {reportType} year {profitYear}"));
             }
 
-            // 2. Build dictionary of archived checksums for quick lookup
+            // 2. Build dictionaries of archived checksums AND actual values for quick lookup
             var archivedChecksums = archived.KeyFieldsChecksumJson.ToDictionary(
                 kvp => kvp.Key,
                 kvp => Convert.ToBase64String(kvp.Value.Value) // The hash bytes
+            );
+
+            var archivedValues = archived.KeyFieldsChecksumJson.ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value.Key // The actual archived decimal value
             );
 
             // 3. Validate each provided field
@@ -199,7 +204,7 @@ public sealed class ChecksumValidationService : IChecksumValidationService
             int passedValidations = 0;
             int failedValidations = 0;
 
-            // Group 0: Beginning Balance Continuity (most fundamental - checks year-to-year balance sheet continuity)
+            // Group 0: Beginning Balance (PAY444 vs archived PAY443 for SAME year)
             var beginningBalanceGroup = await ValidateBeginningBalanceGroupAsync(
                 profitYear, currentValues, validatedReports, cancellationToken);
             validationGroups.Add(beginningBalanceGroup);
@@ -208,7 +213,7 @@ public sealed class ChecksumValidationService : IChecksumValidationService
             failedValidations += beginningBalanceGroup.Validations.Count(v => !v.IsValid);
             if (!beginningBalanceGroup.IsValid)
             {
-                criticalIssues.Add($"CRITICAL: Beginning balance mismatch between year {profitYear - 1} and {profitYear} - balance sheet continuity is broken");
+                criticalIssues.Add($"CRITICAL: Beginning balance mismatch - PAY444 does not match archived PAY443 for year {profitYear}");
             }
 
             // Group 1: Total Distributions (4-way match)
@@ -301,9 +306,9 @@ public sealed class ChecksumValidationService : IChecksumValidationService
     }
 
     /// <summary>
-    /// Validates the Beginning Balance continuity between years.
-    /// Validation Rule: PAY444.BeginningBalance (year N) = PAY443.TotalProfitSharingBalance (year N-1)
-    /// This ensures the balance sheet is continuous from one year to the next.
+    /// Group 0: Validates beginning balance against archived PAY443 for SAME year.
+    /// Validation Rule: PAY444.BeginningBalance (year N) should match PAY443.TotalProfitSharingBalance (archived year N)
+    /// This validates that the current Master Update matches what was finalized at year-end.
     /// </summary>
     private async Task<CrossReferenceValidationGroup> ValidateBeginningBalanceGroupAsync(
         short profitYear,
@@ -312,75 +317,34 @@ public sealed class ChecksumValidationService : IChecksumValidationService
         CancellationToken cancellationToken)
     {
         var validations = new List<CrossReferenceValidation>();
-        var previousYear = (short)(profitYear - 1);
 
-        // Check if PAY443.TotalProfitSharingBalance from previous year exists
-        var pay443PreviousYear = await ValidateSingleFieldAsync(
-            previousYear,
+        // Get archived PAY443.TotalProfitSharingBalance for SAME year (profitYear)
+        var pay443Validation = await ValidateSingleFieldAsync(
+            profitYear,
             "PAY443",
             "TotalProfitSharingBalance",
-            currentValues, // This will be empty, which means we're just checking if the archived value exists
+            currentValues,
             cancellationToken);
 
-        if (pay443PreviousYear.IsValid || pay443PreviousYear.ExpectedValue.HasValue)
-        {
-            // We found the archived value from previous year
-            var expectedBeginningBalance = pay443PreviousYear.ExpectedValue ?? 0m;
-
-            _logger.LogInformation(
-                "Found PAY443.TotalProfitSharingBalance from year {PreviousYear}: {Amount:C} - this should be {CurrentYear}'s beginning balance",
-                previousYear, expectedBeginningBalance, profitYear);
-
-            validations.Add(new CrossReferenceValidation
-            {
-                FieldName = $"PAY443.TotalProfitSharingBalance (Year {previousYear}) → PAY444.BeginningBalance (Year {profitYear})",
-                ReportCode = "PAY443→PAY444",
-                IsValid = true, // We'll mark this as valid since PAY443 data exists; actual balance validation happens when PAY444 runs
-                CurrentValue = null, // PAY444 doesn't provide this value yet
-                ExpectedValue = expectedBeginningBalance,
-                Variance = null,
-                Message = $"PAY443 ending balance from {previousYear} is {expectedBeginningBalance:C}. This will be validated against PAY444 beginning balance when available.",
-                ArchivedAt = pay443PreviousYear.ArchivedAt
-            });
-
-            validatedReports.Add("PAY443");
-            validatedReports.Add("PAY444");
-        }
-        else
-        {
-            // No PAY443 data from previous year
-            validations.Add(new CrossReferenceValidation
-            {
-                FieldName = $"PAY443.TotalProfitSharingBalance (Year {previousYear})",
-                ReportCode = "PAY443",
-                IsValid = false,
-                CurrentValue = null,
-                ExpectedValue = null,
-                Variance = null,
-                Message = $"No archived PAY443 data found for year {previousYear}. Cannot verify beginning balance continuity for year {profitYear}.",
-                ArchivedAt = null
-            });
-
-            _logger.LogWarning(
-                "No PAY443.TotalProfitSharingBalance archived for year {PreviousYear} - cannot validate beginning balance for year {CurrentYear}",
-                previousYear, profitYear);
-        }
+        validations.Add(pay443Validation);
+        validatedReports.Add("PAY443");
+        validatedReports.Add("PAY444");
 
         bool allValid = validations.All(v => v.IsValid);
 
         string summary = allValid
-            ? $"✅ PAY443 ending balance from {previousYear} is available for beginning balance validation"
-            : $"⚠️ Cannot validate beginning balance - no PAY443 data from {previousYear}";
+            ? $"✅ Beginning balance matches archived PAY443 for year {profitYear}"
+            : $"⚠️ Beginning balance does NOT match archived PAY443 for year {profitYear}";
 
         return new CrossReferenceValidationGroup
         {
-            GroupName = "Beginning Balance Continuity",
-            Description = $"Validates that year-end balance from {previousYear} (PAY443) is available for {profitYear} beginning balance validation",
+            GroupName = "Beginning Balance",
+            Description = $"Validates PAY444.BeginningBalance matches archived PAY443.TotalProfitSharingBalance for year {profitYear}",
             IsValid = allValid,
             Validations = validations,
             Summary = summary,
             Priority = "Critical",
-            ValidationRule = $"PAY444.BeginningBalance ({profitYear}) should equal PAY443.TotalProfitSharingBalance ({previousYear})"
+            ValidationRule = $"PAY444.BeginningBalance should equal archived PAY443.TotalProfitSharingBalance (year {profitYear})"
         };
     }
 
@@ -595,15 +559,30 @@ public sealed class ChecksumValidationService : IChecksumValidationService
             var checksumResponse = validationResult.Value;
             bool fieldIsValid = checksumResponse?.IsValid ?? false;
 
-            // Get expected value from archived data if validation failed
+            // Get expected value from archived data
             decimal? expectedValue = null;
-            if (!fieldIsValid && checksumResponse?.FieldResults.ContainsKey(fieldName) == true)
+            if (checksumResponse != null)
             {
-                // We don't have the actual archived value, but we know it doesn't match
-                expectedValue = null; // Could enhance this by storing actual values in checksum table
+                // Retrieve the archived report to get the actual value (not just the checksum)
+                var archived = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+                    await ctx.ReportChecksums
+                        .Where(r => r.ProfitYear == profitYear && r.ReportType == reportCode)
+                        .OrderByDescending(r => r.CreatedAtUtc)
+                        .FirstOrDefaultAsync(cancellationToken), cancellationToken);
+
+                if (archived != null)
+                {
+                    var archivedFieldData = archived.KeyFieldsChecksumJson
+                        .FirstOrDefault(kvp => kvp.Key == fieldName);
+
+                    if (!string.IsNullOrEmpty(archivedFieldData.Key))
+                    {
+                        expectedValue = archivedFieldData.Value.Key; // The actual archived value
+                    }
+                }
             }
 
-            decimal? variance = expectedValue.HasValue
+            decimal? variance = expectedValue.HasValue && currentValue.HasValue
                 ? currentValue - expectedValue
                 : null;
 

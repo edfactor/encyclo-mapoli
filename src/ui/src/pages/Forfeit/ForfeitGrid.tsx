@@ -41,7 +41,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
               {
                 profitYear: fiscalCloseProfitYear,
                 useFrozenData: true,
-                archive: shouldArchive,
+                archive: false, // Always use archive=false for normal pagination
                 pagination: {
                   skip: pageNum * pageSz,
                   take: pageSz,
@@ -53,32 +53,36 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
             ).unwrap();
           }
         },
-        [initialSearchLoaded, fiscalCloseProfitYear, triggerSearch, shouldArchive]
+        [initialSearchLoaded, fiscalCloseProfitYear, triggerSearch]
       )
     });
 
-  const onSearch = useCallback(async () => {
-    await triggerSearch(
-      {
-        profitYear: fiscalCloseProfitYear,
-        useFrozenData: true,
-        archive: shouldArchive,
-        pagination: {
-          skip: pageNumber * pageSize,
-          take: pageSize,
-          sortBy: sortParams.sortBy,
-          isSortDescending: sortParams.isSortDescending
-        }
-      },
-      false
-    ).unwrap();
-  }, [pageNumber, pageSize, sortParams, triggerSearch, fiscalCloseProfitYear, shouldArchive]);
-
+  // Separate useEffect to handle archive=true ONLY when status changes to Complete
   useEffect(() => {
-    if (initialSearchLoaded) {
-      onSearch();
+    console.log("=== ARCHIVE USEEFFECT TRIGGERED ===");
+    console.log("shouldArchive:", shouldArchive);
+    console.log("initialSearchLoaded:", initialSearchLoaded);
+    console.log("fiscalCloseProfitYear:", fiscalCloseProfitYear);
+
+    if (shouldArchive && initialSearchLoaded) {
+      console.log("=== TRIGGERING ARCHIVE REQUEST ===");
+      triggerSearch(
+        {
+          profitYear: fiscalCloseProfitYear,
+          useFrozenData: true,
+          archive: true, // ONLY set to true when Complete status selected
+          pagination: {
+            skip: pageNumber * pageSize,
+            take: pageSize,
+            sortBy: sortParams.sortBy,
+            isSortDescending: sortParams.isSortDescending
+          }
+        },
+        false
+      );
+      // Note: shouldArchive will be reset by parent component (Forfeit.tsx)
     }
-  }, [initialSearchLoaded, onSearch]);
+  }, [shouldArchive, initialSearchLoaded, fiscalCloseProfitYear, pageNumber, pageSize, sortParams, triggerSearch]);
 
   useEffect(() => {
     if (pageNumberReset) {

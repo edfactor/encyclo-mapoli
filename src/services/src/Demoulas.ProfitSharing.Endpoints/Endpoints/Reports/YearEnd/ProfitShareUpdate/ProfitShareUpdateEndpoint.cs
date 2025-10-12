@@ -60,16 +60,27 @@ public class ProfitShareUpdateEndpoint
             "Performing cross-reference validation for Master Update preview year {ProfitYear}",
             req.ProfitYear);
 
+        // IMPORTANT: Use PAY443 field names as keys because the validation service compares current PAY444 values
+        // against archived PAY443 checksums FOR THE SAME PROFIT YEAR (except Beginning Balance which compares to previous year).
+        // The service looks up values using "PAY443.{fieldName}" or "PAY444.{fieldName}" keys.
         var currentValues = new Dictionary<string, decimal>
         {
-            ["PAY444.BeginningBalance"] = response.ProfitShareUpdateTotals.BeginningBalance,
-            ["PAY444.Distributions"] = response.ProfitShareUpdateTotals.Distributions,
-            ["PAY444.TotalForfeitures"] = response.ProfitShareUpdateTotals.Forfeiture,
-            ["PAY444.TotalContributions"] = response.ProfitShareUpdateTotals.TotalContribution,
-            ["PAY444.TotalEarnings"] = response.ProfitShareUpdateTotals.Earnings + response.ProfitShareUpdateTotals.Earnings2
-        };
+            // Beginning Balance: PAY444 (2024) beginning balance is compared against PAY443 (2023) ending balance
+            // The validation service looks for "PAY444.BeginningBalance (Year 2024)" key
+            [$"PAY444.BeginningBalance (Year {req.ProfitYear})"] = response.ProfitShareUpdateTotals.BeginningBalance,
 
-        var crossRefValidation = await _checksumValidationService.ValidateMasterUpdateCrossReferencesAsync(
+            // Distributions: PAY444 (2024) is compared against PAY443 (2024) archived data
+            ["PAY443.DistributionTotals"] = response.ProfitShareUpdateTotals.Distributions,
+
+            // Forfeitures: PAY444 (2024) is compared against PAY443 (2024) archived data
+            ["PAY443.TotalForfeitures"] = response.ProfitShareUpdateTotals.Forfeiture,
+
+            // Contributions: PAY444 (2024) is compared against PAY443 (2024) archived data
+            ["PAY443.TotalContributions"] = response.ProfitShareUpdateTotals.TotalContribution,
+
+            // Earnings: PAY444 (2024) is compared against PAY443 (2024) archived data
+            ["PAY443.TotalEarnings"] = response.ProfitShareUpdateTotals.Earnings + response.ProfitShareUpdateTotals.Earnings2
+        }; var crossRefValidation = await _checksumValidationService.ValidateMasterUpdateCrossReferencesAsync(
             req.ProfitYear,
             currentValues,
             ct);
