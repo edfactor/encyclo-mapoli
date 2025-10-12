@@ -382,21 +382,121 @@ const ProfitShareEditUpdate = () => {
 
   // Helper function to find validation for a specific field
   const getFieldValidation = (fieldKey: string) => {
-    if (!validationResponse) return null;
-    
-    for (const group of validationResponse.validationGroups) {
-      const validation = group.validations.find(v => 
-        v.fieldName.includes(fieldKey) || v.fieldName === `PAY444.${fieldKey}`
-      );
-      if (validation) return validation;
+    console.log("getFieldValidation called with fieldKey:", fieldKey);
+    console.log("validationResponse:", validationResponse);
+
+    if (!validationResponse) {
+      console.log("No validation response");
+      return null;
     }
+
+    console.log("validationGroups:", validationResponse.validationGroups);
+
+    for (const group of validationResponse.validationGroups) {
+      console.log("Checking group:", group);
+      console.log("Group validations:", group.validations);
+      const validation = group.validations.find((v) => {
+        console.log(`Comparing v.fieldName="${v.fieldName}" with fieldKey="${fieldKey}"`);
+        return v.fieldName === fieldKey;
+      });
+      if (validation) {
+        console.log("Found validation:", validation);
+        return validation;
+      }
+    }
+    console.log("No validation found for fieldKey:", fieldKey);
     return null;
   };
 
-  // Helper to render validation icon with popup for a specific field
-  const renderValidationIcon = (fieldKey: string, fieldDisplayName: string) => {
+  // Helper to render validation icon positioned absolutely in a TotalsGrid (like State Taxes pattern)
+  const renderValidationIconInGrid = (fieldKey: string, fieldDisplayName: string) => {
+    console.log("renderValidationIconInGrid called for:", fieldKey, fieldDisplayName);
     const validation = getFieldValidation(fieldKey);
-    if (!validation) return null;
+    console.log("Validation result for", fieldKey, ":", validation);
+    if (!validation) {
+      console.log("No validation found, returning null for:", fieldKey);
+      return null;
+    }
+
+    return (
+      <div
+        className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
+        onClick={() => handleValidationToggle(fieldKey)}>
+        <InfoOutlinedIcon
+          className={`cursor-pointer ${validation.isValid ? "text-green-500" : "text-orange-500"}`}
+          fontSize="small"
+        />
+        {openValidationField === fieldKey && (
+          <div className="absolute left-0 top-full z-[1000] mt-1 max-h-[300px] w-[350px] overflow-auto rounded border border-gray-300 bg-white shadow-lg">
+            <div className="p-2 px-4 pb-4">
+              <Typography
+                variant="subtitle2"
+                sx={{ p: 1, fontWeight: "bold" }}>
+                {fieldDisplayName}
+              </Typography>
+              <table className="w-full border-collapse text-[0.95rem]">
+                <thead>
+                  <tr>
+                    <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">Report</th>
+                    <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="border-b border-gray-100 px-2 py-1 text-left">Current (PAY444)</td>
+                    <td className="border-b border-gray-100 px-2 py-1 text-right">
+                      {numberToCurrency(validation.currentValue || 0)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="border-b border-gray-100 px-2 py-1 text-left">Expected (PAY443)</td>
+                    <td className="border-b border-gray-100 px-2 py-1 text-right">
+                      {numberToCurrency(validation.expectedValue || 0)}
+                    </td>
+                  </tr>
+                  {!validation.isValid && (validation.variance || 0) !== 0 && (
+                    <tr className="bg-orange-50">
+                      <td className="px-2 py-1 text-left font-semibold text-orange-700">Variance</td>
+                      <td className="px-2 py-1 text-right font-bold text-orange-700">
+                        {numberToCurrency(validation.variance || 0)}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+              {validation.message && (
+                <Typography
+                  variant="caption"
+                  sx={{ mt: 1, display: "block", px: 1, color: "text.secondary" }}>
+                  {validation.message}
+                </Typography>
+              )}
+              <div className="mt-2 flex items-center justify-end gap-2 px-2">
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: validation.isValid ? "success.main" : "warning.main",
+                    fontWeight: "bold"
+                  }}>
+                  {validation.isValid ? "✓ Values Match" : "⚠ Values Mismatch"}
+                </Typography>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Helper to render validation icon with popup for a specific field (legacy - replaced by renderValidationIconInGrid)
+  const renderValidationIcon = (fieldKey: string, fieldDisplayName: string) => {
+    console.log("renderValidationIcon called for:", fieldKey, fieldDisplayName);
+    const validation = getFieldValidation(fieldKey);
+    console.log("Validation result for", fieldKey, ":", validation);
+    if (!validation) {
+      console.log("No validation found, returning null for:", fieldKey);
+      return null;
+    }
 
     const isOpen = openValidationField === fieldKey;
 
@@ -418,7 +518,7 @@ const ProfitShareEditUpdate = () => {
                 </Typography>
                 <Typography
                   variant="caption"
-                  sx={{ 
+                  sx={{
                     color: validation.isValid ? "success.main" : "warning.main",
                     fontWeight: "bold"
                   }}>
@@ -428,18 +528,27 @@ const ProfitShareEditUpdate = () => {
               <table className="w-full border-collapse text-sm">
                 <tbody>
                   <tr>
-                    <td className="border-b border-gray-200 py-2 pr-2 font-semibold text-gray-700">Current (PAY444):</td>
-                    <td className="border-b border-gray-200 py-2 text-right">{numberToCurrency(validation.currentValue || 0)}</td>
+                    <td className="border-b border-gray-200 py-2 pr-2 font-semibold text-gray-700">
+                      Current (PAY444):
+                    </td>
+                    <td className="border-b border-gray-200 py-2 text-right">
+                      {numberToCurrency(validation.currentValue || 0)}
+                    </td>
                   </tr>
                   <tr>
-                    <td className="border-b border-gray-200 py-2 pr-2 font-semibold text-gray-700">Expected (PAY443):</td>
-                    <td className="border-b border-gray-200 py-2 text-right">{numberToCurrency(validation.expectedValue || 0)}</td>
+                    <td className="border-b border-gray-200 py-2 pr-2 font-semibold text-gray-700">
+                      Expected (PAY443):
+                    </td>
+                    <td className="border-b border-gray-200 py-2 text-right">
+                      {numberToCurrency(validation.expectedValue || 0)}
+                    </td>
                   </tr>
                   {!validation.isValid && (validation.variance || 0) !== 0 && (
                     <tr className="bg-orange-50">
                       <td className="py-2 pr-2 font-semibold text-orange-700">Variance:</td>
                       <td className="py-2 text-right font-semibold text-orange-700">
-                        {(validation.variance || 0) > 0 ? "+" : ""}{numberToCurrency(validation.variance || 0)}
+                        {(validation.variance || 0) > 0 ? "+" : ""}
+                        {numberToCurrency(validation.variance || 0)}
                       </td>
                     </tr>
                   )}
@@ -668,150 +777,381 @@ const ProfitShareEditUpdate = () => {
                   </Typography>
                 </div>
 
-                <div className="relative">
-                  <TotalsGrid
-                    displayData={[
-                      [
-                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.beginningBalance || 0),
-                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.totalContribution || 0),
-                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earnings || 0),
-                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earnings2 || 0),
-                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.forfeiture || 0),
-                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.distributions || 0),
-                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.military || 0),
-                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.endingBalance || 0)
-                      ],
-                      [
-                        "",
-                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.allocations || 0),
-                        "",
-                        "",
-                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.maxPointsTotal || 0),
-                        "",
-                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0),
-                        numberToCurrency(
-                          (profitSharingUpdate.profitShareUpdateTotals.allocations || 0) +
-                            (profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0)
-                        )
-                      ],
-                      [
-                        "",
-                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.contributionPoints || 0),
-                        numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earningPoints || 0),
-                        "",
-                        "",
-                        "",
-                        "",
-                        ""
-                      ]
-                    ]}
-                    leftColumnHeaders={["Total", "Allocation", "Point"]}
-                    topRowHeaders={[
-                      "",
-                      "Beginning Balance",
-                      "Contributions",
-                      "Earnings",
-                      "Earnings2",
-                      "Forfeitures",
-                      "Distributions",
-                      "Military/Paid Allocation",
-                      "Ending Balance"
-                    ]}
-                    tablePadding="12px"
-                  />
-                  {validationResponse &&
-                    validationResponse.validationGroups &&
-                    validationResponse.validationGroups.length > 0 && (
-                      <div
-                        className="absolute left-[180px] top-[30px] z-10"
-                        onMouseEnter={handleValidationPopoverOpen}
-                        onMouseLeave={handleValidationPopoverClose}>
-                        <InfoOutlinedIcon
-                          className={`cursor-pointer ${validationResponse.passedValidations === validationResponse.totalValidations ? "text-green-500" : "text-orange-500"}`}
-                          fontSize="small"
-                        />
-                        {validationPopupOpen && (
-                          <div className="absolute left-0 top-full z-[1000] mt-1 max-h-[400px] w-[400px] overflow-auto rounded border border-gray-300 bg-white shadow-lg">
-                            <div className="p-2 px-4 pb-4">
-                              <Typography
-                                variant="subtitle2"
-                                sx={{ p: 1, fontWeight: "bold" }}>
-                                Cross-Reference Validation
-                              </Typography>
-                              <Typography
-                                variant="caption"
-                                sx={{ px: 1, pb: 1, display: "block", color: "text.secondary" }}>
-                                {validationResponse.passedValidations} of {validationResponse.totalValidations} checks
-                                passed
-                              </Typography>
-                              {validationResponse.validationGroups.map((group, groupIndex) => (
-                                <div
-                                  key={groupIndex}
-                                  className="mb-2">
+                {/* Multiple TotalsGrids side-by-side, exactly like QPAY129 State Taxes pattern */}
+                <div className="flex items-start gap-2">
+                  {/* Beginning Balance with validation icon */}
+                  <div className="relative flex-1">
+                    <TotalsGrid
+                      displayData={[
+                        [numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.beginningBalance || 0)],
+                        [""],
+                        [""]
+                      ]}
+                      leftColumnHeaders={["Total", "Allocation", "Point"]}
+                      topRowHeaders={["Beginning Balance"]}
+                      breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
+                    />
+                    {(() => {
+                      console.log("=== BEGINNING BALANCE ICON CHECK ===");
+                      console.log("validationResponse exists?", !!validationResponse);
+                      const validation = getFieldValidation("PAY443.TotalProfitSharingBalance (Year 2023)");
+                      console.log("validation result:", validation);
+                      console.log("Should show icon?", !!validationResponse && !!validation);
+                      return (
+                        validationResponse &&
+                        validation && (
+                          <div
+                            className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
+                            onClick={() => handleValidationToggle("PAY443.TotalProfitSharingBalance (Year 2023)")}>
+                            <InfoOutlinedIcon
+                              className={`cursor-pointer ${validation.isValid ? "text-green-500" : "text-orange-500"}`}
+                              fontSize="small"
+                            />
+                            {openValidationField === "PAY443.TotalProfitSharingBalance (Year 2023)" && (
+                              <div className="absolute left-0 top-full z-[1000] mt-1 max-h-[300px] w-[350px] overflow-auto rounded border border-gray-300 bg-white shadow-lg">
+                                <div className="p-2 px-4 pb-4">
                                   <Typography
-                                    variant="body2"
-                                    sx={{ px: 1, pb: 0.5, fontWeight: "600" }}>
-                                    {group.groupName}
+                                    variant="subtitle2"
+                                    sx={{ p: 1 }}>
+                                    Beginning Balance
                                   </Typography>
-                                  <table className="w-full border-collapse text-[0.85rem]">
+                                  <table className="w-full border-collapse text-[0.95rem]">
                                     <thead>
-                                      <tr className="bg-gray-50">
+                                      <tr>
                                         <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">
-                                          Field
+                                          Report
                                         </th>
                                         <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">
-                                          Current
-                                        </th>
-                                        <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">
-                                          Expected
-                                        </th>
-                                        <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">
-                                          Variance
-                                        </th>
-                                        <th className="border-b border-gray-300 px-2 py-1 text-center font-semibold">
-                                          Status
+                                          Amount
                                         </th>
                                       </tr>
                                     </thead>
                                     <tbody>
-                                      {group.validations.map((field, fieldIndex) => (
-                                        <tr
-                                          key={fieldIndex}
-                                          className={!field.isValid ? "bg-orange-50" : ""}>
-                                          <td className="border-b border-gray-100 px-2 py-1 text-left text-xs">
-                                            {field.fieldName.replace("PAY444.", "")}
-                                          </td>
-                                          <td className="border-b border-gray-100 px-2 py-1 text-right">
-                                            {numberToCurrency(field.currentValue || 0)}
-                                          </td>
-                                          <td className="border-b border-gray-100 px-2 py-1 text-right">
-                                            {numberToCurrency(field.expectedValue || 0)}
-                                          </td>
-                                          <td
-                                            className={`border-b border-gray-100 px-2 py-1 text-right ${!field.isValid ? "font-semibold text-orange-700" : ""}`}>
-                                            {(field.variance || 0) !== 0
-                                              ? `${(field.variance || 0) > 0 ? "+" : ""}${numberToCurrency(field.variance || 0)}`
-                                              : "-"}
-                                          </td>
-                                          <td className="border-b border-gray-100 px-2 py-1 text-center">
-                                            {field.isValid ? (
-                                              <span className="text-green-600">✓</span>
-                                            ) : (
-                                              <span className="text-orange-600">⚠</span>
-                                            )}
-                                          </td>
-                                        </tr>
-                                      ))}
+                                      <tr>
+                                        <td className="border-b border-gray-100 px-2 py-1 text-left">
+                                          PAY444 (Current)
+                                        </td>
+                                        <td className="border-b border-gray-100 px-2 py-1 text-right">
+                                          {numberToCurrency(validation.currentValue || 0)}
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
+                                        <td className="px-2 py-1 text-right">
+                                          {numberToCurrency(validation.expectedValue || 0)}
+                                        </td>
+                                      </tr>
                                     </tbody>
                                   </table>
                                 </div>
-                              ))}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      );
+                    })()}
+                  </div>
+
+                  {/* Contributions */}
+                  <div className="relative flex-1">
+                    <TotalsGrid
+                      displayData={[
+                        [numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.totalContribution || 0)],
+                        [numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.allocations || 0)],
+                        [numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.contributionPoints || 0)]
+                      ]}
+                      leftColumnHeaders={["Total", "Allocation", "Point"]}
+                      topRowHeaders={["Contributions"]}
+                      breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
+                    />
+                    {validationResponse && getFieldValidation("TotalContributions") && (
+                      <div
+                        className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
+                        onClick={() => handleValidationToggle("TotalContributions")}>
+                        <InfoOutlinedIcon
+                          className={`cursor-pointer ${getFieldValidation("TotalContributions")!.isValid ? "text-green-500" : "text-orange-500"}`}
+                          fontSize="small"
+                        />
+                        {openValidationField === "TotalContributions" && (
+                          <div className="absolute left-0 top-full z-[1000] mt-1 max-h-[300px] w-[350px] overflow-auto rounded border border-gray-300 bg-white shadow-lg">
+                            <div className="p-2 px-4 pb-4">
+                              <Typography
+                                variant="subtitle2"
+                                sx={{ p: 1 }}>
+                                Contributions
+                              </Typography>
+                              <table className="w-full border-collapse text-[0.95rem]">
+                                <thead>
+                                  <tr>
+                                    <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">
+                                      Report
+                                    </th>
+                                    <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">
+                                      Amount
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr>
+                                    <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
+                                    <td className="border-b border-gray-100 px-2 py-1 text-right">
+                                      {numberToCurrency(
+                                        getFieldValidation("PAY444.TotalContributions")!.currentValue || 0
+                                      )}
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
+                                    <td className="px-2 py-1 text-right">
+                                      {numberToCurrency(
+                                        getFieldValidation("PAY444.TotalContributions")!.expectedValue || 0
+                                      )}
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
                             </div>
                           </div>
                         )}
                       </div>
                     )}
+                  </div>
+
+                  {/* Earnings */}
+                  <div className="relative flex-1">
+                    <TotalsGrid
+                      displayData={[
+                        [numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earnings || 0)],
+                        [""],
+                        [numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earningPoints || 0)]
+                      ]}
+                      leftColumnHeaders={["Total", "Allocation", "Point"]}
+                      topRowHeaders={["Earnings"]}
+                      breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
+                    />
+                    {validationResponse && getFieldValidation("TotalEarnings") && (
+                      <div
+                        className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
+                        onClick={() => handleValidationToggle("TotalEarnings")}>
+                        <InfoOutlinedIcon
+                          className={`cursor-pointer ${getFieldValidation("TotalEarnings")!.isValid ? "text-green-500" : "text-orange-500"}`}
+                          fontSize="small"
+                        />
+                        {openValidationField === "TotalEarnings" && (
+                          <div className="absolute left-0 top-full z-[1000] mt-1 max-h-[300px] w-[350px] overflow-auto rounded border border-gray-300 bg-white shadow-lg">
+                            <div className="p-2 px-4 pb-4">
+                              <Typography
+                                variant="subtitle2"
+                                sx={{ p: 1 }}>
+                                Earnings
+                              </Typography>
+                              <table className="w-full border-collapse text-[0.95rem]">
+                                <thead>
+                                  <tr>
+                                    <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">
+                                      Report
+                                    </th>
+                                    <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">
+                                      Amount
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr>
+                                    <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
+                                    <td className="border-b border-gray-100 px-2 py-1 text-right">
+                                      {numberToCurrency(getFieldValidation("PAY444.TotalEarnings")!.currentValue || 0)}
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
+                                    <td className="px-2 py-1 text-right">
+                                      {numberToCurrency(getFieldValidation("PAY444.TotalEarnings")!.expectedValue || 0)}
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Earnings2 */}
+                  <div className="flex-1">
+                    <TotalsGrid
+                      displayData={[
+                        [numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earnings2 || 0)],
+                        [""],
+                        [""]
+                      ]}
+                      leftColumnHeaders={["Total", "Allocation", "Point"]}
+                      topRowHeaders={["Earnings2"]}
+                      breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
+                    />
+                  </div>
+
+                  {/* Forfeitures */}
+                  <div className="relative flex-1">
+                    <TotalsGrid
+                      displayData={[
+                        [numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.forfeiture || 0)],
+                        [numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.maxPointsTotal || 0)],
+                        [""]
+                      ]}
+                      leftColumnHeaders={["Total", "Allocation", "Point"]}
+                      topRowHeaders={["Forfeitures"]}
+                      breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
+                    />
+                    {validationResponse && getFieldValidation("TotalForfeitures") && (
+                      <div
+                        className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
+                        onClick={() => handleValidationToggle("TotalForfeitures")}>
+                        <InfoOutlinedIcon
+                          className={`cursor-pointer ${getFieldValidation("TotalForfeitures")!.isValid ? "text-green-500" : "text-orange-500"}`}
+                          fontSize="small"
+                        />
+                        {openValidationField === "TotalForfeitures" && (
+                          <div className="absolute left-0 top-full z-[1000] mt-1 max-h-[300px] w-[350px] overflow-auto rounded border border-gray-300 bg-white shadow-lg">
+                            <div className="p-2 px-4 pb-4">
+                              <Typography
+                                variant="subtitle2"
+                                sx={{ p: 1 }}>
+                                Forfeitures
+                              </Typography>
+                              <table className="w-full border-collapse text-[0.95rem]">
+                                <thead>
+                                  <tr>
+                                    <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">
+                                      Report
+                                    </th>
+                                    <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">
+                                      Amount
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr>
+                                    <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
+                                    <td className="border-b border-gray-100 px-2 py-1 text-right">
+                                      {numberToCurrency(
+                                        getFieldValidation("PAY444.TotalForfeitures")!.currentValue || 0
+                                      )}
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
+                                    <td className="px-2 py-1 text-right">
+                                      {numberToCurrency(
+                                        getFieldValidation("PAY444.TotalForfeitures")!.expectedValue || 0
+                                      )}
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Distributions */}
+                  <div className="relative flex-1">
+                    <TotalsGrid
+                      displayData={[
+                        [numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.distributions || 0)],
+                        [""],
+                        [""]
+                      ]}
+                      leftColumnHeaders={["Total", "Allocation", "Point"]}
+                      topRowHeaders={["Distributions"]}
+                      breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
+                    />
+                    {validationResponse && getFieldValidation("DistributionTotals") && (
+                      <div
+                        className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
+                        onClick={() => handleValidationToggle("DistributionTotals")}>
+                        <InfoOutlinedIcon
+                          className={`cursor-pointer ${getFieldValidation("DistributionTotals")!.isValid ? "text-green-500" : "text-orange-500"}`}
+                          fontSize="small"
+                        />
+                        {openValidationField === "DistributionTotals" && (
+                          <div className="absolute left-0 top-full z-[1000] mt-1 max-h-[300px] w-[350px] overflow-auto rounded border border-gray-300 bg-white shadow-lg">
+                            <div className="p-2 px-4 pb-4">
+                              <Typography
+                                variant="subtitle2"
+                                sx={{ p: 1 }}>
+                                Distributions
+                              </Typography>
+                              <table className="w-full border-collapse text-[0.95rem]">
+                                <thead>
+                                  <tr>
+                                    <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">
+                                      Report
+                                    </th>
+                                    <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">
+                                      Amount
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr>
+                                    <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
+                                    <td className="border-b border-gray-100 px-2 py-1 text-right">
+                                      {numberToCurrency(getFieldValidation("PAY444.Distributions")!.currentValue || 0)}
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
+                                    <td className="px-2 py-1 text-right">
+                                      {numberToCurrency(getFieldValidation("PAY444.Distributions")!.expectedValue || 0)}
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Military/Paid Allocation */}
+                  <div className="flex-1">
+                    <TotalsGrid
+                      displayData={[
+                        [numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.military || 0)],
+                        [numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0)],
+                        [""]
+                      ]}
+                      leftColumnHeaders={["Total", "Allocation", "Point"]}
+                      topRowHeaders={["Military/Paid Allocation"]}
+                      breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
+                    />
+                  </div>
+
+                  {/* Ending Balance */}
+                  <div className="flex-1">
+                    <TotalsGrid
+                      displayData={[
+                        [numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.endingBalance || 0)],
+                        [
+                          numberToCurrency(
+                            (profitSharingUpdate.profitShareUpdateTotals.allocations || 0) +
+                              (profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0)
+                          )
+                        ],
+                        [""]
+                      ]}
+                      leftColumnHeaders={["Total", "Allocation", "Point"]}
+                      topRowHeaders={["Ending Balance"]}
+                      breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
+                    />
+                  </div>
                 </div>
+
                 <TotalsGrid
                   tablePadding="12px"
                   displayData={[
