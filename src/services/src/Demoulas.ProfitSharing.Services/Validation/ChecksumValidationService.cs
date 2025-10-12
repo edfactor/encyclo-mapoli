@@ -86,11 +86,6 @@ public sealed class ChecksumValidationService : IChecksumValidationService
                 kvp => Convert.ToBase64String(kvp.Value.Value) // The hash bytes
             );
 
-            var archivedValues = archived.KeyFieldsChecksumJson.ToDictionary(
-                kvp => kvp.Key,
-                kvp => kvp.Value.Key // The actual archived decimal value
-            );
-
             // 3. Validate each provided field
             var fieldResults = new Dictionary<string, FieldValidationResult>();
             var mismatchedFields = new List<string>();

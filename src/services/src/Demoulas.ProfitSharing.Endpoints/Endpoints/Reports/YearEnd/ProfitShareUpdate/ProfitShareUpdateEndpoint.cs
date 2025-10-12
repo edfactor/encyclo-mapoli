@@ -67,7 +67,7 @@ public class ProfitShareUpdateEndpoint
         {
             // Beginning Balance: PAY444 (2024) beginning balance is compared against PAY443 (2023) ending balance
             // The validation service looks for "PAY444.BeginningBalance (Year 2024)" key
-            [$"PAY444.BeginningBalance (Year {req.ProfitYear})"] = response.ProfitShareUpdateTotals.BeginningBalance,
+            ["PAY443.TotalProfitSharingBalance"] = response.ProfitShareUpdateTotals.BeginningBalance,
 
             // Distributions: PAY444 (2024) is compared against PAY443 (2024) archived data
             ["PAY443.DistributionTotals"] = response.ProfitShareUpdateTotals.Distributions,
