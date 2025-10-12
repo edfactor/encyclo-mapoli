@@ -59,13 +59,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
 
   // Separate useEffect to handle archive=true ONLY when status changes to Complete
   useEffect(() => {
-    console.log("=== ARCHIVE USEEFFECT TRIGGERED ===");
-    console.log("shouldArchive:", shouldArchive);
-    console.log("initialSearchLoaded:", initialSearchLoaded);
-    console.log("fiscalCloseProfitYear:", fiscalCloseProfitYear);
-
     if (shouldArchive && initialSearchLoaded) {
-      console.log("=== TRIGGERING ARCHIVE REQUEST ===");
       triggerSearch(
         {
           profitYear: fiscalCloseProfitYear,

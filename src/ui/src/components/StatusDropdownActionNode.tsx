@@ -49,7 +49,6 @@ const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({ onS
     if (onSearchClicked && currentStatus === "1" && navigationObj) {
       // Auto-transition to "In Progress" (status 2)
       const autoChangeStatus = async () => {
-        console.log("=== AUTO-CHANGING STATUS FROM NOT STARTED TO IN PROGRESS ===");
         await handleStatusChange("2");
       };
       autoChangeStatus();
