@@ -47,21 +47,23 @@ We use **EF Core 9** with Oracle provider. All DB access MUST follow these patte
 
 **CRITICAL**: Use `context.UseReadOnlyContext()` for read-only ops—it auto-applies `.AsNoTracking()`. Do NOT add `.AsNoTracking()` when using `UseReadOnlyContext()`.
 
-### Query Tagging (MANDATORY)
-Always tag queries for traceability:
-- `TagWithCallSite()`: Auto file/method/line tracking (use by default)
-- `TagWith()`: Add business context (year, user, operation, ticket)
-- Combine both for maximum traceability
+### Query Tagging (Recommended)
+Tag queries for production traceability:
+- `TagWith()`: Add business context (year, user, operation, ticket) - **Required for complex operations**
+- `TagWithCallSite()`: Auto file/method/line tracking - Optional but helpful for debugging
 
 ```csharp
-// Standard query
-var data = await _context.Employees.TagWithCallSite().Where(e => e.IsActive).ToListAsync(ct);
-
-// With business context
+// Business context tagging (required for year-end, reports, etc.)
 var report = await _context.ProfitSharingRecords
-    .TagWithCallSite()
     .TagWith($"YearEnd-{year}-Calc")
     .Where(r => r.ProfitYear == year)
+    .ToListAsync(ct);
+
+// Optional: Add call site for detailed tracing
+var data = await _context.Employees
+    .TagWithCallSite()
+    .TagWith($"Report-{reportType}")
+    .Where(e => e.IsActive)
     .ToListAsync(ct);
 ```
 
@@ -72,17 +74,19 @@ var report = await _context.ProfitSharingRecords
 ### Bulk Operations (ExecuteUpdate/ExecuteDelete)
 Use EF9 bulk ops—no entity loading, single SQL, efficient:
 ```csharp
-await _context.Records.TagWithCallSite()
+await _context.Records
+    .TagWith($"BulkUpdate-Status-{year}")
     .Where(r => r.Year == year)
     .ExecuteUpdateAsync(s => s.SetProperty(r => r.Status, newStatus), ct);
 ```
 
 ### Performance Patterns
 **Read-only (preferred)**:
+**Read-only (preferred)**:
 ```csharp
 await using var ctx = await _factory.CreateDbContextAsync(ct);
 ctx.UseReadOnlyContext(); // Auto AsNoTracking
-var data = await ctx.Members.TagWithCallSite().ToListAsync(ct);
+var data = await ctx.Members.TagWith("GetMembers").ToListAsync(ct);
 ```
 
 **Projection**: Select only needed columns for DTOs
@@ -103,7 +107,6 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
     ctx.UseReadOnlyContext();
     
     var member = await ctx.Members
-        .TagWithCallSite()
         .TagWith($"GetMember-{id}")
         .FirstOrDefaultAsync(m => m.Id == id, ct);
     
@@ -111,8 +114,6 @@ public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
         ? Result<MemberDto>.Failure(Error.MemberNotFound)
         : Result<MemberDto>.Success(member.ToDto());
 }
-
-## Telemetry & Observability (MANDATORY)
 
 All FastEndpoints MUST implement comprehensive telemetry. **See [TELEMETRY_GUIDE.md](../src/ui/public/docs/TELEMETRY_GUIDE.md)** for complete reference.
 
@@ -340,7 +341,6 @@ dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitS
 - Duplicate mapping logic already covered by Mapperly profiles.
 - Hardcode environment-specific connection strings or credentials.
 - Access `DbContext`, `IProfitSharingDataContextFactory`, or any EF Core DbSet directly inside endpoint classes. (If present, refactor: move data logic into a service and have the endpoint call that service returning `Result<T>`.)
-- Write EF Core queries without `TagWithCallSite()` or `TagWith()` tags (required for production traceability).
 - Use null-coalescing operator `??` in EF Core query expressions (Oracle provider translation issue—use explicit conditionals instead).
 - Use lazy loading in EF Core (use explicit `Include()`/`ThenInclude()` instead).
 - Use synchronous EF Core methods (`FirstOrDefault`, `ToList`, etc.)—always use async variants (`FirstOrDefaultAsync`, `ToListAsync`, etc.).
