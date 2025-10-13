@@ -132,8 +132,8 @@ public class ValidationEndpointAuthorizationTests : ApiTestBase<Api.Program>
     [Description("PS-1873: User without CanViewYearEndReports should get 403 Forbidden")]
     public async Task ValidateAllocTransfers_WithoutCanViewYearEndReports_Returns403()
     {
-        // Arrange: User without required policy
-        ApiClient.CreateAndAssignTokenForClient(Role.AUDITOR);
+        // Arrange: User without required policy (BENEFICIARY_ADMINISTRATOR doesn't have CanViewYearEndReports)
+        ApiClient.CreateAndAssignTokenForClient(Role.BENEFICIARY_ADMINISTRATOR);
 
         // Act
         var request = new YearRequest { ProfitYear = TestYear };
