@@ -45,12 +45,16 @@ public sealed class GetMasterUpdateValidationEndpoint
             s.Response<MasterUpdateCrossReferenceValidationResponse>(200, "Validation data retrieved successfully");
             s.Response(404, "No archived reports found for the specified year");
             s.Response(400, $"Invalid profit year (must be between 2020 and {DateTime.UtcNow.Year + 1})");
+            s.Response(403, "Forbidden - Requires year-end report viewing permissions");
         });
-        // Group assignment removed - validation endpoints don't need group
-        Description(d =>
-        {
-            d.WithTags("Validation");
-        });
+        Group<ValidationGroup>();
+        Policies(Security.Policy.CanViewYearEndReports);
+        Description(x => x
+            .Produces<MasterUpdateCrossReferenceValidationResponse>(200)
+            .Produces(404)
+            .Produces(400)
+            .Produces(403)
+            .WithTags("Validation"));
     }
 
     public override Task<Results<Ok<MasterUpdateCrossReferenceValidationResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(
@@ -69,6 +73,24 @@ public sealed class GetMasterUpdateValidationEndpoint
                 profitYear,
                 ct);
 
+            if (result.IsSuccess && result.Value != null)
+            {
+                // Record business metrics for successful validation retrieval
+                Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                    new KeyValuePair<string, object?>("operation", "master-update-validation-retrieval"),
+                    new KeyValuePair<string, object?>("endpoint", nameof(GetMasterUpdateValidationEndpoint)),
+                    new KeyValuePair<string, object?>("profit_year", profitYear));
+
+                // Record validation metrics
+                var validationGroupCount = result.Value.ValidationGroups.Count;
+                var validGroupCount = result.Value.ValidationGroups.Count(g => g.IsValid);
+
+                Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.RecordCountsProcessed.Record(
+                    validationGroupCount,
+                    new KeyValuePair<string, object?>("record_type", "validation-groups"),
+                    new KeyValuePair<string, object?>("endpoint", nameof(GetMasterUpdateValidationEndpoint)));
+            }
+
             return result.Match<Results<Ok<MasterUpdateCrossReferenceValidationResponse>, NotFound, ProblemHttpResult>>(
                 success => TypedResults.Ok(success),
                 problemDetails =>
@@ -76,6 +98,9 @@ public sealed class GetMasterUpdateValidationEndpoint
                     // Check if this is a "not found" error (code 104)
                     if (result.Error?.Code == 104)
                     {
+                        _logger.LogWarning(
+                            "No archived reports found for profit year {ProfitYear}",
+                            profitYear);
                         return TypedResults.NotFound();
                     }
 

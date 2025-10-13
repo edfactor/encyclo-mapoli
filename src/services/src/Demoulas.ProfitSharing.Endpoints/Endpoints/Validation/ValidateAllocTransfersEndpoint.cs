@@ -50,6 +50,7 @@ public sealed class ValidateAllocTransfersEndpoint
             s.Response(403, "Forbidden - Requires appropriate role permissions");
         });
         Group<ValidationGroup>();
+        Policies(Security.Policy.CanViewYearEndReports);
         Description(x => x
             .Produces<CrossReferenceValidationGroup>(200)
             .Produces(404)
