@@ -11,17 +11,17 @@ using Microsoft.Extensions.Logging;
 namespace Demoulas.ProfitSharing.Services.Validation;
 
 /// <summary>
-/// Service for validating balance integrity rules per the Balance Reports Cross-Reference Matrix.
-/// Implements Rule 2: ALLOC + PAID ALLOC = 0 validation.
+/// Service for validating ALLOC/PAID ALLOC transfer balance integrity per the Balance Reports Cross-Reference Matrix Rule 2.
+/// Focused on allocation transfer-specific validation logic.
 /// </summary>
-public sealed class BalanceValidationService : IBalanceValidationService
+public sealed class AllocTransferValidationService : IAllocTransferValidationService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
-    private readonly ILogger<BalanceValidationService> _logger;
+    private readonly ILogger<AllocTransferValidationService> _logger;
 
-    public BalanceValidationService(
+    public AllocTransferValidationService(
         IProfitSharingDataContextFactory dataContextFactory,
-        ILogger<BalanceValidationService> logger)
+        ILogger<AllocTransferValidationService> logger)
     {
         _dataContextFactory = dataContextFactory ?? throw new ArgumentNullException(nameof(dataContextFactory));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));

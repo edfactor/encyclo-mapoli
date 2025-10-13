@@ -4,10 +4,10 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 namespace Demoulas.ProfitSharing.Common.Interfaces;
 
 /// <summary>
-/// Service for validating balance integrity rules per the Balance Reports Cross-Reference Matrix.
-/// Focuses on Rule 2 and related balance equation validations.
+/// Service for validating ALLOC/PAID ALLOC transfer balance integrity per the Balance Reports Cross-Reference Matrix Rule 2.
+/// Focused on allocation transfer-specific validation logic.
 /// </summary>
-public interface IBalanceValidationService
+public interface IAllocTransferValidationService
 {
     /// <summary>
     /// Validates that ALLOC (Incoming QDRO Beneficiary) and PAID ALLOC (Outgoing XFER Beneficiary)

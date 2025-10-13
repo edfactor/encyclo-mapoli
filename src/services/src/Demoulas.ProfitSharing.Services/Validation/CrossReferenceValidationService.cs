@@ -32,18 +32,18 @@ namespace Demoulas.ProfitSharing.Services.Validation;
 public class CrossReferenceValidationService : ICrossReferenceValidationService
 {
     private readonly IChecksumValidationService _checksumValidationService;
-    private readonly IBalanceValidationService _balanceValidationService;
+    private readonly IAllocTransferValidationService _allocTransferValidationService;
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ILogger<CrossReferenceValidationService> _logger;
 
     public CrossReferenceValidationService(
         IChecksumValidationService checksumValidationService,
-        IBalanceValidationService balanceValidationService,
+        IAllocTransferValidationService allocTransferValidationService,
         IProfitSharingDataContextFactory dataContextFactory,
         ILogger<CrossReferenceValidationService> logger)
     {
         _checksumValidationService = checksumValidationService;
-        _balanceValidationService = balanceValidationService;
+        _allocTransferValidationService = allocTransferValidationService;
         _dataContextFactory = dataContextFactory;
         _logger = logger;
     }
@@ -351,7 +351,7 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
     /// <summary>
     /// Validates that ALLOC (Incoming QDRO Beneficiary) and PAID ALLOC (Outgoing XFER Beneficiary) 
     /// transactions sum to zero, per Balance Matrix Rule 2.
-    /// Delegates to IBalanceValidationService for the actual validation logic.
+    /// Delegates to IAllocTransferValidationService for the actual validation logic.
     /// </summary>
     /// <remarks>
     /// ALLOC: ProfitCodeId = 6 (IncomingQdroBeneficiary), stored in Contribution field.
@@ -363,8 +363,8 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
         short profitYear,
         CancellationToken cancellationToken)
     {
-        // Delegate to dedicated balance validation service
-        var result = await _balanceValidationService.ValidateAllocTransfersAsync(profitYear, cancellationToken);
+        // Delegate to dedicated ALLOC transfer validation service
+        var result = await _allocTransferValidationService.ValidateAllocTransfersAsync(profitYear, cancellationToken);
 
         // Return the validation group, or a default error group if the service call failed
         if (result.IsSuccess && result.Value != null)
@@ -372,7 +372,7 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
             return result.Value;
         }
 
-        _logger.LogError("Balance validation service returned failure: {Error}", result.Error?.Description);
+        _logger.LogError("ALLOC transfer validation service returned failure: {Error}", result.Error?.Description);
 
         // Return error validation group
         return new CrossReferenceValidationGroup

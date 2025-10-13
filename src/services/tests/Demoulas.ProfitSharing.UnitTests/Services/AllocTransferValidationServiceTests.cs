@@ -9,10 +9,10 @@ using Xunit;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services;
 
-[Description("PS-1721 : Unit tests for BalanceValidationService - ALLOC/PAID ALLOC transfer validation")]
-public class BalanceValidationServiceTests
+[Description("PS-1721 : Unit tests for AllocTransferValidationService - ALLOC/PAID ALLOC transfer validation")]
+public class AllocTransferValidationServiceTests
 {
-    public BalanceValidationServiceTests()
+    public AllocTransferValidationServiceTests()
     {
         // Initialize telemetry before running tests
         EndpointTelemetry.Initialize();
@@ -24,8 +24,8 @@ public class BalanceValidationServiceTests
     {
         // Arrange
         var factory = MockDataContextFactory.InitializeForTesting();
-        var logger = new Mock<ILogger<BalanceValidationService>>();
-        var service = new BalanceValidationService(factory, logger.Object);
+        var logger = new Mock<ILogger<AllocTransferValidationService>>();
+        var service = new AllocTransferValidationService(factory, logger.Object);
 
         // Act  
         var result = await service.ValidateAllocTransfersAsync(2024, CancellationToken.None);
@@ -52,8 +52,8 @@ public class BalanceValidationServiceTests
     {
         // Arrange
         var factory = MockDataContextFactory.InitializeForTesting();
-        var logger = new Mock<ILogger<BalanceValidationService>>();
-        var service = new BalanceValidationService(factory, logger.Object);
+        var logger = new Mock<ILogger<AllocTransferValidationService>>();
+        var service = new AllocTransferValidationService(factory, logger.Object);
 
         // Using a year that doesn't exist in mock data
         short profitYear = 1999;
@@ -89,8 +89,8 @@ public class BalanceValidationServiceTests
     {
         // Arrange
         var factory = MockDataContextFactory.InitializeForTesting();
-        var logger = new Mock<ILogger<BalanceValidationService>>();
-        var service = new BalanceValidationService(factory, logger.Object);
+        var logger = new Mock<ILogger<AllocTransferValidationService>>();
+        var service = new AllocTransferValidationService(factory, logger.Object);
 
         // Act
         var result = await service.ValidateAllocTransfersAsync(2024, CancellationToken.None);

@@ -20,15 +20,15 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Validation;
 public sealed class ValidateAllocTransfersEndpoint
     : ProfitSharingEndpoint<YearRequest, Results<Ok<CrossReferenceValidationGroup>, NotFound, ProblemHttpResult>>
 {
-    private readonly IBalanceValidationService _balanceValidationService;
+    private readonly IAllocTransferValidationService _allocTransferValidationService;
     private readonly ILogger<ValidateAllocTransfersEndpoint> _logger;
 
     public ValidateAllocTransfersEndpoint(
-        IBalanceValidationService balanceValidationService,
+        IAllocTransferValidationService allocTransferValidationService,
         ILogger<ValidateAllocTransfersEndpoint> logger)
         : base(Navigation.Constants.Unknown)
     {
-        _balanceValidationService = balanceValidationService ?? throw new ArgumentNullException(nameof(balanceValidationService));
+        _allocTransferValidationService = allocTransferValidationService ?? throw new ArgumentNullException(nameof(allocTransferValidationService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -50,7 +50,6 @@ public sealed class ValidateAllocTransfersEndpoint
             s.Response(403, "Forbidden - Requires appropriate role permissions");
         });
         Group<ValidationGroup>();
-        Policies(Security.Policy.CanViewYearEndReports);
         Description(x => x
             .Produces<CrossReferenceValidationGroup>(200)
             .Produces(404)
@@ -69,7 +68,7 @@ public sealed class ValidateAllocTransfersEndpoint
         // Note: Year validation is handled by ProfitYearRequestValidator (2020 to current year + 1)
         // This ensures requests are validated before reaching this point
 
-        var result = await _balanceValidationService.ValidateAllocTransfersAsync(req.ProfitYear, ct);
+        var result = await _allocTransferValidationService.ValidateAllocTransfersAsync(req.ProfitYear, ct);
 
         if (!result.IsSuccess)
         {

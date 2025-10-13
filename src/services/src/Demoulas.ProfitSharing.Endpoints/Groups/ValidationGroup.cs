@@ -30,8 +30,9 @@ public sealed class ValidationGroup : GroupBase
                 .WithRequestTimeout(TimeSpan.FromMinutes(2))
                 .WithTags(RouteName));
 
-            // NOTE: Authorization is configured per-endpoint using Policies() rather than group-level Roles()
-            // This allows each endpoint to specify appropriate policy-based access control
+            // PS-1721: Group-level policy authorization for year-end report viewing
+            // All validation endpoints require this permission
+            ep.Policies(Policy.CanViewYearEndReports);
         });
     }
 }

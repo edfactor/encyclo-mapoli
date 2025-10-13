@@ -48,7 +48,6 @@ public sealed class GetMasterUpdateValidationEndpoint
             s.Response(403, "Forbidden - Requires year-end report viewing permissions");
         });
         Group<ValidationGroup>();
-        Policies(Security.Policy.CanViewYearEndReports);
         Description(x => x
             .Produces<MasterUpdateCrossReferenceValidationResponse>(200)
             .Produces(404)

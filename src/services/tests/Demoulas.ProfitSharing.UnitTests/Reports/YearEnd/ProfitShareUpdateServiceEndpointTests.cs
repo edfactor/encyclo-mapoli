@@ -25,9 +25,9 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
     public ProfitShareUpdateServiceEndpointTests()
     {
         IProfitShareUpdateService svc = ServiceProvider?.GetRequiredService<IProfitShareUpdateService>()!;
-        IChecksumValidationService checksumSvc = ServiceProvider?.GetRequiredService<IChecksumValidationService>()!;
+        ICrossReferenceValidationService crossRefSvc = ServiceProvider?.GetRequiredService<ICrossReferenceValidationService>()!;
         ILogger<ProfitShareUpdateEndpoint> logger = ServiceProvider?.GetRequiredService<ILogger<ProfitShareUpdateEndpoint>>()!;
-        _endpoint = new ProfitShareUpdateEndpoint(svc, checksumSvc, logger);
+        _endpoint = new ProfitShareUpdateEndpoint(svc, crossRefSvc, logger);
     }
 
     [Fact(DisplayName = "Unauthorized")]

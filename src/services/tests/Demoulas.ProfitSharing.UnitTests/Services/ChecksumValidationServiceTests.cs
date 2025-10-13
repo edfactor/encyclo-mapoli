@@ -21,16 +21,14 @@ namespace Demoulas.ProfitSharing.UnitTests.Services;
 public class ChecksumValidationServiceTests
 {
     private readonly ScenarioDataContextFactory _scenarioFactory;
-    private readonly Mock<IBalanceValidationService> _mockBalanceValidationService;
     private readonly Mock<ILogger<ChecksumValidationService>> _mockLogger;
     private readonly ChecksumValidationService _service;
 
     public ChecksumValidationServiceTests()
     {
         _scenarioFactory = new ScenarioDataContextFactory();
-        _mockBalanceValidationService = new Mock<IBalanceValidationService>();
         _mockLogger = new Mock<ILogger<ChecksumValidationService>>();
-        _service = new ChecksumValidationService(_scenarioFactory, _mockBalanceValidationService.Object, _mockLogger.Object);
+        _service = new ChecksumValidationService(_scenarioFactory, _mockLogger.Object);
     }
 
     [Fact]
@@ -423,39 +421,4 @@ public class ChecksumValidationServiceTests
         result.Error!.Code.ShouldBe(900);
         result.Error.Description.ShouldContain("Failed to validate checksums");
     }
-
-    #region ALLOC Transfer Validation Delegation Tests
-
-    [Fact]
-    [Description("PS-1721 : Constructor requires IBalanceValidationService dependency")]
-    public void Constructor_NullBalanceValidationService_ThrowsArgumentNullException()
-    {
-        // Arrange & Act & Assert
-        Should.Throw<ArgumentNullException>(() =>
-            new ChecksumValidationService(
-                _scenarioFactory,
-                null!, // Null IBalanceValidationService
-                _mockLogger.Object))
-            .ParamName.ShouldBe("balanceValidationService");
-    }
-
-    [Fact]
-    [Description("PS-1721 : ChecksumValidationService properly injects IBalanceValidationService")]
-    public void Constructor_ValidDependencies_CreatesServiceSuccessfully()
-    {
-        // Arrange
-        var mockBalanceService = new Mock<IBalanceValidationService>();
-        var mockLogger = new Mock<ILogger<ChecksumValidationService>>();
-
-        // Act - Constructor should not throw
-        var service = new ChecksumValidationService(
-            _scenarioFactory,
-            mockBalanceService.Object,
-            mockLogger.Object);
-
-        // Assert
-        service.ShouldNotBeNull();
-    }
-
-    #endregion
 }
