@@ -67,9 +67,19 @@ public sealed class ProfitDetailReversalsEndpoint: ProfitSharingEndpoint<IdsRequ
             // Convert Result<bool> to proper HTTP response
             return result.Match<Results<Ok<IdsResponse>, NotFound, ProblemHttpResult>>(
                 success => TypedResults.Ok(new IdsResponse { Ids = req.Ids ?? Array.Empty<int>()}),
-                error => error.Detail == Error.EntityNotFound("Profit details").Description 
-                    ? TypedResults.NotFound() 
-                    : TypedResults.Problem(error.Detail));
+                error => 
+                {
+                    // Check if this is a validation error about profit details not being found
+                    if (error.Detail == "Validation error" && 
+                        error.Extensions.TryGetValue("errors", out var errorsObj) &&
+                        errorsObj is Dictionary<string, string[]> validationErrors &&
+                        validationErrors.TryGetValue("profitDetailIds", out var messages) &&
+                        messages.Any(msg => msg.StartsWith("Profit details not found for IDs:")))
+                    {
+                        return TypedResults.NotFound();
+                    }
+                    return TypedResults.Problem(error.Detail);
+                });
         });
     }
 }
