@@ -70,10 +70,20 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
               </th>
 
               {/* Contributions */}
-              <th className="px-3 py-2 text-right text-sm font-semibold">Contributions</th>
+              <th className="px-3 py-2 text-right text-sm font-semibold">
+                <div className="flex items-center justify-end gap-1">
+                  <span>Contributions</span>
+                  {renderHeaderValidationIcon("TotalContributions")}
+                </div>
+              </th>
 
               {/* Earnings */}
-              <th className="px-3 py-2 text-right text-sm font-semibold">Earnings</th>
+              <th className="px-3 py-2 text-right text-sm font-semibold">
+                <div className="flex items-center justify-end gap-1">
+                  <span>Earnings</span>
+                  {renderHeaderValidationIcon("TotalEarnings")}
+                </div>
+              </th>
 
               {/* Earnings2 */}
               <th className="px-3 py-2 text-right text-sm font-semibold">Earnings2</th>
@@ -82,7 +92,7 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
               <th className="px-3 py-2 text-right text-sm font-semibold">
                 <div className="flex items-center justify-end gap-1">
                   <span>Forfeitures</span>
-                  {renderHeaderValidationIcon("ForfeitureTotals")}
+                  {renderHeaderValidationIcon("TotalForfeitures")}
                 </div>
               </th>
 
@@ -127,7 +137,7 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
               <td className="px-3 py-2 text-right">{numberToCurrency(totals.allocations || 0)}</td>
               <td className="px-3 py-2 text-right"></td>
               <td className="px-3 py-2 text-right"></td>
-              <td className="px-3 py-2 text-right">{numberToCurrency(0)}</td>
+              <td className="px-3 py-2 text-right">{numberToCurrency(totals.maxPointsTotal || 0)}</td>
               <td className="px-3 py-2 text-right"></td>
               <td className="px-3 py-2 text-right">{numberToCurrency(totals.paidAllocations || 0)}</td>
               <td className="px-3 py-2 text-right">
@@ -188,8 +198,78 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
         </div>
       )}
 
+      {/* Contributions Validation Popup */}
+      {openValidationField === "TotalContributions" && getFieldValidation("TotalContributions") && (
+        <div className="fixed left-1/2 top-1/2 z-[1000] max-h-[300px] w-[350px] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded border border-gray-300 bg-white shadow-lg">
+          <div className="p-2 px-4 pb-4">
+            <Typography
+              variant="subtitle2"
+              sx={{ p: 1 }}>
+              Contributions
+            </Typography>
+            <table className="w-full border-collapse text-[0.95rem]">
+              <thead>
+                <tr>
+                  <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">Report</th>
+                  <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
+                  <td className="border-b border-gray-100 px-2 py-1 text-right">
+                    {numberToCurrency(getFieldValidation("PAY443.TotalContributions")!.currentValue || 0)}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
+                  <td className="px-2 py-1 text-right">
+                    {numberToCurrency(getFieldValidation("PAY443.TotalContributions")!.expectedValue || 0)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Earnings Validation Popup */}
+      {openValidationField === "TotalEarnings" && getFieldValidation("TotalEarnings") && (
+        <div className="fixed left-1/2 top-1/2 z-[1000] max-h-[300px] w-[350px] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded border border-gray-300 bg-white shadow-lg">
+          <div className="p-2 px-4 pb-4">
+            <Typography
+              variant="subtitle2"
+              sx={{ p: 1 }}>
+              Earnings
+            </Typography>
+            <table className="w-full border-collapse text-[0.95rem]">
+              <thead>
+                <tr>
+                  <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">Report</th>
+                  <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
+                  <td className="border-b border-gray-100 px-2 py-1 text-right">
+                    {numberToCurrency(getFieldValidation("PAY443.TotalEarnings")!.currentValue || 0)}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
+                  <td className="px-2 py-1 text-right">
+                    {numberToCurrency(getFieldValidation("PAY443.TotalEarnings")!.expectedValue || 0)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {/* Forfeitures Validation Popup */}
-      {openValidationField === "ForfeitureTotals" && getFieldValidation("ForfeitureTotals") && (
+      {openValidationField === "TotalForfeitures" && getFieldValidation("TotalForfeitures") && (
         <div className="fixed left-1/2 top-1/2 z-[1000] max-h-[300px] w-[350px] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded border border-gray-300 bg-white shadow-lg">
           <div className="p-2 px-4 pb-4">
             <Typography
@@ -208,13 +288,13 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
                 <tr>
                   <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
                   <td className="border-b border-gray-100 px-2 py-1 text-right">
-                    {numberToCurrency(getFieldValidation("ForfeitureTotals")!.currentValue || 0)}
+                    {numberToCurrency(getFieldValidation("PAY443.TotalForfeitures")!.currentValue || 0)}
                   </td>
                 </tr>
                 <tr>
                   <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
                   <td className="px-2 py-1 text-right">
-                    {numberToCurrency(getFieldValidation("ForfeitureTotals")!.expectedValue || 0)}
+                    {numberToCurrency(getFieldValidation("PAY443.TotalForfeitures")!.expectedValue || 0)}
                   </td>
                 </tr>
               </tbody>
