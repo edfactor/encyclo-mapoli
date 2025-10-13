@@ -377,11 +377,8 @@ const ProfitShareEditUpdate = () => {
 
   // Helper to render validation icon with popup for a specific field (legacy - replaced by renderValidationIconInGrid)
   const renderValidationIcon = (fieldKey: string, fieldDisplayName: string) => {
-    console.log("renderValidationIcon called for:", fieldKey, fieldDisplayName);
     const validation = getFieldValidation(fieldKey);
-    console.log("Validation result for", fieldKey, ":", validation);
     if (!validation) {
-      console.log("No validation found, returning null for:", fieldKey);
       return null;
     }
 
@@ -527,24 +524,14 @@ const ProfitShareEditUpdate = () => {
             (profitSharingUpdate.profitShareUpdateTotals.allocations || 0) +
             (profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0)
         }
-      : undefined,
-    onValidationLoaded: (data) => {
-      console.log("✅ Checksum validation loaded successfully:", data);
-      console.log("  - Total validation groups:", data?.validationGroups?.length || 0);
-    },
-    onError: (error) => {
-      console.error("❌ Checksum validation error:", error);
-    }
+      : undefined
   });
 
   // Helper to render validation icon positioned absolutely in a TotalsGrid (like State Taxes pattern)
   // IMPORTANT: Must be declared AFTER getFieldValidation helper
   const renderValidationIconInGrid = (fieldKey: string, fieldDisplayName: string) => {
-    console.log("renderValidationIconInGrid called for:", fieldKey, fieldDisplayName);
     const validation = getFieldValidation(fieldKey);
-    console.log("Validation result for", fieldKey, ":", validation);
     if (!validation) {
-      console.log("No validation found, returning null for:", fieldKey);
       return null;
     }
 
@@ -801,11 +788,7 @@ const ProfitShareEditUpdate = () => {
                       breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
                     />
                     {(() => {
-                      console.log("=== BEGINNING BALANCE ICON CHECK ===");
-                      console.log("validationResponse exists?", !!validationResponse);
                       const validation = getFieldValidation("TotalProfitSharingBalance");
-                      console.log("validation result:", validation);
-                      console.log("Should show icon?", !!validationResponse && !!validation);
                       return (
                         validationResponse &&
                         validation && (
@@ -841,15 +824,7 @@ const ProfitShareEditUpdate = () => {
                                           PAY444 (Current)
                                         </td>
                                         <td className="border-b border-gray-100 px-2 py-1 text-right">
-                                          {(() => {
-                                            console.log("=== BEGINNING BALANCE VALUES ===");
-                                            console.log("validation object:", validation);
-                                            console.log("currentValue:", validation.currentValue);
-                                            console.log("expectedValue:", validation.expectedValue);
-                                            console.log("reportCode:", validation.reportCode);
-                                            console.log("fieldName:", validation.fieldName);
-                                            return numberToCurrency(validation.currentValue || 0);
-                                          })()}
+                                          {numberToCurrency(validation.currentValue || 0)}
                                         </td>
                                       </tr>
                                       <tr>
