@@ -521,9 +521,10 @@ const ProfitShareEditUpdate = () => {
           EarningsTotals: profitSharingUpdate.profitShareUpdateTotals.earnings,
           IncomingAllocations: profitSharingUpdate.profitShareUpdateTotals.allocations,
           OutgoingAllocations: profitSharingUpdate.profitShareUpdateTotals.paidAllocations,
-          // NetAllocTransfer is calculated field: allocations - paidAllocations
+          // NetAllocTransfer is calculated field: allocations + paidAllocations
+          // Note: paidAllocations is already stored as a NEGATIVE value in the database
           NetAllocTransfer:
-            (profitSharingUpdate.profitShareUpdateTotals.allocations || 0) -
+            (profitSharingUpdate.profitShareUpdateTotals.allocations || 0) +
             (profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0)
         }
       : undefined,
