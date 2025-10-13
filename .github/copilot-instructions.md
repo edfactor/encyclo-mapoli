@@ -7,7 +7,7 @@
   - `src/services/` - .NET 9 multi-project solution `Demoulas.ProfitSharing.slnx` (FastEndpoints, EF Core 9 + Oracle, Aspire, Serilog, RabbitMQ, Mapperly, Shouldly)
     - Hosted using **.NET Aspire** (`Demoulas.ProfitSharing.AppHost`) - do not create ad-hoc hosts
     - **Start app**: `aspire run` from project root
-    - [Aspire docs](https://github.com/dotnet/docs-aspire/blob/main/docs/cli/overview.md)
+  - Aspire docs: https://github.com/dotnet/docs-aspire/blob/main/docs/cli/overview.md
   - `src/ui/` - Vite + React + TypeScript + Tailwind + Redux Toolkit + `smart-ui-library`
 - **Database**: Oracle 19. EF Core migrations via `ProfitSharingDbContext`; CLI utility `Demoulas.ProfitSharing.Data.Cli` for schema ops
 - **Cross-cutting**: Central package mgmt (`Directory.Packages.props`), shared build config (`Directory.Build.props`), global SDK pin (`global.json`)
@@ -105,6 +105,17 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
   - IMPORTANT: Avoid using the null-coalescing operator `??` inside expressions that will be translated by Entity Framework Core into SQL. The Oracle EF Core provider can fail with `??` in queries. Use explicit conditional projection instead.
 - XML doc comments for public & internal APIs.
 
+### Project-specific Conventions
+
+These conventions are important project-wide rules. Follow them in addition to the coding style above:
+
+- Public methods use PascalCase naming
+- Private fields start with underscore (_)
+- Use Task/Task<T> or ValueTask/ValueTask<T> for asynchronous operations
+- Dependencies are injected through constructor parameters (constructor injection)
+- Use Result<T> pattern for error handling instead of throwing exceptions directly
+- Use DTOs/ViewModels for data transfer between layers
+
 ## Database & CLI
 - Add a migration (run from repo root PowerShell):
   ```pwsh
@@ -201,8 +212,12 @@ See BRANCHING_AND_WORKFLOW.md (`.github/`) for complete Git, Jira, and PR conven
 
 **Quick Summary**:
 - Always branch from `develop` (not `main`)
-- Branch naming: `<type>/PS-####-short-description`
-- Commit messages: Start with `PS-####:`
+- Branching and commit message examples:
+
+```text
+Branch example: feature/PS-1720-add-reporting-view
+Commit example: PS-1720: Add reporting view
+```
 - PR title: Start with Jira key
 - Use Atlassian MCP for all Jira/Confluence interactions
 - AI assistants: Do NOT auto-create or auto-merge PRs (human review required)
