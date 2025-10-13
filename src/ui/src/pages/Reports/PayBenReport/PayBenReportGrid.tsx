@@ -1,8 +1,8 @@
 import { RefObject, useCallback, useMemo } from "react";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { CAPTIONS } from "../../../constants";
 import { GridPaginationActions, GridPaginationState } from "../../../hooks/useGridPagination";
 import { PayBenReportResponse } from "../../../types";
-import { CAPTIONS } from "../../../constants";
 import { PayBenReportGridColumn } from "./PayBenReportGridColumns";
 
 interface PayBenReportGridProps {
@@ -54,8 +54,7 @@ const PayBenReportGrid = ({
             providedOptions={{
               rowData: data.results,
               columnDefs: columnDefs,
-              suppressMultiSort: true,
-              masterDetail: true
+              suppressMultiSort: true
             }}
           />
         </div>
