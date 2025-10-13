@@ -14,17 +14,21 @@ namespace Demoulas.ProfitSharing.Services.Validation;
 /// <summary>
 /// Service for validating archived report checksums against caller-provided field values.
 /// Detects data drift by comparing stored checksums with current values from the caller.
+/// Orchestrates cross-reference validations including balance integrity checks.
 /// </summary>
 public sealed class ChecksumValidationService : IChecksumValidationService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
+    private readonly IBalanceValidationService _balanceValidationService;
     private readonly ILogger<ChecksumValidationService> _logger;
 
     public ChecksumValidationService(
         IProfitSharingDataContextFactory dataContextFactory,
+        IBalanceValidationService balanceValidationService,
         ILogger<ChecksumValidationService> logger)
     {
         _dataContextFactory = dataContextFactory ?? throw new ArgumentNullException(nameof(dataContextFactory));
+        _balanceValidationService = balanceValidationService ?? throw new ArgumentNullException(nameof(balanceValidationService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -257,6 +261,18 @@ public sealed class ChecksumValidationService : IChecksumValidationService
             if (!earningsGroup.IsValid)
             {
                 warnings.Add($"Earnings totals mismatch - review PAY443 and PAY444 values");
+            }
+
+            // Group 5: ALLOC/PAID ALLOC Transfers (Balance Matrix Rule 2)
+            var allocTransfersGroup = await ValidateAllocTransfersGroupAsync(
+                profitYear, cancellationToken);
+            validationGroups.Add(allocTransfersGroup);
+            totalValidations += allocTransfersGroup.Validations.Count;
+            passedValidations += allocTransfersGroup.Validations.Count(v => v.IsValid);
+            failedValidations += allocTransfersGroup.Validations.Count(v => !v.IsValid);
+            if (!allocTransfersGroup.IsValid)
+            {
+                criticalIssues.Add($"CRITICAL: ALLOC/PAID ALLOC transfers do not balance to zero for year {profitYear} - Balance integrity violation");
             }
 
             // Determine overall validation status
@@ -498,6 +514,57 @@ public sealed class ChecksumValidationService : IChecksumValidationService
             Summary = summary,
             Priority = "High",
             ValidationRule = "PAY444.EARNINGS = PAY443.TotalEarnings"
+        };
+    }
+
+    /// <summary>
+    /// Validates that ALLOC (Incoming QDRO Beneficiary) and PAID ALLOC (Outgoing XFER Beneficiary) 
+    /// transactions sum to zero, per Balance Matrix Rule 2.
+    /// Delegates to IBalanceValidationService for the actual validation logic.
+    /// </summary>
+    /// <remarks>
+    /// ALLOC: ProfitCodeId = 6 (IncomingQdroBeneficiary), stored in Contribution field.
+    /// PAID ALLOC: ProfitCodeId = 5 (OutgoingXferBeneficiary), stored in Forfeiture field.
+    /// Rule: Sum(ALLOC) + Sum(PAID ALLOC) = 0
+    /// Reference: BALANCE_REPORTS_CROSS_REFERENCE_MATRIX.md - Rule 2
+    /// </remarks>
+    private async Task<CrossReferenceValidationGroup> ValidateAllocTransfersGroupAsync(
+        short profitYear,
+        CancellationToken cancellationToken)
+    {
+        // Delegate to dedicated balance validation service
+        var result = await _balanceValidationService.ValidateAllocTransfersAsync(profitYear, cancellationToken);
+
+        // Return the validation group, or a default error group if the service call failed
+        if (result.IsSuccess && result.Value != null)
+        {
+            return result.Value;
+        }
+
+        _logger.LogError("Balance validation service returned failure: {Error}", result.Error?.Description);
+
+        // Return error validation group
+        return new CrossReferenceValidationGroup
+        {
+            GroupName = "ALLOC/PAID ALLOC Transfers",
+            Description = $"Error validating ALLOC transfers for year {profitYear}",
+            IsValid = false,
+            Validations = new List<CrossReferenceValidation>
+            {
+                new CrossReferenceValidation
+                {
+                    FieldName = "NetAllocTransfer",
+                    ReportCode = "PAY444",
+                    CurrentValue = null,
+                    ExpectedValue = 0m,
+                    IsValid = false,
+                    Message = $"Service error: {result.Error?.Description ?? "Unknown error"}",
+                    Notes = "Balance validation service failed"
+                }
+            },
+            Summary = $"❌ Error validating ALLOC transfers: {result.Error?.Description ?? "Unknown error"}",
+            Priority = "Critical",
+            ValidationRule = "Sum(ALLOC) + Sum(PAID ALLOC) must equal 0 (Balance Matrix Rule 2)"
         };
     }
 
