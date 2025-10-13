@@ -183,13 +183,13 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
                 <tr>
                   <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
                   <td className="border-b border-gray-100 px-2 py-1 text-right">
-                    {numberToCurrency(getFieldValidation("TotalProfitSharingBalance")!.currentValue || 0)}
+                    {numberToCurrency(getFieldValidation("TotalProfitSharingBalance")?.currentValue || 0)}
                   </td>
                 </tr>
                 <tr>
                   <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
                   <td className="px-2 py-1 text-right">
-                    {numberToCurrency(getFieldValidation("TotalProfitSharingBalance")!.expectedValue || 0)}
+                    {numberToCurrency(getFieldValidation("TotalProfitSharingBalance")?.expectedValue || 0)}
                   </td>
                 </tr>
               </tbody>
@@ -218,13 +218,13 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
                 <tr>
                   <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
                   <td className="border-b border-gray-100 px-2 py-1 text-right">
-                    {numberToCurrency(getFieldValidation("PAY443.TotalContributions")!.currentValue || 0)}
+                    {numberToCurrency(getFieldValidation("PAY443.TotalContributions")?.currentValue || 0)}
                   </td>
                 </tr>
                 <tr>
                   <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
                   <td className="px-2 py-1 text-right">
-                    {numberToCurrency(getFieldValidation("PAY443.TotalContributions")!.expectedValue || 0)}
+                    {numberToCurrency(getFieldValidation("PAY443.TotalContributions")?.expectedValue || 0)}
                   </td>
                 </tr>
               </tbody>
@@ -253,13 +253,13 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
                 <tr>
                   <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
                   <td className="border-b border-gray-100 px-2 py-1 text-right">
-                    {numberToCurrency(getFieldValidation("PAY443.TotalEarnings")!.currentValue || 0)}
+                    {numberToCurrency(getFieldValidation("PAY443.TotalEarnings")?.currentValue || 0)}
                   </td>
                 </tr>
                 <tr>
                   <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
                   <td className="px-2 py-1 text-right">
-                    {numberToCurrency(getFieldValidation("PAY443.TotalEarnings")!.expectedValue || 0)}
+                    {numberToCurrency(getFieldValidation("PAY443.TotalEarnings")?.expectedValue || 0)}
                   </td>
                 </tr>
               </tbody>
@@ -288,13 +288,13 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
                 <tr>
                   <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
                   <td className="border-b border-gray-100 px-2 py-1 text-right">
-                    {numberToCurrency(getFieldValidation("PAY443.TotalForfeitures")!.currentValue || 0)}
+                    {numberToCurrency(getFieldValidation("PAY443.TotalForfeitures")?.currentValue || 0)}
                   </td>
                 </tr>
                 <tr>
                   <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
                   <td className="px-2 py-1 text-right">
-                    {numberToCurrency(getFieldValidation("PAY443.TotalForfeitures")!.expectedValue || 0)}
+                    {numberToCurrency(getFieldValidation("PAY443.TotalForfeitures")?.expectedValue || 0)}
                   </td>
                 </tr>
               </tbody>
@@ -323,13 +323,13 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
                 <tr>
                   <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
                   <td className="border-b border-gray-100 px-2 py-1 text-right">
-                    {numberToCurrency(getFieldValidation("DistributionTotals")!.currentValue || 0)}
+                    {numberToCurrency(getFieldValidation("DistributionTotals")?.currentValue || 0)}
                   </td>
                 </tr>
                 <tr>
                   <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
                   <td className="px-2 py-1 text-right">
-                    {numberToCurrency(getFieldValidation("DistributionTotals")!.expectedValue || 0)}
+                    {numberToCurrency(getFieldValidation("DistributionTotals")?.expectedValue || 0)}
                   </td>
                 </tr>
               </tbody>
@@ -359,7 +359,7 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
                   <tr>
                     <td className="border-b border-gray-100 px-2 py-1 text-left">Incoming (ALLOC - code 6)</td>
                     <td className="border-b border-gray-100 px-2 py-1 text-right">
-                      {numberToCurrency(getFieldValidation("IncomingAllocations")!.currentValue || 0)}
+                      {numberToCurrency(getFieldValidation("IncomingAllocations")?.currentValue || 0)}
                     </td>
                   </tr>
                 )}
@@ -367,22 +367,22 @@ export const MasterUpdateSummaryTable: React.FC<MasterUpdateSummaryTableProps> =
                   <tr>
                     <td className="border-b border-gray-100 px-2 py-1 text-left">Outgoing (PAID ALLOC - code 5)</td>
                     <td className="border-b border-gray-100 px-2 py-1 text-right">
-                      {numberToCurrency(getFieldValidation("OutgoingAllocations")!.currentValue || 0)}
+                      {numberToCurrency(getFieldValidation("OutgoingAllocations")?.currentValue || 0)}
                     </td>
                   </tr>
                 )}
                 <tr className="font-semibold">
                   <td className="px-2 py-1 text-left">Net Transfer (Should be $0.00)</td>
                   <td
-                    className={`px-2 py-1 text-right ${getFieldValidation("NetAllocTransfer")!.isValid ? "text-green-600" : "text-orange-600"}`}>
-                    {numberToCurrency(getFieldValidation("NetAllocTransfer")!.currentValue || 0)}
+                    className={`px-2 py-1 text-right ${getFieldValidation("NetAllocTransfer")?.isValid ? "text-green-600" : "text-orange-600"}`}>
+                    {numberToCurrency(getFieldValidation("NetAllocTransfer")?.currentValue || 0)}
                   </td>
                 </tr>
               </tbody>
             </table>
-            {getFieldValidation("NetAllocTransfer")!.message && (
+            {getFieldValidation("NetAllocTransfer")?.message && (
               <div className="mt-2 rounded bg-gray-50 p-2 text-sm">
-                <strong>Note:</strong> {getFieldValidation("NetAllocTransfer")!.message}
+                <strong>Note:</strong> {getFieldValidation("NetAllocTransfer")?.message}
               </div>
             )}
           </div>

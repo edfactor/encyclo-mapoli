@@ -488,4 +488,183 @@ describe("MasterUpdateSummaryTable", () => {
       expect(popup).toBeInTheDocument();
     });
   });
+
+  describe("Null Safety in Popups", () => {
+    it("handles null validation data gracefully in Beginning Balance popup", () => {
+      const mockGetFieldValidationWithNulls = (field: string) => {
+        if (field === "TotalProfitSharingBalance") {
+          return { isValid: false, currentValue: null, expectedValue: null, message: null };
+        }
+        return null;
+      };
+
+      const propsWithNullData = {
+        ...defaultProps,
+        getFieldValidation: mockGetFieldValidationWithNulls,
+        openValidationField: "TotalProfitSharingBalance"
+      };
+
+      render(<MasterUpdateSummaryTable {...propsWithNullData} />);
+
+      // Should render $0.00 when values are null
+      expect(screen.getAllByText("$0.00").length).toBeGreaterThan(0);
+    });
+
+    it("handles null validation data gracefully in Contributions popup", () => {
+      const mockGetFieldValidationWithNulls = (field: string) => {
+        if (field === "TotalContributions") {
+          return { isValid: false, currentValue: 50000, expectedValue: 45000, message: null };
+        }
+        // PAY443.TotalContributions returns null - this is the critical test
+        if (field === "PAY443.TotalContributions") {
+          return null;
+        }
+        return null;
+      };
+
+      const propsWithNullData = {
+        ...defaultProps,
+        getFieldValidation: mockGetFieldValidationWithNulls,
+        openValidationField: "TotalContributions"
+      };
+
+      // Should NOT throw error when rendering popup with null sub-field
+      expect(() => render(<MasterUpdateSummaryTable {...propsWithNullData} />)).not.toThrow();
+
+      // Should render $0.00 when PAY443 values are null
+      expect(screen.getAllByText("$0.00").length).toBeGreaterThan(0);
+    });
+
+    it("handles null validation data gracefully in Earnings popup", () => {
+      const mockGetFieldValidationWithNulls = (field: string) => {
+        if (field === "TotalEarnings") {
+          return { isValid: false, currentValue: 25000, expectedValue: 24000, message: null };
+        }
+        // PAY443.TotalEarnings returns null
+        if (field === "PAY443.TotalEarnings") {
+          return null;
+        }
+        return null;
+      };
+
+      const propsWithNullData = {
+        ...defaultProps,
+        getFieldValidation: mockGetFieldValidationWithNulls,
+        openValidationField: "TotalEarnings"
+      };
+
+      expect(() => render(<MasterUpdateSummaryTable {...propsWithNullData} />)).not.toThrow();
+      expect(screen.getAllByText("$0.00").length).toBeGreaterThan(0);
+    });
+
+    it("handles null validation data gracefully in Forfeitures popup", () => {
+      const mockGetFieldValidationWithNulls = (field: string) => {
+        if (field === "TotalForfeitures") {
+          return { isValid: false, currentValue: 10000, expectedValue: 9500, message: null };
+        }
+        // PAY443.TotalForfeitures returns null
+        if (field === "PAY443.TotalForfeitures") {
+          return null;
+        }
+        return null;
+      };
+
+      const propsWithNullData = {
+        ...defaultProps,
+        getFieldValidation: mockGetFieldValidationWithNulls,
+        openValidationField: "TotalForfeitures"
+      };
+
+      expect(() => render(<MasterUpdateSummaryTable {...propsWithNullData} />)).not.toThrow();
+      expect(screen.getAllByText("$0.00").length).toBeGreaterThan(0);
+    });
+
+    it("handles null validation data gracefully in Distributions popup", () => {
+      const mockGetFieldValidationWithNulls = (field: string) => {
+        if (field === "DistributionTotals") {
+          // Return null for currentValue and expectedValue to test null handling
+          return { isValid: false, currentValue: null, expectedValue: null, message: null };
+        }
+        return null;
+      };
+
+      const propsWithNullData = {
+        ...defaultProps,
+        getFieldValidation: mockGetFieldValidationWithNulls,
+        openValidationField: "DistributionTotals"
+      };
+
+      expect(() => render(<MasterUpdateSummaryTable {...propsWithNullData} />)).not.toThrow();
+      expect(screen.getAllByText("$0.00").length).toBeGreaterThan(0);
+    });
+
+    it("handles null validation data gracefully in NetAllocTransfer popup", () => {
+      const mockGetFieldValidationWithNulls = (field: string) => {
+        if (field === "NetAllocTransfer") {
+          return { isValid: true, currentValue: 0, expectedValue: 0, message: "Balanced" };
+        }
+        // IncomingAllocations and OutgoingAllocations return null
+        if (field === "IncomingAllocations" || field === "OutgoingAllocations") {
+          return null;
+        }
+        return null;
+      };
+
+      const propsWithNullData = {
+        ...defaultProps,
+        getFieldValidation: mockGetFieldValidationWithNulls,
+        openValidationField: "NetAllocTransfer"
+      };
+
+      expect(() => render(<MasterUpdateSummaryTable {...propsWithNullData} />)).not.toThrow();
+
+      // Should show net transfer value
+      expect(screen.getByText("Net Transfer (Should be $0.00)")).toBeInTheDocument();
+
+      // Should not show incoming/outgoing rows since they return null
+      expect(screen.queryByText("Incoming (ALLOC - code 6)")).not.toBeInTheDocument();
+      expect(screen.queryByText("Outgoing (PAID ALLOC - code 5)")).not.toBeInTheDocument();
+    });
+
+    it("handles completely missing validation response", () => {
+      const mockGetFieldValidationReturnsNull = () => null;
+
+      const propsWithNoValidation = {
+        ...defaultProps,
+        getFieldValidation: mockGetFieldValidationReturnsNull,
+        openValidationField: "TotalContributions"
+      };
+
+      // Should NOT render popup when getFieldValidation returns null for the field
+      const { container } = render(<MasterUpdateSummaryTable {...propsWithNoValidation} />);
+
+      const popup = container.querySelector(".fixed.left-1\\/2.top-1\\/2");
+      expect(popup).not.toBeInTheDocument();
+    });
+
+    it("handles undefined currentValue and expectedValue properties", () => {
+      const mockGetFieldValidationWithUndefined = (field: string) => {
+        if (field === "TotalProfitSharingBalance") {
+          return {
+            isValid: false,
+            currentValue: undefined,
+            expectedValue: undefined,
+            message: null
+          };
+        }
+        return null;
+      };
+
+      const propsWithUndefinedValues = {
+        ...defaultProps,
+        getFieldValidation: mockGetFieldValidationWithUndefined,
+        openValidationField: "TotalProfitSharingBalance"
+      };
+
+      render(<MasterUpdateSummaryTable {...propsWithUndefinedValues} />);
+
+      // Should render $0.00 when values are undefined
+      expect(screen.getAllByText("$0.00").length).toBeGreaterThan(0);
+    });
+  });
 });
