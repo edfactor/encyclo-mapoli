@@ -132,6 +132,19 @@ public sealed class ValidateReportChecksumEndpoint
                 result.Error?.Description ?? "Unknown error");
         }
 
-        return result.ToHttpResult(Error.EntityNotFound("Archived report"));
+        // Map Result<T> to HTTP response
+        // NotFound (404) if no archived report exists
+        // Problem (500) for other errors
+        return result.Match<Results<Ok<ChecksumValidationResponse>, NotFound, ProblemHttpResult>>(
+            v => TypedResults.Ok(v),
+            pd =>
+            {
+                // Check if this is a "not found" error (code 104)
+                if (result.Error?.Code == 104)
+                {
+                    return TypedResults.NotFound();
+                }
+                return TypedResults.Problem(pd.Detail);
+            });
     }
 }
