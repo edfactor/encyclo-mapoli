@@ -316,6 +316,35 @@ public sealed class ChecksumValidationService : IChecksumValidationService
         }
     }
 
+    /// <inheritdoc />
+    public async Task<Result<MasterUpdateCrossReferenceValidationResponse>> GetMasterUpdateArchivedValuesAsync(
+        short profitYear,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Simply call the existing validation method with empty dictionary
+            // The validation groups will contain expectedValue for each field (the archived values)
+            // The UI can use these expectedValue fields to compare against its current values
+            var emptyCurrentValues = new Dictionary<string, decimal>();
+
+            return await ValidateMasterUpdateCrossReferencesAsync(
+                profitYear,
+                emptyCurrentValues,
+                cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Error retrieving Master Update archived values for year {ProfitYear}",
+                profitYear);
+
+            return Result<MasterUpdateCrossReferenceValidationResponse>.Failure(
+                Error.Unexpected($"Failed to retrieve Master Update archived values: {ex.Message}"));
+        }
+    }
+
     /// <summary>
     /// Group 0: Validates beginning balance against archived PAY443 for SAME year.
     /// Validation Rule: PAY444.BeginningBalance (year N) should match PAY443.TotalProfitSharingBalance (archived year N)
@@ -586,15 +615,46 @@ public sealed class ChecksumValidationService : IChecksumValidationService
                 ? value
                 : null;
 
+            // Always fetch the archived/expected value, even if no current value provided
+            // This allows the UI to perform its own comparison
+            decimal? expectedValue = null;
+            DateTime? archivedAt = null;
+
+            var archived = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+                await ctx.ReportChecksums
+                    .TagWith($"GetArchivedValue-{reportCode}-{fieldName}-Year{profitYear}")
+                    .Where(r => r.ProfitYear == profitYear && r.ReportType == reportCode)
+                    .OrderByDescending(r => r.CreatedAtUtc)
+                    .FirstOrDefaultAsync(cancellationToken), cancellationToken);
+
+            if (archived != null)
+            {
+                archivedAt = archived.CreatedAtUtc.DateTime;
+                var archivedFieldData = archived.KeyFieldsChecksumJson
+                    .FirstOrDefault(kvp => kvp.Key == fieldName);
+
+                if (!string.IsNullOrEmpty(archivedFieldData.Key))
+                {
+                    expectedValue = archivedFieldData.Value.Key; // The actual archived value
+                }
+            }
+
             if (currentValue == null)
             {
+                // Return archived value even though no current value to compare against
+                // UI will use expectedValue for its own comparison
                 return new CrossReferenceValidation
                 {
                     FieldName = fieldName,
                     ReportCode = reportCode,
-                    IsValid = false,
+                    IsValid = false, // Cannot validate without current value
+                    CurrentValue = null,
+                    ExpectedValue = expectedValue,
+                    ArchivedAt = archivedAt,
                     Message = $"Current value not provided for {reportCode}.{fieldName}",
-                    Notes = "Validation skipped - no current value available"
+                    Notes = expectedValue.HasValue
+                        ? $"Archived value available: {expectedValue.Value:N2}"
+                        : "No archived value found"
                 };
             }
 
@@ -621,28 +681,7 @@ public sealed class ChecksumValidationService : IChecksumValidationService
             var checksumResponse = validationResult.Value;
             bool fieldIsValid = checksumResponse?.IsValid ?? false;
 
-            // Get expected value from archived data
-            decimal? expectedValue = null;
-            if (checksumResponse != null)
-            {
-                // Retrieve the archived report to get the actual value (not just the checksum)
-                var archived = await _dataContextFactory.UseReadOnlyContext(async ctx =>
-                    await ctx.ReportChecksums
-                        .Where(r => r.ProfitYear == profitYear && r.ReportType == reportCode)
-                        .OrderByDescending(r => r.CreatedAtUtc)
-                        .FirstOrDefaultAsync(cancellationToken), cancellationToken);
-
-                if (archived != null)
-                {
-                    var archivedFieldData = archived.KeyFieldsChecksumJson
-                        .FirstOrDefault(kvp => kvp.Key == fieldName);
-
-                    if (!string.IsNullOrEmpty(archivedFieldData.Key))
-                    {
-                        expectedValue = archivedFieldData.Value.Key; // The actual archived value
-                    }
-                }
-            }
+            // expectedValue and archivedAt already fetched above
 
             decimal? variance = expectedValue.HasValue && currentValue.HasValue
                 ? currentValue - expectedValue

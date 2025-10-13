@@ -51,7 +51,6 @@ public sealed class GetMasterUpdateValidationEndpoint
         {
             d.WithTags("Validation");
         });
-        AllowAnonymous();
     }
 
     public override Task<Results<Ok<MasterUpdateCrossReferenceValidationResponse>, NotFound, ProblemHttpResult>> ExecuteAsync(
@@ -65,13 +64,9 @@ public sealed class GetMasterUpdateValidationEndpoint
             // Note: Year validation is handled by ProfitYearRequestValidator (2020 to current year + 1)
             // This ensures requests are validated before reaching this point
 
-            // For standalone validation endpoint, pass empty dictionary
-            // This will cause validation service to compare only archived report checksums
-            var emptyCurrentValues = new Dictionary<string, decimal>();
-
-            var result = await _validationService.ValidateMasterUpdateCrossReferencesAsync(
+            // Get archived values without comparison - UI will do the comparison
+            var result = await _validationService.GetMasterUpdateArchivedValuesAsync(
                 profitYear,
-                emptyCurrentValues,
                 ct);
 
             return result.Match<Results<Ok<MasterUpdateCrossReferenceValidationResponse>, NotFound, ProblemHttpResult>>(

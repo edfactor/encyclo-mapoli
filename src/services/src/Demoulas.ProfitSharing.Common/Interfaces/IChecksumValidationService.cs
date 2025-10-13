@@ -49,4 +49,19 @@ public interface IChecksumValidationService
         short profitYear,
         Dictionary<string, decimal> currentValues,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves archived checksum values for Master Update validation without performing comparison.
+    /// Returns the expected values from archived reports (PAY443, QPAY129, QPAY066TA, etc.) so the
+    /// UI can perform its own comparison against current values.
+    /// </summary>
+    /// <param name="profitYear">The profit year to retrieve archived values for</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>
+    /// Result containing archived checksum values grouped by category with field names and expected values.
+    /// UI can compare these against current values to determine validation status.
+    /// </returns>
+    Task<Result<MasterUpdateCrossReferenceValidationResponse>> GetMasterUpdateArchivedValuesAsync(
+        short profitYear,
+        CancellationToken cancellationToken = default);
 }

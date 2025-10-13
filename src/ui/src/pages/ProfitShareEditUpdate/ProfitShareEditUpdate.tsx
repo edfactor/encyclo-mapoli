@@ -511,6 +511,22 @@ const ProfitShareEditUpdate = () => {
   } = useChecksumValidation({
     profitYear: profitYear || 0,
     autoFetch: true,
+    // Pass current values from PAY444 for client-side comparison with PAY443 archived values
+    currentValues: profitSharingUpdate?.profitShareUpdateTotals
+      ? {
+          TotalProfitSharingBalance: profitSharingUpdate.profitShareUpdateTotals.beginningBalance,
+          DistributionTotals: profitSharingUpdate.profitShareUpdateTotals.distributions,
+          ForfeitureTotals: profitSharingUpdate.profitShareUpdateTotals.forfeiture,
+          ContributionTotals: profitSharingUpdate.profitShareUpdateTotals.totalContribution,
+          EarningsTotals: profitSharingUpdate.profitShareUpdateTotals.earnings,
+          IncomingAllocations: profitSharingUpdate.profitShareUpdateTotals.allocations,
+          OutgoingAllocations: profitSharingUpdate.profitShareUpdateTotals.paidAllocations,
+          // NetAllocTransfer is calculated field: allocations - paidAllocations
+          NetAllocTransfer:
+            (profitSharingUpdate.profitShareUpdateTotals.allocations || 0) -
+            (profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0)
+        }
+      : undefined,
     onValidationLoaded: (data) => {
       console.log("✅ Checksum validation loaded successfully:", data);
       console.log("  - Total validation groups:", data?.validationGroups?.length || 0);
