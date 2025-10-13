@@ -30,8 +30,8 @@ public sealed class ValidationGroup : GroupBase
                 .WithRequestTimeout(TimeSpan.FromMinutes(2))
                 .WithTags(RouteName));
 
-            // Validation endpoints restricted to IT DevOps and Administrators
-            ep.Roles(Role.ITDEVOPS, Role.ADMINISTRATOR);
+            // NOTE: Authorization is configured per-endpoint using Policies() rather than group-level Roles()
+            // This allows each endpoint to specify appropriate policy-based access control
         });
     }
 }
