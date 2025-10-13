@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DSMAccordion, numberToCurrency, Page, setMessage, SmartModal, TotalsGrid } from "smart-ui-library";
 import StatusDropdownActionNode from "../../components/StatusDropdownActionNode";
+import { useChecksumValidation } from "../../hooks/useChecksumValidation";
 import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
 import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
 import {
@@ -33,7 +34,6 @@ import {
 } from "../../reduxstore/types";
 // usePrerequisiteNavigations now encapsulated by PrerequisiteGuard
 import PrerequisiteGuard from "../../components/PrerequisiteGuard";
-import { MasterUpdateCrossReferenceValidationResponse } from "../../types/validation/cross-reference-validation";
 import { MessageKeys, Messages } from "../../utils/messageDictonary";
 import ChangesList from "./ChangesList";
 import ProfitShareEditConfirmation from "./ProfitShareEditConfirmation";
@@ -107,8 +107,8 @@ const useRevertAction = (
 const useSaveAction = (
   setEmployeesReverted: (count: number) => void,
   setBeneficiariesReverted: (count: number) => void,
-  setEtvasReverted: (count: number) => void,
-  setValidationResponse: (response: MasterUpdateCrossReferenceValidationResponse | null) => void
+  setEtvasReverted: (count: number) => void
+  // NOTE: Removed setValidationResponse parameter - now using useChecksumValidation hook
 ) => {
   const { profitSharingEditQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const [applyMaster] = useGetMasterApplyMutation();
@@ -141,9 +141,9 @@ const useSaveAction = (
         console.log("Successfully applied changes to year end: ", payload);
         console.log("Employees affected: ", payload?.employeesEffected);
 
-        // Capture cross-reference validation if present
+        // NOTE: Removed setValidationResponse call - useChecksumValidation hook handles this
+        // Cross-reference validation will auto-refresh via the hook after save
         if (payload.crossReferenceValidation) {
-          setValidationResponse(payload.crossReferenceValidation);
           console.log("Cross-reference validation:", payload.crossReferenceValidation);
         }
 
@@ -368,124 +368,11 @@ const ProfitShareEditUpdate = () => {
   const [updatedBy, setUpdatedBy] = useState<string | null>(null);
   const [updatedTime, setUpdatedTime] = useState<string | null>(null);
 
-  // State for cross-reference validation response
-  const [validationResponse, setValidationResponse] = useState<MasterUpdateCrossReferenceValidationResponse | null>(
-    null
-  );
-
   // State for validation popup - track which field popup is open
   const [openValidationField, setOpenValidationField] = useState<string | null>(null);
 
   const handleValidationToggle = (fieldName: string) => {
     setOpenValidationField(openValidationField === fieldName ? null : fieldName);
-  };
-
-  // Helper function to find validation for a specific field
-  const getFieldValidation = (fieldKey: string) => {
-    console.log("getFieldValidation called with fieldKey:", fieldKey);
-    console.log("validationResponse:", validationResponse);
-
-    if (!validationResponse) {
-      console.log("No validation response");
-      return null;
-    }
-
-    console.log("validationGroups:", validationResponse.validationGroups);
-
-    for (const group of validationResponse.validationGroups) {
-      console.log("Checking group:", group);
-      console.log("Group validations:", group.validations);
-      const validation = group.validations.find((v) => {
-        console.log(`Comparing v.fieldName="${v.fieldName}" with fieldKey="${fieldKey}"`);
-        return v.fieldName === fieldKey;
-      });
-      if (validation) {
-        console.log("Found validation:", validation);
-        return validation;
-      }
-    }
-    console.log("No validation found for fieldKey:", fieldKey);
-    return null;
-  };
-
-  // Helper to render validation icon positioned absolutely in a TotalsGrid (like State Taxes pattern)
-  const renderValidationIconInGrid = (fieldKey: string, fieldDisplayName: string) => {
-    console.log("renderValidationIconInGrid called for:", fieldKey, fieldDisplayName);
-    const validation = getFieldValidation(fieldKey);
-    console.log("Validation result for", fieldKey, ":", validation);
-    if (!validation) {
-      console.log("No validation found, returning null for:", fieldKey);
-      return null;
-    }
-
-    return (
-      <div
-        className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
-        onClick={() => handleValidationToggle(fieldKey)}>
-        <InfoOutlinedIcon
-          className={`cursor-pointer ${validation.isValid ? "text-green-500" : "text-orange-500"}`}
-          fontSize="small"
-        />
-        {openValidationField === fieldKey && (
-          <div className="absolute left-0 top-full z-[1000] mt-1 max-h-[300px] w-[350px] overflow-auto rounded border border-gray-300 bg-white shadow-lg">
-            <div className="p-2 px-4 pb-4">
-              <Typography
-                variant="subtitle2"
-                sx={{ p: 1, fontWeight: "bold" }}>
-                {fieldDisplayName}
-              </Typography>
-              <table className="w-full border-collapse text-[0.95rem]">
-                <thead>
-                  <tr>
-                    <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">Report</th>
-                    <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td className="border-b border-gray-100 px-2 py-1 text-left">Current (PAY444)</td>
-                    <td className="border-b border-gray-100 px-2 py-1 text-right">
-                      {numberToCurrency(validation.currentValue || 0)}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="border-b border-gray-100 px-2 py-1 text-left">Expected (PAY443)</td>
-                    <td className="border-b border-gray-100 px-2 py-1 text-right">
-                      {numberToCurrency(validation.expectedValue || 0)}
-                    </td>
-                  </tr>
-                  {!validation.isValid && (validation.variance || 0) !== 0 && (
-                    <tr className="bg-orange-50">
-                      <td className="px-2 py-1 text-left font-semibold text-orange-700">Variance</td>
-                      <td className="px-2 py-1 text-right font-bold text-orange-700">
-                        {numberToCurrency(validation.variance || 0)}
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-              {validation.message && (
-                <Typography
-                  variant="caption"
-                  sx={{ mt: 1, display: "block", px: 1, color: "text.secondary" }}>
-                  {validation.message}
-                </Typography>
-              )}
-              <div className="mt-2 flex items-center justify-end gap-2 px-2">
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: validation.isValid ? "success.main" : "warning.main",
-                    fontWeight: "bold"
-                  }}>
-                  {validation.isValid ? "✓ Values Match" : "⚠ Values Mismatch"}
-                </Typography>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
   };
 
   // Helper to render validation icon with popup for a specific field (legacy - replaced by renderValidationIconInGrid)
@@ -581,8 +468,8 @@ const ProfitShareEditUpdate = () => {
   const saveAction = useSaveAction(
     setEmployeesAffected,
     setBeneficiariesAffected,
-    setEtvasAffected,
-    setValidationResponse
+    setEtvasAffected
+    // NOTE: Removed setValidationResponse - now using useChecksumValidation hook
   );
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [pageNumberReset, setPageNumberReset] = useState(false);
@@ -614,13 +501,118 @@ const ProfitShareEditUpdate = () => {
   const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
   const isReadOnly = useReadOnlyNavigation();
 
+  // Use checksum validation hook to fetch validation data independently from any page
+  const {
+    validationData: validationResponse,
+    isLoading: isValidationLoading,
+    error: validationError,
+    refetch: refetchValidation,
+    getFieldValidation
+  } = useChecksumValidation({
+    profitYear: profitYear || 0,
+    autoFetch: true,
+    onValidationLoaded: (data) => {
+      console.log("✅ Checksum validation loaded successfully:", data);
+      console.log("  - Total validation groups:", data?.validationGroups?.length || 0);
+    },
+    onError: (error) => {
+      console.error("❌ Checksum validation error:", error);
+    }
+  });
+
+  // Helper to render validation icon positioned absolutely in a TotalsGrid (like State Taxes pattern)
+  // IMPORTANT: Must be declared AFTER getFieldValidation helper
+  const renderValidationIconInGrid = (fieldKey: string, fieldDisplayName: string) => {
+    console.log("renderValidationIconInGrid called for:", fieldKey, fieldDisplayName);
+    const validation = getFieldValidation(fieldKey);
+    console.log("Validation result for", fieldKey, ":", validation);
+    if (!validation) {
+      console.log("No validation found, returning null for:", fieldKey);
+      return null;
+    }
+
+    return (
+      <div
+        className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
+        onClick={() => handleValidationToggle(fieldKey)}>
+        <InfoOutlinedIcon
+          className={`cursor-pointer ${validation.isValid ? "text-green-500" : "text-orange-500"}`}
+          fontSize="small"
+        />
+        {openValidationField === fieldKey && (
+          <div className="absolute left-0 top-full z-[1000] mt-1 max-h-[300px] w-[350px] overflow-auto rounded border border-gray-300 bg-white shadow-lg">
+            <div className="p-2 px-4 pb-4">
+              <Typography
+                variant="subtitle2"
+                sx={{ p: 1, fontWeight: "bold" }}>
+                {fieldDisplayName}
+              </Typography>
+              <table className="w-full border-collapse text-[0.95rem]">
+                <thead>
+                  <tr>
+                    <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">Report</th>
+                    <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="border-b border-gray-100 px-2 py-1 text-left">Current (PAY444)</td>
+                    <td className="border-b border-gray-100 px-2 py-1 text-right">
+                      {numberToCurrency(validation.currentValue || 0)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="border-b border-gray-100 px-2 py-1 text-left">Expected (PAY443)</td>
+                    <td className="border-b border-gray-100 px-2 py-1 text-right">
+                      {numberToCurrency(validation.expectedValue || 0)}
+                    </td>
+                  </tr>
+                  {!validation.isValid && (validation.variance || 0) !== 0 && (
+                    <tr className="bg-orange-50">
+                      <td className="px-2 py-1 text-left font-semibold text-orange-700">Variance</td>
+                      <td className="px-2 py-1 text-right font-bold text-orange-700">
+                        {numberToCurrency(validation.variance || 0)}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+              {validation.message && (
+                <Typography
+                  variant="caption"
+                  sx={{ mt: 1, display: "block", px: 1, color: "text.secondary" }}>
+                  {validation.message}
+                </Typography>
+              )}
+              <div className="mt-2 flex items-center justify-end gap-2 px-2">
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: validation.isValid ? "success.main" : "warning.main",
+                    fontWeight: "bold"
+                  }}>
+                  {validation.isValid ? "✓ Values Match" : "⚠ Values Mismatch"}
+                </Typography>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // Extract cross-reference validation from profitSharingUpdate response
+  // NOTE: This useEffect is now DISABLED because we're using the useChecksumValidation hook
+  // which auto-fetches validation data independently based on profitYear.
+  // Keeping this commented for reference in case we need to revert.
+  /*
   useEffect(() => {
     if (profitSharingUpdate?.crossReferenceValidation) {
       setValidationResponse(profitSharingUpdate.crossReferenceValidation);
       console.log("Loaded cross-reference validation from GET response:", profitSharingUpdate.crossReferenceValidation);
     }
   }, [profitSharingUpdate]);
+  */
 
   useEffect(() => {
     const currentYear = new Date().getFullYear();
@@ -1127,7 +1119,7 @@ const ProfitShareEditUpdate = () => {
                   </div>
 
                   {/* Military/Paid Allocation */}
-                  <div className="flex-1">
+                  <div className="relative flex-1">
                     <TotalsGrid
                       displayData={[
                         [numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.military || 0)],
@@ -1138,6 +1130,73 @@ const ProfitShareEditUpdate = () => {
                       topRowHeaders={["Military/Paid Allocation"]}
                       breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
                     />
+                    {validationResponse && getFieldValidation("NetAllocTransfer") && (
+                      <div
+                        className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
+                        onClick={() => handleValidationToggle("NetAllocTransfer")}>
+                        <InfoOutlinedIcon
+                          className={`cursor-pointer ${getFieldValidation("NetAllocTransfer")!.isValid ? "text-green-500" : "text-orange-500"}`}
+                          fontSize="small"
+                        />
+                        {openValidationField === "NetAllocTransfer" && (
+                          <div className="absolute left-0 top-full z-[1000] mt-1 max-h-[300px] w-[400px] overflow-auto rounded border border-gray-300 bg-white shadow-lg">
+                            <div className="p-2 px-4 pb-4">
+                              <Typography
+                                variant="subtitle2"
+                                sx={{ p: 1 }}>
+                                ALLOC/PAID ALLOC Transfer Balance
+                              </Typography>
+                              <table className="w-full border-collapse text-[0.95rem]">
+                                <thead>
+                                  <tr>
+                                    <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">
+                                      Field
+                                    </th>
+                                    <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">
+                                      Amount
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {getFieldValidation("IncomingAllocations") && (
+                                    <tr>
+                                      <td className="border-b border-gray-100 px-2 py-1 text-left">
+                                        Incoming (ALLOC - code 6)
+                                      </td>
+                                      <td className="border-b border-gray-100 px-2 py-1 text-right">
+                                        {numberToCurrency(getFieldValidation("IncomingAllocations")!.currentValue || 0)}
+                                      </td>
+                                    </tr>
+                                  )}
+                                  {getFieldValidation("OutgoingAllocations") && (
+                                    <tr>
+                                      <td className="border-b border-gray-100 px-2 py-1 text-left">
+                                        Outgoing (PAID ALLOC - code 5)
+                                      </td>
+                                      <td className="border-b border-gray-100 px-2 py-1 text-right">
+                                        {numberToCurrency(getFieldValidation("OutgoingAllocations")!.currentValue || 0)}
+                                      </td>
+                                    </tr>
+                                  )}
+                                  <tr className="font-semibold">
+                                    <td className="px-2 py-1 text-left">Net Transfer (Should be $0.00)</td>
+                                    <td
+                                      className={`px-2 py-1 text-right ${getFieldValidation("NetAllocTransfer")!.isValid ? "text-green-600" : "text-orange-600"}`}>
+                                      {numberToCurrency(getFieldValidation("NetAllocTransfer")!.currentValue || 0)}
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                              {getFieldValidation("NetAllocTransfer")!.message && (
+                                <div className="mt-2 rounded bg-gray-50 p-2 text-sm">
+                                  <strong>Note:</strong> {getFieldValidation("NetAllocTransfer")!.message}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Ending Balance */}

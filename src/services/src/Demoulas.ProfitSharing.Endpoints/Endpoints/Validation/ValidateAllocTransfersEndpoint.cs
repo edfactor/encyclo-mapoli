@@ -42,11 +42,11 @@ public sealed class ValidateAllocTransfersEndpoint
                             "(Outgoing XFER Beneficiary, code 5) transactions sum to zero for a given profit year. " +
                             "This is Balance Matrix Rule 2 - a critical data integrity check. " +
                             "Returns detailed breakdown of incoming allocations, outgoing allocations, and net transfer amount.";
-            s.RequestParam(r => r.ProfitYear, "The profit year to validate (e.g., 2024)");
+            s.RequestParam(r => r.ProfitYear, $"The profit year to validate (must be between 2020 and {DateTime.UtcNow.Year + 1})");
             s.ExampleRequest = new YearRequest { ProfitYear = 2024 };
             s.Response<CrossReferenceValidationGroup>(200, "Validation completed. Check IsValid to determine if transfers balance.");
             s.Response(404, "No profit data found for the specified year");
-            s.Response(400, "Invalid request parameters (e.g., profit year out of range)");
+            s.Response(400, $"Invalid profit year (must be between 2020 and {DateTime.UtcNow.Year + 1})");
             s.Response(403, "Forbidden - Requires appropriate role permissions");
         });
         Group<ValidationGroup>();
@@ -65,15 +65,8 @@ public sealed class ValidateAllocTransfersEndpoint
             "Validating ALLOC/PAID ALLOC transfer balance for year {ProfitYear}",
             req.ProfitYear);
 
-        // Validate profit year is reasonable
-        if (req.ProfitYear < 1990 || req.ProfitYear > DateTime.UtcNow.Year + 1)
-        {
-            _logger.LogWarning("Invalid profit year requested: {ProfitYear}", req.ProfitYear);
-            return TypedResults.Problem(
-                title: "Invalid Profit Year",
-                detail: $"Profit year {req.ProfitYear} is out of valid range (1990-{DateTime.UtcNow.Year + 1})",
-                statusCode: 400);
-        }
+        // Note: Year validation is handled by ProfitYearRequestValidator (2020 to current year + 1)
+        // This ensures requests are validated before reaching this point
 
         var result = await _balanceValidationService.ValidateAllocTransfersAsync(req.ProfitYear, ct);
 
