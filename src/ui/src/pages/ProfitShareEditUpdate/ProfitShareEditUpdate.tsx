@@ -912,7 +912,7 @@ const ProfitShareEditUpdate = () => {
                                     <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
                                     <td className="border-b border-gray-100 px-2 py-1 text-right">
                                       {numberToCurrency(
-                                        getFieldValidation("PAY444.TotalContributions")!.currentValue || 0
+                                        getFieldValidation("PAY443.TotalContributions")?.currentValue || 0
                                       )}
                                     </td>
                                   </tr>
@@ -920,7 +920,7 @@ const ProfitShareEditUpdate = () => {
                                     <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
                                     <td className="px-2 py-1 text-right">
                                       {numberToCurrency(
-                                        getFieldValidation("PAY444.TotalContributions")!.expectedValue || 0
+                                        getFieldValidation("PAY443.TotalContributions")?.expectedValue || 0
                                       )}
                                     </td>
                                   </tr>
@@ -976,13 +976,13 @@ const ProfitShareEditUpdate = () => {
                                   <tr>
                                     <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
                                     <td className="border-b border-gray-100 px-2 py-1 text-right">
-                                      {numberToCurrency(getFieldValidation("PAY444.TotalEarnings")!.currentValue || 0)}
+                                      {numberToCurrency(getFieldValidation("PAY443.TotalEarnings")?.currentValue || 0)}
                                     </td>
                                   </tr>
                                   <tr>
                                     <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
                                     <td className="px-2 py-1 text-right">
-                                      {numberToCurrency(getFieldValidation("PAY444.TotalEarnings")!.expectedValue || 0)}
+                                      {numberToCurrency(getFieldValidation("PAY443.TotalEarnings")?.expectedValue || 0)}
                                     </td>
                                   </tr>
                                 </tbody>
@@ -1052,7 +1052,7 @@ const ProfitShareEditUpdate = () => {
                                     <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
                                     <td className="border-b border-gray-100 px-2 py-1 text-right">
                                       {numberToCurrency(
-                                        getFieldValidation("PAY444.TotalForfeitures")!.currentValue || 0
+                                        getFieldValidation("PAY443.TotalForfeitures")?.currentValue || 0
                                       )}
                                     </td>
                                   </tr>
@@ -1060,7 +1060,7 @@ const ProfitShareEditUpdate = () => {
                                     <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
                                     <td className="px-2 py-1 text-right">
                                       {numberToCurrency(
-                                        getFieldValidation("PAY444.TotalForfeitures")!.expectedValue || 0
+                                        getFieldValidation("PAY443.TotalForfeitures")?.expectedValue || 0
                                       )}
                                     </td>
                                   </tr>
@@ -1116,13 +1116,17 @@ const ProfitShareEditUpdate = () => {
                                   <tr>
                                     <td className="border-b border-gray-100 px-2 py-1 text-left">PAY444 (Current)</td>
                                     <td className="border-b border-gray-100 px-2 py-1 text-right">
-                                      {numberToCurrency(getFieldValidation("PAY444.Distributions")!.currentValue || 0)}
+                                      {numberToCurrency(
+                                        getFieldValidation("PAY443.DistributionTotals")?.currentValue || 0
+                                      )}
                                     </td>
                                   </tr>
                                   <tr>
                                     <td className="px-2 py-1 text-left">PAY443 (Expected)</td>
                                     <td className="px-2 py-1 text-right">
-                                      {numberToCurrency(getFieldValidation("PAY444.Distributions")!.expectedValue || 0)}
+                                      {numberToCurrency(
+                                        getFieldValidation("PAY443.DistributionTotals")?.expectedValue || 0
+                                      )}
                                     </td>
                                   </tr>
                                 </tbody>

@@ -1,6 +1,9 @@
 import { useEffect, useMemo } from "react";
 import { useGetMasterUpdateValidationQuery } from "../reduxstore/api/ValidationApi";
-import { MasterUpdateCrossReferenceValidationResponse, CrossReferenceValidation } from "../types/validation/cross-reference-validation";
+import {
+  CrossReferenceValidation,
+  MasterUpdateCrossReferenceValidationResponse
+} from "../types/validation/cross-reference-validation";
 
 export interface ChecksumValidationConfig {
   /** The profit year to validate */
@@ -38,22 +41,30 @@ const enrichValidationWithCurrentValues = (
   }
 
   // Map field names to current values
+  // Note: fieldName can be simple (e.g., "TotalProfitSharingBalance") or prefixed with report code (e.g., "PAY443.DistributionTotals")
+  // We need to handle both cases
+  const fieldName = apiValidation.fieldName;
   const currentValue =
-    apiValidation.fieldName === "TotalProfitSharingBalance"
+    fieldName === "TotalProfitSharingBalance"
       ? currentValues.TotalProfitSharingBalance
-      : apiValidation.fieldName === "DistributionTotals"
+      : fieldName === "DistributionTotals" ||
+          fieldName === "PAY443.DistributionTotals" ||
+          fieldName === "QPAY129.Distributions" ||
+          fieldName === "QPAY066TA.TotalDisbursements"
         ? currentValues.DistributionTotals
-        : apiValidation.fieldName === "ForfeitureTotals"
+        : fieldName === "ForfeitureTotals" ||
+            fieldName === "PAY443.TotalForfeitures" ||
+            fieldName === "QPAY129.ForfeitedAmount"
           ? currentValues.ForfeitureTotals
-          : apiValidation.fieldName === "ContributionTotals"
+          : fieldName === "ContributionTotals" || fieldName === "PAY443.TotalContributions"
             ? currentValues.ContributionTotals
-            : apiValidation.fieldName === "EarningsTotals"
+            : fieldName === "EarningsTotals" || fieldName === "PAY443.TotalEarnings"
               ? currentValues.EarningsTotals
-              : apiValidation.fieldName === "IncomingAllocations"
+              : fieldName === "IncomingAllocations"
                 ? currentValues.IncomingAllocations
-                : apiValidation.fieldName === "OutgoingAllocations"
+                : fieldName === "OutgoingAllocations"
                   ? currentValues.OutgoingAllocations
-                  : apiValidation.fieldName === "NetAllocTransfer"
+                  : fieldName === "NetAllocTransfer"
                     ? currentValues.NetAllocTransfer
                     : null;
 
