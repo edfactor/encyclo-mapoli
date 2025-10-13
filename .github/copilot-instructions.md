@@ -50,7 +50,6 @@ We use **EF Core 9** with Oracle provider. All DB access MUST follow these patte
 ### Query Tagging (Recommended)
 Tag queries for production traceability:
 - `TagWith()`: Add business context (year, user, operation, ticket) - **Required for complex operations**
-- `TagWithCallSite()`: Auto file/method/line tracking - Optional but helpful for debugging
 
 ```csharp
 // Business context tagging (required for year-end, reports, etc.)
@@ -61,7 +60,6 @@ var report = await _context.ProfitSharingRecords
 
 // Optional: Add call site for detailed tracing
 var data = await _context.Employees
-    .TagWithCallSite()
     .TagWith($"Report-{reportType}")
     .Where(e => e.IsActive)
     .ToListAsync(ct);

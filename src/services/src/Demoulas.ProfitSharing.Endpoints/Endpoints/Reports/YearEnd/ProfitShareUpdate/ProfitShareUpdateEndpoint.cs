@@ -18,17 +18,17 @@ public class ProfitShareUpdateEndpoint
         ProfitShareUpdateEndpoint.ProfitShareUpdateClassMap>
 {
     private readonly IProfitShareUpdateService _profitShareUpdateService;
-    private readonly IChecksumValidationService _checksumValidationService;
+    private readonly ICrossReferenceValidationService _crossReferenceValidationService;
     private readonly ILogger<ProfitShareUpdateEndpoint> _logger;
 
     public ProfitShareUpdateEndpoint(
         IProfitShareUpdateService profitShareUpdateService,
-        IChecksumValidationService checksumValidationService,
+        ICrossReferenceValidationService crossReferenceValidationService,
         ILogger<ProfitShareUpdateEndpoint> logger)
         : base(Navigation.Constants.ProfitShareReportEditRun)
     {
         _profitShareUpdateService = profitShareUpdateService;
-        _checksumValidationService = checksumValidationService;
+        _crossReferenceValidationService = crossReferenceValidationService;
         _logger = logger;
     }
 
@@ -80,7 +80,10 @@ public class ProfitShareUpdateEndpoint
 
             // Earnings: PAY444 (2024) is compared against PAY443 (2024) archived data
             ["PAY443.TotalEarnings"] = response.ProfitShareUpdateTotals.Earnings + response.ProfitShareUpdateTotals.Earnings2
-        }; var crossRefValidation = await _checksumValidationService.ValidateMasterUpdateCrossReferencesAsync(
+        };
+
+        // PS-1721: Now using ICrossReferenceValidationService instead of IChecksumValidationService
+        var crossRefValidation = await _crossReferenceValidationService.ValidateMasterUpdateCrossReferencesAsync(
             req.ProfitYear,
             currentValues,
             ct);

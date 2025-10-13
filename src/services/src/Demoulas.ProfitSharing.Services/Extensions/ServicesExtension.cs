@@ -103,6 +103,8 @@ public static class ServicesExtension
 
         // Validation services
         _ = builder.Services.AddScoped<IChecksumValidationService, ChecksumValidationService>();
+        _ = builder.Services.AddScoped<ICrossReferenceValidationService, CrossReferenceValidationService>();
+        _ = builder.Services.AddScoped<IArchivedValueService, ArchivedValueService>();
         _ = builder.Services.AddScoped<IBalanceValidationService, BalanceValidationService>();
 
         // Register lookup caches as singletons (they manage their own distributed cache access)

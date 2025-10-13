@@ -1,0 +1,531 @@
+using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
+using Demoulas.ProfitSharing.Common.Telemetry;
+using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Demoulas.ProfitSharing.Services.Validation;
+
+/// <summary>
+/// Service for orchestrating cross-reference validation across multiple year-end report fields.
+/// Extracted from ChecksumValidationService to improve separation of concerns (PS-1721).
+/// </summary>
+/// <remarks>
+/// This service validates that related fields across different year-end reports (PAY443, PAY444, QPAY129, QPAY066TA)
+/// maintain consistent values by comparing current values against archived checksums.
+/// 
+/// Validation is organized into logical groups:
+/// - Beginning Balance: PAY444.BeginningBalance vs PAY443.TotalProfitSharingBalance
+/// - Distributions: PAY444.DISTRIB vs PAY443, QPAY129, QPAY066TA
+/// - Forfeitures: PAY444.FORFEITS vs PAY443, QPAY129
+/// - Contributions: PAY444.CONTRIB vs PAY443
+/// - Earnings: PAY444.EARNINGS vs PAY443
+/// - ALLOC Transfers: ALLOC + PAID ALLOC must sum to zero (Balance Matrix Rule 2)
+/// </remarks>
+public class CrossReferenceValidationService : ICrossReferenceValidationService
+{
+    private readonly IChecksumValidationService _checksumValidationService;
+    private readonly IBalanceValidationService _balanceValidationService;
+    private readonly IProfitSharingDataContextFactory _dataContextFactory;
+    private readonly ILogger<CrossReferenceValidationService> _logger;
+
+    public CrossReferenceValidationService(
+        IChecksumValidationService checksumValidationService,
+        IBalanceValidationService balanceValidationService,
+        IProfitSharingDataContextFactory dataContextFactory,
+        ILogger<CrossReferenceValidationService> logger)
+    {
+        _checksumValidationService = checksumValidationService;
+        _balanceValidationService = balanceValidationService;
+        _dataContextFactory = dataContextFactory;
+        _logger = logger;
+    }
+
+    /// <summary>
+    /// Validates cross-references between Master Update (PAY444) fields and related year-end reports.
+    /// </summary>
+    /// <param name="profitYear">The profit year to validate.</param>
+    /// <param name="currentValues">Dictionary of current field values keyed by "ReportCode.FieldName".</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Comprehensive validation response with groups, statistics, and recommended actions.</returns>
+    public async Task<Result<MasterUpdateCrossReferenceValidationResponse>> ValidateMasterUpdateCrossReferencesAsync(
+        short profitYear,
+        Dictionary<string, decimal> currentValues,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger.LogInformation(
+                "Starting cross-reference validation for Master Update year {ProfitYear} with {FieldCount} current values",
+                profitYear, currentValues.Count);
+
+            // Track which reports have been validated (to avoid duplicate checks)
+            var validatedReports = new HashSet<string>();
+
+            // Execute validation groups
+            var beginningBalanceGroup = await ValidateBeginningBalanceGroupAsync(
+                profitYear, currentValues, validatedReports, cancellationToken);
+
+            var distributionsGroup = await ValidateDistributionsGroupAsync(
+                profitYear, currentValues, validatedReports, cancellationToken);
+
+            var forfeituresGroup = await ValidateForfeituresGroupAsync(
+                profitYear, currentValues, validatedReports, cancellationToken);
+
+            var contributionsGroup = await ValidateContributionsGroupAsync(
+                profitYear, currentValues, validatedReports, cancellationToken);
+
+            var earningsGroup = await ValidateEarningsGroupAsync(
+                profitYear, currentValues, validatedReports, cancellationToken);
+
+            var allocTransfersGroup = await ValidateAllocTransfersGroupAsync(
+                profitYear, cancellationToken);
+
+            // Combine all validation groups
+            var validationGroups = new List<CrossReferenceValidationGroup>
+            {
+                beginningBalanceGroup,
+                distributionsGroup,
+                forfeituresGroup,
+                contributionsGroup,
+                earningsGroup,
+                allocTransfersGroup
+            };
+
+            // Calculate statistics
+            int totalValidations = validationGroups.Sum(g => g.Validations.Count);
+            int passedValidations = validationGroups.Sum(g => g.Validations.Count(v => v.IsValid));
+            int failedValidations = totalValidations - passedValidations;
+
+            // Identify critical issues
+            var criticalIssues = validationGroups
+                .Where(g => !g.IsValid && g.Priority == "Critical")
+                .Select(g => g.GroupName)
+                .ToList();
+
+            var warnings = validationGroups
+                .Where(g => !g.IsValid && g.Priority != "Critical")
+                .Select(g => g.GroupName)
+                .ToList();
+
+            bool blockMasterUpdate = criticalIssues.Any();
+
+            _logger.LogInformation(
+                "Cross-reference validation completed for year {ProfitYear}: {PassedCount}/{TotalCount} validations passed, {CriticalCount} critical issues, Block={Block}",
+                profitYear, passedValidations, totalValidations, criticalIssues.Count, blockMasterUpdate);
+
+            var message = blockMasterUpdate
+                ? "⚠️ BLOCK Master Update submission. Critical validation failures detected."
+                : warnings.Any()
+                    ? "⚠️ Allow Master Update submission with warnings. Review non-critical issues."
+                    : "✅ All cross-reference validations passed. Safe to submit Master Update.";
+
+            var response = new MasterUpdateCrossReferenceValidationResponse
+            {
+                ProfitYear = profitYear,
+                ValidationGroups = validationGroups,
+                TotalValidations = totalValidations,
+                PassedValidations = passedValidations,
+                FailedValidations = failedValidations,
+                CriticalIssues = criticalIssues,
+                Warnings = warnings,
+                BlockMasterUpdate = blockMasterUpdate,
+                Message = message
+            };
+
+            return Result<MasterUpdateCrossReferenceValidationResponse>.Success(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error validating Master Update cross-references for year {ProfitYear}", profitYear);
+            return Result<MasterUpdateCrossReferenceValidationResponse>.Failure(
+                Error.Unexpected($"Cross-reference validation failed: {ex.Message}"));
+        }
+    }
+
+    #region Validation Groups
+
+    private async Task<CrossReferenceValidationGroup> ValidateBeginningBalanceGroupAsync(
+        short profitYear,
+        Dictionary<string, decimal> currentValues,
+        HashSet<string> validatedReports,
+        CancellationToken cancellationToken)
+    {
+        var validations = new List<CrossReferenceValidation>();
+
+        // Get archived PAY443.TotalProfitSharingBalance for SAME year (profitYear)
+        var pay443Validation = await ValidateSingleFieldAsync(
+            profitYear,
+            "PAY443",
+            "TotalProfitSharingBalance",
+            currentValues,
+            cancellationToken);
+
+        validations.Add(pay443Validation);
+        validatedReports.Add("PAY443");
+        validatedReports.Add("PAY444");
+
+        bool allValid = validations.All(v => v.IsValid);
+
+        string summary = allValid
+            ? $"✅ Beginning balance matches archived PAY443 for year {profitYear}"
+            : $"⚠️ Beginning balance does NOT match archived PAY443 for year {profitYear}";
+
+        return new CrossReferenceValidationGroup
+        {
+            GroupName = "Beginning Balance",
+            Description = $"Validates PAY444.BeginningBalance matches archived PAY443.TotalProfitSharingBalance for year {profitYear}",
+            IsValid = allValid,
+            Validations = validations,
+            Summary = summary,
+            Priority = "Critical",
+            ValidationRule = $"PAY444.BeginningBalance should equal archived PAY443.TotalProfitSharingBalance"
+        };
+    }
+
+    /// <summary>
+    /// Validates the Total Distributions cross-references (PAY443, QPAY129, QPAY066TA).
+    /// Validation Rule: PAY444.DISTRIB = PAY443.TotalDistributions = QPAY129.Distributions = QPAY066TA.TotalDisbursements
+    /// </summary>
+    private async Task<CrossReferenceValidationGroup> ValidateDistributionsGroupAsync(
+        short profitYear,
+        Dictionary<string, decimal> currentValues,
+        HashSet<string> validatedReports,
+        CancellationToken cancellationToken)
+    {
+        var validations = new List<CrossReferenceValidation>();
+
+        // PAY443.DistributionTotals
+        var pay443Validation = await ValidateSingleFieldAsync(
+            profitYear, "PAY443", "DistributionTotals", currentValues, cancellationToken);
+        validations.Add(pay443Validation);
+        validatedReports.Add("PAY443");
+
+        // QPAY129.Distributions
+        var qpay129Validation = await ValidateSingleFieldAsync(
+            profitYear, "QPAY129", "Distributions", currentValues, cancellationToken);
+        validations.Add(qpay129Validation);
+        validatedReports.Add("QPAY129");
+
+        // QPAY066TA.TotalDisbursements
+        var qpay066taValidation = await ValidateSingleFieldAsync(
+            profitYear, "QPAY066TA", "TotalDisbursements", currentValues, cancellationToken);
+        validations.Add(qpay066taValidation);
+        validatedReports.Add("QPAY066TA");
+
+        bool allValid = validations.All(v => v.IsValid);
+        string summary = allValid
+            ? "All distribution totals are in sync across PAY443, QPAY129, and QPAY066TA."
+            : "Distribution totals are OUT OF SYNC. This is a critical financial discrepancy.";
+
+        return new CrossReferenceValidationGroup
+        {
+            GroupName = "Total Distributions",
+            Description = "Cross-validation of distribution totals across year-end reports",
+            IsValid = allValid,
+            Validations = validations,
+            Summary = summary,
+            Priority = "Critical",
+            ValidationRule = "PAY444.DISTRIB = PAY443.DistributionTotals = QPAY129.Distributions = QPAY066TA.TotalDisbursements"
+        };
+    }
+
+    /// <summary>
+    /// Validates the Total Forfeitures cross-references (PAY443, QPAY129).
+    /// Validation Rule: PAY444.FORFEITS = PAY443.TotalForfeitures = QPAY129.ForfeitedAmount
+    /// </summary>
+    private async Task<CrossReferenceValidationGroup> ValidateForfeituresGroupAsync(
+        short profitYear,
+        Dictionary<string, decimal> currentValues,
+        HashSet<string> validatedReports,
+        CancellationToken cancellationToken)
+    {
+        var validations = new List<CrossReferenceValidation>();
+
+        // PAY443.TotalForfeitures
+        var pay443Validation = await ValidateSingleFieldAsync(
+            profitYear, "PAY443", "TotalForfeitures", currentValues, cancellationToken);
+        validations.Add(pay443Validation);
+        validatedReports.Add("PAY443");
+
+        // QPAY129.ForfeitedAmount
+        var qpay129Validation = await ValidateSingleFieldAsync(
+            profitYear, "QPAY129", "ForfeitedAmount", currentValues, cancellationToken);
+        validations.Add(qpay129Validation);
+        validatedReports.Add("QPAY129");
+
+        bool allValid = validations.All(v => v.IsValid);
+        string summary = allValid
+            ? "All forfeiture totals are in sync across PAY443 and QPAY129."
+            : "Forfeiture totals are OUT OF SYNC. Review PAY443 and QPAY129 data.";
+
+        return new CrossReferenceValidationGroup
+        {
+            GroupName = "Total Forfeitures",
+            Description = "Cross-validation of forfeiture totals across year-end reports",
+            IsValid = allValid,
+            Validations = validations,
+            Summary = summary,
+            Priority = "Critical",
+            ValidationRule = "PAY444.FORFEITS = PAY443.TotalForfeitures = QPAY129.ForfeitedAmount"
+        };
+    }
+
+    /// <summary>
+    /// Validates the Total Contributions cross-references (PAY443).
+    /// Validation Rule: PAY444.CONTRIB = PAY443.TotalContributions
+    /// </summary>
+    private async Task<CrossReferenceValidationGroup> ValidateContributionsGroupAsync(
+        short profitYear,
+        Dictionary<string, decimal> currentValues,
+        HashSet<string> validatedReports,
+        CancellationToken cancellationToken)
+    {
+        var validations = new List<CrossReferenceValidation>();
+
+        // PAY443.TotalContributions (if it exists - need to add to response DTO)
+        var pay443Validation = await ValidateSingleFieldAsync(
+            profitYear, "PAY443", "TotalContributions", currentValues, cancellationToken);
+        validations.Add(pay443Validation);
+        validatedReports.Add("PAY443");
+
+        bool allValid = validations.All(v => v.IsValid);
+        string summary = allValid
+            ? "Contribution totals are in sync."
+            : "Contribution totals mismatch detected.";
+
+        return new CrossReferenceValidationGroup
+        {
+            GroupName = "Total Contributions",
+            Description = "Cross-validation of contribution totals",
+            IsValid = allValid,
+            Validations = validations,
+            Summary = summary,
+            Priority = "High",
+            ValidationRule = "PAY444.CONTRIB = PAY443.TotalContributions"
+        };
+    }
+
+    /// <summary>
+    /// Validates the Total Earnings cross-references (PAY443).
+    /// Validation Rule: PAY444.EARNINGS = PAY443.TotalEarnings
+    /// </summary>
+    private async Task<CrossReferenceValidationGroup> ValidateEarningsGroupAsync(
+        short profitYear,
+        Dictionary<string, decimal> currentValues,
+        HashSet<string> validatedReports,
+        CancellationToken cancellationToken)
+    {
+        var validations = new List<CrossReferenceValidation>();
+
+        // PAY443.TotalEarnings (if it exists - need to add to response DTO)
+        var pay443Validation = await ValidateSingleFieldAsync(
+            profitYear, "PAY443", "TotalEarnings", currentValues, cancellationToken);
+        validations.Add(pay443Validation);
+        validatedReports.Add("PAY443");
+
+        bool allValid = validations.All(v => v.IsValid);
+        string summary = allValid
+            ? "Earnings totals are in sync."
+            : "Earnings totals mismatch detected.";
+
+        return new CrossReferenceValidationGroup
+        {
+            GroupName = "Total Earnings",
+            Description = "Cross-validation of earnings totals",
+            IsValid = allValid,
+            Validations = validations,
+            Summary = summary,
+            Priority = "High",
+            ValidationRule = "PAY444.EARNINGS = PAY443.TotalEarnings"
+        };
+    }
+
+    /// <summary>
+    /// Validates that ALLOC (Incoming QDRO Beneficiary) and PAID ALLOC (Outgoing XFER Beneficiary) 
+    /// transactions sum to zero, per Balance Matrix Rule 2.
+    /// Delegates to IBalanceValidationService for the actual validation logic.
+    /// </summary>
+    /// <remarks>
+    /// ALLOC: ProfitCodeId = 6 (IncomingQdroBeneficiary), stored in Contribution field.
+    /// PAID ALLOC: ProfitCodeId = 5 (OutgoingXferBeneficiary), stored in Forfeiture field.
+    /// Rule: Sum(ALLOC) + Sum(PAID ALLOC) = 0
+    /// Reference: BALANCE_REPORTS_CROSS_REFERENCE_MATRIX.md - Rule 2
+    /// </remarks>
+    private async Task<CrossReferenceValidationGroup> ValidateAllocTransfersGroupAsync(
+        short profitYear,
+        CancellationToken cancellationToken)
+    {
+        // Delegate to dedicated balance validation service
+        var result = await _balanceValidationService.ValidateAllocTransfersAsync(profitYear, cancellationToken);
+
+        // Return the validation group, or a default error group if the service call failed
+        if (result.IsSuccess && result.Value != null)
+        {
+            return result.Value;
+        }
+
+        _logger.LogError("Balance validation service returned failure: {Error}", result.Error?.Description);
+
+        // Return error validation group
+        return new CrossReferenceValidationGroup
+        {
+            GroupName = "ALLOC/PAID ALLOC Transfers",
+            Description = $"Error validating ALLOC transfers for year {profitYear}",
+            IsValid = false,
+            Validations = new List<CrossReferenceValidation>
+            {
+                new CrossReferenceValidation
+                {
+                    FieldName = "NetAllocTransfer",
+                    ReportCode = "PAY444",
+                    CurrentValue = null,
+                    ExpectedValue = 0m,
+                    IsValid = false,
+                    Message = $"Service error: {result.Error?.Description ?? "Unknown error"}",
+                    Notes = "Balance validation service failed"
+                }
+            },
+            Summary = $"❌ Error validating ALLOC transfers: {result.Error?.Description ?? "Unknown error"}",
+            Priority = "Critical",
+            ValidationRule = "Sum(ALLOC) + Sum(PAID ALLOC) must equal 0 (Balance Matrix Rule 2)"
+        };
+    }
+
+    #endregion
+
+    #region Helper Methods
+
+    /// <summary>
+    /// Validates a single field against its archived checksum.
+    /// </summary>
+    private async Task<CrossReferenceValidation> ValidateSingleFieldAsync(
+        short profitYear,
+        string reportCode,
+        string fieldName,
+        Dictionary<string, decimal> currentValues,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Look up current value using "ReportCode.FieldName" key
+            string lookupKey = $"{reportCode}.{fieldName}";
+            decimal? currentValue = currentValues.TryGetValue(lookupKey, out decimal value)
+                ? value
+                : null;
+
+            // Always fetch the archived/expected value, even if no current value provided
+            // This allows the UI to perform its own comparison
+            decimal? expectedValue = null;
+            DateTime? archivedAt = null;
+
+            var archived = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+                await ctx.ReportChecksums
+                    .TagWith($"GetArchivedValue-{reportCode}-{fieldName}-Year{profitYear}")
+                    .Where(r => r.ProfitYear == profitYear && r.ReportType == reportCode)
+                    .OrderByDescending(r => r.CreatedAtUtc)
+                    .FirstOrDefaultAsync(cancellationToken), cancellationToken);
+
+            if (archived != null)
+            {
+                archivedAt = archived.CreatedAtUtc.DateTime;
+                var archivedFieldData = archived.KeyFieldsChecksumJson
+                    .FirstOrDefault(kvp => kvp.Key == fieldName);
+
+                if (!string.IsNullOrEmpty(archivedFieldData.Key))
+                {
+                    expectedValue = archivedFieldData.Value.Key; // The actual archived value
+                }
+            }
+
+            if (currentValue == null)
+            {
+                // Return archived value even though no current value to compare against
+                // UI will use expectedValue for its own comparison
+                return new CrossReferenceValidation
+                {
+                    FieldName = fieldName,
+                    ReportCode = reportCode,
+                    IsValid = false, // Cannot validate without current value
+                    CurrentValue = null,
+                    ExpectedValue = expectedValue,
+                    ArchivedAt = archivedAt,
+                    Message = $"Current value not provided for {reportCode}.{fieldName}",
+                    Notes = expectedValue.HasValue
+                        ? $"Archived value available: {expectedValue.Value:N2}"
+                        : "No archived value found"
+                };
+            }
+
+            // Validate against archived checksum
+            var validationResult = await _checksumValidationService.ValidateReportFieldsAsync(
+                profitYear,
+                reportCode,
+                new Dictionary<string, decimal> { [fieldName] = currentValue.Value },
+                cancellationToken);
+
+            if (!validationResult.IsSuccess)
+            {
+                return new CrossReferenceValidation
+                {
+                    FieldName = fieldName,
+                    ReportCode = reportCode,
+                    IsValid = false,
+                    CurrentValue = currentValue,
+                    Message = $"Validation failed: {validationResult.Error?.Description ?? "Unknown error"}",
+                    Notes = "Error during validation"
+                };
+            }
+
+            var checksumResponse = validationResult.Value;
+            bool fieldIsValid = checksumResponse?.IsValid ?? false;
+
+            // expectedValue and archivedAt already fetched above
+
+            decimal? variance = expectedValue.HasValue && currentValue.HasValue
+                ? currentValue - expectedValue
+                : null;
+
+            string message = fieldIsValid
+                ? $"{reportCode}.{fieldName} matches archived value"
+                : $"{reportCode}.{fieldName} does NOT match archived value";
+
+            return new CrossReferenceValidation
+            {
+                FieldName = fieldName,
+                ReportCode = reportCode,
+                IsValid = fieldIsValid,
+                CurrentValue = currentValue,
+                ExpectedValue = expectedValue,
+                Variance = variance,
+                Message = message,
+                ArchivedAt = checksumResponse?.ArchivedAt
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Error validating {ReportCode}.{FieldName} for year {ProfitYear}",
+                reportCode, fieldName, profitYear);
+
+            return new CrossReferenceValidation
+            {
+                FieldName = fieldName,
+                ReportCode = reportCode,
+                IsValid = false,
+                Message = $"Validation error: {ex.Message}",
+                Notes = "Exception during validation"
+            };
+        }
+    }
+
+    #endregion
+}

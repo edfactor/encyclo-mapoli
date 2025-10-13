@@ -19,15 +19,15 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Validation;
 public sealed class GetMasterUpdateValidationEndpoint
     : ProfitSharingEndpoint<YearRequest, Results<Ok<MasterUpdateCrossReferenceValidationResponse>, NotFound, ProblemHttpResult>>
 {
-    private readonly IChecksumValidationService _validationService;
+    private readonly ICrossReferenceValidationService _crossReferenceValidationService;
     private readonly ILogger<GetMasterUpdateValidationEndpoint> _logger;
 
     public GetMasterUpdateValidationEndpoint(
-        IChecksumValidationService validationService,
+        ICrossReferenceValidationService crossReferenceValidationService,
         ILogger<GetMasterUpdateValidationEndpoint> logger)
         : base(Navigation.Constants.Unknown)
     {
-        _validationService = validationService ?? throw new ArgumentNullException(nameof(validationService));
+        _crossReferenceValidationService = crossReferenceValidationService ?? throw new ArgumentNullException(nameof(crossReferenceValidationService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -69,8 +69,10 @@ public sealed class GetMasterUpdateValidationEndpoint
             // This ensures requests are validated before reaching this point
 
             // Get archived values without comparison - UI will do the comparison
-            var result = await _validationService.GetMasterUpdateArchivedValuesAsync(
+            // PS-1721: Now using ICrossReferenceValidationService with empty dictionary to get ExpectedValues
+            var result = await _crossReferenceValidationService.ValidateMasterUpdateCrossReferencesAsync(
                 profitYear,
+                new Dictionary<string, decimal>(), // Empty dictionary - we only want archived ExpectedValues
                 ct);
 
             if (result.IsSuccess && result.Value != null)
