@@ -34,74 +34,18 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
         CancellationToken cancellationToken = default)
     {
         return await _factory.UseReadOnlyContext(async ctx =>
-    {
-        // ReadOnlyDbContext automatically handles AsSplitQuery and AsNoTracking
-        IQueryable<ProfitDetail> profitDetailsQuery = ctx.ProfitDetails;
-
-        // OPTIMIZATION: Pre-filter ProfitDetails before expensive join if we have selective criteria
-        if (req?.EndProfitYear.HasValue == true)
         {
-            profitDetailsQuery = profitDetailsQuery.Where(pd => pd.ProfitYear <= req.EndProfitYear.Value);
-        }
-
-        if (req?.PaymentType.HasValue == true)
-        {
-            // Apply payment type filter early for massive performance gain
-            var commentTypeIds = req.PaymentType switch
-            {
-                1 => new byte?[] { CommentType.Constants.Hardship.Id, CommentType.Constants.Distribution.Id },
-                2 => new byte?[] { CommentType.Constants.Payoff.Id, CommentType.Constants.Forfeit.Id },
-                3 => new byte?[] { CommentType.Constants.Rollover.Id, CommentType.Constants.RothIra.Id },
-                _ => Array.Empty<byte?>()
-            };
-
-            if (commentTypeIds.Length > 0)
-            {
-                profitDetailsQuery = profitDetailsQuery.Where(pd => commentTypeIds.Contains(pd.CommentTypeId));
-            }
-        }
-
-        var query = profitDetailsQuery
-            .Include(pd => pd.ProfitCode)
-            .Include(pd => pd.ZeroContributionReason)
-            .Include(pd => pd.TaxCode)
-            .Include(pd => pd.CommentType)
-            .TagWith("MasterInquiry: Get beneficiary with profit details")
-            .Join(ctx.Beneficiaries.Join(ctx.BeneficiaryContacts, b => b.BeneficiaryContactId, bc => bc.Id, (b, bc) => new { b, bc }),
-                pd => pd.Ssn,  // Join only on SSN - CommentRelatedPsnSuffix is just data, not a join key
-                bene => bene.bc.Ssn,
-                (pd, d) => new MasterInquiryItem
-                {
-                    ProfitDetail = pd,
-                    ProfitCode = pd.ProfitCode,
-                    ZeroContributionReason = pd.ZeroContributionReason,
-                    TaxCode = pd.TaxCode,
-                    CommentType = pd.CommentType,
-                    TransactionDate = pd.CreatedAtUtc,
-                    Member = new InquiryDemographics
-                    {
-                        Id = d.b.Id,  // Use Beneficiary.Id, not BeneficiaryContact.Id
-                        BadgeNumber = d.b.BadgeNumber,
-                        FullName = d.bc.ContactInfo.FullName != null ? d.bc.ContactInfo.FullName : d.bc.ContactInfo.LastName,
-                        FirstName = d.bc.ContactInfo.FirstName,
-                        LastName = d.bc.ContactInfo.LastName,
-                        PayFrequencyId = 0,
-                        Ssn = d.bc.Ssn,
-                        PsnSuffix = d.b.PsnSuffix,
-                        CurrentIncomeYear = 0,
-                        CurrentHoursYear = 0,
-                        IsExecutive = false,
-                        EmploymentStatusId = null,  // Beneficiaries don't have employment status
-                    }
-                });
-
-        return query;
-    }, cancellationToken);
+            return await GetBeneficiaryInquiryQueryAsync(ctx, req, cancellationToken);
+        }, cancellationToken);
     }
 
-    public IQueryable<MasterInquiryItem> GetBeneficiaryInquiryQuery(
+    /// <summary>
+    /// Builds the query for beneficiary inquiry with optional filtering using an existing context.
+    /// </summary>
+    public async Task<IQueryable<MasterInquiryItem>> GetBeneficiaryInquiryQueryAsync(
         ProfitSharingReadOnlyDbContext ctx,
-        MasterInquiryRequest? req = null)
+        MasterInquiryRequest? req = null,
+        CancellationToken cancellationToken = default)
     {
         // ReadOnlyDbContext automatically handles AsSplitQuery and AsNoTracking
         IQueryable<ProfitDetail> profitDetailsQuery = ctx.ProfitDetails;
@@ -163,7 +107,7 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
                     }
                 });
 
-        return query;
+        return await Task.FromResult(query);
     }
 
     /// <summary>

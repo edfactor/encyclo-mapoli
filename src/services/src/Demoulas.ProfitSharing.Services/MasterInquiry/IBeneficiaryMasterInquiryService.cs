@@ -23,15 +23,17 @@ public interface IBeneficiaryMasterInquiryService
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Builds the query for beneficiary inquiry using an existing context.
+    /// Builds the query for beneficiary inquiry using an existing context to avoid nested context creation.
     /// Use this overload when calling from within an existing UseReadOnlyContext scope.
     /// </summary>
     /// <param name="ctx">The existing database context to use.</param>
     /// <param name="req">Optional master inquiry request with filter criteria</param>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Queryable of beneficiary inquiry items</returns>
-    IQueryable<MasterInquiryItem> GetBeneficiaryInquiryQuery(
+    Task<IQueryable<MasterInquiryItem>> GetBeneficiaryInquiryQueryAsync(
         ProfitSharingReadOnlyDbContext ctx,
-        MasterInquiryRequest? req = null);
+        MasterInquiryRequest? req = null,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets detailed beneficiary information by ID.

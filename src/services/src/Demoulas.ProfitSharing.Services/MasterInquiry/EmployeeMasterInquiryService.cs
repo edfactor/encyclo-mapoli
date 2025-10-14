@@ -47,103 +47,37 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
 
         return await _factory.UseReadOnlyContext(async ctx =>
         {
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
-
-            // ReadOnlyDbContext automatically handles AsSplitQuery and AsNoTracking
-            // TagWith helps identify this query in profiling/logging
-            IQueryable<ProfitDetail> profitDetailsQuery = ctx.ProfitDetails;
-
-            // OPTIMIZATION: Pre-filter ProfitDetails before expensive join if we have selective criteria
-            if (req?.EndProfitYear.HasValue == true)
-            {
-                profitDetailsQuery = profitDetailsQuery.Where(pd => pd.ProfitYear <= req.EndProfitYear.Value);
-                _logger.LogDebug("Applied EndProfitYear filter: {EndProfitYear}", req.EndProfitYear.Value);
-            }
-
-            if (req?.PaymentType.HasValue == true)
-            {
-                // Apply payment type filter early for massive performance gain
-                var commentTypeIds = req.PaymentType switch
-                {
-                    1 => new byte?[] { CommentType.Constants.Hardship.Id, CommentType.Constants.Distribution.Id },
-                    2 => new byte?[] { CommentType.Constants.Payoff.Id, CommentType.Constants.Forfeit.Id },
-                    3 => new byte?[] { CommentType.Constants.Rollover.Id, CommentType.Constants.RothIra.Id },
-                    _ => Array.Empty<byte?>()
-                };
-
-                if (commentTypeIds.Length > 0)
-                {
-                    profitDetailsQuery = profitDetailsQuery.Where(pd => commentTypeIds.Contains(pd.CommentTypeId));
-                    _logger.LogDebug("Applied PaymentType filter: {PaymentType}, CommentTypeIds: {CommentTypeIds}",
-                        req.PaymentType.Value, string.Join(", ", commentTypeIds.Where(id => id.HasValue).Select(id => id!.Value)));
-                }
-            }
-
-            var query = profitDetailsQuery
-                .Include(pd => pd.ProfitCode)
-                .Include(pd => pd.ZeroContributionReason)
-                .Include(pd => pd.TaxCode)
-                .Include(pd => pd.CommentType)
-                .TagWith("EmployeeMasterInquiry: Get demographics with profit details")
-                .Join(demographics,
-                    pd => pd.Ssn,
-                    d => d.Ssn,
-                    (pd, d) => new MasterInquiryItem
-                    {
-                        ProfitDetail = pd,
-                        ProfitCode = pd.ProfitCode,
-                        ZeroContributionReason = pd.ZeroContributionReason,
-                        TaxCode = pd.TaxCode,
-                        CommentType = pd.CommentType,
-                        TransactionDate = pd.CreatedAtUtc,
-                        Member = new InquiryDemographics
-                        {
-                            Id = d.Id,
-                            BadgeNumber = d.BadgeNumber,
-                            FullName = d.ContactInfo.FullName != null ? d.ContactInfo.FullName : d.ContactInfo.LastName,
-                            FirstName = d.ContactInfo.FirstName,
-                            LastName = d.ContactInfo.LastName,
-                            PayFrequencyId = d.PayFrequencyId,
-                            Ssn = d.Ssn,
-                            PsnSuffix = 0,
-                            IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
-                            EmploymentStatusId = d.EmploymentStatusId,
-                            // Use correlated subqueries for PayProfits data
-                            // These will be optimized by Oracle when IX_PayProfits_Demographic_Year index exists
-                            CurrentIncomeYear = ctx.PayProfits
-                                .Where(pp => pp.DemographicId == d.Id && pp.ProfitYear == pd.ProfitYear)
-                                .Select(pp => pp.CurrentIncomeYear)
-                                .FirstOrDefault(),
-                            CurrentHoursYear = ctx.PayProfits
-                                .Where(pp => pp.DemographicId == d.Id && pp.ProfitYear == pd.ProfitYear)
-                                .Select(pp => pp.CurrentHoursYear)
-                                .FirstOrDefault()
-                        }
-                    });
-
-            return query;
+            return await GetEmployeeInquiryQueryAsync(ctx, req, cancellationToken);
         }, cancellationToken);
     }
 
-    public IQueryable<MasterInquiryItem> GetEmployeeInquiryQuery(
+    public async Task<IQueryable<MasterInquiryItem>> GetEmployeeInquiryQueryAsync(
         ProfitSharingReadOnlyDbContext ctx,
-        MasterInquiryRequest? req = null)
+        MasterInquiryRequest? req = null,
+        CancellationToken cancellationToken = default)
     {
-        // Use synchronous version - we already have a context
-        var demographics = _demographicReaderService.BuildDemographicQuery(ctx).Result;
+        _logger.LogDebug("Building employee inquiry query (with context). EndProfitYear: {EndProfitYear}, PaymentType: {PaymentType}, BadgeNumber: {BadgeNumber}",
+            req?.EndProfitYear, req?.PaymentType, req?.BadgeNumber);
+
+        _logger.LogInformation("TRACE: About to call BuildDemographicQuery");
+        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx).ConfigureAwait(false);
+        _logger.LogInformation("TRACE: BuildDemographicQuery completed");
 
         // ReadOnlyDbContext automatically handles AsSplitQuery and AsNoTracking
         // TagWith helps identify this query in profiling/logging
         IQueryable<ProfitDetail> profitDetailsQuery = ctx.ProfitDetails;
+        _logger.LogInformation("TRACE: Got ProfitDetails query");
 
         // OPTIMIZATION: Pre-filter ProfitDetails before expensive join if we have selective criteria
         if (req?.EndProfitYear.HasValue == true)
         {
             profitDetailsQuery = profitDetailsQuery.Where(pd => pd.ProfitYear <= req.EndProfitYear.Value);
+            _logger.LogDebug("Applied EndProfitYear filter: {EndProfitYear}", req.EndProfitYear.Value);
         }
 
         if (req?.PaymentType.HasValue == true)
         {
+            // Apply payment type filter early for massive performance gain
             var commentTypeIds = req.PaymentType switch
             {
                 1 => new byte?[] { CommentType.Constants.Hardship.Id, CommentType.Constants.Distribution.Id },
@@ -155,61 +89,55 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
             if (commentTypeIds.Length > 0)
             {
                 profitDetailsQuery = profitDetailsQuery.Where(pd => commentTypeIds.Contains(pd.CommentTypeId));
+                _logger.LogDebug("Applied PaymentType filter: {PaymentType}, CommentTypeIds: {CommentTypeIds}",
+                    req.PaymentType.Value, string.Join(", ", commentTypeIds.Where(id => id.HasValue).Select(id => id!.Value)));
             }
         }
 
-        // LEFT JOIN Demographics with ProfitDetails using composable queries
-        // EF Core 9 will optimize this into a single SQL query with proper indexes
+        _logger.LogInformation("TRACE: About to build query with Include");
         var query = profitDetailsQuery
-            .TagWith("EmployeeMasterInquiry: Demographics LEFT JOIN ProfitDetails")
-            .GroupJoin(
-                demographics,
+            .Include(pd => pd.ProfitCode)
+            .Include(pd => pd.ZeroContributionReason)
+            .Include(pd => pd.TaxCode)
+            .Include(pd => pd.CommentType)
+            .TagWith("EmployeeMasterInquiry: Get demographics with profit details")
+            .Join(demographics,
                 pd => pd.Ssn,
                 d => d.Ssn,
-                (pd, demos) => new { pd, demos })
-            .SelectMany(
-                x => x.demos.DefaultIfEmpty(),
-                (x, d) => new { x.pd, d })
-            .Where(x => x.d != null) // Ensure we have a matching demographic
-            .Select(x => new
-            {
-                pd = x.pd,
-                d = x.d!,
-                profitYear = x.pd.ProfitYear
-            })
-            .Select(x => new MasterInquiryItem
-            {
-                ProfitDetail = x.pd,
-                ProfitCode = x.pd.ProfitCode,
-                ZeroContributionReason = x.pd.ZeroContributionReason,
-                TaxCode = x.pd.TaxCode,
-                CommentType = x.pd.CommentType,
-                TransactionDate = x.pd.CreatedAtUtc,
-                Member = new InquiryDemographics
+                (pd, d) => new MasterInquiryItem
                 {
-                    Id = x.d.Id,
-                    BadgeNumber = x.d.BadgeNumber,
-                    FullName = x.d.ContactInfo.FullName != null ? x.d.ContactInfo.FullName : x.d.ContactInfo.LastName,
-                    FirstName = x.d.ContactInfo.FirstName,
-                    LastName = x.d.ContactInfo.LastName,
-                    PayFrequencyId = x.d.PayFrequencyId,
-                    Ssn = x.d.Ssn,
-                    PsnSuffix = 0,
-                    IsExecutive = x.d.PayFrequencyId == PayFrequency.Constants.Monthly,
-                    EmploymentStatusId = x.d.EmploymentStatusId,
-                    // Use correlated subqueries for PayProfits data
-                    // These will be optimized by Oracle when IX_PayProfits_Demographic_Year index exists
-                    CurrentIncomeYear = ctx.PayProfits
-                        .Where(pp => pp.DemographicId == x.d.Id && pp.ProfitYear == x.profitYear)
-                        .Select(pp => pp.CurrentIncomeYear)
-                        .FirstOrDefault(),
-                    CurrentHoursYear = ctx.PayProfits
-                        .Where(pp => pp.DemographicId == x.d.Id && pp.ProfitYear == x.profitYear)
-                        .Select(pp => pp.CurrentHoursYear)
-                        .FirstOrDefault()
-                }
-            });
+                    ProfitDetail = pd,
+                    ProfitCode = pd.ProfitCode,
+                    ZeroContributionReason = pd.ZeroContributionReason,
+                    TaxCode = pd.TaxCode,
+                    CommentType = pd.CommentType,
+                    TransactionDate = pd.CreatedAtUtc,
+                    Member = new InquiryDemographics
+                    {
+                        Id = d.Id,
+                        BadgeNumber = d.BadgeNumber,
+                        FullName = d.ContactInfo.FullName != null ? d.ContactInfo.FullName : d.ContactInfo.LastName,
+                        FirstName = d.ContactInfo.FirstName,
+                        LastName = d.ContactInfo.LastName,
+                        PayFrequencyId = d.PayFrequencyId,
+                        Ssn = d.Ssn,
+                        PsnSuffix = 0,
+                        IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
+                        EmploymentStatusId = d.EmploymentStatusId,
+                        // Use correlated subqueries for PayProfits data
+                        // These will be optimized by Oracle when IX_PayProfits_Demographic_Year index exists
+                        CurrentIncomeYear = ctx.PayProfits
+                            .Where(pp => pp.DemographicId == d.Id && pp.ProfitYear == pd.ProfitYear)
+                            .Select(pp => pp.CurrentIncomeYear)
+                            .FirstOrDefault(),
+                        CurrentHoursYear = ctx.PayProfits
+                            .Where(pp => pp.DemographicId == d.Id && pp.ProfitYear == pd.ProfitYear)
+                            .Select(pp => pp.CurrentHoursYear)
+                            .FirstOrDefault()
+                    }
+                });
 
+        _logger.LogInformation("TRACE: Query built, returning");
         return query;
     }
 

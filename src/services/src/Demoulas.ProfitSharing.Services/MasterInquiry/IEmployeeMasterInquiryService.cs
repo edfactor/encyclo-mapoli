@@ -24,14 +24,16 @@ public interface IEmployeeMasterInquiryService
 
     /// <summary>
     /// Gets a queryable collection of MasterInquiryItem for employees/demographics using an existing context.
-    /// Use this overload when calling from within an existing UseReadOnlyContext scope.
+    /// Use this overload when calling from within an existing UseReadOnlyContext scope to avoid nested context creation.
     /// </summary>
     /// <param name="ctx">The existing database context to use.</param>
     /// <param name="req">Optional request containing pre-filters to apply.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A queryable collection of employee inquiry items.</returns>
-    IQueryable<MasterInquiryItem> GetEmployeeInquiryQuery(
+    Task<IQueryable<MasterInquiryItem>> GetEmployeeInquiryQueryAsync(
         ProfitSharingReadOnlyDbContext ctx,
-        MasterInquiryRequest? req = null);
+        MasterInquiryRequest? req = null,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets detailed employee information for a specific demographic ID.

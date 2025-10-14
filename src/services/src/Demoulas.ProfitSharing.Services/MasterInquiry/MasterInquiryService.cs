@@ -76,14 +76,18 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 else
                 {
                     // Original path: Build full query for complex filters
+                    // FIXED: Pass context to avoid nested context creation deadlock
+                    _logger.LogInformation("TRACE: Building query for MemberType {MemberType}", req.MemberType);
                     IQueryable<MasterInquiryItem> query = req.MemberType switch
                     {
-                        1 => await GetMasterInquiryDemographics(req, timeoutToken),
-                        2 => await GetMasterInquiryBeneficiary(req, timeoutToken),
-                        _ => (await GetMasterInquiryDemographics(req, timeoutToken)).Union(await GetMasterInquiryBeneficiary(req, timeoutToken))
+                        1 => await GetMasterInquiryDemographics(ctx, req, timeoutToken),
+                        2 => await GetMasterInquiryBeneficiary(ctx, req, timeoutToken),
+                        _ => (await GetMasterInquiryDemographics(ctx, req, timeoutToken)).Union(await GetMasterInquiryBeneficiary(ctx, req, timeoutToken))
                     };
+                    _logger.LogInformation("TRACE: Query built for MemberType {MemberType}", req.MemberType);
 
                     query = FilterMemberQuery(req, query).TagWith("MasterInquiry: Filtered member query");
+                    _logger.LogInformation("TRACE: Query filtered");
 
                     // Get unique SSNs from the query with timeout (keep as IQueryable)
                     // EF Core 9: This will use optimized SQL for DISTINCT
@@ -91,10 +95,14 @@ public sealed class MasterInquiryService : IMasterInquiryService
                         .Select(x => x.Member.Ssn)
                         .Distinct()
                         .TagWith("MasterInquiry: Extract unique SSNs");
+                    _logger.LogInformation("TRACE: SSN query composed");
                 }
 
                 // Safety check: Log warning if SSN set might be large (for monitoring)
-                var estimatedCount = await ssnQuery.CountAsync(timeoutToken);
+                _logger.LogInformation("TRACE: About to execute CountAsync");
+                var estimatedCount = await ssnQuery.CountAsync(timeoutToken).ConfigureAwait(false);
+                _logger.LogInformation("TRACE: CountAsync completed, count={Count}", estimatedCount);
+
                 if (estimatedCount > 50000)
                 {
                     _logger.LogWarning(
@@ -102,28 +110,34 @@ public sealed class MasterInquiryService : IMasterInquiryService
                         estimatedCount, req.ProfitYear);
                 }
 
+                _logger.LogInformation("TRACE: About to call BuildDemographicQuery for duplicates");
                 var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
 
                 // Use query composition instead of .Contains() to avoid Oracle limits
                 // EF Core 9 will generate efficient JOIN or EXISTS instead of IN clause
+                _logger.LogInformation("TRACE: About to execute duplicate SSN query");
                 var duplicateSsns = await demographics
                     .Where(d => ssnQuery.Contains(d.Ssn))
                     .GroupBy(d => d.Ssn)
                     .Where(g => g.Count() > 1)
                     .Select(g => g.Key)
                     .TagWith("MasterInquiry: Find duplicate SSNs via JOIN")
-                    .ToHashSetAsync(timeoutToken);
+                    .ToHashSetAsync(timeoutToken).ConfigureAwait(false);
+                _logger.LogInformation("TRACE: Duplicate SSN query completed, count={Count}", duplicateSsns.Count);
 
                 // Materialize SSN list only when needed for exact match handling
                 var ssnList = new HashSet<int>();
                 if (estimatedCount == 0 && (req.Ssn != 0 || req.BadgeNumber != 0))
                 {
+                    _logger.LogInformation("TRACE: Calling HandleExactBadgeOrSsn for Ssn={Ssn}, Badge={Badge}", req.Ssn, req.BadgeNumber);
                     // If an exact match is found, then the bene or empl is added to the ssnList.
                     await HandleExactBadgeOrSsn(ctx, ssnList, req.BadgeNumber, req.PsnSuffix, req.Ssn, timeoutToken);
+                    _logger.LogInformation("TRACE: HandleExactBadgeOrSsn completed, ssnList.Count={Count}", ssnList.Count);
 
                     // Early return if still no results found
                     if (ssnList.Count == 0)
                     {
+                        _logger.LogInformation("TRACE: Early return - no results found");
                         return new PaginatedResponseDto<MemberDetails>(req) { Results = [], Total = 0 };
                     }
                 }
@@ -311,9 +325,10 @@ public sealed class MasterInquiryService : IMasterInquiryService
             // Use context-based overloads to avoid nested context disposal
             IQueryable<MasterInquiryItem> query = req.MemberType switch
             {
-                1 => _employeeInquiryService.GetEmployeeInquiryQuery(ctx, null),
-                2 => _beneficiaryInquiryService.GetBeneficiaryInquiryQuery(ctx, null),
-                _ => _employeeInquiryService.GetEmployeeInquiryQuery(ctx, null).Union(_beneficiaryInquiryService.GetBeneficiaryInquiryQuery(ctx, null))
+                1 => await _employeeInquiryService.GetEmployeeInquiryQueryAsync(ctx, null, cancellationToken),
+                2 => await _beneficiaryInquiryService.GetBeneficiaryInquiryQueryAsync(ctx, null, cancellationToken),
+                _ => (await _employeeInquiryService.GetEmployeeInquiryQueryAsync(ctx, null, cancellationToken))
+                    .Union(await _beneficiaryInquiryService.GetBeneficiaryInquiryQueryAsync(ctx, null, cancellationToken))
             };
 
             query = FilterMemberQuery(req, query);
@@ -369,9 +384,10 @@ public sealed class MasterInquiryService : IMasterInquiryService
             // Use context-based overloads to avoid nested context disposal
             IQueryable<MasterInquiryItem> query = req.MemberType switch
             {
-                1 => _employeeInquiryService.GetEmployeeInquiryQuery(ctx, null),
-                2 => _beneficiaryInquiryService.GetBeneficiaryInquiryQuery(ctx, null),
-                _ => _employeeInquiryService.GetEmployeeInquiryQuery(ctx, null).Union(_beneficiaryInquiryService.GetBeneficiaryInquiryQuery(ctx, null))
+                1 => await _employeeInquiryService.GetEmployeeInquiryQueryAsync(ctx, null, cancellationToken),
+                2 => await _beneficiaryInquiryService.GetBeneficiaryInquiryQueryAsync(ctx, null, cancellationToken),
+                _ => (await _employeeInquiryService.GetEmployeeInquiryQueryAsync(ctx, null, cancellationToken))
+                    .Union(await _beneficiaryInquiryService.GetBeneficiaryInquiryQueryAsync(ctx, null, cancellationToken))
             };
 
             var masterInquiryRequest = new MasterInquiryRequest
@@ -490,13 +506,20 @@ public sealed class MasterInquiryService : IMasterInquiryService
         }, cancellationToken);
     }
 
-    private async Task<IQueryable<MasterInquiryItem>> GetMasterInquiryDemographics(MasterInquiryRequest? req = null, CancellationToken cancellationToken = default)
+    private async Task<IQueryable<MasterInquiryItem>> GetMasterInquiryDemographics(
+        ProfitSharingReadOnlyDbContext ctx,
+        MasterInquiryRequest? req = null,
+        CancellationToken cancellationToken = default)
     {
-        return await _employeeInquiryService.GetEmployeeInquiryQueryAsync(req, cancellationToken);
+        return await _employeeInquiryService.GetEmployeeInquiryQueryAsync(ctx, req, cancellationToken);
     }
-    private async Task<IQueryable<MasterInquiryItem>> GetMasterInquiryBeneficiary(MasterInquiryRequest? req = null, CancellationToken cancellationToken = default)
+
+    private async Task<IQueryable<MasterInquiryItem>> GetMasterInquiryBeneficiary(
+        ProfitSharingReadOnlyDbContext ctx,
+        MasterInquiryRequest? req = null,
+        CancellationToken cancellationToken = default)
     {
-        return await _beneficiaryInquiryService.GetBeneficiaryInquiryQueryAsync(req, cancellationToken);
+        return await _beneficiaryInquiryService.GetBeneficiaryInquiryQueryAsync(ctx, req, cancellationToken);
     }
 
     private async Task<(int ssn, MemberDetails? memberDetails)> GetDemographicDetails(
