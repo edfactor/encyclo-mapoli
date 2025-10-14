@@ -17,7 +17,7 @@ describe("MasterInquiryMemberDetails", () => {
     addressZipCode: "01850",
     dateOfBirth: "1980-01-15",
     age: 45,
-    phoneNumber: "978-555-1234",
+    phoneNumber: "9785551234",
     workLocation: "Store 4",
     storeNumber: 4,
     hireDate: "2010-05-01",
@@ -61,7 +61,7 @@ describe("MasterInquiryMemberDetails", () => {
     addressZipCode: "02101",
     dateOfBirth: "1985-06-20",
     age: 40,
-    phoneNumber: "617-555-9876",
+    phoneNumber: "6175559876",
     workLocation: null,
     storeNumber: 0,
     hireDate: null,
@@ -132,7 +132,7 @@ describe("MasterInquiryMemberDetails", () => {
     expect(screen.getByText("Doe, John")).toBeInTheDocument();
     expect(screen.getByText("123 Main St")).toBeInTheDocument();
     expect(screen.getByText("Lowell, MA 01850")).toBeInTheDocument();
-    expect(screen.getByText("978-555-1234")).toBeInTheDocument();
+    expect(screen.getByText("(978) 555-1234")).toBeInTheDocument(); // Formatted phone
     expect(screen.getByText("Store 4")).toBeInTheDocument();
     expect(screen.getByText("4")).toBeInTheDocument();
 
@@ -141,7 +141,11 @@ describe("MasterInquiryMemberDetails", () => {
     expect(screen.getByText("Full Time")).toBeInTheDocument();
     expect(screen.getByText("Active")).toBeInTheDocument();
     expect(screen.getByText("M")).toBeInTheDocument();
-    expect(screen.getByText(/01\/15\/80 \(45\)/)).toBeInTheDocument(); // DOB with age
+    expect(
+      screen.getByText((_content, element) => {
+        return element?.textContent === "01/15/80 (45)";
+      })
+    ).toBeInTheDocument(); // DOB with age
     expect(screen.getByText("XXX-XX-1234")).toBeInTheDocument();
 
     // Milestone Section
@@ -171,14 +175,18 @@ describe("MasterInquiryMemberDetails", () => {
     expect(screen.getByText("Smith, Jane")).toBeInTheDocument();
     expect(screen.getByText("456 Oak Ave")).toBeInTheDocument();
     expect(screen.getByText("Boston, MA 02101")).toBeInTheDocument();
-    expect(screen.getByText("617-555-9876")).toBeInTheDocument();
+    expect(screen.getByText("(617) 555-9876")).toBeInTheDocument(); // Formatted phone
 
     // Personal Section - should NOT show employee-specific fields
     expect(screen.queryByText("Department")).not.toBeInTheDocument();
     expect(screen.queryByText("Class")).not.toBeInTheDocument();
     expect(screen.queryByText("Status")).not.toBeInTheDocument();
     expect(screen.getByText("F")).toBeInTheDocument();
-    expect(screen.getByText(/06\/20\/85 \(40\)/)).toBeInTheDocument(); // DOB with age
+    expect(
+      screen.getByText((_content, element) => {
+        return element?.textContent === "06/20/85 (40)";
+      })
+    ).toBeInTheDocument(); // DOB with age
 
     // Milestone Section - should NOT show employee-specific fields
     expect(screen.queryByText("Hire Date")).not.toBeInTheDocument();
@@ -261,7 +269,11 @@ describe("MasterInquiryMemberDetails", () => {
     );
 
     expect(screen.getByText("Terminated")).toBeInTheDocument();
-    expect(screen.getByText("12/31/23")).toBeInTheDocument(); // Termination Date
+    expect(
+      screen.getByText((_content, element) => {
+        return element?.textContent === "12/31/23";
+      })
+    ).toBeInTheDocument(); // Termination Date
     expect(screen.getByText("Retired")).toBeInTheDocument();
   });
 
@@ -342,5 +354,77 @@ describe("MasterInquiryMemberDetails", () => {
 
     // Component should still be rendered correctly
     expect(screen.getByText("Doe, John")).toBeInTheDocument();
+  });
+
+  // PS-1897: Verify phone number formatting
+  it("should format phone numbers correctly (PS-1897)", () => {
+    render(
+      <MasterInquiryMemberDetails
+        memberType={1}
+        id={1}
+        profitYear={2025}
+        memberDetails={mockEmployeeDetails}
+        isLoading={false}
+      />
+    );
+
+    expect(screen.getByText("(978) 555-1234")).toBeInTheDocument();
+  });
+
+  // PS-1897: Verify enrollment code removal
+  it("should not display enrollment codes like (1) (PS-1897)", () => {
+    const detailsWithEnrollmentCode = {
+      ...mockEmployeeDetails,
+      enrollmentId: 2 // This typically returns "Y (2)" from getEnrolledStatus
+    };
+    render(
+      <MasterInquiryMemberDetails
+        memberType={1}
+        id={1}
+        profitYear={2025}
+        memberDetails={detailsWithEnrollmentCode}
+        isLoading={false}
+      />
+    );
+
+    // Should not contain enrollment codes in parentheses
+    const enrolledText = screen.getAllByText(/Enrolled|Y|N/);
+    enrolledText.forEach((text) => {
+      expect(text.textContent).not.toMatch(/\(\d+\)/);
+    });
+  });
+
+  // PS-1897: Verify Previous ETVA is removed
+  it("should not display Previous ETVA field (PS-1897)", () => {
+    render(
+      <MasterInquiryMemberDetails
+        memberType={1}
+        id={1}
+        profitYear={2025}
+        memberDetails={mockEmployeeDetails}
+        isLoading={false}
+      />
+    );
+
+    expect(screen.queryByText("Previous ETVA")).not.toBeInTheDocument();
+  });
+
+  // PS-1897: Verify balance grouping order
+  it("should group beginning and current balances together (PS-1897)", () => {
+    render(
+      <MasterInquiryMemberDetails
+        memberType={1}
+        id={1}
+        profitYear={2025}
+        memberDetails={mockEmployeeDetails}
+        isLoading={false}
+      />
+    );
+
+    // Beginning balances should appear before current balances
+    expect(screen.getByText("Begin Balance")).toBeInTheDocument();
+    expect(screen.getByText("Begin Vested Balance")).toBeInTheDocument();
+    expect(screen.getByText("Current Balance")).toBeInTheDocument();
+    expect(screen.getByText("Current Vested Balance")).toBeInTheDocument();
   });
 });
