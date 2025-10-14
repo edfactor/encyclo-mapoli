@@ -244,17 +244,6 @@ public sealed class MasterInquiryService : IMasterInquiryService
             query = query.Where(pd => pd.ProfitYear <= req.EndProfitYear.Value);
         }
 
-        // Apply month filters
-        if (req.StartProfitMonth.HasValue)
-        {
-            query = query.Where(pd => pd.MonthToDate >= req.StartProfitMonth.Value);
-        }
-
-        if (req.EndProfitMonth.HasValue)
-        {
-            query = query.Where(pd => pd.MonthToDate <= req.EndProfitMonth.Value);
-        }
-
         // Apply ProfitCode filter
         if (req.ProfitCode.HasValue)
         {
@@ -388,9 +377,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 MemberType = req.MemberType,
                 BadgeNumber = req.BadgeNumber,
                 Ssn = !string.IsNullOrWhiteSpace(req.Ssn) ? int.Parse(req.Ssn) : 0,
-                EndProfitYear = req.EndProfitYear,
-                StartProfitMonth = req.StartProfitMonth,
-                EndProfitMonth = req.EndProfitMonth,
+                EndProfitYear = req.ProfitYear,
                 ProfitCode = req.ProfitCode,
                 ContributionAmount = req.ContributionAmount,
                 EarningsAmount = req.EarningsAmount,

@@ -77,16 +77,6 @@ public static class MasterInquiryHelpers
             query = query.Where(x => x.Member.PsnSuffix == req.PsnSuffix);
         }
 
-        if (req.StartProfitMonth.HasValue)
-        {
-            query = query.Where(x => (x.ProfitDetail == null || x.ProfitDetail.MonthToDate >= req.StartProfitMonth));
-        }
-
-        if (req.EndProfitMonth.HasValue)
-        {
-            query = query.Where(x => (x.ProfitDetail == null || x.ProfitDetail.MonthToDate <= req.EndProfitMonth));
-        }
-
         if (req.ContributionAmount.HasValue)
         {
             query = query.Where(x => (x.ProfitDetail == null || x.ProfitDetail.Contribution == req.ContributionAmount));

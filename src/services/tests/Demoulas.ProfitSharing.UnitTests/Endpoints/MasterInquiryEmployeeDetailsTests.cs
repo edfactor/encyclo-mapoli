@@ -32,29 +32,6 @@ public class MasterInquiryEmployeeDetailsTests : ApiTestBase<Api.Program>
         response.Response.EnsureSuccessStatusCode();
     }
 
-    [Fact(DisplayName = "PS-433: Employee Details - Start Profit Month")]
-    public async Task GetEmployeeDetailsWithStartProfitMonth()
-    {
-        // Use FINANCEMANAGER and EXECUTIVEADMIN to get unmasked data for all employees including executives
-        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
-        var request = new MasterInquiryRequest { StartProfitMonth = 1, Skip = 0, Take = 25, ProfitYear = profitYear };
-        var response = await ApiClient.POSTAsync<MasterInquirySearchEndpoint, MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>(request);
-        response.ShouldNotBeNull();
-        response.Response.EnsureSuccessStatusCode();
-    }
-
-    [Fact(DisplayName = "PS-433: Employee Details - End Profit Month")]
-    public async Task GetEmployeeDetailsWithEndProfitMonth()
-    {
-        // Use FINANCEMANAGER and EXECUTIVEADMIN to get unmasked data for all employees including executives
-        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
-        var request = new MasterInquiryRequest { EndProfitMonth = 12, Skip = 0, Take = 25, ProfitYear = profitYear };
-        var response = await ApiClient.POSTAsync<MasterInquirySearchEndpoint, MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>(request);
-        response.ShouldNotBeNull();
-        response.Response.IsSuccessStatusCode.ShouldBeTrue(response.Response.ReasonPhrase);
-        response.Response.EnsureSuccessStatusCode();
-    }
-
     [Fact(DisplayName = "PS-433: Employee Details - Profit Code")]
     public async Task GetEmployeeDetailsWithProfitCode()
     {
@@ -128,8 +105,6 @@ public class MasterInquiryEmployeeDetailsTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var request = new MasterInquiryRequest
         {
-            StartProfitMonth = 1,
-            EndProfitMonth = 12,
             EndProfitYear = 2024,
             ContributionAmount = 0,
             EarningsAmount = 0,
