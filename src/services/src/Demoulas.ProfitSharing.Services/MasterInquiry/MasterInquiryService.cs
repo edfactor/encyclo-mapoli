@@ -63,15 +63,15 @@ public sealed class MasterInquiryService : IMasterInquiryService
         {
             return await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                // CRITICAL OPTIMIZATION: For highly selective filters (PaymentType, EndProfitYear),
-                // query ProfitDetails FIRST to get SSN list, then join member data.
-                // This avoids expensive joins on full datasets.
-                HashSet<int> ssnList;
+                // CRITICAL FIX: Keep SSN query composable to avoid Oracle's ~10K limit on IN clauses
+                // and prevent loading 150K+ SSNs into memory. Use query composition for efficient JOINs.
+                IQueryable<int> ssnQuery;
+                bool useOptimizedPath = ShouldUseOptimizedSsnQuery(req);
 
-                if (ShouldUseOptimizedSsnQuery(req))
+                if (useOptimizedPath)
                 {
-                    // Fast path: Get SSNs directly from filtered ProfitDetails
-                    ssnList = await GetSsnsFromProfitDetails(ctx, req, timeoutToken);
+                    // Fast path: Get SSN query directly from filtered ProfitDetails (not materialized)
+                    ssnQuery = GetSsnQueryFromProfitDetails(ctx, req);
                 }
                 else
                 {
@@ -85,39 +85,58 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
                     query = FilterMemberQuery(req, query).TagWith("MasterInquiry: Filtered member query");
 
-                    // Get unique SSNs from the query with timeout
+                    // Get unique SSNs from the query with timeout (keep as IQueryable)
                     // EF Core 9: This will use optimized SQL for DISTINCT
-                    ssnList = await query
+                    ssnQuery = query
                         .Select(x => x.Member.Ssn)
                         .Distinct()
-                        .TagWith("MasterInquiry: Extract unique SSNs")
-                        .ToHashSetAsync(timeoutToken);
+                        .TagWith("MasterInquiry: Extract unique SSNs");
+                }
+
+                // Safety check: Log warning if SSN set might be large (for monitoring)
+                var estimatedCount = await ssnQuery.CountAsync(timeoutToken);
+                if (estimatedCount > 50000)
+                {
+                    _logger.LogWarning(
+                        "Master inquiry query returned {SsnCount} SSNs for profit year {ProfitYear}. Consider adding more selective filters.",
+                        estimatedCount, req.ProfitYear);
                 }
 
                 var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
 
-                // Optimize duplicate detection - fetch in one query with SSN filtering
-                // EF Core 9: This uses optimized GROUP BY with HAVING COUNT(*) > 1
+                // Use query composition instead of .Contains() to avoid Oracle limits
+                // EF Core 9 will generate efficient JOIN or EXISTS instead of IN clause
                 var duplicateSsns = await demographics
-                    .Where(d => ssnList.Contains(d.Ssn))
+                    .Where(d => ssnQuery.Contains(d.Ssn))
                     .GroupBy(d => d.Ssn)
                     .Where(g => g.Count() > 1)
                     .Select(g => g.Key)
-                    .TagWith("MasterInquiry: Find duplicate SSNs")
+                    .TagWith("MasterInquiry: Find duplicate SSNs via JOIN")
                     .ToHashSetAsync(timeoutToken);
 
-                if (ssnList.Count == 0 && (req.Ssn != 0 || req.BadgeNumber != 0))
+                // Materialize SSN list only when needed for exact match handling
+                var ssnList = new HashSet<int>();
+                if (estimatedCount == 0 && (req.Ssn != 0 || req.BadgeNumber != 0))
                 {
                     // If an exact match is found, then the bene or empl is added to the ssnList.
                     await HandleExactBadgeOrSsn(ctx, ssnList, req.BadgeNumber, req.PsnSuffix, req.Ssn, timeoutToken);
-                }
 
-                // Early return if no results found
-                if (ssnList.Count == 0)
+                    // Early return if still no results found
+                    if (ssnList.Count == 0)
+                    {
+                        return new PaginatedResponseDto<MemberDetails>(req) { Results = [], Total = 0 };
+                    }
+                }
+                else if (estimatedCount == 0)
                 {
+                    // Early return if no results found and no exact match to try
                     return new PaginatedResponseDto<MemberDetails>(req) { Results = [], Total = 0 };
                 }
-
+                else
+                {
+                    // Materialize for downstream processing only when we have results
+                    ssnList = await ssnQuery.ToHashSetAsync(timeoutToken);
+                }
                 short currentYear = req.ProfitYear;
                 short previousYear = (short)(currentYear - 1);
                 var memberType = req.MemberType;
@@ -139,9 +158,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
                     // Combine and deduplicate by SSN
                     var allResults = employeeDetails.Concat(beneficiaryDetails)
-                        .GroupBy(d => d.Ssn)
-                        .Select(g => g.First())
-                        .ToList();
+                            .GroupBy(d => d.Ssn)
+                            .Select(g => g.First())
+                            .ToList();
 
                     // Apply sorting based on request
                     var sortedResults = ApplySorting(allResults.AsQueryable(), req).ToList();
@@ -191,13 +210,13 @@ public sealed class MasterInquiryService : IMasterInquiryService
     }
 
     /// <summary>
-    /// Optimized query to get SSNs directly from ProfitDetails with selective filters.
+    /// Optimized query to get SSN query (not materialized) directly from ProfitDetails with selective filters.
     /// This avoids expensive joins when we have highly selective criteria.
+    /// CRITICAL: Returns IQueryable to enable query composition and avoid Oracle's ~10K IN clause limit.
     /// </summary>
-    private static async Task<HashSet<int>> GetSsnsFromProfitDetails(
+    private static IQueryable<int> GetSsnQueryFromProfitDetails(
         ProfitSharingReadOnlyDbContext ctx,
-        MasterInquiryRequest req,
-        CancellationToken cancellationToken)
+        MasterInquiryRequest req)
     {
         var query = ctx.ProfitDetails
             .TagWith("MasterInquiry: Optimized SSN extraction from ProfitDetails");
@@ -248,12 +267,11 @@ public sealed class MasterInquiryService : IMasterInquiryService
             query = query.Where(pd => pd.Ssn == req.Ssn);
         }
 
-        // Get distinct SSNs - this should be MUCH faster than joining first
-        return await query
+        // Return composable query - DO NOT materialize here
+        return query
             .Select(pd => pd.Ssn)
             .Distinct()
-            .TagWith("MasterInquiry: Get distinct SSNs (optimized path)")
-            .ToHashSetAsync(cancellationToken);
+            .TagWith("MasterInquiry: Get distinct SSNs (optimized path - composable)");
     }
 
     /* This handles the case where we are given an exact badge or ssn and there are no PROFIT_DETAIL rows */

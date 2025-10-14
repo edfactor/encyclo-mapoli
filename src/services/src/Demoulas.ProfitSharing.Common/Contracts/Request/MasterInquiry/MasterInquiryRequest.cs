@@ -5,8 +5,6 @@ public record MasterInquiryRequest : MasterInquiryMemberRequest
 {
     [DefaultValue(2025)]
     public short? EndProfitYear { get; set; }
-    public byte? StartProfitMonth { get; set; }
-    public byte? EndProfitMonth { get; set; }
     public byte? ProfitCode { get; set; }
     public decimal? ContributionAmount { get; set; }
     public decimal? EarningsAmount { get; set; }
@@ -30,8 +28,6 @@ public record MasterInquiryRequest : MasterInquiryMemberRequest
             Id = 123,
             Ssn = 123456987,
             EndProfitYear = 2025,
-            StartProfitMonth = 1,
-            EndProfitMonth = 12,
             ProfitCode = 2,
             ContributionAmount = 1000.00m,
             EarningsAmount = 150.50m,
