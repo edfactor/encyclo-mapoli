@@ -38,7 +38,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
     const enrollmentStatus = useMemo(() => {
       if (!memberDetails) return { enrolled: "", forfeited: "" };
       return {
-        enrolled: getEnrolledStatus(memberDetails.enrollmentId) + " (" + memberDetails.enrollmentId + ")",
+        enrolled: getEnrolledStatus(memberDetails.enrollmentId),
         forfeited: getForfeitedStatus(memberDetails.enrollmentId)
       };
     }, [memberDetails?.enrollmentId]);

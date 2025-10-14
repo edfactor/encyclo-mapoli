@@ -1,0 +1,530 @@
+using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
+using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
+using Demoulas.ProfitSharing.Common.Extensions;
+using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Contexts;
+using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Services.Extensions;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.Util.Extensions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+
+namespace Demoulas.ProfitSharing.Services.MasterInquiry;
+
+/// <summary>
+/// Service handling employee/demographic master inquiry operations.
+/// Provides optimized queries for employee lookups with profit details.
+/// </summary>
+public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
+{
+    private readonly ILogger<EmployeeMasterInquiryService> _logger;
+    private readonly IMissiveService _missiveService;
+    private readonly IDemographicReaderService _demographicReaderService;
+
+    public EmployeeMasterInquiryService(
+        ILoggerFactory loggerFactory,
+        IMissiveService missiveService,
+        IDemographicReaderService demographicReaderService)
+    {
+        _logger = loggerFactory.CreateLogger<EmployeeMasterInquiryService>();
+        _missiveService = missiveService;
+        _demographicReaderService = demographicReaderService;
+    }
+
+    public async Task<IQueryable<MasterInquiryItem>> GetEmployeeInquiryQueryAsync(
+        ProfitSharingReadOnlyDbContext ctx,
+        MasterInquiryRequest? req = null)
+    {
+        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+
+        // EF Core 9: Use AsSplitQuery to avoid cartesian explosion from multiple includes
+        // TagWith helps identify this query in profiling/logging
+        var profitDetailsQuery = ctx.ProfitDetails.AsSplitQuery();
+
+        // OPTIMIZATION: Pre-filter ProfitDetails before expensive join if we have selective criteria
+        if (req?.EndProfitYear.HasValue == true)
+        {
+            profitDetailsQuery = profitDetailsQuery.Where(pd => pd.ProfitYear <= req.EndProfitYear.Value);
+        }
+
+        if (req?.PaymentType.HasValue == true)
+        {
+            // Apply payment type filter early for massive performance gain
+            var commentTypeIds = req.PaymentType switch
+            {
+                1 => new byte?[] { CommentType.Constants.Hardship.Id, CommentType.Constants.Distribution.Id },
+                2 => new byte?[] { CommentType.Constants.Payoff.Id, CommentType.Constants.Forfeit.Id },
+                3 => new byte?[] { CommentType.Constants.Rollover.Id, CommentType.Constants.RothIra.Id },
+                _ => Array.Empty<byte?>()
+            };
+
+            if (commentTypeIds.Length > 0)
+            {
+                profitDetailsQuery = profitDetailsQuery.Where(pd => commentTypeIds.Contains(pd.CommentTypeId));
+            }
+        }
+
+        var query = profitDetailsQuery
+            .Include(pd => pd.ProfitCode)
+            .Include(pd => pd.ZeroContributionReason)
+            .Include(pd => pd.TaxCode)
+            .Include(pd => pd.CommentType)
+            .TagWith("EmployeeMasterInquiry: Get demographics with profit details")
+            .Join(demographics,
+                pd => pd.Ssn,
+                d => d.Ssn,
+                (pd, d) => new MasterInquiryItem
+                {
+                    ProfitDetail = pd,
+                    ProfitCode = pd.ProfitCode,
+                    ZeroContributionReason = pd.ZeroContributionReason,
+                    TaxCode = pd.TaxCode,
+                    CommentType = pd.CommentType,
+                    TransactionDate = pd.CreatedAtUtc,
+                    Member = new InquiryDemographics
+                    {
+                        Id = d.Id,
+                        BadgeNumber = d.BadgeNumber,
+                        FullName = d.ContactInfo.FullName != null ? d.ContactInfo.FullName : d.ContactInfo.LastName,
+                        FirstName = d.ContactInfo.FirstName,
+                        LastName = d.ContactInfo.LastName,
+                        PayFrequencyId = d.PayFrequencyId,
+                        Ssn = d.Ssn,
+                        PsnSuffix = 0,
+                        IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
+                        // Use correlated subqueries for PayProfits data
+                        // These will be optimized by Oracle when IX_PayProfits_Demographic_Year index exists
+                        CurrentIncomeYear = ctx.PayProfits
+                            .Where(pp => pp.DemographicId == d.Id && pp.ProfitYear == pd.ProfitYear)
+                            .Select(pp => pp.CurrentIncomeYear)
+                            .FirstOrDefault(),
+                        CurrentHoursYear = ctx.PayProfits
+                            .Where(pp => pp.DemographicId == d.Id && pp.ProfitYear == pd.ProfitYear)
+                            .Select(pp => pp.CurrentHoursYear)
+                            .FirstOrDefault()
+                    }
+                });
+
+        return query;
+    }
+
+    public async Task<(int ssn, MemberDetails? memberDetails)> GetEmployeeDetailsAsync(
+        ProfitSharingReadOnlyDbContext ctx,
+        int id,
+        short currentYear,
+        short previousYear,
+        CancellationToken cancellationToken = default)
+    {
+        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+        var memberData = await demographics
+            .Include(d => d.PayProfits)
+            .ThenInclude(pp => pp.Enrollment)
+            .Include(d => d.Department)
+            .Include(d => d.TerminationCode)
+            .Include(d => d.PayClassification)
+            .Include(d => d.Gender)
+            .Where(d => d.Id == id)
+            .Select(d => new
+            {
+                d.Id,
+                d.ContactInfo.FirstName,
+                d.ContactInfo.LastName,
+                d.ContactInfo.PhoneNumber,
+                d.Address.City,
+                d.Address.State,
+                Address = d.Address.Street,
+                d.Address.PostalCode,
+                d.DateOfBirth,
+                d.Ssn,
+                d.BadgeNumber,
+                d.PayFrequencyId,
+                d.ReHireDate,
+                d.HireDate,
+                d.TerminationDate,
+                d.StoreNumber,
+                DemographicId = d.Id,
+                d.EmploymentStatusId,
+                d.EmploymentStatus,
+                IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
+                d.FullTimeDate,
+                Department = d.Department != null ? d.Department.Name : "N/A",
+                TerminationReason = d.TerminationCode != null ? d.TerminationCode.Name : "N/A",
+                Gender = d.Gender != null ? d.Gender.Name : "N/A",
+                PayClassification = d.PayClassification != null ? d.PayClassification.Name : "N/A",
+
+                CurrentPayProfit = d.PayProfits
+                    .Select(x =>
+                        new
+                        {
+                            x.ProfitYear,
+                            x.CurrentHoursYear,
+                            x.Etva,
+                            x.EnrollmentId,
+                            x.Enrollment
+                        })
+                    .FirstOrDefault(x => x.ProfitYear == currentYear),
+                PreviousPayProfit = d.PayProfits
+                    .Select(x =>
+                        new
+                        {
+                            x.ProfitYear,
+                            x.CurrentHoursYear,
+                            x.Etva,
+                            x.EnrollmentId,
+                            x.Enrollment,
+                            x.PsCertificateIssuedDate
+                        })
+                    .FirstOrDefault(x => x.ProfitYear == previousYear)
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (memberData == null)
+        {
+            return (0, new MemberDetails { Id = 0 });
+        }
+
+        var missives = await _missiveService.DetermineMissivesForSsns([memberData.Ssn], currentYear, cancellationToken);
+        var missiveList = missives.TryGetValue(memberData.Ssn, out var m) ? m : new List<int>();
+        var duplicateSsns = await demographics
+                .GroupBy(d => d.Ssn)
+                .Where(g => g.Count() > 1 && g.Key == memberData.Ssn)
+                .Select(g => g.Key)
+                .ToHashSetAsync(cancellationToken);
+
+        List<int> badgeNumbersOfDuplicates = [];
+        if (duplicateSsns.Any())
+        {
+            badgeNumbersOfDuplicates = await demographics
+                .Where(d => d.Ssn == memberData.Ssn && d.Id != memberData.DemographicId)
+                .Select(d => d.BadgeNumber)
+                .ToListAsync(cancellationToken);
+        }
+
+        return (ssn: memberData.Ssn, memberDetails: new MemberDetails
+        {
+            IsEmployee = true,
+            Id = memberData.Id,
+            FirstName = memberData.FirstName,
+            LastName = memberData.LastName,
+            AddressCity = memberData.City!,
+            AddressState = memberData.State!,
+            Address = memberData.Address,
+            AddressZipCode = memberData.PostalCode!,
+            DateOfBirth = memberData.DateOfBirth,
+            Age = memberData.DateOfBirth.Age(),
+            Ssn = memberData.Ssn.MaskSsn(),
+            YearToDateProfitSharingHours = memberData.CurrentPayProfit?.CurrentHoursYear ?? 0,
+            HireDate = memberData.HireDate,
+            ReHireDate = memberData.ReHireDate,
+            FullTimeDate = memberData.FullTimeDate,
+            TerminationDate = memberData.TerminationDate,
+            StoreNumber = memberData.StoreNumber,
+            EnrollmentId = memberData.CurrentPayProfit?.EnrollmentId,
+            Enrollment = memberData.CurrentPayProfit?.Enrollment?.Name,
+            BadgeNumber = memberData.BadgeNumber,
+            PayFrequencyId = memberData.PayFrequencyId,
+            IsExecutive = memberData.IsExecutive,
+            CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
+            PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
+
+            EmploymentStatus = memberData.EmploymentStatus?.Name,
+
+            Department = memberData.Department,
+            TerminationReason = memberData.TerminationReason,
+            Gender = memberData.Gender,
+            PayClassification = memberData.PayClassification,
+            PhoneNumber = memberData.PhoneNumber,
+
+            ReceivedContributionsLastYear = memberData.PreviousPayProfit?.PsCertificateIssuedDate != null,
+            Missives = missiveList,
+            BadgesOfDuplicateSsns = badgeNumbersOfDuplicates
+        });
+    }
+
+    public async Task<PaginatedResponseDto<MemberDetails>> GetEmployeeDetailsForSsnsAsync(
+        ProfitSharingReadOnlyDbContext ctx,
+        MasterInquiryRequest req,
+        ISet<int> ssns,
+        short currentYear,
+        short previousYear,
+        ISet<int> duplicateSsns,
+        CancellationToken cancellationToken = default)
+    {
+        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+
+        // EF Core 9: Use AsSplitQuery for complex includes to avoid cartesian explosion
+        var query = demographics
+            .Where(d => ssns.Contains(d.Ssn))
+            .TagWith("EmployeeMasterInquiry: Get demographic details for SSNs")
+            .AsSplitQuery(); // Splits into multiple queries to avoid JOIN performance issues
+
+        if (req.BadgeNumber.HasValue && req.BadgeNumber != 0)
+        {
+            query = query.Where(d => d.BadgeNumber == req.BadgeNumber);
+        }
+
+        // Optimize projection: only select needed fields, avoid loading unnecessary navigation properties
+        var members = await query
+            .Select(d => new
+            {
+                d.Id,
+                d.ContactInfo.FullName,
+                d.ContactInfo.FirstName,
+                d.ContactInfo.LastName,
+                d.Address.City,
+                d.Address.State,
+                Address = d.Address.Street,
+                d.Address.PostalCode,
+                d.DateOfBirth,
+                d.Ssn,
+                d.BadgeNumber,
+                d.PayFrequencyId,
+                d.ReHireDate,
+                d.HireDate,
+                d.TerminationDate,
+                d.StoreNumber,
+                DemographicId = d.Id,
+                d.EmploymentStatusId,
+                d.EmploymentStatus,
+                IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
+                // Optimize PayProfit queries - only fetch what we need for current/previous years
+                CurrentPayProfit = d.PayProfits
+                    .Where(x => x.ProfitYear == currentYear)
+                    .Select(x => new
+                    {
+                        x.ProfitYear,
+                        x.CurrentHoursYear,
+                        x.Etva,
+                        x.EnrollmentId,
+                        x.Enrollment.Name
+                    }).FirstOrDefault(),
+                PreviousPayProfit = d.PayProfits
+                    .Where(x => x.ProfitYear == previousYear)
+                    .Select(x => new
+                    {
+                        x.ProfitYear,
+                        x.CurrentHoursYear,
+                        x.Etva,
+                        x.EnrollmentId,
+                        x.Enrollment.Name,
+                        x.PsCertificateIssuedDate
+                    }).FirstOrDefault()
+            })
+            .ToPaginationResultsAsync(req, cancellationToken);
+
+        // Fetch missives for all SSNs in one query (exclude duplicates)
+        var nonDuplicateSsns = members.Results.Select(m => m.Ssn).Except(duplicateSsns).ToList();
+        var missivesDict = await _missiveService.DetermineMissivesForSsns(nonDuplicateSsns, currentYear, cancellationToken);
+
+        // Fetch all duplicate badge numbers in one query instead of N queries
+        // EF Core 9: Optimized batch query
+        var duplicateBadgeMap = new Dictionary<int, List<int>>();
+        if (duplicateSsns.Any())
+        {
+            var duplicateData = await demographics
+                .Where(d => duplicateSsns.Contains(d.Ssn))
+                .Select(d => new { d.Ssn, d.BadgeNumber, d.Id })
+                .TagWith("EmployeeMasterInquiry: Fetch duplicate badges")
+                .ToListAsync(cancellationToken);
+
+            foreach (var dup in duplicateSsns)
+            {
+                duplicateBadgeMap[dup] = duplicateData
+                    .Where(d => d.Ssn == dup)
+                    .Select(d => d.BadgeNumber)
+                    .Distinct()
+                    .ToList();
+            }
+        }
+
+        var detailsList = new List<MemberDetails>();
+        foreach (var memberData in members.Results)
+        {
+            var missiveList = missivesDict.TryGetValue(memberData.Ssn, out var m) ? m : new List<int>();
+
+            // Get duplicate badges from pre-fetched map
+            var duplicateBadges = duplicateSsns.Contains(memberData.Ssn) && duplicateBadgeMap.TryGetValue(memberData.Ssn, out var badges)
+                ? badges.Where(b => b != memberData.BadgeNumber).ToList()
+                : new List<int>();
+
+            detailsList.Add(new MemberDetails
+            {
+                IsEmployee = true,
+                Id = memberData.Id,
+                FirstName = memberData.FirstName,
+                LastName = memberData.LastName,
+                AddressCity = memberData.City!,
+                AddressState = memberData.State!,
+                Address = memberData.Address,
+                AddressZipCode = memberData.PostalCode!,
+                DateOfBirth = memberData.DateOfBirth,
+                IsExecutive = memberData.IsExecutive,
+                Age = memberData.DateOfBirth.Age(),
+                Ssn = memberData.Ssn.MaskSsn(),
+                YearToDateProfitSharingHours = memberData.CurrentPayProfit?.CurrentHoursYear ?? 0,
+                HireDate = memberData.HireDate,
+                ReHireDate = memberData.ReHireDate,
+                TerminationDate = memberData.TerminationDate,
+                StoreNumber = memberData.StoreNumber,
+                EnrollmentId = memberData.CurrentPayProfit?.EnrollmentId,
+                Enrollment = memberData.CurrentPayProfit?.Name,
+                BadgeNumber = memberData.BadgeNumber,
+                PayFrequencyId = memberData.PayFrequencyId,
+                CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
+                PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
+                EmploymentStatus = memberData.EmploymentStatus?.Name,
+                ReceivedContributionsLastYear = memberData.PreviousPayProfit?.PsCertificateIssuedDate != null,
+                Missives = missiveList,
+                BadgesOfDuplicateSsns = duplicateBadges
+            });
+        }
+
+        return new PaginatedResponseDto<MemberDetails>(req) { Results = detailsList, Total = members.Total };
+    }
+
+    public async Task<List<MemberDetails>> GetAllEmployeeDetailsForSsnsAsync(
+        ProfitSharingReadOnlyDbContext ctx,
+        ISet<int> ssns,
+        short currentYear,
+        short previousYear,
+        ISet<int> duplicateSsns,
+        CancellationToken cancellationToken = default)
+    {
+        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+
+        // EF Core 9: Use AsSplitQuery to avoid cartesian explosion with PayProfits
+        var query = demographics
+            .Where(d => ssns.Contains(d.Ssn))
+            .TagWith("EmployeeMasterInquiry: Get all demographic details for SSNs")
+            .AsSplitQuery();
+
+        // Optimize projection: only select needed fields
+        var members = await query
+            .Select(d => new
+            {
+                d.Id,
+                d.ContactInfo.FullName,
+                d.ContactInfo.FirstName,
+                d.ContactInfo.LastName,
+                d.Address.City,
+                d.Address.State,
+                Address = d.Address.Street,
+                d.Address.PostalCode,
+                d.DateOfBirth,
+                d.Ssn,
+                d.BadgeNumber,
+                d.PayFrequencyId,
+                d.ReHireDate,
+                d.HireDate,
+                d.TerminationDate,
+                d.StoreNumber,
+                DemographicId = d.Id,
+                d.EmploymentStatus,
+                IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
+                // Optimize PayProfit queries
+                CurrentPayProfit = d.PayProfits
+                    .Where(x => x.ProfitYear == currentYear)
+                    .Select(x => new
+                    {
+                        x.CurrentHoursYear,
+                        x.Etva,
+                        x.EnrollmentId,
+                        x.Enrollment.Name
+                    }).FirstOrDefault(),
+                PreviousPayProfit = d.PayProfits
+                    .Where(x => x.ProfitYear == previousYear)
+                    .Select(x => new
+                    {
+                        x.Etva,
+                        x.PsCertificateIssuedDate
+                    }).FirstOrDefault()
+            })
+            .ToListAsync(cancellationToken);
+
+        // Fetch missives for all non-duplicate SSNs in one query
+        var nonDuplicateSsns = members.Select(m => m.Ssn).Except(duplicateSsns).ToList();
+        var missivesDict = await _missiveService.DetermineMissivesForSsns(nonDuplicateSsns, currentYear, cancellationToken);
+
+        // Fetch all duplicate badge numbers in one optimized query
+        var duplicateBadgeMap = new Dictionary<int, List<int>>();
+        if (duplicateSsns.Any())
+        {
+            var duplicateData = await demographics
+                .Where(d => duplicateSsns.Contains(d.Ssn))
+                .Select(d => new { d.Ssn, d.BadgeNumber, d.Id })
+                .TagWith("EmployeeMasterInquiry: Fetch all duplicate badges")
+                .ToListAsync(cancellationToken);
+
+            foreach (var dup in duplicateSsns)
+            {
+                duplicateBadgeMap[dup] = duplicateData
+                    .Where(d => d.Ssn == dup)
+                    .Select(d => d.BadgeNumber)
+                    .Distinct()
+                    .ToList();
+            }
+        }
+
+        var detailsList = new List<MemberDetails>();
+        foreach (var memberData in members)
+        {
+            var missiveList = missivesDict.TryGetValue(memberData.Ssn, out var m) ? m : new List<int>();
+
+            // Get duplicate badges from pre-fetched map
+            var duplicateBadges = duplicateSsns.Contains(memberData.Ssn) && duplicateBadgeMap.TryGetValue(memberData.Ssn, out var badges)
+                ? badges.Where(b => b != memberData.BadgeNumber).ToList()
+                : new List<int>();
+
+            detailsList.Add(new MemberDetails
+            {
+                IsEmployee = true,
+                Id = memberData.Id,
+                FirstName = memberData.FirstName,
+                LastName = memberData.LastName,
+                AddressCity = memberData.City!,
+                AddressState = memberData.State!,
+                Address = memberData.Address,
+                AddressZipCode = memberData.PostalCode!,
+                DateOfBirth = memberData.DateOfBirth,
+                IsExecutive = memberData.IsExecutive,
+                Age = memberData.DateOfBirth.Age(),
+                Ssn = memberData.Ssn.MaskSsn(),
+                YearToDateProfitSharingHours = memberData.CurrentPayProfit?.CurrentHoursYear ?? 0,
+                HireDate = memberData.HireDate,
+                ReHireDate = memberData.ReHireDate,
+                TerminationDate = memberData.TerminationDate,
+                StoreNumber = memberData.StoreNumber,
+                EnrollmentId = memberData.CurrentPayProfit?.EnrollmentId,
+                Enrollment = memberData.CurrentPayProfit?.Name,
+                BadgeNumber = memberData.BadgeNumber,
+                PayFrequencyId = memberData.PayFrequencyId,
+                CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
+                PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
+                EmploymentStatus = memberData.EmploymentStatus?.Name,
+                ReceivedContributionsLastYear = memberData.PreviousPayProfit?.PsCertificateIssuedDate != null,
+                Missives = missiveList,
+                BadgesOfDuplicateSsns = duplicateBadges
+            });
+        }
+
+        return detailsList;
+    }
+
+    public async Task<int> FindEmployeeSsnByBadgeAsync(
+        ProfitSharingReadOnlyDbContext ctx,
+        int badgeNumber,
+        CancellationToken cancellationToken = default)
+    {
+        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+        int ssnEmpl = await demographics
+            .AsNoTracking()
+            .Where(d => d.BadgeNumber == badgeNumber)
+            .Select(d => d.Ssn)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return ssnEmpl;
+    }
+}
