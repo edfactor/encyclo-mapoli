@@ -12,9 +12,6 @@ public record MasterInquiryMemberDetailsRequest : SortedPaginationRequestDto
     public int? BadgeNumber { get; set; }
     public short? PsnSuffix { get; set; }
     public string? Ssn { get; set; }
-    public short? EndProfitYear { get; set; }
-    public byte? StartProfitMonth { get; set; }
-    public byte? EndProfitMonth { get; set; }
     public byte? ProfitCode { get; set; }
     public decimal? ContributionAmount { get; set; }
     public decimal? EarningsAmount { get; set; }

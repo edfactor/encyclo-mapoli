@@ -2,6 +2,7 @@ import { Typography } from "@mui/material";
 import { memo, useMemo } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
+import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
 import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
 
 interface ProfitData {
@@ -24,6 +25,7 @@ interface MasterInquiryGridProps {
 const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = memo(
   ({ profitData, isLoading, profitGridPagination, onPaginationChange, onSortChange }) => {
     const columnDefs = useMemo(() => GetMasterInquiryGridColumns(), []);
+    const gridMaxHeight = useDynamicGridHeight();
 
     if (isLoading) {
       return <Typography>Loading profit details...</Typography>;
@@ -47,7 +49,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = memo(
 
     return (
       <>
-        <div style={{ height: "400px", width: "100%" }}>
+        <div style={{ width: "100%" }}>
           <div style={{ padding: "0 24px 0 24px" }}>
             <Typography
               variant="h2"
@@ -59,6 +61,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = memo(
             preferenceKey={CAPTIONS.MASTER_INQUIRY}
             handleSortChanged={handleSortChange}
             isLoading={!!isLoading}
+            maxHeight={gridMaxHeight}
             providedOptions={{
               rowData: profitData.results,
               columnDefs: columnDefs,
