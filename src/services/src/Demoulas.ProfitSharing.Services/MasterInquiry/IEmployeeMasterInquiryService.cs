@@ -2,9 +2,8 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 using Demoulas.ProfitSharing.Data.Contexts;
-using Demoulas.ProfitSharing.Services.MasterInquiry;
 
-namespace Demoulas.ProfitSharing.Common.Interfaces;
+namespace Demoulas.ProfitSharing.Services.MasterInquiry;
 
 /// <summary>
 /// Service for employee/demographic master inquiry operations.
@@ -22,6 +21,17 @@ public interface IEmployeeMasterInquiryService
     Task<IQueryable<MasterInquiryItem>> GetEmployeeInquiryQueryAsync(
         MasterInquiryRequest? req = null,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets a queryable collection of MasterInquiryItem for employees/demographics using an existing context.
+    /// Use this overload when calling from within an existing UseReadOnlyContext scope.
+    /// </summary>
+    /// <param name="ctx">The existing database context to use.</param>
+    /// <param name="req">Optional request containing pre-filters to apply.</param>
+    /// <returns>A queryable collection of employee inquiry items.</returns>
+    IQueryable<MasterInquiryItem> GetEmployeeInquiryQuery(
+        ProfitSharingReadOnlyDbContext ctx,
+        MasterInquiryRequest? req = null);
 
     /// <summary>
     /// Gets detailed employee information for a specific demographic ID.

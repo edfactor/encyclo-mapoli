@@ -1,10 +1,10 @@
 import { Grid, Typography } from "@mui/material";
-import LabelValueSection from "components/LabelValueSection";
 import React, { memo, useMemo } from "react";
 import { formatNumberWithComma, numberToCurrency } from "smart-ui-library";
-import { formatPercentage } from "utils/formatPercentage";
+import LabelValueSection from "../../components/LabelValueSection";
 import { mmDDYYFormat } from "../../utils/dateUtils";
 import { getEnrolledStatus, getForfeitedStatus } from "../../utils/enrollmentUtil";
+import { formatPercentage } from "../../utils/formatPercentage";
 import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 
 // Sometimes we get back end zip codes that are 1907 rather than 01907
@@ -83,6 +83,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         employmentStatus,
         gender,
         dateOfBirth,
+        age,
         ssn: ssnValue,
         allocationToAmount,
         badgesOfDuplicateSsns
@@ -99,6 +100,8 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         }
       }
 
+      const dobDisplay = dateOfBirth ? `${mmDDYYFormat(dateOfBirth)} (${age})` : "N/A";
+
       return [
         ...(isEmployee ? [{ label: "Badge", value: viewBadgeLinkRenderer(badgeNumber) }] : []),
         ...(!isEmployee ? [{ label: "PSN", value: viewBadgeLinkRenderer(badgeNumber, psnSuffix) }] : []),
@@ -106,7 +109,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         ...(isEmployee ? [{ label: "Class", value: PayClassification || "N/A" }] : []),
         ...(isEmployee ? [{ label: "Status", value: employmentStatus ?? "N/A" }] : []),
         { label: "Gender", value: gender || "N/A" },
-        { label: "DOB", value: mmDDYYFormat(dateOfBirth) },
+        { label: "DOB", value: dobDisplay },
         { label: "SSN", value: `${ssnValue}` },
         ...duplicateBadgeLink,
         { label: "Allocation To", value: numberToCurrency(allocationToAmount) }

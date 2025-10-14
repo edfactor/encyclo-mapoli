@@ -42,6 +42,9 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         MasterInquiryRequest? req = null,
         CancellationToken cancellationToken = default)
     {
+        _logger.LogDebug("Building employee inquiry query. EndProfitYear: {EndProfitYear}, PaymentType: {PaymentType}, BadgeNumber: {BadgeNumber}",
+            req?.EndProfitYear, req?.PaymentType, req?.BadgeNumber);
+
         return await _factory.UseReadOnlyContext(async ctx =>
         {
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
@@ -54,6 +57,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
             if (req?.EndProfitYear.HasValue == true)
             {
                 profitDetailsQuery = profitDetailsQuery.Where(pd => pd.ProfitYear <= req.EndProfitYear.Value);
+                _logger.LogDebug("Applied EndProfitYear filter: {EndProfitYear}", req.EndProfitYear.Value);
             }
 
             if (req?.PaymentType.HasValue == true)
@@ -70,6 +74,8 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                 if (commentTypeIds.Length > 0)
                 {
                     profitDetailsQuery = profitDetailsQuery.Where(pd => commentTypeIds.Contains(pd.CommentTypeId));
+                    _logger.LogDebug("Applied PaymentType filter: {PaymentType}, CommentTypeIds: {CommentTypeIds}",
+                        req.PaymentType.Value, string.Join(", ", commentTypeIds.Where(id => id.HasValue).Select(id => id!.Value)));
                 }
             }
 
@@ -119,12 +125,103 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         }, cancellationToken);
     }
 
+    public IQueryable<MasterInquiryItem> GetEmployeeInquiryQuery(
+        ProfitSharingReadOnlyDbContext ctx,
+        MasterInquiryRequest? req = null)
+    {
+        // Use synchronous version - we already have a context
+        var demographics = _demographicReaderService.BuildDemographicQuery(ctx).Result;
+
+        // ReadOnlyDbContext automatically handles AsSplitQuery and AsNoTracking
+        // TagWith helps identify this query in profiling/logging
+        IQueryable<ProfitDetail> profitDetailsQuery = ctx.ProfitDetails;
+
+        // OPTIMIZATION: Pre-filter ProfitDetails before expensive join if we have selective criteria
+        if (req?.EndProfitYear.HasValue == true)
+        {
+            profitDetailsQuery = profitDetailsQuery.Where(pd => pd.ProfitYear <= req.EndProfitYear.Value);
+        }
+
+        if (req?.PaymentType.HasValue == true)
+        {
+            var commentTypeIds = req.PaymentType switch
+            {
+                1 => new byte?[] { CommentType.Constants.Hardship.Id, CommentType.Constants.Distribution.Id },
+                2 => new byte?[] { CommentType.Constants.Payoff.Id, CommentType.Constants.Forfeit.Id },
+                3 => new byte?[] { CommentType.Constants.Rollover.Id, CommentType.Constants.RothIra.Id },
+                _ => Array.Empty<byte?>()
+            };
+
+            if (commentTypeIds.Length > 0)
+            {
+                profitDetailsQuery = profitDetailsQuery.Where(pd => commentTypeIds.Contains(pd.CommentTypeId));
+            }
+        }
+
+        // LEFT JOIN Demographics with ProfitDetails using composable queries
+        // EF Core 9 will optimize this into a single SQL query with proper indexes
+        var query = profitDetailsQuery
+            .TagWith("EmployeeMasterInquiry: Demographics LEFT JOIN ProfitDetails")
+            .GroupJoin(
+                demographics,
+                pd => pd.Ssn,
+                d => d.Ssn,
+                (pd, demos) => new { pd, demos })
+            .SelectMany(
+                x => x.demos.DefaultIfEmpty(),
+                (x, d) => new { x.pd, d })
+            .Where(x => x.d != null) // Ensure we have a matching demographic
+            .Select(x => new
+            {
+                pd = x.pd,
+                d = x.d!,
+                profitYear = x.pd.ProfitYear
+            })
+            .Select(x => new MasterInquiryItem
+            {
+                ProfitDetail = x.pd,
+                ProfitCode = x.pd.ProfitCode,
+                ZeroContributionReason = x.pd.ZeroContributionReason,
+                TaxCode = x.pd.TaxCode,
+                CommentType = x.pd.CommentType,
+                TransactionDate = x.pd.CreatedAtUtc,
+                Member = new InquiryDemographics
+                {
+                    Id = x.d.Id,
+                    BadgeNumber = x.d.BadgeNumber,
+                    FullName = x.d.ContactInfo.FullName != null ? x.d.ContactInfo.FullName : x.d.ContactInfo.LastName,
+                    FirstName = x.d.ContactInfo.FirstName,
+                    LastName = x.d.ContactInfo.LastName,
+                    PayFrequencyId = x.d.PayFrequencyId,
+                    Ssn = x.d.Ssn,
+                    PsnSuffix = 0,
+                    IsExecutive = x.d.PayFrequencyId == PayFrequency.Constants.Monthly,
+                    EmploymentStatusId = x.d.EmploymentStatusId,
+                    // Use correlated subqueries for PayProfits data
+                    // These will be optimized by Oracle when IX_PayProfits_Demographic_Year index exists
+                    CurrentIncomeYear = ctx.PayProfits
+                        .Where(pp => pp.DemographicId == x.d.Id && pp.ProfitYear == x.profitYear)
+                        .Select(pp => pp.CurrentIncomeYear)
+                        .FirstOrDefault(),
+                    CurrentHoursYear = ctx.PayProfits
+                        .Where(pp => pp.DemographicId == x.d.Id && pp.ProfitYear == x.profitYear)
+                        .Select(pp => pp.CurrentHoursYear)
+                        .FirstOrDefault()
+                }
+            });
+
+        return query;
+    }
+
     public async Task<(int ssn, MemberDetails? memberDetails)> GetEmployeeDetailsAsync(
         int id,
         short currentYear,
         short previousYear,
         CancellationToken cancellationToken = default)
     {
+        _logger.LogDebug("Getting employee details for ID: {EmployeeId}, CurrentYear: {CurrentYear}, PreviousYear: {PreviousYear}",
+            id, currentYear, previousYear);
+
         return await _factory.UseReadOnlyContext(async ctx =>
         {
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
@@ -192,11 +289,21 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
 
             if (memberData == null)
             {
+                _logger.LogInformation("Employee not found for ID: {EmployeeId}", id);
                 return (0, new MemberDetails { Id = 0 });
             }
 
+            _logger.LogDebug("Retrieved employee details for ID: {EmployeeId}, Badge: {BadgeNumber}, SSN: {MaskedSsn}",
+                id, memberData.BadgeNumber, memberData.Ssn.MaskSsn());
+
             var missives = await _missiveService.DetermineMissivesForSsns([memberData.Ssn], currentYear, cancellationToken);
             var missiveList = missives.TryGetValue(memberData.Ssn, out var m) ? m : new List<int>();
+
+            if (missiveList.Any())
+            {
+                _logger.LogDebug("Found {MissiveCount} missives for SSN: {MaskedSsn}", missiveList.Count, memberData.Ssn.MaskSsn());
+            }
+
             var duplicateSsns = await demographics
                     .GroupBy(d => d.Ssn)
                     .Where(g => g.Count() > 1 && g.Key == memberData.Ssn)
@@ -210,6 +317,9 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     .Where(d => d.Ssn == memberData.Ssn && d.Id != memberData.DemographicId)
                     .Select(d => d.BadgeNumber)
                     .ToListAsync(cancellationToken);
+
+                _logger.LogWarning("Duplicate SSN detected for Badge: {BadgeNumber}, SSN: {MaskedSsn}, Duplicate badges: {DuplicateBadges}",
+                    memberData.BadgeNumber, memberData.Ssn.MaskSsn(), string.Join(", ", badgeNumbersOfDuplicates));
             }
 
             return (ssn: memberData.Ssn, memberDetails: new MemberDetails
@@ -246,6 +356,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                 Gender = memberData.Gender,
                 PayClassification = memberData.PayClassification,
                 PhoneNumber = memberData.PhoneNumber,
+                WorkLocation = memberData.StoreNumber > 0 ? $"Store {memberData.StoreNumber}" : null,
 
                 ReceivedContributionsLastYear = memberData.PreviousPayProfit?.PsCertificateIssuedDate != null,
                 Missives = missiveList,
@@ -262,6 +373,9 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         ISet<int> duplicateSsns,
         CancellationToken cancellationToken = default)
     {
+        _logger.LogDebug("Getting paginated employee details for {SsnCount} SSNs. BadgeNumber: {BadgeNumber}, CurrentYear: {CurrentYear}",
+            ssns.Count, req.BadgeNumber, currentYear);
+
         return await _factory.UseReadOnlyContext(async ctx =>
         {
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
@@ -284,6 +398,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     d.ContactInfo.FullName,
                     d.ContactInfo.FirstName,
                     d.ContactInfo.LastName,
+                    d.ContactInfo.PhoneNumber,
                     d.Address.City,
                     d.Address.State,
                     Address = d.Address.Street,
@@ -294,12 +409,17 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     d.PayFrequencyId,
                     d.ReHireDate,
                     d.HireDate,
+                    d.FullTimeDate,
                     d.TerminationDate,
                     d.StoreNumber,
                     DemographicId = d.Id,
                     d.EmploymentStatusId,
                     d.EmploymentStatus,
                     IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
+                    Department = d.Department != null ? d.Department.Name : "N/A",
+                    TerminationReason = d.TerminationCode != null ? d.TerminationCode.Name : "N/A",
+                    Gender = d.Gender != null ? d.Gender.Name : "N/A",
+                    PayClassification = d.PayClassification != null ? d.PayClassification.Name : "N/A",
                     // Optimize PayProfit queries - only fetch what we need for current/previous years
                     CurrentPayProfit = d.PayProfits
                         .Where(x => x.ProfitYear == currentYear)
@@ -377,6 +497,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     YearToDateProfitSharingHours = memberData.CurrentPayProfit?.CurrentHoursYear ?? 0,
                     HireDate = memberData.HireDate,
                     ReHireDate = memberData.ReHireDate,
+                    FullTimeDate = memberData.FullTimeDate,
                     TerminationDate = memberData.TerminationDate,
                     StoreNumber = memberData.StoreNumber,
                     EnrollmentId = memberData.CurrentPayProfit?.EnrollmentId,
@@ -386,11 +507,20 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
                     PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
                     EmploymentStatus = memberData.EmploymentStatus?.Name,
+                    Department = memberData.Department,
+                    TerminationReason = memberData.TerminationReason,
+                    Gender = memberData.Gender,
+                    PayClassification = memberData.PayClassification,
+                    PhoneNumber = memberData.PhoneNumber,
+                    WorkLocation = memberData.StoreNumber > 0 ? $"Store {memberData.StoreNumber}" : null,
                     ReceivedContributionsLastYear = memberData.PreviousPayProfit?.PsCertificateIssuedDate != null,
                     Missives = missiveList,
                     BadgesOfDuplicateSsns = duplicateBadges
                 });
             }
+
+            _logger.LogDebug("Retrieved {ResultCount} employee details from {TotalCount} total matching records",
+                detailsList.Count, members.Total);
 
             return new PaginatedResponseDto<MemberDetails>(req) { Results = detailsList, Total = members.Total };
         }, cancellationToken);
@@ -403,6 +533,9 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         ISet<int> duplicateSsns,
         CancellationToken cancellationToken = default)
     {
+        _logger.LogDebug("Getting all employee details for {SsnCount} SSNs (non-paginated). CurrentYear: {CurrentYear}",
+            ssns.Count, currentYear);
+
         return await _factory.UseReadOnlyContext(async ctx =>
         {
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
@@ -420,6 +553,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     d.ContactInfo.FullName,
                     d.ContactInfo.FirstName,
                     d.ContactInfo.LastName,
+                    d.ContactInfo.PhoneNumber,
                     d.Address.City,
                     d.Address.State,
                     Address = d.Address.Street,
@@ -430,11 +564,16 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     d.PayFrequencyId,
                     d.ReHireDate,
                     d.HireDate,
+                    d.FullTimeDate,
                     d.TerminationDate,
                     d.StoreNumber,
                     DemographicId = d.Id,
                     d.EmploymentStatus,
                     IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
+                    Department = d.Department != null ? d.Department.Name : "N/A",
+                    TerminationReason = d.TerminationCode != null ? d.TerminationCode.Name : "N/A",
+                    Gender = d.Gender != null ? d.Gender.Name : "N/A",
+                    PayClassification = d.PayClassification != null ? d.PayClassification.Name : "N/A",
                     // Optimize PayProfit queries
                     CurrentPayProfit = d.PayProfits
                         .Where(x => x.ProfitYear == currentYear)
@@ -506,6 +645,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     YearToDateProfitSharingHours = memberData.CurrentPayProfit?.CurrentHoursYear ?? 0,
                     HireDate = memberData.HireDate,
                     ReHireDate = memberData.ReHireDate,
+                    FullTimeDate = memberData.FullTimeDate,
                     TerminationDate = memberData.TerminationDate,
                     StoreNumber = memberData.StoreNumber,
                     EnrollmentId = memberData.CurrentPayProfit?.EnrollmentId,
@@ -515,6 +655,12 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
                     PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
                     EmploymentStatus = memberData.EmploymentStatus?.Name,
+                    Department = memberData.Department,
+                    TerminationReason = memberData.TerminationReason,
+                    Gender = memberData.Gender,
+                    PayClassification = memberData.PayClassification,
+                    PhoneNumber = memberData.PhoneNumber,
+                    WorkLocation = memberData.StoreNumber > 0 ? $"Store {memberData.StoreNumber}" : null,
                     ReceivedContributionsLastYear = memberData.PreviousPayProfit?.PsCertificateIssuedDate != null,
                     Missives = missiveList,
                     BadgesOfDuplicateSsns = duplicateBadges
@@ -529,6 +675,8 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         int badgeNumber,
         CancellationToken cancellationToken = default)
     {
+        _logger.LogDebug("Finding employee SSN by badge number: {BadgeNumber}", badgeNumber);
+
         return await _factory.UseReadOnlyContext(async ctx =>
         {
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
@@ -537,6 +685,15 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                 .Where(d => d.BadgeNumber == badgeNumber)
                 .Select(d => d.Ssn)
                 .FirstOrDefaultAsync(cancellationToken);
+
+            if (ssnEmpl == 0)
+            {
+                _logger.LogInformation("No employee found for badge number: {BadgeNumber}", badgeNumber);
+            }
+            else
+            {
+                _logger.LogDebug("Found SSN for badge number: {BadgeNumber}, SSN: {MaskedSsn}", badgeNumber, ssnEmpl.MaskSsn());
+            }
 
             return ssnEmpl;
         }, cancellationToken);

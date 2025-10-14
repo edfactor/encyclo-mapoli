@@ -308,11 +308,12 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
+            // Use context-based overloads to avoid nested context disposal
             IQueryable<MasterInquiryItem> query = req.MemberType switch
             {
-                1 => await GetMasterInquiryDemographics(null, cancellationToken),
-                2 => await GetMasterInquiryBeneficiary(null, cancellationToken),
-                _ => (await GetMasterInquiryDemographics(null, cancellationToken)).Union(await GetMasterInquiryBeneficiary(null, cancellationToken))
+                1 => _employeeInquiryService.GetEmployeeInquiryQuery(ctx, null),
+                2 => _beneficiaryInquiryService.GetBeneficiaryInquiryQuery(ctx, null),
+                _ => _employeeInquiryService.GetEmployeeInquiryQuery(ctx, null).Union(_beneficiaryInquiryService.GetBeneficiaryInquiryQuery(ctx, null))
             };
 
             query = FilterMemberQuery(req, query);
@@ -365,11 +366,12 @@ public sealed class MasterInquiryService : IMasterInquiryService
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
+            // Use context-based overloads to avoid nested context disposal
             IQueryable<MasterInquiryItem> query = req.MemberType switch
             {
-                1 => await GetMasterInquiryDemographics(null, cancellationToken),
-                2 => await GetMasterInquiryBeneficiary(null, cancellationToken),
-                _ => (await GetMasterInquiryDemographics(null, cancellationToken)).Union(await GetMasterInquiryBeneficiary(null, cancellationToken))
+                1 => _employeeInquiryService.GetEmployeeInquiryQuery(ctx, null),
+                2 => _beneficiaryInquiryService.GetBeneficiaryInquiryQuery(ctx, null),
+                _ => _employeeInquiryService.GetEmployeeInquiryQuery(ctx, null).Union(_beneficiaryInquiryService.GetBeneficiaryInquiryQuery(ctx, null))
             };
 
             var masterInquiryRequest = new MasterInquiryRequest
@@ -597,6 +599,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 TerminationReason = memberData.TerminationReason,
                 Gender = memberData.Gender,
                 PayClassification = memberData.PayClassification,
+                PhoneNumber = memberData.PhoneNumber,
+                WorkLocation = memberData.WorkLocation,
 
                 AllocationToAmount = balance?.AllocationsToBeneficiary ?? 0,
                 AllocationFromAmount = balance?.AllocationsFromBeneficiary ?? 0,
