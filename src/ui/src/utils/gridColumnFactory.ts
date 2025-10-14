@@ -712,7 +712,7 @@ export const createStatusColumn = (options: FormattableColumnOptions = {}): ColD
     headerName = "Status",
     field = "status",
     colId = field,
-    minWidth = 180,
+    minWidth = 70,
     maxWidth,
     alignment = "left",
     sortable = true,
