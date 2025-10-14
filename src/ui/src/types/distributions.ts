@@ -18,6 +18,8 @@ export interface DistributionSearchRequest {
 }
 
 export interface DistributionSearchResponse {
+  id: number;
+  paymentSequence: number;
   ssn: string;
   badgeNumber: number | null;
   fullName: string;
