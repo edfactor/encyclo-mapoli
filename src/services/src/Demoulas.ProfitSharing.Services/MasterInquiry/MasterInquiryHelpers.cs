@@ -1,4 +1,4 @@
-using Demoulas.Common.Contracts.Contracts.Request;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -162,13 +162,13 @@ public static class MasterInquiryHelpers
         }
 
         // Use fast path if we have PaymentType (highly selective)
-        if (req.PaymentType.HasValue && req.PaymentType.Value > 0)
+        if (req.PaymentType is > 0)
         {
             return true;
         }
 
         // Also use fast path if we have EndProfitYear with SSN or BadgeNumber (targeted lookup)
-        if (req.EndProfitYear.HasValue && (req.Ssn != 0 || (req.BadgeNumber.HasValue && req.BadgeNumber.Value > 0)))
+        if (req.EndProfitYear.HasValue && (req.Ssn != 0 || req.BadgeNumber is > 0))
         {
             return true;
         }

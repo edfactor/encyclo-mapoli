@@ -31,7 +31,6 @@ public sealed class MasterInquiryService : IMasterInquiryService
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ILogger _logger;
     private readonly ITotalService _totalService;
-    private readonly IMissiveService _missiveService;
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly IEmployeeMasterInquiryService _employeeInquiryService;
     private readonly IBeneficiaryMasterInquiryService _beneficiaryInquiryService;
@@ -40,14 +39,12 @@ public sealed class MasterInquiryService : IMasterInquiryService
         IProfitSharingDataContextFactory dataContextFactory,
         ITotalService totalService,
         ILoggerFactory loggerFactory,
-        IMissiveService missiveService,
         IDemographicReaderService demographicReaderService,
         IEmployeeMasterInquiryService employeeInquiryService,
         IBeneficiaryMasterInquiryService beneficiaryInquiryService)
     {
         _dataContextFactory = dataContextFactory;
         _totalService = totalService;
-        _missiveService = missiveService;
         _demographicReaderService = demographicReaderService;
         _employeeInquiryService = employeeInquiryService;
         _beneficiaryInquiryService = beneficiaryInquiryService;
@@ -81,9 +78,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
                     // Original path: Build full query for complex filters
                     IQueryable<MasterInquiryItem> query = req.MemberType switch
                     {
-                        1 => await GetMasterInquiryDemographics(req, cancellationToken),
-                        2 => await GetMasterInquiryBeneficiary(req, cancellationToken),
-                        _ => (await GetMasterInquiryDemographics(req, cancellationToken)).Union(await GetMasterInquiryBeneficiary(req, cancellationToken))
+                        1 => await GetMasterInquiryDemographics(req, timeoutToken),
+                        2 => await GetMasterInquiryBeneficiary(req, timeoutToken),
+                        _ => (await GetMasterInquiryDemographics(req, timeoutToken)).Union(await GetMasterInquiryBeneficiary(req, timeoutToken))
                     };
 
                     query = FilterMemberQuery(req, query).TagWith("MasterInquiry: Filtered member query");
