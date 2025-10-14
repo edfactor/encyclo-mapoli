@@ -1,10 +1,11 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormLabel, Grid, MenuItem, TextField } from "@mui/material";
+import { Checkbox, FormLabel, Grid, ListItemText, MenuItem, TextField } from "@mui/material";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { DistributionSearchFormData } from "../../types";
 import { mustBeNumberValidator } from "../../utils/FormValidators";
+import { getDistributionIdLabel } from "../../utils/lookups";
 
 interface DistributionInquirySearchFilterProps {
   onSearch: (data: DistributionSearchFormData) => void;
@@ -22,6 +23,7 @@ const schema = yup.object().shape({
     }),
   frequency: yup.string().nullable(),
   paymentFlag: yup.string().nullable(),
+  paymentFlags: yup.array().of(yup.string().required()).nullable(),
   taxCode: yup.string().nullable(),
   minGrossAmount: mustBeNumberValidator(),
   maxGrossAmount: mustBeNumberValidator().test("greater-than-min", "Max must be greater than Min", function (value) {
@@ -54,6 +56,7 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
       ssnOrMemberNumber: "",
       frequency: null,
       paymentFlag: null,
+      paymentFlags: [],
       taxCode: null,
       minGrossAmount: "",
       maxGrossAmount: "",
@@ -71,6 +74,7 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
       ssnOrMemberNumber: "",
       frequency: null,
       paymentFlag: null,
+      paymentFlags: [],
       taxCode: null,
       minGrossAmount: "",
       maxGrossAmount: "",
@@ -132,20 +136,56 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <FormLabel>Payment Flag</FormLabel>
           <Controller
-            name="paymentFlag"
+            name="paymentFlags"
             control={control}
             render={({ field }) => (
               <TextField
                 {...field}
-                value={field.value ?? ""}
+                value={field.value ?? []}
                 select
+                SelectProps={{
+                  multiple: true,
+                  renderValue: (selected) => {
+                    const selectedArray = selected as string[];
+                    return selectedArray.length === 0 ? "All" : selectedArray.join(", ");
+                  }
+                }}
                 fullWidth
                 variant="outlined"
-                error={!!errors.paymentFlag}
-                helperText={errors.paymentFlag?.message}>
-                <MenuItem value="">All</MenuItem>
-                <MenuItem value="Y">Yes</MenuItem>
-                <MenuItem value="C">Check</MenuItem>
+                error={!!errors.paymentFlags}
+                helperText={errors.paymentFlags?.message}>
+                <MenuItem value="C">
+                  <Checkbox checked={(field.value ?? []).indexOf("C") > -1} />
+                  <ListItemText primary={`C - ${getDistributionIdLabel("C")}`} />
+                </MenuItem>
+                <MenuItem value="D">
+                  <Checkbox checked={(field.value ?? []).indexOf("D") > -1} />
+                  <ListItemText primary={`D - ${getDistributionIdLabel("D")}`} />
+                </MenuItem>
+                <MenuItem value="H">
+                  <Checkbox checked={(field.value ?? []).indexOf("H") > -1} />
+                  <ListItemText primary={`H - ${getDistributionIdLabel("H")}`} />
+                </MenuItem>
+                <MenuItem value="O">
+                  <Checkbox checked={(field.value ?? []).indexOf("O") > -1} />
+                  <ListItemText primary={`O - ${getDistributionIdLabel("O")}`} />
+                </MenuItem>
+                <MenuItem value="P">
+                  <Checkbox checked={(field.value ?? []).indexOf("P") > -1} />
+                  <ListItemText primary={`P - ${getDistributionIdLabel("P")}`} />
+                </MenuItem>
+                <MenuItem value="X">
+                  <Checkbox checked={(field.value ?? []).indexOf("X") > -1} />
+                  <ListItemText primary={`X - ${getDistributionIdLabel("X")}`} />
+                </MenuItem>
+                <MenuItem value="Y">
+                  <Checkbox checked={(field.value ?? []).indexOf("Y") > -1} />
+                  <ListItemText primary={`Y - ${getDistributionIdLabel("Y")}`} />
+                </MenuItem>
+                <MenuItem value="Z">
+                  <Checkbox checked={(field.value ?? []).indexOf("Z") > -1} />
+                  <ListItemText primary={`Z - ${getDistributionIdLabel("Z")}`} />
+                </MenuItem>
               </TextField>
             )}
           />

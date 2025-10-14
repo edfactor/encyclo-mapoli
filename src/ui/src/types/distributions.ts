@@ -6,6 +6,7 @@ export interface DistributionSearchRequest {
   psnSuffix?: number;
   distributionFrequencyId?: string;
   distributionStatusId?: string;
+  distributionStatusIds?: string[];
   taxCodeId?: string;
   minGrossAmount?: number;
   maxGrossAmount?: number;
@@ -18,6 +19,8 @@ export interface DistributionSearchRequest {
 }
 
 export interface DistributionSearchResponse {
+  id: number;
+  paymentSequence: number;
   ssn: string;
   badgeNumber: number | null;
   fullName: string;
@@ -38,6 +41,7 @@ export interface DistributionSearchFormData {
   ssnOrMemberNumber?: string;
   frequency?: string | null;
   paymentFlag?: string | null;
+  paymentFlags?: string[];
   taxCode?: string | null;
   minGrossAmount?: string;
   maxGrossAmount?: string;

@@ -14,6 +14,7 @@ public sealed record DistributionSearchRequest : SortedPaginationRequestDto
     public short? PsnSuffix { get; set; }
     public char? DistributionFrequencyId { get; set; }
     public char? DistributionStatusId { get; set; }
+    public List<string>? DistributionStatusIds { get; set; }
     public char? TaxCodeId { get; set; }
     public decimal? MinGrossAmount { get; set; }
     public decimal? MaxGrossAmount { get; set; }
