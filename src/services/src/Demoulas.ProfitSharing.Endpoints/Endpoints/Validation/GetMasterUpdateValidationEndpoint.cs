@@ -33,7 +33,7 @@ public sealed class GetMasterUpdateValidationEndpoint
 
     public override void Configure()
     {
-        Get("validation/checksum/master-update/{profitYear}");
+        Get("checksum/master-update/{profitYear}");
         Summary(s =>
         {
             s.Summary = "Get Master Update cross-reference validation data for a specific profit year";
