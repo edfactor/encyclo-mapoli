@@ -100,7 +100,12 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IReportRunnerService, ReportRunnerService>();
         _ = builder.Services.AddScoped<IStateTaxLookupService, StateTaxLookupService>();
         _ = builder.Services.AddScoped<IMergeProfitDetailsService, MergeProfitDetailsService>();
+
+        // Validation services
         _ = builder.Services.AddScoped<IChecksumValidationService, ChecksumValidationService>();
+        _ = builder.Services.AddScoped<ICrossReferenceValidationService, CrossReferenceValidationService>();
+        _ = builder.Services.AddScoped<IArchivedValueService, ArchivedValueService>();
+        _ = builder.Services.AddScoped<IAllocTransferValidationService, AllocTransferValidationService>();
 
         // Register lookup caches as singletons (they manage their own distributed cache access)
         _ = builder.Services.AddSingleton<Services.Caching.StateTaxCache>();

@@ -107,29 +107,82 @@ public sealed class AuditService : IAuditService
         IEnumerable<PropertyInfo> properties;
         if (classHasAttribute)
         {
-            // If class has the attribute, include all decimal properties
+            // If class has the attribute, include all numeric properties (including nullable)
             properties = type.GetProperties()
-                .Where(p => p.PropertyType == typeof(decimal));
+                .Where(p => IsNumericType(p.PropertyType));
         }
         else
         {
             // Otherwise, only include properties that explicitly have the attribute
             properties = type.GetProperties()
                 .Where(p => Attribute.IsDefined(p, typeof(YearEndArchivePropertyAttribute))
-                            && p.PropertyType == typeof(decimal));
+                            && IsNumericType(p.PropertyType));
         }
 
         foreach (var prop in properties)
         {
-            var value = (decimal)(prop.GetValue(obj) ?? 0);
+            // Convert all numeric types to decimal for consistent hashing
+            var rawValue = prop.GetValue(obj);
+            var value = ConvertToDecimal(rawValue);
             result.Add(new KeyValuePair<string, decimal>(prop.Name, value));
         }
+
+        // Materialize the result list to avoid lazy evaluation issues with yield return
+        var materializedResult = new List<KeyValuePair<string, KeyValuePair<decimal, byte[]>>>();
 
         foreach (var kevValue in result)
         {
             var hash = SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(kevValue.Value));
             var kvp = new KeyValuePair<string, KeyValuePair<decimal, byte[]>>(kevValue.Key, new KeyValuePair<decimal, byte[]>(kevValue.Value, hash));
-            yield return kvp;
+            materializedResult.Add(kvp);
         }
+
+        return materializedResult;
+    }
+
+    /// <summary>
+    /// Determines if a type is a numeric type (including nullable variants).
+    /// Supports all C# primitive numeric types: byte, sbyte, short, ushort, int, uint, long, ulong, float, double, decimal.
+    /// </summary>
+    private static bool IsNumericType(Type type)
+    {
+        // Get the underlying type if nullable
+        var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
+
+        return underlyingType == typeof(byte) ||
+               underlyingType == typeof(sbyte) ||
+               underlyingType == typeof(short) ||
+               underlyingType == typeof(ushort) ||
+               underlyingType == typeof(int) ||
+               underlyingType == typeof(uint) ||
+               underlyingType == typeof(long) ||
+               underlyingType == typeof(ulong) ||
+               underlyingType == typeof(float) ||
+               underlyingType == typeof(double) ||
+               underlyingType == typeof(decimal);
+    }
+
+    /// <summary>
+    /// Converts any numeric type (or null) to decimal for consistent hashing.
+    /// Returns 0m for null values.
+    /// </summary>
+    private static decimal ConvertToDecimal(object? value)
+    {
+        return value switch
+        {
+            byte b => b,
+            sbyte sb => sb,
+            short s => s,
+            ushort us => us,
+            int i => i,
+            uint ui => ui,
+            long l => l,
+            ulong ul => ul,
+            float f => (decimal)f,
+            double d => (decimal)d,
+            decimal dec => dec,
+            null => 0m,
+            _ => 0m
+        };
     }
 }

@@ -16,6 +16,7 @@ import { useLazyGetBreakdownByStoreQuery, useLazyGetBreakdownByStoreTotalsQuery 
 import { RootState } from "reduxstore/store";
 import { FilterParams } from "reduxstore/types";
 import { DSMGrid, numberToCurrency } from "smart-ui-library";
+import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
 import presets from "./presets";
 import { GetQPAY066AdHocGridColumns } from "./QPAY066AdHocGridColumns";
 
@@ -102,6 +103,9 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, storeNumber, onLoadingC
   const isQPAY066MReport = params.reportId === 8;
 
   const isLoadingQPAY066MData = isQPAY066MReport && (isBreakdownFetching || isTotalsFetching);
+
+  // Use dynamic grid height utility hook
+  const gridMaxHeight = useDynamicGridHeight();
 
   useEffect(() => {
     if (isQPAY066MReport && hasToken && profitYear && storeNumber) {
@@ -267,6 +271,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, storeNumber, onLoadingC
         <DSMGrid
           preferenceKey="QPAY066_ADHOC_REPORT"
           isLoading={isBreakdownFetching || isTotalsFetching}
+          maxHeight={gridMaxHeight}
           providedOptions={{
             rowData: rowData,
             columnDefs: columnDefs

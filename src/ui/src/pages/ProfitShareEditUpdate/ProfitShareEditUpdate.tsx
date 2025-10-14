@@ -1,9 +1,11 @@
 import { Replay } from "@mui/icons-material";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Alert, AlertTitle, Button, CircularProgress, Grid, Tooltip, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DSMAccordion, numberToCurrency, Page, setMessage, SmartModal, TotalsGrid } from "smart-ui-library";
 import StatusDropdownActionNode from "../../components/StatusDropdownActionNode";
+import { useChecksumValidation } from "../../hooks/useChecksumValidation";
 import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
 import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
 import {
@@ -31,11 +33,10 @@ import {
   ProfitYearRequest
 } from "../../reduxstore/types";
 // usePrerequisiteNavigations now encapsulated by PrerequisiteGuard
-import CrossReferenceValidationDisplay from "../../components/CrossReferenceValidationDisplay/CrossReferenceValidationDisplay";
 import PrerequisiteGuard from "../../components/PrerequisiteGuard";
-import { MasterUpdateCrossReferenceValidationResponse } from "../../types/validation/cross-reference-validation";
 import { MessageKeys, Messages } from "../../utils/messageDictonary";
 import ChangesList from "./ChangesList";
+import { MasterUpdateSummaryTable } from "./MasterUpdateSummaryTable";
 import ProfitShareEditConfirmation from "./ProfitShareEditConfirmation";
 import ProfitShareEditUpdateSearchFilter from "./ProfitShareEditUpdateSearchFilter";
 import ProfitShareEditUpdateTabs from "./ProfitShareEditUpdateTabs";
@@ -107,8 +108,8 @@ const useRevertAction = (
 const useSaveAction = (
   setEmployeesReverted: (count: number) => void,
   setBeneficiariesReverted: (count: number) => void,
-  setEtvasReverted: (count: number) => void,
-  setValidationResponse: (response: MasterUpdateCrossReferenceValidationResponse | null) => void
+  setEtvasReverted: (count: number) => void
+  // NOTE: Removed setValidationResponse parameter - now using useChecksumValidation hook
 ) => {
   const { profitSharingEditQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const [applyMaster] = useGetMasterApplyMutation();
@@ -141,9 +142,9 @@ const useSaveAction = (
         console.log("Successfully applied changes to year end: ", payload);
         console.log("Employees affected: ", payload?.employeesEffected);
 
-        // Capture cross-reference validation if present
+        // NOTE: Removed setValidationResponse call - useChecksumValidation hook handles this
+        // Cross-reference validation will auto-refresh via the hook after save
         if (payload.crossReferenceValidation) {
-          setValidationResponse(payload.crossReferenceValidation);
           console.log("Cross-reference validation:", payload.crossReferenceValidation);
         }
 
@@ -368,10 +369,89 @@ const ProfitShareEditUpdate = () => {
   const [updatedBy, setUpdatedBy] = useState<string | null>(null);
   const [updatedTime, setUpdatedTime] = useState<string | null>(null);
 
-  // State for cross-reference validation response
-  const [validationResponse, setValidationResponse] = useState<MasterUpdateCrossReferenceValidationResponse | null>(
-    null
-  );
+  // State for validation popup - track which field popup is open
+  const [openValidationField, setOpenValidationField] = useState<string | null>(null);
+
+  const handleValidationToggle = (fieldName: string) => {
+    setOpenValidationField(openValidationField === fieldName ? null : fieldName);
+  };
+
+  // Helper to render validation icon with popup for a specific field (legacy - replaced by renderValidationIconInGrid)
+  const renderValidationIcon = (fieldKey: string, fieldDisplayName: string) => {
+    const validation = getFieldValidation(fieldKey);
+    if (!validation) {
+      return null;
+    }
+
+    const isOpen = openValidationField === fieldKey;
+
+    return (
+      <div className="relative ml-1 inline-block">
+        <InfoOutlinedIcon
+          className={`cursor-pointer ${validation.isValid ? "text-green-500" : "text-orange-500"}`}
+          fontSize="small"
+          onClick={() => handleValidationToggle(fieldKey)}
+        />
+        {isOpen && (
+          <div className="absolute left-0 top-full z-[1000] mt-1 w-[350px] rounded border border-gray-300 bg-white shadow-lg">
+            <div className="p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <Typography
+                  variant="subtitle2"
+                  sx={{ fontWeight: "bold" }}>
+                  {fieldDisplayName}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: validation.isValid ? "success.main" : "warning.main",
+                    fontWeight: "bold"
+                  }}>
+                  {validation.isValid ? "✓ Match" : "⚠ Mismatch"}
+                </Typography>
+              </div>
+              <table className="w-full border-collapse text-sm">
+                <tbody>
+                  <tr>
+                    <td className="border-b border-gray-200 py-2 pr-2 font-semibold text-gray-700">
+                      Current (PAY444):
+                    </td>
+                    <td className="border-b border-gray-200 py-2 text-right">
+                      {numberToCurrency(validation.currentValue || 0)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="border-b border-gray-200 py-2 pr-2 font-semibold text-gray-700">
+                      Expected (PAY443):
+                    </td>
+                    <td className="border-b border-gray-200 py-2 text-right">
+                      {numberToCurrency(validation.expectedValue || 0)}
+                    </td>
+                  </tr>
+                  {!validation.isValid && (validation.variance || 0) !== 0 && (
+                    <tr className="bg-orange-50">
+                      <td className="py-2 pr-2 font-semibold text-orange-700">Variance:</td>
+                      <td className="py-2 text-right font-semibold text-orange-700">
+                        {(validation.variance || 0) > 0 ? "+" : ""}
+                        {numberToCurrency(validation.variance || 0)}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+              {validation.message && (
+                <Typography
+                  variant="caption"
+                  sx={{ display: "block", mt: 1, color: "text.secondary", fontStyle: "italic" }}>
+                  {validation.message}
+                </Typography>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   // This is a flag used to indicate that the year end change have been made
   // and a banner should be shown indicating this
@@ -386,8 +466,8 @@ const ProfitShareEditUpdate = () => {
   const saveAction = useSaveAction(
     setEmployeesAffected,
     setBeneficiariesAffected,
-    setEtvasAffected,
-    setValidationResponse
+    setEtvasAffected
+    // NOTE: Removed setValidationResponse - now using useChecksumValidation hook
   );
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [pageNumberReset, setPageNumberReset] = useState(false);
@@ -418,6 +498,126 @@ const ProfitShareEditUpdate = () => {
   const dispatch = useDispatch();
   const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
   const isReadOnly = useReadOnlyNavigation();
+
+  // Use checksum validation hook to fetch validation data independently from any page
+  const {
+    validationData: validationResponse,
+    isLoading: isValidationLoading,
+    error: validationError,
+    refetch: refetchValidation,
+    getFieldValidation
+  } = useChecksumValidation({
+    profitYear: profitYear || 0,
+    autoFetch: true,
+    // Pass current values from PAY444 for client-side comparison with PAY443 archived values
+    currentValues: profitSharingUpdate?.profitShareUpdateTotals
+      ? {
+          TotalProfitSharingBalance: profitSharingUpdate.profitShareUpdateTotals.beginningBalance,
+          DistributionTotals: profitSharingUpdate.profitShareUpdateTotals.distributions,
+          ForfeitureTotals: profitSharingUpdate.profitShareUpdateTotals.forfeiture,
+          ContributionTotals: profitSharingUpdate.profitShareUpdateTotals.totalContribution,
+          EarningsTotals: profitSharingUpdate.profitShareUpdateTotals.earnings,
+          IncomingAllocations: profitSharingUpdate.profitShareUpdateTotals.allocations,
+          OutgoingAllocations: profitSharingUpdate.profitShareUpdateTotals.paidAllocations,
+          // NetAllocTransfer is calculated field: allocations + paidAllocations
+          // Note: paidAllocations is already stored as a NEGATIVE value in the database
+          NetAllocTransfer:
+            (profitSharingUpdate.profitShareUpdateTotals.allocations || 0) +
+            (profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0)
+        }
+      : undefined
+  });
+
+  // Helper to render validation icon positioned absolutely in a TotalsGrid (like State Taxes pattern)
+  // IMPORTANT: Must be declared AFTER getFieldValidation helper
+  const renderValidationIconInGrid = (fieldKey: string, fieldDisplayName: string) => {
+    const validation = getFieldValidation(fieldKey);
+    if (!validation) {
+      return null;
+    }
+
+    return (
+      <div
+        className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
+        onClick={() => handleValidationToggle(fieldKey)}>
+        <InfoOutlinedIcon
+          className={`cursor-pointer ${validation.isValid ? "text-green-500" : "text-orange-500"}`}
+          fontSize="small"
+        />
+        {openValidationField === fieldKey && (
+          <div className="absolute left-0 top-full z-[1000] mt-1 max-h-[300px] w-[350px] overflow-auto rounded border border-gray-300 bg-white shadow-lg">
+            <div className="p-2 px-4 pb-4">
+              <Typography
+                variant="subtitle2"
+                sx={{ p: 1, fontWeight: "bold" }}>
+                {fieldDisplayName}
+              </Typography>
+              <table className="w-full border-collapse text-[0.95rem]">
+                <thead>
+                  <tr>
+                    <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">Report</th>
+                    <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="border-b border-gray-100 px-2 py-1 text-left">Current (PAY444)</td>
+                    <td className="border-b border-gray-100 px-2 py-1 text-right">
+                      {numberToCurrency(validation.currentValue || 0)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="border-b border-gray-100 px-2 py-1 text-left">Expected (PAY443)</td>
+                    <td className="border-b border-gray-100 px-2 py-1 text-right">
+                      {numberToCurrency(validation.expectedValue || 0)}
+                    </td>
+                  </tr>
+                  {!validation.isValid && (validation.variance || 0) !== 0 && (
+                    <tr className="bg-orange-50">
+                      <td className="px-2 py-1 text-left font-semibold text-orange-700">Variance</td>
+                      <td className="px-2 py-1 text-right font-bold text-orange-700">
+                        {numberToCurrency(validation.variance || 0)}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+              {validation.message && (
+                <Typography
+                  variant="caption"
+                  sx={{ mt: 1, display: "block", px: 1, color: "text.secondary" }}>
+                  {validation.message}
+                </Typography>
+              )}
+              <div className="mt-2 flex items-center justify-end gap-2 px-2">
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: validation.isValid ? "success.main" : "warning.main",
+                    fontWeight: "bold"
+                  }}>
+                  {validation.isValid ? "✓ Values Match" : "⚠ Values Mismatch"}
+                </Typography>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Extract cross-reference validation from profitSharingUpdate response
+  // NOTE: This useEffect is now DISABLED because we're using the useChecksumValidation hook
+  // which auto-fetches validation data independently based on profitYear.
+  // Keeping this commented for reference in case we need to revert.
+  /*
+  useEffect(() => {
+    if (profitSharingUpdate?.crossReferenceValidation) {
+      setValidationResponse(profitSharingUpdate.crossReferenceValidation);
+      console.log("Loaded cross-reference validation from GET response:", profitSharingUpdate.crossReferenceValidation);
+    }
+  }, [profitSharingUpdate]);
+  */
 
   useEffect(() => {
     const currentYear = new Date().getFullYear();
@@ -527,13 +727,6 @@ const ProfitShareEditUpdate = () => {
             )
           }
 
-          {/* Cross-Reference Validation Display */}
-          {validationResponse && (
-            <div className="w-full px-[24px]">
-              <CrossReferenceValidationDisplay validation={validationResponse} />
-            </div>
-          )}
-
           <Grid
             container
             rowSpacing="24px"
@@ -577,60 +770,19 @@ const ProfitShareEditUpdate = () => {
                   <Typography
                     fontWeight="bold"
                     variant="body2">
-                    {`Employees: ${profitSharingUpdate.profitShareUpdateTotals.totalEmployees} | Beneficiaries: ${profitSharingUpdate.profitShareUpdateTotals.totalBeneficaries}`}
+                    {`Employees: ${profitSharingUpdate.profitShareUpdateTotals.totalEmployees} | Beneficiaries: ${profitSharingUpdate.profitShareUpdateTotals.totalBeneficiaries}`}
                   </Typography>
                 </div>
 
-                <TotalsGrid
-                  displayData={[
-                    [
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.beginningBalance || 0),
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.totalContribution || 0),
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earnings || 0),
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earnings2 || 0),
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.forfeiture || 0),
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.distributions || 0),
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.military || 0),
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.endingBalance || 0)
-                    ],
-                    [
-                      "",
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.allocations || 0),
-                      "",
-                      "",
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.maxPointsTotal || 0),
-                      "",
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0),
-                      numberToCurrency(
-                        (profitSharingUpdate.profitShareUpdateTotals.allocations || 0) +
-                          (profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0)
-                      )
-                    ],
-                    [
-                      "",
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.contributionPoints || 0),
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earningPoints || 0),
-                      "",
-                      "",
-                      "",
-                      "",
-                      ""
-                    ]
-                  ]}
-                  leftColumnHeaders={["Total", "Allocation", "Point"]}
-                  topRowHeaders={[
-                    "",
-                    "Beginning Balance",
-                    "Contributions",
-                    "Earnings",
-                    "Earnings2",
-                    "Forfeitures",
-                    "Distributions",
-                    "Military/Paid Allocation",
-                    "Ending Balance"
-                  ]}
-                  tablePadding="12px"
+                {/* Unified Summary Table (PAY444) */}
+                <MasterUpdateSummaryTable
+                  totals={profitSharingUpdate.profitShareUpdateTotals}
+                  validationResponse={validationResponse}
+                  getFieldValidation={getFieldValidation}
+                  openValidationField={openValidationField}
+                  onValidationToggle={handleValidationToggle}
                 />
+
                 <TotalsGrid
                   tablePadding="12px"
                   displayData={[
@@ -657,7 +809,7 @@ const ProfitShareEditUpdate = () => {
                 </div>
                 <div className="flex gap-2">
                   <TotalsGrid
-                    breakPoints={{ xs: 5, sm: 5, md: 5, lg: 5, xl: 5 }}
+                    breakpoints={{ xs: 5, sm: 5, md: 5, lg: 5, xl: 5 }}
                     tablePadding="4px"
                     displayData={[
                       [

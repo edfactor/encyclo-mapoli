@@ -3,7 +3,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 
-public sealed record MasterInquiryResponseDto : IdRequest, IIsExecutive
+public sealed record MasterInquiryResponseDto : IdRequest, IIsExecutive, IProfitYearRequest
 {
     public bool IsEmployee => PsnSuffix == 0;
     public string Ssn { get; set; } = string.Empty;

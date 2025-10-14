@@ -14,6 +14,7 @@ import { MilitaryApi } from "./api/MilitaryApi";
 import { NavigationApi } from "./api/NavigationApi";
 import { NavigationStatusApi } from "./api/NavigationStatusApi";
 import { SecurityApi } from "./api/SecurityApi";
+import { validationApi } from "./api/ValidationApi";
 import { YearsEndApi } from "./api/YearsEndApi";
 import navigationStatusSlice from "./slices/NavigationStatusSlice";
 import AppSupportSlice from "./slices/appSupportSlice";
@@ -61,7 +62,8 @@ export const store = configureStore({
     [NavigationStatusApi.reducerPath]: NavigationStatusApi.reducer,
     [BeneficiariesApi.reducerPath]: BeneficiariesApi.reducer,
     [AdjustmentsApi.reducerPath]: AdjustmentsApi.reducer,
-    [DistributionApi.reducerPath]: DistributionApi.reducer
+    [DistributionApi.reducerPath]: DistributionApi.reducer,
+    [validationApi.reducerPath]: validationApi.reducer
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -82,6 +84,7 @@ export const store = configureStore({
       .concat(BeneficiariesApi.middleware)
       .concat(AdjustmentsApi.middleware)
       .concat(DistributionApi.middleware)
+      .concat(validationApi.middleware)
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
