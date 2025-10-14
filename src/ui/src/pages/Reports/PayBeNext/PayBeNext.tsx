@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import { DSMAccordion, DSMGrid, ISortParams, Page, Pagination, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { CAPTIONS } from "../../../constants";
+import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
 import { useLazyAdhocBeneficiariesReportQuery } from "../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../reduxstore/store";
@@ -39,6 +40,9 @@ const PayBeNext = () => {
     isSortDescending: true
   });
   const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
+
+  // Use dynamic grid height utility hook
+  const gridMaxHeight = useDynamicGridHeight();
 
   const addRowToSelectedRows = (id: number) => {
     setSelectedRowIds((prev) => [...prev, id]);
@@ -287,7 +291,7 @@ const PayBeNext = () => {
           size={{ xs: 12 }}
           width="100%">
           {isSuccess && (
-            <>
+            <div className="relative">
               <div>
                 <Typography
                   variant="h2"
@@ -298,6 +302,7 @@ const PayBeNext = () => {
                 <DSMGrid
                   preferenceKey={CAPTIONS.BENEFICIARY_INQUIRY}
                   isLoading={isFetching}
+                  maxHeight={gridMaxHeight}
                   handleSortChanged={sortEventHandler}
                   providedOptions={{
                     rowData: gridData,
@@ -360,7 +365,7 @@ const PayBeNext = () => {
                     />
                   )}
               </div>
-            </>
+            </div>
           )}
 
           {/**Render Report here! */}

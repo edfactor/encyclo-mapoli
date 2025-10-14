@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { Path, useNavigate } from "react-router-dom";
 import { DSMGrid, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
+import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
 import { useGridPagination } from "../../hooks/useGridPagination";
 import { useLazyGetQPAY066BTerminatedWithVestedBalanceQuery } from "../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../reduxstore/store";
@@ -18,6 +19,9 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ _filterParams, onLoadingCha
   const navigate = useNavigate();
   const hasToken = useSelector((state: RootState) => !!state.security.token);
   const [getQPAY066BData, { data: qpay066bData, isFetching }] = useLazyGetQPAY066BTerminatedWithVestedBalanceQuery();
+
+  // Use dynamic grid height utility hook
+  const gridMaxHeight = useDynamicGridHeight();
 
   const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
     initialPageSize: 25,
@@ -75,7 +79,7 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ _filterParams, onLoadingCha
   const showTotals = !!qpay066bData?.response?.results;
 
   return (
-    <>
+    <div className="relative">
       {showTotals && (
         <div className="sticky top-0 z-10 flex bg-white">
           <TotalsGrid
@@ -126,6 +130,7 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ _filterParams, onLoadingCha
           <DSMGrid
             preferenceKey="QPAY066B_GRID"
             isLoading={isFetching}
+            maxHeight={gridMaxHeight}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: qpay066bData?.response?.results || [],
@@ -143,7 +148,7 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ _filterParams, onLoadingCha
           )}
         </>
       )}
-    </>
+    </div>
   );
 };
 

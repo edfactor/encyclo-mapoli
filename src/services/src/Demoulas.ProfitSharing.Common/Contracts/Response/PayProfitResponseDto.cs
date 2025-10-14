@@ -1,5 +1,7 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
-public sealed record PayProfitResponseDto
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+public sealed record PayProfitResponseDto : IProfitYearRequest
 {
     /// <summary>
     /// Gets or sets the Oracle HCM (Human Capital Management) identifier.

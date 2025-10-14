@@ -45,104 +45,182 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
             short currentYear = request.ProfitYear;
             short lastYear = (short)(currentYear - 1);
 
-            ForfeituresAndPointsForYearResponseWithTotals response = await ComputeTotals(ctx, currentYear, lastYear, cancellationToken);
+            // Validate no duplicate SSNs exist
+            var validator = new InlineValidator<short>();
+            validator.RuleFor(r => r)
+                .MustAsync(async (_, ct) => !await _duplicateSsnReportService.DuplicateSsnExistsAsync(ct))
+                .WithMessage("There are presently duplicate SSN's in the system, which will cause this process to fail.");
+            await validator.ValidateAndThrowAsync(currentYear, cancellationToken);
 
-            // Employee details
-            List<ForfeituresAndPointsForYearResponse> members = await GetMembers(ctx, currentYear, cancellationToken);
+            // Execute queries sequentially (DbContext is not thread-safe)
+            // Query 1: Last year total balance - aggregate in database
+            decimal? lastYearTotal = await _totalService.TotalVestingBalance(ctx, lastYear, DateOnly.MaxValue)
+                
+                .TagWith($"ForfeituresReport-LastYearTotal-{lastYear}")
+                .SumAsync(ptvb => ptvb.CurrentBalance, cancellationToken);
 
-            // Each employee's value is independently rounded. 
+            // Query 2: Current year transactions (reused for totals and member details)
+            var transactionsInCurrentYear = await _totalService.GetTransactionsBySsnForProfitYearForOracle(ctx, currentYear)
+                
+                .TagWith($"ForfeituresReport-Transactions-{currentYear}")
+                .ToListAsync(cancellationToken);
+
+            // Query 3: Current year balances with projection (only load needed fields)
+            var currentBalances = await _totalService.TotalVestingBalance(ctx, currentYear, DateOnly.MaxValue)
+                
+                .TagWith($"ForfeituresReport-CurrentBalances-{currentYear}")
+                .Select(b => new { b.Ssn, b.Id, b.CurrentBalance })
+                .ToListAsync(cancellationToken);
+
+            // Query 4: Demographics joined with PayProfits with projection (only load needed fields)
+            IQueryable<Demographic> demographicExpression = await _demographicReaderService.BuildDemographicQuery(ctx, true);
+            var employeeData = await (
+                from demo in demographicExpression
+                join pp in ctx.PayProfits on demo.Id equals pp.DemographicId
+                where pp.ProfitYear == currentYear
+                select new
+                {
+                    // Demographic fields
+                    DemographicId = demo.Id,
+                    Ssn = demo.Ssn,
+                    BadgeNumber = demo.BadgeNumber,
+                    FullName = demo.ContactInfo.FullName,
+                    PayFrequencyId = demo.PayFrequencyId,
+                    // PayProfit fields
+                    PointsEarned = pp.PointsEarned
+                })
+                .TagWith($"ForfeituresReport-EmployeeData-{currentYear}")
+                .ToListAsync(cancellationToken);
+
+            // Query 5: Beneficiaries with projection (only load needed fields)
+            var beneficiaries = await ctx.Beneficiaries
+                .TagWith($"ForfeituresReport-Beneficiaries-{currentYear}")
+                .Where(b => b.Contact != null)
+                .Select(b => new
+                {
+                    ContactSsn = b.Contact!.Ssn,
+                    ContactId = b.Contact!.Id,
+                    ContactFullName = b.Contact.ContactInfo.FullName,
+                    BadgeNumber = b.BadgeNumber,
+                    PsnSuffix = b.PsnSuffix
+                })
+                .ToListAsync(cancellationToken);
+
+            // Build fast lookup dictionaries (in-memory, very fast)
+            var transactionsBySsn = transactionsInCurrentYear.ToDictionary(t => t.Ssn);
+            var balancesByKey = currentBalances.ToDictionary(b => (b.Ssn, b.Id));
+
+            // Compute totals (in-memory aggregation)
+            decimal distributionsTotal = transactionsInCurrentYear.Sum(syd => syd.DistributionsTotal);
+            decimal paidAllocationsTotal = transactionsInCurrentYear.Sum(syd => syd.PaidAllocationsTotal);
+            decimal allocationsTotal = transactionsInCurrentYear.Sum(syd => syd.AllocationsTotal);
+            decimal forfeitsTotal = transactionsInCurrentYear.Sum(syd => syd.ForfeitsTotal);
+            int totalContForfeitPoints = (int)employeeData.Sum(e => e.PointsEarned ?? 0);
+
+            // Build employee members
+            var employeeSsns = new HashSet<int>();
+            var members = new List<ForfeituresAndPointsForYearResponse>(employeeData.Count + 100);
+
+            foreach (var emp in employeeData)
+            {
+                employeeSsns.Add(emp.Ssn);
+                var balance = balancesByKey.GetValueOrDefault((emp.Ssn, emp.DemographicId));
+                var transaction = transactionsBySsn.GetValueOrDefault(emp.Ssn);
+
+                var member = ToMemberDetailsFromProjection(
+                    emp.FullName!,
+                    emp.BadgeNumber,
+                    emp.Ssn,
+                    emp.PayFrequencyId,
+                    balance?.CurrentBalance,
+                    emp.PointsEarned,
+                    transaction);
+
+                // Filter immediately
+                if (member.ContForfeitPoints != 0 || member.EarningPoints != 0 || member.Forfeitures != 0)
+                {
+                    members.Add(member);
+                }
+            }
+
+            // Add beneficiaries (excluding employees)
+            foreach (var bene in beneficiaries)
+            {
+                if (!employeeSsns.Contains(bene.ContactSsn))
+                {
+                    var balance = balancesByKey.GetValueOrDefault((bene.ContactSsn, bene.ContactId));
+
+                    var member = ToBeneficiaryMemberDetails(
+                        bene.ContactFullName!,
+                        bene.ContactSsn,
+                        bene.BadgeNumber,
+                        bene.PsnSuffix,
+                        balance?.CurrentBalance);
+
+                    // Filter immediately
+                    if (member.EarningPoints != 0)
+                    {
+                        members.Add(member);
+                    }
+                }
+            }
+
+            // Sort once at the end
+            members = members
+                .OrderBy(m => m.EmployeeName, StringComparer.Ordinal)
+                .ThenByDescending(m => m.BadgeNumber)
+                .ToList();
+
+            // Calculate total earning points
             int earningPoints = members.Sum(r => r.EarningPoints);
 
-            PaginatedResponseDto<ForfeituresAndPointsForYearResponse> paginatedData = await members.AsQueryable().ToPaginationResultsAsync(request, cancellationToken);
+            // Apply pagination
+            PaginatedResponseDto<ForfeituresAndPointsForYearResponse> paginatedData =
+                await members.AsQueryable().ToPaginationResultsAsync(request, cancellationToken);
 
-            return response with { TotalEarningPoints = earningPoints, Response = paginatedData };
+            return new ForfeituresAndPointsForYearResponseWithTotals
+            {
+                DistributionTotals = distributionsTotal,
+                AllocationsFromTotals = allocationsTotal,
+                AllocationToTotals = paidAllocationsTotal,
+                TotalForfeitures = forfeitsTotal,
+                TotalEarningPoints = earningPoints,
+                TotalForfeitPoints = totalContForfeitPoints,
+                TotalProfitSharingBalance = lastYearTotal,
+                ReportDate = DateTimeOffset.UtcNow,
+                ReportName = $"PROFIT SHARING FORFEITURES AND POINTS FOR {currentYear}",
+                StartDate = new DateOnly(currentYear, 1, 1),
+                EndDate = new DateOnly(currentYear, 12, 31),
+                Response = paginatedData
+            };
         }, cancellationToken);
     }
 
-
-    private async Task<ForfeituresAndPointsForYearResponseWithTotals> ComputeTotals(ProfitSharingReadOnlyDbContext ctx, short currentYear, short lastYear,
-        CancellationToken cancellationToken)
+    // Optimized helper for employees when using projection
+    private static ForfeituresAndPointsForYearResponse ToMemberDetailsFromProjection(
+        string fullName,
+        int badgeNumber,
+        int ssn,
+        int payFrequencyId,
+        decimal? currentBalance,
+        decimal? pointsEarned,
+        ProfitDetailRollup? singleYearNumbers)
     {
-        decimal? lastYearTotal = await _totalService.TotalVestingBalance(ctx, lastYear, DateOnly.MaxValue).SumAsync(ptvb => ptvb.CurrentBalance, cancellationToken);
+        decimal balanceConsideredForEarnings = (currentBalance ?? 0) - (singleYearNumbers?.MilitaryTotal ?? 0) - (singleYearNumbers?.ClassActionFundTotal ?? 0);
+        int earningsPoints = (int)Math.Round(balanceConsideredForEarnings / 100, MidpointRounding.AwayFromZero);
+        decimal forfeitures = singleYearNumbers == null ? 0.00m : -1 * singleYearNumbers.TotalForfeitures;
 
-        var transactionsInCurrentYear = await _totalService.GetTransactionsBySsnForProfitYearForOracle(ctx, currentYear).ToListAsync(cancellationToken);
-        decimal distributionsTotal = transactionsInCurrentYear.Sum(syd => syd.DistributionsTotal);
-        decimal paidAllocationsTotal = transactionsInCurrentYear.Sum(syd => syd.PaidAllocationsTotal);
-        decimal allocationsTotal = transactionsInCurrentYear.Sum(syd => syd.AllocationsTotal);
-        decimal forfeitsTotal = transactionsInCurrentYear.Sum(syd => syd.ForfeitsTotal);
-
-        int totalContForfeitPoints = (int)(await ctx.PayProfits.Where(p => p.ProfitYear == currentYear).SumAsync(p => p.PointsEarned, cancellationToken))!;
-
-        return new ForfeituresAndPointsForYearResponseWithTotals
+        return new ForfeituresAndPointsForYearResponse
         {
-            DistributionTotals = distributionsTotal,
-            AllocationsFromTotals = allocationsTotal,
-            AllocationToTotals = paidAllocationsTotal,
-            TotalForfeitures = forfeitsTotal,
-            TotalEarningPoints = 0,
-            TotalForfeitPoints = totalContForfeitPoints,
-            TotalProfitSharingBalance = lastYearTotal,
-            ReportDate = DateTimeOffset.UtcNow,
-            ReportName = $"PROFIT SHARING FORFEITURES AND POINTS FOR {currentYear}",
-            StartDate = new DateOnly(currentYear,
-                    1,
-                    1),
-            EndDate = new DateOnly(currentYear,
-                    12,
-                    31),
-            Response = new PaginatedResponseDto<ForfeituresAndPointsForYearResponse> { Total = 0, Results = [] }
-        }
-            ;
+            EmployeeName = fullName,
+            BadgeNumber = badgeNumber,
+            Ssn = ssn.MaskSsn(),
+            Forfeitures = forfeitures,
+            ContForfeitPoints = (short)(pointsEarned ?? 0),
+            EarningPoints = earningsPoints,
+            IsExecutive = payFrequencyId == PayFrequency.Constants.Monthly,
+        };
     }
-
-    private async Task<List<ForfeituresAndPointsForYearResponse>> GetMembers(ProfitSharingReadOnlyDbContext ctx, short currentYear, CancellationToken cancellationToken)
-    {
-        var validator = new InlineValidator<short>();
-        // Inline async rule to prevent running when duplicate SSNs exist.
-        validator.RuleFor(r => r)
-            .MustAsync(async (_, ct) => !await _duplicateSsnReportService.DuplicateSsnExistsAsync(ct))
-            .WithMessage("There are presently duplicate SSN's in the system, which will cause this process to fail.");
-
-        await validator.ValidateAndThrowAsync(currentYear, cancellationToken);
-
-        // Get current balances for all members (some members could have no balance)
-        Dictionary<(int Ssn, int Id), ParticipantTotalVestingBalance> memberAmountsBySsn = await _totalService
-            .TotalVestingBalance(ctx, currentYear, DateOnly.MaxValue)
-            .ToDictionaryAsync(ptvb => (ptvb.Ssn, ptvb.Id), ptvb => ptvb, cancellationToken);
-
-        // Get this year's transactions for all members (some members could have no transactions)
-        var transactionsInCurrentYearBySsn =
-            await _totalService.GetTransactionsBySsnForProfitYearForOracle(ctx, currentYear)
-                .ToDictionaryAsync(ptvb => ptvb.Ssn, ptvb => ptvb, cancellationToken);
-
-        // Gather all the employees
-        IQueryable<Demographic> demographicExpression = await _demographicReaderService.BuildDemographicQuery(ctx, true);
-        var employeesRaw = await demographicExpression
-            .Join(ctx.PayProfits, d => d.Id, pp => pp.DemographicId, (d, pp) => new { d, pp })
-            .Where(pp => pp.pp.ProfitYear == currentYear).ToListAsync(cancellationToken);
-
-        Dictionary<int, ForfeituresAndPointsForYearResponse> employeeMembersBySsn = employeesRaw
-            .ToDictionary(d => d.d.Ssn, v => ToMemberDetails(v.d, memberAmountsBySsn.GetValueOrDefault((v.d.Ssn, v.d.Id)), v.pp,
-                transactionsInCurrentYearBySsn.GetValueOrDefault(v.d.Ssn)));
-
-        // Gather Bene's
-        Dictionary<int, ForfeituresAndPointsForYearResponse> beneMembers = await ctx.Beneficiaries
-            .Include(b => b.Contact)
-            .Where(b => !employeeMembersBySsn.Keys.Contains(b.Contact!.Ssn)) // omit employees
-            .ToDictionaryAsync(b => b.Contact!.Ssn, v => ToMemberDetails(v, memberAmountsBySsn.GetValueOrDefault((v.Contact!.Ssn, v.Contact!.Id))),
-                cancellationToken);
-
-        List<ForfeituresAndPointsForYearResponse> members = employeeMembersBySsn.Values.Concat(beneMembers.Values)
-            .OrderBy(m => m.EmployeeName, StringComparer.Ordinal)
-            .ThenByDescending(m => m.BadgeNumber)
-            .ToList();
-
-        // Filter out members with nothing going on
-        members = members.Where(m => m.ContForfeitPoints != 0 || m.EarningPoints != 0 || m.Forfeitures != 0).ToList();
-
-        return members;
-    }
-
 
     private static ForfeituresAndPointsForYearResponse ToMemberDetails(Demographic d, ParticipantTotalVestingBalance? ptvb, PayProfit pp,
         ProfitDetailRollup? singleYearNumbers
@@ -176,6 +254,25 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
             ContForfeitPoints = 0,
             EarningPoints = earningsPoints,
             BeneficiaryPsn = "0" + b.Psn,
+            IsExecutive = false,
+        };
+    }
+
+    // Optimized helper for beneficiaries when using projection
+    private static ForfeituresAndPointsForYearResponse ToBeneficiaryMemberDetails(string fullName, int ssn, int badgeNumber, short psnSuffix, decimal? currentBalance)
+    {
+        short earningsPoints = currentBalance != null ? (short)Math.Round(currentBalance.Value / 100, MidpointRounding.AwayFromZero) : (short)0;
+        string psn = $"{badgeNumber}{psnSuffix:D4}";
+
+        return new ForfeituresAndPointsForYearResponse
+        {
+            EmployeeName = fullName,
+            BadgeNumber = 0,
+            Ssn = ssn.MaskSsn(),
+            Forfeitures = 0.00m,
+            ContForfeitPoints = 0,
+            EarningPoints = earningsPoints,
+            BeneficiaryPsn = "0" + psn,
             IsExecutive = false,
         };
     }

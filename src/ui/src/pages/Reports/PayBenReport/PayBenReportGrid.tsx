@@ -1,8 +1,9 @@
 import { RefObject, useCallback, useMemo } from "react";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { CAPTIONS } from "../../../constants";
+import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { GridPaginationActions, GridPaginationState } from "../../../hooks/useGridPagination";
 import { PayBenReportResponse } from "../../../types";
-import { CAPTIONS } from "../../../constants";
 import { PayBenReportGridColumn } from "./PayBenReportGridColumns";
 
 interface PayBenReportGridProps {
@@ -28,6 +29,9 @@ const PayBenReportGrid = ({
 }: PayBenReportGridProps) => {
   const columnDefs = useMemo(() => PayBenReportGridColumn(), []);
 
+  // Use dynamic grid height utility hook
+  const gridMaxHeight = useDynamicGridHeight();
+
   const handleSortChanged = useCallback(
     (update: ISortParams) => {
       // Handle empty sortBy case - set default (preserving original logic)
@@ -44,12 +48,13 @@ const PayBenReportGrid = ({
   );
 
   return (
-    <>
+    <div className="relative">
       {showData && data?.results && (
         <div ref={innerRef}>
           <DSMGrid
             preferenceKey={CAPTIONS.PAYBEN_REPORT}
             isLoading={isLoading}
+            maxHeight={gridMaxHeight}
             handleSortChanged={handleSortChanged}
             providedOptions={{
               rowData: data.results,
@@ -73,7 +78,7 @@ const PayBenReportGrid = ({
           recordCount={data.total || 0}
         />
       )}
-    </>
+    </div>
   );
 };
 
