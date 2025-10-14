@@ -1,15 +1,17 @@
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
+
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 
 /// <summary>
 /// Comprehensive cross-reference validation results for Master Update (PAY444|PAY447).
 /// Validates that all prerequisite report values match their archived checksums.
 /// </summary>
-public class MasterUpdateCrossReferenceValidationResponse
+public class MasterUpdateCrossReferenceValidationResponse: IProfitYearRequest
 {
     /// <summary>
     /// The profit year being validated
     /// </summary>
-    public short ProfitYear { get; init; }
+    public short ProfitYear { get; set; }
 
     /// <summary>
     /// Whether all cross-reference validations passed

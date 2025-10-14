@@ -1,7 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
-public sealed class CommentType : ILookupTable<byte>
+public sealed class CommentType : ILookupTable<byte>, IEquatable<CommentType>
 {
     public required byte Id { get; set; }
     public required string Name { get; set; }
@@ -46,14 +46,45 @@ public sealed class CommentType : ILookupTable<byte>
         return false;
     }
 
-    // Override GetHashCode to be consistent with Equals
-    public override int GetHashCode()
+    public bool Equals(CommentType? other)
     {
-        return Id.GetHashCode();
+        if (other != null)
+        {
+            return other.Id == this.Id;
+        }
+        return false;
     }
 
     public static implicit operator byte(CommentType commentType)
     {
         return commentType.Id;
+    }
+
+    public static bool operator ==(CommentType? left, CommentType? right)
+    {
+        if (ReferenceEquals(left, right))
+        {
+            return true;
+        }
+        if (ReferenceEquals(left, null))
+        {
+            return false;
+        }
+        if (ReferenceEquals(right, null))
+        {
+            return false;
+        }
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(CommentType? left, CommentType? right)  
+    {
+        return !(left == right);
+    }
+
+    // Override GetHashCode to be consistent with Equals
+    public override int GetHashCode()
+    {
+        return Id.GetHashCode();
     }
 }

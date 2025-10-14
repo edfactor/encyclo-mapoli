@@ -55,7 +55,7 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto : IIsExecut
     }
 }
 
-public sealed record TerminatedEmployeeAndBeneficiaryYearDetailDto : IIsExecutive
+public sealed record TerminatedEmployeeAndBeneficiaryYearDetailDto : IIsExecutive, IProfitYearRequest
 {
     public short ProfitYear { get; set; }
     public decimal BeginningBalance { get; set; }

@@ -2,6 +2,7 @@ import { Box, CircularProgress, Typography } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { DSMGrid, Pagination } from "smart-ui-library";
+import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
 import { useGridPagination } from "../../hooks/useGridPagination";
 import { RootState } from "../../reduxstore/store";
 import { QPAY600FilterParams } from "./QPAY600FilterSection";
@@ -16,6 +17,9 @@ interface QPAY600GridProps {
 const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, employeeStatus, onLoadingChange }) => {
   const hasToken = useSelector((state: RootState) => !!state.security.token);
   const [isFetching, setIsFetching] = useState(false);
+
+  // Use dynamic grid height utility hook
+  const gridMaxHeight = useDynamicGridHeight();
 
   const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
     initialPageSize: 25,
@@ -132,7 +136,7 @@ const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, employeeStatus,
   }, [data]);
 
   return (
-    <>
+    <div className="relative">
       <div style={{ padding: "0 24px 0 24px" }}>
         <Typography
           variant="h2"
@@ -154,6 +158,7 @@ const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, employeeStatus,
           <DSMGrid
             preferenceKey={`QPAY600_${employeeStatus.toUpperCase().replace(" ", "_")}`}
             isLoading={isFetching}
+            maxHeight={gridMaxHeight}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: data.results || [],
@@ -172,7 +177,7 @@ const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, employeeStatus,
           )}
         </>
       )}
-    </>
+    </div>
   );
 };
 

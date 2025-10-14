@@ -1,7 +1,9 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
-public sealed record GroupedProfitSummaryDto
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
+public sealed record GroupedProfitSummaryDto : IProfitYearRequest
 {
-    public int ProfitYear { get; set; }
+    public short ProfitYear { get; set; }
     public byte MonthToDate { get; set; }
     public decimal TotalContribution { get; set; }
     public decimal TotalEarnings { get; set; }

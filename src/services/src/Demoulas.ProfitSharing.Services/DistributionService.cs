@@ -102,7 +102,22 @@ public sealed class DistributionService : IDistributionService
                 query = query.Where(d => d.FrequencyId == request.DistributionFrequencyId.Value);
             }
 
-            if (request.DistributionStatusId.HasValue)
+            // Support both single and multiple status IDs
+            // Prioritize DistributionStatusIds (array) if provided, otherwise use single DistributionStatusId
+            if (request.DistributionStatusIds != null && request.DistributionStatusIds.Count > 0)
+            {
+                // Convert string list to char list for comparison
+                var statusChars = request.DistributionStatusIds
+                    .Where(s => !string.IsNullOrEmpty(s) && s.Length == 1)
+                    .Select(s => s[0])
+                    .ToList();
+
+                if (statusChars.Count > 0)
+                {
+                    query = query.Where(d => statusChars.Contains(d.StatusId));
+                }
+            }
+            else if (request.DistributionStatusId.HasValue)
             {
                 query = query.Where(d => d.StatusId == request.DistributionStatusId.Value);
             }

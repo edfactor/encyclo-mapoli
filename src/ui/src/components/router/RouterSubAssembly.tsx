@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import PSDrawer from "../../components/Drawer/PSDrawer";
+import SmartPSDrawer from "../../components/Drawer/SmartPSDrawer";
 import DSMDynamicBreadcrumbs from "../../components/DSMDynamicBreadcrumbs/DSMDynamicBreadcrumbs";
 import ProtectedRoute from "../../components/ProtectedRoute/ProtectedRoute";
 import DemographicBadgesNotInPayprofit from "../../pages/DecemberActivities/DemographicBadgesNotInPayprofit/DemographicBadgesNotInPayprofit";
@@ -221,7 +221,7 @@ const RouterSubAssembly: React.FC = () => {
                 }}>
                 <DSMDynamicBreadcrumbs />
               </Box>
-              <PSDrawer navigationData={data} />
+              <SmartPSDrawer navigationData={data} />
               <Routes>
                 <Route
                   path="/unauthorized"

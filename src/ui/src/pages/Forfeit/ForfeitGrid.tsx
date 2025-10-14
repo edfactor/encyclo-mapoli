@@ -1,12 +1,13 @@
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetForfeituresAndPointsQuery } from "reduxstore/api/YearsEndApi";
-import { RootState } from "reduxstore/store";
 import { DSMGrid, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import ReportSummary from "../../components/ReportSummary";
 import { CAPTIONS } from "../../constants";
+import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
+import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
 import { useGridPagination } from "../../hooks/useGridPagination";
+import { useLazyGetForfeituresAndPointsQuery } from "../../reduxstore/api/YearsEndApi";
+import { RootState } from "../../reduxstore/store";
 import { GetProfitShareForfeitColumns } from "./ForfeitGridColumns";
 
 interface ForfeitGridProps {
@@ -14,18 +15,23 @@ interface ForfeitGridProps {
   setInitialSearchLoaded: (loaded: boolean) => void;
   pageNumberReset: boolean;
   setPageNumberReset: (reset: boolean) => void;
+  shouldArchive: boolean;
 }
 
 const ForfeitGrid: React.FC<ForfeitGridProps> = ({
   initialSearchLoaded,
   setInitialSearchLoaded,
   pageNumberReset,
-  setPageNumberReset
+  setPageNumberReset,
+  shouldArchive
 }) => {
   const { forfeituresAndPoints } = useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearch, { isFetching }] = useLazyGetForfeituresAndPointsQuery();
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const columnDefs = useMemo(() => GetProfitShareForfeitColumns(), []);
+
+  // Use dynamic grid height utility hook
+  const gridMaxHeight = useDynamicGridHeight();
 
   const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
     useGridPagination({
@@ -39,6 +45,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
               {
                 profitYear: fiscalCloseProfitYear,
                 useFrozenData: true,
+                archive: false, // Always use archive=false for normal pagination
                 pagination: {
                   skip: pageNum * pageSz,
                   take: pageSz,
@@ -54,27 +61,26 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
       )
     });
 
-  const onSearch = useCallback(async () => {
-    await triggerSearch(
-      {
-        profitYear: fiscalCloseProfitYear,
-        useFrozenData: true,
-        pagination: {
-          skip: pageNumber * pageSize,
-          take: pageSize,
-          sortBy: sortParams.sortBy,
-          isSortDescending: sortParams.isSortDescending
-        }
-      },
-      false
-    ).unwrap();
-  }, [pageNumber, pageSize, sortParams, triggerSearch, fiscalCloseProfitYear]);
-
+  // Separate useEffect to handle archive=true ONLY when status changes to Complete
   useEffect(() => {
-    if (initialSearchLoaded) {
-      onSearch();
+    if (shouldArchive && initialSearchLoaded) {
+      triggerSearch(
+        {
+          profitYear: fiscalCloseProfitYear,
+          useFrozenData: true,
+          archive: true, // ONLY set to true when Complete status selected
+          pagination: {
+            skip: pageNumber * pageSize,
+            take: pageSize,
+            sortBy: sortParams.sortBy,
+            isSortDescending: sortParams.isSortDescending
+          }
+        },
+        false
+      );
+      // Note: shouldArchive will be reset by parent component (Forfeit.tsx)
     }
-  }, [initialSearchLoaded, onSearch]);
+  }, [shouldArchive, initialSearchLoaded, fiscalCloseProfitYear, pageNumber, pageSize, sortParams, triggerSearch]);
 
   useEffect(() => {
     if (pageNumberReset) {
@@ -101,7 +107,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
   };
 
   return (
-    <>
+    <div className="relative">
       {forfeituresAndPoints?.response && (
         <>
           <div className="sticky top-0 z-10 flex bg-white">
@@ -127,6 +133,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
           <DSMGrid
             preferenceKey={CAPTIONS.FORFEIT}
             isLoading={isFetching}
+            maxHeight={gridMaxHeight}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: forfeituresAndPoints.response.results,
@@ -151,7 +158,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
           )}
         </>
       )}
-    </>
+    </div>
   );
 };
 

@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareUpdate;
 
@@ -17,11 +18,18 @@ public class ProfitShareUpdateEndpoint
         ProfitShareUpdateEndpoint.ProfitShareUpdateClassMap>
 {
     private readonly IProfitShareUpdateService _profitShareUpdateService;
+    private readonly ICrossReferenceValidationService _crossReferenceValidationService;
+    private readonly ILogger<ProfitShareUpdateEndpoint> _logger;
 
-    public ProfitShareUpdateEndpoint(IProfitShareUpdateService profitShareUpdateService)
+    public ProfitShareUpdateEndpoint(
+        IProfitShareUpdateService profitShareUpdateService,
+        ICrossReferenceValidationService crossReferenceValidationService,
+        ILogger<ProfitShareUpdateEndpoint> logger)
         : base(Navigation.Constants.ProfitShareReportEditRun)
     {
         _profitShareUpdateService = profitShareUpdateService;
+        _crossReferenceValidationService = crossReferenceValidationService;
+        _logger = logger;
     }
 
     public override string ReportFileName => "profit-sharing-update-report";
@@ -42,9 +50,66 @@ public class ProfitShareUpdateEndpoint
         base.Configure();
     }
 
-    public override Task<ProfitShareUpdateResponse> GetResponse(ProfitShareUpdateRequest req, CancellationToken ct)
+    public override async Task<ProfitShareUpdateResponse> GetResponse(ProfitShareUpdateRequest req, CancellationToken ct)
     {
-        return _profitShareUpdateService.ProfitShareUpdate(req, ct);
+        // Get the Master Update preview data with totals
+        var response = await _profitShareUpdateService.ProfitShareUpdate(req, ct);
+
+        // Perform cross-reference validation using the totals from the response
+        _logger.LogInformation(
+            "Performing cross-reference validation for Master Update preview year {ProfitYear}",
+            req.ProfitYear);
+
+        // IMPORTANT: Use PAY443 field names as keys because the validation service compares current PAY444 values
+        // against archived PAY443 checksums FOR THE SAME PROFIT YEAR (except Beginning Balance which compares to previous year).
+        // The service looks up values using "PAY443.{fieldName}" or "PAY444.{fieldName}" keys.
+        var currentValues = new Dictionary<string, decimal>
+        {
+            // Beginning Balance: PAY444 (2024) beginning balance is compared against PAY443 (2023) ending balance
+            // The validation service looks for "PAY444.BeginningBalance (Year 2024)" key
+            ["PAY443.TotalProfitSharingBalance"] = response.ProfitShareUpdateTotals.BeginningBalance,
+
+            // Distributions: PAY444 (2024) is compared against PAY443 (2024) archived data
+            ["PAY443.DistributionTotals"] = response.ProfitShareUpdateTotals.Distributions,
+
+            // Forfeitures: PAY444 (2024) is compared against PAY443 (2024) archived data
+            ["PAY443.TotalForfeitures"] = response.ProfitShareUpdateTotals.Forfeiture,
+
+            // Contributions: PAY444 (2024) is compared against PAY443 (2024) archived data
+            ["PAY443.TotalContributions"] = response.ProfitShareUpdateTotals.TotalContribution,
+
+            // Earnings: PAY444 (2024) is compared against PAY443 (2024) archived data
+            ["PAY443.TotalEarnings"] = response.ProfitShareUpdateTotals.Earnings + response.ProfitShareUpdateTotals.Earnings2
+        };
+
+        // PS-1721: Now using ICrossReferenceValidationService instead of IChecksumValidationService
+        var crossRefValidation = await _crossReferenceValidationService.ValidateMasterUpdateCrossReferencesAsync(
+            req.ProfitYear,
+            currentValues,
+            ct);
+
+        if (!crossRefValidation.IsSuccess)
+        {
+            _logger.LogWarning(
+                "Cross-reference validation failed for Master Update preview year {ProfitYear}: {ErrorDescription}",
+                req.ProfitYear,
+                crossRefValidation.Error?.Description ?? "Unknown error");
+        }
+        else if (crossRefValidation.Value is not null)
+        {
+            // Attach validation results to response so UI can display them
+            response.CrossReferenceValidation = crossRefValidation.Value;
+
+            _logger.LogInformation(
+                "Master Update preview validation completed for year {ProfitYear}: " +
+                "{PassedValidations}/{TotalValidations} passed, BlockMasterUpdate: {BlockMasterUpdate}",
+                req.ProfitYear,
+                crossRefValidation.Value.PassedValidations,
+                crossRefValidation.Value.TotalValidations,
+                crossRefValidation.Value.BlockMasterUpdate);
+        }
+
+        return response;
     }
 
     public class ProfitShareUpdateClassMap : ClassMap<ProfitShareUpdateMemberResponse>

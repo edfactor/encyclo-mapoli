@@ -17,7 +17,7 @@ DECLARE
     INQUIRIES_MENU CONSTANT NUMBER := 2;
     BENEFICIARIES_MENU CONSTANT NUMBER := 3;
     DISTRIBUTIONS_MENU CONSTANT NUMBER := 4;
-    RECONCILIATION_MENU CONSTANT NUMBER := 5;
+    -- RECONCILIATION_MENU CONSTANT NUMBER := 5; -- REMOVED
     YEAR_END_MENU CONSTANT NUMBER := 6;
     IT_DEVOPS_MENU CONSTANT NUMBER := 7;
 
@@ -31,6 +31,10 @@ DECLARE
     -- Third-level under Fiscal Close
     PROF_SHARE_REPORT_BY_AGE CONSTANT NUMBER := 11;
     PROF_SHARE_BY_STORE CONSTANT NUMBER := 12;
+    
+    -- Groups under INQUIRIES
+    INQUIRIES_GROUP CONSTANT NUMBER := 13;
+    ADJUSTMENTS_GROUP CONSTANT NUMBER := 14;
 
     -- AVAILABLE PAGES (ids starting at 100)
 
@@ -183,19 +187,20 @@ BEGIN
     
 
 --Top level menus
-    insert_navigation_item(INQUIRIES_MENU, TOP_LEVEL_MENU, 'INQUIRIES AND ADJUSTMENTS', '', '', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(INQUIRIES_MENU, TOP_LEVEL_MENU, 'INQUIRIES & ADJUSTMENTS', 'Inquiries & Adjustments', '', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
 
-    insert_navigation_item(BENEFICIARIES_MENU, TOP_LEVEL_MENU, 'BENEFICIARIES', '', '', STATUS_NORMAL, ORDER_SECOND, '', DISABLED, IS_NAVIGABLE);
-    insert_navigation_item(DISTRIBUTIONS_MENU, TOP_LEVEL_MENU, 'DISTRIBUTIONS', '', '', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(RECONCILIATION_MENU, TOP_LEVEL_MENU, 'RECONCILIATION', '', '', STATUS_NORMAL, ORDER_FOURTH, '', DISABLED, IS_NAVIGABLE);
-    insert_navigation_item(YEAR_END_MENU, TOP_LEVEL_MENU, 'YEAR END', '', '', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(IT_DEVOPS_MENU, TOP_LEVEL_MENU, 'IT DEVOPS', '', '', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(BENEFICIARIES_MENU, TOP_LEVEL_MENU, 'BENEFICIARIES', 'Beneficiaries', '', STATUS_NORMAL, ORDER_SECOND, '', DISABLED, IS_NAVIGABLE);
+    insert_navigation_item(DISTRIBUTIONS_MENU, TOP_LEVEL_MENU, 'DISTRIBUTIONS', 'Distributions', '', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+    -- RECONCILIATION REMOVED
+    insert_navigation_item(YEAR_END_MENU, TOP_LEVEL_MENU, 'YEAR END', 'Year End', '', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(IT_DEVOPS_MENU, TOP_LEVEL_MENU, 'IT DEVOPS', 'IT DevOps', '', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
 
 --Sub values for INQUIRIES
-    insert_navigation_item(MASTER_INQUIRY_PAGE, INQUIRIES_MENU, 'MASTER INQUIRY', '', 'master-inquiry', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(ADJUSTMENTS_PAGE, INQUIRIES_MENU, 'ADJUSTMENTS', '', 'adjustments', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(ADHOC_REPORT, INQUIRIES_MENU, 'ADHOC REPORT', '', 'adhoc-report', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(PAY_BENEFICIARY_REPORT, INQUIRIES_MENU, 'PAY BENEFICIARY REPORT', '', 'payben-report', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(INQUIRIES_GROUP, INQUIRIES_MENU, 'Inquiries', '', '', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(MASTER_INQUIRY_PAGE, INQUIRIES_GROUP, 'MASTER INQUIRY', '', 'master-inquiry', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    
+    insert_navigation_item(ADJUSTMENTS_GROUP, INQUIRIES_MENU, 'Adjustments', '', '', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(ADJUSTMENTS_PAGE, ADJUSTMENTS_GROUP, 'ADJUSTMENTS', '', 'adjustments', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
 
 
 --distribution items
@@ -219,14 +224,14 @@ BEGIN
     insert_navigation_item(TERMINATIONS, DECEMBER_ACTIVITIES, 'Terminations', 'QPAY066','prof-term', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(FORFEITURES, DECEMBER_ACTIVITIES, 'Forfeitures', '008-12', 'forfeitures-adjustment', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(DISTRIBUTIONS_AND_FORFEITURES, DECEMBER_ACTIVITIES, 'Distributions and Forfeitures', 'QPAY129', 'distributions-and-forfeitures', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(MANAGE_EXECUTIVE_HOURS_PAGE, DECEMBER_ACTIVITIES, 'Manage Executive Hours', 'PROF-DOLLAR-EXEC-EXTRACT, TPR008-09', 'manage-executive-hours-and-dollars', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(PROFIT_SHARE_REPORT, DECEMBER_ACTIVITIES, 'Profit Share Report', 'PAY426', 'profit-share-report', STATUS_NORMAL, ORDER_NINTH, '', ENABLED, IS_NAVIGABLE);
                           
 -- Profit Share Totals (Year End)
     insert_navigation_item(FISCAL_CLOSE, YEAR_END_MENU, 'Fiscal Close', '', 'fiscal-close', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);           
 
 -- Fiscal Close menu items updated according to ticket requirements
-    insert_navigation_item(MANAGE_EXECUTIVE_HOURS_PAGE, FISCAL_CLOSE, 'Manage Executive Hours', 'PROF-DOLLAR-EXEC-EXTRACT, TPR008-09', 'manage-executive-hours-and-dollars', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(YTD_WAGES_EXTRACT, FISCAL_CLOSE, 'YTD Wages Extract', 'PROF-DOLLAR-EXTRACT', 'ytd-wages-extract', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(YTD_WAGES_EXTRACT, FISCAL_CLOSE, 'YTD Wages Extract', 'PROF-DOLLAR-EXTRACT', 'ytd-wages-extract', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
 
 
 -- Dev-only: PAY426N entries (not assigned to roles in SQL)
@@ -256,7 +261,7 @@ BEGIN
     insert_navigation_item(PROF_CONTROL_SHEET, FISCAL_CLOSE, 'Prof Control Sheet', 'PROF-CNTRL-SHEET', 'prof-control-sheet', STATUS_NORMAL, ORDER_ELEVENTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(PROF_SHARE_REPORT_BY_AGE, FISCAL_CLOSE, 'Prof Share Report By Age', 'Prof130', '', STATUS_NORMAL, ORDER_TWELFTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(PROF_SHARE_GROSS_RPT, FISCAL_CLOSE, 'Prof Share Gross Rpt', 'QPAY501', 'profit-share-gross-report', STATUS_NORMAL, ORDER_THIRTEENTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(PROF_SHARE_BY_STORE, FISCAL_CLOSE, 'Prof Share by Store', 'QPAY066TA', 'profit-share-by-store', STATUS_NORMAL, ORDER_FOURTEENTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROF_SHARE_BY_STORE, FISCAL_CLOSE, 'Prof Share by Store', 'QPAY066TA', '', STATUS_NORMAL, ORDER_FOURTEENTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(REPRINT_CERTIFICATES, FISCAL_CLOSE, 'Reprint Certificates / Print Profit Certs', 'PAYCERT', 'reprint-certificates', STATUS_NORMAL, ORDER_FIFTEENTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(SAVE_PROF_PAYMSTR, FISCAL_CLOSE, 'Save Prof Paymstr', '', 'save-prof-paymstr', STATUS_NORMAL, ORDER_SIXTEENTH, '', ENABLED, IS_NAVIGABLE);
     
@@ -329,10 +334,20 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(BENEFICIARIES_MENU, DISTRIBUTIONS_CLERK); 
     assign_navigation_role(BENEFICIARIES_MENU, HARDSHIP_ADMINISTRATOR); 
 
+-- Assign roles for INQUIRIES_GROUP
+    assign_navigation_role(INQUIRIES_GROUP, SYSTEM_ADMINISTRATOR); 
+    assign_navigation_role(INQUIRIES_GROUP, FINANCE_MANAGER); 
+    assign_navigation_role(INQUIRIES_GROUP, DISTRIBUTIONS_CLERK);
+
 -- Assign roles for MASTER INQUIRY (Endpoints base -> Navigation.Constants.MasterInquiry; Policy -> CanRunMasterInquiry)
     assign_navigation_role(MASTER_INQUIRY_PAGE, SYSTEM_ADMINISTRATOR); 
     assign_navigation_role(MASTER_INQUIRY_PAGE, FINANCE_MANAGER); 
-    assign_navigation_role(MASTER_INQUIRY_PAGE, DISTRIBUTIONS_CLERK); 
+    assign_navigation_role(MASTER_INQUIRY_PAGE, DISTRIBUTIONS_CLERK);
+
+-- Assign roles for ADJUSTMENTS_GROUP
+    assign_navigation_role(ADJUSTMENTS_GROUP, SYSTEM_ADMINISTRATOR); 
+    assign_navigation_role(ADJUSTMENTS_GROUP, FINANCE_MANAGER);
+    assign_navigation_role(ADJUSTMENTS_GROUP, DISTRIBUTIONS_CLERK);
 
 -- Assign roles for ADJUSTMENTS (Endpoints base -> Navigation.Constants.Adjustments; Policy -> CanRunMasterInquiry)
     assign_navigation_role(ADJUSTMENTS_PAGE, SYSTEM_ADMINISTRATOR); 
@@ -452,12 +467,14 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
 
     -- IT Devops role assignments
     assign_navigation_role(INQUIRIES_MENU, IT_DEVOPS);
+    assign_navigation_role(INQUIRIES_GROUP, IT_DEVOPS);
+    assign_navigation_role(ADJUSTMENTS_GROUP, IT_DEVOPS);
     assign_navigation_role(DEMOGRAPHIC_FREEZE_PAGE, IT_DEVOPS);
     assign_navigation_role(MASTER_INQUIRY_PAGE, IT_DEVOPS);
     assign_navigation_role(BENEFICIARIES_MENU, IT_DEVOPS);
     assign_navigation_role(DISTRIBUTIONS_MENU, IT_DEVOPS);
     assign_navigation_role(DISTRIBUTION_INQUIRY_PAGE, IT_DEVOPS);
-    assign_navigation_role(RECONCILIATION_MENU, IT_DEVOPS);
+    -- assign_navigation_role(RECONCILIATION_MENU, IT_DEVOPS); -- REMOVED
     assign_navigation_role(YEAR_END_MENU, IT_DEVOPS);
     assign_navigation_role(DECEMBER_ACTIVITIES, IT_DEVOPS);
     assign_navigation_role(CLEANUP_REPORTS, IT_DEVOPS);

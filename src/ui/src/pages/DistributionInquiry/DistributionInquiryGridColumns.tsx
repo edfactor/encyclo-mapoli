@@ -3,7 +3,8 @@ import {
   createBadgeColumn,
   createCurrencyColumn,
   createNameColumn,
-  createSSNColumn
+  createSSNColumn,
+  createStatusColumn
 } from "../../utils/gridColumnFactory";
 import { ActionsCellRenderer } from "./DistributionActions";
 
@@ -30,6 +31,10 @@ export const GetDistributionInquiryColumns = (): ColDef[] => {
       headerClass: "center-align",
       cellClass: "center-align"
     },
+    createStatusColumn({
+      headerName: "Status",
+      field: "distributionStatusId"
+    }),
     {
       headerName: "Tax Flag",
       field: "taxCodeName",
