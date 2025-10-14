@@ -59,8 +59,7 @@ const PayBenReportGrid = ({
             providedOptions={{
               rowData: data.results,
               columnDefs: columnDefs,
-              suppressMultiSort: true,
-              masterDetail: true
+              suppressMultiSort: true
             }}
           />
         </div>
