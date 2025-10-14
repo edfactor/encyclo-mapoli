@@ -58,7 +58,8 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
             .Include(pd => pd.CommentType)
             .TagWith("MasterInquiry: Get beneficiary with profit details")
             .Join(ctx.Beneficiaries.Join(ctx.BeneficiaryContacts, b => b.BeneficiaryContactId, bc => bc.Id, (b, bc) => new { b, bc }),
-                pd => pd.Ssn, bene => bene.bc.Ssn,
+                pd => pd.Ssn,  // Join only on SSN - CommentRelatedPsnSuffix is just data, not a join key
+                bene => bene.bc.Ssn,
                 (pd, d) => new MasterInquiryItem
                 {
                     ProfitDetail = pd,
@@ -69,7 +70,7 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
                     TransactionDate = pd.CreatedAtUtc,
                     Member = new InquiryDemographics
                     {
-                        Id = d.bc.Id,
+                        Id = d.b.Id,  // Use Beneficiary.Id, not BeneficiaryContact.Id
                         BadgeNumber = d.b.BadgeNumber,
                         FullName = d.bc.ContactInfo.FullName != null ? d.bc.ContactInfo.FullName : d.bc.ContactInfo.LastName,
                         FirstName = d.bc.ContactInfo.FirstName,
@@ -80,6 +81,7 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
                         CurrentIncomeYear = 0,
                         CurrentHoursYear = 0,
                         IsExecutive = false,
+                        EmploymentStatusId = null,  // Beneficiaries don't have employment status
                     }
                 });
 

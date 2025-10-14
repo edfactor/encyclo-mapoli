@@ -95,6 +95,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                         Ssn = d.Ssn,
                         PsnSuffix = 0,
                         IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
+                        EmploymentStatusId = d.EmploymentStatusId,
                         // Use correlated subqueries for PayProfits data
                         // These will be optimized by Oracle when IX_PayProfits_Demographic_Year index exists
                         CurrentIncomeYear = ctx.PayProfits

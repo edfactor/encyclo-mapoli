@@ -443,7 +443,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 TransactionDate = x.TransactionDate,
                 CurrentIncomeYear = x.Member.CurrentIncomeYear,
                 CurrentHoursYear = x.Member.CurrentHoursYear,
-                IsExecutive = x.Member.IsExecutive
+                IsExecutive = x.Member.IsExecutive,
             }).ToPaginationResultsAsync(req, cancellationToken);
 
             var formattedResults = rawQuery.Results.Select(x => new MasterInquiryResponseDto
@@ -481,7 +481,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 TransactionDate = x.TransactionDate,
                 CurrentIncomeYear = x.CurrentIncomeYear,
                 CurrentHoursYear = x.CurrentHoursYear,
-                IsExecutive = x.IsExecutive
+                IsExecutive = x.IsExecutive,
+                EmploymentStatusId = x.EmploymentStatusId ?? '\0',
             });
 
             return new PaginatedResponseDto<MasterInquiryResponseDto>(req) { Results = formattedResults, Total = rawQuery.Total };

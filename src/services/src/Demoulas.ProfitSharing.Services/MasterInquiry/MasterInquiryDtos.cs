@@ -34,6 +34,7 @@ public sealed class InquiryDemographics
     public decimal CurrentHoursYear { get; init; }
     public int Id { get; set; }
     public bool IsExecutive { get; set; }
+    public char? EmploymentStatusId { get; init; }
 }
 
 /// <summary>
@@ -76,4 +77,5 @@ public sealed class MasterInquiryRawDto
     public decimal CurrentHoursYear { get; init; }
     public decimal Payment { get; set; }
     public bool IsExecutive { get; set; }
+    public char? EmploymentStatusId { get; init; }
 }
