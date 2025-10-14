@@ -40,9 +40,9 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
     {
         var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
 
-        // EF Core 9: Use AsSplitQuery to avoid cartesian explosion from multiple includes
+        // ReadOnlyDbContext automatically handles AsSplitQuery and AsNoTracking
         // TagWith helps identify this query in profiling/logging
-        var profitDetailsQuery = ctx.ProfitDetails.AsSplitQuery();
+        IQueryable<ProfitDetail> profitDetailsQuery = ctx.ProfitDetails;
 
         // OPTIMIZATION: Pre-filter ProfitDetails before expensive join if we have selective criteria
         if (req?.EndProfitYear.HasValue == true)
@@ -255,11 +255,10 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
     {
         var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
 
-        // EF Core 9: Use AsSplitQuery for complex includes to avoid cartesian explosion
+        // ReadOnlyDbContext automatically handles AsSplitQuery and AsNoTracking
         var query = demographics
             .Where(d => ssns.Contains(d.Ssn))
-            .TagWith("EmployeeMasterInquiry: Get demographic details for SSNs")
-            .AsSplitQuery(); // Splits into multiple queries to avoid JOIN performance issues
+            .TagWith("EmployeeMasterInquiry: Get demographic details for SSNs");
 
         if (req.BadgeNumber.HasValue && req.BadgeNumber != 0)
         {
@@ -395,11 +394,10 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
     {
         var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
 
-        // EF Core 9: Use AsSplitQuery to avoid cartesian explosion with PayProfits
+        // ReadOnlyDbContext automatically handles AsSplitQuery and AsNoTracking
         var query = demographics
             .Where(d => ssns.Contains(d.Ssn))
-            .TagWith("EmployeeMasterInquiry: Get all demographic details for SSNs")
-            .AsSplitQuery();
+            .TagWith("EmployeeMasterInquiry: Get all demographic details for SSNs");
 
         // Optimize projection: only select needed fields
         var members = await query
@@ -519,8 +517,8 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         CancellationToken cancellationToken = default)
     {
         var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+        // ReadOnlyDbContext automatically handles AsNoTracking
         int ssnEmpl = await demographics
-            .AsNoTracking()
             .Where(d => d.BadgeNumber == badgeNumber)
             .Select(d => d.Ssn)
             .FirstOrDefaultAsync(cancellationToken);

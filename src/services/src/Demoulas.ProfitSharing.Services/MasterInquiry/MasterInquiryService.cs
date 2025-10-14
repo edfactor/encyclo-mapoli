@@ -34,6 +34,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
     private readonly IMissiveService _missiveService;
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly IEmployeeMasterInquiryService _employeeInquiryService;
+    private readonly IBeneficiaryMasterInquiryService _beneficiaryInquiryService;
 
     public MasterInquiryService(
         IProfitSharingDataContextFactory dataContextFactory,
@@ -41,13 +42,15 @@ public sealed class MasterInquiryService : IMasterInquiryService
         ILoggerFactory loggerFactory,
         IMissiveService missiveService,
         IDemographicReaderService demographicReaderService,
-        IEmployeeMasterInquiryService employeeInquiryService)
+        IEmployeeMasterInquiryService employeeInquiryService,
+        IBeneficiaryMasterInquiryService beneficiaryInquiryService)
     {
         _dataContextFactory = dataContextFactory;
         _totalService = totalService;
         _missiveService = missiveService;
         _demographicReaderService = demographicReaderService;
         _employeeInquiryService = employeeInquiryService;
+        _beneficiaryInquiryService = beneficiaryInquiryService;
         _logger = loggerFactory.CreateLogger<MasterInquiryService>();
     }
 
@@ -271,11 +274,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             // If they gave us the badge... then lets use that.
             else if (psnSuffix > 0)
             {
-                int ssnBene = await ctx.Beneficiaries
-                    .AsNoTracking()
-                    .Where(b => b.BadgeNumber == badgeNumber && b.PsnSuffix == psnSuffix)
-                    .Join(ctx.BeneficiaryContacts, b => b.BeneficiaryContactId, bc => bc.Id, (b, bc) => bc.Ssn)
-                    .FirstOrDefaultAsync(cancellationToken);
+                int ssnBene = await _beneficiaryInquiryService.FindBeneficiarySsnByBadgeAsync(ctx, badgeNumber!.Value, psnSuffix.Value, cancellationToken);
 
                 if (ssnBene != 0)
                 {
@@ -493,67 +492,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
     {
         return await _employeeInquiryService.GetEmployeeInquiryQueryAsync(ctx, req);
     }
-    private static IQueryable<MasterInquiryItem> GetMasterInquiryBeneficiary(ProfitSharingReadOnlyDbContext ctx, MasterInquiryRequest? req = null)
+    private IQueryable<MasterInquiryItem> GetMasterInquiryBeneficiary(ProfitSharingReadOnlyDbContext ctx, MasterInquiryRequest? req = null)
     {
-        // EF Core 9: Use AsSplitQuery to avoid cartesian explosion
-        var profitDetailsQuery = ctx.ProfitDetails.AsSplitQuery();
-
-        // OPTIMIZATION: Pre-filter ProfitDetails before expensive join if we have selective criteria
-        if (req?.EndProfitYear.HasValue == true)
-        {
-            profitDetailsQuery = profitDetailsQuery.Where(pd => pd.ProfitYear <= req.EndProfitYear.Value);
-        }
-
-        if (req?.PaymentType.HasValue == true)
-        {
-            // Apply payment type filter early for massive performance gain
-            var commentTypeIds = req.PaymentType switch
-            {
-                1 => new byte?[] { CommentType.Constants.Hardship.Id, CommentType.Constants.Distribution.Id },
-                2 => new byte?[] { CommentType.Constants.Payoff.Id, CommentType.Constants.Forfeit.Id },
-                3 => new byte?[] { CommentType.Constants.Rollover.Id, CommentType.Constants.RothIra.Id },
-                _ => Array.Empty<byte?>()
-            };
-
-            if (commentTypeIds.Length > 0)
-            {
-                profitDetailsQuery = profitDetailsQuery.Where(pd => commentTypeIds.Contains(pd.CommentTypeId));
-            }
-        }
-
-        var query = profitDetailsQuery
-            .Include(pd => pd.ProfitCode)
-            .Include(pd => pd.ZeroContributionReason)
-            .Include(pd => pd.TaxCode)
-            .Include(pd => pd.CommentType)
-            .TagWith("MasterInquiry: Get beneficiary with profit details")
-            .Join(ctx.Beneficiaries.Join(ctx.BeneficiaryContacts, b => b.BeneficiaryContactId, bc => bc.Id, (b, bc) => new { b, bc }),
-                pd => pd.Ssn, bene => bene.bc.Ssn,
-                (pd, d) => new MasterInquiryItem
-                {
-                    ProfitDetail = pd,
-                    ProfitCode = pd.ProfitCode,
-                    ZeroContributionReason = pd.ZeroContributionReason,
-                    TaxCode = pd.TaxCode,
-                    CommentType = pd.CommentType,
-                    TransactionDate = pd.CreatedAtUtc,
-                    Member = new InquiryDemographics
-                    {
-                        Id = d.bc.Id,
-                        BadgeNumber = d.b.BadgeNumber,
-                        FullName = d.bc.ContactInfo.FullName != null ? d.bc.ContactInfo.FullName : d.bc.ContactInfo.LastName,
-                        FirstName = d.bc.ContactInfo.FirstName,
-                        LastName = d.bc.ContactInfo.LastName,
-                        PayFrequencyId = 0,
-                        Ssn = d.bc.Ssn,
-                        PsnSuffix = d.b.PsnSuffix,
-                        CurrentIncomeYear = 0,
-                        CurrentHoursYear = 0,
-                        IsExecutive = false,
-                    }
-                });
-
-        return query;
+        return _beneficiaryInquiryService.GetBeneficiaryInquiryQuery(ctx, req);
     }
 
     private async Task<(int ssn, MemberDetails? memberDetails)> GetDemographicDetails(ProfitSharingReadOnlyDbContext ctx,
@@ -565,50 +506,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
     private async Task<(int ssn, MemberDetails? memberDetails)> GetBeneficiaryDetails(ProfitSharingReadOnlyDbContext ctx,
      int id, CancellationToken cancellationToken)
     {
-        var memberData = await ctx.Beneficiaries
-            .Include(b => b.Contact)
-            .Where(b => b.Id == id)
-            .Select(b => new
-            {
-                b.Id,
-                b.Contact!.ContactInfo.FirstName,
-                b.Contact.ContactInfo.LastName,
-                b.Contact.Address.City,
-                b.Contact.Address.State,
-                Address = b.Contact.Address.Street,
-                b.Contact.Address.PostalCode,
-                b.Contact.DateOfBirth,
-                b.Contact.Ssn,
-                b.BadgeNumber,
-                b.PsnSuffix,
-                b.DemographicId
-            })
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (memberData == null)
-        {
-            return (0, new MemberDetails { Id = 0 });
-        }
-
-
-        return (memberData.Ssn, new MemberDetails
-        {
-            IsEmployee = false,
-            Id = memberData.Id,
-            FirstName = memberData.FirstName,
-            LastName = memberData.LastName,
-            AddressCity = memberData.City!,
-            AddressState = memberData.State!,
-            Address = memberData.Address,
-            AddressZipCode = memberData.PostalCode!,
-            DateOfBirth = memberData.DateOfBirth,
-            Age = memberData.DateOfBirth.Age(),
-            Ssn = memberData.Ssn.MaskSsn(),
-            BadgeNumber = memberData.BadgeNumber,
-            PsnSuffix = memberData.PsnSuffix,
-            PayFrequencyId = 0,
-            IsExecutive = false,
-        });
+        return await _beneficiaryInquiryService.GetBeneficiaryDetailsAsync(ctx, id, cancellationToken);
     }
 
     private async Task<IEnumerable<MemberProfitPlanDetails>> GetVestingDetails(Dictionary<int, MemberDetails> memberDetailsMap,
@@ -719,56 +617,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         ISet<int> ssns,
         CancellationToken cancellationToken)
     {
-        // EF Core 9: Optimize beneficiary query with better projection
-        var membersQuery = ctx.Beneficiaries
-            .Where(b => b.Contact != null && ssns.Contains(b.Contact.Ssn))
-            .TagWith("MasterInquiry: Get beneficiary details for SSNs");
-
-        // Only filter by BadgeNumber if provided and not 0
-        var badgeNumber = ((MasterInquiryRequest)req).BadgeNumber;
-        if (badgeNumber.HasValue && badgeNumber != 0)
-        {
-            membersQuery = membersQuery.Where(b => b.BadgeNumber == badgeNumber);
-        }
-
-        // Optimize projection: select only what we need
-        var members = membersQuery
-            .Select(b => new
-            {
-                b.Id,
-                b.Contact!.ContactInfo.FullName,
-                b.Contact!.ContactInfo.FirstName,
-                b.Contact.ContactInfo.LastName,
-                b.Contact.Address.City,
-                b.Contact.Address.State,
-                Address = b.Contact.Address.Street,
-                b.Contact.Address.PostalCode,
-                b.Contact.DateOfBirth,
-                b.Contact.Ssn,
-                b.BadgeNumber,
-                b.PsnSuffix,
-                DemographicId = b.Id
-            });
-
-
-        return members.Select(memberData => new MemberDetails
-        {
-            Id = memberData.Id,
-            IsEmployee = false,
-            FirstName = memberData.FirstName,
-            LastName = memberData.LastName,
-            AddressCity = memberData.City!,
-            AddressState = memberData.State!,
-            Address = memberData.Address,
-            AddressZipCode = memberData.PostalCode!,
-            DateOfBirth = memberData.DateOfBirth,
-            Ssn = memberData.Ssn.MaskSsn(),
-            BadgeNumber = memberData.BadgeNumber,
-            PsnSuffix = memberData.PsnSuffix,
-            PayFrequencyId = 0,
-            IsExecutive = false,
-        })
-            .ToPaginationResultsAsync(req, cancellationToken);
+        return _beneficiaryInquiryService.GetBeneficiaryDetailsForSsnsAsync(ctx, req, ssns, cancellationToken);
     }
 
     private static IQueryable<MasterInquiryItem> FilterMemberQuery(MasterInquiryRequest req, IQueryable<MasterInquiryItem> query)
@@ -783,50 +632,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
     private async Task<List<MemberDetails>> GetAllBeneficiaryDetailsForSsns(ProfitSharingReadOnlyDbContext ctx, ISet<int> ssns, CancellationToken cancellationToken)
     {
-        // EF Core 9: Optimize projection to fetch only needed data
-        var members = await ctx.Beneficiaries
-            .Where(b => b.Contact != null && ssns.Contains(b.Contact.Ssn))
-            .TagWith("MasterInquiry: Get all beneficiary details for SSNs")
-            .Select(b => new
-            {
-                b.Id,
-                b.Contact!.ContactInfo.FirstName,
-                b.Contact.ContactInfo.LastName,
-                b.Contact.Address.City,
-                b.Contact.Address.State,
-                Address = b.Contact.Address.Street,
-                b.Contact.Address.PostalCode,
-                b.Contact.DateOfBirth,
-                b.Contact.Ssn,
-                b.BadgeNumber,
-                b.PsnSuffix,
-                DemographicId = b.Id
-            })
-            .ToListAsync(cancellationToken);
-
-        var detailsList = new List<MemberDetails>();
-        foreach (var memberData in members)
-        {
-            detailsList.Add(new MemberDetails
-            {
-                Id = memberData.Id,
-                IsEmployee = false,
-                FirstName = memberData.FirstName,
-                LastName = memberData.LastName,
-                AddressCity = memberData.City!,
-                AddressState = memberData.State!,
-                Address = memberData.Address,
-                AddressZipCode = memberData.PostalCode!,
-                DateOfBirth = memberData.DateOfBirth,
-                Ssn = memberData.Ssn.MaskSsn(),
-                BadgeNumber = memberData.BadgeNumber,
-                PsnSuffix = memberData.PsnSuffix,
-                PayFrequencyId = 0,
-                IsExecutive = false,
-            });
-        }
-
-        return detailsList;
+        return await _beneficiaryInquiryService.GetAllBeneficiaryDetailsForSsnsAsync(ctx, ssns, cancellationToken);
     }
 
     private static IQueryable<MemberDetails> ApplySorting(IQueryable<MemberDetails> query, SortedPaginationRequestDto req)
