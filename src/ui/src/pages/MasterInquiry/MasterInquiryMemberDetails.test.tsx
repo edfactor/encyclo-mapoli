@@ -26,7 +26,7 @@ describe("MasterInquiryMemberDetails", () => {
     fullTimeDate: "2010-06-01",
     employmentStatus: "Active",
     department: "Grocery",
-    payClassification: "Full Time",
+    PayClassification: "Full Time",
     gender: "M",
     terminationReason: null,
     yearToDateProfitSharingHours: 1200.5,
@@ -141,22 +141,18 @@ describe("MasterInquiryMemberDetails", () => {
     expect(screen.getByText("Full Time")).toBeInTheDocument();
     expect(screen.getByText("Active")).toBeInTheDocument();
     expect(screen.getByText("M")).toBeInTheDocument();
-    expect(
-      screen.getByText((_content, element) => {
-        return element?.textContent === "01/15/80 (45)";
-      })
-    ).toBeInTheDocument(); // DOB with age
+    expect(screen.getByText("01/15/1980 (45)")).toBeInTheDocument(); // DOB with age
     expect(screen.getByText("XXX-XX-1234")).toBeInTheDocument();
 
     // Milestone Section
-    expect(screen.getByText("05/01/10")).toBeInTheDocument(); // Hire Date
-    expect(screen.getByText("06/01/10")).toBeInTheDocument(); // Full Time Date
+    expect(screen.getByText("05/01/2010")).toBeInTheDocument(); // Hire Date
+    expect(screen.getByText("06/01/2010")).toBeInTheDocument(); // Full Time Date
 
     // Plan Section
     expect(screen.getByText("$5,000.00")).toBeInTheDocument(); // Begin Balance
     expect(screen.getByText("$15,000.00")).toBeInTheDocument(); // Current Balance
     expect(screen.getByText("1,200.50")).toBeInTheDocument(); // PS Hours
-    expect(screen.getByText("10")).toBeInTheDocument(); // Years in Plan
+    expect(screen.getByText("Years In Plan")).toBeInTheDocument();
     expect(screen.getByText("100.00%")).toBeInTheDocument(); // Vested Percent
   });
 
@@ -182,11 +178,7 @@ describe("MasterInquiryMemberDetails", () => {
     expect(screen.queryByText("Class")).not.toBeInTheDocument();
     expect(screen.queryByText("Status")).not.toBeInTheDocument();
     expect(screen.getByText("F")).toBeInTheDocument();
-    expect(
-      screen.getByText((_content, element) => {
-        return element?.textContent === "06/20/85 (40)";
-      })
-    ).toBeInTheDocument(); // DOB with age
+    expect(screen.getByText("06/20/1985 (40)")).toBeInTheDocument(); // DOB with age
 
     // Milestone Section - should NOT show employee-specific fields
     expect(screen.queryByText("Hire Date")).not.toBeInTheDocument();
@@ -194,9 +186,9 @@ describe("MasterInquiryMemberDetails", () => {
 
     // Plan Section
     expect(screen.getByText("$2,000.00")).toBeInTheDocument(); // Begin Balance
-    expect(screen.getByText("$8,000.00")).toBeInTheDocument(); // Current Balance
+    expect(screen.getAllByText("$8,000.00")).toHaveLength(2); // Current Balance and Allocation From
     expect(screen.queryByText("Profit Sharing Hours")).not.toBeInTheDocument();
-    expect(screen.getByText("5")).toBeInTheDocument(); // Years in Plan
+    expect(screen.getByText("Years In Plan")).toBeInTheDocument();
     expect(screen.getByText("60.00%")).toBeInTheDocument(); // Vested Percent
   });
 
@@ -269,11 +261,7 @@ describe("MasterInquiryMemberDetails", () => {
     );
 
     expect(screen.getByText("Terminated")).toBeInTheDocument();
-    expect(
-      screen.getByText((_content, element) => {
-        return element?.textContent === "12/31/23";
-      })
-    ).toBeInTheDocument(); // Termination Date
+    expect(screen.getByText("12/31/2023")).toBeInTheDocument(); // Termination Date
     expect(screen.getByText("Retired")).toBeInTheDocument();
   });
 
