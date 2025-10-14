@@ -131,3 +131,23 @@ export const getFrequencyCodeLabel = (reasonCode: string): string => {
 
   return reasons[reasonCode] ?? "";
 };
+
+/**
+ * Returns a label for a distribution status ID
+ * @param statusId - Single character distribution status ID
+ * @returns Distribution status description or empty string if not found
+ */
+export const getDistributionIdLabel = (statusId: string): string => {
+  const distributionStatuses: Record<string, string> = {
+    C: "Manual Check",
+    D: "Purge this Record",
+    H: "Request is on hold",
+    O: "Override vested amount",
+    P: "Payment has been made",
+    X: "Purge all records for SSN",
+    Y: "Request is OK to pay",
+    Z: "Purge all records for SSN"
+  };
+
+  return distributionStatuses[statusId] ?? "";
+};

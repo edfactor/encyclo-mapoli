@@ -42,7 +42,10 @@ const DistributionInquiryContent = () => {
       request.distributionFrequencyId = formData.frequency;
     }
 
-    if (formData.paymentFlag) {
+    // Support both single and multiple payment flags
+    if (formData.paymentFlags && formData.paymentFlags.length > 0) {
+      request.distributionStatusIds = formData.paymentFlags;
+    } else if (formData.paymentFlag) {
       request.distributionStatusId = formData.paymentFlag;
     }
 
