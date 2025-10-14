@@ -78,12 +78,22 @@ public sealed class MasterInquiryService : IMasterInquiryService
                     // Original path: Build full query for complex filters
                     // FIXED: Pass context to avoid nested context creation deadlock
                     _logger.LogInformation("TRACE: Building query for MemberType {MemberType}", req.MemberType);
-                    IQueryable<MasterInquiryItem> query = req.MemberType switch
+                    IQueryable<MasterInquiryItem> query;
+
+                    if (req.MemberType == 1)
                     {
-                        1 => await GetMasterInquiryDemographics(ctx, req, timeoutToken),
-                        2 => await GetMasterInquiryBeneficiary(ctx, req, timeoutToken),
-                        _ => (await GetMasterInquiryDemographics(ctx, req, timeoutToken)).Union(await GetMasterInquiryBeneficiary(ctx, req, timeoutToken))
-                    };
+                        query = await GetMasterInquiryDemographics(ctx, req, timeoutToken);
+                    }
+                    else if (req.MemberType == 2)
+                    {
+                        query = await GetMasterInquiryBeneficiary(ctx, req, timeoutToken);
+                    }
+                    else
+                    {
+                        var empQuery = await GetMasterInquiryDemographics(ctx, req, timeoutToken);
+                        var benQuery = await GetMasterInquiryBeneficiary(ctx, req, timeoutToken);
+                        query = empQuery.Union(benQuery);
+                    }
                     _logger.LogInformation("TRACE: Query built for MemberType {MemberType}", req.MemberType);
 
                     query = FilterMemberQuery(req, query).TagWith("MasterInquiry: Filtered member query");
@@ -323,13 +333,22 @@ public sealed class MasterInquiryService : IMasterInquiryService
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             // Use context-based overloads to avoid nested context disposal
-            IQueryable<MasterInquiryItem> query = req.MemberType switch
+            IQueryable<MasterInquiryItem> query;
+
+            if (req.MemberType == 1)
             {
-                1 => await _employeeInquiryService.GetEmployeeInquiryQueryAsync(ctx, null, cancellationToken),
-                2 => await _beneficiaryInquiryService.GetBeneficiaryInquiryQueryAsync(ctx, null, cancellationToken),
-                _ => (await _employeeInquiryService.GetEmployeeInquiryQueryAsync(ctx, null, cancellationToken))
-                    .Union(await _beneficiaryInquiryService.GetBeneficiaryInquiryQueryAsync(ctx, null, cancellationToken))
-            };
+                query = await _employeeInquiryService.GetEmployeeInquiryQueryAsync(ctx, null, cancellationToken);
+            }
+            else if (req.MemberType == 2)
+            {
+                query = await _beneficiaryInquiryService.GetBeneficiaryInquiryQueryAsync(ctx, null, cancellationToken);
+            }
+            else
+            {
+                var empQuery = await _employeeInquiryService.GetEmployeeInquiryQueryAsync(ctx, null, cancellationToken);
+                var benQuery = await _beneficiaryInquiryService.GetBeneficiaryInquiryQueryAsync(ctx, null, cancellationToken);
+                query = empQuery.Union(benQuery);
+            }
 
             query = FilterMemberQuery(req, query);
 
@@ -382,13 +401,22 @@ public sealed class MasterInquiryService : IMasterInquiryService
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             // Use context-based overloads to avoid nested context disposal
-            IQueryable<MasterInquiryItem> query = req.MemberType switch
+            IQueryable<MasterInquiryItem> query;
+
+            if (req.MemberType == 1)
             {
-                1 => await _employeeInquiryService.GetEmployeeInquiryQueryAsync(ctx, null, cancellationToken),
-                2 => await _beneficiaryInquiryService.GetBeneficiaryInquiryQueryAsync(ctx, null, cancellationToken),
-                _ => (await _employeeInquiryService.GetEmployeeInquiryQueryAsync(ctx, null, cancellationToken))
-                    .Union(await _beneficiaryInquiryService.GetBeneficiaryInquiryQueryAsync(ctx, null, cancellationToken))
-            };
+                query = await _employeeInquiryService.GetEmployeeInquiryQueryAsync(ctx, null, cancellationToken);
+            }
+            else if (req.MemberType == 2)
+            {
+                query = await _beneficiaryInquiryService.GetBeneficiaryInquiryQueryAsync(ctx, null, cancellationToken);
+            }
+            else
+            {
+                var empQuery = await _employeeInquiryService.GetEmployeeInquiryQueryAsync(ctx, null, cancellationToken);
+                var benQuery = await _beneficiaryInquiryService.GetBeneficiaryInquiryQueryAsync(ctx, null, cancellationToken);
+                query = empQuery.Union(benQuery);
+            }
 
             var masterInquiryRequest = new MasterInquiryRequest
             {

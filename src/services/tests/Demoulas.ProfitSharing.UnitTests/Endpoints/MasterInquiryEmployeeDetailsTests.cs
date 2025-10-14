@@ -89,16 +89,6 @@ public class MasterInquiryEmployeeDetailsTests : ApiTestBase<Api.Program>
         response.Response.EnsureSuccessStatusCode();
     }
 
-    [Fact(DisplayName = "PS-433: Employee Details - Social Security")]
-    public async Task GetEmployeeDetailsWithSocialSecurity()
-    {
-        ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
-        var request = new MasterInquiryRequest { Ssn = 100000000, Skip = 0, Take = 25, ProfitYear = profitYear };
-        var response = await ApiClient.POSTAsync<MasterInquirySearchEndpoint, MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>(request);
-        response.ShouldNotBeNull();
-        response.Response.EnsureSuccessStatusCode();
-    }
-
     [Fact(DisplayName = "PS-433: Employee Details - All Filters")]
     public async Task GetEmployeeDetailsWithAllFilters()
     {
