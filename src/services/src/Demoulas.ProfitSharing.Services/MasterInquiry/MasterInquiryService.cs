@@ -81,9 +81,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
                     // Original path: Build full query for complex filters
                     IQueryable<MasterInquiryItem> query = req.MemberType switch
                     {
-                        1 => await GetMasterInquiryDemographics(ctx, req),
-                        2 => GetMasterInquiryBeneficiary(ctx, req),
-                        _ => (await GetMasterInquiryDemographics(ctx, req)).Union(GetMasterInquiryBeneficiary(ctx, req))
+                        1 => await GetMasterInquiryDemographics(req, cancellationToken),
+                        2 => await GetMasterInquiryBeneficiary(req, cancellationToken),
+                        _ => (await GetMasterInquiryDemographics(req, cancellationToken)).Union(await GetMasterInquiryBeneficiary(req, cancellationToken))
                     };
 
                     query = FilterMemberQuery(req, query).TagWith("MasterInquiry: Filtered member query");
@@ -128,17 +128,17 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
                 if (memberType == 1)
                 {
-                    detailsList = await GetDemographicDetailsForSsns(ctx, req, ssnList, currentYear, previousYear, duplicateSsns, timeoutToken);
+                    detailsList = await GetDemographicDetailsForSsns(req, ssnList, currentYear, previousYear, duplicateSsns, timeoutToken);
                 }
                 else if (memberType == 2)
                 {
-                    detailsList = await GetBeneficiaryDetailsForSsns(ctx, req, ssnList, timeoutToken);
+                    detailsList = await GetBeneficiaryDetailsForSsns(req, ssnList, timeoutToken);
                 }
                 else
                 {
                     // For both, merge and deduplicate by SSN
-                    var employeeDetails = await GetAllDemographicDetailsForSsns(ctx, ssnList, currentYear, previousYear, duplicateSsns, timeoutToken);
-                    var beneficiaryDetails = await GetAllBeneficiaryDetailsForSsns(ctx, ssnList, timeoutToken);
+                    var employeeDetails = await GetAllDemographicDetailsForSsns(ssnList, currentYear, previousYear, duplicateSsns, timeoutToken);
+                    var beneficiaryDetails = await GetAllBeneficiaryDetailsForSsns(ssnList, timeoutToken);
 
                     // Combine and deduplicate by SSN
                     var allResults = employeeDetails.Concat(beneficiaryDetails)
@@ -274,7 +274,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             // If they gave us the badge... then lets use that.
             else if (psnSuffix > 0)
             {
-                int ssnBene = await _beneficiaryInquiryService.FindBeneficiarySsnByBadgeAsync(ctx, badgeNumber!.Value, psnSuffix.Value, cancellationToken);
+                int ssnBene = await _beneficiaryInquiryService.FindBeneficiarySsnByBadgeAsync(badgeNumber!.Value, psnSuffix.Value, cancellationToken);
 
                 if (ssnBene != 0)
                 {
@@ -283,7 +283,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             }
             else if (badgeNumber != 0)
             {
-                int ssnEmpl = await _employeeInquiryService.FindEmployeeSsnByBadgeAsync(ctx, badgeNumber.Value, cancellationToken);
+                int ssnEmpl = await _employeeInquiryService.FindEmployeeSsnByBadgeAsync(badgeNumber.Value, cancellationToken);
 
                 if (ssnEmpl != 0)
                 {
@@ -306,9 +306,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
         {
             IQueryable<MasterInquiryItem> query = req.MemberType switch
             {
-                1 => await GetMasterInquiryDemographics(ctx),
-                2 => GetMasterInquiryBeneficiary(ctx),
-                _ => (await GetMasterInquiryDemographics(ctx)).Union(GetMasterInquiryBeneficiary(ctx))
+                1 => await GetMasterInquiryDemographics(null, cancellationToken),
+                2 => await GetMasterInquiryBeneficiary(null, cancellationToken),
+                _ => (await GetMasterInquiryDemographics(null, cancellationToken)).Union(await GetMasterInquiryBeneficiary(null, cancellationToken))
             };
 
             query = FilterMemberQuery(req, query);
@@ -345,15 +345,12 @@ public sealed class MasterInquiryService : IMasterInquiryService
     {
         short currentYear = req.ProfitYear;
         short previousYear = (short)(currentYear - 1);
-        var members = await _dataContextFactory.UseReadOnlyContext(ctx =>
+        var members = req.MemberType switch
         {
-            return req.MemberType switch
-            {
-                1 => GetDemographicDetails(ctx, req.Id, currentYear, previousYear, cancellationToken),
-                2 => GetBeneficiaryDetails(ctx, req.Id, cancellationToken),
-                _ => throw new ValidationException("Invalid MemberType provided")
-            };
-        }, cancellationToken);
+            1 => await GetDemographicDetails(req.Id, currentYear, previousYear, cancellationToken),
+            2 => await GetBeneficiaryDetails(req.Id, cancellationToken),
+            _ => throw new ValidationException("Invalid MemberType provided")
+        };
         Dictionary<int, MemberDetails> memberDetailsMap = new Dictionary<int, MemberDetails> { { members.ssn, members.memberDetails ?? new MemberDetails { Id = 0 } } };
 
         var details = await GetVestingDetails(memberDetailsMap, currentYear, previousYear, cancellationToken);
@@ -366,9 +363,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
         {
             IQueryable<MasterInquiryItem> query = req.MemberType switch
             {
-                1 => await GetMasterInquiryDemographics(ctx),
-                2 => GetMasterInquiryBeneficiary(ctx),
-                _ => (await GetMasterInquiryDemographics(ctx)).Union(GetMasterInquiryBeneficiary(ctx))
+                1 => await GetMasterInquiryDemographics(null, cancellationToken),
+                2 => await GetMasterInquiryBeneficiary(null, cancellationToken),
+                _ => (await GetMasterInquiryDemographics(null, cancellationToken)).Union(await GetMasterInquiryBeneficiary(null, cancellationToken))
             };
 
             var masterInquiryRequest = new MasterInquiryRequest
@@ -489,25 +486,25 @@ public sealed class MasterInquiryService : IMasterInquiryService
         }, cancellationToken);
     }
 
-    private async Task<IQueryable<MasterInquiryItem>> GetMasterInquiryDemographics(ProfitSharingReadOnlyDbContext ctx, MasterInquiryRequest? req = null)
+    private async Task<IQueryable<MasterInquiryItem>> GetMasterInquiryDemographics(MasterInquiryRequest? req = null, CancellationToken cancellationToken = default)
     {
-        return await _employeeInquiryService.GetEmployeeInquiryQueryAsync(ctx, req);
+        return await _employeeInquiryService.GetEmployeeInquiryQueryAsync(req, cancellationToken);
     }
-    private IQueryable<MasterInquiryItem> GetMasterInquiryBeneficiary(ProfitSharingReadOnlyDbContext ctx, MasterInquiryRequest? req = null)
+    private async Task<IQueryable<MasterInquiryItem>> GetMasterInquiryBeneficiary(MasterInquiryRequest? req = null, CancellationToken cancellationToken = default)
     {
-        return _beneficiaryInquiryService.GetBeneficiaryInquiryQuery(ctx, req);
-    }
-
-    private async Task<(int ssn, MemberDetails? memberDetails)> GetDemographicDetails(ProfitSharingReadOnlyDbContext ctx,
-       int id, short currentYear, short previousYear, CancellationToken cancellationToken)
-    {
-        return await _employeeInquiryService.GetEmployeeDetailsAsync(ctx, id, currentYear, previousYear, cancellationToken);
+        return await _beneficiaryInquiryService.GetBeneficiaryInquiryQueryAsync(req, cancellationToken);
     }
 
-    private async Task<(int ssn, MemberDetails? memberDetails)> GetBeneficiaryDetails(ProfitSharingReadOnlyDbContext ctx,
-     int id, CancellationToken cancellationToken)
+    private async Task<(int ssn, MemberDetails? memberDetails)> GetDemographicDetails(
+       int id, short currentYear, short previousYear, CancellationToken cancellationToken = default)
     {
-        return await _beneficiaryInquiryService.GetBeneficiaryDetailsAsync(ctx, id, cancellationToken);
+        return await _employeeInquiryService.GetEmployeeDetailsAsync(id, currentYear, previousYear, cancellationToken);
+    }
+
+    private async Task<(int ssn, MemberDetails? memberDetails)> GetBeneficiaryDetails(
+     int id, CancellationToken cancellationToken = default)
+    {
+        return await _beneficiaryInquiryService.GetBeneficiaryDetailsAsync(id, cancellationToken);
     }
 
     private async Task<IEnumerable<MemberProfitPlanDetails>> GetVestingDetails(Dictionary<int, MemberDetails> memberDetailsMap,
@@ -608,17 +605,17 @@ public sealed class MasterInquiryService : IMasterInquiryService
         return detailsList;
     }
 
-    private async Task<PaginatedResponseDto<MemberDetails>> GetDemographicDetailsForSsns(ProfitSharingReadOnlyDbContext ctx, SortedPaginationRequestDto req, ISet<int> ssns, short currentYear, short previousYear, ISet<int> duplicateSsns, CancellationToken cancellationToken)
+    private async Task<PaginatedResponseDto<MemberDetails>> GetDemographicDetailsForSsns(SortedPaginationRequestDto req, ISet<int> ssns, short currentYear, short previousYear, ISet<int> duplicateSsns, CancellationToken cancellationToken = default)
     {
-        return await _employeeInquiryService.GetEmployeeDetailsForSsnsAsync(ctx, (MasterInquiryRequest)req, ssns, currentYear, previousYear, duplicateSsns, cancellationToken);
+        return await _employeeInquiryService.GetEmployeeDetailsForSsnsAsync((MasterInquiryRequest)req, ssns, currentYear, previousYear, duplicateSsns, cancellationToken);
     }
 
-    private Task<PaginatedResponseDto<MemberDetails>> GetBeneficiaryDetailsForSsns(ProfitSharingReadOnlyDbContext ctx,
+    private Task<PaginatedResponseDto<MemberDetails>> GetBeneficiaryDetailsForSsns(
         SortedPaginationRequestDto req,
         ISet<int> ssns,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
-        return _beneficiaryInquiryService.GetBeneficiaryDetailsForSsnsAsync(ctx, req, ssns, cancellationToken);
+        return _beneficiaryInquiryService.GetBeneficiaryDetailsForSsnsAsync(req, ssns, cancellationToken);
     }
 
     private static IQueryable<MasterInquiryItem> FilterMemberQuery(MasterInquiryRequest req, IQueryable<MasterInquiryItem> query)
@@ -626,14 +623,14 @@ public sealed class MasterInquiryService : IMasterInquiryService
         return MasterInquiryHelpers.FilterMemberQuery(req, query);
     }
 
-    private async Task<List<MemberDetails>> GetAllDemographicDetailsForSsns(ProfitSharingReadOnlyDbContext ctx, ISet<int> ssns, short currentYear, short previousYear, ISet<int> duplicateSsns, CancellationToken cancellationToken)
+    private async Task<List<MemberDetails>> GetAllDemographicDetailsForSsns(ISet<int> ssns, short currentYear, short previousYear, ISet<int> duplicateSsns, CancellationToken cancellationToken = default)
     {
-        return await _employeeInquiryService.GetAllEmployeeDetailsForSsnsAsync(ctx, ssns, currentYear, previousYear, duplicateSsns, cancellationToken);
+        return await _employeeInquiryService.GetAllEmployeeDetailsForSsnsAsync(ssns, currentYear, previousYear, duplicateSsns, cancellationToken);
     }
 
-    private async Task<List<MemberDetails>> GetAllBeneficiaryDetailsForSsns(ProfitSharingReadOnlyDbContext ctx, ISet<int> ssns, CancellationToken cancellationToken)
+    private async Task<List<MemberDetails>> GetAllBeneficiaryDetailsForSsns(ISet<int> ssns, CancellationToken cancellationToken = default)
     {
-        return await _beneficiaryInquiryService.GetAllBeneficiaryDetailsForSsnsAsync(ctx, ssns, cancellationToken);
+        return await _beneficiaryInquiryService.GetAllBeneficiaryDetailsForSsnsAsync(ssns, cancellationToken);
     }
 
     private static IQueryable<MemberDetails> ApplySorting(IQueryable<MemberDetails> query, SortedPaginationRequestDto req)
