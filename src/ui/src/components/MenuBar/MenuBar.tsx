@@ -7,7 +7,7 @@ import { RouteCategory } from "../../types/MenuTypes";
 import { getFirstNavigableRoute, getL0NavigationForRoute } from "../Drawer/utils/navigationStructureUtils";
 import { ICommon } from "../ICommon";
 import NavButton from "./NavButton";
-import PopupMenu from "./PopupMenu";
+import PageSearch from "./PageSearch";
 
 export interface MenuBarProps extends ICommon {
   menuInfo: RouteCategory[];
@@ -21,7 +21,6 @@ export const MenuBar: FC<MenuBarProps> = ({ menuInfo, impersonationMultiSelect, 
   const dispatch = useDispatch();
   const homeTabSelected = location.pathname === "/";
 
-  
   const drawerOnlySections = useMemo(() => {
     if (!navigationData?.navigation) return [] as string[];
 
@@ -105,7 +104,15 @@ export const MenuBar: FC<MenuBarProps> = ({ menuInfo, impersonationMultiSelect, 
           );
         })}
       </div>
-      {impersonationMultiSelect}
+      <div className="mr-4 flex items-center gap-4">
+        <PageSearch navigationData={navigationData} />
+        {impersonationMultiSelect && (
+          <>
+            <div className="h-8 w-px bg-white opacity-30" />
+            {impersonationMultiSelect}
+          </>
+        )}
+      </div>
     </div>
   );
 };
