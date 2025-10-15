@@ -35,6 +35,7 @@ DECLARE
     -- Groups under INQUIRIES
     INQUIRIES_GROUP CONSTANT NUMBER := 13;
     ADJUSTMENTS_GROUP CONSTANT NUMBER := 14;
+    ADHOC_GROUP CONSTANT NUMBER := 15;
 
     -- AVAILABLE PAGES (ids starting at 100)
 
@@ -200,6 +201,13 @@ BEGIN
     insert_navigation_item(ADJUSTMENTS_GROUP, INQUIRIES_MENU, 'Adjustments', '', '', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(ADJUSTMENTS_PAGE, ADJUSTMENTS_GROUP, 'ADJUSTMENTS', '', 'adjustments', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
 
+    insert_navigation_item(ADHOC_GROUP, INQUIRIES_MENU, 'Adhoc Reports', '', '', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PAY_BEN_REPORT, ADHOC_GROUP, 'Pay Ben Report', '', 'payben-report', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(QPAY600, ADHOC_GROUP, 'QPAY600', '', 'qpay600', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(TERMINATED_LETTERS, ADHOC_GROUP, 'Terminated Letters', 'QPROF003-1', 'terminated-letters', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(RECENTLY_TERMINATED, ADHOC_GROUP, 'Recently Terminated', 'PROF-VESTED|PAY508', 'recently-terminated', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(QPAY066_AD_HOC_REPORTS, ADHOC_GROUP, 'QPAY066* Ad Hoc Reports', 'QPAY066*', 'qpay066-adhoc', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
+
 
 --distribution items
     insert_navigation_item(DISTRIBUTION_INQUIRY_PAGE, DISTRIBUTIONS_MENU, 'Distribution Inquiry (008-14l)', '', 'distributions-inquiry', STATUS_NORMAL, ORDER_ELEVENTH, '', DISABLED, IS_NAVIGABLE);
@@ -240,9 +248,9 @@ BEGIN
     insert_navigation_item(PROFIT_SUMMARY, FISCAL_CLOSE, 'Profit Summary (PAY426 summary)', '', 'pay426-9', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(PAY426N_FROZEN, FISCAL_CLOSE, 'Profit Sharing Report', 'PAY426N', 'pay426n_frozen', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
 
-    insert_navigation_item(QPAY066_AD_HOC_REPORTS, FISCAL_CLOSE, 'QPAY066* Ad Hoc Reports', 'QPAY066*', 'qpay066-adhoc', STATUS_NORMAL, ORDER_SEVENTEENTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(RECENTLY_TERMINATED, FISCAL_CLOSE, 'Recently Terminated', 'PROF-VESTED|PAY508', 'recently-terminated', STATUS_NORMAL, ORDER_EIGHTEENTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(TERMINATED_LETTERS, FISCAL_CLOSE, 'Terminated Letters', 'QPROF003-1', 'terminated-letters', STATUS_NORMAL, ORDER_NINETEENTH, '', ENABLED, IS_NAVIGABLE);
+    
+    
+    
 
 -- Pay Beneficiary Report (Year End / Fiscal Close)
     insert_navigation_item(PAY_BENEFICIARY_REPORT, FISCAL_CLOSE, 'Pay Beneficiary Report', '', 'payben-report', STATUS_NORMAL, ORDER_TENTH, '', ENABLED, IS_NAVIGABLE);
@@ -251,7 +259,7 @@ BEGIN
     insert_navigation_item(ADHOC_BENEFICIARIES_REPORT, FISCAL_CLOSE, 'Adhoc Beneficiaries Report (Pay Be Next)', '', 'adhoc-beneficiaries-report', STATUS_NORMAL, ORDER_NINETEENTH, '', ENABLED, IS_NAVIGABLE);
 
 -- QPAY600 (Year End child)
-    insert_navigation_item(QPAY600, FISCAL_CLOSE, 'QPAY600', '', 'qpay600', STATUS_NORMAL, ORDER_TWENTIETH, '', ENABLED, IS_NAVIGABLE);
+    
     insert_navigation_item(GET_ELIGIBLE_EMPLOYEES, FISCAL_CLOSE, 'Get Eligible Employees', 'GET-ELIGIBLE-EMPS', 'eligible-employees', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(PROFIT_SHARE_FORFEIT, FISCAL_CLOSE, 'Profit Share Forfeit', 'PAY443', 'forfeit', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(MASTER_UPDATE, FISCAL_CLOSE, 'Master Update', 'PAY444|PAY447', 'profit-share-update', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
@@ -266,7 +274,7 @@ BEGIN
     
     insert_navigation_item(PROFIT_SHARE_REPORT_FINAL_RUN, FISCAL_CLOSE, 'Profit Share Report Final Run', '', 'profit-share-report-final-run', STATUS_NORMAL, ORDER_SEVENTEENTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(PROFIT_SHARE_REPORT_EDIT_RUN, FISCAL_CLOSE, 'Profit Share Report Edit Run', '', 'profit-share-report-edit-run', STATUS_NORMAL, ORDER_EIGHTEENTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(PAY_BEN_REPORT, BENEFICIARIES_MENU, 'Pay Ben Report', '', 'payben-report', STATUS_NORMAL, ORDER_NINETEENTH, '', ENABLED, IS_NAVIGABLE);
+    
     insert_navigation_item(PRINT_PROFIT_CERTS, FISCAL_CLOSE, 'Reprint Certificates / Print Profit Certs', 'PAYCERT', 'reprint-certificates', STATUS_NORMAL, ORDER_TWENTIETH, '', ENABLED, IS_NAVIGABLE);
 
 
@@ -300,6 +308,11 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
 --  Remove other role assignments so the IT menu is exclusive to IT-DevOps.
     assign_navigation_role(IT_DEVOPS_MENU, IT_DEVOPS);
 
+-- Payben report 
+    assign_navigation_role(PAY_BEN_REPORT, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(PAY_BEN_REPORT, FINANCE_MANAGER);
+    assign_navigation_role(PAY_BEN_REPORT, DISTRIBUTIONS_CLERK);
+
 -- Print PS Jobs
     assign_navigation_role(PRINT_PS_JOBS, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(PRINT_PS_JOBS, FINANCE_MANAGER);
@@ -330,6 +343,11 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(INQUIRIES_GROUP, SYSTEM_ADMINISTRATOR); 
     assign_navigation_role(INQUIRIES_GROUP, FINANCE_MANAGER); 
     assign_navigation_role(INQUIRIES_GROUP, DISTRIBUTIONS_CLERK);
+
+-- Assign roles for ADHOC_GROUP
+    assign_navigation_role(ADHOC_GROUP, SYSTEM_ADMINISTRATOR); 
+    assign_navigation_role(ADHOC_GROUP, FINANCE_MANAGER); 
+    assign_navigation_role(ADHOC_GROUP, DISTRIBUTIONS_CLERK);
 
 -- Assign roles for MASTER INQUIRY (Endpoints base -> Navigation.Constants.MasterInquiry; Policy -> CanRunMasterInquiry)
     assign_navigation_role(MASTER_INQUIRY_PAGE, SYSTEM_ADMINISTRATOR); 
@@ -461,6 +479,7 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(INQUIRIES_MENU, IT_DEVOPS);
     assign_navigation_role(INQUIRIES_GROUP, IT_DEVOPS);
     assign_navigation_role(ADJUSTMENTS_GROUP, IT_DEVOPS);
+    assign_navigation_role(ADHOC_GROUP, IT_DEVOPS);
     assign_navigation_role(DEMOGRAPHIC_FREEZE_PAGE, IT_DEVOPS);
     assign_navigation_role(MASTER_INQUIRY_PAGE, IT_DEVOPS);
     assign_navigation_role(BENEFICIARIES_MENU, IT_DEVOPS);

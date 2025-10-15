@@ -1,7 +1,7 @@
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { openDrawer } from "../../reduxstore/slices/generalSlice";
+import { openDrawer, setActiveSubMenu } from "../../reduxstore/slices/generalSlice";
 import { NavigationResponseDto } from "../../reduxstore/types";
 import { RouteCategory } from "../../types/MenuTypes";
 import { getFirstNavigableRoute, getL0NavigationForRoute } from "../Drawer/utils/navigationStructureUtils";
@@ -21,14 +21,22 @@ export const MenuBar: FC<MenuBarProps> = ({ menuInfo, impersonationMultiSelect, 
   const dispatch = useDispatch();
   const homeTabSelected = location.pathname === "/";
 
-  // Sections that should open the drawer instead of navigating
-  const drawerOnlySections = ["INQUIRIES", "YEAR END", "DISTRIBUTIONS", "IT DEVOPS"];
+  
+  const drawerOnlySections = useMemo(() => {
+    if (!navigationData?.navigation) return [] as string[];
+
+    return navigationData.navigation
+      .filter((item) => item.parentId === null && (item.items?.length ?? 0) > 0)
+      .map((item) => item.title);
+  }, [navigationData]);
 
   // Determine which L0 section contains the current route
   const activeL0Section = getL0NavigationForRoute(navigationData, location.pathname);
 
   const handleMenuClick = (current: RouteCategory) => {
     if (drawerOnlySections.includes(current.menuLabel)) {
+      // Set the active submenu so the drawer knows which section to show, then open drawer
+      dispatch(setActiveSubMenu(current.menuLabel));
       // Open drawer for drawer-only sections and navigate to first child route
       dispatch(openDrawer());
 
@@ -63,20 +71,34 @@ export const MenuBar: FC<MenuBarProps> = ({ menuInfo, impersonationMultiSelect, 
           label="Home"
         />
         {menuInfo.map((current: RouteCategory, index: number) => {
-          return current.items ? (
-            <PopupMenu
-              navigationData={navigationData}
-              key={index}
-              menuLabel={current.menuLabel}
-              items={current.items}
-              parentRoute={current.parentRoute}
-              disabled={current.disabled}
-            />
-          ) : (
+          // Render top-level items as NavButton only. Previously some items opened a PopupMenu.
+          // Clicking a top-level item should either open the drawer (and set the active submenu)
+          // or navigate normally.
+          return (
             <NavButton
               key={index}
               isUnderlined={isMenuItemActive(current.menuLabel)}
-              onClick={() => handleMenuClick(current)}
+              onClick={() => {
+                // If this top-level has child items, set them as the active submenu and open drawer
+                if (current.items && current.items.length > 0) {
+                  dispatch(setActiveSubMenu(current.menuLabel));
+                  dispatch(openDrawer());
+
+                  // Navigate to the first available route in this section so
+                  // SmartPSDrawer (which auto-detects the drawer root from route)
+                  // will select the correct L0 section to display.
+                  const firstRoute = getFirstNavigableRoute(navigationData, current.menuLabel);
+                  if (firstRoute) {
+                    const absolutePath = firstRoute.startsWith("/") ? firstRoute : `/${firstRoute}`;
+                    navigate(absolutePath, { replace: false });
+                  }
+
+                  return;
+                }
+
+                // Otherwise, fall back to existing handler (which handles drawer-only sections)
+                handleMenuClick(current);
+              }}
               label={current.menuLabel}
               disabled={current.disabled}
             />
