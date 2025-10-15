@@ -32,7 +32,7 @@ describe("MasterInquiryMemberDetails", () => {
     fullTimeDate: "2010-06-01",
     employmentStatus: "Active",
     department: "Grocery",
-    PayClassification: "Full Time",
+    payClassification: "Full Time",
     gender: "M",
     terminationReason: null,
     yearToDateProfitSharingHours: 1200.5,
