@@ -5,6 +5,7 @@ import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
 
 const MissiveAlerts: React.FC = () => {
   const { missiveAlerts } = useMissiveAlerts();
+
   if (!missiveAlerts || missiveAlerts.length === 0) {
     return null;
   }

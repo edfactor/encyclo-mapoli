@@ -197,14 +197,17 @@ const useMasterInquiry = () => {
         .then((details) => {
           dispatch({ type: "MEMBER_DETAILS_FETCH_SUCCESS", payload: { details } });
 
-          // We cannot cross references missives unless we have some in the redux store
-          if (details.missives && Array.isArray(missives) && missives.length > 0) {
-            const localMissives: MissiveResponse[] = details.missives
-              .map((id: number) => missives.find((m: MissiveResponse) => m.id === id))
-              .filter(Boolean) as MissiveResponse[];
+          // Process missives if present in the response
+          if (details.missives && details.missives.length > 0) {
+            if (Array.isArray(missives) && missives.length > 0) {
+              // Cross-reference with Redux store missives
+              const localMissives: MissiveResponse[] = details.missives
+                .map((id: number) => missives.find((m: MissiveResponse) => m.id === id))
+                .filter(Boolean) as MissiveResponse[];
 
-            if (localMissives.length > 0) {
-              addAlerts(localMissives);
+              if (localMissives.length > 0) {
+                addAlerts(localMissives);
+              }
             }
           }
 
@@ -220,11 +223,28 @@ const useMasterInquiry = () => {
     state.selection.selectedMember,
     state.search.params?.endProfitYear,
     triggerMemberDetails,
-    missives,
     masterInquiryRequestParams?.memberType,
     addAlert,
     addAlerts
   ]);
+
+  // Process missives when they become available for existing member details
+  useEffect(() => {
+    if (
+      state.selection.memberDetails?.missives &&
+      state.selection.memberDetails.missives.length > 0 &&
+      Array.isArray(missives) &&
+      missives.length > 0
+    ) {
+      const localMissives: MissiveResponse[] = state.selection.memberDetails.missives
+        .map((id: number) => missives.find((m: MissiveResponse) => m.id === id))
+        .filter(Boolean) as MissiveResponse[];
+
+      if (localMissives.length > 0) {
+        addAlerts(localMissives);
+      }
+    }
+  }, [missives, state.selection.memberDetails?.missives, addAlerts]);
 
   const profitFetchDeps = useMemo(
     () => ({

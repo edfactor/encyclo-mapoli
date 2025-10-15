@@ -71,6 +71,15 @@ public sealed class DistributionService : IDistributionService
             int searchSsn;
             if (!string.IsNullOrWhiteSpace(request.Ssn) && int.TryParse(request.Ssn, out searchSsn))
             {
+                // Validate that SSN exists in either demographics or beneficiaries
+                var ssnExists = await demographic.AnyAsync(d => d.Ssn == searchSsn, cancellationToken) ||
+                               await ctx.Beneficiaries.AnyAsync(b => b.Contact!.Ssn == searchSsn, cancellationToken);
+
+                if (!ssnExists)
+                {
+                    throw new InvalidOperationException("SSN not found.");
+                }
+
                 query = query.Where(d => d.Ssn == searchSsn);
             }
 
@@ -147,6 +156,20 @@ public sealed class DistributionService : IDistributionService
                 query = query.Where(d => d.CheckAmount <= request.MaxCheckAmount.Value);
             }
 
+            // Filter by MemberType similar to MasterInquiry pattern
+            if (request.MemberType.HasValue)
+            {
+                if (request.MemberType.Value == 1) // Employees only
+                {
+                    query = query.Where(d => d.BadgeNumber != null);
+                }
+                else if (request.MemberType.Value == 2) // Beneficiaries only
+                {
+                    query = query.Where(d => d.BadgeNumber == null);
+                }
+                // If null or any other value, don't filter (show all)
+            }
+
             return await query.ToPaginationResultsAsync(request, cancellationToken);
         }, cancellationToken);
 
@@ -170,7 +193,8 @@ public sealed class DistributionService : IDistributionService
                 FederalTax = d.FederalTaxAmount,
                 StateTax = d.StateTaxAmount,
                 CheckAmount = d.CheckAmount,
-                IsExecutive = d.IsExecutive
+                IsExecutive = d.IsExecutive,
+                IsEmployee = d.BadgeNumber.HasValue
             }).ToList()
         };
 

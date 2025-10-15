@@ -4,8 +4,12 @@ import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import { Button, Divider, Grid, Tooltip } from "@mui/material";
 import { useState } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
+import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
+import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
+import { DISTRIBUTION_INQUIRY_MESSAGES } from "../../components/MissiveAlerts/MissiveMessages";
 import StatusDropdownActionNode from "../../components/StatusDropdownActionNode";
 import { CAPTIONS } from "../../constants";
+import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
 import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
 import { useLazySearchDistributionsQuery } from "../../reduxstore/api/DistributionApi";
 import { DistributionSearchFormData } from "../../types";
@@ -17,66 +21,98 @@ const DistributionInquiryContent = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const [triggerSearch, { data, isFetching }] = useLazySearchDistributionsQuery();
   const isReadOnly = useReadOnlyNavigation();
+  const { missiveAlerts, addAlert, clearAlerts } = useMissiveAlerts();
 
   const handleSearch = async (formData: DistributionSearchFormData) => {
-    const request: any = {
-      skip: 0,
-      take: 25,
-      sortBy: "badgeNumber",
-      isSortDescending: false
-    };
+    try {
+      clearAlerts();
 
-    // Map form data to API request
-    if (formData.ssnOrMemberNumber) {
-      const value = formData.ssnOrMemberNumber.trim();
-      // Check if it's exactly 9 digits (SSN) or 5-11 digits (badge number)
-      if (/^\d{9}$/.test(value)) {
-        request.ssn = value;
-      } else if (/^\d{5,11}$/.test(value)) {
-        request.badgeNumber = parseInt(value, 10);
+      const request: any = {
+        skip: 0,
+        take: 25,
+        sortBy: "badgeNumber",
+        isSortDescending: false,
+        onlyNetworkToastErrors: true
+      };
+
+      // Map SSN directly
+      if (formData.socialSecurity) {
+        request.ssn = formData.socialSecurity.trim();
       }
-      // Otherwise, set neither (invalid format)
-    }
 
-    if (formData.frequency) {
-      request.distributionFrequencyId = formData.frequency;
-    }
+      // Map badge number directly
+      if (formData.badgeNumber) {
+        request.badgeNumber = Number(formData.badgeNumber);
+      }
 
-    // Support both single and multiple payment flags
-    if (formData.paymentFlags && formData.paymentFlags.length > 0) {
-      request.distributionStatusIds = formData.paymentFlags;
-    } else if (formData.paymentFlag) {
-      request.distributionStatusId = formData.paymentFlag;
-    }
+      // Map member type: "all" -> null, "employees" -> 1, "beneficiaries" -> 2
+      if (formData.memberType) {
+        request.memberType =
+          formData.memberType === "all"
+            ? null
+            : formData.memberType === "employees"
+              ? 1
+              : formData.memberType === "beneficiaries"
+                ? 2
+                : null;
+      }
 
-    if (formData.taxCode) {
-      request.taxCodeId = formData.taxCode;
-    }
+      if (formData.frequency) {
+        request.distributionFrequencyId = formData.frequency;
+      }
 
-    if (formData.minGrossAmount) {
-      request.minGrossAmount = parseFloat(formData.minGrossAmount);
-    }
+      // Support both single and multiple payment flags
+      if (formData.paymentFlags && formData.paymentFlags.length > 0) {
+        request.distributionStatusIds = formData.paymentFlags;
+      } else if (formData.paymentFlag) {
+        request.distributionStatusId = formData.paymentFlag;
+      }
 
-    if (formData.maxGrossAmount) {
-      request.maxGrossAmount = parseFloat(formData.maxGrossAmount);
-    }
+      if (formData.taxCode) {
+        request.taxCodeId = formData.taxCode;
+      }
 
-    if (formData.minCheckAmount) {
-      request.minCheckAmount = parseFloat(formData.minCheckAmount);
-    }
+      if (formData.minGrossAmount) {
+        request.minGrossAmount = parseFloat(formData.minGrossAmount);
+      }
 
-    if (formData.maxCheckAmount) {
-      request.maxCheckAmount = parseFloat(formData.maxCheckAmount);
-    }
+      if (formData.maxGrossAmount) {
+        request.maxGrossAmount = parseFloat(formData.maxGrossAmount);
+      }
 
-    setSearchData(request);
-    setHasSearched(true);
-    await triggerSearch(request);
+      if (formData.minCheckAmount) {
+        request.minCheckAmount = parseFloat(formData.minCheckAmount);
+      }
+
+      if (formData.maxCheckAmount) {
+        request.maxCheckAmount = parseFloat(formData.maxCheckAmount);
+      }
+
+      setSearchData(request);
+      await triggerSearch(request).unwrap();
+      // Only set hasSearched to true if the search was successful
+      setHasSearched(true);
+    } catch (error: any) {
+      // Reset hasSearched to false on error to hide the grid
+      setHasSearched(false);
+
+      // Check if it's a 500 error with "Badge number not found" or "SSN not found" title
+      if (
+        error?.status === 500 &&
+        (error?.data?.title === "Badge number not found." || error?.data?.title === "SSN not found.")
+      ) {
+        addAlert(DISTRIBUTION_INQUIRY_MESSAGES.MEMBER_NOT_FOUND);
+      } else {
+        // For other errors, you might want to show a generic error message
+        console.error("Search failed:", error);
+      }
+    }
   };
 
   const handleReset = () => {
     setSearchData(null);
     setHasSearched(false);
+    clearAlerts();
   };
 
   const handlePaginationChange = async (pageNumber: number, pageSize: number, sortParams: any) => {
@@ -111,6 +147,8 @@ const DistributionInquiryContent = () => {
       <Grid width="100%">
         <Divider />
       </Grid>
+
+      {missiveAlerts.length > 0 && <MissiveAlerts />}
 
       <Grid
         width="100%"
@@ -173,7 +211,9 @@ const DistributionInquiry = () => {
     <Page
       label={CAPTIONS.DISTRIBUTIONS_INQUIRY}
       actionNode={renderActionNode()}>
-      <DistributionInquiryContent />
+      <MissiveAlertProvider>
+        <DistributionInquiryContent />
+      </MissiveAlertProvider>
     </Page>
   );
 };

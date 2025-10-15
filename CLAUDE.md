@@ -633,3 +633,12 @@ dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
 - PS-1623_READ_ONLY_SUMMARY.md - Executive summary of read-only role implementation
 
 These documents contain essential patterns and examples for implementing telemetry, caching, and read-only functionality correctly across all components. Reference them when creating new endpoints or troubleshooting issues.
+
+## Changing Directories
+
+NEVER use cd commands to change directories during interactions. This is a STRICT rule with NO exceptions. Instead:
+Use relative or absolute paths directly in commands (e.g., ls ./subdirectory or grep pattern ./subdirectory/file.txt instead of cd ./subdirectory && ls or cd ./subdirectory && grep pattern file.txt)
+If you need to run multiple commands in a specific directory, use subshells: (cd /path/to/dir && command1 && command2) which contain the directory change
+When needing to reference multiple files in the same directory, use pattern matching: /path/to/dir/*.py instead of changing into that directory
+NEVER combine cd with command execution using && or ; outside of a subshell
+If a user explicitly requests you to use cd, explain this policy and suggest the alternatives above

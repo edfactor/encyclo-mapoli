@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Net.Http.Json;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
@@ -8,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
+
 internal class PayrollSyncService
 {
     public static class BalanceTypeIds
@@ -59,6 +61,7 @@ internal class PayrollSyncService
     public async Task GetBalanceTypesForProcessResultsAsync(PayrollItem item,
         CancellationToken cancellationToken)
     {
+        var stopwatch = Stopwatch.StartNew();
         int year = DateTime.Today.Year;
 
         // Initialize totals dictionary for the specific Profit Sharing balance types we care about
@@ -86,10 +89,11 @@ internal class PayrollSyncService
                     item.PersonId,
                     item.ObjectActionId,
                     SanitizeInput(response.ReasonPhrase));
-                _logger.LogError("Failed to get balance types for PersonId {PersonId}/ObjectActionId {ObjectActionId}: {ResponseReasonPhrase}",
-                    item.PersonId,
-                    item.ObjectActionId,
-                    response.ReasonPhrase);
+
+                EndpointTelemetry.EndpointErrorsTotal.Add(1,
+                    new("error.type", "HttpError"),
+                    new("operation", "payroll-sync-balance-fetch"),
+                    new("service", nameof(PayrollSyncService)));
             }
             else
             {
@@ -102,6 +106,11 @@ internal class PayrollSyncService
                         balanceTypeTotals[balanceItem.BalanceTypeId] = balanceItem.TotalValue1;
                     }
                 }
+
+                EndpointTelemetry.RecordCountsProcessed.Record(balanceResults?.Items?.Count ?? 0,
+                    new("operation", "payroll-sync-balance-fetch"),
+                    new("record.type", "balance-items"),
+                    new("service", nameof(PayrollSyncService)));
             }
         }
         catch (Exception ex)
@@ -110,6 +119,18 @@ internal class PayrollSyncService
                 item.PersonId,
                 item.ObjectActionId,
                 ex.Message);
+
+            EndpointTelemetry.EndpointErrorsTotal.Add(1,
+                new("error.type", ex.GetType().Name),
+                new("operation", "payroll-sync-balance-fetch"),
+                new("service", nameof(PayrollSyncService)));
+        }
+        finally
+        {
+            stopwatch.Stop();
+            EndpointTelemetry.BusinessLogicDurationMs.Record(stopwatch.Elapsed.TotalMilliseconds,
+                new("operation", "payroll-sync-balance-fetch"),
+                new("service", nameof(PayrollSyncService)));
         }
 
         if (balanceTypeTotals.Values.All(v => v == 0))
@@ -118,6 +139,12 @@ internal class PayrollSyncService
         }
 
         await CalculateAndUpdatePayProfitRecord(item.PersonId, year, balanceTypeTotals, cancellationToken).ConfigureAwait(false);
+
+        // Record successful balance processing
+        EndpointTelemetry.BusinessOperationsTotal.Add(1,
+            new("operation", "payroll-sync-balance-processed"),
+            new("status", "success"),
+            new("service", nameof(PayrollSyncService)));
     }
 
     /// <summary>
@@ -144,6 +171,7 @@ internal class PayrollSyncService
         return _profitSharingDataContextFactory.UseWritableContext(async context =>
         {
             Demographic? demographic = await context.Demographics
+                .TagWith($"PayrollSync-GetDemographic-OracleHcmId:{oracleHcmId}-Year:{year}")
                 .Include(d => d.PayProfits.Where(p => p.ProfitYear >= year))
                 .Include(demographic => demographic.ContactInfo)
                 .FirstOrDefaultAsync(d => d.OracleHcmId == oracleHcmId, cancellationToken).ConfigureAwait(false);

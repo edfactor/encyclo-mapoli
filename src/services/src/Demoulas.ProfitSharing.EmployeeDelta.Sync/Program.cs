@@ -10,6 +10,7 @@ using Demoulas.ProfitSharing.Data.Interceptors;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.Services.LogMasking;
 using Demoulas.Util.Extensions;
+using Microsoft.Extensions.Hosting;
 using OpenTelemetry.Metrics;
 
 var builder = Host.CreateApplicationBuilder(args);
