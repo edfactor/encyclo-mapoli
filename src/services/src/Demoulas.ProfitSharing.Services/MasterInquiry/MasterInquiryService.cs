@@ -309,7 +309,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                     ssnList.Add(ssnBene);
                 }
             }
-            else if (badgeNumber != 0)
+            else if (badgeNumber.HasValue && badgeNumber.Value != 0)
             {
                 int ssnEmpl = await _employeeInquiryService.FindEmployeeSsnByBadgeAsync(badgeNumber.Value, cancellationToken);
 
