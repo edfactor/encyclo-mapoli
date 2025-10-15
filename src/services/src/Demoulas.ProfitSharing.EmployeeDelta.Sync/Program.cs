@@ -44,13 +44,15 @@ builder.Services.AddOpenTelemetry().WithMetrics(m =>
 });
 
 // Configure logging - configuration read from SmartLogging section in appsettings
-builder.SetDefaultLoggerConfiguration(config =>
-{
-    config.MaskingOperators = [
-        new UnformattedSocialSecurityNumberMaskingOperator(),
-        new SensitiveValueMaskingOperator()
-    ];
-});
+LoggingConfig logConfig = new();
+builder.Configuration.Bind("SmartLogging", logConfig);
+
+logConfig.MaskingOperators = [
+    new UnformattedSocialSecurityNumberMaskingOperator(),
+    new SensitiveValueMaskingOperator()
+];
+
+builder.SetDefaultLoggerConfiguration(logConfig);
 
 #pragma warning disable S125
 //HashSet<long> debugOracleHcmIdSet = [300005072436966, 300005305133563, 300005305485131, 300005305501085];

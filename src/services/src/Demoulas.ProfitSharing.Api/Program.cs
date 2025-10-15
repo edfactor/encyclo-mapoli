@@ -56,7 +56,6 @@ else
 }
 
 // Configure logging - configuration read from SmartLogging section in appsettings
-
 LoggingConfig logConfig = new();
 builder.Configuration.Bind("SmartLogging", logConfig);
 
