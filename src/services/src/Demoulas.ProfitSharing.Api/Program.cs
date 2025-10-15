@@ -56,13 +56,16 @@ else
 }
 
 // Configure logging - configuration read from SmartLogging section in appsettings
-builder.SetDefaultLoggerConfiguration(config =>
-{
-    config.MaskingOperators = [
-        new UnformattedSocialSecurityNumberMaskingOperator(),
-        new SensitiveValueMaskingOperator()
-    ];
-});
+
+LoggingConfig logConfig = new();
+builder.Configuration.Bind("SmartLogging", logConfig);
+
+logConfig.MaskingOperators = [
+    new UnformattedSocialSecurityNumberMaskingOperator(),
+    new SensitiveValueMaskingOperator()
+];
+
+builder.SetDefaultLoggerConfiguration(logConfig);
 
 _ = builder.AddSecurityServices();
 
