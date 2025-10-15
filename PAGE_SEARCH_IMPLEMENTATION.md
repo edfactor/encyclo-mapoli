@@ -13,7 +13,7 @@ Added a new page search functionality to the MenuBar component that allows users
 - **Contextual hints**: Shows parent navigation path (inspired by VS Code search)
   - Example: "Clean up Reports" shows "in Year End > December Activities"
 - **Visual design**: Dark gradient-styled search box matching the menu bar theme
-- **Navigation with drawer**: 
+- **Navigation with drawer**:
   - Navigates to the selected page
   - Automatically opens the drawer
   - Sets the correct L0 section as active
@@ -53,14 +53,33 @@ interface SearchableNavigationItem {
 
 #### Navigation Integration
 
-When a page is selected:
-1. Finds the L0 (top-level) parent section using `getL0NavigationForRoute`
-2. Dispatches `setActiveSubMenu` with the L0 section title
-3. Dispatches `openDrawer` to ensure drawer is visible
-4. Navigates to the selected page
-5. The drawer automatically highlights the selected page in the navigation tree
+When a page is selected from the search:
 
-This ensures users can find any page via search and the navigation context is properly maintained.
+1. **Stores navigation ID** in `localStorage` for drawer active item tracking (`navigationId`)
+2. **Pre-expands parent hierarchy**: Gets the parent chain using `getNavigationParentChain` and sets each parent item's expanded state in localStorage (`nav-expanded-{id}`)
+3. **Finds L1 submenu**: Extracts the L1 (first-level child) item from the parent chain to determine which submenu section to show
+4. Dispatches `setActiveSubMenu` with the **L1 section title** (e.g., "Fiscal Close", not "Year End")
+5. Dispatches `openDrawer` to ensure drawer is visible
+6. Navigates to the selected page using React Router
+7. **Auto-expansion on navigation**: The `RecursiveNavItem` component detects when it contains an active child path and automatically expands to show the full hierarchy
+
+**Understanding the Drawer Structure:**
+- **L0** (Menu Bar) - "Year End", "Inquiries & Adjustments", "Distributions", etc.
+- **L1** (Drawer Main Menu) - "December Activities", "Fiscal Close", "Print PS Jobs"
+- **L2+** (Drawer Submenu) - Nested pages within each L1 section
+
+The drawer operates in two modes:
+- **Main Menu View**: Shows L1 items when no submenu is active
+- **Submenu View**: Shows children of selected L1 item (triggered by `setActiveSubMenu`)
+
+**Key Features:**
+- **Active path detection**: Each navigation item checks if it or any descendant contains the current route
+- **Auto-expansion**: Parent items automatically expand when they contain the active page
+- **localStorage synchronization**: Expanded states persist and are re-checked when the route changes
+- **Persistent expansion**: Once expanded via search, the hierarchy remains expanded until manually collapsed
+- **Deep nesting support**: Works correctly for pages nested 4-5+ levels deep (e.g., Year End > Fiscal Close > Prof Share by Store > Under-21 Report > QPAY066TA-UNDR21)
+
+This ensures users can find any page via search and the complete navigation hierarchy is automatically revealed, matching the expected behavior.
 
 #### Contextual Display
 
@@ -161,18 +180,21 @@ The PageSearch component automatically:
 
 ## User Experience
 
-1. User types in the search box (e.g., "cleanup")
+1. User types in the search box (e.g., "terminated letters")
 2. Dropdown shows matching pages with context:
    ```
-   Clean up Reports
-   Review and clean
-   in Year End > December Activities
+   Terminated Letters
+   QPROF003-1
+   in Inquiries & Adjustments > Adhoc Reports
    ```
 3. User clicks a result
 4. App navigates to the selected page
-5. **Drawer automatically opens** with the correct section
-6. **Selected page is highlighted** in the navigation tree
-7. Search input clears automatically
+5. **Drawer automatically opens** with the correct L0 section (e.g., "Inquiries & Adjustments")
+6. **All parent levels expand** to show the full path (e.g., "Adhoc Reports" > "Terminated Letters")
+7. **Selected page is highlighted** in the navigation tree with active styling
+8. Search input clears automatically
+
+The result is a seamless navigation experience where users can quickly jump to any page and see exactly where it lives in the navigation hierarchy.
 
 ## Technical Notes
 
@@ -181,6 +203,46 @@ The PageSearch component automatically:
 - Manual filtering (`filterOptions={(x) => x}`) for custom search logic
 - Memoized search results for performance
 - Dropdown only opens when input has content
+
+### Auto-Expansion Implementation
+
+The drawer's `RecursiveNavItem` component includes intelligent auto-expansion logic:
+
+```typescript
+// Check if this item or any descendant contains the active path
+const containsActivePath = useCallback((navItem: NavigationDto): boolean => {
+  const navItemPath = navItem.url?.replace(/^\/+/, "");
+  if (currentPath === navItemPath) return true;
+  
+  if (navItem.items && navItem.items.length > 0) {
+    return navItem.items.some(child => containsActivePath(child));
+  }
+  
+  return false;
+}, [currentPath]);
+
+// Auto-expand if this item contains the active path
+useEffect(() => {
+  if (hasActiveChild && !isActive) {
+    setExpanded(true);
+  }
+}, [hasActiveChild, isActive]);
+
+// Re-check localStorage when location changes
+useEffect(() => {
+  const storedExpanded = getStoredExpanded();
+  if (storedExpanded && !expanded) {
+    setExpanded(true);
+  }
+}, [location.pathname]);
+```
+
+This ensures that when navigating from the page search:
+1. The search sets localStorage expanded states for all parents
+2. React Router navigates to the new page
+3. The drawer detects the route change and re-checks localStorage
+4. Parent items auto-expand because they contain the active path
+5. The full hierarchy becomes visible
 
 ## Future Enhancements (Optional)
 

@@ -134,14 +134,15 @@ describe("MenuBar with PageSearch", () => {
   it("should show vertical separator when impersonation is displayed", () => {
     const impersonationComponent = <div data-testid="impersonation">Impersonate</div>;
     renderMenuBar(mockMenuInfo, mockNavigationData, impersonationComponent);
-    
+
     // Check impersonation is rendered
     expect(screen.getByTestId("impersonation")).toBeDefined();
-    
+
     // Check for separator (vertical line) - should be AFTER search, BEFORE impersonation
     const separator = document.querySelector(".h-8.w-px.bg-white.opacity-30");
     expect(separator).toBeDefined();
-  });  it("should not show vertical separator when impersonation is not displayed", () => {
+  });
+  it("should not show vertical separator when impersonation is not displayed", () => {
     renderMenuBar(mockMenuInfo, mockNavigationData, undefined);
 
     // Check for separator (should not exist)

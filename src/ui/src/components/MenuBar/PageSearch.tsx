@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { openDrawer, setActiveSubMenu } from "../../reduxstore/slices/generalSlice";
 import { NavigationDto, NavigationResponseDto } from "../../reduxstore/types";
+import { getNavigationParentChain } from "../Drawer/utils/drawerUtils";
 import { getL0NavigationForRoute } from "../Drawer/utils/navigationStructureUtils";
 
 export interface PageSearchProps {
@@ -80,19 +81,43 @@ export const PageSearch: FC<PageSearchProps> = ({ navigationData }) => {
   const handleSelect = (_event: React.SyntheticEvent, value: string | SearchableNavigationItem | null) => {
     if (value && typeof value !== "string") {
       const absolutePath = value.url.startsWith("/") ? value.url : `/${value.url}`;
-      
-      // Find the L0 parent section for this page
+
+      // Store navigation ID for drawer active item tracking
+      if (value.id) {
+        localStorage.setItem("navigationId", value.id.toString());
+
+        // Get the parent chain for this navigation item
+        // This includes all ancestors from the root down to the selected item
+        const parentChain = getNavigationParentChain(navigationData?.navigation, value.id);
+
+        // Expand all parent items in the chain by setting their localStorage expanded state
+        // This ensures the drawer shows the full path to the selected item
+        parentChain.forEach((parent) => {
+          if (parent.items && parent.items.length > 0) {
+            // Only expand items that have children (not leaf nodes)
+            localStorage.setItem(`nav-expanded-${parent.id}`, JSON.stringify(true));
+          }
+        });
+
+        // Find the L1 item (direct child of L0) in the parent chain
+        // This is what should be set as activeSubmenu to trigger submenu view
+        // Parent chain goes: L0 > L1 > L2 > ... > selected item
+        // We want the L1 item (index 1 in the chain)
+        if (parentChain.length >= 2) {
+          const l1Item = parentChain[1]; // L0 is at index 0, L1 is at index 1
+          dispatch(setActiveSubMenu(l1Item.title));
+        }
+      }
+
+      // Find the L0 parent section for this page and open the drawer
       const l0Section = getL0NavigationForRoute(navigationData, absolutePath);
-      
-      // If found, set the active submenu and open drawer
       if (l0Section) {
-        dispatch(setActiveSubMenu(l0Section.title));
         dispatch(openDrawer());
       }
-      
+
       // Navigate to the page
       navigate(absolutePath);
-      
+
       // Clear search
       setInputValue("");
       setIsOpen(false);

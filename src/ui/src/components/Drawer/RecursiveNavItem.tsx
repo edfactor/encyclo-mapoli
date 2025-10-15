@@ -51,14 +51,37 @@ export const RecursiveNavItem: FC<RecursiveNavItemProps> = ({ item, level, maxAu
   const itemPath = item.url?.replace(/^\/+/, "");
   const isActive = currentPath === itemPath;
 
-  // Auto-expand logic: Only expand if level is within auto-expand depth
-  // Do NOT auto-expand based on hasActiveChild - let user manually expand groups
-  // This matches the original PSDrawer behavior where groups stay collapsed by default
+  // Check if this item or any descendant contains the active path
+  const containsActivePath = useCallback((navItem: NavigationDto): boolean => {
+    const navItemPath = navItem.url?.replace(/^\/+/, "");
+    if (currentPath === navItemPath) return true;
+    
+    if (navItem.items && navItem.items.length > 0) {
+      return navItem.items.some(child => containsActivePath(child));
+    }
+    
+    return false;
+  }, [currentPath]);
+
+  const hasActiveChild = containsActivePath(item);
+
+  // Auto-expand logic: expand if level is within auto-expand depth OR if this item contains the active path
   useEffect(() => {
     if (level <= maxAutoExpandDepth) {
       setExpanded(true);
+    } else if (hasActiveChild && !isActive) {
+      // Auto-expand parent items that contain the active child
+      setExpanded(true);
     }
-  }, [level, maxAutoExpandDepth]);
+  }, [level, maxAutoExpandDepth, hasActiveChild, isActive]);
+
+  // Re-check localStorage when location changes (for page search navigation)
+  useEffect(() => {
+    const storedExpanded = getStoredExpanded();
+    if (storedExpanded && !expanded) {
+      setExpanded(true);
+    }
+  }, [location.pathname, getStoredExpanded, expanded]);
 
   // Persist expanded state
   useEffect(() => {
