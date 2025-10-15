@@ -8,6 +8,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.OracleHcm.Clients;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Factories;
@@ -146,6 +147,7 @@ public static class OracleHcmExtension
     /// <returns>The updated <see cref="IHostApplicationBuilder"/> instance.</returns>
     /// <remarks>
     /// This method performs the following actions:
+    /// - Initializes endpoint telemetry for business operations tracking
     /// - Retrieves and binds the Oracle HCM configuration.
     /// - Registers the Oracle HCM configuration as a singleton service.
     /// - Registers necessary Oracle HCM services.
@@ -157,6 +159,10 @@ public static class OracleHcmExtension
     public static IHostApplicationBuilder AddOracleHcmSynchronization(this IHostApplicationBuilder builder,
         OracleHcmConfig oracleHcmConfig)
     {
+        // Initialize endpoint telemetry for comprehensive business operations tracking
+        // Safe to call multiple times (idempotent)
+        EndpointTelemetry.Initialize();
+
         builder.Services.AddTransient((_) => oracleHcmConfig);
 
         RegisterOracleHcmServices(builder.Services);
