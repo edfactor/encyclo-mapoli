@@ -45,3 +45,12 @@ export const MASTER_INQUIRY_MESSAGES = {
     description: `Vested percentage now at ${vestedPercentage * 100}%.`
   })
 };
+
+export const DISTRIBUTION_INQUIRY_MESSAGES = {
+  MEMBER_NOT_FOUND: {
+    id: 910,
+    severity: "Error" as const,
+    message: "Member Not Found",
+    description: "The member you are searching for does not exist in the system."
+  } as MissiveResponse
+};
