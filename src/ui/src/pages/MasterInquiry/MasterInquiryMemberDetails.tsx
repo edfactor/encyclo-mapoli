@@ -96,7 +96,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
 
       const duplicateBadgeLink = [];
       if (badgesOfDuplicateSsns && badgesOfDuplicateSsns.length) {
-        for (let badge of badgesOfDuplicateSsns) {
+        for (const badge of badgesOfDuplicateSsns) {
           duplicateBadgeLink.push({
             label: "Duplicate SSN with",
             value: viewBadgeLinkRenderer(badge),

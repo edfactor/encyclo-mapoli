@@ -4,17 +4,24 @@ import EditIcon from "@mui/icons-material/Edit";
 import UndoIcon from "@mui/icons-material/Undo";
 import { IconButton, Tooltip } from "@mui/material";
 import { ICellRendererParams } from "ag-grid-community";
+import { useDispatch } from "react-redux";
+import { setCurrentDistribution } from "../../reduxstore/slices/distributionSlice";
+import type { DistributionSearchResponse } from "../../types/distributions";
 
 export const ActionsCellRenderer = (props: ICellRendererParams) => {
+  const dispatch = useDispatch();
+
   const handleReverse = () => {
     console.log("Reverse distribution", props.data);
   };
 
   const handleView = () => {
+    dispatch(setCurrentDistribution(props.data as DistributionSearchResponse));
     console.log("View distribution", props.data);
   };
 
   const handleEdit = () => {
+    dispatch(setCurrentDistribution(props.data as DistributionSearchResponse));
     console.log("Edit distribution", props.data);
   };
 

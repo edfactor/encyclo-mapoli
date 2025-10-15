@@ -1,8 +1,15 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormLabel, Grid, ListItemText, MenuItem, TextField } from "@mui/material";
 import { Controller, Resolver, useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import {
+  clearCurrentDistribution,
+  clearCurrentMember,
+  clearHistoricalDisbursements,
+  clearPendingDisbursements
+} from "../../reduxstore/slices/distributionSlice";
 import { DistributionSearchFormData } from "../../types";
 import { mustBeNumberValidator } from "../../utils/FormValidators";
 import { getDistributionIdLabel } from "../../utils/lookups";
@@ -44,6 +51,7 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
   onReset,
   isLoading
 }) => {
+  const dispatch = useDispatch();
   const {
     control,
     handleSubmit,
@@ -81,6 +89,13 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
       minCheckAmount: "",
       maxCheckAmount: ""
     });
+
+    // Clear all distribution slice data
+    dispatch(clearCurrentMember());
+    dispatch(clearCurrentDistribution());
+    dispatch(clearPendingDisbursements());
+    dispatch(clearHistoricalDisbursements());
+
     onReset();
   };
 
