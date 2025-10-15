@@ -4,6 +4,7 @@ export interface DistributionSearchRequest {
   ssn?: string;
   badgeNumber?: number;
   psnSuffix?: number;
+  memberType?: number | null; // 1 = employees, 2 = beneficiaries, null = all
   distributionFrequencyId?: string;
   distributionStatusId?: string;
   distributionStatusIds?: string[];
@@ -25,6 +26,7 @@ export interface DistributionSearchResponse {
   badgeNumber: number | null;
   fullName: string;
   isExecutive: boolean;
+  isEmployee: boolean;
   frequencyId: string;
   frequencyName: string;
   statusId: string;
@@ -38,7 +40,9 @@ export interface DistributionSearchResponse {
 }
 
 export interface DistributionSearchFormData {
-  ssnOrMemberNumber?: string;
+  socialSecurity?: string;
+  badgeNumber?: string;
+  memberType?: string; // "all", "employees", "beneficiaries"
   frequency?: string | null;
   paymentFlag?: string | null;
   paymentFlags?: string[];
