@@ -254,6 +254,12 @@
   .duplicate-ssn-alert-text {
     margin: 4px 0 0 0;
   }
+
+  .navbuttons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
 }
 /*
 @font-face {
