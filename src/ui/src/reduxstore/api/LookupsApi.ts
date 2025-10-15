@@ -31,6 +31,9 @@ export const LookupsApi = createApi({
         url: "/lookup/missives",
         method: "GET"
       }),
+      transformResponse: (response: { items: MissiveResponse[]; count: number }) => {
+        return response.items;
+      },
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
