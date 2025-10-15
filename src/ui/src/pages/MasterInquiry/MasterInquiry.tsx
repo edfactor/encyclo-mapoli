@@ -2,8 +2,6 @@ import { CircularProgress, Divider, Grid } from "@mui/material";
 import { memo } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
-import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
-import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
 import useMasterInquiry from "./hooks/useMasterInquiry";
 import MasterInquiryGrid from "./MasterInquiryDetailsGrid";
 import MasterInquiryMemberDetails from "./MasterInquiryMemberDetails";
@@ -11,7 +9,6 @@ import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
 
 const MasterInquiryContent = memo(() => {
-  const { missiveAlerts } = useMissiveAlerts();
   const {
     searchParams,
     searchResults,
@@ -40,7 +37,6 @@ const MasterInquiryContent = memo(() => {
         width={"100%"}>
         <Divider />
       </Grid>
-      {missiveAlerts.length > 0 && <MissiveAlerts />}
       <Grid
         size={{ xs: 12 }}
         width={"100%"}>

@@ -1,6 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
 import MasterInquiryMemberDetails from "./MasterInquiryMemberDetails";
+
+// Helper function to render components with MissiveAlertProvider
+const renderWithProvider = (component: React.ReactElement) => {
+  return render(<MissiveAlertProvider>{component}</MissiveAlertProvider>);
+};
 
 describe("MasterInquiryMemberDetails", () => {
   const mockEmployeeDetails = {
@@ -92,7 +98,7 @@ describe("MasterInquiryMemberDetails", () => {
   };
 
   it("should render loading state when isLoading is true", () => {
-    const { container } = render(
+    const { container } = renderWithProvider(
       <MasterInquiryMemberDetails
         memberType={1}
         id={1}
@@ -105,7 +111,7 @@ describe("MasterInquiryMemberDetails", () => {
   });
 
   it("should render 'No details found' when memberDetails is null and not loading", () => {
-    render(
+    renderWithProvider(
       <MasterInquiryMemberDetails
         memberType={1}
         id={1}
@@ -118,7 +124,7 @@ describe("MasterInquiryMemberDetails", () => {
   });
 
   it("should render employee details correctly", () => {
-    render(
+    renderWithProvider(
       <MasterInquiryMemberDetails
         memberType={1}
         id={1}
@@ -157,7 +163,7 @@ describe("MasterInquiryMemberDetails", () => {
   });
 
   it("should render beneficiary details correctly", () => {
-    render(
+    renderWithProvider(
       <MasterInquiryMemberDetails
         memberType={2}
         id={2}
@@ -194,7 +200,7 @@ describe("MasterInquiryMemberDetails", () => {
 
   it("should display N/A for null phone number", () => {
     const detailsWithoutPhone = { ...mockEmployeeDetails, phoneNumber: null };
-    render(
+    renderWithProvider(
       <MasterInquiryMemberDetails
         memberType={1}
         id={1}
@@ -211,7 +217,7 @@ describe("MasterInquiryMemberDetails", () => {
 
   it("should format 4-digit zip codes correctly", () => {
     const detailsWithShortZip = { ...mockEmployeeDetails, addressZipCode: "1850" };
-    render(
+    renderWithProvider(
       <MasterInquiryMemberDetails
         memberType={1}
         id={1}
@@ -229,7 +235,7 @@ describe("MasterInquiryMemberDetails", () => {
       ...mockEmployeeDetails,
       badgesOfDuplicateSsns: [54321, 98765]
     };
-    render(
+    renderWithProvider(
       <MasterInquiryMemberDetails
         memberType={1}
         id={1}
@@ -250,7 +256,7 @@ describe("MasterInquiryMemberDetails", () => {
       terminationReason: "Retired",
       employmentStatus: "Terminated"
     };
-    render(
+    renderWithProvider(
       <MasterInquiryMemberDetails
         memberType={1}
         id={1}
@@ -267,7 +273,7 @@ describe("MasterInquiryMemberDetails", () => {
 
   it("should display current year label correctly", () => {
     const currentYear = new Date().getFullYear();
-    render(
+    renderWithProvider(
       <MasterInquiryMemberDetails
         memberType={1}
         id={1}
@@ -282,7 +288,7 @@ describe("MasterInquiryMemberDetails", () => {
   });
 
   it("should display end year label for past years", () => {
-    render(
+    renderWithProvider(
       <MasterInquiryMemberDetails
         memberType={1}
         id={1}
@@ -304,7 +310,7 @@ describe("MasterInquiryMemberDetails", () => {
       beginVestedAmount: null,
       currentVestedAmount: null
     };
-    render(
+    renderWithProvider(
       <MasterInquiryMemberDetails
         memberType={1}
         id={1}
@@ -319,7 +325,7 @@ describe("MasterInquiryMemberDetails", () => {
   });
 
   it("should not re-render when props haven't changed", () => {
-    const { rerender } = render(
+    const { rerender } = renderWithProvider(
       <MasterInquiryMemberDetails
         memberType={1}
         id={1}
@@ -329,15 +335,17 @@ describe("MasterInquiryMemberDetails", () => {
       />
     );
 
-    // Re-render with same props
+    // Re-render with same props (must wrap in provider again)
     rerender(
-      <MasterInquiryMemberDetails
-        memberType={1}
-        id={1}
-        profitYear={2025}
-        memberDetails={mockEmployeeDetails}
-        isLoading={false}
-      />
+      <MissiveAlertProvider>
+        <MasterInquiryMemberDetails
+          memberType={1}
+          id={1}
+          profitYear={2025}
+          memberDetails={mockEmployeeDetails}
+          isLoading={false}
+        />
+      </MissiveAlertProvider>
     );
 
     // Component should still be rendered correctly
@@ -346,7 +354,7 @@ describe("MasterInquiryMemberDetails", () => {
 
   // PS-1897: Verify phone number formatting
   it("should format phone numbers correctly (PS-1897)", () => {
-    render(
+    renderWithProvider(
       <MasterInquiryMemberDetails
         memberType={1}
         id={1}
@@ -365,7 +373,7 @@ describe("MasterInquiryMemberDetails", () => {
       ...mockEmployeeDetails,
       enrollmentId: 2 // This typically returns "Y (2)" from getEnrolledStatus
     };
-    render(
+    renderWithProvider(
       <MasterInquiryMemberDetails
         memberType={1}
         id={1}
@@ -384,7 +392,7 @@ describe("MasterInquiryMemberDetails", () => {
 
   // PS-1897: Verify Previous ETVA is removed
   it("should not display Previous ETVA field (PS-1897)", () => {
-    render(
+    renderWithProvider(
       <MasterInquiryMemberDetails
         memberType={1}
         id={1}
@@ -399,7 +407,7 @@ describe("MasterInquiryMemberDetails", () => {
 
   // PS-1897: Verify balance grouping order
   it("should group beginning and current balances together (PS-1897)", () => {
-    render(
+    renderWithProvider(
       <MasterInquiryMemberDetails
         memberType={1}
         id={1}

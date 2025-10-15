@@ -2,6 +2,8 @@ import { Grid, Typography } from "@mui/material";
 import React, { memo, useMemo } from "react";
 import { formatNumberWithComma, numberToCurrency } from "smart-ui-library";
 import LabelValueSection from "../../components/LabelValueSection";
+import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
+import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
 import { mmDDYYFormat } from "../../utils/dateUtils";
 import { getEnrolledStatus, getForfeitedStatus } from "../../utils/enrollmentUtil";
 import { formatPercentage } from "../../utils/formatPercentage";
@@ -35,6 +37,8 @@ in the React memo stuff at the bottom and are important for edge cases like thes
 */
 const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = memo(
   ({ memberType, id, profitYear, memberDetails, isLoading }) => {
+    const { missiveAlerts } = useMissiveAlerts();
+
     // Memoized enrollment status
     const enrollmentStatus = useMemo(() => {
       if (!memberDetails) return { enrolled: "", forfeited: "" };
@@ -238,6 +242,13 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
               </Grid>
             </Grid>
           </Grid>
+
+          {/* Missive Alerts - Display at bottom of member details */}
+          {missiveAlerts.length > 0 && (
+            <Grid size={{ xs: 12 }}>
+              <MissiveAlerts />
+            </Grid>
+          )}
         </Grid>
       </div>
     );
