@@ -52,16 +52,19 @@ export const RecursiveNavItem: FC<RecursiveNavItemProps> = ({ item, level, maxAu
   const isActive = currentPath === itemPath;
 
   // Check if this item or any descendant contains the active path
-  const containsActivePath = useCallback((navItem: NavigationDto): boolean => {
-    const navItemPath = navItem.url?.replace(/^\/+/, "");
-    if (currentPath === navItemPath) return true;
-    
-    if (navItem.items && navItem.items.length > 0) {
-      return navItem.items.some(child => containsActivePath(child));
-    }
-    
-    return false;
-  }, [currentPath]);
+  const containsActivePath = useCallback(
+    (navItem: NavigationDto): boolean => {
+      const navItemPath = navItem.url?.replace(/^\/+/, "");
+      if (currentPath === navItemPath) return true;
+
+      if (navItem.items && navItem.items.length > 0) {
+        return navItem.items.some((child) => containsActivePath(child));
+      }
+
+      return false;
+    },
+    [currentPath]
+  );
 
   const hasActiveChild = containsActivePath(item);
 

@@ -64,15 +64,18 @@ When a page is selected from the search:
 7. **Auto-expansion on navigation**: The `RecursiveNavItem` component detects when it contains an active child path and automatically expands to show the full hierarchy
 
 **Understanding the Drawer Structure:**
+
 - **L0** (Menu Bar) - "Year End", "Inquiries & Adjustments", "Distributions", etc.
 - **L1** (Drawer Main Menu) - "December Activities", "Fiscal Close", "Print PS Jobs"
 - **L2+** (Drawer Submenu) - Nested pages within each L1 section
 
 The drawer operates in two modes:
+
 - **Main Menu View**: Shows L1 items when no submenu is active
 - **Submenu View**: Shows children of selected L1 item (triggered by `setActiveSubMenu`)
 
 **Key Features:**
+
 - **Active path detection**: Each navigation item checks if it or any descendant contains the current route
 - **Auto-expansion**: Parent items automatically expand when they contain the active page
 - **localStorage synchronization**: Expanded states persist and are re-checked when the route changes
@@ -210,16 +213,19 @@ The drawer's `RecursiveNavItem` component includes intelligent auto-expansion lo
 
 ```typescript
 // Check if this item or any descendant contains the active path
-const containsActivePath = useCallback((navItem: NavigationDto): boolean => {
-  const navItemPath = navItem.url?.replace(/^\/+/, "");
-  if (currentPath === navItemPath) return true;
-  
-  if (navItem.items && navItem.items.length > 0) {
-    return navItem.items.some(child => containsActivePath(child));
-  }
-  
-  return false;
-}, [currentPath]);
+const containsActivePath = useCallback(
+  (navItem: NavigationDto): boolean => {
+    const navItemPath = navItem.url?.replace(/^\/+/, "");
+    if (currentPath === navItemPath) return true;
+
+    if (navItem.items && navItem.items.length > 0) {
+      return navItem.items.some((child) => containsActivePath(child));
+    }
+
+    return false;
+  },
+  [currentPath]
+);
 
 // Auto-expand if this item contains the active path
 useEffect(() => {
@@ -238,6 +244,7 @@ useEffect(() => {
 ```
 
 This ensures that when navigating from the page search:
+
 1. The search sets localStorage expanded states for all parents
 2. React Router navigates to the new page
 3. The drawer detects the route change and re-checks localStorage
