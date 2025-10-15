@@ -28,22 +28,26 @@ namespace Demoulas.ProfitSharing.Services.Validation;
 /// - Contributions: PAY444.CONTRIB vs PAY443
 /// - Earnings: PAY444.EARNINGS vs PAY443
 /// - ALLOC Transfers: ALLOC + PAID ALLOC must sum to zero (Balance Matrix Rule 2)
+/// - Balance Equation: Comprehensive validation of all balance components (Balance Matrix Rule 5)
 /// </remarks>
 public class CrossReferenceValidationService : ICrossReferenceValidationService
 {
     private readonly IChecksumValidationService _checksumValidationService;
     private readonly IAllocTransferValidationService _allocTransferValidationService;
+    private readonly IBalanceEquationValidationService _balanceEquationValidationService;
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ILogger<CrossReferenceValidationService> _logger;
 
     public CrossReferenceValidationService(
         IChecksumValidationService checksumValidationService,
         IAllocTransferValidationService allocTransferValidationService,
+        IBalanceEquationValidationService balanceEquationValidationService,
         IProfitSharingDataContextFactory dataContextFactory,
         ILogger<CrossReferenceValidationService> logger)
     {
         _checksumValidationService = checksumValidationService;
         _allocTransferValidationService = allocTransferValidationService;
+        _balanceEquationValidationService = balanceEquationValidationService;
         _dataContextFactory = dataContextFactory;
         _logger = logger;
     }
@@ -88,6 +92,9 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
             var allocTransfersGroup = await ValidateAllocTransfersGroupAsync(
                 profitYear, cancellationToken);
 
+            var balanceEquationGroup = await ValidateBalanceEquationGroupAsync(
+                profitYear, currentValues, cancellationToken);
+
             // Combine all validation groups
             var validationGroups = new List<CrossReferenceValidationGroup>
             {
@@ -96,7 +103,8 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
                 forfeituresGroup,
                 contributionsGroup,
                 earningsGroup,
-                allocTransfersGroup
+                allocTransfersGroup,
+                balanceEquationGroup
             };
 
             // Calculate statistics
@@ -396,6 +404,48 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
             Summary = $"❌ Error validating ALLOC transfers: {result.Error?.Description ?? "Unknown error"}",
             Priority = "Critical",
             ValidationRule = "Sum(ALLOC) + Sum(PAID ALLOC) must equal 0 (Balance Matrix Rule 2)"
+        };
+    }
+
+    private async Task<CrossReferenceValidationGroup> ValidateBalanceEquationGroupAsync(
+        short profitYear,
+        Dictionary<string, decimal> currentValues,
+        CancellationToken cancellationToken)
+    {
+        // Delegate to dedicated balance equation validation service
+        var result = await _balanceEquationValidationService.ValidateBalanceEquationAsync(
+            profitYear, currentValues, cancellationToken);
+
+        // Return the validation group, or a default error group if the service call failed
+        if (result.IsSuccess && result.Value != null)
+        {
+            return result.Value;
+        }
+
+        _logger.LogError("Balance equation validation service returned failure: {Error}", result.Error?.Description);
+
+        // Return error validation group
+        return new CrossReferenceValidationGroup
+        {
+            GroupName = "Balance Equation",
+            Description = $"Error validating balance equation for year {profitYear}",
+            IsValid = false,
+            Validations = new List<CrossReferenceValidation>
+            {
+                new CrossReferenceValidation
+                {
+                    FieldName = "BalanceEquation",
+                    ReportCode = "PAY444",
+                    CurrentValue = null,
+                    ExpectedValue = null,
+                    IsValid = false,
+                    Message = $"Service error: {result.Error?.Description ?? "Unknown error"}",
+                    Notes = "Balance equation validation service failed"
+                }
+            },
+            Summary = $"❌ Error validating balance equation: {result.Error?.Description ?? "Unknown error"}",
+            Priority = "Critical",
+            ValidationRule = "Ending Balance = Beginning Balance + Contributions + ALLOC - Distributions - PAID ALLOC + Earnings - Forfeitures (Balance Matrix Rule 5)"
         };
     }
 
