@@ -43,17 +43,14 @@ builder.Services.AddOpenTelemetry().WithMetrics(m =>
     m.AddMeter(GlobalMeter.Name);
 });
 
-ElasticSearchConfig smartConfig = new ElasticSearchConfig();
-builder.Configuration.Bind("Logging:Smart", smartConfig);
-
-FileSystemLogConfig fileSystemLog = new FileSystemLogConfig();
-builder.Configuration.Bind("Logging:FileSystem", fileSystemLog);
-
-smartConfig.MaskingOperators = [
-    new UnformattedSocialSecurityNumberMaskingOperator(),
-    new SensitiveValueMaskingOperator()
-];
-builder.SetDefaultLoggerConfiguration(smartConfig, fileSystemLog);
+// Configure logging - configuration read from SmartLogging section in appsettings
+builder.SetDefaultLoggerConfiguration(config =>
+{
+    config.MaskingOperators = [
+        new UnformattedSocialSecurityNumberMaskingOperator(),
+        new SensitiveValueMaskingOperator()
+    ];
+});
 
 #pragma warning disable S125
 //HashSet<long> debugOracleHcmIdSet = [300005072436966, 300005305133563, 300005305485131, 300005305501085];

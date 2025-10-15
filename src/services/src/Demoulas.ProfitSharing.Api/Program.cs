@@ -55,17 +55,14 @@ else
         .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 }
 
-ElasticSearchConfig smartConfig = new ElasticSearchConfig();
-builder.Configuration.Bind("Logging:Smart", smartConfig);
-
-FileSystemLogConfig fileSystemLog = new FileSystemLogConfig();
-builder.Configuration.Bind("Logging:FileSystem", fileSystemLog);
-
-smartConfig.MaskingOperators = [
-    new UnformattedSocialSecurityNumberMaskingOperator(),
-    new SensitiveValueMaskingOperator()
-];
-builder.SetDefaultLoggerConfiguration(smartConfig, fileSystemLog);
+// Configure logging - configuration read from SmartLogging section in appsettings
+builder.SetDefaultLoggerConfiguration(config =>
+{
+    config.MaskingOperators = [
+        new UnformattedSocialSecurityNumberMaskingOperator(),
+        new SensitiveValueMaskingOperator()
+    ];
+});
 
 _ = builder.AddSecurityServices();
 
