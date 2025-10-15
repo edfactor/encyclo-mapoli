@@ -20,6 +20,7 @@ import navigationStatusSlice from "./slices/NavigationStatusSlice";
 import AppSupportSlice from "./slices/appSupportSlice";
 import beneficiarySlice from "./slices/beneficiarySlice";
 import commonSlice from "./slices/commonSlice";
+import distributionSlice from "./slices/distributionSlice";
 import forfeituresAdjustmentSlice from "./slices/forfeituresAdjustmentSlice";
 import frozenSlice from "./slices/frozenSlice";
 import generalSlice from "./slices/generalSlice";
@@ -49,6 +50,7 @@ export const store = configureStore({
     navigationStatus: navigationStatusSlice,
     forfeituresAdjustment: forfeituresAdjustmentSlice,
     beneficiaries: beneficiarySlice,
+    distribution: distributionSlice,
 
     [SecurityApi.reducerPath]: SecurityApi.reducer,
     [YearsEndApi.reducerPath]: YearsEndApi.reducer,

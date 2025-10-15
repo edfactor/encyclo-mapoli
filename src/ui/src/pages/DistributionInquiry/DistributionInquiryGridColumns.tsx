@@ -23,26 +23,18 @@ export const GetDistributionInquiryColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align"
     },
-    {
+    createStatusColumn({
       headerName: "Pay Flag",
-      field: "statusName",
-      sortable: true,
-      resizable: true,
-      headerClass: "center-align",
-      cellClass: "center-align"
-    },
+      field: "statusName"
+    }),
     createStatusColumn({
       headerName: "Status",
       field: "distributionStatusId"
     }),
-    {
+    createStatusColumn({
       headerName: "Tax Flag",
-      field: "taxCodeName",
-      sortable: true,
-      resizable: true,
-      headerClass: "center-align",
-      cellClass: "center-align"
-    },
+      field: "taxCodeName"
+    }),
     createCurrencyColumn({
       headerName: "Gross Amount",
       field: "grossAmount"
