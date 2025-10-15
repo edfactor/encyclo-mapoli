@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { openDrawer, setActiveSubMenu } from "../../reduxstore/slices/generalSlice";
@@ -21,8 +21,14 @@ export const MenuBar: FC<MenuBarProps> = ({ menuInfo, impersonationMultiSelect, 
   const dispatch = useDispatch();
   const homeTabSelected = location.pathname === "/";
 
-  // Sections that should open the drawer instead of navigating
-  const drawerOnlySections = ["INQUIRIES AND ADJUSTMENTS", "YEAR END", "DISTRIBUTIONS", "IT DEVOPS"];
+  
+  const drawerOnlySections = useMemo(() => {
+    if (!navigationData?.navigation) return [] as string[];
+
+    return navigationData.navigation
+      .filter((item) => item.parentId === null && (item.items?.length ?? 0) > 0)
+      .map((item) => item.title);
+  }, [navigationData]);
 
   // Determine which L0 section contains the current route
   const activeL0Section = getL0NavigationForRoute(navigationData, location.pathname);
