@@ -14,6 +14,7 @@ public sealed record DistributionSearchResponse : IIsExecutive
     public int? BadgeNumber { get; set; }
     public required string FullName { get; set; }
     public bool IsExecutive { get; set; }
+    public bool IsEmployee { get; set; }
     public char FrequencyId { get; set; }
     public required string FrequencyName { get; set; }
     public char StatusId { get; set; }
@@ -35,6 +36,7 @@ public sealed record DistributionSearchResponse : IIsExecutive
             BadgeNumber = 701001,
             FullName = "John Doe",
             IsExecutive = false,
+            IsEmployee = true,
             FrequencyId = 'W',
             FrequencyName = "Weekly",
             StatusId = 'P',
