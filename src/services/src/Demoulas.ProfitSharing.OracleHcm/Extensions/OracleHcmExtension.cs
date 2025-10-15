@@ -7,6 +7,7 @@ using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.OracleHcm.Clients;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Factories;
@@ -55,7 +56,8 @@ public static class OracleHcmExtension
     /// <remarks>
     /// This method registers the Oracle HCM synchronization services and the hosted service
     /// responsible for managing Oracle HCM background processes. It ensures that the necessary
-    /// dependencies and configurations are added to the application.
+    /// dependencies and configurations are added to the application, including a null implementation
+    /// of INavigationService suitable for console/background service contexts.
     /// </remarks>
 #if DEBUG
     public static IHostApplicationBuilder AddEmployeeDeltaSyncService(this IHostApplicationBuilder builder, ISet<long>? debugOracleHcmIdSet = null)
@@ -68,6 +70,9 @@ public static class OracleHcmExtension
 
         // Process each delta employee one at a time.
         oracleHcmConfig.Limit = 1;
+
+        // Register null navigation service for console app context (navigation concepts don't apply)
+        builder.Services.AddScoped<INavigationService, NullNavigationService>();
 
         // Add Oracle HCM synchronization with the retrieved configuration.
         builder.AddOracleHcmSynchronization(oracleHcmConfig);
@@ -94,6 +99,9 @@ public static class OracleHcmExtension
         OracleHcmConfig oracleHcmConfig = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>()
                                           ?? new OracleHcmConfig { BaseAddress = string.Empty, DemographicUrl = string.Empty };
 
+        // Register null navigation service for console app context (navigation concepts don't apply)
+        builder.Services.AddScoped<INavigationService, NullNavigationService>();
+
         builder.Services.AddScoped<ITotalService, TotalService>();
         builder.Services.AddSingleton<ICalendarService, CalendarService>();
         builder.Services.AddScoped<ITotalService, TotalService>();
@@ -111,6 +119,9 @@ public static class OracleHcmExtension
     {
         OracleHcmConfig oracleHcmConfig = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>()
                                           ?? new OracleHcmConfig { BaseAddress = string.Empty, DemographicUrl = string.Empty };
+
+        // Register null navigation service for console app context (navigation concepts don't apply)
+        builder.Services.AddScoped<INavigationService, NullNavigationService>();
 
         builder.AddOracleHcmSynchronization(oracleHcmConfig);
         builder.Services.AddHostedService<EmployeePayrollSyncService>();
