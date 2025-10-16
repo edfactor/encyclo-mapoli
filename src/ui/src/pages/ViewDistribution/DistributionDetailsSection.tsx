@@ -1,5 +1,6 @@
-import { Grid, Paper, Typography } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import { numberToCurrency } from "smart-ui-library";
+import LabelValueSection from "../../components/LabelValueSection";
 import { DistributionSearchResponse } from "../../types";
 
 interface DistributionDetailsSectionProps {
@@ -7,178 +8,59 @@ interface DistributionDetailsSectionProps {
 }
 
 const DistributionDetailsSection: React.FC<DistributionDetailsSectionProps> = ({ distribution }) => {
-  // Helper function to format Yes/No
-  const formatYesNo = (value: boolean): string => (value ? "Yes" : "No");
+  // Column 1 data
+  const column1Data = [
+    { label: "Payment Flag", value: `${distribution.statusId} - ${distribution.statusName}` },
+    { label: "Amount Requested", value: numberToCurrency(distribution.grossAmount) },
+    { label: "State Tax Override", value: "No" },
+    { label: "Sequence Number", value: distribution.paymentSequence }
+  ];
 
-  // Format percentage
-  const formatPercentage = (value: number): string => `${(value * 100).toFixed(1)}%`;
+  // Column 2 data
+  const column2Data = [
+    { label: "Tax Code", value: `${distribution.taxCodeId} - ${distribution.taxCodeName}` },
+    { label: "Fed Tax Override", value: "No" },
+    { label: "Fed Tax Percentage", value: "20%" },
+    { label: "State Tax Percentage", value: "5.1%" },
+    { label: "Memo", value: "-" }
+  ];
+
+  // Column 3 data
+  const column3Data = [
+    { label: "Reason Code", value: "R - Rollover" },
+    { label: "Fed Tax", value: numberToCurrency(distribution.federalTax) },
+    { label: "State Tax", value: numberToCurrency(distribution.stateTax) },
+    { label: "Employee Deceased", value: "No" }
+  ];
 
   return (
     <Grid
-      width="100%"
-      paddingX="24px">
-      <Paper
-        elevation={2}
-        sx={{ padding: "16px" }}>
-        {/* Section Header */}
+      container
+      paddingX="24px"
+      width="100%">
+      <Grid size={{ xs: 12 }}>
         <Typography
-          variant="h5"
-          sx={{
-            color: "#0258A5",
-            marginBottom: "24px",
-            fontWeight: "600"
-          }}>
+          variant="h2"
+          sx={{ color: "#0258A5", marginY: "8px" }}>
           Distribution Details
         </Typography>
+      </Grid>
 
-        {/* Distribution Details Grid - 3 columns */}
+      <Grid size={{ xs: 12 }}>
         <Grid
           container
           spacing={3}>
-          {/* Column 1 */}
-          <Grid size={{ xs: 12, md: 4 }}>
-            {/* Payment Flag */}
-            <Grid sx={{ marginBottom: "16px" }}>
-              <Typography
-                variant="body2"
-                sx={{ color: "#666", fontWeight: "bold" }}>
-                Payment Flag
-              </Typography>
-              <Typography variant="body1">
-                {distribution.statusId} - {distribution.statusName}
-              </Typography>
-            </Grid>
-
-            {/* Amount Requested */}
-            <Grid sx={{ marginBottom: "16px" }}>
-              <Typography
-                variant="body2"
-                sx={{ color: "#666", fontWeight: "bold" }}>
-                Amount Requested
-              </Typography>
-              <Typography variant="body1">{numberToCurrency(distribution.grossAmount)}</Typography>
-            </Grid>
-
-            {/* State Tax Override */}
-            <Grid sx={{ marginBottom: "16px" }}>
-              <Typography
-                variant="body2"
-                sx={{ color: "#666", fontWeight: "bold" }}>
-                State Tax Override
-              </Typography>
-              <Typography variant="body1">No</Typography>
-            </Grid>
-
-            {/* Sequence Number */}
-            <Grid sx={{ marginBottom: "16px" }}>
-              <Typography
-                variant="body2"
-                sx={{ color: "#666", fontWeight: "bold" }}>
-                Sequence Number
-              </Typography>
-              <Typography variant="body1">{distribution.paymentSequence}</Typography>
-            </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <LabelValueSection data={column1Data} />
           </Grid>
-
-          {/* Column 2 */}
-          <Grid size={{ xs: 12, md: 4 }}>
-            {/* Tax Code */}
-            <Grid sx={{ marginBottom: "16px" }}>
-              <Typography
-                variant="body2"
-                sx={{ color: "#666", fontWeight: "bold" }}>
-                Tax Code
-              </Typography>
-              <Typography variant="body1">
-                {distribution.taxCodeId} - {distribution.taxCodeName}
-              </Typography>
-            </Grid>
-
-            {/* Fed Tax Override */}
-            <Grid sx={{ marginBottom: "16px" }}>
-              <Typography
-                variant="body2"
-                sx={{ color: "#666", fontWeight: "bold" }}>
-                Fed Tax Override
-              </Typography>
-              <Typography variant="body1">No</Typography>
-            </Grid>
-
-            {/* Fed Tax Percentage */}
-            <Grid sx={{ marginBottom: "16px" }}>
-              <Typography
-                variant="body2"
-                sx={{ color: "#666", fontWeight: "bold" }}>
-                Fed Tax Percentage
-              </Typography>
-              <Typography variant="body1">20%</Typography>
-            </Grid>
-
-            {/* State Tax Percentage */}
-            <Grid sx={{ marginBottom: "16px" }}>
-              <Typography
-                variant="body2"
-                sx={{ color: "#666", fontWeight: "bold" }}>
-                State Tax Percentage
-              </Typography>
-              <Typography variant="body1">5.1%</Typography>
-            </Grid>
-
-            {/* Memo */}
-            <Grid sx={{ marginBottom: "16px" }}>
-              <Typography
-                variant="body2"
-                sx={{ color: "#666", fontWeight: "bold" }}>
-                Memo
-              </Typography>
-              <Typography variant="body1">-</Typography>
-            </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <LabelValueSection data={column2Data} />
           </Grid>
-
-          {/* Column 3 */}
-          <Grid size={{ xs: 12, md: 4 }}>
-            {/* Reason Code */}
-            <Grid sx={{ marginBottom: "16px" }}>
-              <Typography
-                variant="body2"
-                sx={{ color: "#666", fontWeight: "bold" }}>
-                Reason Code
-              </Typography>
-              <Typography variant="body1">R - Rollover</Typography>
-            </Grid>
-
-            {/* Fed Tax */}
-            <Grid sx={{ marginBottom: "16px" }}>
-              <Typography
-                variant="body2"
-                sx={{ color: "#666", fontWeight: "bold" }}>
-                Fed Tax
-              </Typography>
-              <Typography variant="body1">{numberToCurrency(distribution.federalTax)}</Typography>
-            </Grid>
-
-            {/* State Tax */}
-            <Grid sx={{ marginBottom: "16px" }}>
-              <Typography
-                variant="body2"
-                sx={{ color: "#666", fontWeight: "bold" }}>
-                State Tax
-              </Typography>
-              <Typography variant="body1">{numberToCurrency(distribution.stateTax)}</Typography>
-            </Grid>
-
-            {/* Employee Deceased */}
-            <Grid sx={{ marginBottom: "16px" }}>
-              <Typography
-                variant="body2"
-                sx={{ color: "#666", fontWeight: "bold" }}>
-                Employee Deceased
-              </Typography>
-              <Typography variant="body1">No</Typography>
-            </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <LabelValueSection data={column3Data} />
           </Grid>
         </Grid>
-      </Paper>
+      </Grid>
     </Grid>
   );
 };

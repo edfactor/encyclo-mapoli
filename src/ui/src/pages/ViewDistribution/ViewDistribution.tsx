@@ -4,16 +4,14 @@ import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
-import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
 import { CAPTIONS, ROUTES } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
-import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
 import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
 import { RootState } from "../../reduxstore/store";
 import DisbursementsHistory from "./DisbursementsHistory";
 import DistributionDetailsSection from "./DistributionDetailsSection";
 import useViewDistribution from "./hooks/useViewDistribution";
-import MemberDetailsSection from "./MemberDetailsSection";
+import MasterInquiryMemberDetails from "../MasterInquiry/MasterInquiryMemberDetails";
 import PendingDisbursementsList from "./PendingDisbursementsList";
 
 const ViewDistributionContent = () => {
@@ -22,7 +20,6 @@ const ViewDistributionContent = () => {
 
   const profitYear = useDecemberFlowProfitYear();
   const isReadOnly = useReadOnlyNavigation();
-  const { missiveAlerts } = useMissiveAlerts();
 
   const { currentMember, currentDistribution } = useSelector((state: RootState) => state.distribution);
 
@@ -102,9 +99,6 @@ const ViewDistributionContent = () => {
         </Button>
       </Grid>
 
-      {/* Missive Alerts */}
-      {missiveAlerts.length > 0 && <MissiveAlerts />}
-
       {/* Loading State */}
       {isLoading && (
         <Grid
@@ -117,8 +111,27 @@ const ViewDistributionContent = () => {
       {/* Content - Member and Distribution Details */}
       {!isLoading && currentMember && (
         <>
-          <MemberDetailsSection member={currentMember} />
-          {currentDistribution && <DistributionDetailsSection distribution={currentDistribution} />}
+          <Grid width="100%">
+            <Divider />
+          </Grid>
+          <MasterInquiryMemberDetails
+            memberType={currentMember.isEmployee ? 1 : 2}
+            id={memberId as string}
+            profitYear={profitYear}
+            memberDetails={currentMember}
+            isLoading={isLoading}
+          />
+          <Grid width="100%">
+            <Divider />
+          </Grid>
+          {currentDistribution && (
+            <>
+              <DistributionDetailsSection distribution={currentDistribution} />
+              <Grid width="100%">
+                <Divider />
+              </Grid>
+            </>
+          )}
 
           {/* Pending Disbursements List */}
           <PendingDisbursementsList
