@@ -64,7 +64,7 @@ logConfig.MaskingOperators = [
     new SensitiveValueMaskingOperator()
 ];
 
-builder.SetDefaultLoggerConfiguration(logConfig);
+_ = builder.SetDefaultLoggerConfiguration(logConfig);
 
 _ = builder.AddSecurityServices();
 

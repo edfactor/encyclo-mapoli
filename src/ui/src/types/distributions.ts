@@ -138,4 +138,6 @@ export interface DistributionsAndForfeitures {
 export interface DistributionsAndForfeituresQueryParams {
   startDate?: string;
   endDate?: string;
+  state?: string;
+  taxCode?: string;
 }

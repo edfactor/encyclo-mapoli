@@ -5,6 +5,11 @@ export interface MissiveResponse {
   severity: string;
 }
 
+export interface StateListResponse {
+  abbreviation: string;
+  name: string;
+}
+
 export interface RowCountResult {
   tableName: string;
   rowCount: number;

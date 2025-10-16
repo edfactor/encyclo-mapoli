@@ -1,7 +1,13 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 
 import { setAccountingYearData, setMissivesData } from "reduxstore/slices/lookupsSlice";
-import { CalendarResponseDto, MissiveResponse, ProfitYearRequest, YearRangeRequest } from "reduxstore/types";
+import {
+  CalendarResponseDto,
+  MissiveResponse,
+  ProfitYearRequest,
+  StateListResponse,
+  YearRangeRequest
+} from "reduxstore/types";
 import { createDataSourceAwareBaseQuery } from "./api";
 
 const baseQuery = createDataSourceAwareBaseQuery();
@@ -58,6 +64,15 @@ export const LookupsApi = createApi({
         url: "/lookup/duplicate-ssns/exists",
         method: "GET"
       })
+    }),
+    getStates: builder.query<StateListResponse[], void>({
+      query: () => ({
+        url: "/lookup/states",
+        method: "GET"
+      }),
+      transformResponse: (response: { results: StateListResponse[] }) => {
+        return response.results;
+      }
     })
   })
 });
@@ -66,5 +81,6 @@ export const {
   useLazyGetAccountingYearQuery,
   useLazyGetMissivesQuery,
   useLazyGetAccountingRangeQuery,
-  useLazyGetDuplicateSsnExistsQuery
+  useLazyGetDuplicateSsnExistsQuery,
+  useGetStatesQuery
 } = LookupsApi;

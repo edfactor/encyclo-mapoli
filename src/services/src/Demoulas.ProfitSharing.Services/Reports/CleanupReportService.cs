@@ -341,7 +341,11 @@ FROM FILTERED_DEMOGRAPHIC p1
                                       // PROFIT_DETAIL.MonthToDate <--- is the month selector  See QPAY129.pco
                                       (pd.ProfitYear > startDate.Year || (pd.ProfitYear == startDate.Year && pd.MonthToDate >= startDate.Month)) &&
                                       (pd.ProfitYear < endDate.Year || (pd.ProfitYear == endDate.Year && pd.MonthToDate <= endDate.Month)) &&
-                                      !(pd.ProfitCodeId == /*9*/ ProfitCode.Constants.Outgoing100PercentVestedPayment && pd.CommentTypeId.HasValue && transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value))
+                                      !(pd.ProfitCodeId == /*9*/ ProfitCode.Constants.Outgoing100PercentVestedPayment && pd.CommentTypeId.HasValue && transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)) &&
+                                      // State filter - apply if specified
+                                      (string.IsNullOrEmpty(req.State) || pd.CommentRelatedState == req.State) &&
+                                      // Tax code filter - apply if specified (convert string to char for comparison)
+                                      (string.IsNullOrEmpty(req.TaxCode) || req.TaxCode.Length == 0 || (pd.TaxCodeId.HasValue && pd.TaxCodeId.Value == req.TaxCode[0]))
 
                             select new
                             {

@@ -1,10 +1,11 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { CircularProgress, FormHelperText, Grid } from "@mui/material";
+import { CircularProgress, FormControl, FormHelperText, FormLabel, Grid, MenuItem, TextField } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { format } from "date-fns";
 import { useEffect } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
+import { useGetStatesQuery } from "reduxstore/api/LookupsApi";
 import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import {
   clearDistributionsAndForfeitures,
@@ -14,9 +15,10 @@ import {
 import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import { tryddmmyyyyToDate } from "../../../utils/dateUtils";
-import { endDateAfterStartDateValidator } from "../../../utils/FormValidators";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear.ts";
+import { tryddmmyyyyToDate } from "../../../utils/dateUtils";
+import { getMonthEndDate, getMonthStartDate } from "../../../utils/dateRangeUtils";
+import { endDateAfterStartDateValidator } from "../../../utils/FormValidators";
 
 const formatDateOnly = (date: Date | null): string | undefined => {
   if (!date) return undefined;
@@ -26,11 +28,15 @@ const formatDateOnly = (date: Date | null): string | undefined => {
 interface DistributionsAndForfeituresSearch {
   startDate: Date | null;
   endDate: Date | null;
+  state: string;
+  taxCode: string;
 }
 
 const schema = yup.object().shape({
   startDate: yup.date().nullable(),
-  endDate: endDateAfterStartDateValidator("startDate")
+  endDate: endDateAfterStartDateValidator("startDate"),
+  state: yup.string(),
+  taxCode: yup.string()
 });
 
 interface DistributionsAndForfeituresSearchFilterProps {
@@ -42,6 +48,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
 }) => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
+  const { data: statesData, isLoading: isLoadingStates } = useGetStatesQuery();
   const dispatch = useDispatch();
   //  const fiscalData = useFiscalCalendarYear();
   const profitYear = useDecemberFlowProfitYear();
@@ -56,7 +63,9 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
     resolver: yupResolver(schema) as Resolver<DistributionsAndForfeituresSearch>,
     defaultValues: {
       startDate: null,
-      endDate: null
+      endDate: null,
+      state: "",
+      taxCode: ""
     }
   });
 
@@ -66,7 +75,9 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
       reset({
         // PROFIT_DETAIL transactions historically have month/year - so this date range is the profit_year
         startDate: tryddmmyyyyToDate(new Date(profitYear, 0, 1)),
-        endDate: tryddmmyyyyToDate(new Date(profitYear, 11, 31))
+        endDate: tryddmmyyyyToDate(new Date(profitYear, 11, 31)),
+        state: "",
+        taxCode: ""
       });
     }
   }, [reset]);
@@ -77,6 +88,8 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
         {
           ...(data.startDate && { startDate: formatDateOnly(data.startDate) }),
           ...(data.endDate && { endDate: formatDateOnly(data.endDate) }),
+          ...(data.state && data.state !== "" && { state: data.state }),
+          ...(data.taxCode && data.taxCode !== "" && { taxCode: data.taxCode }),
           pagination: { skip: 0, take: 25, sortBy: "employeeName, date", isSortDescending: false }
         },
         false
@@ -84,7 +97,9 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
       dispatch(
         setDistributionsAndForfeituresQueryParams({
           startDate: formatDateOnly(data.startDate),
-          endDate: formatDateOnly(data.endDate)
+          endDate: formatDateOnly(data.endDate),
+          state: data.state || undefined,
+          taxCode: data.taxCode || undefined
         })
       );
       setInitialSearchLoaded(true);
@@ -98,7 +113,9 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
     reset({
       // PROFIT_DETAIL transactions historically have month/year - so this date range is the profit_year
       startDate: tryddmmyyyyToDate(new Date(profitYear, 0, 1)),
-      endDate: tryddmmyyyyToDate(new Date(profitYear, 11, 31))
+      endDate: tryddmmyyyyToDate(new Date(profitYear, 11, 31)),
+      state: "",
+      taxCode: ""
     });
 
     // Clear the data in Redux store
@@ -131,7 +148,9 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
               <DsmDatePicker
                 id="startDate"
                 onChange={(value: Date | null) => {
-                  field.onChange(value);
+                  // Expand month selection to first day of month
+                  const expandedDate = getMonthStartDate(value);
+                  field.onChange(expandedDate);
                   trigger("endDate");
                 }}
                 value={field.value}
@@ -153,7 +172,9 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
               <DsmDatePicker
                 id="endDate"
                 onChange={(value: Date | null) => {
-                  field.onChange(value);
+                  // Expand month selection to last day of month
+                  const expandedDate = getMonthEndDate(value);
+                  field.onChange(expandedDate);
                   trigger("endDate");
                 }}
                 value={field.value}
@@ -166,6 +187,61 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
             )}
           />
           {errors.endDate && <FormHelperText error>{errors.endDate.message}</FormHelperText>}
+        </Grid>
+        <Grid size={{ xs: 12, sm: 4, md: 2 }}>
+          <FormLabel>State</FormLabel>
+          <FormControl fullWidth>
+            <Controller
+              name="state"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  value={field.value ?? ""}
+                  select
+                  fullWidth
+                  size="small"
+                  variant="outlined"
+                  disabled={isLoadingStates}
+                  error={!!errors.state}
+                  helperText={errors.state?.message}>
+                  <MenuItem value="">All</MenuItem>
+                  {statesData?.map((state: { abbreviation: string; name: string }) => (
+                    <MenuItem
+                      key={state.abbreviation}
+                      value={state.abbreviation}>
+                      {state.abbreviation} - {state.name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
+            />
+          </FormControl>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 4, md: 2 }}>
+          <FormLabel>Tax Code</FormLabel>
+          <FormControl fullWidth>
+            <Controller
+              name="taxCode"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  value={field.value ?? ""}
+                  select
+                  fullWidth
+                  size="small"
+                  variant="outlined"
+                  error={!!errors.taxCode}
+                  helperText={errors.taxCode?.message}>
+                  <MenuItem value="">All</MenuItem>
+                  <MenuItem value="1">1</MenuItem>
+                  <MenuItem value="3">3</MenuItem>
+                  <MenuItem value="7">7</MenuItem>
+                </TextField>
+              )}
+            />
+          </FormControl>
         </Grid>
       </Grid>
       <Grid
