@@ -1,6 +1,7 @@
 ﻿using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.ItDevOps;
@@ -29,7 +30,7 @@ public abstract class PristineBaseTest
         DbFactory = new PristineDataContextFactory();
         DistributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
         CalendarService = new CalendarService(DbFactory, Aps, DistributedCache);
-        FrozenService = new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, DistributedCache);
+        FrozenService = new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, DistributedCache, new Mock<INavigationService>().Object);
         EmbeddedSqlService = new EmbeddedSqlService();
         DemographicReaderService = new DemographicReaderService(FrozenService, HttpContextAccessor);
         TotalService = new TotalService(DbFactory, CalendarService, EmbeddedSqlService, DemographicReaderService);

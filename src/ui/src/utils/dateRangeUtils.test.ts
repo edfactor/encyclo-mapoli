@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getMonthStartDate, getMonthEndDate, getMonthDateRange } from "./dateRangeUtils";
+import { getMonthDateRange, getMonthEndDate, getMonthStartDate } from "./dateRangeUtils";
 
 describe("dateRangeUtils", () => {
   describe("getMonthStartDate", () => {
@@ -120,8 +120,8 @@ describe("dateRangeUtils", () => {
     it("should handle all 30-day months correctly", () => {
       // April, June, September, November
       const thirtyDayMonths = [3, 5, 8, 10]; // 0-indexed
-      
-      thirtyDayMonths.forEach(month => {
+
+      thirtyDayMonths.forEach((month) => {
         const date = new Date(2025, month, 15);
         const result = getMonthEndDate(date);
         expect(result?.getDate()).toBe(30);
@@ -131,8 +131,8 @@ describe("dateRangeUtils", () => {
     it("should handle all 31-day months correctly", () => {
       // January, March, May, July, August, October, December
       const thirtyOneDayMonths = [0, 2, 4, 6, 7, 9, 11]; // 0-indexed
-      
-      thirtyOneDayMonths.forEach(month => {
+
+      thirtyOneDayMonths.forEach((month) => {
         const date = new Date(2025, month, 15);
         const result = getMonthEndDate(date);
         expect(result?.getDate()).toBe(31);
@@ -156,7 +156,7 @@ describe("dateRangeUtils", () => {
     it("should return both start and end dates for a month", () => {
       const date = new Date(2025, 2, 15); // March 15, 2025
       const result = getMonthDateRange(date);
-      
+
       expect(result.startDate).not.toBeNull();
       expect(result.endDate).not.toBeNull();
       expect(result.startDate?.getDate()).toBe(1);
@@ -174,7 +174,7 @@ describe("dateRangeUtils", () => {
     it("should handle February leap year correctly", () => {
       const date = new Date(2024, 1, 15); // February 15, 2024
       const result = getMonthDateRange(date);
-      
+
       expect(result.startDate?.getDate()).toBe(1);
       expect(result.endDate?.getDate()).toBe(29);
     });
@@ -182,7 +182,7 @@ describe("dateRangeUtils", () => {
     it("should handle February non-leap year correctly", () => {
       const date = new Date(2025, 1, 15); // February 15, 2025
       const result = getMonthDateRange(date);
-      
+
       expect(result.startDate?.getDate()).toBe(1);
       expect(result.endDate?.getDate()).toBe(28);
     });
@@ -190,13 +190,13 @@ describe("dateRangeUtils", () => {
     it("should work for single-month query (same month)", () => {
       const date = new Date(2025, 2, 15); // March 2025
       const result = getMonthDateRange(date);
-      
+
       // User selects same month for start and end
       // Should get full month range
       expect(result.startDate?.getFullYear()).toBe(2025);
       expect(result.startDate?.getMonth()).toBe(2);
       expect(result.startDate?.getDate()).toBe(1);
-      
+
       expect(result.endDate?.getFullYear()).toBe(2025);
       expect(result.endDate?.getMonth()).toBe(2);
       expect(result.endDate?.getDate()).toBe(31);
@@ -207,38 +207,38 @@ describe("dateRangeUtils", () => {
     it("should handle the reported FL tax issue scenario (March 2025)", () => {
       // User wants to see March transactions for badge 68318
       const marchDate = new Date(2025, 2, 1); // March 2025
-      
+
       const startDate = getMonthStartDate(marchDate);
       const endDate = getMonthEndDate(marchDate);
-      
+
       // Should query from March 1 to March 31
-      expect(startDate?.toISOString().split('T')[0]).toBe('2025-03-01');
-      expect(endDate?.toISOString().split('T')[0]).toBe('2025-03-31');
+      expect(startDate?.toISOString().split("T")[0]).toBe("2025-03-01");
+      expect(endDate?.toISOString().split("T")[0]).toBe("2025-03-31");
     });
 
     it("should handle quarter range (Q1 2025)", () => {
       // User selects January to March
       const january = getMonthStartDate(new Date(2025, 0, 1));
       const march = getMonthEndDate(new Date(2025, 2, 1));
-      
-      expect(january?.toISOString().split('T')[0]).toBe('2025-01-01');
-      expect(march?.toISOString().split('T')[0]).toBe('2025-03-31');
+
+      expect(january?.toISOString().split("T")[0]).toBe("2025-01-01");
+      expect(march?.toISOString().split("T")[0]).toBe("2025-03-31");
     });
 
     it("should handle full year range (2025)", () => {
       // User selects January to December
       const yearStart = getMonthStartDate(new Date(2025, 0, 1));
       const yearEnd = getMonthEndDate(new Date(2025, 11, 1));
-      
-      expect(yearStart?.toISOString().split('T')[0]).toBe('2025-01-01');
-      expect(yearEnd?.toISOString().split('T')[0]).toBe('2025-12-31');
+
+      expect(yearStart?.toISOString().split("T")[0]).toBe("2025-01-01");
+      expect(yearEnd?.toISOString().split("T")[0]).toBe("2025-12-31");
     });
 
     it("should handle profit year that matches fiscal year", () => {
       // Typical profit year: January 1 to December 31
       const profitYearStart = getMonthStartDate(new Date(2025, 0, 1));
       const profitYearEnd = getMonthEndDate(new Date(2025, 11, 1));
-      
+
       expect(profitYearStart?.getMonth()).toBe(0); // January
       expect(profitYearStart?.getDate()).toBe(1);
       expect(profitYearEnd?.getMonth()).toBe(11); // December
@@ -251,11 +251,11 @@ describe("dateRangeUtils", () => {
       // December to January crossing year boundary
       const december = getMonthEndDate(new Date(2024, 11, 15));
       const january = getMonthStartDate(new Date(2025, 0, 15));
-      
+
       expect(december?.getFullYear()).toBe(2024);
       expect(december?.getMonth()).toBe(11);
       expect(december?.getDate()).toBe(31);
-      
+
       expect(january?.getFullYear()).toBe(2025);
       expect(january?.getMonth()).toBe(0);
       expect(january?.getDate()).toBe(1);
@@ -264,7 +264,7 @@ describe("dateRangeUtils", () => {
     it("should maintain time component as start of day", () => {
       const date = new Date(2025, 2, 15, 14, 30, 45); // March 15, 2025, 2:30:45 PM
       const startDate = getMonthStartDate(date);
-      
+
       // Should be midnight of the first day
       expect(startDate?.getHours()).toBe(0);
       expect(startDate?.getMinutes()).toBe(0);
@@ -276,10 +276,10 @@ describe("dateRangeUtils", () => {
       // Create dates that might be affected by timezone
       const date1 = new Date(2025, 2, 15);
       const date2 = new Date(Date.UTC(2025, 2, 15));
-      
+
       const start1 = getMonthStartDate(date1);
       const start2 = getMonthStartDate(date2);
-      
+
       // Both should return first day of March
       expect(start1?.getDate()).toBe(1);
       expect(start2?.getDate()).toBe(1);

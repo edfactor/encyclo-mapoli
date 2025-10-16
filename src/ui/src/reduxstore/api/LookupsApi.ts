@@ -6,6 +6,7 @@ import {
   MissiveResponse,
   ProfitYearRequest,
   StateListResponse,
+  TaxCodeResponse,
   YearRangeRequest
 } from "reduxstore/types";
 import { createDataSourceAwareBaseQuery } from "./api";
@@ -70,8 +71,17 @@ export const LookupsApi = createApi({
         url: "/lookup/states",
         method: "GET"
       }),
-      transformResponse: (response: { results: StateListResponse[] }) => {
-        return response.results;
+      transformResponse: (response: { items: StateListResponse[] }) => {
+        return response.items;
+      }
+    }),
+    getTaxCodes: builder.query<TaxCodeResponse[], void>({
+      query: () => ({
+        url: "/lookup/tax-codes",
+        method: "GET"
+      }),
+      transformResponse: (response: { items: TaxCodeResponse[] }) => {
+        return response.items;
       }
     })
   })
@@ -82,5 +92,6 @@ export const {
   useLazyGetMissivesQuery,
   useLazyGetAccountingRangeQuery,
   useLazyGetDuplicateSsnExistsQuery,
-  useGetStatesQuery
+  useGetStatesQuery,
+  useGetTaxCodesQuery
 } = LookupsApi;

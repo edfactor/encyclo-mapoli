@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { useEffect } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useGetStatesQuery } from "reduxstore/api/LookupsApi";
+import { useGetStatesQuery, useGetTaxCodesQuery } from "reduxstore/api/LookupsApi";
 import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import {
   clearDistributionsAndForfeitures,
@@ -16,8 +16,8 @@ import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear.ts";
-import { tryddmmyyyyToDate } from "../../../utils/dateUtils";
 import { getMonthEndDate, getMonthStartDate } from "../../../utils/dateRangeUtils";
+import { tryddmmyyyyToDate } from "../../../utils/dateUtils";
 import { endDateAfterStartDateValidator } from "../../../utils/FormValidators";
 
 const formatDateOnly = (date: Date | null): string | undefined => {
@@ -49,6 +49,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
   const { data: statesData, isLoading: isLoadingStates } = useGetStatesQuery();
+  const { data: taxCodesData, isLoading: isLoadingTaxCodes } = useGetTaxCodesQuery();
   const dispatch = useDispatch();
   //  const fiscalData = useFiscalCalendarYear();
   const profitYear = useDecemberFlowProfitYear();
@@ -84,16 +85,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid && hasToken) {
-      triggerSearch(
-        {
-          ...(data.startDate && { startDate: formatDateOnly(data.startDate) }),
-          ...(data.endDate && { endDate: formatDateOnly(data.endDate) }),
-          ...(data.state && data.state !== "" && { state: data.state }),
-          ...(data.taxCode && data.taxCode !== "" && { taxCode: data.taxCode }),
-          pagination: { skip: 0, take: 25, sortBy: "employeeName, date", isSortDescending: false }
-        },
-        false
-      ).unwrap();
+      // Store query params in Redux - this will trigger the Grid's useEffect to make the API call
       dispatch(
         setDistributionsAndForfeituresQueryParams({
           startDate: formatDateOnly(data.startDate),
@@ -232,12 +224,17 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                   fullWidth
                   size="small"
                   variant="outlined"
+                  disabled={isLoadingTaxCodes}
                   error={!!errors.taxCode}
                   helperText={errors.taxCode?.message}>
                   <MenuItem value="">All</MenuItem>
-                  <MenuItem value="1">1</MenuItem>
-                  <MenuItem value="3">3</MenuItem>
-                  <MenuItem value="7">7</MenuItem>
+                  {taxCodesData?.map((taxCode: { id: string; name: string }) => (
+                    <MenuItem
+                      key={taxCode.id}
+                      value={taxCode.id}>
+                      {taxCode.id} - {taxCode.name}
+                    </MenuItem>
+                  ))}
                 </TextField>
               )}
             />

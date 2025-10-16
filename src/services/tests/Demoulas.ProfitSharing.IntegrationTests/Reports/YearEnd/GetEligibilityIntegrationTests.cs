@@ -1,6 +1,7 @@
 ﻿using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.ItDevOps;
 using Demoulas.ProfitSharing.Services.Reports;
@@ -20,7 +21,7 @@ public class GetEligibilityIntegrationTests : PristineBaseTest
     [Fact]
     public async Task BasicTest()
     {
-        GetEligibleEmployeesService es = new(DbFactory, CalendarService, new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, DistributedCache), new HttpContextAccessor()));
+        GetEligibleEmployeesService es = new(DbFactory, CalendarService, new DemographicReaderService(new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, DistributedCache, new Mock<INavigationService>().Object), new HttpContextAccessor()));
         GetEligibleEmployeesResponse empls = await es.GetEligibleEmployeesAsync(new ProfitYearRequest { ProfitYear = 2024, Take = int.MaxValue }, CancellationToken.None);
 
         TestOutputHelper.WriteLine("On Frozen: " + empls.NumberReadOnFrozen);

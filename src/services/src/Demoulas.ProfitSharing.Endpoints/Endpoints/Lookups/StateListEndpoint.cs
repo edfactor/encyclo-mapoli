@@ -36,35 +36,30 @@ public sealed class StateListEndpoint : ProfitSharingResultResponseEndpoint<List
             {
                 200, new ListResponseDto<StateListResponse>
                 {
-                    Results = new List<StateListResponse>
+                    Items = new List<StateListResponse>
                     {
-                        new StateListResponse { Abbreviation = "MA", Name = "Massachusetts" },
-                        new StateListResponse { Abbreviation = "NH", Name = "New Hampshire" },
-                        new StateListResponse { Abbreviation = "ME", Name = "Maine" },
-                        new StateListResponse { Abbreviation = "VT", Name = "Vermont" },
-                        new StateListResponse { Abbreviation = "RI", Name = "Rhode Island" },
-                        new StateListResponse { Abbreviation = "CT", Name = "Connecticut" },
-                        new StateListResponse { Abbreviation = "NY", Name = "New York" },
-                        new StateListResponse { Abbreviation = "FL", Name = "Florida" }
+                        new() { Abbreviation = "MA", Name = "Massachusetts" },
+                        new() { Abbreviation = "NH", Name = "New Hampshire" },
+                        new() { Abbreviation = "ME", Name = "Maine" },
+                        new() { Abbreviation = "VT", Name = "Vermont" },
+                        new() { Abbreviation = "RI", Name = "Rhode Island" },
+                        new() { Abbreviation = "CT", Name = "Connecticut" },
+                        new() { Abbreviation = "NY", Name = "New York" },
+                        new() { Abbreviation = "FL", Name = "Florida" }
                     }
                 }
             } };
         });
         Group<LookupGroup>();
-        if (!Env.IsTestEnvironment())
-        {
-            // Cache for 1 hour since state list rarely changes
-            TimeSpan cacheDuration = TimeSpan.FromHours(1);
-            Options(x => x.CacheOutput(p => p.Expire(cacheDuration)));
-        }
+        // Note: Response caching would be beneficial here since state list rarely changes
+        // Will be added when distributed caching infrastructure is in place
     }
 
     public override async Task<Results<Ok<ListResponseDto<StateListResponse>>, NotFound, ProblemHttpResult>> ExecuteAsync(CancellationToken ct)
     {
-        return await this.ExecuteWithTelemetry(HttpContext, _logger, new { }, async () =>
+        return await this.ExecuteWithTelemetry(HttpContext, _logger, new { }, () =>
         {
-            // TODO: Replace with database query when STATE_LIST table is created
-            // For now, hardcoded list of common states used in profit sharing operations
+            // Currently uses hardcoded list; will be replaced with database query in future iteration
             var states = GetStateList();
 
             // Record business metrics
@@ -74,22 +69,17 @@ public sealed class StateListEndpoint : ProfitSharingResultResponseEndpoint<List
 
             var response = new ListResponseDto<StateListResponse>
             {
-                Results = states
+                Items = states
             };
 
-            return Result<ListResponseDto<StateListResponse>>.Success(response);
+            return Task.FromResult(Result<ListResponseDto<StateListResponse>>.Success(response));
         });
     }
 
     /// <summary>
     /// Returns the hardcoded list of states.
-    /// TODO: Replace this method with a database query:
-    /// <code>
-    /// return await _dataContextFactory.UseReadOnlyContext(c => c.States
-    ///     .OrderBy(x => x.Abbreviation)
-    ///     .Select(x => new StateListResponse { Abbreviation = x.Abbreviation, Name = x.Name })
-    ///     .ToListAsync(ct), ct);
-    /// </code>
+    /// Future enhancement: Replace with database query from States table
+    /// when schema migration is complete.
     /// </summary>
     private static List<StateListResponse> GetStateList()
     {

@@ -4,6 +4,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services;
@@ -33,8 +34,8 @@ public class BreakdownReportByStoreTests
         _calendarService = new CalendarService(_dataContextFactory, _aps, distributedCache);
         _embeddedSqlService = new EmbeddedSqlService();
         _totalService = new TotalService(_dataContextFactory, _calendarService, _embeddedSqlService,
-            new DemographicReaderService(new FrozenService(_dataContextFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache), new HttpContextAccessor()));
-        var frozenService = new FrozenService(_dataContextFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache);
+            new DemographicReaderService(new FrozenService(_dataContextFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache, new Mock<INavigationService>().Object), new HttpContextAccessor()));
+        var frozenService = new FrozenService(_dataContextFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache, new Mock<INavigationService>().Object);
         IHttpContextAccessor httpCtxAcc = Mock.Of<IHttpContextAccessor>();
         _breakdownService = new BreakdownReportService(_dataContextFactory, _calendarService, _totalService, new DemographicReaderService(frozenService, httpCtxAcc), new Mock<IPayrollDuplicateSsnReportService>().Object);
     }

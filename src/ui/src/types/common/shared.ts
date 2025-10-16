@@ -10,6 +10,11 @@ export interface StateListResponse {
   name: string;
 }
 
+export interface TaxCodeResponse {
+  id: string;
+  name: string;
+}
+
 export interface RowCountResult {
   tableName: string;
   rowCount: number;

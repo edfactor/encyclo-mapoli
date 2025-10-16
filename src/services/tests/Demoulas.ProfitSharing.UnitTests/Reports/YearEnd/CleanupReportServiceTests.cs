@@ -427,7 +427,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             });
 
             response = await ApiClient
-                    .GETAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(req);
+                    .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(req);
 
 
             response.Result.ShouldNotBeNull();
@@ -448,7 +448,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         });
 
         response = await ApiClient
-            .GETAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
                 DistributionsAndForfeitureTotalsResponse>(req);
 
         response.Result.ShouldNotBeNull();
@@ -467,7 +467,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         });
 
         response = await ApiClient
-            .GETAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
                 DistributionsAndForfeitureTotalsResponse>(req);
 
         response.ShouldNotBeNull();
@@ -485,7 +485,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         });
 
         response = await ApiClient
-            .GETAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
                 DistributionsAndForfeitureTotalsResponse>(req);
 
         response.ShouldNotBeNull();

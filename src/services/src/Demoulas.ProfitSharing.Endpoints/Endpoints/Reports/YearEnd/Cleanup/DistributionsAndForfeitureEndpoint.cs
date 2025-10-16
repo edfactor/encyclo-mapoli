@@ -29,7 +29,7 @@ public class DistributionsAndForfeitureEndpoint : ProfitSharingEndpoint<Distribu
 
     public override void Configure()
     {
-        Get("distributions-and-forfeitures");
+        Post("distributions-and-forfeitures");
         Summary(s =>
         {
             s.Summary = "Lists distributions and forfeitures for a date range";
@@ -53,7 +53,7 @@ public class DistributionsAndForfeitureEndpoint : ProfitSharingEndpoint<Distribu
                 new("operation", "year-end-cleanup-distributions-forfeitures"),
                 new("endpoint", nameof(DistributionsAndForfeitureEndpoint)));
 
-            if (serviceResult.IsSuccess && serviceResult.Value?.Response?.Results != null)
+            if (serviceResult is { IsSuccess: true, Value.Response.Results: not null })
             {
                 var resultCount = serviceResult.Value.Response.Results.Count();
                 EndpointTelemetry.RecordCountsProcessed.Record(resultCount,

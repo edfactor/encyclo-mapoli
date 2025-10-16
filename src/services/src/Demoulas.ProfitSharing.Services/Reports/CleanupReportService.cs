@@ -345,7 +345,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                                       // State filter - apply if specified
                                       (string.IsNullOrEmpty(req.State) || pd.CommentRelatedState == req.State) &&
                                       // Tax code filter - apply if specified (convert string to char for comparison)
-                                      (string.IsNullOrEmpty(req.TaxCode) || req.TaxCode.Length == 0 || (pd.TaxCodeId.HasValue && pd.TaxCodeId.Value == req.TaxCode[0]))
+                                      (string.IsNullOrEmpty(req.TaxCode) || (pd.TaxCodeId.HasValue && pd.TaxCodeId.Value.ToString() == req.TaxCode))
 
                             select new
                             {
