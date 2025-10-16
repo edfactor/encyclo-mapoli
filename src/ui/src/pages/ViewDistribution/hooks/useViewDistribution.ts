@@ -1,13 +1,8 @@
 import { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
 import { DISTRIBUTION_INQUIRY_MESSAGES } from "../../../components/MissiveAlerts/MissiveMessages";
 import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
 import { useLazyGetProfitMasterInquiryMemberQuery } from "../../../reduxstore/api/InquiryApi";
-import {
-  clearCurrentDistribution,
-  clearCurrentMember,
-  setCurrentMember
-} from "../../../reduxstore/slices/distributionSlice";
+import { clearCurrentMember, setCurrentMember } from "../../../reduxstore/slices/distributionSlice";
 
 interface UseViewDistributionReturn {
   isLoading: boolean;
@@ -17,7 +12,7 @@ interface UseViewDistributionReturn {
 }
 
 const useViewDistribution = (): UseViewDistributionReturn => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatcßh();
   const { addAlert } = useMissiveAlerts();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,8 +31,6 @@ const useViewDistribution = (): UseViewDistributionReturn => {
           memberType: Number(memberType),
           profitYear: profitYear
         };
-
-        console.log("Fetching member with request:", request);
 
         const response = await triggerMemberQuery(request).unwrap();
 
