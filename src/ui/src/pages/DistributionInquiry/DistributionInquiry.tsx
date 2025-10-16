@@ -2,7 +2,8 @@ import AddIcon from "@mui/icons-material/Add";
 import DownloadIcon from "@mui/icons-material/Download";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import { Button, Divider, Grid, Tooltip } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
 import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
@@ -12,16 +13,31 @@ import { CAPTIONS } from "../../constants";
 import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
 import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
 import { useLazySearchDistributionsQuery } from "../../reduxstore/api/DistributionApi";
+import {
+  clearCurrentDistribution,
+  clearCurrentMember,
+  clearHistoricalDisbursements,
+  clearPendingDisbursements
+} from "../../reduxstore/slices/distributionSlice";
 import { DistributionSearchFormData } from "../../types";
 import DistributionInquiryGrid from "./DistributionInquiryGrid";
 import DistributionInquirySearchFilter from "./DistributionInquirySearchFilter";
 
 const DistributionInquiryContent = () => {
+  const dispatch = useDispatch();
   const [searchData, setSearchData] = useState<any>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [triggerSearch, { data, isFetching }] = useLazySearchDistributionsQuery();
   const isReadOnly = useReadOnlyNavigation();
   const { missiveAlerts, addAlert, clearAlerts } = useMissiveAlerts();
+
+  // Clear all distribution slice data when component mounts
+  useEffect(() => {
+    dispatch(clearCurrentMember());
+    dispatch(clearCurrentDistribution());
+    dispatch(clearPendingDisbursements());
+    dispatch(clearHistoricalDisbursements());
+  }, [dispatch]);
 
   const handleSearch = async (formData: DistributionSearchFormData) => {
     try {

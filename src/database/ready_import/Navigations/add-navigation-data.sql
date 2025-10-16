@@ -36,6 +36,7 @@ DECLARE
     INQUIRIES_GROUP CONSTANT NUMBER := 13;
     ADJUSTMENTS_GROUP CONSTANT NUMBER := 14;
     ADHOC_GROUP CONSTANT NUMBER := 15;
+    --DISTRIBUTIONS_GROUP CONSTANT NUMBER := 16;
 
     -- AVAILABLE PAGES (ids starting at 100)
 
@@ -96,6 +97,7 @@ DECLARE
     PAY426N_FROZEN CONSTANT NUMBER := 153;
     PROFIT_DETAILS_REVERSAL CONSTANT NUMBER := 154;
     PRINT_PS_JOBS CONSTANT NUMBER :=155;
+    VIEW_DISTRIBUTION_PAGE CONSTANT NUMBER := 156;
 
 
     --- These are the role IDs from the ROLES table
@@ -210,7 +212,8 @@ BEGIN
 
 
 --distribution items
-    insert_navigation_item(DISTRIBUTION_INQUIRY_PAGE, DISTRIBUTIONS_MENU, 'Distribution Inquiry (008-14l)', '', 'distributions-inquiry', STATUS_NORMAL, ORDER_ELEVENTH, '', DISABLED, IS_NAVIGABLE);
+    insert_navigation_item(DISTRIBUTION_INQUIRY_PAGE, DISTRIBUTIONS_MENU, 'Distribution Inquiry (008-14l)', '', 'distributions-inquiry', STATUS_NORMAL, ORDER_FIRST, '', DISABLED, IS_NAVIGABLE);
+    insert_navigation_item(VIEW_DISTRIBUTION_PAGE, DISTRIBUTIONS_MENU, 'View Distribution (008-14V)', '', 'view-distribution', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, NOT_NAVIGABLE);
 
 --It Operations
     insert_navigation_item(DEMOGRAPHIC_FREEZE_PAGE, IT_DEVOPS_MENU, 'Demographic Freeze', '', 'demographic-freeze', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -322,10 +325,19 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(DISTRIBUTIONS_MENU, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(DISTRIBUTIONS_MENU, FINANCE_MANAGER);
     assign_navigation_role(DISTRIBUTIONS_MENU, DISTRIBUTIONS_CLERK);
+    assign_navigation_role(DISTRIBUTIONS_MENU, HARDSHIP_ADMINISTRATOR);
 
     assign_navigation_role(DISTRIBUTION_INQUIRY_PAGE, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(DISTRIBUTION_INQUIRY_PAGE, FINANCE_MANAGER);
     assign_navigation_role(DISTRIBUTION_INQUIRY_PAGE, DISTRIBUTIONS_CLERK);
+    assign_navigation_role(DISTRIBUTION_INQUIRY_PAGE, HARDSHIP_ADMINISTRATOR);
+
+-- View Distribution
+    assign_navigation_role(VIEW_DISTRIBUTION_PAGE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(VIEW_DISTRIBUTION_PAGE, FINANCE_MANAGER);
+    assign_navigation_role(VIEW_DISTRIBUTION_PAGE, DISTRIBUTIONS_CLERK);
+    assign_navigation_role(VIEW_DISTRIBUTION_PAGE, HARDSHIP_ADMINISTRATOR);
+   
 
 -- Assign roles for INQUIRIES (Master Inquiry endpoints -> CanRunMasterInquiry)
     assign_navigation_role(INQUIRIES_MENU, SYSTEM_ADMINISTRATOR);
@@ -358,6 +370,12 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(ADJUSTMENTS_GROUP, SYSTEM_ADMINISTRATOR); 
     assign_navigation_role(ADJUSTMENTS_GROUP, FINANCE_MANAGER);
     assign_navigation_role(ADJUSTMENTS_GROUP, DISTRIBUTIONS_CLERK);
+
+-- Assign roles for DISTRIBUTIONS_MENU
+    --assign_navigation_role(DISTRIBUTIONS_MENU, SYSTEM_ADMINISTRATOR); 
+    --assign_navigation_role(DISTRIBUTIONS_MENU, FINANCE_MANAGER); 
+    --assign_navigation_role(DISTRIBUTIONS_MENU, DISTRIBUTIONS_CLERK);
+    --assign_navigation_role(DISTRIBUTIONS_MENU, HARDSHIP_ADMINISTRATOR);
 
 -- Assign roles for ADJUSTMENTS (Endpoints base -> Navigation.Constants.Adjustments; Policy -> CanRunMasterInquiry)
     assign_navigation_role(ADJUSTMENTS_PAGE, SYSTEM_ADMINISTRATOR); 
@@ -485,6 +503,9 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(BENEFICIARIES_MENU, IT_DEVOPS);
     assign_navigation_role(DISTRIBUTIONS_MENU, IT_DEVOPS);
     assign_navigation_role(DISTRIBUTION_INQUIRY_PAGE, IT_DEVOPS);
+    assign_navigation_role(VIEW_DISTRIBUTION_PAGE, IT_DEVOPS);
+    
+
     -- assign_navigation_role(RECONCILIATION_MENU, IT_DEVOPS); -- REMOVED
     assign_navigation_role(YEAR_END_MENU, IT_DEVOPS);
     assign_navigation_role(DECEMBER_ACTIVITIES, IT_DEVOPS);

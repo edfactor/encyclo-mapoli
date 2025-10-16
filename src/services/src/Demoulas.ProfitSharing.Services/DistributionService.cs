@@ -65,7 +65,9 @@ public sealed class DistributionService : IDistributionService
                             dist.FederalTaxAmount,
                             dist.StateTaxAmount,
                             dist.CheckAmount,
-                            IsExecutive = dem != null && dem.PayFrequencyId == PayFrequency.Constants.Monthly
+                            IsExecutive = dem != null && dem.PayFrequencyId == PayFrequency.Constants.Monthly,
+                            DemographicId = dem != null ? (int?)dem.OracleHcmId : null,
+                            BeneficiaryId = ben != null ? (int?)ben.Id : null
                         };
 
             int searchSsn;
@@ -194,7 +196,9 @@ public sealed class DistributionService : IDistributionService
                 StateTax = d.StateTaxAmount,
                 CheckAmount = d.CheckAmount,
                 IsExecutive = d.IsExecutive,
-                IsEmployee = d.BadgeNumber.HasValue
+                IsEmployee = d.BadgeNumber.HasValue,
+                DemographicId = d.DemographicId,
+                BeneficiaryId = d.BeneficiaryId
             }).ToList()
         };
 

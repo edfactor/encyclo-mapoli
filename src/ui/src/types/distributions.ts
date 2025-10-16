@@ -37,6 +37,8 @@ export interface DistributionSearchResponse {
   federalTax: number;
   stateTax: number;
   checkAmount: number;
+  demographicId: number | null;
+  beneficiaryId: number | null;
 }
 
 export interface DistributionSearchFormData {
