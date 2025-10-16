@@ -17,7 +17,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
     private readonly IDemographicReaderService _demographicReaderService;
 
     public ForfeitureAdjustmentService(IProfitSharingDataContextFactory dbContextFactory,
-        TotalService totalService, IEmbeddedSqlService embeddedSqlService,
+        TotalService totalService,
         IFrozenService frozenService,
         IDemographicReaderService demographicReaderService)
     {
