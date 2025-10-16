@@ -228,12 +228,14 @@ export const YearsEndApi = createApi({
     >({
       query: (params) => ({
         url: `yearend/distributions-and-forfeitures`,
-        method: "GET",
-        params: {
+        method: "POST",
+        body: {
           startDate: params.startDate,
           endDate: params.endDate,
-          take: params.pagination.take,
+          states: params.states,
+          taxCodes: params.taxCodes,
           skip: params.pagination.skip,
+          take: params.pagination.take,
           sortBy: params.pagination.sortBy,
           isSortDescending: params.pagination.isSortDescending
         }

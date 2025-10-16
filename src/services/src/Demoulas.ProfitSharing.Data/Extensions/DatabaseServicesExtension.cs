@@ -1,4 +1,6 @@
-﻿using Demoulas.Common.Contracts.Interfaces;
+﻿using System.Diagnostics;
+using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.Common.Data.Contexts.Configuration;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Contexts.Interceptor;
 using Demoulas.Common.Data.Contexts.Interfaces;
@@ -61,6 +63,13 @@ public static class DatabaseServicesExtension
         IProfitSharingDataContextFactory factory = DataContextFactory.Initialize(builder, factoryRequests);
 
         _ = builder.Services.AddSingleton(factory);
+
+        builder.Services.AddSingleton(new PaginationOptions
+        {
+            EnableOracleWindowFunctionOptimization = true,
+            MaxComplexityScoreForOptimization = 6,
+            FallbackOnError = !Debugger.IsAttached
+        });
 
         return builder;
     }

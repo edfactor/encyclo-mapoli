@@ -60,8 +60,8 @@ public class ApiIntegrationTestBase<TStartup> where TStartup : class
 
         // WARNING: note the very specific type matching required for this mock to get invoked, not general enough for other integration tests
         profitSharingDataContextFactoryMock
-            .Setup(factory => factory.UseReadOnlyContext(It.IsAny<Func<ProfitSharingReadOnlyDbContext, Task<PaginatedResponseDto<ExecutiveHoursAndDollarsResponse>>>>()))
-            .Returns<Func<ProfitSharingReadOnlyDbContext, Task<PaginatedResponseDto<ExecutiveHoursAndDollarsResponse>>>>(func => func(ctx));
+            .Setup(factory => factory.UseReadOnlyContext(It.IsAny<Func<ProfitSharingReadOnlyDbContext, Task<PaginatedResponseDto<ExecutiveHoursAndDollarsResponse>>>>(), It.IsAny<CancellationToken>()))
+            .Returns<Func<ProfitSharingReadOnlyDbContext, Task<PaginatedResponseDto<ExecutiveHoursAndDollarsResponse>>>, CancellationToken>((func, ct) => func(ctx));
 
         SomeWhatMockDbContextFactory = profitSharingDataContextFactoryMock.Object;
 

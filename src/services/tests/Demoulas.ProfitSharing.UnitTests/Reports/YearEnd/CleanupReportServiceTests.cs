@@ -191,10 +191,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         var profitYear = (short)(2024);
         var req = new YearEndProfitSharingReportRequest()
         {
-            Skip = 0,
-            Take = byte.MaxValue,
-            ProfitYear = profitYear,
-            ReportId = YearEndProfitSharingReportId.Age21OrOlderWith1000Hours
+            Skip = 0, Take = byte.MaxValue, ProfitYear = profitYear, ReportId = YearEndProfitSharingReportId.Age21OrOlderWith1000Hours
             // Default to report 2 for active/inactive
         };
         var testHours = 1001;
@@ -305,7 +302,10 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var profitYear = (short)Math.Min(DateTime.Now.Year - 1, 2024);
-        var req = new YearEndProfitSharingReportRequest() { Skip = 0, Take = byte.MaxValue, ProfitYear = profitYear, ReportId = YearEndProfitSharingReportId.Age21OrOlderWith1000Hours };
+        var req = new YearEndProfitSharingReportRequest()
+        {
+            Skip = 0, Take = byte.MaxValue, ProfitYear = profitYear, ReportId = YearEndProfitSharingReportId.Age21OrOlderWith1000Hours
+        };
         var testHours = 1001;
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
@@ -427,7 +427,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             });
 
             response = await ApiClient
-                    .GETAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(req);
+                .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(req);
 
 
             response.Result.ShouldNotBeNull();
@@ -448,7 +448,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         });
 
         response = await ApiClient
-            .GETAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
                 DistributionsAndForfeitureTotalsResponse>(req);
 
         response.Result.ShouldNotBeNull();
@@ -467,7 +467,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         });
 
         response = await ApiClient
-            .GETAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
                 DistributionsAndForfeitureTotalsResponse>(req);
 
         response.ShouldNotBeNull();
@@ -485,7 +485,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         });
 
         response = await ApiClient
-            .GETAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
                 DistributionsAndForfeitureTotalsResponse>(req);
 
         response.ShouldNotBeNull();
