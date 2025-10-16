@@ -11,9 +11,11 @@ import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
 import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
 import { RootState } from "../../reduxstore/store";
+import DisbursementsHistory from "./DisbursementsHistory";
 import DistributionDetailsSection from "./DistributionDetailsSection";
 import useViewDistribution from "./hooks/useViewDistribution";
 import MemberDetailsSection from "./MemberDetailsSection";
+import PendingDisbursementsList from "./PendingDisbursementsList";
 
 const ViewDistributionContent = () => {
   const { memberId, memberType } = useParams<{ memberId: string; memberType: string }>();
@@ -118,6 +120,18 @@ const ViewDistributionContent = () => {
         <>
           <MemberDetailsSection member={currentMember} />
           {currentDistribution && <DistributionDetailsSection distribution={currentDistribution} />}
+
+          {/* Pending Disbursements List */}
+          <PendingDisbursementsList
+            badgeNumber={currentMember.badgeNumber}
+            memberType={currentMember.isEmployee ? 1 : 2}
+          />
+
+          {/* Disbursements History */}
+          <DisbursementsHistory
+            badgeNumber={currentMember.badgeNumber}
+            memberType={currentMember.isEmployee ? 1 : 2}
+          />
         </>
       )}
 
