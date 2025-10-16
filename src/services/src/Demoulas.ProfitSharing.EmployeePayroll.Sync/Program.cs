@@ -42,17 +42,16 @@ builder.Services.AddOpenTelemetry().WithMetrics(m =>
     m.AddMeter(GlobalMeter.Name);
 });
 
-ElasticSearchConfig smartConfig = new ElasticSearchConfig();
-builder.Configuration.Bind("Logging:Smart", smartConfig);
+// Configure logging - configuration read from SmartLogging section in appsettings
+LoggingConfig logConfig = new();
+builder.Configuration.Bind("SmartLogging", logConfig);
 
-FileSystemLogConfig fileSystemLog = new FileSystemLogConfig();
-builder.Configuration.Bind("Logging:FileSystem", fileSystemLog);
-
-smartConfig.MaskingOperators = [
+logConfig.MaskingOperators = [
     new UnformattedSocialSecurityNumberMaskingOperator(),
     new SensitiveValueMaskingOperator()
 ];
-builder.SetDefaultLoggerConfiguration(smartConfig, fileSystemLog);
+
+builder.SetDefaultLoggerConfiguration(logConfig);
 
 builder.AddEmployeePayrollSyncService();
 
