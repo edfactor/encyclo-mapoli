@@ -116,6 +116,9 @@ export interface DistributionsAndForfeitureTotalsResponse extends PagedReportRes
   stateTaxTotal: number;
   federalTaxTotal: number;
   forfeitureTotal: number;
+  forfeitureRegularTotal: number;
+  forfeitureAdministrativeTotal: number;
+  forfeitureClassActionTotal: number;
   stateTaxTotals: Record<string, number>;
 }
 
@@ -130,6 +133,7 @@ export interface DistributionsAndForfeitures {
   state: string | null;
   federalTax: number;
   forfeitAmount: number;
+  forfeitType: string | null;
   age: number;
   taxCode: string | null;
   otherName: string | null;
