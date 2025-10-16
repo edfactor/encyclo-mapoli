@@ -342,10 +342,10 @@ FROM FILTERED_DEMOGRAPHIC p1
                                       (pd.ProfitYear > startDate.Year || (pd.ProfitYear == startDate.Year && pd.MonthToDate >= startDate.Month)) &&
                                       (pd.ProfitYear < endDate.Year || (pd.ProfitYear == endDate.Year && pd.MonthToDate <= endDate.Month)) &&
                                       !(pd.ProfitCodeId == /*9*/ ProfitCode.Constants.Outgoing100PercentVestedPayment && pd.CommentTypeId.HasValue && transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)) &&
-                                      // State filter - apply if specified
-                                      (string.IsNullOrEmpty(req.State) || pd.CommentRelatedState == req.State) &&
-                                      // Tax code filter - apply if specified (convert string to char for comparison)
-                                      (string.IsNullOrEmpty(req.TaxCode) || (pd.TaxCodeId.HasValue && pd.TaxCodeId.Value.ToString() == req.TaxCode))
+                                      // State filter - apply if specified (supports multiple states)
+                                      (req.States == null || req.States.Length == 0 || req.States.Contains(pd.CommentRelatedState)) &&
+                                      // Tax code filter - apply if specified (supports multiple tax codes)
+                                      (req.TaxCodes == null || req.TaxCodes.Length == 0 || (pd.TaxCodeId.HasValue && req.TaxCodes.Contains(pd.TaxCodeId.Value)))
 
                             select new
                             {

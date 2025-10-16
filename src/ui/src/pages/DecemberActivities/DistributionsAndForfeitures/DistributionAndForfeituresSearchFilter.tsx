@@ -28,15 +28,15 @@ const formatDateOnly = (date: Date | null): string | undefined => {
 interface DistributionsAndForfeituresSearch {
   startDate: Date | null;
   endDate: Date | null;
-  state: string;
-  taxCode: string;
+  states: string[];
+  taxCodes: string[];
 }
 
 const schema = yup.object().shape({
   startDate: yup.date().nullable(),
   endDate: endDateAfterStartDateValidator("startDate"),
-  state: yup.string(),
-  taxCode: yup.string()
+  states: yup.array().of(yup.string().required()).required(),
+  taxCodes: yup.array().of(yup.string().required()).required()
 });
 
 interface DistributionsAndForfeituresSearchFilterProps {
@@ -65,8 +65,8 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
     defaultValues: {
       startDate: null,
       endDate: null,
-      state: "",
-      taxCode: ""
+      states: [],
+      taxCodes: []
     }
   });
 
@@ -77,8 +77,8 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
         // PROFIT_DETAIL transactions historically have month/year - so this date range is the profit_year
         startDate: tryddmmyyyyToDate(new Date(profitYear, 0, 1)),
         endDate: tryddmmyyyyToDate(new Date(profitYear, 11, 31)),
-        state: "",
-        taxCode: ""
+        states: [],
+        taxCodes: []
       });
     }
   }, [reset]);
@@ -90,8 +90,8 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
         setDistributionsAndForfeituresQueryParams({
           startDate: formatDateOnly(data.startDate),
           endDate: formatDateOnly(data.endDate),
-          state: data.state || undefined,
-          taxCode: data.taxCode || undefined
+          states: data.states || [],
+          taxCodes: data.taxCodes || []
         })
       );
       setInitialSearchLoaded(true);
@@ -106,8 +106,8 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
       // PROFIT_DETAIL transactions historically have month/year - so this date range is the profit_year
       startDate: tryddmmyyyyToDate(new Date(profitYear, 0, 1)),
       endDate: tryddmmyyyyToDate(new Date(profitYear, 11, 31)),
-      state: "",
-      taxCode: ""
+      states: [],
+      taxCodes: []
     });
 
     // Clear the data in Redux store
@@ -184,20 +184,46 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
           <FormLabel>State</FormLabel>
           <FormControl fullWidth>
             <Controller
-              name="state"
+              name="states"
               control={control}
               render={({ field }) => (
                 <TextField
                   {...field}
-                  value={field.value ?? ""}
+                  value={field.value.length === 0 ? ["ALL"] : field.value}
+                  onChange={(e) => {
+                    const value = e.target.value as unknown as string[];
+                    // If "ALL" is clicked when items are selected, clear to empty (All)
+                    if (value.includes("ALL") && value.length > 1) {
+                      const lastSelected = value[value.length - 1];
+                      if (lastSelected === "ALL") {
+                        // User clicked "All" - clear everything
+                        field.onChange([]);
+                      } else {
+                        // User clicked a specific item - remove "ALL"
+                        field.onChange(value.filter((v) => v !== "ALL"));
+                      }
+                    } else {
+                      field.onChange(value);
+                    }
+                  }}
                   select
+                  SelectProps={{
+                    multiple: true,
+                    renderValue: (selected) => {
+                      const vals = selected as string[];
+                      if (vals.length === 0 || vals.includes("ALL")) {
+                        return "All";
+                      }
+                      return vals.join(", ");
+                    }
+                  }}
                   fullWidth
                   size="small"
                   variant="outlined"
                   disabled={isLoadingStates}
-                  error={!!errors.state}
-                  helperText={errors.state?.message}>
-                  <MenuItem value="">All</MenuItem>
+                  error={!!errors.states}
+                  helperText={errors.states?.message}>
+                  <MenuItem value="ALL">All</MenuItem>
                   {statesData?.map((state: { abbreviation: string; name: string }) => (
                     <MenuItem
                       key={state.abbreviation}
@@ -214,20 +240,46 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
           <FormLabel>Tax Code</FormLabel>
           <FormControl fullWidth>
             <Controller
-              name="taxCode"
+              name="taxCodes"
               control={control}
               render={({ field }) => (
                 <TextField
                   {...field}
-                  value={field.value ?? ""}
+                  value={field.value.length === 0 ? ["ALL"] : field.value}
+                  onChange={(e) => {
+                    const value = e.target.value as unknown as string[];
+                    // If "ALL" is clicked when items are selected, clear to empty (All)
+                    if (value.includes("ALL") && value.length > 1) {
+                      const lastSelected = value[value.length - 1];
+                      if (lastSelected === "ALL") {
+                        // User clicked "All" - clear everything
+                        field.onChange([]);
+                      } else {
+                        // User clicked a specific item - remove "ALL"
+                        field.onChange(value.filter((v) => v !== "ALL"));
+                      }
+                    } else {
+                      field.onChange(value);
+                    }
+                  }}
                   select
+                  SelectProps={{
+                    multiple: true,
+                    renderValue: (selected) => {
+                      const vals = selected as string[];
+                      if (vals.length === 0 || vals.includes("ALL")) {
+                        return "All";
+                      }
+                      return vals.join(", ");
+                    }
+                  }}
                   fullWidth
                   size="small"
                   variant="outlined"
                   disabled={isLoadingTaxCodes}
-                  error={!!errors.taxCode}
-                  helperText={errors.taxCode?.message}>
-                  <MenuItem value="">All</MenuItem>
+                  error={!!errors.taxCodes}
+                  helperText={errors.taxCodes?.message}>
+                  <MenuItem value="ALL">All</MenuItem>
                   {taxCodesData?.map((taxCode: { id: string; name: string }) => (
                     <MenuItem
                       key={taxCode.id}

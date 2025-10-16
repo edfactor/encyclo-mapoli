@@ -62,6 +62,8 @@ export interface DistributionSearchResultDto {
 export interface DistributionsAndForfeituresRequestDto {
   startDate?: string;
   endDate?: string;
+  states?: string[];
+  taxCodes?: string[];
   pagination: SortedPaginationRequestDto;
 }
 
@@ -138,6 +140,6 @@ export interface DistributionsAndForfeitures {
 export interface DistributionsAndForfeituresQueryParams {
   startDate?: string;
   endDate?: string;
-  state?: string;
-  taxCode?: string;
+  states?: string[];
+  taxCodes?: string[];
 }

@@ -49,12 +49,14 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
               ...(distributionsAndForfeituresQueryParams?.endDate && {
                 endDate: distributionsAndForfeituresQueryParams?.endDate
               }),
-              ...(distributionsAndForfeituresQueryParams?.state && {
-                state: distributionsAndForfeituresQueryParams?.state
-              }),
-              ...(distributionsAndForfeituresQueryParams?.taxCode && {
-                taxCode: distributionsAndForfeituresQueryParams?.taxCode
-              }),
+              ...(distributionsAndForfeituresQueryParams?.states &&
+                distributionsAndForfeituresQueryParams.states.length > 0 && {
+                  states: distributionsAndForfeituresQueryParams?.states
+                }),
+              ...(distributionsAndForfeituresQueryParams?.taxCodes &&
+                distributionsAndForfeituresQueryParams.taxCodes.length > 0 && {
+                  taxCodes: distributionsAndForfeituresQueryParams?.taxCodes
+                }),
               pagination: {
                 skip: pageNum * pageSz,
                 take: pageSz,
@@ -71,8 +73,8 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
           profitYear,
           distributionsAndForfeituresQueryParams?.startDate,
           distributionsAndForfeituresQueryParams?.endDate,
-          distributionsAndForfeituresQueryParams?.state,
-          distributionsAndForfeituresQueryParams?.taxCode,
+          distributionsAndForfeituresQueryParams?.states,
+          distributionsAndForfeituresQueryParams?.taxCodes,
           triggerSearch
         ]
       )
@@ -107,12 +109,8 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
       ...(distributionsAndForfeituresQueryParams?.endDate && {
         endDate: distributionsAndForfeituresQueryParams?.endDate
       }),
-      ...(distributionsAndForfeituresQueryParams?.state && {
-        state: distributionsAndForfeituresQueryParams?.state
-      }),
-      ...(distributionsAndForfeituresQueryParams?.taxCode && {
-        taxCode: distributionsAndForfeituresQueryParams?.taxCode
-      }),
+      states: distributionsAndForfeituresQueryParams?.states || [],
+      taxCodes: distributionsAndForfeituresQueryParams?.taxCodes || [],
       pagination: {
         skip: pageNumber * pageSize,
         take: pageSize,
@@ -125,8 +123,8 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   }, [
     distributionsAndForfeituresQueryParams?.endDate,
     distributionsAndForfeituresQueryParams?.startDate,
-    distributionsAndForfeituresQueryParams?.state,
-    distributionsAndForfeituresQueryParams?.taxCode,
+    distributionsAndForfeituresQueryParams?.states,
+    distributionsAndForfeituresQueryParams?.taxCodes,
     profitYear,
     pageNumber,
     pageSize,
@@ -140,8 +138,8 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     const currentQueryParams = {
       startDate: distributionsAndForfeituresQueryParams?.startDate,
       endDate: distributionsAndForfeituresQueryParams?.endDate,
-      state: distributionsAndForfeituresQueryParams?.state,
-      taxCode: distributionsAndForfeituresQueryParams?.taxCode,
+      states: JSON.stringify(distributionsAndForfeituresQueryParams?.states || []),
+      taxCodes: JSON.stringify(distributionsAndForfeituresQueryParams?.taxCodes || []),
       profitYear
     };
 
@@ -149,8 +147,8 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
       prevQueryParams.current &&
       (prevQueryParams.current.startDate !== currentQueryParams.startDate ||
         prevQueryParams.current.endDate !== currentQueryParams.endDate ||
-        prevQueryParams.current.state !== currentQueryParams.state ||
-        prevQueryParams.current.taxCode !== currentQueryParams.taxCode ||
+        prevQueryParams.current.states !== currentQueryParams.states ||
+        prevQueryParams.current.taxCodes !== currentQueryParams.taxCodes ||
         prevQueryParams.current.profitYear !== currentQueryParams.profitYear)
     ) {
       resetPagination();
@@ -160,8 +158,8 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   }, [
     distributionsAndForfeituresQueryParams?.startDate,
     distributionsAndForfeituresQueryParams?.endDate,
-    distributionsAndForfeituresQueryParams?.state,
-    distributionsAndForfeituresQueryParams?.taxCode,
+    distributionsAndForfeituresQueryParams?.states,
+    distributionsAndForfeituresQueryParams?.taxCodes,
     profitYear,
     resetPagination
   ]);

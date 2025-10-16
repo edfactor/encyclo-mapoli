@@ -566,4 +566,209 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         response.Response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
 
     }
+
+    [Fact]
+    [Description("PS-1902 : Distributions filtering by states array - empty array returns all")]
+    public async Task GetDistributionsAndForfeitures_WithEmptyStatesArray_ReturnsAll()
+    {
+        // Arrange
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        var req = new DistributionsAndForfeituresRequest()
+        {
+            Skip = 0,
+            Take = byte.MaxValue,
+            States = [] // Empty array = "All"
+        };
+
+        // Act
+        var response = await ApiClient
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(req);
+
+        // Assert
+        response.Response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+        var result = response.Result;
+        result.ShouldNotBeNull();
+        result.Response.ShouldNotBeNull();
+        // Empty array should not filter - returns all records
+        _testOutputHelper.WriteLine($"Empty states array returned {result.Response.Results.Count()} records");
+    }
+
+    [Fact]
+    [Description("PS-1902 : Distributions filtering by states array - specific states filter results")]
+    public async Task GetDistributionsAndForfeitures_WithSpecificStates_FiltersResults()
+    {
+        // Arrange
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+
+        // First get all records to have a baseline
+        var reqAll = new DistributionsAndForfeituresRequest()
+        {
+            Skip = 0,
+            Take = byte.MaxValue,
+            States = []
+        };
+        var responseAll = await ApiClient
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(reqAll);
+        var allCount = responseAll.Result?.Response.Results.Count() ?? 0;
+
+        // Now filter by specific state (MA)
+        var reqFiltered = new DistributionsAndForfeituresRequest()
+        {
+            Skip = 0,
+            Take = byte.MaxValue,
+            States = ["MA"] // Only Massachusetts
+        };
+
+        // Act
+        var response = await ApiClient
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(reqFiltered);
+
+        // Assert
+        response.Response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+        var result = response.Result;
+        result.ShouldNotBeNull();
+        result.Response.ShouldNotBeNull();
+
+        // Filtered results should be <= all results
+        var filteredCount = result.Response.Results.Count();
+        filteredCount.ShouldBeLessThanOrEqualTo(allCount);
+
+        // All returned records should have State = "MA" (or null/empty if no state data)
+        var nonMARecords = result.Response.Results.Where(r => r.State != "MA" && !string.IsNullOrEmpty(r.State)).ToList();
+        nonMARecords.ShouldBeEmpty($"Expected only MA records, but found: {string.Join(", ", nonMARecords.Select(r => r.State))}");
+
+        _testOutputHelper.WriteLine($"All records: {allCount}, MA filtered: {filteredCount}");
+    }
+
+    [Fact]
+    [Description("PS-1902 : Distributions filtering by multiple states")]
+    public async Task GetDistributionsAndForfeitures_WithMultipleStates_ReturnsMatchingRecords()
+    {
+        // Arrange
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        var req = new DistributionsAndForfeituresRequest()
+        {
+            Skip = 0,
+            Take = byte.MaxValue,
+            States = ["MA", "CT", "NH"] // Multiple states
+        };
+
+        // Act
+        var response = await ApiClient
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(req);
+
+        // Assert
+        response.Response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+        var result = response.Result;
+        result.ShouldNotBeNull();
+        result.Response.ShouldNotBeNull();
+
+        // All returned records should have State in ["MA", "CT", "NH"] (or null/empty)
+        var invalidRecords = result.Response.Results
+            .Where(r => !string.IsNullOrEmpty(r.State) && !new[] { "MA", "CT", "NH" }.Contains(r.State))
+            .ToList();
+        invalidRecords.ShouldBeEmpty($"Expected only MA/CT/NH records, but found: {string.Join(", ", invalidRecords.Select(r => r.State))}");
+
+        _testOutputHelper.WriteLine($"Multi-state filter returned {result.Response.Results.Count()} records");
+    }
+
+    [Fact]
+    [Description("PS-1902 : Distributions filtering by tax codes array - empty array returns all")]
+    public async Task GetDistributionsAndForfeitures_WithEmptyTaxCodesArray_ReturnsAll()
+    {
+        // Arrange
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        var req = new DistributionsAndForfeituresRequest()
+        {
+            Skip = 0,
+            Take = byte.MaxValue,
+            TaxCodes = [] // Empty array = "All"
+        };
+
+        // Act
+        var response = await ApiClient
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(req);
+
+        // Assert
+        response.Response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+        var result = response.Result;
+        result.ShouldNotBeNull();
+        result.Response.ShouldNotBeNull();
+        _testOutputHelper.WriteLine($"Empty tax codes array returned {result.Response.Results.Count()} records");
+    }
+
+    [Fact]
+    [Description("PS-1902 : Distributions filtering by tax codes array - specific codes filter results")]
+    public async Task GetDistributionsAndForfeitures_WithSpecificTaxCodes_FiltersResults()
+    {
+        // Arrange
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+
+        // First get all records
+        var reqAll = new DistributionsAndForfeituresRequest()
+        {
+            Skip = 0,
+            Take = byte.MaxValue,
+            TaxCodes = []
+        };
+        var responseAll = await ApiClient
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(reqAll);
+        var allCount = responseAll.Result?.Response.Results.Count() ?? 0;
+
+        // Now filter by specific tax code
+        var reqFiltered = new DistributionsAndForfeituresRequest()
+        {
+            Skip = 0,
+            Take = byte.MaxValue,
+            TaxCodes = ['H'] // Only tax code H
+        };
+
+        // Act
+        var response = await ApiClient
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(reqFiltered);
+
+        // Assert
+        response.Response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+        var result = response.Result;
+        result.ShouldNotBeNull();
+        result.Response.ShouldNotBeNull();
+
+        var filteredCount = result.Response.Results.Count();
+        filteredCount.ShouldBeLessThanOrEqualTo(allCount);
+
+        _testOutputHelper.WriteLine($"All records: {allCount}, Tax code H filtered: {filteredCount}");
+    }
+
+    [Fact]
+    [Description("PS-1902 : Distributions filtering by combined states and tax codes")]
+    public async Task GetDistributionsAndForfeitures_WithStatesAndTaxCodes_FiltersResults()
+    {
+        // Arrange
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        var req = new DistributionsAndForfeituresRequest()
+        {
+            Skip = 0,
+            Take = byte.MaxValue,
+            States = ["MA", "CT"],
+            TaxCodes = ['H', '8']
+        };
+
+        // Act
+        var response = await ApiClient
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(req);
+
+        // Assert
+        response.Response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+        var result = response.Result;
+        result.ShouldNotBeNull();
+        result.Response.ShouldNotBeNull();
+
+        // Verify state filtering
+        var invalidStateRecords = result.Response.Results
+            .Where(r => !string.IsNullOrEmpty(r.State) && !new[] { "MA", "CT" }.Contains(r.State))
+            .ToList();
+        invalidStateRecords.ShouldBeEmpty("All records should have State = MA or CT");
+
+        _testOutputHelper.WriteLine($"Combined filter (MA/CT + H/8) returned {result.Response.Results.Count()} records");
+    }
 }

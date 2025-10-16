@@ -232,8 +232,8 @@ export const YearsEndApi = createApi({
         body: {
           startDate: params.startDate,
           endDate: params.endDate,
-          state: params.state,
-          taxCode: params.taxCode,
+          states: params.states,
+          taxCodes: params.taxCodes,
           skip: params.pagination.skip,
           take: params.pagination.take,
           sortBy: params.pagination.sortBy,

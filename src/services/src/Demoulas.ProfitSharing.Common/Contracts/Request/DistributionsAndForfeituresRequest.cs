@@ -6,6 +6,6 @@ public sealed record DistributionsAndForfeituresRequest : SortedPaginationReques
 {
     public DateOnly? StartDate { get; set; }
     public DateOnly? EndDate { get; set; }
-    public string? State { get; set; }
-    public string? TaxCode { get; set; }
+    public string[]? States { get; set; }
+    public char[]? TaxCodes { get; set; }
 }
