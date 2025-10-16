@@ -1,4 +1,6 @@
-﻿using Demoulas.Common.Data.Services.Interfaces;
+﻿using System.Diagnostics;
+using Demoulas.Common.Data.Contexts.Configuration;
+using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -113,6 +115,13 @@ public static class ServicesExtension
         // Register lookup caches as singletons (they manage their own distributed cache access)
         _ = builder.Services.AddSingleton<Services.Caching.StateTaxCache>();
         _ = builder.Services.AddSingleton<Services.Caching.ProfitCodeCache>();
+
+        builder.Services.AddSingleton(new PaginationOptions
+        {
+            EnableOracleWindowFunctionOptimization = true,
+            MaxComplexityScoreForOptimization = 5,
+            FallbackOnError = !Debugger.IsAttached
+        });
 
         builder.AddProjectCachingServices();
 
