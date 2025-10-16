@@ -116,13 +116,6 @@ public static class ServicesExtension
         _ = builder.Services.AddSingleton<Services.Caching.StateTaxCache>();
         _ = builder.Services.AddSingleton<Services.Caching.ProfitCodeCache>();
 
-        builder.Services.AddSingleton(new PaginationOptions
-        {
-            EnableOracleWindowFunctionOptimization = true,
-            MaxComplexityScoreForOptimization = 5,
-            FallbackOnError = !Debugger.IsAttached
-        });
-
         builder.AddProjectCachingServices();
 
         return builder;

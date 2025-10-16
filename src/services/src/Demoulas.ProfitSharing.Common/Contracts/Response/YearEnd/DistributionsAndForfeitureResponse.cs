@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+
 public sealed record DistributionsAndForfeitureResponse : IIsExecutive
 {
     public required int BadgeNumber { get; set; }
@@ -14,6 +15,10 @@ public sealed record DistributionsAndForfeitureResponse : IIsExecutive
     public required string? State { get; set; }
     public required decimal FederalTax { get; set; }
     public required decimal ForfeitAmount { get; set; }
+    /// <summary>
+    /// Forfeit type indicator: 'A' = Administrative, 'C' = Class Action, null = Regular
+    /// </summary>
+    public char? ForfeitType { get; set; }
     public required byte? Age { get; set; }
     public required char? TaxCode { get; set; }
     public string? OtherName { get; set; }

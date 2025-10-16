@@ -359,6 +359,8 @@ FROM FILTERED_DEMOGRAPHIC p1
                                 StateTax = pd.StateTaxes,
                                 FederalTax = pd.FederalTaxes,
                                 ForfeitAmount = pd.ProfitCodeId == /*2*/ ProfitCode.Constants.OutgoingForfeitures.Id ? pd.Forfeiture : 0,
+                                pd.CommentTypeId,
+                                pd.Remark,
                                 pd.YearToDate,
                                 pd.MonthToDate,
                                 Date = pd.CreatedAtUtc,
@@ -375,14 +377,34 @@ FROM FILTERED_DEMOGRAPHIC p1
                         DistributionTotal = g.Sum(x => x.DistributionAmount),
                         StateTaxTotal = g.Sum(x => x.StateTax),
                         FederalTaxTotal = g.Sum(x => x.FederalTax),
-                        ForfeitureTotal = g.Sum(x => x.ForfeitAmount)
+                        ForfeitureTotal = g.Sum(x => x.ForfeitAmount),
+                        // MAIN-2170: Breakdown forfeitures by type
+                        ForfeitureRegular = g.Where(x =>
+                            x.ForfeitAmount != 0 &&
+                            x.CommentTypeId != CommentType.Constants.ForfeitClassAction.Id &&
+                            x.CommentTypeId != CommentType.Constants.ForfeitAdministrative.Id &&
+                            (x.Remark == null || (!x.Remark.Contains("ADMINISTRATIVE") && !x.Remark.Contains("FORFEIT CA") && !x.Remark.Contains("UN-FORFEIT CA")))
+                        ).Sum(x => x.ForfeitAmount),
+                        ForfeitureAdministrative = g.Where(x =>
+                            x.ForfeitAmount != 0 &&
+                            (x.CommentTypeId == CommentType.Constants.ForfeitAdministrative.Id ||
+                             (x.Remark != null && x.Remark.Contains("ADMINISTRATIVE")))
+                        ).Sum(x => x.ForfeitAmount),
+                        ForfeitureClassAction = g.Where(x =>
+                            x.ForfeitAmount != 0 &&
+                            (x.CommentTypeId == CommentType.Constants.ForfeitClassAction.Id ||
+                             (x.Remark != null && (x.Remark.Contains("FORFEIT CA") || x.Remark.Contains("UN-FORFEIT CA"))))
+                        ).Sum(x => x.ForfeitAmount)
                     })
                     .FirstOrDefaultAsync(cancellationToken: cancellationToken) ?? new
                     {
                         DistributionTotal = 0m,
                         StateTaxTotal = 0m,
                         FederalTaxTotal = 0m,
-                        ForfeitureTotal = 0m
+                        ForfeitureTotal = 0m,
+                        ForfeitureRegular = 0m,
+                        ForfeitureAdministrative = 0m,
+                        ForfeitureClassAction = 0m
                     };
 
                 // Calculate state tax totals by state
@@ -406,6 +428,16 @@ FROM FILTERED_DEMOGRAPHIC p1
                     State = pd.State,
                     FederalTax = pd.FederalTax,
                     ForfeitAmount = pd.ForfeitAmount,
+                    // MAIN-2170: Determine forfeit type indicator
+                    ForfeitType = pd.ForfeitAmount != 0
+                        ? (pd.CommentTypeId == CommentType.Constants.ForfeitAdministrative.Id ||
+                           (pd.Remark != null && pd.Remark.Contains("ADMINISTRATIVE")))
+                            ? 'A'
+                            : (pd.CommentTypeId == CommentType.Constants.ForfeitClassAction.Id ||
+                               (pd.Remark != null && (pd.Remark.Contains("FORFEIT CA") || pd.Remark.Contains("UN-FORFEIT CA"))))
+                                ? 'C'
+                                : (char?)null
+                        : null,
                     Date = pd.MonthToDate is > 0 and <= 12 ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1) : pd.Date.ToDateOnly(),
                     // Note, this computes "Age" at time of transaction, or "Age @ Txn"
                     Age = (byte)(pd.MonthToDate is > 0 and < 13
@@ -427,6 +459,9 @@ FROM FILTERED_DEMOGRAPHIC p1
                     StateTaxTotal = totals.StateTaxTotal,
                     FederalTaxTotal = totals.FederalTaxTotal,
                     ForfeitureTotal = totals.ForfeitureTotal,
+                    ForfeitureRegularTotal = totals.ForfeitureRegular,
+                    ForfeitureAdministrativeTotal = totals.ForfeitureAdministrative,
+                    ForfeitureClassActionTotal = totals.ForfeitureClassAction,
                     StateTaxTotals = stateTaxTotals,
                     Response = new PaginatedResponseDto<DistributionsAndForfeitureResponse>(req)
                     {

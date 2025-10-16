@@ -771,4 +771,245 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
 
         _testOutputHelper.WriteLine($"Combined filter (MA/CT + H/8) returned {result.Response.Results.Count()} records");
     }
+
+    [Fact]
+    [Description("MAIN-2170: Forfeit type indicators - Regular forfeitures have no type")]
+    public async Task GetDistributionsAndForfeitures_RegularForfeitures_NoTypeIndicator()
+    {
+        // Arrange
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+
+        await MockDbContextFactory.UseWritableContext(async ctx =>
+        {
+            // Create a test profit detail with regular forfeiture (no special comment type)
+            var testDemographic = ctx.Demographics.FirstOrDefault();
+            if (testDemographic != null)
+            {
+                var regularForfeiture = new ProfitDetail
+                {
+                    Ssn = testDemographic.Ssn,
+                    ProfitYear = 2025,
+                    ProfitYearIteration = 1,
+                    DistributionSequence = 1,
+                    ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id,
+                    Contribution = 0,
+                    Earnings = 0,
+                    Forfeiture = 100.00m,
+                    MonthToDate = 3,
+                    YearToDate = 2025,
+                    FederalTaxes = 0,
+                    StateTaxes = 0,
+                    CommentTypeId = null,
+                    Remark = "Regular forfeit",
+                    YearsOfServiceCredit = 0
+                };
+                ctx.ProfitDetails.Add(regularForfeiture);
+                await ctx.SaveChangesAsync();
+            }
+        });
+
+        var req = new DistributionsAndForfeituresRequest { Skip = 0, Take = byte.MaxValue };
+
+        // Act
+        var response = await ApiClient
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(req);
+
+        // Assert
+        response.Response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+        var result = response.Result;
+        result.ShouldNotBeNull();
+
+        var regularForfeitRecord = result.Response.Results.FirstOrDefault(r => r.ForfeitAmount == 100.00m && r.ForfeitType == null);
+        regularForfeitRecord.ShouldNotBeNull("Should have regular forfeit with no type indicator");
+
+        _testOutputHelper.WriteLine($"Regular forfeit record found with ForfeitType = null");
+    }
+
+    [Fact]
+    [Description("MAIN-2170: Forfeit type indicators - Administrative forfeitures marked with 'A'")]
+    public async Task GetDistributionsAndForfeitures_AdministrativeForfeitures_MarkedWithA()
+    {
+        // Arrange
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+
+        await MockDbContextFactory.UseWritableContext(async ctx =>
+        {
+            var testDemographic = ctx.Demographics.FirstOrDefault();
+            if (testDemographic != null)
+            {
+                var adminForfeiture = new ProfitDetail
+                {
+                    Ssn = testDemographic.Ssn,
+                    ProfitYear = 2025,
+                    ProfitYearIteration = 1,
+                    DistributionSequence = 2,
+                    ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id,
+                    Contribution = 0,
+                    Earnings = 0,
+                    Forfeiture = 200.00m,
+                    MonthToDate = 3,
+                    YearToDate = 2025,
+                    FederalTaxes = 0,
+                    StateTaxes = 0,
+                    CommentTypeId = CommentType.Constants.ForfeitAdministrative.Id,
+                    Remark = "ADMINISTRATIVE",
+                    YearsOfServiceCredit = 0
+                };
+                ctx.ProfitDetails.Add(adminForfeiture);
+                await ctx.SaveChangesAsync();
+            }
+        });
+
+        var req = new DistributionsAndForfeituresRequest { Skip = 0, Take = byte.MaxValue };
+
+        // Act
+        var response = await ApiClient
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(req);
+
+        // Assert
+        response.Response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+        var result = response.Result;
+        result.ShouldNotBeNull();
+
+        var adminForfeitRecord = result.Response.Results.FirstOrDefault(r => r.ForfeitAmount == 200.00m && r.ForfeitType == 'A');
+        adminForfeitRecord.ShouldNotBeNull("Should have administrative forfeit marked with 'A'");
+
+        // Verify totals breakdown
+        result.ForfeitureAdministrativeTotal.ShouldBeGreaterThanOrEqualTo(200.00m);
+
+        _testOutputHelper.WriteLine($"Administrative forfeit record found with ForfeitType = 'A', Admin Total = {result.ForfeitureAdministrativeTotal}");
+    }
+
+    [Fact]
+    [Description("MAIN-2170: Forfeit type indicators - Class Action forfeitures marked with 'C'")]
+    public async Task GetDistributionsAndForfeitures_ClassActionForfeitures_MarkedWithC()
+    {
+        // Arrange
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+
+        await MockDbContextFactory.UseWritableContext(async ctx =>
+        {
+            var testDemographic = ctx.Demographics.FirstOrDefault();
+            if (testDemographic != null)
+            {
+                var caForfeiture = new ProfitDetail
+                {
+                    Ssn = testDemographic.Ssn,
+                    ProfitYear = 2025,
+                    ProfitYearIteration = 1,
+                    DistributionSequence = 3,
+                    ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id,
+                    Contribution = 0,
+                    Earnings = 0,
+                    Forfeiture = 300.00m,
+                    MonthToDate = 3,
+                    YearToDate = 2025,
+                    FederalTaxes = 0,
+                    StateTaxes = 0,
+                    CommentTypeId = CommentType.Constants.ForfeitClassAction.Id,
+                    Remark = "FORFEIT CA",
+                    YearsOfServiceCredit = 0
+                };
+                ctx.ProfitDetails.Add(caForfeiture);
+                await ctx.SaveChangesAsync();
+            }
+        });
+
+        var req = new DistributionsAndForfeituresRequest { Skip = 0, Take = byte.MaxValue };
+
+        // Act
+        var response = await ApiClient
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(req);
+
+        // Assert
+        response.Response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+        var result = response.Result;
+        result.ShouldNotBeNull();
+
+        var caForfeitRecord = result.Response.Results.FirstOrDefault(r => r.ForfeitAmount == 300.00m && r.ForfeitType == 'C');
+        caForfeitRecord.ShouldNotBeNull("Should have class action forfeit marked with 'C'");
+
+        // Verify totals breakdown
+        result.ForfeitureClassActionTotal.ShouldBeGreaterThanOrEqualTo(300.00m);
+
+        _testOutputHelper.WriteLine($"Class Action forfeit record found with ForfeitType = 'C', CA Total = {result.ForfeitureClassActionTotal}");
+    }
+
+    [Fact]
+    [Description("MAIN-2170: Forfeit breakdown totals - Sum of all forfeit types equals total")]
+    public async Task GetDistributionsAndForfeitures_ForfeitTotals_SumEqualsTotal()
+    {
+        // Arrange
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+
+        var req = new DistributionsAndForfeituresRequest { Skip = 0, Take = byte.MaxValue };
+
+        // Act
+        var response = await ApiClient
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(req);
+
+        // Assert
+        response.Response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+        var result = response.Result;
+        result.ShouldNotBeNull();
+
+        // Verify that sum of breakdown equals total
+        var calculatedTotal = result.ForfeitureRegularTotal + result.ForfeitureAdministrativeTotal + result.ForfeitureClassActionTotal;
+        calculatedTotal.ShouldBe(result.ForfeitureTotal, 0.01m);
+
+        _testOutputHelper.WriteLine($"Forfeit totals verified: Regular={result.ForfeitureRegularTotal}, Admin={result.ForfeitureAdministrativeTotal}, CA={result.ForfeitureClassActionTotal}, Total={result.ForfeitureTotal}");
+    }
+
+    [Fact]
+    [Description("MAIN-2170: Forfeit type indicators - Remark-based detection for Administrative")]
+    public async Task GetDistributionsAndForfeitures_AdministrativeForfeitures_DetectedByRemark()
+    {
+        // Arrange
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+
+        await MockDbContextFactory.UseWritableContext(async ctx =>
+        {
+            var testDemographic = ctx.Demographics.FirstOrDefault();
+            if (testDemographic != null)
+            {
+                // Test with remark containing "ADMINISTRATIVE" but no CommentTypeId
+                var adminForfeitByRemark = new ProfitDetail
+                {
+                    Ssn = testDemographic.Ssn,
+                    ProfitYear = 2025,
+                    ProfitYearIteration = 1,
+                    DistributionSequence = 4,
+                    ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id,
+                    Contribution = 0,
+                    Earnings = 0,
+                    Forfeiture = 150.00m,
+                    MonthToDate = 4,
+                    YearToDate = 2025,
+                    FederalTaxes = 0,
+                    StateTaxes = 0,
+                    CommentTypeId = null,
+                    Remark = "Legacy ADMINISTRATIVE forfeit",
+                    YearsOfServiceCredit = 0
+                };
+                ctx.ProfitDetails.Add(adminForfeitByRemark);
+                await ctx.SaveChangesAsync();
+            }
+        });
+
+        var req = new DistributionsAndForfeituresRequest { Skip = 0, Take = byte.MaxValue };
+
+        // Act
+        var response = await ApiClient
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(req);
+
+        // Assert
+        response.Response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+        var result = response.Result;
+        result.ShouldNotBeNull();
+
+        var adminForfeitRecord = result.Response.Results.FirstOrDefault(r => r.ForfeitAmount == 150.00m && r.ForfeitType == 'A');
+        adminForfeitRecord.ShouldNotBeNull("Should detect administrative forfeit from remark field");
+
+        _testOutputHelper.WriteLine($"Administrative forfeit detected from remark: ForfeitType = 'A'");
+    }
 }
