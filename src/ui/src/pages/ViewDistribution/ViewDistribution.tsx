@@ -5,7 +5,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
 import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
-import StatusDropdownActionNode from "../../components/StatusDropdownActionNode";
 import { CAPTIONS, ROUTES } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
@@ -153,7 +152,7 @@ const ViewDistributionContent = () => {
 
 const ViewDistribution = () => {
   const renderActionNode = () => {
-    return <StatusDropdownActionNode />;
+    return null;
   };
 
   return (
