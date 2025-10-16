@@ -1,0 +1,169 @@
+import { Button, CircularProgress, Divider, Grid, Typography } from "@mui/material";
+import { useEffect } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
+import { Page } from "smart-ui-library";
+import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
+import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
+import { CAPTIONS, ROUTES } from "../../constants";
+import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
+import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
+import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
+import { RootState } from "../../reduxstore/store";
+import DisbursementsHistory from "./DisbursementsHistory";
+import DistributionDetailsSection from "./DistributionDetailsSection";
+import useViewDistribution from "./hooks/useViewDistribution";
+import MemberDetailsSection from "./MemberDetailsSection";
+import PendingDisbursementsList from "./PendingDisbursementsList";
+
+const ViewDistributionContent = () => {
+  const { memberId, memberType } = useParams<{ memberId: string; memberType: string }>();
+  const navigate = useNavigate();
+
+  const profitYear = useDecemberFlowProfitYear();
+  const isReadOnly = useReadOnlyNavigation();
+  const { missiveAlerts } = useMissiveAlerts();
+
+  const { currentMember, currentDistribution } = useSelector((state: RootState) => state.distribution);
+
+  const { isLoading, fetchMember, clearMemberData } = useViewDistribution();
+
+  // Fetch member data when component mounts or memberId changes
+  useEffect(() => {
+    if (memberId && memberType && profitYear) {
+      fetchMember(memberId, memberType, profitYear);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memberId, memberType, profitYear]);
+
+  // Clear data only on unmount
+  useEffect(() => {
+    return () => {
+      clearMemberData();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleEdit = () => {
+    // TODO: Navigate to edit page when implemented
+    console.log("Edit distribution");
+  };
+
+  const handleCancel = () => {
+    navigate(`/${ROUTES.DISTRIBUTIONS_INQUIRY}`);
+  };
+
+  // Show error if no memberId or memberType parameter
+  if (!memberId || !memberType) {
+    return (
+      <Grid
+        container
+        padding="24px">
+        <Typography
+          variant="h6"
+          color="error">
+          Member ID and Member Type are required in the URL.
+        </Typography>
+        <Typography
+          variant="body1"
+          sx={{ marginTop: "8px" }}>
+          Example: /view-distribution/12345/1
+        </Typography>
+      </Grid>
+    );
+  }
+
+  return (
+    <Grid
+      container
+      rowSpacing="24px">
+      <Grid width="100%">
+        <Divider />
+      </Grid>
+
+      {/* Action Buttons */}
+      <Grid
+        width="100%"
+        sx={{ display: "flex", justifyContent: "flex-end", paddingX: "24px", gap: "12px" }}>
+        <Button
+          variant="outlined"
+          disabled={isReadOnly || isLoading}
+          onClick={handleEdit}
+          startIcon={<span>✏️</span>}
+          className="h-10 min-w-fit whitespace-nowrap">
+          EDIT
+        </Button>
+        <Button
+          variant="outlined"
+          onClick={handleCancel}
+          startIcon={<span>✖</span>}
+          className="h-10 min-w-fit whitespace-nowrap">
+          CANCEL
+        </Button>
+      </Grid>
+
+      {/* Missive Alerts */}
+      {missiveAlerts.length > 0 && <MissiveAlerts />}
+
+      {/* Loading State */}
+      {isLoading && (
+        <Grid
+          width="100%"
+          sx={{ display: "flex", justifyContent: "center", padding: "48px" }}>
+          <CircularProgress />
+        </Grid>
+      )}
+
+      {/* Content - Member and Distribution Details */}
+      {!isLoading && currentMember && (
+        <>
+          <MemberDetailsSection member={currentMember} />
+          {currentDistribution && <DistributionDetailsSection distribution={currentDistribution} />}
+
+          {/* Pending Disbursements List */}
+          <PendingDisbursementsList
+            badgeNumber={currentMember.badgeNumber}
+            memberType={currentMember.isEmployee ? 1 : 2}
+          />
+
+          {/* Disbursements History */}
+          <DisbursementsHistory
+            badgeNumber={currentMember.badgeNumber}
+            memberType={currentMember.isEmployee ? 1 : 2}
+          />
+        </>
+      )}
+
+      {/* No member found */}
+      {!isLoading && !currentMember && (
+        <Grid
+          width="100%"
+          padding="24px">
+          <Typography
+            variant="h6"
+            color="error">
+            Member not found for ID: {memberId}
+          </Typography>
+        </Grid>
+      )}
+    </Grid>
+  );
+};
+
+const ViewDistribution = () => {
+  const renderActionNode = () => {
+    return null;
+  };
+
+  return (
+    <Page
+      label={CAPTIONS.VIEW_DISTRIBUTION}
+      actionNode={renderActionNode()}>
+      <MissiveAlertProvider>
+        <ViewDistributionContent />
+      </MissiveAlertProvider>
+    </Page>
+  );
+};
+
+export default ViewDistribution;

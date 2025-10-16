@@ -1,31 +1,29 @@
 import { ColDef } from "ag-grid-community";
 import {
-  createBadgeColumn,
   createCurrencyColumn,
   createNameColumn,
   createSSNColumn,
   createStatusColumn
 } from "../../utils/gridColumnFactory";
-import { ActionsCellRenderer } from "./DistributionActions";
 
-export const GetDistributionInquiryColumns = (): ColDef[] => {
+export const GetDisbursementGridColumns = (): ColDef[] => {
   const columns: ColDef[] = [
     createSSNColumn({
       maxWidth: 130
     }),
     createNameColumn({
       field: "fullName",
+      headerName: "Name",
       maxWidth: 250
     }),
-    createBadgeColumn({}),
     {
-      headerName: "Frequency",
-      field: "frequencyName",
+      headerName: "Sequence",
+      field: "paymentSequence",
       sortable: true,
       resizable: true,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      maxWidth: 130
+      headerClass: "center-align",
+      cellClass: "center-align",
+      maxWidth: 100
     },
     createStatusColumn({
       headerName: "Pay Flag",
@@ -37,10 +35,19 @@ export const GetDistributionInquiryColumns = (): ColDef[] => {
       field: "taxCodeName",
       maxWidth: 200
     }),
+    {
+      headerName: "Reason Code",
+      field: "frequencyName",
+      sortable: true,
+      resizable: true,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      maxWidth: 180
+    },
     createCurrencyColumn({
-      headerName: "Gross Amount",
+      headerName: "Amount Requested",
       field: "grossAmount",
-      maxWidth: 130
+      maxWidth: 150
     }),
     createCurrencyColumn({
       headerName: "Federal Tax",
@@ -56,18 +63,7 @@ export const GetDistributionInquiryColumns = (): ColDef[] => {
       headerName: "Check Amount",
       field: "checkAmount",
       maxWidth: 130
-    }),
-    {
-      headerName: "Action",
-      field: "actions",
-      sortable: false,
-      resizable: false,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      cellRenderer: ActionsCellRenderer,
-      minWidth: 200,
-      maxWidth: 250
-    }
+    })
   ];
 
   return columns;
