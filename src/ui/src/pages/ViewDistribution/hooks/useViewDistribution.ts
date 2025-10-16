@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { useDispatch } from "react-redux";
 import { DISTRIBUTION_INQUIRY_MESSAGES } from "../../../components/MissiveAlerts/MissiveMessages";
 import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
 import { useLazyGetProfitMasterInquiryMemberQuery } from "../../../reduxstore/api/InquiryApi";
@@ -12,7 +13,7 @@ interface UseViewDistributionReturn {
 }
 
 const useViewDistribution = (): UseViewDistributionReturn => {
-  const dispatch = useDispatcßh();
+  const dispatch = useDispatch();
   const { addAlert } = useMissiveAlerts();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
