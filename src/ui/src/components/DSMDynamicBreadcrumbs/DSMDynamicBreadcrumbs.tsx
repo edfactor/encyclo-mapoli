@@ -54,7 +54,7 @@ const DSMDynamicBreadcrumbs: React.FC<DSMDynamicBreadcrumbsProps> = ({ separator
       navigate(sanitizedPath);
     }
   };
-
+  //build breadcrumb items from navigation history
   const buildBreadcrumbItems = (): BreadcrumbItem[] => {
     if (customItems) return customItems;
 
