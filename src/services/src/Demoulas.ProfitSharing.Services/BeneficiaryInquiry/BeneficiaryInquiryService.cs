@@ -99,18 +99,23 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                     break;
             }
 
-            return query.ToPaginationResultsAsync(request, cancellation);
+            // IMPORTANT: await the pagination while the DbContext (and its connection) is still alive.
+            return await query.ToPaginationResultsAsync(request, cancellation);
         }, cancellation);
 
-        foreach (var item in result.Result.Results)
+        var payload = result?.Results;
+        if (payload == null || !payload.Any())
+        {
+            return result ?? new PaginatedResponseDto<BeneficiarySearchFilterResponse>();
+        }
+
+        foreach (var item in payload)
         {
             item.Ssn = !item.Ssn!.Contains("X") ? item.Ssn.MaskSsn() : item.Ssn;
         }
 
-        return result.Result;
+        return result;
     }
-
-
 
     private int StepBackNumber(int num)
     {
@@ -143,6 +148,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             return (num / 10) * 10;
         }
     }
+
     private async Task<PaginatedResponseDto<BeneficiaryDto>> GetPreviousBeneficiaries(BeneficiaryRequestDto request, IQueryable<Beneficiary> query, CancellationToken cancellationToken)
     {
         List<BeneficiaryDto> res = new();
@@ -214,7 +220,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 Ssn = x.Demographic != null && x.Demographic.Ssn != 0 ? x.Demographic.Ssn.ToString() : string.Empty,
                 City = x.Demographic != null && x.Demographic.Address != null ? x.Demographic.Address.City : null,
                 CountryIso = x.Demographic != null && x.Demographic.Address != null ? x.Demographic.Address.CountryIso ?? "" : "",
-                PostalCode = x.Demographic != null && x.Demographic.Address != null ? x.Demographic.Address.PostalCode : null,
+                PostalCode = x.Demographic != null && x.Demographic.Address !=  null ? x.Demographic.Address.PostalCode : null,
                 State = x.Demographic != null && x.Demographic.Address != null ? x.Demographic.Address.State : null,
                 Street = x.Demographic != null && x.Demographic.Address != null ? x.Demographic.Address.Street : "",
                 Street2 = x.Demographic != null && x.Demographic.Address != null ? x.Demographic.Address.Street2 : null,

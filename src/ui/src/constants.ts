@@ -1,4 +1,4 @@
-export const MAX_EMPLOYEE_BADGE_LENGTH: number = 7;
+export const MAX_EMPLOYEE_BADGE_LENGTH: number = 6;
 
 export const drawerOpenWidth: number = 368;
 export const drawerClosedWidth: number = 64;

@@ -7,6 +7,7 @@ using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.OracleHcm.Clients;
@@ -19,6 +20,7 @@ using Demoulas.ProfitSharing.OracleHcm.Messaging;
 using Demoulas.ProfitSharing.OracleHcm.Services;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
 using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.Services.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.ItDevOps;
@@ -91,6 +93,7 @@ public static class OracleHcmExtension
         builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
         builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
         builder.Services.AddScoped<IFrozenService, FrozenService>();
+        builder.Services.AddScoped<IBeneficiaryInquiryService, BeneficiaryInquiryService>();
 
         return builder;
     }
