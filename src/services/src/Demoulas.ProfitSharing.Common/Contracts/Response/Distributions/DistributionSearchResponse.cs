@@ -25,6 +25,8 @@ public sealed record DistributionSearchResponse : IIsExecutive
     public decimal FederalTax { get; set; }
     public decimal StateTax { get; set; }
     public decimal CheckAmount { get; set; }
+    public int? DemographicId { get; set; }
+    public int? BeneficiaryId { get; set; }
 
     public static DistributionSearchResponse SampleResponse()
     {
@@ -46,7 +48,9 @@ public sealed record DistributionSearchResponse : IIsExecutive
             GrossAmount = 1500.00M,
             FederalTax = 150.00M,
             StateTax = 75.00M,
-            CheckAmount = 1275.00M
+            CheckAmount = 1275.00M,
+            DemographicId = 5001,
+            BeneficiaryId = null
         };
 
         return response;

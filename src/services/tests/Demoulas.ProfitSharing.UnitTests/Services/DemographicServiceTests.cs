@@ -27,6 +27,7 @@ public class DemographicsServiceTests
     {
     }
 
+    private static int _demographicIdCounter = 1;
     private static Mock<DbSet<T>> BuildMockDbSetWithBackingList<T>(List<T> data) where T : class
     {
         // Start with IQueryable-enabled DbSet backed by the list
@@ -34,9 +35,28 @@ public class DemographicsServiceTests
 
         // Ensure Add/Remove operations mutate the backing list
         mockSet.Setup(s => s.Add(It.IsAny<T>()))
-            .Callback<T>(e => data.Add(e));
+            .Callback<T>(e =>
+            {
+                // Simulate auto-increment ID for Demographic entities
+                if (e is Demographic demo && demo.Id == 0)
+                {
+                    demo.Id = _demographicIdCounter++;
+                }
+                data.Add(e);
+            });
         mockSet.Setup(s => s.AddRange(It.IsAny<IEnumerable<T>>()))
-            .Callback<IEnumerable<T>>(range => data.AddRange(range));
+            .Callback<IEnumerable<T>>(range =>
+            {
+                foreach (var e in range)
+                {
+                    // Simulate auto-increment ID for Demographic entities
+                    if (e is Demographic demo && demo.Id == 0)
+                    {
+                        demo.Id = _demographicIdCounter++;
+                    }
+                    data.Add(e);
+                }
+            });
         mockSet.Setup(s => s.Remove(It.IsAny<T>()))
             .Callback<T>(e => data.Remove(e));
         mockSet.Setup(s => s.RemoveRange(It.IsAny<IEnumerable<T>>()))
@@ -50,7 +70,15 @@ public class DemographicsServiceTests
 
         // Async adds used by service (e.g., DemographicSyncAudit.AddAsync)
         mockSet.Setup(s => s.AddAsync(It.IsAny<T>(), It.IsAny<CancellationToken>()))
-            .Callback<T, CancellationToken>((e, _) => data.Add(e))
+            .Callback<T, CancellationToken>((e, _) =>
+            {
+                // Simulate auto-increment ID for Demographic entities
+                if (e is Demographic demo && demo.Id == 0)
+                {
+                    demo.Id = _demographicIdCounter++;
+                }
+                data.Add(e);
+            })
             .Returns<T, CancellationToken>((e, _) =>
                 ValueTask.FromResult((EntityEntry<T>)null!));
 
