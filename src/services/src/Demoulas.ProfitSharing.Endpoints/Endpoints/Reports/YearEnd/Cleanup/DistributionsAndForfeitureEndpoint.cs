@@ -62,6 +62,8 @@ public class DistributionsAndForfeitureEndpoint : ProfitSharingEndpoint<Distribu
 
                 _logger.LogInformation("Year-end cleanup report for distributions and forfeitures generated, returned {Count} records (correlation: {CorrelationId})",
                     resultCount, HttpContext.TraceIdentifier);
+
+                return serviceResult.ToHttpResult();
             }
 
             return serviceResult.ToHttpResult(Error.NoPayProfitsDataAvailable);

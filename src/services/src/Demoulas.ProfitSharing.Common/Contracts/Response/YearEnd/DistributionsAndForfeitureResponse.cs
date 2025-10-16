@@ -39,6 +39,7 @@ public sealed record DistributionsAndForfeitureResponse : IIsExecutive
             State = "MA",
             FederalTax = 51.52m,
             ForfeitAmount = 0m,
+            ForfeitType = null,
             Age = 33,
             TaxCode = '9',
             HasForfeited = false

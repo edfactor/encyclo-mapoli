@@ -39,6 +39,9 @@ public sealed record DistributionsAndForfeitureTotalsResponse : ReportResponseBa
             StateTaxTotal = 1234.56m,
             FederalTaxTotal = 987.65m,
             ForfeitureTotal = 345.67m,
+            ForfeitureRegularTotal = 200.00m,
+            ForfeitureAdministrativeTotal = 100.00m,
+            ForfeitureClassActionTotal = 45.67m,
             StateTaxTotals = new Dictionary<string, decimal>
             {
                 { "MA", 100.00m }, { "NH", 23.56m }
