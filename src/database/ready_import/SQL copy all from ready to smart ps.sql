@@ -81,7 +81,7 @@ BEGIN
      TERMINATION_CODE_ID,
      EMPLOYMENT_STATUS_ID)
     SELECT
-                PY_ASSIGN_ID AS ORACLEHCMID,
+        ROWNUM AS ORACLEHCMID,
                 DEM_SSN,
                 DEM_BADGE,
                 PY_NAM,
