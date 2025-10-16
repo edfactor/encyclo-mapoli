@@ -782,7 +782,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
             // Create a test profit detail with regular forfeiture (no special comment type)
-            var testDemographic = ctx.Demographics.FirstOrDefault();
+            var testDemographic = await ctx.Demographics.FirstOrDefaultAsync();
             if (testDemographic != null)
             {
                 var regularForfeiture = new ProfitDetail
@@ -834,7 +834,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
 
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
-            var testDemographic = ctx.Demographics.FirstOrDefault();
+            var testDemographic = await ctx.Demographics.FirstOrDefaultAsync();
             if (testDemographic != null)
             {
                 var adminForfeiture = new ProfitDetail
@@ -889,7 +889,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
 
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
-            var testDemographic = ctx.Demographics.FirstOrDefault();
+            var testDemographic = await ctx.Demographics.FirstOrDefaultAsync();
             if (testDemographic != null)
             {
                 var caForfeiture = new ProfitDetail
@@ -969,7 +969,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
 
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
-            var testDemographic = ctx.Demographics.FirstOrDefault();
+            var testDemographic = await ctx.Demographics.FirstOrDefaultAsync();
             if (testDemographic != null)
             {
                 // Test with remark containing "ADMINISTRATIVE" but no CommentTypeId
