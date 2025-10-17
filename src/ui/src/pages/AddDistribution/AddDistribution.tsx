@@ -92,6 +92,14 @@ const AddDistributionContent = () => {
   // Track 3rd party address requirement
   const [thirdPartyAddressRequired, setThirdPartyAddressRequired] = useState(false);
 
+  // Determine validation errors
+  const maxDistributionsReached = sequenceNumber === 10;
+  const noAvailableBalance = memberData?.currentVestedAmount === 0;
+  const validationError =
+    maxDistributionsReached ? "Member has reached maximum of nine distributions."
+    : noAvailableBalance ? "Member has no available balance to distribute."
+    : null;
+
   // Check form validity periodically
   useEffect(() => {
     const interval = setInterval(() => {
@@ -126,13 +134,13 @@ const AddDistributionContent = () => {
         sx={{ display: "flex", justifyContent: "flex-end", paddingX: "24px", gap: "12px" }}>
         <Tooltip
           title={
-            isReadOnly ? "You are in read-only mode" : thirdPartyAddressRequired ? "3rd Party Address Required" : ""
+            isReadOnly ? "You are in read-only mode" : thirdPartyAddressRequired ? "3rd Party Address Required" : validationError ? validationError : ""
           }>
           <span>
             <Button
               variant="contained"
               onClick={handleSave}
-              disabled={isReadOnly || isSubmitting || isMemberLoading || !isFormValid || thirdPartyAddressRequired}
+              disabled={isReadOnly || isSubmitting || isMemberLoading || !isFormValid || thirdPartyAddressRequired || !!validationError}
               className="h-10 min-w-fit whitespace-nowrap">
               SAVE
             </Button>
@@ -155,6 +163,23 @@ const AddDistributionContent = () => {
       </Grid>
 
       {/* Error Messages */}
+      {validationError && (
+        <Grid
+          width="100%"
+          sx={{ paddingX: "24px" }}>
+          <Alert
+            severity="error"
+            sx={{
+              "& .MuiAlert-message": {
+                fontSize: "1.1rem",
+                fontWeight: "bold"
+              }
+            }}>
+            {validationError}
+          </Alert>
+        </Grid>
+      )}
+
       {memberError && (
         <Grid
           width="100%"
