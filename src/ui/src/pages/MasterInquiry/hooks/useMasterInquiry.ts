@@ -35,8 +35,12 @@ const useMasterInquiry = () => {
 
   const { addAlert, addAlerts, clearAlerts } = useMissiveAlerts();
 
+  // Refs for tracking previous calls to prevent duplicates
   const searchParamsRef = useRef(state.search.params);
   const selectedMemberRef = useRef(state.selection.selectedMember);
+  const lastSearchParamsRef = useRef<string | null>(null);
+  const lastMemberDetailsCallRef = useRef<{ memberType: number; id: number } | null>(null);
+  const lastProfitDetailsCallRef = useRef<{ memberType: number; id: number } | null>(null);
 
   useEffect(() => {
     searchParamsRef.current = state.search.params;
@@ -61,12 +65,12 @@ const useMasterInquiry = () => {
           }
         })
           .unwrap()
-          .then((response) => {
+          .then((response: any) => {
             const results = Array.isArray(response) ? response : response.results;
             const total = Array.isArray(response) ? response.length : response.total;
             dispatch({ type: "MEMBERS_FETCH_SUCCESS", payload: { results: { results, total } } });
           })
-          .catch((error) => {
+          .catch((error: any) => {
             dispatch({ type: "MEMBERS_FETCH_FAILURE", payload: { error: error?.toString() || "Unknown error" } });
           });
       }
@@ -87,7 +91,7 @@ const useMasterInquiry = () => {
           isSortDescending: sortParams.isSortDescending
         })
           .unwrap()
-          .then((profitData) => {
+          .then((profitData: any) => {
             dispatch({ type: "PROFIT_DATA_FETCH_SUCCESS", payload: { profitData } });
           });
       }
@@ -112,6 +116,26 @@ const useMasterInquiry = () => {
   const executeSearch = useCallback(
     async (params: MasterInquiryRequest) => {
       try {
+        // Create deterministic key from search parameters
+        const currentParamsString = JSON.stringify({
+          badge: params.badgeNumber,
+          ssn: params.ssn,
+          name: params.name,
+          profitYear: params.profitYear,
+          endProfitYear: params.endProfitYear,
+          startProfitMonth: params.startProfitMonth,
+          endProfitMonth: params.endProfitMonth,
+          memberType: params.memberType,
+          paymentType: params.paymentType
+        });
+
+        // Skip if same params and already searching
+        if (lastSearchParamsRef.current === currentParamsString && state.search.isSearching) {
+          console.log("[useMasterInquiry] Skipping duplicate executeSearch call");
+          return;
+        }
+
+        lastSearchParamsRef.current = currentParamsString;
         dispatch({ type: "SEARCH_START", payload: { params, isManual: true } });
         clearAlerts();
 
@@ -186,46 +210,64 @@ const useMasterInquiry = () => {
 
   // Fetch member details when selected member changes
   useEffect(() => {
-    if (state.selection.selectedMember?.memberType && state.selection.selectedMember?.id) {
-      dispatch({ type: "MEMBER_DETAILS_FETCH_START" });
-      triggerMemberDetails({
-        memberType: state.selection.selectedMember.memberType,
-        id: state.selection.selectedMember.id,
-        profitYear: state.search.params?.endProfitYear
-      })
-        .unwrap()
-        .then((details) => {
-          dispatch({ type: "MEMBER_DETAILS_FETCH_SUCCESS", payload: { details } });
+    const currentMember = state.selection.selectedMember;
+    if (!currentMember?.memberType || !currentMember?.id) {
+      return;
+    }
 
-          // Process missives if present in the response
-          if (details.missives && details.missives.length > 0) {
-            if (Array.isArray(missives) && missives.length > 0) {
-              // Cross-reference with Redux store missives
-              const localMissives: MissiveResponse[] = details.missives
-                .map((id: number) => missives.find((m: MissiveResponse) => m.id === id))
-                .filter(Boolean) as MissiveResponse[];
+    // Skip if we just called with same member
+    if (
+      lastMemberDetailsCallRef.current?.memberType === currentMember.memberType &&
+      lastMemberDetailsCallRef.current?.id === currentMember.id
+    ) {
+      console.log("[useMasterInquiry] Skipping duplicate member details fetch");
+      return;
+    }
 
-              if (localMissives.length > 0) {
-                addAlerts(localMissives);
-              }
+    lastMemberDetailsCallRef.current = {
+      memberType: currentMember.memberType,
+      id: currentMember.id
+    };
+
+    dispatch({ type: "MEMBER_DETAILS_FETCH_START" });
+    triggerMemberDetails({
+      memberType: currentMember.memberType,
+      id: currentMember.id,
+      profitYear: state.search.params?.endProfitYear
+    })
+      .unwrap()
+      .then((details: any) => {
+        dispatch({ type: "MEMBER_DETAILS_FETCH_SUCCESS", payload: { details } });
+
+        // Process missives if present in the response
+        if (details.missives && details.missives.length > 0) {
+          if (Array.isArray(missives) && missives.length > 0) {
+            // Cross-reference with Redux store missives
+            const localMissives: MissiveResponse[] = details.missives
+              .map((id: number) => missives.find((m: MissiveResponse) => m.id === id))
+              .filter(Boolean) as MissiveResponse[];
+
+            if (localMissives.length > 0) {
+              addAlerts(localMissives);
             }
           }
+        }
 
-          if (!details.isEmployee && masterInquiryRequestParams?.memberType === "all") {
-            addAlert(MASTER_INQUIRY_MESSAGES.BENEFICIARY_FOUND(details.ssn));
-          }
-        })
-        .catch(() => {
-          dispatch({ type: "MEMBER_DETAILS_FETCH_FAILURE" });
-        });
-    }
+        if (!details.isEmployee && masterInquiryRequestParams?.memberType === "all") {
+          addAlert(MASTER_INQUIRY_MESSAGES.BENEFICIARY_FOUND(details.ssn));
+        }
+      })
+      .catch(() => {
+        dispatch({ type: "MEMBER_DETAILS_FETCH_FAILURE" });
+      });
   }, [
     state.selection.selectedMember,
     state.search.params?.endProfitYear,
     triggerMemberDetails,
     masterInquiryRequestParams?.memberType,
     addAlert,
-    addAlerts
+    addAlerts,
+    missives
   ]);
 
   // Process missives when they become available for existing member details
@@ -266,24 +308,40 @@ const useMasterInquiry = () => {
   );
 
   useEffect(() => {
-    if (profitFetchDeps.memberType && profitFetchDeps.id) {
-      dispatch({ type: "PROFIT_DATA_FETCH_START" });
-      triggerProfitDetails({
-        memberType: profitFetchDeps.memberType,
-        id: profitFetchDeps.id,
-        skip: profitFetchDeps.pageNumber * profitFetchDeps.pageSize,
-        take: profitFetchDeps.pageSize,
-        sortBy: profitFetchDeps.sortBy,
-        isSortDescending: profitFetchDeps.isSortDescending
-      })
-        .unwrap()
-        .then((profitData) => {
-          dispatch({ type: "PROFIT_DATA_FETCH_SUCCESS", payload: { profitData } });
-        })
-        .catch(() => {
-          dispatch({ type: "PROFIT_DATA_FETCH_FAILURE" });
-        });
+    if (!profitFetchDeps.memberType || !profitFetchDeps.id) {
+      return;
     }
+
+    // Skip if we just called with same member (ignore pagination changes for dedup)
+    if (
+      lastProfitDetailsCallRef.current?.memberType === profitFetchDeps.memberType &&
+      lastProfitDetailsCallRef.current?.id === profitFetchDeps.id
+    ) {
+      console.log("[useMasterInquiry] Skipping duplicate profit details fetch");
+      return;
+    }
+
+    lastProfitDetailsCallRef.current = {
+      memberType: profitFetchDeps.memberType,
+      id: profitFetchDeps.id
+    };
+
+    dispatch({ type: "PROFIT_DATA_FETCH_START" });
+    triggerProfitDetails({
+      memberType: profitFetchDeps.memberType,
+      id: profitFetchDeps.id,
+      skip: profitFetchDeps.pageNumber * profitFetchDeps.pageSize,
+      take: profitFetchDeps.pageSize,
+      sortBy: profitFetchDeps.sortBy,
+      isSortDescending: profitFetchDeps.isSortDescending
+    })
+      .unwrap()
+      .then((profitData: any) => {
+        dispatch({ type: "PROFIT_DATA_FETCH_SUCCESS", payload: { profitData } });
+      })
+      .catch(() => {
+        dispatch({ type: "PROFIT_DATA_FETCH_FAILURE" });
+      });
   }, [profitFetchDeps, triggerProfitDetails]);
 
   const clearSearch = useCallback(() => {

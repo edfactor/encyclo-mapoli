@@ -61,6 +61,20 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
 
     return (
       <Box sx={{ width: "100%", paddingTop: "24px" }}>
+        {/* CSS for badge link styling */}
+        <style>
+          {`
+            .badge-link-style {
+              color: #0258A5 !important;
+              text-decoration: underline !important;
+              cursor: pointer !important;
+              font-weight: 500 !important;
+            }
+            .badge-link-style:hover {
+              color: #014073 !important;
+            }
+          `}
+        </style>
         <div style={{ padding: "0 24px 0 24px" }}>
           <Typography
             variant="h2"

@@ -51,7 +51,6 @@ const MasterInquiryContent = memo(() => {
 
       {showMemberGrid && searchResults && !isFetchingMembers && (
         <MasterInquiryMemberGrid
-          key={searchParams?._timestamp || Date.now()}
           searchResults={searchResults}
           onMemberSelect={selectMember}
           memberGridPagination={memberGridPagination}
@@ -69,39 +68,55 @@ const MasterInquiryContent = memo(() => {
         </Grid>
       )}
 
-      {showMemberDetails && selectedMember && !isFetchingMemberDetails && (
-        <MasterInquiryMemberDetails
-          memberType={selectedMember.memberType}
-          id={selectedMember.id}
-          profitYear={searchParams?.endProfitYear}
-          memberDetails={memberDetails}
-          isLoading={isFetchingMemberDetails}
-        />
-      )}
-
-      {showMemberDetails && selectedMember && isFetchingMemberDetails && (
+      {/* Member Details Section - Always render when we have selection, just control visibility */}
+      {selectedMember && (
         <Grid
           size={{ xs: 12 }}
-          sx={{ display: "flex", justifyContent: "center", padding: "24px" }}>
-          <CircularProgress />
+          sx={{
+            display: showMemberDetails ? "block" : "none",
+            transition: "opacity 0.2s ease-in-out"
+          }}>
+          {!isFetchingMemberDetails && memberDetails ? (
+            <MasterInquiryMemberDetails
+              memberType={selectedMember.memberType}
+              id={selectedMember.id}
+              profitYear={searchParams?.endProfitYear}
+              memberDetails={memberDetails}
+              isLoading={isFetchingMemberDetails}
+            />
+          ) : (
+            <Grid
+              size={{ xs: 12 }}
+              sx={{ display: "flex", justifyContent: "center", padding: "24px" }}>
+              <CircularProgress />
+            </Grid>
+          )}
         </Grid>
       )}
 
-      {showProfitDetails && selectedMember && !isFetchingProfitData && (
-        <MasterInquiryGrid
-          profitData={memberProfitData}
-          isLoading={isFetchingProfitData}
-          profitGridPagination={profitGridPagination}
-          onPaginationChange={profitGridPagination.handlePaginationChange}
-          onSortChange={profitGridPagination.handleSortChange}
-        />
-      )}
-
-      {showProfitDetails && selectedMember && isFetchingProfitData && (
+      {/* Profit Details Section - Always render when we have selection, just control visibility */}
+      {selectedMember && (
         <Grid
           size={{ xs: 12 }}
-          sx={{ display: "flex", justifyContent: "center", padding: "24px" }}>
-          <CircularProgress />
+          sx={{
+            display: showProfitDetails ? "block" : "none",
+            transition: "opacity 0.2s ease-in-out"
+          }}>
+          {!isFetchingProfitData && memberProfitData ? (
+            <MasterInquiryGrid
+              profitData={memberProfitData}
+              isLoading={isFetchingProfitData}
+              profitGridPagination={profitGridPagination}
+              onPaginationChange={profitGridPagination.handlePaginationChange}
+              onSortChange={profitGridPagination.handleSortChange}
+            />
+          ) : (
+            <Grid
+              size={{ xs: 12 }}
+              sx={{ display: "flex", justifyContent: "center", padding: "24px" }}>
+              <CircularProgress />
+            </Grid>
+          )}
         </Grid>
       )}
 
