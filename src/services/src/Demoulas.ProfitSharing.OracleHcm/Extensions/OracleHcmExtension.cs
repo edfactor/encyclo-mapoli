@@ -93,7 +93,6 @@ public static class OracleHcmExtension
         builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
         builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
         builder.Services.AddScoped<IFrozenService, FrozenService>();
-        builder.Services.AddScoped<IBeneficiaryInquiryService, BeneficiaryInquiryService>();
 
         return builder;
     }
