@@ -69,22 +69,28 @@ export const RecursiveNavItem: FC<RecursiveNavItemProps> = ({ item, level, maxAu
   const hasActiveChild = containsActivePath(item);
 
   // Auto-expand logic: expand if level is within auto-expand depth OR if this item contains the active path
+  // This only runs on mount or when the active path changes, not on every render
   useEffect(() => {
-    if (level <= maxAutoExpandDepth) {
+    const storedExpanded = getStoredExpanded();
+    
+    // Don't override user's manual collapse/expand choices unless necessary
+    if (level <= maxAutoExpandDepth && !storedExpanded) {
       setExpanded(true);
-    } else if (hasActiveChild && !isActive) {
+    } else if (hasActiveChild && !isActive && !storedExpanded) {
       // Auto-expand parent items that contain the active child
       setExpanded(true);
     }
-  }, [level, maxAutoExpandDepth, hasActiveChild, isActive]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]); // Only re-run when location changes
 
   // Re-check localStorage when location changes (for page search navigation)
   useEffect(() => {
     const storedExpanded = getStoredExpanded();
-    if (storedExpanded && !expanded) {
-      setExpanded(true);
+    // Only restore expanded state from localStorage, don't force it
+    if (storedExpanded) {
+      setExpanded(storedExpanded);
     }
-  }, [location.pathname, getStoredExpanded, expanded]);
+  }, [location.pathname, getStoredExpanded]);
 
   // Persist expanded state
   useEffect(() => {
