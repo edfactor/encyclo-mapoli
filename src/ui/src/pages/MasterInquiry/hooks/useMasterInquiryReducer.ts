@@ -92,28 +92,50 @@ export const initialState: MasterInquiryState = {
 
 export function masterInquiryReducer(state: MasterInquiryState, action: MasterInquiryAction): MasterInquiryState {
   switch (action.type) {
-    case "SEARCH_START":
+    case "SEARCH_START": {
+      // Compare current params with new params to detect if truly new search
+      const currentParams = state.search.params;
+      const newParams = action.payload.params;
+
+      const isParametersChanged =
+        !currentParams ||
+        currentParams.badgeNumber !== newParams.badgeNumber ||
+        currentParams.ssn !== newParams.ssn ||
+        currentParams.name !== newParams.name ||
+        currentParams.profitYear !== newParams.profitYear ||
+        currentParams.endProfitYear !== newParams.endProfitYear ||
+        currentParams.startProfitMonth !== newParams.startProfitMonth ||
+        currentParams.endProfitMonth !== newParams.endProfitMonth ||
+        currentParams.memberType !== newParams.memberType ||
+        currentParams.paymentType !== newParams.paymentType;
+
+      // Only clear results/mode for NEW searches (not pagination/sorting)
+      const shouldClearResults = action.payload.isManual && isParametersChanged;
+
       return {
         ...state,
         search: {
           ...state.search,
-          params: action.payload.params,
+          params: newParams,
           isSearching: true,
           isManuallySearching: action.payload.isManual,
-          results: null,
-          noResultsMessage: null,
+          results: shouldClearResults ? null : state.search.results,
+          noResultsMessage: shouldClearResults ? null : state.search.noResultsMessage,
           error: null
         },
-        selection: {
-          ...state.selection,
-          selectedMember: null,
-          memberDetails: null,
-          memberProfitData: null
-        },
+        selection: shouldClearResults
+          ? {
+              ...state.selection,
+              selectedMember: null,
+              memberDetails: null,
+              memberProfitData: null
+            }
+          : state.selection,
         view: {
-          mode: "searching"
+          mode: shouldClearResults ? "searching" : state.view.mode
         }
       };
+    }
 
     case "SEARCH_SUCCESS": {
       const hasResults = action.payload.results.results.length > 0;

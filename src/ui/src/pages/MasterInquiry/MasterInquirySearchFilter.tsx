@@ -13,7 +13,7 @@ import {
   TextField
 } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
-import React, { memo, useCallback, useEffect, useMemo } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
@@ -79,6 +79,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       badgeNumber: string;
     }>();
 
+    // Ref to track if URL search has been processed
+    const urlSearchProcessedRef = useRef(false);
+
     // profitYear should always start with this year
     const profitYear = useDecemberFlowProfitYear();
 
@@ -122,7 +125,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
 
     // Initialize form when badge number is provided via URL
     useEffect(() => {
-      if (badgeNumber) {
+      if (badgeNumber && !urlSearchProcessedRef.current) {
+        urlSearchProcessedRef.current = true;
+
         const formData = {
           ...schema.getDefault(),
           memberType: determineCorrectMemberType(badgeNumber) as "all" | "employees" | "beneficiaries" | "none",

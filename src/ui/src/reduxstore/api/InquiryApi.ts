@@ -10,11 +10,14 @@ import {
 } from "../types";
 import { createDataSourceAwareBaseQuery } from "./api";
 
+// In-flight request tracking to prevent duplicate API calls
+const inFlightRequests = new Map<string, Promise<any>>();
+
 const baseQuery = createDataSourceAwareBaseQuery();
 export const InquiryApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "inquiryApi",
-  tagTypes: ["memberDetails"],
+  tagTypes: ["MemberDetails", "ProfitDetails"],
   endpoints: (builder) => ({
     // Master Inquiry API endpoints
     searchProfitMasterInquiry: builder.query<Paged<EmployeeDetails>, MasterInquiryRequest>({
@@ -43,7 +46,32 @@ export const InquiryApi = createApi({
           isSortDescending: params.pagination.isSortDescending,
           _timestamp: params._timestamp
         }
-      })
+      }),
+      async onQueryStarted(args, { queryFulfilled }) {
+        const requestKey = JSON.stringify({
+          badge: args.badgeNumber,
+          ssn: args.ssn,
+          name: args.name,
+          profitYear: args.profitYear,
+          endProfitYear: args.endProfitYear,
+          startProfitMonth: args.startProfitMonth,
+          endProfitMonth: args.endProfitMonth,
+          memberType: args.memberType,
+          paymentType: args.paymentType
+        });
+
+        if (inFlightRequests.has(requestKey)) {
+          console.log("[InquiryApi] Skipping duplicate search request");
+          return;
+        }
+
+        inFlightRequests.set(requestKey, queryFulfilled);
+        try {
+          await queryFulfilled;
+        } finally {
+          inFlightRequests.delete(requestKey);
+        }
+      }
     }),
     getProfitMasterInquiryMember: builder.query<EmployeeDetails, MasterInquiryMemberRequest>({
       query: (params) => ({
@@ -51,7 +79,24 @@ export const InquiryApi = createApi({
         method: "POST",
         body: params
       }),
-      providesTags: ["memberDetails"]
+      providesTags: (_result, _error, args) => [
+        { type: "MemberDetails" as const, id: `${args.memberType}-${args.id}` }
+      ],
+      async onQueryStarted(args, { queryFulfilled }) {
+        const requestKey = `member-${args.memberType}-${args.id}`;
+
+        if (inFlightRequests.has(requestKey)) {
+          console.log("[InquiryApi] Skipping duplicate member details request");
+          return;
+        }
+
+        inFlightRequests.set(requestKey, queryFulfilled);
+        try {
+          await queryFulfilled;
+        } finally {
+          inFlightRequests.delete(requestKey);
+        }
+      }
     }),
     getProfitMasterInquiryMemberDetails: builder.query<
       Paged<MasterInquiryResponseDto>,
@@ -62,7 +107,18 @@ export const InquiryApi = createApi({
         method: "GET",
         params: pagination
       }),
-      async onQueryStarted(_args, { dispatch, queryFulfilled }) {
+      providesTags: (_result, _error, args) => [
+        { type: "ProfitDetails" as const, id: `${args.memberType}-${args.id}` }
+      ],
+      async onQueryStarted(args, { dispatch, queryFulfilled }) {
+        const requestKey = `profit-${args.memberType}-${args.id}`;
+
+        if (inFlightRequests.has(requestKey)) {
+          console.log("[InquiryApi] Skipping duplicate profit details request");
+          return;
+        }
+
+        inFlightRequests.set(requestKey, queryFulfilled);
         try {
           const { data } = await queryFulfilled;
           const { results } = data;
@@ -73,6 +129,8 @@ export const InquiryApi = createApi({
           dispatch(setMasterInquiryResults(transformedResults));
         } catch (err) {
           console.error("Failed to fetch profit master inquiry member details:", err);
+        } finally {
+          inFlightRequests.delete(requestKey);
         }
       }
     }),
@@ -140,7 +198,7 @@ export const InquiryApi = createApi({
           take: params.pagination.take
         }
       }),
-      async onQueryStarted(params: MasterInquiryRequest, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_params: MasterInquiryRequest, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setMasterInquiryGroupingData(data.results));
