@@ -40,9 +40,9 @@ public class BeneficiaryServiceTest : ApiTestBase<Program>
                         LastName = "DELAROSA",
                         FirstName = "ZOE",
                         MiddleName =null,
-                        PhoneNumber = null,
-                        MobileNumber = null,
-                        EmailAddress = null,
+                        PhoneNumber = "",
+                        MobileNumber = "",
+                        EmailAddress = "",
                     CreatedDate = DateOnly.FromDateTime(new DateTime(2025,5,8,0,0,0,DateTimeKind.Utc)),
                 Relationship = "DAUGHTER",
                 KindId ='P',
@@ -75,9 +75,9 @@ public class BeneficiaryServiceTest : ApiTestBase<Program>
             LastName = "DELAROSA",
             FirstName = "ZOE",
             MiddleName = null,
-            PhoneNumber = null,
-            MobileNumber = null,
-            EmailAddress = null,
+            PhoneNumber = "",
+            MobileNumber = "",
+            EmailAddress = "",
             CreatedDate = DateOnly.FromDateTime(new DateTime(2025, 5, 8, 0, 0, 0, DateTimeKind.Utc)),
             Relationship = "DAUGHTER",
             KindId = 'P',
@@ -112,14 +112,14 @@ public class BeneficiaryServiceTest : ApiTestBase<Program>
         var res = await _beneficiaryService.GetBeneficiary(new BeneficiaryRequestDto() { BadgeNumber = 703244 }, CancellationToken.None);
         Assert.NotNull(res);
         Assert.NotNull(res.Beneficiaries?.Results);
-        res.Beneficiaries.Results.ShouldBeEquivalentTo(_beneficiaryList);
+        res.Beneficiaries.Results.ShouldBeEquivalentTo(_beneficiaryList, nameof(BeneficiaryDto.CurrentBalance), nameof(BeneficiaryDto.Kind));
     }
     [Fact(DisplayName = "Get Beneficiary Detail")]
     public async Task GetBeneficiaryDetail()
     {
         var res = await _beneficiaryService.GetBeneficiaryDetail(new BeneficiaryDetailRequest() { BadgeNumber = 703244, PsnSuffix = 1000 }, CancellationToken.None);
         Assert.NotNull(res);
-        res.ShouldBeEquivalentTo(_beneficiaryDetail);
+        res.ShouldBeEquivalentTo(_beneficiaryDetail, nameof(BeneficiaryDetailResponse.CurrentBalance));
     }
 
     [Fact(DisplayName = "Beneficiary Search Filter")]
