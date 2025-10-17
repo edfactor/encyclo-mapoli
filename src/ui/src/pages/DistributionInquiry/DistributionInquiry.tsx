@@ -22,11 +22,13 @@ import {
 import { DistributionSearchFormData } from "../../types";
 import DistributionInquiryGrid from "./DistributionInquiryGrid";
 import DistributionInquirySearchFilter from "./DistributionInquirySearchFilter";
+import NewEntryDialog from "./NewEntryDialog";
 
 const DistributionInquiryContent = () => {
   const dispatch = useDispatch();
   const [searchData, setSearchData] = useState<any>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [isNewEntryDialogOpen, setIsNewEntryDialogOpen] = useState(false);
   const [triggerSearch, { data, isFetching }] = useLazySearchDistributionsQuery();
   const isReadOnly = useReadOnlyNavigation();
   const { missiveAlerts, addAlert, clearAlerts } = useMissiveAlerts();
@@ -145,7 +147,11 @@ const DistributionInquiryContent = () => {
   };
 
   const handleNewEntry = () => {
-    console.log("New Entry clicked");
+    setIsNewEntryDialogOpen(true);
+  };
+
+  const handleCloseNewEntryDialog = () => {
+    setIsNewEntryDialogOpen(false);
   };
 
   const handleExport = () => {
@@ -182,12 +188,14 @@ const DistributionInquiryContent = () => {
         </Tooltip>
         <Button
           variant="outlined"
+          disabled={true}
           onClick={handleExport}
           startIcon={<DownloadIcon />}>
           EXPORT
         </Button>
         <Button
           variant="outlined"
+          disabled={true}
           onClick={handleReport}
           startIcon={<PictureAsPdfIcon />}>
           REPORT
@@ -214,6 +222,12 @@ const DistributionInquiryContent = () => {
           />
         </Grid>
       )}
+
+      {/* New Entry Dialog */}
+      <NewEntryDialog
+        open={isNewEntryDialogOpen}
+        onClose={handleCloseNewEntryDialog}
+      />
     </Grid>
   );
 };
