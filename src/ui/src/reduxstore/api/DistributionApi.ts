@@ -1,6 +1,11 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { createDataSourceAwareBaseQuery } from "./api";
-import { DistributionSearchRequest, DistributionSearchResultDto } from "../../types";
+import {
+  DistributionSearchRequest,
+  DistributionSearchResultDto,
+  CreateDistributionRequest,
+  CreateOrUpdateDistributionResponse
+} from "../../types";
 
 const baseQuery = createDataSourceAwareBaseQuery();
 
@@ -14,8 +19,15 @@ export const DistributionApi = createApi({
         method: "POST",
         body: request
       })
+    }),
+    createDistribution: builder.mutation<CreateOrUpdateDistributionResponse, CreateDistributionRequest>({
+      query: (request) => ({
+        url: "/distribution",
+        method: "POST",
+        body: request
+      })
     })
   })
 });
 
-export const { useLazySearchDistributionsQuery } = DistributionApi;
+export const { useLazySearchDistributionsQuery, useCreateDistributionMutation } = DistributionApi;

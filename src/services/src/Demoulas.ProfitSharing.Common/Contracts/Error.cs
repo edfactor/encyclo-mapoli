@@ -41,6 +41,15 @@ public sealed record Error
     public static Error SameDemographicMerge => new(109, "Cannot merge demographic with itself");
     public static Error MergeOperationFailed(string message) => new(110, $"Merge operation failed: {message}");
 
+    // Forfeiture adjustment errors
+    public static Error ForfeitureAmountZero => new(116, "Forfeiture amount cannot be zero");
+    public static Error InvalidProfitYear => new(117, "Profit year must be provided and be valid");
+    public static Error NoPayProfitDataForYear => new(118, "No profit sharing data found for employee for the specified year");
+    public static Error ProfitDetailNotFound => new(119, "Profit detail not found");
+    public static Error VestingBalanceNotFound => new(120, "No vesting balance data found for employee");
+    public static Error ClassActionForfeitureCannotBeReversed => new(121, "Class action forfeiture cannot be reversed");
+    public static Error InsufficientVestingBalance => new(122, "Insufficient vesting balance for forfeiture adjustment");
+
     // Unexpected error wrapper (message captured). Prefer logging full exception separately.
     public static Error Unexpected(string message) => new(900, message);
 

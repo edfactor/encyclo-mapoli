@@ -12,6 +12,7 @@ using Demoulas.ProfitSharing.Services.Audit;
 using Demoulas.ProfitSharing.Services.Beneficiaries;
 using Demoulas.ProfitSharing.Services.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
+using Demoulas.ProfitSharing.Services.Caching.HostedServices;
 using Demoulas.ProfitSharing.Services.Certificates;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.ItDevOps;
@@ -26,6 +27,7 @@ using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.ProfitSharing.Services.Reports.Breakdown;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using Demoulas.ProfitSharing.Services.Validation;
+using Demoulas.Util.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -117,6 +119,12 @@ public static class ServicesExtension
         _ = builder.Services.AddSingleton<Services.Caching.ProfitCodeCache>();
 
         builder.AddProjectCachingServices();
+
+        // Register cache warmer hosted service (not in test environment)
+        if (!builder.Environment.IsTestEnvironment())
+        {
+            _ = builder.Services.AddHostedService<StateTaxCacheWarmerHostedService>();
+        }
 
         return builder;
     }

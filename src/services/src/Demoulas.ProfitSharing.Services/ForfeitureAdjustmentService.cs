@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -17,7 +18,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
     private readonly IDemographicReaderService _demographicReaderService;
 
     public ForfeitureAdjustmentService(IProfitSharingDataContextFactory dbContextFactory,
-        TotalService totalService, IEmbeddedSqlService embeddedSqlService,
+        TotalService totalService,
         IFrozenService frozenService,
         IDemographicReaderService demographicReaderService)
     {
@@ -27,7 +28,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
         _demographicReaderService = demographicReaderService;
     }
 
-    public Task<SuggestedForfeitureAdjustmentResponse> GetSuggestedForfeitureAmount(SuggestedForfeitureAdjustmentRequest req, CancellationToken cancellationToken = default)
+    public Task<Result<SuggestedForfeitureAdjustmentResponse>> GetSuggestedForfeitureAmount(SuggestedForfeitureAdjustmentRequest req, CancellationToken cancellationToken = default)
     {
         return _dbContextFactory.UseReadOnlyContext(async context =>
         {
@@ -41,7 +42,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
             if (demographic == null)
             {
-                throw new ArgumentException("Employee not found.");
+                return Result<SuggestedForfeitureAdjustmentResponse>.Failure(Error.EmployeeNotFound);
             }
 
             // Get the most recent PROFIT_CODE = 2 (forfeiture) transaction for this employee
@@ -55,12 +56,12 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             // → Suggest UNFORFEIT (negative amount to reverse it)
             if (lastForfeitureTransaction != null && lastForfeitureTransaction.Forfeiture > 0)
             {
-                return new SuggestedForfeitureAdjustmentResponse
+                return Result<SuggestedForfeitureAdjustmentResponse>.Success(new SuggestedForfeitureAdjustmentResponse
                 {
                     SuggestedForfeitAmount = -lastForfeitureTransaction.Forfeiture, // Negative = unforfeit
                     DemographicId = demographic.Id,
                     BadgeNumber = demographic.BadgeNumber
-                };
+                });
             }
 
             // PATH 2: No forfeiture history OR last transaction was UNFORFEIT (negative amount)
@@ -71,35 +72,40 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             // If fully vested, nothing to forfeit
             if (totalVestingBalance.VestingPercent == 1m)
             {
-                return new SuggestedForfeitureAdjustmentResponse { SuggestedForfeitAmount = 0m, DemographicId = demographic.Id, BadgeNumber = demographic.BadgeNumber };
+                return Result<SuggestedForfeitureAdjustmentResponse>.Success(new SuggestedForfeitureAdjustmentResponse
+                {
+                    SuggestedForfeitAmount = 0m,
+                    DemographicId = demographic.Id,
+                    BadgeNumber = demographic.BadgeNumber
+                });
             }
 
             // Calculate unvested amount that should be forfeited
             var unvestedAmount = (totalVestingBalance.CurrentBalance ?? 0m) - (totalVestingBalance.VestedBalance ?? 0m);
 
-            return new SuggestedForfeitureAdjustmentResponse
+            return Result<SuggestedForfeitureAdjustmentResponse>.Success(new SuggestedForfeitureAdjustmentResponse
             {
                 SuggestedForfeitAmount = Math.Round(unvestedAmount, 2, MidpointRounding.AwayFromZero), // Positive = forfeit
                 DemographicId = demographic.Id,
                 BadgeNumber = demographic.BadgeNumber
-            };
+            });
         }, cancellationToken);
     }
 
-    public async Task UpdateForfeitureAdjustmentAsync(ForfeitureAdjustmentUpdateRequest req, CancellationToken cancellationToken = default)
+    public async Task<Result<bool>> UpdateForfeitureAdjustmentAsync(ForfeitureAdjustmentUpdateRequest req, CancellationToken cancellationToken = default)
     {
         if (req.ForfeitureAmount == 0)
         {
-            throw new ArgumentException("Forfeiture amount cannot be zero");
+            return Result<bool>.Failure(Error.ForfeitureAmountZero);
         }
 
         // We can probably only do the wall clock year or the frozen year.
         if (req.ProfitYear <= 0)
         {
-            throw new ArgumentException("Profit year must be provided");
+            return Result<bool>.Failure(Error.InvalidProfitYear);
         }
 
-        await _dbContextFactory.UseWritableContext(async context =>
+        return await _dbContextFactory.UseWritableContext(async context =>
         {
             var demographics = await _demographicReaderService.BuildDemographicQuery(context, false);
             var employeeData = await demographics
@@ -116,12 +122,12 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
             if (employeeData == null)
             {
-                throw new ArgumentException($"Employee with badge number {req.BadgeNumber} not found");
+                return Result<bool>.Failure(Error.EmployeeNotFound);
             }
 
             if (!employeeData.HasPayProfit)
             {
-                throw new ArgumentException($"No profit sharing data found for employee with badge number {req.BadgeNumber} for year {req.ProfitYear}");
+                return Result<bool>.Failure(Error.NoPayProfitDataForYear);
             }
 
             // Determine if this is a forfeit or un-forfeit operation
@@ -133,13 +139,12 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                     .FirstOrDefaultAsync(pd => pd.Id == req.OffsettingProfitDetailId.Value, cancellationToken);
                 if (offsettingProfitDetail == null)
                 {
-                    throw new InvalidOperationException($"Offsetting profit detail with ID {req.OffsettingProfitDetailId.Value} not found");
+                    return Result<bool>.Failure(Error.ProfitDetailNotFound);
                 }
 
                 if (offsettingProfitDetail?.CommentTypeId == CommentType.Constants.ForfeitClassAction && !isForfeit)
                 {
-                    throw new InvalidOperationException(
-                        $"Offsetting profit detail with ID {req.OffsettingProfitDetailId.Value} is a class action forfeiture and cannot be unforfeited.");
+                    return Result<bool>.Failure(Error.ClassActionForfeitureCannotBeReversed);
                 }
             }
 
@@ -150,10 +155,10 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 (short)req.ProfitYear,
                 cancellationToken);
 
-            // If no vesting balance found, throw an exception
+            // If no vesting balance found, return failure
             if (vestingBalance == null)
             {
-                throw new ArgumentException($"No vesting balance data found for employee with badge number {req.BadgeNumber}");
+                return Result<bool>.Failure(Error.VestingBalanceNotFound);
             }
 
             // From docs: "From the screen in figure 2, if you enter the value in #17 to box #12 and hit enter, you will create a PROFIT_DETAIL record.
@@ -211,8 +216,8 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                     int wallClockYear = DateTime.Now.Year;
                     if (req.ProfitYear <= wallClockYear - 2)
                     {
-                        throw new ArgumentException(
-                            $"Cannot update profit year {req.ProfitYear}. Only current year ({wallClockYear}) and previous year ({wallClockYear - 1}) are allowed.");
+                        return Result<bool>.Failure(Error.Unexpected(
+                            $"Cannot update profit year {req.ProfitYear}. Only current year ({wallClockYear}) and previous year ({wallClockYear - 1}) are allowed."));
                     }
 
                     // Determine live year set - normally just current year, but includes previous year for special cases (YE)
@@ -270,19 +275,21 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             }
 
             await context.SaveChangesAsync(cancellationToken);
+            return Result<bool>.Success(true);
         }, cancellationToken);
     }
 
-    public async Task UpdateForfeitureAdjustmentBulkAsync(List<ForfeitureAdjustmentUpdateRequest> requests, CancellationToken cancellationToken = default)
+    public async Task<Result<bool>> UpdateForfeitureAdjustmentBulkAsync(List<ForfeitureAdjustmentUpdateRequest> requests, CancellationToken cancellationToken = default)
     {
-        await _dbContextFactory.UseWritableContext(async context =>
+        foreach (var req in requests)
         {
-            foreach (var req in requests)
+            var result = await UpdateForfeitureAdjustmentAsync(req, cancellationToken);
+            if (result.IsError)
             {
-                await UpdateForfeitureAdjustmentAsync(req, cancellationToken);
+                return Result<bool>.Failure(result.Error);
             }
+        }
 
-            await context.SaveChangesAsync(cancellationToken);
-        }, cancellationToken);
+        return Result<bool>.Success(true);
     }
 }

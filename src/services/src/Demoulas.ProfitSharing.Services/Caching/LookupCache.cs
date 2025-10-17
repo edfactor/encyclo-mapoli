@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
@@ -26,6 +27,7 @@ public class LookupCache<TKey, TValue, TEntity> : ILookupCache<TKey, TValue>
     private readonly Func<TEntity, TKey> _keySelector;
     private readonly Func<TEntity, TValue> _valueSelector;
     private readonly TimeSpan _absoluteExpiration;
+    private readonly Func<ProfitSharingReadOnlyDbContext, IQueryable<TEntity>> _getDbSetFunc;
 
     // Version counter key (never expires)
     private string VersionKey => $"lookup:{_lookupName}:version";
@@ -43,6 +45,7 @@ public class LookupCache<TKey, TValue, TEntity> : ILookupCache<TKey, TValue>
     /// <param name="queryBuilder">Function to build the query from DbSet</param>
     /// <param name="keySelector">Function to extract key from entity</param>
     /// <param name="valueSelector">Function to extract value from entity</param>
+    /// <param name="getDbSetFunc">Function to get DbSet from read-only context (e.g., ctx => ctx.StateTaxes)</param>
     /// <param name="absoluteExpiration">Cache expiration time (default 1 hour)</param>
     public LookupCache(
         IDistributedCache cache,
@@ -52,6 +55,7 @@ public class LookupCache<TKey, TValue, TEntity> : ILookupCache<TKey, TValue>
         Func<IQueryable<TEntity>, IQueryable<TEntity>> queryBuilder,
         Func<TEntity, TKey> keySelector,
         Func<TEntity, TValue> valueSelector,
+        Func<ProfitSharingReadOnlyDbContext, IQueryable<TEntity>> getDbSetFunc,
         TimeSpan? absoluteExpiration = null)
     {
         _cache = cache;
@@ -61,6 +65,7 @@ public class LookupCache<TKey, TValue, TEntity> : ILookupCache<TKey, TValue>
         _queryBuilder = queryBuilder;
         _keySelector = keySelector;
         _valueSelector = valueSelector;
+        _getDbSetFunc = getDbSetFunc;
         _absoluteExpiration = absoluteExpiration ?? TimeSpan.FromHours(1);
     }
 
@@ -163,13 +168,13 @@ public class LookupCache<TKey, TValue, TEntity> : ILookupCache<TKey, TValue>
     }
 
     /// <summary>
-    /// Loads all lookup data from the database.
+    /// Loads all lookup data from the database using the provided read-only context.
     /// </summary>
     private async ValueTask<Dictionary<TKey, TValue>> LoadFromDatabaseAsync(CancellationToken cancellationToken)
     {
         return await _contextFactory.UseReadOnlyContext(async ctx =>
         {
-            var dbSet = ctx.Set<TEntity>();
+            var dbSet = _getDbSetFunc(ctx);
             var query = _queryBuilder(dbSet);
 
             var entities = await query.ToListAsync(cancellationToken);

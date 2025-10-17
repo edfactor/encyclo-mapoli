@@ -17,7 +17,6 @@ import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../constants";
 import {
   clearCurrentDistribution,
   clearCurrentMember,
@@ -59,12 +58,6 @@ const schema = yup.object().shape({
 const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterProps> = memo(
   ({ onSearch, onReset, isLoading }) => {
     const dispatch = useDispatch();
-
-    const determineCorrectMemberType = (badgeNum: string | undefined) => {
-      if (!badgeNum) return "all";
-      if (badgeNum.length <= MAX_EMPLOYEE_BADGE_LENGTH) return "employees";
-      return "beneficiaries";
-    };
 
     const {
       control,
@@ -180,133 +173,6 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
         { value: "beneficiaries", label: "Beneficiaries" }
       ],
       []
-    );
-
-    const TextInputField = useCallback(
-      ({
-        name,
-        label,
-        type = "text",
-        disabled = false,
-        helperText,
-        placeholder
-      }: {
-        name: keyof DistributionSearchFormData;
-        label: string;
-        type?: string;
-        disabled?: boolean;
-        helperText?: string;
-        placeholder?: string;
-      }) => (
-        <Grid size={{ xs: 12, sm: 6, md: name === "socialSecurity" || name === "badgeNumber" ? 3 : type === "number" ? 2 : 4 }}>
-          <FormLabel>{label}</FormLabel>
-          <Controller
-            name={name}
-            control={control}
-            render={({ field }) => (
-              <TextField
-                name={field.name}
-                ref={field.ref}
-                onBlur={field.onBlur}
-                fullWidth
-                type={type}
-                size="small"
-                variant="outlined"
-                placeholder={placeholder}
-                value={field.value ?? ""}
-                error={!!errors[name]}
-                disabled={disabled}
-                onChange={(e) => {
-                  const value = e.target.value;
-
-                  // For SSN and badge fields, only allow numeric input
-                  if (name === "socialSecurity" || name === "badgeNumber") {
-                    if (value !== "" && !/^\d*$/.test(value)) {
-                      return;
-                    }
-                  }
-
-                  // Prevent input beyond 11 characters for badgeNumber
-                  if (name === "badgeNumber" && value.length > 11) {
-                    return;
-                  }
-                  // Prevent input beyond 9 characters for socialSecurity
-                  if (name === "socialSecurity" && value.length > 9) {
-                    return;
-                  }
-                  const parsedValue = type === "number" && value !== "" ? Number(value) : value === "" ? null : value;
-                  field.onChange(parsedValue);
-
-                  // Auto-update memberType when badgeNumber changes
-                  if (name === "badgeNumber") {
-                    handleBadgeNumberChange(e);
-                  }
-                }}
-                sx={
-                  disabled
-                    ? {
-                        "& .MuiOutlinedInput-root": {
-                          backgroundColor: "#f5f5f5"
-                        }
-                      }
-                    : undefined
-                }
-              />
-            )}
-          />
-          {errors[name] && <FormHelperText error>{errors[name]?.message}</FormHelperText>}
-          {!errors[name] && helperText && (
-            <FormHelperText sx={{ color: "info.main", fontSize: "0.75rem", marginTop: "4px" }}>
-              {helperText}
-            </FormHelperText>
-          )}
-        </Grid>
-      ),
-      [control, errors, handleBadgeNumberChange]
-    );
-
-    const RadioGroupField = memo(
-      ({
-        name,
-        label,
-        options,
-        disabled = false
-      }: {
-        name: "memberType";
-        label: string;
-        options: Array<{ value: string; label: string }>;
-        disabled?: boolean;
-      }) => (
-        <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-          <FormControl error={!!errors[name]}>
-            <FormLabel>{label}</FormLabel>
-            <Controller
-              name={name}
-              control={control}
-              render={({ field }) => (
-                <RadioGroup
-                  {...field}
-                  row>
-                  {options.map((option) => (
-                    <FormControlLabel
-                      key={option.value}
-                      value={option.value}
-                      control={
-                        <Radio
-                          size="small"
-                          disabled={disabled}
-                        />
-                      }
-                      label={option.label}
-                      disabled={disabled}
-                    />
-                  ))}
-                </RadioGroup>
-              )}
-            />
-          </FormControl>
-        </Grid>
-      )
     );
 
     return (
