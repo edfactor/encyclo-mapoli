@@ -19,6 +19,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 using MockQueryable.Moq;
 using Moq;
+using System.ComponentModel;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services;
 
@@ -89,6 +90,7 @@ public class DemographicsServiceTests
     }
 
     [Fact]
+    [Description("PS-0000 : Audit error handling - verify DemographicSyncAudit records are added and saved")]
     public async Task AuditError_AddsAuditRecordsAndSaves()
     {
         // Arrange
@@ -138,6 +140,7 @@ public class DemographicsServiceTests
     }
 
     [Fact]
+    [Description("PS-0000 : Insert new demographic entities - verify new records are added to database")]
     public async Task AddDemographicsStreamAsync_InsertsNewEntities()
     {
         // Arrange list-backed sets
@@ -374,6 +377,7 @@ public class DemographicsServiceTests
     }
 
     [Fact]
+    [Description("PS-0000 : Duplicate SSN handling - verify duplicate SSNs are detected and audit logged")]
     public async Task AddDemographicsStreamAsync_HandlesDuplicateSsn()
     {
         // Arrange
@@ -410,6 +414,7 @@ public class DemographicsServiceTests
     /// </summary>
     /// <returns></returns>
     [Fact]
+    [Description("PS-0000 : SSN match with DOB mismatch - verify demographic update when SSN matches but DOB differs")]
     public async Task AddDemographicsStreamAsync_SSNMatch_NoDobMatch()
     {
         // Arrange
@@ -513,6 +518,7 @@ public class DemographicsServiceTests
     /// </summary>
     /// <returns></returns>
     [Fact]
+    [Description("PS-0000 : Terminated employee SSN match no balance - verify handling when terminated employee has no balance")]
     public async Task AddDemographicsStreamAsync_SSNMatch_NoDobMatch_ExistingEmployeeTerminated_NoBalance()
     {
         // Arrange
@@ -635,6 +641,7 @@ public class DemographicsServiceTests
     }
 
     [Fact]
+    [Description("PS-0000 : Terminated employee SSN match with balance - verify handling when terminated employee has balance")]
     public async Task AddDemographicsStreamAsync_SSNMatch_NoDobMatch_ExistingEmployeeTerminated_HasBalance()
     {
         // Arrange
@@ -755,6 +762,7 @@ public class DemographicsServiceTests
     }
 
     [Fact]
+    [Description("PS-0000 : Merge profit details - verify profit details are merged from source to target demographic")]
     public async Task MergeProfitDetailsToDemographic_WithValidSourceAndTarget_MergesAndAudits()
     {
         // Arrange
@@ -830,6 +838,7 @@ public class DemographicsServiceTests
     }
 
     [Fact]
+    [Description("PS-0000 : Merge profit details save failure - verify critical error is logged when save changes fails")]
     public async Task MergeProfitDetailsToDemographic_WhenSaveChangesFails_LogsCriticalError()
     {
         // Arrange
