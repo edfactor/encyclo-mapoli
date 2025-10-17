@@ -1,5 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -25,6 +26,8 @@ public class DemographicsServiceTests
 {
     public DemographicsServiceTests()
     {
+        // Initialize telemetry metrics for testing
+        EndpointTelemetry.Initialize();
     }
 
     private static int _demographicIdCounter = 1;
