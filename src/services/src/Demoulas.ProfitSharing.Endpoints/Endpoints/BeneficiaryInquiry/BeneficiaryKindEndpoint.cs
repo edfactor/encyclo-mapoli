@@ -45,7 +45,7 @@ public class BeneficiaryKindEndpoint : ProfitSharingEndpoint<BeneficiaryKindRequ
         {
             this.RecordRequestMetrics(HttpContext, _logger, req);
 
-            var response = await _beneficiaryService.GetBeneficiaryKind(req, ct);
+            var response = await _beneficiaryService.GetBeneficiaryKind(ct);
 
             // Business metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,
