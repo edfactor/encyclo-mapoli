@@ -63,6 +63,7 @@ public class NavigationFaker
             // Distribution items
             new Navigation { Id = 103, ParentId = 4, Title = "DISTRIBUTIONS INQUIRY", SubTitle = "", Url = "distributions-inquiry", StatusId = 1, OrderNumber = 1, Icon = "", Disabled = false, IsNavigable = true, RequiredRoles = new List<NavigationRole>(), NavigationStatus = notStarted },
             new Navigation { Id = 156, ParentId = 4, Title = "VIEW DISTRIBUTION (008-14V)", SubTitle = "", Url = "view-distribution", StatusId = 1, OrderNumber = 2, Icon = "", Disabled = false, IsNavigable = false, RequiredRoles = new List<NavigationRole>(rolesInquiries), NavigationStatus = notStarted },
+            new Navigation { Id = 157, ParentId = 4, Title = "ADD DISTRIBUTION (008-14A)", SubTitle = "", Url = "add-distribution", StatusId = 1, OrderNumber = 3, Icon = "", Disabled = false, IsNavigable = false, RequiredRoles = new List<NavigationRole>(rolesInquiries), NavigationStatus = notStarted },
 
             // IT Operations
             new Navigation { Id = 102, ParentId = 7, Title = "Demographic Freeze", SubTitle = "", Url = "demographic-freeze", StatusId = 1, OrderNumber = 1, Icon = "", Disabled = false, IsNavigable = true, RequiredRoles = new List<NavigationRole>(rolesFreeze), NavigationStatus = notStarted },

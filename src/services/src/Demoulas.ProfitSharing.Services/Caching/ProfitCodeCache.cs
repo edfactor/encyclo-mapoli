@@ -1,3 +1,4 @@
+using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.Extensions.Caching.Distributed;
@@ -23,6 +24,7 @@ public sealed class ProfitCodeCache : LookupCache<byte, ProfitCode, ProfitCode>
             queryBuilder: query => query, // No filtering needed
             keySelector: entity => entity.Id,
             valueSelector: entity => entity, // Return full entity
+            getDbSetFunc: ctx => ctx.ProfitCodes, // Get DbSet from read-only context
             absoluteExpiration: TimeSpan.FromHours(24)) // Profit codes are effectively static
     {
     }
