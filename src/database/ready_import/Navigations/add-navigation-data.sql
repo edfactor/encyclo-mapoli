@@ -99,6 +99,7 @@ DECLARE
     PRINT_PS_JOBS CONSTANT NUMBER :=155;
     VIEW_DISTRIBUTION_PAGE CONSTANT NUMBER := 156;
     ADD_DISTRIBUTION_PAGE CONSTANT NUMBER := 157;
+    BENEFICIARY_INQUIRY_PAGE CONSTANT NUMBER :=158;
 
 
     --- These are the role IDs from the ROLES table
@@ -191,7 +192,7 @@ BEGIN
 --Top level menus
     insert_navigation_item(INQUIRIES_MENU, TOP_LEVEL_MENU, 'INQUIRIES & ADJUSTMENTS', 'Inquiries & Adjustments', '', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
 
-    insert_navigation_item(BENEFICIARIES_MENU, TOP_LEVEL_MENU, 'BENEFICIARIES', 'Beneficiaries', '', STATUS_NORMAL, ORDER_SECOND, '', DISABLED, IS_NAVIGABLE);
+    insert_navigation_item(BENEFICIARIES_MENU, TOP_LEVEL_MENU, 'BENEFICIARIES', 'Beneficiaries', '', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(DISTRIBUTIONS_MENU, TOP_LEVEL_MENU, 'DISTRIBUTIONS', 'Distributions', '', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
     -- RECONCILIATION REMOVED
     insert_navigation_item(YEAR_END_MENU, TOP_LEVEL_MENU, 'YEAR END', 'Year End', '', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
@@ -211,6 +212,8 @@ BEGIN
     insert_navigation_item(RECENTLY_TERMINATED, ADHOC_GROUP, 'Recently Terminated', 'PROF-VESTED|PAY508', 'recently-terminated', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(QPAY066_AD_HOC_REPORTS, ADHOC_GROUP, 'QPAY066* Ad Hoc Reports', 'QPAY066*', 'qpay066-adhoc', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
 
+--beneficiary items
+    insert_navigation_item(BENEFICIARY_INQUIRY_PAGE, BENEFICIARIES_MENU, 'Beneficiary Inquiry', '', 'beneficiary', STATUS_NORMAL, ORDER_FIRST, '', DISABLED, IS_NAVIGABLE);
 
 --distribution items
     insert_navigation_item(DISTRIBUTION_INQUIRY_PAGE, DISTRIBUTIONS_MENU, 'Distribution Inquiry (008-14l)', '', 'distributions-inquiry', STATUS_NORMAL, ORDER_FIRST, '', DISABLED, IS_NAVIGABLE);
@@ -334,6 +337,19 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(DISTRIBUTION_INQUIRY_PAGE, DISTRIBUTIONS_CLERK);
     assign_navigation_role(DISTRIBUTION_INQUIRY_PAGE, HARDSHIP_ADMINISTRATOR);
 
+-- Beneficiary Inquiry Menu
+    assign_navigation_role(BENEFICIARIES_MENU, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(BENEFICIARIES_MENU, FINANCE_MANAGER);
+    assign_navigation_role(BENEFICIARIES_MENU, DISTRIBUTIONS_CLERK);
+    assign_navigation_role(BENEFICIARIES_MENU, HARDSHIP_ADMINISTRATOR);
+
+-- Beneficiary Inquiry
+    assign_navigation_role(BENEFICIARY_INQUIRY_PAGE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(BENEFICIARY_INQUIRY_PAGE, FINANCE_MANAGER);
+    assign_navigation_role(BENEFICIARY_INQUIRY_PAGE, DISTRIBUTIONS_CLERK);
+    assign_navigation_role(BENEFICIARY_INQUIRY_PAGE, HARDSHIP_ADMINISTRATOR);
+
+
 -- View Distribution
     assign_navigation_role(VIEW_DISTRIBUTION_PAGE, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(VIEW_DISTRIBUTION_PAGE, FINANCE_MANAGER);
@@ -356,9 +372,7 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
 -- Assign roles for YEAR END (YearEndGroup -> CanViewYearEndReports)
     assign_navigation_role(YEAR_END_MENU, SYSTEM_ADMINISTRATOR); 
     assign_navigation_role(YEAR_END_MENU, FINANCE_MANAGER); 
--- Assign roles for BENEFICIARIES (BeneficiariesGroup -> CanMaintainBeneficiaries)
-    assign_navigation_role(BENEFICIARIES_MENU, DISTRIBUTIONS_CLERK); 
-    assign_navigation_role(BENEFICIARIES_MENU, HARDSHIP_ADMINISTRATOR); 
+
 
 -- Assign roles for INQUIRIES_GROUP
     assign_navigation_role(INQUIRIES_GROUP, SYSTEM_ADMINISTRATOR); 
@@ -510,6 +524,7 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(DEMOGRAPHIC_FREEZE_PAGE, IT_DEVOPS);
     assign_navigation_role(MASTER_INQUIRY_PAGE, IT_DEVOPS);
     assign_navigation_role(BENEFICIARIES_MENU, IT_DEVOPS);
+    assign_navigation_role(BENEFICIARY_INQUIRY_PAGE, IT_DEVOPS);
     assign_navigation_role(DISTRIBUTIONS_MENU, IT_DEVOPS);
     assign_navigation_role(DISTRIBUTION_INQUIRY_PAGE, IT_DEVOPS);
     assign_navigation_role(VIEW_DISTRIBUTION_PAGE, IT_DEVOPS);

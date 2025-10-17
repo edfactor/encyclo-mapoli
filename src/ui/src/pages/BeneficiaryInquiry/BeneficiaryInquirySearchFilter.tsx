@@ -1,10 +1,10 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, Grid, MenuItem, Select, TextField } from "@mui/material";
-import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../constants";
 import { Controller, Resolver, useForm } from "react-hook-form";
-import { BeneficiarySearchFilterRequest, BeneficiaryTypeDto, MasterInquiryRequest } from "reduxstore/types";
+import { BeneficiarySearchFilterRequest } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../constants";
 import { ssnValidator } from "../../utils/FormValidators";
 
 const schema = yup.object().shape({
@@ -44,12 +44,14 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
     memberType = memberType ?? "2";
     let badge = undefined,
       psn = undefined;
-    if (badgePsn && badgePsn.length > MAX_EMPLOYEE_BADGE_LENGTH) {
-      if (badgePsn.length == MAX_EMPLOYEE_BADGE_LENGTH) {
+    if (badgePsn) {
+      if (badgePsn.length <= MAX_EMPLOYEE_BADGE_LENGTH) {
+        // Badge only (7 digits or less)
         badge = parseInt(badgePsn);
       } else {
-        badge = badgePsn ? parseInt(badgePsn.slice(0, -4)) : 0;
-        psn = badgePsn ? parseInt(badgePsn.slice(-4)) : 0;
+        // Badge + PSN (more than 7 digits)
+        badge = parseInt(badgePsn.slice(0, MAX_EMPLOYEE_BADGE_LENGTH));
+        psn = parseInt(badgePsn.slice(MAX_EMPLOYEE_BADGE_LENGTH));
       }
     }
     if (isValid) {
