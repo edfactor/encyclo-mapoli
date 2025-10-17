@@ -214,11 +214,6 @@ public class NavigationService : INavigationService
     }
 
 
-    public NavigationDto GetNavigation(short navigationId)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task<List<NavigationStatusDto>> GetNavigationStatus(CancellationToken cancellationToken)
     {
         // Try to get from distributed cache first
