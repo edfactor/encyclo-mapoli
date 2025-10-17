@@ -9,6 +9,11 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
     css: true,
+    // Windows limitation: Reduce workers to avoid "too many open files" error
+    // On Windows, limit to 1 worker; on Unix systems, use default (auto-detected based on CPU cores)
+    threads: process.platform === 'win32' ? 1 : true,
+    // Disable file-level parallelism on Windows to reduce file descriptor pressure
+    fileParallelism: process.platform === 'win32' ? false : true,
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
