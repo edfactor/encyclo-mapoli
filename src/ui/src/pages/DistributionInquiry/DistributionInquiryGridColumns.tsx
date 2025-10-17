@@ -10,9 +10,12 @@ import { ActionsCellRenderer } from "./DistributionActions";
 
 export const GetDistributionInquiryColumns = (): ColDef[] => {
   const columns: ColDef[] = [
-    createSSNColumn({}),
+    createSSNColumn({
+      maxWidth: 130
+    }),
     createNameColumn({
-      field: "fullName"
+      field: "fullName",
+      maxWidth: 250
     }),
     createBadgeColumn({}),
     {
@@ -21,43 +24,38 @@ export const GetDistributionInquiryColumns = (): ColDef[] => {
       sortable: true,
       resizable: true,
       headerClass: "left-align",
-      cellClass: "left-align"
-    },
-    {
-      headerName: "Pay Flag",
-      field: "statusName",
-      sortable: true,
-      resizable: true,
-      headerClass: "center-align",
-      cellClass: "center-align"
+      cellClass: "left-align",
+      maxWidth: 130
     },
     createStatusColumn({
-      headerName: "Status",
-      field: "distributionStatusId"
+      headerName: "Pay Flag",
+      field: "statusName",
+      maxWidth: 180
     }),
-    {
+    createStatusColumn({
       headerName: "Tax Flag",
       field: "taxCodeName",
-      sortable: true,
-      resizable: true,
-      headerClass: "center-align",
-      cellClass: "center-align"
-    },
+      maxWidth: 200
+    }),
     createCurrencyColumn({
       headerName: "Gross Amount",
-      field: "grossAmount"
+      field: "grossAmount",
+      maxWidth: 130
     }),
     createCurrencyColumn({
       headerName: "Federal Tax",
-      field: "federalTax"
+      field: "federalTax",
+      maxWidth: 120
     }),
     createCurrencyColumn({
       headerName: "State Tax",
-      field: "stateTax"
+      field: "stateTax",
+      maxWidth: 120
     }),
     createCurrencyColumn({
       headerName: "Check Amount",
-      field: "checkAmount"
+      field: "checkAmount",
+      maxWidth: 130
     }),
     {
       headerName: "Action",
@@ -67,7 +65,8 @@ export const GetDistributionInquiryColumns = (): ColDef[] => {
       headerClass: "center-align",
       cellClass: "center-align",
       cellRenderer: ActionsCellRenderer,
-      minWidth: 200
+      minWidth: 200,
+      maxWidth: 250
     }
   ];
 

@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
+
 public sealed class CommentType : ILookupTable<byte>, IEquatable<CommentType>
 {
     public required byte Id { get; set; }
@@ -34,6 +35,7 @@ public sealed class CommentType : ILookupTable<byte>, IEquatable<CommentType>
         // The variable name here purposely corresponds to the ZeroContrbutionReason.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested name
         public static CommentType SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested => new() { Id = 24, Name = ">64 & >5 100%" };
         public static CommentType ForfeitClassAction => new() { Id = 25, Name = "Forfeit Class Action" }; //https://demoulas.atlassian.net/wiki/spaces/MAIN/pages/402817082/008-12+to+forfeit+Class+Action+-+Mockup
+        public static CommentType ForfeitAdministrative => new() { Id = 26, Name = "Forfeit Administrative" }; // MAIN-2170 Administrative forfeitures
     }
 
     // Override Equals method for correct comparison between materialized values and constants
@@ -77,7 +79,7 @@ public sealed class CommentType : ILookupTable<byte>, IEquatable<CommentType>
         return left.Equals(right);
     }
 
-    public static bool operator !=(CommentType? left, CommentType? right)  
+    public static bool operator !=(CommentType? left, CommentType? right)
     {
         return !(left == right);
     }

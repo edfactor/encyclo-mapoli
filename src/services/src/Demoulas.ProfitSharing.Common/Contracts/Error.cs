@@ -42,15 +42,24 @@ public sealed record Error
     public static Error MergeOperationFailed(string message) => new(110, $"Merge operation failed: {message}");
 
     // Beneficiary Disbursement errors
-    public static Error DisburserDoesNotExist => new(120, "Disburser does not exist");
-    public static Error BeneficiaryDoesNotExist(string psn) => new(121, $"Beneficiary {psn} does not exist");
-    public static Error PercentageMoreThan100 => new(122, "Total percentage cannot exceed 100%");
+    public static Error DisburserDoesNotExist => new(128, "Disburser does not exist");
+    public static Error BeneficiaryDoesNotExist(string psn) => new(129, $"Beneficiary {psn} does not exist");
+    public static Error PercentageMoreThan100 => new(130, "Total percentage cannot exceed 100%");
     public static Error CantMixPercentageAndAmount => new(123, "Cannot mix percentage and amounts");
     public static Error PercentageAndAmountsMustBePositive => new(124, "Percentages and amounts must be greater than or equal to zero.");
     public static Error NotEnoughFundsToCoverAmounts => new(125, "Not enough funds to cover specified amounts.");
     public static Error DisburserIsStillMarkedAlive => new(126, "Disburser not yet marked as deceased.");
     public static Error RemainingAmountToDisburse(decimal amount) => new(127, $"Remaining amount to disburse must be zero. Remaining amount: {amount:C}");
 
+
+    // Forfeiture adjustment errors
+    public static Error ForfeitureAmountZero => new(116, "Forfeiture amount cannot be zero");
+    public static Error InvalidProfitYear => new(117, "Profit year must be provided and be valid");
+    public static Error NoPayProfitDataForYear => new(118, "No profit sharing data found for employee for the specified year");
+    public static Error ProfitDetailNotFound => new(119, "Profit detail not found");
+    public static Error VestingBalanceNotFound => new(120, "No vesting balance data found for employee");
+    public static Error ClassActionForfeitureCannotBeReversed => new(121, "Class action forfeiture cannot be reversed");
+    public static Error InsufficientVestingBalance => new(122, "Insufficient vesting balance for forfeiture adjustment");
 
     // Unexpected error wrapper (message captured). Prefer logging full exception separately.
     public static Error Unexpected(string message) => new(900, message);

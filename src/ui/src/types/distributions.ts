@@ -4,6 +4,7 @@ export interface DistributionSearchRequest {
   ssn?: string;
   badgeNumber?: number;
   psnSuffix?: number;
+  memberType?: number | null; // 1 = employees, 2 = beneficiaries, null = all
   distributionFrequencyId?: string;
   distributionStatusId?: string;
   distributionStatusIds?: string[];
@@ -25,6 +26,7 @@ export interface DistributionSearchResponse {
   badgeNumber: number | null;
   fullName: string;
   isExecutive: boolean;
+  isEmployee: boolean;
   frequencyId: string;
   frequencyName: string;
   statusId: string;
@@ -35,10 +37,14 @@ export interface DistributionSearchResponse {
   federalTax: number;
   stateTax: number;
   checkAmount: number;
+  demographicId: number | null;
+  beneficiaryId: number | null;
 }
 
 export interface DistributionSearchFormData {
-  ssnOrMemberNumber?: string;
+  socialSecurity?: string;
+  badgeNumber?: string;
+  memberType?: string; // "all", "employees", "beneficiaries"
   frequency?: string | null;
   paymentFlag?: string | null;
   paymentFlags?: string[];
@@ -58,6 +64,8 @@ export interface DistributionSearchResultDto {
 export interface DistributionsAndForfeituresRequestDto {
   startDate?: string;
   endDate?: string;
+  states?: string[];
+  taxCodes?: string[];
   pagination: SortedPaginationRequestDto;
 }
 
@@ -110,6 +118,9 @@ export interface DistributionsAndForfeitureTotalsResponse extends PagedReportRes
   stateTaxTotal: number;
   federalTaxTotal: number;
   forfeitureTotal: number;
+  forfeitureRegularTotal: number;
+  forfeitureAdministrativeTotal: number;
+  forfeitureClassActionTotal: number;
   stateTaxTotals: Record<string, number>;
 }
 
@@ -124,6 +135,7 @@ export interface DistributionsAndForfeitures {
   state: string | null;
   federalTax: number;
   forfeitAmount: number;
+  forfeitType: string | null;
   age: number;
   taxCode: string | null;
   otherName: string | null;
@@ -134,4 +146,71 @@ export interface DistributionsAndForfeitures {
 export interface DistributionsAndForfeituresQueryParams {
   startDate?: string;
   endDate?: string;
+  states?: string[];
+  taxCodes?: string[];
+}
+
+// State Tax Lookup
+export interface StateTaxLookupResponse {
+  state: string;
+  stateTaxRate: number;
+}
+
+// Create Distribution Request (matches backend CreateDistributionRequest)
+export interface CreateDistributionRequest {
+  badgeNumber: number;
+  statusId: string;
+  frequencyId: string;
+  payeeId?: number | null;
+  thirdPartyPayee?: {
+    payee?: string | null;
+    name?: string | null;
+    account?: string | null;
+    address: {
+      street: string;
+      street2?: string | null;
+      street3?: string | null;
+      street4?: string | null;
+      city?: string | null;
+      state?: string | null;
+      postalCode?: string | null;
+      countryIso?: string;
+    };
+    memo?: string | null;
+  } | null;
+  forTheBenefitOfPayee?: string | null;
+  forTheBenefitOfAccountType?: string | null;
+  tax1099ForEmployee: boolean;
+  tax1099ForBeneficiary: boolean;
+  federalTaxPercentage: number;
+  stateTaxPercentage: number;
+  grossAmount: number;
+  federalTaxAmount: number;
+  stateTaxAmount: number;
+  checkAmount: number;
+  taxCodeId: string;
+  isDeceased: boolean;
+  genderId?: string | null;
+  isQdro: boolean;
+  memo?: string | null;
+  isRothIra: boolean;
+}
+
+// Create/Update Distribution Response
+export interface CreateOrUpdateDistributionResponse {
+  id: number;
+  badgeNumber: number;
+  statusId: string;
+  frequencyId: string;
+  federalTaxPercentage: number;
+  federalTaxAmount: number;
+  stateTaxPercentage: number;
+  stateTaxAmount: number;
+  grossAmount: number;
+  checkAmount: number;
+  taxCodeId: string;
+  maskSsn: string;
+  paymentSequence: number;
+  createdAt: string;
+  memo?: string | null;
 }

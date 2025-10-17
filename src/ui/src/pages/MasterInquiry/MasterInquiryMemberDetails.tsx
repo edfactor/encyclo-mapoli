@@ -2,6 +2,8 @@ import { Grid, Typography } from "@mui/material";
 import React, { memo, useMemo } from "react";
 import { formatNumberWithComma, numberToCurrency } from "smart-ui-library";
 import LabelValueSection from "../../components/LabelValueSection";
+import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
+import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
 import { mmDDYYFormat } from "../../utils/dateUtils";
 import { getEnrolledStatus, getForfeitedStatus } from "../../utils/enrollmentUtil";
 import { formatPercentage } from "../../utils/formatPercentage";
@@ -35,6 +37,8 @@ in the React memo stuff at the bottom and are important for edge cases like thes
 */
 const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = memo(
   ({ memberType, id, profitYear, memberDetails, isLoading }) => {
+    const { missiveAlerts } = useMissiveAlerts();
+
     // Memoized enrollment status
     const enrollmentStatus = useMemo(() => {
       if (!memberDetails) return { enrolled: "", forfeited: "" };
@@ -80,7 +84,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         psnSuffix,
         isEmployee,
         department,
-        PayClassification,
+        payClassification,
         employmentStatus,
         gender,
         dateOfBirth,
@@ -92,7 +96,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
 
       const duplicateBadgeLink = [];
       if (badgesOfDuplicateSsns && badgesOfDuplicateSsns.length) {
-        for (let badge of badgesOfDuplicateSsns) {
+        for (const badge of badgesOfDuplicateSsns) {
           duplicateBadgeLink.push({
             label: "Duplicate SSN with",
             value: viewBadgeLinkRenderer(badge),
@@ -107,7 +111,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         ...(isEmployee ? [{ label: "Badge", value: viewBadgeLinkRenderer(badgeNumber) }] : []),
         ...(!isEmployee ? [{ label: "PSN", value: viewBadgeLinkRenderer(badgeNumber, psnSuffix) }] : []),
         ...(isEmployee ? [{ label: "Department", value: department || "N/A" }] : []),
-        ...(isEmployee ? [{ label: "Class", value: PayClassification || "N/A" }] : []),
+        ...(isEmployee ? [{ label: "Class", value: payClassification || "N/A" }] : []),
         ...(isEmployee ? [{ label: "Status", value: employmentStatus ?? "N/A" }] : []),
         { label: "Gender", value: gender || "N/A" },
         { label: "DOB", value: dobDisplay },
@@ -238,6 +242,13 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
               </Grid>
             </Grid>
           </Grid>
+
+          {/* Missive Alerts - Display at bottom of member details */}
+          {missiveAlerts.length > 0 && (
+            <Grid size={{ xs: 12 }}>
+              <MissiveAlerts />
+            </Grid>
+          )}
         </Grid>
       </div>
     );

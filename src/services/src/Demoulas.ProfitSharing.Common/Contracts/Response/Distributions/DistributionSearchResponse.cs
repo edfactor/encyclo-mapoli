@@ -14,6 +14,7 @@ public sealed record DistributionSearchResponse : IIsExecutive
     public int? BadgeNumber { get; set; }
     public required string FullName { get; set; }
     public bool IsExecutive { get; set; }
+    public bool IsEmployee { get; set; }
     public char FrequencyId { get; set; }
     public required string FrequencyName { get; set; }
     public char StatusId { get; set; }
@@ -24,6 +25,8 @@ public sealed record DistributionSearchResponse : IIsExecutive
     public decimal FederalTax { get; set; }
     public decimal StateTax { get; set; }
     public decimal CheckAmount { get; set; }
+    public int? DemographicId { get; set; }
+    public int? BeneficiaryId { get; set; }
 
     public static DistributionSearchResponse SampleResponse()
     {
@@ -35,6 +38,7 @@ public sealed record DistributionSearchResponse : IIsExecutive
             BadgeNumber = 701001,
             FullName = "John Doe",
             IsExecutive = false,
+            IsEmployee = true,
             FrequencyId = 'W',
             FrequencyName = "Weekly",
             StatusId = 'P',
@@ -44,7 +48,9 @@ public sealed record DistributionSearchResponse : IIsExecutive
             GrossAmount = 1500.00M,
             FederalTax = 150.00M,
             StateTax = 75.00M,
-            CheckAmount = 1275.00M
+            CheckAmount = 1275.00M,
+            DemographicId = 5001,
+            BeneficiaryId = null
         };
 
         return response;

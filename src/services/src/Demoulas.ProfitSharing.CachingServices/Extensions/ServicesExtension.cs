@@ -1,5 +1,6 @@
 ﻿using Demoulas.Common.Caching.Interfaces;
 using Demoulas.ProfitSharing.Common.Caching;
+using Demoulas.ProfitSharing.Services.Caching;
 using Demoulas.ProfitSharing.Services.Caching.HostedServices;
 using Demoulas.Util.Extensions;
 using Microsoft.Extensions.DependencyInjection;

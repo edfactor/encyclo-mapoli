@@ -18,7 +18,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("USING_NLS_COMP")
-                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("ProductVersion", "9.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -26186,6 +26186,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = (byte)25,
                             Name = "Forfeit Class Action"
+                        },
+                        new
+                        {
+                            Id = (byte)26,
+                            Name = "Forfeit Administrative"
                         });
                 });
 
@@ -30080,9 +30085,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasIndex("ZeroContributionReasonId")
                         .HasDatabaseName("IX_PAY_PROFIT_ZEROCONTRIBUTIONREASONID");
-
-                    b.HasIndex(new[] { "DemographicId", "ProfitYear" }, "IX_DemographicId_ProfitYear")
-                        .HasDatabaseName("IX_PAY_PROFIT_DEMOGRAPHICID_PROFITYEAR");
 
                     b.HasIndex(new[] { "EnrollmentId" }, "IX_EnrollmentId")
                         .HasDatabaseName("IX_PAY_PROFIT_ENROLLMENTID");

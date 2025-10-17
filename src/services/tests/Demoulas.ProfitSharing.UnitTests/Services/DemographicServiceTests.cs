@@ -1,5 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -18,6 +19,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 using MockQueryable.Moq;
 using Moq;
+using System.ComponentModel;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services;
 
@@ -25,8 +27,11 @@ public class DemographicsServiceTests
 {
     public DemographicsServiceTests()
     {
+        // Initialize telemetry metrics for testing
+        EndpointTelemetry.Initialize();
     }
 
+    private static int _demographicIdCounter = 1;
     private static Mock<DbSet<T>> BuildMockDbSetWithBackingList<T>(List<T> data) where T : class
     {
         // Start with IQueryable-enabled DbSet backed by the list
@@ -34,9 +39,28 @@ public class DemographicsServiceTests
 
         // Ensure Add/Remove operations mutate the backing list
         mockSet.Setup(s => s.Add(It.IsAny<T>()))
-            .Callback<T>(e => data.Add(e));
+            .Callback<T>(e =>
+            {
+                // Simulate auto-increment ID for Demographic entities
+                if (e is Demographic demo && demo.Id == 0)
+                {
+                    demo.Id = _demographicIdCounter++;
+                }
+                data.Add(e);
+            });
         mockSet.Setup(s => s.AddRange(It.IsAny<IEnumerable<T>>()))
-            .Callback<IEnumerable<T>>(range => data.AddRange(range));
+            .Callback<IEnumerable<T>>(range =>
+            {
+                foreach (var e in range)
+                {
+                    // Simulate auto-increment ID for Demographic entities
+                    if (e is Demographic demo && demo.Id == 0)
+                    {
+                        demo.Id = _demographicIdCounter++;
+                    }
+                    data.Add(e);
+                }
+            });
         mockSet.Setup(s => s.Remove(It.IsAny<T>()))
             .Callback<T>(e => data.Remove(e));
         mockSet.Setup(s => s.RemoveRange(It.IsAny<IEnumerable<T>>()))
@@ -50,7 +74,15 @@ public class DemographicsServiceTests
 
         // Async adds used by service (e.g., DemographicSyncAudit.AddAsync)
         mockSet.Setup(s => s.AddAsync(It.IsAny<T>(), It.IsAny<CancellationToken>()))
-            .Callback<T, CancellationToken>((e, _) => data.Add(e))
+            .Callback<T, CancellationToken>((e, _) =>
+            {
+                // Simulate auto-increment ID for Demographic entities
+                if (e is Demographic demo && demo.Id == 0)
+                {
+                    demo.Id = _demographicIdCounter++;
+                }
+                data.Add(e);
+            })
             .Returns<T, CancellationToken>((e, _) =>
                 ValueTask.FromResult((EntityEntry<T>)null!));
 
@@ -58,6 +90,7 @@ public class DemographicsServiceTests
     }
 
     [Fact]
+    [Description("PS-0000 : Audit error handling - verify DemographicSyncAudit records are added and saved")]
     public async Task AuditError_AddsAuditRecordsAndSaves()
     {
         // Arrange
@@ -107,6 +140,7 @@ public class DemographicsServiceTests
     }
 
     [Fact]
+    [Description("PS-0000 : Insert new demographic entities - verify new records are added to database")]
     public async Task AddDemographicsStreamAsync_InsertsNewEntities()
     {
         // Arrange list-backed sets
@@ -343,6 +377,7 @@ public class DemographicsServiceTests
     }
 
     [Fact]
+    [Description("PS-0000 : Duplicate SSN handling - verify duplicate SSNs are detected and audit logged")]
     public async Task AddDemographicsStreamAsync_HandlesDuplicateSsn()
     {
         // Arrange
@@ -379,6 +414,7 @@ public class DemographicsServiceTests
     /// </summary>
     /// <returns></returns>
     [Fact]
+    [Description("PS-0000 : SSN match with DOB mismatch - verify demographic update when SSN matches but DOB differs")]
     public async Task AddDemographicsStreamAsync_SSNMatch_NoDobMatch()
     {
         // Arrange
@@ -482,6 +518,7 @@ public class DemographicsServiceTests
     /// </summary>
     /// <returns></returns>
     [Fact]
+    [Description("PS-0000 : Terminated employee SSN match no balance - verify handling when terminated employee has no balance")]
     public async Task AddDemographicsStreamAsync_SSNMatch_NoDobMatch_ExistingEmployeeTerminated_NoBalance()
     {
         // Arrange
@@ -604,6 +641,7 @@ public class DemographicsServiceTests
     }
 
     [Fact]
+    [Description("PS-0000 : Terminated employee SSN match with balance - verify handling when terminated employee has balance")]
     public async Task AddDemographicsStreamAsync_SSNMatch_NoDobMatch_ExistingEmployeeTerminated_HasBalance()
     {
         // Arrange
@@ -724,6 +762,7 @@ public class DemographicsServiceTests
     }
 
     [Fact]
+    [Description("PS-0000 : Merge profit details - verify profit details are merged from source to target demographic")]
     public async Task MergeProfitDetailsToDemographic_WithValidSourceAndTarget_MergesAndAudits()
     {
         // Arrange
@@ -799,6 +838,7 @@ public class DemographicsServiceTests
     }
 
     [Fact]
+    [Description("PS-0000 : Merge profit details save failure - verify critical error is logged when save changes fails")]
     public async Task MergeProfitDetailsToDemographic_WhenSaveChangesFails_LogsCriticalError()
     {
         // Arrange

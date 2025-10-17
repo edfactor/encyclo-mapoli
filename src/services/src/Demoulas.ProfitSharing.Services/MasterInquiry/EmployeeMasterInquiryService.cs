@@ -1,4 +1,4 @@
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
@@ -250,7 +250,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                     memberData.BadgeNumber, memberData.Ssn.MaskSsn(), string.Join(", ", badgeNumbersOfDuplicates));
             }
 
-            return (ssn: memberData.Ssn, memberDetails: new MemberDetails
+            return (memberData.Ssn, new MemberDetails
             {
                 IsEmployee = true,
                 Id = memberData.Id,
@@ -357,7 +357,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                             x.CurrentHoursYear,
                             x.Etva,
                             x.EnrollmentId,
-                            x.Enrollment.Name
+                            Name = x.Enrollment != null ? x.Enrollment.Name : null
                         }).FirstOrDefault(),
                     PreviousPayProfit = d.PayProfits
                         .Where(x => x.ProfitYear == previousYear)
@@ -367,7 +367,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                             x.CurrentHoursYear,
                             x.Etva,
                             x.EnrollmentId,
-                            x.Enrollment.Name,
+                            Name = x.Enrollment != null ? x.Enrollment.Name : null,
                             x.PsCertificateIssuedDate
                         }).FirstOrDefault()
                 })
@@ -510,7 +510,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                             x.CurrentHoursYear,
                             x.Etva,
                             x.EnrollmentId,
-                            x.Enrollment.Name
+                            Name = x.Enrollment != null ? x.Enrollment.Name : null
                         }).FirstOrDefault(),
                     PreviousPayProfit = d.PayProfits
                         .Where(x => x.ProfitYear == previousYear)

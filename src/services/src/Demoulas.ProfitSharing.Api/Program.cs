@@ -55,17 +55,16 @@ else
         .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 }
 
-ElasticSearchConfig smartConfig = new ElasticSearchConfig();
-builder.Configuration.Bind("Logging:Smart", smartConfig);
+// Configure logging - configuration read from SmartLogging section in appsettings
+LoggingConfig logConfig = new();
+builder.Configuration.Bind("SmartLogging", logConfig);
 
-FileSystemLogConfig fileSystemLog = new FileSystemLogConfig();
-builder.Configuration.Bind("Logging:FileSystem", fileSystemLog);
-
-smartConfig.MaskingOperators = [
+logConfig.MaskingOperators = [
     new UnformattedSocialSecurityNumberMaskingOperator(),
     new SensitiveValueMaskingOperator()
 ];
-builder.SetDefaultLoggerConfiguration(smartConfig, fileSystemLog);
+
+_ = builder.SetDefaultLoggerConfiguration(logConfig);
 
 _ = builder.AddSecurityServices();
 
@@ -164,7 +163,7 @@ builder.Services.AddHealthChecks().AddCheck<EnvironmentHealthCheck>("Environment
 builder.Services.Configure<HealthCheckPublisherOptions>(options =>
 {
     options.Delay = TimeSpan.FromMinutes(1);       // Initial delay before the first run
-    options.Period = TimeSpan.FromMinutes(10);     // How often health checks are run
+    options.Period = TimeSpan.FromMinutes(15);     // How often health checks are run
     options.Predicate = _ => true;
 });
 

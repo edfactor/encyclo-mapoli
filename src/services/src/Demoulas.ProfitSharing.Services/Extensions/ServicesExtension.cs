@@ -1,4 +1,6 @@
-﻿using Demoulas.Common.Data.Services.Interfaces;
+﻿using System.Diagnostics;
+using Demoulas.Common.Data.Contexts.Configuration;
+using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -10,6 +12,7 @@ using Demoulas.ProfitSharing.Services.Audit;
 using Demoulas.ProfitSharing.Services.Beneficiaries;
 using Demoulas.ProfitSharing.Services.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
+using Demoulas.ProfitSharing.Services.Caching.HostedServices;
 using Demoulas.ProfitSharing.Services.Certificates;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.ItDevOps;
@@ -24,6 +27,7 @@ using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.ProfitSharing.Services.Reports.Breakdown;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using Demoulas.ProfitSharing.Services.Validation;
+using Demoulas.Util.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -109,12 +113,19 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<ICrossReferenceValidationService, CrossReferenceValidationService>();
         _ = builder.Services.AddScoped<IArchivedValueService, ArchivedValueService>();
         _ = builder.Services.AddScoped<IAllocTransferValidationService, AllocTransferValidationService>();
+        _ = builder.Services.AddScoped<IBalanceEquationValidationService, BalanceEquationValidationService>();
 
         // Register lookup caches as singletons (they manage their own distributed cache access)
         _ = builder.Services.AddSingleton<Services.Caching.StateTaxCache>();
         _ = builder.Services.AddSingleton<Services.Caching.ProfitCodeCache>();
 
         builder.AddProjectCachingServices();
+
+        // Register cache warmer hosted service (not in test environment)
+        if (!builder.Environment.IsTestEnvironment())
+        {
+            _ = builder.Services.AddHostedService<StateTaxCacheWarmerHostedService>();
+        }
 
         return builder;
     }

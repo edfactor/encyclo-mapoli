@@ -44,14 +44,21 @@ const StandaloneMemberDetails: React.FC<StandaloneMemberDetailsProps> = ({
         .then((details) => {
           setMemberDetails(details);
 
-          // We cannot cross references missives unless we have some in the redux store
-          if (details.missives && Array.isArray(reduxStoreMissives) && reduxStoreMissives.length > 0) {
-            const localMissives: MissiveResponse[] = details.missives
-              .map((missiveId: number) => reduxStoreMissives.find((m: MissiveResponse) => m.id === missiveId))
-              .filter(Boolean) as MissiveResponse[];
+          // Process missives if present in the response
+          if (details.missives && details.missives.length > 0) {
+            if (Array.isArray(reduxStoreMissives) && reduxStoreMissives.length > 0) {
+              // Cross-reference with Redux store missives
+              const localMissives: MissiveResponse[] = details.missives
+                .map((missiveId: number) => reduxStoreMissives.find((m: MissiveResponse) => m.id === missiveId))
+                .filter(Boolean) as MissiveResponse[];
 
-            if (localMissives.length > 0) {
-              addAlerts(localMissives);
+              if (localMissives.length > 0) {
+                addAlerts(localMissives);
+              } else {
+                console.warn("Missive IDs from API not found in Redux store:", details.missives);
+              }
+            } else {
+              console.warn("Missives lookup data not loaded yet. Cannot display alerts for:", details.missives);
             }
           }
 
@@ -69,16 +76,25 @@ const StandaloneMemberDetails: React.FC<StandaloneMemberDetailsProps> = ({
   // Initial fetch and refetch when dependencies change
   useEffect(() => {
     fetchMemberDetails.current();
-  }, [
-    memberType,
-    id,
-    profitYear,
-    triggerMemberDetails,
-    reduxStoreMissives,
-    masterInquiryRequestParams?.memberType,
-    addAlert,
-    addAlerts
-  ]);
+  }, [memberType, id, profitYear, triggerMemberDetails, masterInquiryRequestParams?.memberType, addAlert, addAlerts]);
+
+  // Process missives when they become available for existing member details
+  useEffect(() => {
+    if (
+      memberDetails?.missives &&
+      memberDetails.missives.length > 0 &&
+      Array.isArray(reduxStoreMissives) &&
+      reduxStoreMissives.length > 0
+    ) {
+      const localMissives: MissiveResponse[] = memberDetails.missives
+        .map((missiveId: number) => reduxStoreMissives.find((m: MissiveResponse) => m.id === missiveId))
+        .filter(Boolean) as MissiveResponse[];
+
+      if (localMissives.length > 0) {
+        addAlerts(localMissives);
+      }
+    }
+  }, [reduxStoreMissives, memberDetails?.missives, addAlerts]);
 
   // Refetch when refreshTrigger changes
   useEffect(() => {
