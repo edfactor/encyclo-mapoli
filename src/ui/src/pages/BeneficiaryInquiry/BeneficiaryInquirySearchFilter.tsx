@@ -1,10 +1,10 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, Grid, MenuItem, Select, TextField } from "@mui/material";
-import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../constants";
 import { Controller, Resolver, useForm } from "react-hook-form";
-import { BeneficiarySearchFilterRequest, BeneficiaryTypeDto, MasterInquiryRequest } from "reduxstore/types";
+import { BeneficiarySearchFilterRequest } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../constants";
 import { ssnValidator } from "../../utils/FormValidators";
 
 const schema = yup.object().shape({
@@ -44,8 +44,8 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
     memberType = memberType ?? "2";
     let badge = undefined,
       psn = undefined;
-    if (badgePsn && badgePsn.length >= MAX_EMPLOYEE_BADGE_LENGTH) {
-      if (badgePsn.length == MAX_EMPLOYEE_BADGE_LENGTH) {
+    if (badgePsn && badgePsn.length >= MAX_EMPLOYEE_BADGE_LENGTH - 1) {
+      if (badgePsn.length == MAX_EMPLOYEE_BADGE_LENGTH - 1) {
         badge = parseInt(badgePsn);
       } else {
         badge = badgePsn ? parseInt(badgePsn.slice(0, -4)) : 0;
