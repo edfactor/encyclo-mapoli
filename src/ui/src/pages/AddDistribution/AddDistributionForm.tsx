@@ -189,6 +189,14 @@ const AddDistributionForm = forwardRef<AddDistributionFormRef, AddDistributionFo
       }
     }, [thirdPartyName, setValue]);
 
+    // Clear tax overrides when Rollover is selected
+    useEffect(() => {
+      if (reasonCode === "R") {
+        setValue("fedTaxOverride", false);
+        setValue("stateTaxOverride", false);
+      }
+    }, [reasonCode, setValue]);
+
     // Calculate taxes on amount change
     const calculateTaxes = useCallback(() => {
       const amount = parseFloat(amountRequested);
