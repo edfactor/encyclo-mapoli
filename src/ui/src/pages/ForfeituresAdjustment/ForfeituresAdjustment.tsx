@@ -215,7 +215,6 @@ const ForfeituresAdjustment = () => {
               <ForfeituresTransactionGrid
                 transactionData={transactionData}
                 isLoading={isLoadingTransactions}
-                gridPagination={transactionGridPagination}
                 onPaginationChange={transactionGridPagination.handlePaginationChange}
                 onSortChange={transactionGridPagination.handleSortChange}
               />

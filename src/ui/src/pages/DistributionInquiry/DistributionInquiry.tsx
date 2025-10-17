@@ -4,7 +4,8 @@ import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import { Button, Divider, Grid, Tooltip } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { DSMAccordion, Page } from "smart-ui-library";
+import { useLocation } from "react-router-dom";
+import { DSMAccordion, Page, formatNumberWithComma } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
 import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
 import { DISTRIBUTION_INQUIRY_MESSAGES } from "../../components/MissiveAlerts/MissiveMessages";
@@ -26,6 +27,7 @@ import NewEntryDialog from "./NewEntryDialog";
 
 const DistributionInquiryContent = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
   const [searchData, setSearchData] = useState<any>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [isNewEntryDialogOpen, setIsNewEntryDialogOpen] = useState(false);
@@ -40,6 +42,23 @@ const DistributionInquiryContent = () => {
     dispatch(clearPendingDisbursements());
     dispatch(clearHistoricalDisbursements());
   }, [dispatch]);
+
+  // Display success message if returning from AddDistribution
+  useEffect(() => {
+    const state = location.state as any;
+    if (state?.showSuccessMessage && state?.memberName) {
+      const amountText = state.amount ? ` for $${formatNumberWithComma(state.amount)}` : "";
+      const successMessage = {
+        id: 911,
+        severity: "success" as const,
+        message: "Distribution Saved Successfully",
+        description: `Distribution${amountText} for ${state.memberName} has been saved successfully.`
+      };
+      addAlert(successMessage);
+      // Clear the state after displaying the message
+      window.history.replaceState({}, document.title);
+    }
+  }, [location, addAlert]);
 
   const handleSearch = async (formData: DistributionSearchFormData) => {
     try {

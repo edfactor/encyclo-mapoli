@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Alert, Button, CircularProgress, Divider, Grid, Tooltip } from "@mui/material";
 import { Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
+import { DISTRIBUTION_INQUIRY_MESSAGES } from "../../components/MissiveAlerts/MissiveMessages";
 import { CAPTIONS, ROUTES } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
@@ -18,6 +19,7 @@ const AddDistributionContent = () => {
   const formRef = useRef<AddDistributionFormRef>(null);
   const isReadOnly = useReadOnlyNavigation();
   const [isFormValid, setIsFormValid] = useState(false);
+  const [submittedAmount, setSubmittedAmount] = useState<number | null>(null);
 
   const profitYear = useDecemberFlowProfitYear();
 
@@ -54,15 +56,25 @@ const AddDistributionContent = () => {
 
   // Handle successful submission
   useEffect(() => {
-    if (submissionSuccess) {
-      // Navigate to distributions inquiry page
-      navigate(`/${ROUTES.DISTRIBUTIONS_INQUIRY}`);
+    if (submissionSuccess && memberData) {
+      // Get member name
+      const memberName = `${memberData.firstName} ${memberData.lastName}`;
+
+      // Navigate to distributions inquiry page with success message
+      navigate(`/${ROUTES.DISTRIBUTIONS_INQUIRY}`, {
+        state: {
+          showSuccessMessage: true,
+          memberName: memberName,
+          amount: submittedAmount
+        }
+      });
     }
-  }, [submissionSuccess, navigate]);
+  }, [submissionSuccess, memberData, submittedAmount, navigate]);
 
   // Handle form submission
   const handleFormSubmit = async (data: CreateDistributionRequest) => {
     try {
+      setSubmittedAmount(data.grossAmount);
       await submitDistribution(data);
     } catch (error) {
       console.error("Failed to submit distribution:", error);
