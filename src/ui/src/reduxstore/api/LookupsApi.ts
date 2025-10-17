@@ -1,13 +1,15 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 
-import { setAccountingYearData, setMissivesData, setStateTaxData } from "reduxstore/slices/lookupsSlice";
+import { setAccountingYearData, setMissivesData, setStateTaxData } from "../slices/lookupsSlice";
 import {
   CalendarResponseDto,
   MissiveResponse,
   ProfitYearRequest,
-  YearRangeRequest,
-  StateTaxLookupResponse
-} from "reduxstore/types";
+  StateListResponse,
+  StateTaxLookupResponse,
+  TaxCodeResponse,
+  YearRangeRequest
+} from "../types";
 import { createDataSourceAwareBaseQuery } from "./api";
 
 const baseQuery = createDataSourceAwareBaseQuery();
@@ -78,6 +80,24 @@ export const LookupsApi = createApi({
           console.log("Err: " + err);
         }
       }
+    }),
+    getStates: builder.query<StateListResponse[], void>({
+      query: () => ({
+        url: "/lookup/states",
+        method: "GET"
+      }),
+      transformResponse: (response: { items: StateListResponse[] }) => {
+        return response.items;
+      }
+    }),
+    getTaxCodes: builder.query<TaxCodeResponse[], void>({
+      query: () => ({
+        url: "/lookup/tax-codes",
+        method: "GET"
+      }),
+      transformResponse: (response: { items: TaxCodeResponse[] }) => {
+        return response.items;
+      }
     })
   })
 });
@@ -87,5 +107,7 @@ export const {
   useLazyGetMissivesQuery,
   useLazyGetAccountingRangeQuery,
   useLazyGetDuplicateSsnExistsQuery,
-  useLazyGetStateTaxQuery
+  useLazyGetStateTaxQuery,
+  useGetStatesQuery,
+  useGetTaxCodesQuery
 } = LookupsApi;

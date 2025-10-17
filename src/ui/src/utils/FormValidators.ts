@@ -117,7 +117,7 @@ export const mustBeNumberValidator = (fieldName?: string) =>
     });
 
 /**
- * Returns a validator for an end date (Date object) that must be after a start date
+ * Returns a validator for an end date (Date object) that must be after or equal to a start date
  * @param startFieldName - The name of the start date field in the parent schema
  * @param errorMessage - Optional custom error message
  */
@@ -125,10 +125,10 @@ export const endDateAfterStartDateValidator = (startFieldName: string, errorMess
   yup
     .date()
     .nullable()
-    .test("is-after-start", errorMessage || "End Date must be after Start Date", function (value) {
+    .test("is-after-start", errorMessage || "End Date must be on or after Start Date", function (value) {
       const startDate = this.parent[startFieldName];
       if (!startDate || !value) return true;
-      return value > startDate;
+      return value >= startDate;
     });
 
 /**
