@@ -129,7 +129,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 _logger.LogInformation("TRACE: Starting optimized duplicate SSN detection");
                 var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
                 var duplicateSsns = new HashSet<int>();
-                
+
                 const int oracleBatchSize = 1000;
                 var ssnBatches = ssnList.Chunk(oracleBatchSize).ToList();
                 _logger.LogInformation("TRACE: Processing {BatchCount} SSN batches (max {BatchSize} per batch, total {Total} SSNs)",
@@ -144,13 +144,13 @@ public sealed class MasterInquiryService : IMasterInquiryService
                         .Select(g => g.Key)
                         .TagWith($"MasterInquiry: Optimized duplicate detection - Year {req.ProfitYear}, batch size {ssnBatch.Count()}")
                         .ToListAsync(timeoutToken).ConfigureAwait(false);
-                    
+
                     foreach (var dup in batchDuplicates)
                     {
                         duplicateSsns.Add(dup);
                     }
                 }
-                
+
                 _logger.LogInformation("TRACE: Duplicate SSN query completed, count={Count}", duplicateSsns.Count);
 
                 // Handle exact match lookup when no results found
@@ -174,7 +174,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                     {
                         var demographicsForDup = await _demographicReaderService.BuildDemographicQuery(ctx);
                         duplicateSsns = new HashSet<int>();
-                        
+
                         var exactMatchBatches = ssnList.Chunk(oracleBatchSize).ToList();
                         foreach (var ssnBatch in exactMatchBatches)
                         {
@@ -185,7 +185,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                                 .Select(g => g.Key)
                                 .TagWith("MasterInquiry: Duplicate detection after exact match")
                                 .ToListAsync(timeoutToken).ConfigureAwait(false);
-                            
+
                             foreach (var dup in batchDuplicates)
                             {
                                 duplicateSsns.Add(dup);

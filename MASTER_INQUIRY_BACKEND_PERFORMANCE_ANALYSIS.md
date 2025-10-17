@@ -459,7 +459,7 @@ foreach (var ssnBatch in ssnBatches)
         .Select(g => g.Key)
         .TagWith($"MasterInquiry: Optimized duplicate detection - batch size {ssnBatch.Count()}")
         .ToListAsync(timeoutToken).ConfigureAwait(false);
-    
+
     foreach (var dup in batchDuplicates)
     {
         duplicateSsns.Add(dup);
@@ -468,6 +468,7 @@ foreach (var ssnBatch in ssnBatches)
 ```
 
 **Impact**:
+
 - Prevents runtime errors for queries with >1000 SSNs
 - Maintains performance optimization (scoped filtering)
 - Adds logging for batch processing transparency
@@ -490,6 +491,7 @@ private IQueryable<int> GetDuplicateSsnQuery(IQueryable<Demographic> demographic
 ```
 
 **Potential Issue**: Line 64 uses this result in a `.Contains()` without batching:
+
 ```csharp
 var dupSsns = await GetDuplicateSsnQuery(demographics).ToHashSetAsync(ct);
 // ... later ...
@@ -497,6 +499,7 @@ var dupSsns = await GetDuplicateSsnQuery(demographics).ToHashSetAsync(ct);
 ```
 
 **Recommendation for Follow-up**:
+
 1. **Low Priority**: Unlikely to have >1000 duplicate SSNs in demographics
 2. **If Needed**: Apply same batching pattern as MasterInquiryService
 3. **Consider**: Extract to shared service if pattern repeats elsewhere
