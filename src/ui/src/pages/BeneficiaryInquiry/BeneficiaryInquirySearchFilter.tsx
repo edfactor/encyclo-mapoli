@@ -44,12 +44,14 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
     memberType = memberType ?? "2";
     let badge = undefined,
       psn = undefined;
-    if (badgePsn && badgePsn.length >= MAX_EMPLOYEE_BADGE_LENGTH - 1) {
-      if (badgePsn.length == MAX_EMPLOYEE_BADGE_LENGTH - 1) {
+    if (badgePsn) {
+      if (badgePsn.length <= MAX_EMPLOYEE_BADGE_LENGTH) {
+        // Badge only (7 digits or less)
         badge = parseInt(badgePsn);
       } else {
-        badge = badgePsn ? parseInt(badgePsn.slice(0, -4)) : 0;
-        psn = badgePsn ? parseInt(badgePsn.slice(-4)) : 0;
+        // Badge + PSN (more than 7 digits)
+        badge = parseInt(badgePsn.slice(0, MAX_EMPLOYEE_BADGE_LENGTH));
+        psn = parseInt(badgePsn.slice(MAX_EMPLOYEE_BADGE_LENGTH));
       }
     }
     if (isValid) {
