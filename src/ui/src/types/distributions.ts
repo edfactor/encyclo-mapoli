@@ -149,3 +149,68 @@ export interface DistributionsAndForfeituresQueryParams {
   states?: string[];
   taxCodes?: string[];
 }
+
+// State Tax Lookup
+export interface StateTaxLookupResponse {
+  state: string;
+  stateTaxRate: number;
+}
+
+// Create Distribution Request (matches backend CreateDistributionRequest)
+export interface CreateDistributionRequest {
+  badgeNumber: number;
+  statusId: string;
+  frequencyId: string;
+  payeeId?: number | null;
+  thirdPartyPayee?: {
+    payee?: string | null;
+    name?: string | null;
+    account?: string | null;
+    address: {
+      street: string;
+      street2?: string | null;
+      street3?: string | null;
+      street4?: string | null;
+      city?: string | null;
+      state?: string | null;
+      postalCode?: string | null;
+      countryIso?: string;
+    };
+    memo?: string | null;
+  } | null;
+  forTheBenefitOfPayee?: string | null;
+  forTheBenefitOfAccountType?: string | null;
+  tax1099ForEmployee: boolean;
+  tax1099ForBeneficiary: boolean;
+  federalTaxPercentage: number;
+  stateTaxPercentage: number;
+  grossAmount: number;
+  federalTaxAmount: number;
+  stateTaxAmount: number;
+  checkAmount: number;
+  taxCodeId: string;
+  isDeceased: boolean;
+  genderId?: string | null;
+  isQdro: boolean;
+  memo?: string | null;
+  isRothIra: boolean;
+}
+
+// Create/Update Distribution Response
+export interface CreateOrUpdateDistributionResponse {
+  id: number;
+  badgeNumber: number;
+  statusId: string;
+  frequencyId: string;
+  federalTaxPercentage: number;
+  federalTaxAmount: number;
+  stateTaxPercentage: number;
+  stateTaxAmount: number;
+  grossAmount: number;
+  checkAmount: number;
+  taxCodeId: string;
+  maskSsn: string;
+  paymentSequence: number;
+  createdAt: string;
+  memo?: string | null;
+}

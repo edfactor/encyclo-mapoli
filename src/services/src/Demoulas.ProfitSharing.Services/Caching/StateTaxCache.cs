@@ -1,3 +1,4 @@
+using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.Extensions.Caching.Distributed;
@@ -23,6 +24,7 @@ public sealed class StateTaxCache : LookupCache<string, decimal?, StateTax>
             queryBuilder: query => query, // No filtering needed
             keySelector: entity => entity.Abbreviation,
             valueSelector: entity => (decimal?)entity.Rate, // Nullable to distinguish "exists with 0" from "not found"
+            getDbSetFunc: ctx => ctx.StateTaxes, // Get DbSet from read-only context
             absoluteExpiration: TimeSpan.FromHours(4)) // State taxes rarely change
     {
     }

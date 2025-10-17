@@ -81,7 +81,7 @@ const MilitaryContributionForm = ({
       } catch (error) {
         const serviceError = error as ServiceErrorResponse;
         if (serviceError?.data) {
-          let errorMessages: string[] = [];
+          const errorMessages: string[] = [];
 
           if (Array.isArray(serviceError.data.errors)) {
             errorMessages.push("Errors:");

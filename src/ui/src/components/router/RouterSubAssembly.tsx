@@ -56,6 +56,7 @@ import MilitaryContribution from "../../pages/DecemberActivities/MilitaryContrib
 import DevDebug from "../../pages/Dev/DevDebug";
 import DistributionInquiry from "../../pages/DistributionInquiry/DistributionInquiry";
 import ViewDistribution from "../../pages/ViewDistribution/ViewDistribution";
+import AddDistribution from "../../pages/AddDistribution/AddDistribution";
 import Documentation from "../../pages/Documentation/Documentation";
 import RecentlyTerminated from "../../pages/FiscalClose/RecentlyTerminated/RecentlyTerminated";
 import TerminatedLetters from "../../pages/FiscalClose/TerminatedLetters/TerminatedLetters";
@@ -237,6 +238,9 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={`${ROUTES.VIEW_DISTRIBUTION}/:memberId/:memberType`}
                   element={<ViewDistribution />}></Route>
+                <Route
+                  path={`${ROUTES.ADD_DISTRIBUTION}/:memberId/:memberType`}
+                  element={<AddDistribution />}></Route>
                 <Route
                   path={ROUTES.PAY_BEN_REPORT}
                   element={<PayBenReport />}></Route>
