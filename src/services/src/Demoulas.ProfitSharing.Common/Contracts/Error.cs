@@ -41,6 +41,17 @@ public sealed record Error
     public static Error SameDemographicMerge => new(109, "Cannot merge demographic with itself");
     public static Error MergeOperationFailed(string message) => new(110, $"Merge operation failed: {message}");
 
+    // Beneficiary Disbursement errors
+    public static Error DisburserDoesNotExist => new(120, "Disburser does not exist");
+    public static Error BeneficiaryDoesNotExist(string psn) => new(121, $"Beneficiary {psn} does not exist");
+    public static Error PercentageMoreThan100 => new(122, "Total percentage cannot exceed 100%");
+    public static Error CantMixPercentageAndAmount => new(123, "Cannot mix percentage and amounts");
+    public static Error PercentageAndAmountsMustBePositive => new(124, "Percentages and amounts must be greater than or equal to zero.");
+    public static Error NotEnoughFundsToCoverAmounts => new(125, "Not enough funds to cover specified amounts.");
+    public static Error DisburserIsStillMarkedAlive => new(126, "Disburser not yet marked as deceased.");
+    public static Error RemainingAmountToDisburse(decimal amount) => new(127, $"Remaining amount to disburse must be zero. Remaining amount: {amount:C}");
+
+
     // Unexpected error wrapper (message captured). Prefer logging full exception separately.
     public static Error Unexpected(string message) => new(900, message);
 
