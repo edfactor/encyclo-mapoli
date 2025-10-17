@@ -262,6 +262,9 @@ const AddDistributionContent = () => {
               onSubmit={handleFormSubmit}
               onReset={handleFormReset}
               isSubmitting={isSubmitting}
+              dateOfBirth={memberData.dateOfBirth}
+              age={memberData.age}
+              vestedAmount={memberData.currentVestedAmount}
             />
           </Grid>
 

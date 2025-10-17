@@ -50,6 +50,9 @@ interface AddDistributionFormProps {
   onSubmit: (request: CreateDistributionRequest) => Promise<void>;
   onReset: () => void;
   isSubmitting: boolean;
+  dateOfBirth?: string | null;
+  age?: number | null;
+  vestedAmount?: number | null;
 }
 
 // Validation schema
@@ -78,7 +81,7 @@ const schema = yup.object().shape({
 });
 
 const AddDistributionForm = forwardRef<AddDistributionFormRef, AddDistributionFormProps>(
-  ({ stateTaxRate, sequenceNumber, badgeNumber, onSubmit, onReset, isSubmitting }, ref) => {
+  ({ stateTaxRate, sequenceNumber, badgeNumber, onSubmit, onReset, isSubmitting, dateOfBirth, age, vestedAmount }, ref) => {
     const {
       control,
       handleSubmit,
@@ -123,6 +126,7 @@ const AddDistributionForm = forwardRef<AddDistributionFormRef, AddDistributionFo
     const fedTaxOverride = watch("fedTaxOverride");
     const stateTaxOverride = watch("stateTaxOverride");
     const reasonCode = watch("reasonCode");
+    const taxCode = watch("taxCode");
 
     // Watch 3rd party fields
     const thirdPartyName = watch("thirdPartyName");
@@ -196,6 +200,17 @@ const AddDistributionForm = forwardRef<AddDistributionFormRef, AddDistributionFo
         setValue("stateTaxOverride", false);
       }
     }, [reasonCode, setValue]);
+
+    // Auto-set memo when age > 64, tax code is 7, and amount differs from vested amount
+    useEffect(() => {
+      const memberAge = age ?? 0;
+      const requestedAmount = parseFloat(amountRequested) || 0;
+      const vested = vestedAmount ?? 0;
+
+      if (memberAge > 64 && taxCode === "7" && requestedAmount !== vested && requestedAmount > 0) {
+        setValue("memo", "AGE > 64 OVERRIDE");
+      }
+    }, [age, taxCode, amountRequested, vestedAmount, setValue]);
 
     // Calculate taxes on amount change
     const calculateTaxes = useCallback(() => {
