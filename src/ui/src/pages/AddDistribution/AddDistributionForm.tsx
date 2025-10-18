@@ -50,6 +50,9 @@ interface AddDistributionFormProps {
   onSubmit: (request: CreateDistributionRequest) => Promise<void>;
   onReset: () => void;
   isSubmitting: boolean;
+  dateOfBirth?: string | null;
+  age?: number | null;
+  vestedAmount?: number | null;
 }
 
 // Validation schema
@@ -78,7 +81,7 @@ const schema = yup.object().shape({
 });
 
 const AddDistributionForm = forwardRef<AddDistributionFormRef, AddDistributionFormProps>(
-  ({ stateTaxRate, sequenceNumber, badgeNumber, onSubmit, onReset, isSubmitting }, ref) => {
+  ({ stateTaxRate, sequenceNumber, badgeNumber, onSubmit, onReset, isSubmitting, dateOfBirth, age, vestedAmount }, ref) => {
     const {
       control,
       handleSubmit,
@@ -122,6 +125,8 @@ const AddDistributionForm = forwardRef<AddDistributionFormRef, AddDistributionFo
     const amountRequested = watch("amountRequested");
     const fedTaxOverride = watch("fedTaxOverride");
     const stateTaxOverride = watch("stateTaxOverride");
+    const reasonCode = watch("reasonCode");
+    const taxCode = watch("taxCode");
 
     // Watch 3rd party fields
     const thirdPartyName = watch("thirdPartyName");
@@ -187,6 +192,25 @@ const AddDistributionForm = forwardRef<AddDistributionFormRef, AddDistributionFo
         setValue("reasonCode", "R"); // Rollover
       }
     }, [thirdPartyName, setValue]);
+
+    // Clear tax overrides when Rollover is selected
+    useEffect(() => {
+      if (reasonCode === "R") {
+        setValue("fedTaxOverride", false);
+        setValue("stateTaxOverride", false);
+      }
+    }, [reasonCode, setValue]);
+
+    // Auto-set memo when age > 64, tax code is 7, and amount differs from vested amount
+    useEffect(() => {
+      const memberAge = age ?? 0;
+      const requestedAmount = parseFloat(amountRequested) || 0;
+      const vested = vestedAmount ?? 0;
+
+      if (memberAge > 64 && taxCode === "7" && requestedAmount !== vested && requestedAmount > 0) {
+        setValue("memo", "AGE > 64 OVERRIDE");
+      }
+    }, [age, taxCode, amountRequested, vestedAmount, setValue]);
 
     // Calculate taxes on amount change
     const calculateTaxes = useCallback(() => {
@@ -608,265 +632,269 @@ const AddDistributionForm = forwardRef<AddDistributionFormRef, AddDistributionFo
             />
           </Grid>
 
-          {/* 3rd Party Details Section */}
-          <Grid size={{ xs: 12 }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5", marginTop: "24px", marginBottom: "16px" }}>
-              3rd Party Details
-            </Typography>
-          </Grid>
+          {/* 3rd Party Details Section - Only show when Reason Code is "R - Rollover" */}
+          {reasonCode === "R" && (
+            <>
+              <Grid size={{ xs: 12 }}>
+                <Typography
+                  variant="h2"
+                  sx={{ color: "#0258A5", marginTop: "24px", marginBottom: "16px" }}>
+                  3rd Party Details
+                </Typography>
+              </Grid>
 
-          {/* Name */}
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>Name</FormLabel>
-            <Controller
-              name="thirdPartyName"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  onBlur={() => {
-                    field.onBlur();
-                    if (field.value?.trim()) {
-                      setThirdPartyTouched(true);
-                    }
-                  }}
-                />
-              )}
-            />
-          </Grid>
-
-          {/* Address 1 */}
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>Address 1</FormLabel>
-            <Controller
-              name="thirdPartyAddress1"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  sx={
-                    thirdPartyTouched && !field.value?.trim()
-                      ? { "& .MuiOutlinedInput-root": { borderColor: "#d32f2f" } }
-                      : undefined
-                  }
-                  error={thirdPartyTouched && !field.value?.trim()}
-                />
-              )}
-            />
-          </Grid>
-
-          {/* Address 2 */}
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>Address 2</FormLabel>
-            <Controller
-              name="thirdPartyAddress2"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                />
-              )}
-            />
-          </Grid>
-
-          {/* City */}
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>City</FormLabel>
-            <Controller
-              name="thirdPartyCity"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  sx={
-                    thirdPartyTouched && !field.value?.trim()
-                      ? { "& .MuiOutlinedInput-root": { borderColor: "#d32f2f" } }
-                      : undefined
-                  }
-                  error={thirdPartyTouched && !field.value?.trim()}
-                />
-              )}
-            />
-          </Grid>
-
-          {/* State */}
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>State</FormLabel>
-            <Controller
-              name="thirdPartyState"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  sx={
-                    thirdPartyTouched && !field.value?.trim()
-                      ? { "& .MuiOutlinedInput-root": { borderColor: "#d32f2f" } }
-                      : undefined
-                  }
-                  error={thirdPartyTouched && !field.value?.trim()}
-                />
-              )}
-            />
-          </Grid>
-
-          {/* Zip */}
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>Zip</FormLabel>
-            <Controller
-              name="thirdPartyZip"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  sx={
-                    thirdPartyTouched && !field.value?.trim()
-                      ? { "& .MuiOutlinedInput-root": { borderColor: "#d32f2f" } }
-                      : undefined
-                  }
-                  error={thirdPartyTouched && !field.value?.trim()}
-                />
-              )}
-            />
-          </Grid>
-
-          {/* Check Payable To */}
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>Check Payable To</FormLabel>
-            <Controller
-              name="checkPayableTo"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                />
-              )}
-            />
-          </Grid>
-
-          {/* FBO Pay To */}
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>FBO Pay To</FormLabel>
-            <Controller
-              name="fboPayTo"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                />
-              )}
-            />
-          </Grid>
-
-          {/* FBO Type */}
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>FBO Type</FormLabel>
-            <Controller
-              name="fboType"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                />
-              )}
-            />
-          </Grid>
-
-          {/* Account */}
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>Account</FormLabel>
-            <Controller
-              name="account"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                />
-              )}
-            />
-          </Grid>
-
-          {/* Roth IRA */}
-          <Grid
-            size={{ xs: 12, sm: 6, md: 4 }}
-            sx={{ display: "flex", alignItems: "center" }}>
-            <Controller
-              name="rothIra"
-              control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={field.value}
-                      onChange={field.onChange}
+              {/* Name */}
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <FormLabel>Name</FormLabel>
+                <Controller
+                  name="thirdPartyName"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      onBlur={() => {
+                        field.onBlur();
+                        if (field.value?.trim()) {
+                          setThirdPartyTouched(true);
+                        }
+                      }}
                     />
-                  }
-                  label="Roth IRA"
+                  )}
                 />
-              )}
-            />
-          </Grid>
+              </Grid>
 
-          {/* SSN */}
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>SSN</FormLabel>
-            <Controller
-              name="thirdPartySsn"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  placeholder="9 digits"
-                  error={!!errors.thirdPartySsn}
-                  helperText={errors.thirdPartySsn?.message}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Only allow digits
-                    if (value === "" || /^\d*$/.test(value)) {
-                      // Limit to 9 digits
-                      if (value.length <= 9) {
-                        field.onChange(value);
+              {/* Address 1 */}
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <FormLabel>Address 1</FormLabel>
+                <Controller
+                  name="thirdPartyAddress1"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      sx={
+                        thirdPartyTouched && !field.value?.trim()
+                          ? { "& .MuiOutlinedInput-root": { borderColor: "#d32f2f" } }
+                          : undefined
                       }
-                    }
-                  }}
+                      error={thirdPartyTouched && !field.value?.trim()}
+                    />
+                  )}
                 />
-              )}
-            />
-          </Grid>
+              </Grid>
+
+              {/* Address 2 */}
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <FormLabel>Address 2</FormLabel>
+                <Controller
+                  name="thirdPartyAddress2"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                    />
+                  )}
+                />
+              </Grid>
+
+              {/* City */}
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <FormLabel>City</FormLabel>
+                <Controller
+                  name="thirdPartyCity"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      sx={
+                        thirdPartyTouched && !field.value?.trim()
+                          ? { "& .MuiOutlinedInput-root": { borderColor: "#d32f2f" } }
+                          : undefined
+                      }
+                      error={thirdPartyTouched && !field.value?.trim()}
+                    />
+                  )}
+                />
+              </Grid>
+
+              {/* State */}
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <FormLabel>State</FormLabel>
+                <Controller
+                  name="thirdPartyState"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      sx={
+                        thirdPartyTouched && !field.value?.trim()
+                          ? { "& .MuiOutlinedInput-root": { borderColor: "#d32f2f" } }
+                          : undefined
+                      }
+                      error={thirdPartyTouched && !field.value?.trim()}
+                    />
+                  )}
+                />
+              </Grid>
+
+              {/* Zip */}
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <FormLabel>Zip</FormLabel>
+                <Controller
+                  name="thirdPartyZip"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      sx={
+                        thirdPartyTouched && !field.value?.trim()
+                          ? { "& .MuiOutlinedInput-root": { borderColor: "#d32f2f" } }
+                          : undefined
+                      }
+                      error={thirdPartyTouched && !field.value?.trim()}
+                    />
+                  )}
+                />
+              </Grid>
+
+              {/* Check Payable To */}
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <FormLabel>Check Payable To</FormLabel>
+                <Controller
+                  name="checkPayableTo"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                    />
+                  )}
+                />
+              </Grid>
+
+              {/* FBO Pay To */}
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <FormLabel>FBO Pay To</FormLabel>
+                <Controller
+                  name="fboPayTo"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                    />
+                  )}
+                />
+              </Grid>
+
+              {/* FBO Type */}
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <FormLabel>FBO Type</FormLabel>
+                <Controller
+                  name="fboType"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                    />
+                  )}
+                />
+              </Grid>
+
+              {/* Account */}
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <FormLabel>Account</FormLabel>
+                <Controller
+                  name="account"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                    />
+                  )}
+                />
+              </Grid>
+
+              {/* Roth IRA */}
+              <Grid
+                size={{ xs: 12, sm: 6, md: 4 }}
+                sx={{ display: "flex", alignItems: "center" }}>
+                <Controller
+                  name="rothIra"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={field.value}
+                          onChange={field.onChange}
+                        />
+                      }
+                      label="Roth IRA"
+                    />
+                  )}
+                />
+              </Grid>
+
+              {/* SSN */}
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <FormLabel>SSN</FormLabel>
+                <Controller
+                  name="thirdPartySsn"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      placeholder="9 digits"
+                      error={!!errors.thirdPartySsn}
+                      helperText={errors.thirdPartySsn?.message}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        // Only allow digits
+                        if (value === "" || /^\d*$/.test(value)) {
+                          // Limit to 9 digits
+                          if (value.length <= 9) {
+                            field.onChange(value);
+                          }
+                        }
+                      }}
+                    />
+                  )}
+                />
+              </Grid>
+            </>
+          )}
         </Grid>
       </form>
     );

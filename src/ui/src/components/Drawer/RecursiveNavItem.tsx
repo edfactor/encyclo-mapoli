@@ -115,7 +115,11 @@ export const RecursiveNavItem: FC<RecursiveNavItemProps> = ({ item, level, maxAu
 
       // Store navigation ID for read-only checks and other features
       if (item.id) {
-        localStorage.setItem("navigationId", item.id.toString());
+        try {
+          localStorage.setItem("navigationId", item.id.toString());
+        } catch (error) {
+          console.error("Error saving navigation ID:", error);
+        }
       }
 
       navigate(absolutePath);

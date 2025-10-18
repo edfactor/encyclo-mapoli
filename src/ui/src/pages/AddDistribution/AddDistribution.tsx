@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Alert, Button, CircularProgress, Divider, Grid, Tooltip } from "@mui/material";
 import { Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
+import { DISTRIBUTION_INQUIRY_MESSAGES } from "../../components/MissiveAlerts/MissiveMessages";
 import { CAPTIONS, ROUTES } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
@@ -18,6 +19,7 @@ const AddDistributionContent = () => {
   const formRef = useRef<AddDistributionFormRef>(null);
   const isReadOnly = useReadOnlyNavigation();
   const [isFormValid, setIsFormValid] = useState(false);
+  const [submittedAmount, setSubmittedAmount] = useState<number | null>(null);
 
   const profitYear = useDecemberFlowProfitYear();
 
@@ -54,15 +56,25 @@ const AddDistributionContent = () => {
 
   // Handle successful submission
   useEffect(() => {
-    if (submissionSuccess) {
-      // Navigate to distributions inquiry page
-      navigate(`/${ROUTES.DISTRIBUTIONS_INQUIRY}`);
+    if (submissionSuccess && memberData) {
+      // Get member name
+      const memberName = `${memberData.firstName} ${memberData.lastName}`;
+
+      // Navigate to distributions inquiry page with success message
+      navigate(`/${ROUTES.DISTRIBUTIONS_INQUIRY}`, {
+        state: {
+          showSuccessMessage: true,
+          memberName: memberName,
+          amount: submittedAmount
+        }
+      });
     }
-  }, [submissionSuccess, navigate]);
+  }, [submissionSuccess, memberData, submittedAmount, navigate]);
 
   // Handle form submission
   const handleFormSubmit = async (data: CreateDistributionRequest) => {
     try {
+      setSubmittedAmount(data.grossAmount);
       await submitDistribution(data);
     } catch (error) {
       console.error("Failed to submit distribution:", error);
@@ -91,6 +103,14 @@ const AddDistributionContent = () => {
 
   // Track 3rd party address requirement
   const [thirdPartyAddressRequired, setThirdPartyAddressRequired] = useState(false);
+
+  // Determine validation errors
+  const maxDistributionsReached = sequenceNumber === 10;
+  const noAvailableBalance = memberData?.currentVestedAmount === 0;
+  const validationError =
+    maxDistributionsReached ? "Member has reached maximum of nine distributions."
+    : noAvailableBalance ? "Member has no available balance to distribute."
+    : null;
 
   // Check form validity periodically
   useEffect(() => {
@@ -126,13 +146,13 @@ const AddDistributionContent = () => {
         sx={{ display: "flex", justifyContent: "flex-end", paddingX: "24px", gap: "12px" }}>
         <Tooltip
           title={
-            isReadOnly ? "You are in read-only mode" : thirdPartyAddressRequired ? "3rd Party Address Required" : ""
+            isReadOnly ? "You are in read-only mode" : thirdPartyAddressRequired ? "3rd Party Address Required" : validationError ? validationError : ""
           }>
           <span>
             <Button
               variant="contained"
               onClick={handleSave}
-              disabled={isReadOnly || isSubmitting || isMemberLoading || !isFormValid || thirdPartyAddressRequired}
+              disabled={isReadOnly || isSubmitting || isMemberLoading || !isFormValid || thirdPartyAddressRequired || !!validationError}
               className="h-10 min-w-fit whitespace-nowrap">
               SAVE
             </Button>
@@ -155,6 +175,23 @@ const AddDistributionContent = () => {
       </Grid>
 
       {/* Error Messages */}
+      {validationError && (
+        <Grid
+          width="100%"
+          sx={{ paddingX: "24px" }}>
+          <Alert
+            severity="error"
+            sx={{
+              "& .MuiAlert-message": {
+                fontSize: "1.1rem",
+                fontWeight: "bold"
+              }
+            }}>
+            {validationError}
+          </Alert>
+        </Grid>
+      )}
+
       {memberError && (
         <Grid
           width="100%"
@@ -225,6 +262,9 @@ const AddDistributionContent = () => {
               onSubmit={handleFormSubmit}
               onReset={handleFormReset}
               isSubmitting={isSubmitting}
+              dateOfBirth={memberData.dateOfBirth}
+              age={memberData.age}
+              vestedAmount={memberData.currentVestedAmount}
             />
           </Grid>
 

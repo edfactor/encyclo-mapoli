@@ -52,5 +52,12 @@ export const DISTRIBUTION_INQUIRY_MESSAGES = {
     severity: "Error" as const,
     message: "Member Not Found",
     description: "The member you are searching for does not exist in the system."
+  } as MissiveResponse,
+
+  DISTRIBUTION_SAVED_SUCCESS: {
+    id: 911,
+    severity: "success" as const,
+    message: "Distribution Saved Successfully",
+    description: "The distribution has been saved successfully."
   } as MissiveResponse
 };
