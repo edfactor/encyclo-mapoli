@@ -15,20 +15,26 @@ import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAler
 import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
 import { CAPTIONS } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
-import { useGridPagination } from "../../hooks/useGridPagination";
+import { SortParams, useGridPagination } from "../../hooks/useGridPagination";
 import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
 import { InquiryApi } from "../../reduxstore/api/InquiryApi";
 import { clearForfeitureAdjustmentData } from "../../reduxstore/slices/forfeituresAdjustmentSlice";
+import { MasterInquiryResponseDto } from "../../types/master-inquiry/master-inquiry";
 import AddForfeitureModal from "./AddForfeitureModal";
 import ForfeituresAdjustmentPanel from "./ForfeituresAdjustmentPanel";
 import ForfeituresAdjustmentSearchFilter from "./ForfeituresAdjustmentSearchFilter";
 import ForfeituresTransactionGrid from "./ForfeituresTransactionGrid";
 
+interface TransactionData {
+  results: MasterInquiryResponseDto[];
+  total: number;
+}
+
 const ForfeituresAdjustment = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [isAddForfeitureModalOpen, setIsAddForfeitureModalOpen] = useState(false);
   const [pageNumberReset, setPageNumberReset] = useState(false);
-  const [transactionData, setTransactionData] = useState<any>(null);
+  const [transactionData, setTransactionData] = useState<TransactionData | null>(null);
   const { forfeitureAdjustmentData, forfeitureAdjustmentQueryParams } = useSelector(
     (state: RootState) => state.forfeituresAdjustment
   );
@@ -40,7 +46,7 @@ const ForfeituresAdjustment = () => {
     useLazyGetProfitMasterInquiryMemberDetailsQuery();
   const dispatch = useDispatch();
 
-  const handleTransactionGridPaginationChange = (pageNumber: number, pageSize: number, sortParams: any) => {
+  const handleTransactionGridPaginationChange = (pageNumber: number, pageSize: number, sortParams: SortParams) => {
     fetchTransactionDetails(pageNumber, pageSize, sortParams);
   };
 
@@ -109,7 +115,7 @@ const ForfeituresAdjustment = () => {
     }
   };
 
-  const fetchTransactionDetails = (pageNumber = 0, pageSize = 50, sortParams = null) => {
+  const fetchTransactionDetails = (pageNumber = 0, pageSize = 50, sortParams: SortParams | null = null) => {
     if (forfeitureAdjustmentData) {
       const apiParams = {
         memberType: 1,
@@ -124,7 +130,7 @@ const ForfeituresAdjustment = () => {
         .unwrap()
         .then((response) => {
           // Filter for "Outgoing forfeitures" transactions (profit code 2)
-          const filteredResults = response.results.filter((transaction: any) => {
+          const filteredResults = response.results.filter((transaction) => {
             return transaction.profitCodeId === 2;
           });
 

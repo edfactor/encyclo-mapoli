@@ -1,5 +1,6 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { SearchResponse } from "./hooks/useMasterInquiryReducer";
 import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
 
 /**
@@ -10,8 +11,8 @@ import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
 
 describe("MasterInquiryMemberGrid - Badge Link Styling", () => {
   // Minimal mock data - just enough to render the component
-  const mockSearchResults = {
-    results: [] as any[],
+  const mockSearchResults: SearchResponse = {
+    results: [],
     total: 0
   };
 

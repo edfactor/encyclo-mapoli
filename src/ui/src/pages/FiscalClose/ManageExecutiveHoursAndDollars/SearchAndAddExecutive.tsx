@@ -1,10 +1,20 @@
 import { AddOutlined } from "@mui/icons-material";
 import { Button, Divider, Grid, Tooltip } from "@mui/material";
 import { DSMAccordion, Page } from "smart-ui-library";
+import { ExecutiveHoursAndDollars, PagedReportResponse } from "../../../reduxstore/types";
+import { ExecutiveHoursAndDollarsRequestDto } from "../../../types/fiscal/executive";
+import { GridPaginationState, GridPaginationActions } from "../../../hooks/useGridPagination";
 import ManageExecutiveHoursAndDollarsGrid from "./ManageExecutiveHoursAndDollarsGrid";
 import ManageExecutiveHoursAndDollarsSearchFilter from "./ManageExecutiveHoursAndDollarsSearchFilter";
 
 // PS-1623: Secure-by-default, all add actions are read-only unless explicitly overridden. QA: Verify add button is disabled unless isReadOnly is false.
+
+interface ExecutiveSearchForm {
+  profitYear?: number;
+  badgeNumber?: number;
+  name?: string;
+  storeNumber?: number;
+}
 
 interface RenderAddButtonInternalProps {
   canAddExecutives: boolean;
@@ -45,14 +55,14 @@ const RenderAddButton = ({ canAddExecutives, onAddToMainGrid, isReadOnly = true 
 };
 
 interface SearchAndAddExecutiveProps {
-  executeModalSearch: (searchForm: any) => void;
-  modalSelectedExecutives: any[];
+  executeModalSearch: (searchForm: ExecutiveSearchForm) => void;
+  modalSelectedExecutives: ExecutiveHoursAndDollars[];
   addExecutivesToMainGrid: () => void;
   isModalSearching: boolean;
   // Additional props needed for the modal grid
-  modalResults: any;
-  selectExecutivesInModal: (executives: any[]) => void;
-  modalGridPagination: any;
+  modalResults: PagedReportResponse<ExecutiveHoursAndDollars> | null;
+  selectExecutivesInModal: (executives: ExecutiveHoursAndDollars[]) => void;
+  modalGridPagination: GridPaginationState & GridPaginationActions;
   isReadOnly?: boolean;
 }
 
