@@ -27,20 +27,17 @@ type BeneficiaryInquirySearchFilterProps = {
 const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterProps> = ({ onSearch }) => {
   const {
     control,
-    register,
     formState: { errors, isValid },
-    setValue,
     handleSubmit,
-    reset,
-    setFocus,
-    watch
+    reset
   } = useForm<beneficiaryRequest>({
     resolver: yupResolver(schema) as Resolver<beneficiaryRequest>,
     mode: "onBlur"
   });
 
   const onSubmit = (data: beneficiaryRequest) => {
-    let { badgePsn, name, socialSecurity: ssn, memberType } = data;
+    const { badgePsn, name, socialSecurity: ssn } = data;
+    let { memberType } = data;
     memberType = memberType ?? "2";
     let badge: number | undefined = undefined;
     let psn: number | undefined = undefined;

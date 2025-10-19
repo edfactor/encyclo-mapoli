@@ -155,8 +155,15 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridSearchProps> = ({
     setSelectedRows(selectedData);
   }, []);
 
-  // Need a useEffect on a change in TerminatedLetters to reset the page number
-  const prevTerminatedLetters = useRef<any>(null);
+interface TerminatedLettersData {
+  response?: {
+    results: TerminatedLettersDetail[];
+    total: number;
+  };
+}
+
+// Need a useEffect on a change in TerminatedLetters to reset the page number
+  const prevTerminatedLetters = useRef<TerminatedLettersData | null>(null);
   useEffect(() => {
     if (
       terminatedLetters !== prevTerminatedLetters.current &&

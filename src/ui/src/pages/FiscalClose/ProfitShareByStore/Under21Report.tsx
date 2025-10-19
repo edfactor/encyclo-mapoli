@@ -73,8 +73,13 @@ const Under21Report = () => {
     }
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, fetchUnder21Totals, fetchUnder21Breakdown]);
 
-  // Need a useEffect to reset the page number when under21Totals changes
-  const prevUnder21Totals = useRef<any>(null);
+interface Under21TotalsData {
+  numberOfEmployees?: number;
+  [key: string]: unknown;
+}
+
+// Need a useEffect to reset the page number when under21Totals changes
+  const prevUnder21Totals = useRef<Under21TotalsData | null>(null);
   useEffect(() => {
     if (under21Totals?.numberOfEmployees !== prevUnder21Totals.current?.numberOfEmployees) {
       setPageNumber(0);

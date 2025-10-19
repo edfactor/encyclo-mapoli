@@ -7,6 +7,14 @@ import { Location, useLocation, useNavigate } from "react-router-dom";
 import { getReadablePathName } from "../../utils/getReadablePathName";
 import { BreadcrumbItem } from "./DSMBreadcrumbItem";
 
+interface NavigationItem {
+  title?: string;
+  subTitle?: string;
+  url?: string;
+  items?: NavigationItem[];
+  [key: string]: unknown;
+}
+
 interface DSMDynamicBreadcrumbsProps {
   separator?: string;
   customItems?: BreadcrumbItem[];
@@ -72,13 +80,13 @@ const DSMDynamicBreadcrumbs: React.FC<DSMDynamicBreadcrumbsProps> = ({ separator
         };
       });
   };
-  const findNavigationItemByUrl = (path: string) => {
+  const findNavigationItemByUrl = (path: string): NavigationItem | undefined => {
     const navData = navigationState?.navigationData;
     if (!navData?.navigation) return undefined;
 
     const cleanPath = path.replace(/^\/+/, "");
 
-    const findByUrl = (items: any[]): any | undefined => {
+    const findByUrl = (items: NavigationItem[]): NavigationItem | undefined => {
       for (const item of items) {
         if (item.url && item.url.replace(/^\/+/, "") === cleanPath) return item;
         if (item.items && item.items.length > 0) {

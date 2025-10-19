@@ -122,7 +122,7 @@ const PopupMenu: FC<myProps> = ({ menuLabel, items, parentRoute, disabled, navig
               transformOrigin: placement === "bottom" ? "center top" : "center bottom"
             }}>
             <Paper>
-              <ClickAwayListener onClickAway={(e: any) => handleClose(e)}>
+              <ClickAwayListener onClickAway={(e: React.MouseEvent<HTMLElement> | MouseEvent) => handleClose(e)}>
                 <MenuList
                   autoFocusItem={open}
                   id="menu-list-grow"

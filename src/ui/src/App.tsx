@@ -36,7 +36,7 @@ const App = () => {
   const [uiBuildInfo, setUiBuildInfo] = useState<BuildInfo | null>(null);
   const [buildInfoText, setBuildInfoText] = useState("");
   const { buildNumber } = useSelector((state: RootState) => state.common);
-  const [oktaAuth, setOktaAuth] = useState<any>(null);
+  const [oktaAuth, setOktaAuth] = useState<OktaAuth | null>(null);
   const [loadMissives] = useLazyGetMissivesQuery();
   const [triggerHealth] = useLazyGetHealthQuery();
 
@@ -122,7 +122,7 @@ const App = () => {
         }
         const data = await response.json();
         setUiBuildInfo(data);
-      } catch (e) {
+      } catch (_e) {
         // Silently ignore buildinfo.json errors in development
         console.debug("buildinfo.json not available (expected in dev mode)");
       }

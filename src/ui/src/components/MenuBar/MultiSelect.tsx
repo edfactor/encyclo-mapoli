@@ -4,6 +4,7 @@ import ListItemText from "@mui/material/ListItemText";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import { FC } from "react";
+import { SelectChangeEvent } from "@mui/material/Select";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -19,7 +20,7 @@ const MenuProps = {
 
 type MultiSelectCheckmarksProps = {
   options: string[];
-  handleChange: Function;
+  handleChange: (event: SelectChangeEvent<string[]>) => void;
   handleClose: () => void;
   value: string[];
   dataTestId?: string;

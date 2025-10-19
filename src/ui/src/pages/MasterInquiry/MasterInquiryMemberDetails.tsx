@@ -177,7 +177,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         receivedContributionsLastYear
       } = memberDetails;
 
-      var yearLabel = profitYear == new Date().getFullYear() ? "Current" : `End ${profitYear}`;
+      const yearLabel = profitYear == new Date().getFullYear() ? "Current" : `End ${profitYear}`;
 
       // Format current vested balance with bold blue styling per PS-1897
       const formattedCurrentVested =
