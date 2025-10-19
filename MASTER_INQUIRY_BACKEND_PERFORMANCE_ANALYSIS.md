@@ -476,6 +476,36 @@ foreach (var ssnBatch in ssnBatches)
 
 **Risk Assessment**: Low - typical queries have 5-50 SSNs, batching adds minimal overhead for small sets while preventing catastrophic failure for large sets.
 
+### AgeInSql() Extension Method Now Available
+
+**Update**: The common library team (Demoulas.Util.Extensions) has implemented `.AgeInSql()` extension method for DateTime, DateTimeOffset, and DateOnly types.
+
+**Current Usage in MasterInquiryService** (line 655):
+
+```csharp
+// In-memory age calculation (after data materialized)
+Age = memberData.DateOfBirth.Age()
+```
+
+**Assessment**: This is **already optimal** because:
+
+1. Age calculation happens **after** `foreach` loop (in-memory)
+2. Data is already materialized from detail services
+3. No query projection involved - `.AgeInSql()` would throw here
+
+**Where `.AgeInSql()` COULD Help**: If we ever add age calculation to EF Core query projections:
+
+```csharp
+// Example future optimization in detail services
+.Select(d => new MemberData
+{
+    DateOfBirth = d.DateOfBirth,
+    Age = d.DateOfBirth.AgeInSql()  // ✅ Would calculate in Oracle SQL
+})
+```
+
+**Current Approach**: No changes needed - age calculation is not a bottleneck (<0.1s in our trace analysis).
+
 ### Similar Pattern Found: PayrollDuplicateSsnReportService
 
 **Observation**: `PayrollDuplicateSsnReportService.cs` has similar duplicate SSN detection logic (lines 145-150) that is reusable:
