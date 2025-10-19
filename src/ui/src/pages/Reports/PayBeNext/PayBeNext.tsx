@@ -1,7 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, Divider, FormLabel, Grid, MenuItem, Select, Typography } from "@mui/material";
 import { ICellRendererParams } from "ag-grid-community";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { useSelector } from "react-redux";
 import { DSMAccordion, DSMGrid, ISortParams, Page, Pagination, SearchAndReset } from "smart-ui-library";
@@ -44,18 +44,18 @@ const PayBeNext = () => {
   // Use dynamic grid height utility hook
   const gridMaxHeight = useDynamicGridHeight();
 
-  const addRowToSelectedRows = (id: number) => {
+  const addRowToSelectedRows = useCallback((id: number) => {
     setSelectedRowIds((prev) => [...prev, id]);
-  };
+  }, []);
 
-  const removeRowFromSelectedRows = (id: number) => {
-    setSelectedRowIds(selectedRowIds.filter((rowId) => rowId !== id));
-  };
+  const removeRowFromSelectedRows = useCallback((id: number) => {
+    setSelectedRowIds((prev) => prev.filter((rowId) => rowId !== id));
+  }, []);
 
   const mainColumns = useMemo(() => PayBeNextColumnDef(), []);
   const detailColumns = useMemo(
     () => GetProfitDetailColumnDef(addRowToSelectedRows, removeRowFromSelectedRows),
-    [selectedRowIds]
+    [addRowToSelectedRows, removeRowFromSelectedRows]
   );
 
   const {
@@ -97,7 +97,7 @@ const PayBeNext = () => {
             isExpandable: false,
             isExpanded: false,
             parentId: parseInt(row.badgeNumber + "" + row.beneficiaryId),
-            suggestedForfeit: (detail as any).suggestedForfeit || 0
+            suggestedForfeit: (detail as BeneficiaryReportDto).suggestedForfeit || 0
           });
         }
       }

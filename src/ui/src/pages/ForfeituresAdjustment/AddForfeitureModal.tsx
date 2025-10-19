@@ -99,7 +99,7 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
 
       // If the response has an error block, handle it
       if (result.error) {
-        handleResponseError(result.error);
+        handleResponseError(result.error as ServiceErrorResponse);
         return;
       }
 
@@ -110,8 +110,7 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
 
       // Close the modal
       onClose();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (_error: any) {
+    } catch (_error) {
       // This needs to be called with a blank set of properties to satisfy the type
       handleResponseError({} as ServiceErrorResponse);
     }

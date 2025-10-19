@@ -693,7 +693,7 @@ const ProfitShareEditUpdate = () => {
   return (
     <PrerequisiteGuard
       navigationId={currentNavigationId}
-      messageTemplate={Messages.ProfitSharePrerequisiteIncomplete as any}>
+      messageTemplate={Messages.ProfitSharePrerequisiteIncomplete}>
       {({ prerequisitesComplete }) => (
         <Page
           label="Master Update (PAY444|PAY447)"

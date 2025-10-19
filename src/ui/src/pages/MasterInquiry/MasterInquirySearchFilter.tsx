@@ -98,7 +98,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       reset,
       setValue
     } = useForm<MasterInquirySearch>({
-      resolver: yupResolver(schema) as any,
+      resolver: yupResolver(schema) as Resolver<MasterInquirySearch>,
       mode: "onBlur",
       defaultValues: {
         endProfitYear: profitYear,

@@ -55,10 +55,10 @@ const Termination = () => {
       }
     };
 
-    window.addEventListener("dsmMessage" as any, handleMessageEvent);
+    window.addEventListener("dsmMessage" as unknown as string, handleMessageEvent);
 
     return () => {
-      window.removeEventListener("dsmMessage" as any, handleMessageEvent);
+      window.removeEventListener("dsmMessage" as unknown as string, handleMessageEvent);
     };
   }, [scrollToTop]);
 

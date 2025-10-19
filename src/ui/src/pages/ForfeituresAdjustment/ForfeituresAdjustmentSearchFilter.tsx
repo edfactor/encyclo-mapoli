@@ -123,10 +123,15 @@ const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFil
         result.error &&
         "status" in result.error &&
         result.error.status === 500 &&
-        "data" in result.error &&
-        (result.error as any).data?.title === "Employee not found."
+        "data" in result.error
       ) {
-        addAlert(FORFEITURES_ADJUSTMENT_MESSAGES.EMPLOYEE_NOT_FOUND);
+        const errorData = result.error as { data?: { title?: string } };
+        if (errorData.data?.title === "Employee not found.") {
+          addAlert(FORFEITURES_ADJUSTMENT_MESSAGES.EMPLOYEE_NOT_FOUND);
+        } else {
+          // Handle other errors if needed
+          console.error("Forfeitures adjustment employee search error:", result.error);
+        }
       } else {
         // Handle other errors if needed
         console.error("Forfeitures adjustment employee search error:", result.error);

@@ -72,7 +72,7 @@ export const RecursiveNavItem: FC<RecursiveNavItemProps> = ({ item, level, maxAu
   // This only runs on mount or when the active path changes, not on every render
   useEffect(() => {
     const storedExpanded = getStoredExpanded();
-    
+
     // Don't override user's manual collapse/expand choices unless necessary
     if (level <= maxAutoExpandDepth && !storedExpanded) {
       setExpanded(true);

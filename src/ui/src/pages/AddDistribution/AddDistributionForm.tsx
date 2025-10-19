@@ -81,7 +81,10 @@ const schema = yup.object().shape({
 });
 
 const AddDistributionForm = forwardRef<AddDistributionFormRef, AddDistributionFormProps>(
-  ({ stateTaxRate, sequenceNumber, badgeNumber, onSubmit, onReset, isSubmitting, dateOfBirth, age, vestedAmount }, ref) => {
+  (
+    { stateTaxRate, sequenceNumber, badgeNumber, onSubmit, onReset, isSubmitting, dateOfBirth, age, vestedAmount },
+    ref
+  ) => {
     const {
       control,
       handleSubmit,
@@ -153,7 +156,7 @@ const AddDistributionForm = forwardRef<AddDistributionFormRef, AddDistributionFo
       }
     }, [sequenceNumber, setValue]);
 
-  // Track previous amount to detect changes
+    // Track previous amount to detect changes
     const prevAmountRef = useRef(amountRequested);
 
     useEffect(() => {
@@ -172,7 +175,12 @@ const AddDistributionForm = forwardRef<AddDistributionFormRef, AddDistributionFo
     // Check 3rd party address validation when touched
     useEffect(() => {
       if (thirdPartyTouched) {
-        const isValid = !!(thirdPartyAddress1?.trim() && thirdPartyCity?.trim() && thirdPartyState?.trim() && thirdPartyZip?.trim());
+        const isValid = !!(
+          thirdPartyAddress1?.trim() &&
+          thirdPartyCity?.trim() &&
+          thirdPartyState?.trim() &&
+          thirdPartyZip?.trim()
+        );
         setThirdPartyAddressValid(isValid);
       }
     }, [thirdPartyTouched, thirdPartyAddress1, thirdPartyCity, thirdPartyState, thirdPartyZip]);

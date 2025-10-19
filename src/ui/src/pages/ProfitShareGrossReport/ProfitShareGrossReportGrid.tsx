@@ -7,15 +7,8 @@ import { RootState } from "reduxstore/store";
 import { GrossWagesReportDto } from "reduxstore/types";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
-import { useGridPagination, SortParams } from "../../hooks/useGridPagination";
+import { SortParams, useGridPagination } from "../../hooks/useGridPagination";
 import { GetProfitShareGrossReportColumns } from "./ProfitShareGrossReportColumns";
-
-const totalsRow = {
-  psWages: 0,
-  psAmount: 0,
-  loans: 0,
-  forfeitures: 0
-};
 
 interface ProfitShareGrossReportGridProps {
   initialSearchLoaded: boolean;

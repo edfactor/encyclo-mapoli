@@ -18,11 +18,52 @@ const formatZipCode = (zipCode: string): string => {
   return zipCode;
 };
 
+interface MemberDetails {
+  [key: string]: unknown;
+  enrollmentId?: number;
+  firstName?: string;
+  lastName?: string;
+  address?: string;
+  addressCity?: string;
+  addressState?: string;
+  addressZipCode?: string;
+  phoneNumber?: string;
+  isEmployee?: boolean;
+  workLocation?: string;
+  storeNumber?: number;
+  badgeNumber?: number;
+  psnSuffix?: number;
+  department?: string;
+  payClassification?: string;
+  employmentStatus?: string;
+  gender?: string;
+  dateOfBirth?: string;
+  age?: number;
+  ssn?: string;
+  allocationToAmount?: number;
+  badgesOfDuplicateSsns?: number[];
+  beginPSAmount?: number;
+  currentPSAmount?: number;
+  beginVestedAmount?: number;
+  currentVestedAmount?: number;
+  yearToDateProfitSharingHours?: number;
+  yearsInPlan?: number;
+  percentageVested?: number;
+  receivedContributionsLastYear?: boolean;
+  hireDate?: string;
+  fullTimeDate?: string;
+  terminationDate?: string;
+  terminationReason?: string;
+  reHireDate?: string;
+  currentEtva?: number;
+  allocationFromAmount?: number;
+}
+
 interface MasterInquiryMemberDetailsProps {
   memberType: number;
   id: string | number;
   profitYear?: number | null | undefined;
-  memberDetails?: any | null;
+  memberDetails?: MemberDetails | null;
   isLoading?: boolean;
 }
 

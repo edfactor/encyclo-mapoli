@@ -14,10 +14,17 @@ import ProfitSummary from "../PAY426Reports/ProfitSummary/ProfitSummary";
 import ProfitShareReportGrid from "./ProfitShareReportGrid";
 import ProfitShareReportSearchFilter from "./ProfitShareReportSearchFilter.tsx";
 
+interface SearchParams {
+  [key: string]: unknown;
+  reportId?: number;
+  badgeNumber?: number;
+  profitYear?: number;
+}
+
 const ProfitShareReport = () => {
   const [selectedPresetParams, setSelectedPresetParams] = useState<FilterParams | null>(null);
   const [isLoadingTotals, setIsLoadingTotals] = useState(false);
-  const [currentSearchParams, setCurrentSearchParams] = useState<any>(null);
+  const [currentSearchParams, setCurrentSearchParams] = useState<SearchParams | null>(null);
   const [isInitialSearchLoaded, setIsInitialSearchLoaded] = useState(false);
 
   const { yearEndProfitSharingReportTotals } = useSelector((state: RootState) => state.yearsEnd);
@@ -56,12 +63,12 @@ const ProfitShareReport = () => {
     setIsInitialSearchLoaded(false);
   };
 
-  const handleSearchParamsUpdate = (searchParams: any) => {
+  const handleSearchParamsUpdate = (searchParams: SearchParams) => {
     setCurrentSearchParams(searchParams);
     setIsInitialSearchLoaded(true);
   };
 
-  const handleStatusChange = (newStatus: string, statusName?: string) => {
+  const handleStatusChange = (_newStatus: string, statusName?: string) => {
     // Check if the status is "Complete" and trigger search with archive=true
     if (statusName === "Complete" && profitYear) {
       setIsLoadingTotals(true);

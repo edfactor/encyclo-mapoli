@@ -107,10 +107,11 @@ const AddDistributionContent = () => {
   // Determine validation errors
   const maxDistributionsReached = sequenceNumber === 10;
   const noAvailableBalance = memberData?.currentVestedAmount === 0;
-  const validationError =
-    maxDistributionsReached ? "Member has reached maximum of nine distributions."
-    : noAvailableBalance ? "Member has no available balance to distribute."
-    : null;
+  const validationError = maxDistributionsReached
+    ? "Member has reached maximum of nine distributions."
+    : noAvailableBalance
+      ? "Member has no available balance to distribute."
+      : null;
 
   // Check form validity periodically
   useEffect(() => {
@@ -146,13 +147,26 @@ const AddDistributionContent = () => {
         sx={{ display: "flex", justifyContent: "flex-end", paddingX: "24px", gap: "12px" }}>
         <Tooltip
           title={
-            isReadOnly ? "You are in read-only mode" : thirdPartyAddressRequired ? "3rd Party Address Required" : validationError ? validationError : ""
+            isReadOnly
+              ? "You are in read-only mode"
+              : thirdPartyAddressRequired
+                ? "3rd Party Address Required"
+                : validationError
+                  ? validationError
+                  : ""
           }>
           <span>
             <Button
               variant="contained"
               onClick={handleSave}
-              disabled={isReadOnly || isSubmitting || isMemberLoading || !isFormValid || thirdPartyAddressRequired || !!validationError}
+              disabled={
+                isReadOnly ||
+                isSubmitting ||
+                isMemberLoading ||
+                !isFormValid ||
+                thirdPartyAddressRequired ||
+                !!validationError
+              }
               className="h-10 min-w-fit whitespace-nowrap">
               SAVE
             </Button>

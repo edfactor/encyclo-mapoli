@@ -12,7 +12,13 @@ interface AddUnforfeitModalProps {
   suggestedForfeitResponse?: SuggestedForfeitResponse | null;
 }
 
-const handleResponseError = (error: any) => {
+interface ErrorResponse {
+  data?: {
+    title?: string;
+  };
+}
+
+const handleResponseError = (error: ErrorResponse) => {
   const title = error?.data?.title;
 
   if (typeof title === "string") {

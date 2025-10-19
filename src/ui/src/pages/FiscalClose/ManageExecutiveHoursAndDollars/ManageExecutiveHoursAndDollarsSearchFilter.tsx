@@ -46,9 +46,18 @@ const validationSchema = yup
     )
   );
 
+interface SearchData {
+  profitYear: number;
+  badgeNumber?: number;
+  socialSecurity?: string | undefined;
+  fullNameContains?: string | null;
+  hasExecutiveHoursAndDollars: boolean;
+  isMonthlyPayroll: boolean;
+}
+
 interface ManageExecutiveHoursAndDollarsSearchFilterProps {
   isModal?: boolean;
-  onSearch: (searchData: any) => void;
+  onSearch: (searchData: SearchData) => void;
   onReset: () => void;
   isSearching: boolean;
 }

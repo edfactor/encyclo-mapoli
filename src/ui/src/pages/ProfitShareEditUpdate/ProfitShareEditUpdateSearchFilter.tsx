@@ -2,7 +2,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetProfitShareEditQuery, useLazyGetProfitShareUpdateQuery } from "reduxstore/api/YearsEndApi";
@@ -230,7 +230,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
       // First we have to do the update calls
       triggerSearchUpdate(updateParams, false)
         .unwrap()
-        .then((response) => {
+        .then((response: { profitShareUpdateTotals: { maxOverTotal: number } }) => {
           // We need to set the profitSharingUpdate in the store
           if (response.profitShareUpdateTotals && response.profitShareUpdateTotals.maxOverTotal > 0) {
             dispatch(setTotalForfeituresGreaterThanZero(true));
@@ -272,9 +272,9 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
     if (resetYearEndPage) {
       handleReset();
     }
-  }, [resetYearEndPage]);
+  }, [resetYearEndPage, handleReset]);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     // We need to clear both grids and then both sets of query params
     if (setMinimumFieldsEntered) {
       setMinimumFieldsEntered(false);
@@ -305,7 +305,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
       badgeToAdjust2: null,
       adjustEarningsSecondaryAmount: null
     });
-  };
+  }, [dispatch, reset, fiscalCloseProfitYearAsDate, setMinimumFieldsEntered, setPageReset, setInitialSearchLoaded]);
 
   return (
     <form onSubmit={validateAndSearch}>
