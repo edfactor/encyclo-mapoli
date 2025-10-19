@@ -3,7 +3,7 @@ import { useCallback, useMemo } from "react";
 import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
-import { useGridPagination } from "../../hooks/useGridPagination";
+import { useGridPagination, SortParams } from "../../hooks/useGridPagination";
 import { DistributionSearchResponse } from "../../types";
 import { GetDistributionInquiryColumns } from "./DistributionInquiryGridColumns";
 
@@ -11,7 +11,7 @@ interface DistributionInquiryGridProps {
   postReturnData: DistributionSearchResponse[] | null;
   totalRecords: number;
   isLoading: boolean;
-  onPaginationChange: (pageNumber: number, pageSize: number, sortParams: any) => void;
+  onPaginationChange: (pageNumber: number, pageSize: number, sortParams: SortParams) => void;
 }
 
 const DistributionInquiryGrid: React.FC<DistributionInquiryGridProps> = ({
@@ -25,7 +25,7 @@ const DistributionInquiryGrid: React.FC<DistributionInquiryGridProps> = ({
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
     onPaginationChange: useCallback(
-      async (pageNum: number, pageSz: number, sortPrms: any) => {
+      async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
         onPaginationChange(pageNum, pageSz, sortPrms);
       },
       [onPaginationChange]

@@ -1,7 +1,8 @@
 import { Box, Typography } from "@mui/material";
 import React, { memo, useMemo } from "react";
-import { DSMGrid, formatNumberWithComma, Pagination } from "smart-ui-library";
+import { DSMGrid, formatNumberWithComma, Pagination, ISortParams } from "smart-ui-library";
 import { EmployeeDetails } from "../../reduxstore/types";
+import { SortParams } from "../../hooks/useGridPagination";
 import { GetMasterInquiryMemberGridColumns } from "./MasterInquiryMemberGridColumns";
 
 interface SearchResponse {
@@ -23,10 +24,10 @@ interface MasterInquiryMemberGridProps {
   memberGridPagination: {
     pageNumber: number;
     pageSize: number;
-    sortParams: any;
+    sortParams: SortParams;
   };
   onPaginationChange: (pageNumber: number, pageSize: number) => void;
-  onSortChange: (sortParams: any) => void;
+  onSortChange: (sortParams: SortParams) => void;
   isLoading?: boolean;
 }
 
@@ -55,7 +56,7 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
       onPaginationChange(pageNumber, pageSize);
     };
 
-    const handleSortChange = (sortParams: any) => {
+    const handleSortChange = (sortParams: ISortParams) => {
       onSortChange(sortParams);
     };
 

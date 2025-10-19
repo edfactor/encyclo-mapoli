@@ -5,9 +5,14 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { DSMGrid, Pagination, SmartModal } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { CAPTIONS } from "../../../constants";
+import { GridPaginationState, GridPaginationActions } from "../../../hooks/useGridPagination";
 import { ExecutiveHoursAndDollars, PagedReportResponse } from "../../../reduxstore/types";
 import { GetManageExecutiveHoursAndDollarsColumns } from "./ManageExecutiveHoursAndDollarsGridColumns";
 import SearchAndAddExecutive from "./SearchAndAddExecutive";
+
+interface ManageExecutiveSearchForm {
+  [key: string]: unknown;
+}
 
 interface RenderAddExecutiveButtonProps {
   reportReponse: PagedReportResponse<ExecutiveHoursAndDollars> | null;

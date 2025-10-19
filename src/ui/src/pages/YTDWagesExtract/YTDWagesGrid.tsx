@@ -4,7 +4,7 @@ import { DSMGrid, Pagination } from "smart-ui-library";
 import { RefObject } from "react";
 import ReportSummary from "../../components/ReportSummary";
 import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
-import { GridPaginationActions, GridPaginationState } from "../../hooks/useGridPagination";
+import { GridPaginationActions, GridPaginationState, SortParams } from "../../hooks/useGridPagination";
 import { EmployeeWagesForYearResponse } from "../../reduxstore/types";
 import { GetYTDWagesColumns } from "./YTDWagesGridColumns";
 
@@ -16,7 +16,7 @@ interface YTDWagesGridProps {
   hasResults: boolean;
   pagination: GridPaginationState & GridPaginationActions;
   onPaginationChange: (pageNumber: number, pageSize: number) => void;
-  onSortChange: (sortParams: any) => void;
+  onSortChange: (sortParams: SortParams) => void;
 }
 
 const YTDWagesGrid = ({

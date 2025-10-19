@@ -103,7 +103,7 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
         }
         return "";
       },
-      onCellClicked: (event: any) => {
+      onCellClicked: (event: ICellRendererParams) => {
         if (event.data && !event.data.isDetail && event.data.isExpandable) {
           handleRowExpansion(event.data.badgeNumber.toString());
         }
@@ -121,14 +121,14 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
         ...column,
         cellRenderer: (params: ICellRendererParams) => {
           if (params.data?.isDetail) {
-            const hideInDetails = !detailColumns.some((detailCol) => detailCol.field === (column as any).field);
+            const hideInDetails = !detailColumns.some((detailCol) => detailCol.field === (column as ColDef).field);
             if (hideInDetails) {
               return "";
             }
           }
 
-          if ((column as any).cellRenderer) {
-            return (column as any).cellRenderer(params);
+          if ((column as ColDef).cellRenderer) {
+            return (column as ColDef).cellRenderer(params);
           }
           return params.valueFormatted ? params.valueFormatted : params.value;
         }
@@ -146,8 +146,8 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
               if (!params.data?.isDetail) {
                 return "";
               }
-              if ((column as any).cellRenderer) {
-                return (column as any).cellRenderer(params);
+              if ((column as ColDef).cellRenderer) {
+                return (column as ColDef).cellRenderer(params);
               }
               return params.valueFormatted ? params.valueFormatted : params.value;
             }
@@ -192,7 +192,7 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
             providedOptions={{
               rowData: gridData,
               columnDefs: columnDefs,
-              getRowClass: (params: any) => (params.data.isDetail ? "detail-row" : ""),
+              getRowClass: (params: { data: { isDetail: boolean } }) => (params.data.isDetail ? "detail-row" : ""),
               rowSelection: {
                 mode: "multiRow",
                 checkboxes: false,

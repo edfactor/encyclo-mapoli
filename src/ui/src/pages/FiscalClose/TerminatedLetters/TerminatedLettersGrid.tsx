@@ -49,7 +49,7 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridSearchProps> = ({
   const [triggerDownload, { isFetching: isDownloading }] = useLazyGetTerminatedLettersDownloadQuery();
 
   const onSearch = useCallback(async () => {
-    const request: any = {
+    const request: TerminatedLettersRequest = {
       profitYear: profitYear || 0,
       pagination: {
         skip: pageNumber * pageSize,
@@ -82,7 +82,7 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridSearchProps> = ({
 
     const badgeNumbers = selectedRows.map((row) => row.badgeNumber);
 
-    const request: any = {
+    const request: TerminatedLettersRequest = {
       profitYear: profitYear || 0,
       badgeNumbers: badgeNumbers,
       pagination: {

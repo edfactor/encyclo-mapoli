@@ -3,10 +3,22 @@ import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetRecentlyTerminatedReportQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMGrid, Pagination, ISortParams } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
-import { useGridPagination } from "../../../hooks/useGridPagination";
+import { useGridPagination, SortParams } from "../../../hooks/useGridPagination";
 import { GetRecentlyTerminatedColumns } from "./RecentlyTerminatedGridColumns";
+
+interface RecentlyTerminatedRequest {
+  profitYear: number;
+  pagination: {
+    skip: number;
+    take: number;
+    sortBy: string;
+    isSortDescending: boolean;
+  };
+  beginningDate?: string;
+  endingDate?: string;
+}
 
 interface RecentlyTerminatedGridSearchProps {
   initialSearchLoaded: boolean;
@@ -28,9 +40,9 @@ const RecentlyTerminatedGrid: React.FC<RecentlyTerminatedGridSearchProps> = ({
       initialSortBy: "fullName, terminationDate",
       initialSortDescending: false,
       onPaginationChange: useCallback(
-        async (pageNum: number, pageSz: number, sortPrms: any) => {
+        async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
           if (hasToken && initialSearchLoaded) {
-            const request: any = {
+            const request: RecentlyTerminatedRequest = {
               profitYear: profitYear || 0,
               pagination: {
                 skip: pageNum * pageSz,
@@ -62,7 +74,7 @@ const RecentlyTerminatedGrid: React.FC<RecentlyTerminatedGridSearchProps> = ({
     });
 
   const onSearch = useCallback(async () => {
-    const request: any = {
+    const request: RecentlyTerminatedRequest = {
       profitYear: profitYear || 0,
       pagination: {
         skip: pageNumber * pageSize,
@@ -91,7 +103,7 @@ const RecentlyTerminatedGrid: React.FC<RecentlyTerminatedGridSearchProps> = ({
   ]);
 
   // Need a useEffect on a change in RecentlyTerminated to reset the page number
-  const prevRecentlyTerminated = useRef<any>(null);
+  const prevRecentlyTerminated = useRef<typeof recentlyTerminated | null>(null);
   useEffect(() => {
     if (
       recentlyTerminated !== prevRecentlyTerminated.current &&
@@ -109,7 +121,7 @@ const RecentlyTerminatedGrid: React.FC<RecentlyTerminatedGridSearchProps> = ({
     }
   }, [initialSearchLoaded, onSearch, hasToken]);
 
-  const sortEventHandler = (update: any) => handleSortChange(update);
+  const sortEventHandler = (update: ISortParams) => handleSortChange(update);
   const columnDefs = useMemo(() => GetRecentlyTerminatedColumns(), []);
 
   return (

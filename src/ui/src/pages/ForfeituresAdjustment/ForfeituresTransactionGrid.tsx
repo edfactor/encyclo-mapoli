@@ -1,20 +1,20 @@
 import { Typography, CircularProgress } from "@mui/material";
 import { memo, useMemo, useCallback } from "react";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMGrid, Pagination, ISortParams } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import { GetForfeituresTransactionGridColumns } from "./ForfeituresTransactionGridColumns";
-import { useGridPagination } from "../../hooks/useGridPagination";
+import { useGridPagination, SortParams } from "../../hooks/useGridPagination";
 
 interface TransactionData {
-  results: any[];
+  results: unknown[];
   total: number;
 }
 
 interface ForfeituresTransactionGridProps {
   transactionData?: TransactionData | null;
   isLoading?: boolean;
-  onPaginationChange?: (pageNumber: number, pageSize: number, sortParams: any) => void;
-  onSortChange?: (sortParams: any) => void;
+  onPaginationChange?: (pageNumber: number, pageSize: number, sortParams: SortParams) => void;
+  onSortChange?: (sortParams: SortParams) => void;
 }
 
 const ForfeituresTransactionGrid: React.FC<ForfeituresTransactionGridProps> = memo(
@@ -26,7 +26,7 @@ const ForfeituresTransactionGrid: React.FC<ForfeituresTransactionGridProps> = me
       initialSortBy: "transactionDate",
       initialSortDescending: true,
       onPaginationChange: useCallback(
-        (pageNum: number, pageSz: number, sortPrms: any) => {
+        (pageNum: number, pageSz: number, sortPrms: SortParams) => {
           if (onPaginationChange) {
             onPaginationChange(pageNum, pageSz, sortPrms);
           }
@@ -36,7 +36,7 @@ const ForfeituresTransactionGrid: React.FC<ForfeituresTransactionGridProps> = me
     });
 
     const handleSortChangeInternal = useCallback(
-      (sortParams: any) => {
+      (sortParams: ISortParams) => {
         handleSortChange(sortParams);
         if (onSortChange) {
           onSortChange(sortParams);

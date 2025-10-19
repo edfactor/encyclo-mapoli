@@ -3,7 +3,7 @@ import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMGrid, Pagination, ISortParams } from "smart-ui-library";
 import ReportSummary from "../../../../components/ReportSummary";
 import { useGridPagination } from "../../../../hooks/useGridPagination";
 import { GetUnder21BreakdownColumnDefs } from "./GetUnder21BreakdownColumnDefs";
@@ -40,7 +40,7 @@ const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
     [navigate]
   );
 
-  const sortEventHandler = (update: any) => {
+  const sortEventHandler = (update: ISortParams) => {
     if (update.sortBy === "") {
       update.sortBy = "badgeNumber";
       update.isSortDescending = false;

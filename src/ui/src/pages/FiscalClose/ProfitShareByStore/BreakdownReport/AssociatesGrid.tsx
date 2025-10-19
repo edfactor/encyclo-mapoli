@@ -36,7 +36,7 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({
       initialSortBy: "badgeNumber",
       initialSortDescending: false,
       onPaginationChange: useCallback(
-        async (pageNum: number, pageSz: number, sortPrms: any) => {
+        async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
           if (hasToken) {
             const params = {
               profitYear: queryParams?.profitYear || profitYear,
