@@ -21,6 +21,10 @@ function toCapitalCase(str: string): string {
   });
 }
 
+interface VestingSearchResult {
+  data?: unknown;
+}
+
 const VestedAmountsByAge = () => {
   const [hasInitialSearchRun, setHasInitialSearchRun] = useState(false);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
@@ -40,12 +44,12 @@ const VestedAmountsByAge = () => {
         },
         false
       )
-        .then((result: any) => {
+        .then((result: VestingSearchResult) => {
           if (result.data) {
             dispatch(setVestedAmountsByAgeQueryParams(profitYear));
           }
         })
-        .catch((error: any) => {
+        .catch((error: unknown) => {
           console.error("Initial vested amounts by age search failed:", error);
         });
     }

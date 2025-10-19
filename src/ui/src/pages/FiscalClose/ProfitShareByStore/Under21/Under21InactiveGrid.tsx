@@ -1,12 +1,11 @@
-import React, { useMemo } from "react";
-import { Typography } from "@mui/material";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { Grid } from "@mui/material";
+import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
-import { under21InactiveColumnDefs } from "./GetUnder21BreakdownColumnDefs";
 import { useNavigate } from "react-router-dom";
+import { RootState } from "reduxstore/store";
+import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../../components/ReportSummary";
+import { under21InactiveColumnDefs } from "./GetUnder21BreakdownColumnDefs";
 
 interface Under21InactiveGridProps {
   isLoading?: boolean;

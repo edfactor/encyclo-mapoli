@@ -1,9 +1,8 @@
 import { AddOutlined } from "@mui/icons-material";
 import { Button, Divider, Grid, Tooltip } from "@mui/material";
 import { DSMAccordion, Page } from "smart-ui-library";
+import { GridPaginationActions, GridPaginationState } from "../../../hooks/useGridPagination";
 import { ExecutiveHoursAndDollars, PagedReportResponse } from "../../../reduxstore/types";
-import { ExecutiveHoursAndDollarsRequestDto } from "../../../types/fiscal/executive";
-import { GridPaginationState, GridPaginationActions } from "../../../hooks/useGridPagination";
 import ManageExecutiveHoursAndDollarsGrid from "./ManageExecutiveHoursAndDollarsGrid";
 import ManageExecutiveHoursAndDollarsSearchFilter from "./ManageExecutiveHoursAndDollarsSearchFilter";
 

@@ -1,18 +1,18 @@
-import { Page } from "smart-ui-library";
-import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
-import { SecurityState } from "reduxstore/slices/securitySlice";
 import React, { useEffect } from "react";
-import { useLazyGetCurrentUserQuery, useLazyGetMetadataQuery } from "reduxstore/api/ItOperationsApi";
-import DSMCollapsedAccordion from "../../components/DSMCollapsedAccordion";
+import { useSelector } from "react-redux";
 import { useGetHealthQuery } from "reduxstore/api/AppSupportApi";
+import { useLazyGetCurrentUserQuery, useLazyGetMetadataQuery } from "reduxstore/api/ItOperationsApi";
+import { SecurityState } from "reduxstore/slices/securitySlice";
+import { RootState } from "reduxstore/store";
+import { Page } from "smart-ui-library";
 import { getHealthStatusDescription } from "utils/appSupportUtil";
+import DSMCollapsedAccordion from "../../components/DSMCollapsedAccordion";
 
 const DevDebug = () => {
   const securityState = useSelector<RootState, SecurityState>((state) => state.security);
   const hasToken: boolean = !!useSelector((state: RootState) => securityState.token);
   const { data: healthData, isLoading: healthLoading } = useGetHealthQuery();
-  const healthStatus = useSelector((state: RootState) => state.support.health);
+  //const healthStatus = useSelector((state: RootState) => state.support.health);
 
   // Initialize the lazy queries
   const [getCurrentUser, { data: currentUserData, isLoading: currentUserLoading }] = useLazyGetCurrentUserQuery();
@@ -66,7 +66,7 @@ const DevDebug = () => {
         <div style={{ marginTop: "24px" }}>
           <DSMCollapsedAccordion
             title={`API Health Status: ${healthData?.status || "Unknown"}`}
-            initiallyExpanded={healthData?.status !== "Healthy"}>
+            isCollapsedOnRender={healthData?.status !== "Healthy"}>
             <div>
               {healthLoading ? (
                 <p>Loading health data...</p>

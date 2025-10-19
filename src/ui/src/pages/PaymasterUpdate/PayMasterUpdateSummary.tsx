@@ -15,6 +15,13 @@ interface ProfitYearSearch {
   profitYear: number;
 }
 
+interface NavigationItem {
+  id: number;
+  statusName?: string;
+  items?: NavigationItem[];
+  [key: string]: unknown;
+}
+
 const PayMasterUpdateSummary = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,10 +43,10 @@ const PayMasterUpdateSummary = () => {
   useEffect(() => {
     const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
 
-    const getNavigationObjectBasedOnId = (navigationArray?: any[], id?: number): any => {
+    const getNavigationObjectBasedOnId = (navigationArray: NavigationItem[] | undefined, id: number | undefined): NavigationItem | undefined => {
       if (navigationArray) {
         for (const item of navigationArray) {
-          if (item.id == id) {
+          if (item.id === id) {
             return item;
           }
           if (item.items && item.items.length > 0) {
