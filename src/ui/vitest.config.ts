@@ -23,6 +23,9 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
+      // Ensure coverage directory exists and cleanup is handled properly
+      reportsDirectory: './coverage',
+      cleanOnRerun: true,
       exclude: [
         'node_modules/',
         'src/test/',
