@@ -284,7 +284,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
         foreach (var req in requests)
         {
             var result = await UpdateForfeitureAdjustmentAsync(req, cancellationToken);
-            if (result.IsError)
+            if (result.IsError && result.Error != null)
             {
                 return Result<bool>.Failure(result.Error);
             }
