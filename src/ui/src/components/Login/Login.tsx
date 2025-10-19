@@ -11,6 +11,7 @@ const Login = () => {
   const { authState, oktaAuth } = useOktaAuth();
   const dispatch = useDispatch();
 
+  // FIXME: Why are these here? They are unused
   const [skipRole, setSkipRole] = useState<boolean>(true);
   const [skipPermission, setSkipPermission] = useState<boolean>(true);
   const [skipUsername, setSkipUsername] = useState<boolean>(true);

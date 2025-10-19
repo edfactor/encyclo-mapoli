@@ -4,6 +4,13 @@ import { setNavigation, setNavigationError } from "../../reduxstore/slices/navig
 import { NavigationRequestDto, NavigationResponseDto } from "../../reduxstore/types";
 import { createDataSourceAwareBaseQuery } from "./api";
 
+interface NavigationItem {
+  isNavigable?: boolean;
+  items?: NavigationItem[];
+  prerequisiteNavigations?: NavigationItem[];
+  [key: string]: unknown;
+}
+
 const baseQuery = createDataSourceAwareBaseQuery();
 
 export const NavigationApi = createApi({
@@ -19,7 +26,7 @@ export const NavigationApi = createApi({
         try {
           const { data } = await queryFulfilled;
           // Normalize navigation items to ensure `isNavigable` is present (default true)
-          const normalize = (items) => {
+          const normalize = (items: NavigationItem[] | undefined): NavigationItem[] | undefined => {
             if (!items) return items;
             return items.map((it) => ({
               ...it,
@@ -35,7 +42,12 @@ export const NavigationApi = createApi({
           console.error("Failed to fetch navigation:", err);
           // More descriptive error message
           const errorMessage =
-            err.error?.status === 401
+            err &&
+            typeof err === "object" &&
+            "error" in err &&
+            (err as Record<string, unknown>).error &&
+            typeof (err as Record<string, unknown>).error === "object" &&
+            (err as Record<string, Record<string, unknown>>).error.status === 401
               ? "Authentication error - please log in again"
               : "Failed to fetch navigation data";
 

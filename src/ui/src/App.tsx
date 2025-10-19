@@ -37,8 +37,8 @@ const App = () => {
   const [buildInfoText, setBuildInfoText] = useState("");
   const { buildNumber } = useSelector((state: RootState) => state.common);
   const [oktaAuth, setOktaAuth] = useState<any>(null);
-  const [loadMissives, { isFetching }] = useLazyGetMissivesQuery();
-  const [triggerHealth, { data: healthData, isLoading }] = useLazyGetHealthQuery();
+  const [loadMissives] = useLazyGetMissivesQuery();
+  const [triggerHealth] = useLazyGetHealthQuery();
 
   const health = useSelector((state: RootState) => state.support.health);
 

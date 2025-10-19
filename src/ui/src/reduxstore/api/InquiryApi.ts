@@ -11,7 +11,7 @@ import {
 import { createDataSourceAwareBaseQuery } from "./api";
 
 // In-flight request tracking to prevent duplicate API calls
-const inFlightRequests = new Map<string, Promise<any>>();
+const inFlightRequests = new Map<string, Promise<unknown>>();
 
 const baseQuery = createDataSourceAwareBaseQuery();
 export const InquiryApi = createApi({
