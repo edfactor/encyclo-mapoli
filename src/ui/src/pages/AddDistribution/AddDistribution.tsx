@@ -1,9 +1,8 @@
+import { Alert, Button, CircularProgress, Divider, Grid, Tooltip } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Alert, Button, CircularProgress, Divider, Grid, Tooltip } from "@mui/material";
 import { Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
-import { DISTRIBUTION_INQUIRY_MESSAGES } from "../../components/MissiveAlerts/MissiveMessages";
 import { CAPTIONS, ROUTES } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
@@ -277,7 +276,14 @@ const AddDistributionContent = () => {
               onReset={handleFormReset}
               isSubmitting={isSubmitting}
               dateOfBirth={memberData.dateOfBirth}
-              age={memberData.age}
+              age={
+                memberData.dateOfBirth
+                  ? Math.floor(
+                      (Date.now() - new Date(memberData.dateOfBirth).getTime()) /
+                        (1000 * 60 * 60 * 24 * 365.25)
+                    )
+                  : undefined
+              }
               vestedAmount={memberData.currentVestedAmount}
             />
           </Grid>

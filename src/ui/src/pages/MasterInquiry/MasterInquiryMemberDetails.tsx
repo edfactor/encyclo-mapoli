@@ -9,6 +9,7 @@ import { getEnrolledStatus, getForfeitedStatus } from "../../utils/enrollmentUti
 import { formatPercentage } from "../../utils/formatPercentage";
 import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 import { formatPhoneNumber } from "../../utils/phoneUtils";
+import type { EmployeeDetails } from "../../types/employee/employee";
 
 // Sometimes we get back end zip codes that are 1907 rather than 01907
 const formatZipCode = (zipCode: string): string => {
@@ -18,52 +19,11 @@ const formatZipCode = (zipCode: string): string => {
   return zipCode;
 };
 
-interface MemberDetails {
-  [key: string]: unknown;
-  enrollmentId?: number;
-  firstName?: string;
-  lastName?: string;
-  address?: string;
-  addressCity?: string;
-  addressState?: string;
-  addressZipCode?: string;
-  phoneNumber?: string;
-  isEmployee?: boolean;
-  workLocation?: string;
-  storeNumber?: number;
-  badgeNumber?: number;
-  psnSuffix?: number;
-  department?: string;
-  payClassification?: string;
-  employmentStatus?: string;
-  gender?: string;
-  dateOfBirth?: string;
-  age?: number;
-  ssn?: string;
-  allocationToAmount?: number;
-  badgesOfDuplicateSsns?: number[];
-  beginPSAmount?: number;
-  currentPSAmount?: number;
-  beginVestedAmount?: number;
-  currentVestedAmount?: number;
-  yearToDateProfitSharingHours?: number;
-  yearsInPlan?: number;
-  percentageVested?: number;
-  receivedContributionsLastYear?: boolean;
-  hireDate?: string;
-  fullTimeDate?: string;
-  terminationDate?: string;
-  terminationReason?: string;
-  reHireDate?: string;
-  currentEtva?: number;
-  allocationFromAmount?: number;
-}
-
 interface MasterInquiryMemberDetailsProps {
   memberType: number;
   id: string | number;
   profitYear?: number | null | undefined;
-  memberDetails?: MemberDetails | null;
+  memberDetails?: EmployeeDetails | null;
   isLoading?: boolean;
 }
 
@@ -83,11 +43,12 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
     // Memoized enrollment status
     const enrollmentStatus = useMemo(() => {
       if (!memberDetails) return { enrolled: "", forfeited: "" };
+      const enrollmentId = memberDetails.enrollmentId ?? 0;
       return {
-        enrolled: getEnrolledStatus(memberDetails.enrollmentId),
-        forfeited: getForfeitedStatus(memberDetails.enrollmentId)
+        enrolled: getEnrolledStatus(enrollmentId),
+        forfeited: getForfeitedStatus(enrollmentId)
       };
-    }, [memberDetails?.enrollmentId]);
+    }, [memberDetails]);
 
     // Memoized summary section
     const summarySection = useMemo(() => {
@@ -105,13 +66,21 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         storeNumber
       } = memberDetails;
 
+      const formattedCity = addressCity || "";
+      const formattedState = addressState || "";
+      const formattedZip = addressZipCode ? formatZipCode(addressZipCode) : "";
+      const cityStateZip =
+        [formattedCity, formattedState].filter(Boolean).join(", ") + (formattedZip ? ` ${formattedZip}` : "");
+
       return [
         { label: "Name", value: `${lastName}, ${firstName}` },
         { label: "Address", value: `${address}` },
-        { label: "", value: `${addressCity}, ${addressState} ${formatZipCode(addressZipCode)}` },
+        { label: "", value: cityStateZip },
         { label: "Phone #", value: formatPhoneNumber(phoneNumber) },
         ...(isEmployee ? [{ label: "Work Location", value: workLocation || "N/A" }] : []),
-        ...(isEmployee ? [{ label: "Store", value: storeNumber > 0 ? storeNumber : "N/A" }] : []),
+        ...(isEmployee
+          ? [{ label: "Store", value: typeof storeNumber === "number" && storeNumber > 0 ? storeNumber : "N/A" }]
+          : []),
         { label: "Enrolled", value: enrollmentStatus.enrolled.replace(/\s*\(\d+\)/, "") }, // Remove code like "(1)"
         { label: "Forfeited", value: enrollmentStatus.forfeited.replace(/\s*\(\d+\)/, "") } // Remove code like "(1)"
       ];
@@ -125,11 +94,10 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         psnSuffix,
         isEmployee,
         department,
-        payClassification,
+        PayClassification,
         employmentStatus,
         gender,
         dateOfBirth,
-        age,
         ssn: ssnValue,
         allocationToAmount,
         badgesOfDuplicateSsns
@@ -146,13 +114,16 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         }
       }
 
+      const age = dateOfBirth
+        ? Math.floor((Date.now() - new Date(dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365.25))
+        : 0;
       const dobDisplay = dateOfBirth ? `${mmDDYYFormat(dateOfBirth)} (${age})` : "N/A";
 
       return [
         ...(isEmployee ? [{ label: "Badge", value: viewBadgeLinkRenderer(badgeNumber) }] : []),
         ...(!isEmployee ? [{ label: "PSN", value: viewBadgeLinkRenderer(badgeNumber, psnSuffix) }] : []),
         ...(isEmployee ? [{ label: "Department", value: department || "N/A" }] : []),
-        ...(isEmployee ? [{ label: "Class", value: payClassification || "N/A" }] : []),
+        ...(isEmployee ? [{ label: "Class", value: PayClassification || "N/A" }] : []),
         ...(isEmployee ? [{ label: "Status", value: employmentStatus ?? "N/A" }] : []),
         { label: "Gender", value: gender || "N/A" },
         { label: "DOB", value: dobDisplay },

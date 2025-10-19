@@ -21,7 +21,21 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    /* Path aliases matching vite.config.ts */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "reduxstore/*": ["./src/reduxstore/*"],
+      "utils/*": ["./src/utils/*"],
+      "Okta/*": ["./src/Okta/*"],
+      "components/*": ["./src/components/*"],
+      "pages/*": ["./src/pages/*"],
+      "schemas/*": ["./src/schemas/*"],
+      "hooks/*": ["./src/hooks/*"],
+      "styles/*": ["./src/styles/*"]
+    }
   },
-  "include": ["src"]
+  "include": ["src", "agGridConfig.ts"]
 }
