@@ -4,7 +4,7 @@ import { useLazyGetEligibleEmployeesQuery } from "../../../../reduxstore/api/Yea
 import { setEligibleEmployeesQueryParams } from "../../../../reduxstore/slices/yearsEndSlice";
 import { RootState } from "../../../../reduxstore/store";
 import useFiscalCloseProfitYear from "../../../../hooks/useFiscalCloseProfitYear";
-import { useGridPagination } from "../../../../hooks/useGridPagination";
+import { useGridPagination, SortParams } from "../../../../hooks/useGridPagination";
 import {
   initialState,
   eligibleEmployeesReducer,
@@ -25,7 +25,7 @@ const useEligibleEmployees = () => {
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
 
   const handlePaginationChange = useCallback(
-    (pageNumber: number, pageSize: number, sortParams: any) => {
+    (pageNumber: number, pageSize: number, sortParams: SortParams) => {
       if (fiscalCloseProfitYear && hasToken) {
         try {
           const request = {

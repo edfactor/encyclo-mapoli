@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { useLazyGetNegativeEVTASSNQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../../reduxstore/store";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
-import { useGridPagination } from "../../../../hooks/useGridPagination";
+import { useGridPagination, SortParams } from "../../../../hooks/useGridPagination";
 import {
   initialState,
   negativeEtvaForSSNsOnPayprofitReducer,
@@ -23,7 +23,7 @@ const useNegativeEtvaForSSNsOnPayprofit = () => {
   const decemberFlowProfitYear = useDecemberFlowProfitYear();
 
   const handlePaginationChange = useCallback(
-    (pageNumber: number, pageSize: number, sortParams: any) => {
+    (pageNumber: number, pageSize: number, sortParams: SortParams) => {
       if (decemberFlowProfitYear && hasToken) {
         try {
           const request = {

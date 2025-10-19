@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { useLazyPayBenReportQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../../reduxstore/store";
 import { PayBenReportRequest } from "../../../../types";
-import { useGridPagination } from "../../../../hooks/useGridPagination";
+import { useGridPagination, SortParams } from "../../../../hooks/useGridPagination";
 import { initialState, payBenReportReducer, selectShowData, selectHasResults } from "./usePayBenReportReducer";
 
 const usePayBenReport = () => {
@@ -13,7 +13,7 @@ const usePayBenReport = () => {
   const hasToken = !!useSelector((state: RootState) => state.security.token);
 
   const handlePaginationChange = useCallback(
-    (pageNumber: number, pageSize: number, sortParams: any) => {
+    (pageNumber: number, pageSize: number, sortParams: SortParams) => {
       if (hasToken) {
         try {
           const request: PayBenReportRequest = {

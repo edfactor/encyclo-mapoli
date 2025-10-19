@@ -4,7 +4,7 @@ import { useLazyGetEmployeeWagesForYearQuery } from "../../../reduxstore/api/Yea
 import { setEmployeeWagesForYearQueryParams } from "../../../reduxstore/slices/yearsEndSlice";
 import { RootState } from "../../../reduxstore/store";
 import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
-import { useGridPagination } from "../../../hooks/useGridPagination";
+import { useGridPagination, SortParams } from "../../../hooks/useGridPagination";
 import { initialState, ytdWagesReducer, selectShowData, selectHasResults } from "./useYTDWagesReducer";
 
 export interface YTDWagesSearchParams {
@@ -20,7 +20,7 @@ const useYTDWages = () => {
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
 
   const handlePaginationChange = useCallback(
-    (pageNumber: number, pageSize: number, sortParams: any) => {
+    (pageNumber: number, pageSize: number, sortParams: SortParams) => {
       if (fiscalCloseProfitYear && hasToken) {
         try {
           const request = {

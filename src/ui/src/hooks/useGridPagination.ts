@@ -1,17 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+export interface SortParams {
+  sortBy: string;
+  isSortDescending: boolean;
+}
+
 export interface GridPaginationState {
   pageNumber: number;
   pageSize: number;
-  sortParams: {
-    sortBy: string;
-    isSortDescending: boolean;
-  };
+  sortParams: SortParams;
 }
 
 export interface GridPaginationActions {
   handlePaginationChange: (pageNumber: number, pageSize: number) => void;
-  handleSortChange: (sortParams: any) => void;
+  handleSortChange: (sortParams: SortParams) => void;
   resetPagination: () => void;
 }
 
@@ -19,7 +21,7 @@ export interface UseGridPaginationConfig {
   initialPageSize: number;
   initialSortBy: string;
   initialSortDescending?: boolean;
-  onPaginationChange?: (pageNumber: number, pageSize: number, sortParams: any) => void;
+  onPaginationChange?: (pageNumber: number, pageSize: number, sortParams: SortParams) => void;
 }
 
 /*
@@ -88,7 +90,7 @@ export const useGridPagination = ({
   );
 
   const handleSortChange = useCallback(
-    (newSortParams: any) => {
+    (newSortParams: SortParams) => {
       setSortBy(newSortParams.sortBy);
       setIsSortDescending(newSortParams.isSortDescending);
 

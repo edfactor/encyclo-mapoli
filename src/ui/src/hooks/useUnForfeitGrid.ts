@@ -12,7 +12,7 @@ import { formatNumberWithComma, setMessage } from "smart-ui-library";
 import { Messages } from "../utils/messageDictonary";
 import useDecemberFlowProfitYear from "./useDecemberFlowProfitYear";
 import { useEditState } from "./useEditState";
-import { useGridPagination } from "./useGridPagination";
+import { useGridPagination, SortParams } from "./useGridPagination";
 import { useRowSelection } from "./useRowSelection";
 
 interface UnForfeitGridConfig {
@@ -54,8 +54,8 @@ export const useUnForfeitGrid = ({
 
   const editState = useEditState();
   const selectionState = useRowSelection();
-  const gridRef = useRef<any>(null);
-  const prevUnForfeits = useRef<any>(null);
+  const gridRef = useRef<{ api: GridApi } | null>(null);
+  const prevUnForfeits = useRef<typeof unForfeits | null>(null);
 
   // Create a request object based on current parameters
   const createRequest = useCallback(
@@ -91,7 +91,7 @@ export const useUnForfeitGrid = ({
       initialSortBy: "fullName",
       initialSortDescending: false,
       onPaginationChange: useCallback(
-        async (pageNum: number, pageSz: number, sortPrms: any) => {
+        async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
           if (initialSearchLoaded) {
             const request = createRequest(pageNum * pageSz, sortPrms.sortBy, sortPrms.isSortDescending);
             if (request && request.pagination) {
@@ -346,7 +346,7 @@ export const useUnForfeitGrid = ({
   useEffect(() => {
     if (unForfeits?.response?.results && unForfeits.response.results.length > 0) {
       const initialExpandState: Record<string, boolean> = {};
-      unForfeits.response.results.forEach((row: any) => {
+      unForfeits.response.results.forEach((row) => {
         const hasDetails = row.details && row.details.length > 0;
         if (hasDetails) {
           initialExpandState[row.badgeNumber.toString()] = true;
@@ -367,7 +367,7 @@ export const useUnForfeitGrid = ({
   }, [editState.loadingRowIds]);
 
   // Sort handler that immediately triggers a search with the new sort parameters
-  const sortEventHandler = (update: any) => {
+  const sortEventHandler = (update: SortParams) => {
     handleSortChange(update);
   };
 

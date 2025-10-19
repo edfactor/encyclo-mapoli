@@ -1,6 +1,14 @@
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+
+interface ExecutiveSearchForm {
+  badgeNumber?: number;
+  socialSecurity?: string;
+  fullNameContains?: string;
+  hasExecutiveHoursAndDollars?: boolean;
+  isMonthlyPayroll?: boolean;
+}
 import {
   useLazyGetAdditionalExecutivesQuery,
   useLazyGetExecutiveHoursAndDollarsQuery,
@@ -123,7 +131,7 @@ const useManageExecutiveHoursAndDollars = () => {
   });
 
   const executeSearch = useCallback(
-    async (searchForm: any) => {
+    async (searchForm: ExecutiveSearchForm) => {
       const searchParams: ExecutiveHoursAndDollarsRequestDto = {
         profitYear: profitYear || 0,
         ...(searchForm.badgeNumber && { badgeNumber: searchForm.badgeNumber }),
@@ -155,7 +163,7 @@ const useManageExecutiveHoursAndDollars = () => {
   );
 
   const executeModalSearch = useCallback(
-    async (searchForm: any) => {
+    async (searchForm: ExecutiveSearchForm) => {
       const searchParams: ExecutiveHoursAndDollarsRequestDto = {
         profitYear: profitYear || 0,
         ...(searchForm.badgeNumber && { badgeNumber: searchForm.badgeNumber }),

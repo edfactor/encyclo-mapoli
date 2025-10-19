@@ -12,7 +12,7 @@ import { formatNumberWithComma, setMessage } from "smart-ui-library";
 import { Messages } from "../utils/messageDictonary";
 import useDecemberFlowProfitYear from "./useDecemberFlowProfitYear";
 import { useEditState } from "./useEditState";
-import { useGridPagination } from "./useGridPagination";
+import { useGridPagination, SortParams } from "./useGridPagination";
 import { useRowSelection } from "./useRowSelection";
 
 interface TerminationSearchRequest {
@@ -70,7 +70,7 @@ export const useTerminationGrid = ({
 
   const editState = useEditState();
   const selectionState = useRowSelection();
-  const gridRef = useRef<any>(null);
+  const gridRef = useRef<{ api: GridApi } | null>(null);
   const lastRequestKeyRef = useRef<string | null>(null);
 
   // Create a request object based on current parameters
@@ -108,7 +108,7 @@ export const useTerminationGrid = ({
       initialSortBy: "name",
       initialSortDescending: false,
       onPaginationChange: useCallback(
-        async (pageNum: number, pageSz: number, sortPrms: any) => {
+        async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
           if (initialSearchLoaded && searchParams) {
             const params = createRequest(
               pageNum * pageSz,
@@ -158,11 +158,11 @@ export const useTerminationGrid = ({
   // Initialize expandedRows when data is loaded
   useEffect(() => {
     if (termination?.response?.results && termination.response.results.length > 0) {
-      const badgeNumbers = termination.response.results.map((row: any) => row.badgeNumber).join(",");
+      const badgeNumbers = termination.response.results.map((row) => row.badgeNumber).join(",");
       const prevBadgeNumbers = Object.keys(expandedRows).join(",");
       if (badgeNumbers !== prevBadgeNumbers) {
         const initialExpandState: Record<string, boolean> = {};
-        termination.response.results.forEach((row: any) => {
+        termination.response.results.forEach((row) => {
           if (row.yearDetails && row.yearDetails.length > 0) {
             initialExpandState[row.badgeNumber] = true;
           }
@@ -218,9 +218,9 @@ export const useTerminationGrid = ({
           sortParams.isSortDescending,
           selectedProfitYear,
           pageSize,
-          (params as any).beginningDate,
-          (params as any).endingDate,
-          (params as any).archive
+          params.beginningDate,
+          params.endingDate,
+          (params as StartAndEndDateRequest & { archive?: boolean }).archive
         );
 
         // Prevent duplicate requests
@@ -437,7 +437,7 @@ export const useTerminationGrid = ({
   }, [editState.hasAnyEdits, onUnsavedChanges]);
 
   // Sort handler that immediately triggers a search with the new sort parameters
-  const sortEventHandler = (update: any) => {
+  const sortEventHandler = (update: SortParams) => {
     handleSortChange(update);
   };
 

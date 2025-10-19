@@ -5,10 +5,12 @@ import { useLazyGetMilitaryContributionsQuery } from "reduxstore/api/MilitaryApi
 import { clearMasterInquiryData, setMasterInquiryData } from "reduxstore/slices/inquirySlice";
 import { clearMilitaryContributions } from "reduxstore/slices/militarySlice";
 import { RootState } from "reduxstore/store";
-import { MasterInquiryRequest, MissiveResponse } from "reduxstore/types";
+import { MasterInquiryDetail, MasterInquiryRequest, MissiveResponse } from "reduxstore/types";
+import { Paged } from "smart-ui-library";
+import { ServiceErrorResponse } from "../../../../types/errors/errors";
 import { MASTER_INQUIRY_MESSAGES } from "../../../../components/MissiveAlerts/MissiveMessages";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
-import { useGridPagination } from "../../../../hooks/useGridPagination";
+import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useMissiveAlerts } from "../../../../hooks/useMissiveAlerts";
 
 interface SearchFormData {
@@ -25,7 +27,7 @@ interface MilitaryState {
     error: string | null;
   };
   contributions: {
-    data: any | null;
+    data: Paged<MasterInquiryDetail> | null;
     isLoading: boolean;
     error: string | null;
   };
@@ -37,7 +39,7 @@ type MilitaryAction =
   | { type: "SEARCH_FAILURE"; payload: { error: string } }
   | { type: "SEARCH_RESET" }
   | { type: "CONTRIBUTIONS_FETCH_START" }
-  | { type: "CONTRIBUTIONS_FETCH_SUCCESS"; payload: { data: any } }
+  | { type: "CONTRIBUTIONS_FETCH_SUCCESS"; payload: { data: Paged<MasterInquiryDetail> } }
   | { type: "CONTRIBUTIONS_FETCH_FAILURE"; payload: { error: string } };
 
 const initialState: MilitaryState = {
@@ -151,7 +153,7 @@ export const useMilitaryContribution = () => {
   profitYearRef.current = profitYear;
 
   const handleContributionsPaginationChange = useCallback(
-    (pageNumber: number, pageSize: number, sortParams: any) => {
+    (pageNumber: number, pageSize: number, sortParams: SortParams) => {
       const currentMemberDetails = memberDetailsRef.current;
       const currentProfitYear = profitYearRef.current;
 
@@ -171,11 +173,13 @@ export const useMilitaryContribution = () => {
         }
       })
         .unwrap()
-        .then((data: any) => {
+        .then((data) => {
           dispatch({ type: "CONTRIBUTIONS_FETCH_SUCCESS", payload: { data } });
         })
-        .catch((error: any) => {
-          dispatch({ type: "CONTRIBUTIONS_FETCH_FAILURE", payload: { error: error?.toString() || "Unknown error" } });
+        .catch((error) => {
+          const serviceError = error as ServiceErrorResponse;
+          const errorMsg = serviceError?.data?.detail || "Failed to fetch contributions";
+          dispatch({ type: "CONTRIBUTIONS_FETCH_FAILURE", payload: { error: errorMsg } });
         });
     },
     [fetchContributions]
@@ -227,13 +231,15 @@ export const useMilitaryContribution = () => {
               pagination: { skip: 0, take: 25, sortBy: "contributionDate", isSortDescending: false }
             })
               .unwrap()
-              .then((data: any) => {
+              .then((data) => {
                 dispatch({ type: "CONTRIBUTIONS_FETCH_SUCCESS", payload: { data } });
               })
-              .catch((error: any) => {
+              .catch((error) => {
+                const serviceError = error as ServiceErrorResponse;
+                const errorMsg = serviceError?.data?.detail || "Failed to fetch contributions";
                 dispatch({
                   type: "CONTRIBUTIONS_FETCH_FAILURE",
-                  payload: { error: error?.toString() || "Unknown error" }
+                  payload: { error: errorMsg }
                 });
               });
           } catch (err) {

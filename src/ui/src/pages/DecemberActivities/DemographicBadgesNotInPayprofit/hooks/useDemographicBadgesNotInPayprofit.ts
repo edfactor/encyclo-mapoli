@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { useLazyGetDemographicBadgesNotInPayprofitQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../../reduxstore/store";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
-import { useGridPagination } from "../../../../hooks/useGridPagination";
+import { useGridPagination, SortParams } from "../../../../hooks/useGridPagination";
 import {
   initialState,
   demographicBadgesNotInPayprofitReducer,
@@ -23,7 +23,7 @@ const useDemographicBadgesNotInPayprofit = () => {
   const decemberFlowProfitYear = useDecemberFlowProfitYear();
 
   const handlePaginationChange = useCallback(
-    (pageNumber: number, pageSize: number, sortParams: any) => {
+    (pageNumber: number, pageSize: number, sortParams: SortParams) => {
       if (decemberFlowProfitYear && hasToken) {
         try {
           // Handle empty sortBy case - set default

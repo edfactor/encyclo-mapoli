@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { useLazyGetDuplicateNamesAndBirthdaysQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../../reduxstore/store";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
-import { useGridPagination } from "../../../../hooks/useGridPagination";
+import { useGridPagination, SortParams } from "../../../../hooks/useGridPagination";
 import {
   initialState,
   duplicateNamesAndBirthdaysReducer,
@@ -23,7 +23,7 @@ const useDuplicateNamesAndBirthdays = () => {
   const decemberFlowProfitYear = useDecemberFlowProfitYear();
 
   const handlePaginationChange = useCallback(
-    (pageNumber: number, pageSize: number, sortParams: any) => {
+    (pageNumber: number, pageSize: number, sortParams: SortParams) => {
       if (decemberFlowProfitYear && hasToken) {
         try {
           const request = {
