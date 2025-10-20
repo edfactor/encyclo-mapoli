@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
+import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { useLazyGetEmployeeWagesForYearQuery } from "../../../reduxstore/api/YearsEndApi";
 import { setEmployeeWagesForYearQueryParams } from "../../../reduxstore/slices/yearsEndSlice";
 import { RootState } from "../../../reduxstore/store";
-import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
-import { useGridPagination, SortParams } from "../../../hooks/useGridPagination";
-import { initialState, ytdWagesReducer, selectShowData, selectHasResults } from "./useYTDWagesReducer";
+import { initialState, selectHasResults, selectShowData, ytdWagesReducer } from "./useYTDWagesReducer";
 
 export interface YTDWagesSearchParams {
   profitYear: number;
@@ -61,7 +61,7 @@ const useYTDWages = () => {
   });
 
   const executeSearch = useCallback(
-    async (searchParams: YTDWagesSearchParams, source = "manual") => {
+    async (searchParams: YTDWagesSearchParams, _source?: string) => {
       if (!hasToken) return;
 
       dispatch({ type: "SEARCH_START", payload: { profitYear: searchParams.profitYear } });

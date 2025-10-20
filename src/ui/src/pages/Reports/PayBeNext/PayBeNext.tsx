@@ -16,7 +16,7 @@ import {
   adhocBeneficiariesReportResponse,
   BeneficiaryReportDto
 } from "../../../reduxstore/types";
-import { GetProfitDetailColumnDef, PayBeNextColumnDef } from "./PayBeNextColumnDef";
+import { PayBeNextGridColumns, ProfitDetailGridColumns } from "./PayBeNextGridColumns";
 
 const schema = yup.object().shape({
   profitYear: yup.string().notRequired(),
@@ -52,9 +52,9 @@ const PayBeNext = () => {
     setSelectedRowIds((prev) => prev.filter((rowId) => rowId !== id));
   }, []);
 
-  const mainColumns = useMemo(() => PayBeNextColumnDef(), []);
+  const mainColumns = useMemo(() => PayBeNextGridColumns(), []);
   const detailColumns = useMemo(
-    () => GetProfitDetailColumnDef(addRowToSelectedRows, removeRowFromSelectedRows),
+    () => ProfitDetailGridColumns(addRowToSelectedRows, removeRowFromSelectedRows),
     [addRowToSelectedRows, removeRowFromSelectedRows]
   );
 

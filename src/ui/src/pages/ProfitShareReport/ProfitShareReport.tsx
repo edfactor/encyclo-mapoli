@@ -51,7 +51,7 @@ const ProfitShareReport = () => {
             dispatch(setYearEndProfitSharingReportQueryParams(profitYear));
           }
         })
-        .catch((error) => {
+        .catch((_error) => {
           setIsLoadingTotals(false);
         });
     }

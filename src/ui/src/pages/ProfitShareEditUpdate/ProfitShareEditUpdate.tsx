@@ -1,5 +1,4 @@
 import { Replay } from "@mui/icons-material";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Alert, AlertTitle, Button, CircularProgress, Grid, Tooltip, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -42,9 +41,9 @@ import ProfitShareEditUpdateSearchFilter from "./ProfitShareEditUpdateSearchFilt
 import ProfitShareEditUpdateTabs from "./ProfitShareEditUpdateTabs";
 
 const useRevertAction = (
-  setEmployeesReverted: (count: number) => void,
-  setBeneficiariesReverted: (count: number) => void,
-  setEtvasReverted: (count: number) => void,
+  //setEmployeesReverted: (count: number) => void,
+  //setBeneficiariesReverted: (count: number) => void,
+  //setEtvasReverted: (count: number) => void,
   setChangesApplied: (changes: boolean) => void
 ) => {
   const [trigger] = useLazyGetMasterRevertQuery();
@@ -105,84 +104,84 @@ const useRevertAction = (
   return revertAction;
 };
 
-const useSaveAction = (
-  setEmployeesReverted: (count: number) => void,
-  setBeneficiariesReverted: (count: number) => void,
-  setEtvasReverted: (count: number) => void
+const useSaveAction = () =>
+  //setEmployeesReverted: (count: number) => void,
+  //setBeneficiariesReverted: (count: number) => void,
+  //setEtvasReverted: (count: number) => void
   // NOTE: Removed setValidationResponse parameter - now using useChecksumValidation hook
-) => {
-  const { profitSharingEditQueryParams } = useSelector((state: RootState) => state.yearsEnd);
-  const [applyMaster] = useGetMasterApplyMutation();
-  const dispatch = useDispatch();
-  const profitYear = useFiscalCloseProfitYear();
+  {
+    const { profitSharingEditQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+    const [applyMaster] = useGetMasterApplyMutation();
+    const dispatch = useDispatch();
+    const profitYear = useFiscalCloseProfitYear();
 
-  const saveAction = async (): Promise<void> => {
-    const params: ProfitShareMasterApplyRequest = {
-      profitYear: profitYear ?? 0,
-      contributionPercent: profitSharingEditQueryParams?.contributionPercent ?? 0,
-      earningsPercent: profitSharingEditQueryParams?.earningsPercent ?? 0,
-      incomingForfeitPercent: profitSharingEditQueryParams?.incomingForfeitPercent ?? 0,
-      secondaryEarningsPercent: profitSharingEditQueryParams?.secondaryEarningsPercent ?? 0,
-      maxAllowedContributions: profitSharingEditQueryParams?.maxAllowedContributions ?? 0,
-      badgeToAdjust: profitSharingEditQueryParams?.badgeToAdjust ?? 0,
-      adjustContributionAmount: profitSharingEditQueryParams?.adjustContributionAmount ?? 0,
-      adjustEarningsAmount: profitSharingEditQueryParams?.adjustEarningsAmount ?? 0,
-      adjustIncomingForfeitAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0,
-      badgeToAdjust2: profitSharingEditQueryParams?.badgeToAdjust2 ?? 0,
-      adjustEarningsSecondaryAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0
+    const saveAction = async (): Promise<void> => {
+      const params: ProfitShareMasterApplyRequest = {
+        profitYear: profitYear ?? 0,
+        contributionPercent: profitSharingEditQueryParams?.contributionPercent ?? 0,
+        earningsPercent: profitSharingEditQueryParams?.earningsPercent ?? 0,
+        incomingForfeitPercent: profitSharingEditQueryParams?.incomingForfeitPercent ?? 0,
+        secondaryEarningsPercent: profitSharingEditQueryParams?.secondaryEarningsPercent ?? 0,
+        maxAllowedContributions: profitSharingEditQueryParams?.maxAllowedContributions ?? 0,
+        badgeToAdjust: profitSharingEditQueryParams?.badgeToAdjust ?? 0,
+        adjustContributionAmount: profitSharingEditQueryParams?.adjustContributionAmount ?? 0,
+        adjustEarningsAmount: profitSharingEditQueryParams?.adjustEarningsAmount ?? 0,
+        adjustIncomingForfeitAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0,
+        badgeToAdjust2: profitSharingEditQueryParams?.badgeToAdjust2 ?? 0,
+        adjustEarningsSecondaryAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0
+      };
+
+      dispatch(setProfitShareApplyOrRevertLoading(true));
+
+      await applyMaster(params)
+        .unwrap()
+        .then((payload: ProfitShareMasterResponse) => {
+          dispatch(setProfitEditUpdateChangesAvailable(false));
+
+          console.log("Successfully applied changes to year end: ", payload);
+          console.log("Employees affected: ", payload?.employeesEffected);
+
+          // NOTE: Removed setValidationResponse call - useChecksumValidation hook handles this
+          // Cross-reference validation will auto-refresh via the hook after save
+          if (payload.crossReferenceValidation) {
+            console.log("Cross-reference validation:", payload.crossReferenceValidation);
+          }
+
+          //setEmployeesReverted(payload?.employeesEffected ?? 0);
+          //setBeneficiariesReverted(payload?.beneficiariesEffected ?? 0);
+          //setEtvasReverted(payload?.etvasEffected ?? 0);
+          dispatch(
+            setMessage({
+              ...Messages.ProfitShareApplySuccess,
+              message: {
+                ...Messages.ProfitShareApplySuccess.message,
+                message: `Employees affected: ${payload?.employeesEffected} | Beneficiaries: ${payload?.beneficiariesEffected} | ETVAs: ${payload?.etvasEffected} `
+              }
+            })
+          );
+          dispatch(setResetYearEndPage(true));
+          dispatch(setProfitEditUpdateRevertChangesAvailable(true));
+          dispatch(setProfitShareEditUpdateShowSearch(false));
+          // Clear the grids
+          dispatch(clearProfitSharingUpdate());
+        })
+        .catch((error) => {
+          console.error("ERROR: Did not apply changes to year end", error);
+          dispatch(
+            setMessage({
+              ...Messages.ProfitShareApplyFail,
+              message: {
+                ...Messages.ProfitShareApplyFail.message,
+                message: `Employees affected: 0 | Beneficiaries: 0, | ETVAs: 0 `
+              }
+            })
+          );
+        });
+      dispatch(setProfitShareApplyOrRevertLoading(false));
     };
 
-    dispatch(setProfitShareApplyOrRevertLoading(true));
-
-    await applyMaster(params)
-      .unwrap()
-      .then((payload: ProfitShareMasterResponse) => {
-        dispatch(setProfitEditUpdateChangesAvailable(false));
-
-        console.log("Successfully applied changes to year end: ", payload);
-        console.log("Employees affected: ", payload?.employeesEffected);
-
-        // NOTE: Removed setValidationResponse call - useChecksumValidation hook handles this
-        // Cross-reference validation will auto-refresh via the hook after save
-        if (payload.crossReferenceValidation) {
-          console.log("Cross-reference validation:", payload.crossReferenceValidation);
-        }
-
-        setEmployeesReverted(payload?.employeesEffected ?? 0);
-        setBeneficiariesReverted(payload?.beneficiariesEffected ?? 0);
-        setEtvasReverted(payload?.etvasEffected ?? 0);
-        dispatch(
-          setMessage({
-            ...Messages.ProfitShareApplySuccess,
-            message: {
-              ...Messages.ProfitShareApplySuccess.message,
-              message: `Employees affected: ${payload?.employeesEffected} | Beneficiaries: ${payload?.beneficiariesEffected} | ETVAs: ${payload?.etvasEffected} `
-            }
-          })
-        );
-        dispatch(setResetYearEndPage(true));
-        dispatch(setProfitEditUpdateRevertChangesAvailable(true));
-        dispatch(setProfitShareEditUpdateShowSearch(false));
-        // Clear the grids
-        dispatch(clearProfitSharingUpdate());
-      })
-      .catch((error) => {
-        console.error("ERROR: Did not apply changes to year end", error);
-        dispatch(
-          setMessage({
-            ...Messages.ProfitShareApplyFail,
-            message: {
-              ...Messages.ProfitShareApplyFail.message,
-              message: `Employees affected: 0 | Beneficiaries: 0, | ETVAs: 0 `
-            }
-          })
-        );
-      });
-    dispatch(setProfitShareApplyOrRevertLoading(false));
+    return saveAction;
   };
-
-  return saveAction;
-};
 
 const wasFormUsed = (profitSharingEditQueryParams: ProfitShareEditUpdateQueryParams) => {
   return (
@@ -360,12 +359,12 @@ const RenderRevertButton = (
 };
 
 const ProfitShareEditUpdate = () => {
-  const [beneficiariesAffected, setBeneficiariesAffected] = useState(0);
-  const [employeesAffected, setEmployeesAffected] = useState(0);
-  const [etvasAffected, setEtvasAffected] = useState(0);
-  const [beneficiariesReverted, setBeneficiariesReverted] = useState(0);
-  const [employeesReverted, setEmployeesReverted] = useState(0);
-  const [etvasReverted, setEtvasReverted] = useState(0);
+  //const [beneficiariesAffected, setBeneficiariesAffected] = useState(0);
+  //const [employeesAffected, setEmployeesAffected] = useState(0);
+  //const [etvasAffected, setEtvasAffected] = useState(0);
+  //const [beneficiariesReverted, setBeneficiariesReverted] = useState(0);
+  //const [employeesReverted, setEmployeesReverted] = useState(0);
+  //const [etvasReverted, setEtvasReverted] = useState(0);
   const [updatedBy, setUpdatedBy] = useState<string | null>(null);
   const [updatedTime, setUpdatedTime] = useState<string | null>(null);
 
@@ -377,98 +376,22 @@ const ProfitShareEditUpdate = () => {
   };
 
   // Helper to render validation icon with popup for a specific field (legacy - replaced by renderValidationIconInGrid)
-  const renderValidationIcon = (fieldKey: string, fieldDisplayName: string) => {
-    const validation = getFieldValidation(fieldKey);
-    if (!validation) {
-      return null;
-    }
-
-    const isOpen = openValidationField === fieldKey;
-
-    return (
-      <div className="relative ml-1 inline-block">
-        <InfoOutlinedIcon
-          className={`cursor-pointer ${validation.isValid ? "text-green-500" : "text-orange-500"}`}
-          fontSize="small"
-          onClick={() => handleValidationToggle(fieldKey)}
-        />
-        {isOpen && (
-          <div className="absolute left-0 top-full z-[1000] mt-1 w-[350px] rounded border border-gray-300 bg-white shadow-lg">
-            <div className="p-3">
-              <div className="mb-2 flex items-center justify-between">
-                <Typography
-                  variant="subtitle2"
-                  sx={{ fontWeight: "bold" }}>
-                  {fieldDisplayName}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: validation.isValid ? "success.main" : "warning.main",
-                    fontWeight: "bold"
-                  }}>
-                  {validation.isValid ? "✓ Match" : "⚠ Mismatch"}
-                </Typography>
-              </div>
-              <table className="w-full border-collapse text-sm">
-                <tbody>
-                  <tr>
-                    <td className="border-b border-gray-200 py-2 pr-2 font-semibold text-gray-700">
-                      Current (PAY444):
-                    </td>
-                    <td className="border-b border-gray-200 py-2 text-right">
-                      {numberToCurrency(validation.currentValue || 0)}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="border-b border-gray-200 py-2 pr-2 font-semibold text-gray-700">
-                      Expected (PAY443):
-                    </td>
-                    <td className="border-b border-gray-200 py-2 text-right">
-                      {numberToCurrency(validation.expectedValue || 0)}
-                    </td>
-                  </tr>
-                  {!validation.isValid && (validation.variance || 0) !== 0 && (
-                    <tr className="bg-orange-50">
-                      <td className="py-2 pr-2 font-semibold text-orange-700">Variance:</td>
-                      <td className="py-2 text-right font-semibold text-orange-700">
-                        {(validation.variance || 0) > 0 ? "+" : ""}
-                        {numberToCurrency(validation.variance || 0)}
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-              {validation.message && (
-                <Typography
-                  variant="caption"
-                  sx={{ display: "block", mt: 1, color: "text.secondary", fontStyle: "italic" }}>
-                  {validation.message}
-                </Typography>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
 
   // This is a flag used to indicate that the year end change have been made
   // and a banner should be shown indicating this
   const [changesApplied, setChangesApplied] = useState<boolean>(false);
 
   const revertAction = useRevertAction(
-    setEmployeesReverted,
-    setBeneficiariesReverted,
-    setEtvasReverted,
+    //setEmployeesReverted,
+    // setBeneficiariesReverted,
+    // setEtvasReverted,
     setChangesApplied
   );
-  const saveAction = useSaveAction(
-    setEmployeesAffected,
-    setBeneficiariesAffected,
-    setEtvasAffected
-    // NOTE: Removed setValidationResponse - now using useChecksumValidation hook
-  );
+  const saveAction = useSaveAction();
+  //setEmployeesAffected,
+  //setBeneficiariesAffected,
+  //setEtvasAffected
+  // NOTE: Removed setValidationResponse - now using useChecksumValidation hook
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [pageNumberReset, setPageNumberReset] = useState(false);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
@@ -530,81 +453,6 @@ const ProfitShareEditUpdate = () => {
 
   // Helper to render validation icon positioned absolutely in a TotalsGrid (like State Taxes pattern)
   // IMPORTANT: Must be declared AFTER getFieldValidation helper
-  const renderValidationIconInGrid = (fieldKey: string, fieldDisplayName: string) => {
-    const validation = getFieldValidation(fieldKey);
-    if (!validation) {
-      return null;
-    }
-
-    return (
-      <div
-        className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
-        onClick={() => handleValidationToggle(fieldKey)}>
-        <InfoOutlinedIcon
-          className={`cursor-pointer ${validation.isValid ? "text-green-500" : "text-orange-500"}`}
-          fontSize="small"
-        />
-        {openValidationField === fieldKey && (
-          <div className="absolute left-0 top-full z-[1000] mt-1 max-h-[300px] w-[350px] overflow-auto rounded border border-gray-300 bg-white shadow-lg">
-            <div className="p-2 px-4 pb-4">
-              <Typography
-                variant="subtitle2"
-                sx={{ p: 1, fontWeight: "bold" }}>
-                {fieldDisplayName}
-              </Typography>
-              <table className="w-full border-collapse text-[0.95rem]">
-                <thead>
-                  <tr>
-                    <th className="border-b border-gray-300 px-2 py-1 text-left font-semibold">Report</th>
-                    <th className="border-b border-gray-300 px-2 py-1 text-right font-semibold">Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td className="border-b border-gray-100 px-2 py-1 text-left">Current (PAY444)</td>
-                    <td className="border-b border-gray-100 px-2 py-1 text-right">
-                      {numberToCurrency(validation.currentValue || 0)}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="border-b border-gray-100 px-2 py-1 text-left">Expected (PAY443)</td>
-                    <td className="border-b border-gray-100 px-2 py-1 text-right">
-                      {numberToCurrency(validation.expectedValue || 0)}
-                    </td>
-                  </tr>
-                  {!validation.isValid && (validation.variance || 0) !== 0 && (
-                    <tr className="bg-orange-50">
-                      <td className="px-2 py-1 text-left font-semibold text-orange-700">Variance</td>
-                      <td className="px-2 py-1 text-right font-bold text-orange-700">
-                        {numberToCurrency(validation.variance || 0)}
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-              {validation.message && (
-                <Typography
-                  variant="caption"
-                  sx={{ mt: 1, display: "block", px: 1, color: "text.secondary" }}>
-                  {validation.message}
-                </Typography>
-              )}
-              <div className="mt-2 flex items-center justify-end gap-2 px-2">
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: validation.isValid ? "success.main" : "warning.main",
-                    fontWeight: "bold"
-                  }}>
-                  {validation.isValid ? "✓ Values Match" : "⚠ Values Mismatch"}
-                </Typography>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
 
   // Extract cross-reference validation from profitSharingUpdate response
   // NOTE: This useEffect is now DISABLED because we're using the useChecksumValidation hook
@@ -688,6 +536,7 @@ const ProfitShareEditUpdate = () => {
         setChangesApplied(false);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onStatusSearch, hasToken, updatedTime, updatedBy]);
 
   return (

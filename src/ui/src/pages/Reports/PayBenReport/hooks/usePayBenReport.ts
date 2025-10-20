@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { useSelector } from "react-redux";
+import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useLazyPayBenReportQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../../reduxstore/store";
 import { PayBenReportRequest } from "../../../../types";
-import { useGridPagination, SortParams } from "../../../../hooks/useGridPagination";
-import { initialState, payBenReportReducer, selectShowData, selectHasResults } from "./usePayBenReportReducer";
+import { initialState, payBenReportReducer, selectHasResults, selectShowData } from "./usePayBenReportReducer";
 
 const usePayBenReport = () => {
   const [state, dispatch] = useReducer(payBenReportReducer, initialState);
@@ -48,29 +48,26 @@ const usePayBenReport = () => {
     onPaginationChange: handlePaginationChange
   });
 
-  const executeSearch = useCallback(
-    async (source = "manual") => {
-      if (!hasToken) return;
+  const executeSearch = useCallback(async () => {
+    if (!hasToken) return;
 
-      dispatch({ type: "SEARCH_START" });
+    dispatch({ type: "SEARCH_START" });
 
-      try {
-        const request: PayBenReportRequest = {
-          skip: pagination.pageNumber * pagination.pageSize,
-          take: pagination.pageSize,
-          sortBy: pagination.sortParams.sortBy,
-          isSortDescending: pagination.sortParams.isSortDescending
-        };
+    try {
+      const request: PayBenReportRequest = {
+        skip: pagination.pageNumber * pagination.pageSize,
+        take: pagination.pageSize,
+        sortBy: pagination.sortParams.sortBy,
+        isSortDescending: pagination.sortParams.isSortDescending
+      };
 
-        const result = await triggerReport(request).unwrap();
-        dispatch({ type: "SEARCH_SUCCESS", payload: result });
-      } catch (error) {
-        console.error("Search failed:", error);
-        dispatch({ type: "SEARCH_ERROR" });
-      }
-    },
-    [hasToken, pagination, triggerReport]
-  );
+      const result = await triggerReport(request).unwrap();
+      dispatch({ type: "SEARCH_SUCCESS", payload: result });
+    } catch (error) {
+      console.error("Search failed:", error);
+      dispatch({ type: "SEARCH_ERROR" });
+    }
+  }, [hasToken, pagination, triggerReport]);
 
   const hasInitiallySearched = useRef(false);
 

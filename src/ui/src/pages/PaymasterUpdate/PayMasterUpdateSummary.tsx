@@ -43,7 +43,10 @@ const PayMasterUpdateSummary = () => {
   useEffect(() => {
     const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
 
-    const getNavigationObjectBasedOnId = (navigationArray: NavigationItem[] | undefined, id: number | undefined): NavigationItem | undefined => {
+    const getNavigationObjectBasedOnId = (
+      navigationArray: NavigationItem[] | undefined,
+      id: number | undefined
+    ): NavigationItem | undefined => {
       if (navigationArray) {
         for (const item of navigationArray) {
           if (item.id === id) {
@@ -123,7 +126,7 @@ const PayMasterUpdateSummary = () => {
       </Stack>
     );
   };
-
+  /*
   const updateSummarySection = [
     {
       label: "Employees Updated",
@@ -149,8 +152,7 @@ const PayMasterUpdateSummary = () => {
       label: "After Vested Amount",
       value: updateSummary ? numberToCurrency(updateSummary.totalAfterVestedAmount) : "-"
     }
-  ];
-
+  ];*/
   const onSearch = (data: ProfitYearSearch) => {
     setInitialSearchLoaded(true);
     getUpdateSummary({
