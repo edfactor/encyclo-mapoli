@@ -10,7 +10,7 @@ import { RootState } from "reduxstore/store";
 import { MasterInquiryRequest, MasterInquirySearch, MissiveResponse } from "reduxstore/types";
 import { MASTER_INQUIRY_MESSAGES } from "../../../components/MissiveAlerts/MissiveMessages";
 import { ROUTES } from "../../../constants";
-import { useGridPagination, SortParams } from "../../../hooks/useGridPagination";
+import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
 import { isSimpleSearch } from "../utils/MasterInquiryFunctions";
 import {
@@ -19,10 +19,8 @@ import {
   selectShowMemberDetails,
   selectShowMemberGrid,
   selectShowProfitDetails,
-  type SelectedMember,
   type SearchResponse,
-  type MemberDetails,
-  type ProfitData
+  type SelectedMember
 } from "./useMasterInquiryReducer";
 
 const useMasterInquiry = () => {
@@ -34,7 +32,8 @@ const useMasterInquiry = () => {
   const [triggerProfitDetails] = useLazyGetProfitMasterInquiryMemberDetailsQuery();
 
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
-  const missives: MissiveResponse[] = useSelector((state: RootState) => state.lookups.missives);
+  const missivesFromStore = useSelector((state: RootState) => state.lookups.missives);
+  const missives: MissiveResponse[] = useMemo(() => missivesFromStore ?? [], [missivesFromStore]);
 
   const { addAlert, addAlerts, clearAlerts } = useMissiveAlerts();
 
@@ -68,7 +67,7 @@ const useMasterInquiry = () => {
           }
         })
           .unwrap()
-          .then((response: SearchResponse | SearchResponse['results']) => {
+          .then((response: SearchResponse | SearchResponse["results"]) => {
             const results = Array.isArray(response) ? response : response.results;
             const total = Array.isArray(response) ? response.length : response.total;
             dispatch({ type: "MEMBERS_FETCH_SUCCESS", payload: { results: { results, total } } });
@@ -94,7 +93,7 @@ const useMasterInquiry = () => {
           isSortDescending: sortParams.isSortDescending
         })
           .unwrap()
-          .then((profitData: ProfitData) => {
+          .then((profitData) => {
             dispatch({ type: "PROFIT_DATA_FETCH_SUCCESS", payload: { profitData } });
           });
       }
@@ -164,7 +163,7 @@ const useMasterInquiry = () => {
             endProfitYear: params.endProfitYear,
             startProfitMonth: params.startProfitMonth,
             endProfitMonth: params.endProfitMonth,
-            socialSecurity: params.ssn,
+            socialSecurity: params.ssn ? params.ssn.toString() : undefined,
             name: params.name,
             badgeNumber: params.badgeNumber,
             paymentType: "all",
@@ -204,6 +203,7 @@ const useMasterInquiry = () => {
         } as MissiveResponse);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [triggerSearch, masterInquiryRequestParams, clearAlerts]
   );
 
@@ -239,7 +239,7 @@ const useMasterInquiry = () => {
       profitYear: state.search.params?.endProfitYear
     })
       .unwrap()
-      .then((details: MemberDetails) => {
+      .then((details) => {
         dispatch({ type: "MEMBER_DETAILS_FETCH_SUCCESS", payload: { details } });
 
         // Process missives if present in the response
@@ -339,7 +339,7 @@ const useMasterInquiry = () => {
       isSortDescending: profitFetchDeps.isSortDescending
     })
       .unwrap()
-      .then((profitData: ProfitData) => {
+      .then((profitData) => {
         dispatch({ type: "PROFIT_DATA_FETCH_SUCCESS", payload: { profitData } });
       })
       .catch(() => {
@@ -359,6 +359,7 @@ const useMasterInquiry = () => {
     memberGridPagination.resetPagination();
     profitGridPagination.resetPagination();
     clearSearch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [memberGridPagination.resetPagination, profitGridPagination.resetPagination, clearSearch]);
 
   const showMemberGrid = selectShowMemberGrid(state);

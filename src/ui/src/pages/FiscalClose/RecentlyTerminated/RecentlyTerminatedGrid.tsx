@@ -3,9 +3,9 @@ import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetRecentlyTerminatedReportQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, Pagination, ISortParams } from "smart-ui-library";
+import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
-import { useGridPagination, SortParams } from "../../../hooks/useGridPagination";
+import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { GetRecentlyTerminatedColumns } from "./RecentlyTerminatedGridColumns";
 
 interface RecentlyTerminatedRequest {
@@ -34,44 +34,38 @@ const RecentlyTerminatedGrid: React.FC<RecentlyTerminatedGridSearchProps> = ({
   const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch, { isFetching }] = useLazyGetRecentlyTerminatedReportQuery();
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
-    useGridPagination({
-      initialPageSize: 25,
-      initialSortBy: "fullName, terminationDate",
-      initialSortDescending: false,
-      onPaginationChange: useCallback(
-        async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
-          if (hasToken && initialSearchLoaded) {
-            const request: RecentlyTerminatedRequest = {
-              profitYear: profitYear || 0,
-              pagination: {
-                skip: pageNum * pageSz,
-                take: pageSz,
-                sortBy: sortPrms.sortBy,
-                isSortDescending: sortPrms.isSortDescending
-              }
-            };
-
-            if (recentlyTerminatedQueryParams?.beginningDate !== undefined) {
-              request.beginningDate = recentlyTerminatedQueryParams.beginningDate;
+  const { pageNumber, pageSize, handlePaginationChange, handleSortChange, resetPagination } = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "fullName, terminationDate",
+    initialSortDescending: false,
+    onPaginationChange: useCallback(
+      async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
+        if (hasToken && initialSearchLoaded && recentlyTerminatedQueryParams?.beginningDate && recentlyTerminatedQueryParams?.endingDate) {
+          const request: RecentlyTerminatedRequest = {
+            profitYear: profitYear || 0,
+            beginningDate: recentlyTerminatedQueryParams.beginningDate,
+            endingDate: recentlyTerminatedQueryParams.endingDate,
+            pagination: {
+              skip: pageNum * pageSz,
+              take: pageSz,
+              sortBy: sortPrms.sortBy,
+              isSortDescending: sortPrms.isSortDescending
             }
-            if (recentlyTerminatedQueryParams?.endingDate !== undefined) {
-              request.endingDate = recentlyTerminatedQueryParams.endingDate;
-            }
+          };
 
-            await triggerSearch(request, false);
-          }
-        },
-        [
-          hasToken,
-          initialSearchLoaded,
-          profitYear,
-          recentlyTerminatedQueryParams?.beginningDate,
-          recentlyTerminatedQueryParams?.endingDate,
-          triggerSearch
-        ]
-      )
-    });
+          await triggerSearch(request, false);
+        }
+      },
+      [
+        hasToken,
+        initialSearchLoaded,
+        profitYear,
+        recentlyTerminatedQueryParams?.beginningDate,
+        recentlyTerminatedQueryParams?.endingDate,
+        triggerSearch
+      ]
+    )
+  });
 
   // Need a useEffect on a change in RecentlyTerminated to reset the page number
   const prevRecentlyTerminated = useRef<typeof recentlyTerminated | null>(null);

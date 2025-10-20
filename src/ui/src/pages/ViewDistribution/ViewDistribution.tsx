@@ -8,10 +8,10 @@ import { CAPTIONS, ROUTES } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
 import { RootState } from "../../reduxstore/store";
+import MasterInquiryMemberDetails from "../MasterInquiry/MasterInquiryMemberDetails";
 import DisbursementsHistory from "./DisbursementsHistory";
 import DistributionDetailsSection from "./DistributionDetailsSection";
 import useViewDistribution from "./hooks/useViewDistribution";
-import MasterInquiryMemberDetails from "../MasterInquiry/MasterInquiryMemberDetails";
 import PendingDisbursementsList from "./PendingDisbursementsList";
 
 const ViewDistributionContent = () => {
@@ -115,8 +115,8 @@ const ViewDistributionContent = () => {
             <Divider />
           </Grid>
           <MasterInquiryMemberDetails
-            memberType={currentMember.isEmployee ? 1 : 2}
-            id={memberId as string}
+            //memberType={currentMember.isEmployee ? 1 : 2}
+            //id={memberId as string}
             profitYear={profitYear}
             memberDetails={currentMember}
             isLoading={isLoading}

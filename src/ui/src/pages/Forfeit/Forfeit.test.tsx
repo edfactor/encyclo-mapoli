@@ -149,8 +149,8 @@ describe("Forfeit", () => {
   });
 
   it("should set initialSearchLoaded to true when search is clicked", async () => {
-    const mockStore = createMockStore();
-    const { container } = render(<Forfeit />, { wrapper: wrapper(mockStore) });
+    //const mockStore = createMockStore();
+    //const { container } = render(<Forfeit />, { wrapper: wrapper(mockStore) });
 
     const searchButton = screen.getByTestId("search-button");
 

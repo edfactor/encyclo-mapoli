@@ -1,10 +1,10 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { Path, useNavigate } from "react-router-dom";
-import { DSMGrid, numberToCurrency, Pagination, TotalsGrid, ISortParams } from "smart-ui-library";
+import { useNavigate } from "react-router-dom";
+import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
-import { useGridPagination, SortParams } from "../../hooks/useGridPagination";
+import { SortParams, useGridPagination } from "../../hooks/useGridPagination";
 import { useLazyGetQPAY066BTerminatedWithVestedBalanceQuery } from "../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../reduxstore/store";
 import { QPAY066BFilterParams } from "./QPAY066BFilterSection";
@@ -61,22 +61,16 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ _filterParams, onLoadingCha
         }
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasToken, getQPAY066BData]);
-
-  const handleNavigationForButton = useCallback(
-    (destination: string | Partial<Path>) => {
-      navigate(destination);
-    },
-    [navigate]
-  );
 
   const sortEventHandler = (update: ISortParams) => {
     handleSortChange(update);
   };
 
-  const columnDefs = useMemo(() => GetQPAY066BGridColumns(handleNavigationForButton), [handleNavigationForButton]);
+  const columnDefs = useMemo(() => GetQPAY066BGridColumns(), []);
 
-  const showTotals = !!qpay066bData?.response?.results;
+  const showTotals = !!qpay066bData?.response?.response;
 
   return (
     <div className="relative">
@@ -133,17 +127,17 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ _filterParams, onLoadingCha
             maxHeight={gridMaxHeight}
             handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: qpay066bData?.response?.results || [],
+              rowData: qpay066bData?.response?.response?.results || [],
               columnDefs: columnDefs
             }}
           />
-          {!!qpay066bData?.response?.results?.length && (
+          {!!qpay066bData?.response?.response?.results?.length && (
             <Pagination
               pageNumber={pageNumber}
               setPageNumber={(value: number) => handlePaginationChange(value - 1, pageSize)}
               pageSize={pageSize}
               setPageSize={(value: number) => handlePaginationChange(0, value)}
-              recordCount={qpay066bData.response.total}
+              recordCount={qpay066bData.response.response.total}
             />
           )}
         </>

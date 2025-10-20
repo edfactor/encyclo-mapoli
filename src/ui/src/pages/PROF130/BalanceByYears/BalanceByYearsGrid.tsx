@@ -7,11 +7,7 @@ import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { GetBalanceByYearsGridColumns } from "./BalanceByYearsGridColumns";
 // numberToCurrency imported above
 
-interface BalanceByYearsGridProps {
-  initialSearchLoaded: boolean;
-}
-
-const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLoaded }) => {
+const BalanceByYearsGrid: React.FC = () => {
   const [_discard0, setSortParams] = useState<ISortParams>({
     sortBy: "badgeNumber",
     isSortDescending: false

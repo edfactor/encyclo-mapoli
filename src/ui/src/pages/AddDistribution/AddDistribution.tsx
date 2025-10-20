@@ -253,8 +253,8 @@ const AddDistributionContent = () => {
             <Divider />
           </Grid>
           <MasterInquiryMemberDetails
-            memberType={parseInt(memberType || "0", 10)}
-            id={memberId as string}
+            //memberType={parseInt(memberType || "0", 10)}
+            //id={memberId as string}
             profitYear={profitYear || 0}
             memberDetails={memberData}
             isLoading={isLoading}
@@ -279,8 +279,7 @@ const AddDistributionContent = () => {
               age={
                 memberData.dateOfBirth
                   ? Math.floor(
-                      (Date.now() - new Date(memberData.dateOfBirth).getTime()) /
-                        (1000 * 60 * 60 * 24 * 365.25)
+                      (Date.now() - new Date(memberData.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365.25)
                     )
                   : undefined
               }

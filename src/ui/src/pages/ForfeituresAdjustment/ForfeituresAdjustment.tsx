@@ -33,7 +33,7 @@ interface TransactionData {
 const ForfeituresAdjustment = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [isAddForfeitureModalOpen, setIsAddForfeitureModalOpen] = useState(false);
-  const [pageNumberReset, setPageNumberReset] = useState(false);
+  //const [pageNumberReset, setPageNumberReset] = useState(false);
   const [transactionData, setTransactionData] = useState<TransactionData | null>(null);
   const { forfeitureAdjustmentData, forfeitureAdjustmentQueryParams } = useSelector(
     (state: RootState) => state.forfeituresAdjustment
@@ -189,10 +189,7 @@ const ForfeituresAdjustment = () => {
           </Grid>
           <Grid width={"100%"}>
             <DSMAccordion title="Filter">
-              <ForfeituresAdjustmentSearchFilter
-                setInitialSearchLoaded={handleSearchComplete}
-                setPageReset={setPageNumberReset}
-              />
+              <ForfeituresAdjustmentSearchFilter setInitialSearchLoaded={handleSearchComplete} />
             </DSMAccordion>
           </Grid>
           <MissiveAlerts />

@@ -4,12 +4,12 @@ import React, { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { Path, useNavigate } from "react-router-dom";
 import {
-  useLazyGetYearEndProfitSharingReportLiveQuery,
-  useLazyGetYearEndProfitSharingReportFrozenQuery
+  useLazyGetYearEndProfitSharingReportFrozenQuery,
+  useLazyGetYearEndProfitSharingReportLiveQuery
 } from "reduxstore/api/YearsEndApi";
 import { FilterParams } from "reduxstore/types";
-import { DSMGrid, Pagination, ISortParams } from "smart-ui-library";
-import { useGridPagination, SortParams } from "../../../hooks/useGridPagination";
+import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { RootState } from "../../../reduxstore/store";
 import { GetProfitSharingReportGridColumns } from "./GetProfitSharingReportGridColumns";
 import presets from "./presets";
@@ -56,12 +56,12 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFroz
       [hasToken, params, profitYear, trigger]
     )
   });
-
+  /*
   const getCurrentPresetId = () => {
     const matchingPreset = presets.find((preset) => JSON.stringify(preset.params) === JSON.stringify(params));
     return matchingPreset ? matchingPreset.id : "default";
   };
-
+  */
   // Notify parent component about loading state changes
   useEffect(() => {
     onLoadingChange?.(isFetching);
@@ -93,6 +93,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFroz
         reportId: matchingPreset ? Number(matchingPreset.id) : 0
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trigger, hasToken, profitYear, params]);
 
   const handleNavigationForButton = useCallback(
@@ -131,7 +132,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFroz
         balance: 0
       }
     ];
-  }, [data, params]);
+  }, [data]);
 
   return (
     <>

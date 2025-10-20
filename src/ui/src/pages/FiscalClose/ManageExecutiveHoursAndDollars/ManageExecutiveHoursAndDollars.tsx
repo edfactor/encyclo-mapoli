@@ -1,5 +1,4 @@
-import { SaveOutlined } from "@mui/icons-material";
-import { Button, Divider, Grid, Tooltip } from "@mui/material";
+import { Divider, Grid } from "@mui/material";
 import FrozenYearWarning from "components/FrozenYearWarning";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import StatusReadOnlyInfo from "components/StatusReadOnlyInfo";
@@ -13,12 +12,14 @@ import useManageExecutiveHoursAndDollars from "./hooks/useManageExecutiveHoursAn
 import ManageExecutiveHoursAndDollarsGrid from "./ManageExecutiveHoursAndDollarsGrid";
 import ManageExecutiveHoursAndDollarsSearchFilter from "./ManageExecutiveHoursAndDollarsSearchFilter";
 
+/*
 interface RenderSaveButtonProps {
   hasPendingChanges: boolean;
   onSave: () => void;
   isReadOnly?: boolean;
 }
-
+*/
+/*
 const RenderSaveButton = memo(({ hasPendingChanges, onSave, isReadOnly = true }: RenderSaveButtonProps) => {
   const isDisabled = !hasPendingChanges || isReadOnly;
   const readOnlyTooltip = "You are in read-only mode and cannot save changes.";
@@ -50,7 +51,7 @@ const RenderSaveButton = memo(({ hasPendingChanges, onSave, isReadOnly = true }:
     return saveButton;
   }
 });
-
+*/
 interface ManageExecutiveHoursAndDollarsContentProps {
   hookData: ReturnType<typeof useManageExecutiveHoursAndDollars>;
 }
@@ -93,10 +94,11 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
     }
   };
 
+  /*
   const renderActionNode = () => {
     return <StatusDropdownActionNode onStatusChange={handleStatusChange} />;
   };
-
+  */
   return (
     <Grid
       container
@@ -143,12 +145,12 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
 
 const ManageExecutiveHoursAndDollars = () => {
   const hookData = useManageExecutiveHoursAndDollars();
-  const { hasPendingChanges, saveChanges } = hookData;
-  const isReadOnly = useReadOnlyNavigation();
+  //const { hasPendingChanges, saveChanges } = hookData;
+  //const isReadOnly = useReadOnlyNavigation();
 
- const renderActionNode = () => {
-      return <StatusDropdownActionNode />;
-    };
+  const renderActionNode = () => {
+    return <StatusDropdownActionNode />;
+  };
 
   return (
     <Page

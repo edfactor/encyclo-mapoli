@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetProfitMasterInquiryMemberQuery } from "reduxstore/api/InquiryApi";
 import { RootState } from "reduxstore/store";
-import { MissiveResponse, MasterInquiryDetail } from "reduxstore/types";
+import { MissiveResponse } from "reduxstore/types";
 import { MASTER_INQUIRY_MESSAGES } from "../../components/MissiveAlerts/MissiveMessages";
 import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
+import { EmployeeDetails } from "../../types/employee/employee";
 import MasterInquiryMemberDetails from "./MasterInquiryMemberDetails";
 
 interface StandaloneMemberDetailsProps {
@@ -25,7 +26,7 @@ const StandaloneMemberDetails: React.FC<StandaloneMemberDetailsProps> = ({
   profitYear,
   refreshTrigger
 }) => {
-  const [memberDetails, setMemberDetails] = useState<MasterInquiryDetail | null>(null);
+  const [memberDetails, setMemberDetails] = useState<EmployeeDetails | null>(null);
   const [triggerMemberDetails, { isFetching }] = useLazyGetProfitMasterInquiryMemberQuery();
   const prevRefreshTrigger = useRef<number | undefined>(refreshTrigger);
 
@@ -106,8 +107,8 @@ const StandaloneMemberDetails: React.FC<StandaloneMemberDetailsProps> = ({
 
   return (
     <MasterInquiryMemberDetails
-      memberType={memberType}
-      id={id}
+      //memberType={memberType}
+      //id={id}
       profitYear={profitYear}
       memberDetails={memberDetails}
       isLoading={isFetching}

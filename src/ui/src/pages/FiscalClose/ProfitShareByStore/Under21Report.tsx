@@ -53,7 +53,7 @@ const Under21Report = () => {
     };
 
     fetchData();
-  }, [fetchUnder21Totals, fetchUnder21Breakdown, pageNumber, pageSize, sortParams]);
+  }, [fetchUnder21Totals, fetchUnder21Breakdown, pageNumber, pageSize, sortParams, profitYear]);
 
   useEffect(() => {
     if (initialSearchLoaded) {
@@ -71,15 +71,10 @@ const Under21Report = () => {
       fetchUnder21Totals(queryParams);
       fetchUnder21Breakdown(queryParams);
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, fetchUnder21Totals, fetchUnder21Breakdown]);
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, fetchUnder21Totals, fetchUnder21Breakdown, profitYear]);
 
-interface Under21TotalsData {
-  numberOfEmployees?: number;
-  [key: string]: unknown;
-}
-
-// Need a useEffect to reset the page number when under21Totals changes
-  const prevUnder21Totals = useRef<Under21TotalsData | null>(null);
+  // Need a useEffect to reset the page number when under21Totals changes
+  const prevUnder21Totals = useRef<typeof under21Totals>(null);
   useEffect(() => {
     if (under21Totals?.numberOfEmployees !== prevUnder21Totals.current?.numberOfEmployees) {
       setPageNumber(0);
@@ -87,6 +82,7 @@ interface Under21TotalsData {
     prevUnder21Totals.current = under21Totals;
   }, [under21Totals]);
 
+  /*
   const handleSearch = (profitYear: number, isSortDescending: boolean) => {
     const queryParams = {
       profitYear,
@@ -102,6 +98,8 @@ interface Under21TotalsData {
     fetchUnder21Totals(queryParams);
     fetchUnder21Breakdown(queryParams);
   };
+
+  */
 
   return (
     <Page
