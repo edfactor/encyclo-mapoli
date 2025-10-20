@@ -2,6 +2,8 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 
 import { setBeneficiaryError } from "reduxstore/slices/beneficiarySlice";
 import {
+  BeneficiaryDetailRequest,
+  BeneficiaryDetailResponse,
   BeneficiaryKindRequestDto,
   BeneficiaryKindResponseDto,
   BeneficiaryRequestDto,
@@ -132,8 +134,7 @@ export const BeneficiariesApi = createApi({
         }
       }
     }),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    getBeneficiaryDetail: builder.query<any, any>({
+    getBeneficiaryDetail: builder.query<BeneficiaryDetailResponse, BeneficiaryDetailRequest>({
       query: (request) => ({
         url: `/beneficiaries/detail`,
         method: "GET",

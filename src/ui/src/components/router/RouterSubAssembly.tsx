@@ -101,7 +101,7 @@ const RouterSubAssembly: React.FC = () => {
 
     // Try to match against enum keys or values (case/format tolerant)
     const matched = Object.values(ImpersonationRoles).find((r) => {
-      const keyForValue = Object.keys(ImpersonationRoles).find((k) => (ImpersonationRoles as any)[k] === r) || "";
+      const keyForValue = Object.keys(ImpersonationRoles).find((k) => (ImpersonationRoles as Record<string, string>)[k] === r) || "";
       return normalize(r) === normalize(roleParam) || normalize(keyForValue) === normalize(roleParam);
     });
 

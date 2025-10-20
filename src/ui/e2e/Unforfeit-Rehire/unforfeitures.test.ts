@@ -72,7 +72,7 @@ test.describe("Unforfeitures landing page: ", () => {
     await expect(response.status()).toBe(200);
     const suggestedUnforfeit = await page.locator('[col-id="suggestedUnforfeit"]');
     const count = await suggestedUnforfeit.count();
-    for (var i = 0; i < count; i++) {
+    for (let i = 0; i < count; i++) {
       const innerText = await suggestedUnforfeit.nth(i).innerText();
       const numericValue = Number(innerText.replace(/[^0-9.]/g, ""));
       if (innerText.length > 0 && !isNaN(numericValue) && numericValue > 0) {

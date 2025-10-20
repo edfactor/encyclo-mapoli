@@ -110,7 +110,7 @@ export const usePrerequisiteNavigations = (
             }
           };
 
-          dispatch(setMessage(finalPayload as any));
+          dispatch(setMessage(finalPayload));
         }
       }
     } else {

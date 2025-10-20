@@ -22,10 +22,23 @@ const schema = yup.object().shape({
   badgeNumber: psnValidator
 });
 
+interface SearchParams {
+  [key: string]: unknown;
+  reportId?: number;
+  badgeNumber?: number;
+  profitYear?: number;
+  pagination?: {
+    skip: number;
+    take: number;
+    sortBy: string;
+    isSortDescending: boolean;
+  };
+}
+
 interface ProfitShareReportSearchFilterProps {
   profitYear: number;
   presetParams: FilterParams;
-  onSearchParamsUpdate?: (searchParams: any) => void;
+  onSearchParamsUpdate?: (searchParams: SearchParams) => void;
 }
 
 const ProfitShareReportSearchFilter: React.FC<ProfitShareReportSearchFilterProps> = ({

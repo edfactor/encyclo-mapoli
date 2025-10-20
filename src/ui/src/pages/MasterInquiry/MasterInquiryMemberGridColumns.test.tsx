@@ -40,7 +40,7 @@ describe("MasterInquiryMemberGridColumns - Badge Styling", () => {
 
     it("should not create anchor tags with cellRenderer", () => {
       const columns = GetMasterInquiryMemberGridColumns();
-      const badgeColumn = columns.find((col: ColDef) => col.field === "badgeNumber") as any;
+      const badgeColumn = columns.find((col: ColDef) => col.field === "badgeNumber");
 
       expect(badgeColumn).toBeDefined();
 

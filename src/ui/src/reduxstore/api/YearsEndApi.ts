@@ -666,8 +666,15 @@ export const YearsEndApi = createApi({
     }),
     getTerminationReport: builder.query<TerminationResponse, TerminationRequestWithArchive>({
       query: (params) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const body: any = {
+        const body: {
+          beginningDate: Date;
+          endingDate: Date;
+          skip: number;
+          take: number;
+          sortBy?: string;
+          isSortDescending?: boolean;
+          profitYear?: number;
+        } = {
           beginningDate: params.beginningDate,
           endingDate: params.endingDate,
           skip: params.pagination.skip,
@@ -1229,17 +1236,22 @@ export const YearsEndApi = createApi({
           dispatch(clearForfeitureAdjustmentData());
 
           // Don't handle "Employee not found" errors here - let them bubble up to component
+          type RTKQueryError = {
+            error?: {
+              status?: number;
+              data?: {
+                title?: string;
+              };
+            };
+          };
 
           if (
             typeof err === "object" &&
             err !== null &&
             "error" in err &&
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            typeof (err as any).error === "object" &&
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (err as any).error?.status === 500 &&
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (err as any).error?.data?.title === "Employee not found."
+            typeof (err as RTKQueryError).error === "object" &&
+            (err as RTKQueryError).error?.status === 500 &&
+            (err as RTKQueryError).error?.data?.title === "Employee not found."
           ) {
             return; // Don't log or handle, just clear data and let component handle it
           }

@@ -8,8 +8,8 @@ import {
   useLazyGetYearEndProfitSharingReportFrozenQuery
 } from "reduxstore/api/YearsEndApi";
 import { FilterParams } from "reduxstore/types";
-import { DSMGrid, Pagination } from "smart-ui-library";
-import { useGridPagination } from "../../../hooks/useGridPagination";
+import { DSMGrid, Pagination, ISortParams } from "smart-ui-library";
+import { useGridPagination, SortParams } from "../../../hooks/useGridPagination";
 import { RootState } from "../../../reduxstore/store";
 import { GetProfitSharingReportGridColumns } from "./GetProfitSharingReportGridColumns";
 import presets from "./presets";
@@ -37,7 +37,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFroz
     initialSortBy: "employeeName",
     initialSortDescending: false,
     onPaginationChange: useCallback(
-      (pageNum: number, pageSz: number, sortPrms: any) => {
+      (pageNum: number, pageSz: number, sortPrms: SortParams) => {
         if (hasToken && params) {
           const matchingPreset = presets.find((preset) => JSON.stringify(preset.params) === JSON.stringify(params));
           trigger({
@@ -102,7 +102,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFroz
     [navigate]
   );
 
-  const sortEventHandler = (update: any) => {
+  const sortEventHandler = (update: ISortParams) => {
     handleSortChange(update);
   };
 

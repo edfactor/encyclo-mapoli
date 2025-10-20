@@ -10,7 +10,7 @@ import { RootState } from "reduxstore/store";
 import { MasterInquiryRequest, MasterInquirySearch, MissiveResponse } from "reduxstore/types";
 import { MASTER_INQUIRY_MESSAGES } from "../../../components/MissiveAlerts/MissiveMessages";
 import { ROUTES } from "../../../constants";
-import { useGridPagination } from "../../../hooks/useGridPagination";
+import { useGridPagination, SortParams } from "../../../hooks/useGridPagination";
 import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
 import { isSimpleSearch } from "../utils/MasterInquiryFunctions";
 import {
@@ -19,7 +19,10 @@ import {
   selectShowMemberDetails,
   selectShowMemberGrid,
   selectShowProfitDetails,
-  type SelectedMember
+  type SelectedMember,
+  type SearchResponse,
+  type MemberDetails,
+  type ProfitData
 } from "./useMasterInquiryReducer";
 
 const useMasterInquiry = () => {
@@ -51,7 +54,7 @@ const useMasterInquiry = () => {
   }, [state.selection.selectedMember]);
 
   const handleMemberGridPaginationChange = useCallback(
-    (pageNumber: number, pageSize: number, sortParams: any) => {
+    (pageNumber: number, pageSize: number, sortParams: SortParams) => {
       const currentSearchParams = searchParamsRef.current;
       if (currentSearchParams) {
         dispatch({ type: "MEMBERS_FETCH_START" });
@@ -65,12 +68,12 @@ const useMasterInquiry = () => {
           }
         })
           .unwrap()
-          .then((response: any) => {
+          .then((response: SearchResponse | SearchResponse['results']) => {
             const results = Array.isArray(response) ? response : response.results;
             const total = Array.isArray(response) ? response.length : response.total;
             dispatch({ type: "MEMBERS_FETCH_SUCCESS", payload: { results: { results, total } } });
           })
-          .catch((error: any) => {
+          .catch((error: Error) => {
             dispatch({ type: "MEMBERS_FETCH_FAILURE", payload: { error: error?.toString() || "Unknown error" } });
           });
       }
@@ -79,7 +82,7 @@ const useMasterInquiry = () => {
   );
 
   const handleProfitGridPaginationChange = useCallback(
-    (pageNumber: number, pageSize: number, sortParams: any) => {
+    (pageNumber: number, pageSize: number, sortParams: SortParams) => {
       const currentSelectedMember = selectedMemberRef.current;
       if (currentSelectedMember?.memberType && currentSelectedMember?.id) {
         triggerProfitDetails({
@@ -91,7 +94,7 @@ const useMasterInquiry = () => {
           isSortDescending: sortParams.isSortDescending
         })
           .unwrap()
-          .then((profitData: any) => {
+          .then((profitData: ProfitData) => {
             dispatch({ type: "PROFIT_DATA_FETCH_SUCCESS", payload: { profitData } });
           });
       }
@@ -236,7 +239,7 @@ const useMasterInquiry = () => {
       profitYear: state.search.params?.endProfitYear
     })
       .unwrap()
-      .then((details: any) => {
+      .then((details: MemberDetails) => {
         dispatch({ type: "MEMBER_DETAILS_FETCH_SUCCESS", payload: { details } });
 
         // Process missives if present in the response
@@ -336,7 +339,7 @@ const useMasterInquiry = () => {
       isSortDescending: profitFetchDeps.isSortDescending
     })
       .unwrap()
-      .then((profitData: any) => {
+      .then((profitData: ProfitData) => {
         dispatch({ type: "PROFIT_DATA_FETCH_SUCCESS", payload: { profitData } });
       })
       .catch(() => {

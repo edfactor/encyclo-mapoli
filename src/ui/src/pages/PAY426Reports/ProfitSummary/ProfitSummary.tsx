@@ -73,7 +73,6 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({
   showCommitButton = false
 }) => {
   const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingSummaryReportQuery();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedLineItem, setSelectedLineItem] = useState<string | null>(null);
   const [shouldArchive, setShouldArchive] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);

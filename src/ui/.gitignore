@@ -33,3 +33,4 @@ dist-ssr
 /e2e_results
 .playwright.env
 /playwright/.cache/
+coverage/

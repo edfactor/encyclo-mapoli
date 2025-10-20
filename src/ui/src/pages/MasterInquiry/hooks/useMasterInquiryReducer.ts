@@ -14,11 +14,15 @@ export interface SearchResponse {
 }
 
 export interface MemberDetails {
-  [key: string]: any;
+  [key: string]: unknown;
+  missives?: number[];
+  isEmployee?: boolean;
+  ssn?: string;
+  badgeNumber?: number;
 }
 
 export interface ProfitData {
-  results: any[];
+  results: Array<Record<string, unknown>>;
   total: number;
 }
 

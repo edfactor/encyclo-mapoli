@@ -36,7 +36,7 @@ const createMockStore = (initialState = {}) => {
   });
 };
 
-const createWrapper = (store: any) => {
+const createWrapper = (store: ReturnType<typeof createMockStore>) => {
   return ({ children }: { children: React.ReactNode }) => (
     <Provider store={store}>
       <BrowserRouter>{children}</BrowserRouter>

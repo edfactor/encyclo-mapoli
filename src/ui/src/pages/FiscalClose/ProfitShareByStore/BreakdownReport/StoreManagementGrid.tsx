@@ -7,7 +7,7 @@ import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
-import { useGridPagination } from "../../../../hooks/useGridPagination";
+import { useGridPagination, SortParams } from "../../../../hooks/useGridPagination";
 import { GetStoreManagementGridColumns } from "./StoreManagementGridColumns";
 
 interface StoreManagementGridProps {
@@ -36,7 +36,7 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({
       initialSortBy: "badgeNumber",
       initialSortDescending: false,
       onPaginationChange: useCallback(
-        async (pageNum: number, pageSz: number, sortPrms: any) => {
+        async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
           if (hasToken) {
             const params = {
               profitYear: queryParams?.profitYear || profitYear,

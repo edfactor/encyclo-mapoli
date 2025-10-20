@@ -393,10 +393,7 @@ describe("RecursiveNavItem - Collapsible Menu Tests", () => {
 
     // Should log error
     await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "Error saving expanded state:",
-        expect.any(Error)
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith("Error saving expanded state:", expect.any(Error));
     });
 
     setItemSpy.mockRestore();
@@ -452,7 +449,7 @@ describe("RecursiveNavItem - Collapsible Menu Tests", () => {
 
     // Level 2 should have indentation of 2 + 2*2 = 6
     const listItemButton = container.querySelector('[role="button"]');
-    
+
     // Check that paddingLeft is applied (exact value depends on MUI theme)
     expect(listItemButton).toHaveStyle({ paddingLeft: expect.any(String) });
   });

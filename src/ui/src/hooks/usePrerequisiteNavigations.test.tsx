@@ -28,7 +28,7 @@ describe("usePrerequisiteNavigations", () => {
     items: []
   });
 
-  const createMockStore = (navigationData: any) => {
+  const createMockStore = (navigationData: { navigation: NavigationDto[] }) => {
     return configureStore({
       reducer: {
         navigation: () => ({

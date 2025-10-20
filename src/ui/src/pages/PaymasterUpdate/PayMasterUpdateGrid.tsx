@@ -5,7 +5,7 @@ import { Path } from "react-router";
 import { YearsEndApi } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, Pagination } from "smart-ui-library";
-import { useGridPagination } from "../../hooks/useGridPagination";
+import { useGridPagination, SortParams } from "../../hooks/useGridPagination";
 import { GetPayMasterUpdateGridColumns } from "./PayMasterUpdateGridColumns";
 
 interface PayMasterUpdateGridProps {
@@ -33,7 +33,7 @@ const PayMasterUpdateGrid: React.FC<PayMasterUpdateGridProps> = ({
       initialSortBy: "name",
       initialSortDescending: false,
       onPaginationChange: useCallback(
-        async (pageNum: number, pageSz: number, sortPrms: any) => {
+        async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
           if (initialSearchLoaded && hasToken) {
             try {
               await triggerSearch({

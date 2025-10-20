@@ -13,7 +13,7 @@ interface ValidationResult {
 
 interface MasterUpdateSummaryTableProps {
   totals: ProfitShareUpdateTotals;
-  validationResponse: any;
+  validationResponse: ValidationResult | null | undefined;
   getFieldValidation: (fieldKey: string) => ValidationResult | null;
   openValidationField: string | null;
   onValidationToggle: (fieldName: string) => void;

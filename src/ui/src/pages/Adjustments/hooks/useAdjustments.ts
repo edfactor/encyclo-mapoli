@@ -20,6 +20,18 @@ interface SearchFormData {
   badgeNumber?: string;
 }
 
+interface MemberRecord {
+  id: number;
+  isEmployee: boolean;
+  badgeNumber?: number;
+}
+
+interface ProfitDetailsResponse {
+  results: Array<Record<string, unknown>>;
+  total: number;
+  totalRecords?: number;
+}
+
 export const useAdjustments = () => {
   const [triggerSearch] = useLazySearchProfitMasterInquiryQuery();
   const [triggerProfitDetails] = useLazyGetProfitMasterInquiryMemberDetailsQuery();
@@ -29,11 +41,11 @@ export const useAdjustments = () => {
     (state: RootState) => state.inquiry
   );
   const { clearAlerts, addAlert } = useMissiveAlerts();
-  const profitDetailsResponseSource = useRef<any>(null);
-  const profitDetailsResponseDestination = useRef<any>(null);
+  const profitDetailsResponseSource = useRef<ProfitDetailsResponse | null>(null);
+  const profitDetailsResponseDestination = useRef<ProfitDetailsResponse | null>(null);
 
   const fetchProfitDetailsForMember = useCallback(
-    async (member: any, isSecondary: boolean = false) => {
+    async (member: MemberRecord, isSecondary: boolean = false) => {
       try {
         console.log(`Fetching profit details for ${isSecondary ? "secondary" : "primary"} member:`, member);
 

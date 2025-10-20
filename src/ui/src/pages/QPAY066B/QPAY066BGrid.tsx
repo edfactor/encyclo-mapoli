@@ -2,9 +2,9 @@ import { Box, CircularProgress, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { Path, useNavigate } from "react-router-dom";
-import { DSMGrid, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
+import { DSMGrid, numberToCurrency, Pagination, TotalsGrid, ISortParams } from "smart-ui-library";
 import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
-import { useGridPagination } from "../../hooks/useGridPagination";
+import { useGridPagination, SortParams } from "../../hooks/useGridPagination";
 import { useLazyGetQPAY066BTerminatedWithVestedBalanceQuery } from "../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../reduxstore/store";
 import { QPAY066BFilterParams } from "./QPAY066BFilterSection";
@@ -28,7 +28,7 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ _filterParams, onLoadingCha
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
     onPaginationChange: useCallback(
-      (pageNum: number, pageSz: number, sortPrms: any) => {
+      (pageNum: number, pageSz: number, sortPrms: SortParams) => {
         if (hasToken) {
           getQPAY066BData({
             profitYear: 2024,
@@ -70,7 +70,7 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ _filterParams, onLoadingCha
     [navigate]
   );
 
-  const sortEventHandler = (update: any) => {
+  const sortEventHandler = (update: ISortParams) => {
     handleSortChange(update);
   };
 

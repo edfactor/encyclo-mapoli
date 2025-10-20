@@ -1,6 +1,7 @@
 import { Grid } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useLazySearchDistributionsQuery } from "../../reduxstore/api/DistributionApi";
+import { SortParams } from "../../hooks/useGridPagination";
 import DisbursementGrid from "./DisbursementGrid";
 
 interface PendingDisbursementsListProps {
@@ -34,7 +35,7 @@ const PendingDisbursementsList: React.FC<PendingDisbursementsListProps> = ({ bad
     fetchPendingDisbursements();
   }, [badgeNumber, memberType, searchParams, triggerSearch]);
 
-  const handlePaginationChange = useCallback(async (pageNumber: number, pageSize: number, sortParams: any) => {
+  const handlePaginationChange = useCallback(async (pageNumber: number, pageSize: number, sortParams: SortParams) => {
     setSearchParams({
       skip: pageNumber * pageSize,
       take: pageSize,

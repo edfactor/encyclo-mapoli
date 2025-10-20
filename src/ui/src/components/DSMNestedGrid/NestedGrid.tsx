@@ -2,7 +2,7 @@ import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
 import React from "react";
 import { INestedGridColumn, INestedGridRowData, NestedGridRow } from "./NestedGridRow";
 
-export interface INestedGridProps<T = any> {
+export interface INestedGridProps<T extends Record<string, unknown> = Record<string, unknown>> {
   data: INestedGridRowData<T>[];
   columns: INestedGridColumn<T>[];
   renderNestedContent: (row: INestedGridRowData<T>, isExpanded: boolean) => React.ReactNode;

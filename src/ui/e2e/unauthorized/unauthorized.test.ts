@@ -206,7 +206,6 @@ test.describe("Unauthorized Access", () => {
 
     // Log errors for debugging if test fails
     if (criticalErrors.length > 0) {
-      // eslint-disable-next-line no-console
       console.log("Console errors detected:", criticalErrors);
     }
 

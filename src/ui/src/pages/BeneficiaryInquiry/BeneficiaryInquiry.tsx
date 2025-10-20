@@ -122,11 +122,16 @@ const BeneficiaryInquiry = () => {
       setDeleteInProgress(true);
       triggerDeleteBeneficiary({ id: deleteBeneficiaryId })
         .unwrap()
-        .then((res: any) => {
+        .then(() => {
           setChange((prev) => prev + 1);
         })
-        .catch((err: any) => {
-          console.error(`Something went wrong! Error: ${err.data.title}`);
+        .catch((err: unknown) => {
+          if (err && typeof err === "object" && "data" in err) {
+            const errorData = err as { data?: { title?: string } };
+            console.error(`Something went wrong! Error: ${errorData.data?.title}`);
+          } else {
+            console.error("Something went wrong!");
+          }
         })
         .finally(() => {
           setOpenDeleteConfirmationDialog(false);

@@ -4,6 +4,8 @@ import { DISTRIBUTION_INQUIRY_MESSAGES } from "../../../components/MissiveAlerts
 import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
 import { useLazyGetProfitMasterInquiryMemberQuery } from "../../../reduxstore/api/InquiryApi";
 import { clearCurrentMember, setCurrentMember } from "../../../reduxstore/slices/distributionSlice";
+import type { EmployeeDetails } from "../../../types/employee/employee";
+import type { ServiceErrorResponse } from "../../../types/errors/errors";
 
 interface UseViewDistributionReturn {
   isLoading: boolean;
@@ -37,24 +39,25 @@ const useViewDistribution = (): UseViewDistributionReturn => {
 
         // Check if we got a response
         if (response) {
-          dispatch(setCurrentMember(response as any));
+          dispatch(setCurrentMember(response as EmployeeDetails));
         } else {
           // No member found
           addAlert(DISTRIBUTION_INQUIRY_MESSAGES.MEMBER_NOT_FOUND);
           setError("Member not found");
         }
-      } catch (err: any) {
+      } catch (err) {
         console.error("Error fetching member:", err);
+        const serviceError = err as ServiceErrorResponse;
 
         // Check for specific error messages
         if (
-          err?.status === 500 &&
-          (err?.data?.title === "Badge number not found." || err?.data?.title === "SSN not found.")
+          serviceError?.data?.status === 500 &&
+          (serviceError?.data?.title === "Badge number not found." || serviceError?.data?.title === "SSN not found.")
         ) {
           addAlert(DISTRIBUTION_INQUIRY_MESSAGES.MEMBER_NOT_FOUND);
           setError("Member not found");
         } else {
-          const errorMessage = err?.data?.detail || err?.message || "Failed to load member data";
+          const errorMessage = serviceError?.data?.detail || "Failed to load member data";
           setError(errorMessage);
         }
       } finally {

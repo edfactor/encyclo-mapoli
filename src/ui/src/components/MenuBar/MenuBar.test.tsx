@@ -51,7 +51,7 @@ describe("MenuBar with PageSearch", () => {
     navigation: [
       {
         id: 1,
-        parentId: null as any,
+        parentId: null,
         title: "Year End",
         subTitle: "",
         url: "",

@@ -102,7 +102,7 @@ const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, employeeStatus,
     }
   }, [hasToken, filterParams]);
 
-  const sortEventHandler = (update: any) => {
+  const sortEventHandler = (update: ISortParams) => {
     handleSortChange(update);
   };
 

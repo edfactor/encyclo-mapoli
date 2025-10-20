@@ -336,13 +336,13 @@ describe("useExecutiveModal", () => {
       const onAddExecutives = vi.fn();
 
       const { result, rerender } = renderHook(
-        ({ executives }) =>
+        ({ executives }: { executives: typeof mockExecutive[] }) =>
           useExecutiveModal({
             ...defaultProps,
             onAddExecutives,
             selectedExecutives: executives
           }),
-        { initialProps: { executives: [] as any[] } }
+        { initialProps: { executives: [] } }
       );
 
       const firstHandler = result.current.handleAddToMainGrid;

@@ -1,9 +1,8 @@
+import { Alert, Button, CircularProgress, Divider, Grid, Tooltip } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Alert, Button, CircularProgress, Divider, Grid, Tooltip } from "@mui/material";
 import { Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
-import { DISTRIBUTION_INQUIRY_MESSAGES } from "../../components/MissiveAlerts/MissiveMessages";
 import { CAPTIONS, ROUTES } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
@@ -107,10 +106,11 @@ const AddDistributionContent = () => {
   // Determine validation errors
   const maxDistributionsReached = sequenceNumber === 10;
   const noAvailableBalance = memberData?.currentVestedAmount === 0;
-  const validationError =
-    maxDistributionsReached ? "Member has reached maximum of nine distributions."
-    : noAvailableBalance ? "Member has no available balance to distribute."
-    : null;
+  const validationError = maxDistributionsReached
+    ? "Member has reached maximum of nine distributions."
+    : noAvailableBalance
+      ? "Member has no available balance to distribute."
+      : null;
 
   // Check form validity periodically
   useEffect(() => {
@@ -146,13 +146,26 @@ const AddDistributionContent = () => {
         sx={{ display: "flex", justifyContent: "flex-end", paddingX: "24px", gap: "12px" }}>
         <Tooltip
           title={
-            isReadOnly ? "You are in read-only mode" : thirdPartyAddressRequired ? "3rd Party Address Required" : validationError ? validationError : ""
+            isReadOnly
+              ? "You are in read-only mode"
+              : thirdPartyAddressRequired
+                ? "3rd Party Address Required"
+                : validationError
+                  ? validationError
+                  : ""
           }>
           <span>
             <Button
               variant="contained"
               onClick={handleSave}
-              disabled={isReadOnly || isSubmitting || isMemberLoading || !isFormValid || thirdPartyAddressRequired || !!validationError}
+              disabled={
+                isReadOnly ||
+                isSubmitting ||
+                isMemberLoading ||
+                !isFormValid ||
+                thirdPartyAddressRequired ||
+                !!validationError
+              }
               className="h-10 min-w-fit whitespace-nowrap">
               SAVE
             </Button>
@@ -263,7 +276,14 @@ const AddDistributionContent = () => {
               onReset={handleFormReset}
               isSubmitting={isSubmitting}
               dateOfBirth={memberData.dateOfBirth}
-              age={memberData.age}
+              age={
+                memberData.dateOfBirth
+                  ? Math.floor(
+                      (Date.now() - new Date(memberData.dateOfBirth).getTime()) /
+                        (1000 * 60 * 60 * 24 * 365.25)
+                    )
+                  : undefined
+              }
               vestedAmount={memberData.currentVestedAmount}
             />
           </Grid>

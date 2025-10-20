@@ -2,7 +2,7 @@ import { RefObject, useCallback, useMemo } from "react";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
-import { GridPaginationActions, GridPaginationState } from "../../../hooks/useGridPagination";
+import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
 import { PayBenReportResponse } from "../../../types";
 import { PayBenReportGridColumn } from "./PayBenReportGridColumns";
 
@@ -14,7 +14,7 @@ interface PayBenReportGridProps {
   hasResults: boolean;
   pagination: GridPaginationState & GridPaginationActions;
   onPaginationChange: (pageNumber: number, pageSize: number) => void;
-  onSortChange: (sortParams: any) => void;
+  onSortChange: (sortParams: SortParams) => void;
 }
 
 const PayBenReportGrid = ({

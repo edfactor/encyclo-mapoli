@@ -49,7 +49,7 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridSearchProps> = ({
   const [triggerDownload, { isFetching: isDownloading }] = useLazyGetTerminatedLettersDownloadQuery();
 
   const onSearch = useCallback(async () => {
-    const request: any = {
+    const request: TerminatedLettersRequest = {
       profitYear: profitYear || 0,
       pagination: {
         skip: pageNumber * pageSize,
@@ -82,7 +82,7 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridSearchProps> = ({
 
     const badgeNumbers = selectedRows.map((row) => row.badgeNumber);
 
-    const request: any = {
+    const request: TerminatedLettersRequest = {
       profitYear: profitYear || 0,
       badgeNumbers: badgeNumbers,
       pagination: {
@@ -155,8 +155,15 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridSearchProps> = ({
     setSelectedRows(selectedData);
   }, []);
 
-  // Need a useEffect on a change in TerminatedLetters to reset the page number
-  const prevTerminatedLetters = useRef<any>(null);
+interface TerminatedLettersData {
+  response?: {
+    results: TerminatedLettersDetail[];
+    total: number;
+  };
+}
+
+// Need a useEffect on a change in TerminatedLetters to reset the page number
+  const prevTerminatedLetters = useRef<TerminatedLettersData | null>(null);
   useEffect(() => {
     if (
       terminatedLetters !== prevTerminatedLetters.current &&

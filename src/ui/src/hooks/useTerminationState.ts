@@ -79,7 +79,9 @@ function terminationReducer(state: TerminationState, action: TerminationAction):
         let updatedSearchParams = state.searchParams;
 
         if (shouldResetArchive && state.searchParams) {
-          const { archive, ...paramsWithoutArchive } = state.searchParams as any;
+          const { archive, ...paramsWithoutArchive } = state.searchParams as TerminationSearchRequest & {
+            archive?: boolean;
+          };
           updatedSearchParams = paramsWithoutArchive as TerminationSearchRequest;
         }
 
