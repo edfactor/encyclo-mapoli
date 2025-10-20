@@ -1,3 +1,4 @@
+import { useLazyGetTerminatedLettersReportQuery } from "@/reduxstore/api/YearsEndApi";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, Grid } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
@@ -6,7 +7,6 @@ import { useLazyGetAccountingRangeToCurrent } from "hooks/useFiscalCalendarYear"
 import { useEffect } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetTerminatedLettersReportQuery } from "reduxstore/api/YearsEndApi";
 import {
   clearTerminatedLetters,
   clearTerminatedLettersQueryParams,
@@ -68,16 +68,27 @@ const TerminatedLettersSearchFilter: React.FC<TerminatedLettersSearchFilterProps
     }
   });
 
-  const validateAndSearch = handleSubmit((data) => {
+  const validateAndSearch = handleSubmit(async (data) => {
     if (isValid && hasToken) {
+      const pagination = { skip: 0, take: 50, sortBy: "fullName", isSortDescending: false };
+
       dispatch(
         setTerminatedLettersQueryParams({
           profitYear: data.profitYear,
           beginningDate: data.beginningDate,
           endingDate: data.endingDate,
-          pagination: { skip: 0, take: 50, sortBy: "fullName", isSortDescending: false }
+          pagination
         })
       );
+
+      // Perform the search
+      await triggerSearch({
+        profitYear: data.profitYear,
+        beginningDate: data.beginningDate,
+        endingDate: data.endingDate,
+        pagination
+      });
+
       setInitialSearchLoaded(true);
     }
   });
