@@ -6,13 +6,10 @@ import {
   FormHelperText,
   FormLabel,
   Grid,
-  MenuItem,
   Radio,
   RadioGroup,
-  Select,
   TextField
 } from "@mui/material";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
@@ -164,18 +161,20 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       []
     );
 
-    const months = useMemo(() => Array.from({ length: 12 }, (_, i) => i + 1), []);
+    //const months = useMemo(() => Array.from({ length: 12 }, (_, i) => i + 1), []);
 
-    const validateAndSearch = useCallback(
-      handleSubmit((data) => {
+    const onSubmit = useCallback(
+      (data: MasterInquirySearch) => {
         if (isValid) {
           const searchParams = transformSearchParams(data, profitYear);
           onSearch(searchParams);
           dispatch(setMasterInquiryRequestParams(data));
         }
-      }),
-      [handleSubmit, isValid, profitYear, onSearch, dispatch]
+      },
+      [isValid, profitYear, onSearch, dispatch]
     );
+
+    const validateAndSearch = handleSubmit(onSubmit);
 
     const handleReset = useCallback(() => {
       dispatch(clearMasterInquiryRequestParams());
@@ -206,6 +205,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
     }, [dispatch, reset, profitYear, onReset]);
 
     // Memoized form field components
+    /*
     const ProfitYearField = memo(() => (
       <Grid size={{ xs: 12, sm: 6, md: 4 }}>
         <Controller
@@ -228,7 +228,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
         {errors.endProfitYear && <FormHelperText error>{errors.endProfitYear.message}</FormHelperText>}
       </Grid>
     ));
-
+    */
+    /*
     const MonthSelectField = memo(({ name, label }: { name: "startProfitMonth" | "endProfitMonth"; label: string }) => (
       <Grid size={{ xs: 12, sm: 6, md: 4 }}>
         <FormLabel>{label}</FormLabel>
@@ -266,7 +267,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
         {errors[name] && <FormHelperText error>{errors[name]?.message}</FormHelperText>}
       </Grid>
     ));
-
+*/
     const handleBadgeNumberChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const badgeStr = e.target.value;

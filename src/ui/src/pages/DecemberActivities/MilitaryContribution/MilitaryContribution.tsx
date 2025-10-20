@@ -96,7 +96,7 @@ const MilitaryContributionContent = () => {
     if (masterInquiryMemberDetails) {
       fetchMilitaryContributions();
     }
-  }, [masterInquiryMemberDetails]);
+  }, [masterInquiryMemberDetails, fetchMilitaryContributions]);
 
   // Clear the member and contributions state when this component unmounts
   // to ensure visiting the page fresh doesn't show the previous search.
@@ -104,6 +104,7 @@ const MilitaryContributionContent = () => {
     return () => {
       resetSearch();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
