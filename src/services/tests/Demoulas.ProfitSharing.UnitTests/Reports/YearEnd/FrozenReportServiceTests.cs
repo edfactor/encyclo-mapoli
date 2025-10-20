@@ -40,7 +40,7 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
         int demoBadgeNumber = 0;
         const short testYear = 2024;
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        _ = MockDbContextFactory.UseWritableContext(async ctx =>
+        await MockDbContextFactory.UseWritableContext(async ctx =>
         {
             var demoTest = await ctx.Demographics.FirstAsync(CancellationToken.None);
             demoSsn = demoTest.Ssn;
@@ -122,7 +122,7 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
         int demoSsn = 0;
         int demoBadgeNumber = 0;
 
-        _ = MockDbContextFactory.UseWritableContext(async ctx =>
+        await MockDbContextFactory.UseWritableContext(async ctx =>
         {
             var demoTest = await ctx.Demographics.FirstAsync(CancellationToken.None);
             demoSsn = demoTest.Ssn;

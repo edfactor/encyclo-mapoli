@@ -65,9 +65,9 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
 
 
     [Fact]
-    public void Ensure_max_contribution_is_tripped()
+    public Task Ensure_max_contribution_is_tripped()
     {
-        _ = MockDbContextFactory.UseWritableContext(async c =>
+        return MockDbContextFactory.UseWritableContext(async c =>
         {
             // Arrange
             // ensure we always have an employee with PointsEarned

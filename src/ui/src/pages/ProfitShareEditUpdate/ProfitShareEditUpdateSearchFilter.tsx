@@ -266,14 +266,6 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
     }
   }, [dispatch, profitSharingUpdate]);
 
-  // I would like handleReset() to be called whenever resetYearEndPage is true
-
-  useEffect(() => {
-    if (resetYearEndPage) {
-      handleReset();
-    }
-  }, [resetYearEndPage, handleReset]);
-
   const handleReset = useCallback(() => {
     // We need to clear both grids and then both sets of query params
     if (setMinimumFieldsEntered) {
@@ -306,6 +298,14 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
       adjustEarningsSecondaryAmount: null
     });
   }, [dispatch, reset, fiscalCloseProfitYearAsDate, setMinimumFieldsEntered, setPageReset, setInitialSearchLoaded]);
+
+  // I would like handleReset() to be called whenever resetYearEndPage is true
+
+  useEffect(() => {
+    if (resetYearEndPage) {
+      handleReset();
+    }
+  }, [resetYearEndPage, handleReset]);
 
   return (
     <form onSubmit={validateAndSearch}>
