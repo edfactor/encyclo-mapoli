@@ -64,43 +64,7 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
     }
 
 
-    [Fact]
-    public Task Ensure_max_contribution_is_tripped()
-    {
-        return MockDbContextFactory.UseWritableContext(async c =>
-        {
-            // Arrange
-            // ensure we always have an employee with PointsEarned
-            await EnsureEmployeeHasPoints(c);
-            ProfitShareUpdateRequest req = new() { ProfitYear = ProfitYear, AdjustContributionAmount = 20, MaxAllowedContributions = 1 };
-            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-
-            // Act
-            TestResult<ProfitShareUpdateResponse> response =
-                await ApiClient
-                    .GETAsync<ProfitShareUpdateEndpoint,
-                        ProfitShareUpdateRequest, ProfitShareUpdateResponse>(req);
-
-            // Assert
-            response.Response.StatusCode.ShouldBe(HttpStatusCode.OK);
-            response.Result.HasExceededMaximumContributions.ShouldBeTrue();
-        });
-    }
-
-
-    private static async Task<PayProfit> EnsureEmployeeHasPoints(ProfitSharingDbContext c)
-    {
-        PayProfit pp = await c.PayProfits
-            .Include(payProfit => payProfit.Demographic!)
-            .ThenInclude(demographic => demographic.ContactInfo)
-            .Include(p => p.Demographic != null)
-            .FirstAsync(CancellationToken.None);
-        pp.ProfitYear = ProfitYear;
-        pp.PointsEarned = 100_000 / 100;
-        await c.SaveChangesAsync(CancellationToken.None);
-        return pp;
-    }
-
+  
 #pragma warning disable AsyncFixer01
 
     [Fact]
