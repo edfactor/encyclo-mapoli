@@ -27,7 +27,8 @@ export const GetProfitDetailColumns = (
   return [
     createYearColumn({
       headerName: "Profit Year",
-      field: "profitYear"
+      field: "profitYear",
+      sortable: false,
     }),
     createHoursColumn({
       field: "hoursTransactionYear",
@@ -35,7 +36,8 @@ export const GetProfitDetailColumns = (
         // Do not show zeros, for many years we only have zero (aka no data)
         const value = params.data?.hoursTransactionYear;
         return value == null || value == 0 ? null : value;
-      }
+      },
+      sortable: false,
     }),
     createCurrencyColumn({
       headerName: "Wages",
@@ -44,11 +46,13 @@ export const GetProfitDetailColumns = (
         // Do not show zeros, for many years we only have zeros (aka no data)
         const value = params.data?.wagesTransactionYear;
         return value == null || value == 0 ? null : value;
-      }
+      },
+      sortable: false,
     }),
     createCurrencyColumn({
       headerName: "Forfeiture",
-      field: "forfeiture"
+      field: "forfeiture",
+      sortable: false,
     }),
     {
       headerName: "Suggested Unforfeiture",
@@ -69,7 +73,8 @@ export const GetProfitDetailColumns = (
 
     createCommentColumn({
       headerName: "Remark",
-      field: "remark"
+      field: "remark",
+      sortable: false,
     }),
     {
       headerName: "Save Button",
