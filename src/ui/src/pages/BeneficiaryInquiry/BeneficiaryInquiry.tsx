@@ -32,6 +32,7 @@ import BeneficiaryInquiryGrid from "./BeneficiaryInquiryGrid";
 import BeneficiaryInquirySearchFilter from "./BeneficiaryInquirySearchFilter";
 import CreateBeneficiary from "./CreateBeneficiary";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface SelectedMember {
   memberType: number;
   id: number;
@@ -48,9 +49,11 @@ const BeneficiaryInquiry = () => {
   const [triggerBeneficiaryDetail, { isSuccess }] = useLazyGetBeneficiaryDetailQuery();
   const [open, setOpen] = useState(false);
   const [openDeleteConfirmationDialog, setOpenDeleteConfirmationDialog] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [badgeNumber, setBadgeNumber] = useState(0);
   const [beneficiaryKind, setBeneficiaryKind] = useState<BeneficiaryKindDto[]>([]);
   const [beneficiaryType, setBeneficiaryType] = useState<BeneficiaryTypeDto[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
 
   const [selectedMember, setSelectedMember] = useState<BeneficiaryDetailResponse | null>();
@@ -64,6 +67,7 @@ const BeneficiaryInquiry = () => {
     useState<Paged<BeneficiarySearchFilterResponse>>();
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "name",
     isSortDescending: true
@@ -77,7 +81,7 @@ const BeneficiaryInquiry = () => {
     if (data) {
       const request: BeneficiaryDetailRequest = {
         badgeNumber: data.badgeNumber,
-        psnSuffix: data.psnSuffix
+        psnSuffix: data.psn
       };
       triggerBeneficiaryDetail(request)
         .unwrap()
