@@ -69,10 +69,9 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
   const {
     control,
     handleSubmit,
-    formState: { isValid },
+
     reset,
-    setValue,
-    watch
+    setValue
   } = useForm<BreakdownSearchParams>({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -92,10 +91,10 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
 
   useEffect(() => {
     if (employeeStatus && employeeStatus !== "") {
-      setValue("store", employeeStatus);
-      if (onStoreChange) {
-        onStoreChange(employeeStatus);
-      }
+      setValue("employeeStatus", employeeStatus);
+      //if (onStoreChange) {
+      //  onStoreChange(data.store);
+      // }
     }
   }, [employeeStatus, setValue, onStoreChange]);
 

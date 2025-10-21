@@ -12,7 +12,7 @@ import { formatNumberWithComma, setMessage } from "smart-ui-library";
 import { Messages } from "../utils/messageDictonary";
 import useDecemberFlowProfitYear from "./useDecemberFlowProfitYear";
 import { useEditState } from "./useEditState";
-import { useGridPagination, SortParams } from "./useGridPagination";
+import { SortParams, useGridPagination } from "./useGridPagination";
 import { useRowSelection } from "./useRowSelection";
 
 interface UnForfeitGridConfig {
@@ -277,7 +277,6 @@ export const useUnForfeitGrid = ({
       editState,
       selectionState,
       unForfeitsQueryParams,
-      pageNumber,
       pageSize,
       sortParams,
       createRequest,

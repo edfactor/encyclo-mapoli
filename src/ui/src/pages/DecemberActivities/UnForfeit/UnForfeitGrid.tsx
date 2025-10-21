@@ -43,7 +43,7 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
     pageNumber,
     pageSize,
     gridData,
-    isFetching,
+
     unForfeits,
     selectedProfitYear,
 

@@ -1,13 +1,13 @@
-import { CircularProgress, Divider, FormLabel, Grid, TextField, Box, Button } from "@mui/material";
-import { memo, useState, useEffect } from "react";
+import { Box, Button, CircularProgress, Divider, FormLabel, Grid, TextField } from "@mui/material";
+import { memo, useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
 import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
 import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
-import StandaloneMemberDetails from "../MasterInquiry/StandaloneMemberDetails";
-import MasterInquiryDetailsGrid from "../MasterInquiry/MasterInquiryDetailsGrid";
-import { useSelector } from "react-redux";
 import { RootState } from "../../reduxstore/store";
+import MasterInquiryDetailsGrid from "../MasterInquiry/MasterInquiryDetailsGrid";
+import StandaloneMemberDetails from "../MasterInquiry/StandaloneMemberDetails";
 import { useAdjustments } from "./hooks/useAdjustments";
 
 const Adjustments = memo(() => {
@@ -45,14 +45,14 @@ const Adjustments = memo(() => {
   useEffect(() => {
     if (masterInquiryMemberDetails && hasSearched) {
       console.log("Fetching profit details for source member:", masterInquiryMemberDetails);
-      fetchProfitDetailsForMember(masterInquiryMemberDetails, profitYear, false);
+      fetchProfitDetailsForMember(masterInquiryMemberDetails, profitYear);
     }
   }, [masterInquiryMemberDetails, hasSearched, fetchProfitDetailsForMember, profitYear]);
 
   useEffect(() => {
     if (masterInquiryMemberDetailsSecondary && hasSearched) {
       console.log("Fetching profit details for destination member:", masterInquiryMemberDetailsSecondary);
-      fetchProfitDetailsForMember(masterInquiryMemberDetailsSecondary, profitYear, true);
+      fetchProfitDetailsForMember(masterInquiryMemberDetailsSecondary, profitYear);
     }
   }, [masterInquiryMemberDetailsSecondary, hasSearched, fetchProfitDetailsForMember, profitYear]);
 

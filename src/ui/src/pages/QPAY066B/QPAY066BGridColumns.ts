@@ -9,7 +9,7 @@ import {
   createStoreColumn
 } from "../../utils/gridColumnFactory";
 
-export const GetQPAY066BGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
+export const GetQPAY066BGridColumns = (): ColDef[] => {
   return [
     createStoreColumn({}),
     createBadgeColumn({}),

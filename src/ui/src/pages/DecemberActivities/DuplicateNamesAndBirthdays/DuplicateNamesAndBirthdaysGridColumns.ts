@@ -67,7 +67,7 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       headerName: "Employment Status",
       field: "employmentStatusName",
       valueFormatter: (params) => {
-        const id = params.data.status; // assuming 'status' is in the row data
+        //const id = params.data.status; // assuming 'status' is in the row data
         const name = params.data.employmentStatusName; // assuming 'statusName' is in the row data
         //see if one is undefined or null then show other
         return `${name}`;

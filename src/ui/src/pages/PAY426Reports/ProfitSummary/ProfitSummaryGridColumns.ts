@@ -1,6 +1,6 @@
 import { ColDef } from "ag-grid-community";
 import { formatNumberWithComma, numberToCurrency } from "smart-ui-library";
-import { createCurrencyColumn } from "../../../utils/gridColumnFactory";
+import { createCurrencyColumn, createPointsColumn } from "../../../utils/gridColumnFactory";
 
 export const GetProfitSummaryGridColumns = (): ColDef[] => {
   return [
@@ -16,15 +16,11 @@ export const GetProfitSummaryGridColumns = (): ColDef[] => {
         return params.data.lineItemPrefix ? `${params.data.lineItemPrefix}. ${params.value}` : params.value;
       }
     },
-    {
+    createPointsColumn({
       headerName: "EMPS",
       field: "numberOfMembers",
-      colId: "numberOfMembers",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
       valueFormatter: (params) => formatNumberWithComma(params.value)
-    },
+    }),
     createCurrencyColumn({
       headerName: "Total Wages",
       field: "totalWages",

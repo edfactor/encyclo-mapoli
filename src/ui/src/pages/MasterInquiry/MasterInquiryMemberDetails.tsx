@@ -4,12 +4,12 @@ import { formatNumberWithComma, numberToCurrency } from "smart-ui-library";
 import LabelValueSection from "../../components/LabelValueSection";
 import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
 import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
+import type { EmployeeDetails } from "../../types/employee/employee";
 import { mmDDYYFormat } from "../../utils/dateUtils";
 import { getEnrolledStatus, getForfeitedStatus } from "../../utils/enrollmentUtil";
 import { formatPercentage } from "../../utils/formatPercentage";
 import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 import { formatPhoneNumber } from "../../utils/phoneUtils";
-import type { EmployeeDetails } from "../../types/employee/employee";
 
 // Sometimes we get back end zip codes that are 1907 rather than 01907
 const formatZipCode = (zipCode: string): string => {
@@ -20,8 +20,8 @@ const formatZipCode = (zipCode: string): string => {
 };
 
 interface MasterInquiryMemberDetailsProps {
-  memberType: number;
-  id: string | number;
+  //memberType: number;
+  //id: string | number;
   profitYear?: number | null | undefined;
   memberDetails?: EmployeeDetails | null;
   isLoading?: boolean;
@@ -37,7 +37,7 @@ in the React memo stuff at the bottom and are important for edge cases like thes
   - The component could show stale data for wrong member
 */
 const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = memo(
-  ({ memberType, id, profitYear, memberDetails, isLoading }) => {
+  ({ profitYear, memberDetails, isLoading }) => {
     const { missiveAlerts } = useMissiveAlerts();
 
     // Memoized enrollment status

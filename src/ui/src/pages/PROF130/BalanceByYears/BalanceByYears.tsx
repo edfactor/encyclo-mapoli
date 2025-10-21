@@ -1,18 +1,16 @@
-import { Divider } from "@mui/material";
-import { Grid } from "@mui/material";
-import { Page } from "smart-ui-library";
-import BalanceByYearsGrid from "./BalanceByYearsGrid";
-import { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "reduxstore/store";
+import { Divider, Grid } from "@mui/material";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetBalanceByYearsQuery } from "reduxstore/api/YearsEndApi";
 import { setBalanceByYearsQueryParams } from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import { Page } from "smart-ui-library";
+import BalanceByYearsGrid from "./BalanceByYearsGrid";
 
 const BalanceByYears = () => {
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [hasInitialSearchRun, setHasInitialSearchRun] = useState(false);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
@@ -42,7 +40,6 @@ const BalanceByYears = () => {
         .then((results) => {
           if (results[0].data) {
             dispatch(setBalanceByYearsQueryParams(profitYear));
-            setInitialSearchLoaded(true);
           }
         })
         .catch((error) => {
@@ -67,7 +64,7 @@ const BalanceByYears = () => {
         </Grid>
 
         <Grid width="100%">
-          <BalanceByYearsGrid initialSearchLoaded={initialSearchLoaded} />
+          <BalanceByYearsGrid />
         </Grid>
       </Grid>
     </Page>

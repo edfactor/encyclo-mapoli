@@ -1,12 +1,11 @@
-import { useCallback, useReducer, useRef } from "react";
+import { useCallback, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
+import { useMergeProfitsDetailMutation } from "../../../reduxstore/api/AdjustmentsApi";
 import {
   useLazyGetProfitMasterInquiryMemberDetailsQuery,
   useLazySearchProfitMasterInquiryQuery
 } from "../../../reduxstore/api/InquiryApi";
-import { useMergeProfitsDetailMutation } from "../../../reduxstore/api/AdjustmentsApi";
-import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
-import { MasterInquiryRequest, MissiveResponse } from "../../../types";
 import {
   clearMasterInquiryData,
   clearMasterInquiryDataSecondary,
@@ -14,12 +13,14 @@ import {
   setMasterInquiryDataSecondary
 } from "../../../reduxstore/slices/inquirySlice";
 import { RootState } from "../../../reduxstore/store";
+import { MasterInquiryRequest, MissiveResponse } from "../../../types";
 
+/*
 interface SearchFormData {
   socialSecurity?: string;
   badgeNumber?: string;
 }
-
+*/
 interface MemberRecord {
   id: number;
   isEmployee: boolean;
@@ -27,9 +28,12 @@ interface MemberRecord {
 }
 
 interface ProfitDetailsResponse {
-  results: Array<Record<string, unknown>>;
+  results: unknown[];
   total: number;
   totalRecords?: number;
+  pageSize?: number;
+  currentPage?: number;
+  totalPages?: number;
 }
 
 export const useAdjustments = () => {
@@ -165,7 +169,7 @@ export const useAdjustments = () => {
         console.error("Error during search:", error);
       }
     },
-    [triggerSearch, reduxDispatch, addAlert, clearAlerts, fetchProfitDetailsForMember]
+    [clearAlerts, triggerSearch, reduxDispatch, fetchProfitDetailsForMember, addSsnDoesNotExistAlert, addAlert]
   );
 
   const executeMerge = useCallback(

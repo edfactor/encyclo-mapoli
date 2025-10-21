@@ -1,7 +1,7 @@
 import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import StandaloneMemberDetails from "pages/MasterInquiry/StandaloneMemberDetails";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   useLazyGetProfitMasterInquiryMemberDetailsQuery,
@@ -33,7 +33,7 @@ interface TransactionData {
 const ForfeituresAdjustment = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [isAddForfeitureModalOpen, setIsAddForfeitureModalOpen] = useState(false);
-  const [pageNumberReset, setPageNumberReset] = useState(false);
+  //const [pageNumberReset, setPageNumberReset] = useState(false);
   const [transactionData, setTransactionData] = useState<TransactionData | null>(null);
   const { forfeitureAdjustmentData, forfeitureAdjustmentQueryParams } = useSelector(
     (state: RootState) => state.forfeituresAdjustment
@@ -115,40 +115,43 @@ const ForfeituresAdjustment = () => {
     }
   };
 
-  const fetchTransactionDetails = (pageNumber = 0, pageSize = 50, sortParams: SortParams | null = null) => {
-    if (forfeitureAdjustmentData) {
-      const apiParams = {
-        memberType: 1,
-        id: forfeitureAdjustmentData.demographicId,
-        skip: pageNumber * pageSize,
-        take: pageSize,
-        sortBy: sortParams?.sortBy,
-        isSortDescending: sortParams?.isSortDescending
-      };
+  const fetchTransactionDetails = useCallback(
+    (pageNumber = 0, pageSize = 50, sortParams: SortParams | null = null) => {
+      if (forfeitureAdjustmentData) {
+        const apiParams = {
+          memberType: 1,
+          id: forfeitureAdjustmentData.demographicId,
+          skip: pageNumber * pageSize,
+          take: pageSize,
+          sortBy: sortParams?.sortBy,
+          isSortDescending: sortParams?.isSortDescending
+        };
 
-      triggerTransactionDetails(apiParams)
-        .unwrap()
-        .then((response) => {
-          // Filter for "Outgoing forfeitures" transactions (profit code 2)
-          const filteredResults = response.results.filter((transaction) => {
-            return transaction.profitCodeId === 2;
+        triggerTransactionDetails(apiParams)
+          .unwrap()
+          .then((response) => {
+            // Filter for "Outgoing forfeitures" transactions (profit code 2)
+            const filteredResults = response.results.filter((transaction) => {
+              return transaction.profitCodeId === 2;
+            });
+
+            console.log(
+              `Filtered ${filteredResults.length} forfeit transactions from ${response.results.length} total transactions`
+            );
+
+            setTransactionData({
+              results: filteredResults,
+              total: filteredResults.length
+            });
+          })
+          .catch((error) => {
+            console.error("Error fetching transaction details:", error);
+            setTransactionData(null);
           });
-
-          console.log(
-            `Filtered ${filteredResults.length} forfeit transactions from ${response.results.length} total transactions`
-          );
-
-          setTransactionData({
-            results: filteredResults,
-            total: filteredResults.length
-          });
-        })
-        .catch((error) => {
-          console.error("Error fetching transaction details:", error);
-          setTransactionData(null);
-        });
-    }
-  };
+      }
+    },
+    [forfeitureAdjustmentData, triggerTransactionDetails]
+  );
 
   useEffect(() => {
     if (forfeitureAdjustmentQueryParams && (!forfeitureAdjustmentData || !initialSearchLoaded)) {
@@ -161,7 +164,7 @@ const ForfeituresAdjustment = () => {
           console.error("Error refreshing forfeiture adjustments:", error);
         });
     }
-  }, []);
+  }, [forfeitureAdjustmentData, forfeitureAdjustmentQueryParams, initialSearchLoaded, triggerSearch]);
 
   useEffect(() => {
     if (forfeitureAdjustmentData && initialSearchLoaded) {
@@ -171,7 +174,14 @@ const ForfeituresAdjustment = () => {
         transactionGridPagination.sortParams
       );
     }
-  }, [forfeitureAdjustmentData, initialSearchLoaded]);
+  }, [
+    fetchTransactionDetails,
+    forfeitureAdjustmentData,
+    initialSearchLoaded,
+    transactionGridPagination.pageNumber,
+    transactionGridPagination.pageSize,
+    transactionGridPagination.sortParams
+  ]);
 
   return (
     <MissiveAlertProvider>
@@ -189,10 +199,7 @@ const ForfeituresAdjustment = () => {
           </Grid>
           <Grid width={"100%"}>
             <DSMAccordion title="Filter">
-              <ForfeituresAdjustmentSearchFilter
-                setInitialSearchLoaded={handleSearchComplete}
-                setPageReset={setPageNumberReset}
-              />
+              <ForfeituresAdjustmentSearchFilter setInitialSearchLoaded={handleSearchComplete} />
             </DSMAccordion>
           </Grid>
           <MissiveAlerts />

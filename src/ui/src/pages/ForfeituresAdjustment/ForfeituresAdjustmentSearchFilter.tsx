@@ -29,7 +29,7 @@ interface ForfeituresAdjustmentSearchParams {
 
 interface ForfeituresAdjustmentSearchFilterProps {
   setInitialSearchLoaded: (loaded: boolean) => void;
-  setPageReset: (reset: boolean) => void;
+  //setPageReset: (reset: boolean) => void;
 }
 
 // Define schema for validation without circular references
@@ -41,8 +41,8 @@ const schema = yup
   .test("at-least-one-required", "Either SSN or Badge is required", (values) => Boolean(values.ssn || values.badge));
 
 const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFilterProps> = ({
-  setInitialSearchLoaded,
-  setPageReset
+  setInitialSearchLoaded
+  //setPageReset
 }) => {
   const dispatch = useDispatch();
   const [triggerSearch, { isFetching }] = useLazyGetForfeitureAdjustmentsQuery();
@@ -100,8 +100,8 @@ const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFil
     clearAlerts(); // Clear any existing alerts
 
     const searchParams = {
-      ssn: data.ssn ? Number(data.ssn) : undefined,
-      badge: data.badge ? Number(data.badge) : undefined,
+      ssn: data.ssn,
+      badge: data.badge,
       profitYear: new Date().getFullYear(), // Use current wall clock year
       skip: 0,
       take: 255,
@@ -110,7 +110,7 @@ const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFil
       onlyNetworkToastErrors: true // Suppress validation errors, only show network errors
     };
 
-    setPageReset(true);
+    //setPageReset(true);
     dispatch(setForfeitureAdjustmentQueryParams(searchParams));
     dispatch(clearForfeitureAdjustmentData());
 
@@ -119,12 +119,7 @@ const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFil
     // If the response has an error block, handle it
     if (result.error) {
       // Check if it's a 500 error with "Employee not found" message
-      if (
-        result.error &&
-        "status" in result.error &&
-        result.error.status === 500 &&
-        "data" in result.error
-      ) {
+      if (result.error && "status" in result.error && result.error.status === 500 && "data" in result.error) {
         const errorData = result.error as { data?: { title?: string } };
         if (errorData.data?.title === "Employee not found.") {
           addAlert(FORFEITURES_ADJUSTMENT_MESSAGES.EMPLOYEE_NOT_FOUND);
@@ -144,7 +139,7 @@ const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFil
 
   const handleReset = () => {
     clearAlerts(); // Clear missive alerts when resetting
-    setPageReset(true);
+    //setPageReset(true);
     reset({
       ssn: "",
       badge: ""

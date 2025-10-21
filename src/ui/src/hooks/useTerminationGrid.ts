@@ -12,7 +12,7 @@ import { formatNumberWithComma, setMessage } from "smart-ui-library";
 import { Messages } from "../utils/messageDictonary";
 import useDecemberFlowProfitYear from "./useDecemberFlowProfitYear";
 import { useEditState } from "./useEditState";
-import { useGridPagination, SortParams } from "./useGridPagination";
+import { SortParams, useGridPagination } from "./useGridPagination";
 import { useRowSelection } from "./useRowSelection";
 
 interface TerminationSearchRequest {
@@ -55,7 +55,7 @@ export const useTerminationGrid = ({
   onLoadingChange
 }: TerminationGridConfig) => {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
-  const [gridApi, setGridApi] = useState<GridApi | null>(null);
+  //const [gridApi, setGridApi] = useState<GridApi | null>(null);
   const [pendingSuccessMessage, setPendingSuccessMessage] = useState<string | null>(null);
   const [isPendingBulkMessage, setIsPendingBulkMessage] = useState<boolean>(false);
   const [isBulkSaveInProgress, setIsBulkSaveInProgress] = useState<boolean>(false);
@@ -126,9 +126,11 @@ export const useTerminationGrid = ({
       )
     });
 
+  /*
   const onGridReady = useCallback((params: { api: GridApi }) => {
     setGridApi(params.api);
   }, []);
+  */
 
   // Effect to show success message after grid finishes loading
   useEffect(() => {
@@ -170,7 +172,7 @@ export const useTerminationGrid = ({
         setExpandedRows(initialExpandState);
       }
     }
-  }, [termination?.response?.results]);
+  }, [expandedRows, termination.response.results]);
 
   // Refresh the grid when loading state changes
   useEffect(() => {

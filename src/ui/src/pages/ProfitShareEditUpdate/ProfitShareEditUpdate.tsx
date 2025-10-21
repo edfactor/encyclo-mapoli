@@ -219,8 +219,8 @@ const RenderSaveButton = (
     totalForfeituresGreaterThanZero,
     invalidProfitShareEditYear
   } = useSelector((state: RootState) => state.yearsEnd);
-  const navigationList = useSelector((state: RootState) => state.navigation.navigationData);
-  const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
+  //const navigationList = useSelector((state: RootState) => state.navigation.navigationData);
+  //const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
   // Determine tooltip reason when disabled by prerequisites
   const prereqTooltip = !prerequisitesComplete
     ? "All prerequisite navigations must be complete before saving."
@@ -425,9 +425,9 @@ const ProfitShareEditUpdate = () => {
   // Use checksum validation hook to fetch validation data independently from any page
   const {
     validationData: validationResponse,
-    isLoading: isValidationLoading,
-    error: validationError,
-    refetch: refetchValidation,
+    //isLoading: isValidationLoading,
+    //error: validationError,
+    //refetch: refetchValidation,
     getFieldValidation
   } = useChecksumValidation({
     profitYear: profitYear || 0,

@@ -3,20 +3,20 @@ import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, Pagination, ISortParams } from "smart-ui-library";
+import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../../components/ReportSummary";
 import { useGridPagination } from "../../../../hooks/useGridPagination";
-import { GetUnder21BreakdownColumnDefs } from "./GetUnder21BreakdownColumnDefs";
+import { GetUnder21BreakdownColumnDefs } from "./GetUnder21BreakdownGridColumns";
 
 interface Under21BreakdownGridProps {
   isLoading?: boolean;
-  initialSearchLoaded: boolean;
+
   setInitialSearchLoaded: (loaded: boolean) => void;
 }
 
 const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
   isLoading = false,
-  initialSearchLoaded,
+
   setInitialSearchLoaded
 }) => {
   const under21Breakdown = useSelector((state: RootState) => state.yearsEnd.under21BreakdownByStore);
