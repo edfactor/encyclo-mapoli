@@ -17,13 +17,13 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
 
 public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYearRequest, DuplicateNamesAndBirthdaysResponse, DuplicateNamesAndBirthdaysEndpoint.DuplicateNamesAndBirthdaysResponseMap>
 {
-    private readonly ICleanupReportService _cleanupReportService;
+    private readonly IDuplicateNamesAndBirthdaysService _duplicateNamesAndBirthdaysService;
     private readonly ILogger<DuplicateNamesAndBirthdaysEndpoint> _logger;
 
-    public DuplicateNamesAndBirthdaysEndpoint(ICleanupReportService cleanupReportService, ILogger<DuplicateNamesAndBirthdaysEndpoint> logger)
+    public DuplicateNamesAndBirthdaysEndpoint(IDuplicateNamesAndBirthdaysService duplicateNamesAndBirthdaysService, ILogger<DuplicateNamesAndBirthdaysEndpoint> logger)
         : base(Navigation.Constants.DuplicateNamesAndBirthdays)
     {
-        _cleanupReportService = cleanupReportService;
+        _duplicateNamesAndBirthdaysService = duplicateNamesAndBirthdaysService;
         _logger = logger;
     }
 
@@ -94,7 +94,7 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
         {
             this.RecordRequestMetrics(HttpContext, _logger, req);
 
-            var result = await _cleanupReportService.GetDuplicateNamesAndBirthdaysAsync(req, ct);
+            var result = await _duplicateNamesAndBirthdaysService.GetDuplicateNamesAndBirthdaysAsync(req, ct);
 
             // Record year-end cleanup report metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,

@@ -122,8 +122,9 @@ public class DemographicsService : IDemographicsServiceInternal
 
             // Duplicate SSN audit
             List<Demographic> duplicateSsns = existing
+                .Where(x=> fallbackPairs.Select(y => y.Ssn).Contains(x.Ssn))
                 .GroupBy(e => e.Ssn)
-                .Where(g => g.Count() > 1)
+                .Where(g =>  g.Count() > 1)
                 .SelectMany(g => g)
                 .ToList();
             if (duplicateSsns.Any())
