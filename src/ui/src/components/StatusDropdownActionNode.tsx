@@ -53,6 +53,7 @@ const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({ onS
       };
       autoChangeStatus();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onSearchClicked]); // Only runs when onSearchClicked changes (i.e., when search button is clicked)
 
   const getNavigationObjectBasedOnId = (navigationArray?: NavigationDto[], id?: number): NavigationDto | undefined => {
@@ -77,7 +78,8 @@ const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({ onS
     const obj = getNavigationObjectBasedOnId(navigationList?.navigation, currentNavigationId ?? undefined);
     if (obj) setNavigationObj(obj);
     setCurrentStatus(obj?.statusId + "");
-  }, [data, navigationList, currentNavigationId, hasToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, navigationList, currentNavigationId, hasToken, triggerGetNavigationStatus]);
 
   const isReadOnly = navigationObj?.isReadOnly ?? false;
   const readOnlyTooltip = "You are in read-only mode and cannot change the status of this page.";

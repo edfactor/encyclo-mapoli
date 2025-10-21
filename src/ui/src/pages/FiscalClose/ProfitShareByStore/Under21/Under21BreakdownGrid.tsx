@@ -6,7 +6,7 @@ import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../../components/ReportSummary";
 import { useGridPagination } from "../../../../hooks/useGridPagination";
-import { GetUnder21BreakdownColumnDefs } from "./GetUnder21BreakdownColumnDefs";
+import { GetUnder21BreakdownColumnDefs } from "./GetUnder21BreakdownGridColumns";
 
 interface Under21BreakdownGridProps {
   isLoading?: boolean;

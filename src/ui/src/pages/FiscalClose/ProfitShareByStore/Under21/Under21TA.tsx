@@ -76,6 +76,7 @@ const Under21TA = () => {
     setPageNumber(0);
   }, [under21Totals, under21Inactive]);
 
+  /*
   const handleSearch = (profitYear: number, isSortDescending: boolean) => {
     const queryParams = {
       profitYear,
@@ -91,7 +92,7 @@ const Under21TA = () => {
     fetchUnder21Totals(queryParams);
     fetchUnder21Inactive(queryParams);
   };
-
+*/
   return (
     <Page
       label={CAPTIONS.QPAY066TA_UNDER21}

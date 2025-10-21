@@ -21,9 +21,9 @@ import {
   UpdateBeneficiaryRequest,
   UpdateBeneficiaryResponse
 } from "reduxstore/types";
+import { SearchAndReset } from "smart-ui-library";
 import { tryddmmyyyyToDate } from "utils/dateUtils";
 import * as yup from "yup";
-import { SearchAndReset } from "smart-ui-library";
 
 const schema = yup.object().shape({
   beneficiarySsn: yup.number().required(),
@@ -171,7 +171,7 @@ const CreateBeneficiary: React.FC<Props> = ({
     };
     triggerUpdateBeneficiary(request)
       .unwrap()
-      .then((res: UpdateBeneficiaryResponse) => {
+      .then((_res: UpdateBeneficiaryResponse) => {
         console.log("update successfully");
         onSaveSuccess();
       });
@@ -198,7 +198,7 @@ const CreateBeneficiary: React.FC<Props> = ({
     };
     triggerAdd(request)
       .unwrap()
-      .then((value) => {
+      .then((_value) => {
         console.log("saved successfully");
         onSaveSuccess();
       })

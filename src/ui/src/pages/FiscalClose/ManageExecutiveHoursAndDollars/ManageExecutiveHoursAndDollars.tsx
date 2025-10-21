@@ -2,7 +2,7 @@ import { Divider, Grid } from "@mui/material";
 import FrozenYearWarning from "components/FrozenYearWarning";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import StatusReadOnlyInfo from "components/StatusReadOnlyInfo";
-import { memo, useState } from "react";
+import { memo } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import { useIsProfitYearFrozen } from "../../../hooks/useIsProfitYearFrozen";
@@ -63,7 +63,7 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
     resetSearch,
     isSearching,
     showGrid,
-    saveExecutiveHoursAndDollars,
+
     gridData,
     modalResults,
     isModalOpen,
@@ -83,7 +83,7 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
   const isReadOnly = useReadOnlyNavigation();
   const isReadOnlyByStatus = useIsReadOnlyByStatus();
   const isFrozen = useIsProfitYearFrozen(profitYear);
-  const [currentStatus, setCurrentStatus] = useState<string | null>(null);
+  //const [currentStatus, setCurrentStatus] = useState<string | null>(null);
 
   /*
   const handleStatusChange = (newStatus: string, statusName?: string) => {

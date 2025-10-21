@@ -23,7 +23,7 @@ import MilitaryContributionSearchFilter from "./MilitaryContributionSearchFilter
 
 const MilitaryContributionContent = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [currentStatus, setCurrentStatus] = useState<string | null>(null);
+  //const [currentStatus, setCurrentStatus] = useState<string | null>(null);
   const [memberDetailsRefreshTrigger, setMemberDetailsRefreshTrigger] = useState(0);
   const { masterInquiryMemberDetails } = useSelector((state: RootState) => state.inquiry);
   const profitYear = useDecemberFlowProfitYear();
@@ -41,6 +41,7 @@ const MilitaryContributionContent = () => {
     resetSearch
   } = useMilitaryContribution();
 
+  /*
   const handleStatusChange = (newStatus: string, statusName?: string) => {
     if (statusName === "Complete" && currentStatus !== "Complete") {
       setCurrentStatus("Complete");
@@ -49,11 +50,12 @@ const MilitaryContributionContent = () => {
       setCurrentStatus(statusName || newStatus);
     }
   };
-
+  */
+  /*
   const renderActionNode = () => {
     return <StatusDropdownActionNode onStatusChange={handleStatusChange} />;
   };
-
+*/
   const handleOpenForm = () => {
     if (!isReadOnly) {
       setIsDialogOpen(true);

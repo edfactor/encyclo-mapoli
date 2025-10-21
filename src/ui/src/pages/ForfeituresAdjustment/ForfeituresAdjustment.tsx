@@ -1,7 +1,7 @@
 import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import StandaloneMemberDetails from "pages/MasterInquiry/StandaloneMemberDetails";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   useLazyGetProfitMasterInquiryMemberDetailsQuery,
@@ -115,40 +115,43 @@ const ForfeituresAdjustment = () => {
     }
   };
 
-  const fetchTransactionDetails = (pageNumber = 0, pageSize = 50, sortParams: SortParams | null = null) => {
-    if (forfeitureAdjustmentData) {
-      const apiParams = {
-        memberType: 1,
-        id: forfeitureAdjustmentData.demographicId,
-        skip: pageNumber * pageSize,
-        take: pageSize,
-        sortBy: sortParams?.sortBy,
-        isSortDescending: sortParams?.isSortDescending
-      };
+  const fetchTransactionDetails = useCallback(
+    (pageNumber = 0, pageSize = 50, sortParams: SortParams | null = null) => {
+      if (forfeitureAdjustmentData) {
+        const apiParams = {
+          memberType: 1,
+          id: forfeitureAdjustmentData.demographicId,
+          skip: pageNumber * pageSize,
+          take: pageSize,
+          sortBy: sortParams?.sortBy,
+          isSortDescending: sortParams?.isSortDescending
+        };
 
-      triggerTransactionDetails(apiParams)
-        .unwrap()
-        .then((response) => {
-          // Filter for "Outgoing forfeitures" transactions (profit code 2)
-          const filteredResults = response.results.filter((transaction) => {
-            return transaction.profitCodeId === 2;
+        triggerTransactionDetails(apiParams)
+          .unwrap()
+          .then((response) => {
+            // Filter for "Outgoing forfeitures" transactions (profit code 2)
+            const filteredResults = response.results.filter((transaction) => {
+              return transaction.profitCodeId === 2;
+            });
+
+            console.log(
+              `Filtered ${filteredResults.length} forfeit transactions from ${response.results.length} total transactions`
+            );
+
+            setTransactionData({
+              results: filteredResults,
+              total: filteredResults.length
+            });
+          })
+          .catch((error) => {
+            console.error("Error fetching transaction details:", error);
+            setTransactionData(null);
           });
-
-          console.log(
-            `Filtered ${filteredResults.length} forfeit transactions from ${response.results.length} total transactions`
-          );
-
-          setTransactionData({
-            results: filteredResults,
-            total: filteredResults.length
-          });
-        })
-        .catch((error) => {
-          console.error("Error fetching transaction details:", error);
-          setTransactionData(null);
-        });
-    }
-  };
+      }
+    },
+    [forfeitureAdjustmentData, triggerTransactionDetails]
+  );
 
   useEffect(() => {
     if (forfeitureAdjustmentQueryParams && (!forfeitureAdjustmentData || !initialSearchLoaded)) {

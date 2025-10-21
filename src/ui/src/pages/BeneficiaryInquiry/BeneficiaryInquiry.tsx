@@ -102,7 +102,8 @@ const BeneficiaryInquiry = () => {
           onSearch(res);
         });
     }
-  }, [initialSearch, pageSize, pageNumber, _sortParams]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialSearch, pageSize, pageNumber, _sortParams, beneficiarySearchFilterRequest, triggerSearch]);
 
   const RefreshBeneficiaryGrid = () => {
     setChange((prev) => prev + 1);
@@ -111,7 +112,7 @@ const BeneficiaryInquiry = () => {
   const columnDefs = useMemo(() => {
     const columns = BeneficiaryGridColumns();
     return columns;
-  }, [beneficiarySearchFilterResponse]);
+  }, []);
 
   const deleteBeneficiary = (id: number) => {
     setDeleteBeneficairyId(id);
@@ -185,7 +186,7 @@ const BeneficiaryInquiry = () => {
         })
         .catch((reason) => console.error(reason));
     }
-  }, [beneficiaryKind, token]);
+  }, [beneficiaryKind, token, triggerGetBeneficiaryKind, triggerGetBeneficiaryType]);
 
   return (
     <MissiveAlertProvider>

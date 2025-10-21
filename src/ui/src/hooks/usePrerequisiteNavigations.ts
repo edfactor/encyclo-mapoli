@@ -117,7 +117,8 @@ export const usePrerequisiteNavigations = (
       setPrerequisitesComplete(true);
       setIncompletePrerequisites([]);
     }
-  }, [navigationId, navigationData, dispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigationId, navigationData, dispatch, messageConfig]);
 
   return { prerequisitesComplete, incompletePrerequisites, currentNavigation };
 };

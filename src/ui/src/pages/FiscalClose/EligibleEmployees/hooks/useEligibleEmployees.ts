@@ -65,7 +65,7 @@ const useEligibleEmployees = () => {
   });
 
   const executeSearch = useCallback(
-    async (searchParams: EligibleEmployeesSearchParams, source = "manual") => {
+    async (searchParams: EligibleEmployeesSearchParams, _source = "manual") => {
       if (!hasToken) return;
 
       dispatch({ type: "SEARCH_START", payload: { profitYear: searchParams.profitYear } });

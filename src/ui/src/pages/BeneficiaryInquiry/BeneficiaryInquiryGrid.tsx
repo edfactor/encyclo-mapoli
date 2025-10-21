@@ -59,7 +59,7 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
           }
         }
       },
-      [selectedMember]
+      [selectedMember?.badgeNumber, selectedMember?.psnSuffix, triggerSearch]
     )
   });
 
@@ -127,7 +127,7 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
 
       triggerUpdate({ id: id, percentage: currentValue }, false)
         .unwrap()
-        .then((res) => {
+        .then((_res) => {
           if (hasToken) onSearch();
         });
     } else {
@@ -183,7 +183,8 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
         }
       }
     ];
-  }, [beneficiaryList]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionButtons]);
 
   const onSearch = useCallback(() => {
     const request = createBeneficiaryInquiryRequest(

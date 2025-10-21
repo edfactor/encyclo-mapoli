@@ -86,7 +86,7 @@ export const useGridPagination = ({
         isUpdatingRef.current = false;
       }
     },
-    [sortBy, isSortDescending, pageSize]
+    [sortBy, isSortDescending]
   );
 
   const handleSortChange = useCallback(
