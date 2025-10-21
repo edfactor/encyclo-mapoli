@@ -183,9 +183,7 @@ const PayMasterUpdateSummary = () => {
         </Grid>
 
         {updateSummary?.response && (
-          <Grid
-            size={{ xs: 12 }}
-            paddingX="24px">
+          <Grid paddingX="24px">
             <TotalsGrid
               displayData={[
                 [
@@ -206,6 +204,7 @@ const PayMasterUpdateSummary = () => {
                 "After Profit Sharing Amount",
                 "After Vested Amount"
               ]}
+              breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
             />
           </Grid>
         )}
