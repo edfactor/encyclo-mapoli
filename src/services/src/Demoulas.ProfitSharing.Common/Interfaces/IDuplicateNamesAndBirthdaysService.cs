@@ -9,4 +9,9 @@ public interface IDuplicateNamesAndBirthdaysService
     Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdaysAsync(
         ProfitYearRequest req,
         CancellationToken cancellationToken = default);
+
+    Task<DuplicateNamesAndBirthdaysCachedResponse?> GetCachedDuplicateNamesAndBirthdaysAsync(
+        CancellationToken cancellationToken = default);
+
+    Task ForceRefreshCacheAsync(CancellationToken cancellationToken = default);
 }

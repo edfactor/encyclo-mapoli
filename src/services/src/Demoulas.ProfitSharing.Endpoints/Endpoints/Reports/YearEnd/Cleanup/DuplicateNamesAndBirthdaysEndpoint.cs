@@ -20,7 +20,9 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
     private readonly IDuplicateNamesAndBirthdaysService _duplicateNamesAndBirthdaysService;
     private readonly ILogger<DuplicateNamesAndBirthdaysEndpoint> _logger;
 
-    public DuplicateNamesAndBirthdaysEndpoint(IDuplicateNamesAndBirthdaysService duplicateNamesAndBirthdaysService, ILogger<DuplicateNamesAndBirthdaysEndpoint> logger)
+    public DuplicateNamesAndBirthdaysEndpoint(
+        IDuplicateNamesAndBirthdaysService duplicateNamesAndBirthdaysService,
+        ILogger<DuplicateNamesAndBirthdaysEndpoint> logger)
         : base(Navigation.Constants.DuplicateNamesAndBirthdays)
     {
         _duplicateNamesAndBirthdaysService = duplicateNamesAndBirthdaysService;
@@ -94,39 +96,66 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
         {
             this.RecordRequestMetrics(HttpContext, _logger, req);
 
-            var result = await _duplicateNamesAndBirthdaysService.GetDuplicateNamesAndBirthdaysAsync(req, ct);
+            // Get cached data only
+            _logger.LogInformation("Fetching duplicate names and birthdays data from cache");
+            var cachedResponse = await _duplicateNamesAndBirthdaysService.GetCachedDuplicateNamesAndBirthdaysAsync(ct);
 
-            // Record year-end cleanup report metrics
-            EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                new("operation", "year-end-cleanup-duplicate-names-birthdays"),
-                new("endpoint", "DuplicateNamesAndBirthdaysEndpoint"),
-                new("report_type", "cleanup"),
-                new("cleanup_type", "duplicate-names-and-birthdays"));
+            ReportResponseBase<DuplicateNamesAndBirthdaysResponse> result;
 
-            var resultCount = result?.Response?.Results?.Count() ?? 0;
+            if (cachedResponse != null)
+            {
+                _logger.LogInformation("Using cached duplicate names and birthdays data (AsOfDate: {AsOfDate})", cachedResponse.AsOfDate);
+
+                // Convert cached response to ReportResponseBase
+                result = new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>
+                {
+                    ReportName = ReportFileName,
+                    ReportDate = cachedResponse.AsOfDate,
+                    StartDate = DateOnly.FromDateTime(cachedResponse.AsOfDate.DateTime),
+                    EndDate = DateOnly.FromDateTime(cachedResponse.AsOfDate.DateTime),
+                    Response = cachedResponse.Data
+                };
+
+                // Record year-end cleanup report metrics
+                EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                    new("operation", "year-end-cleanup-duplicate-names-birthdays"),
+                    new("endpoint", "DuplicateNamesAndBirthdaysEndpoint"),
+                    new("report_type", "cleanup"),
+                    new("cleanup_type", "duplicate-names-and-birthdays"),
+                    new("data_source", "cache"));
+            }
+            else
+            {
+                // Return empty result if cache is not available
+                _logger.LogWarning("Cache not available, returning empty result. Cache will be populated by background service.");
+
+                result = new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>
+                {
+                    ReportName = ReportFileName,
+                    StartDate = DateOnly.FromDateTime(DateTime.Today),
+                    EndDate = DateOnly.FromDateTime(DateTime.Today),
+                    Response = new() { Results = [] }
+                };
+
+                // Record cache miss
+                EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                    new("operation", "year-end-cleanup-duplicate-names-birthdays"),
+                    new("endpoint", "DuplicateNamesAndBirthdaysEndpoint"),
+                    new("report_type", "cleanup"),
+                    new("cleanup_type", "duplicate-names-and-birthdays"),
+                    new("data_source", "cache-miss"));
+            }
+
+            var resultCount = result.Response?.Results?.Count() ?? 0;
             EndpointTelemetry.RecordCountsProcessed.Record(resultCount,
                 new("record_type", "duplicate-names-birthdays-cleanup"),
                 new("endpoint", "DuplicateNamesAndBirthdaysEndpoint"));
 
-            _logger.LogInformation("Year-end cleanup report for duplicate names and birthdays generated, returned {Count} records (correlation: {CorrelationId})",
+            _logger.LogInformation("Year-end cleanup report for duplicate names and birthdays returned {Count} records (correlation: {CorrelationId})",
                 resultCount, HttpContext.TraceIdentifier);
 
-            if (result != null)
-            {
-                this.RecordResponseMetrics(HttpContext, _logger, result);
-                return result;
-            }
-
-            var emptyResult = new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>
-            {
-                ReportName = ReportFileName,
-                StartDate = DateOnly.FromDateTime(DateTime.Today),
-                EndDate = DateOnly.FromDateTime(DateTime.Today),
-                Response = new() { Results = [] }
-            };
-
-            this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
-            return emptyResult;
+            this.RecordResponseMetrics(HttpContext, _logger, result);
+            return result;
         }
         catch (Exception ex)
         {

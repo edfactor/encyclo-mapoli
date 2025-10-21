@@ -27,7 +27,6 @@ public class CleanupReportService : ICleanupReportService
     private readonly TotalService _totalService;
     private readonly IHostEnvironment _host;
     private readonly IDemographicReaderService _demographicReaderService;
-    private readonly IDuplicateNamesAndBirthdaysService _duplicateNamesAndBirthdaysService;
 
     private readonly byte[] _distributionProfitCodes =
     [
@@ -49,15 +48,13 @@ public class CleanupReportService : ICleanupReportService
         ICalendarService calendarService,
         TotalService totalService,
         IHostEnvironment host,
-        IDemographicReaderService demographicReaderService,
-        IDuplicateNamesAndBirthdaysService duplicateNamesAndBirthdaysService)
+        IDemographicReaderService demographicReaderService)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
         _totalService = totalService;
         _host = host;
         _demographicReaderService = demographicReaderService;
-        _duplicateNamesAndBirthdaysService = duplicateNamesAndBirthdaysService;
         _logger = factory.CreateLogger<CleanupReportService>();
     }
 
@@ -113,15 +110,6 @@ public class CleanupReportService : ICleanupReportService
                 Response = results
             };
         }
-    }
-
-
-
-    public async Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdaysAsync(
-        ProfitYearRequest req,
-        CancellationToken cancellationToken = default)
-    {
-        return await _duplicateNamesAndBirthdaysService.GetDuplicateNamesAndBirthdaysAsync(req, cancellationToken);
     }
 
     public async Task<Result<DistributionsAndForfeitureTotalsResponse>> GetDistributionsAndForfeitureAsync(

@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Caching.Interfaces;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -12,6 +13,7 @@ using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -25,6 +27,7 @@ public class DuplicateNamesAndBirthdaysService : IDuplicateNamesAndBirthdaysServ
     private readonly TotalService _totalService;
     private readonly IHostEnvironment _host;
     private readonly IDemographicReaderService _demographicReaderService;
+    private readonly IServiceProvider _serviceProvider;
 
     public DuplicateNamesAndBirthdaysService(
         IProfitSharingDataContextFactory dataContextFactory,
@@ -32,13 +35,15 @@ public class DuplicateNamesAndBirthdaysService : IDuplicateNamesAndBirthdaysServ
         ICalendarService calendarService,
         TotalService totalService,
         IHostEnvironment host,
-        IDemographicReaderService demographicReaderService)
+        IDemographicReaderService demographicReaderService,
+        IServiceProvider serviceProvider)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
         _totalService = totalService;
         _host = host;
         _demographicReaderService = demographicReaderService;
+        _serviceProvider = serviceProvider;
         _logger = factory.CreateLogger<DuplicateNamesAndBirthdaysService>();
     }
 
@@ -184,6 +189,60 @@ FROM FILTERED_DEMOGRAPHIC p1
                     Results = projectedResults
                 }
             };
+        }
+    }
+
+    public async Task<DuplicateNamesAndBirthdaysCachedResponse?> GetCachedDuplicateNamesAndBirthdaysAsync(
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // Resolve cache service at runtime to avoid circular dependency
+            var cacheService = _serviceProvider.GetKeyedService<IBaseCacheService<DuplicateNamesAndBirthdaysCachedResponse>>(
+                "DuplicateNamesAndBirthdaysHostedService");
+
+            if (cacheService == null)
+            {
+                _logger.LogWarning("Cache service not available, returning null");
+                return null;
+            }
+
+            var allCachedData = await cacheService.GetAllAsync(cancellationToken);
+            return allCachedData.FirstOrDefault();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to retrieve cached duplicate names and birthdays data");
+            return null;
+        }
+    }
+
+    public async Task ForceRefreshCacheAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // Resolve cache service at runtime to avoid circular dependency
+            var cacheService = _serviceProvider.GetKeyedService<IBaseCacheService<DuplicateNamesAndBirthdaysCachedResponse>>(
+                "DuplicateNamesAndBirthdaysHostedService");
+
+            if (cacheService == null)
+            {
+                _logger.LogWarning("Cache service not available for force refresh");
+                throw new InvalidOperationException("Cache service is not available");
+            }
+
+            _logger.LogInformation("Force refreshing duplicate names and birthdays cache");
+
+            // Force a complete cache refresh by clearing and reloading all data
+            await cacheService.ClearAsync();
+            await cacheService.InitializeCacheAsync();
+
+            _logger.LogInformation("Cache force refresh completed successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to force refresh duplicate names and birthdays cache");
+            throw;
         }
     }
 }
