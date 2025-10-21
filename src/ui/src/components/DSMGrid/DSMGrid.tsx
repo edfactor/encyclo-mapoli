@@ -46,6 +46,24 @@ export interface ColumnStateWIndex extends ColumnState {
 }
 
 /**
+ * Default column definition for action columns (buttons, icons, etc.)
+ */
+// eslint-disable-next-line react-refresh/only-export-components
+export const ActionColumnDefault: ColDef = {
+  headerName: "Action",
+  colId: "action",
+  pinned: true,
+  sortable: false,
+  resizable: false,
+  lockPosition: true,
+  suppressMovable: true,
+  suppressAutoSize: true,
+  suppressSizeToFit: true,
+  cellStyle: { textAlign: "center" },
+  width: 100
+};
+
+/**
  * Enterprise-ready data grid component built on AG Grid Community.
  *
  * Features:
