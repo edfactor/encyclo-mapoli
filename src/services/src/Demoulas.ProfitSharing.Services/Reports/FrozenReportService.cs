@@ -900,7 +900,9 @@ public class FrozenReportService : IFrozenReportService
                                      Year = pp.ProfitYear
                                  } into pp_tmp
                                  from pp in pp_tmp.DefaultIfEmpty()
-                                 join psBal in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear) on d.Ssn equals psBal.Ssn
+                                 join psBal in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear) on d.Ssn equals psBal.Ssn into
+                                     psBal_tmp
+                                 from psBal in psBal_tmp.DefaultIfEmpty()
                                  join fBal in _totalService.GetForfeitures(ctx, req.ProfitYear) on d.Ssn equals fBal.Ssn into
                                      fBal_tmp
                                  from fBal_lj in fBal_tmp.DefaultIfEmpty()
@@ -915,11 +917,11 @@ public class FrozenReportService : IFrozenReportService
                                      EmployeeName = d.ContactInfo.FullName ?? "",
                                      d.DateOfBirth,
                                      d.Ssn,
-                                     Forfeitures = fBal_lj.TotalAmount,
-                                     Loans = lBal_lj.TotalAmount,
-                                     ProfitSharingAmount = psBal.TotalAmount,
-                                     GrossWages = pp.CurrentIncomeYear + pp.IncomeExecutive,
-                                     pp.EnrollmentId,
+                                     Forfeitures = fBal_lj != null ? fBal_lj.TotalAmount : (decimal?)null,
+                                     Loans = lBal_lj != null ? lBal_lj.TotalAmount : (decimal?)null,
+                                     ProfitSharingAmount = psBal != null ? psBal.TotalAmount : (decimal?)null,
+                                     GrossWages = pp != null ? pp.CurrentIncomeYear + pp.IncomeExecutive : 0m,
+                                     EnrollmentId = pp != null ? pp.EnrollmentId : (byte?)null,
                                      d.PayFrequencyId,
                                  });
 
@@ -943,7 +945,7 @@ public class FrozenReportService : IFrozenReportService
                         Loans = x.Loans ?? 0,
                         ProfitSharingAmount = x.ProfitSharingAmount ?? 0,
                         GrossWages = x.GrossWages,
-                        EnrollmentId = (byte)x.EnrollmentId,
+                        EnrollmentId = (byte)(x.EnrollmentId ?? 0),
                         IsExecutive = x.PayFrequencyId == PayFrequency.Constants.Monthly,
                     }).ToList(),
                     Total = pagedData.Total
