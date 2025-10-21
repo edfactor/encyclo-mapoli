@@ -85,7 +85,7 @@ export const useUnForfeitGrid = ({
     ]
   );
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, resetPagination } =
     useGridPagination({
       initialPageSize: 25,
       initialSortBy: "fullName",
@@ -367,7 +367,9 @@ export const useUnForfeitGrid = ({
 
   // Sort handler that immediately triggers a search with the new sort parameters
   const sortEventHandler = (update: SortParams) => {
-    handleSortChange(update);
+    // Reset to page 0 and perform search with new sort parameters
+    handlePaginationChange(0, pageSize);
+    performSearch(0, update.sortBy, update.isSortDescending);
   };
 
   // Handle row expansion toggle
