@@ -336,7 +336,7 @@ describe("useExecutiveModal", () => {
       const onAddExecutives = vi.fn();
 
       const { result, rerender } = renderHook(
-        ({ executives }: { executives: typeof mockExecutive[] }) =>
+        ({ executives }: { executives: (typeof mockExecutive)[] }) =>
           useExecutiveModal({
             ...defaultProps,
             onAddExecutives,

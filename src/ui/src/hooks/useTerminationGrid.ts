@@ -55,7 +55,6 @@ export const useTerminationGrid = ({
   onLoadingChange
 }: TerminationGridConfig) => {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
-  //const [gridApi, setGridApi] = useState<GridApi | null>(null);
   const [pendingSuccessMessage, setPendingSuccessMessage] = useState<string | null>(null);
   const [isPendingBulkMessage, setIsPendingBulkMessage] = useState<boolean>(false);
   const [isBulkSaveInProgress, setIsBulkSaveInProgress] = useState<boolean>(false);
@@ -71,6 +70,7 @@ export const useTerminationGrid = ({
   const editState = useEditState();
   const selectionState = useRowSelection();
   const gridRef = useRef<{ api: GridApi } | null>(null);
+  const prevTermination = useRef<typeof termination | null>(null);
   const lastRequestKeyRef = useRef<string | null>(null);
 
   // Create a request object based on current parameters
@@ -126,11 +126,9 @@ export const useTerminationGrid = ({
       )
     });
 
-  /*
-  const onGridReady = useCallback((params: { api: GridApi }) => {
-    setGridApi(params.api);
+  const onGridReady = useCallback((_params: { api: GridApi }) => {
+    // Grid is now ready - gridRef will be set by the component
   }, []);
-  */
 
   // Effect to show success message after grid finishes loading
   useEffect(() => {
@@ -157,22 +155,40 @@ export const useTerminationGrid = ({
     onLoadingChange?.(isFetching);
   }, [isFetching, onLoadingChange]);
 
+  // Need a useEffect to reset the page number when total count changes (new search, not pagination)
+  // Don't reset during or immediately after bulk save operations to preserve grid position
+  useEffect(() => {
+    const prevTotal = prevTermination.current?.response?.total;
+    const currentTotal = termination?.response?.total;
+
+    // Skip if this is the initial load (previous was undefined/null OR transitioning from 0 to non-zero)
+    const isInitialLoad =
+      !prevTermination.current || (prevTotal === 0 && currentTotal !== undefined && currentTotal > 0);
+
+    if (
+      !isBulkSaveInProgress &&
+      !isInitialLoad &&
+      termination !== prevTermination.current &&
+      currentTotal !== undefined &&
+      currentTotal !== prevTotal
+    ) {
+      resetPagination();
+    }
+    prevTermination.current = termination;
+  }, [termination, resetPagination, isBulkSaveInProgress]);
+
   // Initialize expandedRows when data is loaded
   useEffect(() => {
     if (termination?.response?.results && termination.response.results.length > 0) {
-      const badgeNumbers = termination.response.results.map((row) => row.badgeNumber).join(",");
-      const prevBadgeNumbers = Object.keys(expandedRows).join(",");
-      if (badgeNumbers !== prevBadgeNumbers) {
-        const initialExpandState: Record<string, boolean> = {};
-        termination.response.results.forEach((row) => {
-          if (row.yearDetails && row.yearDetails.length > 0) {
-            initialExpandState[row.badgeNumber] = true;
-          }
-        });
-        setExpandedRows(initialExpandState);
-      }
+      const initialExpandState: Record<string, boolean> = {};
+      termination.response.results.forEach((row) => {
+        if (row.yearDetails && row.yearDetails.length > 0) {
+          initialExpandState[row.badgeNumber.toString()] = true;
+        }
+      });
+      setExpandedRows(initialExpandState);
     }
-  }, [expandedRows, termination.response.results]);
+  }, [termination?.response?.results]);
 
   // Refresh the grid when loading state changes
   useEffect(() => {
@@ -426,11 +442,18 @@ export const useTerminationGrid = ({
     ]
   );
 
-  // Reset page number to 0 when resetPageFlag changes
+  // Reset page number to 0 when resetPageFlag changes (from search button)
+  // Track the previous value to detect actual changes, not just re-renders
+  const prevResetPageFlag = useRef<boolean>(resetPageFlag);
   useEffect(() => {
-    if (!isBulkSaveInProgress) {
+    // Only reset if the flag actually toggled (changed value)
+    const flagChanged = prevResetPageFlag.current !== resetPageFlag;
+
+    if (flagChanged && !isBulkSaveInProgress) {
       resetPagination();
     }
+
+    prevResetPageFlag.current = resetPageFlag;
   }, [resetPageFlag, resetPagination, isBulkSaveInProgress]);
 
   // Track unsaved changes based on edit state only
@@ -462,20 +485,24 @@ export const useTerminationGrid = ({
       rows.push({
         ...row,
         isExpandable: hasDetails,
-        isExpanded: hasDetails && Boolean(expandedRows[row.badgeNumber])
+        isExpanded: hasDetails && Boolean(expandedRows[row.badgeNumber.toString()]),
+        isDetail: false
       });
 
       // Add detail rows if expanded
-      if (hasDetails && expandedRows[row.badgeNumber]) {
+      if (hasDetails && expandedRows[row.badgeNumber.toString()]) {
+        let index = 0;
         for (const detail of row.yearDetails) {
-          const detailRow = {
+          rows.push({
             ...row,
             ...detail,
             isDetail: true,
-            parentId: row.badgeNumber
-          };
-
-          rows.push(detailRow);
+            isExpandable: false,
+            isExpanded: false,
+            parentId: row.badgeNumber,
+            index: index
+          });
+          index++;
         }
       }
     }
