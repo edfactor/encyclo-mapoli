@@ -4,8 +4,9 @@ import { useSelector } from "react-redux";
 import { Path } from "react-router";
 import { YearsEndApi } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, Pagination } from "smart-ui-library";
-import { useGridPagination, SortParams } from "../../hooks/useGridPagination";
+import { Pagination } from "smart-ui-library";
+import { DSMGrid } from "../../components/DSMGrid/DSMGrid";
+import { SortParams, useGridPagination } from "../../hooks/useGridPagination";
 import { GetPayMasterUpdateGridColumns } from "./PayMasterUpdateGridColumns";
 
 interface PayMasterUpdateGridProps {

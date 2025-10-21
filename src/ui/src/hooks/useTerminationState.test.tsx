@@ -55,7 +55,6 @@ describe("useTerminationState", () => {
 
       expect(result.current.state.resetPageFlag).toBe(!initialResetFlag);
     });
-
   });
 
   describe("handleUnsavedChanges", () => {
@@ -129,7 +128,6 @@ describe("useTerminationState", () => {
       expect(result.current.state.archiveMode).toBe(false);
       expect(result.current.state.shouldArchive).toBe(false);
     });
-
 
     it("should not trigger archive if already in complete status", () => {
       const { result } = renderHook(() => useTerminationState());
