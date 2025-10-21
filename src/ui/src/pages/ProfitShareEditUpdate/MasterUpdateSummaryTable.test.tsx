@@ -4,7 +4,9 @@ import { MasterUpdateSummaryTable } from "./MasterUpdateSummaryTable";
 
 // Mock Material-UI Typography component
 vi.mock("@mui/material", () => ({
-  Typography: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement> & { children?: React.ReactNode }) => <div {...props}>{children}</div>
+  Typography: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement> & { children?: React.ReactNode }) => (
+    <div {...props}>{children}</div>
+  )
 }));
 
 // Mock InfoOutlinedIcon
@@ -50,7 +52,10 @@ describe("MasterUpdateSummaryTable", () => {
   };
 
   const mockGetFieldValidation = (fieldKey: string) => {
-    const validations: Record<string, { isValid: boolean; currentValue: number | null; expectedValue: number | null; message?: string | null }> = {
+    const validations: Record<
+      string,
+      { isValid: boolean; currentValue: number | null; expectedValue: number | null; message?: string | null }
+    > = {
       TotalProfitSharingBalance: { isValid: true, currentValue: 1000000, expectedValue: 1000000 },
       TotalContributions: { isValid: false, currentValue: 50000, expectedValue: 50100 },
       "PAY443.TotalContributions": { isValid: false, currentValue: 50000, expectedValue: 50100 },

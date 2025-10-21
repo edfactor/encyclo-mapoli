@@ -40,7 +40,12 @@ const RecentlyTerminatedGrid: React.FC<RecentlyTerminatedGridSearchProps> = ({
     initialSortDescending: false,
     onPaginationChange: useCallback(
       async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
-        if (hasToken && initialSearchLoaded && recentlyTerminatedQueryParams?.beginningDate && recentlyTerminatedQueryParams?.endingDate) {
+        if (
+          hasToken &&
+          initialSearchLoaded &&
+          recentlyTerminatedQueryParams?.beginningDate &&
+          recentlyTerminatedQueryParams?.endingDate
+        ) {
           const request: RecentlyTerminatedRequest = {
             profitYear: profitYear || 0,
             beginningDate: recentlyTerminatedQueryParams.beginningDate,
