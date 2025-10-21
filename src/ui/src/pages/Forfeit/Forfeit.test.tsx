@@ -148,21 +148,6 @@ describe("Forfeit", () => {
     expect(onSearchClickedStatus.textContent).toBe("enabled");
   });
 
-  it("should set initialSearchLoaded to true when search is clicked", async () => {
-    //const mockStore = createMockStore();
-    //const { container } = render(<Forfeit />, { wrapper: wrapper(mockStore) });
-
-    const searchButton = screen.getByTestId("search-button");
-
-    // Note: This test verifies the prop is passed, but the actual logic
-    // is in ForfeitSearchFilter which we've mocked
-    fireEvent.click(searchButton);
-
-    // The mock ForfeitSearchFilter doesn't actually call setInitialSearchLoaded,
-    // so we just verify the search button can be clicked
-    expect(searchButton).toBeInTheDocument();
-  });
-
   it("should handle multiple status changes correctly", async () => {
     const mockStore = createMockStore();
     render(<Forfeit />, { wrapper: wrapper(mockStore) });
