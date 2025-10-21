@@ -892,12 +892,14 @@ public class FrozenReportService : IFrozenReportService
                                  {
                                      Id = lyPP.DemographicId,
                                      Year = lyPP.ProfitYear
-                                 }
+                                 } into lyPP_tmp
+                                 from lyPP in lyPP_tmp.DefaultIfEmpty()
                                  join pp in ctx.PayProfits on new { d.Id, Year = req.ProfitYear } equals new
                                  {
                                      Id = pp.DemographicId,
                                      Year = pp.ProfitYear
-                                 }
+                                 } into pp_tmp
+                                 from pp in pp_tmp.DefaultIfEmpty()
                                  join psBal in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear) on d.Ssn equals psBal.Ssn
                                  join fBal in _totalService.GetForfeitures(ctx, req.ProfitYear) on d.Ssn equals fBal.Ssn into
                                      fBal_tmp
@@ -905,7 +907,7 @@ public class FrozenReportService : IFrozenReportService
                                  join lBal in _totalService.GetQuoteLoansUnQuote(ctx, req.ProfitYear) on d.Ssn equals lBal.Ssn into
                                      lBal_tmp
                                  from lBal_lj in lBal_tmp.DefaultIfEmpty()
-                                 where pp.CurrentIncomeYear + pp.IncomeExecutive > req.MinGrossAmount
+                                 where pp != null && pp.CurrentIncomeYear + pp.IncomeExecutive > req.MinGrossAmount
                                  orderby d.ContactInfo.FullName
                                  select new
                                  {
