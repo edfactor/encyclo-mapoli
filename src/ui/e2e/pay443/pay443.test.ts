@@ -62,7 +62,7 @@ test.describe.serial("Pay 443: ", () => {
         await page.getByRole("option", { name: "Complete" }).click();
       })()
     ]);
-    const json = await response.json();
+    //const json = await response.json();
     return;
   });
 });

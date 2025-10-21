@@ -7,11 +7,7 @@ import { useGridPagination } from "../../../hooks/useGridPagination";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { GetContributionsByAgeColumns } from "./ContributionsByAgeGridColumns";
 
-interface ContributionsByAgeGridProps {
-  initialSearchLoaded: boolean;
-}
-
-const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initialSearchLoaded }) => {
+const ContributionsByAgeGrid: React.FC = () => {
   const { contributionsByAgeTotal, contributionsByAgeFullTime, contributionsByAgePartTime } = useSelector(
     (state: RootState) => state.yearsEnd
   );

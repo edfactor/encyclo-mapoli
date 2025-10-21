@@ -14,9 +14,9 @@ export interface AddDistributionFormRef {
 
 interface AddDistributionFormData {
   // Distribution Details
-  paymentFlag: string | null;
-  taxCode: string | null;
-  reasonCode: string | null;
+  paymentFlag: string;
+  taxCode: string;
+  reasonCode: string;
   amountRequested: string;
   fedTaxOverride: boolean;
   fedTaxPct: string;
@@ -25,13 +25,13 @@ interface AddDistributionFormData {
   stateTaxPct: string;
   stateTax: string;
   sequenceNumber: string;
-  memo: string;
+  memo?: string;
   employeeDeceased: boolean;
 
   // 3rd Party Details
   thirdPartyName: string;
   thirdPartyAddress1: string;
-  thirdPartyAddress2: string;
+  thirdPartyAddress2?: string;
   thirdPartyCity: string;
   thirdPartyState: string;
   thirdPartyZip: string;
@@ -40,7 +40,7 @@ interface AddDistributionFormData {
   fboType: string;
   account: string;
   rothIra: boolean;
-  thirdPartySsn: string;
+  thirdPartySsn?: string;
 }
 
 interface AddDistributionFormProps {
@@ -81,10 +81,7 @@ const schema = yup.object().shape({
 });
 
 const AddDistributionForm = forwardRef<AddDistributionFormRef, AddDistributionFormProps>(
-  (
-    { stateTaxRate, sequenceNumber, badgeNumber, onSubmit, onReset, isSubmitting, dateOfBirth, age, vestedAmount },
-    ref
-  ) => {
+  ({ stateTaxRate, sequenceNumber, badgeNumber, onSubmit, age, vestedAmount }, ref) => {
     const {
       control,
       handleSubmit,
@@ -96,9 +93,9 @@ const AddDistributionForm = forwardRef<AddDistributionFormRef, AddDistributionFo
       resolver: yupResolver(schema),
       mode: "onChange",
       defaultValues: {
-        paymentFlag: null,
-        taxCode: null,
-        reasonCode: null,
+        paymentFlag: "",
+        taxCode: "",
+        reasonCode: "",
         amountRequested: "",
         fedTaxOverride: false,
         fedTaxPct: "20.0",

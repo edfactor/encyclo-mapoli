@@ -60,7 +60,7 @@ test.describe("Unforfeitures landing page: ", () => {
         await page.getByRole("option", { name: "Complete" }).click();
       })()
     ]);
-    const json = await response.json();
+    //const json = await response.json();
     await expect(response.status()).toBe(200);
   });
 

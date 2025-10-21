@@ -149,6 +149,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       }
     }, [badgeNumber, reset, profitYear, onSearch, navigate]);
 
+    /*
     const selectSx = useMemo(
       () => ({
         "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
@@ -160,6 +161,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       }),
       []
     );
+    */
 
     //const months = useMemo(() => Array.from({ length: 12 }, (_, i) => i + 1), []);
 

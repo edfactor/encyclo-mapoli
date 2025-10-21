@@ -2,12 +2,12 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { DSMGrid, numberToCurrency, Pagination, TotalsGrid, ISortParams } from "smart-ui-library";
+import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
-import { useGridPagination, SortParams } from "../../../hooks/useGridPagination";
+import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { useLazyGetDistributionsAndForfeituresQuery } from "../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../reduxstore/store";
 import { GetDistributionsAndForfeituresColumns } from "./DistributionAndForfeituresGridColumns";
@@ -15,8 +15,9 @@ import { GetDistributionsAndForfeituresColumns } from "./DistributionAndForfeitu
 interface DistributionsAndForfeituresQueryParams {
   startDate?: string;
   endDate?: string;
-  states?: string[];
-  taxCodes?: string[];
+  states?: string; // Stringified for comparison
+  taxCodes?: string; // Stringified for comparison
+  profitYear?: number;
 }
 
 interface DistributionsAndForfeituresGridSearchProps {
@@ -37,7 +38,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     (state: RootState) => state.yearsEnd
   );
   const profitYear = useDecemberFlowProfitYear();
-  const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
+  const [triggerSearch] = useLazyGetDistributionsAndForfeituresQuery();
 
   // Make the initial page size configurable via state so it can be updated if needed
   const [initialPageSize, setInitialPageSize] = useState<number>(25);

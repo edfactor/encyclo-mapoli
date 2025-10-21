@@ -47,7 +47,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     pageNumber,
     pageSize,
     gridData,
-    isFetching,
+
     termination,
     selectedProfitYear,
 

@@ -28,7 +28,7 @@ const DsmDatePicker: FC<MyProps> = ({
   onChange,
   value,
   disableFuture,
-  setError,
+
   required,
   label,
   onKeyDown,

@@ -81,19 +81,23 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
         taxCodes: []
       });
     }
-  }, [reset]);
+  }, [reset, profitYear]);
 
-  const validateAndSearch = handleSubmit((data) => {
+  const validateAndSearch = handleSubmit(async (data) => {
     if (isValid && hasToken) {
-      // Store query params in Redux - this will trigger the Grid's useEffect to make the API call
-      dispatch(
-        setDistributionsAndForfeituresQueryParams({
-          startDate: formatDateOnly(data.startDate),
-          endDate: formatDateOnly(data.endDate),
-          states: data.states || [],
-          taxCodes: data.taxCodes || []
-        })
-      );
+      const queryParams = {
+        startDate: formatDateOnly(data.startDate),
+        endDate: formatDateOnly(data.endDate),
+        states: data.states || [],
+        taxCodes: data.taxCodes || []
+      };
+
+      // Store query params in Redux
+      dispatch(setDistributionsAndForfeituresQueryParams(queryParams));
+
+      // Perform the search
+      await triggerSearch(queryParams);
+
       setInitialSearchLoaded(true);
     }
   });

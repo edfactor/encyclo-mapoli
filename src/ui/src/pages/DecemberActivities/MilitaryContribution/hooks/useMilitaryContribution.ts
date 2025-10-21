@@ -7,11 +7,11 @@ import { clearMilitaryContributions } from "reduxstore/slices/militarySlice";
 import { RootState } from "reduxstore/store";
 import { MasterInquiryDetail, MasterInquiryRequest, MissiveResponse } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
-import { ServiceErrorResponse } from "../../../../types/errors/errors";
 import { MASTER_INQUIRY_MESSAGES } from "../../../../components/MissiveAlerts/MissiveMessages";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useMissiveAlerts } from "../../../../hooks/useMissiveAlerts";
+import { ServiceErrorResponse } from "../../../../types/errors/errors";
 
 interface SearchFormData {
   socialSecurity?: string;
@@ -267,7 +267,7 @@ export const useMilitaryContribution = () => {
         return false;
       }
     },
-    [triggerSearch, reduxDispatch, addAlert, clearAlerts]
+    [triggerSearch, reduxDispatch, addAlert, clearAlerts, fetchContributions]
   );
 
   const fetchMilitaryContributions = useCallback(() => {

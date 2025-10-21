@@ -161,7 +161,7 @@ const ForfeituresAdjustment = () => {
           console.error("Error refreshing forfeiture adjustments:", error);
         });
     }
-  }, []);
+  }, [forfeitureAdjustmentData, forfeitureAdjustmentQueryParams, initialSearchLoaded, triggerSearch]);
 
   useEffect(() => {
     if (forfeitureAdjustmentData && initialSearchLoaded) {
@@ -171,7 +171,14 @@ const ForfeituresAdjustment = () => {
         transactionGridPagination.sortParams
       );
     }
-  }, [forfeitureAdjustmentData, initialSearchLoaded]);
+  }, [
+    fetchTransactionDetails,
+    forfeitureAdjustmentData,
+    initialSearchLoaded,
+    transactionGridPagination.pageNumber,
+    transactionGridPagination.pageSize,
+    transactionGridPagination.sortParams
+  ]);
 
   return (
     <MissiveAlertProvider>

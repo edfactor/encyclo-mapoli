@@ -1,17 +1,17 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
-import {
-  useLazyGetProfitMasterInquiryGroupingQuery,
-  useLazyGetProfitMasterInquiryFilteredDetailsQuery
-} from "reduxstore/api/InquiryApi";
-import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
-import { Typography, Box, CircularProgress } from "@mui/material";
-import { RootState } from "reduxstore/store";
-import { useSelector } from "react-redux";
-import { MasterInquiryRequest, GroupedProfitSummaryDto, MasterInquiryResponseDto } from "reduxstore/types";
+import { Box, CircularProgress, Typography } from "@mui/material";
 import { NestedGrid } from "components/DSMNestedGrid/NestedGrid";
 import { INestedGridColumn, INestedGridRowData } from "components/DSMNestedGrid/NestedGridRow";
-import { numberToCurrency, DSMGrid } from "smart-ui-library";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import {
+  useLazyGetProfitMasterInquiryFilteredDetailsQuery,
+  useLazyGetProfitMasterInquiryGroupingQuery
+} from "reduxstore/api/InquiryApi";
+import { RootState } from "reduxstore/store";
+import { GroupedProfitSummaryDto, MasterInquiryRequest, MasterInquiryResponseDto } from "reduxstore/types";
+import { DSMGrid, numberToCurrency } from "smart-ui-library";
 import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
+import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
 
 const MasterInquiryGroupingGrid = ({ searchParams }: { searchParams: MasterInquiryRequest }) => {
   const [getProfitMasterInquiryGrouping, { isLoading: isGroupingLoading }] =
@@ -149,7 +149,8 @@ const MasterInquiryGroupingGrid = ({ searchParams }: { searchParams: MasterInqui
 
   // Handle row expansion/collapse
   const handleRowToggle = useCallback(
-    (rowId: string, isExpanded: boolean, row: INestedGridRowData<GroupedProfitSummaryDto>) => {
+    (row: INestedGridRowData<GroupedProfitSummaryDto>, isExpanded: boolean) => {
+      const rowId = String(row.id);
       if (!isExpanded) {
         // Collapsing row
         setExpandedRowIds((prev) => {
@@ -225,6 +226,7 @@ const MasterInquiryGroupingGrid = ({ searchParams }: { searchParams: MasterInqui
         </Box>
       );
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [expandedRowDataMap, detailColumns, isFetchingFilteredDetails]
   );
 

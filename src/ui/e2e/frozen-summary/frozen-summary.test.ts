@@ -182,7 +182,7 @@ test.describe("Frozen Summary Tab", () => {
     await tabList.focus();
 
     // Get initial tab
-    const initialTab = page.getByRole("tab", { name: /demographics|search|main/i }).first();
+    //const initialTab = page.getByRole("tab", { name: /demographics|search|main/i }).first();
 
     // Press arrow key to navigate to next tab
     await page.keyboard.press("ArrowRight");

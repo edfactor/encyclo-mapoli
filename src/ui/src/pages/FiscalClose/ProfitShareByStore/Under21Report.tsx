@@ -139,7 +139,6 @@ const Under21Report = () => {
             <Grid width="100%">
               <Under21BreakdownGrid
                 isLoading={isBreakdownLoading}
-                initialSearchLoaded={initialSearchLoaded}
                 setInitialSearchLoaded={setInitialSearchLoaded}
                 pageNumber={pageNumber}
                 setPageNumber={setPageNumber}

@@ -5,7 +5,7 @@ import { FocusEvent, JSX, useCallback, useEffect, useMemo, useState } from "reac
 import { useSelector } from "react-redux";
 import { useLazyGetBeneficiariesQuery, useLazyUpdateBeneficiaryQuery } from "reduxstore/api/BeneficiariesApi";
 import { RootState } from "reduxstore/store";
-import { BeneficiaryDetailResponse, BeneficiaryDto, BeneficiaryRequestDto } from "reduxstore/types";
+import { BeneficiaryDto, BeneficiaryRequestDto } from "reduxstore/types";
 import { DSMGrid, Paged, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import { SortParams, useGridPagination } from "../../hooks/useGridPagination";
@@ -13,15 +13,15 @@ import { BeneficiaryInquiryGridColumns } from "./BeneficiaryInquiryGridColumns";
 import { BeneficiaryOfGridColumns } from "./BeneficiaryOfGridColumns";
 
 interface BeneficiaryInquiryGridProps {
-  selectedMember: BeneficiaryDetailResponse | null;
+  selectedMember: BeneficiaryDto | null;
   count: number;
   createOrUpdateBeneficiary: (selectedMember: BeneficiaryDto | undefined) => void;
   deleteBeneficiary: (id: number) => void;
-  refresh: () => void;
+  //refresh: () => void;
 }
 
 const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
-  refresh,
+  //refresh,
   selectedMember,
   count,
   createOrUpdateBeneficiary,

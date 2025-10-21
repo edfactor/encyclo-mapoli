@@ -2,7 +2,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetProfitShareEditQuery, useLazyGetProfitShareUpdateQuery } from "reduxstore/api/YearsEndApi";
@@ -84,7 +84,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
 
-  const fiscalCloseProfitYearAsDate = new Date(fiscalCloseProfitYear, 0, 1);
+  const fiscalCloseProfitYearAsDate = useMemo(() => new Date(fiscalCloseProfitYear, 0, 1), [fiscalCloseProfitYear]);
 
   useEffect(() => {
     if (fiscalCloseProfitYear && !profitSharingUpdate && !profitSharingEdit) {

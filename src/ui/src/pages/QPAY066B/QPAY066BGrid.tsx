@@ -1,22 +1,20 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
 import { SortParams, useGridPagination } from "../../hooks/useGridPagination";
 import { useLazyGetQPAY066BTerminatedWithVestedBalanceQuery } from "../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../reduxstore/store";
-import { QPAY066BFilterParams } from "./QPAY066BFilterSection";
 import { GetQPAY066BGridColumns } from "./QPAY066BGridColumns";
 
 interface QPAY066BGridProps {
-  filterParams: QPAY066BFilterParams;
+  //filterParams: QPAY066BFilterParams;
   onLoadingChange?: (isLoading: boolean) => void;
 }
 
-const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ _filterParams, onLoadingChange }) => {
-  const navigate = useNavigate();
+const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ onLoadingChange }) => {
+  //const navigate = useNavigate();
   const hasToken = useSelector((state: RootState) => !!state.security.token);
   const [getQPAY066BData, { data: qpay066bData, isFetching }] = useLazyGetQPAY066BTerminatedWithVestedBalanceQuery();
 

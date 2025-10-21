@@ -151,8 +151,12 @@ const MilitaryContributionContent = () => {
         <DialogContent>
           <MilitaryContributionForm
             onSubmit={(contribution) => {
-              handleContributionSaved(contribution);
-              dispatch(InquiryApi.util.invalidateTags(["memberDetails"]));
+              handleContributionSaved({
+                contributionAmount: contribution.contributionAmount as number,
+                contributionYear: contribution.contributionYear,
+                isSupplementalContribution: contribution.isSupplementalContribution
+              });
+              dispatch(InquiryApi.util.invalidateTags(["MemberDetails"]));
             }}
             onCancel={handleCloseForm}
             badgeNumber={Number(masterInquiryMemberDetails?.badgeNumber)}

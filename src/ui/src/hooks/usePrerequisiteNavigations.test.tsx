@@ -174,7 +174,7 @@ describe("usePrerequisiteNavigations", () => {
       navigation: [navigation]
     });
 
-    const customBuild = vi.fn((template, incomplete, current) => ({
+    const customBuild = vi.fn((template) => ({
       ...template,
       message: {
         ...template.message,

@@ -85,6 +85,7 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
   const isFrozen = useIsProfitYearFrozen(profitYear);
   const [currentStatus, setCurrentStatus] = useState<string | null>(null);
 
+  /*
   const handleStatusChange = (newStatus: string, statusName?: string) => {
     if (statusName === "Complete" && currentStatus !== "Complete") {
       setCurrentStatus("Complete");
@@ -93,6 +94,7 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
       setCurrentStatus(statusName || newStatus);
     }
   };
+  */
 
   /*
   const renderActionNode = () => {
