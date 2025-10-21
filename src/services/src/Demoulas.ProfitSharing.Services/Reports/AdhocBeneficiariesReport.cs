@@ -34,18 +34,27 @@ public class AdhocBeneficiariesReport : IAdhocBeneficiariesReport
         {
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx);
             var employeeSsns = demographicQuery.Select(d => d.Ssn);
+            var baseQuery = ctx.Beneficiaries
+                .Select(b => new
+                {
+                    b.Id,
+                    b.PsnSuffix,
+                    b.Relationship,
+                    b.BadgeNumber,
+                    ContactSsn = b.Contact!.Ssn,
+                    ContactFullName = b.Contact.ContactInfo!.FullName,
+                    DemographicPayFrequencyId = b.Demographic != null ? b.Demographic.PayFrequencyId : (int?)null
+                });
 
-            IQueryable<Beneficiary> baseQuery = ctx.Beneficiaries.Include(b => b.Contact)
-                .ThenInclude(beneficiaryContact => beneficiaryContact!.ContactInfo);
-
-            baseQuery = req.IsAlsoEmployee ? baseQuery.Where(b => employeeSsns.Contains(b.Contact!.Ssn)) :
-                baseQuery.Where(b => !employeeSsns.Contains(b.Contact!.Ssn));
+            baseQuery = req.IsAlsoEmployee 
+                ? baseQuery.Where(b => employeeSsns.Contains(b.ContactSsn)) 
+                : baseQuery.Where(b => !employeeSsns.Contains(b.ContactSsn));
 
             // Apply pagination
             var pagedBeneficiaries = await baseQuery
                 .ToPaginationResultsAsync(req, cancellationToken);
 
-            var beneficiarySsns = pagedBeneficiaries.Results.Select(b => b.Contact!.Ssn).ToHashSet();
+            var beneficiarySsns = pagedBeneficiaries.Results.Select(b => b.ContactSsn).ToHashSet();
 
             var totalBalanceResult = await _totalService.GetTotalBalanceSet(ctx, req.ProfitYear)
                 .Where(x => beneficiarySsns.Contains(x.Ssn))
@@ -60,7 +69,7 @@ public class AdhocBeneficiariesReport : IAdhocBeneficiariesReport
             var filteredList = pagedBeneficiaries.Results.Select(b =>
             {
                 var profitDetailsForBeneficiary = allProfitDetails
-                    .Where(pd => pd.Ssn == b.Contact!.Ssn)
+                    .Where(pd => pd.Ssn == b.ContactSsn)
                     .Select(pd => new ProfitDetailDto(
                         pd.ProfitYear,
                         pd.ProfitCode.Name,
@@ -70,20 +79,19 @@ public class AdhocBeneficiariesReport : IAdhocBeneficiariesReport
                         DateOnly.FromDateTime(pd.CreatedAtUtc.DateTime),
                         pd.Remark)).ToList();
 
-                totalBalanceResult.TryGetValue(b.Contact!.Ssn, out var totalBalance);
-
+                totalBalanceResult.TryGetValue(b.ContactSsn, out var totalBalance);
 
                 return new BeneficiaryReportDto(
                     b.PsnSuffix,
-                    b.Contact?.ContactInfo?.FullName ?? string.Empty,
-                    b.Contact != null ? b.Contact.Ssn.MaskSsn() : string.Empty,
+                    b.ContactFullName ?? string.Empty,
+                    b.ContactSsn.MaskSsn(),
                     b.Relationship,
                     totalBalance?.TotalAmount ?? 0,
                     b.BadgeNumber,
                     b.PsnSuffix,
                     profitDetailsForBeneficiary
                 )
-                { IsExecutive = b.Demographic != null ? b.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly : false };
+                { IsExecutive = b.DemographicPayFrequencyId == PayFrequency.Constants.Monthly };
             }).ToList();
 
             return new AdhocBeneficiariesReportResponse
