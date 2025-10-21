@@ -14,6 +14,7 @@ using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Linq.Dynamic.Core;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
@@ -92,9 +93,21 @@ public sealed class UnforfeitService : IUnforfeitService
                     };
 
                 // Apply pagination to main query
+                var sortBy = (req.SortBy ?? "badgenumber").ToLowerInvariant() switch {
+                    "rehireddate" => "RehireDate",
+                    "companycontributionyears" => "YearsOfService",
+                    _ => (req.SortBy ?? "")
+                };
+
+                if (req.IsSortDescending ?? false)
+                {
+                    sortBy += " DESC";
+                }
+                
+
                 var paginatedMain = await mainQuery
                     .Distinct() // Remove duplicates from multiple ProfitDetail rows
-                    .OrderBy(x => x.BadgeNumber)
+                    .OrderBy(sortBy)
                     .Skip(req.Skip ?? 0)
                     .Take(req.Take ?? 10)
                     .ToListAsync(cancellationToken);
