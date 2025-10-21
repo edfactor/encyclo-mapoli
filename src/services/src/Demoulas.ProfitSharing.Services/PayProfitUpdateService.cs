@@ -189,7 +189,7 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
         CancellationToken cancellation)
     {
         // Create DataTable for bulk insert
-        DataTable table = new();
+        using DataTable table = new();
         table.Columns.Add("ssn", typeof(int));
         table.Columns.Add("profit_year", typeof(short));
         table.Columns.Add("enrollment_id", typeof(byte));
