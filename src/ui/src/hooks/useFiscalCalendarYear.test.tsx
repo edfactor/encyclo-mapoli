@@ -2,7 +2,6 @@ import { configureStore } from "@reduxjs/toolkit";
 import { renderHook } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { LazyQueryTrigger, QueryDefinition } from "@reduxjs/toolkit/query";
 import type { CalendarResponseDto } from "../types/common/api";
 import useFiscalCalendarYear, { useLazyGetAccountingRangeToCurrent } from "./useFiscalCalendarYear";
 

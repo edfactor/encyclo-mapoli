@@ -1,9 +1,8 @@
 import { Breadcrumbs, Link, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "../../reduxstore/store";
-import { getNavigationPath } from "../Drawer/utils/navigationStructureUtils";
 import { Location, useLocation, useNavigate } from "react-router-dom";
+import { RootState } from "../../reduxstore/store";
 import { getReadablePathName } from "../../utils/getReadablePathName";
 import { BreadcrumbItem } from "./DSMBreadcrumbItem";
 
@@ -97,7 +96,7 @@ const DSMDynamicBreadcrumbs: React.FC<DSMDynamicBreadcrumbsProps> = ({ separator
       return undefined;
     };
 
-    return findByUrl(navData.navigation);
+    return findByUrl(navData.navigation as unknown as NavigationItem[]);
   };
 
   const getCurrentPageLabel = (): string => {
