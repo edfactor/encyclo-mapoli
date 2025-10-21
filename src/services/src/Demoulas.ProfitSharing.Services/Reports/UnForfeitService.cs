@@ -96,7 +96,7 @@ public sealed class UnforfeitService : IUnforfeitService
                 var sortBy = (req.SortBy ?? "badgenumber").ToLowerInvariant() switch {
                     "rehireddate" => "RehireDate",
                     "companycontributionyears" => "YearsOfService",
-                    _ => (req.SortBy ?? "")
+                    _ => (req.SortBy ?? "badgenumber")
                 };
 
                 if (req.IsSortDescending ?? false)
