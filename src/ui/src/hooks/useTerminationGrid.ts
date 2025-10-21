@@ -172,7 +172,7 @@ export const useTerminationGrid = ({
         setExpandedRows(initialExpandState);
       }
     }
-  }, [expandedRows, termination.response.results]);
+  }, [expandedRows, termination?.response?.results]);
 
   // Refresh the grid when loading state changes
   useEffect(() => {
@@ -522,7 +522,6 @@ export const useTerminationGrid = ({
     handleBulkSave,
     handleRowExpansion,
     sortEventHandler,
-    onGridReady,
 
     // Pagination
     paginationHandlers,
