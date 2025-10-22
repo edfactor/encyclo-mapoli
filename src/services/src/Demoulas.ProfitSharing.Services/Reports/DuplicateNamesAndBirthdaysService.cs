@@ -1,4 +1,5 @@
 ﻿using Demoulas.Common.Caching.Interfaces;
+using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
@@ -54,7 +55,6 @@ public class DuplicateNamesAndBirthdaysService : IDuplicateNamesAndBirthdaysServ
         using (_logger.BeginScope("Request BEGIN DUPLICATE NAMES AND BIRTHDAYS"))
         {
             var dict = new Dictionary<int, byte>();
-            var balanceByBadge = new Dictionary<int, decimal>();
             var dupInfo = new HashSet<DemographicMatchDto>();
             var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
@@ -193,8 +193,23 @@ FROM FILTERED_DEMOGRAPHIC p1
     }
 
     public async Task<DuplicateNamesAndBirthdaysCachedResponse?> GetCachedDuplicateNamesAndBirthdaysAsync(
-        CancellationToken cancellationToken = default)
+        ProfitYearRequest request, CancellationToken cancellationToken = default)
     {
+        if (_host.IsTestEnvironment())
+        {
+            var testData = await GetDuplicateNamesAndBirthdaysAsync(request, cancellationToken);
+            return new DuplicateNamesAndBirthdaysCachedResponse
+            {
+                AsOfDate = DateTimeOffset.UtcNow,
+                Data = new PaginatedResponseDto<DuplicateNamesAndBirthdaysResponse>
+                {
+                    Total = testData.Response.Total,
+                    Results = testData.Response.Results
+                }
+            };
+        }
+
+
         try
         {
             // Resolve cache service at runtime to avoid circular dependency
@@ -208,7 +223,34 @@ FROM FILTERED_DEMOGRAPHIC p1
             }
 
             var allCachedData = await cacheService.GetAllAsync(cancellationToken);
-            return allCachedData.FirstOrDefault();
+            var cachedResponse = allCachedData.FirstOrDefault();
+
+            if (cachedResponse == null)
+            {
+                return null;
+            }
+
+            // Apply pagination to the cached data
+            var skip = request.Skip ?? 0;
+            var take = request.Take ?? byte.MaxValue; // Default to byte.MaxValue if not specified
+
+            var paginatedResults = cachedResponse.Data.Results
+                .Skip(skip)
+                .Take(take)
+                .ToList();
+
+            return new DuplicateNamesAndBirthdaysCachedResponse
+            {
+                AsOfDate = cachedResponse.AsOfDate,
+                Data = new PaginatedResponseDto<DuplicateNamesAndBirthdaysResponse>(new PaginationRequestDto
+                {
+                    Skip = skip,
+                    Take = take
+                })
+                {
+                    Results = paginatedResults
+                }
+            };
         }
         catch (Exception ex)
         {

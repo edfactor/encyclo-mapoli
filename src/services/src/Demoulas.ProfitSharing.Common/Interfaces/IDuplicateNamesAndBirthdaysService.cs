@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
@@ -11,7 +11,7 @@ public interface IDuplicateNamesAndBirthdaysService
         CancellationToken cancellationToken = default);
 
     Task<DuplicateNamesAndBirthdaysCachedResponse?> GetCachedDuplicateNamesAndBirthdaysAsync(
-        CancellationToken cancellationToken = default);
+        ProfitYearRequest request, CancellationToken cancellationToken = default);
 
     Task ForceRefreshCacheAsync(CancellationToken cancellationToken = default);
 }

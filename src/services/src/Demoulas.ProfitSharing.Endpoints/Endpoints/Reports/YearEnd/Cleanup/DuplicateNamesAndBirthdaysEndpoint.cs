@@ -98,7 +98,7 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
 
             // Get cached data only
             _logger.LogInformation("Fetching duplicate names and birthdays data from cache");
-            var cachedResponse = await _duplicateNamesAndBirthdaysService.GetCachedDuplicateNamesAndBirthdaysAsync(ct);
+            var cachedResponse = await _duplicateNamesAndBirthdaysService.GetCachedDuplicateNamesAndBirthdaysAsync(req, ct);
 
             ReportResponseBase<DuplicateNamesAndBirthdaysResponse> result;
 
