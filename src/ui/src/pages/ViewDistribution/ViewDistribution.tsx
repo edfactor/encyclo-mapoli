@@ -46,9 +46,12 @@ const ViewDistributionContent = () => {
   }, []);
 
   const handleEdit = () => {
-    // Ensure current distribution is set in Redux before navigating
-    if (currentDistribution && memberId && memberType) {
-      dispatch(setCurrentDistribution(currentDistribution));
+    // Navigate to edit page using URL parameters
+    if (memberId && memberType) {
+      // Set current distribution if available
+      if (currentDistribution) {
+        dispatch(setCurrentDistribution(currentDistribution));
+      }
       navigate(`/${ROUTES.EDIT_DISTRIBUTION}/${memberId}/${memberType}`);
     }
   };
