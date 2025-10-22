@@ -115,7 +115,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 {
                     Hours = pp.CurrentHoursYear + pp.HoursExecutive,
                     Wages = pp.CurrentIncomeYear + pp.IncomeExecutive,
-                    Points = (int)Math.Round((pp.CurrentIncomeYear + pp.IncomeExecutive) / 100),
+                    Points = (int)Math.Round((pp.CurrentIncomeYear + pp.IncomeExecutive) / 100, MidpointRounding.AwayFromZero),
                     DateOfBirth = d.DateOfBirth,
                     EmploymentStatus = d.EmploymentStatusId,
                     TerminationDate = d.TerminationDate,
@@ -451,7 +451,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 NumberOfEmployeesUnder21 = numberOfEmployeesUnder21,
                 WagesTotal = wagesTotal,
                 HoursTotal = Math.Truncate(hoursTotal),
-                PointsTotal = Math.Round(wagesTotal / 100),
+                PointsTotal = Math.Round(wagesTotal / 100, MidpointRounding.AwayFromZero),
             };
         }, cancellationToken);
     }
