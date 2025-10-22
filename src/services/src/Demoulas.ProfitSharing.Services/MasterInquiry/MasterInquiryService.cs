@@ -314,6 +314,20 @@ public sealed class MasterInquiryService : IMasterInquiryService
             query = query.Where(pd => pd.Ssn == req.Ssn);
         }
 
+        // PERFORMANCE FIX: If BadgeNumber is provided, filter by SSN from Demographics first
+        // This makes BadgeNumber searches as fast as SSN searches
+        if (req.BadgeNumber.HasValue && req.BadgeNumber.Value > 0)
+        {
+            // Get SSN from Demographics for this badge number
+            var ssnFromBadge = ctx.Demographics
+                .Where(d => d.BadgeNumber == req.BadgeNumber.Value)
+                .Select(d => d.Ssn)
+                .TagWith($"MasterInquiry: Get SSN for BadgeNumber {req.BadgeNumber.Value}");
+
+            // Filter ProfitDetails to only this SSN
+            query = query.Where(pd => ssnFromBadge.Contains(pd.Ssn));
+        }
+
         // Return composable query - DO NOT materialize here
         return query
             .Select(pd => pd.Ssn)

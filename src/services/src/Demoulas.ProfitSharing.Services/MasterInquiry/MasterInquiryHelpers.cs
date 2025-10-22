@@ -157,8 +157,9 @@ public static class MasterInquiryHelpers
             return true;
         }
 
-        // Also use fast path if we have EndProfitYear with SSN or BadgeNumber (targeted lookup)
-        if (req.EndProfitYear.HasValue && (req.Ssn != 0 || req.BadgeNumber is > 0))
+        // PERFORMANCE FIX: Use fast path for specific SSN or BadgeNumber lookups regardless of PaymentType
+        // This makes BadgeNumber searches as fast as SSN searches
+        if (req.Ssn != 0 || req.BadgeNumber is > 0)
         {
             return true;
         }
