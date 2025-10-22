@@ -1,19 +1,14 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Services;
-using Demoulas.ProfitSharing.Services.Internal;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Reports;
-using Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using Moq;
 using Shouldly;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
@@ -22,7 +17,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 /// Regression tests for Profit Sharing Summary Report (Report 9) to ensure COBOL PAY426N logic is preserved.
 /// Bug fix: October 2025 optimization incorrectly used IsTerminatedInFiscalYear instead of IsTerminatedBeforeFiscalEnd.
 /// </summary>
-[Description("PS-REGRESSION: Profit Sharing Summary Report COBOL Logic")]
+[Description("PS-1262: Profit Sharing Summary Report COBOL Logic")]
 public class ProfitSharingSummaryReportRegressionTests
 {
     private readonly ITestOutputHelper _testOutputHelper;
@@ -47,7 +42,7 @@ public class ProfitSharingSummaryReportRegressionTests
         var hireDate = fiscalStart.AddYears(-3);
 
         var factory = new ScenarioFactory { ProfitYear = TestYear };
-        
+
         // Employee terminated BEFORE fiscal year (previous year) - should count
         var emp1 = new Demographic
         {
@@ -109,7 +104,7 @@ public class ProfitSharingSummaryReportRegressionTests
         };
 
         factory.Demographics = [emp1, emp2];
-        factory.PayProfits = 
+        factory.PayProfits =
         [
             new PayProfit
             {
@@ -136,26 +131,24 @@ public class ProfitSharingSummaryReportRegressionTests
         ];
 
         var mockFactory = factory.BuildMocks();
-        
+
         // Mock calendar service
         var mockCalendarService = new Mock<ICalendarService>();
         mockCalendarService
             .Setup(c => c.GetYearStartAndEndAccountingDatesAsync(TestYear, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new CalendarResponseDto
             {
-                ProfitYear = TestYear,
                 FiscalBeginDate = fiscalStart,
-                FiscalEndDate = fiscalEnd,
-                FirstPayDateOfFiscalYear = fiscalStart
+                FiscalEndDate = fiscalEnd
             });
-        
+
         // Mock total service and demographic reader
         var mockTotalService = new Mock<TotalService>();
         var mockDemographicReader = new Mock<IDemographicReaderService>();
-        
+
         var service = new ProfitSharingSummaryReportService(
-            mockFactory, 
-            mockCalendarService.Object, 
+            mockFactory,
+            mockCalendarService.Object,
             mockTotalService.Object,
             mockDemographicReader.Object);
 
@@ -168,10 +161,10 @@ public class ProfitSharingSummaryReportRegressionTests
         result.ShouldNotBeNull();
         var reports = result.LineItems;
         reports.ShouldNotBeEmpty();
-        
+
         var report7 = reports.FirstOrDefault(r => r.LineItemPrefix == "7");
         report7.ShouldNotBeNull();
-        report7.NumberOfMembers.ShouldBeGreaterThanOrEqualTo(1, 
+        report7.NumberOfMembers.ShouldBeGreaterThanOrEqualTo(1,
             "Report 7 should count terminated employees before fiscal end");
 
         _testOutputHelper.WriteLine($"Report 7: {report7.NumberOfMembers} members, {report7.TotalHours} hours, ${report7.TotalWages} wages");
