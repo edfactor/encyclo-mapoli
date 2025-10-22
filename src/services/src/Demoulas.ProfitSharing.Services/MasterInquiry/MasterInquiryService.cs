@@ -135,17 +135,17 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 _logger.LogInformation("TRACE: Processing {BatchCount} SSN batches (max {BatchSize} per batch, total {Total} SSNs)",
                     ssnBatches.Count, oracleBatchSize, ssnList.Count);
 
-                foreach (var ssnBatch in ssnBatches)
+                foreach (int[] ssnBatch in ssnBatches)
                 {
                     var batchDuplicates = await demographics
                         .Where(d => ssnBatch.Contains(d.Ssn))  // Filter to SSN batch FIRST (critical optimization)
                         .GroupBy(d => d.Ssn)
                         .Where(g => g.Count() > 1)
                         .Select(g => g.Key)
-                        .TagWith($"MasterInquiry: Optimized duplicate detection - Year {req.ProfitYear}, batch size {ssnBatch.Count()}")
+                        .TagWith($"MasterInquiry: Optimized duplicate detection - Year {req.ProfitYear}, batch size {ssnBatch.Length}")
                         .ToListAsync(timeoutToken).ConfigureAwait(false);
 
-                    foreach (var dup in batchDuplicates)
+                    foreach (int dup in batchDuplicates)
                     {
                         duplicateSsns.Add(dup);
                     }
@@ -158,7 +158,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 {
                     _logger.LogInformation("TRACE: Calling HandleExactBadgeOrSsn for Ssn={Ssn}, Badge={Badge}", req.Ssn, req.BadgeNumber);
                     // If an exact match is found, then the bene or empl is added to the ssnList.
-                    await HandleExactBadgeOrSsn(ctx, ssnList, req.BadgeNumber, req.PsnSuffix, req.Ssn, timeoutToken);
+                    await HandleExactBadgeOrSsn(ssnList, req.BadgeNumber, req.PsnSuffix, req.Ssn, timeoutToken);
                     _logger.LogInformation("TRACE: HandleExactBadgeOrSsn completed, ssnList.Count={Count}", ssnList.Count);
 
                     // Early return if still no results found
@@ -173,10 +173,10 @@ public sealed class MasterInquiryService : IMasterInquiryService
                     if (ssnList.Count > 0)
                     {
                         var demographicsForDup = await _demographicReaderService.BuildDemographicQuery(ctx);
-                        duplicateSsns = new HashSet<int>();
+                        duplicateSsns = [];
 
                         var exactMatchBatches = ssnList.Chunk(oracleBatchSize).ToList();
-                        foreach (var ssnBatch in exactMatchBatches)
+                        foreach (int[] ssnBatch in exactMatchBatches)
                         {
                             var batchDuplicates = await demographicsForDup
                                 .Where(d => ssnBatch.Contains(d.Ssn))
@@ -186,7 +186,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                                 .TagWith("MasterInquiry: Duplicate detection after exact match")
                                 .ToListAsync(timeoutToken).ConfigureAwait(false);
 
-                            foreach (var dup in batchDuplicates)
+                            foreach (int dup in batchDuplicates)
                             {
                                 duplicateSsns.Add(dup);
                             }
@@ -200,7 +200,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 }
                 short currentYear = req.ProfitYear;
                 short previousYear = (short)(currentYear - 1);
-                var memberType = req.MemberType;
+                byte? memberType = req.MemberType;
                 PaginatedResponseDto<MemberDetails> detailsList;
 
                 if (memberType == 1)
@@ -227,8 +227,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                     var sortedResults = ApplySorting(allResults.AsQueryable(), req).ToList();
 
                     // Apply pagination to the final deduplicated result set
-                    var skip = req.Skip ?? 0;
-                    var take = req.Take ?? 25;
+                    int skip = req.Skip ?? 0;
+                    int take = req.Take ?? 25;
                     var paginatedResults = sortedResults.Skip(skip).Take(take).ToList();
 
                     detailsList = new PaginatedResponseDto<MemberDetails>(req) { Results = paginatedResults, Total = sortedResults.Count };
@@ -282,12 +282,12 @@ public sealed class MasterInquiryService : IMasterInquiryService
         // Apply PaymentType filter (highly selective)
         if (req.PaymentType.HasValue)
         {
-            var commentTypeIds = req.PaymentType switch
+            byte?[] commentTypeIds = req.PaymentType switch
             {
-                1 => new byte?[] { CommentType.Constants.Hardship.Id, CommentType.Constants.Distribution.Id },
-                2 => new byte?[] { CommentType.Constants.Payoff.Id, CommentType.Constants.Forfeit.Id },
-                3 => new byte?[] { CommentType.Constants.Rollover.Id, CommentType.Constants.RothIra.Id },
-                _ => Array.Empty<byte?>()
+                1 => [CommentType.Constants.Hardship.Id, CommentType.Constants.Distribution.Id],
+                2 => [CommentType.Constants.Payoff.Id, CommentType.Constants.Forfeit.Id],
+                3 => [CommentType.Constants.Rollover.Id, CommentType.Constants.RothIra.Id],
+                _ => []
             };
 
             if (commentTypeIds.Length > 0)
@@ -337,7 +337,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
     }
 
     /* This handles the case where we are given an exact badge or ssn and there are no PROFIT_DETAIL rows */
-    private async Task HandleExactBadgeOrSsn(ProfitSharingReadOnlyDbContext ctx, HashSet<int> ssnList, int? badgeNumber, short? psnSuffix, int ssn, CancellationToken cancellationToken = default)
+    private async Task HandleExactBadgeOrSsn(HashSet<int> ssnList, int? badgeNumber, short? psnSuffix, int ssn, CancellationToken cancellationToken = default)
     {
 
         // Some Members do not have Transactions yet (aka new employees, or new Bene) - so if we are asked about a specific psn/badge, we handle that here.
@@ -373,11 +373,11 @@ public sealed class MasterInquiryService : IMasterInquiryService
     public async Task<PaginatedResponseDto<GroupedProfitSummaryDto>> GetGroupedProfitDetails(MasterInquiryRequest req, CancellationToken cancellationToken = default)
     {
         // These are the ProfitCode IDs used in GetProfitCodesForBalanceCalc()
-        byte[] balanceProfitCodes = new byte[]
-        {
+        byte[] balanceProfitCodes =
+        [
             ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id, ProfitCode.Constants.OutgoingForfeitures.Id, ProfitCode.Constants.OutgoingDirectPayments.Id,
             ProfitCode.Constants.OutgoingXferBeneficiary.Id, ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
-        };
+        ];
 
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
@@ -499,7 +499,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 query = query.Where(x => x.ProfitDetail != null && x.ProfitDetail.MonthToDate == req.MonthToDate.Value);
             }
 
-            var paymentProfitCodes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
+            byte[] paymentProfitCodes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
 
             // First projection: SQL-translatable only
             var rawQuery = await query.Select(x => new MasterInquiryRawDto
