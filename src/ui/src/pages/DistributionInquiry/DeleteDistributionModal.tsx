@@ -1,16 +1,16 @@
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
+  Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Typography,
-  CircularProgress,
-  Box
+  Typography
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { DistributionSearchResponse } from "../../types";
 import { numberToCurrency } from "smart-ui-library";
+import { DistributionSearchResponse } from "../../types";
 
 interface DeleteDistributionModalProps {
   open: boolean;
@@ -63,17 +63,13 @@ const DeleteDistributionModal = ({
           <Typography
             variant="body1"
             sx={{ mb: 2 }}>
-            Are you sure you want to delete the following distribution for{" "}
-            <strong>
-              {distribution.fullName}, {distribution.badgeNumber}, {distribution.frequencyName}, and{" "}
-              {numberToCurrency(distribution.grossAmount)}
-            </strong>
-            ?
-          </Typography>
-          <Typography
-            variant="body2"
-            color="textSecondary">
-            This action cannot be undone.
+            Are you sure you want to delete this distribution for
+            <strong> {distribution.fullName}?</strong>
+            <br />
+            <br />
+            Frequency: <strong>{distribution.frequencyName}</strong>
+            <br />
+            Amount: <strong>{numberToCurrency(distribution.grossAmount)}</strong>
           </Typography>
         </Box>
       </DialogContent>
