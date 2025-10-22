@@ -1,6 +1,8 @@
 import { Button, CircularProgress, Divider, Grid, Typography } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import CloseIcon from "@mui/icons-material/Close";
 import { useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
@@ -8,6 +10,7 @@ import { CAPTIONS, ROUTES } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
 import { RootState } from "../../reduxstore/store";
+import { setCurrentDistribution } from "../../reduxstore/slices/distributionSlice";
 import MasterInquiryMemberDetails from "../MasterInquiry/MasterInquiryMemberDetails";
 import DisbursementsHistory from "./DisbursementsHistory";
 import DistributionDetailsSection from "./DistributionDetailsSection";
@@ -17,6 +20,7 @@ import PendingDisbursementsList from "./PendingDisbursementsList";
 const ViewDistributionContent = () => {
   const { memberId, memberType } = useParams<{ memberId: string; memberType: string }>();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const profitYear = useDecemberFlowProfitYear();
   const isReadOnly = useReadOnlyNavigation();
@@ -42,8 +46,11 @@ const ViewDistributionContent = () => {
   }, []);
 
   const handleEdit = () => {
-    // TODO: Navigate to edit page when implemented
-    console.log("Edit distribution");
+    // Ensure current distribution is set in Redux before navigating
+    if (currentDistribution && memberId && memberType) {
+      dispatch(setCurrentDistribution(currentDistribution));
+      navigate(`/${ROUTES.EDIT_DISTRIBUTION}/${memberId}/${memberType}`);
+    }
   };
 
   const handleCancel = () => {
@@ -86,15 +93,13 @@ const ViewDistributionContent = () => {
           variant="outlined"
           disabled={isReadOnly || isLoading}
           onClick={handleEdit}
-          startIcon={<span>✏️</span>}
-          className="h-10 min-w-fit whitespace-nowrap">
+          startIcon={<EditIcon />}>
           EDIT
         </Button>
         <Button
           variant="outlined"
           onClick={handleCancel}
-          startIcon={<span>✖</span>}
-          className="h-10 min-w-fit whitespace-nowrap">
+          startIcon={<CloseIcon />}>
           CANCEL
         </Button>
       </Grid>
