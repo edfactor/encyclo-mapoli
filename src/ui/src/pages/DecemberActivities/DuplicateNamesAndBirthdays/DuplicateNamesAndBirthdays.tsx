@@ -22,7 +22,7 @@ const DuplicateNamesAndBirthdays = () => {
         type: "success",
         text: "Cache refresh requested successfully. The cache will be updated in the background."
       });
-    } catch (error) {
+    } catch {
       setRefreshMessage({
         type: "error",
         text: "Failed to request cache refresh. Please try again later."

@@ -276,8 +276,8 @@ FROM FILTERED_DEMOGRAPHIC p1
             _logger.LogInformation("Force refreshing duplicate names and birthdays cache");
 
             // Force a complete cache refresh by clearing and reloading all data
-            await cacheService.ClearAsync();
-            await cacheService.InitializeCacheAsync();
+            await cacheService.ClearAsync(cancellationToken);
+            await cacheService.InitializeCacheAsync(cancellationToken);
 
             _logger.LogInformation("Cache force refresh completed successfully");
         }
