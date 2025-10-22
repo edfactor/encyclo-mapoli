@@ -71,7 +71,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 if (useOptimizedPath)
                 {
                     // Fast path: Get SSN query directly from filtered ProfitDetails (not materialized)
-                    ssnQuery = GetSsnQueryFromProfitDetails(ctx, req);
+                    ssnQuery = await GetSsnQueryFromProfitDetails(ctx, req);
                 }
                 else
                 {
@@ -272,7 +272,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
     /// This avoids expensive joins when we have highly selective criteria.
     /// CRITICAL: Returns IQueryable to enable query composition and avoid Oracle's ~10K IN clause limit.
     /// </summary>
-    private static IQueryable<int> GetSsnQueryFromProfitDetails(
+    private async Task<IQueryable<int>> GetSsnQueryFromProfitDetails(
         ProfitSharingReadOnlyDbContext ctx,
         MasterInquiryRequest req)
     {
@@ -316,10 +316,11 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
         // PERFORMANCE FIX: If BadgeNumber is provided, filter by SSN from Demographics first
         // This makes BadgeNumber searches as fast as SSN searches
-        if (req.BadgeNumber.HasValue && req.BadgeNumber.Value > 0)
+        if (req.BadgeNumber is > 0)
         {
             // Get SSN from Demographics for this badge number
-            var ssnFromBadge = ctx.Demographics
+            var demographicsForDup = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var ssnFromBadge = demographicsForDup
                 .Where(d => d.BadgeNumber == req.BadgeNumber.Value)
                 .Select(d => d.Ssn)
                 .TagWith($"MasterInquiry: Get SSN for BadgeNumber {req.BadgeNumber.Value}");
