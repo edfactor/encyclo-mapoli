@@ -402,52 +402,56 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
     {
         var frozenStateResponse = await _frozenService.GetActiveFrozenDemographic(cancellationToken);
         short yearEnd = frozenStateResponse.ProfitYear;
-        var result = await _dataContextFactory.UseReadOnlyContext(async context =>
+        
+        List<BeneficiaryDetailResponse> result;
+        
+        if (request.PsnSuffix.HasValue && request.PsnSuffix > 0)
         {
-            IQueryable<BeneficiaryDetailResponse> query;
-            if (request.PsnSuffix.HasValue && request.PsnSuffix > 0)
+            // Query from database - use async
+            result = await _dataContextFactory.UseReadOnlyContext(async context =>
             {
-                query = context.Beneficiaries.Include(x => x.Contact).ThenInclude(x => x!.Address).Include(x => x.Contact!.ContactInfo)
-                .Where(x => x.BadgeNumber == request.BadgeNumber && x.PsnSuffix == request.PsnSuffix)
-                .Select(x => new BeneficiaryDetailResponse
-                {
-                    Name = x.Contact!.ContactInfo!.FullName,
-                    BadgeNumber = x.BadgeNumber,
-                    City = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.City : null,
-                    DateOfBirth = x.Contact!.DateOfBirth,
-                    PsnSuffix = x.PsnSuffix,
-                    Ssn = x.Contact!.Ssn.ToString(),
-                    State = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.State : null,
-                    Street = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.Street : null,
-                    Zip = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.PostalCode : null,
-                    IsExecutive = false,
-                });
-            }
-            else
+                return await context.Beneficiaries
+                    .Where(x => x.BadgeNumber == request.BadgeNumber && x.PsnSuffix == request.PsnSuffix)
+                    .Select(x => new BeneficiaryDetailResponse
+                    {
+                        Name = x.Contact!.ContactInfo!.FullName,
+                        BadgeNumber = x.BadgeNumber,
+                        City = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.City : null,
+                        DateOfBirth = x.Contact!.DateOfBirth,
+                        PsnSuffix = x.PsnSuffix,
+                        Ssn = x.Contact!.Ssn.ToString(),
+                        State = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.State : null,
+                        Street = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.Street : null,
+                        Zip = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.PostalCode : null,
+                        IsExecutive = false,
+                    })
+                    .ToListAsync(cancellationToken);
+            }, cancellationToken);
+        }
+        else
+        {
+            // Query from in-memory service result - use sync
+            var memberDetail = await _masterInquiryService.GetMembersAsync(new Common.Contracts.Request.MasterInquiry.MasterInquiryRequest
             {
-                var memberDetail = await _masterInquiryService.GetMembersAsync(new Common.Contracts.Request.MasterInquiry.MasterInquiryRequest
-                {
-                    BadgeNumber = request.BadgeNumber,
-                    EndProfitYear = (short)DateTime.Now.Year,
-                    ProfitYear = (short)DateTime.Now.Year,
-                    MemberType = EmployeeMemberType
-                });
-                query = memberDetail.Results.Select(x => new BeneficiaryDetailResponse
-                {
-                    Name = x.FullName,
-                    BadgeNumber = x.BadgeNumber,
-                    City = x.AddressCity,
-                    DateOfBirth = x.DateOfBirth,
-                    Ssn = x.Ssn.ToString(),
-                    State = x.AddressState,
-                    Street = x.Address,
-                    Zip = x.AddressZipCode,
-                    IsExecutive = x.IsExecutive,
-                }).AsQueryable();
-            }
-
-            return await query.ToListAsync(cancellationToken);
-        }, cancellationToken);
+                BadgeNumber = request.BadgeNumber,
+                EndProfitYear = (short)DateTime.Now.Year,
+                ProfitYear = (short)DateTime.Now.Year,
+                MemberType = EmployeeMemberType
+            });
+            
+            result = memberDetail.Results.Select(x => new BeneficiaryDetailResponse
+            {
+                Name = x.FullName,
+                BadgeNumber = x.BadgeNumber,
+                City = x.AddressCity,
+                DateOfBirth = x.DateOfBirth,
+                Ssn = x.Ssn.ToString(),
+                State = x.AddressState,
+                Street = x.Address,
+                Zip = x.AddressZipCode,
+                IsExecutive = x.IsExecutive,
+            }).ToList(); // Use .ToList() for in-memory collection
+        }
 
 
         ISet<int> badgeNumbers = new HashSet<int>(result.Select(x => x.BadgeNumber).ToList());
