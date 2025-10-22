@@ -243,7 +243,7 @@ describe("transformSearchParams", () => {
   });
 
   it("should handle numeric badge number", () => {
-    const data = { ...baseSearchData, badgeNumber: 9876543 as any };
+    const data = { ...baseSearchData, badgeNumber: "9876543" };
     const result = transformSearchParams(data, 2024);
 
     expect(result.badgeNumber).toBe(9876543);

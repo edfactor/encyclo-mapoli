@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { DSMGrid, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
+import { DSMGrid, numberToCurrency, Pagination, TotalsGrid, ISortParams } from "smart-ui-library";
 import ReportSummary from "../../components/ReportSummary";
 import { CAPTIONS } from "../../constants";
 import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
 import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
-import { useGridPagination } from "../../hooks/useGridPagination";
+import { useGridPagination, SortParams } from "../../hooks/useGridPagination";
 import { useLazyGetForfeituresAndPointsQuery } from "../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../reduxstore/store";
 import { GetProfitShareForfeitColumns } from "./ForfeitGridColumns";
@@ -39,7 +39,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
       initialSortBy: "badgeNumber",
       initialSortDescending: false,
       onPaginationChange: useCallback(
-        async (pageNum: number, pageSz: number, sortPrms: any) => {
+        async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
           if (initialSearchLoaded) {
             await triggerSearch(
               {
@@ -89,7 +89,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
     }
   }, [pageNumberReset, setPageNumberReset, resetPagination]);
 
-  const sortEventHandler = (update: any) => handleSortChange(update);
+  const sortEventHandler = (update: ISortParams) => handleSortChange(update);
 
   // Some API responses may return numeric totals as strings; coerce safely before formatting.
   const safeNumber = (val: unknown) => {

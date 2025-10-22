@@ -18,14 +18,14 @@ const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ onSearch, i
     }
   });
 
-  const doSearch = useCallback(
+  const doSearch = useCallback(() => {
+    // call the form submit handler returned by handleSubmit
     handleSubmit(() => {
       if (fiscalCloseProfitYear) {
         onSearch({ profitYear: fiscalCloseProfitYear });
       }
-    }),
-    [handleSubmit, fiscalCloseProfitYear, onSearch]
-  );
+    })();
+  }, [handleSubmit, fiscalCloseProfitYear, onSearch]);
 
   return (
     <form onSubmit={doSearch}>

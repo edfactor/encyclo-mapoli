@@ -104,11 +104,9 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
   );
 
   const onSelectionChanged = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (event: any) => {
+    (event: { api: { getSelectedNodes: () => Array<{ data: { badge: number } }> } }) => {
       const selectedNodes = event.api.getSelectedNodes();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const selectedIds = selectedNodes.map((node: any) => node.data.badge);
+      const selectedIds = selectedNodes.map((node) => node.data.badge);
       setSelectedRowIds(selectedIds);
       onSelectionChange?.(selectedIds);
     },

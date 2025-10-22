@@ -8,13 +8,13 @@ import {
   useLazySearchProfitMasterInquiryQuery
 } from "../../../reduxstore/api/InquiryApi";
 import { useLazyGetStateTaxQuery } from "../../../reduxstore/api/LookupsApi";
-import { CreateDistributionRequest } from "../../../types";
+import { CreateDistributionRequest, EmployeeDetails } from "../../../types";
 import { ServiceErrorResponse } from "../../../types/errors/errors";
 
 // State interface
 interface AddDistributionState {
   member: {
-    data: any | null;
+    data: EmployeeDetails | null;
     isLoading: boolean;
     error: string | null;
   };
@@ -38,7 +38,7 @@ interface AddDistributionState {
 // Action types
 type AddDistributionAction =
   | { type: "MEMBER_FETCH_START" }
-  | { type: "MEMBER_FETCH_SUCCESS"; payload: { data: any } }
+  | { type: "MEMBER_FETCH_SUCCESS"; payload: { data: EmployeeDetails } }
   | { type: "MEMBER_FETCH_FAILURE"; payload: { error: string } }
   | { type: "STATE_TAX_FETCH_START" }
   | { type: "STATE_TAX_FETCH_SUCCESS"; payload: { rate: number } }
@@ -241,8 +241,9 @@ export const useAddDistribution = () => {
         });
 
         return stateTaxResponse.stateTaxRate;
-      } catch (error: any) {
-        const errorMsg = error?.data?.message || error?.message || "Failed to fetch state tax rate";
+      } catch (error) {
+        const serviceError = error as ServiceErrorResponse;
+        const errorMsg = serviceError?.data?.detail || "Failed to fetch state tax rate";
         dispatch({ type: "STATE_TAX_FETCH_FAILURE", payload: { error: errorMsg } });
         // Don't throw - state tax is optional, set to 0 if not found
         dispatch({
@@ -283,8 +284,9 @@ export const useAddDistribution = () => {
         });
 
         return nextSequence;
-      } catch (error: any) {
-        const errorMsg = error?.data?.message || error?.message || "Failed to calculate sequence number";
+      } catch (error) {
+        const serviceError = error as ServiceErrorResponse;
+        const errorMsg = serviceError?.data?.detail || "Failed to calculate sequence number";
         dispatch({ type: "SEQUENCE_NUMBER_FETCH_FAILURE", payload: { error: errorMsg } });
         // Default to 1 if we can't calculate
         dispatch({
@@ -307,7 +309,7 @@ export const useAddDistribution = () => {
         const isSSN = identifier.length === 9 && /^\d{9}$/.test(identifier);
 
         let searchResponse;
-        let memberId: any;
+        let memberId: number;
         let badgeNum = identifierNum;
 
         // Step 1: Try to search for member using identifier (could be badge number or SSN)
@@ -335,7 +337,7 @@ export const useAddDistribution = () => {
           } else {
             throw new Error("Member not found");
           }
-        } catch (searchError: any) {
+        } catch (searchError) {
           if (isSSN) {
             throw new Error(`No member found with SSN ${identifier}`);
           }
@@ -360,8 +362,9 @@ export const useAddDistribution = () => {
         await calculateSequenceNumber(badgeNum, memberType);
 
         return memberResponse;
-      } catch (error: any) {
-        const errorMsg = error?.data?.message || error?.message || "Failed to fetch member data";
+      } catch (error) {
+        const serviceError = error as ServiceErrorResponse;
+        const errorMsg = serviceError?.data?.detail || "Failed to fetch member data";
         dispatch({ type: "MEMBER_FETCH_FAILURE", payload: { error: errorMsg } });
         throw error;
       }

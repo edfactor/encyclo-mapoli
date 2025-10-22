@@ -4,12 +4,14 @@ import { MasterUpdateSummaryTable } from "./MasterUpdateSummaryTable";
 
 // Mock Material-UI Typography component
 vi.mock("@mui/material", () => ({
-  Typography: ({ children, ...props }: any) => <div {...props}>{children}</div>
+  Typography: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement> & { children?: React.ReactNode }) => (
+    <div {...props}>{children}</div>
+  )
 }));
 
 // Mock InfoOutlinedIcon
 vi.mock("@mui/icons-material/InfoOutlined", () => ({
-  default: ({ className, onClick }: any) => (
+  default: ({ className, onClick }: { className?: string; onClick?: () => void }) => (
     <svg
       data-testid="info-icon"
       className={className}
@@ -50,7 +52,10 @@ describe("MasterUpdateSummaryTable", () => {
   };
 
   const mockGetFieldValidation = (fieldKey: string) => {
-    const validations: Record<string, any> = {
+    const validations: Record<
+      string,
+      { isValid: boolean; currentValue: number | null; expectedValue: number | null; message?: string | null }
+    > = {
       TotalProfitSharingBalance: { isValid: true, currentValue: 1000000, expectedValue: 1000000 },
       TotalContributions: { isValid: false, currentValue: 50000, expectedValue: 50100 },
       "PAY443.TotalContributions": { isValid: false, currentValue: 50000, expectedValue: 50100 },
@@ -380,7 +385,7 @@ describe("MasterUpdateSummaryTable", () => {
       render(
         <MasterUpdateSummaryTable
           {...defaultProps}
-          totals={totalsWithUndefined as any}
+          totals={totalsWithUndefined as typeof mockTotals}
         />
       );
 

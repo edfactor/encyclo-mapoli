@@ -1,9 +1,8 @@
-import { SaveOutlined } from "@mui/icons-material";
-import { Button, Divider, Grid, Tooltip } from "@mui/material";
+import { Divider, Grid } from "@mui/material";
 import FrozenYearWarning from "components/FrozenYearWarning";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import StatusReadOnlyInfo from "components/StatusReadOnlyInfo";
-import { memo, useState } from "react";
+import { memo } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import { useIsProfitYearFrozen } from "../../../hooks/useIsProfitYearFrozen";
@@ -13,12 +12,14 @@ import useManageExecutiveHoursAndDollars from "./hooks/useManageExecutiveHoursAn
 import ManageExecutiveHoursAndDollarsGrid from "./ManageExecutiveHoursAndDollarsGrid";
 import ManageExecutiveHoursAndDollarsSearchFilter from "./ManageExecutiveHoursAndDollarsSearchFilter";
 
+/*
 interface RenderSaveButtonProps {
   hasPendingChanges: boolean;
   onSave: () => void;
   isReadOnly?: boolean;
 }
-
+*/
+/*
 const RenderSaveButton = memo(({ hasPendingChanges, onSave, isReadOnly = true }: RenderSaveButtonProps) => {
   const isDisabled = !hasPendingChanges || isReadOnly;
   const readOnlyTooltip = "You are in read-only mode and cannot save changes.";
@@ -50,7 +51,7 @@ const RenderSaveButton = memo(({ hasPendingChanges, onSave, isReadOnly = true }:
     return saveButton;
   }
 });
-
+*/
 interface ManageExecutiveHoursAndDollarsContentProps {
   hookData: ReturnType<typeof useManageExecutiveHoursAndDollars>;
 }
@@ -62,7 +63,7 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
     resetSearch,
     isSearching,
     showGrid,
-    saveExecutiveHoursAndDollars,
+
     gridData,
     modalResults,
     isModalOpen,
@@ -82,8 +83,9 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
   const isReadOnly = useReadOnlyNavigation();
   const isReadOnlyByStatus = useIsReadOnlyByStatus();
   const isFrozen = useIsProfitYearFrozen(profitYear);
-  const [currentStatus, setCurrentStatus] = useState<string | null>(null);
+  //const [currentStatus, setCurrentStatus] = useState<string | null>(null);
 
+  /*
   const handleStatusChange = (newStatus: string, statusName?: string) => {
     if (statusName === "Complete" && currentStatus !== "Complete") {
       setCurrentStatus("Complete");
@@ -92,11 +94,13 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
       setCurrentStatus(statusName || newStatus);
     }
   };
+  */
 
+  /*
   const renderActionNode = () => {
     return <StatusDropdownActionNode onStatusChange={handleStatusChange} />;
   };
-
+  */
   return (
     <Grid
       container
@@ -143,12 +147,12 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
 
 const ManageExecutiveHoursAndDollars = () => {
   const hookData = useManageExecutiveHoursAndDollars();
-  const { hasPendingChanges, saveChanges } = hookData;
-  const isReadOnly = useReadOnlyNavigation();
+  //const { hasPendingChanges, saveChanges } = hookData;
+  //const isReadOnly = useReadOnlyNavigation();
 
- const renderActionNode = () => {
-      return <StatusDropdownActionNode />;
-    };
+  const renderActionNode = () => {
+    return <StatusDropdownActionNode />;
+  };
 
   return (
     <Page

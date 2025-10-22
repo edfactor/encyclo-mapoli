@@ -15,6 +15,13 @@ interface ProfitYearSearch {
   profitYear: number;
 }
 
+interface NavigationItem {
+  id: number;
+  statusName?: string;
+  items?: NavigationItem[];
+  [key: string]: unknown;
+}
+
 const PayMasterUpdateSummary = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,10 +43,13 @@ const PayMasterUpdateSummary = () => {
   useEffect(() => {
     const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
 
-    const getNavigationObjectBasedOnId = (navigationArray?: any[], id?: number): any => {
+    const getNavigationObjectBasedOnId = (
+      navigationArray: NavigationItem[] | undefined,
+      id: number | undefined
+    ): NavigationItem | undefined => {
       if (navigationArray) {
         for (const item of navigationArray) {
-          if (item.id == id) {
+          if (item.id === id) {
             return item;
           }
           if (item.items && item.items.length > 0) {
@@ -116,7 +126,7 @@ const PayMasterUpdateSummary = () => {
       </Stack>
     );
   };
-
+  /*
   const updateSummarySection = [
     {
       label: "Employees Updated",
@@ -142,8 +152,7 @@ const PayMasterUpdateSummary = () => {
       label: "After Vested Amount",
       value: updateSummary ? numberToCurrency(updateSummary.totalAfterVestedAmount) : "-"
     }
-  ];
-
+  ];*/
   const onSearch = (data: ProfitYearSearch) => {
     setInitialSearchLoaded(true);
     getUpdateSummary({
@@ -174,9 +183,7 @@ const PayMasterUpdateSummary = () => {
         </Grid>
 
         {updateSummary?.response && (
-          <Grid
-            size={{ xs: 12 }}
-            paddingX="24px">
+          <Grid paddingX="24px">
             <TotalsGrid
               displayData={[
                 [
@@ -197,6 +204,7 @@ const PayMasterUpdateSummary = () => {
                 "After Profit Sharing Amount",
                 "After Vested Amount"
               ]}
+              breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
             />
           </Grid>
         )}

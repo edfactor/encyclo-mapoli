@@ -3,22 +3,15 @@ import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
-import { VestedAmountsByAge } from "../../../reduxstore/types";
 import { GetVestedAmountsByAgeColumns } from "./VestedAmountsByAgeGridColumns";
 
 interface VestedAmountsByAgeGridProps {
   gridTitle: string;
   countColName: string;
   amountColName: string;
-  totalCount?: keyof VestedAmountsByAge | undefined;
 }
 
-const VestedAmountsByAgeGrid: React.FC<VestedAmountsByAgeGridProps> = ({
-  gridTitle,
-  amountColName,
-  countColName,
-  totalCount
-}) => {
+const VestedAmountsByAgeGrid: React.FC<VestedAmountsByAgeGridProps> = ({ gridTitle, amountColName, countColName }) => {
   const [_sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "badgeNumber",
     isSortDescending: false

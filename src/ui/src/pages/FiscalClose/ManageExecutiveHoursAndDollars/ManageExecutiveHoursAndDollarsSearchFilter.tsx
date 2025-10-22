@@ -38,7 +38,7 @@ const validationSchema = yup
   .test("at-least-one-required", "At least one field must be provided", (values) =>
     Boolean(
       values.profitYear ||
-      values.socialSecurity ||
+        values.socialSecurity ||
         values.badgeNumber ||
         values.fullNameContains ||
         values.hasExecutiveHoursAndDollars !== false ||
@@ -46,9 +46,18 @@ const validationSchema = yup
     )
   );
 
+interface SearchData {
+  profitYear: number;
+  badgeNumber?: number;
+  socialSecurity?: string | undefined;
+  fullNameContains?: string | null;
+  hasExecutiveHoursAndDollars: boolean;
+  isMonthlyPayroll: boolean;
+}
+
 interface ManageExecutiveHoursAndDollarsSearchFilterProps {
   isModal?: boolean;
-  onSearch: (searchData: any) => void;
+  onSearch: (searchData: SearchData) => void;
   onReset: () => void;
   isSearching: boolean;
 }

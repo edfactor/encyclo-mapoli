@@ -1,7 +1,7 @@
 import { Typography } from "@mui/material";
 import { useCallback, useMemo } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
-import { useGridPagination } from "../../hooks/useGridPagination";
+import { useGridPagination, SortParams } from "../../hooks/useGridPagination";
 import { DistributionSearchResponse } from "../../types";
 import { GetDisbursementGridColumns } from "./DisbursementGridColumns";
 
@@ -12,7 +12,7 @@ interface DisbursementGridProps {
   isLoading: boolean;
   initialPageSize?: number;
   rowsPerPageOptions?: number[];
-  onPaginationChange: (pageNumber: number, pageSize: number, sortParams: any) => void;
+  onPaginationChange: (pageNumber: number, pageSize: number, sortParams: SortParams) => void;
 }
 
 const DisbursementGrid: React.FC<DisbursementGridProps> = ({
@@ -29,7 +29,7 @@ const DisbursementGrid: React.FC<DisbursementGridProps> = ({
     initialSortBy: "paymentSequence",
     initialSortDescending: false,
     onPaginationChange: useCallback(
-      async (pageNum: number, pageSz: number, sortPrms: any) => {
+      async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
         onPaginationChange(pageNum, pageSz, sortPrms);
       },
       [onPaginationChange]

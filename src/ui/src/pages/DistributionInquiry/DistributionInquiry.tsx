@@ -4,12 +4,14 @@ import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import { Button, Divider, Grid, Tooltip } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { DSMAccordion, Page } from "smart-ui-library";
+import { useLocation } from "react-router-dom";
+import { DSMAccordion, Page, formatNumberWithComma } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
 import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
 import { DISTRIBUTION_INQUIRY_MESSAGES } from "../../components/MissiveAlerts/MissiveMessages";
 import StatusDropdownActionNode from "../../components/StatusDropdownActionNode";
 import { CAPTIONS } from "../../constants";
+import { SortParams } from "../../hooks/useGridPagination";
 import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
 import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
 import { useLazySearchDistributionsQuery } from "../../reduxstore/api/DistributionApi";
@@ -19,14 +21,22 @@ import {
   clearHistoricalDisbursements,
   clearPendingDisbursements
 } from "../../reduxstore/slices/distributionSlice";
-import { DistributionSearchFormData } from "../../types";
+import { DistributionSearchFormData, DistributionSearchRequest } from "../../types";
+import { ServiceErrorResponse } from "../../types/errors/errors";
 import DistributionInquiryGrid from "./DistributionInquiryGrid";
 import DistributionInquirySearchFilter from "./DistributionInquirySearchFilter";
 import NewEntryDialog from "./NewEntryDialog";
 
+interface LocationState {
+  showSuccessMessage?: boolean;
+  memberName?: string;
+  amount?: number;
+}
+
 const DistributionInquiryContent = () => {
   const dispatch = useDispatch();
-  const [searchData, setSearchData] = useState<any>(null);
+  const location = useLocation();
+  const [searchData, setSearchData] = useState<DistributionSearchRequest | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [isNewEntryDialogOpen, setIsNewEntryDialogOpen] = useState(false);
   const [triggerSearch, { data, isFetching }] = useLazySearchDistributionsQuery();
@@ -41,16 +51,32 @@ const DistributionInquiryContent = () => {
     dispatch(clearHistoricalDisbursements());
   }, [dispatch]);
 
+  // Display success message if returning from AddDistribution
+  useEffect(() => {
+    const state = location.state as LocationState | undefined;
+    if (state?.showSuccessMessage && state?.memberName) {
+      const amountText = state.amount ? ` for $${formatNumberWithComma(state.amount)}` : "";
+      const successMessage = {
+        id: 911,
+        severity: "success" as const,
+        message: "Distribution Saved Successfully",
+        description: `Distribution${amountText} for ${state.memberName} has been saved successfully.`
+      };
+      addAlert(successMessage);
+      // Clear the state after displaying the message
+      window.history.replaceState({}, document.title);
+    }
+  }, [location, addAlert]);
+
   const handleSearch = async (formData: DistributionSearchFormData) => {
     try {
       clearAlerts();
 
-      const request: any = {
+      const request: DistributionSearchRequest = {
         skip: 0,
         take: 25,
         sortBy: "badgeNumber",
-        isSortDescending: false,
-        onlyNetworkToastErrors: true
+        isSortDescending: false
       };
 
       // Map SSN directly
@@ -110,14 +136,15 @@ const DistributionInquiryContent = () => {
       await triggerSearch(request).unwrap();
       // Only set hasSearched to true if the search was successful
       setHasSearched(true);
-    } catch (error: any) {
+    } catch (error) {
+      const serviceError = error as ServiceErrorResponse;
       // Reset hasSearched to false on error to hide the grid
       setHasSearched(false);
 
       // Check if it's a 500 error with "Badge number not found" or "SSN not found" title
       if (
-        error?.status === 500 &&
-        (error?.data?.title === "Badge number not found." || error?.data?.title === "SSN not found.")
+        serviceError?.data.status === 500 &&
+        (serviceError?.data?.title === "Badge number not found." || serviceError?.data?.title === "SSN not found.")
       ) {
         addAlert(DISTRIBUTION_INQUIRY_MESSAGES.MEMBER_NOT_FOUND);
       } else {
@@ -133,9 +160,9 @@ const DistributionInquiryContent = () => {
     clearAlerts();
   };
 
-  const handlePaginationChange = async (pageNumber: number, pageSize: number, sortParams: any) => {
+  const handlePaginationChange = async (pageNumber: number, pageSize: number, sortParams: SortParams) => {
     if (searchData) {
-      const request = {
+      const request: DistributionSearchRequest = {
         ...searchData,
         skip: pageNumber * pageSize,
         take: pageSize,

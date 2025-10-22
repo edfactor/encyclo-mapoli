@@ -101,30 +101,37 @@ export const generalSlice = createSlice({
       state.appBanner = action.payload;
     },
 
-    setError: (state, { payload }) => {
-      if (payload.data.Messag) {
-        state.error = payload.data.Message;
+    setError: (state, action: PayloadAction<Record<string, unknown>>) => {
+      const { payload } = action;
+      if (payload.data && typeof payload.data === "object" && "Messag" in payload.data) {
+        const data = payload.data as Record<string, unknown>;
+        if (data.Message) {
+          state.error = String(data.Message);
+        }
         return;
       }
       if (payload.error || payload === "") {
-        state.error = payload.error;
+        state.error = String(payload.error || "");
         return;
       }
-      if (payload.data.title) {
-        state.error = payload.data.title;
+      if (payload.data && typeof payload.data === "object" && "title" in payload.data) {
+        const data = payload.data as Record<string, unknown>;
+        if (data.title) {
+          state.error = String(data.title);
+        }
         return;
       }
 
-      if (payload.status !== 200) {
+      if (typeof payload.status === "number" && payload.status !== 200) {
         if (payload.data) {
-          state.error = payload.data;
+          state.error = String(payload.data);
         } else {
           state.error = "Network error - check log";
         }
 
         return;
       }
-      state.error = payload;
+      state.error = String(payload);
     },
     setOnDropdownBlur: (state, action: PayloadAction<{ onBlur: boolean }>) => {
       state.onDropdownBlur = action.payload;

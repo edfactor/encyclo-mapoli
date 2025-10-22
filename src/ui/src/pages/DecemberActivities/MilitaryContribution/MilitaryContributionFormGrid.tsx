@@ -2,17 +2,23 @@ import { Button, Tooltip, Typography } from "@mui/material";
 import React, { useCallback, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMGrid, Pagination, ISortParams } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { GridPaginationState, GridPaginationActions } from "../../../hooks/useGridPagination";
 import StandaloneMemberDetails from "../../MasterInquiry/StandaloneMemberDetails";
 import { GetMilitaryContributionColumns } from "./MilitaryContributionFormGridColumns";
 
+interface MilitaryContributionResponse {
+  results: unknown[];
+  total: number;
+}
+
 interface MilitaryContributionGridProps {
-  militaryContributionsData: any;
+  militaryContributionsData: MilitaryContributionResponse | null;
   isLoadingContributions: boolean;
-  contributionsGridPagination: any;
+  contributionsGridPagination: GridPaginationState & GridPaginationActions;
   onAddContribution: () => void;
   refreshTrigger?: number;
   isReadOnly?: boolean;
@@ -39,7 +45,7 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
   );
 
   const handleSortChange = useCallback(
-    (sortParams: any) => {
+    (sortParams: ISortParams) => {
       contributionsGridPagination.handleSortChange(sortParams);
     },
     [contributionsGridPagination]

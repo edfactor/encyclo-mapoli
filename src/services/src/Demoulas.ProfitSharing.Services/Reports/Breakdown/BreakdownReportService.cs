@@ -216,6 +216,7 @@ public sealed class BreakdownReportService : IBreakdownService
 
             // Load pensioner SSNs ONCE - PERFORMANCE OPTIMIZATION
             int[] pensionerSsns = await ctx.ExcludedIds
+                .TagWith($"GetTotalsByStore-PensionerSsns-{request.ProfitYear}")
                 .Where(x => x.ExcludedIdTypeId == ExcludedIdType.Constants.QPay066TAExclusions)
                 .Select(x => x.ExcludedIdValue)
                 .ToArrayAsync(cancellationToken);
@@ -228,22 +229,61 @@ public sealed class BreakdownReportService : IBreakdownService
                 employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber);
             }
 
-            var employeeSsns = await employeesBase.Select(e => e.Ssn).ToHashSetAsync(cancellationToken);
+            // PERFORMANCE OPTIMIZATION: Materialize the full query with ALL financial data in ONE database call
+            // instead of getting SSNs first then re-querying for financial data (avoiding multiple WHERE IN queries)
+            var employees = await employeesBase
+                .TagWith($"GetTotalsByStore-AllData-Store{request.StoreNumber}-{request.ProfitYear}")
+                .ToListAsync(cancellationToken);
 
-            ThrowIfInvalidSsns(employeeSsns);
+            ThrowIfInvalidSsns(employees.Select(e => e.Ssn).ToHashSet());
 
-            var snapshots = await GetEmployeeFinancialSnapshotsAsync(
-                ctx, request.ProfitYear, employeeSsns, cancellationToken);
+            // Now get vesting ratios - we still need these as they're computed separately
+            var employeeSsns = employees.Select(e => e.Ssn).ToHashSet();
 
-            // ── Aggregate --------------------------------------------------------------
+            // Degenerate guard: prevent full table scan
+            if (employeeSsns.Count == 0)
+            {
+                return new BreakdownByStoreTotals
+                {
+                    TotalNumberEmployees = 0,
+                    TotalBeginningBalances = 0,
+                    TotalEarnings = 0,
+                    TotalContributions = 0,
+                    TotalForfeitures = 0,
+                    TotalDisbursements = 0,
+                    TotalEndBalances = 0,
+                    TotalVestedBalance = 0
+                };
+            }
+
+            // Batch SSNs if > 5000 to avoid Oracle IN clause limit (10K is max, use 5K for safety)
+            var vestingBySsn = new Dictionary<int, decimal>();
+            const int batchSize = 5000;
+            var ssnList = employeeSsns.ToList();
+
+            for (int i = 0; i < ssnList.Count; i += batchSize)
+            {
+                var batch = ssnList.Skip(i).Take(batchSize).ToList();
+                var batchVesting = await _totalService.GetVestingRatio(ctx, request.ProfitYear, calInfo.FiscalEndDate)
+                    .TagWith($"GetTotalsByStore-Vesting-Batch{i / batchSize}-{request.ProfitYear}")
+                    .Where(vr => batch.Contains(vr.Ssn))
+                    .ToDictionaryAsync(vr => vr.Ssn, vr => vr.Ratio, cancellationToken);
+
+                foreach (var kvp in batchVesting)
+                {
+                    vestingBySsn[kvp.Key] = kvp.Value;
+                }
+            }
+
+            // ── Aggregate from already-loaded data ────────────────────────────────────
             var totals = new BreakdownByStoreTotals
             {
-                TotalNumberEmployees = (short)snapshots.Count,
-                TotalBeginningBalances = snapshots.Sum(x => x.BeginningBalance),
-                TotalEarnings = snapshots.Sum(x => x.Txn.TotalEarnings),
-                TotalContributions = snapshots.Sum(x => x.Txn.TotalContributions),
-                TotalForfeitures = snapshots.Sum(x => x.Txn.TotalForfeitures),
-                TotalDisbursements = snapshots.Sum(x => x.Txn.Distribution)
+                TotalNumberEmployees = (short)employees.Count,
+                TotalBeginningBalances = employees.Sum(e => e.BeginningBalance ?? 0),
+                TotalEarnings = employees.Sum(e => e.Earnings),
+                TotalContributions = employees.Sum(e => e.Contributions),
+                TotalForfeitures = employees.Sum(e => e.Forfeitures),
+                TotalDisbursements = employees.Sum(e => e.Distributions)
             };
 
             totals.TotalEndBalances = totals.TotalBeginningBalances
@@ -251,17 +291,19 @@ public sealed class BreakdownReportService : IBreakdownService
                                      + totals.TotalContributions
                                      + totals.TotalForfeitures
                                      + totals.TotalDisbursements
-                                     + snapshots.Sum(x => x.Txn.BeneficiaryAllocation);
+                                     + employees.Sum(e => e.BeneficiaryAllocation ?? 0);
 
-            totals.TotalVestedBalance = snapshots.Sum(x =>
+            // Calculate vested balance using the vesting ratios we fetched
+            totals.TotalVestedBalance = employees.Sum(e =>
             {
-                var endBal = x.BeginningBalance
-                           + x.Txn.TotalContributions
-                           + x.Txn.TotalEarnings
-                           + x.Txn.TotalForfeitures
-                           + x.Txn.Distribution
-                           + x.Txn.BeneficiaryAllocation;
-                return endBal * x.VestingRatio;
+                var endBal = (e.BeginningBalance ?? 0)
+                           + e.Contributions
+                           + e.Earnings
+                           + e.Forfeitures
+                           + e.Distributions
+                           + (e.BeneficiaryAllocation ?? 0);
+                var vestingRatio = vestingBySsn.GetValueOrDefault(e.Ssn, 0);
+                return endBal * vestingRatio;
             });
 
             return totals;

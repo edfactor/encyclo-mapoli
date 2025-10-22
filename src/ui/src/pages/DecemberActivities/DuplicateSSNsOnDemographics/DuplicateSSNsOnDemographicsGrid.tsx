@@ -1,7 +1,7 @@
 import { RefObject, useMemo } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
-import { GridPaginationActions, GridPaginationState } from "../../../hooks/useGridPagination";
+import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
 import { DuplicateSSNDetail, PagedReportResponse } from "../../../types";
 import { GetDuplicateSSNsOnDemographicsColumns } from "./DuplicateSSNsOnDemographicsGridColumns";
 
@@ -13,7 +13,7 @@ interface DuplicateSSNsOnDemographicsGridProps {
   hasResults: boolean;
   pagination: GridPaginationState & GridPaginationActions;
   onPaginationChange: (pageNumber: number, pageSize: number) => void;
-  onSortChange: (sortParams: any) => void;
+  onSortChange: (sortParams: SortParams) => void;
 }
 
 const DuplicateSSNsOnDemographicsGrid = ({

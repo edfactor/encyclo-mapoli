@@ -9,10 +9,16 @@ import {
 } from "../../utils/gridColumnFactory";
 
 export const GetMasterInquiryMemberGridColumns = (): ColDef[] => {
+  const badgeColumn = createBadgeColumn({
+    psnSuffix: true,
+    renderAsLink: false // Don't render as link - row click handles selection
+  });
+
+  // Add CSS class to make badge look like a link
+  badgeColumn.cellClass = "badge-link-style";
+
   return [
-    createBadgeColumn({
-      psnSuffix: true
-    }),
+    badgeColumn,
     createNameColumn({ field: "fullName" }),
     createSSNColumn({
       maxWidth: 250,

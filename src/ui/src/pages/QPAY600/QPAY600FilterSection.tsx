@@ -31,7 +31,7 @@ const QPAY600FilterSection: React.FC<QPAY600FilterSectionProps> = ({ onFilterCha
   const {
     control,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors },
     reset,
     trigger
   } = useForm<QPAY600FilterParams>({

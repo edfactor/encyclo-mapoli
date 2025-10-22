@@ -23,6 +23,19 @@ import { TerminatedLettersDetail } from "types/reports/terminated-letters";
 import { CAPTIONS } from "../../../constants";
 import { GetTerminatedLettersColumns } from "./TerminatedLettersGridColumns";
 
+interface TerminatedLettersRequest {
+  profitYear: number;
+  pagination: {
+    skip: number;
+    take: number;
+    sortBy: string;
+    isSortDescending: boolean;
+  };
+  beginningDate?: string;
+  endingDate?: string;
+  badgeNumbers?: number[];
+}
+
 interface TerminatedLettersGridSearchProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
@@ -48,41 +61,38 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridSearchProps> = ({
   const [triggerSearch, { isFetching }] = useLazyGetTerminatedLettersReportQuery();
   const [triggerDownload, { isFetching: isDownloading }] = useLazyGetTerminatedLettersDownloadQuery();
 
-  const onSearch = useCallback(async () => {
-    const request: any = {
-      profitYear: profitYear || 0,
-      pagination: {
-        skip: pageNumber * pageSize,
-        take: pageSize,
-        sortBy: sortParams.sortBy,
-        isSortDescending: sortParams.isSortDescending
+  const handlePaginationChange = useCallback(
+    async (newPageNumber: number, newPageSize: number, newSortParams?: ISortParams) => {
+      if (hasToken && initialSearchLoaded) {
+        const request: TerminatedLettersRequest = {
+          profitYear: profitYear || 0,
+          pagination: {
+            skip: newPageNumber * newPageSize,
+            take: newPageSize,
+            sortBy: newSortParams?.sortBy || sortParams.sortBy,
+            isSortDescending: newSortParams?.isSortDescending || sortParams.isSortDescending
+          }
+        };
+
+        if (terminatedLettersQueryParams?.beginningDate !== undefined) {
+          request.beginningDate = terminatedLettersQueryParams.beginningDate;
+        }
+        if (terminatedLettersQueryParams?.endingDate !== undefined) {
+          request.endingDate = terminatedLettersQueryParams.endingDate;
+        }
+
+        await triggerSearch(request, false);
       }
-    };
-
-    if (terminatedLettersQueryParams?.beginningDate !== undefined) {
-      request.beginningDate = terminatedLettersQueryParams.beginningDate;
-    }
-    if (terminatedLettersQueryParams?.endingDate !== undefined) {
-      request.endingDate = terminatedLettersQueryParams.endingDate;
-    }
-
-    await triggerSearch(request, false);
-  }, [
-    terminatedLettersQueryParams?.endingDate,
-    terminatedLettersQueryParams?.beginningDate,
-    profitYear,
-    pageNumber,
-    pageSize,
-    sortParams,
-    triggerSearch
-  ]);
+    },
+    [hasToken, initialSearchLoaded, profitYear, terminatedLettersQueryParams, sortParams, triggerSearch]
+  );
 
   const handlePrint = useCallback(async () => {
     if (selectedRows.length === 0) return;
 
     const badgeNumbers = selectedRows.map((row) => row.badgeNumber);
 
-    const request: any = {
+    const request: TerminatedLettersRequest = {
       profitYear: profitYear || 0,
       badgeNumbers: badgeNumbers,
       pagination: {
@@ -155,8 +165,15 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridSearchProps> = ({
     setSelectedRows(selectedData);
   }, []);
 
+  interface TerminatedLettersData {
+    response?: {
+      results: TerminatedLettersDetail[];
+      total: number;
+    };
+  }
+
   // Need a useEffect on a change in TerminatedLetters to reset the page number
-  const prevTerminatedLetters = useRef<any>(null);
+  const prevTerminatedLetters = useRef<TerminatedLettersData | null>(null);
   useEffect(() => {
     if (
       terminatedLetters !== prevTerminatedLetters.current &&
@@ -170,10 +187,8 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridSearchProps> = ({
   }, [terminatedLetters]);
 
   useEffect(() => {
-    if (hasToken && initialSearchLoaded) {
-      onSearch();
-    }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken, setInitialSearchLoaded]);
+    handlePaginationChange(pageNumber, pageSize, sortParams);
+  }, [pageNumber, pageSize, sortParams, handlePaginationChange]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetTerminatedLettersColumns(), []);

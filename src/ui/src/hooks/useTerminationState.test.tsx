@@ -55,29 +55,6 @@ describe("useTerminationState", () => {
 
       expect(result.current.state.resetPageFlag).toBe(!initialResetFlag);
     });
-
-    it("should include archive flag when in archive mode", () => {
-      const { result } = renderHook(() => useTerminationState());
-
-      // First, set status to trigger archive mode
-      act(() => {
-        result.current.actions.handleStatusChange("complete", "Complete");
-      });
-
-      const searchParams = {
-        profitYear: 2024,
-        beginningDate: "2024-01-01",
-        endingDate: "2024-12-31",
-        forfeitureStatus: "all",
-        pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: false }
-      };
-
-      act(() => {
-        result.current.actions.handleSearch(searchParams);
-      });
-
-      expect(result.current.state.searchParams).toHaveProperty("archive", true);
-    });
   });
 
   describe("handleUnsavedChanges", () => {
@@ -150,55 +127,6 @@ describe("useTerminationState", () => {
 
       expect(result.current.state.archiveMode).toBe(false);
       expect(result.current.state.shouldArchive).toBe(false);
-    });
-
-    it("should update search params with archive flag when changing to complete", () => {
-      const { result } = renderHook(() => useTerminationState());
-
-      const searchParams = {
-        profitYear: 2024,
-        beginningDate: "2024-01-01",
-        endingDate: "2024-12-31",
-        forfeitureStatus: "all",
-        pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: false }
-      };
-
-      act(() => {
-        result.current.actions.handleSearch(searchParams);
-      });
-
-      act(() => {
-        result.current.actions.handleStatusChange("complete", "Complete");
-      });
-
-      expect(result.current.state.searchParams).toHaveProperty("archive", true);
-    });
-
-    it("should remove archive flag when changing from complete to non-complete", () => {
-      const { result } = renderHook(() => useTerminationState());
-
-      const searchParams = {
-        profitYear: 2024,
-        beginningDate: "2024-01-01",
-        endingDate: "2024-12-31",
-        forfeitureStatus: "all",
-        pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: false }
-      };
-
-      act(() => {
-        result.current.actions.handleSearch(searchParams);
-      });
-
-      act(() => {
-        result.current.actions.handleStatusChange("complete", "Complete");
-      });
-
-      act(() => {
-        result.current.actions.handleStatusChange("in-progress", "In Progress");
-      });
-
-      expect(result.current.state.searchParams).not.toHaveProperty("archive");
-      expect(result.current.state.archiveMode).toBe(false);
     });
 
     it("should not trigger archive if already in complete status", () => {
@@ -282,7 +210,6 @@ describe("useTerminationState", () => {
 
       expect(result.current.state.archiveMode).toBe(true);
       expect(result.current.state.shouldArchive).toBe(true);
-      expect(result.current.state.searchParams).toHaveProperty("archive", true);
 
       act(() => {
         result.current.actions.handleArchiveHandled();

@@ -2,7 +2,7 @@ import { RefObject, useCallback, useMemo } from "react";
 import { Path, useNavigate } from "react-router";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
-import { GridPaginationState, GridPaginationActions } from "../../../hooks/useGridPagination";
+import { GridPaginationState, GridPaginationActions, SortParams } from "../../../hooks/useGridPagination";
 import { NegativeEtvaForSSNDetail, PagedReportResponse } from "../../../types";
 import { GetNegativeEtvaForSSNsOnPayProfitColumns } from "./NegativeEtvaForSSNsOnPayprofitGridColumns";
 
@@ -14,7 +14,7 @@ interface NegativeEtvaForSSNsOnPayprofitGridProps {
   hasResults: boolean;
   pagination: GridPaginationState & GridPaginationActions;
   onPaginationChange: (pageNumber: number, pageSize: number) => void;
-  onSortChange: (sortParams: any) => void;
+  onSortChange: (sortParams: SortParams) => void;
 }
 
 const NegativeEtvaForSSNsOnPayprofitGrid = ({

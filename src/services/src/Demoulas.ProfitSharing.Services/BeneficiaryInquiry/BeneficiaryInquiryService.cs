@@ -114,10 +114,10 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             return await query.ToPaginationResultsAsync(request, cancellationToken);
         }, cancellationToken);
 
-        var payload = result?.Results;
+        var payload = result.Results;
         if (payload == null || !payload.Any())
         {
-            return result ?? new PaginatedResponseDto<BeneficiarySearchFilterResponse>();
+            return result;
         }
 
         foreach (var item in payload)

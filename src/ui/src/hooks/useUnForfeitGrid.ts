@@ -12,7 +12,7 @@ import { formatNumberWithComma, setMessage } from "smart-ui-library";
 import { Messages } from "../utils/messageDictonary";
 import useDecemberFlowProfitYear from "./useDecemberFlowProfitYear";
 import { useEditState } from "./useEditState";
-import { useGridPagination } from "./useGridPagination";
+import { SortParams, useGridPagination } from "./useGridPagination";
 import { useRowSelection } from "./useRowSelection";
 
 interface UnForfeitGridConfig {
@@ -54,8 +54,8 @@ export const useUnForfeitGrid = ({
 
   const editState = useEditState();
   const selectionState = useRowSelection();
-  const gridRef = useRef<any>(null);
-  const prevUnForfeits = useRef<any>(null);
+  const gridRef = useRef<{ api: GridApi } | null>(null);
+  const prevUnForfeits = useRef<typeof unForfeits | null>(null);
 
   // Create a request object based on current parameters
   const createRequest = useCallback(
@@ -85,25 +85,24 @@ export const useUnForfeitGrid = ({
     ]
   );
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange, resetPagination } =
-    useGridPagination({
-      initialPageSize: 25,
-      initialSortBy: "fullName",
-      initialSortDescending: false,
-      onPaginationChange: useCallback(
-        async (pageNum: number, pageSz: number, sortPrms: any) => {
-          if (initialSearchLoaded) {
-            const request = createRequest(pageNum * pageSz, sortPrms.sortBy, sortPrms.isSortDescending);
-            if (request && request.pagination) {
-              // Update the pageSize in the request
-              request.pagination.take = pageSz;
-              await triggerSearch(request, false);
-            }
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, resetPagination } = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "fullName",
+    initialSortDescending: false,
+    onPaginationChange: useCallback(
+      async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
+        if (initialSearchLoaded) {
+          const request = createRequest(pageNum * pageSz, sortPrms.sortBy, sortPrms.isSortDescending);
+          if (request && request.pagination) {
+            // Update the pageSize in the request
+            request.pagination.take = pageSz;
+            await triggerSearch(request, false);
           }
-        },
-        [initialSearchLoaded, createRequest, triggerSearch]
-      )
-    });
+        }
+      },
+      [initialSearchLoaded, createRequest, triggerSearch]
+    )
+  });
 
   const onGridReady = useCallback((params: { api: GridApi }) => {
     setGridApi(params.api);
@@ -277,7 +276,6 @@ export const useUnForfeitGrid = ({
       editState,
       selectionState,
       unForfeitsQueryParams,
-      pageNumber,
       pageSize,
       sortParams,
       createRequest,
@@ -346,7 +344,7 @@ export const useUnForfeitGrid = ({
   useEffect(() => {
     if (unForfeits?.response?.results && unForfeits.response.results.length > 0) {
       const initialExpandState: Record<string, boolean> = {};
-      unForfeits.response.results.forEach((row: any) => {
+      unForfeits.response.results.forEach((row) => {
         const hasDetails = row.details && row.details.length > 0;
         if (hasDetails) {
           initialExpandState[row.badgeNumber.toString()] = true;
@@ -367,8 +365,10 @@ export const useUnForfeitGrid = ({
   }, [editState.loadingRowIds]);
 
   // Sort handler that immediately triggers a search with the new sort parameters
-  const sortEventHandler = (update: any) => {
-    handleSortChange(update);
+  const sortEventHandler = (update: SortParams) => {
+    // Reset to page 0 and perform search with new sort parameters
+    handlePaginationChange(0, pageSize);
+    performSearch(0, update.sortBy, update.isSortDescending);
   };
 
   // Handle row expansion toggle

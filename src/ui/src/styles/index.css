@@ -176,6 +176,11 @@
     background: #fff3e0;
   }
 
+  .missive-success {
+    border-left-color: #2e7d32;
+    background: #e8f5e9;
+  }
+
   .missive-message {
     font-weight: 600;
     display: block;
@@ -185,6 +190,10 @@
 
   .missive-warning .missive-message {
     color: #ed6c02;
+  }
+
+  .missive-success .missive-message {
+    color: #2e7d32;
   }
 
   .missive-description {

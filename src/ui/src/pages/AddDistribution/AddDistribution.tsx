@@ -1,6 +1,9 @@
+import { Alert, Button, CircularProgress, Divider, Grid, Tooltip } from "@mui/material";
+import SaveIcon from "@mui/icons-material/Save";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import CancelIcon from "@mui/icons-material/Cancel";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Alert, Button, CircularProgress, Divider, Grid, Tooltip } from "@mui/material";
 import { Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
 import { CAPTIONS, ROUTES } from "../../constants";
@@ -18,6 +21,7 @@ const AddDistributionContent = () => {
   const formRef = useRef<AddDistributionFormRef>(null);
   const isReadOnly = useReadOnlyNavigation();
   const [isFormValid, setIsFormValid] = useState(false);
+  const [submittedAmount, setSubmittedAmount] = useState<number | null>(null);
 
   const profitYear = useDecemberFlowProfitYear();
 
@@ -54,15 +58,25 @@ const AddDistributionContent = () => {
 
   // Handle successful submission
   useEffect(() => {
-    if (submissionSuccess) {
-      // Navigate to distributions inquiry page
-      navigate(`/${ROUTES.DISTRIBUTIONS_INQUIRY}`);
+    if (submissionSuccess && memberData) {
+      // Get member name
+      const memberName = `${memberData.firstName} ${memberData.lastName}`;
+
+      // Navigate to distributions inquiry page with success message
+      navigate(`/${ROUTES.DISTRIBUTIONS_INQUIRY}`, {
+        state: {
+          showSuccessMessage: true,
+          memberName: memberName,
+          amount: submittedAmount
+        }
+      });
     }
-  }, [submissionSuccess, navigate]);
+  }, [submissionSuccess, memberData, submittedAmount, navigate]);
 
   // Handle form submission
   const handleFormSubmit = async (data: CreateDistributionRequest) => {
     try {
+      setSubmittedAmount(data.grossAmount);
       await submitDistribution(data);
     } catch (error) {
       console.error("Failed to submit distribution:", error);
@@ -91,6 +105,15 @@ const AddDistributionContent = () => {
 
   // Track 3rd party address requirement
   const [thirdPartyAddressRequired, setThirdPartyAddressRequired] = useState(false);
+
+  // Determine validation errors
+  const maxDistributionsReached = sequenceNumber === 10;
+  const noAvailableBalance = memberData?.currentVestedAmount === 0;
+  const validationError = maxDistributionsReached
+    ? "Member has reached maximum of nine distributions."
+    : noAvailableBalance
+      ? "Member has no available balance to distribute."
+      : null;
 
   // Check form validity periodically
   useEffect(() => {
@@ -126,14 +149,27 @@ const AddDistributionContent = () => {
         sx={{ display: "flex", justifyContent: "flex-end", paddingX: "24px", gap: "12px" }}>
         <Tooltip
           title={
-            isReadOnly ? "You are in read-only mode" : thirdPartyAddressRequired ? "3rd Party Address Required" : ""
+            isReadOnly
+              ? "You are in read-only mode"
+              : thirdPartyAddressRequired
+                ? "3rd Party Address Required"
+                : validationError
+                  ? validationError
+                  : ""
           }>
           <span>
             <Button
-              variant="contained"
+              variant="outlined"
               onClick={handleSave}
-              disabled={isReadOnly || isSubmitting || isMemberLoading || !isFormValid || thirdPartyAddressRequired}
-              className="h-10 min-w-fit whitespace-nowrap">
+              disabled={
+                isReadOnly ||
+                isSubmitting ||
+                isMemberLoading ||
+                !isFormValid ||
+                thirdPartyAddressRequired ||
+                !!validationError
+              }
+              startIcon={<SaveIcon />}>
               SAVE
             </Button>
           </span>
@@ -142,19 +178,36 @@ const AddDistributionContent = () => {
           variant="outlined"
           onClick={handleReset}
           disabled={isSubmitting}
-          className="h-10 min-w-fit whitespace-nowrap">
+          startIcon={<RestartAltIcon />}>
           RESET
         </Button>
         <Button
           variant="outlined"
           onClick={handleCancel}
           disabled={isSubmitting}
-          className="h-10 min-w-fit whitespace-nowrap">
+          startIcon={<CancelIcon />}>
           CANCEL
         </Button>
       </Grid>
 
       {/* Error Messages */}
+      {validationError && (
+        <Grid
+          width="100%"
+          sx={{ paddingX: "24px" }}>
+          <Alert
+            severity="error"
+            sx={{
+              "& .MuiAlert-message": {
+                fontSize: "1.1rem",
+                fontWeight: "bold"
+              }
+            }}>
+            {validationError}
+          </Alert>
+        </Grid>
+      )}
+
       {memberError && (
         <Grid
           width="100%"
@@ -203,8 +256,8 @@ const AddDistributionContent = () => {
             <Divider />
           </Grid>
           <MasterInquiryMemberDetails
-            memberType={parseInt(memberType || "0", 10)}
-            id={memberId as string}
+            //memberType={parseInt(memberType || "0", 10)}
+            //id={memberId as string}
             profitYear={profitYear || 0}
             memberDetails={memberData}
             isLoading={isLoading}
@@ -225,6 +278,15 @@ const AddDistributionContent = () => {
               onSubmit={handleFormSubmit}
               onReset={handleFormReset}
               isSubmitting={isSubmitting}
+              dateOfBirth={memberData.dateOfBirth}
+              age={
+                memberData.dateOfBirth
+                  ? Math.floor(
+                      (Date.now() - new Date(memberData.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365.25)
+                    )
+                  : undefined
+              }
+              vestedAmount={memberData.currentVestedAmount}
             />
           </Grid>
 

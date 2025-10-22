@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, ReactNode } from "react";
 import { Security } from "@okta/okta-react";
 import { OktaAuth, toRelativeUrl } from "@okta/okta-auth-js";
 
@@ -10,9 +10,14 @@ import OktaLoginCallback from "components/MenuBar/OktaLoginCallback";
 const clientId = import.meta.env.VITE_REACT_APP_OKTA_CLIENT_ID;
 const issuer = import.meta.env.VITE_REACT_APP_OKTA_ISSUER;
 
+interface RouteSecurityProps {
+  oktaEnabled: boolean;
+  children?: ReactNode;
+}
+
 //@ts-expect-error we do not have types for this
-const RouteSecurity = ({ oktaEnabled, children }) => {
-  const [oktaAuth, setOktaAuth] = useState<any>(null);
+const RouteSecurity: React.FC<RouteSecurityProps> = ({ oktaEnabled, children }) => {
+  const [oktaAuth, setOktaAuth] = useState<OktaAuth | null>(null);
   const navigate = useNavigate();
   useEffect(() => {
     const config = oktaConfig(clientId, issuer);

@@ -23,7 +23,7 @@ import MilitaryContributionSearchFilter from "./MilitaryContributionSearchFilter
 
 const MilitaryContributionContent = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [currentStatus, setCurrentStatus] = useState<string | null>(null);
+  //const [currentStatus, setCurrentStatus] = useState<string | null>(null);
   const [memberDetailsRefreshTrigger, setMemberDetailsRefreshTrigger] = useState(0);
   const { masterInquiryMemberDetails } = useSelector((state: RootState) => state.inquiry);
   const profitYear = useDecemberFlowProfitYear();
@@ -41,6 +41,7 @@ const MilitaryContributionContent = () => {
     resetSearch
   } = useMilitaryContribution();
 
+  /*
   const handleStatusChange = (newStatus: string, statusName?: string) => {
     if (statusName === "Complete" && currentStatus !== "Complete") {
       setCurrentStatus("Complete");
@@ -49,11 +50,12 @@ const MilitaryContributionContent = () => {
       setCurrentStatus(statusName || newStatus);
     }
   };
-
+  */
+  /*
   const renderActionNode = () => {
     return <StatusDropdownActionNode onStatusChange={handleStatusChange} />;
   };
-
+*/
   const handleOpenForm = () => {
     if (!isReadOnly) {
       setIsDialogOpen(true);
@@ -96,7 +98,7 @@ const MilitaryContributionContent = () => {
     if (masterInquiryMemberDetails) {
       fetchMilitaryContributions();
     }
-  }, [masterInquiryMemberDetails]);
+  }, [masterInquiryMemberDetails, fetchMilitaryContributions]);
 
   // Clear the member and contributions state when this component unmounts
   // to ensure visiting the page fresh doesn't show the previous search.
@@ -104,6 +106,7 @@ const MilitaryContributionContent = () => {
     return () => {
       resetSearch();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -150,8 +153,12 @@ const MilitaryContributionContent = () => {
         <DialogContent>
           <MilitaryContributionForm
             onSubmit={(contribution) => {
-              handleContributionSaved(contribution);
-              dispatch(InquiryApi.util.invalidateTags(["memberDetails"]));
+              handleContributionSaved({
+                contributionAmount: contribution.contributionAmount as number,
+                contributionYear: contribution.contributionYear,
+                isSupplementalContribution: contribution.isSupplementalContribution
+              });
+              dispatch(InquiryApi.util.invalidateTags(["MemberDetails"]));
             }}
             onCancel={handleCloseForm}
             badgeNumber={Number(masterInquiryMemberDetails?.badgeNumber)}
