@@ -248,6 +248,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                     Take = take
                 })
                 {
+                    Total = cachedResponse.Data.Results.Count(),
                     Results = paginatedResults
                 }
             };
