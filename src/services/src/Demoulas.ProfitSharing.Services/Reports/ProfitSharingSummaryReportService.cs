@@ -236,27 +236,27 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                          x.DateOfBirth <= birthday18),
 
                 // Line 7: Terminated age 18+ with <1000 hours and no prior balance
+                // COBOL Logic: Counts ALL terminated employees classified as Report 7, not just those terminated in fiscal year
                 CreateLineFromData(
                     "TERMINATED",
                     ((int)YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndNoPriorAmount).ToString(),
                     GetEnumDescription(YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndNoPriorAmount),
-                    x => IsTerminatedInFiscalYear(x) &&
+                    x => x.EmploymentStatus == EmploymentStatus.Constants.Terminated &&
+                         x.TerminationDate != null &&
+                         x.TerminationDate < fiscalEndDate &&
                          x.Hours < _hoursThreshold &&
                          x.DateOfBirth <= birthday18 &&
                          x.PriorBalance == 0),
 
                 // Line 8: Terminated age 18+ with <1000 hours and prior balance
-                // Note: Uses totalsFilter to count differently
+                // COBOL Logic: Counts ALL terminated employees classified as Report 8, not just those terminated in fiscal year
                 CreateLineFromData(
                     "TERMINATED",
                     ((int)YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndPriorAmount).ToString(),
                     GetEnumDescription(YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndPriorAmount),
-                    x => IsTerminatedInFiscalYear(x) &&
-                         x.Hours < _hoursThreshold &&
-                         x.DateOfBirth <= birthday18 &&
-                         x.PriorBalance > 0,
-                    // Totals filter: count all matching the pattern
-                    x => x.Hours >= 0 &&
+                    x => x.EmploymentStatus == EmploymentStatus.Constants.Terminated &&
+                         x.TerminationDate != null &&
+                         x.TerminationDate < fiscalEndDate &&
                          x.Hours < _hoursThreshold &&
                          x.DateOfBirth <= birthday18 &&
                          x.PriorBalance > 0),
