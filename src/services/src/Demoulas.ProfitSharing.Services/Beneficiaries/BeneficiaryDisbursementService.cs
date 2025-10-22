@@ -126,8 +126,8 @@ public sealed class BeneficiaryDisbursementService : IBeneficiaryDisbursementSer
                     MonthToDate = (byte)DateTime.Now.Month,
                     YearToDate = (short)DateTime.Now.Year,
                     CommentTypeId = request.IsDeceased ? CommentType.Constants.TransferOut : CommentType.Constants.QdroOut,
-                    Remark = $"{(request.IsDeceased ? "XREF>" : "QDRO>")}{request.BadgeNumber}{request.PsnSuffix}",
-                    CommentRelatedOracleHcmId = beneficiaryAsEmployee?.OracleHcmId,
+                    Remark = $"{(request.IsDeceased ? "XREF>" : "QDRO>")}{request.BadgeNumber}{request.PsnSuffix?.ToString("0000") ?? "0000"}",
+                    CommentRelatedOracleHcmId = disburserOracleHcmId,
                     CommentRelatedPsnSuffix = b.PsnSuffix,
                 };
 
@@ -140,7 +140,7 @@ public sealed class BeneficiaryDisbursementService : IBeneficiaryDisbursementSer
                     MonthToDate = (byte)DateTime.Now.Month,
                     YearToDate = (short)DateTime.Now.Year,
                     CommentTypeId = request.IsDeceased ? CommentType.Constants.TransferIn : CommentType.Constants.QdroIn,
-                    Remark = $"{(request.IsDeceased ? "XREF<" : "QDRO<")}{request.BadgeNumber}{request.PsnSuffix}",
+                    Remark = $"{(request.IsDeceased ? "XREF<" : "QDRO<")}{request.BadgeNumber}{request.PsnSuffix?.ToString("0000") ?? "0000"}",
                     CommentRelatedOracleHcmId = disburserOracleHcmId,
                     CommentRelatedPsnSuffix = request.PsnSuffix,
                 };
