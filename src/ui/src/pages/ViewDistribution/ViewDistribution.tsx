@@ -1,6 +1,8 @@
 import { Button, CircularProgress, Divider, Grid, Typography } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { useState } from "react";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
@@ -16,6 +18,9 @@ import DisbursementsHistory from "./DisbursementsHistory";
 import DistributionDetailsSection from "./DistributionDetailsSection";
 import useViewDistribution from "./hooks/useViewDistribution";
 import PendingDisbursementsList from "./PendingDisbursementsList";
+import DeleteDistributionModal from "../DistributionInquiry/DeleteDistributionModal";
+import { useDeleteDistributionMutation } from "../../reduxstore/api/DistributionApi";
+import { ServiceErrorResponse } from "../../types/errors/errors";
 
 const ViewDistributionContent = () => {
   const { memberId, memberType } = useParams<{ memberId: string; memberType: string }>();
@@ -28,6 +33,9 @@ const ViewDistributionContent = () => {
   const { currentMember, currentDistribution } = useSelector((state: RootState) => state.distribution);
 
   const { isLoading, fetchMember, clearMemberData } = useViewDistribution();
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deleteDistribution, { isLoading: isDeleting }] = useDeleteDistributionMutation();
 
   // Fetch member data when component mounts or memberId changes
   useEffect(() => {
@@ -58,6 +66,38 @@ const ViewDistributionContent = () => {
 
   const handleCancel = () => {
     navigate(`/${ROUTES.DISTRIBUTIONS_INQUIRY}`);
+  };
+
+  const handleDelete = () => {
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setIsDeleteDialogOpen(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!currentDistribution) return;
+
+    try {
+      await deleteDistribution(currentDistribution.id).unwrap();
+      handleCloseDeleteDialog();
+
+      // Navigate to inquiry page with success message
+      navigate(`/${ROUTES.DISTRIBUTIONS_INQUIRY}`, {
+        state: {
+          showSuccessMessage: true,
+          operationType: "deleted",
+          memberName: currentDistribution.fullName
+        }
+      });
+    } catch (error) {
+      const serviceError = error as ServiceErrorResponse;
+      const errorMsg = serviceError?.data?.detail || "Failed to delete distribution";
+      console.error("Delete failed:", errorMsg);
+      handleCloseDeleteDialog();
+      // Optionally show error notification here using MissiveAlerts if needed
+    }
   };
 
   // Show error if no memberId or memberType parameter
@@ -98,6 +138,14 @@ const ViewDistributionContent = () => {
           onClick={handleEdit}
           startIcon={<EditIcon />}>
           EDIT
+        </Button>
+        <Button
+          variant="outlined"
+          color="error"
+          disabled={isReadOnly || isLoading || isDeleting}
+          onClick={handleDelete}
+          startIcon={<DeleteIcon />}>
+          DELETE
         </Button>
         <Button
           variant="outlined"
@@ -167,6 +215,15 @@ const ViewDistributionContent = () => {
           </Typography>
         </Grid>
       )}
+
+      {/* Delete Distribution Modal */}
+      <DeleteDistributionModal
+        open={isDeleteDialogOpen}
+        distribution={currentDistribution}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCloseDeleteDialog}
+        isLoading={isDeleting}
+      />
     </Grid>
   );
 };
