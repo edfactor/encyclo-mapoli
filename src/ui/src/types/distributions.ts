@@ -214,3 +214,8 @@ export interface CreateOrUpdateDistributionResponse {
   createdAt: string;
   memo?: string | null;
 }
+
+// Edit Distribution Request (extends CreateDistributionRequest with id)
+export interface EditDistributionRequest extends CreateDistributionRequest {
+  id: number;
+}

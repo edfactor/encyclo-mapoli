@@ -85,25 +85,24 @@ export const useUnForfeitGrid = ({
     ]
   );
 
-  const { pageNumber, pageSize, sortParams, handlePaginationChange, resetPagination } =
-    useGridPagination({
-      initialPageSize: 25,
-      initialSortBy: "fullName",
-      initialSortDescending: false,
-      onPaginationChange: useCallback(
-        async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
-          if (initialSearchLoaded) {
-            const request = createRequest(pageNum * pageSz, sortPrms.sortBy, sortPrms.isSortDescending);
-            if (request && request.pagination) {
-              // Update the pageSize in the request
-              request.pagination.take = pageSz;
-              await triggerSearch(request, false);
-            }
+  const { pageNumber, pageSize, sortParams, handlePaginationChange, resetPagination } = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "fullName",
+    initialSortDescending: false,
+    onPaginationChange: useCallback(
+      async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
+        if (initialSearchLoaded) {
+          const request = createRequest(pageNum * pageSz, sortPrms.sortBy, sortPrms.isSortDescending);
+          if (request && request.pagination) {
+            // Update the pageSize in the request
+            request.pagination.take = pageSz;
+            await triggerSearch(request, false);
           }
-        },
-        [initialSearchLoaded, createRequest, triggerSearch]
-      )
-    });
+        }
+      },
+      [initialSearchLoaded, createRequest, triggerSearch]
+    )
+  });
 
   const onGridReady = useCallback((params: { api: GridApi }) => {
     setGridApi(params.api);
