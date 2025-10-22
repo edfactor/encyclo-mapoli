@@ -1,12 +1,21 @@
 ﻿using System.ComponentModel;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Data.Contexts.Interfaces;
+using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.Services.Internal;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.ItDevOps;
 using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using Shouldly;
 using Xunit.Abstractions;
@@ -142,15 +151,18 @@ public class ProfitSharingSummaryReportRegressionTests
                 FiscalEndDate = fiscalEnd
             });
 
-        // Mock total service and demographic reader
-        var mockTotalService = new Mock<TotalService>();
-        var mockDemographicReader = new Mock<IDemographicReaderService>();
+        // Create real TotalService with mocked dependencies
+        var mockEmbeddedSql = new Mock<IEmbeddedSqlService>();
+        var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
+        var frozenService = new FrozenService(mockFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache, new Mock<INavigationService>().Object);
+        var demographicReader = new DemographicReaderService(frozenService, new HttpContextAccessor());
+        var totalService = new TotalService(mockFactory, mockCalendarService.Object, mockEmbeddedSql.Object, demographicReader);
 
         var service = new ProfitSharingSummaryReportService(
             mockFactory,
             mockCalendarService.Object,
-            mockTotalService.Object,
-            mockDemographicReader.Object);
+            totalService,
+            demographicReader);
 
         // Act
         var result = await service.GetYearEndProfitSharingSummaryReportAsync(
