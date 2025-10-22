@@ -43,6 +43,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();
         _ = builder.Services.AddScoped<ICertificateService, CertificateService>();
         _ = builder.Services.AddScoped<ICleanupReportService, CleanupReportService>();
+        _ = builder.Services.AddScoped<IDuplicateNamesAndBirthdaysService, DuplicateNamesAndBirthdaysService>();
         _ = builder.Services.AddScoped<IDistributionService, DistributionService>();
         _ = builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
         _ = builder.Services.AddScoped<IForfeituresAndPointsForYearService, ForfeituresAndPointsForYearService>();

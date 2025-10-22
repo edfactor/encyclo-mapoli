@@ -273,6 +273,13 @@ export const YearsEndApi = createApi({
         }
       }
     }),
+    refreshDuplicateNamesAndBirthdaysCache: builder.mutation<string, void>({
+      query: () => ({
+        url: "yearend/duplicate-names-and-birthdays/refresh-cache",
+        method: "POST",
+        body: {}
+      })
+    }),
     getGrossWagesReport: builder.query<GrossWagesReportResponse, GrossWagesReportDto>({
       query: (params) => ({
         url: "yearend/frozen/grosswages",
@@ -1406,6 +1413,7 @@ export const {
   useLazyGetDistributionsByAgeQuery,
   useLazyDownloadCertificatesFileQuery,
   useLazyGetDuplicateNamesAndBirthdaysQuery,
+  useRefreshDuplicateNamesAndBirthdaysCacheMutation,
   useLazyGetDuplicateSSNsQuery,
   useLazyGetEligibleEmployeesQuery,
   //useLazyGetEmployeesOnMilitaryLeaveQuery,

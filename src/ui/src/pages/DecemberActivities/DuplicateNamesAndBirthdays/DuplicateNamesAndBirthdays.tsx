@@ -1,20 +1,41 @@
-import { CircularProgress, Divider, Grid } from "@mui/material";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import { Alert, Box, Button, Chip, CircularProgress, Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
+import { useRefreshDuplicateNamesAndBirthdaysCacheMutation } from "../../../reduxstore/api/YearsEndApi";
 import DuplicateNamesAndBirthdaysGrid from "./DuplicateNamesAndBirthdaysGrid";
 import useDuplicateNamesAndBirthdays from "./hooks/useDuplicateNamesAndBirthdays";
 
 const DuplicateNamesAndBirthdays = () => {
   const componentRef = useRef<HTMLDivElement>(null);
   const { searchResults, isSearching, pagination, showData, hasResults } = useDuplicateNamesAndBirthdays();
+  const [refreshCache, { isLoading: isRefreshing }] = useRefreshDuplicateNamesAndBirthdaysCacheMutation();
+  const [refreshMessage, setRefreshMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const handleRefreshCache = async () => {
+    try {
+      setRefreshMessage(null);
+      await refreshCache().unwrap();
+      setRefreshMessage({
+        type: "success",
+        text: "Cache refresh requested successfully. The cache will be updated in the background."
+      });
+    } catch {
+      setRefreshMessage({
+        type: "error",
+        text: "Failed to request cache refresh. Please try again later."
+      });
+    }
+  };
 
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
   };
 
   const recordCount = searchResults?.response?.total || 0;
+  const reportDate = searchResults?.reportDate ? new Date(searchResults.reportDate).toLocaleString() : "N/A";
 
   return (
     <Page
@@ -26,6 +47,45 @@ const DuplicateNamesAndBirthdays = () => {
         <Grid width={"100%"}>
           <Divider />
         </Grid>
+
+        {/* Report As Of Date and Refresh Button */}
+        <Grid
+          width={"100%"}
+          container
+          alignItems="center"
+          justifyContent="space-between"
+          paddingX={2}>
+          <Box
+            display="flex"
+            alignItems="center"
+            gap={1}>
+            <Chip
+              label={`Report as of: ${reportDate}`}
+              className="bg-dsm-grey-hover"
+            />
+          </Box>
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<RefreshIcon />}
+            onClick={handleRefreshCache}
+            disabled={isRefreshing}>
+            {isRefreshing ? "Refreshing..." : "Refresh Cache"}
+          </Button>
+        </Grid>
+
+        {/* Refresh Message */}
+        {refreshMessage && (
+          <Grid
+            width={"100%"}
+            paddingX={2}>
+            <Alert
+              severity={refreshMessage.type}
+              onClose={() => setRefreshMessage(null)}>
+              {refreshMessage.text}
+            </Alert>
+          </Grid>
+        )}
 
         {isSearching && !searchResults ? (
           <Grid
