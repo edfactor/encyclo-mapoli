@@ -10,12 +10,12 @@ import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAler
 import { CAPTIONS, ROUTES } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
-import { RootState } from "../../reduxstore";
 import {
   useLazyGetProfitMasterInquiryMemberQuery,
   useLazySearchProfitMasterInquiryQuery
 } from "../../reduxstore/api/InquiryApi";
 import { useLazyGetStateTaxQuery } from "../../reduxstore/api/LookupsApi";
+import type { RootState } from "../../reduxstore/store";
 import { EditDistributionRequest, EmployeeDetails } from "../../types";
 import { ServiceErrorResponse } from "../../types/errors/errors";
 import MasterInquiryMemberDetails from "../MasterInquiry/MasterInquiryMemberDetails";

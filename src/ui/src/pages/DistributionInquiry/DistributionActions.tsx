@@ -45,7 +45,10 @@ export const ActionsCellRenderer = (props: ICellRendererParams) => {
   };
 
   const handleDelete = () => {
-    console.log("Delete distribution", props.data);
+    const distribution = props.data as DistributionSearchResponse;
+    dispatch(setCurrentDistribution(distribution));
+    // Parent component will handle opening the delete modal
+    window.dispatchEvent(new CustomEvent("openDeleteModal", { detail: distribution }));
   };
 
   return (

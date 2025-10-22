@@ -4,7 +4,7 @@ import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import { Button, Divider, Grid, Tooltip } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { DSMAccordion, Page, formatNumberWithComma } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
 import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
@@ -26,20 +26,28 @@ import { ServiceErrorResponse } from "../../types/errors/errors";
 import DistributionInquiryGrid from "./DistributionInquiryGrid";
 import DistributionInquirySearchFilter from "./DistributionInquirySearchFilter";
 import NewEntryDialog from "./NewEntryDialog";
+import DeleteDistributionModal from "./DeleteDistributionModal";
+import { useDeleteDistributionMutation } from "../../reduxstore/api/DistributionApi";
+import { DistributionSearchResponse } from "../../types";
 
 interface LocationState {
   showSuccessMessage?: boolean;
   memberName?: string;
   amount?: number;
+  operationType?: "added" | "deleted";
 }
 
 const DistributionInquiryContent = () => {
   const dispatch = useDispatch();
   const location = useLocation();
+  const navigate = useNavigate();
   const [searchData, setSearchData] = useState<DistributionSearchRequest | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [isNewEntryDialogOpen, setIsNewEntryDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [distributionToDelete, setDistributionToDelete] = useState<DistributionSearchResponse | null>(null);
   const [triggerSearch, { data, isFetching }] = useLazySearchDistributionsQuery();
+  const [deleteDistribution, { isLoading: isDeleting }] = useDeleteDistributionMutation();
   const isReadOnly = useReadOnlyNavigation();
   const { missiveAlerts, addAlert, clearAlerts } = useMissiveAlerts();
 
@@ -51,22 +59,49 @@ const DistributionInquiryContent = () => {
     dispatch(clearHistoricalDisbursements());
   }, [dispatch]);
 
-  // Display success message if returning from AddDistribution
+  // Display success/error message if returning from AddDistribution or after deletion
   useEffect(() => {
     const state = location.state as LocationState | undefined;
     if (state?.showSuccessMessage && state?.memberName) {
-      const amountText = state.amount ? ` for $${formatNumberWithComma(state.amount)}` : "";
+      let message = "Distribution Saved Successfully";
+      let description = "";
+
+      if (state.operationType === "deleted") {
+        message = "Distribution Deleted Successfully";
+        description = `${state.memberName}'s distribution has been successfully deleted.`;
+      } else if (state.operationType === "delete-failed") {
+        message = "Distribution Deletion Failed";
+        description = `${state.memberName}'s distribution could not be deleted.`;
+      } else {
+        // Default to added/saved
+        const amountText = state.amount ? ` for $${formatNumberWithComma(state.amount)}` : "";
+        description = `Distribution${amountText} for ${state.memberName} has been saved successfully.`;
+      }
+
       const successMessage = {
         id: 911,
-        severity: "success" as const,
-        message: "Distribution Saved Successfully",
-        description: `Distribution${amountText} for ${state.memberName} has been saved successfully.`
+        severity: (state.operationType === "delete-failed" ? "error" : "success") as const,
+        message: message,
+        description: description
       };
       addAlert(successMessage);
       // Clear the state after displaying the message
       window.history.replaceState({}, document.title);
     }
   }, [location, addAlert]);
+
+  // Listen for delete modal open event from DistributionActions
+  useEffect(() => {
+    const handleOpenDeleteModal = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const distribution = customEvent.detail as DistributionSearchResponse;
+      setDistributionToDelete(distribution);
+      setIsDeleteDialogOpen(true);
+    };
+
+    window.addEventListener("openDeleteModal", handleOpenDeleteModal);
+    return () => window.removeEventListener("openDeleteModal", handleOpenDeleteModal);
+  }, []);
 
   const handleSearch = async (formData: DistributionSearchFormData) => {
     try {
@@ -181,6 +216,40 @@ const DistributionInquiryContent = () => {
     setIsNewEntryDialogOpen(false);
   };
 
+  const handleCloseDeleteDialog = () => {
+    setIsDeleteDialogOpen(false);
+    setDistributionToDelete(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!distributionToDelete) return;
+
+    try {
+      await deleteDistribution(distributionToDelete.id).unwrap();
+      handleCloseDeleteDialog();
+
+      // Navigate to inquiry page with success message
+      navigate("", {
+        state: {
+          showSuccessMessage: true,
+          operationType: "deleted",
+          memberName: distributionToDelete.fullName
+        }
+      });
+    } catch (error) {
+      const serviceError = error as ServiceErrorResponse;
+      const errorMsg = serviceError?.data?.detail || "Failed to delete distribution";
+      const errorMessage = {
+        id: 912,
+        severity: "error" as const,
+        message: "Delete Failed",
+        description: errorMsg
+      };
+      addAlert(errorMessage);
+      handleCloseDeleteDialog();
+    }
+  };
+
   const handleExport = () => {
     console.log("Export clicked");
   };
@@ -254,6 +323,15 @@ const DistributionInquiryContent = () => {
       <NewEntryDialog
         open={isNewEntryDialogOpen}
         onClose={handleCloseNewEntryDialog}
+      />
+
+      {/* Delete Distribution Modal */}
+      <DeleteDistributionModal
+        open={isDeleteDialogOpen}
+        distribution={distributionToDelete}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCloseDeleteDialog}
+        isLoading={isDeleting}
       />
     </Grid>
   );

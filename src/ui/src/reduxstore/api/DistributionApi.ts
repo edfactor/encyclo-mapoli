@@ -34,9 +34,19 @@ export const DistributionApi = createApi({
         method: "PUT",
         body: request
       })
+    }),
+    deleteDistribution: builder.mutation<boolean, number>({
+      query: (id) => ({
+        url: `/distribution/${id}`,
+        method: "DELETE"
+      })
     })
   })
 });
 
-export const { useLazySearchDistributionsQuery, useCreateDistributionMutation, useUpdateDistributionMutation } =
-  DistributionApi;
+export const {
+  useLazySearchDistributionsQuery,
+  useCreateDistributionMutation,
+  useUpdateDistributionMutation,
+  useDeleteDistributionMutation
+} = DistributionApi;
