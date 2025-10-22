@@ -69,6 +69,7 @@ import PayBeNext from "../../pages/Reports/PayBeNext/PayBeNext";
 import PayBenReport from "../../pages/Reports/PayBenReport/PayBenReport";
 import ReprintCertificates from "../../pages/ReprintCertificates/ReprintCertificates";
 import ViewDistribution from "../../pages/ViewDistribution/ViewDistribution";
+import EditDistribution from "../../pages/EditDistribution/EditDistribution";
 import LandingPage from "./LandingPage";
 
 const RouterSubAssembly: React.FC = () => {
@@ -242,6 +243,9 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={`${ROUTES.ADD_DISTRIBUTION}/:memberId/:memberType`}
                   element={<AddDistribution />}></Route>
+                <Route
+                  path={`${ROUTES.EDIT_DISTRIBUTION}/:memberId/:memberType`}
+                  element={<EditDistribution />}></Route>
                 <Route
                   path={ROUTES.PAY_BEN_REPORT}
                   element={<PayBenReport />}></Route>

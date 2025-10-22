@@ -100,6 +100,7 @@ DECLARE
     VIEW_DISTRIBUTION_PAGE CONSTANT NUMBER := 156;
     ADD_DISTRIBUTION_PAGE CONSTANT NUMBER := 157;
     BENEFICIARY_INQUIRY_PAGE CONSTANT NUMBER :=158;
+    EDIT_DISTRIBUTION_PAGE CONSTANT NUMBER := 159;
 
 
     --- These are the role IDs from the ROLES table
@@ -219,6 +220,7 @@ BEGIN
     insert_navigation_item(DISTRIBUTION_INQUIRY_PAGE, DISTRIBUTIONS_MENU, 'Distribution Inquiry (008-14l)', '', 'distributions-inquiry', STATUS_NORMAL, ORDER_FIRST, '', DISABLED, IS_NAVIGABLE);
     insert_navigation_item(VIEW_DISTRIBUTION_PAGE, DISTRIBUTIONS_MENU, 'View Distribution (008-14V)', '', 'view-distribution', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, NOT_NAVIGABLE);
     insert_navigation_item(ADD_DISTRIBUTION_PAGE, DISTRIBUTIONS_MENU, 'Add Distribution (008-14A)', '', 'add-distribution', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, NOT_NAVIGABLE);
+    insert_navigation_item(EDIT_DISTRIBUTION_PAGE, DISTRIBUTIONS_MENU, 'Edit Distribution (008-14E)', '', 'edit-distribution', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, NOT_NAVIGABLE);
 
 --It Operations
     insert_navigation_item(DEMOGRAPHIC_FREEZE_PAGE, IT_DEVOPS_MENU, 'Demographic Freeze', '', 'demographic-freeze', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -362,7 +364,14 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(ADD_DISTRIBUTION_PAGE, DISTRIBUTIONS_CLERK);
     assign_navigation_role(ADD_DISTRIBUTION_PAGE, HARDSHIP_ADMINISTRATOR);
     assign_navigation_role(ADD_DISTRIBUTION_PAGE, IT_DEVOPS);
-   
+
+-- Edit Distribution
+    assign_navigation_role(EDIT_DISTRIBUTION_PAGE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(EDIT_DISTRIBUTION_PAGE, FINANCE_MANAGER);
+    assign_navigation_role(EDIT_DISTRIBUTION_PAGE, DISTRIBUTIONS_CLERK);
+    assign_navigation_role(EDIT_DISTRIBUTION_PAGE, HARDSHIP_ADMINISTRATOR);
+    assign_navigation_role(EDIT_DISTRIBUTION_PAGE, IT_DEVOPS);
+
 
 -- Assign roles for INQUIRIES (Master Inquiry endpoints -> CanRunMasterInquiry)
     assign_navigation_role(INQUIRIES_MENU, SYSTEM_ADMINISTRATOR);
