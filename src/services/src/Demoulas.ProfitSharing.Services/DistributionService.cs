@@ -20,6 +20,7 @@ using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services;
+
 public sealed class DistributionService : IDistributionService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
@@ -544,19 +545,19 @@ public sealed class DistributionService : IDistributionService
                 .ToList();
 
             var manualAndOnHoldDistributions = await (
-                from d in ctx.Distributions.Include(x=>x.Frequency)
-               where d.StatusId == DistributionStatus.Constants.RequestOnHold || d.StatusId == DistributionStatus.Constants.ManualCheck
-               group d by d.StatusId into g
-               select new DistributionRunReportSummaryResponse
-               {
-                   DistributionFrequencyId = null,
-                   DistributionTypeName = g.First().Status!.Name,
-                   TotalDistributions = g.Count(),
-                   TotalGrossAmount = g.Sum(d => d.GrossAmount),
-                   TotalFederalTaxAmount = g.Sum(d => d.FederalTaxAmount),
-                   TotalStateTaxAmount = g.Sum(d => d.StateTaxAmount),
-                   TotalCheckAmount = g.Sum(d => d.GrossAmount) - g.Sum(d => d.FederalTaxAmount) - g.Sum(d => d.StateTaxAmount)
-               }).ToListAsync(cancellationToken);
+                from d in ctx.Distributions.Include(x => x.Frequency)
+                where d.StatusId == DistributionStatus.Constants.RequestOnHold || d.StatusId == DistributionStatus.Constants.ManualCheck
+                group d by d.StatusId into g
+                select new DistributionRunReportSummaryResponse
+                {
+                    DistributionFrequencyId = null,
+                    DistributionTypeName = g.First().Status!.Name,
+                    TotalDistributions = g.Count(),
+                    TotalGrossAmount = g.Sum(d => d.GrossAmount),
+                    TotalFederalTaxAmount = g.Sum(d => d.FederalTaxAmount),
+                    TotalStateTaxAmount = g.Sum(d => d.StateTaxAmount),
+                    TotalCheckAmount = g.Sum(d => d.GrossAmount) - g.Sum(d => d.FederalTaxAmount) - g.Sum(d => d.StateTaxAmount)
+                }).ToListAsync(cancellationToken);
 
             var foundStatusNames = manualAndOnHoldDistributions.Select(gr => gr.DistributionTypeName).ToHashSet();
             var missingStatuses = (await ctx.DistributionStatuses.Where(d => d.Id == DistributionStatus.Constants.RequestOnHold || d.Id == DistributionStatus.Constants.ManualCheck).ToListAsync(cancellationToken))
@@ -587,16 +588,65 @@ public sealed class DistributionService : IDistributionService
     {
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var query = from dist in ctx.Distributions.Include(x=>x.Payee)
+            var query = from dist in ctx.Distributions.Include(x => x.Payee)
                         where dist.StatusId == DistributionStatus.Constants.RequestOnHold
-                        select new DistributionsOnHoldResponse
+                        select new
                         {
-                            Ssn = dist.Ssn.MaskSsn(),
+                            dist.Ssn,
                             PayTo = dist.Payee!.Name,
-                            CheckAmount = dist.CheckAmount,
+                            dist.CheckAmount,
                         };
             var paginatedResults = await query.ToPaginationResultsAsync(request, cancellationToken);
-            return Result<PaginatedResponseDto<DistributionsOnHoldResponse>>.Success(paginatedResults);
+
+            var maskedResults = new PaginatedResponseDto<DistributionsOnHoldResponse>(request)
+            {
+                Total = paginatedResults.Total,
+                Results = paginatedResults.Results.Select(d => new DistributionsOnHoldResponse
+                {
+                    Ssn = d.Ssn.MaskSsn(),
+                    PayTo = d.PayTo,
+                    CheckAmount = d.CheckAmount,
+                }).ToList()
+            };
+
+            return Result<PaginatedResponseDto<DistributionsOnHoldResponse>>.Success(maskedResults);
+        }, cancellationToken);
+    }
+
+    public async Task<Result<PaginatedResponseDto<ManualChecksWrittenResponse>>> GetManualCheckDistributions(SortedPaginationRequestDto request, CancellationToken cancellationToken)
+    {
+        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var query = from dist in ctx.Distributions.Include(x => x.Payee)
+                        where dist.StatusId == DistributionStatus.Constants.ManualCheck
+                        select new
+                        {
+                            dist.Ssn,
+                            PayTo = dist.Payee!.Name,
+                            dist.CheckAmount,
+                            dist.ManualCheckNumber,
+                            dist.GrossAmount,
+                            dist.FederalTaxAmount,
+                            dist.StateTaxAmount,
+                        };
+            var paginatedResults = await query.ToPaginationResultsAsync(request, cancellationToken);
+
+            var maskedResults = new PaginatedResponseDto<ManualChecksWrittenResponse>(request)
+            {
+                Total = paginatedResults.Total,
+                Results = paginatedResults.Results.Select(d => new ManualChecksWrittenResponse
+                {
+                    Ssn = d.Ssn.MaskSsn(),
+                    PayTo = d.PayTo,
+                    CheckAmount = d.CheckAmount,
+                    CheckNumber = d.ManualCheckNumber,
+                    GrossAmount = d.GrossAmount,
+                    FederalTaxAmount = d.FederalTaxAmount,
+                    StateTaxAmount = d.StateTaxAmount,
+                }).ToList()
+            };
+
+            return Result<PaginatedResponseDto<ManualChecksWrittenResponse>>.Success(maskedResults);
         }, cancellationToken);
     }
 
@@ -639,15 +689,15 @@ public sealed class DistributionService : IDistributionService
             .Include(d => d.Payee)
             .Include(d => d.ThirdPartyPayee)
             .ThenInclude(tp => tp!.Address)
-            .Where(x=>x.StatusId != DistributionStatus.Constants.RequestOnHold && x.StatusId != DistributionStatus.Constants.ManualCheck)
-            .Select(d=>d);
-        
+            .Where(x => x.StatusId != DistributionStatus.Constants.RequestOnHold && x.StatusId != DistributionStatus.Constants.ManualCheck)
+            .Select(d => d);
+
         if (distributionFrequencies.Any())
         {
             distributionQuery = distributionQuery.Where(d => distributionFrequencies.Contains(d.FrequencyId));
         }
 
-        
+
         return distributionQuery;
     }
 }
