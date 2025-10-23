@@ -507,6 +507,81 @@ public sealed class DistributionService : IDistributionService
         }, cancellationToken);
     }
 
+    public async Task<Result<DistributionRunReportSummaryResponse[]>> GetDistributionRunReportSummary(CancellationToken cancellationToken)
+    {
+        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var distributionQuery = GetDistributionExtract(ctx, cancellationToken, Array.Empty<char>());
+
+            var groupedResults = await distributionQuery
+                .GroupBy(d => d.FrequencyId)
+                .Select(g => new DistributionRunReportSummaryResponse
+                {
+                    DistributionFrequencyId = g.Key,
+                    DistributionTypeName = g.First().Frequency!.Name,
+                    TotalDistributions = g.Count(),
+                    TotalGrossAmount = g.Sum(d => d.GrossAmount),
+                    TotalFederalTaxAmount = g.Sum(d => d.FederalTaxAmount),
+                    TotalStateTaxAmount = g.Sum(d => d.StateTaxAmount),
+                    TotalCheckAmount = g.Sum(d => d.GrossAmount) - g.Sum(d => d.FederalTaxAmount) - g.Sum(d => d.StateTaxAmount)
+                })
+                .ToListAsync(cancellationToken);
+
+            var foundFrequencyIds = groupedResults.Select(gr => gr.DistributionFrequencyId).ToHashSet();
+            var missingFrequencies = (await ctx.DistributionFrequencies.ToListAsync(cancellationToken))
+                .Where(df => !foundFrequencyIds.Any(gr => gr == df.Id))
+                .Select(df => new DistributionRunReportSummaryResponse
+                {
+                    DistributionFrequencyId = df.Id,
+                    DistributionTypeName = df.Name,
+                    TotalDistributions = 0,
+                    TotalGrossAmount = 0,
+                    TotalFederalTaxAmount = 0,
+                    TotalStateTaxAmount = 0,
+                    TotalCheckAmount = 0
+                })
+                .ToList();
+
+            var manualAndOnHoldDistributions = await (
+                from d in ctx.Distributions.Include(x=>x.Frequency)
+               where d.StatusId == DistributionStatus.Constants.RequestOnHold || d.StatusId == DistributionStatus.Constants.ManualCheck
+               group d by d.StatusId into g
+               select new DistributionRunReportSummaryResponse
+               {
+                   DistributionFrequencyId = null,
+                   DistributionTypeName = g.First().Status!.Name,
+                   TotalDistributions = g.Count(),
+                   TotalGrossAmount = g.Sum(d => d.GrossAmount),
+                   TotalFederalTaxAmount = g.Sum(d => d.FederalTaxAmount),
+                   TotalStateTaxAmount = g.Sum(d => d.StateTaxAmount),
+                   TotalCheckAmount = g.Sum(d => d.GrossAmount) - g.Sum(d => d.FederalTaxAmount) - g.Sum(d => d.StateTaxAmount)
+               }).ToListAsync(cancellationToken);
+
+            var foundStatusNames = manualAndOnHoldDistributions.Select(gr => gr.DistributionTypeName).ToHashSet();
+            var missingStatuses = (await ctx.DistributionStatuses.Where(d => d.Id == DistributionStatus.Constants.RequestOnHold || d.Id == DistributionStatus.Constants.ManualCheck).ToListAsync(cancellationToken))
+                .Where(ds => !foundStatusNames.Any(gr => gr == ds.Name))
+                .Select(ds => new DistributionRunReportSummaryResponse
+                {
+                    DistributionFrequencyId = null,
+                    DistributionTypeName = ds.Name,
+                    TotalDistributions = 0,
+                    TotalGrossAmount = 0,
+                    TotalFederalTaxAmount = 0,
+                    TotalStateTaxAmount = 0,
+                    TotalCheckAmount = 0
+                })
+                .ToList();
+
+            groupedResults.AddRange(missingFrequencies);
+            groupedResults.AddRange(manualAndOnHoldDistributions);
+            groupedResults.AddRange(missingStatuses);
+
+            groupedResults.Sort((a, b) => a.DistributionTypeName.CompareTo(b.DistributionTypeName));
+
+            return Result<DistributionRunReportSummaryResponse[]>.Success(groupedResults.ToArray());
+        }, cancellationToken);
+    }
+
     private Result<bool> ValidateDistributionRequest(CreateDistributionRequest request)
     {
         var validationErrors = new Dictionary<string, string[]>();
@@ -546,7 +621,7 @@ public sealed class DistributionService : IDistributionService
             .Include(d => d.Payee)
             .Include(d => d.ThirdPartyPayee)
             .ThenInclude(tp => tp!.Address)
-            .Where(x=>x.StatusId != DistributionStatus.Constants.RequestOnHold)
+            .Where(x=>x.StatusId != DistributionStatus.Constants.RequestOnHold && x.StatusId != DistributionStatus.Constants.ManualCheck)
             .Select(d=>d);
         
         if (distributionFrequencies.Any())

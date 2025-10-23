@@ -10,4 +10,5 @@ public interface IDistributionService
     Task<CreateOrUpdateDistributionResponse> CreateDistribution(CreateDistributionRequest request, CancellationToken cancellationToken);
     Task<Result<CreateOrUpdateDistributionResponse>> UpdateDistribution(UpdateDistributionRequest request, CancellationToken cancellationToken);
     Task<Result<bool>> DeleteDistribution(int distributionId, CancellationToken cancellationToken);
+    Task<Result<DistributionRunReportSummaryResponse[]>> GetDistributionRunReportSummary(CancellationToken cancellationToken);
 }
