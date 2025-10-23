@@ -19,6 +19,7 @@ using Demoulas.ProfitSharing.OracleHcm.HostedServices;
 using Demoulas.ProfitSharing.OracleHcm.Jobs;
 using Demoulas.ProfitSharing.OracleHcm.Messaging;
 using Demoulas.ProfitSharing.OracleHcm.Services;
+using Demoulas.ProfitSharing.OracleHcm.Services.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;

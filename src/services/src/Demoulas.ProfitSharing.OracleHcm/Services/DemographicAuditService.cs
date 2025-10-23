@@ -28,7 +28,6 @@ public sealed class DemographicAuditService : IDemographicAuditService
 
         if (duplicateSsnGroups.Count > 0)
         {
-            DemographicsIngestMetrics.DuplicateSsns.Add(duplicateSsnGroups.Count);
             _logger.LogDebug("Detected {Count} duplicate SSN groups", duplicateSsnGroups.Count);
         }
 
@@ -45,26 +44,20 @@ public sealed class DemographicAuditService : IDemographicAuditService
             var ids = group.Select(e => e.OracleHcmId).ToList();
             var badges = group.Select(e => e.BadgeNumber).ToList();
 
-            _logger.LogCritical(
-                "Multiple demographics with same SSN. " +
+            _logger.LogWarning(
+                "Duplicate SSN detected: " +
                 "SSN={SSN}, OracleHcmIds={OracleHcmIds}, BadgeNumbers={BadgeNumbers}",
                 group.Key, ids, badges);
 
-            var auditRecord = new DemographicsAudit
+            var auditRecord = new DemographicSyncAudit
             {
-                AuditedAt = DateTime.UtcNow,
-                RecordType = "DuplicateSSN",
-                RecordValue = group.Key.ToString(),
-                Detail = $"OracleHcmIds: {string.Join(", ", ids)}; Badges: {string.Join(", ", badges)}",
-                DemographicId = group.First().Id
+                BadgeNumber = group.First().BadgeNumber,
+                OracleHcmId = group.First().OracleHcmId,
+                PropertyName = "SSN",
+                Message = $"Duplicate SSN detected: {group.Key}. OracleHcmIds: {string.Join(", ", ids)}; Badges: {string.Join(", ", badges)}"
             };
 
             commands.Add(new AddAuditCommand(auditRecord));
-        }
-
-        if (duplicateGroups.Count > 0)
-        {
-            DemographicsIngestMetrics.DuplicateAudits.Add(duplicateGroups.Count);
         }
 
         return commands;
@@ -97,8 +90,6 @@ public sealed class DemographicAuditService : IDemographicAuditService
             return commands;
         }
 
-        DemographicsIngestMetrics.SsnConflicts.Add(conflictingItems.Count);
-
         foreach (var incomingItem in conflictingItems)
         {
             var conflictingExisting = existingBySsn[incomingItem.Ssn]
@@ -108,7 +99,7 @@ public sealed class DemographicAuditService : IDemographicAuditService
             foreach (var existingItem in conflictingExisting)
             {
                 // If existing record is terminated, allow overwrite
-                if (existingItem.EmploymentStatus == "T")
+                if (existingItem.EmploymentStatusId == EmploymentStatus.Constants.Terminated)
                 {
                     _logger.LogWarning(
                         "SSN conflict detected but existing record is terminated. " +
@@ -126,14 +117,14 @@ public sealed class DemographicAuditService : IDemographicAuditService
                     incomingItem.Ssn, existingItem.BadgeNumber, incomingItem.BadgeNumber,
                     existingItem.OracleHcmId, incomingItem.OracleHcmId);
 
-                var auditRecord = new DemographicsAudit
+                var auditRecord = new DemographicSyncAudit
                 {
-                    AuditedAt = DateTime.UtcNow,
-                    RecordType = "SSNConflict",
-                    RecordValue = incomingItem.Ssn.ToString(),
-                    Detail = $"Existing Badge={existingItem.BadgeNumber}, OracleId={existingItem.OracleHcmId}; " +
-                             $"Incoming Badge={incomingItem.BadgeNumber}, OracleId={incomingItem.OracleHcmId}",
-                    DemographicId = existingItem.Id
+                    BadgeNumber = existingItem.BadgeNumber,
+                    OracleHcmId = existingItem.OracleHcmId,
+                    PropertyName = "SSN",
+                    Message = $"SSN conflict: SSN={incomingItem.Ssn}. " +
+                              $"Existing Badge={existingItem.BadgeNumber}, OracleId={existingItem.OracleHcmId}; " +
+                              $"Incoming Badge={incomingItem.BadgeNumber}, OracleId={incomingItem.OracleHcmId}"
                 };
 
                 commands.Add(new AddAuditCommand(auditRecord));

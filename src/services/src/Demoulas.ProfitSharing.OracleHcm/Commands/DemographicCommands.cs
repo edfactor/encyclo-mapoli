@@ -1,41 +1,42 @@
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Commands;
 
 /// <summary>
-/// Command to add a demographics audit record.
+/// Command to add a demographic sync audit record.
 /// </summary>
 public sealed class AddAuditCommand : IDemographicCommand
 {
-    private readonly DemographicsAudit _auditRecord;
+    private readonly DemographicSyncAudit _auditRecord;
 
-    public AddAuditCommand(DemographicsAudit auditRecord)
+    public AddAuditCommand(DemographicSyncAudit auditRecord)
     {
         _auditRecord = auditRecord;
     }
 
     public async Task ExecuteAsync(ProfitSharingDbContext context, CancellationToken ct)
     {
-        await context.DemographicsAudits.AddAsync(_auditRecord, ct);
+        await context.DemographicSyncAudit.AddAsync(_auditRecord, ct);
     }
 }
 
 /// <summary>
-/// Command to add a demographics history record.
+/// Command to add a demographic history record.
 /// </summary>
 public sealed class AddHistoryCommand : IDemographicCommand
 {
-    private readonly DemographicsHistory _historyRecord;
+    private readonly DemographicHistory _historyRecord;
 
-    public AddHistoryCommand(DemographicsHistory historyRecord)
+    public AddHistoryCommand(DemographicHistory historyRecord)
     {
         _historyRecord = historyRecord;
     }
 
     public async Task ExecuteAsync(ProfitSharingDbContext context, CancellationToken ct)
     {
-        await context.DemographicsHistories.AddAsync(_historyRecord, ct);
+        await context.DemographicHistories.AddAsync(_historyRecord, ct);
     }
 }
 
@@ -77,45 +78,45 @@ public sealed class UpdateDemographicCommand : IDemographicCommand
 }
 
 /// <summary>
-/// Command to update SSN in BeneficiaryContacts for a given OracleHcmId.
+/// Command to update SSN in BeneficiaryContacts using old SSN.
 /// </summary>
 public sealed class UpdateBeneficiaryContactsSsnCommand : IDemographicCommand
 {
-    private readonly long _oracleHcmId;
+    private readonly int _oldSsn;
     private readonly int _newSsn;
 
-    public UpdateBeneficiaryContactsSsnCommand(long oracleHcmId, int newSsn)
+    public UpdateBeneficiaryContactsSsnCommand(int oldSsn, int newSsn)
     {
-        _oracleHcmId = oracleHcmId;
+        _oldSsn = oldSsn;
         _newSsn = newSsn;
     }
 
-    public async Task ExecuteAsync(ProfitSharingDbContext context, CancellationToken ct)
+    public Task ExecuteAsync(ProfitSharingDbContext context, CancellationToken ct)
     {
-        await context.BeneficiaryContacts
-            .Where(bc => bc.OracleHcmId == _oracleHcmId)
+        return context.BeneficiaryContacts
+            .Where(bc => bc.Ssn == _oldSsn)
             .ExecuteUpdateAsync(s => s.SetProperty(bc => bc.Ssn, _newSsn), ct);
     }
 }
 
 /// <summary>
-/// Command to update SSN in ProfitDetails for a given OracleHcmId.
+/// Command to update SSN in ProfitDetails using old SSN.
 /// </summary>
 public sealed class UpdateProfitDetailsSsnCommand : IDemographicCommand
 {
-    private readonly long _oracleHcmId;
+    private readonly int _oldSsn;
     private readonly int _newSsn;
 
-    public UpdateProfitDetailsSsnCommand(long oracleHcmId, int newSsn)
+    public UpdateProfitDetailsSsnCommand(int oldSsn, int newSsn)
     {
-        _oracleHcmId = oracleHcmId;
+        _oldSsn = oldSsn;
         _newSsn = newSsn;
     }
 
-    public async Task ExecuteAsync(ProfitSharingDbContext context, CancellationToken ct)
+    public Task ExecuteAsync(ProfitSharingDbContext context, CancellationToken ct)
     {
-        await context.ProfitDetails
-            .Where(pd => pd.OracleHcmId == _oracleHcmId)
+        return context.ProfitDetails
+            .Where(pd => pd.Ssn == _oldSsn)
             .ExecuteUpdateAsync(s => s.SetProperty(pd => pd.Ssn, _newSsn), ct);
     }
 }

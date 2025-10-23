@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.OracleHcm.Commands;
 using Demoulas.ProfitSharing.OracleHcm.Services.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -111,17 +111,18 @@ public sealed class DemographicHistoryService : IDemographicHistoryService
                 continue;
             }
 
+            var oldSsn = existing.Ssn;
             var newSsn = incoming.Ssn;
 
-            // Update related BeneficiaryContacts
-            commands.Add(new UpdateBeneficiaryContactsSsnCommand(existing.OracleHcmId, newSsn));
+            // Update related BeneficiaryContacts using old SSN
+            commands.Add(new UpdateBeneficiaryContactsSsnCommand(oldSsn, newSsn));
 
-            // Update related ProfitDetails
-            commands.Add(new UpdateProfitDetailsSsnCommand(existing.OracleHcmId, newSsn));
+            // Update related ProfitDetails using old SSN
+            commands.Add(new UpdateProfitDetailsSsnCommand(oldSsn, newSsn));
 
             _logger.LogDebug(
                 "Prepared SSN update commands for OracleHcmId {OracleHcmId}: {OldSsn} -> {NewSsn}",
-                existing.OracleHcmId, existing.Ssn, newSsn);
+                existing.OracleHcmId, oldSsn, newSsn);
         }
 
         return commands;
@@ -133,80 +134,53 @@ public sealed class DemographicHistoryService : IDemographicHistoryService
     {
         return existing.Ssn != incoming.Ssn ||
                existing.BadgeNumber != incoming.BadgeNumber ||
-               existing.FirstName != incoming.FirstName ||
-               existing.MiddleInitial != incoming.MiddleInitial ||
-               existing.LastName != incoming.LastName ||
-               existing.Gender != incoming.Gender ||
-               existing.BirthDate != incoming.BirthDate ||
+               existing.ContactInfo.FirstName != incoming.ContactInfo.FirstName ||
+               existing.ContactInfo.MiddleName != incoming.ContactInfo.MiddleName ||
+               existing.ContactInfo.LastName != incoming.ContactInfo.LastName ||
+               existing.GenderId != incoming.GenderId ||
+               existing.DateOfBirth != incoming.DateOfBirth ||
                existing.HireDate != incoming.HireDate ||
                existing.TerminationDate != incoming.TerminationDate ||
-               existing.EmploymentStatus != incoming.EmploymentStatus ||
-               existing.HomePhoneNumber != incoming.HomePhoneNumber ||
-               existing.CellPhoneNumber != incoming.CellPhoneNumber ||
-               existing.AddressLine1 != incoming.AddressLine1 ||
-               existing.AddressLine2 != incoming.AddressLine2 ||
-               existing.City != incoming.City ||
-               existing.State != incoming.State ||
-               existing.ZipCode != incoming.ZipCode ||
-               existing.EmailAddress != incoming.EmailAddress ||
-               existing.Military != incoming.Military ||
-               existing.MaritalStatus != incoming.MaritalStatus;
+               existing.EmploymentStatusId != incoming.EmploymentStatusId ||
+               existing.ContactInfo.PhoneNumber != incoming.ContactInfo.PhoneNumber ||
+               existing.ContactInfo.MobileNumber != incoming.ContactInfo.MobileNumber ||
+               existing.Address.Street != incoming.Address.Street ||
+               existing.Address.Street2 != incoming.Address.Street2 ||
+               existing.Address.City != incoming.Address.City ||
+               existing.Address.State != incoming.Address.State ||
+               existing.Address.PostalCode != incoming.Address.PostalCode ||
+               existing.ContactInfo.EmailAddress != incoming.ContactInfo.EmailAddress;
     }
 
-    private static DemographicsHistory CreateHistoryRecord(Demographic demographic)
+    private static DemographicHistory CreateHistoryRecord(Demographic demographic)
     {
-        return new DemographicsHistory
-        {
-            DemographicId = demographic.Id,
-            OracleHcmId = demographic.OracleHcmId,
-            Ssn = demographic.Ssn,
-            BadgeNumber = demographic.BadgeNumber,
-            FirstName = demographic.FirstName,
-            MiddleInitial = demographic.MiddleInitial,
-            LastName = demographic.LastName,
-            Gender = demographic.Gender,
-            BirthDate = demographic.BirthDate,
-            HireDate = demographic.HireDate,
-            TerminationDate = demographic.TerminationDate,
-            EmploymentStatus = demographic.EmploymentStatus,
-            HomePhoneNumber = demographic.HomePhoneNumber,
-            CellPhoneNumber = demographic.CellPhoneNumber,
-            AddressLine1 = demographic.AddressLine1,
-            AddressLine2 = demographic.AddressLine2,
-            City = demographic.City,
-            State = demographic.State,
-            ZipCode = demographic.ZipCode,
-            EmailAddress = demographic.EmailAddress,
-            Military = demographic.Military,
-            MaritalStatus = demographic.MaritalStatus,
-            ValidFrom = DateTime.UtcNow,
-            ValidTo = null
-        };
+        var history = DemographicHistory.FromDemographic(demographic);
+        history.ValidFrom = DateTimeOffset.UtcNow;
+        history.ValidTo = new DateTime(2100, 1, 1, 0, 0, 0, DateTimeKind.Local);
+        return history;
     }
 
     private static void UpdateDemographicValues(Demographic existing, Demographic incoming)
     {
         existing.Ssn = incoming.Ssn;
         existing.BadgeNumber = incoming.BadgeNumber;
-        existing.FirstName = incoming.FirstName;
-        existing.MiddleInitial = incoming.MiddleInitial;
-        existing.LastName = incoming.LastName;
-        existing.Gender = incoming.Gender;
-        existing.BirthDate = incoming.BirthDate;
+        existing.ContactInfo.FirstName = incoming.ContactInfo.FirstName;
+        existing.ContactInfo.MiddleName = incoming.ContactInfo.MiddleName;
+        existing.ContactInfo.LastName = incoming.ContactInfo.LastName;
+        existing.GenderId = incoming.GenderId;
+        existing.DateOfBirth = incoming.DateOfBirth;
         existing.HireDate = incoming.HireDate;
         existing.TerminationDate = incoming.TerminationDate;
-        existing.EmploymentStatus = incoming.EmploymentStatus;
-        existing.HomePhoneNumber = incoming.HomePhoneNumber;
-        existing.CellPhoneNumber = incoming.CellPhoneNumber;
-        existing.AddressLine1 = incoming.AddressLine1;
-        existing.AddressLine2 = incoming.AddressLine2;
-        existing.City = incoming.City;
-        existing.State = incoming.State;
-        existing.ZipCode = incoming.ZipCode;
-        existing.EmailAddress = incoming.EmailAddress;
-        existing.Military = incoming.Military;
-        existing.MaritalStatus = incoming.MaritalStatus;
-        existing.LastModifiedDate = DateTime.UtcNow;
+        existing.EmploymentStatusId = incoming.EmploymentStatusId;
+        existing.ContactInfo.PhoneNumber = incoming.ContactInfo.PhoneNumber;
+        existing.ContactInfo.MobileNumber = incoming.ContactInfo.MobileNumber;
+        existing.Address.Street = incoming.Address.Street;
+        existing.Address.Street2 = incoming.Address.Street2;
+        existing.Address.City = incoming.Address.City;
+        existing.Address.State = incoming.Address.State;
+        existing.Address.PostalCode = incoming.Address.PostalCode;
+        existing.ContactInfo.EmailAddress = incoming.ContactInfo.EmailAddress;
+        existing.ModifiedAtUtc = DateTimeOffset.UtcNow;
     }
 
     #endregion
