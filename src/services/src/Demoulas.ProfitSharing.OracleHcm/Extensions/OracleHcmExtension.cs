@@ -215,6 +215,11 @@ public static class OracleHcmExtension
         // Repositories
         services.AddScoped<IDemographicsRepository, DemographicsRepository>();
 
+        // Domain services (business logic)
+        services.AddScoped<IDemographicMatchingService, DemographicMatchingService>();
+        services.AddScoped<IDemographicAuditService, DemographicAuditService>();
+        services.AddScoped<IDemographicHistoryService, DemographicHistoryService>();
+
         // Internal services
         services.AddTransient<IDemographicsServiceInternal, DemographicsService>();
         services.AddTransient<IEmployeeSyncService, EmployeeSyncService>();
