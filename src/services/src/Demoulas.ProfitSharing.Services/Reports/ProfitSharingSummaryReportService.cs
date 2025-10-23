@@ -259,21 +259,17 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     x => x.Hours >= 0 &&
                          x.Hours < _hoursThreshold &&
                          x.DateOfBirth <= birthday18 &&
-                         x.PriorBalance > 0),
-
-                // Line 10: Terminated under 18 with no wages
-                CreateLineFromData(
-                    "TERMINATED",
-                    ((int)YearEndProfitSharingReportId.TerminatedUnder18NoWages).ToString(),
-                    GetEnumDescription(YearEndProfitSharingReportId.TerminatedUnder18NoWages),
-                    x => IsTerminatedInFiscalYear(x) &&
-                         x.Wages == 0 &&
-                         x.DateOfBirth > birthday18)
+                         x.PriorBalance > 0)
             };
 
-            // Line N: Non-employee beneficiaries (still needs separate query)
+            // Line N: Non-employee beneficiaries (from BeneficiaryContacts, NOT in Demographics)
+            // Matches COBOL Report 10 logic
+            var demographicSsns = await ctx.Demographics
+                .Select(d => d.Ssn)
+                .ToListAsync(cancellationToken);
+
             var beneQry = ctx.BeneficiaryContacts
-                .Where(bc => !demographicQuery.Any(x => x.Ssn == bc.Ssn))
+                .Where(bc => !demographicSsns.Contains(bc.Ssn))
                 .Join(_totalService.GetTotalBalanceSet(ctx, req.ProfitYear), x => x.Ssn, x => x.Ssn,
                     (pp, tot) => new { pp, tot });
 
@@ -313,9 +309,18 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-
-            // Always fetch all details for the year
-            IQueryable<YearEndProfitSharingReportDetail> allDetails = await ActiveSummary(ctx, req, calInfo.FiscalEndDate);
+            IQueryable<YearEndProfitSharingReportDetail> allDetails;
+            
+            // Special handling for Report 10: Non-Employee Beneficiaries
+            if (req.ReportId == YearEndProfitSharingReportId.NonEmployeeBeneficiaries)
+            {
+                allDetails = await GetNonEmployeeBeneficiariesAsync(ctx, req.ProfitYear, cancellationToken);
+            }
+            else
+            {
+                // Standard employee reports (1-8): fetch from Demographics/PayProfit
+                allDetails = await ActiveSummary(ctx, req, calInfo.FiscalEndDate);
+            }
 
             // Apply report-specific filtering for ReportId 1-8, 10
             IQueryable<YearEndProfitSharingReportDetail> filteredDetails = allDetails;
@@ -529,6 +534,63 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     }
 
     /// <summary>
+    /// Returns non-employee beneficiaries (people with balances who are NOT in Demographics/PayProfit).
+    /// Matches COBOL PAY426N Report 10 logic: reads PAYBEN, excludes anyone in PAYPROFIT.
+    /// </summary>
+    private async Task<IQueryable<YearEndProfitSharingReportDetail>> GetNonEmployeeBeneficiariesAsync(
+        ProfitSharingReadOnlyDbContext ctx, 
+        short profitYear, 
+        CancellationToken cancellationToken = default)
+    {
+        // Get all Demographics SSNs to exclude
+        var demographicSsns = await ctx.Demographics
+            .Select(d => d.Ssn)
+            .ToListAsync(cancellationToken);
+
+        // Get beneficiaries who are NOT in Demographics (non-employees)
+        var beginningBalanceYear = (short)(profitYear - 1);
+        var balances = _totalService.GetTotalBalanceSet(ctx, beginningBalanceYear);
+
+        // We cannot call MaskSsn() inside an EF Core-translated query. Materialize the minimal data first
+        // then apply MaskSsn() in-memory.
+        var rawBeneficiaries = await (
+            from bc in ctx.BeneficiaryContacts
+            where !demographicSsns.Contains(bc.Ssn)
+            join bal in balances on bc.Ssn equals bal.Ssn
+            select new { Beneficiary = bc, Balance = bal }
+        ).ToListAsync(cancellationToken);
+
+        var details = rawBeneficiaries.Select(x => new YearEndProfitSharingReportDetail
+        {
+            BadgeNumber = 0,  // Non-employees have badge 0
+            ProfitYear = profitYear,
+            PriorProfitYear = beginningBalanceYear,
+            EmployeeName = x.Beneficiary.UserName ?? string.Empty,
+            StoreNumber = 0,
+            EmployeeTypeCode = '\0',
+            EmployeeTypeName = "Non-Employee",
+            DateOfBirth = x.Beneficiary.DateOfBirth,
+            Age = 99,  // Fixed value per COBOL
+            // Use the MaskSsn extension in-memory (bc.Ssn is an int)
+            Ssn = x.Beneficiary.Ssn.MaskSsn(),
+            Wages = 0,  // Non-employees have no wages
+            Hours = 0,  // Non-employees have no hours
+            Points = 0,  // No points earned
+            IsNew = false,
+            IsUnder21 = false,
+            EmployeeStatus = EmploymentStatus.Constants.Terminated,  // Treated as terminated per COBOL
+            Balance = (decimal)(x.Balance.TotalAmount ?? 0),
+            PriorBalance = 0,
+            YearsInPlan = 99,  // Fixed value per COBOL (WS-PYRS = 99)
+            TerminationDate = null,
+            FirstContributionYear = null,
+            IsExecutive = false
+        }).AsQueryable();
+
+        return details;
+    }
+
+    /// <summary>
     /// Returns a queryable of year-end profit sharing report details for the given request.
     /// </summary>
     private Task<IQueryable<YearEndProfitSharingReportDetail>> ActiveSummary(ProfitSharingReadOnlyDbContext ctx, BadgeNumberRequest req, DateOnly ageAsOfDate)
@@ -620,8 +682,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate <= fiscalEndDate && x.TerminationDate >= fiscalBeginDate &&
                 x.Hours < _hoursThreshold && x.DateOfBirth <= birthday18 && x.PriorBalance > 0,
             10 => x =>
-                x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate <= fiscalEndDate && x.TerminationDate >= fiscalBeginDate &&
-                x.Wages == 0 && x.DateOfBirth > birthday18,
+                x.BadgeNumber == 0, // Non-employee beneficiaries (not in Demographics/PayProfit)
             11 => x => x.BadgeNumber == 0,
             _ => x => true
         };
