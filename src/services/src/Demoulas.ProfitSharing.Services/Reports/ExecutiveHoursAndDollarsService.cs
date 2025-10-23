@@ -71,8 +71,9 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
             }
             if (request.FullNameContains != null)
             {
-                var pattern = $"%{request.FullNameContains.ToUpperInvariant()}%";
-                query = query.Where(pp => EF.Functions.Like(pp.Demographic!.ContactInfo!.FullName!.ToUpper(), pattern));
+                // Use Contains for in-memory compatibility (unit tests)
+                var searchValue = request.FullNameContains.ToUpperInvariant();
+                query = query.Where(pp => pp.Demographic!.ContactInfo!.FullName!.ToUpper().Contains(searchValue));
             }
 
             // Select unmasked SSN for sorting, then mask after pagination
