@@ -881,6 +881,9 @@ public class DemographicsServiceTests
     }
 }
 
+// TODO: Remove this test helper - DemographicsService is sealed and shouldn't be inherited
+// This was used for testing fallback SQL logic, which should now be tested via DemographicsRepository instead
+/*
 internal sealed class TestableDemographicsService : DemographicsService
 {
     public TestableDemographicsService(
@@ -902,3 +905,4 @@ internal sealed class TestableDemographicsService : DemographicsService
         return Task.FromResult(new List<Demographic>());
     }
 }
+*/

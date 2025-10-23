@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Metrics;
@@ -15,7 +9,6 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Mappers;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
-using EntityFramework.Exceptions.Common;
 using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -27,7 +20,7 @@ namespace Demoulas.ProfitSharing.OracleHcm.Services;
 /// Demographics ingestion/upsert with primary OracleHcmId matching, (SSN,BadgeNumber) fallback, history tracking, and audit logging.
 /// Includes metrics counters & structured summary logging.
 /// </summary>
-public class DemographicsService : IDemographicsServiceInternal
+public sealed class DemographicsService : IDemographicsServiceInternal
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly DemographicMapper _mapper;
@@ -387,7 +380,7 @@ public class DemographicsService : IDemographicsServiceInternal
         return inserted;
     }
 
-    protected virtual async Task<List<Demographic>> GetMatchingDemographicsByFallbackSqlAsync(List<(int Ssn, int Badge)> pairs, ProfitSharingDbContext context, CancellationToken ct)
+    private static async Task<List<Demographic>> GetMatchingDemographicsByFallbackSqlAsync(List<(int Ssn, int Badge)> pairs, ProfitSharingDbContext context, CancellationToken ct)
     {
         List<string> clauses = new();
         List<OracleParameter> parameters = new();

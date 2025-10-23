@@ -9,6 +9,8 @@ using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Common.Telemetry;
+using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Data.Repositories;
 using Demoulas.ProfitSharing.OracleHcm.Clients;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Factories;
@@ -210,6 +212,8 @@ public static class OracleHcmExtension
         services.AddTransient<AddressMapper>();
         services.AddTransient<ContactInfoMapper>();
 
+        // Repositories
+        services.AddScoped<IDemographicsRepository, DemographicsRepository>();
 
         // Internal services
         services.AddTransient<IDemographicsServiceInternal, DemographicsService>();
