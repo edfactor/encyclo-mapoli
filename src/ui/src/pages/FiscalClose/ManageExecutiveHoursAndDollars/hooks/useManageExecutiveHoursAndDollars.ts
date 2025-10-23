@@ -1,14 +1,6 @@
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-
-interface ExecutiveSearchForm {
-  badgeNumber?: number;
-  socialSecurity?: string;
-  fullNameContains?: string;
-  hasExecutiveHoursAndDollars?: boolean;
-  isMonthlyPayroll?: boolean;
-}
 import {
   useLazyGetAdditionalExecutivesQuery,
   useLazyGetExecutiveHoursAndDollarsQuery,
@@ -24,8 +16,8 @@ import {
 import { RootState } from "reduxstore/store";
 import { ExecutiveHoursAndDollars, ExecutiveHoursAndDollarsGrid } from "reduxstore/types";
 import { ISortParams } from "smart-ui-library";
-import { ExecutiveHoursAndDollarsRequestDto } from "types/fiscal/executive";
 import { useGridPagination } from "../../../../hooks/useGridPagination";
+import { ExecutiveHoursAndDollarsRequestDto } from "../../../../types/fiscal/executive";
 import {
   initialState,
   manageExecutiveHoursAndDollarsReducer,
@@ -35,6 +27,14 @@ import {
   selectShowGrid,
   selectShowModal
 } from "./useManageExecutiveHoursAndDollarsReducer";
+
+interface ExecutiveSearchForm {
+  badgeNumber?: number;
+  socialSecurity?: string;
+  fullNameContains?: string;
+  hasExecutiveHoursAndDollars?: boolean;
+  isMonthlyPayroll?: boolean;
+}
 
 const useManageExecutiveHoursAndDollars = () => {
   const [state, dispatch] = useReducer(manageExecutiveHoursAndDollarsReducer, initialState);
@@ -80,7 +80,9 @@ const useManageExecutiveHoursAndDollars = () => {
             dispatch({ type: "SEARCH_SUCCESS", payload: { results: response } });
           })
           .catch((error) => {
-            dispatch({ type: "SEARCH_FAILURE", payload: { error: error?.toString() || "Search failed" } });
+            const errorMessage = error?.toString() || "Search failed";
+            dispatch({ type: "SEARCH_FAILURE", payload: { error: errorMessage } });
+            console.error("Executive search error:", error);
           });
       }
     },
@@ -118,14 +120,14 @@ const useManageExecutiveHoursAndDollars = () => {
 
   const mainGridPagination = useGridPagination({
     initialPageSize: 25,
-    initialSortBy: "storeNumber",
+    initialSortBy: "fullName",
     initialSortDescending: false,
     onPaginationChange: handleMainGridPaginationChange
   });
 
   const modalGridPagination = useGridPagination({
     initialPageSize: 25,
-    initialSortBy: "storeNumber",
+    initialSortBy: "fullName",
     initialSortDescending: false,
     onPaginationChange: handleModalGridPaginationChange
   });

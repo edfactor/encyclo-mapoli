@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Data.Contexts.Extensions;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -70,20 +71,19 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
             }
             if (request.FullNameContains != null)
             {
-                // LINQ needs this simpler query so it can convert it to SQL.
-#pragma warning disable RCS1155
-                query = query.Where(pp =>
-                    pp.Demographic!.ContactInfo!.FullName!.ToLower().Contains(request.FullNameContains.ToLower()));
-#pragma warning restore RCS1155
+                // Use Contains for in-memory compatibility (unit tests)
+                var searchValue = request.FullNameContains.ToUpperInvariant();
+                query = query.Where(pp => pp.Demographic!.ContactInfo!.FullName!.ToUpper().Contains(searchValue));
             }
 
+            // Select unmasked SSN for sorting, then mask after pagination
             var paginatedResult = await query
                 .Select(p => new ExecutiveHoursAndDollarsResponse
                 {
                     BadgeNumber = p.Demographic!.BadgeNumber,
                     FullName = p.Demographic.ContactInfo.FullName,
                     StoreNumber = p.Demographic.StoreNumber,
-                    Ssn = p.Demographic.Ssn.MaskSsn(),
+                    Ssn = p.Demographic.Ssn.ToString(), // Keep unmasked for sorting
                     HoursExecutive = p.HoursExecutive,
                     IncomeExecutive = p.IncomeExecutive,
                     CurrentHoursYear = p.CurrentHoursYear,
@@ -92,19 +92,18 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
                     PayFrequencyName = p.Demographic.PayFrequency!.Name,
                     EmploymentStatusId = p.Demographic.EmploymentStatusId,
                     EmploymentStatusName = p.Demographic.EmploymentStatus!.Name,
-                    IsExecutive = false,
+                    IsExecutive = p.Demographic.PayFrequencyId == 2,
                 })
-                .OrderBy(p => p.StoreNumber)
-                .ThenBy(p => p.BadgeNumber)
                 .ToPaginationResultsAsync(request, cancellationToken);
 
-            // Now, fix the IsExecutive field in memory since Oracle's EF Driver doesnt handle the boolean projection
-            foreach (var item in paginatedResult.Results)
-            {
-                item.IsExecutive = item.PayFrequencyId == 2;
-            }
+            // Mask SSN after pagination/sorting
+            var results = paginatedResult.Results.Select(r => r with { Ssn = r.Ssn.MaskSsn() }).ToList();
 
-            return paginatedResult;
+            return new PaginatedResponseDto<ExecutiveHoursAndDollarsResponse>
+            {
+                Results = results,
+                Total = paginatedResult.Total
+            };
         }, cancellationToken);
 
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
