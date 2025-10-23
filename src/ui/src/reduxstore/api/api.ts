@@ -5,10 +5,17 @@ export const url = process.env.VITE_REACT_APP_PS_API as string;
 
 export const tagTypes = ["Get"];
 
+interface SecurityState {
+  token: string | null;
+  impersonating: string[];
+}
+
+interface AppState {
+  security: SecurityState;
+}
+
 export const prepareHeaders = (headers: Headers, context: { getState: () => unknown }) => {
-  // this must be any type below to solve circular type reference issues
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const state = context.getState() as any;
+  const state = context.getState() as AppState;
   const token = state.security.token;
   const impersonating = state.security.impersonating;
 
@@ -35,7 +42,7 @@ export const createDataSourceAwareBaseQuery = (
     mode: "cors",
     timeout: timeout ?? 100000, // Default 100 seconds, allow override for long-running operations
     prepareHeaders: (headers, { getState }) => {
-      const root = getState() as any;
+      const root = getState() as AppState;
       const token = root.security.token;
       const impersonating = root.security.impersonating;
       if (token) {
@@ -65,7 +72,7 @@ export const createDataSourceAwareBaseQuery = (
     if (result.data && typeof result.data === "object") {
       const hdr =
         (result.meta as FetchBaseQueryMeta | undefined)?.response?.headers?.get("x-demographic-data-source") ?? "Live";
-      (result.data as Record<string, unknown>).dataSource = hdr;
+      (result.data as Record<string, string>).dataSource = hdr;
     }
     return result;
   };

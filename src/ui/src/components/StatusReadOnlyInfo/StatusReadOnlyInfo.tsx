@@ -9,6 +9,13 @@ interface StatusReadOnlyInfoProps {
   message?: string;
 }
 
+interface NavigationItem {
+  id: number;
+  items?: NavigationItem[];
+  statusName?: string;
+  [key: string]: unknown;
+}
+
 /**
  * Component that displays an informational banner explaining why the page is read-only
  * due to page status not being "In Progress". Instructs users to change status to enable modifications.
@@ -18,11 +25,11 @@ const StatusReadOnlyInfo = ({ message }: StatusReadOnlyInfoProps) => {
   const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
 
   // Helper function to find current navigation item
-  const getCurrentNavigation = () => {
-    const findNavigation = (items: any[]): any => {
+  const getCurrentNavigation = (): NavigationItem | null => {
+    const findNavigation = (items: NavigationItem[]): NavigationItem | null => {
       for (const item of items) {
         if (item.id === currentNavigationId) return item;
-        if (item.items?.length > 0) {
+        if (item.items?.length && item.items.length > 0) {
           const found = findNavigation(item.items);
           if (found) return found;
         }

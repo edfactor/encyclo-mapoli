@@ -27,23 +27,20 @@ type BeneficiaryInquirySearchFilterProps = {
 const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterProps> = ({ onSearch }) => {
   const {
     control,
-    register,
     formState: { errors, isValid },
-    setValue,
     handleSubmit,
-    reset,
-    setFocus,
-    watch
+    reset
   } = useForm<beneficiaryRequest>({
     resolver: yupResolver(schema) as Resolver<beneficiaryRequest>,
     mode: "onBlur"
   });
 
-  const onSubmit = (data: any) => {
-    let { badgePsn, name, ssn, memberType } = data;
+  const onSubmit = (data: beneficiaryRequest) => {
+    const { badgePsn, name, socialSecurity: ssn } = data;
+    let { memberType } = data;
     memberType = memberType ?? "2";
-    let badge = undefined,
-      psn = undefined;
+    let badge: number | undefined = undefined;
+    let psn: number | undefined = undefined;
     if (badgePsn) {
       if (badgePsn.length <= MAX_EMPLOYEE_BADGE_LENGTH) {
         // Badge only (7 digits or less)
@@ -61,10 +58,10 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
         memberType: Number(memberType),
         name: name,
         ssn: ssn ? Number(ssn) : undefined,
-        skip: data.pagination?.skip || 0,
-        take: data.pagination?.take || 5,
-        sortBy: data.pagination?.sortBy || "name",
-        isSortDescending: data.pagination?.isSortDescending || true
+        skip: 0,
+        take: 5,
+        sortBy: "name",
+        isSortDescending: true
       };
       onSearch(beneficiarySearchFilterRequest);
     }

@@ -32,6 +32,7 @@ import BeneficiaryInquiryGrid from "./BeneficiaryInquiryGrid";
 import BeneficiaryInquirySearchFilter from "./BeneficiaryInquirySearchFilter";
 import CreateBeneficiary from "./CreateBeneficiary";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface SelectedMember {
   memberType: number;
   id: number;
@@ -48,9 +49,11 @@ const BeneficiaryInquiry = () => {
   const [triggerBeneficiaryDetail, { isSuccess }] = useLazyGetBeneficiaryDetailQuery();
   const [open, setOpen] = useState(false);
   const [openDeleteConfirmationDialog, setOpenDeleteConfirmationDialog] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [badgeNumber, setBadgeNumber] = useState(0);
   const [beneficiaryKind, setBeneficiaryKind] = useState<BeneficiaryKindDto[]>([]);
   const [beneficiaryType, setBeneficiaryType] = useState<BeneficiaryTypeDto[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
 
   const [selectedMember, setSelectedMember] = useState<BeneficiaryDetailResponse | null>();
@@ -64,6 +67,7 @@ const BeneficiaryInquiry = () => {
     useState<Paged<BeneficiarySearchFilterResponse>>();
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "name",
     isSortDescending: true
@@ -77,7 +81,7 @@ const BeneficiaryInquiry = () => {
     if (data) {
       const request: BeneficiaryDetailRequest = {
         badgeNumber: data.badgeNumber,
-        psnSuffix: data.psnSuffix
+        psnSuffix: data.psn
       };
       triggerBeneficiaryDetail(request)
         .unwrap()
@@ -102,7 +106,8 @@ const BeneficiaryInquiry = () => {
           onSearch(res);
         });
     }
-  }, [initialSearch, pageSize, pageNumber, _sortParams]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialSearch, pageSize, pageNumber, _sortParams, beneficiarySearchFilterRequest, triggerSearch]);
 
   const RefreshBeneficiaryGrid = () => {
     setChange((prev) => prev + 1);
@@ -111,7 +116,7 @@ const BeneficiaryInquiry = () => {
   const columnDefs = useMemo(() => {
     const columns = BeneficiaryGridColumns();
     return columns;
-  }, [beneficiarySearchFilterResponse]);
+  }, []);
 
   const deleteBeneficiary = (id: number) => {
     setDeleteBeneficairyId(id);
@@ -122,11 +127,16 @@ const BeneficiaryInquiry = () => {
       setDeleteInProgress(true);
       triggerDeleteBeneficiary({ id: deleteBeneficiaryId })
         .unwrap()
-        .then((res: any) => {
+        .then(() => {
           setChange((prev) => prev + 1);
         })
-        .catch((err: any) => {
-          console.error(`Something went wrong! Error: ${err.data.title}`);
+        .catch((err: unknown) => {
+          if (err && typeof err === "object" && "data" in err) {
+            const errorData = err as { data?: { title?: string } };
+            console.error(`Something went wrong! Error: ${errorData.data?.title}`);
+          } else {
+            console.error("Something went wrong!");
+          }
         })
         .finally(() => {
           setOpenDeleteConfirmationDialog(false);
@@ -180,7 +190,7 @@ const BeneficiaryInquiry = () => {
         })
         .catch((reason) => console.error(reason));
     }
-  }, [beneficiaryKind, token]);
+  }, [beneficiaryKind, token, triggerGetBeneficiaryKind, triggerGetBeneficiaryType]);
 
   return (
     <MissiveAlertProvider>

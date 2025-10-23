@@ -46,7 +46,7 @@ const PrerequisiteGuard: React.FC<PrerequisiteGuardProps> = ({
   const { prerequisitesComplete, incompletePrerequisites, currentNavigation } = usePrerequisiteNavigations(
     resolvedNavigationId,
     {
-      messageTemplate: messageTemplate as any
+      messageTemplate: messageTemplate as unknown as MessageUpdateLike
     }
   );
 

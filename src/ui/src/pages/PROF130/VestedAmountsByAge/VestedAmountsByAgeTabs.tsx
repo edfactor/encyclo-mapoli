@@ -56,7 +56,7 @@ const VestedAmountByAgeTabs: React.FC = () => {
                 gridTitle="Full Time 100% Vested"
                 countColName="fullTime100PercentCount"
                 amountColName="fullTime100PercentAmount"
-                totalCount="totalFullTimeCount"
+                //totalCount="totalFullTimeCount"
               />
             </TabPanel>
             <TabPanel value="2">
@@ -64,7 +64,7 @@ const VestedAmountByAgeTabs: React.FC = () => {
                 gridTitle="Full Time Partially Vested"
                 countColName="fullTimePartialCount"
                 amountColName="fullTimePartialAmount"
-                totalCount="totalPartialVestedCount"
+                //totalCount="totalPartialVestedCount"
               />
             </TabPanel>
             <TabPanel value="3">
@@ -93,7 +93,7 @@ const VestedAmountByAgeTabs: React.FC = () => {
                 gridTitle="Beneficiaries"
                 countColName="beneficiaryCount"
                 amountColName="beneficiaryAmount"
-                totalCount="totalBeneficiaryCount"
+                //totalCount="totalBeneficiaryCount"
               />
             </TabPanel>
           </TabContext>

@@ -239,7 +239,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         List<DemographicHistory>? demographicHistories = new DemographicHistoryFaker(demographics).Generate(demographics.Count);
 
         var profitDetails = new ProfitDetailFaker(demographics).Generate(demographics.Count * 5);
-        var mockProfitDetails = profitDetails.BuildMockDbSet();
+        var mockProfitDetails = BuildMockDbSetWithBackingList(profitDetails);
         _profitSharingDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
 
@@ -282,7 +282,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaryList.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaryList.Object);
 
-        Mock<DbSet<PayProfit>> mockProfits = profits.BuildMockDbSet();
+        Mock<DbSet<PayProfit>> mockProfits = BuildMockDbSetWithBackingList(profits);
         _profitSharingDbContext.Setup(m => m.PayProfits).Returns(mockProfits.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.PayProfits).Returns(mockProfits.Object);
 

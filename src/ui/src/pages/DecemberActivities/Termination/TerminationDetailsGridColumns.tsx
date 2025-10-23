@@ -24,7 +24,6 @@ interface SaveButtonCellParams extends ICellRendererParams {
 export const GetDetailColumns = (
   addRowToSelectedRows: (id: number) => void,
   removeRowFromSelectedRows: (id: number) => void,
-  selectedRowIds: number[],
   selectedProfitYear: number,
   onSave?: (request: ForfeitureAdjustmentUpdateRequest, name: string) => Promise<void>,
   onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[], names: string[]) => Promise<void>,

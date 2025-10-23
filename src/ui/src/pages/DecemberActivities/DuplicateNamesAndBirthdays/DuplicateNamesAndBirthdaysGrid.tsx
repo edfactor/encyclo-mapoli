@@ -3,7 +3,7 @@ import { DSMGrid, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import { DuplicateNameAndBirthday, PagedReportResponse } from "../../../types";
 import { GetDuplicateNamesAndBirthdayColumns } from "./DuplicateNamesAndBirthdaysGridColumns";
-import { GridPaginationState, GridPaginationActions } from "../../../hooks/useGridPagination";
+import { GridPaginationState, GridPaginationActions, SortParams } from "../../../hooks/useGridPagination";
 
 interface DuplicateNamesAndBirthdaysGridProps {
   innerRef: RefObject<HTMLDivElement | null>;
@@ -13,7 +13,7 @@ interface DuplicateNamesAndBirthdaysGridProps {
   hasResults: boolean;
   pagination: GridPaginationState & GridPaginationActions;
   onPaginationChange: (pageNumber: number, pageSize: number) => void;
-  onSortChange: (sortParams: any) => void;
+  onSortChange: (sortParams: SortParams) => void;
 }
 
 const DuplicateNamesAndBirthdaysGrid = ({

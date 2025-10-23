@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Telemetry;
@@ -86,11 +86,9 @@ public sealed class StateListEndpoint : ProfitSharingResultResponseEndpoint<List
         return new List<StateListResponse>
         {
             new StateListResponse { Abbreviation = "CT", Name = "Connecticut" },
-            new StateListResponse { Abbreviation = "FL", Name = "Florida" },
             new StateListResponse { Abbreviation = "MA", Name = "Massachusetts" },
             new StateListResponse { Abbreviation = "ME", Name = "Maine" },
             new StateListResponse { Abbreviation = "NH", Name = "New Hampshire" },
-            new StateListResponse { Abbreviation = "NY", Name = "New York" },
             new StateListResponse { Abbreviation = "RI", Name = "Rhode Island" },
             new StateListResponse { Abbreviation = "VT", Name = "Vermont" }
         };

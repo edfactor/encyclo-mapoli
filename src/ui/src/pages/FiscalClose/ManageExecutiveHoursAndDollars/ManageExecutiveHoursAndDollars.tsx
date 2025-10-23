@@ -1,13 +1,16 @@
 import { SaveOutlined } from "@mui/icons-material";
-import { Button, Divider, Grid, Tooltip } from "@mui/material";
+import { Box, Button, Divider, Grid, Tooltip } from "@mui/material";
 import FrozenYearWarning from "components/FrozenYearWarning";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import StatusReadOnlyInfo from "components/StatusReadOnlyInfo";
-import { memo, useState } from "react";
+import { memo, useCallback } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
+import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
+import { EXECUTIVE_HOURS_AND_DOLLARS_MESSAGES } from "../../../components/MissiveAlerts/MissiveMessages";
 import { CAPTIONS } from "../../../constants";
 import { useIsProfitYearFrozen } from "../../../hooks/useIsProfitYearFrozen";
 import { useIsReadOnlyByStatus } from "../../../hooks/useIsReadOnlyByStatus";
+import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
 import useManageExecutiveHoursAndDollars from "./hooks/useManageExecutiveHoursAndDollars";
 import ManageExecutiveHoursAndDollarsGrid from "./ManageExecutiveHoursAndDollarsGrid";
@@ -50,7 +53,6 @@ const RenderSaveButton = memo(({ hasPendingChanges, onSave, isReadOnly = true }:
     return saveButton;
   }
 });
-
 interface ManageExecutiveHoursAndDollarsContentProps {
   hookData: ReturnType<typeof useManageExecutiveHoursAndDollars>;
 }
@@ -62,7 +64,7 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
     resetSearch,
     isSearching,
     showGrid,
-    saveExecutiveHoursAndDollars,
+
     gridData,
     modalResults,
     isModalOpen,
@@ -82,8 +84,9 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
   const isReadOnly = useReadOnlyNavigation();
   const isReadOnlyByStatus = useIsReadOnlyByStatus();
   const isFrozen = useIsProfitYearFrozen(profitYear);
-  const [currentStatus, setCurrentStatus] = useState<string | null>(null);
+  //const [currentStatus, setCurrentStatus] = useState<string | null>(null);
 
+  /*
   const handleStatusChange = (newStatus: string, statusName?: string) => {
     if (statusName === "Complete" && currentStatus !== "Complete") {
       setCurrentStatus("Complete");
@@ -92,11 +95,13 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
       setCurrentStatus(statusName || newStatus);
     }
   };
+  */
 
+  /*
   const renderActionNode = () => {
     return <StatusDropdownActionNode onStatusChange={handleStatusChange} />;
   };
-
+  */
   return (
     <Grid
       container
@@ -141,14 +146,33 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
   );
 });
 
-const ManageExecutiveHoursAndDollars = () => {
+const ManageExecutiveHoursAndDollarsInner = () => {
   const hookData = useManageExecutiveHoursAndDollars();
   const { hasPendingChanges, saveChanges } = hookData;
   const isReadOnly = useReadOnlyNavigation();
+  const { addAlert } = useMissiveAlerts();
 
- const renderActionNode = () => {
-      return <StatusDropdownActionNode />;
-    };
+  const handleSave = useCallback(async () => {
+    try {
+      await saveChanges();
+      addAlert(EXECUTIVE_HOURS_AND_DOLLARS_MESSAGES.EXECUTIVE_HOURS_SAVED_SUCCESS);
+    } catch (_error) {
+      addAlert(EXECUTIVE_HOURS_AND_DOLLARS_MESSAGES.EXECUTIVE_HOURS_SAVE_ERROR);
+    }
+  }, [saveChanges, addAlert]);
+
+  const renderActionNode = () => {
+    return (
+      <Box sx={{ display: "flex", gap: 2 }}>
+        <RenderSaveButton
+          hasPendingChanges={hasPendingChanges}
+          onSave={handleSave}
+          isReadOnly={isReadOnly}
+        />
+        <StatusDropdownActionNode />
+      </Box>
+    );
+  };
 
   return (
     <Page
@@ -156,6 +180,14 @@ const ManageExecutiveHoursAndDollars = () => {
       actionNode={renderActionNode()}>
       <ManageExecutiveHoursAndDollarsContent hookData={hookData} />
     </Page>
+  );
+};
+
+const ManageExecutiveHoursAndDollars = () => {
+  return (
+    <MissiveAlertProvider>
+      <ManageExecutiveHoursAndDollarsInner />
+    </MissiveAlertProvider>
   );
 };
 

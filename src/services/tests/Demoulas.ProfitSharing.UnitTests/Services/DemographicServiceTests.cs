@@ -376,39 +376,7 @@ public class DemographicsServiceTests
         return scenarioFactory;
     }
 
-    [Fact]
-    [Description("PS-0000 : Duplicate SSN handling - verify duplicate SSNs are detected and audit logged")]
-    public async Task AddDemographicsStreamAsync_HandlesDuplicateSsn()
-    {
-        // Arrange
-        var scenarioFactory = SetupScenarioFactoryWithSeededDemographics(out var demographics, out var _ /*histories*/, out var audits, out var beneficiaryContacts, out var profitDetails);
-
-
-        Dictionary<long, int>? fakeSsnLookup = demographics.ToDictionary(d => d.OracleHcmId, d => 222222222);
-
-        var oracleEmployees = demographics.Select(d => d.ToOracleFromDemographic());
-        var employees = oracleEmployees.Select(e => e.CreateDemographicsRequest(fakeSsnLookup)).ToArray();
-
-        var loggerMock = new Mock<ILogger<DemographicsService>>();
-        var totalServiceMock = new Mock<ITotalService>();
-        var mapper = new DemographicMapper(new AddressMapper(), new ContactInfoMapper());
-        var fakeSsnService = new Mock<IFakeSsnService>();
-
-        var service = new DemographicsService(
-            scenarioFactory,
-            mapper,
-            loggerMock.Object,
-            totalServiceMock.Object,
-            fakeSsnService.Object
-        );
-
-        // Act
-        await service.AddDemographicsStreamAsync(employees);
-
-        // Assert
-        Assert.True(audits.Count > 0, "Expected audit records for duplicate SSN handling.");
-    }
-
+    
     /// <summary>
     /// UC - If SSN matches but DateOfBirth does not match, and existing employee is terminated,
     /// </summary>

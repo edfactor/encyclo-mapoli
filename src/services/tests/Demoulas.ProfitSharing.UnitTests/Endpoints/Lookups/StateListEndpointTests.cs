@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
@@ -43,7 +43,6 @@ public class StateListEndpointTests : ApiTestBase<Api.Program>
         var abbreviations = response.Result.Items.Select(s => s.Abbreviation).ToList();
         abbreviations.ShouldContain("MA");
         abbreviations.ShouldContain("NH");
-        abbreviations.ShouldContain("FL");
     }
 
     [Fact(DisplayName = "StateList - Should order states alphabetically")]

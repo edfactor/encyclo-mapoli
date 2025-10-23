@@ -32,12 +32,23 @@ export const ActionsCellRenderer = (props: ICellRendererParams) => {
   };
 
   const handleEdit = () => {
-    dispatch(setCurrentDistribution(props.data as DistributionSearchResponse));
-    console.log("Edit distribution", props.data);
+    const distribution = props.data as DistributionSearchResponse;
+    dispatch(setCurrentDistribution(distribution));
+
+    // Navigate to edit distribution page with memberId and memberType as URL parameters
+    const memberId = distribution.demographicId || distribution.beneficiaryId;
+    const memberType = distribution.demographicId ? 1 : 2; // 1 = employee, 2 = beneficiary
+
+    if (memberId) {
+      navigate(`/${ROUTES.EDIT_DISTRIBUTION}/${memberId}/${memberType}`);
+    }
   };
 
   const handleDelete = () => {
-    console.log("Delete distribution", props.data);
+    const distribution = props.data as DistributionSearchResponse;
+    dispatch(setCurrentDistribution(distribution));
+    // Parent component will handle opening the delete modal
+    window.dispatchEvent(new CustomEvent("openDeleteModal", { detail: distribution }));
   };
 
   return (

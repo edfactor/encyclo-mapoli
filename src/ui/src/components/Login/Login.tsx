@@ -1,5 +1,5 @@
 import { useOktaAuth } from "@okta/okta-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
 import { setToken } from "reduxstore/slices/securitySlice";
@@ -11,9 +11,10 @@ const Login = () => {
   const { authState, oktaAuth } = useOktaAuth();
   const dispatch = useDispatch();
 
-  const [skipRole, setSkipRole] = useState<boolean>(true);
-  const [skipPermission, setSkipPermission] = useState<boolean>(true);
-  const [skipUsername, setSkipUsername] = useState<boolean>(true);
+  // FIXME: Why are these here? They are unused
+  //const [skipRole, setSkipRole] = useState<boolean>(true);
+  //const [skipPermission, setSkipPermission] = useState<boolean>(true);
+  //const [skipUsername, setSkipUsername] = useState<boolean>(true);
 
   useEffect(() => {
     const login = async () => {
@@ -29,9 +30,9 @@ const Login = () => {
         const accessToken = oktaAuth.getAccessToken();
         if (accessToken) {
           dispatch(setToken(accessToken));
-          setSkipRole(false);
-          setSkipPermission(false);
-          setSkipUsername(false);
+          //(false);
+          //setSkipPermission(false);
+          //setSkipUsername(false);
         }
       }
     }

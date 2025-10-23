@@ -2,15 +2,23 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { DSMGrid, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
+import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
-import { useGridPagination } from "../../../hooks/useGridPagination";
+import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { useLazyGetDistributionsAndForfeituresQuery } from "../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../reduxstore/store";
 import { GetDistributionsAndForfeituresColumns } from "./DistributionAndForfeituresGridColumns";
+
+interface DistributionsAndForfeituresQueryParams {
+  startDate?: string;
+  endDate?: string;
+  states?: string; // Stringified for comparison
+  taxCodes?: string; // Stringified for comparison
+  profitYear?: number;
+}
 
 interface DistributionsAndForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
@@ -30,7 +38,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     (state: RootState) => state.yearsEnd
   );
   const profitYear = useDecemberFlowProfitYear();
-  const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
+  const [triggerSearch] = useLazyGetDistributionsAndForfeituresQuery();
 
   // Make the initial page size configurable via state so it can be updated if needed
   const [initialPageSize, setInitialPageSize] = useState<number>(25);
@@ -41,7 +49,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
       initialSortBy: "employeeName, date",
       initialSortDescending: false,
       onPaginationChange: useCallback(
-        async (pageNum: number, pageSz: number, sortPrms: any) => {
+        async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
           if (hasToken && initialSearchLoaded) {
             const request = {
               profitYear: profitYear || 0,
@@ -148,7 +156,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   ]);
 
   // Reset pagination when search filters change (not when paginating through results)
-  const prevQueryParams = useRef<any>(null);
+  const prevQueryParams = useRef<DistributionsAndForfeituresQueryParams | null>(null);
   useEffect(() => {
     const currentQueryParams = {
       startDate: distributionsAndForfeituresQueryParams?.startDate,
@@ -197,7 +205,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     };
   }, [stateTaxTimeout, forfeitureTimeout]);
 
-  const sortEventHandler = (update: any) => handleSortChange(update);
+  const sortEventHandler = (update: ISortParams) => handleSortChange(update);
   const columnDefs = useMemo(() => GetDistributionsAndForfeituresColumns(), []);
 
   return (

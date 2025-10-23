@@ -26,8 +26,17 @@ const DistributionDetailsSection: React.FC<DistributionDetailsSectionProps> = ({
   ];
 
   // Column 3 data
+  const reasonCodeMap: { [key: string]: string } = {
+    H: "H - Hardship",
+    P: "P - Pay Direct",
+    R: "R - Rollover",
+    M: "M - Monthly",
+    Q: "Q - Quarterly",
+    A: "A - Annually"
+  };
+
   const column3Data = [
-    { label: "Reason Code", value: "R - Rollover" },
+    { label: "Reason Code", value: reasonCodeMap[distribution.frequencyId] || distribution.frequencyId },
     { label: "Fed Tax", value: numberToCurrency(distribution.federalTax) },
     { label: "State Tax", value: numberToCurrency(distribution.stateTax) },
     { label: "Employee Deceased", value: "No" }

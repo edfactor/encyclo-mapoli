@@ -28,7 +28,7 @@ window.fetch = function captureUrlFetch(input: RequestInfo | URL, init?: Request
 
   // Actual fetch call
   return originalFetch
-    .apply(this, [input as any, init as any])
+    .apply(this, [input as RequestInfo | URL, init as RequestInit | undefined])
     .then((response) => {
       const endTime = performance.now();
       requestData.duration = Math.round(endTime - startTime);
@@ -96,12 +96,21 @@ window.fetch = function captureUrlFetch(input: RequestInfo | URL, init?: Request
 };
 
 // Helper function to update session storage with actual request data
+interface RequestHistoryEntry {
+  requestId: string;
+  time: string;
+  method: string;
+  url: string;
+  status: string | number;
+  duration: number;
+}
+
 function updateSessionStorage(
   requestId: string,
   data: { url: string; method: string; status: number; duration: number }
 ) {
-  const history = JSON.parse(sessionStorage.getItem("api_request_history") || "[]");
-  const updatedHistory = history.map((entry: any) => {
+  const history = JSON.parse(sessionStorage.getItem("api_request_history") || "[]") as RequestHistoryEntry[];
+  const updatedHistory = history.map((entry) => {
     if (entry.requestId === requestId) {
       return {
         ...entry,
@@ -118,15 +127,26 @@ function updateSessionStorage(
   sessionStorage.setItem("api_request_history", JSON.stringify(updatedHistory.slice(0, 50)));
 }
 
+interface RtkQueryAction {
+  type: string;
+  meta?: {
+    requestId?: string;
+  };
+  error?: {
+    status?: number;
+  };
+}
+
 /**
  * This middleware logs RTK Query API requests to session storage
  * by tracking pending/fulfilled action pairs and correlating them with fetch requests
  */
-export const apiLoggerMiddleware: Middleware = () => (next) => (action: any) => {
+export const apiLoggerMiddleware: Middleware = () => (next) => (action: unknown) => {
+  const typedAction = action as RtkQueryAction;
   // Handle RTK Query actions
-  if (action.type && typeof action.type === "string") {
+  if (typedAction.type && typeof typedAction.type === "string") {
     // First check if it's an RTK Query action by looking for the pattern api/endpoint/status
-    const parts = action.type.split("/");
+    const parts = typedAction.type.split("/");
 
     // Must have exactly 3 parts and end with a standard RTK Query status
     if (parts.length === 3 && ["pending", "fulfilled", "rejected"].includes(parts[2])) {
@@ -135,8 +155,8 @@ export const apiLoggerMiddleware: Middleware = () => (next) => (action: any) => 
       const status = parts[2];
 
       // Only handle pending actions (start of request)
-      if (status === "pending" && action.meta?.requestId) {
-        const requestId = action.meta.requestId;
+      if (status === "pending" && typedAction.meta?.requestId) {
+        const requestId = typedAction.meta.requestId;
 
         // Store timing information for this request
         requestTimings.set(requestId, {
@@ -147,7 +167,7 @@ export const apiLoggerMiddleware: Middleware = () => (next) => (action: any) => 
         });
 
         // Initial entry for the request
-        const requestInfo = {
+        const requestInfo: RequestHistoryEntry = {
           time: new Date().toISOString(), // Changed from Date.now() for better readability
           method: "GET", // Will be updated when fetch completes
           url: `${baseUrl}/api/pending`, // Placeholder until fetch completes
@@ -157,22 +177,22 @@ export const apiLoggerMiddleware: Middleware = () => (next) => (action: any) => 
         };
 
         // Add to history
-        const history = JSON.parse(sessionStorage.getItem("api_request_history") || "[]");
+        const history = JSON.parse(sessionStorage.getItem("api_request_history") || "[]") as RequestHistoryEntry[];
         history.unshift(requestInfo);
         // Limit to exactly 50 entries
         sessionStorage.setItem("api_request_history", JSON.stringify(history.slice(0, 50)));
       }
 
       // Handle completion actions (end of request)
-      else if ((status === "fulfilled" || status === "rejected") && action.meta?.requestId) {
-        const requestId = action.meta.requestId;
+      else if ((status === "fulfilled" || status === "rejected") && typedAction.meta?.requestId) {
+        const requestId = typedAction.meta.requestId;
         const requestData = requestTimings.get(requestId);
 
         if (requestData && !requestData.completed) {
           // If the fetch hasn't updated with actual data yet, use the completion time
           const endTime = performance.now();
           const duration = Math.round(endTime - requestData.startTime);
-          const responseStatus = status === "fulfilled" ? 200 : action.error?.status || 500;
+          const responseStatus = status === "fulfilled" ? 200 : typedAction.error?.status || 500;
 
           // Update the request timing record
           requestTimings.set(requestId, {

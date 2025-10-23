@@ -38,7 +38,7 @@ const validationSchema = yup
   .test("at-least-one-required", "At least one field must be provided", (values) =>
     Boolean(
       values.profitYear ||
-      values.socialSecurity ||
+        values.socialSecurity ||
         values.badgeNumber ||
         values.fullNameContains ||
         values.hasExecutiveHoursAndDollars !== false ||
@@ -46,9 +46,18 @@ const validationSchema = yup
     )
   );
 
+interface SearchData {
+  profitYear: number;
+  badgeNumber?: number;
+  socialSecurity?: string | undefined;
+  fullNameContains?: string | null;
+  hasExecutiveHoursAndDollars: boolean;
+  isMonthlyPayroll: boolean;
+}
+
 interface ManageExecutiveHoursAndDollarsSearchFilterProps {
   isModal?: boolean;
-  onSearch: (searchData: any) => void;
+  onSearch: (searchData: SearchData) => void;
   onReset: () => void;
   isSearching: boolean;
 }
@@ -61,38 +70,26 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
 }) => {
   const [activeField, setActiveField] = useState<"socialSecurity" | "badgeNumber" | "fullNameContains" | null>(null);
 
-  const [oneAddSearchFilterEntered, setOneAddSearchFilterEntered] = useState<boolean>(false);
+  const [fieldStates, setFieldStates] = useState({
+    socialSecurity: false,
+    badgeNumber: false,
+    fullNameContains: false,
+    hasExecutiveHoursAndDollars: false,
+    isMonthlyPayroll: false
+  });
 
-  let socialSecurityChosen = false;
-  let badgeNumberChosen = false;
-  let fullNameChosen = false;
-  let hasExecutiveHoursAndDollarsChosen = false;
-  let isMonthlyPayrollChosen = false;
+  const oneAddSearchFilterEntered =
+    fieldStates.socialSecurity ||
+    fieldStates.badgeNumber ||
+    fieldStates.fullNameContains ||
+    fieldStates.hasExecutiveHoursAndDollars ||
+    fieldStates.isMonthlyPayroll;
 
-  const toggleSearchFieldEntered = (value: boolean, fieldType: string) => {
-    if (fieldType === "socialSecurity") {
-      socialSecurityChosen = value;
-    }
-    if (fieldType === "badgeNumber") {
-      badgeNumberChosen = value;
-    }
-    if (fieldType === "fullNameContains") {
-      fullNameChosen = value;
-    }
-    if (fieldType === "hasExecutiveHoursAndDollars") {
-      hasExecutiveHoursAndDollarsChosen = value;
-    }
-    if (fieldType === "isMonthlyPayroll") {
-      isMonthlyPayrollChosen = value;
-    }
-
-    setOneAddSearchFilterEntered(
-      socialSecurityChosen ||
-        badgeNumberChosen ||
-        fullNameChosen ||
-        hasExecutiveHoursAndDollarsChosen ||
-        isMonthlyPayrollChosen
-    );
+  const toggleSearchFieldEntered = (value: boolean, fieldType: keyof typeof fieldStates) => {
+    setFieldStates((prev) => ({
+      ...prev,
+      [fieldType]: value
+    }));
   };
 
   const profitYear = useFiscalCloseProfitYear();
@@ -154,13 +151,14 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
   });
 
   const handleReset = () => {
-    setOneAddSearchFilterEntered(false);
     setActiveField(null);
-    socialSecurityChosen = false;
-    badgeNumberChosen = false;
-    fullNameChosen = false;
-    isMonthlyPayrollChosen = false;
-    hasExecutiveHoursAndDollarsChosen = false;
+    setFieldStates({
+      socialSecurity: false,
+      badgeNumber: false,
+      fullNameContains: false,
+      hasExecutiveHoursAndDollars: false,
+      isMonthlyPayroll: false
+    });
 
     reset({
       profitYear: profitYear,

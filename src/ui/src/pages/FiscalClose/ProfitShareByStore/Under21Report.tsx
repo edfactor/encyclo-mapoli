@@ -53,7 +53,7 @@ const Under21Report = () => {
     };
 
     fetchData();
-  }, [fetchUnder21Totals, fetchUnder21Breakdown, pageNumber, pageSize, sortParams]);
+  }, [fetchUnder21Totals, fetchUnder21Breakdown, pageNumber, pageSize, sortParams, profitYear]);
 
   useEffect(() => {
     if (initialSearchLoaded) {
@@ -71,10 +71,10 @@ const Under21Report = () => {
       fetchUnder21Totals(queryParams);
       fetchUnder21Breakdown(queryParams);
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, fetchUnder21Totals, fetchUnder21Breakdown]);
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, fetchUnder21Totals, fetchUnder21Breakdown, profitYear]);
 
   // Need a useEffect to reset the page number when under21Totals changes
-  const prevUnder21Totals = useRef<any>(null);
+  const prevUnder21Totals = useRef<typeof under21Totals>(null);
   useEffect(() => {
     if (under21Totals?.numberOfEmployees !== prevUnder21Totals.current?.numberOfEmployees) {
       setPageNumber(0);
@@ -82,6 +82,7 @@ const Under21Report = () => {
     prevUnder21Totals.current = under21Totals;
   }, [under21Totals]);
 
+  /*
   const handleSearch = (profitYear: number, isSortDescending: boolean) => {
     const queryParams = {
       profitYear,
@@ -97,6 +98,8 @@ const Under21Report = () => {
     fetchUnder21Totals(queryParams);
     fetchUnder21Breakdown(queryParams);
   };
+
+  */
 
   return (
     <Page
@@ -136,7 +139,6 @@ const Under21Report = () => {
             <Grid width="100%">
               <Under21BreakdownGrid
                 isLoading={isBreakdownLoading}
-                initialSearchLoaded={initialSearchLoaded}
                 setInitialSearchLoaded={setInitialSearchLoaded}
                 pageNumber={pageNumber}
                 setPageNumber={setPageNumber}

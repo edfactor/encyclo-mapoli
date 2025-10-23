@@ -3,20 +3,18 @@ import { Checkbox, Divider, FormLabel, Grid, MenuItem, Select, Typography } from
 import { ICellRendererParams } from "ag-grid-community";
 import { useMemo, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
-import { useSelector } from "react-redux";
 import { DSMAccordion, DSMGrid, ISortParams, Page, Pagination, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { CAPTIONS } from "../../../constants";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
 import { useLazyAdhocBeneficiariesReportQuery } from "../../../reduxstore/api/YearsEndApi";
-import { RootState } from "../../../reduxstore/store";
 import {
   AdhocBeneficiariesReportRequest,
   adhocBeneficiariesReportResponse,
   BeneficiaryReportDto
 } from "../../../reduxstore/types";
-import { GetProfitDetailColumnDef, PayBeNextColumnDef } from "./PayBeNextColumnDef";
+import { PayBeNextGridColumns, ProfitDetailGridColumns } from "./PayBeNextGridColumns";
 
 const schema = yup.object().shape({
   profitYear: yup.string().notRequired(),
@@ -29,7 +27,6 @@ interface bRequest {
 
 const PayBeNext = () => {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
-  const { token } = useSelector((state: RootState) => state.security);
   const profitYear = useFiscalCloseProfitYear();
   const [triggerReport, { isFetching, isSuccess }] = useLazyAdhocBeneficiariesReportQuery();
   const [adhocBeneficiariesReport, setAdhocBeneficiariesReport] = useState<adhocBeneficiariesReportResponse>();
@@ -39,24 +36,12 @@ const PayBeNext = () => {
     sortBy: "psnSuffix",
     isSortDescending: true
   });
-  const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
 
   // Use dynamic grid height utility hook
   const gridMaxHeight = useDynamicGridHeight();
 
-  const addRowToSelectedRows = (id: number) => {
-    setSelectedRowIds((prev) => [...prev, id]);
-  };
-
-  const removeRowFromSelectedRows = (id: number) => {
-    setSelectedRowIds(selectedRowIds.filter((rowId) => rowId !== id));
-  };
-
-  const mainColumns = useMemo(() => PayBeNextColumnDef(), []);
-  const detailColumns = useMemo(
-    () => GetProfitDetailColumnDef(addRowToSelectedRows, removeRowFromSelectedRows),
-    [selectedRowIds]
-  );
+  const mainColumns = useMemo(() => PayBeNextGridColumns(), []);
+  const detailColumns = useMemo(() => ProfitDetailGridColumns(), []);
 
   const {
     control,
@@ -97,7 +82,7 @@ const PayBeNext = () => {
             isExpandable: false,
             isExpanded: false,
             parentId: parseInt(row.badgeNumber + "" + row.beneficiaryId),
-            suggestedForfeit: (detail as any).suggestedForfeit || 0
+            suggestedForfeit: 0
           });
         }
       }

@@ -7,11 +7,7 @@ import { useGridPagination } from "../../../hooks/useGridPagination";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { GetBalanceByAgeColumns } from "./BalanceByAgeGridColumns";
 
-interface BalanceByAgeGridProps {
-  initialSearchLoaded: boolean;
-}
-
-const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded }) => {
+const BalanceByAgeGrid: React.FC = () => {
   const { balanceByAgeTotal, balanceByAgeFullTime, balanceByAgePartTime } = useSelector(
     (state: RootState) => state.yearsEnd
   );

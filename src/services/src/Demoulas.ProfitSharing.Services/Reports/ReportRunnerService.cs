@@ -19,6 +19,7 @@ public class ReportRunnerService : IReportRunnerService
     private readonly ITerminatedEmployeeService _terminatedEmployeeService;
     private readonly IUnforfeitService _unForfeitService;
     private readonly ICleanupReportService _cleanupReportService;
+    private readonly IDuplicateNamesAndBirthdaysService _duplicateNamesAndBirthdaysService;
     private readonly IPayrollDuplicateSsnReportService _payrollDuplicateSsnReportService;
     private readonly INegativeEtvaReportService _negativeEtvaReportService;
     private readonly IGetEligibleEmployeesService _getEligibleEmployeesService;
@@ -32,6 +33,7 @@ public class ReportRunnerService : IReportRunnerService
         IProfitShareUpdateService profitShareUpdateService,
         IUnforfeitService unForfeitService,
         ICleanupReportService cleanupReportService,
+        IDuplicateNamesAndBirthdaysService duplicateNamesAndBirthdaysService,
         IPayrollDuplicateSsnReportService payrollDuplicateSsnReportService,
         INegativeEtvaReportService negativeEtvaReportService,
         IGetEligibleEmployeesService getEligibleEmployeesService,
@@ -44,6 +46,7 @@ public class ReportRunnerService : IReportRunnerService
         _profitShareUpdateService = profitShareUpdateService;
         _unForfeitService = unForfeitService;
         _cleanupReportService = cleanupReportService;
+        _duplicateNamesAndBirthdaysService = duplicateNamesAndBirthdaysService;
         _payrollDuplicateSsnReportService = payrollDuplicateSsnReportService;
         _negativeEtvaReportService = negativeEtvaReportService;
         _getEligibleEmployeesService = getEligibleEmployeesService;
@@ -62,7 +65,7 @@ public class ReportRunnerService : IReportRunnerService
             }),
             ["duplicateNamesAndBirthdays"] = async ct => await Handle("duplicateNamesAndBirthdays", ct, async () =>
             {
-                var r = await _cleanupReportService.GetDuplicateNamesAndBirthdaysAsync(new ProfitYearRequest { ProfitYear = wallClockYear }, ct);
+                var r = await _duplicateNamesAndBirthdaysService.GetDuplicateNamesAndBirthdaysAsync(new ProfitYearRequest { ProfitYear = wallClockYear }, ct);
                 return (r.Response.Total, r.Response.Results.Count());
             }),
             ["negativeEtvaReportService"] = async ct => await Handle("negativeEtvaReportService", ct, async () =>

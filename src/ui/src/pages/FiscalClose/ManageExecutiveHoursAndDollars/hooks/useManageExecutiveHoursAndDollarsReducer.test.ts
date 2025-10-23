@@ -102,14 +102,24 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
       const stateWithData: ManageExecutiveHoursAndDollarsState = {
         ...initialState,
         search: {
-          params: { profitYear: 2024 } as any,
+          params: {
+            profitYear: 2024,
+            pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false }
+          },
           results: { results: [], total: 0 },
           isSearching: false,
           error: null,
           initialLoaded: true
         },
         grid: {
-          data: {} as any,
+          data: {
+            reportName: "Test",
+            reportDate: "2024-01-01",
+            startDate: "2024-01-01",
+            endDate: "2024-12-31",
+            dataSource: "test",
+            response: { results: [], total: 0 }
+          },
           pendingChanges: null,
           additionalExecutives: [],
           selectedRows: []
@@ -336,10 +346,20 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
         ...initialState,
         modal: {
           isOpen: true,
-          results: {} as any,
-          selectedExecutives: [{ badgeNumber: 12345 } as any],
+          results: {
+            reportName: "Test",
+            reportDate: "2024-01-01",
+            startDate: "2024-01-01",
+            endDate: "2024-12-31",
+            dataSource: "test",
+            response: { results: [], total: 0 }
+          },
+          selectedExecutives: [{ badgeNumber: 12345, fullName: "Test", hoursExecutive: 40, incomeExecutive: 1000 }],
           isSearching: false,
-          searchParams: {} as any
+          searchParams: {
+            profitYear: 2024,
+            pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false }
+          }
         }
       };
 
@@ -403,7 +423,7 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
         ...initialState,
         modal: {
           ...initialState.modal,
-          selectedExecutives: [{ badgeNumber: 12345 } as any]
+          selectedExecutives: [{ badgeNumber: 12345, fullName: "Test", hoursExecutive: 40, incomeExecutive: 1000 }]
         }
       };
 
@@ -445,24 +465,49 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
     it("should reset to initial state", () => {
       const stateWithData: ManageExecutiveHoursAndDollarsState = {
         search: {
-          params: {} as any,
+          params: {
+            profitYear: 2024,
+            pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false }
+          },
           results: { results: [], total: 0 },
           isSearching: false,
           error: null,
           initialLoaded: true
         },
         grid: {
-          data: {} as any,
-          pendingChanges: {} as any,
+          data: {
+            reportName: "Test",
+            reportDate: "2024-01-01",
+            startDate: "2024-01-01",
+            endDate: "2024-12-31",
+            dataSource: "test",
+            response: { results: [], total: 0 }
+          },
+          pendingChanges: {
+            profitYear: 2024,
+            executiveHoursAndDollars: [
+              { badgeNumber: 12345, fullName: "Test", hoursExecutive: 40, incomeExecutive: 1000 }
+            ]
+          },
           additionalExecutives: [],
           selectedRows: []
         },
         modal: {
           isOpen: true,
-          results: {} as any,
+          results: {
+            reportName: "Test",
+            reportDate: "2024-01-01",
+            startDate: "2024-01-01",
+            endDate: "2024-12-31",
+            dataSource: "test",
+            response: { results: [], total: 0 }
+          },
           selectedExecutives: [],
           isSearching: false,
-          searchParams: {} as any
+          searchParams: {
+            profitYear: 2024,
+            pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false }
+          }
         },
         view: {
           mode: "results",
@@ -533,7 +578,7 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
           search: {
             ...initialState.search,
             results: {
-              results: [{ badgeNumber: 12345 } as any],
+              results: [{ badgeNumber: 12345, fullName: "Test", hoursExecutive: 40, incomeExecutive: 1000 }],
               total: 1
             }
           },
@@ -572,7 +617,7 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
           endDate: "2024-12-31",
           dataSource: "test",
           response: {
-            results: [{ badgeNumber: 12345, fullName: "John" } as any],
+            results: [{ badgeNumber: 12345, fullName: "John", hoursExecutive: 40, incomeExecutive: 1000 }],
             total: 1
           }
         };
@@ -594,12 +639,12 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
           endDate: "2024-12-31",
           dataSource: "test",
           response: {
-            results: [{ badgeNumber: 12345, fullName: "John" } as any],
+            results: [{ badgeNumber: 12345, fullName: "John", hoursExecutive: 40, incomeExecutive: 1000 }],
             total: 1
           }
         };
 
-        const additional = [{ badgeNumber: 22222, fullName: "Jane" } as any];
+        const additional = [{ badgeNumber: 22222, fullName: "Jane", hoursExecutive: 35, incomeExecutive: 900 }];
 
         const state: ManageExecutiveHoursAndDollarsState = {
           ...initialState,
@@ -618,12 +663,14 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
           endDate: "2024-12-31",
           dataSource: "test",
           response: {
-            results: [{ badgeNumber: 12345, fullName: "John" } as any],
+            results: [{ badgeNumber: 12345, fullName: "John", hoursExecutive: 40, incomeExecutive: 1000 }],
             total: 1
           }
         };
 
-        const additional = [{ badgeNumber: 12345, fullName: "John Updated" } as any];
+        const additional = [
+          { badgeNumber: 12345, fullName: "John Updated", hoursExecutive: 45, incomeExecutive: 1100 }
+        ];
 
         const state: ManageExecutiveHoursAndDollarsState = {
           ...initialState,

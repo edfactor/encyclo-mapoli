@@ -1,6 +1,6 @@
 import { RefObject, useCallback, useMemo } from "react";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { GridPaginationActions, GridPaginationState } from "../../../hooks/useGridPagination";
+import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
 import { DemographicBadgesNotInPayprofit, PagedReportResponse } from "../../../types";
 import { GetDemographicBadgesNotInPayprofitColumns } from "./DemographicBadgesNotInPayprofitGridColumns";
 
@@ -12,7 +12,7 @@ interface DemographicBadgesNotInPayprofitGridProps {
   hasResults: boolean;
   pagination: GridPaginationState & GridPaginationActions;
   onPaginationChange: (pageNumber: number, pageSize: number) => void;
-  onSortChange: (sortParams: any) => void;
+  onSortChange: (sortParams: SortParams) => void;
 }
 
 const DemographicBadgesNotInPayprofitGrid = ({

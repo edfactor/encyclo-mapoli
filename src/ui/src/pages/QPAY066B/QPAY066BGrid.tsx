@@ -1,22 +1,20 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { Path, useNavigate } from "react-router-dom";
-import { DSMGrid, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
+import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
-import { useGridPagination } from "../../hooks/useGridPagination";
+import { SortParams, useGridPagination } from "../../hooks/useGridPagination";
 import { useLazyGetQPAY066BTerminatedWithVestedBalanceQuery } from "../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../reduxstore/store";
-import { QPAY066BFilterParams } from "./QPAY066BFilterSection";
 import { GetQPAY066BGridColumns } from "./QPAY066BGridColumns";
 
 interface QPAY066BGridProps {
-  filterParams: QPAY066BFilterParams;
+  //filterParams: QPAY066BFilterParams;
   onLoadingChange?: (isLoading: boolean) => void;
 }
 
-const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ _filterParams, onLoadingChange }) => {
-  const navigate = useNavigate();
+const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ onLoadingChange }) => {
+  //const navigate = useNavigate();
   const hasToken = useSelector((state: RootState) => !!state.security.token);
   const [getQPAY066BData, { data: qpay066bData, isFetching }] = useLazyGetQPAY066BTerminatedWithVestedBalanceQuery();
 
@@ -28,7 +26,7 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ _filterParams, onLoadingCha
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
     onPaginationChange: useCallback(
-      (pageNum: number, pageSz: number, sortPrms: any) => {
+      (pageNum: number, pageSz: number, sortPrms: SortParams) => {
         if (hasToken) {
           getQPAY066BData({
             profitYear: 2024,
@@ -61,22 +59,16 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ _filterParams, onLoadingCha
         }
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasToken, getQPAY066BData]);
 
-  const handleNavigationForButton = useCallback(
-    (destination: string | Partial<Path>) => {
-      navigate(destination);
-    },
-    [navigate]
-  );
-
-  const sortEventHandler = (update: any) => {
+  const sortEventHandler = (update: ISortParams) => {
     handleSortChange(update);
   };
 
-  const columnDefs = useMemo(() => GetQPAY066BGridColumns(handleNavigationForButton), [handleNavigationForButton]);
+  const columnDefs = useMemo(() => GetQPAY066BGridColumns(), []);
 
-  const showTotals = !!qpay066bData?.response?.results;
+  const showTotals = !!qpay066bData?.response?.response;
 
   return (
     <div className="relative">
@@ -133,17 +125,17 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ _filterParams, onLoadingCha
             maxHeight={gridMaxHeight}
             handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: qpay066bData?.response?.results || [],
+              rowData: qpay066bData?.response?.response?.results || [],
               columnDefs: columnDefs
             }}
           />
-          {!!qpay066bData?.response?.results?.length && (
+          {!!qpay066bData?.response?.response?.results?.length && (
             <Pagination
               pageNumber={pageNumber}
               setPageNumber={(value: number) => handlePaginationChange(value - 1, pageSize)}
               pageSize={pageSize}
               setPageSize={(value: number) => handlePaginationChange(0, value)}
-              recordCount={qpay066bData.response.total}
+              recordCount={qpay066bData.response.response.total}
             />
           )}
         </>

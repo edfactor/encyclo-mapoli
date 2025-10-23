@@ -7,9 +7,8 @@ import {
   createPercentageColumn
 } from "utils/gridColumnFactory";
 
-export const GetUnder21BreakdownColumnDefs = (navFunction?: (path: string) => void) => [
+export const GetUnder21BreakdownColumnDefs = () => [
   createBadgeColumn({
-    navigateFunction: navFunction,
     renderAsLink: true
   }),
   createNameColumn({
@@ -59,10 +58,10 @@ export const GetUnder21BreakdownColumnDefs = (navFunction?: (path: string) => vo
  * @param navFunction Function to handle navigation when clicking on badge numbers
  * @returns Column definitions for the Under 21 Inactive grid
  */
-export const under21InactiveColumnDefs = (navFunction?: (path: string) => void) => [
+export const under21InactiveColumnDefs = () => [
   createBadgeColumn({
     field: "badgeNumber",
-    navigateFunction: navFunction,
+
     renderAsLink: true
   }),
   createNameColumn({

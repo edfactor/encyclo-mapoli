@@ -64,16 +64,10 @@ const activeInactivePlaceholders: YearEndProfitSharingReportSummaryLineItem[] = 
 interface ProfitSummaryProps {
   onPresetParamsChange?: (params: FilterParams | null) => void;
   frozenData: boolean;
-  showCommitButton?: boolean;
 }
 
-const ProfitSummary: React.FC<ProfitSummaryProps> = ({
-  onPresetParamsChange,
-  frozenData,
-  showCommitButton = false
-}) => {
+const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, frozenData }) => {
   const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingSummaryReportQuery();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedLineItem, setSelectedLineItem] = useState<string | null>(null);
   const [shouldArchive, setShouldArchive] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);

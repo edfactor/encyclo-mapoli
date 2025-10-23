@@ -71,7 +71,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 if (useOptimizedPath)
                 {
                     // Fast path: Get SSN query directly from filtered ProfitDetails (not materialized)
-                    ssnQuery = GetSsnQueryFromProfitDetails(ctx, req);
+                    ssnQuery = await GetSsnQueryFromProfitDetails(ctx, req);
                 }
                 else
                 {
@@ -108,40 +108,57 @@ public sealed class MasterInquiryService : IMasterInquiryService
                     _logger.LogInformation("TRACE: SSN query composed");
                 }
 
-                // Safety check: Log warning if SSN set might be large (for monitoring)
-                _logger.LogInformation("TRACE: About to execute CountAsync");
-                var estimatedCount = await ssnQuery.CountAsync(timeoutToken).ConfigureAwait(false);
-                _logger.LogInformation("TRACE: CountAsync completed, count={Count}", estimatedCount);
+                // PERFORMANCE FIX: Materialize SSN list first (needed for exact match handling and duplicate detection)
+                // This replaces the expensive CountAsync that added 0.5-1s latency
+                _logger.LogInformation("TRACE: Materializing SSN list");
+                var ssnList = await ssnQuery.ToHashSetAsync(timeoutToken).ConfigureAwait(false);
+                _logger.LogInformation("TRACE: SSN list materialized, count={Count}", ssnList.Count);
 
-                if (estimatedCount > 50000)
+                // Safety check: Log warning if SSN set is very large (for monitoring)
+                if (ssnList.Count > 50000)
                 {
                     _logger.LogWarning(
                         "Master inquiry query returned {SsnCount} SSNs for profit year {ProfitYear}. Consider adding more selective filters.",
-                        estimatedCount, req.ProfitYear);
+                        ssnList.Count, req.ProfitYear);
                 }
 
-                _logger.LogInformation("TRACE: About to call BuildDemographicQuery for duplicates");
+                // PERFORMANCE FIX: Optimize duplicate detection by scoping to filtered SSN set FIRST
+                // OLD: Query ALL demographics then filter - could be 100K+ rows joining with ssnQuery
+                // NEW: Filter demographics to SSN set first, then group - much smaller dataset
+                // ORACLE LIMIT: Batch SSN list to avoid ORA-01795 (max 1000 items in IN clause)
+                _logger.LogInformation("TRACE: Starting optimized duplicate SSN detection");
                 var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var duplicateSsns = new HashSet<int>();
 
-                // Use query composition instead of .Contains() to avoid Oracle limits
-                // EF Core 9 will generate efficient JOIN or EXISTS instead of IN clause
-                _logger.LogInformation("TRACE: About to execute duplicate SSN query");
-                var duplicateSsns = await demographics
-                    .Where(d => ssnQuery.Contains(d.Ssn))
-                    .GroupBy(d => d.Ssn)
-                    .Where(g => g.Count() > 1)
-                    .Select(g => g.Key)
-                    .TagWith("MasterInquiry: Find duplicate SSNs via JOIN")
-                    .ToHashSetAsync(timeoutToken).ConfigureAwait(false);
+                const int oracleBatchSize = 1000;
+                var ssnBatches = ssnList.Chunk(oracleBatchSize).ToList();
+                _logger.LogInformation("TRACE: Processing {BatchCount} SSN batches (max {BatchSize} per batch, total {Total} SSNs)",
+                    ssnBatches.Count, oracleBatchSize, ssnList.Count);
+
+                foreach (int[] ssnBatch in ssnBatches)
+                {
+                    var batchDuplicates = await demographics
+                        .Where(d => ssnBatch.Contains(d.Ssn))  // Filter to SSN batch FIRST (critical optimization)
+                        .GroupBy(d => d.Ssn)
+                        .Where(g => g.Count() > 1)
+                        .Select(g => g.Key)
+                        .TagWith($"MasterInquiry: Optimized duplicate detection - Year {req.ProfitYear}, batch size {ssnBatch.Length}")
+                        .ToListAsync(timeoutToken).ConfigureAwait(false);
+
+                    foreach (int dup in batchDuplicates)
+                    {
+                        duplicateSsns.Add(dup);
+                    }
+                }
+
                 _logger.LogInformation("TRACE: Duplicate SSN query completed, count={Count}", duplicateSsns.Count);
 
-                // Materialize SSN list only when needed for exact match handling
-                var ssnList = new HashSet<int>();
-                if (estimatedCount == 0 && (req.Ssn != 0 || req.BadgeNumber != 0))
+                // Handle exact match lookup when no results found
+                if (ssnList.Count == 0 && (req.Ssn != 0 || req.BadgeNumber != 0))
                 {
                     _logger.LogInformation("TRACE: Calling HandleExactBadgeOrSsn for Ssn={Ssn}, Badge={Badge}", req.Ssn, req.BadgeNumber);
                     // If an exact match is found, then the bene or empl is added to the ssnList.
-                    await HandleExactBadgeOrSsn(ctx, ssnList, req.BadgeNumber, req.PsnSuffix, req.Ssn, timeoutToken);
+                    await HandleExactBadgeOrSsn(ssnList, req.BadgeNumber, req.PsnSuffix, req.Ssn, timeoutToken);
                     _logger.LogInformation("TRACE: HandleExactBadgeOrSsn completed, ssnList.Count={Count}", ssnList.Count);
 
                     // Early return if still no results found
@@ -150,20 +167,40 @@ public sealed class MasterInquiryService : IMasterInquiryService
                         _logger.LogInformation("TRACE: Early return - no results found");
                         return new PaginatedResponseDto<MemberDetails>(req) { Results = [], Total = 0 };
                     }
+
+                    // Re-check for duplicates after HandleExactBadgeOrSsn added SSNs
+                    // ORACLE LIMIT: Use same batching as main path (unlikely to hit limit here, but consistent)
+                    if (ssnList.Count > 0)
+                    {
+                        var demographicsForDup = await _demographicReaderService.BuildDemographicQuery(ctx);
+                        duplicateSsns = [];
+
+                        var exactMatchBatches = ssnList.Chunk(oracleBatchSize).ToList();
+                        foreach (int[] ssnBatch in exactMatchBatches)
+                        {
+                            var batchDuplicates = await demographicsForDup
+                                .Where(d => ssnBatch.Contains(d.Ssn))
+                                .GroupBy(d => d.Ssn)
+                                .Where(g => g.Count() > 1)
+                                .Select(g => g.Key)
+                                .TagWith("MasterInquiry: Duplicate detection after exact match")
+                                .ToListAsync(timeoutToken).ConfigureAwait(false);
+
+                            foreach (int dup in batchDuplicates)
+                            {
+                                duplicateSsns.Add(dup);
+                            }
+                        }
+                    }
                 }
-                else if (estimatedCount == 0)
+                else if (ssnList.Count == 0)
                 {
                     // Early return if no results found and no exact match to try
                     return new PaginatedResponseDto<MemberDetails>(req) { Results = [], Total = 0 };
                 }
-                else
-                {
-                    // Materialize for downstream processing only when we have results
-                    ssnList = await ssnQuery.ToHashSetAsync(timeoutToken);
-                }
                 short currentYear = req.ProfitYear;
                 short previousYear = (short)(currentYear - 1);
-                var memberType = req.MemberType;
+                byte? memberType = req.MemberType;
                 PaginatedResponseDto<MemberDetails> detailsList;
 
                 if (memberType == 1)
@@ -190,18 +227,15 @@ public sealed class MasterInquiryService : IMasterInquiryService
                     var sortedResults = ApplySorting(allResults.AsQueryable(), req).ToList();
 
                     // Apply pagination to the final deduplicated result set
-                    var skip = req.Skip ?? 0;
-                    var take = req.Take ?? 25;
+                    int skip = req.Skip ?? 0;
+                    int take = req.Take ?? 25;
                     var paginatedResults = sortedResults.Skip(skip).Take(take).ToList();
 
                     detailsList = new PaginatedResponseDto<MemberDetails>(req) { Results = paginatedResults, Total = sortedResults.Count };
                 }
 
-                // Calculate age efficiently in-memory
-                foreach (MemberDetails details in detailsList.Results)
-                {
-                    details.Age = details.DateOfBirth.Age();
-                }
+                // PERFORMANCE FIX: Age calculation removed - already calculated in GetEmployeeDetailsForSsnsAsync/GetBeneficiaryDetailsForSsnsAsync
+                // Eliminates unnecessary loop over results (minor optimization, but good practice)
 
                 return detailsList;
             }, timeoutToken);
@@ -238,7 +272,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
     /// This avoids expensive joins when we have highly selective criteria.
     /// CRITICAL: Returns IQueryable to enable query composition and avoid Oracle's ~10K IN clause limit.
     /// </summary>
-    private static IQueryable<int> GetSsnQueryFromProfitDetails(
+    private async Task<IQueryable<int>> GetSsnQueryFromProfitDetails(
         ProfitSharingReadOnlyDbContext ctx,
         MasterInquiryRequest req)
     {
@@ -248,12 +282,12 @@ public sealed class MasterInquiryService : IMasterInquiryService
         // Apply PaymentType filter (highly selective)
         if (req.PaymentType.HasValue)
         {
-            var commentTypeIds = req.PaymentType switch
+            byte?[] commentTypeIds = req.PaymentType switch
             {
-                1 => new byte?[] { CommentType.Constants.Hardship.Id, CommentType.Constants.Distribution.Id },
-                2 => new byte?[] { CommentType.Constants.Payoff.Id, CommentType.Constants.Forfeit.Id },
-                3 => new byte?[] { CommentType.Constants.Rollover.Id, CommentType.Constants.RothIra.Id },
-                _ => Array.Empty<byte?>()
+                1 => [CommentType.Constants.Hardship.Id, CommentType.Constants.Distribution.Id],
+                2 => [CommentType.Constants.Payoff.Id, CommentType.Constants.Forfeit.Id],
+                3 => [CommentType.Constants.Rollover.Id, CommentType.Constants.RothIra.Id],
+                _ => []
             };
 
             if (commentTypeIds.Length > 0)
@@ -280,6 +314,21 @@ public sealed class MasterInquiryService : IMasterInquiryService
             query = query.Where(pd => pd.Ssn == req.Ssn);
         }
 
+        // PERFORMANCE FIX: If BadgeNumber is provided, filter by SSN from Demographics first
+        // This makes BadgeNumber searches as fast as SSN searches
+        if (req.BadgeNumber is > 0)
+        {
+            // Get SSN from Demographics for this badge number
+            var demographicsForDup = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var ssnFromBadge = demographicsForDup
+                .Where(d => d.BadgeNumber == req.BadgeNumber.Value)
+                .Select(d => d.Ssn)
+                .TagWith($"MasterInquiry: Get SSN for BadgeNumber {req.BadgeNumber.Value}");
+
+            // Filter ProfitDetails to only this SSN
+            query = query.Where(pd => ssnFromBadge.Contains(pd.Ssn));
+        }
+
         // Return composable query - DO NOT materialize here
         return query
             .Select(pd => pd.Ssn)
@@ -288,7 +337,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
     }
 
     /* This handles the case where we are given an exact badge or ssn and there are no PROFIT_DETAIL rows */
-    private async Task HandleExactBadgeOrSsn(ProfitSharingReadOnlyDbContext ctx, HashSet<int> ssnList, int? badgeNumber, short? psnSuffix, int ssn, CancellationToken cancellationToken = default)
+    private async Task HandleExactBadgeOrSsn(HashSet<int> ssnList, int? badgeNumber, short? psnSuffix, int ssn, CancellationToken cancellationToken = default)
     {
 
         // Some Members do not have Transactions yet (aka new employees, or new Bene) - so if we are asked about a specific psn/badge, we handle that here.
@@ -324,11 +373,11 @@ public sealed class MasterInquiryService : IMasterInquiryService
     public async Task<PaginatedResponseDto<GroupedProfitSummaryDto>> GetGroupedProfitDetails(MasterInquiryRequest req, CancellationToken cancellationToken = default)
     {
         // These are the ProfitCode IDs used in GetProfitCodesForBalanceCalc()
-        byte[] balanceProfitCodes = new byte[]
-        {
+        byte[] balanceProfitCodes =
+        [
             ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id, ProfitCode.Constants.OutgoingForfeitures.Id, ProfitCode.Constants.OutgoingDirectPayments.Id,
             ProfitCode.Constants.OutgoingXferBeneficiary.Id, ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
-        };
+        ];
 
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
@@ -450,7 +499,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 query = query.Where(x => x.ProfitDetail != null && x.ProfitDetail.MonthToDate == req.MonthToDate.Value);
             }
 
-            var paymentProfitCodes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
+            byte[] paymentProfitCodes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
 
             // First projection: SQL-translatable only
             var rawQuery = await query.Select(x => new MasterInquiryRawDto

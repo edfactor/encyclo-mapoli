@@ -110,14 +110,15 @@ export const usePrerequisiteNavigations = (
             }
           };
 
-          dispatch(setMessage(finalPayload as any));
+          dispatch(setMessage(finalPayload));
         }
       }
     } else {
       setPrerequisitesComplete(true);
       setIncompletePrerequisites([]);
     }
-  }, [navigationId, navigationData, dispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigationId, navigationData, dispatch, messageConfig]);
 
   return { prerequisitesComplete, incompletePrerequisites, currentNavigation };
 };

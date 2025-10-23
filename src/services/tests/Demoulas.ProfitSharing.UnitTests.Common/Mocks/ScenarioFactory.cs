@@ -130,7 +130,7 @@ public sealed class ScenarioFactory
                 Ssn = 0,
                 BadgeNumber = 721,
                 StoreNumber = 0,
-                PayClassificationId = "0",
+                PayClassificationId = PayClassification.Constants.Manager,
                 ContactInfo = new ContactInfo
                 {
                     FullName = "Lasty, Firsty",

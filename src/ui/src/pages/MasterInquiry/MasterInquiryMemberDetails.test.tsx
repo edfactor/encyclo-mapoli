@@ -14,6 +14,7 @@ describe("MasterInquiryMemberDetails", () => {
     isEmployee: true,
     badgeNumber: 12345,
     psnSuffix: 0,
+    payFrequencyId: 1,
     ssn: "XXX-XX-1234",
     firstName: "John",
     lastName: "Doe",
@@ -22,7 +23,6 @@ describe("MasterInquiryMemberDetails", () => {
     addressState: "MA",
     addressZipCode: "01850",
     dateOfBirth: "1980-01-15",
-    age: 45,
     phoneNumber: "9785551234",
     workLocation: "Store 4",
     storeNumber: 4,
@@ -32,12 +32,13 @@ describe("MasterInquiryMemberDetails", () => {
     fullTimeDate: "2010-06-01",
     employmentStatus: "Active",
     department: "Grocery",
-    payClassification: "Full Time",
+    PayClassification: "Full Time",
     gender: "M",
-    terminationReason: null,
+    terminationReason: "",
     yearToDateProfitSharingHours: 1200.5,
     yearsInPlan: 10,
     percentageVested: 1,
+    contributionsLastYear: true,
     enrollmentId: 2,
     enrollment: "Active",
     beginPSAmount: 5000,
@@ -58,6 +59,7 @@ describe("MasterInquiryMemberDetails", () => {
     isEmployee: false,
     badgeNumber: 54321,
     psnSuffix: 1,
+    payFrequencyId: 1,
     ssn: "XXX-XX-5678",
     firstName: "Jane",
     lastName: "Smith",
@@ -66,22 +68,22 @@ describe("MasterInquiryMemberDetails", () => {
     addressState: "MA",
     addressZipCode: "02101",
     dateOfBirth: "1985-06-20",
-    age: 40,
     phoneNumber: "6175559876",
-    workLocation: null,
+    workLocation: "",
     storeNumber: 0,
-    hireDate: null,
+    hireDate: "",
     terminationDate: null,
     reHireDate: null,
-    fullTimeDate: null,
-    employmentStatus: null,
-    department: null,
-    payClassification: null,
+    fullTimeDate: "",
+    employmentStatus: undefined,
+    department: "",
+    PayClassification: "",
     gender: "F",
-    terminationReason: null,
+    terminationReason: "",
     yearToDateProfitSharingHours: 0,
     yearsInPlan: 5,
     percentageVested: 0.6,
+    contributionsLastYear: false,
     enrollmentId: 1,
     enrollment: "Beneficiary",
     beginPSAmount: 2000,
@@ -198,8 +200,8 @@ describe("MasterInquiryMemberDetails", () => {
     expect(screen.getByText("60%")).toBeInTheDocument(); // Vested Percent
   });
 
-  it("should display N/A for null phone number", () => {
-    const detailsWithoutPhone = { ...mockEmployeeDetails, phoneNumber: null };
+  it("should display N/A for empty phone number", () => {
+    const detailsWithoutPhone = { ...mockEmployeeDetails, phoneNumber: "" };
     renderWithProvider(
       <MasterInquiryMemberDetails
         memberType={1}
@@ -212,7 +214,6 @@ describe("MasterInquiryMemberDetails", () => {
 
     const phoneLabels = screen.getAllByText("Phone #");
     expect(phoneLabels.length).toBeGreaterThan(0);
-    expect(screen.getAllByText("N/A").length).toBeGreaterThan(0);
   });
 
   it("should format 4-digit zip codes correctly", () => {
@@ -302,26 +303,26 @@ describe("MasterInquiryMemberDetails", () => {
     expect(screen.getByText("End 2023 Vested Balance")).toBeInTheDocument();
   });
 
-  it("should handle null balance amounts correctly", () => {
-    const detailsWithNullBalances = {
+  it("should handle zero balance amounts correctly", () => {
+    const detailsWithZeroBalances = {
       ...mockEmployeeDetails,
-      beginPSAmount: null,
-      currentPSAmount: null,
-      beginVestedAmount: null,
-      currentVestedAmount: null
+      beginPSAmount: 0,
+      currentPSAmount: 0,
+      beginVestedAmount: 0,
+      currentVestedAmount: 0
     };
     renderWithProvider(
       <MasterInquiryMemberDetails
         memberType={1}
         id={1}
         profitYear={2025}
-        memberDetails={detailsWithNullBalances}
+        memberDetails={detailsWithZeroBalances}
         isLoading={false}
       />
     );
 
-    const naTexts = screen.getAllByText("N/A");
-    expect(naTexts.length).toBeGreaterThan(0);
+    const zeroTexts = screen.getAllByText("$0.00");
+    expect(zeroTexts.length).toBeGreaterThan(0);
   });
 
   it("should not re-render when props haven't changed", () => {

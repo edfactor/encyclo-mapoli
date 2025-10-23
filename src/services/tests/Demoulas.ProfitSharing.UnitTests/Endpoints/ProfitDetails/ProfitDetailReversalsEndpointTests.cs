@@ -23,7 +23,7 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "ProfitDetailReversals - Should return not found when profit details don't exist")]
-    [Description("Should return 404 Not Found when trying to reverse non-existent profit details")]
+    [Description("Should return 400 Bad Request when trying to reverse non-existent profit details")]
     public async Task ProfitDetailReversals_WithNonExistentIds_ShouldReturnNotFound()
     {
         // Arrange
@@ -38,11 +38,11 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
 
         // Assert
         response.ShouldNotBeNull();
-        response.Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "ProfitDetailReversals - Should return not found for single non-existent ID")]
-    [Description("Should return 404 Not Found when trying to reverse single non-existent profit detail")]
+    [Description("Should return 400 Bad Request when trying to reverse single non-existent profit detail")]
     public async Task ProfitDetailReversals_WithSingleNonExistentId_ShouldReturnNotFound()
     {
         // Arrange
@@ -57,11 +57,11 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
 
         // Assert
         response.ShouldNotBeNull();
-        response.Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "ProfitDetailReversals - Should return not found for maximum batch size of non-existent IDs")]
-    [Description("Should return 404 Not Found when trying to reverse maximum batch size of non-existent profit details")]
+    [Description("Should return 400 Bad Request when trying to reverse maximum batch size of non-existent profit details")]
     public async Task ProfitDetailReversals_WithMaximumBatchSizeNonExistent_ShouldReturnNotFound()
     {
         // Arrange
@@ -77,11 +77,11 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
 
         // Assert
         response.ShouldNotBeNull();
-        response.Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "ProfitDetailReversals - Should work with System Administrator role (not found case)")]
-    [Description("Should allow System Administrator to access endpoint and return 404 for non-existent profit details")]
+    [Description("Should allow System Administrator to access endpoint and return 400 for non-existent profit details")]
     public async Task ProfitDetailReversals_WithSystemAdministratorRole_ShouldReturnNotFound()
     {
         // Arrange
@@ -96,7 +96,7 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
 
         // Assert
         response.ShouldNotBeNull();
-        response.Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "ProfitDetailReversals - Should require authentication")]
@@ -235,7 +235,7 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "ProfitDetailReversals - Should handle service not found errors")]
-    [Description("Should return not found when profit details don't exist")]
+    [Description("Should return validation error when profit details don't exist")]
     public async Task ProfitDetailReversals_WithNonExistentIds_ShouldHandleNotFound()
     {
         // Arrange
@@ -250,16 +250,16 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
 
         // Assert
         response.ShouldNotBeNull();
-        response.Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "ProfitDetailReversals - Should handle concurrent requests with not found")]
-    [Description("Should handle multiple simultaneous reversal requests and return 404 for non-existent IDs")]
+    [Description("Should handle multiple simultaneous reversal requests and return 400 for non-existent IDs")]
     public async Task ProfitDetailReversals_WithConcurrentRequests_ShouldReturnNotFound()
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        
+
         var request1 = new IdsRequest { Ids = new[] { 10, 11, 12 } };
         var request2 = new IdsRequest { Ids = new[] { 20, 21, 22 } };
         var request3 = new IdsRequest { Ids = new[] { 30, 31, 32 } };
@@ -278,7 +278,7 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
         foreach (var response in responses)
         {
             response.ShouldNotBeNull();
-            response.Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+            response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         }
     }
 
@@ -288,7 +288,7 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
     [InlineData(50)]
     [InlineData(100)]
     [InlineData(500)]
-    [Description("Should return 404 Not Found for various batch sizes of non-existent profit details")]
+    [Description("Should return 400 Bad Request for various batch sizes of non-existent profit details")]
     public async Task ProfitDetailReversals_WithVariousBatchSizes_ShouldReturnNotFound(int batchSize)
     {
         // Arrange
@@ -304,7 +304,7 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
 
         // Assert
         response.ShouldNotBeNull();
-        response.Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "ProfitDetailReversals - Endpoint configuration should be correct")]
@@ -318,9 +318,9 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
         // Act & Assert
         // Verify the endpoint can be instantiated with its dependencies
         var endpoint = new ProfitDetailReversalsEndpoint(
-            mockProfitDetailReversalsService.Object, 
+            mockProfitDetailReversalsService.Object,
             loggerMock.Object);
-            
+
         endpoint.ShouldNotBeNull();
         mockProfitDetailReversalsService.ShouldNotBeNull();
 
@@ -329,7 +329,7 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "ProfitDetailReversals - Should verify telemetry integration")]
-    [Description("Should ensure endpoint implements proper telemetry patterns even for not found cases")]
+    [Description("Should ensure endpoint implements proper telemetry patterns even for validation failures")]
     public async Task ProfitDetailReversals_ShouldImplementTelemetryIntegration()
     {
         // Arrange
@@ -344,15 +344,15 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
 
         // Assert
         response.ShouldNotBeNull();
-        response.Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
-        
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+
         // Note: In a real test environment with telemetry infrastructure,
         // we would verify that:
         // 1. Activity was created with proper operation name
         // 2. Business operation metrics were recorded
         // 3. Request/response metrics were captured
         // 4. Any sensitive fields were properly masked
-        // Even for not found cases, telemetry should still be working
+        // Even for validation failures, telemetry should still be working
     }
 
     [Fact(DisplayName = "ProfitDetailReversals - Should handle service exceptions gracefully")]
@@ -361,9 +361,9 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        
+
         // Use a request that might cause service-level issues
-        // In this test environment, these IDs don't exist so they return 404
+        // In this test environment, these IDs don't exist so they return 400
         var request = new IdsRequest
         {
             Ids = new[] { int.MaxValue - 1, int.MaxValue - 2, int.MaxValue - 3 }
@@ -374,12 +374,12 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
 
         // Assert
         response.ShouldNotBeNull();
-        // In the test environment, non-existent IDs return 404 Not Found
-        response.Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        // In the test environment, non-existent IDs return 400 Bad Request (validation failure)
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "ProfitDetailReversals - Should return not found for non-existent correlation test")]
-    [Description("Should return 404 Not Found when trying to reverse non-existent profit details")]
+    [Description("Should return 400 Bad Request when trying to reverse non-existent profit details")]
     public async Task ProfitDetailReversals_ShouldReturnNotFoundForNonExistentIds()
     {
         // Arrange
@@ -395,8 +395,8 @@ public class ProfitDetailReversalsEndpointTests : ApiTestBase<Api.Program>
 
         // Assert
         response.ShouldNotBeNull();
-        response.Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
-        
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+
         // Note: In a successful scenario with existing profit details,
         // the response would maintain request-response correlation
         // with exact ID matching and order preservation

@@ -1,7 +1,8 @@
 import { Box, Typography } from "@mui/material";
 import React, { memo, useMemo } from "react";
-import { DSMGrid, formatNumberWithComma, Pagination } from "smart-ui-library";
+import { DSMGrid, formatNumberWithComma, Pagination, ISortParams } from "smart-ui-library";
 import { EmployeeDetails } from "../../reduxstore/types";
+import { SortParams } from "../../hooks/useGridPagination";
 import { GetMasterInquiryMemberGridColumns } from "./MasterInquiryMemberGridColumns";
 
 interface SearchResponse {
@@ -23,10 +24,10 @@ interface MasterInquiryMemberGridProps {
   memberGridPagination: {
     pageNumber: number;
     pageSize: number;
-    sortParams: any;
+    sortParams: SortParams;
   };
   onPaginationChange: (pageNumber: number, pageSize: number) => void;
-  onSortChange: (sortParams: any) => void;
+  onSortChange: (sortParams: SortParams) => void;
   isLoading?: boolean;
 }
 
@@ -55,12 +56,26 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
       onPaginationChange(pageNumber, pageSize);
     };
 
-    const handleSortChange = (sortParams: any) => {
+    const handleSortChange = (sortParams: ISortParams) => {
       onSortChange(sortParams);
     };
 
     return (
       <Box sx={{ width: "100%", paddingTop: "24px" }}>
+        {/* CSS for badge link styling */}
+        <style>
+          {`
+            .badge-link-style {
+              color: #0258A5 !important;
+              text-decoration: underline !important;
+              cursor: pointer !important;
+              font-weight: 500 !important;
+            }
+            .badge-link-style:hover {
+              color: #014073 !important;
+            }
+          `}
+        </style>
         <div style={{ padding: "0 24px 0 24px" }}>
           <Typography
             variant="h2"

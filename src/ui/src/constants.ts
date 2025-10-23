@@ -52,6 +52,7 @@ export const ROUTES = {
   DISTRIBUTIONS_INQUIRY: "distributions-inquiry",
   VIEW_DISTRIBUTION: "view-distribution",
   ADD_DISTRIBUTION: "add-distribution",
+  EDIT_DISTRIBUTION: "edit-distribution",
 
   PAY426_ACTIVE_18_20: "pay426-1",
   PAY426_ACTIVE_21_PLUS: "pay426-2",
@@ -110,6 +111,7 @@ export const CAPTIONS = {
   DISTRIBUTIONS_INQUIRY: "Distribution Inquiry (008-14l)",
   VIEW_DISTRIBUTION: "View Distribution (008-14V)",
   ADD_DISTRIBUTION: "Add Distribution (008-14A)",
+  EDIT_DISTRIBUTION: "Edit Distribution (008-14E)",
   DUPLICATE_NAMES: "Duplicate Names and Birthdays",
   DUPLICATE_SSNS: "Duplicate SSNs in Demographics",
   ELIGIBLE_EMPLOYEES: "Get Eligible Employees (GET-ELIGIBLE-EMPS)",

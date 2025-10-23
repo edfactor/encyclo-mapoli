@@ -1,13 +1,17 @@
 import { Box, CircularProgress } from "@mui/material";
 import { useCallback, useEffect, useMemo } from "react";
 import { useLazyGetYearEndProfitSharingReportLiveQuery } from "reduxstore/api/YearsEndApi";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMGrid, Pagination, ISortParams } from "smart-ui-library";
 import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
-import { useGridPagination } from "../../hooks/useGridPagination";
+import { useGridPagination, SortParams } from "../../hooks/useGridPagination";
 import { GetProfitShareReportColumns } from "./ProfitShareReportGridColumns";
 
+interface ProfitShareReportSearchParams {
+  [key: string]: unknown;
+}
+
 interface ProfitShareReportGridProps {
-  searchParams: any;
+  searchParams: ProfitShareReportSearchParams | null;
   isInitialSearchLoaded: boolean;
   profitYear: number;
 }
@@ -44,7 +48,7 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
     onPaginationChange: useCallback(
-      async (pageNum: number, pageSz: number, sortPrms: any) => {
+      async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
         if (isInitialSearchLoaded && searchParams) {
           const params = createRequest(
             pageNum * pageSz,
@@ -84,7 +88,7 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
   }, [isInitialSearchLoaded, searchParams, createRequest, profitYear, pageNumber, pageSize, sortParams, triggerSearch]);
 
   const handleSortChanged = useCallback(
-    (update: any) => {
+    (update: ISortParams) => {
       // Handle empty sortBy case - set default to badgeNumber
       if (update.sortBy === "") {
         update.sortBy = "badgeNumber";

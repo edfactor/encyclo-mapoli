@@ -4,6 +4,7 @@ import {
   DistributionSearchRequest,
   DistributionSearchResultDto,
   CreateDistributionRequest,
+  EditDistributionRequest,
   CreateOrUpdateDistributionResponse
 } from "../../types";
 
@@ -26,8 +27,26 @@ export const DistributionApi = createApi({
         method: "POST",
         body: request
       })
+    }),
+    updateDistribution: builder.mutation<CreateOrUpdateDistributionResponse, EditDistributionRequest>({
+      query: (request) => ({
+        url: "/distribution",
+        method: "PUT",
+        body: request
+      })
+    }),
+    deleteDistribution: builder.mutation<boolean, number>({
+      query: (id) => ({
+        url: `/distribution/${id}`,
+        method: "DELETE"
+      })
     })
   })
 });
 
-export const { useLazySearchDistributionsQuery, useCreateDistributionMutation } = DistributionApi;
+export const {
+  useLazySearchDistributionsQuery,
+  useCreateDistributionMutation,
+  useUpdateDistributionMutation,
+  useDeleteDistributionMutation
+} = DistributionApi;
