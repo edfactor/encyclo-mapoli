@@ -1,25 +1,27 @@
-import { Divider, Grid } from "@mui/material";
+import { SaveOutlined } from "@mui/icons-material";
+import { Box, Button, Divider, Grid, Tooltip } from "@mui/material";
 import FrozenYearWarning from "components/FrozenYearWarning";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import StatusReadOnlyInfo from "components/StatusReadOnlyInfo";
-import { memo } from "react";
+import { memo, useCallback } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
+import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
+import { EXECUTIVE_HOURS_AND_DOLLARS_MESSAGES } from "../../../components/MissiveAlerts/MissiveMessages";
 import { CAPTIONS } from "../../../constants";
 import { useIsProfitYearFrozen } from "../../../hooks/useIsProfitYearFrozen";
 import { useIsReadOnlyByStatus } from "../../../hooks/useIsReadOnlyByStatus";
+import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
 import useManageExecutiveHoursAndDollars from "./hooks/useManageExecutiveHoursAndDollars";
 import ManageExecutiveHoursAndDollarsGrid from "./ManageExecutiveHoursAndDollarsGrid";
 import ManageExecutiveHoursAndDollarsSearchFilter from "./ManageExecutiveHoursAndDollarsSearchFilter";
 
-/*
 interface RenderSaveButtonProps {
   hasPendingChanges: boolean;
   onSave: () => void;
   isReadOnly?: boolean;
 }
-*/
-/*
+
 const RenderSaveButton = memo(({ hasPendingChanges, onSave, isReadOnly = true }: RenderSaveButtonProps) => {
   const isDisabled = !hasPendingChanges || isReadOnly;
   const readOnlyTooltip = "You are in read-only mode and cannot save changes.";
@@ -51,7 +53,6 @@ const RenderSaveButton = memo(({ hasPendingChanges, onSave, isReadOnly = true }:
     return saveButton;
   }
 });
-*/
 interface ManageExecutiveHoursAndDollarsContentProps {
   hookData: ReturnType<typeof useManageExecutiveHoursAndDollars>;
 }
@@ -145,13 +146,32 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
   );
 });
 
-const ManageExecutiveHoursAndDollars = () => {
+const ManageExecutiveHoursAndDollarsInner = () => {
   const hookData = useManageExecutiveHoursAndDollars();
-  //const { hasPendingChanges, saveChanges } = hookData;
-  //const isReadOnly = useReadOnlyNavigation();
+  const { hasPendingChanges, saveChanges } = hookData;
+  const isReadOnly = useReadOnlyNavigation();
+  const { addAlert } = useMissiveAlerts();
+
+  const handleSave = useCallback(async () => {
+    try {
+      await saveChanges();
+      addAlert(EXECUTIVE_HOURS_AND_DOLLARS_MESSAGES.EXECUTIVE_HOURS_SAVED_SUCCESS);
+    } catch (error) {
+      addAlert(EXECUTIVE_HOURS_AND_DOLLARS_MESSAGES.EXECUTIVE_HOURS_SAVE_ERROR);
+    }
+  }, [saveChanges, addAlert]);
 
   const renderActionNode = () => {
-    return <StatusDropdownActionNode />;
+    return (
+      <Box sx={{ display: "flex", gap: 2 }}>
+        <RenderSaveButton
+          hasPendingChanges={hasPendingChanges}
+          onSave={handleSave}
+          isReadOnly={isReadOnly}
+        />
+        <StatusDropdownActionNode />
+      </Box>
+    );
   };
 
   return (
@@ -160,6 +180,14 @@ const ManageExecutiveHoursAndDollars = () => {
       actionNode={renderActionNode()}>
       <ManageExecutiveHoursAndDollarsContent hookData={hookData} />
     </Page>
+  );
+};
+
+const ManageExecutiveHoursAndDollars = () => {
+  return (
+    <MissiveAlertProvider>
+      <ManageExecutiveHoursAndDollarsInner />
+    </MissiveAlertProvider>
   );
 };
 
