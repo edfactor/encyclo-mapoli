@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Extensions;
@@ -579,6 +580,23 @@ public sealed class DistributionService : IDistributionService
             groupedResults.Sort((a, b) => a.DistributionTypeName.CompareTo(b.DistributionTypeName));
 
             return Result<DistributionRunReportSummaryResponse[]>.Success(groupedResults.ToArray());
+        }, cancellationToken);
+    }
+
+    public async Task<Result<PaginatedResponseDto<DistributionsOnHoldResponse>>> GetDistributionsOnHold(SortedPaginationRequestDto request, CancellationToken cancellationToken)
+    {
+        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var query = from dist in ctx.Distributions.Include(x=>x.Payee)
+                        where dist.StatusId == DistributionStatus.Constants.RequestOnHold
+                        select new DistributionsOnHoldResponse
+                        {
+                            Ssn = dist.Ssn.MaskSsn(),
+                            PayTo = dist.Payee!.Name,
+                            CheckAmount = dist.CheckAmount,
+                        };
+            var paginatedResults = await query.ToPaginationResultsAsync(request, cancellationToken);
+            return Result<PaginatedResponseDto<DistributionsOnHoldResponse>>.Success(paginatedResults);
         }, cancellationToken);
     }
 
