@@ -156,7 +156,7 @@ const ManageExecutiveHoursAndDollarsInner = () => {
     try {
       await saveChanges();
       addAlert(EXECUTIVE_HOURS_AND_DOLLARS_MESSAGES.EXECUTIVE_HOURS_SAVED_SUCCESS);
-    } catch (error) {
+    } catch (_error) {
       addAlert(EXECUTIVE_HOURS_AND_DOLLARS_MESSAGES.EXECUTIVE_HOURS_SAVE_ERROR);
     }
   }, [saveChanges, addAlert]);
