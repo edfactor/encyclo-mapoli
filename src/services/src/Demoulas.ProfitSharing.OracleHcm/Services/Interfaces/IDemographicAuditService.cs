@@ -1,54 +1,38 @@
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.OracleHcm.Commands;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services.Interfaces;
 
 /// <summary>
 /// Service for detecting and auditing demographic data issues.
-/// Handles duplicate SSN detection, SSN conflict resolution, and audit logging.
+/// Returns commands for transaction-safe execution.
 /// </summary>
 public interface IDemographicAuditService
 {
     /// <summary>
     /// Detects demographics with duplicate SSNs.
     /// </summary>
-    /// <param name="existing">List of existing demographics to check</param>
-    /// <param name="fallbackSsns">List of SSNs from fallback matching</param>
-    /// <returns>List of demographics with duplicate SSNs</returns>
-    List<Demographic> DetectDuplicateSsns(
-        List<Demographic> existing,
-        List<int> fallbackSsns);
+    /// <param name="demographics">List of demographics to check for duplicates</param>
+    /// <returns>List of groupings by SSN that have duplicates</returns>
+    List<IGrouping<int, Demographic>> DetectDuplicateSsns(
+        List<Demographic> demographics);
 
     /// <summary>
-    /// Creates audit records for duplicate SSNs.
+    /// Prepares audit commands for duplicate SSNs.
     /// </summary>
-    /// <param name="duplicates">List of demographics with duplicate SSNs</param>
-    /// <param name="ct">Cancellation token</param>
-    Task AuditDuplicateSsnsAsync(
-        List<Demographic> duplicates,
-        CancellationToken ct);
+    /// <param name="duplicateGroups">Groups of demographics with duplicate SSNs</param>
+    /// <returns>List of commands to execute</returns>
+    List<IDemographicCommand> PrepareAuditDuplicateSsns(
+        List<IGrouping<int, Demographic>> duplicateGroups);
 
     /// <summary>
-    /// Checks for SSN conflicts and creates appropriate audit records.
-    /// Handles cases where OracleHcmId matches but SSN differs.
+    /// Prepares audit commands for SSN conflicts.
+    /// Handles cases where SSN matches but Badge or OracleId differ.
     /// </summary>
-    /// <param name="incomingByOracleId">Dictionary of incoming demographics by OracleHcmId</param>
     /// <param name="existing">List of existing demographics</param>
-    /// <param name="ct">Cancellation token</param>
-    Task CheckSsnConflictsAsync(
-        Dictionary<long, Demographic> incomingByOracleId,
+    /// <param name="incoming">List of incoming demographics</param>
+    /// <returns>List of commands to execute</returns>
+    List<IDemographicCommand> PrepareCheckSsnConflicts(
         List<Demographic> existing,
-        CancellationToken ct);
-
-    /// <summary>
-    /// Creates a single audit record for a demographic.
-    /// </summary>
-    /// <param name="demographic">Demographic to audit</param>
-    /// <param name="message">Audit message</param>
-    /// <param name="property">Property name being audited</param>
-    /// <param name="ct">Cancellation token</param>
-    Task CreateAuditAsync(
-        Demographic demographic,
-        string message,
-        string property,
-        CancellationToken ct);
+        List<Demographic> incoming);
 }

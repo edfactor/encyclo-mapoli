@@ -75,3 +75,47 @@ public sealed class UpdateDemographicCommand : IDemographicCommand
         return Task.CompletedTask;
     }
 }
+
+/// <summary>
+/// Command to update SSN in BeneficiaryContacts for a given OracleHcmId.
+/// </summary>
+public sealed class UpdateBeneficiaryContactsSsnCommand : IDemographicCommand
+{
+    private readonly long _oracleHcmId;
+    private readonly int _newSsn;
+
+    public UpdateBeneficiaryContactsSsnCommand(long oracleHcmId, int newSsn)
+    {
+        _oracleHcmId = oracleHcmId;
+        _newSsn = newSsn;
+    }
+
+    public async Task ExecuteAsync(ProfitSharingDbContext context, CancellationToken ct)
+    {
+        await context.BeneficiaryContacts
+            .Where(bc => bc.OracleHcmId == _oracleHcmId)
+            .ExecuteUpdateAsync(s => s.SetProperty(bc => bc.Ssn, _newSsn), ct);
+    }
+}
+
+/// <summary>
+/// Command to update SSN in ProfitDetails for a given OracleHcmId.
+/// </summary>
+public sealed class UpdateProfitDetailsSsnCommand : IDemographicCommand
+{
+    private readonly long _oracleHcmId;
+    private readonly int _newSsn;
+
+    public UpdateProfitDetailsSsnCommand(long oracleHcmId, int newSsn)
+    {
+        _oracleHcmId = oracleHcmId;
+        _newSsn = newSsn;
+    }
+
+    public async Task ExecuteAsync(ProfitSharingDbContext context, CancellationToken ct)
+    {
+        await context.ProfitDetails
+            .Where(pd => pd.OracleHcmId == _oracleHcmId)
+            .ExecuteUpdateAsync(s => s.SetProperty(pd => pd.Ssn, _newSsn), ct);
+    }
+}

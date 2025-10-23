@@ -1,48 +1,50 @@
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.OracleHcm.Commands;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services.Interfaces;
 
 /// <summary>
 /// Service for managing demographic history tracking and entity updates.
-/// Handles closing old history records and creating new ones when data changes.
+/// Returns commands for transaction-safe execution.
 /// </summary>
 public interface IDemographicHistoryService
 {
     /// <summary>
-    /// Updates existing demographics with incoming data and tracks history changes.
-    /// Creates new history records when data changes are detected.
+    /// Prepares commands to update existing demographics with history tracking.
+    /// Creates history records before updating entity values.
     /// </summary>
-    /// <param name="incomingByOracleId">Dictionary of incoming demographics by OracleHcmId</param>
-    /// <param name="incomingBySsnBadge">Lookup of incoming demographics by (SSN, BadgeNumber)</param>
-    /// <param name="existing">List of existing demographics to update</param>
-    /// <param name="modificationDate">Timestamp for the update</param>
-    /// <param name="ct">Cancellation token</param>
-    /// <returns>Number of demographics updated</returns>
-    Task<int> UpdateExistingWithHistoryAsync(
-        Dictionary<long, Demographic> incomingByOracleId,
-        ILookup<(int Ssn, int BadgeNumber), Demographic> incomingBySsnBadge,
+    /// <param name="existing">Existing demographics to update</param>
+    /// <param name="incoming">Incoming demographics with new values</param>
+    /// <returns>Tuple of (updated count, list of commands to execute)</returns>
+    (int UpdatedCount, List<IDemographicCommand> Commands) PrepareUpdateExistingWithHistory(
         List<Demographic> existing,
-        DateTimeOffset modificationDate,
-        CancellationToken ct);
+        List<Demographic> incoming);
 
     /// <summary>
-    /// Inserts new demographics with initial history records.
+    /// Prepares commands to insert new demographics with initial history records.
     /// </summary>
-    /// <param name="newDemographics">List of new demographics to insert</param>
-    /// <param name="ct">Cancellation token</param>
-    /// <returns>Number of demographics inserted</returns>
-    Task<int> InsertNewWithHistoryAsync(
-        List<Demographic> newDemographics,
-        CancellationToken ct);
+    /// <param name="newDemographics">New demographics to insert</param>
+    /// <returns>Tuple of (inserted count, list of commands to execute)</returns>
+    (int InsertedCount, List<IDemographicCommand> Commands) PrepareInsertNewWithHistory(
+        List<Demographic> newDemographics);
 
     /// <summary>
-    /// Updates related entities when SSN changes (BeneficiaryContacts, ProfitDetails).
+    /// Detects SSN changes between existing and incoming demographics.
     /// </summary>
-    /// <param name="oldSsn">Old SSN value</param>
-    /// <param name="newSsn">New SSN value</param>
-    /// <param name="ct">Cancellation token</param>
-    Task UpdateRelatedEntitiesForSsnChangeAsync(
-        int oldSsn,
-        int newSsn,
-        CancellationToken ct);
+    /// <param name="existing">Existing demographics</param>
+    /// <param name="incomingByOracleId">Dictionary of incoming demographics by OracleHcmId</param>
+    /// <returns>List of demographics with SSN changes</returns>
+    List<Demographic> DetectSsnChanges(
+        List<Demographic> existing,
+        Dictionary<long, Demographic> incomingByOracleId);
+
+    /// <summary>
+    /// Prepares commands to update SSNs in related entities (BeneficiaryContacts, ProfitDetails).
+    /// </summary>
+    /// <param name="ssnChangedDemographics">Demographics with SSN changes</param>
+    /// <param name="incomingByOracleId">Dictionary of incoming demographics by OracleHcmId</param>
+    /// <returns>List of commands to execute</returns>
+    List<IDemographicCommand> PrepareSsnUpdateCommands(
+        List<Demographic> ssnChangedDemographics,
+        Dictionary<long, Demographic> incomingByOracleId);
 }

@@ -1,7 +1,6 @@
-using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Metrics;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Repositories;
+using Demoulas.ProfitSharing.OracleHcm.Commands;
 using Demoulas.ProfitSharing.OracleHcm.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
@@ -9,18 +8,14 @@ namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
 /// <summary>
 /// Handles audit operations and duplicate detection for demographics.
-/// Provides SSN conflict checking, duplicate detection, and audit record creation.
+/// Returns commands for transaction-safe execution.
 /// </summary>
 public sealed class DemographicAuditService : IDemographicAuditService
 {
-    private readonly IDemographicsRepository _repository;
     private readonly ILogger<DemographicAuditService> _logger;
 
-    public DemographicAuditService(
-        IDemographicsRepository repository,
-        ILogger<DemographicAuditService> logger)
+    public DemographicAuditService(ILogger<DemographicAuditService> logger)
     {
-        _repository = repository;
         _logger = logger;
     }
 
@@ -40,10 +35,11 @@ public sealed class DemographicAuditService : IDemographicAuditService
         return duplicateSsnGroups;
     }
 
-    public async Task AuditDuplicateSsnsAsync(
-        List<IGrouping<int, Demographic>> duplicateGroups,
-        CancellationToken ct)
+    public List<IDemographicCommand> PrepareAuditDuplicateSsns(
+        List<IGrouping<int, Demographic>> duplicateGroups)
     {
+        var commands = new List<IDemographicCommand>();
+
         foreach (var group in duplicateGroups)
         {
             var ids = group.Select(e => e.OracleHcmId).ToList();
@@ -63,17 +59,21 @@ public sealed class DemographicAuditService : IDemographicAuditService
                 DemographicId = group.First().Id
             };
 
-            await _repository.AddAuditRecordAsync(auditRecord, ct);
+            commands.Add(new AddAuditCommand(auditRecord));
         }
 
-        DemographicsIngestMetrics.DuplicateAudits.Add(duplicateGroups.Count);
-    }
+        if (duplicateGroups.Count > 0)
+        {
+            DemographicsIngestMetrics.DuplicateAudits.Add(duplicateGroups.Count);
+        }
 
-    public async Task CheckSsnConflictsAsync(
+        return commands;
+    }
+    public List<IDemographicCommand> PrepareCheckSsnConflicts(
         List<Demographic> existing,
-        List<Demographic> incoming,
-        CancellationToken ct)
+        List<Demographic> incoming)
     {
+        var commands = new List<IDemographicCommand>();
         var existingBySsn = existing.ToLookup(e => e.Ssn);
 
         var conflictingItems = incoming
@@ -94,7 +94,7 @@ public sealed class DemographicAuditService : IDemographicAuditService
 
         if (conflictingItems.Count == 0)
         {
-            return;
+            return commands;
         }
 
         DemographicsIngestMetrics.SsnConflicts.Add(conflictingItems.Count);
@@ -136,42 +136,11 @@ public sealed class DemographicAuditService : IDemographicAuditService
                     DemographicId = existingItem.Id
                 };
 
-                await _repository.AddAuditRecordAsync(auditRecord, ct);
+                commands.Add(new AddAuditCommand(auditRecord));
             }
         }
+
+        return commands;
     }
 
-    public async Task CreateAuditAsync(
-        string recordType,
-        string recordValue,
-        string detail,
-        int? demographicId,
-        CancellationToken ct)
-    {
-        var auditRecord = new DemographicsAudit
-        {
-            AuditedAt = DateTime.UtcNow,
-            RecordType = recordType,
-            RecordValue = recordValue,
-            Detail = detail,
-            DemographicId = demographicId
-        };
-
-        await _repository.AddAuditRecordAsync(auditRecord, ct);
-    }
-
-    public async Task<List<Demographic>> GetSsnConflictsAsync(
-        List<Demographic> incoming,
-        CancellationToken ct)
-    {
-        var ssns = incoming.Select(d => d.Ssn).Distinct().ToList();
-        var existingWithSameSsns = await _repository.GetBySsnsAsync(ssns, ct);
-
-        return existingWithSameSsns
-            .Where(existing => incoming.Any(incoming =>
-                incoming.Ssn == existing.Ssn &&
-                (incoming.BadgeNumber != existing.BadgeNumber ||
-                 incoming.OracleHcmId != existing.OracleHcmId)))
-            .ToList();
-    }
 }

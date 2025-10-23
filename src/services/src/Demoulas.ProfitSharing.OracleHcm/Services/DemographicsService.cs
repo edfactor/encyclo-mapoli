@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Data.Repositories;
+using Demoulas.ProfitSharing.OracleHcm.Commands;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Mappers;
 using Demoulas.ProfitSharing.OracleHcm.Services.Interfaces;
@@ -96,44 +97,55 @@ public sealed class DemographicsService : IDemographicsServiceInternal
             .Select(g => g.First())
             .ToList();
 
-        // Step 3: Detect duplicate SSNs and audit
+        // Step 3: Collect commands from domain services
+        var commands = new List<IDemographicCommand>();
+
+        // 3a: Detect duplicate SSNs and prepare audit commands
         var duplicateSsnGroups = _auditService.DetectDuplicateSsns(existing);
         if (duplicateSsnGroups.Count > 0)
         {
-            await _auditService.AuditDuplicateSsnsAsync(duplicateSsnGroups, cancellationToken).ConfigureAwait(false);
+            var auditCommands = _auditService.PrepareAuditDuplicateSsns(duplicateSsnGroups);
+            commands.AddRange(auditCommands);
         }
 
-        // Step 4: Check for SSN conflicts
-        await _auditService.CheckSsnConflictsAsync(existing, incoming, cancellationToken).ConfigureAwait(false);
+        // 3b: Check for SSN conflicts and prepare audit commands
+        var conflictCommands = _auditService.PrepareCheckSsnConflicts(existing, incoming);
+        commands.AddRange(conflictCommands);
 
-        // Step 5: Identify new demographics to insert
+        // 3c: Identify new demographics and prepare insert commands with history
         List<Demographic> newDemographics = _matchingService.IdentifyNewDemographics(incoming, existing);
-
-        // Step 6: Insert new demographics with history
-        int inserted = await _historyService.InsertNewWithHistoryAsync(newDemographics, cancellationToken).ConfigureAwait(false);
+        var (inserted, insertCommands) = _historyService.PrepareInsertNewWithHistory(newDemographics);
+        commands.AddRange(insertCommands);
         if (inserted > 0)
         {
             DemographicsIngestMetrics.RecordsInserted.Add(inserted);
         }
 
-        // Step 7: Update existing demographics with history tracking
-        int updated = await _historyService.UpdateExistingWithHistoryAsync(existing, incoming, cancellationToken).ConfigureAwait(false);
+        // 3d: Prepare update commands with history tracking
+        var (updated, updateCommands) = _historyService.PrepareUpdateExistingWithHistory(existing, incoming);
+        commands.AddRange(updateCommands);
         if (updated > 0)
         {
             DemographicsIngestMetrics.RecordsUpdated.Add(updated);
         }
 
-        // Step 8: Update related entities for SSN changes
-        List<Demographic> ssnChangedDemographics = existing
-            .Where(e => incomingByOracleId.TryGetValue(e.OracleHcmId, out var incoming) && e.Ssn != incoming.Ssn)
-            .ToList();
-        await _historyService.UpdateRelatedEntitiesForSsnChangeAsync(ssnChangedDemographics, cancellationToken).ConfigureAwait(false);
+        // 3e: Detect SSN changes and prepare update commands for related entities
+        List<Demographic> ssnChangedDemographics = _historyService.DetectSsnChanges(existing, incomingByOracleId);
+        if (ssnChangedDemographics.Count > 0)
+        {
+            var ssnUpdateCommands = _historyService.PrepareSsnUpdateCommands(ssnChangedDemographics, incomingByOracleId);
+            commands.AddRange(ssnUpdateCommands);
+        }
 
-        // Step 9: Save all changes
+        // Step 4: Execute all commands in single transaction
         try
         {
             await _dataContextFactory.UseWritableContext(async context =>
             {
+                foreach (var command in commands)
+                {
+                    await command.ExecuteAsync(context, cancellationToken).ConfigureAwait(false);
+                }
                 await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }, cancellationToken).ConfigureAwait(false);
 

@@ -1,6 +1,5 @@
-using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Repositories;
+using Demoulas.ProfitSharing.OracleHcm.Commands;
 using Demoulas.ProfitSharing.OracleHcm.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
@@ -8,28 +7,24 @@ namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
 /// <summary>
 /// Handles history tracking and entity updates for demographics.
-/// Provides change detection, history record creation, and related entity updates.
+/// Returns commands for transaction-safe execution.
 /// </summary>
 public sealed class DemographicHistoryService : IDemographicHistoryService
 {
-    private readonly IDemographicsRepository _repository;
     private readonly ILogger<DemographicHistoryService> _logger;
 
-    public DemographicHistoryService(
-        IDemographicsRepository repository,
-        ILogger<DemographicHistoryService> logger)
+    public DemographicHistoryService(ILogger<DemographicHistoryService> logger)
     {
-        _repository = repository;
         _logger = logger;
     }
 
-    public async Task<int> UpdateExistingWithHistoryAsync(
+    public (int UpdatedCount, List<IDemographicCommand> Commands) PrepareUpdateExistingWithHistory(
         List<Demographic> existing,
-        List<Demographic> incoming,
-        CancellationToken ct)
+        List<Demographic> incoming)
     {
         var incomingLookup = incoming.ToDictionary(e => e.OracleHcmId);
         var updatedCount = 0;
+        var commands = new List<IDemographicCommand>();
 
         foreach (var existingItem in existing)
         {
@@ -46,66 +41,90 @@ public sealed class DemographicHistoryService : IDemographicHistoryService
 
             // Create history record before updating
             var historyRecord = CreateHistoryRecord(existingItem);
-            await _repository.AddHistoryRecordAsync(historyRecord, ct);
+            commands.Add(new AddHistoryCommand(historyRecord));
 
             // Update existing demographic with new values
             UpdateDemographicValues(existingItem, incomingItem);
+            commands.Add(new UpdateDemographicCommand(existingItem));
             updatedCount++;
         }
 
         if (updatedCount > 0)
         {
-            _logger.LogDebug("Updated {Count} demographics with history tracking", updatedCount);
+            _logger.LogDebug("Prepared {Count} demographics for update with history tracking", updatedCount);
         }
 
-        return updatedCount;
+        return (updatedCount, commands);
     }
 
-    public async Task<int> InsertNewWithHistoryAsync(
-        List<Demographic> newDemographics,
-        CancellationToken ct)
+    public (int InsertedCount, List<IDemographicCommand> Commands) PrepareInsertNewWithHistory(
+        List<Demographic> newDemographics)
     {
         if (newDemographics.Count == 0)
         {
-            return 0;
+            return (0, new List<IDemographicCommand>());
         }
+
+        var commands = new List<IDemographicCommand>();
 
         foreach (var demographic in newDemographics)
         {
-            await _repository.AddAsync(demographic, ct);
+            commands.Add(new AddDemographicCommand(demographic));
 
             // Create initial history record
             var historyRecord = CreateHistoryRecord(demographic);
-            await _repository.AddHistoryRecordAsync(historyRecord, ct);
+            commands.Add(new AddHistoryCommand(historyRecord));
         }
 
-        _logger.LogDebug("Inserted {Count} new demographics with initial history", newDemographics.Count);
-        return newDemographics.Count;
+        _logger.LogDebug("Prepared {Count} new demographics for insertion with initial history", newDemographics.Count);
+        return (newDemographics.Count, commands);
     }
 
-    public async Task UpdateRelatedEntitiesForSsnChangeAsync(
-        List<Demographic> ssnChangedDemographics,
-        CancellationToken ct)
+    public List<Demographic> DetectSsnChanges(
+        List<Demographic> existing,
+        Dictionary<long, Demographic> incomingByOracleId)
     {
-        if (ssnChangedDemographics.Count == 0)
+        var ssnChangedDemographics = existing
+            .Where(e => incomingByOracleId.TryGetValue(e.OracleHcmId, out var incoming) && e.Ssn != incoming.Ssn)
+            .ToList();
+
+        if (ssnChangedDemographics.Count > 0)
         {
-            return;
+            _logger.LogInformation(
+                "Detected {Count} SSN changes",
+                ssnChangedDemographics.Count);
         }
 
-        foreach (var demographic in ssnChangedDemographics)
-        {
-            // Update BeneficiaryContacts SSN
-            await _repository.UpdateBeneficiaryContactsSsnAsync(
-                demographic.Id, demographic.Ssn, ct);
+        return ssnChangedDemographics;
+    }
 
-            // Update ProfitDetails SSN
-            await _repository.UpdateProfitDetailsSsnAsync(
-                demographic.Id, demographic.Ssn, ct);
+    public List<IDemographicCommand> PrepareSsnUpdateCommands(
+        List<Demographic> ssnChangedDemographics,
+        Dictionary<long, Demographic> incomingByOracleId)
+    {
+        var commands = new List<IDemographicCommand>();
+
+        foreach (var existing in ssnChangedDemographics)
+        {
+            if (!incomingByOracleId.TryGetValue(existing.OracleHcmId, out var incoming))
+            {
+                continue;
+            }
+
+            var newSsn = incoming.Ssn;
+
+            // Update related BeneficiaryContacts
+            commands.Add(new UpdateBeneficiaryContactsSsnCommand(existing.OracleHcmId, newSsn));
+
+            // Update related ProfitDetails
+            commands.Add(new UpdateProfitDetailsSsnCommand(existing.OracleHcmId, newSsn));
+
+            _logger.LogDebug(
+                "Prepared SSN update commands for OracleHcmId {OracleHcmId}: {OldSsn} -> {NewSsn}",
+                existing.OracleHcmId, existing.Ssn, newSsn);
         }
 
-        _logger.LogInformation(
-            "Updated related entities for {Count} SSN changes",
-            ssnChangedDemographics.Count);
+        return commands;
     }
 
     #region Private Helpers
