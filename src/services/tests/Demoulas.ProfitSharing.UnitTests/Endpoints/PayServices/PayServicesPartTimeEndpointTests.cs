@@ -4,6 +4,7 @@ using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.PayServices;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.PayServices;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -87,7 +88,7 @@ public sealed class PayServicesPartTimeEndpointTests
         _payServiceMock
             .Setup(x => x.GetPayServices(
                 It.IsAny<PayServicesRequest>(),
-                PayServicesRequest.Constants.PartTime,
+                EmploymentType.Constants.PartTime,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PayServicesResponse>.Success(expectedResponse));
 
@@ -97,7 +98,7 @@ public sealed class PayServicesPartTimeEndpointTests
         // Assert
         _payServiceMock.Verify(x => x.GetPayServices(
             It.Is<PayServicesRequest>(r => r.ProfitYear == request.ProfitYear),
-            PayServicesRequest.Constants.PartTime,
+            EmploymentType.Constants.PartTime,
             cancellationToken),
             Times.Once);
     }
@@ -118,7 +119,7 @@ public sealed class PayServicesPartTimeEndpointTests
         _payServiceMock
             .Setup(x => x.GetPayServices(
                 It.IsAny<PayServicesRequest>(),
-                PayServicesRequest.Constants.PartTime,
+                EmploymentType.Constants.PartTime,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PayServicesResponse>.Success(expectedResponse));
 
@@ -128,7 +129,7 @@ public sealed class PayServicesPartTimeEndpointTests
         // Assert
         _payServiceMock.Verify(x => x.GetPayServices(
             It.Is<PayServicesRequest>(r => r.ProfitYear == profitYear),
-            PayServicesRequest.Constants.PartTime,
+            EmploymentType.Constants.PartTime,
             It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -145,7 +146,7 @@ public sealed class PayServicesPartTimeEndpointTests
         _payServiceMock
             .Setup(x => x.GetPayServices(
                 It.IsAny<PayServicesRequest>(),
-                PayServicesRequest.Constants.PartTime,
+                EmploymentType.Constants.PartTime,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PayServicesResponse>.Success(CreateSuccessResponse(2024)));
 
@@ -155,7 +156,7 @@ public sealed class PayServicesPartTimeEndpointTests
         // Assert
         _payServiceMock.Verify(x => x.GetPayServices(
             It.IsAny<PayServicesRequest>(),
-            PayServicesRequest.Constants.PartTime,
+            EmploymentType.Constants.PartTime,
             cancellationToken),
             Times.Once);
     }
@@ -181,7 +182,7 @@ public sealed class PayServicesPartTimeEndpointTests
         await _endpoint.ExecuteAsync(request, CancellationToken.None);
 
         // Assert
-        capturedEmploymentType.ShouldBe(PayServicesRequest.Constants.PartTime);
+        capturedEmploymentType.ShouldBe(EmploymentType.Constants.PartTime);
         capturedEmploymentType.ShouldBe('P');
     }
 
@@ -200,7 +201,7 @@ public sealed class PayServicesPartTimeEndpointTests
         _payServiceMock
             .Setup(x => x.GetPayServices(
                 It.IsAny<PayServicesRequest>(),
-                PayServicesRequest.Constants.PartTime,
+                EmploymentType.Constants.PartTime,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PayServicesResponse>.Failure(error));
 
@@ -210,7 +211,7 @@ public sealed class PayServicesPartTimeEndpointTests
 
         _payServiceMock.Verify(x => x.GetPayServices(
             It.IsAny<PayServicesRequest>(),
-            PayServicesRequest.Constants.PartTime,
+            EmploymentType.Constants.PartTime,
             It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -229,7 +230,7 @@ public sealed class PayServicesPartTimeEndpointTests
         _payServiceMock
             .Setup(x => x.GetPayServices(
                 It.IsAny<PayServicesRequest>(),
-                PayServicesRequest.Constants.PartTime,
+                EmploymentType.Constants.PartTime,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PayServicesResponse>.ValidationFailure(validationErrors));
 
@@ -238,7 +239,7 @@ public sealed class PayServicesPartTimeEndpointTests
 
         _payServiceMock.Verify(x => x.GetPayServices(
             It.IsAny<PayServicesRequest>(),
-            PayServicesRequest.Constants.PartTime,
+            EmploymentType.Constants.PartTime,
             It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -255,7 +256,7 @@ public sealed class PayServicesPartTimeEndpointTests
         _payServiceMock
             .Setup(x => x.GetPayServices(
                 It.IsAny<PayServicesRequest>(),
-                PayServicesRequest.Constants.PartTime,
+                EmploymentType.Constants.PartTime,
                 It.IsAny<CancellationToken>()))
             .ThrowsAsync(new OperationCanceledException());
 
@@ -286,7 +287,7 @@ public sealed class PayServicesPartTimeEndpointTests
         _payServiceMock
             .Setup(x => x.GetPayServices(
                 It.IsAny<PayServicesRequest>(),
-                PayServicesRequest.Constants.PartTime,
+                EmploymentType.Constants.PartTime,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PayServicesResponse>.Success(emptyResponse));
 
@@ -296,7 +297,7 @@ public sealed class PayServicesPartTimeEndpointTests
         // Assert
         _payServiceMock.Verify(x => x.GetPayServices(
             It.IsAny<PayServicesRequest>(),
-            PayServicesRequest.Constants.PartTime,
+            EmploymentType.Constants.PartTime,
             It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -337,10 +338,10 @@ public sealed class PayServicesPartTimeEndpointTests
     public void PayServicesRequest_Constants_ShouldBeCorrectlyDefined()
     {
         // Assert
-        PayServicesRequest.Constants.PartTime.ShouldBe('P');
-        PayServicesRequest.Constants.FullTimeStraightSalary.ShouldBe('H');
-        PayServicesRequest.Constants.FullTimeAccruedPaidHolidays.ShouldBe('G');
-        PayServicesRequest.Constants.FullTimeEightPaidHolidays.ShouldBe('F');
+        EmploymentType.Constants.PartTime.ShouldBe('P');
+        EmploymentType.Constants.FullTimeStraightSalary.ShouldBe('H');
+        EmploymentType.Constants.FullTimeAccruedPaidHolidays.ShouldBe('G');
+        EmploymentType.Constants.FullTimeEightPaidHolidays.ShouldBe('F');
     }
 
     #endregion
@@ -397,7 +398,7 @@ public sealed class PayServicesPartTimeEndpointTests
         _payServiceMock
             .Setup(x => x.GetPayServices(
                 It.IsAny<PayServicesRequest>(),
-                PayServicesRequest.Constants.PartTime,
+                EmploymentType.Constants.PartTime,
                 It.IsAny<CancellationToken>()))
             .Callback(() => serviceCallCount++)
             .ReturnsAsync(Result<PayServicesResponse>.Success(CreateSuccessResponse(2024)));
@@ -409,7 +410,7 @@ public sealed class PayServicesPartTimeEndpointTests
         serviceCallCount.ShouldBe(1);
         _payServiceMock.Verify(x => x.GetPayServices(
             It.IsAny<PayServicesRequest>(),
-            PayServicesRequest.Constants.PartTime,
+            EmploymentType.Constants.PartTime,
             It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -435,7 +436,7 @@ public sealed class PayServicesPartTimeEndpointTests
         await _endpoint.ExecuteAsync(request, CancellationToken.None);
 
         // Assert
-        actualEmploymentType.ShouldBe(PayServicesRequest.Constants.PartTime);
+        actualEmploymentType.ShouldBe(EmploymentType.Constants.PartTime);
     }
 
     #endregion
@@ -453,7 +454,7 @@ public sealed class PayServicesPartTimeEndpointTests
         _payServiceMock
             .Setup(x => x.GetPayServices(
                 It.IsAny<PayServicesRequest>(),
-                PayServicesRequest.Constants.PartTime,
+                EmploymentType.Constants.PartTime,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PayServicesResponse>.Success(CreateSuccessResponse(2024)));
 
@@ -476,7 +477,7 @@ public sealed class PayServicesPartTimeEndpointTests
         _payServiceMock
             .Setup(x => x.GetPayServices(
                 It.IsAny<PayServicesRequest>(),
-                PayServicesRequest.Constants.PartTime,
+                EmploymentType.Constants.PartTime,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PayServicesResponse>.Success(CreateSuccessResponse(2024)));
 
@@ -493,7 +494,7 @@ public sealed class PayServicesPartTimeEndpointTests
         // Assert
         _payServiceMock.Verify(x => x.GetPayServices(
             It.IsAny<PayServicesRequest>(),
-            PayServicesRequest.Constants.PartTime,
+            EmploymentType.Constants.PartTime,
             It.IsAny<CancellationToken>()),
             Times.Exactly(concurrentCalls));
     }
@@ -512,7 +513,7 @@ public sealed class PayServicesPartTimeEndpointTests
         _payServiceMock
             .Setup(x => x.GetPayServices(
                 It.IsAny<PayServicesRequest>(),
-                PayServicesRequest.Constants.PartTime,
+                EmploymentType.Constants.PartTime,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PayServicesResponse>.Success(CreateSuccessResponse(2024)));
 
@@ -524,7 +525,7 @@ public sealed class PayServicesPartTimeEndpointTests
         // Verification happens through the ExecuteWithTelemetry wrapper
         _payServiceMock.Verify(x => x.GetPayServices(
             It.IsAny<PayServicesRequest>(),
-            PayServicesRequest.Constants.PartTime,
+            EmploymentType.Constants.PartTime,
             It.IsAny<CancellationToken>()),
             Times.Once);
     }

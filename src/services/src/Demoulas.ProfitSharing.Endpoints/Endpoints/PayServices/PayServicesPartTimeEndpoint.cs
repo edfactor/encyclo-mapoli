@@ -4,6 +4,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.PayServices;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Common.Validators;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
@@ -57,7 +58,7 @@ public sealed class PayServicesPartTimeEndpoint: ProfitSharingEndpoint<PayServic
         return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
             // Call the service to get demographics
-            var result = await _payService.GetPayServices(req, PayServicesRequest.Constants.PartTime, ct);
+            var result = await _payService.GetPayServices(req, EmploymentType.Constants.PartTime, ct);
 
             // Record business operation metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,
