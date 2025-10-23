@@ -29,10 +29,13 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
 
       editable: !mini
     }),
-    createCurrencyColumn({
-      headerName: "Executive Dollars",
-      field: "incomeExecutive"
-    }),
+    {
+      ...createCurrencyColumn({
+        headerName: "Executive Dollars",
+        field: "incomeExecutive"
+      }),
+      editable: !mini
+    },
     createHoursColumn({
       headerName: "Oracle Hours",
       field: "currentHoursYear"
