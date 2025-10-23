@@ -31,22 +31,17 @@ public class PayBenReportService : IPayBenReportService
 
             var res = query.Select(x => new PayBenReportResponse()
             {
-                Ssn = x.Contact != null ? x.Contact.Ssn.ToString() : string.Empty,
+                Ssn = x.Contact != null ? x.Contact.Ssn.MaskSsn() : string.Empty,
                 BeneficiaryFullName = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.FullName ?? string.Empty : string.Empty,
                 DemographicFullName = x.Demographic != null && x.Demographic.ContactInfo != null ? x.Demographic.ContactInfo.FullName ?? string.Empty : string.Empty,
-                Psn = x.Psn,
+                Psn = $"{x.BadgeNumber}{x.PsnSuffix:D4}",
                 BadgeNumber = x.BadgeNumber,
                 Percentage = x.Percent
             });
             PaginatedResponseDto<PayBenReportResponse> final = await res.ToPaginationResultsAsync(request, cancellationToken);
             return final;
         }, cancellationToken);
-        // Post-process only the results
-        foreach (var item in result.Results)
-        {
-
-            item.Ssn = Convert.ToInt32(item.Ssn).MaskSsn();
-        }
+       
         return result;
     }
 }
