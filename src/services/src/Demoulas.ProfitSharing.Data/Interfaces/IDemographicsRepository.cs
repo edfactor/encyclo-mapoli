@@ -50,6 +50,16 @@ public interface IDemographicsRepository
         IEnumerable<int> ssns,
         CancellationToken ct);
 
+    /// <summary>
+    /// Retrieves demographics by multiple SSNs.
+    /// </summary>
+    /// <param name="ssns">Collection of SSNs to search for</param>
+    /// <param name="ct">Cancellation token</param>
+    /// <returns>List of demographics matching the SSNs</returns>
+    Task<List<Demographic>> GetBySsnsAsync(
+        IEnumerable<int> ssns,
+        CancellationToken ct);
+
     #endregion
 
     #region Command Operations
@@ -98,6 +108,42 @@ public interface IDemographicsRepository
     /// <param name="newSsn">New SSN value</param>
     /// <param name="ct">Cancellation token</param>
     Task UpdateRelatedSsnAsync(int oldSsn, int newSsn, CancellationToken ct);
+
+    #endregion
+
+    #region Audit and History Operations
+
+    /// <summary>
+    /// Adds a demographics audit record.
+    /// Does not call SaveChanges - caller is responsible for transaction management.
+    /// </summary>
+    /// <param name="auditRecord">Audit record to insert</param>
+    /// <param name="ct">Cancellation token</param>
+    Task AddAuditRecordAsync(DemographicsAudit auditRecord, CancellationToken ct);
+
+    /// <summary>
+    /// Adds a demographics history record.
+    /// Does not call SaveChanges - caller is responsible for transaction management.
+    /// </summary>
+    /// <param name="historyRecord">History record to insert</param>
+    /// <param name="ct">Cancellation token</param>
+    Task AddHistoryRecordAsync(DemographicsHistory historyRecord, CancellationToken ct);
+
+    /// <summary>
+    /// Updates SSN in BeneficiaryContacts for a specific demographic.
+    /// </summary>
+    /// <param name="demographicId">Demographic ID</param>
+    /// <param name="newSsn">New SSN value</param>
+    /// <param name="ct">Cancellation token</param>
+    Task UpdateBeneficiaryContactsSsnAsync(int demographicId, int newSsn, CancellationToken ct);
+
+    /// <summary>
+    /// Updates SSN in ProfitDetails for a specific demographic.
+    /// </summary>
+    /// <param name="demographicId">Demographic ID</param>
+    /// <param name="newSsn">New SSN value</param>
+    /// <param name="ct">Cancellation token</param>
+    Task UpdateProfitDetailsSsnAsync(int demographicId, int newSsn, CancellationToken ct);
 
     #endregion
 

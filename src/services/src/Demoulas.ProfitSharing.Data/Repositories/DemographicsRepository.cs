@@ -194,6 +194,69 @@ public sealed class DemographicsRepository : IDemographicsRepository
 
     #endregion
 
+    #region Audit and History Operations
+
+    public Task AddAuditRecordAsync(DemographicsAudit auditRecord, CancellationToken ct)
+    {
+        return _contextFactory.UseWritableContext(async ctx =>
+        {
+            await ctx.DemographicsAudits.AddAsync(auditRecord, ct);
+        }, ct);
+    }
+
+    public Task AddHistoryRecordAsync(DemographicsHistory historyRecord, CancellationToken ct)
+    {
+        return _contextFactory.UseWritableContext(async ctx =>
+        {
+            await ctx.DemographicsHistories.AddAsync(historyRecord, ct);
+        }, ct);
+    }
+
+    public Task UpdateBeneficiaryContactsSsnAsync(int demographicId, int newSsn, CancellationToken ct)
+    {
+        return _contextFactory.UseWritableContext(async ctx =>
+        {
+            await ctx.BeneficiaryContacts
+                .Where(b => b.DemographicId == demographicId)
+                .ExecuteUpdateAsync(s => s.SetProperty(b => b.Ssn, newSsn), ct);
+        }, ct);
+    }
+
+    public Task UpdateProfitDetailsSsnAsync(int demographicId, int newSsn, CancellationToken ct)
+    {
+        return _contextFactory.UseWritableContext(async ctx =>
+        {
+            var demographic = await ctx.Demographics
+                .FirstOrDefaultAsync(d => d.Id == demographicId, ct);
+
+            if (demographic != null)
+            {
+                await ctx.ProfitDetails
+                    .Where(p => p.Ssn == demographic.Ssn)
+                    .ExecuteUpdateAsync(s => s.SetProperty(p => p.Ssn, newSsn), ct);
+            }
+        }, ct);
+    }
+
+    public Task<List<Demographic>> GetBySsnsAsync(IEnumerable<int> ssns, CancellationToken ct)
+    {
+        return _contextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var ssnList = ssns.ToList();
+            if (ssnList.Count == 0)
+            {
+                return new List<Demographic>();
+            }
+
+            return await ctx.Demographics
+                .TagWith($"DemographicsRepo-GetBySsns-Count:{ssnList.Count}")
+                .Where(d => ssnList.Contains(d.Ssn))
+                .ToListAsync(ct);
+        }, ct);
+    }
+
+    #endregion
+
     #region Transaction Management
 
     public Task<int> SaveChangesAsync(CancellationToken ct)
