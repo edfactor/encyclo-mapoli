@@ -536,4 +536,25 @@ public sealed class DistributionService : IDistributionService
             ? Result<bool>.ValidationFailure(validationErrors)
             : Result<bool>.Success(true);
     }
+
+    private IQueryable<Distribution> GetDistributionExtract(IProfitSharingDbContext ctx, CancellationToken cancellationToken, char[] distributionFrequencies)
+    {
+        var distributionQuery = ctx.Distributions
+            .Include(d => d.Frequency)
+            .Include(d => d.Status)
+            .Include(d => d.TaxCode)
+            .Include(d => d.Payee)
+            .Include(d => d.ThirdPartyPayee)
+            .ThenInclude(tp => tp!.Address)
+            .Where(x=>x.StatusId != DistributionStatus.Constants.RequestOnHold)
+            .Select(d=>d);
+        
+        if (distributionFrequencies.Any())
+        {
+            distributionQuery = distributionQuery.Where(d => distributionFrequencies.Contains(d.FrequencyId));
+        }
+
+        
+        return distributionQuery;
+    }
 }

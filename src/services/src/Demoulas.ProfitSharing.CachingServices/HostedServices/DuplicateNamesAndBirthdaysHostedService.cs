@@ -16,7 +16,7 @@ public sealed class DuplicateNamesAndBirthdaysHostedService : BaseCacheHostedSer
 
     protected override string BaseKeyName => "DNAB";
 
-    protected override ushort RefreshSeconds { get; set; } = 21600; // Every 6 hours refresh
+    protected override ushort RefreshSeconds { get; set; } = ushort.MaxValue; // Every 18.2 hours refresh
 
     public DuplicateNamesAndBirthdaysHostedService(
         IHostEnvironment hostEnvironment,

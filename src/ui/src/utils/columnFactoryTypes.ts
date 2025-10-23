@@ -1,4 +1,4 @@
-import { ValueFormatterParams, ValueGetterParams } from "ag-grid-community";
+import { ValueFormatterParams, ValueGetterParams, ITooltipParams } from "ag-grid-community";
 
 // Base interface with common properties
 export interface BaseColumnOptions {
@@ -11,7 +11,7 @@ export interface BaseColumnOptions {
   resizable?: boolean;
   tooltip?: string; // Static tooltip text
   tooltipField?: string; // Field name containing tooltip data
-  tooltipValueGetter?: (params: ValueGetterParams) => string; // Dynamic tooltip generator
+  tooltipValueGetter?: (params: ITooltipParams) => string; // Dynamic tooltip generator
   headerTooltip?: string; // Header tooltip text
 }
 

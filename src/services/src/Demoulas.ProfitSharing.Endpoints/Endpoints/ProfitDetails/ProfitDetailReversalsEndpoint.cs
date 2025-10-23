@@ -19,7 +19,8 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ProfitDetails;
-public sealed class ProfitDetailReversalsEndpoint: ProfitSharingEndpoint<IdsRequest, Results<Ok<IdsResponse>, NotFound, ProblemHttpResult>>
+
+public sealed class ProfitDetailReversalsEndpoint : ProfitSharingEndpoint<IdsRequest, Results<Ok<IdsResponse>, NotFound, ProblemHttpResult>>
 {
     private readonly IProfitDetailReversalsService _profitDetailReversalsService;
     private readonly ILogger<ProfitDetailReversalsEndpoint> _logger;
@@ -57,29 +58,18 @@ public sealed class ProfitDetailReversalsEndpoint: ProfitSharingEndpoint<IdsRequ
         return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
             var result = await _profitDetailReversalsService.ReverseProfitDetailsAsync(req.Ids, ct);
-            
+
             // Record business operation metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,
                 new("operation", "profit-detail-reversal"),
                 new("endpoint", nameof(ProfitDetailReversalsEndpoint)),
                 new("batch_size", req.Ids?.Length.ToString() ?? "0"));
-            
+
             // Convert Result<bool> to proper HTTP response
-            return result.Match<Results<Ok<IdsResponse>, NotFound, ProblemHttpResult>>(
-                success => TypedResults.Ok(new IdsResponse { Ids = req.Ids ?? Array.Empty<int>()}),
-                error => 
-                {
-                    // Check if this is a validation error about profit details not being found
-                    if (error.Detail == "Validation error" && 
-                        error.Extensions.TryGetValue("errors", out var errorsObj) &&
-                        errorsObj is Dictionary<string, string[]> validationErrors &&
-                        validationErrors.TryGetValue("profitDetailIds", out var messages) &&
-                        messages.Any(msg => msg.StartsWith("Profit details not found for IDs:")))
-                    {
-                        return TypedResults.NotFound();
-                    }
-                    return TypedResults.Problem(error.Detail);
-                });
+            // Use implicit cast to ensure validation errors are properly included in the response
+            return result.IsSuccess
+                ? TypedResults.Ok(new IdsResponse { Ids = req.Ids ?? Array.Empty<int>() })
+                : (Results<Ok<IdsResponse>, NotFound, ProblemHttpResult>)TypedResults.Problem(result.Error!);
         });
     }
 }
