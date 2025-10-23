@@ -263,31 +263,30 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             };
 
             // Line N: Non-employee beneficiaries (from BeneficiaryContacts, NOT in Demographics)
-            // Matches COBOL Report 10 logic
-            var demographicSsns = await ctx.Demographics
-                .Select(d => d.Ssn)
-                .ToListAsync(cancellationToken);
+            // Matches COBOL Report 10 logic - LEFT JOIN anti-join pattern
+            var beneData = await (
+                from bc in ctx.BeneficiaryContacts
+                join d in ctx.Demographics on bc.Ssn equals d.Ssn into demoJoin
+                from d in demoJoin.DefaultIfEmpty()
+                where d == null
+                join tot in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear) on bc.Ssn equals tot.Ssn
+                select new { bc, tot }
+            ).ToListAsync(cancellationToken);
 
-            var beneQry = ctx.BeneficiaryContacts
-                .Where(bc => !demographicSsns.Contains(bc.Ssn))
-                .Join(_totalService.GetTotalBalanceSet(ctx, req.ProfitYear), x => x.Ssn, x => x.Ssn,
-                    (pp, tot) => new { pp, tot });
-
-            var beneficiaryLineItem = await beneQry.GroupBy(x => true).Select(x => new YearEndProfitSharingReportSummaryLineItem
+            if (beneData.Any())
             {
-                Subgroup = "TERMINATED",
-                LineItemPrefix = "N",
-                LineItemTitle = "NON-EMPLOYEE BENEFICIARIES",
-                NumberOfMembers = x.Count(),
-                TotalWages = 0,
-                TotalHours = 0,
-                TotalPoints = 0,
-                TotalBalance = x.Sum(y => y.tot.TotalAmount ?? 0),
-                TotalPriorBalance = 0
-            }).FirstOrDefaultAsync(cancellationToken);
-
-            if (beneficiaryLineItem != null)
-            {
+                var beneficiaryLineItem = new YearEndProfitSharingReportSummaryLineItem
+                {
+                    Subgroup = "TERMINATED",
+                    LineItemPrefix = "N",
+                    LineItemTitle = "NON-EMPLOYEE BENEFICIARIES",
+                    NumberOfMembers = beneData.Count,
+                    TotalWages = 0,
+                    TotalHours = 0,
+                    TotalPoints = 0,
+                    TotalBalance = beneData.Sum(x => x.tot.TotalAmount ?? 0),
+                    TotalPriorBalance = 0
+                };
                 lineItems.Add(beneficiaryLineItem);
             }
 
@@ -348,31 +347,51 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
             var details = await filteredDetails.ToPaginationResultsAsync(sortReq, cancellationToken);
 
-            // Totals (use filteredDetails for counts)
-            var filteredTotals = await (
-                from a in filteredDetails
-                group a by true
-                into g
-                select new
-                {
-                    NumberOfEmployees = g.Count(),
-                    NumberOfNewEmployees = g.Count(x => x.YearsInPlan == 0),
-                    WagesTotal = g.Sum(x => x.Wages),
-                    HoursTotal = g.Sum(x => x.Hours),
-                    PointsTotal = g.Sum(x => x.Points),
-                    BalanceTotal = g.Sum(x => x.Balance),
-                }
-            ).FirstOrDefaultAsync(cancellationToken);
-
-            ProfitShareTotal totals = new ProfitShareTotal
+            // Totals calculation - handle in-memory queryables (Report 10) vs EF queryables (Reports 1-8)
+            ProfitShareTotal totals;
+            
+            if (req.ReportId == YearEndProfitSharingReportId.NonEmployeeBeneficiaries)
             {
-                WagesTotal = filteredTotals?.WagesTotal ?? 0,
-                HoursTotal = filteredTotals?.HoursTotal ?? 0,
-                PointsTotal = filteredTotals?.PointsTotal ?? 0,
-                BalanceTotal = filteredTotals?.BalanceTotal ?? 0,
-                NumberOfEmployees = filteredTotals?.NumberOfEmployees ?? 0,
-                NumberOfNewEmployees = filteredTotals?.NumberOfNewEmployees ?? 0,
-            };
+                // Report 10: filteredDetails is in-memory, use synchronous LINQ
+                var filteredList = filteredDetails.ToList();
+                totals = new ProfitShareTotal
+                {
+                    WagesTotal = filteredList.Sum(x => x.Wages),
+                    HoursTotal = filteredList.Sum(x => x.Hours),
+                    PointsTotal = filteredList.Sum(x => x.Points),
+                    BalanceTotal = filteredList.Sum(x => x.Balance),
+                    NumberOfEmployees = filteredList.Count,
+                    NumberOfNewEmployees = filteredList.Count(x => x.YearsInPlan == 0),
+                };
+            }
+            else
+            {
+                // Reports 1-8: filteredDetails is EF queryable, use async operations
+                var filteredTotals = await (
+                    from a in filteredDetails
+                    group a by true
+                    into g
+                    select new
+                    {
+                        NumberOfEmployees = g.Count(),
+                        NumberOfNewEmployees = g.Count(x => x.YearsInPlan == 0),
+                        WagesTotal = g.Sum(x => x.Wages),
+                        HoursTotal = g.Sum(x => x.Hours),
+                        PointsTotal = g.Sum(x => x.Points),
+                        BalanceTotal = g.Sum(x => x.Balance),
+                    }
+                ).FirstOrDefaultAsync(cancellationToken);
+
+                totals = new ProfitShareTotal
+                {
+                    WagesTotal = filteredTotals?.WagesTotal ?? 0,
+                    HoursTotal = filteredTotals?.HoursTotal ?? 0,
+                    PointsTotal = filteredTotals?.PointsTotal ?? 0,
+                    BalanceTotal = filteredTotals?.BalanceTotal ?? 0,
+                    NumberOfEmployees = filteredTotals?.NumberOfEmployees ?? 0,
+                    NumberOfNewEmployees = filteredTotals?.NumberOfEmployees ?? 0,
+                };
+            }
 
             var response = new YearEndProfitSharingReportResponse
             {
@@ -542,20 +561,18 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         short profitYear, 
         CancellationToken cancellationToken = default)
     {
-        // Get all Demographics SSNs to exclude
-        var demographicSsns = await ctx.Demographics
-            .Select(d => d.Ssn)
-            .ToListAsync(cancellationToken);
-
         // Get beneficiaries who are NOT in Demographics (non-employees)
+        // Use a database-side anti-join instead of materializing all Demographics SSNs
         var beginningBalanceYear = (short)(profitYear - 1);
         var balances = _totalService.GetTotalBalanceSet(ctx, beginningBalanceYear);
 
         // We cannot call MaskSsn() inside an EF Core-translated query. Materialize the minimal data first
-        // then apply MaskSsn() in-memory.
+        // then apply MaskSsn() in-memory. Use LEFT JOIN with null check for anti-join pattern.
         var rawBeneficiaries = await (
             from bc in ctx.BeneficiaryContacts
-            where !demographicSsns.Contains(bc.Ssn)
+            join d in ctx.Demographics on bc.Ssn equals d.Ssn into demoJoin
+            from d in demoJoin.DefaultIfEmpty()
+            where d == null  // Anti-join: only beneficiaries NOT in Demographics
             join bal in balances on bc.Ssn equals bal.Ssn
             select new { Beneficiary = bc, Balance = bal }
         ).ToListAsync(cancellationToken);
@@ -565,12 +582,12 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             BadgeNumber = 0,  // Non-employees have badge 0
             ProfitYear = profitYear,
             PriorProfitYear = beginningBalanceYear,
-            EmployeeName = x.Beneficiary.UserName ?? string.Empty,
+            EmployeeName = x.Beneficiary.ContactInfo.FullName ?? string.Empty,
             StoreNumber = 0,
             EmployeeTypeCode = '\0',
             EmployeeTypeName = "Non-Employee",
             DateOfBirth = x.Beneficiary.DateOfBirth,
-            Age = 99,  // Fixed value per COBOL
+            Age = (byte)x.Beneficiary.DateOfBirth.Age(),  // Cast short to byte
             // Use the MaskSsn extension in-memory (bc.Ssn is an int)
             Ssn = x.Beneficiary.Ssn.MaskSsn(),
             Wages = 0,  // Non-employees have no wages
@@ -581,7 +598,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             EmployeeStatus = EmploymentStatus.Constants.Terminated,  // Treated as terminated per COBOL
             Balance = (decimal)(x.Balance.TotalAmount ?? 0),
             PriorBalance = 0,
-            YearsInPlan = 99,  // Fixed value per COBOL (WS-PYRS = 99)
+            YearsInPlan = 0,  // Fixed value per COBOL (WS-PYRS = 99)
             TerminationDate = null,
             FirstContributionYear = null,
             IsExecutive = false
