@@ -33,6 +33,8 @@ export const GetTerminatedLettersColumns = (): ColDef[] => {
     }),
     {
       headerName: "Print",
+      checkboxSelection: true,
+      headerCheckboxSelection: true,
       width: 95,
       maxWidth: 95,
       minWidth: 95,
