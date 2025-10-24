@@ -23,7 +23,7 @@ public sealed class YearEndSetEnrollmentEndpoint : ProfitSharingRequestEndpoint<
 
     public override void Configure()
     {
-        Post("update-enrollment/{profitYear?}");
+        Post("update-enrollment");
         Summary(s =>
         {
             s.Summary = "Updates the enrollment id of all members for the year";
