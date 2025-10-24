@@ -1,5 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Validators;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
@@ -23,8 +24,15 @@ public sealed class YearEndSetEnrollmentEndpoint : ProfitSharingRequestEndpoint<
     public override void Configure()
     {
         Post("update-enrollment");
-        Summary(s => { s.Summary = "Updates the enrollment id of all members for the year"; });
+        Summary(s =>
+        {
+            s.Summary = "Updates the enrollment id of all members for the year";
+            s.Description = "Accepts profit year as optional route parameter or in request body. Route parameter takes precedence if provided.";
+        });
         Group<YearEndGroup>();
+
+        // Wire up FluentValidation validator for profit year validation
+        Validator<ProfitYearRequestValidator>();
     }
 
     public override async Task HandleAsync(ProfitYearRequest req, CancellationToken ct)
@@ -41,7 +49,8 @@ public sealed class YearEndSetEnrollmentEndpoint : ProfitSharingRequestEndpoint<
             // Record business metrics
             Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.BusinessOperationsTotal.Add(1,
                 new KeyValuePair<string, object?>("operation", "update-enrollment"),
-                new KeyValuePair<string, object?>("endpoint.category", "year-end"));
+                new KeyValuePair<string, object?>("endpoint.category", "year-end"),
+                new KeyValuePair<string, object?>("profit_year", req.ProfitYear.ToString()));
 
             // Log enrollment update (this is a bulk operation)
             _logger.LogInformation("Year-end enrollment updated for profit year {ProfitYear} (correlation: {CorrelationId})",
@@ -50,7 +59,7 @@ public sealed class YearEndSetEnrollmentEndpoint : ProfitSharingRequestEndpoint<
             await Send.NoContentAsync(ct);
 
             // Record successful response
-            this.RecordResponseMetrics(HttpContext, _logger, new { Success = true }, isSuccess: true);
+            this.RecordResponseMetrics(HttpContext, _logger, new { Success = true, ProfitYear = req.ProfitYear }, isSuccess: true);
         }
         catch (Exception ex)
         {

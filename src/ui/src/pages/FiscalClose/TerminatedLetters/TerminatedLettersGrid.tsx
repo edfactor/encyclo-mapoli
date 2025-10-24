@@ -245,11 +245,12 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridSearchProps> = ({
               suppressMultiSort: true,
               rowSelection: {
                 mode: "multiRow",
-                checkboxes: true,
-                headerCheckbox: true,
+                checkboxes: false,
+                headerCheckbox: false,
                 enableClickSelection: false
               },
-              onSelectionChanged: handleSelectionChanged
+              onSelectionChanged: handleSelectionChanged,
+              suppressRowClickSelection: true
             }}
           />
         </>

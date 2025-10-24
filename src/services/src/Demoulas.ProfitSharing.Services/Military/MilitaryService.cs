@@ -161,11 +161,12 @@ public class MilitaryService : IMilitaryService
                     query = query.Where(x => x.BadgeNumber == req.BadgeNumber);
                 }
 
-                // get the correct fiscal end date for the contribution year
-                await GetCalendarProfitYearDateForResponses(query, cancellationToken);
+                var results = await query.ToPaginationResultsAsync(req, cancellationToken);
 
-                return await query.ToPaginationResultsAsync(req, cancellationToken);
-            }, cancellationToken);
+                // get the correct fiscal end date for the contribution year
+                await GetCalendarProfitYearDateForResponses(results, cancellationToken);
+                return results;
+            });
 
             return Result<PaginatedResponseDto<MilitaryContributionResponse>>.Success(result);
         }
@@ -182,11 +183,11 @@ public class MilitaryService : IMilitaryService
     /// <param name="query"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async Task GetCalendarProfitYearDateForResponses(IQueryable<MilitaryContributionResponse> militaryContributions, CancellationToken cancellationToken)
+    private async Task GetCalendarProfitYearDateForResponses(PaginatedResponseDto<MilitaryContributionResponse> militaryContributions, CancellationToken cancellationToken)
     {
         Dictionary<int, DateOnly> profitYearsMap = new Dictionary<int, DateOnly>();
 
-        foreach ( var contributions in militaryContributions)
+        foreach ( var contributions in militaryContributions.Results)
         {
             if (profitYearsMap.ContainsKey(contributions.ContributionDate.Year))
             {
