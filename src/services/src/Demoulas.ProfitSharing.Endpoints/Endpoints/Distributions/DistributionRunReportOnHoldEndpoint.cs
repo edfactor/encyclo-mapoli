@@ -14,13 +14,14 @@ using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Endpoints.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Distributions;
 
-public sealed class DistributionRunReportOnHoldEndpoint : ProfitSharingEndpoint<SortedPaginationRequestDto,Results<Ok<PaginatedResponseDto<DistributionsOnHoldResponse>>, NotFound, ProblemHttpResult>>
+public sealed class DistributionRunReportOnHoldEndpoint : ProfitSharingEndpoint<SortedPaginationRequestDto, Results<Ok<PaginatedResponseDto<DistributionsOnHoldResponse>>, NotFound, ProblemHttpResult>>
 {
     private readonly IDistributionService _distributionService;
     private readonly ILogger<DistributionRunReportOnHoldEndpoint> _logger;
@@ -49,15 +50,11 @@ public sealed class DistributionRunReportOnHoldEndpoint : ProfitSharingEndpoint<
         Group<DistributionGroup>();
     }
 
-    
-    public override async Task<Results<Ok<PaginatedResponseDto<DistributionsOnHoldResponse>>, NotFound, ProblemHttpResult>> ExecuteAsync(SortedPaginationRequestDto req, CancellationToken ct)
+
+    public override Task<Results<Ok<PaginatedResponseDto<DistributionsOnHoldResponse>>, NotFound, ProblemHttpResult>> ExecuteAsync(SortedPaginationRequestDto req, CancellationToken ct)
     {
-        using var activity = this.StartEndpointActivity(HttpContext);
-
-        try
+        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
-            this.RecordRequestMetrics(HttpContext, _logger, new { });
-
             var result = await _distributionService.GetDistributionsOnHold(req, ct);
 
             // Record distribution on-hold report metrics
@@ -70,11 +67,6 @@ public sealed class DistributionRunReportOnHoldEndpoint : ProfitSharingEndpoint<
 
             return result
                 .ToHttpResult(Error.EntityNotFound("OnHoldDistributions"));
-        }
-        catch (Exception ex)
-        {
-            this.RecordException(HttpContext, _logger, ex, activity);
-            throw;
-        }
+        }); // No sensitive fields accessed
     }
 }

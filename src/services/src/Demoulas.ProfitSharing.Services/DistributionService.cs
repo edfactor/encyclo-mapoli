@@ -174,6 +174,10 @@ public sealed class DistributionService : IDistributionService
                 // If null or any other value, don't filter (show all)
             }
 
+            // Add query tagging for production traceability
+            var searchContext = $"DistributionSearch-Badge{request.BadgeNumber}-SSN{(string.IsNullOrWhiteSpace(request.Ssn?.MaskSsn()) ? "None" : "Provided")}-{DateTime.UtcNow:yyyyMMddHHmm}";
+            query = query.TagWith(searchContext);
+
             return await query.ToPaginationResultsAsync(request, cancellationToken);
         }, cancellationToken);
 
@@ -516,6 +520,7 @@ public sealed class DistributionService : IDistributionService
             var distributionQuery = GetDistributionExtract(ctx, cancellationToken, Array.Empty<char>());
 
             var groupedResults = await distributionQuery
+                .TagWith($"DistributionSummaryReport-{DateTime.UtcNow:yyyyMMddHHmm}")
                 .GroupBy(d => d.FrequencyId)
                 .Select(g => new DistributionRunReportSummaryResponse
                 {
@@ -557,7 +562,9 @@ public sealed class DistributionService : IDistributionService
                     TotalFederalTaxAmount = g.Sum(d => d.FederalTaxAmount),
                     TotalStateTaxAmount = g.Sum(d => d.StateTaxAmount),
                     TotalCheckAmount = g.Sum(d => d.GrossAmount) - g.Sum(d => d.FederalTaxAmount) - g.Sum(d => d.StateTaxAmount)
-                }).ToListAsync(cancellationToken);
+                })
+                .TagWith($"DistributionSummaryManualOnHold-{DateTime.UtcNow:yyyyMMddHHmm}")
+                .ToListAsync(cancellationToken);
 
             var foundStatusNames = manualAndOnHoldDistributions.Select(gr => gr.DistributionTypeName).ToHashSet();
             var missingStatuses = (await ctx.DistributionStatuses.Where(d => d.Id == DistributionStatus.Constants.RequestOnHold || d.Id == DistributionStatus.Constants.ManualCheck).ToListAsync(cancellationToken))
@@ -596,6 +603,10 @@ public sealed class DistributionService : IDistributionService
                             PayTo = dist.Payee!.Name,
                             dist.CheckAmount,
                         };
+
+            // Add query tagging for on-hold distributions
+            query = query.TagWith($"DistributionsOnHold-{DateTime.UtcNow:yyyyMMddHHmm}");
+
             var paginatedResults = await query.ToPaginationResultsAsync(request, cancellationToken);
 
             var maskedResults = new PaginatedResponseDto<DistributionsOnHoldResponse>(request)
@@ -629,6 +640,10 @@ public sealed class DistributionService : IDistributionService
                             dist.FederalTaxAmount,
                             dist.StateTaxAmount,
                         };
+
+            // Add query tagging for manual check distributions
+            query = query.TagWith($"ManualCheckDistributions-{DateTime.UtcNow:yyyyMMddHHmm}");
+
             var paginatedResults = await query.ToPaginationResultsAsync(request, cancellationToken);
 
             var maskedResults = new PaginatedResponseDto<ManualChecksWrittenResponse>(request)
@@ -657,11 +672,11 @@ public sealed class DistributionService : IDistributionService
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
             var distributionQuery = GetDistributionExtract(ctx, cancellationToken, request.DistributionFrequencies ?? Array.Empty<char>());
             var query = from dist in distributionQuery
-                        join dem in demographicQuery.Include(x=>x.PayClassification)
-                                                    .Include(x=>x.Address)
-                                                    .Include(x=>x.Department)
-                                                    .Include(x=>x.EmploymentType)
-                                                    .Include(x=>x.ContactInfo) on dist.Ssn equals dem.Ssn
+                        join dem in demographicQuery.Include(x => x.PayClassification)
+                                                    .Include(x => x.Address)
+                                                    .Include(x => x.Department)
+                                                    .Include(x => x.EmploymentType)
+                                                    .Include(x => x.ContactInfo) on dist.Ssn equals dem.Ssn
                         select new DistributionRunReportDetail
                         {
                             BadgeNumber = dem.BadgeNumber,
@@ -699,6 +714,11 @@ public sealed class DistributionService : IDistributionService
                             Tax1099ForEmployee = dist.Tax1099ForEmployee,
                             Tax1099ForBeneficiary = dist.Tax1099ForBeneficiary
                         };
+
+            // Add query tagging for distribution run report
+            var frequencies = request.DistributionFrequencies?.Length > 0 ? string.Join(",", request.DistributionFrequencies) : "All";
+            query = query.TagWith($"DistributionRunReport-Freq{frequencies}-{DateTime.UtcNow:yyyyMMddHHmm}");
+
             var paginatedResults = await query.ToPaginationResultsAsync(request, cancellationToken);
             return Result<PaginatedResponseDto<DistributionRunReportDetail>>.Success(paginatedResults);
         }, cancellationToken);
@@ -751,6 +771,9 @@ public sealed class DistributionService : IDistributionService
             distributionQuery = distributionQuery.Where(d => distributionFrequencies.Contains(d.FrequencyId));
         }
 
+        // Add query tagging for distribution extract operations
+        var frequencies = distributionFrequencies.Any() ? string.Join(",", distributionFrequencies) : "All";
+        distributionQuery = distributionQuery.TagWith($"DistributionExtract-Freq{frequencies}-{DateTime.UtcNow:yyyyMMddHHmm}");
 
         return distributionQuery;
     }

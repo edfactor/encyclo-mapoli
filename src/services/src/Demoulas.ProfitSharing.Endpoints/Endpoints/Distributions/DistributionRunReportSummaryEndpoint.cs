@@ -12,6 +12,7 @@ using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Endpoints.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
@@ -47,14 +48,10 @@ public sealed class DistributionRunReportSummaryEndpoint : ProfitSharingResponse
         Group<DistributionGroup>();
     }
 
-    public override async Task<Results<Ok<DistributionRunReportSummaryResponse[]>, NotFound, ProblemHttpResult>> ExecuteAsync(CancellationToken ct)
+    public override Task<Results<Ok<DistributionRunReportSummaryResponse[]>, NotFound, ProblemHttpResult>> ExecuteAsync(CancellationToken ct)
     {
-        using var activity = this.StartEndpointActivity(HttpContext);
-
-        try
+        return this.ExecuteWithTelemetry(HttpContext, _logger, new { }, async () =>
         {
-            this.RecordRequestMetrics(HttpContext, _logger, new { });
-
             var result = await _distributionService.GetDistributionRunReportSummary(ct).ConfigureAwait(false);
 
             // Record distribution run report metrics
@@ -72,11 +69,6 @@ public sealed class DistributionRunReportSummaryEndpoint : ProfitSharingResponse
 
             return result
                 .ToHttpResult(Error.EntityNotFound("DistributionRun"));
-        }
-        catch (Exception ex)
-        {
-            this.RecordException(HttpContext, _logger, ex, activity);
-            throw;
-        }
+        }); // No sensitive fields accessed
     }
 }
