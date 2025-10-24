@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Mappers;
 using Demoulas.ProfitSharing.OracleHcm.Messaging;
 using Demoulas.ProfitSharing.OracleHcm.Services;
+using Demoulas.ProfitSharing.OracleHcm.Services.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Demoulas.ProfitSharing.UnitTests.Common.Fakes;
@@ -117,9 +118,17 @@ public class DemographicsServiceTests
         var totalServiceMock = new Mock<ITotalService>();
         var mapper = new DemographicMapper(new AddressMapper(), new ContactInfoMapper());
         var fakeSsnService = new Mock<IFakeSsnService>();
+        var repositoryMock = new Mock<IDemographicsRepository>();
+        var matchingServiceMock = new Mock<IDemographicMatchingService>();
+        var auditServiceMock = new Mock<IDemographicAuditService>();
+        var historyServiceMock = new Mock<IDemographicHistoryService>();
 
         var service = new DemographicsService(
             scenarioFactory,
+            repositoryMock.Object,
+            matchingServiceMock.Object,
+            auditServiceMock.Object,
+            historyServiceMock.Object,
             mapper,
             loggerMock.Object,
             totalServiceMock.Object,
@@ -198,8 +207,17 @@ public class DemographicsServiceTests
         var mapper = new DemographicMapper(new AddressMapper(), new ContactInfoMapper());
         var fakeSsnService = new Mock<IFakeSsnService>();
 
-        var service = new TestableDemographicsService(
+        var repositoryMock = new Mock<IDemographicsRepository>();
+        var matchingServiceMock = new Mock<IDemographicMatchingService>();
+        var auditServiceMock = new Mock<IDemographicAuditService>();
+        var historyServiceMock = new Mock<IDemographicHistoryService>();
+
+        var service = new DemographicsService(
             scenarioFactory,
+            repositoryMock.Object,
+            matchingServiceMock.Object,
+            auditServiceMock.Object,
+            historyServiceMock.Object,
             mapper,
             loggerMock.Object,
             totalServiceMock.Object,
@@ -376,7 +394,7 @@ public class DemographicsServiceTests
         return scenarioFactory;
     }
 
-    
+
     /// <summary>
     /// UC - If SSN matches but DateOfBirth does not match, and existing employee is terminated,
     /// </summary>
@@ -464,9 +482,17 @@ public class DemographicsServiceTests
         var totalServiceMock = new Mock<ITotalService>();
         var mapper = new DemographicMapper(new AddressMapper(), new ContactInfoMapper());
         var fakeSsnService = new Mock<IFakeSsnService>();
+        var repositoryMock = new Mock<IDemographicsRepository>();
+        var matchingServiceMock = new Mock<IDemographicMatchingService>();
+        var auditServiceMock = new Mock<IDemographicAuditService>();
+        var historyServiceMock = new Mock<IDemographicHistoryService>();
 
         var service = new DemographicsService(
             scenarioFactory,
+            repositoryMock.Object,
+            matchingServiceMock.Object,
+            auditServiceMock.Object,
+            historyServiceMock.Object,
             mapper,
             loggerMock.Object,
             totalServiceMock.Object,
@@ -568,6 +594,10 @@ public class DemographicsServiceTests
         var totalServiceMock = new Mock<ITotalService>();
         var mapper = new DemographicMapper(new AddressMapper(), new ContactInfoMapper());
         var fakeSsnService = new Mock<IFakeSsnService>();
+        var repositoryMock = new Mock<IDemographicsRepository>();
+        var matchingServiceMock = new Mock<IDemographicMatchingService>();
+        var auditServiceMock = new Mock<IDemographicAuditService>();
+        var historyServiceMock = new Mock<IDemographicHistoryService>();
 
         totalServiceMock.Setup(t => t.GetVestingBalanceForSingleMemberAsync(It.IsAny<Demoulas.ProfitSharing.Common.Contracts.Request.SearchBy>(), It.IsAny<int>(), It.IsAny<short>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Demoulas.ProfitSharing.Common.Contracts.Response.BalanceEndpointResponse
@@ -585,6 +615,10 @@ public class DemographicsServiceTests
 
         var service = new DemographicsService(
             scenarioFactory,
+            repositoryMock.Object,
+            matchingServiceMock.Object,
+            auditServiceMock.Object,
+            historyServiceMock.Object,
             mapper,
             loggerMock.Object,
             totalServiceMock.Object,
@@ -691,6 +725,10 @@ public class DemographicsServiceTests
         var totalServiceMock = new Mock<ITotalService>();
         var mapper = new DemographicMapper(new AddressMapper(), new ContactInfoMapper());
         var fakeSsnService = new Mock<IFakeSsnService>();
+        var repositoryMock = new Mock<IDemographicsRepository>();
+        var matchingServiceMock = new Mock<IDemographicMatchingService>();
+        var auditServiceMock = new Mock<IDemographicAuditService>();
+        var historyServiceMock = new Mock<IDemographicHistoryService>();
 
         totalServiceMock.Setup(t => t.GetVestingBalanceForSingleMemberAsync(It.IsAny<Demoulas.ProfitSharing.Common.Contracts.Request.SearchBy>(), It.IsAny<int>(), It.IsAny<short>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Demoulas.ProfitSharing.Common.Contracts.Response.BalanceEndpointResponse
@@ -708,6 +746,10 @@ public class DemographicsServiceTests
 
         var service = new DemographicsService(
             scenarioFactory,
+            repositoryMock.Object,
+            matchingServiceMock.Object,
+            auditServiceMock.Object,
+            historyServiceMock.Object,
             mapper,
             loggerMock.Object,
             totalServiceMock.Object,
@@ -778,8 +820,17 @@ public class DemographicsServiceTests
         fakeSsnService.Setup(f => f.GenerateFakeSsnAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(fakeSsnValue);
 
+        var repositoryMock = new Mock<IDemographicsRepository>();
+        var matchingServiceMock = new Mock<IDemographicMatchingService>();
+        var auditServiceMock = new Mock<IDemographicAuditService>();
+        var historyServiceMock = new Mock<IDemographicHistoryService>();
+
         var service = new DemographicsService(
             scenarioFactory,
+            repositoryMock.Object,
+            matchingServiceMock.Object,
+            auditServiceMock.Object,
+            historyServiceMock.Object,
             mapper,
             loggerMock.Object,
             totalServiceMock.Object,
@@ -857,8 +908,17 @@ public class DemographicsServiceTests
         fakeSsnService.Setup(f => f.GenerateFakeSsnAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(999999999);
 
+        var repositoryMock = new Mock<IDemographicsRepository>();
+        var matchingServiceMock = new Mock<IDemographicMatchingService>();
+        var auditServiceMock = new Mock<IDemographicAuditService>();
+        var historyServiceMock = new Mock<IDemographicHistoryService>();
+
         var service = new DemographicsService(
             scenarioFactory,
+            repositoryMock.Object,
+            matchingServiceMock.Object,
+            auditServiceMock.Object,
+            historyServiceMock.Object,
             mapper,
             loggerMock.Object,
             totalServiceMock.Object,
@@ -880,29 +940,3 @@ public class DemographicsServiceTests
             Times.Once);
     }
 }
-
-// TODO: Remove this test helper - DemographicsService is sealed and shouldn't be inherited
-// This was used for testing fallback SQL logic, which should now be tested via DemographicsRepository instead
-/*
-internal sealed class TestableDemographicsService : DemographicsService
-{
-    public TestableDemographicsService(
-        IProfitSharingDataContextFactory dataContextFactory,
-        DemographicMapper mapper,
-        ILogger<DemographicsService> logger,
-        ITotalService totalService,
-        IFakeSsnService fakeSsnService)
-        : base(dataContextFactory, mapper, logger, totalService, fakeSsnService)
-    {
-    }
-
-    protected override Task<List<Demographic>> GetMatchingDemographicsByFallbackSqlAsync(
-        List<(int Ssn, int Badge)> pairs,
-        ProfitSharingDbContext context,
-        CancellationToken ct)
-    {
-        // Mock implementation that returns empty list to avoid FromSqlRaw in tests
-        return Task.FromResult(new List<Demographic>());
-    }
-}
-*/
