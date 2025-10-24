@@ -14,4 +14,5 @@ public interface IDistributionService
     Task<Result<DistributionRunReportSummaryResponse[]>> GetDistributionRunReportSummary(CancellationToken cancellationToken);
     Task<Result<PaginatedResponseDto<DistributionsOnHoldResponse>>> GetDistributionsOnHold(SortedPaginationRequestDto request, CancellationToken cancellationToken);
     Task<Result<PaginatedResponseDto<ManualChecksWrittenResponse>>> GetManualCheckDistributions(SortedPaginationRequestDto request, CancellationToken cancellationToken);
+    Task<Result<PaginatedResponseDto<DistributionRunReportDetail>>> GetDistributionRunReport(DistributionRunReportRequest request, CancellationToken cancellationToken);
 }

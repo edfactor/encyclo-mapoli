@@ -650,6 +650,60 @@ public sealed class DistributionService : IDistributionService
         }, cancellationToken);
     }
 
+    public async Task<Result<PaginatedResponseDto<DistributionRunReportDetail>>> GetDistributionRunReport(DistributionRunReportRequest request, CancellationToken cancellationToken)
+    {
+        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+            var distributionQuery = GetDistributionExtract(ctx, cancellationToken, request.DistributionFrequencies ?? Array.Empty<char>());
+            var query = from dist in distributionQuery
+                        join dem in demographicQuery.Include(x=>x.PayClassification)
+                                                    .Include(x=>x.Address)
+                                                    .Include(x=>x.Department)
+                                                    .Include(x=>x.EmploymentType)
+                                                    .Include(x=>x.ContactInfo) on dist.Ssn equals dem.Ssn
+                        select new DistributionRunReportDetail
+                        {
+                            BadgeNumber = dem.BadgeNumber,
+                            DepartmentId = dem.DepartmentId,
+                            DepartmentName = dem.Department!.Name,
+                            PayClassificationId = dem.PayClassificationId,
+                            PayClassificationName = dem.PayClassification!.Name,
+                            StoreNumber = dem.StoreNumber,
+                            TaxCodeId = dist.TaxCodeId,
+                            TaxCodeName = dist.TaxCode!.Name,
+                            EmployeeName = dem.ContactInfo!.FullName ?? "",
+                            EmploymentTypeId = dem.EmploymentTypeId,
+                            EmploymentTypeName = dem.EmploymentType!.Name,
+                            HireDate = dem.HireDate,
+                            FullTimeDate = dem.FullTimeDate,
+                            DateOfBirth = dem.DateOfBirth,
+                            Age = dem.DateOfBirth.Age(),
+                            GrossAmount = dist.GrossAmount,
+                            StateTaxAmount = dist.StateTaxAmount,
+                            FederalTaxAmount = dist.FederalTaxAmount,
+                            CheckAmount = dist.CheckAmount,
+                            PayeeName = dist.Payee != null ? dist.Payee.Name : null,
+                            PayeeAddress = dist.Payee != null ? dist.Payee.Address!.Street : null,
+                            PayeeCity = dist.Payee != null ? dist.Payee.Address!.City : null,
+                            PayeeState = dist.Payee != null ? dist.Payee.Address!.State : null,
+                            PayeePostalCode = dist.Payee != null ? dist.Payee.Address!.PostalCode : null,
+                            ThirdPartyPayeeName = dist.ThirdPartyPayee != null ? dist.ThirdPartyPayee.Name : null,
+                            ThirdPartyPayeeAddress = dist.ThirdPartyPayee != null ? dist.ThirdPartyPayee.Address!.Street : null,
+                            ThirdPartyPayeeCity = dist.ThirdPartyPayee != null ? dist.ThirdPartyPayee.Address!.City : null,
+                            ThirdPartyPayeeState = dist.ThirdPartyPayee != null ? dist.ThirdPartyPayee.Address!.State : null,
+                            ThirdPartyPayeePostalCode = dist.ThirdPartyPayee != null ? dist.ThirdPartyPayee.Address!.PostalCode : null,
+                            IsDesceased = dist.IsDeceased,
+                            ForTheBenefitOfAccountType = dist.ForTheBenefitOfAccountType,
+                            ForTheBenefitOfPayee = dist.ForTheBenefitOfPayee,
+                            Tax1099ForEmployee = dist.Tax1099ForEmployee,
+                            Tax1099ForBeneficiary = dist.Tax1099ForBeneficiary
+                        };
+            var paginatedResults = await query.ToPaginationResultsAsync(request, cancellationToken);
+            return Result<PaginatedResponseDto<DistributionRunReportDetail>>.Success(paginatedResults);
+        }, cancellationToken);
+    }
+
     private Result<bool> ValidateDistributionRequest(CreateDistributionRequest request)
     {
         var validationErrors = new Dictionary<string, string[]>();
