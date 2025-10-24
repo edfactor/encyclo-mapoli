@@ -171,6 +171,25 @@ public class ScenarioDataContextFactory : IProfitSharingDataContextFactory
         }
     }
 
+#pragma warning disable RCS1229
+    public Task UseReadOnlyContext(Func<ProfitSharingReadOnlyDbContext, Task> func, CancellationToken cancellationToken = new CancellationToken())
+#pragma warning restore RCS1229
+    {
+        try
+        {
+            return func.Invoke(ProfitSharingReadOnlyDbContext.Object);
+        }
+        catch (TargetInvocationException ex)
+        {
+            switch (ex.InnerException)
+            {
+                case null:
+                    throw;
+                default:
+                    throw ex.InnerException;
+            }
+        }
+    }
 
     public async Task<T> UseStoreInfoContext<T>(Func<DemoulasCommonDataContext, Task<T>> func)
     {

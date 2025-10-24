@@ -1,3 +1,4 @@
+﻿using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -166,7 +167,7 @@ public sealed class DemographicsRepository : IDemographicsRepository
     /// }, ct);
     /// </example>
     public Task<TResult> ExecuteWithChangesAsync<TResult>(
-        Func<Microsoft.EntityFrameworkCore.DbContext, Task<TResult>> operation,
+        Func<ProfitSharingDbContext, Task<TResult>> operation,
         CancellationToken ct)
     {
         return _contextFactory.UseWritableContext(operation, ct);

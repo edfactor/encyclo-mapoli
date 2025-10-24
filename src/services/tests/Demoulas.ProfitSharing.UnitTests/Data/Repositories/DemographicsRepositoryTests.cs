@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Repositories;
 using Demoulas.ProfitSharing.UnitTests.Common.Fakes;
@@ -257,10 +257,11 @@ public sealed class DemographicsRepositoryTests
         await repository.AddRangeAsync(newDemographics, default);
 
         // Assert
-        await factory.UseReadOnlyContext(async ctx =>
+        await factory.UseReadOnlyContext(ctx =>
         {
             var count = ctx.Demographics.Count();
             count.ShouldBe(5);
+            return Task.CompletedTask;
         }, default);
     }
 
@@ -302,7 +303,15 @@ public sealed class DemographicsRepositoryTests
         var demographics = new DemographicFaker().Generate(1);
         var beneficiaryContacts = new List<BeneficiaryContact>
         {
-            new() { Id = 1, Ssn = demographics[0].Ssn, BadgeNumber = 12345, PsnSuffix = 1 }
+            new()
+            {
+                Id = 1,
+                Ssn = demographics[0].Ssn,
+                DateOfBirth = DateOnly.FromDateTime(DateTime.Today.AddYears(-30)),
+                Address = new Address { Street = "123 Main St", City = "TestCity", State = "TS", PostalCode = "12345" },
+                ContactInfo = new ContactInfo { FirstName = "Test", LastName = "User", FullName = "User, Test" },
+                CreatedDate = DateOnly.FromDateTime(DateTime.Today)
+            }
         };
 
         var factory = ScenarioDataContextFactory.Create(
@@ -336,8 +345,7 @@ public sealed class DemographicsRepositoryTests
                 Id = 1,
                 Ssn = demographics[0].Ssn,
                 ProfitYear = 2025,
-                ProfitCodeId = "REG",
-                PayPeriodEndDate = DateOnly.FromDateTime(DateTime.Today)
+                ProfitCodeId = 1
             }
         };
 

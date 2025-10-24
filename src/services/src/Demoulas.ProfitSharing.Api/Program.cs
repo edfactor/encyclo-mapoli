@@ -74,7 +74,7 @@ if (!builder.Environment.IsTestEnvironment() && Environment.GetEnvironmentVariab
 }
 else
 {
-    builder.Services.AddTestingSecurity(builder.Configuration);
+    builder.Services.AddModernTestingSecurity(builder.Configuration);
 }
 
 builder.ConfigureSecurityPolicies();

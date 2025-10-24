@@ -538,6 +538,26 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         }
     }
 
+#pragma warning disable RCS1229
+    public Task UseReadOnlyContext(Func<ProfitSharingReadOnlyDbContext, Task> func, CancellationToken cancellationToken = new CancellationToken())
+#pragma warning restore RCS1229
+    {
+        try
+        {
+            return func.Invoke(_profitSharingReadOnlyDbContext.Object);
+        }
+        catch (TargetInvocationException ex)
+        {
+            switch (ex.InnerException)
+            {
+                case null:
+                    throw;
+                default:
+                    throw ex.InnerException;
+            }
+        }
+    }
+
 
     public async Task<T> UseStoreInfoContext<T>(Func<DemoulasCommonDataContext, Task<T>> func)
     {
