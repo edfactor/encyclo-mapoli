@@ -165,12 +165,6 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 x.EmploymentStatus == EmploymentStatus.Constants.Terminated &&
                 x.TerminationDate != null && x.TerminationDate > fiscalEndDate;
 
-            bool IsTerminatedInFiscalYear(dynamic x) =>
-                x.EmploymentStatus == EmploymentStatus.Constants.Terminated &&
-                x.TerminationDate != null &&
-                x.TerminationDate <= fiscalEndDate &&
-                x.TerminationDate >= fiscalBeginDate;
-
             bool IsTerminatedBeforeFiscalEnd(dynamic x) =>
                 x.EmploymentStatus == EmploymentStatus.Constants.Terminated &&
                 x.TerminationDate != null &&
@@ -264,9 +258,10 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
             // Line N: Non-employee beneficiaries (from BeneficiaryContacts, NOT in Demographics)
             // Matches COBOL Report 10 logic - LEFT JOIN anti-join pattern
+            var demographicQueryForBeneficiaries = await _demographicReaderService.BuildDemographicQuery(ctx, req.UseFrozenData);
             var beneData = await (
                 from bc in ctx.BeneficiaryContacts
-                join d in ctx.Demographics on bc.Ssn equals d.Ssn into demoJoin
+                join d in demographicQueryForBeneficiaries on bc.Ssn equals d.Ssn into demoJoin
                 from d in demoJoin.DefaultIfEmpty()
                 where d == null
                 join tot in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear) on bc.Ssn equals tot.Ssn
@@ -557,8 +552,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     /// Matches COBOL PAY426N Report 10 logic: reads PAYBEN, excludes anyone in PAYPROFIT.
     /// </summary>
     private async Task<IQueryable<YearEndProfitSharingReportDetail>> GetNonEmployeeBeneficiariesAsync(
-        ProfitSharingReadOnlyDbContext ctx, 
-        short profitYear, 
+        ProfitSharingReadOnlyDbContext ctx,
+        short profitYear,
         CancellationToken cancellationToken = default)
     {
         // Get beneficiaries who are NOT in Demographics (non-employees)
@@ -566,11 +561,14 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         var beginningBalanceYear = (short)(profitYear - 1);
         var balances = _totalService.GetTotalBalanceSet(ctx, beginningBalanceYear);
 
+        // Build demographic query using the reader service (frozen data not needed for anti-join check)
+        var demographicQueryForAntiJoin = await _demographicReaderService.BuildDemographicQuery(ctx, useFrozenData: false);
+
         // We cannot call MaskSsn() inside an EF Core-translated query. Materialize the minimal data first
         // then apply MaskSsn() in-memory. Use LEFT JOIN with null check for anti-join pattern.
         var rawBeneficiaries = await (
             from bc in ctx.BeneficiaryContacts
-            join d in ctx.Demographics on bc.Ssn equals d.Ssn into demoJoin
+            join d in demographicQueryForAntiJoin on bc.Ssn equals d.Ssn into demoJoin
             from d in demoJoin.DefaultIfEmpty()
             where d == null  // Anti-join: only beneficiaries NOT in Demographics
             join bal in balances on bc.Ssn equals bal.Ssn

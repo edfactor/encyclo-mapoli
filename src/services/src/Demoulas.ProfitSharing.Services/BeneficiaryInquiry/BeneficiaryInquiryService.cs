@@ -437,7 +437,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 EndProfitYear = (short)DateTime.Now.Year,
                 ProfitYear = (short)DateTime.Now.Year,
                 MemberType = EmployeeMemberType
-            });
+            }, cancellationToken);
             
             result = memberDetail.Results.Select(x => new BeneficiaryDetailResponse
             {
