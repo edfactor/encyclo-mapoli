@@ -28116,6 +28116,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(1)")
                         .HasColumnName("DECEASED");
 
+                    b.Property<string>("ManualCheckNumber")
+                        .HasMaxLength(16)
+                        .HasColumnType("NVARCHAR2(16)")
+                        .HasColumnName("MANUAL_CHECK_NUMBER");
+
                     b.Property<string>("Memo")
                         .HasMaxLength(128)
                         .HasColumnType("NVARCHAR2(128)")

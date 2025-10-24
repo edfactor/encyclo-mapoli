@@ -21,6 +21,7 @@ using Demoulas.ProfitSharing.Services.MasterInquiry;
 using Demoulas.ProfitSharing.Services.MergeProfitDetails;
 using Demoulas.ProfitSharing.Services.Military;
 using Demoulas.ProfitSharing.Services.Navigations;
+using Demoulas.ProfitSharing.Services.PayServices;
 using Demoulas.ProfitSharing.Services.ProfitMaster;
 using Demoulas.ProfitSharing.Services.ProfitShareEdit;
 using Demoulas.ProfitSharing.Services.Reports;
@@ -127,6 +128,9 @@ public static class ServicesExtension
         {
             _ = builder.Services.AddHostedService<StateTaxCacheWarmerHostedService>();
         }
+
+        // PayServicees
+        _ = builder.Services.AddScoped<IPayService, PayService>();
 
         return builder;
     }

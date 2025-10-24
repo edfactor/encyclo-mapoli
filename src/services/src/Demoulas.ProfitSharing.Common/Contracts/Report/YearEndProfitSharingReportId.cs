@@ -20,6 +20,6 @@ public enum YearEndProfitSharingReportId : byte
     TerminatedAge18OrOlderWithLessThan1000HoursAndNoPriorAmount = 7,
     [Description(">= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT (TERMINATED)")]
     TerminatedAge18OrOlderWithLessThan1000HoursAndPriorAmount = 8,
-    [Description("< AGE 18 NO WAGES : 0 (TERMINATED)")]
-    TerminatedUnder18NoWages = 10
+    [Description("NON-EMPLOYEE BENEFICIARIES")]
+    NonEmployeeBeneficiaries = 10
 }

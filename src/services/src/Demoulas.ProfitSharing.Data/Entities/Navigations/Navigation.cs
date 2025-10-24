@@ -84,6 +84,7 @@ public sealed class Navigation
         public const short ViewDistribution = 156;
         public const short AddDistribution = 157;
 
+        public const short DistributionEditRunReport = 160;
     }
 
     public short Id { get; set; }

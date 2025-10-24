@@ -46,7 +46,7 @@ const MilitaryContributionSearchFilter: React.FC = () => {
     formState: { errors, isValid }
   } = useForm<SearchFormData>({
     resolver: yupResolver(validationSchema) as Resolver<SearchFormData>,
-    mode: "onBlur"
+    mode: "onChange"
   });
 
   const socialSecurity = watch("socialSecurity");

@@ -1,11 +1,12 @@
-import { Button, Grid, Stack, Tooltip } from "@mui/material";
+import { Button, CircularProgress, Grid, Stack, Tooltip } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetUpdateSummaryQuery, useUpdateEnrollmentMutation } from "reduxstore/api/YearsEndApi";
+import { setMessage } from "reduxstore/slices/messageSlice";
 import { RootState } from "reduxstore/store";
-import { DSMAccordion, numberToCurrency, Page, SmartModal, TotalsGrid } from "smart-ui-library";
+import { ApiMessageAlert, DSMAccordion, numberToCurrency, Page, SmartModal, TotalsGrid } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
 import PayMasterUpdateGrid from "./PayMasterUpdateGrid";
@@ -31,9 +32,10 @@ const PayMasterUpdateSummary = () => {
   const { updateSummary } = useSelector((state: RootState) => state.yearsEnd);
   const navigationList = useSelector((state: RootState) => state.navigation.navigationData);
   const isReadOnly = useReadOnlyNavigation();
+  const dispatch = useDispatch();
 
   const [getUpdateSummary] = useLazyGetUpdateSummaryQuery();
-  const [updateEnrollment] = useUpdateEnrollmentMutation();
+  const [updateEnrollment, { isLoading: isUpdating }] = useUpdateEnrollmentMutation();
 
   useEffect(() => {
     setInitialSearchLoaded(true);
@@ -90,8 +92,38 @@ const PayMasterUpdateSummary = () => {
   };
 
   const handleUpdate = async () => {
-    await updateEnrollment({});
-    setIsModalOpen(false);
+    try {
+      await updateEnrollment({
+        profitYear: fiscalCloseProfitYear ?? 0
+      })
+      .unwrap();
+      dispatch(
+        setMessage({
+          key: "UpdateEnrollment",
+          message: {
+            type: "success",
+            title: "Enrollment Updated",
+            message: "Enrollment has been successfully updated."
+          }
+        })
+      );
+    } catch (error: unknown) {
+     
+      dispatch(
+        setMessage({
+          key: "UpdateEnrollment",
+          message: {
+            type: "error",
+            title: "Update Enrollment Failed",
+            message: "Failed to update enrollment. Please try again."
+          }
+        })
+      );
+      console.error("Update enrollment failed:", error);
+    }
+    finally{
+      setIsModalOpen(false);
+    }
   };
 
   const handleCancel = () => {
@@ -170,6 +202,7 @@ const PayMasterUpdateSummary = () => {
     <Page
       label={CAPTIONS.PAY450_SUMMARY}
       actionNode={renderActionNode()}>
+      <ApiMessageAlert commonKey="UpdateEnrollment" />
       <Grid
         container
         rowSpacing="24px">
@@ -227,12 +260,20 @@ const PayMasterUpdateSummary = () => {
             onClick={handleUpdate}
             variant="contained"
             color="primary"
+            disabled={isUpdating}
             className="mr-2">
             Yes, Update
+            {isUpdating && (
+              <CircularProgress
+                size={"15px"}
+                color={"inherit"}
+              />
+            )}
           </Button>,
           <Button
             onClick={handleCancel}
-            variant="outlined">
+            variant="outlined"
+            disabled={isUpdating}>
             No, Cancel
           </Button>
         ]}
