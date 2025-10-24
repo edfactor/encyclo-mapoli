@@ -3,6 +3,7 @@ using System;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    partial class ProfitSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251023154537_OutstandingMigrations")]
+    partial class OutstandingMigrations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28115,11 +28118,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<bool>("IsDeceased")
                         .HasColumnType("NUMBER(1)")
                         .HasColumnName("DECEASED");
-
-                    b.Property<string>("ManualCheckNumber")
-                        .HasMaxLength(16)
-                        .HasColumnType("NVARCHAR2(16)")
-                        .HasColumnName("MANUAL_CHECK_NUMBER");
 
                     b.Property<string>("Memo")
                         .HasMaxLength(128)
