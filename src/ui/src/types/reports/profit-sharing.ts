@@ -250,3 +250,7 @@ export interface GrossReportParams {
   profitYear: number;
   gross?: number;
 }
+
+export interface UpdateEnrollmentRequest {
+  profitYear: number;
+}

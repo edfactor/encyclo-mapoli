@@ -46,6 +46,7 @@ internal sealed class DistributionMap : ModifiedBaseMap<Distribution>
         _ = builder.Property(d => d.RothIra).HasColumnType("NUMBER(1)").HasColumnName("ROTH_IRA");
         _ = builder.Property(d => d.Memo).HasColumnName("MEMO").HasMaxLength(128);
         _ = builder.Property(d => d.ThirdPartyPayeeAccount).HasMaxLength(30).HasColumnName("THIRD_PARTY_PAYEE_ACCOUNT");
+        _ = builder.Property(d => d.ManualCheckNumber).HasMaxLength(16).HasColumnName("MANUAL_CHECK_NUMBER");
 
 
         _ = builder.HasOne(d => d.Gender).WithMany().HasForeignKey(d => d.GenderId);
