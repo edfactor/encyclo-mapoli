@@ -170,11 +170,11 @@ export const YearsEndApi = createApi({
       // after we do the update. Yet the working copy in the grid is
       // the correct data, a refresh is not needed.
     }),
-    updateEnrollment: builder.mutation<void, ProfitYearRequest>({
-      query: (params) => ({
+    updateEnrollment: builder.mutation({
+      query: () => ({
         url: `yearend/update-enrollment`,
         method: "POST",
-        body: params
+        body: {}
       })
     }),
     getDuplicateSSNs: builder.query<PagedReportResponse<DuplicateSSNDetail>, DuplicateSSNsRequestDto>({
