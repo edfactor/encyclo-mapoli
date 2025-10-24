@@ -1,4 +1,4 @@
-import { Divider } from "@mui/material";
+import { Box, CircularProgress, Divider } from "@mui/material";
 import { Grid } from "@mui/material";
 import { Page } from "smart-ui-library";
 import DistributionByAgeGrid from "./DistributionByAgeGrid";
@@ -12,8 +12,8 @@ import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const DistributionByAge = () => {
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [hasInitialSearchRun, setHasInitialSearchRun] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
@@ -42,11 +42,13 @@ const DistributionByAge = () => {
         .then((results) => {
           if (results[0].data) {
             dispatch(setDistributionsByAgeQueryParams(profitYear));
-            setInitialSearchLoaded(true);
           }
         })
         .catch((error) => {
           console.error("Initial distribution by age search failed:", error);
+        })
+        .finally(() => {
+          setInitialLoad(false);
         });
     }
   }, [hasToken, profitYear, hasInitialSearchRun, triggerSearch, dispatch]);
@@ -66,9 +68,21 @@ const DistributionByAge = () => {
           <Divider />
         </Grid>
 
-        <Grid width="100%">
-          <DistributionByAgeGrid initialSearchLoaded={initialSearchLoaded} />
-        </Grid>
+        {initialLoad ? (
+          <Grid width="100%">
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              minHeight="200px">
+              <CircularProgress />
+            </Box>
+          </Grid>
+        ) : (
+          <Grid width="100%">
+            <DistributionByAgeGrid />
+          </Grid>
+        )}
       </Grid>
     </Page>
   );

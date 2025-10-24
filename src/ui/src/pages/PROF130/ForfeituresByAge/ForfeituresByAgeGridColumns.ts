@@ -4,23 +4,29 @@ import { createCurrencyColumn, createCountColumn, createAgeColumn } from "../../
 
 export const GetForfeituresByAgeColumns = (_reportType: FrozenReportsByAgeRequestType): ColDef[] => {
   return [
-    createAgeColumn({
-      headerName: "Age",
-      field: "age",
-      minWidth: 80,
-      sortable: false
-    }),
-    createCountColumn({
-      headerName: "EMPS",
-      field: "employeeCount",
-      minWidth: 100,
-      sortable: false
-    }),
-    createCurrencyColumn({
-      headerName: "Amount",
-      field: "amount",
-      minWidth: 150,
-      sortable: false
-    })
+    {
+      ...createAgeColumn({
+        headerName: "Age",
+        field: "age",
+        minWidth: 80
+      }),
+      flex: 1
+    } as ColDef,
+    {
+      ...createCountColumn({
+        headerName: "EMPS",
+        field: "employeeCount",
+        minWidth: 100
+      }),
+      flex: 1
+    } as ColDef,
+    {
+      ...createCurrencyColumn({
+        headerName: "Amount",
+        field: "amount",
+        minWidth: 150
+      }),
+      flex: 2
+    } as ColDef
   ];
 };

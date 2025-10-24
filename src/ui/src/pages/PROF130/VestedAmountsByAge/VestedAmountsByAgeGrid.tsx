@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams } from "smart-ui-library";
+import { DSMGrid } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { GetVestedAmountsByAgeColumns } from "./VestedAmountsByAgeGridColumns";
 
@@ -12,14 +12,7 @@ interface VestedAmountsByAgeGridProps {
 }
 
 const VestedAmountsByAgeGrid: React.FC<VestedAmountsByAgeGridProps> = ({ gridTitle, amountColName, countColName }) => {
-  const [_sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
-    isSortDescending: false
-  });
-
   const { vestedAmountsByAge } = useSelector((state: RootState) => state.yearsEnd);
-
-  const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
   const columnDefs = useMemo(
     () => GetVestedAmountsByAgeColumns(countColName, amountColName),
@@ -34,10 +27,11 @@ const VestedAmountsByAgeGrid: React.FC<VestedAmountsByAgeGridProps> = ({ gridTit
           <DSMGrid
             preferenceKey={gridTitle}
             isLoading={false}
-            handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: vestedAmountsByAge?.response.results,
-              columnDefs: columnDefs
+              columnDefs: columnDefs,
+              suppressHorizontalScroll: true,
+              suppressColumnVirtualisation: true
             }}
           />
         </>

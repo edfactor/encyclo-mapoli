@@ -1,9 +1,8 @@
 import { Grid } from "@mui/material";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, numberToCurrency, TotalsGrid } from "smart-ui-library";
-import { useGridPagination } from "../../../hooks/useGridPagination";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { GetContributionsByAgeColumns } from "./ContributionsByAgeGridColumns";
 
@@ -11,15 +10,6 @@ const ContributionsByAgeGrid: React.FC = () => {
   const { contributionsByAgeTotal, contributionsByAgeFullTime, contributionsByAgePartTime } = useSelector(
     (state: RootState) => state.yearsEnd
   );
-
-  const { handleSortChange } = useGridPagination({
-    initialPageSize: 255,
-    initialSortBy: "badgeNumber",
-    initialSortDescending: false,
-    onPaginationChange: useCallback(() => {
-      // This component doesn't use pagination, only sorting
-    }, [])
-  });
 
   const columnDefsTotal = useMemo(() => GetContributionsByAgeColumns(FrozenReportsByAgeRequestType.Total), []);
 
@@ -34,10 +24,9 @@ const ContributionsByAgeGrid: React.FC = () => {
             <Grid
               size={{ xs: 12 }}
               container
-              columnSpacing={2}
               rowSpacing={0}>
               <Grid size={{ xs: 4 }}>
-                <h2 className="text-dsm-secondary">Total</h2>
+                <h2 className="px-[24px] text-dsm-secondary">Total</h2>
                 <TotalsGrid
                   breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
                   tablePadding="0px"
@@ -52,10 +41,11 @@ const ContributionsByAgeGrid: React.FC = () => {
                 <DSMGrid
                   preferenceKey={"CONT_AGE_Total"}
                   isLoading={false}
-                  handleSortChanged={handleSortChange}
                   providedOptions={{
                     rowData: contributionsByAgeTotal?.response?.results ?? [],
-                    columnDefs: columnDefsTotal ?? []
+                    columnDefs: columnDefsTotal ?? [],
+                    suppressHorizontalScroll: true,
+                    suppressColumnVirtualisation: true
                   }}
                 />
               </Grid>
@@ -76,10 +66,11 @@ const ContributionsByAgeGrid: React.FC = () => {
                 <DSMGrid
                   preferenceKey={"CONT_AGE_FullTime"}
                   isLoading={false}
-                  handleSortChanged={handleSortChange}
                   providedOptions={{
                     rowData: contributionsByAgeFullTime?.response?.results ?? [],
-                    columnDefs: columnDefsTotal ?? []
+                    columnDefs: columnDefsTotal ?? [],
+                    suppressHorizontalScroll: true,
+                    suppressColumnVirtualisation: true
                   }}
                 />
               </Grid>
@@ -100,10 +91,11 @@ const ContributionsByAgeGrid: React.FC = () => {
                 <DSMGrid
                   preferenceKey={"CONT_AGE_PartTime"}
                   isLoading={false}
-                  handleSortChanged={handleSortChange}
                   providedOptions={{
                     rowData: contributionsByAgePartTime?.response?.results ?? [],
-                    columnDefs: columnDefsTotal ?? []
+                    columnDefs: columnDefsTotal ?? [],
+                    suppressHorizontalScroll: true,
+                    suppressColumnVirtualisation: true
                   }}
                 />
               </Grid>

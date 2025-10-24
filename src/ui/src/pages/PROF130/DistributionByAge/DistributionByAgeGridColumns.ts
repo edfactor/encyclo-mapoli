@@ -5,24 +5,30 @@ import { createCurrencyColumn, createCountColumn, createAgeColumn } from "../../
 export const GetDistributionsByAgeColumns = (_reportType: FrozenReportsByAgeRequestType): (ColDef | ColGroupDef)[] => {
   // Flattened column set (no header group) to avoid group header render issues
   const columns: ColDef[] = [
-    createAgeColumn({
-      headerName: "Age",
-      field: "age",
-      minWidth: 80,
-      sortable: false
-    }),
-    createCountColumn({
-      headerName: "EMPS",
-      field: "regularEmployeeCount",
-      minWidth: 100,
-      sortable: false
-    }),
-    createCurrencyColumn({
-      headerName: "Amount",
-      field: "regularAmount",
-      minWidth: 150,
-      sortable: false
-    })
+    {
+      ...createAgeColumn({
+        headerName: "Age",
+        field: "age",
+        minWidth: 80
+      }),
+      flex: 1
+    } as ColDef,
+    {
+      ...createCountColumn({
+        headerName: "EMPS",
+        field: "regularEmployeeCount",
+        minWidth: 100
+      }),
+      flex: 1
+    } as ColDef,
+    {
+      ...createCurrencyColumn({
+        headerName: "Amount",
+        field: "regularAmount",
+        minWidth: 150
+      }),
+      flex: 2
+    } as ColDef
   ];
   return columns;
 };

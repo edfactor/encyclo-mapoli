@@ -1,4 +1,4 @@
-import { Divider } from "@mui/material";
+import { Box, CircularProgress, Divider } from "@mui/material";
 import { Grid } from "@mui/material";
 import { Page } from "smart-ui-library";
 import ForfeituresByAgeGrid from "./ForfeituresByAgeGrid";
@@ -11,8 +11,8 @@ import { setForfeituresByAgeQueryParams } from "reduxstore/slices/yearsEndSlice"
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 const ForfeituresByAge = () => {
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [hasInitialSearchRun, setHasInitialSearchRun] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
@@ -41,11 +41,13 @@ const ForfeituresByAge = () => {
         .then((results) => {
           if (results[0].data) {
             dispatch(setForfeituresByAgeQueryParams(profitYear));
-            setInitialSearchLoaded(true);
           }
         })
         .catch((error) => {
           console.error("Initial forfeitures by age search failed:", error);
+        })
+        .finally(() => {
+          setInitialLoad(false);
         });
     }
   }, [hasToken, profitYear, hasInitialSearchRun, triggerSearch, dispatch]);
@@ -65,9 +67,21 @@ const ForfeituresByAge = () => {
           <Divider />
         </Grid>
 
-        <Grid width="100%">
-          <ForfeituresByAgeGrid initialSearchLoaded={initialSearchLoaded} />
-        </Grid>
+        {initialLoad ? (
+          <Grid width="100%">
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              minHeight="200px">
+              <CircularProgress />
+            </Box>
+          </Grid>
+        ) : (
+          <Grid width="100%">
+            <ForfeituresByAgeGrid />
+          </Grid>
+        )}
       </Grid>
     </Page>
   );

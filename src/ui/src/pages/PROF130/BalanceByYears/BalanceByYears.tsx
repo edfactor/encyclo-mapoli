@@ -1,4 +1,4 @@
-import { Divider, Grid } from "@mui/material";
+import { Box, CircularProgress, Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useState } from "react";
@@ -12,6 +12,7 @@ import BalanceByYearsGrid from "./BalanceByYearsGrid";
 
 const BalanceByYears = () => {
   const [hasInitialSearchRun, setHasInitialSearchRun] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
@@ -44,6 +45,9 @@ const BalanceByYears = () => {
         })
         .catch((error) => {
           console.error("Initial balance by years search failed:", error);
+        })
+        .finally(() => {
+          setInitialLoad(false);
         });
     }
   }, [hasToken, profitYear, hasInitialSearchRun, triggerSearch, dispatch]);
@@ -63,9 +67,21 @@ const BalanceByYears = () => {
           <Divider />
         </Grid>
 
-        <Grid width="100%">
-          <BalanceByYearsGrid />
-        </Grid>
+        {initialLoad ? (
+          <Grid width="100%">
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              minHeight="200px">
+              <CircularProgress />
+            </Box>
+          </Grid>
+        ) : (
+          <Grid width="100%">
+            <BalanceByYearsGrid />
+          </Grid>
+        )}
       </Grid>
     </Page>
   );
