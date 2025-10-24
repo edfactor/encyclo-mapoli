@@ -19,7 +19,9 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
     }),
     createStoreColumn({}),
 
-    createSSNColumn({}),
+    createSSNColumn({
+      sortable: true // PS-1829: Enabled - backend now sorts before masking
+    }),
 
     createHoursColumn({
       headerName: "Executive Hours",
@@ -27,10 +29,13 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
 
       editable: !mini
     }),
-    createCurrencyColumn({
-      headerName: "Executive Dollars",
-      field: "incomeExecutive"
-    }),
+    {
+      ...createCurrencyColumn({
+        headerName: "Executive Dollars",
+        field: "incomeExecutive"
+      }),
+      editable: !mini
+    },
     createHoursColumn({
       headerName: "Oracle Hours",
       field: "currentHoursYear"
@@ -45,9 +50,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       field: "payFrequencyId",
 
       valueFormatter: (params) => {
-        const id = params.data?.payFrequencyId; // assuming 'status' is in the row data
-        const name = params.data?.payFrequencyName; // assuming 'statusName' is in the row data
-        return `[${id}] ${name}`;
+        return params.data?.payFrequencyName; // assuming 'statusName' is in the row data
       }
     }),
     createStatusColumn({
@@ -55,9 +58,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       field: "employmentStatusId",
 
       valueFormatter: (params) => {
-        const id = params.data?.employmentStatusId; // assuming 'status' is in the row data
-        const name = params.data?.employmentStatusName; // assuming 'statusName' is in the row data
-        return `[${id}] ${name}`;
+        return params.data?.employmentStatusName; // assuming 'statusName' is in the row data
       }
     })
   ];

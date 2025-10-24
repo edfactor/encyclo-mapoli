@@ -200,7 +200,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             PayProfit payProfit = await SetupTestEmployee_With_HoursAndDollars(c);
             ExecutiveHoursAndDollarsRequest request = new()
             {
-                FullNameContains = payProfit.Demographic!.ContactInfo.FullName,
+                FullNameContains = _example.FullName,
                 ProfitYear = ProfitShareTestYear,
                 Skip = 0,
                 Take = 10
@@ -230,7 +230,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             PayProfit payProfit = await SetupTestEmployee_With_HoursAndDollars(c);
             ExecutiveHoursAndDollarsRequest request = new()
             {
-                FullNameContains = $"ZZ{payProfit.Demographic!.ContactInfo.FullName}",
+                FullNameContains = $"ZZ{_example.FullName}",
                 ProfitYear = ProfitShareTestYear,
                 Skip = 0,
                 Take = 10

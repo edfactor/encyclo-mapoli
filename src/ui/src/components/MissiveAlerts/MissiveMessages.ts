@@ -61,3 +61,19 @@ export const DISTRIBUTION_INQUIRY_MESSAGES = {
     description: "The distribution has been saved successfully."
   } as MissiveResponse
 };
+
+export const EXECUTIVE_HOURS_AND_DOLLARS_MESSAGES = {
+  EXECUTIVE_HOURS_SAVED_SUCCESS: {
+    id: 970,
+    severity: "success" as const,
+    message: "Executive Hours and Dollars Saved",
+    description: "All executive hours and dollars have been saved successfully."
+  } as MissiveResponse,
+
+  EXECUTIVE_HOURS_SAVE_ERROR: {
+    id: 971,
+    severity: "error" as const,
+    message: "Save Failed",
+    description: "Failed to save executive hours and dollars. Please try again."
+  } as MissiveResponse
+};
