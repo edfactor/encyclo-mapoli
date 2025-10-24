@@ -5,7 +5,7 @@ interface UseExecutiveModalProps {
   isOpen: boolean;
   selectedExecutives: ExecutiveHoursAndDollars[];
   onClose: () => void;
-  onSearch: (searchForm: any) => void;
+  onSearch: (searchForm: Record<string, unknown>) => void;
   onSelectExecutives: (executives: ExecutiveHoursAndDollars[]) => void;
   onAddExecutives: () => void;
   isSearching: boolean;
@@ -21,7 +21,7 @@ const useExecutiveModal = ({
   isSearching
 }: UseExecutiveModalProps) => {
   const handleModalSearch = useCallback(
-    (searchForm: any) => {
+    (searchForm: Record<string, unknown>) => {
       onSearch(searchForm);
     },
     [onSearch]

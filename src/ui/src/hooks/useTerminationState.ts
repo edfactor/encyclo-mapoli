@@ -59,7 +59,7 @@ function terminationReducer(state: TerminationState, action: TerminationAction):
       };
 
     case "SET_STATUS_CHANGE": {
-      const { status, statusName } = action.payload;
+      const { statusName } = action.payload;
       const isCompleteLike = (statusName ?? "").toLowerCase().includes("complete");
       const isChangingToComplete = isCompleteLike && state.currentStatus !== statusName;
 
@@ -79,7 +79,9 @@ function terminationReducer(state: TerminationState, action: TerminationAction):
         let updatedSearchParams = state.searchParams;
 
         if (shouldResetArchive && state.searchParams) {
-          const { archive, ...paramsWithoutArchive } = state.searchParams as any;
+          const { ...paramsWithoutArchive } = state.searchParams as TerminationSearchRequest & {
+            archive?: boolean;
+          };
           updatedSearchParams = paramsWithoutArchive as TerminationSearchRequest;
         }
 

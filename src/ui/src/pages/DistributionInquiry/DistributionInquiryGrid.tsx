@@ -3,7 +3,7 @@ import { useCallback, useMemo } from "react";
 import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
-import { useGridPagination } from "../../hooks/useGridPagination";
+import { useGridPagination, SortParams } from "../../hooks/useGridPagination";
 import { DistributionSearchResponse } from "../../types";
 import { GetDistributionInquiryColumns } from "./DistributionInquiryGridColumns";
 
@@ -11,7 +11,7 @@ interface DistributionInquiryGridProps {
   postReturnData: DistributionSearchResponse[] | null;
   totalRecords: number;
   isLoading: boolean;
-  onPaginationChange: (pageNumber: number, pageSize: number, sortParams: any) => void;
+  onPaginationChange: (pageNumber: number, pageSize: number, sortParams: SortParams) => void;
 }
 
 const DistributionInquiryGrid: React.FC<DistributionInquiryGridProps> = ({
@@ -25,7 +25,7 @@ const DistributionInquiryGrid: React.FC<DistributionInquiryGridProps> = ({
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
     onPaginationChange: useCallback(
-      async (pageNum: number, pageSz: number, sortPrms: any) => {
+      async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
         onPaginationChange(pageNum, pageSz, sortPrms);
       },
       [onPaginationChange]
@@ -99,7 +99,7 @@ const DistributionInquiryGrid: React.FC<DistributionInquiryGridProps> = ({
               <Typography
                 variant="subtitle2"
                 sx={{ fontWeight: "bold" }}>
-                Total Gross Amount:
+                Total Gross Amount (Page {pageNumber + 1}):
               </Typography>
               <Typography variant="body1">{numberToCurrency(totals.grossAmount)}</Typography>
             </div>
@@ -107,7 +107,7 @@ const DistributionInquiryGrid: React.FC<DistributionInquiryGridProps> = ({
               <Typography
                 variant="subtitle2"
                 sx={{ fontWeight: "bold" }}>
-                Total Federal Tax:
+                Total Federal Tax (Page {pageNumber + 1}):
               </Typography>
               <Typography variant="body1">{numberToCurrency(totals.federalTax)}</Typography>
             </div>
@@ -115,7 +115,7 @@ const DistributionInquiryGrid: React.FC<DistributionInquiryGridProps> = ({
               <Typography
                 variant="subtitle2"
                 sx={{ fontWeight: "bold" }}>
-                Total State Tax:
+                Total State Tax (Page {pageNumber + 1}):
               </Typography>
               <Typography variant="body1">{numberToCurrency(totals.stateTax)}</Typography>
             </div>
@@ -123,7 +123,7 @@ const DistributionInquiryGrid: React.FC<DistributionInquiryGridProps> = ({
               <Typography
                 variant="subtitle2"
                 sx={{ fontWeight: "bold" }}>
-                Total Check Amount:
+                Total Check Amount (Page {pageNumber + 1}):
               </Typography>
               <Typography variant="body1">{numberToCurrency(totals.checkAmount)}</Typography>
             </div>

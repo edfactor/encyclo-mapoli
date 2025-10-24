@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { baseUrl, impersonateRole } from "../env.setup";
 
 test.describe("Pay Beneficiary Report: ", () => {
@@ -46,7 +46,7 @@ test.describe("Pay Beneficiary Report: ", () => {
       try {
         await fiscalBtn.click({ timeout: 5000 });
         clicked = true;
-      } catch (e) {
+      } catch (_e) {
         await page.waitForTimeout(500);
       }
     }

@@ -1,19 +1,13 @@
+import { Grid } from "@mui/material";
 import { useCallback, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { DSMGrid } from "smart-ui-library";
-import { TotalsGrid } from "components/TotalsGrid/TotalsGrid";
-import { GetContributionsByAgeColumns } from "./ContributionsByAgeGridColumns";
-import { Grid } from "@mui/material";
-import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
-import { numberToCurrency } from "smart-ui-library";
+import { DSMGrid, numberToCurrency, TotalsGrid } from "smart-ui-library";
 import { useGridPagination } from "../../../hooks/useGridPagination";
+import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
+import { GetContributionsByAgeColumns } from "./ContributionsByAgeGridColumns";
 
-interface ContributionsByAgeGridProps {
-  initialSearchLoaded: boolean;
-}
-
-const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initialSearchLoaded }) => {
+const ContributionsByAgeGrid: React.FC = () => {
   const { contributionsByAgeTotal, contributionsByAgeFullTime, contributionsByAgePartTime } = useSelector(
     (state: RootState) => state.yearsEnd
   );

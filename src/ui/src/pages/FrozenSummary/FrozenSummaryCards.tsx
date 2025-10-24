@@ -1,18 +1,17 @@
-import { Typography, CircularProgress } from "@mui/material";
-import { Grid } from "@mui/material";
+import { CircularProgress, Grid, Typography } from "@mui/material";
 import React, { useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
+import { useLazyGetFrozenStateResponseQuery } from "reduxstore/api/ItOperationsApi";
 import {
   useLazyGetBalanceByAgeQuery,
   useLazyGetContributionsByAgeQuery,
   useLazyGetDistributionsByAgeQuery,
   useLazyGetForfeituresByAgeQuery
 } from "reduxstore/api/YearsEndApi";
-import { useLazyGetFrozenStateResponseQuery } from "reduxstore/api/ItOperationsApi";
+import { RootState } from "reduxstore/store";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
-import { FlexibleInfoCard } from "./FlexibleInfoCard";
 import { numberToCurrency } from "smart-ui-library";
+import { FlexibleInfoCard } from "./FlexibleInfoCard";
 
 interface FrozenSummaryCardsProps {
   setSelectedTab: (value: number) => void;
@@ -42,7 +41,7 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
     contributionsByAgePartTime
   } = useSelector((state: RootState) => state.yearsEnd);
 
-  const [fetchFrozenState, { data: frozenState, isLoading, isError }] = useLazyGetFrozenStateResponseQuery();
+  const [fetchFrozenState, { data: frozenState }] = useLazyGetFrozenStateResponseQuery();
 
   useEffect(() => {
     if (hasToken) {

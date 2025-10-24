@@ -30,18 +30,18 @@ definitions:
                 if ($sdk -match "^9\.(\d+)\.(\d+)") {
                   $minor = [int]$matches[1];
                   $patch = [int]$matches[2];
-                  if ($minor -gt 0 -or $patch -ge 304) {
+                  if ($minor -gt 0 -or $patch -ge 306) {
                     $isSdkValid = $true;
                     break;
                   }
                 }
               }
               if ($isSdkValid) {
-                Write-Output ".NET SDK 9.0.304 or higher is installed.";
+                Write-Output ".NET SDK 9.0.306 or higher is installed.";
               } else {
-                Write-Output ".NET SDK 9.0.304 or higher is NOT installed.";
-                Invoke-WebRequest -Uri "https://builds.dotnet.microsoft.com/dotnet/Sdk/9.0.304/dotnet-sdk-9.0.304-win-x64.exe" -OutFile "$env:TEMP\dotnet-sdk-9.0.304-win-x64.exe";
-                Start-Process -FilePath "$env:TEMP\dotnet-sdk-9.0.304-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait;
+                Write-Output ".NET SDK 9.0.306 or higher is NOT installed.";
+                Invoke-WebRequest -Uri "https://builds.dotnet.microsoft.com/dotnet/Sdk/9.0.306/dotnet-sdk-9.0.306-win-x64.exe" -OutFile "$env:TEMP\dotnet-sdk-9.0.306-win-x64.exe";
+                Start-Process -FilePath "$env:TEMP\dotnet-sdk-9.0.306-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait;
               }
             } else {
               Write-Output "No .NET 9.x SDK installed.";
@@ -453,6 +453,29 @@ definitions:
           EOF
         - npm audit --audit-level=high --production
     
+    frontend-lint: &frontend-lint
+      name: Frontend Lint
+      # Run on Bitbucket Cloud to free on-premises resources
+      image: node:22-alpine
+      max-time: 10
+      script:
+        - cd src/ui
+        - echo "Running frontend linting on cloud runner..."
+
+        # Update npm to latest version
+        - npm install -g npm@latest
+
+        # Create .npmrc for JFrog access (uses pipeline variable)
+        - |
+          cat > .npmrc << EOF
+          registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
+          //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
+          EOF
+
+        # Install dependencies and run linting
+        - npm ci
+        - npm run lint
+
     secret-scan: &secret-scan
       name: "Secret scan (Gitleaks)"
       # Runs on Bitbucket Cloud by default (Docker image)
@@ -750,11 +773,13 @@ pipelines:
 
   pull-requests:
     '**':
-      # Stage 1: Fast fail on build/test errors
+      # Stage 1: Code quality checks (fail fast)
+      - step: *frontend-lint
+      # Stage 2: Build and test
       - parallel:
           - step: *build-and-test-backend
           - step: *test-frontend
-      # Stage 2: Run audits and security scans only if build succeeds
+      # Stage 3: Run audits and security scans only if build succeeds
       - parallel:
           - step: *audit-frontend
           - step: *audit-backend

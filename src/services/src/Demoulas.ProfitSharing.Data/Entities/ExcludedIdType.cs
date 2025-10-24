@@ -1,7 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
-public sealed class ExcludedIdType : ILookupTable<byte>
+public sealed class ExcludedIdType : ILookupTable<byte>, IEquatable<ExcludedIdType>
 {
     public required byte Id { get; set; }
     public required string Name { get; set; }
@@ -22,14 +22,45 @@ public sealed class ExcludedIdType : ILookupTable<byte>
         return false;
     }
 
-    // Override GetHashCode to be consistent with Equals
-    public override int GetHashCode()
+    public bool Equals(ExcludedIdType? other)
     {
-        return Id.GetHashCode();
+        if (other != null)
+        {
+            return other.Id == this.Id;
+        }
+        return false;
     }
 
     public static implicit operator byte(ExcludedIdType excludedIdType)
     {
         return excludedIdType.Id;
+    }
+
+    public static bool operator ==(ExcludedIdType? left, ExcludedIdType? right)
+    {
+        if (ReferenceEquals(left, right))
+        {
+            return true;
+        }
+        if (ReferenceEquals(left, null))
+        {
+            return false;
+        }
+        if (ReferenceEquals(right, null))
+        {
+            return false;
+        }
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(ExcludedIdType? left, ExcludedIdType? right)
+    {
+        return !(left == right);
+    }
+
+    // Override GetHashCode to be consistent with Equals
+    public override int GetHashCode()
+    {
+        return Id.GetHashCode();
     }
 }

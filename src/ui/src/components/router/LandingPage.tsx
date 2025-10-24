@@ -1,8 +1,7 @@
-import { useNavigate } from "react-router-dom";
 import storefront from "../../../images/storefront.jpg";
 
 const LandingPage = () => {
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
   return (
     <div className="h-full w-full p-6">

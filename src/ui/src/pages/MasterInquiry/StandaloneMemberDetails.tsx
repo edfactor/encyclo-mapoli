@@ -5,6 +5,7 @@ import { RootState } from "reduxstore/store";
 import { MissiveResponse } from "reduxstore/types";
 import { MASTER_INQUIRY_MESSAGES } from "../../components/MissiveAlerts/MissiveMessages";
 import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
+import { EmployeeDetails } from "../../types/employee/employee";
 import MasterInquiryMemberDetails from "./MasterInquiryMemberDetails";
 
 interface StandaloneMemberDetailsProps {
@@ -25,7 +26,7 @@ const StandaloneMemberDetails: React.FC<StandaloneMemberDetailsProps> = ({
   profitYear,
   refreshTrigger
 }) => {
-  const [memberDetails, setMemberDetails] = useState<any>(null);
+  const [memberDetails, setMemberDetails] = useState<EmployeeDetails | null>(null);
   const [triggerMemberDetails, { isFetching }] = useLazyGetProfitMasterInquiryMemberQuery();
   const prevRefreshTrigger = useRef<number | undefined>(refreshTrigger);
 
@@ -44,14 +45,21 @@ const StandaloneMemberDetails: React.FC<StandaloneMemberDetailsProps> = ({
         .then((details) => {
           setMemberDetails(details);
 
-          // We cannot cross references missives unless we have some in the redux store
-          if (details.missives && Array.isArray(reduxStoreMissives) && reduxStoreMissives.length > 0) {
-            const localMissives: MissiveResponse[] = details.missives
-              .map((missiveId: number) => reduxStoreMissives.find((m: MissiveResponse) => m.id === missiveId))
-              .filter(Boolean) as MissiveResponse[];
+          // Process missives if present in the response
+          if (details.missives && details.missives.length > 0) {
+            if (Array.isArray(reduxStoreMissives) && reduxStoreMissives.length > 0) {
+              // Cross-reference with Redux store missives
+              const localMissives: MissiveResponse[] = details.missives
+                .map((missiveId: number) => reduxStoreMissives.find((m: MissiveResponse) => m.id === missiveId))
+                .filter(Boolean) as MissiveResponse[];
 
-            if (localMissives.length > 0) {
-              addAlerts(localMissives);
+              if (localMissives.length > 0) {
+                addAlerts(localMissives);
+              } else {
+                console.warn("Missive IDs from API not found in Redux store:", details.missives);
+              }
+            } else {
+              console.warn("Missives lookup data not loaded yet. Cannot display alerts for:", details.missives);
             }
           }
 
@@ -69,16 +77,25 @@ const StandaloneMemberDetails: React.FC<StandaloneMemberDetailsProps> = ({
   // Initial fetch and refetch when dependencies change
   useEffect(() => {
     fetchMemberDetails.current();
-  }, [
-    memberType,
-    id,
-    profitYear,
-    triggerMemberDetails,
-    reduxStoreMissives,
-    masterInquiryRequestParams?.memberType,
-    addAlert,
-    addAlerts
-  ]);
+  }, [memberType, id, profitYear, triggerMemberDetails, masterInquiryRequestParams?.memberType, addAlert, addAlerts]);
+
+  // Process missives when they become available for existing member details
+  useEffect(() => {
+    if (
+      memberDetails?.missives &&
+      memberDetails.missives.length > 0 &&
+      Array.isArray(reduxStoreMissives) &&
+      reduxStoreMissives.length > 0
+    ) {
+      const localMissives: MissiveResponse[] = memberDetails.missives
+        .map((missiveId: number) => reduxStoreMissives.find((m: MissiveResponse) => m.id === missiveId))
+        .filter(Boolean) as MissiveResponse[];
+
+      if (localMissives.length > 0) {
+        addAlerts(localMissives);
+      }
+    }
+  }, [reduxStoreMissives, memberDetails?.missives, addAlerts]);
 
   // Refetch when refreshTrigger changes
   useEffect(() => {
@@ -90,8 +107,8 @@ const StandaloneMemberDetails: React.FC<StandaloneMemberDetailsProps> = ({
 
   return (
     <MasterInquiryMemberDetails
-      memberType={memberType}
-      id={id}
+      //memberType={memberType}
+      //id={id}
       profitYear={profitYear}
       memberDetails={memberDetails}
       isLoading={isFetching}

@@ -1,6 +1,13 @@
 import "@testing-library/jest-dom";
 import { cleanup } from "@testing-library/react";
 import { afterEach } from "vitest";
+import { ModuleRegistry } from "ag-grid-community";
+import { ClientSideRowModelModule } from "ag-grid-community";
+
+// Register AG Grid modules globally for tests
+// AG Grid v33+ requires explicit module registration
+// See: https://www.ag-grid.com/react-data-grid/upgrading-to-ag-grid-33/#changes-to-modules/
+ModuleRegistry.registerModules([ClientSideRowModelModule]);
 
 // Cleanup after each test
 afterEach(() => {

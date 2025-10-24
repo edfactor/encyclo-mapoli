@@ -2,9 +2,9 @@ import { Replay } from "@mui/icons-material";
 import { Alert, AlertTitle, Button, CircularProgress, Grid, Tooltip, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { DSMAccordion, numberToCurrency, Page, setMessage, SmartModal } from "smart-ui-library";
+import { DSMAccordion, numberToCurrency, Page, setMessage, SmartModal, TotalsGrid } from "smart-ui-library";
 import StatusDropdownActionNode from "../../components/StatusDropdownActionNode";
-import { TotalsGrid } from "../../components/TotalsGrid/TotalsGrid";
+import { useChecksumValidation } from "../../hooks/useChecksumValidation";
 import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
 import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
 import {
@@ -32,19 +32,18 @@ import {
   ProfitYearRequest
 } from "../../reduxstore/types";
 // usePrerequisiteNavigations now encapsulated by PrerequisiteGuard
-import CrossReferenceValidationDisplay from "../../components/CrossReferenceValidationDisplay/CrossReferenceValidationDisplay";
 import PrerequisiteGuard from "../../components/PrerequisiteGuard";
-import { MasterUpdateCrossReferenceValidationResponse } from "../../types/validation/cross-reference-validation";
 import { MessageKeys, Messages } from "../../utils/messageDictonary";
 import ChangesList from "./ChangesList";
+import { MasterUpdateSummaryTable } from "./MasterUpdateSummaryTable";
 import ProfitShareEditConfirmation from "./ProfitShareEditConfirmation";
 import ProfitShareEditUpdateSearchFilter from "./ProfitShareEditUpdateSearchFilter";
 import ProfitShareEditUpdateTabs from "./ProfitShareEditUpdateTabs";
 
 const useRevertAction = (
-  setEmployeesReverted: (count: number) => void,
-  setBeneficiariesReverted: (count: number) => void,
-  setEtvasReverted: (count: number) => void,
+  //setEmployeesReverted: (count: number) => void,
+  //setBeneficiariesReverted: (count: number) => void,
+  //setEtvasReverted: (count: number) => void,
   setChangesApplied: (changes: boolean) => void
 ) => {
   const [trigger] = useLazyGetMasterRevertQuery();
@@ -105,84 +104,84 @@ const useRevertAction = (
   return revertAction;
 };
 
-const useSaveAction = (
-  setEmployeesReverted: (count: number) => void,
-  setBeneficiariesReverted: (count: number) => void,
-  setEtvasReverted: (count: number) => void,
-  setValidationResponse: (response: MasterUpdateCrossReferenceValidationResponse | null) => void
-) => {
-  const { profitSharingEditQueryParams } = useSelector((state: RootState) => state.yearsEnd);
-  const [applyMaster] = useGetMasterApplyMutation();
-  const dispatch = useDispatch();
-  const profitYear = useFiscalCloseProfitYear();
+const useSaveAction = () =>
+  //setEmployeesReverted: (count: number) => void,
+  //setBeneficiariesReverted: (count: number) => void,
+  //setEtvasReverted: (count: number) => void
+  // NOTE: Removed setValidationResponse parameter - now using useChecksumValidation hook
+  {
+    const { profitSharingEditQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+    const [applyMaster] = useGetMasterApplyMutation();
+    const dispatch = useDispatch();
+    const profitYear = useFiscalCloseProfitYear();
 
-  const saveAction = async (): Promise<void> => {
-    const params: ProfitShareMasterApplyRequest = {
-      profitYear: profitYear ?? 0,
-      contributionPercent: profitSharingEditQueryParams?.contributionPercent ?? 0,
-      earningsPercent: profitSharingEditQueryParams?.earningsPercent ?? 0,
-      incomingForfeitPercent: profitSharingEditQueryParams?.incomingForfeitPercent ?? 0,
-      secondaryEarningsPercent: profitSharingEditQueryParams?.secondaryEarningsPercent ?? 0,
-      maxAllowedContributions: profitSharingEditQueryParams?.maxAllowedContributions ?? 0,
-      badgeToAdjust: profitSharingEditQueryParams?.badgeToAdjust ?? 0,
-      adjustContributionAmount: profitSharingEditQueryParams?.adjustContributionAmount ?? 0,
-      adjustEarningsAmount: profitSharingEditQueryParams?.adjustEarningsAmount ?? 0,
-      adjustIncomingForfeitAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0,
-      badgeToAdjust2: profitSharingEditQueryParams?.badgeToAdjust2 ?? 0,
-      adjustEarningsSecondaryAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0
+    const saveAction = async (): Promise<void> => {
+      const params: ProfitShareMasterApplyRequest = {
+        profitYear: profitYear ?? 0,
+        contributionPercent: profitSharingEditQueryParams?.contributionPercent ?? 0,
+        earningsPercent: profitSharingEditQueryParams?.earningsPercent ?? 0,
+        incomingForfeitPercent: profitSharingEditQueryParams?.incomingForfeitPercent ?? 0,
+        secondaryEarningsPercent: profitSharingEditQueryParams?.secondaryEarningsPercent ?? 0,
+        maxAllowedContributions: profitSharingEditQueryParams?.maxAllowedContributions ?? 0,
+        badgeToAdjust: profitSharingEditQueryParams?.badgeToAdjust ?? 0,
+        adjustContributionAmount: profitSharingEditQueryParams?.adjustContributionAmount ?? 0,
+        adjustEarningsAmount: profitSharingEditQueryParams?.adjustEarningsAmount ?? 0,
+        adjustIncomingForfeitAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0,
+        badgeToAdjust2: profitSharingEditQueryParams?.badgeToAdjust2 ?? 0,
+        adjustEarningsSecondaryAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0
+      };
+
+      dispatch(setProfitShareApplyOrRevertLoading(true));
+
+      await applyMaster(params)
+        .unwrap()
+        .then((payload: ProfitShareMasterResponse) => {
+          dispatch(setProfitEditUpdateChangesAvailable(false));
+
+          console.log("Successfully applied changes to year end: ", payload);
+          console.log("Employees affected: ", payload?.employeesEffected);
+
+          // NOTE: Removed setValidationResponse call - useChecksumValidation hook handles this
+          // Cross-reference validation will auto-refresh via the hook after save
+          if (payload.crossReferenceValidation) {
+            console.log("Cross-reference validation:", payload.crossReferenceValidation);
+          }
+
+          //setEmployeesReverted(payload?.employeesEffected ?? 0);
+          //setBeneficiariesReverted(payload?.beneficiariesEffected ?? 0);
+          //setEtvasReverted(payload?.etvasEffected ?? 0);
+          dispatch(
+            setMessage({
+              ...Messages.ProfitShareApplySuccess,
+              message: {
+                ...Messages.ProfitShareApplySuccess.message,
+                message: `Employees affected: ${payload?.employeesEffected} | Beneficiaries: ${payload?.beneficiariesEffected} | ETVAs: ${payload?.etvasEffected} `
+              }
+            })
+          );
+          dispatch(setResetYearEndPage(true));
+          dispatch(setProfitEditUpdateRevertChangesAvailable(true));
+          dispatch(setProfitShareEditUpdateShowSearch(false));
+          // Clear the grids
+          dispatch(clearProfitSharingUpdate());
+        })
+        .catch((error) => {
+          console.error("ERROR: Did not apply changes to year end", error);
+          dispatch(
+            setMessage({
+              ...Messages.ProfitShareApplyFail,
+              message: {
+                ...Messages.ProfitShareApplyFail.message,
+                message: `Employees affected: 0 | Beneficiaries: 0, | ETVAs: 0 `
+              }
+            })
+          );
+        });
+      dispatch(setProfitShareApplyOrRevertLoading(false));
     };
 
-    dispatch(setProfitShareApplyOrRevertLoading(true));
-
-    await applyMaster(params)
-      .unwrap()
-      .then((payload: ProfitShareMasterResponse) => {
-        dispatch(setProfitEditUpdateChangesAvailable(false));
-
-        console.log("Successfully applied changes to year end: ", payload);
-        console.log("Employees affected: ", payload?.employeesEffected);
-
-        // Capture cross-reference validation if present
-        if (payload.crossReferenceValidation) {
-          setValidationResponse(payload.crossReferenceValidation);
-          console.log("Cross-reference validation:", payload.crossReferenceValidation);
-        }
-
-        setEmployeesReverted(payload?.employeesEffected ?? 0);
-        setBeneficiariesReverted(payload?.beneficiariesEffected ?? 0);
-        setEtvasReverted(payload?.etvasEffected ?? 0);
-        dispatch(
-          setMessage({
-            ...Messages.ProfitShareApplySuccess,
-            message: {
-              ...Messages.ProfitShareApplySuccess.message,
-              message: `Employees affected: ${payload?.employeesEffected} | Beneficiaries: ${payload?.beneficiariesEffected} | ETVAs: ${payload?.etvasEffected} `
-            }
-          })
-        );
-        dispatch(setResetYearEndPage(true));
-        dispatch(setProfitEditUpdateRevertChangesAvailable(true));
-        dispatch(setProfitShareEditUpdateShowSearch(false));
-        // Clear the grids
-        dispatch(clearProfitSharingUpdate());
-      })
-      .catch((error) => {
-        console.error("ERROR: Did not apply changes to year end", error);
-        dispatch(
-          setMessage({
-            ...Messages.ProfitShareApplyFail,
-            message: {
-              ...Messages.ProfitShareApplyFail.message,
-              message: `Employees affected: 0 | Beneficiaries: 0, | ETVAs: 0 `
-            }
-          })
-        );
-      });
-    dispatch(setProfitShareApplyOrRevertLoading(false));
+    return saveAction;
   };
-
-  return saveAction;
-};
 
 const wasFormUsed = (profitSharingEditQueryParams: ProfitShareEditUpdateQueryParams) => {
   return (
@@ -220,8 +219,8 @@ const RenderSaveButton = (
     totalForfeituresGreaterThanZero,
     invalidProfitShareEditYear
   } = useSelector((state: RootState) => state.yearsEnd);
-  const navigationList = useSelector((state: RootState) => state.navigation.navigationData);
-  const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
+  //const navigationList = useSelector((state: RootState) => state.navigation.navigationData);
+  //const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
   // Determine tooltip reason when disabled by prerequisites
   const prereqTooltip = !prerequisitesComplete
     ? "All prerequisite navigations must be complete before saving."
@@ -360,36 +359,39 @@ const RenderRevertButton = (
 };
 
 const ProfitShareEditUpdate = () => {
-  const [beneficiariesAffected, setBeneficiariesAffected] = useState(0);
-  const [employeesAffected, setEmployeesAffected] = useState(0);
-  const [etvasAffected, setEtvasAffected] = useState(0);
-  const [beneficiariesReverted, setBeneficiariesReverted] = useState(0);
-  const [employeesReverted, setEmployeesReverted] = useState(0);
-  const [etvasReverted, setEtvasReverted] = useState(0);
+  //const [beneficiariesAffected, setBeneficiariesAffected] = useState(0);
+  //const [employeesAffected, setEmployeesAffected] = useState(0);
+  //const [etvasAffected, setEtvasAffected] = useState(0);
+  //const [beneficiariesReverted, setBeneficiariesReverted] = useState(0);
+  //const [employeesReverted, setEmployeesReverted] = useState(0);
+  //const [etvasReverted, setEtvasReverted] = useState(0);
   const [updatedBy, setUpdatedBy] = useState<string | null>(null);
   const [updatedTime, setUpdatedTime] = useState<string | null>(null);
 
-  // State for cross-reference validation response
-  const [validationResponse, setValidationResponse] = useState<MasterUpdateCrossReferenceValidationResponse | null>(
-    null
-  );
+  // State for validation popup - track which field popup is open
+  const [openValidationField, setOpenValidationField] = useState<string | null>(null);
+
+  const handleValidationToggle = (fieldName: string) => {
+    setOpenValidationField(openValidationField === fieldName ? null : fieldName);
+  };
+
+  // Helper to render validation icon with popup for a specific field (legacy - replaced by renderValidationIconInGrid)
 
   // This is a flag used to indicate that the year end change have been made
   // and a banner should be shown indicating this
   const [changesApplied, setChangesApplied] = useState<boolean>(false);
 
   const revertAction = useRevertAction(
-    setEmployeesReverted,
-    setBeneficiariesReverted,
-    setEtvasReverted,
+    //setEmployeesReverted,
+    // setBeneficiariesReverted,
+    // setEtvasReverted,
     setChangesApplied
   );
-  const saveAction = useSaveAction(
-    setEmployeesAffected,
-    setBeneficiariesAffected,
-    setEtvasAffected,
-    setValidationResponse
-  );
+  const saveAction = useSaveAction();
+  //setEmployeesAffected,
+  //setBeneficiariesAffected,
+  //setEtvasAffected
+  // NOTE: Removed setValidationResponse - now using useChecksumValidation hook
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [pageNumberReset, setPageNumberReset] = useState(false);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
@@ -419,6 +421,51 @@ const ProfitShareEditUpdate = () => {
   const dispatch = useDispatch();
   const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
   const isReadOnly = useReadOnlyNavigation();
+
+  // Use checksum validation hook to fetch validation data independently from any page
+  const {
+    validationData: validationResponse,
+    //isLoading: isValidationLoading,
+    //error: validationError,
+    //refetch: refetchValidation,
+    getFieldValidation
+  } = useChecksumValidation({
+    profitYear: profitYear || 0,
+    autoFetch: true,
+    // Pass current values from PAY444 for client-side comparison with PAY443 archived values
+    currentValues: profitSharingUpdate?.profitShareUpdateTotals
+      ? {
+          TotalProfitSharingBalance: profitSharingUpdate.profitShareUpdateTotals.beginningBalance,
+          DistributionTotals: profitSharingUpdate.profitShareUpdateTotals.distributions,
+          ForfeitureTotals: profitSharingUpdate.profitShareUpdateTotals.forfeiture,
+          ContributionTotals: profitSharingUpdate.profitShareUpdateTotals.totalContribution,
+          EarningsTotals: profitSharingUpdate.profitShareUpdateTotals.earnings,
+          IncomingAllocations: profitSharingUpdate.profitShareUpdateTotals.allocations,
+          OutgoingAllocations: profitSharingUpdate.profitShareUpdateTotals.paidAllocations,
+          // NetAllocTransfer is calculated field: allocations + paidAllocations
+          // Note: paidAllocations is already stored as a NEGATIVE value in the database
+          NetAllocTransfer:
+            (profitSharingUpdate.profitShareUpdateTotals.allocations || 0) +
+            (profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0)
+        }
+      : undefined
+  });
+
+  // Helper to render validation icon positioned absolutely in a TotalsGrid (like State Taxes pattern)
+  // IMPORTANT: Must be declared AFTER getFieldValidation helper
+
+  // Extract cross-reference validation from profitSharingUpdate response
+  // NOTE: This useEffect is now DISABLED because we're using the useChecksumValidation hook
+  // which auto-fetches validation data independently based on profitYear.
+  // Keeping this commented for reference in case we need to revert.
+  /*
+  useEffect(() => {
+    if (profitSharingUpdate?.crossReferenceValidation) {
+      setValidationResponse(profitSharingUpdate.crossReferenceValidation);
+      console.log("Loaded cross-reference validation from GET response:", profitSharingUpdate.crossReferenceValidation);
+    }
+  }, [profitSharingUpdate]);
+  */
 
   useEffect(() => {
     const currentYear = new Date().getFullYear();
@@ -489,12 +536,13 @@ const ProfitShareEditUpdate = () => {
         setChangesApplied(false);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onStatusSearch, hasToken, updatedTime, updatedBy]);
 
   return (
     <PrerequisiteGuard
       navigationId={currentNavigationId}
-      messageTemplate={Messages.ProfitSharePrerequisiteIncomplete as any}>
+      messageTemplate={Messages.ProfitSharePrerequisiteIncomplete}>
       {({ prerequisitesComplete }) => (
         <Page
           label="Master Update (PAY444|PAY447)"
@@ -527,13 +575,6 @@ const ProfitShareEditUpdate = () => {
               </div>
             )
           }
-
-          {/* Cross-Reference Validation Display */}
-          {validationResponse && (
-            <div className="w-full px-[24px]">
-              <CrossReferenceValidationDisplay validation={validationResponse} />
-            </div>
-          )}
 
           <Grid
             container
@@ -578,60 +619,19 @@ const ProfitShareEditUpdate = () => {
                   <Typography
                     fontWeight="bold"
                     variant="body2">
-                    {`Employees: ${profitSharingUpdate.profitShareUpdateTotals.totalEmployees} | Beneficiaries: ${profitSharingUpdate.profitShareUpdateTotals.totalBeneficaries}`}
+                    {`Employees: ${profitSharingUpdate.profitShareUpdateTotals.totalEmployees} | Beneficiaries: ${profitSharingUpdate.profitShareUpdateTotals.totalBeneficiaries}`}
                   </Typography>
                 </div>
 
-                <TotalsGrid
-                  displayData={[
-                    [
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.beginningBalance || 0),
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.totalContribution || 0),
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earnings || 0),
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earnings2 || 0),
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.forfeiture || 0),
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.distributions || 0),
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.military || 0),
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.endingBalance || 0)
-                    ],
-                    [
-                      "",
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.allocations || 0),
-                      "",
-                      "",
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.maxPointsTotal || 0),
-                      "",
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0),
-                      numberToCurrency(
-                        (profitSharingUpdate.profitShareUpdateTotals.allocations || 0) +
-                          (profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0)
-                      )
-                    ],
-                    [
-                      "",
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.contributionPoints || 0),
-                      numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earningPoints || 0),
-                      "",
-                      "",
-                      "",
-                      "",
-                      ""
-                    ]
-                  ]}
-                  leftColumnHeaders={["Total", "Allocation", "Point"]}
-                  topRowHeaders={[
-                    "",
-                    "Beginning Balance",
-                    "Contributions",
-                    "Earnings",
-                    "Earnings2",
-                    "Forfeitures",
-                    "Distributions",
-                    "Military/Paid Allocation",
-                    "Ending Balance"
-                  ]}
-                  tablePadding="12px"
+                {/* Unified Summary Table (PAY444) */}
+                <MasterUpdateSummaryTable
+                  totals={profitSharingUpdate.profitShareUpdateTotals}
+                  validationResponse={validationResponse}
+                  getFieldValidation={getFieldValidation}
+                  openValidationField={openValidationField}
+                  onValidationToggle={handleValidationToggle}
                 />
+
                 <TotalsGrid
                   tablePadding="12px"
                   displayData={[
@@ -658,7 +658,7 @@ const ProfitShareEditUpdate = () => {
                 </div>
                 <div className="flex gap-2">
                   <TotalsGrid
-                    breakPoints={{ xs: 5, sm: 5, md: 5, lg: 5, xl: 5 }}
+                    breakpoints={{ xs: 5, sm: 5, md: 5, lg: 5, xl: 5 }}
                     tablePadding="4px"
                     displayData={[
                       [

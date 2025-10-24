@@ -49,6 +49,8 @@ public sealed class DistributionService : IDistributionService
                         from ben in benGroup.DefaultIfEmpty()
                         select new
                         {
+                            dist.Id,
+                            dist.PaymentSequence,
                             dist.Ssn,
                             BadgeNumber = dem != null ? (int?)dem.BadgeNumber : null,
                             DemFullName = dem != null ? dem.ContactInfo.FullName : null,
@@ -63,12 +65,23 @@ public sealed class DistributionService : IDistributionService
                             dist.FederalTaxAmount,
                             dist.StateTaxAmount,
                             dist.CheckAmount,
-                            IsExecutive = dem != null && dem.PayFrequencyId == PayFrequency.Constants.Monthly
+                            IsExecutive = dem != null && dem.PayFrequencyId == PayFrequency.Constants.Monthly,
+                            DemographicId = dem != null ? (int?)dem.OracleHcmId : null,
+                            BeneficiaryId = ben != null ? (int?)ben.Id : null
                         };
 
             int searchSsn;
             if (!string.IsNullOrWhiteSpace(request.Ssn) && int.TryParse(request.Ssn, out searchSsn))
             {
+                // Validate that SSN exists in either demographics or beneficiaries
+                var ssnExists = await demographic.AnyAsync(d => d.Ssn == searchSsn, cancellationToken) ||
+                               await ctx.Beneficiaries.AnyAsync(b => b.Contact!.Ssn == searchSsn, cancellationToken);
+
+                if (!ssnExists)
+                {
+                    throw new InvalidOperationException("SSN not found.");
+                }
+
                 query = query.Where(d => d.Ssn == searchSsn);
             }
 
@@ -100,7 +113,22 @@ public sealed class DistributionService : IDistributionService
                 query = query.Where(d => d.FrequencyId == request.DistributionFrequencyId.Value);
             }
 
-            if (request.DistributionStatusId.HasValue)
+            // Support both single and multiple status IDs
+            // Prioritize DistributionStatusIds (array) if provided, otherwise use single DistributionStatusId
+            if (request.DistributionStatusIds != null && request.DistributionStatusIds.Count > 0)
+            {
+                // Convert string list to char list for comparison
+                var statusChars = request.DistributionStatusIds
+                    .Where(s => !string.IsNullOrEmpty(s) && s.Length == 1)
+                    .Select(s => s[0])
+                    .ToList();
+
+                if (statusChars.Count > 0)
+                {
+                    query = query.Where(d => statusChars.Contains(d.StatusId));
+                }
+            }
+            else if (request.DistributionStatusId.HasValue)
             {
                 query = query.Where(d => d.StatusId == request.DistributionStatusId.Value);
             }
@@ -130,14 +158,30 @@ public sealed class DistributionService : IDistributionService
                 query = query.Where(d => d.CheckAmount <= request.MaxCheckAmount.Value);
             }
 
+            // Filter by MemberType similar to MasterInquiry pattern
+            if (request.MemberType.HasValue)
+            {
+                if (request.MemberType.Value == 1) // Employees only
+                {
+                    query = query.Where(d => d.BadgeNumber != null);
+                }
+                else if (request.MemberType.Value == 2) // Beneficiaries only
+                {
+                    query = query.Where(d => d.BadgeNumber == null);
+                }
+                // If null or any other value, don't filter (show all)
+            }
+
             return await query.ToPaginationResultsAsync(request, cancellationToken);
-        });
+        }, cancellationToken);
 
         var result = new PaginatedResponseDto<DistributionSearchResponse>(request)
         {
             Total = data.Total,
             Results = data.Results.Select(d => new DistributionSearchResponse
             {
+                Id = d.Id,
+                PaymentSequence = d.PaymentSequence,
                 Ssn = d.Ssn.MaskSsn(),
                 BadgeNumber = d.BadgeNumber,
                 FullName = d.DemFullName ?? d.BeneFullName,
@@ -151,7 +195,10 @@ public sealed class DistributionService : IDistributionService
                 FederalTax = d.FederalTaxAmount,
                 StateTax = d.StateTaxAmount,
                 CheckAmount = d.CheckAmount,
-                IsExecutive = d.IsExecutive
+                IsExecutive = d.IsExecutive,
+                IsEmployee = d.BadgeNumber.HasValue,
+                DemographicId = d.DemographicId,
+                BeneficiaryId = d.BeneficiaryId
             }).ToList()
         };
 
@@ -488,5 +535,26 @@ public sealed class DistributionService : IDistributionService
         return validationErrors.Count > 0
             ? Result<bool>.ValidationFailure(validationErrors)
             : Result<bool>.Success(true);
+    }
+
+    private IQueryable<Distribution> GetDistributionExtract(IProfitSharingDbContext ctx, CancellationToken cancellationToken, char[] distributionFrequencies)
+    {
+        var distributionQuery = ctx.Distributions
+            .Include(d => d.Frequency)
+            .Include(d => d.Status)
+            .Include(d => d.TaxCode)
+            .Include(d => d.Payee)
+            .Include(d => d.ThirdPartyPayee)
+            .ThenInclude(tp => tp!.Address)
+            .Where(x=>x.StatusId != DistributionStatus.Constants.RequestOnHold)
+            .Select(d=>d);
+        
+        if (distributionFrequencies.Any())
+        {
+            distributionQuery = distributionQuery.Where(d => distributionFrequencies.Contains(d.FrequencyId));
+        }
+
+        
+        return distributionQuery;
     }
 }

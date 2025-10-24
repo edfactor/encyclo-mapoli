@@ -1,11 +1,13 @@
 import { Typography } from "@mui/material";
 import { memo, useMemo } from "react";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMGrid, Pagination, ISortParams } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
+import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
+import { SortParams } from "../../hooks/useGridPagination";
 import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
 
 interface ProfitData {
-  results: any[];
+  results: unknown[];
   total: number;
 }
 
@@ -15,15 +17,16 @@ interface MasterInquiryGridProps {
   profitGridPagination?: {
     pageNumber: number;
     pageSize: number;
-    sortParams: any;
+    sortParams: SortParams;
   };
   onPaginationChange?: (pageNumber: number, pageSize: number) => void;
-  onSortChange?: (sortParams: any) => void;
+  onSortChange?: (sortParams: SortParams) => void;
 }
 
 const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = memo(
   ({ profitData, isLoading, profitGridPagination, onPaginationChange, onSortChange }) => {
     const columnDefs = useMemo(() => GetMasterInquiryGridColumns(), []);
+    const gridMaxHeight = useDynamicGridHeight();
 
     if (isLoading) {
       return <Typography>Loading profit details...</Typography>;
@@ -39,7 +42,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = memo(
       }
     };
 
-    const handleSortChange = (sortParams: any) => {
+    const handleSortChange = (sortParams: ISortParams) => {
       if (onSortChange) {
         onSortChange(sortParams);
       }
@@ -47,7 +50,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = memo(
 
     return (
       <>
-        <div style={{ height: "400px", width: "100%" }}>
+        <div style={{ width: "100%" }}>
           <div style={{ padding: "0 24px 0 24px" }}>
             <Typography
               variant="h2"
@@ -59,6 +62,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = memo(
             preferenceKey={CAPTIONS.MASTER_INQUIRY}
             handleSortChanged={handleSortChange}
             isLoading={!!isLoading}
+            maxHeight={gridMaxHeight}
             providedOptions={{
               rowData: profitData.results,
               columnDefs: columnDefs,

@@ -1,3 +1,4 @@
+import { useLazyGetRecentlyTerminatedReportQuery } from "@/reduxstore/api/YearsEndApi";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, Grid } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
@@ -6,7 +7,6 @@ import { useLazyGetAccountingRangeToCurrent } from "hooks/useFiscalCalendarYear"
 import { useEffect } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetRecentlyTerminatedReportQuery } from "reduxstore/api/YearsEndApi";
 import {
   clearRecentlyTerminated,
   clearRecentlyTerminatedQueryParams,
@@ -16,7 +16,11 @@ import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "utils/dateUtils";
 import * as yup from "yup";
-import { dateStringValidator, endDateStringAfterStartDateValidator, profitYearValidator } from "../../../utils/FormValidators";
+import {
+  dateStringValidator,
+  endDateStringAfterStartDateValidator,
+  profitYearValidator
+} from "../../../utils/FormValidators";
 
 interface RecentlyTerminatedSearch {
   profitYear: number;
@@ -56,21 +60,33 @@ const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterPro
     defaultValues: {
       profitYear: profitYear || recentlyTerminatedQueryParams?.profitYear || undefined,
       beginningDate:
-        recentlyTerminatedQueryParams?.beginningDate || (fiscalData ? fiscalData.fiscalBeginDate : "") || "",
-      endingDate: recentlyTerminatedQueryParams?.endingDate || (fiscalData ? fiscalData.fiscalEndDate : "") || ""
+        recentlyTerminatedQueryParams?.beginningDate || (fiscalData ? mmDDYYFormat(fiscalData.fiscalBeginDate) : ""),
+      endingDate:
+        recentlyTerminatedQueryParams?.endingDate || (fiscalData ? mmDDYYFormat(fiscalData.fiscalEndDate) : "")
     }
   });
 
-  const validateAndSearch = handleSubmit((data) => {
+  const validateAndSearch = handleSubmit(async (data) => {
     if (isValid && hasToken) {
+      const pagination = { skip: 0, take: 25, sortBy: "fullName, terminationDate", isSortDescending: false };
+
       dispatch(
         setRecentlyTerminatedQueryParams({
           profitYear: data.profitYear,
           beginningDate: data.beginningDate,
           endingDate: data.endingDate,
-          pagination: { skip: 0, take: 25, sortBy: "fullName, terminationDate", isSortDescending: false }
+          pagination
         })
       );
+
+      // Perform the search
+      await triggerSearch({
+        profitYear: data.profitYear,
+        beginningDate: data.beginningDate,
+        endingDate: data.endingDate,
+        pagination
+      });
+
       setInitialSearchLoaded(true);
     }
   });
@@ -81,8 +97,8 @@ const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterPro
     // Clear the form fields
     reset({
       profitYear: profitYear || undefined,
-      beginningDate: fiscalData ? fiscalData.fiscalBeginDate : "",
-      endingDate: fiscalData ? fiscalData.fiscalEndDate : ""
+      beginningDate: fiscalData ? (fiscalData ? mmDDYYFormat(fiscalData.fiscalBeginDate) : "") : "",
+      endingDate: fiscalData ? (fiscalData ? mmDDYYFormat(fiscalData.fiscalEndDate) : "") : ""
     });
 
     // Clear the data in Redux store
@@ -99,11 +115,12 @@ const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterPro
     if (fiscalData && fiscalData.fiscalBeginDate && fiscalData.fiscalEndDate) {
       reset({
         profitYear: profitYear || recentlyTerminatedQueryParams?.profitYear || undefined,
-        beginningDate: recentlyTerminatedQueryParams?.beginningDate || fiscalData.fiscalBeginDate,
-        endingDate: recentlyTerminatedQueryParams?.endingDate || fiscalData.fiscalEndDate
+        beginningDate: recentlyTerminatedQueryParams?.beginningDate || mmDDYYFormat(fiscalData.fiscalBeginDate),
+        endingDate: recentlyTerminatedQueryParams?.endingDate || mmDDYYFormat(fiscalData.fiscalEndDate)
       });
+      trigger();
     }
-  }, [fiscalData, profitYear, recentlyTerminatedQueryParams, reset]);
+  }, [fiscalData, profitYear, recentlyTerminatedQueryParams, reset, trigger]);
 
   return (
     <form onSubmit={validateAndSearch}>

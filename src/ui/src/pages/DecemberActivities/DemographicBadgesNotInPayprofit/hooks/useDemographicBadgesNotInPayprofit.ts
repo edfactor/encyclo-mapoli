@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { useSelector } from "react-redux";
+import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useLazyGetDemographicBadgesNotInPayprofitQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../../reduxstore/store";
-import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
-import { useGridPagination } from "../../../../hooks/useGridPagination";
 import {
-  initialState,
   demographicBadgesNotInPayprofitReducer,
-  selectShowData,
-  selectHasResults
+  initialState,
+  selectHasResults,
+  selectShowData
 } from "./useDemographicBadgesNotInPayprofitReducer";
 
 export interface DemographicBadgesNotInPayprofitSearchParams {
@@ -23,7 +23,7 @@ const useDemographicBadgesNotInPayprofit = () => {
   const decemberFlowProfitYear = useDecemberFlowProfitYear();
 
   const handlePaginationChange = useCallback(
-    (pageNumber: number, pageSize: number, sortParams: any) => {
+    (pageNumber: number, pageSize: number, sortParams: SortParams) => {
       if (decemberFlowProfitYear && hasToken) {
         try {
           // Handle empty sortBy case - set default
@@ -68,7 +68,7 @@ const useDemographicBadgesNotInPayprofit = () => {
   });
 
   const executeSearch = useCallback(
-    async (searchParams: DemographicBadgesNotInPayprofitSearchParams, source = "manual") => {
+    async (searchParams: DemographicBadgesNotInPayprofitSearchParams, _source = "manual") => {
       if (!hasToken) return;
 
       dispatch({ type: "SEARCH_START", payload: { profitYear: searchParams.profitYear } });
@@ -101,7 +101,7 @@ const useDemographicBadgesNotInPayprofit = () => {
       hasInitiallySearched.current = true;
       executeSearch({ profitYear: decemberFlowProfitYear }, "auto-initial");
     }
-  }, [decemberFlowProfitYear, state.data, hasToken, state.search.isLoading]);
+  }, [decemberFlowProfitYear, state.data, hasToken, state.search.isLoading, executeSearch]);
 
   return {
     searchResults: state.data,

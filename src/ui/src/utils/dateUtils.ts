@@ -35,6 +35,10 @@ export const getMaskedDateDisplay = (useXPattern = true): string => {
   return useXPattern ? "XX/XX/XXXX" : "N/A";
 };
 
+export const getMaskedMMYYYDateDisplay = (useXPattern = true): string => {
+  return useXPattern ? "XX/XXXX" : "N/A";
+};
+
 //This is all over the UI, not the API
 //Returns masked display if date is masked by backend permissions.
 export const dateMMDDYYYY = (date: Date | string | undefined): string => {
@@ -63,6 +67,18 @@ export const mmDDYYFormat = (date: string | Date | undefined | null) => {
   }
 
   const dateForm = "MM/dd/yyyy";
+  const parsedDate = tryddmmyyyyToDate(date);
+  return parsedDate ? format(parsedDate, dateForm) : "";
+};
+
+//Takes in date and returns it in MM/yyyy format if date exists.
+//Returns masked display if date is masked by backend permissions.
+export const mmYYFormat = (date: string | Date | undefined | null) => {
+  if (isMaskedDate(date)) {
+    return getMaskedMMYYYDateDisplay();
+  }
+
+  const dateForm = "MM/yyyy";
   const parsedDate = tryddmmyyyyToDate(date);
   return parsedDate ? format(parsedDate, dateForm) : "";
 };

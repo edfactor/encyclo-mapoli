@@ -29,7 +29,7 @@ public sealed class StateTaxEndpoint : ProfitSharingEndpoint<StateTaxLookupReque
 
     public override void Configure()
     {
-        Get("/state-taxes/:State");
+        Get("/state-taxes/{state}");
         Group<LookupGroup>();
         Summary(s =>
         {

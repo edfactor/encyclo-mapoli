@@ -4,22 +4,51 @@ import EditIcon from "@mui/icons-material/Edit";
 import UndoIcon from "@mui/icons-material/Undo";
 import { IconButton, Tooltip } from "@mui/material";
 import { ICellRendererParams } from "ag-grid-community";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "../../constants";
+import { setCurrentDistribution } from "../../reduxstore/slices/distributionSlice";
+import type { DistributionSearchResponse } from "../../types/distributions";
 
 export const ActionsCellRenderer = (props: ICellRendererParams) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const handleReverse = () => {
     console.log("Reverse distribution", props.data);
   };
 
   const handleView = () => {
-    console.log("View distribution", props.data);
+    const distribution = props.data as DistributionSearchResponse;
+    dispatch(setCurrentDistribution(distribution));
+
+    // Navigate to view distribution page with memberId and memberType as URL parameters
+    const memberId = distribution.demographicId || distribution.beneficiaryId;
+    const memberType = distribution.demographicId ? 1 : 2; // 1 = employee, 2 = beneficiary
+
+    if (memberId) {
+      navigate(`/${ROUTES.VIEW_DISTRIBUTION}/${memberId}/${memberType}`);
+    }
   };
 
   const handleEdit = () => {
-    console.log("Edit distribution", props.data);
+    const distribution = props.data as DistributionSearchResponse;
+    dispatch(setCurrentDistribution(distribution));
+
+    // Navigate to edit distribution page with memberId and memberType as URL parameters
+    const memberId = distribution.demographicId || distribution.beneficiaryId;
+    const memberType = distribution.demographicId ? 1 : 2; // 1 = employee, 2 = beneficiary
+
+    if (memberId) {
+      navigate(`/${ROUTES.EDIT_DISTRIBUTION}/${memberId}/${memberType}`);
+    }
   };
 
   const handleDelete = () => {
-    console.log("Delete distribution", props.data);
+    const distribution = props.data as DistributionSearchResponse;
+    dispatch(setCurrentDistribution(distribution));
+    // Parent component will handle opening the delete modal
+    window.dispatchEvent(new CustomEvent("openDeleteModal", { detail: distribution }));
   };
 
   return (

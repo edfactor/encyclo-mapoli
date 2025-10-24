@@ -5,7 +5,7 @@ namespace Demoulas.ProfitSharing.Data.Entities;
 /// <summary>
 /// Represents a profit code entity used in the profit-sharing system.
 /// </summary>
-public class ProfitCode : ILookupTable<byte>
+public class ProfitCode : ILookupTable<byte>, IEquatable<CommentType>
 {
     /// <summary>
     /// Contains predefined constants for various profit codes used in the profit-sharing system.
@@ -80,15 +80,46 @@ public class ProfitCode : ILookupTable<byte>
         return false;
     }
 
-    // Override GetHashCode to be consistent with Equals
-    public override int GetHashCode()
+    public virtual bool Equals(CommentType? other)
     {
-        return Id.GetHashCode();
+        if (other != null)
+        {
+            return other.Id == this.Id;
+        }
+        return false;
     }
 
     public static implicit operator byte(ProfitCode profitCode)
     {
         return profitCode.Id;
+    }
+
+    public static bool operator ==(ProfitCode? left, ProfitCode? right)
+    {
+        if (ReferenceEquals(left, right))
+        {
+            return true;
+        }
+        if (ReferenceEquals(left, null))
+        {
+            return false;
+        }
+        if (ReferenceEquals(right, null))
+        {
+            return false;
+        }
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(ProfitCode? left, ProfitCode? right)
+    {
+        return !(left == right);
+    }
+
+    // Override GetHashCode to be consistent with Equals
+    public override int GetHashCode()
+    {
+        return Id.GetHashCode();
     }
 #pragma warning restore S3875
 }

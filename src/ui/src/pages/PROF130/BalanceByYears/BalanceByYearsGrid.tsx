@@ -1,18 +1,13 @@
+import { Grid } from "@mui/material";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, numberToCurrency } from "smart-ui-library";
-import { TotalsGrid } from "components/TotalsGrid/TotalsGrid";
-import { GetBalanceByYearsGridColumns } from "./BalanceByYearsGridColumns";
-import { Grid } from "@mui/material";
+import { DSMGrid, ISortParams, numberToCurrency, TotalsGrid } from "smart-ui-library";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
+import { GetBalanceByYearsGridColumns } from "./BalanceByYearsGridColumns";
 // numberToCurrency imported above
 
-interface BalanceByYearsGridProps {
-  initialSearchLoaded: boolean;
-}
-
-const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLoaded }) => {
+const BalanceByYearsGrid: React.FC = () => {
   const [_discard0, setSortParams] = useState<ISortParams>({
     sortBy: "badgeNumber",
     isSortDescending: false

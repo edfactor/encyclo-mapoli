@@ -40,8 +40,8 @@ public class GetForfeitureAdjustmentsEndpoint : ProfitSharingEndpoint<SuggestedF
     {
         return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
         {
-            var response = await _forfeitureAdjustmentService.GetSuggestedForfeitureAmount(req, ct);
-            return Result<SuggestedForfeitureAdjustmentResponse>.Success(response).ToHttpResult();
+            var result = await _forfeitureAdjustmentService.GetSuggestedForfeitureAmount(req, ct);
+            return result.ToHttpResult(Error.EmployeeNotFound);
         }, "operation:year-end-forfeiture-adjustments-get", $"has_ssn:{req.Ssn.HasValue}", $"has_badge:{req.Badge.HasValue}", $"ssn:{req.Ssn}", $"badge:{req.Badge}");
     }
 }

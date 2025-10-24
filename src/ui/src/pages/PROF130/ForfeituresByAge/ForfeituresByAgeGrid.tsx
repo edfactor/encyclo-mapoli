@@ -1,21 +1,16 @@
+import { Grid } from "@mui/material";
 import { useCallback } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { DSMGrid } from "smart-ui-library";
-import { TotalsGrid } from "components/TotalsGrid/TotalsGrid";
-import { GetForfeituresByAgeColumns } from "./ForfeituresByAgeGridColumns";
-import { Grid } from "@mui/material";
-import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
-import { numberToCurrency } from "smart-ui-library";
+import { DSMGrid, numberToCurrency, TotalsGrid } from "smart-ui-library";
 import { useGridPagination } from "../../../hooks/useGridPagination";
+import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
+import { GetForfeituresByAgeColumns } from "./ForfeituresByAgeGridColumns";
 
-interface ForfeituresByAgeGridProps {
-  initialSearchLoaded: boolean;
-}
-
-const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSearchLoaded }) => {
-  const { forfeituresByAgeTotal, forfeituresByAgeFullTime, forfeituresByAgePartTime, forfeituresByAgeQueryParams } =
-    useSelector((state: RootState) => state.yearsEnd);
+const ForfeituresByAgeGrid: React.FC = () => {
+  const { forfeituresByAgeTotal, forfeituresByAgeFullTime, forfeituresByAgePartTime } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
 
   const { handleSortChange } = useGridPagination({
     initialPageSize: 255,

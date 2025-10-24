@@ -5,9 +5,14 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { DSMGrid, Pagination, SmartModal } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { CAPTIONS } from "../../../constants";
+import { GridPaginationState, GridPaginationActions } from "../../../hooks/useGridPagination";
 import { ExecutiveHoursAndDollars, PagedReportResponse } from "../../../reduxstore/types";
 import { GetManageExecutiveHoursAndDollarsColumns } from "./ManageExecutiveHoursAndDollarsGridColumns";
 import SearchAndAddExecutive from "./SearchAndAddExecutive";
+
+interface ManageExecutiveSearchForm {
+  [key: string]: unknown;
+}
 
 interface RenderAddExecutiveButtonProps {
   reportReponse: PagedReportResponse<ExecutiveHoursAndDollars> | null;
@@ -66,15 +71,15 @@ interface ManageExecutiveHoursAndDollarsGridSearchProps {
   closeModal?: () => void;
   updateExecutiveRow?: (badge: number, hours: number, dollars: number) => void;
   isRowStagedToSave?: (badge: number) => boolean;
-  mainGridPagination?: any;
-  executeModalSearch?: (searchForm: any) => void;
-  modalSelectedExecutives?: any[];
+  mainGridPagination?: GridPaginationState & GridPaginationActions;
+  executeModalSearch?: (searchForm: ManageExecutiveSearchForm) => void;
+  modalSelectedExecutives?: ExecutiveHoursAndDollars[];
   addExecutivesToMainGrid?: () => void;
   isModalSearching?: boolean;
   isReadOnly?: boolean;
   // Props for modal grid (not needed when isModal=false)
   modalResults?: PagedReportResponse<ExecutiveHoursAndDollars> | null;
-  modalGridPagination?: any;
+  modalGridPagination?: GridPaginationState & GridPaginationActions;
   // Shared props
   isSearching: boolean;
   selectExecutivesInModal?: (executives: ExecutiveHoursAndDollars[]) => void;
@@ -172,7 +177,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
   const isPaginationNeeded = hasData;
 
   // Create a mutable copy of the row data for the grid to allow in-place editing
-  const [mutableRowData, setMutableRowData] = useState<any[]>([]);
+  const [mutableRowData, setMutableRowData] = useState<ExecutiveHoursAndDollars[]>([]);
   const isEditingRef = useRef(false);
   const dataInitializedRef = useRef(false);
 

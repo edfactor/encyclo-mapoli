@@ -15,7 +15,7 @@ import useDecemberFlowProfitYear from "./useDecemberFlowProfitYear";
 const useFiscalCalendarYear = (): CalendarResponseDto | null => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { accountingYearData } = useSelector((state: RootState) => state.lookups);
-  const [fetchAccountingYear, { isLoading }] = useLazyGetAccountingYearQuery();
+  const [fetchAccountingYear] = useLazyGetAccountingYearQuery();
   const profitYear = useDecemberFlowProfitYear();
 
   useEffect(() => {

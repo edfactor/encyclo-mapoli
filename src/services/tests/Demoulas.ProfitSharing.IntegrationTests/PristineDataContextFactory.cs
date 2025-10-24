@@ -54,6 +54,11 @@ public sealed class PristineDataContextFactory : IProfitSharingDataContextFactor
         return func(_readOnlyCtx);
     }
 
+    public Task<T> UseReadOnlyContext<T>(Func<ProfitSharingReadOnlyDbContext, Task<T>> func, CancellationToken cancellationToken = default)
+    {
+        return func(_readOnlyCtx);
+    }
+
     public Task<T> UseStoreInfoContext<T>(Func<DemoulasCommonDataContext, Task<T>> func)
     {
         throw new NotImplementedException();

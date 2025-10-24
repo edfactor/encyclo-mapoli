@@ -11,6 +11,21 @@ public sealed record DistributionsAndForfeitureTotalsResponse : ReportResponseBa
     public required decimal FederalTaxTotal { get; init; }
     public required decimal ForfeitureTotal { get; init; }
 
+    /// <summary>
+    /// Regular forfeitures (not Administrative or Class Action)
+    /// </summary>
+    public decimal ForfeitureRegularTotal { get; init; }
+
+    /// <summary>
+    /// Administrative forfeitures (MAIN-2170)
+    /// </summary>
+    public decimal ForfeitureAdministrativeTotal { get; init; }
+
+    /// <summary>
+    /// Class Action forfeitures
+    /// </summary>
+    public decimal ForfeitureClassActionTotal { get; init; }
+
     public required Dictionary<string, decimal> StateTaxTotals { get; init; }
 
     public static DistributionsAndForfeitureTotalsResponse ResponseExample()
@@ -24,6 +39,9 @@ public sealed record DistributionsAndForfeitureTotalsResponse : ReportResponseBa
             StateTaxTotal = 1234.56m,
             FederalTaxTotal = 987.65m,
             ForfeitureTotal = 345.67m,
+            ForfeitureRegularTotal = 200.00m,
+            ForfeitureAdministrativeTotal = 100.00m,
+            ForfeitureClassActionTotal = 45.67m,
             StateTaxTotals = new Dictionary<string, decimal>
             {
                 { "MA", 100.00m }, { "NH", 23.56m }

@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import useFiscalCloseProfitYear from "../../../../hooks/useFiscalCloseProfitYear";
+import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useLazyGetEligibleEmployeesQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { setEligibleEmployeesQueryParams } from "../../../../reduxstore/slices/yearsEndSlice";
 import { RootState } from "../../../../reduxstore/store";
-import useFiscalCloseProfitYear from "../../../../hooks/useFiscalCloseProfitYear";
-import { useGridPagination } from "../../../../hooks/useGridPagination";
 import {
-  initialState,
   eligibleEmployeesReducer,
-  selectShowData,
-  selectHasResults
+  initialState,
+  selectHasResults,
+  selectShowData
 } from "./useEligibleEmployeesReducer";
 
 export interface EligibleEmployeesSearchParams {
@@ -25,7 +25,7 @@ const useEligibleEmployees = () => {
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
 
   const handlePaginationChange = useCallback(
-    (pageNumber: number, pageSize: number, sortParams: any) => {
+    (pageNumber: number, pageSize: number, sortParams: SortParams) => {
       if (fiscalCloseProfitYear && hasToken) {
         try {
           const request = {
@@ -65,7 +65,7 @@ const useEligibleEmployees = () => {
   });
 
   const executeSearch = useCallback(
-    async (searchParams: EligibleEmployeesSearchParams, source = "manual") => {
+    async (searchParams: EligibleEmployeesSearchParams, _source = "manual") => {
       if (!hasToken) return;
 
       dispatch({ type: "SEARCH_START", payload: { profitYear: searchParams.profitYear } });
@@ -99,6 +99,7 @@ const useEligibleEmployees = () => {
       hasInitiallySearched.current = true;
       executeSearch({ profitYear: fiscalCloseProfitYear }, "auto-initial");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fiscalCloseProfitYear, state.data, hasToken, state.search.isLoading]);
 
   return {

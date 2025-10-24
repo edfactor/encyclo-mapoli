@@ -1,18 +1,47 @@
-import { Divider } from "@mui/material";
-import { Grid } from "@mui/material";
-import { useState } from "react";
+import { Divider, Grid } from "@mui/material";
+import { useEffect, useState } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
+import StatusDropdownActionNode from "../../components/StatusDropdownActionNode";
 import { CAPTIONS } from "../../constants";
 import ForfeitGrid from "./ForfeitGrid";
 import ForfeitSearchFilter from "./ForfeitSearchFilter";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const Forfeit = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [pageNumberReset, setPageNumberReset] = useState(false);
+  const [shouldArchive, setShouldArchive] = useState(false);
+  const [searchClickedTrigger, setSearchClickedTrigger] = useState(0);
+
+  const handleStatusChange = (_newStatus: string, statusName?: string) => {
+    // When status is set to "Complete", trigger archiving
+    if (statusName === "Complete") {
+      setShouldArchive(true);
+    }
+  };
+
+  const handleSearchClicked = () => {
+    // Increment trigger to notify StatusDropdownActionNode
+    setSearchClickedTrigger((prev) => prev + 1);
+  };
+
+  // Reset shouldArchive after the archive request is triggered
+  useEffect(() => {
+    if (shouldArchive) {
+      // The ForfeitGrid will handle the archive request, then we reset the flag
+      const timer = setTimeout(() => {
+        setShouldArchive(false);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [shouldArchive]);
 
   const renderActionNode = () => {
-    return <StatusDropdownActionNode />;
+    return (
+      <StatusDropdownActionNode
+        onStatusChange={handleStatusChange}
+        onSearchClicked={searchClickedTrigger > 0 ? () => {} : undefined}
+      />
+    );
   };
 
   return (
@@ -30,6 +59,7 @@ const Forfeit = () => {
             <ForfeitSearchFilter
               setInitialSearchLoaded={setInitialSearchLoaded}
               setPageReset={setPageNumberReset}
+              onSearchClicked={handleSearchClicked}
             />
           </DSMAccordion>
         </Grid>
@@ -40,6 +70,7 @@ const Forfeit = () => {
             setInitialSearchLoaded={setInitialSearchLoaded}
             pageNumberReset={pageNumberReset}
             setPageNumberReset={setPageNumberReset}
+            shouldArchive={shouldArchive}
           />
         </Grid>
       </Grid>

@@ -16,14 +16,24 @@ public sealed class RoleContextMiddleware
     {
         if (context.User?.Identity?.IsAuthenticated == true)
         {
-            string[] roles = context.User.Claims
+            // Extract roles efficiently - pre-allocate collection size hint
+            var roleClaims = context.User.Claims
                 .Where(c => string.Equals(c.Type, System.Security.Claims.ClaimTypes.Role, StringComparison.OrdinalIgnoreCase) ||
-                            string.Equals(c.Type, "roles", StringComparison.OrdinalIgnoreCase))
-                .Select(c => c.Value)
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToArray();
-            bool isItDevOps = roles.Any(r => string.Equals(r, Role.ITDEVOPS, StringComparison.OrdinalIgnoreCase));
-            bool isExecAdmin = roles.Any(r => string.Equals(r, Role.EXECUTIVEADMIN, StringComparison.OrdinalIgnoreCase));
+                            string.Equals(c.Type, "roles", StringComparison.OrdinalIgnoreCase));
+
+            // Use HashSet for efficient distinct operation, then convert to array
+            var rolesSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var claim in roleClaims)
+            {
+                rolesSet.Add(claim.Value);
+            }
+
+            string[] roles = [.. rolesSet];
+
+            // Check for specific roles using Span-based comparison
+            bool isItDevOps = rolesSet.Contains(Role.ITDEVOPS);
+            bool isExecAdmin = rolesSet.Contains(Role.EXECUTIVEADMIN);
+
             MaskingAmbientRoleContext.Current = new RoleContextSnapshot(roles, isItDevOps, isExecAdmin);
         }
         try

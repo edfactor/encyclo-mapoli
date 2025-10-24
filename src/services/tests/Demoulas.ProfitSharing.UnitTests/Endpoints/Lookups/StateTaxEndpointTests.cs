@@ -62,7 +62,7 @@ public class StateTaxEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "StateTax - Should return error for non-existent state")]
-    [Description("PS-#### : Returns error when state is not found in database")]
+    [Description("PS-#### : Returns error when state is not found")]
     public async Task Get_ReturnsError_WhenStateNotFound()
     {
         // Arrange
@@ -79,7 +79,7 @@ public class StateTaxEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "StateTax - Should return error for empty state")]
-    [Description("PS-#### : Returns error when state parameter is empty")]
+    [Description("PS-#### : Returns not found when state parameter is empty (route binding fails)")]
     public async Task Get_ReturnsError_WhenStateIsEmpty()
     {
         // Arrange
@@ -92,11 +92,12 @@ public class StateTaxEndpointTests : ApiTestBase<Api.Program>
         // Assert
         response.ShouldNotBeNull();
         response.Response.IsSuccessStatusCode.ShouldBeFalse();
-        response.Response.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
+        // Empty state causes route binding to fail, returning 404 Not Found
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
 
     [Fact(DisplayName = "StateTax - Should return error for whitespace state")]
-    [Description("PS-#### : Returns error when state parameter is whitespace")]
+    [Description("PS-#### : Returns not found when state parameter is whitespace (route binding fails)")]
     public async Task Get_ReturnsError_WhenStateIsWhitespace()
     {
         // Arrange
@@ -109,7 +110,8 @@ public class StateTaxEndpointTests : ApiTestBase<Api.Program>
         // Assert
         response.ShouldNotBeNull();
         response.Response.IsSuccessStatusCode.ShouldBeFalse();
-        response.Response.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
+        // Whitespace state causes route binding to fail, returning 404 Not Found
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
 
     [Fact(DisplayName = "StateTax - Should work with DISTRIBUTIONSCLERK role")]

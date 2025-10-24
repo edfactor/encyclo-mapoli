@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import PSDrawer from "../../components/Drawer/PSDrawer";
+import SmartPSDrawer from "../../components/Drawer/SmartPSDrawer";
 import DSMDynamicBreadcrumbs from "../../components/DSMDynamicBreadcrumbs/DSMDynamicBreadcrumbs";
 import ProtectedRoute from "../../components/ProtectedRoute/ProtectedRoute";
 import DemographicBadgesNotInPayprofit from "../../pages/DecemberActivities/DemographicBadgesNotInPayprofit/DemographicBadgesNotInPayprofit";
@@ -48,8 +48,9 @@ import EnvironmentUtils from "../../utils/environmentUtils";
 import { createUnauthorizedParams, isPathAllowedInNavigation } from "../../utils/navigationAccessUtils";
 import { validateImpersonationRoles, validateRoleRemoval } from "../../utils/roleUtils";
 
-import { ImpersonationMultiSelect } from "smart-ui-library";
+import { ImpersonationMultiSelect } from "../../components/MenuBar/ImpersonationMultiSelect";
 import { MenuBar } from "../../components/MenuBar/MenuBar";
+import AddDistribution from "../../pages/AddDistribution/AddDistribution";
 import Adjustments from "../../pages/Adjustments/Adjustments";
 import BeneficiaryInquiry from "../../pages/BeneficiaryInquiry/BeneficiaryInquiry";
 import MilitaryContribution from "../../pages/DecemberActivities/MilitaryContribution/MilitaryContribution";
@@ -67,6 +68,8 @@ import QPAY600 from "../../pages/QPAY600/QPAY600";
 import PayBeNext from "../../pages/Reports/PayBeNext/PayBeNext";
 import PayBenReport from "../../pages/Reports/PayBenReport/PayBenReport";
 import ReprintCertificates from "../../pages/ReprintCertificates/ReprintCertificates";
+import ViewDistribution from "../../pages/ViewDistribution/ViewDistribution";
+import EditDistribution from "../../pages/EditDistribution/EditDistribution";
 import LandingPage from "./LandingPage";
 
 const RouterSubAssembly: React.FC = () => {
@@ -99,7 +102,8 @@ const RouterSubAssembly: React.FC = () => {
 
     // Try to match against enum keys or values (case/format tolerant)
     const matched = Object.values(ImpersonationRoles).find((r) => {
-      const keyForValue = Object.keys(ImpersonationRoles).find((k) => (ImpersonationRoles as any)[k] === r) || "";
+      const keyForValue =
+        Object.keys(ImpersonationRoles).find((k) => (ImpersonationRoles as Record<string, string>)[k] === r) || "";
       return normalize(r) === normalize(roleParam) || normalize(keyForValue) === normalize(roleParam);
     });
 
@@ -107,7 +111,7 @@ const RouterSubAssembly: React.FC = () => {
       const roles = [matched as ImpersonationRoles];
       try {
         localStorage.setItem("impersonatingRoles", JSON.stringify(roles));
-      } catch (e) {
+      } catch (_e) {
         // ignore storage errors
       }
       dispatch(setImpersonating(roles));
@@ -221,7 +225,7 @@ const RouterSubAssembly: React.FC = () => {
                 }}>
                 <DSMDynamicBreadcrumbs />
               </Box>
-              <PSDrawer navigationData={data} />
+              <SmartPSDrawer navigationData={data} />
               <Routes>
                 <Route
                   path="/unauthorized"
@@ -233,6 +237,15 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={ROUTES.DISTRIBUTIONS_INQUIRY}
                   element={<DistributionInquiry />}></Route>
+                <Route
+                  path={`${ROUTES.VIEW_DISTRIBUTION}/:memberId/:memberType`}
+                  element={<ViewDistribution />}></Route>
+                <Route
+                  path={`${ROUTES.ADD_DISTRIBUTION}/:memberId/:memberType`}
+                  element={<AddDistribution />}></Route>
+                <Route
+                  path={`${ROUTES.EDIT_DISTRIBUTION}/:memberId/:memberType`}
+                  element={<EditDistribution />}></Route>
                 <Route
                   path={ROUTES.PAY_BEN_REPORT}
                   element={<PayBenReport />}></Route>

@@ -16,8 +16,8 @@ import {
 import { RootState } from "reduxstore/store";
 import { ExecutiveHoursAndDollars, ExecutiveHoursAndDollarsGrid } from "reduxstore/types";
 import { ISortParams } from "smart-ui-library";
-import { ExecutiveHoursAndDollarsRequestDto } from "types/fiscal/executive";
 import { useGridPagination } from "../../../../hooks/useGridPagination";
+import { ExecutiveHoursAndDollarsRequestDto } from "../../../../types/fiscal/executive";
 import {
   initialState,
   manageExecutiveHoursAndDollarsReducer,
@@ -27,6 +27,14 @@ import {
   selectShowGrid,
   selectShowModal
 } from "./useManageExecutiveHoursAndDollarsReducer";
+
+interface ExecutiveSearchForm {
+  badgeNumber?: number;
+  socialSecurity?: string;
+  fullNameContains?: string;
+  hasExecutiveHoursAndDollars?: boolean;
+  isMonthlyPayroll?: boolean;
+}
 
 const useManageExecutiveHoursAndDollars = () => {
   const [state, dispatch] = useReducer(manageExecutiveHoursAndDollarsReducer, initialState);
@@ -72,7 +80,9 @@ const useManageExecutiveHoursAndDollars = () => {
             dispatch({ type: "SEARCH_SUCCESS", payload: { results: response } });
           })
           .catch((error) => {
-            dispatch({ type: "SEARCH_FAILURE", payload: { error: error?.toString() || "Search failed" } });
+            const errorMessage = error?.toString() || "Search failed";
+            dispatch({ type: "SEARCH_FAILURE", payload: { error: errorMessage } });
+            console.error("Executive search error:", error);
           });
       }
     },
@@ -110,20 +120,20 @@ const useManageExecutiveHoursAndDollars = () => {
 
   const mainGridPagination = useGridPagination({
     initialPageSize: 25,
-    initialSortBy: "storeNumber",
+    initialSortBy: "fullName",
     initialSortDescending: false,
     onPaginationChange: handleMainGridPaginationChange
   });
 
   const modalGridPagination = useGridPagination({
     initialPageSize: 25,
-    initialSortBy: "storeNumber",
+    initialSortBy: "fullName",
     initialSortDescending: false,
     onPaginationChange: handleModalGridPaginationChange
   });
 
   const executeSearch = useCallback(
-    async (searchForm: any) => {
+    async (searchForm: ExecutiveSearchForm) => {
       const searchParams: ExecutiveHoursAndDollarsRequestDto = {
         profitYear: profitYear || 0,
         ...(searchForm.badgeNumber && { badgeNumber: searchForm.badgeNumber }),
@@ -155,7 +165,7 @@ const useManageExecutiveHoursAndDollars = () => {
   );
 
   const executeModalSearch = useCallback(
-    async (searchForm: any) => {
+    async (searchForm: ExecutiveSearchForm) => {
       const searchParams: ExecutiveHoursAndDollarsRequestDto = {
         profitYear: profitYear || 0,
         ...(searchForm.badgeNumber && { badgeNumber: searchForm.badgeNumber }),

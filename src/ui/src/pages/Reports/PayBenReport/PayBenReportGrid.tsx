@@ -1,8 +1,9 @@
 import { RefObject, useCallback, useMemo } from "react";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { GridPaginationActions, GridPaginationState } from "../../../hooks/useGridPagination";
-import { PayBenReportResponse } from "../../../types";
 import { CAPTIONS } from "../../../constants";
+import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
+import { PayBenReportResponse } from "../../../types";
 import { PayBenReportGridColumn } from "./PayBenReportGridColumns";
 
 interface PayBenReportGridProps {
@@ -13,7 +14,7 @@ interface PayBenReportGridProps {
   hasResults: boolean;
   pagination: GridPaginationState & GridPaginationActions;
   onPaginationChange: (pageNumber: number, pageSize: number) => void;
-  onSortChange: (sortParams: any) => void;
+  onSortChange: (sortParams: SortParams) => void;
 }
 
 const PayBenReportGrid = ({
@@ -27,6 +28,9 @@ const PayBenReportGrid = ({
   onSortChange
 }: PayBenReportGridProps) => {
   const columnDefs = useMemo(() => PayBenReportGridColumn(), []);
+
+  // Use dynamic grid height utility hook
+  const gridMaxHeight = useDynamicGridHeight();
 
   const handleSortChanged = useCallback(
     (update: ISortParams) => {
@@ -44,18 +48,18 @@ const PayBenReportGrid = ({
   );
 
   return (
-    <>
+    <div className="relative">
       {showData && data?.results && (
         <div ref={innerRef}>
           <DSMGrid
             preferenceKey={CAPTIONS.PAYBEN_REPORT}
             isLoading={isLoading}
+            maxHeight={gridMaxHeight}
             handleSortChanged={handleSortChanged}
             providedOptions={{
               rowData: data.results,
               columnDefs: columnDefs,
-              suppressMultiSort: true,
-              masterDetail: true
+              suppressMultiSort: true
             }}
           />
         </div>
@@ -73,7 +77,7 @@ const PayBenReportGrid = ({
           recordCount={data.total || 0}
         />
       )}
-    </>
+    </div>
   );
 };
 

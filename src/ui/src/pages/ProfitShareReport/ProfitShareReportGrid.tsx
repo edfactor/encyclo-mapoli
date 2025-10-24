@@ -1,12 +1,17 @@
 import { Box, CircularProgress } from "@mui/material";
 import { useCallback, useEffect, useMemo } from "react";
 import { useLazyGetYearEndProfitSharingReportLiveQuery } from "reduxstore/api/YearsEndApi";
-import { DSMGrid, Pagination } from "smart-ui-library";
-import { useGridPagination } from "../../hooks/useGridPagination";
+import { DSMGrid, Pagination, ISortParams } from "smart-ui-library";
+import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
+import { useGridPagination, SortParams } from "../../hooks/useGridPagination";
 import { GetProfitShareReportColumns } from "./ProfitShareReportGridColumns";
 
+interface ProfitShareReportSearchParams {
+  [key: string]: unknown;
+}
+
 interface ProfitShareReportGridProps {
-  searchParams: any;
+  searchParams: ProfitShareReportSearchParams | null;
   isInitialSearchLoaded: boolean;
   profitYear: number;
 }
@@ -21,6 +26,9 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
   const data = searchResults?.response?.results || [];
   const recordCount = searchResults?.response?.total || 0;
   const columnDefs = useMemo(() => GetProfitShareReportColumns(), []);
+
+  // Use dynamic grid height utility hook
+  const gridMaxHeight = useDynamicGridHeight();
 
   const createRequest = useCallback(
     (skip: number, sortBy: string, isSortDescending: boolean, profitYear: number, pageSz: number) => {
@@ -40,7 +48,7 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
     onPaginationChange: useCallback(
-      async (pageNum: number, pageSz: number, sortPrms: any) => {
+      async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
         if (isInitialSearchLoaded && searchParams) {
           const params = createRequest(
             pageNum * pageSz,
@@ -80,7 +88,7 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
   }, [isInitialSearchLoaded, searchParams, createRequest, profitYear, pageNumber, pageSize, sortParams, triggerSearch]);
 
   const handleSortChanged = useCallback(
-    (update: any) => {
+    (update: ISortParams) => {
       // Handle empty sortBy case - set default to badgeNumber
       if (update.sortBy === "") {
         update.sortBy = "badgeNumber";
@@ -102,10 +110,11 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
   }
 
   return (
-    <>
+    <div className="relative">
       <DSMGrid
         preferenceKey={"ProfitShareReportGrid"}
         isLoading={isFetching}
+        maxHeight={gridMaxHeight}
         handleSortChanged={handleSortChanged}
         providedOptions={{
           rowData: data,
@@ -126,7 +135,7 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
           rowsPerPageOptions={[5, 10, 25, 50, 100]}
         />
       )}
-    </>
+    </div>
   );
 };
 

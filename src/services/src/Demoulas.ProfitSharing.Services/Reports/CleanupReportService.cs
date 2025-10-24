@@ -82,7 +82,7 @@ public class CleanupReportService : ICleanupReportService
                                 IsExecutive = dem.PayFrequencyId == PayFrequency.Constants.Monthly,
                             };
                 return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
-            });
+            }, cancellationToken);
 
             var results = new PaginatedResponseDto<DemographicBadgesNotInPayProfitResponse>
             {
@@ -108,155 +108,6 @@ public class CleanupReportService : ICleanupReportService
                 EndDate = calInfo.FiscalEndDate,
                 ReportName = "DEMOGRAPHICS BADGES NOT ON PAYPROFIT",
                 Response = results
-            };
-        }
-    }
-
-
-
-    public async Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdaysAsync(
-        ProfitYearRequest req,
-        CancellationToken cancellationToken = default)
-    {
-        using (_logger.BeginScope("Request BEGIN DUPLICATE NAMES AND BIRTHDAYS"))
-        {
-            var dict = new Dictionary<int, byte>();
-            var balanceByBadge = new Dictionary<int, decimal>();
-            var dupInfo = new HashSet<DemographicMatchDto>();
-            var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
-            {
-                IQueryable<DemographicMatchDto> dupNameSlashDateOfBirth;
-                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
-                // Fallback for mocked (in-memory) db context which does not support raw SQL
-                if (_host.IsTestEnvironment())
-                {
-                    dupNameSlashDateOfBirth = demographics
-                        .Include(d => d.ContactInfo)
-                        .Select(d => new DemographicMatchDto { FullName = d.ContactInfo.FullName!, MatchedId = d.Id });
-                }
-                else
-                {
-                    string dupQuery =
-                        @"WITH FILTERED_DEMOGRAPHIC AS (SELECT /*+ MATERIALIZE */ ID, FULL_NAME, DATE_OF_BIRTH, BADGE_NUMBER
-                              FROM DEMOGRAPHIC
-                              WHERE NOT EXISTS (SELECT /*+ INDEX(fs) */ 1
-                                                FROM FAKE_SSNS fs
-                                                WHERE fs.SSN = DEMOGRAPHIC.SSN))
-SELECT /*+ USE_HASH(p1 p2) */ p1.FULL_NAME as FullName, p2.BADGE_NUMBER MatchedId
-FROM FILTERED_DEMOGRAPHIC p1
-         JOIN FILTERED_DEMOGRAPHIC p2
-              ON p1.Id <> p2.Id /* Avoid self-joins and duplicate pairs */
-                  AND SUBSTR(p1.FULL_NAME,1,1) = SUBSTR(p2.FULL_NAME,1,1) -- Eliminate by first letter before using more CPU intensive functions
-                  AND (ABS(TRUNC(p1.DATE_OF_BIRTH) - TRUNC(p2.DATE_OF_BIRTH)) <= 3 /* Allowable 3-day difference */ )
-                  AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 3 /* Name similarity threshold */
-                  AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME) /* Phonetic similarity */
-UNION ALL
-SELECT /*+ USE_HASH(p1 p2) */ p2.FULL_NAME as FullName, p1.BADGE_NUMBER MatchedId
-FROM FILTERED_DEMOGRAPHIC p1
-         JOIN FILTERED_DEMOGRAPHIC p2
-              ON p1.Id <> p2.Id /* Avoid self-joins and duplicate pairs */
-                  AND SUBSTR(p1.FULL_NAME,1,1) = SUBSTR(p2.FULL_NAME,1,1) -- Eliminate by first letter before using more CPU intensive functions
-                  AND (ABS(TRUNC(p1.DATE_OF_BIRTH) - TRUNC(p2.DATE_OF_BIRTH)) <= 3 /* Allowable 3-day difference */ )                  
-                  AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 3 /* Name similarity threshold */
-                  AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME) /* Phonetic similarity */";
-
-                    dupNameSlashDateOfBirth = ctx.Database
-                        .SqlQueryRaw<DemographicMatchDto>(dupQuery);
-                }
-
-                dupInfo = await dupNameSlashDateOfBirth
-                    .Where(d => !string.IsNullOrEmpty(d.FullName))
-                    .ToHashSetAsync(cancellationToken);
-
-                var names = dupInfo.Select(x => x.FullName).ToHashSet();
-                var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
-
-                var query = from dem in demographics.Include(d => d.EmploymentStatus)
-                            join ppLj in ctx.PayProfits on new { DemographicId = dem.Id, req.ProfitYear } equals new
-                            {
-                                ppLj.DemographicId,
-                                ppLj.ProfitYear
-                            } into tmpPayProfit
-                            from pp in tmpPayProfit.DefaultIfEmpty()
-                            join b in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear) on dem.Ssn equals b.Ssn into tmpBalance
-                            from bal in tmpBalance.DefaultIfEmpty()
-                            join yos in _totalService.GetYearsOfService(ctx, req.ProfitYear, calInfo.FiscalEndDate) on dem.Ssn equals yos.Ssn into tmpYos
-                            from yos in tmpYos.DefaultIfEmpty()
-                            where dem.ContactInfo.FullName != null && names.Contains(dem!.ContactInfo!.FullName!)
-                            select new
-                            {
-                                dem.BadgeNumber,
-                                dem.Ssn,
-                                Name = dem.ContactInfo.FullName,
-                                dem.DateOfBirth,
-                                Address = dem.Address.Street,
-                                dem.Address.City,
-                                dem.Address.State,
-                                dem.Address.PostalCode,
-                                dem.Address.CountryIso,
-                                dem.HireDate,
-                                dem.TerminationDate,
-                                dem.EmploymentStatusId,
-                                EmploymentStatusName = dem.EmploymentStatus!.Name,
-                                dem.StoreNumber,
-                                HoursCurrentYear = pp != null ? pp.CurrentHoursYear : 0,
-                                IncomeCurrentYear = pp != null ? pp.CurrentIncomeYear : 0,
-                                NetBalance = bal != null ? bal.TotalAmount : 0,
-                                Years = yos != null ? yos.Years : (byte)0,
-                                dem.PayFrequencyId,
-                            };
-
-                var rslt = await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
-
-                return rslt;
-            });
-            var projectedResults = results.Results.Select(r => new DuplicateNamesAndBirthdaysResponse
-            {
-                BadgeNumber = r.BadgeNumber,
-                Ssn = r.Ssn.MaskSsn(),
-                Name = r.Name,
-                DateOfBirth = r.DateOfBirth,
-                Address = new AddressResponseDto
-                {
-                    Street = r.Address,
-                    City = r.City,
-                    State = r.State,
-                    PostalCode = r.PostalCode,
-                    CountryIso = r.CountryIso
-                },
-                Years = r.Years,
-                HireDate = r.HireDate,
-                TerminationDate = r.TerminationDate,
-                Status = r.EmploymentStatusId,
-                StoreNumber = r.StoreNumber,
-                Count = dict.ContainsKey(r.BadgeNumber)
-                            ? ++dict[r.BadgeNumber]
-                            : dict[r.BadgeNumber] = 1,
-                NetBalance = r.NetBalance ?? 0,
-                HoursCurrentYear = r.HoursCurrentYear,
-                IncomeCurrentYear = r.IncomeCurrentYear,
-                EmploymentStatusName = r.EmploymentStatusName ?? "",
-                IsExecutive = r.PayFrequencyId == PayFrequency.Constants.Monthly
-            }).ToList();
-
-            foreach (var r in projectedResults)
-            {
-                r.Count = dupInfo.Count(x => x.MatchedId == r.BadgeNumber);
-            }
-
-            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
-
-            return new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>()
-            {
-                ReportDate = DateTimeOffset.UtcNow,
-                StartDate = calInfo.FiscalBeginDate,
-                EndDate = calInfo.FiscalEndDate,
-                ReportName = "DUPLICATE NAMES AND BIRTHDAYS",
-                Response = new PaginatedResponseDto<DuplicateNamesAndBirthdaysResponse>()
-                {
-                    Total = results.Total,
-                    Results = projectedResults
-                }
             };
         }
     }
@@ -341,7 +192,11 @@ FROM FILTERED_DEMOGRAPHIC p1
                                       // PROFIT_DETAIL.MonthToDate <--- is the month selector  See QPAY129.pco
                                       (pd.ProfitYear > startDate.Year || (pd.ProfitYear == startDate.Year && pd.MonthToDate >= startDate.Month)) &&
                                       (pd.ProfitYear < endDate.Year || (pd.ProfitYear == endDate.Year && pd.MonthToDate <= endDate.Month)) &&
-                                      !(pd.ProfitCodeId == /*9*/ ProfitCode.Constants.Outgoing100PercentVestedPayment && pd.CommentTypeId.HasValue && transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value))
+                                      !(pd.ProfitCodeId == /*9*/ ProfitCode.Constants.Outgoing100PercentVestedPayment && pd.CommentTypeId.HasValue && transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)) &&
+                                      // State filter - apply if specified (supports multiple states)
+                                      (req.States == null || req.States.Length == 0 || req.States.Contains(pd.CommentRelatedState)) &&
+                                      // Tax code filter - apply if specified (supports multiple tax codes)
+                                      (req.TaxCodes == null || req.TaxCodes.Length == 0 || (pd.TaxCodeId.HasValue && req.TaxCodes.Contains(pd.TaxCodeId.Value)))
 
                             select new
                             {
@@ -349,12 +204,14 @@ FROM FILTERED_DEMOGRAPHIC p1
                                 nameAndDob.PsnSuffix,
                                 pd.Ssn,
                                 EmployeeName = nameAndDob.FullName,
-                                DistributionAmount = _distributionProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,
+                                DistributionAmount = _distributionProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0m,
                                 TaxCode = pd.TaxCodeId,
                                 State = pd.CommentRelatedState,
                                 StateTax = pd.StateTaxes,
                                 FederalTax = pd.FederalTaxes,
-                                ForfeitAmount = pd.ProfitCodeId == /*2*/ ProfitCode.Constants.OutgoingForfeitures.Id ? pd.Forfeiture : 0,
+                                ForfeitAmount = pd.ProfitCodeId == /*2*/ ProfitCode.Constants.OutgoingForfeitures.Id ? pd.Forfeiture : 0m,
+                                pd.CommentTypeId,
+                                pd.Remark,
                                 pd.YearToDate,
                                 pd.MonthToDate,
                                 Date = pd.CreatedAtUtc,
@@ -371,14 +228,34 @@ FROM FILTERED_DEMOGRAPHIC p1
                         DistributionTotal = g.Sum(x => x.DistributionAmount),
                         StateTaxTotal = g.Sum(x => x.StateTax),
                         FederalTaxTotal = g.Sum(x => x.FederalTax),
-                        ForfeitureTotal = g.Sum(x => x.ForfeitAmount)
+                        ForfeitureTotal = g.Sum(x => x.ForfeitAmount),
+                        // MAIN-2170: Breakdown forfeitures by type
+                        ForfeitureRegular = g.Where(x =>
+                            x.ForfeitAmount != 0 &&
+                            x.CommentTypeId != CommentType.Constants.ForfeitClassAction.Id &&
+                            x.CommentTypeId != CommentType.Constants.ForfeitAdministrative.Id &&
+                            (x.Remark == null || (!x.Remark.Contains("ADMINISTRATIVE") && !x.Remark.Contains("FORFEIT CA") && !x.Remark.Contains("UN-FORFEIT CA")))
+                        ).Sum(x => x.ForfeitAmount),
+                        ForfeitureAdministrative = g.Where(x =>
+                            x.ForfeitAmount != 0 &&
+                            (x.CommentTypeId == CommentType.Constants.ForfeitAdministrative.Id ||
+                             (x.Remark != null && x.Remark.Contains("ADMINISTRATIVE")))
+                        ).Sum(x => x.ForfeitAmount),
+                        ForfeitureClassAction = g.Where(x =>
+                            x.ForfeitAmount != 0 &&
+                            (x.CommentTypeId == CommentType.Constants.ForfeitClassAction.Id ||
+                             (x.Remark != null && (x.Remark.Contains("FORFEIT CA") || x.Remark.Contains("UN-FORFEIT CA"))))
+                        ).Sum(x => x.ForfeitAmount)
                     })
                     .FirstOrDefaultAsync(cancellationToken: cancellationToken) ?? new
                     {
                         DistributionTotal = 0m,
                         StateTaxTotal = 0m,
                         FederalTaxTotal = 0m,
-                        ForfeitureTotal = 0m
+                        ForfeitureTotal = 0m,
+                        ForfeitureRegular = 0m,
+                        ForfeitureAdministrative = 0m,
+                        ForfeitureClassAction = 0m
                     };
 
                 // Calculate state tax totals by state
@@ -402,6 +279,16 @@ FROM FILTERED_DEMOGRAPHIC p1
                     State = pd.State,
                     FederalTax = pd.FederalTax,
                     ForfeitAmount = pd.ForfeitAmount,
+                    // MAIN-2170: Determine forfeit type indicator
+                    ForfeitType = pd.ForfeitAmount != 0
+                        ? (pd.CommentTypeId == CommentType.Constants.ForfeitAdministrative.Id ||
+                           (pd.Remark != null && pd.Remark.Contains("ADMINISTRATIVE")))
+                            ? 'A'
+                            : (pd.CommentTypeId == CommentType.Constants.ForfeitClassAction.Id ||
+                               (pd.Remark != null && (pd.Remark.Contains("FORFEIT CA") || pd.Remark.Contains("UN-FORFEIT CA"))))
+                                ? 'C'
+                                : (char?)null
+                        : null,
                     Date = pd.MonthToDate is > 0 and <= 12 ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1) : pd.Date.ToDateOnly(),
                     // Note, this computes "Age" at time of transaction, or "Age @ Txn"
                     Age = (byte)(pd.MonthToDate is > 0 and < 13
@@ -423,6 +310,9 @@ FROM FILTERED_DEMOGRAPHIC p1
                     StateTaxTotal = totals.StateTaxTotal,
                     FederalTaxTotal = totals.FederalTaxTotal,
                     ForfeitureTotal = totals.ForfeitureTotal,
+                    ForfeitureRegularTotal = totals.ForfeitureRegular,
+                    ForfeitureAdministrativeTotal = totals.ForfeitureAdministrative,
+                    ForfeitureClassActionTotal = totals.ForfeitureClassAction,
                     StateTaxTotals = stateTaxTotals,
                     Response = new PaginatedResponseDto<DistributionsAndForfeitureResponse>(req)
                     {
@@ -432,7 +322,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                 };
 
                 return Result<DistributionsAndForfeitureTotalsResponse>.Success(response);
-            });
+            }, cancellationToken);
 
             return results;
         }

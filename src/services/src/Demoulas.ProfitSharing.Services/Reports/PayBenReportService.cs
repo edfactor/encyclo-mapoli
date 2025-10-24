@@ -40,7 +40,7 @@ public class PayBenReportService : IPayBenReportService
             });
             PaginatedResponseDto<PayBenReportResponse> final = await res.ToPaginationResultsAsync(request, cancellationToken);
             return final;
-        });
+        }, cancellationToken);
         // Post-process only the results
         foreach (var item in result.Results)
         {

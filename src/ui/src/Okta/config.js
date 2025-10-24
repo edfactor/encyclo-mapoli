@@ -10,6 +10,8 @@ const oktaConfig = (_clientId, _Issuer) => ({
     scopes: ["openid", "profile", "email"],
     pkce: true,
     disableHttpsCheck: OKTA_TESTING_DISABLEHTTPSCHECK
+    // Note: restoreOriginalUri is intentionally NOT set here
+    // It's provided via the Security component prop to avoid conflicts
   },
   app: {
     basename: BASENAME

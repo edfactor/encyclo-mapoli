@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { useSelector } from "react-redux";
+import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useLazyGetDuplicateSSNsQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../../reduxstore/store";
-import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
-import { useGridPagination } from "../../../../hooks/useGridPagination";
 import {
-  initialState,
   duplicateSSNsOnDemographicsReducer,
-  selectShowData,
-  selectHasResults
+  initialState,
+  selectHasResults,
+  selectShowData
 } from "./useDuplicateSSNsOnDemographicsReducer";
 
 export interface DuplicateSSNsOnDemographicsSearchParams {
@@ -23,7 +23,7 @@ const useDuplicateSSNsOnDemographics = () => {
   const decemberFlowProfitYear = useDecemberFlowProfitYear();
 
   const handlePaginationChange = useCallback(
-    (pageNumber: number, pageSize: number, sortParams: any) => {
+    (pageNumber: number, pageSize: number, sortParams: SortParams) => {
       if (decemberFlowProfitYear && hasToken) {
         try {
           const request = {
@@ -62,7 +62,7 @@ const useDuplicateSSNsOnDemographics = () => {
   });
 
   const executeSearch = useCallback(
-    async (searchParams: DuplicateSSNsOnDemographicsSearchParams, source = "manual") => {
+    async (searchParams: DuplicateSSNsOnDemographicsSearchParams, _source = "manual") => {
       if (!hasToken) return;
 
       dispatch({ type: "SEARCH_START", payload: { profitYear: searchParams.profitYear } });
@@ -95,6 +95,7 @@ const useDuplicateSSNsOnDemographics = () => {
       hasInitiallySearched.current = true;
       executeSearch({ profitYear: decemberFlowProfitYear }, "auto-initial");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [decemberFlowProfitYear, state.data, hasToken, state.search.isLoading]);
 
   return {

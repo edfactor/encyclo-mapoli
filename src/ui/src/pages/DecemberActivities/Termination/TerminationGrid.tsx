@@ -1,8 +1,7 @@
 import { CellClickedEvent, ColDef, ICellRendererParams } from "ag-grid-community";
 import { useMemo } from "react";
-import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
-import { ReportSummary } from "../../../components/ReportSummary";
-import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
+import { DSMGrid, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
+import ReportSummary from "../../../components/ReportSummary";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
 import { useTerminationGrid } from "../../../hooks/useTerminationGrid";
@@ -48,7 +47,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     pageNumber,
     pageSize,
     gridData,
-    isFetching,
+
     termination,
     selectedProfitYear,
 
@@ -82,7 +81,6 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       GetDetailColumns(
         selectionState.addRowToSelection,
         selectionState.removeRowFromSelection,
-        selectionState.selectedRowIds,
         selectedProfitYear,
         handleSave,
         handleBulkSave,
@@ -91,7 +89,6 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     [
       selectionState.addRowToSelection,
       selectionState.removeRowFromSelection,
-      selectionState.selectedRowIds,
       selectedProfitYear,
       handleSave,
       handleBulkSave,
@@ -107,21 +104,21 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       field: "isExpandable",
       width: 50,
       cellRenderer: (params: ICellRendererParams) => {
-        if (!params.data.isDetail && params.data.isExpandable) {
+        if (params.data && !params.data.isDetail && params.data.isExpandable) {
           return params.data.isExpanded ? "▼" : "►";
         }
         return "";
       },
-      onCellClicked: (params: CellClickedEvent) => {
-        if (!params.data.isDetail && params.data.isExpandable) {
-          handleRowExpansion(params.data.badgeNumber);
+      onCellClicked: (event: CellClickedEvent) => {
+        if (event.data && !event.data.isDetail && event.data.isExpandable) {
+          handleRowExpansion(event.data.badgeNumber.toString());
         }
       },
       suppressSizeToFit: true,
       suppressAutoSize: true,
       lockVisible: true,
       lockPosition: true,
-      pinned: "left"
+      pinned: "left" as const
     } as ColDef;
 
     // Determine which columns to display based on whether it's a detail row
@@ -130,9 +127,9 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
         ...column,
         cellRenderer: (params: ICellRendererParams) => {
           // For detail rows, either hide the column or show a specific value
-          if (params.data.isDetail) {
+          if (params.data?.isDetail) {
             // Check if this main column should be hidden in detail rows
-            const hideInDetails = !detailColumns.some((detailCol) => detailCol.field === column.field);
+            const hideInDetails = !detailColumns.some((detailCol) => detailCol.field === (column as ColDef).field);
 
             if (hideInDetails) {
               return ""; // Hide this column's content for detail rows
@@ -140,38 +137,39 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
           }
 
           // Use the default renderer for this column if available
-          if (column.cellRenderer) {
-            return column.cellRenderer(params);
+          if ((column as ColDef).cellRenderer) {
+            return (column as ColDef).cellRenderer(params);
           }
 
           // Otherwise just return the field value
           return params.valueFormatted ? params.valueFormatted : params.value;
         }
-      };
+      } as ColDef;
     });
 
     // Add detail-specific columns that only appear for detail rows
     const detailOnlyColumns = detailColumns
-      .filter((detailCol) => !mainColumns.some((mainCol) => mainCol.field === detailCol.field))
-      .map((column) => {
-        return {
-          ...column,
-          cellRenderer: (params: ICellRendererParams) => {
-            // Only show content for detail rows
-            if (!params.data.isDetail) {
-              return "";
-            }
+      .filter((detailCol) => !mainColumns.some((mainCol) => mainCol.field === (detailCol as ColDef).field))
+      .map(
+        (column) =>
+          ({
+            ...column,
+            cellRenderer: (params: ICellRendererParams) => {
+              // Only show content for detail rows
+              if (!params.data?.isDetail) {
+                return "";
+              }
 
-            // Use the default renderer for this column if available
-            if (column.cellRenderer) {
-              return column.cellRenderer(params);
-            }
+              // Use the default renderer for this column if available
+              if ((column as ColDef).cellRenderer) {
+                return (column as ColDef).cellRenderer(params);
+              }
 
-            // Otherwise just return the field value
-            return params.valueFormatted ? params.valueFormatted : params.value;
-          }
-        };
-      });
+              // Otherwise just return the field value
+              return params.valueFormatted ? params.valueFormatted : params.value;
+            }
+          }) as ColDef
+      );
 
     // Combine all columns
     return [expansionColumn, ...visibleColumns, ...detailOnlyColumns];
@@ -208,6 +206,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
           </div>
 
           <DSMGrid
+            preferenceKey={"TERMINATION"}
             handleSortChanged={sortEventHandler}
             maxHeight={gridMaxHeight}
             isLoading={false}

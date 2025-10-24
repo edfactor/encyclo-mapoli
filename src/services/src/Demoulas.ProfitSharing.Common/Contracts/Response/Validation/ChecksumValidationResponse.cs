@@ -1,15 +1,17 @@
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
+
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 
 /// <summary>
 /// Response DTO for checksum validation operations.
 /// Contains per-field validation results and overall validation status.
 /// </summary>
-public class ChecksumValidationResponse
+public class ChecksumValidationResponse : IProfitYearRequest
 {
     /// <summary>
     /// The profit year that was validated
     /// </summary>
-    public short ProfitYear { get; init; }
+    public short ProfitYear { get; set; }
 
     /// <summary>
     /// The report type identifier

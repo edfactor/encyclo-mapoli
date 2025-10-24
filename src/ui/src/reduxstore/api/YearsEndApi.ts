@@ -14,8 +14,8 @@ import {
   clearUnder21BreakdownByStore,
   clearUnder21Inactive,
   clearUnder21Totals,
-  clearYearEndProfitSharingReportLive,
   clearYearEndProfitSharingReportFrozen,
+  clearYearEndProfitSharingReportLive,
   clearYearEndProfitSharingReportTotals,
   setAdditionalExecutivesGrid,
   setBalanceByAge,
@@ -56,8 +56,8 @@ import {
   setUnForfeitsDetails,
   setUpdateSummary,
   setVestedAmountsByAge,
-  setYearEndProfitSharingReportLive,
   setYearEndProfitSharingReportFrozen,
+  setYearEndProfitSharingReportLive,
   setYearEndProfitSharingReportTotals
 } from "reduxstore/slices/yearsEndSlice";
 import {
@@ -228,12 +228,14 @@ export const YearsEndApi = createApi({
     >({
       query: (params) => ({
         url: `yearend/distributions-and-forfeitures`,
-        method: "GET",
-        params: {
+        method: "POST",
+        body: {
           startDate: params.startDate,
           endDate: params.endDate,
-          take: params.pagination.take,
+          states: params.states,
+          taxCodes: params.taxCodes,
           skip: params.pagination.skip,
+          take: params.pagination.take,
           sortBy: params.pagination.sortBy,
           isSortDescending: params.pagination.isSortDescending
         }
@@ -270,6 +272,13 @@ export const YearsEndApi = createApi({
           console.log("Err: " + err);
         }
       }
+    }),
+    refreshDuplicateNamesAndBirthdaysCache: builder.mutation<string, void>({
+      query: () => ({
+        url: "yearend/duplicate-names-and-birthdays/refresh-cache",
+        method: "POST",
+        body: {}
+      })
     }),
     getGrossWagesReport: builder.query<GrossWagesReportResponse, GrossWagesReportDto>({
       query: (params) => ({
@@ -569,12 +578,16 @@ export const YearsEndApi = createApi({
     }),
     getForfeituresAndPoints: builder.query<
       ForfeituresAndPoints,
-      FrozenReportsForfeituresAndPointsRequest & { suppressAllToastErrors?: boolean; onlyNetworkToastErrors?: boolean }
+      FrozenReportsForfeituresAndPointsRequest & {
+        suppressAllToastErrors?: boolean;
+        onlyNetworkToastErrors?: boolean;
+        archive?: boolean;
+      }
     >({
       query: (params) => {
-        const { suppressAllToastErrors, onlyNetworkToastErrors } = params;
+        const { suppressAllToastErrors, onlyNetworkToastErrors, archive } = params;
         return {
-          url: "yearend/frozen/forfeitures-and-points",
+          url: `yearend/frozen/forfeitures-and-points${archive ? "?archive=true" : ""}`,
           method: "GET",
           params: {
             profitYear: params.profitYear,
@@ -660,8 +673,15 @@ export const YearsEndApi = createApi({
     }),
     getTerminationReport: builder.query<TerminationResponse, TerminationRequestWithArchive>({
       query: (params) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const body: any = {
+        const body: {
+          beginningDate: Date;
+          endingDate: Date;
+          skip: number;
+          take: number;
+          sortBy?: string;
+          isSortDescending?: boolean;
+          profitYear?: number;
+        } = {
           beginningDate: params.beginningDate,
           endingDate: params.endingDate,
           skip: params.pagination.skip,
@@ -1223,17 +1243,22 @@ export const YearsEndApi = createApi({
           dispatch(clearForfeitureAdjustmentData());
 
           // Don't handle "Employee not found" errors here - let them bubble up to component
+          type RTKQueryError = {
+            error?: {
+              status?: number;
+              data?: {
+                title?: string;
+              };
+            };
+          };
 
           if (
             typeof err === "object" &&
             err !== null &&
             "error" in err &&
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            typeof (err as any).error === "object" &&
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (err as any).error?.status === 500 &&
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (err as any).error?.data?.title === "Employee not found."
+            typeof (err as RTKQueryError).error === "object" &&
+            (err as RTKQueryError).error?.status === 500 &&
+            (err as RTKQueryError).error?.data?.title === "Employee not found."
           ) {
             return; // Don't log or handle, just clear data and let component handle it
           }
@@ -1388,6 +1413,7 @@ export const {
   useLazyGetDistributionsByAgeQuery,
   useLazyDownloadCertificatesFileQuery,
   useLazyGetDuplicateNamesAndBirthdaysQuery,
+  useRefreshDuplicateNamesAndBirthdaysCacheMutation,
   useLazyGetDuplicateSSNsQuery,
   useLazyGetEligibleEmployeesQuery,
   //useLazyGetEmployeesOnMilitaryLeaveQuery,

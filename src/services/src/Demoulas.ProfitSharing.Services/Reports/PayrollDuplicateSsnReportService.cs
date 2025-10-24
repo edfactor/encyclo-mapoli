@@ -36,9 +36,9 @@ namespace Demoulas.ProfitSharing.Services.Reports
 
                 IQueryable<Demographic> demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
 
-                return await getDuplicateSsnQuery(demographics).AnyAsync(ct);
+                return await GetDuplicateSsnQuery(demographics).AnyAsync(ct);
 
-            });
+            }, ct);
         }
 
         public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsnAsync(SortedPaginationRequestDto req, CancellationToken ct)
@@ -49,7 +49,7 @@ namespace Demoulas.ProfitSharing.Services.Reports
                 var cal = await _calendarService.GetYearStartAndEndAccountingDatesAsync(cutoffYear, ct);
                 var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
 
-                var dupSsns = await getDuplicateSsnQuery(demographics).ToHashSetAsync(ct);
+                var dupSsns = await GetDuplicateSsnQuery(demographics).ToHashSetAsync(ct);
 
                 var sortTmp = req.SortBy?.ToLowerInvariant() switch
                 {
@@ -138,11 +138,11 @@ namespace Demoulas.ProfitSharing.Services.Reports
                         }).ToList()
                     },
                 };
-            });
+            }, ct);
         }
 
 
-        private IQueryable<int> getDuplicateSsnQuery(IQueryable<Demographic> demographics)
+        private IQueryable<int> GetDuplicateSsnQuery(IQueryable<Demographic> demographics)
         {
             return demographics
                 .GroupBy(x => x.Ssn)

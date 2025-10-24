@@ -55,7 +55,7 @@ public class NegativeEtvaReportService : INegativeEtvaReportService
                     })
                     .OrderBy(p => p.BadgeNumber)
                     .ToPaginationResultsAsync(req, cancellationToken);
-            });
+            }, cancellationToken);
 
             var results = new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<NegativeEtvaForSsNsOnPayProfitResponse>
             {

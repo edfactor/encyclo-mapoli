@@ -30,8 +30,9 @@ public sealed class ValidationGroup : GroupBase
                 .WithRequestTimeout(TimeSpan.FromMinutes(2))
                 .WithTags(RouteName));
 
-            // Validation endpoints restricted to IT DevOps and Administrators
-            ep.Roles(Role.ITDEVOPS, Role.ADMINISTRATOR);
+            // PS-1721: Group-level policy authorization for year-end report viewing
+            // All validation endpoints require this permission
+            ep.Policies(Policy.CanViewYearEndReports);
         });
     }
 }

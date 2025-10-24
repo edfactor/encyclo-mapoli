@@ -16,7 +16,6 @@ export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void
     }),
     createBadgeColumn({
       headerName: "Badge",
-
       navigateFunction: navFunction
     }),
     createNameColumn({
@@ -62,8 +61,7 @@ export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void
     }),
     createZipColumn({
       field: "postalCode",
-      minWidth: 100,
-      alignment: "center"
+      minWidth: 100
     })
   ];
 };

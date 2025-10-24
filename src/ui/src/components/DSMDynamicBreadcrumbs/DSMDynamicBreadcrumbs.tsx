@@ -1,22 +1,31 @@
 import { Breadcrumbs, Link, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { Location, useLocation, useNavigate } from "react-router-dom";
+import { RootState } from "../../reduxstore/store";
 import { getReadablePathName } from "../../utils/getReadablePathName";
 import { BreadcrumbItem } from "./DSMBreadcrumbItem";
+
+interface NavigationItem {
+  title?: string;
+  subTitle?: string;
+  url?: string;
+  items?: NavigationItem[];
+  [key: string]: unknown;
+}
 
 interface DSMDynamicBreadcrumbsProps {
   separator?: string;
   customItems?: BreadcrumbItem[];
 }
 
-// Prevents login from showing up as first breadcrumb after Auth Redirect
-// Also excludes unauthorized page, dev debug, and documentation from breadcrumb history
 const EXCLUDED_PATHS = ["/login", "/login/callback", "/unauthorized", "/dev-debug", "/documentation"];
 
 const DSMDynamicBreadcrumbs: React.FC<DSMDynamicBreadcrumbsProps> = ({ separator = "/", customItems }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [navigationHistory, setNavigationHistory] = useState<Location[]>([]);
+  const navigationState = useSelector((state: RootState) => state.navigation);
 
   useEffect(() => {
     if (EXCLUDED_PATHS.some((path) => location.pathname.startsWith(path))) {
@@ -52,7 +61,7 @@ const DSMDynamicBreadcrumbs: React.FC<DSMDynamicBreadcrumbsProps> = ({ separator
       navigate(sanitizedPath);
     }
   };
-
+  //build breadcrumb items from navigation history
   const buildBreadcrumbItems = (): BreadcrumbItem[] => {
     if (customItems) return customItems;
 
@@ -60,16 +69,43 @@ const DSMDynamicBreadcrumbs: React.FC<DSMDynamicBreadcrumbsProps> = ({ separator
       .slice(0, -1)
       .filter((loc) => loc.pathname !== "/" && loc.pathname !== "")
       .slice(-3)
-      .map((location) => ({
-        label: getReadablePathName(location.pathname),
-        path: location.pathname
-      }));
+      .map((location) => {
+        const matched = findNavigationItemByUrl(location.pathname);
+        return {
+          label: matched
+            ? `${matched.title}${matched.subTitle ? ` (${matched.subTitle})` : ""}`
+            : getReadablePathName(location.pathname),
+          path: location.pathname
+        };
+      });
+  };
+  const findNavigationItemByUrl = (path: string): NavigationItem | undefined => {
+    const navData = navigationState?.navigationData;
+    if (!navData?.navigation) return undefined;
+
+    const cleanPath = path.replace(/^\/+/, "");
+
+    const findByUrl = (items: NavigationItem[]): NavigationItem | undefined => {
+      for (const item of items) {
+        if (item.url && item.url.replace(/^\/+/, "") === cleanPath) return item;
+        if (item.items && item.items.length > 0) {
+          const sub = findByUrl(item.items);
+          if (sub) return sub;
+        }
+      }
+      return undefined;
+    };
+
+    return findByUrl(navData.navigation as unknown as NavigationItem[]);
   };
 
   const getCurrentPageLabel = (): string => {
     if (navigationHistory.length === 0) return "";
     const currentLocation = navigationHistory[navigationHistory.length - 1];
-    return getReadablePathName(currentLocation.pathname);
+    const matched = findNavigationItemByUrl(currentLocation.pathname);
+    return matched
+      ? `${matched.title}${matched.subTitle ? ` (${matched.subTitle})` : ""}`
+      : getReadablePathName(currentLocation.pathname);
   };
 
   const items = buildBreadcrumbItems();

@@ -1,13 +1,12 @@
 import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { TotalsGrid } from "components/TotalsGrid/TotalsGrid";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetVestingAmountByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { setVestedAmountsByAgeQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
-import { numberToCurrency, Page } from "smart-ui-library";
+import { numberToCurrency, Page, TotalsGrid } from "smart-ui-library";
 import VestedAmountsByAgeTabs from "./VestedAmountsByAgeTabs";
 
 const options: Intl.DateTimeFormatOptions = {
@@ -20,6 +19,10 @@ function toCapitalCase(str: string): string {
   return str.toLowerCase().replace(/(?:^|\s)\S/g, function (match) {
     return match.toUpperCase();
   });
+}
+
+interface VestingSearchResult {
+  data?: unknown;
 }
 
 const VestedAmountsByAge = () => {
@@ -41,12 +44,12 @@ const VestedAmountsByAge = () => {
         },
         false
       )
-        .then((result: any) => {
+        .then((result: VestingSearchResult) => {
           if (result.data) {
             dispatch(setVestedAmountsByAgeQueryParams(profitYear));
           }
         })
-        .catch((error: any) => {
+        .catch((error: unknown) => {
           console.error("Initial vested amounts by age search failed:", error);
         });
     }

@@ -1,11 +1,15 @@
 import { Grid, Typography } from "@mui/material";
-import LabelValueSection from "components/LabelValueSection";
 import React, { memo, useMemo } from "react";
 import { formatNumberWithComma, numberToCurrency } from "smart-ui-library";
-import { formatPercentage } from "utils/formatPercentage";
+import LabelValueSection from "../../components/LabelValueSection";
+import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
+import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
+import type { EmployeeDetails } from "../../types/employee/employee";
 import { mmDDYYFormat } from "../../utils/dateUtils";
 import { getEnrolledStatus, getForfeitedStatus } from "../../utils/enrollmentUtil";
+import { formatPercentage } from "../../utils/formatPercentage";
 import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
+import { formatPhoneNumber } from "../../utils/phoneUtils";
 
 // Sometimes we get back end zip codes that are 1907 rather than 01907
 const formatZipCode = (zipCode: string): string => {
@@ -16,10 +20,10 @@ const formatZipCode = (zipCode: string): string => {
 };
 
 interface MasterInquiryMemberDetailsProps {
-  memberType: number;
-  id: string | number;
+  //memberType: number;
+  //id: string | number;
   profitYear?: number | null | undefined;
-  memberDetails?: any | null;
+  memberDetails?: EmployeeDetails | null;
   isLoading?: boolean;
 }
 
@@ -33,15 +37,18 @@ in the React memo stuff at the bottom and are important for edge cases like thes
   - The component could show stale data for wrong member
 */
 const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = memo(
-  ({ memberType, id, profitYear, memberDetails, isLoading }) => {
+  ({ profitYear, memberDetails, isLoading }) => {
+    const { missiveAlerts } = useMissiveAlerts();
+
     // Memoized enrollment status
     const enrollmentStatus = useMemo(() => {
       if (!memberDetails) return { enrolled: "", forfeited: "" };
+      const enrollmentId = memberDetails.enrollmentId ?? 0;
       return {
-        enrolled: getEnrolledStatus(memberDetails.enrollmentId) + " (" + memberDetails.enrollmentId + ")",
-        forfeited: getForfeitedStatus(memberDetails.enrollmentId)
+        enrolled: getEnrolledStatus(enrollmentId),
+        forfeited: getForfeitedStatus(enrollmentId)
       };
-    }, [memberDetails?.enrollmentId]);
+    }, [memberDetails]);
 
     // Memoized summary section
     const summarySection = useMemo(() => {
@@ -59,15 +66,23 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         storeNumber
       } = memberDetails;
 
+      const formattedCity = addressCity || "";
+      const formattedState = addressState || "";
+      const formattedZip = addressZipCode ? formatZipCode(addressZipCode) : "";
+      const cityStateZip =
+        [formattedCity, formattedState].filter(Boolean).join(", ") + (formattedZip ? ` ${formattedZip}` : "");
+
       return [
         { label: "Name", value: `${lastName}, ${firstName}` },
         { label: "Address", value: `${address}` },
-        { label: "", value: `${addressCity}, ${addressState} ${formatZipCode(addressZipCode)}` },
-        { label: "Phone #", value: phoneNumber || "N/A" },
+        { label: "", value: cityStateZip },
+        { label: "Phone #", value: formatPhoneNumber(phoneNumber) },
         ...(isEmployee ? [{ label: "Work Location", value: workLocation || "N/A" }] : []),
-        ...(isEmployee ? [{ label: "Store", value: storeNumber > 0 ? storeNumber : "N/A" }] : []),
-        { label: "Enrolled", value: enrollmentStatus.enrolled },
-        { label: "Forfeited", value: enrollmentStatus.forfeited }
+        ...(isEmployee
+          ? [{ label: "Store", value: typeof storeNumber === "number" && storeNumber > 0 ? storeNumber : "N/A" }]
+          : []),
+        { label: "Enrolled", value: enrollmentStatus.enrolled.replace(/\s*\(\d+\)/, "") }, // Remove code like "(1)"
+        { label: "Forfeited", value: enrollmentStatus.forfeited.replace(/\s*\(\d+\)/, "") } // Remove code like "(1)"
       ];
     }, [memberDetails, enrollmentStatus]);
 
@@ -90,7 +105,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
 
       const duplicateBadgeLink = [];
       if (badgesOfDuplicateSsns && badgesOfDuplicateSsns.length) {
-        for (let badge of badgesOfDuplicateSsns) {
+        for (const badge of badgesOfDuplicateSsns) {
           duplicateBadgeLink.push({
             label: "Duplicate SSN with",
             value: viewBadgeLinkRenderer(badge),
@@ -99,6 +114,11 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         }
       }
 
+      const age = dateOfBirth
+        ? Math.floor((Date.now() - new Date(dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365.25))
+        : 0;
+      const dobDisplay = dateOfBirth ? `${mmDDYYFormat(dateOfBirth)} (${age})` : "N/A";
+
       return [
         ...(isEmployee ? [{ label: "Badge", value: viewBadgeLinkRenderer(badgeNumber) }] : []),
         ...(!isEmployee ? [{ label: "PSN", value: viewBadgeLinkRenderer(badgeNumber, psnSuffix) }] : []),
@@ -106,7 +126,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         ...(isEmployee ? [{ label: "Class", value: PayClassification || "N/A" }] : []),
         ...(isEmployee ? [{ label: "Status", value: employmentStatus ?? "N/A" }] : []),
         { label: "Gender", value: gender || "N/A" },
-        { label: "DOB", value: mmDDYYFormat(dateOfBirth) },
+        { label: "DOB", value: dobDisplay },
         { label: "SSN", value: `${ssnValue}` },
         ...duplicateBadgeLink,
         { label: "Allocation To", value: numberToCurrency(allocationToAmount) }
@@ -128,18 +148,33 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         receivedContributionsLastYear
       } = memberDetails;
 
-      var yearLabel = profitYear == new Date().getFullYear() ? "Current" : `End ${profitYear}`;
+      const yearLabel = profitYear == new Date().getFullYear() ? "Current" : `End ${profitYear}`;
+
+      // Format current vested balance with bold blue styling per PS-1897
+      const formattedCurrentVested =
+        currentVestedAmount == null ? (
+          "N/A"
+        ) : (
+          <Typography
+            component="span"
+            variant="body2"
+            sx={{ fontWeight: "bold", color: "#0258A5" }}>
+            {numberToCurrency(currentVestedAmount)}
+          </Typography>
+        );
 
       return [
+        // Group 1: Beginning balances
         { label: "Begin Balance", value: beginPSAmount == null ? "N/A" : numberToCurrency(beginPSAmount) },
-        { label: `${yearLabel} Balance`, value: currentPSAmount == null ? "N/A" : numberToCurrency(currentPSAmount) },
         {
           label: "Begin Vested Balance",
           value: beginVestedAmount == null ? "N/A" : numberToCurrency(beginVestedAmount)
         },
+        // Group 2: Current balances (vested balance highlighted)
+        { label: `${yearLabel} Balance`, value: currentPSAmount == null ? "N/A" : numberToCurrency(currentPSAmount) },
         {
           label: `${yearLabel} Vested Balance`,
-          value: currentVestedAmount == null ? "N/A" : numberToCurrency(currentVestedAmount)
+          value: formattedCurrentVested
         },
         ...(isEmployee
           ? [{ label: "Profit Sharing Hours", value: formatNumberWithComma(yearToDateProfitSharingHours) }]
@@ -151,7 +186,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
           value: receivedContributionsLastYear == null ? "N/A" : receivedContributionsLastYear ? "Y" : "N"
         }
       ];
-    }, [memberDetails]);
+    }, [memberDetails, profitYear]);
 
     // Memoized milestone section
     const milestoneSection = useMemo(() => {
@@ -164,7 +199,6 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         terminationReason,
         reHireDate,
         currentEtva,
-        previousEtva,
         allocationFromAmount
       } = memberDetails;
 
@@ -177,7 +211,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         ...(isEmployee ? [{ label: "Termination Reason", value: terminationReason || "N/A" }] : []),
         ...(isEmployee ? [{ label: "Re-Hire Date", value: reHireDate ? mmDDYYFormat(reHireDate) : "N/A" }] : []),
         { label: "ETVA", value: numberToCurrency(currentEtva) },
-        { label: "Previous ETVA", value: numberToCurrency(previousEtva) },
+        // Previous ETVA removed per PS-1897
         { label: "Allocation From", value: numberToCurrency(allocationFromAmount) }
       ];
     }, [memberDetails]);
@@ -220,6 +254,13 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
               </Grid>
             </Grid>
           </Grid>
+
+          {/* Missive Alerts - Display at bottom of member details */}
+          {missiveAlerts.length > 0 && (
+            <Grid size={{ xs: 12 }}>
+              <MissiveAlerts />
+            </Grid>
+          )}
         </Grid>
       </div>
     );

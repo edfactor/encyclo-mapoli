@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { baseUrl, impersonateRole, navigateToPage } from "../env.setup";
+import { baseUrl, impersonateRole } from "../env.setup";
 
 /**
  * E2E Tests for Frozen Summary Tab
@@ -8,18 +8,20 @@ import { baseUrl, impersonateRole, navigateToPage } from "../env.setup";
  * - Tab navigation is straightforward UI interaction
  * - Frozen Summary is a read-only view (no edit operations)
  * - Tests focus on visibility and basic data display
- * - Located in IT DevOps → Demographic Freeze page
+ * - Located in IT DEVOPS → Demographic Freeze page
  */
 test.describe("Frozen Summary Tab", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(baseUrl);
     await page.waitForLoadState("networkidle");
 
-    // Use IT DevOps role which should have access
-    await impersonateRole(page, "Finance-Manager");
+    // Use IT-DevOps role which has access to IT DEVOPS menu
+    await impersonateRole(page, "IT-DevOps");
 
     // Navigate to Demographic Freeze page where Frozen Summary tab exists
-    await navigateToPage(page, "IT DevOps", "Demographic Freeze");
+    await page.getByRole("button", { name: "IT DEVOPS" }).click();
+    await page.getByRole("link", { name: "Demographic Freeze" }).click();
+    await page.waitForLoadState("networkidle");
   });
 
   test("Demographic Freeze page loads successfully", async ({ page }) => {
@@ -159,24 +161,19 @@ test.describe("Frozen Summary Tab", () => {
     await frozenTab.click();
     await page.waitForTimeout(1000);
 
-    // Switch to read-only role
+    // Switch to Finance-Manager role (different from IT-DevOps)
     await page.getByRole("combobox", { name: "roles" }).click();
-    await page.getByRole("option", { name: "Finance-Manager" }).getByRole("checkbox").uncheck();
-    await page.getByRole("option", { name: "IT-DevOps" }).getByRole("checkbox").check();
+    await page.getByRole("option", { name: "IT-DevOps" }).getByRole("checkbox").uncheck();
+    await page.getByRole("option", { name: "Finance-Manager" }).getByRole("checkbox").check();
     await page.locator("body").click();
 
     // Reload page
     await page.reload();
     await page.waitForLoadState("networkidle");
 
-    // Verify page is accessible
+    // Verify page redirects to unauthorized (Finance-Manager doesn't have IT DEVOPS access)
     const accessDenied = page.getByText("Access Denied");
-    const isAccessDenied = await accessDenied.isVisible().catch(() => false);
-    expect(isAccessDenied).toBe(false);
-
-    // Verify Frozen Summary tab is still present
-    const frozenTabAfterReload = page.getByRole("tab", { name: /frozen.*summary/i });
-    await expect(frozenTabAfterReload).toBeVisible();
+    await expect(accessDenied).toBeVisible();
   });
 
   test("Tab navigation works with keyboard", async ({ page }) => {
@@ -185,7 +182,7 @@ test.describe("Frozen Summary Tab", () => {
     await tabList.focus();
 
     // Get initial tab
-    const initialTab = page.getByRole("tab", { name: /demographics|search|main/i }).first();
+    //const initialTab = page.getByRole("tab", { name: /demographics|search|main/i }).first();
 
     // Press arrow key to navigate to next tab
     await page.keyboard.press("ArrowRight");

@@ -8,6 +8,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Metrics;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -69,6 +70,7 @@ public class DemographicsService : IDemographicsServiceInternal
             // Primary match by OracleHcmId
             List<long> oracleIds = byOracle.Keys.ToList();
             List<Demographic> existingByOracle = await context.Demographics
+                .TagWith($"DemographicsSync-OracleMatch-Batch-Count:{requested}")
                 .Where(d => oracleIds.Contains(d.OracleHcmId))
                 .Include(d => d.ContactInfo)
                 .Include(d => d.Address)
@@ -120,8 +122,9 @@ public class DemographicsService : IDemographicsServiceInternal
 
             // Duplicate SSN audit
             List<Demographic> duplicateSsns = existing
+                .Where(x=> fallbackPairs.Select(y => y.Ssn).Contains(x.Ssn))
                 .GroupBy(e => e.Ssn)
-                .Where(g => g.Count() > 1)
+                .Where(g =>  g.Count() > 1)
                 .SelectMany(g => g)
                 .ToList();
             if (duplicateSsns.Any())
@@ -138,7 +141,9 @@ public class DemographicsService : IDemographicsServiceInternal
                         continue;
                     }
                     var proposed = kv.Value;
-                    Demographic? matchToProposed = await context.Demographics.FirstOrDefaultAsync(d => d.Ssn == proposed.Ssn, cancellationToken).ConfigureAwait(false);
+                    Demographic? matchToProposed = await context.Demographics
+                        .TagWith($"DemographicsSync-SSNConflictCheck-OracleHcmId:{kv.Key}")
+                        .FirstOrDefaultAsync(d => d.Ssn == proposed.Ssn, cancellationToken).ConfigureAwait(false);
                     if (matchToProposed == null)
                     {
                         await AddDemographicSyncAuditAsync(existingEntity, "SSN changed with no conflicts.", "SSN", context, cancellationToken).ConfigureAwait(false);
@@ -158,11 +163,33 @@ public class DemographicsService : IDemographicsServiceInternal
             try
             {
                 await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                // Record successful business operation
+                EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                    new("operation", "demographics-ingest-batch"),
+                    new("status", "success"),
+                    new("service", nameof(DemographicsService)));
+
+                EndpointTelemetry.RecordCountsProcessed.Record(requested,
+                    new("operation", "demographics-ingest"),
+                    new("record.type", "demographics-requested"),
+                    new("service", nameof(DemographicsService)));
             }
             catch (Exception ex)
             {
                 _logger.LogCritical(ex, "Failed to save batch: {DemographicsRequests}", employees);
                 DemographicsIngestMetrics.BatchFailures.Add(1);
+
+                // Record failure
+                EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                    new("operation", "demographics-ingest-batch"),
+                    new("status", "failed"),
+                    new("service", nameof(DemographicsService)));
+
+                EndpointTelemetry.EndpointErrorsTotal.Add(1,
+                    new("error.type", ex.GetType().Name),
+                    new("operation", "demographics-ingest-batch"),
+                    new("service", nameof(DemographicsService)));
             }
 
             _logger.LogInformation("Demographics ingest batch summary {@Metrics}", new
@@ -324,6 +351,7 @@ public class DemographicsService : IDemographicsServiceInternal
             {
                 DemographicHistory newHistory = DemographicHistory.FromDemographic(incoming, existingEntity.Id);
                 DemographicHistory oldHistory = await context.DemographicHistories
+                    .TagWith($"DemographicsSync-GetCurrentHistory-DemographicId:{existingEntity.Id}")
                     .Where(h => h.DemographicId == existingEntity.Id && DateTimeOffset.UtcNow >= h.ValidFrom && DateTimeOffset.UtcNow < h.ValidTo)
                     .FirstAsync(ct).ConfigureAwait(false);
                 oldHistory.ValidTo = DateTimeOffset.UtcNow;
@@ -378,9 +406,10 @@ public class DemographicsService : IDemographicsServiceInternal
         {
             return new List<Demographic>();
         }
-        string sql = $"SELECT d.* FROM DEMOGRAPHIC d WHERE {string.Join(" OR ", clauses)}";
+        string sql = $"SELECT * FROM DEMOGRAPHIC WHERE {string.Join(" OR ", clauses)}";
         return await context.Demographics
             .FromSqlRaw(sql, parameters.ToArray())
+            .TagWith($"DemographicsSync-FallbackMatch-SSNBadge-Count:{pairs.Count}")
             .Include(d => d.ContactInfo)
             .Include(d => d.Address)
             .ToListAsync(ct).ConfigureAwait(false);

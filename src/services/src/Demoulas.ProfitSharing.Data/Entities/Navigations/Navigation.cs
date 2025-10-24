@@ -81,6 +81,8 @@ public sealed class Navigation
 
         public const short PayBenReport = 152;
         public const short ProfitDetailReversals = 154;
+        public const short ViewDistribution = 156;
+        public const short AddDistribution = 157;
 
     }
 

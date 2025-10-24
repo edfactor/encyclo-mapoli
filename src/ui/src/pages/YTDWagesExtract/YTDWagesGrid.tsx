@@ -3,9 +3,10 @@ import { DSMGrid, Pagination } from "smart-ui-library";
 
 import { RefObject } from "react";
 import ReportSummary from "../../components/ReportSummary";
+import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
+import { GridPaginationActions, GridPaginationState, SortParams } from "../../hooks/useGridPagination";
 import { EmployeeWagesForYearResponse } from "../../reduxstore/types";
 import { GetYTDWagesColumns } from "./YTDWagesGridColumns";
-import { GridPaginationState, GridPaginationActions } from "../../hooks/useGridPagination";
 
 interface YTDWagesGridProps {
   innerRef: RefObject<HTMLDivElement | null>;
@@ -15,7 +16,7 @@ interface YTDWagesGridProps {
   hasResults: boolean;
   pagination: GridPaginationState & GridPaginationActions;
   onPaginationChange: (pageNumber: number, pageSize: number) => void;
-  onSortChange: (sortParams: any) => void;
+  onSortChange: (sortParams: SortParams) => void;
 }
 
 const YTDWagesGrid = ({
@@ -30,14 +31,18 @@ const YTDWagesGrid = ({
 }: YTDWagesGridProps) => {
   const columnDefs = useMemo(() => GetYTDWagesColumns(), []);
 
+  // Use dynamic grid height utility hook
+  const gridMaxHeight = useDynamicGridHeight();
+
   return (
-    <>
+    <div className="relative">
       {showData && data?.response && (
         <div ref={innerRef}>
           <ReportSummary report={data} />
           <DSMGrid
             preferenceKey={"TERM"}
             isLoading={isLoading}
+            maxHeight={gridMaxHeight}
             handleSortChanged={onSortChange}
             providedOptions={{
               rowData: data.response.results,
@@ -59,7 +64,7 @@ const YTDWagesGrid = ({
           recordCount={data.response.total || 0}
         />
       )}
-    </>
+    </div>
   );
 };
 

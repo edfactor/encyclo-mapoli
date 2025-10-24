@@ -6,14 +6,11 @@ import {
   FormHelperText,
   FormLabel,
   Grid,
-  MenuItem,
   Radio,
   RadioGroup,
-  Select,
   TextField
 } from "@mui/material";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
-import React, { memo, useCallback, useEffect, useMemo } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
@@ -79,6 +76,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       badgeNumber: string;
     }>();
 
+    // Ref to track if URL search has been processed
+    const urlSearchProcessedRef = useRef(false);
+
     // profitYear should always start with this year
     const profitYear = useDecemberFlowProfitYear();
 
@@ -95,7 +95,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       reset,
       setValue
     } = useForm<MasterInquirySearch>({
-      resolver: yupResolver(schema) as any,
+      resolver: yupResolver(schema) as Resolver<MasterInquirySearch>,
       mode: "onBlur",
       defaultValues: {
         endProfitYear: profitYear,
@@ -122,7 +122,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
 
     // Initialize form when badge number is provided via URL
     useEffect(() => {
-      if (badgeNumber) {
+      if (badgeNumber && !urlSearchProcessedRef.current) {
+        urlSearchProcessedRef.current = true;
+
         const formData = {
           ...schema.getDefault(),
           memberType: determineCorrectMemberType(badgeNumber) as "all" | "employees" | "beneficiaries" | "none",
@@ -147,6 +149,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       }
     }, [badgeNumber, reset, profitYear, onSearch, navigate]);
 
+    /*
     const selectSx = useMemo(
       () => ({
         "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
@@ -158,19 +161,22 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       }),
       []
     );
+    */
 
-    const months = useMemo(() => Array.from({ length: 12 }, (_, i) => i + 1), []);
+    //const months = useMemo(() => Array.from({ length: 12 }, (_, i) => i + 1), []);
 
-    const validateAndSearch = useCallback(
-      handleSubmit((data) => {
+    const onSubmit = useCallback(
+      (data: MasterInquirySearch) => {
         if (isValid) {
           const searchParams = transformSearchParams(data, profitYear);
           onSearch(searchParams);
           dispatch(setMasterInquiryRequestParams(data));
         }
-      }),
-      [handleSubmit, isValid, profitYear, onSearch, dispatch]
+      },
+      [isValid, profitYear, onSearch, dispatch]
     );
+
+    const validateAndSearch = handleSubmit(onSubmit);
 
     const handleReset = useCallback(() => {
       dispatch(clearMasterInquiryRequestParams());
@@ -201,6 +207,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
     }, [dispatch, reset, profitYear, onReset]);
 
     // Memoized form field components
+    /*
     const ProfitYearField = memo(() => (
       <Grid size={{ xs: 12, sm: 6, md: 4 }}>
         <Controller
@@ -223,7 +230,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
         {errors.endProfitYear && <FormHelperText error>{errors.endProfitYear.message}</FormHelperText>}
       </Grid>
     ));
-
+    */
+    /*
     const MonthSelectField = memo(({ name, label }: { name: "startProfitMonth" | "endProfitMonth"; label: string }) => (
       <Grid size={{ xs: 12, sm: 6, md: 4 }}>
         <FormLabel>{label}</FormLabel>
@@ -261,7 +269,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
         {errors[name] && <FormHelperText error>{errors[name]?.message}</FormHelperText>}
       </Grid>
     ));
-
+*/
     const handleBadgeNumberChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const badgeStr = e.target.value;
@@ -285,12 +293,14 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
         name,
         label,
         type = "text",
-        disabled = false
+        disabled = false,
+        helperText
       }: {
         name: keyof MasterInquirySearch;
         label: string;
         type?: string;
         disabled?: boolean;
+        helperText?: string;
       }) => (
         <Grid size={{ xs: 12, sm: 6, md: type === "number" ? 2 : 4 }}>
           <FormLabel>{label}</FormLabel>
@@ -335,10 +345,24 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
                     handleBadgeNumberChange(e);
                   }
                 }}
+                sx={
+                  disabled
+                    ? {
+                        "& .MuiOutlinedInput-root": {
+                          backgroundColor: "#f5f5f5"
+                        }
+                      }
+                    : undefined
+                }
               />
             )}
           />
           {errors[name] && <FormHelperText error>{errors[name]?.message}</FormHelperText>}
+          {!errors[name] && helperText && (
+            <FormHelperText sx={{ color: "info.main", fontSize: "0.75rem", marginTop: "4px" }}>
+              {helperText}
+            </FormHelperText>
+          )}
         </Grid>
       ),
       [control, errors, handleBadgeNumberChange]
@@ -477,6 +501,29 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
     const isNameDisabled = hasSocialSecurity || hasBadgeNumber;
     const isBadgeNumberDisabled = hasSocialSecurity || hasName;
 
+    // Helper text for mutual exclusion
+    const getExclusionHelperText = useCallback(
+      (fieldName: string, isDisabled: boolean) => {
+        if (!isDisabled) return undefined;
+
+        if (fieldName === "socialSecurity") {
+          if (hasName) return "Disabled: Name field is in use. Press Reset to clear and re-enable.";
+          if (hasBadgeNumber) return "Disabled: Badge/PSN field is in use. Press Reset to clear and re-enable.";
+        }
+        if (fieldName === "name") {
+          if (hasSocialSecurity) return "Disabled: SSN field is in use. Press Reset to clear and re-enable.";
+          if (hasBadgeNumber) return "Disabled: Badge/PSN field is in use. Press Reset to clear and re-enable.";
+        }
+        if (fieldName === "badgeNumber") {
+          if (hasSocialSecurity) return "Disabled: SSN field is in use. Press Reset to clear and re-enable.";
+          if (hasName) return "Disabled: Name field is in use. Press Reset to clear and re-enable.";
+        }
+
+        return undefined;
+      },
+      [hasSocialSecurity, hasName, hasBadgeNumber]
+    );
+
     const isMemberTypeDisabled = badgeNumberValue !== null && badgeNumberValue !== undefined;
 
     // Determine if search button should be enabled
@@ -526,17 +573,20 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
               label="Social Security Number"
               type="text"
               disabled={isSocialSecurityDisabled}
+              helperText={getExclusionHelperText("socialSecurity", isSocialSecurityDisabled)}
             />
             <TextInputField
               name="name"
               label="Name"
               disabled={isNameDisabled}
+              helperText={getExclusionHelperText("name", isNameDisabled)}
             />
             <TextInputField
               name="badgeNumber"
               label="Badge/PSN Number"
               type="text"
               disabled={isBadgeNumberDisabled}
+              helperText={getExclusionHelperText("badgeNumber", isBadgeNumberDisabled)}
             />
             <RadioGroupField
               name="paymentType"

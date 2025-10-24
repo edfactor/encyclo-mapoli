@@ -43,15 +43,7 @@ public class MasterInquiryRequestValidator : AbstractValidator<MasterInquiryRequ
 
 
 
-            if (x.StartProfitMonth.HasValue)
-            {
-                count++;
-            }
-
-            if (x.EndProfitMonth.HasValue)
-            {
-                count++;
-            }
+         
 
             if (x.ProfitCode.HasValue)
             {
@@ -108,7 +100,7 @@ public class MasterInquiryRequestValidator : AbstractValidator<MasterInquiryRequ
                     providedList.Add("ProfitYear");
                 }
 
-                if (x.BadgeNumber.HasValue && x.BadgeNumber.Value > 0)
+                if (x.BadgeNumber is > 0)
                 {
                     providedList.Add("BadgeNumber");
                 }
@@ -116,16 +108,6 @@ public class MasterInquiryRequestValidator : AbstractValidator<MasterInquiryRequ
                 if (x.PsnSuffix > 0)
                 {
                     providedList.Add("PsnSuffix");
-                }
-
-                if (x.StartProfitMonth.HasValue)
-                {
-                    providedList.Add("StartProfitMonth");
-                }
-
-                if (x.EndProfitMonth.HasValue)
-                {
-                    providedList.Add("EndProfitMonth");
                 }
 
                 if (x.ProfitCode.HasValue)
@@ -211,40 +193,23 @@ public class MasterInquiryRequestValidator : AbstractValidator<MasterInquiryRequ
         // Miscellaneous checks (months, amounts, types, SSN/badge) done in a single Custom validator
         RuleFor(x => x).Custom((x, ctx) =>
         {
-            // Months: validate when present
-            if (x.StartProfitMonth.HasValue && (x.StartProfitMonth.Value < 1 || x.StartProfitMonth.Value > 12))
-            {
-                ctx.AddFailure("StartProfitMonth", "StartProfitMonth must be between 1 and 12.");
-            }
-
-            if (x.EndProfitMonth.HasValue && (x.EndProfitMonth.Value < 1 || x.EndProfitMonth.Value > 12))
-            {
-                ctx.AddFailure("EndProfitMonth", "EndProfitMonth must be between 1 and 12.");
-            }
-
-            // If both months provided, ensure ordering (frontend requires end >= start)
-            if (x.StartProfitMonth.HasValue && x.EndProfitMonth.HasValue && x.StartProfitMonth.Value > x.EndProfitMonth.Value)
-            {
-                ctx.AddFailure("EndProfitMonth", "EndProfitMonth must be the same as or after StartProfitMonth.");
-            }
-
             // Amounts non-negative
-            if (x.ContributionAmount.HasValue && x.ContributionAmount.Value < 0)
+            if (x.ContributionAmount is < 0)
             {
                 ctx.AddFailure("ContributionAmount", "ContributionAmount cannot be negative.");
             }
 
-            if (x.EarningsAmount.HasValue && x.EarningsAmount.Value < 0)
+            if (x.EarningsAmount is < 0)
             {
                 ctx.AddFailure("EarningsAmount", "EarningsAmount cannot be negative.");
             }
 
-            if (x.ForfeitureAmount.HasValue && x.ForfeitureAmount.Value < 0)
+            if (x.ForfeitureAmount is < 0)
             {
                 ctx.AddFailure("ForfeitureAmount", "ForfeitureAmount cannot be negative.");
             }
 
-            if (x.PaymentAmount.HasValue && x.PaymentAmount.Value < 0)
+            if (x.PaymentAmount is < 0)
             {
                 ctx.AddFailure("PaymentAmount", "PaymentAmount cannot be negative.");
             }

@@ -3,7 +3,7 @@ import { DSMGrid, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { EligibleEmployeesResponse } from "../../../reduxstore/types";
 import { GetEligibleEmployeesColumns } from "./EligibleEmployeesGridColumns";
-import { GridPaginationState, GridPaginationActions } from "../../../hooks/useGridPagination";
+import { GridPaginationState, GridPaginationActions, SortParams } from "../../../hooks/useGridPagination";
 
 interface EligibleEmployeesGridProps {
   innerRef: RefObject<HTMLDivElement | null>;
@@ -13,7 +13,7 @@ interface EligibleEmployeesGridProps {
   hasResults: boolean;
   pagination: GridPaginationState & GridPaginationActions;
   onPaginationChange: (pageNumber: number, pageSize: number) => void;
-  onSortChange: (sortParams: any) => void;
+  onSortChange: (sortParams: SortParams) => void;
 }
 
 const EligibleEmployeesGrid = ({

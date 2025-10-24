@@ -1,4 +1,6 @@
-﻿using Demoulas.Common.Data.Services.Interfaces;
+﻿using System.Diagnostics;
+using Demoulas.Common.Data.Contexts.Configuration;
+using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -10,6 +12,7 @@ using Demoulas.ProfitSharing.Services.Audit;
 using Demoulas.ProfitSharing.Services.Beneficiaries;
 using Demoulas.ProfitSharing.Services.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
+using Demoulas.ProfitSharing.Services.Caching.HostedServices;
 using Demoulas.ProfitSharing.Services.Certificates;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.ItDevOps;
@@ -24,6 +27,7 @@ using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.ProfitSharing.Services.Reports.Breakdown;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using Demoulas.ProfitSharing.Services.Validation;
+using Demoulas.Util.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -39,11 +43,14 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();
         _ = builder.Services.AddScoped<ICertificateService, CertificateService>();
         _ = builder.Services.AddScoped<ICleanupReportService, CleanupReportService>();
+        _ = builder.Services.AddScoped<IDuplicateNamesAndBirthdaysService, DuplicateNamesAndBirthdaysService>();
         _ = builder.Services.AddScoped<IDistributionService, DistributionService>();
         _ = builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
         _ = builder.Services.AddScoped<IForfeituresAndPointsForYearService, ForfeituresAndPointsForYearService>();
         _ = builder.Services.AddScoped<IFrozenReportService, FrozenReportService>();
         _ = builder.Services.AddScoped<IMasterInquiryService, MasterInquiryService>();
+        _ = builder.Services.AddScoped<IEmployeeMasterInquiryService, EmployeeMasterInquiryService>();
+        _ = builder.Services.AddScoped<IBeneficiaryMasterInquiryService, BeneficiaryMasterInquiryService>();
         _ = builder.Services.AddScoped<IForfeitureAdjustmentService, ForfeitureAdjustmentService>();
         _ = builder.Services.AddScoped<IExecutiveHoursAndDollarsService, ExecutiveHoursAndDollarsService>();
         _ = builder.Services.AddScoped<IGetEligibleEmployeesService, GetEligibleEmployeesService>();
@@ -100,9 +107,26 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IReportRunnerService, ReportRunnerService>();
         _ = builder.Services.AddScoped<IStateTaxLookupService, StateTaxLookupService>();
         _ = builder.Services.AddScoped<IMergeProfitDetailsService, MergeProfitDetailsService>();
+        _ = builder.Services.AddScoped<IBeneficiaryDisbursementService, BeneficiaryDisbursementService>();
+
+        // Validation services
         _ = builder.Services.AddScoped<IChecksumValidationService, ChecksumValidationService>();
+        _ = builder.Services.AddScoped<ICrossReferenceValidationService, CrossReferenceValidationService>();
+        _ = builder.Services.AddScoped<IArchivedValueService, ArchivedValueService>();
+        _ = builder.Services.AddScoped<IAllocTransferValidationService, AllocTransferValidationService>();
+        _ = builder.Services.AddScoped<IBalanceEquationValidationService, BalanceEquationValidationService>();
+
+        // Register lookup caches as singletons (they manage their own distributed cache access)
+        _ = builder.Services.AddSingleton<Services.Caching.StateTaxCache>();
+        _ = builder.Services.AddSingleton<Services.Caching.ProfitCodeCache>();
 
         builder.AddProjectCachingServices();
+
+        // Register cache warmer hosted service (not in test environment)
+        if (!builder.Environment.IsTestEnvironment())
+        {
+            _ = builder.Services.AddHostedService<StateTaxCacheWarmerHostedService>();
+        }
 
         return builder;
     }

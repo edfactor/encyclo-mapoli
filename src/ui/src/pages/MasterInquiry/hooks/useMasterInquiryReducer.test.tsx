@@ -47,14 +47,15 @@ describe("useMasterInquiryReducer", () => {
       };
 
       const params = {
+        badgeNumber: 12345, // Add actual search parameter to trigger isParametersChanged
         pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: false }
       };
-      const action = { type: "SEARCH_START" as const, payload: { params, isManual: false } };
+      const action = { type: "SEARCH_START" as const, payload: { params, isManual: true } }; // Changed to true for manual search
       const newState = masterInquiryReducer(stateWithData, action);
 
       expect(newState.search.results).toBeNull();
       expect(newState.search.error).toBeNull();
-      expect(newState.search.isManuallySearching).toBe(false);
+      expect(newState.search.isManuallySearching).toBe(true); // Changed to match isManual: true
     });
   });
 

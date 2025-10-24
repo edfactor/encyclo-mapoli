@@ -1,12 +1,11 @@
 import { Button, Grid, Stack, Tooltip } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import TotalsGrid from "components/TotalsGrid/TotalsGrid";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetUpdateSummaryQuery, useUpdateEnrollmentMutation } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMAccordion, numberToCurrency, Page, SmartModal } from "smart-ui-library";
+import { DSMAccordion, numberToCurrency, Page, SmartModal, TotalsGrid } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
 import PayMasterUpdateGrid from "./PayMasterUpdateGrid";
@@ -14,6 +13,13 @@ import PayMasterUpdateSearchFilters from "./PayMasterUpdateSearchFilter";
 
 interface ProfitYearSearch {
   profitYear: number;
+}
+
+interface NavigationItem {
+  id: number;
+  statusName?: string;
+  items?: NavigationItem[];
+  [key: string]: unknown;
 }
 
 const PayMasterUpdateSummary = () => {
@@ -37,10 +43,13 @@ const PayMasterUpdateSummary = () => {
   useEffect(() => {
     const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
 
-    const getNavigationObjectBasedOnId = (navigationArray?: any[], id?: number): any => {
+    const getNavigationObjectBasedOnId = (
+      navigationArray: NavigationItem[] | undefined,
+      id: number | undefined
+    ): NavigationItem | undefined => {
       if (navigationArray) {
         for (const item of navigationArray) {
-          if (item.id == id) {
+          if (item.id === id) {
             return item;
           }
           if (item.items && item.items.length > 0) {
@@ -117,7 +126,7 @@ const PayMasterUpdateSummary = () => {
       </Stack>
     );
   };
-
+  /*
   const updateSummarySection = [
     {
       label: "Employees Updated",
@@ -143,8 +152,7 @@ const PayMasterUpdateSummary = () => {
       label: "After Vested Amount",
       value: updateSummary ? numberToCurrency(updateSummary.totalAfterVestedAmount) : "-"
     }
-  ];
-
+  ];*/
   const onSearch = (data: ProfitYearSearch) => {
     setInitialSearchLoaded(true);
     getUpdateSummary({
@@ -175,9 +183,7 @@ const PayMasterUpdateSummary = () => {
         </Grid>
 
         {updateSummary?.response && (
-          <Grid
-            size={{ xs: 12 }}
-            paddingX="24px">
+          <Grid paddingX="24px">
             <TotalsGrid
               displayData={[
                 [
@@ -198,6 +204,7 @@ const PayMasterUpdateSummary = () => {
                 "After Profit Sharing Amount",
                 "After Vested Amount"
               ]}
+              breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
             />
           </Grid>
         )}

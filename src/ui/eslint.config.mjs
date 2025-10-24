@@ -17,7 +17,7 @@ const compat = new FlatCompat({
 });
 
 export default defineConfig([
-  globalIgnores(["**/dist", "**/.eslintrc.cjs"]),
+  globalIgnores(["**/dist", "**/.eslintrc.cjs", "**/coverage", "**/node_modules", "**/.env*", "**/build"]),
   {
     extends: fixupConfigRules(
       compat.extends("eslint:recommended", "plugin:@typescript-eslint/recommended", "plugin:react-hooks/recommended")
@@ -52,6 +52,14 @@ export default defineConfig([
           destructuredArrayIgnorePattern: "^_"
         }
       ]
+    }
+  },
+  {
+    files: ["**/*.cjs"],
+    languageOptions: {
+      globals: {
+        ...globals.node
+      }
     }
   }
 ]);

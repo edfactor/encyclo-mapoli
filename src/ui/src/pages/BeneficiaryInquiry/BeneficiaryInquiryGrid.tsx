@@ -8,19 +8,20 @@ import { RootState } from "reduxstore/store";
 import { BeneficiaryDto, BeneficiaryRequestDto } from "reduxstore/types";
 import { DSMGrid, Paged, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
-import { useGridPagination } from "../../hooks/useGridPagination";
+import { SortParams, useGridPagination } from "../../hooks/useGridPagination";
 import { BeneficiaryInquiryGridColumns } from "./BeneficiaryInquiryGridColumns";
-import { BeneficiaryOfGridColumns } from "./BeneficiaryOfGridColumn";
+import { BeneficiaryOfGridColumns } from "./BeneficiaryOfGridColumns";
+
 interface BeneficiaryInquiryGridProps {
-  selectedMember: any;
+  selectedMember: BeneficiaryDto | null;
   count: number;
-  createOrUpdateBeneficiary: (selectedMember: BeneficiaryDto) => any;
-  deleteBeneficiary: (id: number) => any;
-  refresh: () => any;
+  createOrUpdateBeneficiary: (selectedMember: BeneficiaryDto | undefined) => void;
+  deleteBeneficiary: (id: number) => void;
+  //refresh: () => void;
 }
 
 const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
-  refresh,
+  //refresh,
   selectedMember,
   count,
   createOrUpdateBeneficiary,
@@ -38,7 +39,7 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
     initialSortBy: "psnSuffix",
     initialSortDescending: true,
     onPaginationChange: useCallback(
-      (pageNum: number, pageSz: number, sortPrms: any) => {
+      (pageNum: number, pageSz: number, sortPrms: SortParams) => {
         if (selectedMember?.badgeNumber && selectedMember?.psnSuffix) {
           const request = createBeneficiaryInquiryRequest(
             pageNum * pageSz,
@@ -58,7 +59,7 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
           }
         }
       },
-      [selectedMember]
+      [selectedMember?.badgeNumber, selectedMember?.psnSuffix, triggerSearch]
     )
   });
 
@@ -81,14 +82,14 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
     return request;
   };
 
-  const sortEventHandler = (update: any) => {
+  const sortEventHandler = (update: SortParams) => {
     if (update.sortBy === "") {
       update.sortBy = "psnSuffix";
       update.isSortDescending = true;
     }
     handleSortChange(update);
   };
-  const actionButtons = (data: any): JSX.Element => {
+  const actionButtons = (data: BeneficiaryDto): JSX.Element => {
     return (
       <>
         <Button
@@ -126,7 +127,7 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
 
       triggerUpdate({ id: id, percentage: currentValue }, false)
         .unwrap()
-        .then((res) => {
+        .then((_res) => {
           if (hasToken) onSearch();
         });
     } else {
@@ -182,7 +183,8 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
         }
       }
     ];
-  }, [beneficiaryList]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionButtons]);
 
   const onSearch = useCallback(() => {
     const request = createBeneficiaryInquiryRequest(

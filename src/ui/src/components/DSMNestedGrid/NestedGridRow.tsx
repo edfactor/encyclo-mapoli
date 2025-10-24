@@ -2,20 +2,20 @@ import React, { useState } from "react";
 import { TableRow, TableCell, IconButton, Collapse, Box } from "@mui/material";
 import { KeyboardArrowDown, KeyboardArrowRight } from "@mui/icons-material";
 
-export type INestedGridRowData<T = any> = {
+export type INestedGridRowData<T extends Record<string, unknown> = Record<string, unknown>> = {
   id: string | number;
-  [key: string]: any;
+  [key: string]: unknown;
 } & T;
 
-export interface INestedGridColumn<T = any> {
+export interface INestedGridColumn<T extends Record<string, unknown> = Record<string, unknown>> {
   key: string;
   label: string;
   align?: "left" | "center" | "right";
   width?: number | string;
-  render?: (value: any, row: INestedGridRowData<T>) => React.ReactNode;
+  render?: (value: unknown, row: INestedGridRowData<T>) => React.ReactNode;
 }
 
-interface INestedGridRowProps<T = any> {
+interface INestedGridRowProps<T extends Record<string, unknown> = Record<string, unknown>> {
   row: INestedGridRowData<T>;
   columns: INestedGridColumn<T>[];
   renderNestedContent: (row: INestedGridRowData<T>, isExpanded: boolean) => React.ReactNode;
