@@ -20,7 +20,7 @@ import {
 } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { CAPTIONS } from "../../constants";
+import { CAPTIONS } from "../../../constants";
 import { GetTerminatedLettersColumns } from "./TerminatedLettersGridColumns";
 
 interface TerminatedLettersRequest {

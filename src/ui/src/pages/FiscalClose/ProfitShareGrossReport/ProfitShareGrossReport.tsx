@@ -4,7 +4,7 @@ import { useState } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import ProfitShareGrossReportGrid from "./ProfitShareGrossReportGrid";
-import ProfitShareGrossReportParameters from "./ProifitShareGrossReportParameters";
+import ProfitShareGrossReportParameters from "./ProfitShareGrossReportSearchFilter";
 
 const ProfitShareGrossReport = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);

@@ -20,11 +20,11 @@ const schema = yup.object().shape({
   gross: yup.number().optional()
 });
 
-interface ProfitShareGrossReportParametersProps {
+interface ProfitShareGrossReportSearchFilterProps {
   setPageReset: (reset: boolean) => void;
 }
 
-const ProfitShareGrossReportParameters: React.FC<ProfitShareGrossReportParametersProps> = ({ setPageReset }) => {
+const ProfitShareGrossReportSearchFilter: React.FC<ProfitShareGrossReportSearchFilterProps> = ({ setPageReset }) => {
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
   const [triggerSearch, { isFetching }] = useLazyGetGrossWagesReportQuery();
@@ -126,4 +126,4 @@ const ProfitShareGrossReportParameters: React.FC<ProfitShareGrossReportParameter
   );
 };
 
-export default ProfitShareGrossReportParameters;
+export default ProfitShareGrossReportSearchFilter;

@@ -4,8 +4,8 @@ import { useSelector } from "react-redux";
 import { useLazyGetRecentlyTerminatedReportQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { CAPTIONS } from "../../constants";
-import { SortParams, useGridPagination } from "../../hooks/useGridPagination";
+import { CAPTIONS } from "../../../constants";
+import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { GetRecentlyTerminatedColumns } from "./RecentlyTerminatedGridColumns";
 
 interface RecentlyTerminatedRequest {

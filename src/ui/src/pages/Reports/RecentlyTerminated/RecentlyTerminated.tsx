@@ -2,7 +2,7 @@ import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useState } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
-import { CAPTIONS } from "../../constants";
+import { CAPTIONS } from "../../../constants";
 import RecentlyTerminatedGrid from "./RecentlyTerminatedGrid";
 import RecentlyTerminatedSearchFilter from "./RecentlyTerminatedSearchFilter";
 

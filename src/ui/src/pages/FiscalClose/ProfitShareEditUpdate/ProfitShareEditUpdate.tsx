@@ -3,7 +3,7 @@ import { Alert, AlertTitle, Button, CircularProgress, Grid, Tooltip, Typography 
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DSMAccordion, numberToCurrency, Page, setMessage, SmartModal, TotalsGrid } from "smart-ui-library";
-import StatusDropdownActionNode from "../../components/StatusDropdownActionNode";
+import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
 import { useChecksumValidation } from "../../../hooks/useChecksumValidation";
 import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
@@ -32,7 +32,7 @@ import {
   ProfitYearRequest
 } from "../../../reduxstore/types";
 // usePrerequisiteNavigations now encapsulated by PrerequisiteGuard
-import PrerequisiteGuard from "../../components/PrerequisiteGuard";
+import PrerequisiteGuard from "../../../components/PrerequisiteGuard";
 import { CAPTIONS } from "../../../constants";
 import { MessageKeys, Messages } from "../../../utils/messageDictonary";
 import ChangesList from "./ChangesList";

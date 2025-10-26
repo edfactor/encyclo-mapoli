@@ -20,7 +20,7 @@ import {
   dateStringValidator,
   endDateStringAfterStartDateValidator,
   profitYearValidator
-} from "../../utils/FormValidators";
+} from "../../../utils/FormValidators";
 
 interface TerminatedLettersSearch {
   profitYear: number;
