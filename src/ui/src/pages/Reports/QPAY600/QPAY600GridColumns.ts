@@ -1,5 +1,5 @@
 import { ColDef } from "ag-grid-community";
-import { createCountColumn, createCurrencyColumn, createPointsColumn } from "../../utils/gridColumnFactory";
+import { createCountColumn, createCurrencyColumn, createPointsColumn } from "../../../utils/gridColumnFactory";
 
 export const GetQPAY600GridColumns = (): ColDef[] => {
   return [

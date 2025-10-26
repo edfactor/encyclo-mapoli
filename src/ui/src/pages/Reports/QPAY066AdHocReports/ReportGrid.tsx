@@ -16,7 +16,7 @@ import { useLazyGetBreakdownByStoreQuery, useLazyGetBreakdownByStoreTotalsQuery 
 import { RootState } from "reduxstore/store";
 import { FilterParams } from "reduxstore/types";
 import { DSMGrid, numberToCurrency } from "smart-ui-library";
-import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
+import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import presets from "./presets";
 import { GetQPAY066AdHocGridColumns } from "./QPAY066AdHocGridColumns";
 

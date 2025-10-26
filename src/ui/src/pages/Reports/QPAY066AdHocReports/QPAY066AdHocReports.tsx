@@ -3,7 +3,7 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import React, { useState } from "react";
 import { ReportPreset } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
-import { CAPTIONS } from "../../constants";
+import { CAPTIONS } from "../../../constants";
 import FilterSection from "./FilterSection";
 import presets from "./presets";
 import ReportGrid from "./ReportGrid";

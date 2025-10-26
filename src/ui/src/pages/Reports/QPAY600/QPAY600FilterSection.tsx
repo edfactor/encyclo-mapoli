@@ -5,7 +5,7 @@ import React from "react";
 import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import { endDateAfterStartDateValidator } from "../../utils/FormValidators";
+import { endDateAfterStartDateValidator } from "../../../utils/FormValidators";
 
 export interface QPAY600FilterParams {
   startDate?: Date | null;

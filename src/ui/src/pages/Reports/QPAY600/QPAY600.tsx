@@ -2,7 +2,7 @@ import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import React, { useState } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
-import { CAPTIONS } from "../../constants";
+import { CAPTIONS } from "../../../constants";
 import QPAY600FilterSection, { QPAY600FilterParams } from "./QPAY600FilterSection";
 import QPAY600Grid from "./QPAY600Grid";
 

@@ -5,7 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 import { ReportPreset } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import { positiveNumberValidator } from "../../utils/FormValidators";
+import { positiveNumberValidator } from "../../../utils/FormValidators";
 
 interface FilterSectionProps {
   presets: ReportPreset[];

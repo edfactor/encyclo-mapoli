@@ -2,9 +2,9 @@ import { Box, CircularProgress, Typography } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { DSMGrid, Pagination } from "smart-ui-library";
-import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
-import { useGridPagination } from "../../hooks/useGridPagination";
-import { RootState } from "../../reduxstore/store";
+import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { useGridPagination } from "../../../hooks/useGridPagination";
+import { RootState } from "../../../reduxstore/store";
 import { QPAY600FilterParams } from "./QPAY600FilterSection";
 import { GetQPAY600GridColumns } from "./QPAY600GridColumns";
 

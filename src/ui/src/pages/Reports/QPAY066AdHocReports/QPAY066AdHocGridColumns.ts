@@ -6,7 +6,7 @@ import {
   createDateColumn,
   createHoursColumn,
   createNameColumn
-} from "../../utils/gridColumnFactory";
+} from "../../../utils/gridColumnFactory";
 
 export const GetQPAY066AdHocGridColumns = (): ColDef[] => [
   createBadgeColumn({}),
