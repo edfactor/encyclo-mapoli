@@ -2,10 +2,10 @@ import { Box, CircularProgress, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
-import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
-import { SortParams, useGridPagination } from "../../hooks/useGridPagination";
-import { useLazyGetQPAY066BTerminatedWithVestedBalanceQuery } from "../../reduxstore/api/YearsEndApi";
-import { RootState } from "../../reduxstore/store";
+import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
+import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
+import { useLazyGetQPAY066BTerminatedWithVestedBalanceQuery } from "../../../reduxstore/api/YearsEndApi";
+import { RootState } from "../../../reduxstore/store";
 import { GetQPAY066BGridColumns } from "./QPAY066BGridColumns";
 
 interface QPAY066BGridProps {

@@ -7,7 +7,7 @@ import {
   createNameColumn,
   createPercentageColumn,
   createStoreColumn
-} from "../../utils/gridColumnFactory";
+} from "../../../utils/gridColumnFactory";
 
 export const GetQPAY066BGridColumns = (): ColDef[] => {
   return [
