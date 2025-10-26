@@ -7,7 +7,7 @@ import { useLazyGetGrossWagesReportQuery } from "reduxstore/api/YearsEndApi";
 import { setGrossWagesReportQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import DsmDatePicker from "../../components/DsmDatePicker/DsmDatePicker";
+import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import { profitYearValidator } from "../../../utils/FormValidators";
 
 interface GrossReportParams {

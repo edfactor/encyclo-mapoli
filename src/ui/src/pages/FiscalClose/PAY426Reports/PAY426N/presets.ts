@@ -1,5 +1,5 @@
 import { ReportPreset } from "reduxstore/types";
-import { CAPTIONS } from "../../../constants";
+import { CAPTIONS } from "../../../../constants";
 
 const presets: ReportPreset[] = [
   {
