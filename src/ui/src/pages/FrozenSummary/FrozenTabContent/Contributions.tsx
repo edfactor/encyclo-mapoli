@@ -1,5 +1,5 @@
 import { Grid } from "@mui/material";
-import ContributionsByAgeGrid from "pages/PROF130/ContributionsByAge/ContributionsByAgeGrid";
+import ContributionsByAgeGrid from "../../../pages/FiscalClose/AgeReports/ContributionsByAge/ContributionsByAgeGrid";
 
 export const Contributions = () => {
   return (
