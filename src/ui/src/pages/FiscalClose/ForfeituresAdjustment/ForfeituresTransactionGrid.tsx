@@ -1,8 +1,8 @@
 import { CircularProgress, Typography } from "@mui/material";
 import { memo, useCallback, useMemo } from "react";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { CAPTIONS } from "../../constants";
-import { SortParams, useGridPagination } from "../../hooks/useGridPagination";
+import { CAPTIONS } from "../../../constants";
+import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { GetForfeituresTransactionGridColumns } from "./ForfeituresTransactionGridColumns";
 
 interface TransactionData {

@@ -5,7 +5,7 @@ import {
   createStateColumn,
   createYearColumn,
   createYesOrNoColumn
-} from "../../utils/gridColumnFactory";
+} from "../../../utils/gridColumnFactory";
 
 export const GetForfeituresTransactionGridColumns = (): ColDef[] => {
   return [

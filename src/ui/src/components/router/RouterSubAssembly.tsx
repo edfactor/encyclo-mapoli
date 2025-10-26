@@ -39,7 +39,7 @@ import ForfeituresByAge from "../../pages/FiscalClose/AgeReports/ForfeituresByAg
 import DemographicFreeze from "../../pages/ITOperations/DemographicFreeze/DemographicFreeze";
 import ProfitShareEditUpdate from "../../pages/FiscalClose/ProfitShareEditUpdate/ProfitShareEditUpdate";
 import Unauthorized from "../../pages/Unauthorized/Unauthorized";
-import YTDWages from "../../pages/YTDWagesExtract/YTDWages";
+import YTDWages from "../../pages/FiscalClose/YTDWagesExtract/YTDWages";
 import { useGetNavigationQuery } from "../../reduxstore/api/NavigationApi";
 import { setImpersonating } from "../../reduxstore/slices/securitySlice";
 import { RootState } from "../../reduxstore/store";
@@ -60,7 +60,7 @@ import ViewDistribution from "../../pages/Distributions/ViewDistribution/ViewDis
 import Documentation from "../../pages/Documentation/Documentation";
 import RecentlyTerminated from "../../pages/Reports/RecentlyTerminated/RecentlyTerminated";
 import TerminatedLetters from "../../pages/Reports/TerminatedLetters/TerminatedLetters";
-import ForfeituresAdjustment from "../../pages/ForfeituresAdjustment/ForfeituresAdjustment";
+import ForfeituresAdjustment from "../../pages/FiscalClose/ForfeituresAdjustment/ForfeituresAdjustment";
 import Adjustments from "../../pages/InquiriesAndAdjustments/Adjustments";
 import PAY426N from "../../pages/FiscalClose/PAY426Reports/PAY426N/PAY426N";
 import ProfitSummary from "../../pages/FiscalClose/PAY426Reports/ProfitSummary/ProfitSummary";

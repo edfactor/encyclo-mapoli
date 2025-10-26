@@ -1,5 +1,5 @@
 import { ISortParams } from "smart-ui-library";
-import { EmployeeWagesForYearResponse } from "../../../reduxstore/types";
+import { EmployeeWagesForYearResponse } from "../../../../reduxstore/types";
 
 export interface PaginationState {
   pageNumber: number;

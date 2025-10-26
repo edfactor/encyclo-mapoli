@@ -4,7 +4,7 @@ import {
   createCurrencyColumn,
   createHoursColumn,
   createStoreColumn
-} from "../../utils/gridColumnFactory";
+} from "../../../utils/gridColumnFactory";
 
 export const GetYTDWagesColumns = (): ColDef[] => {
   const columns: ColDef[] = [

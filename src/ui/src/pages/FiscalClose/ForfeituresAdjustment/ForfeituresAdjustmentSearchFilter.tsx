@@ -12,14 +12,14 @@ import {
 import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import { FORFEITURES_ADJUSTMENT_MESSAGES } from "../../components/MissiveAlerts/MissiveMessages";
-import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
+import { FORFEITURES_ADJUSTMENT_MESSAGES } from "../../../components/MissiveAlerts/MissiveMessages";
+import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
 import {
   badgeNumberStringValidator,
   handleBadgeNumberStringInput,
   handleSsnInput,
   ssnValidator
-} from "../../utils/FormValidators";
+} from "../../../utils/FormValidators";
 
 // Define the search parameters interface
 interface ForfeituresAdjustmentSearchParams {
