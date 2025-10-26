@@ -134,6 +134,7 @@ public class MilitaryService : IMilitaryService
 
             var result = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
+            ctx.UseReadOnlyContext(cancellationToken);
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
             var query = ctx.ProfitDetails
                 .Include(pd => pd.CommentType)
