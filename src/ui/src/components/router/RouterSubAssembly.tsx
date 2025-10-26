@@ -22,10 +22,10 @@ import Under21Report from "../../pages/FiscalClose/ProfitShareByStore/Under21Rep
 import Forfeit from "../../pages/DecemberActivities/Forfeit/Forfeit";
 import FrozenSummary from "../../pages/FrozenSummary/FrozenSummary";
 import MasterInquiry from "../../pages/InquiriesAndAdjustments/MasterInquiry/MasterInquiry";
-import Pay450Summary from "../../pages/PaymasterUpdate/PayMasterUpdateSummary";
-import ProfitSharingControlSheet from "../../pages/PaymasterUpdate/ProfitSharingControlSheet";
 import Profall from "../../pages/FiscalClose/Profall/Profall";
-import ProfitShareGrossReport from "../../pages/ProfitShareGrossReport/ProfitShareGrossReport";
+import Pay450Summary from "../../pages/FiscalClose/PaymasterUpdate/PayMasterUpdateSummary";
+import ProfitSharingControlSheet from "../../pages/FiscalClose/PaymasterUpdate/ProfitSharingControlSheet";
+import ProfitShareGrossReport from "../../pages/FiscalClose/ProfitShareGrossReport/ProfitShareGrossReport";
 
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -37,7 +37,7 @@ import ContributionsByAge from "../../pages/FiscalClose/AgeReports/Contributions
 import DistributionByAge from "../../pages/FiscalClose/AgeReports/DistributionsByAge/DistributionsByAge";
 import ForfeituresByAge from "../../pages/FiscalClose/AgeReports/ForfeituresByAge/ForfeituresByAge";
 import DemographicFreeze from "../../pages/ITOperations/DemographicFreeze/DemographicFreeze";
-import ProfitShareEditUpdate from "../../pages/ProfitShareEditUpdate/ProfitShareEditUpdate";
+import ProfitShareEditUpdate from "../../pages/FiscalClose/ProfitShareEditUpdate/ProfitShareEditUpdate";
 import Unauthorized from "../../pages/Unauthorized/Unauthorized";
 import YTDWages from "../../pages/YTDWagesExtract/YTDWages";
 import { useGetNavigationQuery } from "../../reduxstore/api/NavigationApi";
@@ -58,8 +58,8 @@ import DevDebug from "../../pages/Dev/DevDebug";
 import AddDistribution from "../../pages/Distributions/AddDistribution/AddDistribution";
 import ViewDistribution from "../../pages/Distributions/ViewDistribution/ViewDistribution";
 import Documentation from "../../pages/Documentation/Documentation";
-import RecentlyTerminated from "../../pages/FiscalClose/RecentlyTerminated/RecentlyTerminated";
-import TerminatedLetters from "../../pages/FiscalClose/TerminatedLetters/TerminatedLetters";
+import RecentlyTerminated from "../../pages/Reports/RecentlyTerminated/RecentlyTerminated";
+import TerminatedLetters from "../../pages/Reports/TerminatedLetters/TerminatedLetters";
 import ForfeituresAdjustment from "../../pages/ForfeituresAdjustment/ForfeituresAdjustment";
 import Adjustments from "../../pages/InquiriesAndAdjustments/Adjustments";
 import PAY426N from "../../pages/FiscalClose/PAY426Reports/PAY426N/PAY426N";
@@ -69,7 +69,7 @@ import QPAY066B from "../../pages/QPAY066B/QPAY066B";
 import QPAY600 from "../../pages/QPAY600/QPAY600";
 import PayBeNext from "../../pages/Reports/PayBeNext/PayBeNext";
 import PayBenReport from "../../pages/Reports/PayBenReport/PayBenReport";
-import ReprintCertificates from "../../pages/ReprintCertificates/ReprintCertificates";
+import ReprintCertificates from "../../pages/FiscalClose/ReprintCertificates/ReprintCertificates";
 import LandingPage from "./LandingPage";
 
 const RouterSubAssembly: React.FC = () => {
