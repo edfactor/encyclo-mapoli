@@ -12,7 +12,7 @@ import { FilterParams } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { psnValidator } from "../../../utils/FormValidators";
-import presets from "../../PAY426Reports/PAY426N/presets";
+import presets from "../../FiscalClose/PAY426Reports/PAY426N/presets";
 
 interface ProfitShareReportSearch {
   badgeNumber?: number | null;

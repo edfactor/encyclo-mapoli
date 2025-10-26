@@ -10,7 +10,7 @@ import { FilterParams } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import { useLazyGetYearEndProfitSharingReportTotalsQuery } from "../../../reduxstore/api/YearsEndApi.ts";
-import ProfitSummary from "../../PAY426Reports/ProfitSummary/ProfitSummary";
+import ProfitSummary from "../../FiscalClose/PAY426Reports/ProfitSummary/ProfitSummary";
 import ProfitShareReportGrid from "./ProfitShareReportGrid";
 import ProfitShareReportSearchFilter from "./ProfitShareReportSearchFilter.tsx";
 
