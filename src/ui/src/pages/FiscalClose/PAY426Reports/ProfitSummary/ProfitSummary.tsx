@@ -10,8 +10,8 @@ import {
 } from "reduxstore/api/YearsEndApi";
 import { FilterParams, YearEndProfitSharingReportSummaryLineItem } from "reduxstore/types";
 import { DSMGrid, Page } from "smart-ui-library";
-import { RootState } from "../../../reduxstore/store";
-import CommitModal from "../../DecemberActivities/ProfitShareReport/CommitModal.tsx";
+import { RootState } from "../../../../reduxstore/store";
+import CommitModal from "../../../DecemberActivities/ProfitShareReport/CommitModal.tsx";
 import presets from "../PAY426N/presets";
 import { GetProfitSummaryGridColumns } from "./ProfitSummaryGridColumns";
 

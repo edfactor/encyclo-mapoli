@@ -9,8 +9,8 @@ import {
 } from "reduxstore/api/YearsEndApi";
 import { FilterParams } from "reduxstore/types";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
-import { RootState } from "../../../reduxstore/store";
+import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
+import { RootState } from "../../../../reduxstore/store";
 import { GetProfitSharingReportGridColumns } from "./GetProfitSharingReportGridColumns";
 import presets from "./presets";
 

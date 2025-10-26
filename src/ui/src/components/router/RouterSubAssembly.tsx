@@ -62,8 +62,8 @@ import RecentlyTerminated from "../../pages/FiscalClose/RecentlyTerminated/Recen
 import TerminatedLetters from "../../pages/FiscalClose/TerminatedLetters/TerminatedLetters";
 import ForfeituresAdjustment from "../../pages/ForfeituresAdjustment/ForfeituresAdjustment";
 import Adjustments from "../../pages/InquiriesAndAdjustments/Adjustments";
-import PAY426N from "../../pages/PAY426Reports/PAY426N/PAY426N";
-import ProfitSummary from "../../pages/PAY426Reports/ProfitSummary/ProfitSummary";
+import PAY426N from "../../pages/FiscalClose/PAY426Reports/PAY426N/PAY426N";
+import ProfitSummary from "../../pages/FiscalClose/PAY426Reports/ProfitSummary/ProfitSummary";
 import QPAY066AdHocReports from "../../pages/QPAY066AdHocReports/QPAY066AdHocReports";
 import QPAY066B from "../../pages/QPAY066B/QPAY066B";
 import QPAY600 from "../../pages/QPAY600/QPAY600";

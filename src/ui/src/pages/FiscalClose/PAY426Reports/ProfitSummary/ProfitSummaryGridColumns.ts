@@ -1,6 +1,6 @@
 import { ColDef } from "ag-grid-community";
 import { formatNumberWithComma, numberToCurrency } from "smart-ui-library";
-import { createCurrencyColumn, createPointsColumn } from "../../../utils/gridColumnFactory";
+import { createCurrencyColumn, createPointsColumn } from "../../../../utils/gridColumnFactory";
 
 export const GetProfitSummaryGridColumns = (): ColDef[] => {
   return [

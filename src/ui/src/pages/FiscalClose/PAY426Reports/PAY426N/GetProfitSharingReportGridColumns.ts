@@ -11,7 +11,7 @@ import {
   createSSNColumn,
   createStatusColumn,
   createStoreColumn
-} from "../../../utils/gridColumnFactory";
+} from "../../../../utils/gridColumnFactory";
 
 export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   // Import the date formatter from dateutils
