@@ -26,23 +26,30 @@ This document provides a detailed technical description of how page components a
 
 ```
 src/ui/src/pages/
-├── AddDistribution/           # Distribution creation workflow
-├── Adjustments/               # Adjustment forms
-├── BeneficiaryInquiry/       # Beneficiary search and details
+├── Beneficiaries/            # Beneficiary management pages
+│   ├── BeneficiaryInquiry.tsx
+│   ├── CreateBeneficiary.tsx
+│   └── Grid and filter components
 ├── DecemberActivities/        # Year-end December operations
 │   ├── DemographicBadgesNotInPayprofit/
 │   ├── DistributionsAndForfeitures/
 │   ├── DuplicateNamesAndBirthdays/
 │   ├── DuplicateSSNsOnDemographics/
 │   ├── Forfeit/
+│   ├── ManageExecutiveHoursAndDollars/
 │   ├── MilitaryContribution/
 │   ├── NegativeEtvaForSSNsOnPayprofit/
+│   ├── ProfitShareReport/
 │   ├── Termination/
 │   └── UnForfeit/
-├── DistributionInquiry/      # Distribution search and management
-├── Documentation/             # Application documentation viewer
-├── EditDistribution/          # Distribution editing workflow
-├── FiscalClose/               # Fiscal close operations
+├── Dev/                      # Development/testing pages
+├── Distributions/            # Distribution management
+│   ├── AddDistribution/
+│   ├── DistributionInquiry/
+│   ├── EditDistribution/
+│   └── ViewDistribution/
+├── Documentation/            # Application documentation viewer
+├── FiscalClose/              # Fiscal close operations
 │   ├── AgeReports/
 │   ├── EligibleEmployees/
 │   ├── ForfeituresAdjustment/
@@ -59,31 +66,25 @@ src/ui/src/pages/
 │   └── YTDWagesExtract/
 ├── FrozenSummary/            # Frozen data summary views
 ├── InquiriesAndAdjustments/  # Employee inquiries and adjustments
+│   ├── Adjustments.tsx
+│   ├── MasterInquiry/
+│   └── hooks/
 ├── ITOperations/             # IT operations (demographic freeze, etc.)
-├── MasterInquiry/            # Master inquiry (employee/beneficiary lookup)
 ├── Reports/                  # Reporting pages
-│   ├── PROF130/
-│   │   ├── BalanceByAge/
-│   │   ├── BalanceByYears/
-│   │   ├── ContributionsByAge/
-│   │   ├── DistributionByAge/
-│   │   ├── ForfeituresByAge/
-│   │   └── VestedAmountsByAge/
+│   ├── PayBeNext/
+│   ├── PayBenReport/
 │   ├── QPAY066AdHocReports/
 │   ├── QPAY600/
-│   └── RecentlyTerminated/
-├── ProfitShareReport/        # Main profit share report
-├── Unauthorized/             # Unauthorized access page
-├── ViewDistribution/         # Distribution viewing and disbursement tracking
-├── Distributions/            # Distribution management
-└── Dev/                      # Development/testing pages
+│   ├── RecentlyTerminated/
+│   └── TerminatedLetters/
+└── Unauthorized/             # Unauthorized access page
 ```
 
 ### Statistics
 
-- **Total page directories**: 13 (organized thematically)
-- **Total nested subdirectories**: 40+ components
-- **Total page component files**: ~120+ `.tsx` files across all levels
+- **Total top-level page directories**: 12 (organized thematically)
+- **Total nested subdirectories**: 40+ component pages
+- **Total page component files**: ~130+ `.tsx` files across all levels
 - **Grid column definition files**: 50+ files
 
 ---
