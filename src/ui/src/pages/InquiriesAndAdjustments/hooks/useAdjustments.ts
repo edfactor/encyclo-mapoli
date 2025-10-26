@@ -48,6 +48,18 @@ export const useAdjustments = () => {
   const profitDetailsResponseSource = useRef<ProfitDetailsResponse | null>(null);
   const profitDetailsResponseDestination = useRef<ProfitDetailsResponse | null>(null);
 
+  const addSsnDoesNotExistAlert = useCallback(
+    (ssn: number) => {
+      addAlert({
+        id: Date.now(),
+        message: `No member found with SSN: ${ssn}`,
+        description: `No member found with SSN: ${ssn}`,
+        severity: "warning"
+      } as MissiveResponse);
+    },
+    [addAlert]
+  );
+
   const fetchProfitDetailsForMember = useCallback(
     async (member: MemberRecord, isSecondary: boolean = false) => {
       try {
@@ -270,18 +282,6 @@ export const useAdjustments = () => {
       }
     },
     [mergeProfitsDetail, masterInquiryMemberDetails, masterInquiryMemberDetailsSecondary, addAlert, clearAlerts]
-  );
-
-  const addSsnDoesNotExistAlert = useCallback(
-    (ssn: number) => {
-      addAlert({
-        id: Date.now(),
-        message: `No member found with SSN: ${ssn}`,
-        description: `No member found with SSN: ${ssn}`,
-        severity: "warning"
-      } as MissiveResponse);
-    },
-    [addAlert]
   );
 
   const resetSearch = useCallback(() => {
