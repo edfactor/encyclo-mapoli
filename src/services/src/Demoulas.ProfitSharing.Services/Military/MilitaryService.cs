@@ -134,7 +134,6 @@ public class MilitaryService : IMilitaryService
 
             var result = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-            ctx.UseReadOnlyContext(cancellationToken);
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
             var query = ctx.ProfitDetails
                 .Include(pd => pd.CommentType)
@@ -167,7 +166,7 @@ public class MilitaryService : IMilitaryService
                 // get the correct fiscal end date for the contribution year
                 await GetCalendarProfitYearDateForResponses(results, cancellationToken);
                 return results;
-            });
+            }, cancellationToken);
 
             return Result<PaginatedResponseDto<MilitaryContributionResponse>>.Success(result);
         }
