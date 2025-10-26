@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material";
 import { memo, useMemo } from "react";
-import { DSMGrid, Pagination, ISortParams } from "smart-ui-library";
+import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
 import { SortParams } from "../../hooks/useGridPagination";

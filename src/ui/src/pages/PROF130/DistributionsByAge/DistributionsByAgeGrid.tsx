@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, TotalsGrid, numberToCurrency } from "smart-ui-library";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
-import { GetDistributionsByAgeColumns } from "./DistributionByAgeGridColumns";
+import { GetDistributionsByAgeColumns } from "./DistributionsByAgeGridColumns";
 
 const DistributionByAgeGrid: React.FC = () => {
   const { distributionsByAgeTotal, distributionsByAgeFullTime, distributionsByAgePartTime } = useSelector(

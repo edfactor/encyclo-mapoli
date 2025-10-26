@@ -1,15 +1,15 @@
-import { Box, CircularProgress, Divider } from "@mui/material";
-import { Grid } from "@mui/material";
-import { Page } from "smart-ui-library";
-import ForfeituresByAgeGrid from "./ForfeituresByAgeGrid";
-import { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "reduxstore/store";
+import { Box, CircularProgress, Divider, Grid } from "@mui/material";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetForfeituresByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { setForfeituresByAgeQueryParams } from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import { Page } from "smart-ui-library";
+import { CAPTIONS } from "../../../constants";
+import ForfeituresByAgeGrid from "./ForfeituresByAgeGrid";
 const ForfeituresByAge = () => {
   const [hasInitialSearchRun, setHasInitialSearchRun] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
@@ -58,7 +58,7 @@ const ForfeituresByAge = () => {
 
   return (
     <Page
-      label="Forfeitures By Age"
+      label={CAPTIONS.FORFEITURES_BY_AGE}
       actionNode={renderActionNode()}>
       <Grid
         container

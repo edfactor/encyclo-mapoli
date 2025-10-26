@@ -7,6 +7,7 @@ import { useLazyGetVestingAmountByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { setVestedAmountsByAgeQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { numberToCurrency, Page, TotalsGrid } from "smart-ui-library";
+import { CAPTIONS } from "../../../constants";
 import VestedAmountsByAgeTabs from "./VestedAmountsByAgeTabs";
 
 const options: Intl.DateTimeFormatOptions = {
@@ -65,7 +66,7 @@ const VestedAmountsByAge = () => {
 
   return (
     <Page
-      label="Vested Amounts by Age"
+      label={CAPTIONS.VESTED_AMOUNTS_BY_AGE}
       actionNode={renderActionNode()}>
       <Grid
         container

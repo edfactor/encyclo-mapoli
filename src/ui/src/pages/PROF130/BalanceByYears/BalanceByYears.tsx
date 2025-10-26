@@ -8,6 +8,7 @@ import { setBalanceByYearsQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import { Page } from "smart-ui-library";
+import { CAPTIONS } from "../../../constants";
 import BalanceByYearsGrid from "./BalanceByYearsGrid";
 
 const BalanceByYears = () => {
@@ -58,7 +59,7 @@ const BalanceByYears = () => {
 
   return (
     <Page
-      label="Balance By Years"
+      label={CAPTIONS.BALANCE_BY_YEARS}
       actionNode={renderActionNode()}>
       <Grid
         container

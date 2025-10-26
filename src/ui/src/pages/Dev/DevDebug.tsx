@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useGetHealthQuery } from "reduxstore/api/AppSupportApi";
 import { useLazyGetCurrentUserQuery, useLazyGetMetadataQuery } from "reduxstore/api/ItOperationsApi";
@@ -7,6 +7,7 @@ import { RootState } from "reduxstore/store";
 import { Page } from "smart-ui-library";
 import { getHealthStatusDescription } from "utils/appSupportUtil";
 import DSMCollapsedAccordion from "../../components/DSMCollapsedAccordion";
+import { CAPTIONS } from "../../constants";
 
 interface ApiRequest {
   time: string | number;
@@ -61,7 +62,9 @@ const DevDebug = () => {
   }, []);
 
   return (
-    <Page label="Dev Debug">
+    <Page
+      label={`${CAPTIONS.DEV_DEBUG}`}
+      actionNode={null}>
       <div style={{ padding: "24px" }}>
         {/* Health Status Section */}
         <div style={{ display: "flex", marginTop: "24px", gap: "24px" }}>

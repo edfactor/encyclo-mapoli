@@ -1,15 +1,15 @@
-import { Box, CircularProgress, Divider } from "@mui/material";
-import { Grid } from "@mui/material";
-import { Page } from "smart-ui-library";
-import ContributionsByAgeGrid from "./ContributionsByAgeGrid";
-import { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "reduxstore/store";
+import { Box, CircularProgress, Divider, Grid } from "@mui/material";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetContributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { setContributionsByAgeQueryParams } from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import { Page } from "smart-ui-library";
+import { CAPTIONS } from "../../../constants";
+import ContributionsByAgeGrid from "./ContributionsByAgeGrid";
 
 const ContributionsByAge = () => {
   const [hasInitialSearchRun, setHasInitialSearchRun] = useState(false);
@@ -59,7 +59,7 @@ const ContributionsByAge = () => {
 
   return (
     <Page
-      label="Contributions By Age"
+      label={CAPTIONS.CONTRIBUTIONS_BY_AGE}
       actionNode={renderActionNode()}>
       <Grid
         container

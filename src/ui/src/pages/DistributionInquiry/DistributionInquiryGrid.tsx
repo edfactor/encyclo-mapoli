@@ -3,7 +3,7 @@ import { useCallback, useMemo } from "react";
 import { DSMGrid, numberToCurrency, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
-import { useGridPagination, SortParams } from "../../hooks/useGridPagination";
+import { SortParams, useGridPagination } from "../../hooks/useGridPagination";
 import { DistributionSearchResponse } from "../../types";
 import { GetDistributionInquiryColumns } from "./DistributionInquiryGridColumns";
 

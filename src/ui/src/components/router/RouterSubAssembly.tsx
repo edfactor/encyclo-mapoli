@@ -35,7 +35,7 @@ import MenuData from "../../MenuData";
 import DemographicFreeze from "../../pages/ITOperations/DemographicFreeze/DemographicFreeze";
 import BalanceByAge from "../../pages/PROF130/BalanceByAge/BalanceByAge";
 import ContributionsByAge from "../../pages/PROF130/ContributionsByAge/ContributionsByAge";
-import DistributionByAge from "../../pages/PROF130/DistributionByAge/DistributionByAge";
+import DistributionByAge from "../../pages/PROF130/DistributionsByAge/DistributionsByAge";
 import ForfeituresByAge from "../../pages/PROF130/ForfeituresByAge/ForfeituresByAge";
 import ProfitShareEditUpdate from "../../pages/ProfitShareEditUpdate/ProfitShareEditUpdate";
 import Unauthorized from "../../pages/Unauthorized/Unauthorized";
@@ -57,6 +57,7 @@ import MilitaryContribution from "../../pages/DecemberActivities/MilitaryContrib
 import DevDebug from "../../pages/Dev/DevDebug";
 import DistributionInquiry from "../../pages/DistributionInquiry/DistributionInquiry";
 import Documentation from "../../pages/Documentation/Documentation";
+import EditDistribution from "../../pages/EditDistribution/EditDistribution";
 import RecentlyTerminated from "../../pages/FiscalClose/RecentlyTerminated/RecentlyTerminated";
 import TerminatedLetters from "../../pages/FiscalClose/TerminatedLetters/TerminatedLetters";
 import ForfeituresAdjustment from "../../pages/ForfeituresAdjustment/ForfeituresAdjustment";
@@ -69,7 +70,6 @@ import PayBeNext from "../../pages/Reports/PayBeNext/PayBeNext";
 import PayBenReport from "../../pages/Reports/PayBenReport/PayBenReport";
 import ReprintCertificates from "../../pages/ReprintCertificates/ReprintCertificates";
 import ViewDistribution from "../../pages/ViewDistribution/ViewDistribution";
-import EditDistribution from "../../pages/EditDistribution/EditDistribution";
 import LandingPage from "./LandingPage";
 
 const RouterSubAssembly: React.FC = () => {

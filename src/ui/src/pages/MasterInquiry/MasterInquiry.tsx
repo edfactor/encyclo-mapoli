@@ -133,7 +133,7 @@ const MasterInquiryContent = memo(() => {
 
 const MasterInquiry = () => {
   return (
-    <Page label="MASTER INQUIRY (008-10)">
+    <Page label={CAPTIONS.MASTER_INQUIRY}>
       <MissiveAlertProvider>
         <MasterInquiryContent />
       </MissiveAlertProvider>

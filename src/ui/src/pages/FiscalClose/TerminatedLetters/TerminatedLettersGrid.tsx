@@ -1,3 +1,4 @@
+import { TerminatedLettersDetail } from "";
 import { Print } from "@mui/icons-material";
 import {
   Button,
@@ -19,7 +20,6 @@ import {
 } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { TerminatedLettersDetail } from "types/reports/terminated-letters";
 import { CAPTIONS } from "../../../constants";
 import { GetTerminatedLettersColumns } from "./TerminatedLettersGridColumns";
 

@@ -2,6 +2,7 @@ import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useRef } from "react";
 import { Page } from "smart-ui-library";
+import { CAPTIONS } from "../../../constants";
 import NegativeEtvaForSSNsOnPayprofitGrid from "./NegativeEtvaForSSNsOnPayprofitGrid";
 import useNegativeEtvaForSSNsOnPayprofit from "./hooks/useNegativeEtvaForSSNsOnPayprofit";
 
@@ -17,7 +18,7 @@ const NegativeEtvaForSSNsOnPayprofit = () => {
 
   return (
     <Page
-      label={`Negative ETVA for SSNs on Payprofit (${recordCount} records)`}
+      label={`${CAPTIONS.NEGATIVE_ETVA} (${recordCount} records)`}
       actionNode={renderActionNode()}>
       <Grid
         container

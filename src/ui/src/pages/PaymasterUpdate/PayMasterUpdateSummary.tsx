@@ -95,8 +95,7 @@ const PayMasterUpdateSummary = () => {
     try {
       await updateEnrollment({
         profitYear: fiscalCloseProfitYear ?? 0
-      })
-      .unwrap();
+      }).unwrap();
       dispatch(
         setMessage({
           key: "UpdateEnrollment",
@@ -108,7 +107,6 @@ const PayMasterUpdateSummary = () => {
         })
       );
     } catch (error: unknown) {
-     
       dispatch(
         setMessage({
           key: "UpdateEnrollment",
@@ -120,8 +118,7 @@ const PayMasterUpdateSummary = () => {
         })
       );
       console.error("Update enrollment failed:", error);
-    }
-    finally{
+    } finally {
       setIsModalOpen(false);
     }
   };

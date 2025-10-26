@@ -1,5 +1,5 @@
+import DistributionByAgeGrid from "@/pages/PROF130/DistributionsByAge/DistributionsByAgeGrid";
 import { Grid } from "@mui/material";
-import DistributionByAgeGrid from "pages/PROF130/DistributionByAge/DistributionByAgeGrid";
 
 export const Distributions = () => {
   return (

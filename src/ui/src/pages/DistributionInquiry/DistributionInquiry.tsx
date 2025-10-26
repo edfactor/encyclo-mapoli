@@ -14,21 +14,19 @@ import { CAPTIONS } from "../../constants";
 import { SortParams } from "../../hooks/useGridPagination";
 import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
 import { useReadOnlyNavigation } from "../../hooks/useReadOnlyNavigation";
-import { useLazySearchDistributionsQuery } from "../../reduxstore/api/DistributionApi";
+import { useDeleteDistributionMutation, useLazySearchDistributionsQuery } from "../../reduxstore/api/DistributionApi";
 import {
   clearCurrentDistribution,
   clearCurrentMember,
   clearHistoricalDisbursements,
   clearPendingDisbursements
 } from "../../reduxstore/slices/distributionSlice";
-import { DistributionSearchFormData, DistributionSearchRequest } from "../../types";
+import { DistributionSearchFormData, DistributionSearchRequest, DistributionSearchResponse } from "../../types";
 import { ServiceErrorResponse } from "../../types/errors/errors";
+import DeleteDistributionModal from "./DeleteDistributionModal";
 import DistributionInquiryGrid from "./DistributionInquiryGrid";
 import DistributionInquirySearchFilter from "./DistributionInquirySearchFilter";
 import NewEntryDialog from "./NewEntryDialog";
-import DeleteDistributionModal from "./DeleteDistributionModal";
-import { useDeleteDistributionMutation } from "../../reduxstore/api/DistributionApi";
-import { DistributionSearchResponse } from "../../types";
 
 interface LocationState {
   showSuccessMessage?: boolean;
