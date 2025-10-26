@@ -30,6 +30,7 @@ src/ui/src/pages/
 │   ├── DistributionsAndForfeitures/
 │   ├── DuplicateNamesAndBirthdays/
 │   ├── DuplicateSSNsOnDemographics/
+│   ├── Forfeit/
 │   ├── MilitaryContribution/
 │   ├── NegativeEtvaForSSNsOnPayprofit/
 │   ├── Termination/
@@ -38,45 +39,48 @@ src/ui/src/pages/
 ├── Documentation/             # Application documentation viewer
 ├── EditDistribution/          # Distribution editing workflow
 ├── FiscalClose/               # Fiscal close operations
+│   ├── AgeReports/
 │   ├── EligibleEmployees/
-│   ├── ManageExecutiveHoursAndDollars/
+│   ├── ForfeituresAdjustment/
+│   ├── InfoCard.tsx
+│   ├── PAY426Reports/
+│   ├── PaymasterUpdate/
+│   ├── Profall/
 │   ├── ProfitShareByStore/
-│   ├── RecentlyTerminated/
-│   └── TerminatedLetters/
-├── FiscalFlow/                # Fiscal workflow management
-├── Forfeit/                   # Forfeiture operations
-├── ForfeituresAdjustment/    # Forfeiture adjustments
+│   ├── ProfitShareEditUpdate/
+│   ├── ProfitShareGrossReport/
+│   ├── ProfitShareTotals426/
+│   ├── QPAY066B/
+│   ├── ReprintCertificates/
+│   └── YTDWagesExtract/
 ├── FrozenSummary/            # Frozen data summary views
+├── InquiriesAndAdjustments/  # Employee inquiries and adjustments
 ├── ITOperations/             # IT operations (demographic freeze, etc.)
 ├── MasterInquiry/            # Master inquiry (employee/beneficiary lookup)
-├── PAY426Reports/            # PAY426 series reports
-├── PaymasterUpdate/          # Paymaster update operations
-├── PROF130/                  # PROF130 series reports
-│   ├── BalanceByAge/
-│   ├── BalanceByYears/
-│   ├── ContributionsByAge/
-│   ├── DistributionByAge/
-│   ├── ForfeituresByAge/
-│   └── VestedAmountsByAge/
-├── Profall/                  # Employee listing report
-├── ProfitShareEditUpdate/    # Year-end profit share calculation and update
-├── ProfitShareGrossReport/   # Gross profit sharing report
+├── Reports/                  # Reporting pages
+│   ├── PROF130/
+│   │   ├── BalanceByAge/
+│   │   ├── BalanceByYears/
+│   │   ├── ContributionsByAge/
+│   │   ├── DistributionByAge/
+│   │   ├── ForfeituresByAge/
+│   │   └── VestedAmountsByAge/
+│   ├── QPAY066AdHocReports/
+│   ├── QPAY600/
+│   └── RecentlyTerminated/
 ├── ProfitShareReport/        # Main profit share report
-├── ProfitShareTotals426/     # PAY426 totals report
-├── QPAY066AdHocReports/      # QPAY066 ad-hoc reports
-├── QPAY066B/                 # QPAY066B report
-├── QPAY600/                  # QPAY600 report
-├── ReprintCertificates/      # Certificate reprinting
 ├── Unauthorized/             # Unauthorized access page
 ├── ViewDistribution/         # Distribution viewing and disbursement tracking
-└── YTDWagesExtract/          # Year-to-date wages extract
+├── Distributions/            # Distribution management
+└── Dev/                      # Development/testing pages
 ```
 
 ### Statistics
 
-- **Total page directories**: 33
-- **Total page component files**: ~94 `.tsx` files at depth 1-2
-- **Grid column definition files**: 49 files
+- **Total page directories**: 13 (organized thematically)
+- **Total nested subdirectories**: 40+ components
+- **Total page component files**: ~120+ `.tsx` files across all levels
+- **Grid column definition files**: 50+ files
 
 ---
 
