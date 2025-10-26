@@ -1,23 +1,14 @@
 import { Grid } from "@mui/material";
-import { useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, numberToCurrency, TotalsGrid } from "smart-ui-library";
+import { DSMGrid, numberToCurrency, TotalsGrid } from "smart-ui-library";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { GetBalanceByYearsGridColumns } from "./BalanceByYearsGridColumns";
-// numberToCurrency imported above
 
 const BalanceByYearsGrid: React.FC = () => {
-  const [_discard0, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
-    isSortDescending: false
-  });
-
   const { balanceByYearsTotal, balanceByYearsFullTime, balanceByYearsPartTime } = useSelector(
     (state: RootState) => state.yearsEnd
   );
-
-  const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
   const columnDefsTotal = GetBalanceByYearsGridColumns(FrozenReportsByAgeRequestType.Total);
   const columnDefsFullTime = GetBalanceByYearsGridColumns(FrozenReportsByAgeRequestType.FullTime);
@@ -35,12 +26,11 @@ const BalanceByYearsGrid: React.FC = () => {
           <Grid
             size={{ xs: 12 }}
             container
-            columnSpacing={2}
             rowSpacing={0}>
             <Grid size={{ xs: 4 }}>
-              <h2 className="text-dsm-secondary">Total</h2>
+              <h2 className="px-[24px] text-dsm-secondary">Total</h2>
               <TotalsGrid
-                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
                 tablePadding="0px"
                 displayData={[
                   [
@@ -65,7 +55,7 @@ const BalanceByYearsGrid: React.FC = () => {
             <Grid size={{ xs: 4 }}>
               <h2 className="text-dsm-secondary">Full-time</h2>
               <TotalsGrid
-                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
                 tablePadding="0px"
                 displayData={[
                   [
@@ -90,7 +80,7 @@ const BalanceByYearsGrid: React.FC = () => {
             <Grid size={{ xs: 4 }}>
               <h2 className="text-dsm-secondary">Part-time</h2>
               <TotalsGrid
-                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
                 tablePadding="0px"
                 displayData={[
                   [
@@ -116,16 +106,16 @@ const BalanceByYearsGrid: React.FC = () => {
           <Grid
             size={{ xs: 12 }}
             container
-            columnSpacing={2}
             rowSpacing={0}>
             <Grid size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_Total"}
                 isLoading={false}
-                handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: balanceByYearsTotal?.response.results ?? [],
-                  columnDefs: columnDefsTotal ?? []
+                  columnDefs: columnDefsTotal ?? [],
+                  suppressHorizontalScroll: true,
+                  suppressColumnVirtualisation: true
                 }}
               />
             </Grid>
@@ -133,10 +123,11 @@ const BalanceByYearsGrid: React.FC = () => {
               <DSMGrid
                 preferenceKey={"AGE_FullTime"}
                 isLoading={false}
-                handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: balanceByYearsFullTime?.response.results ?? [],
-                  columnDefs: columnDefsFullTime ?? []
+                  columnDefs: columnDefsFullTime ?? [],
+                  suppressHorizontalScroll: true,
+                  suppressColumnVirtualisation: true
                 }}
               />
             </Grid>
@@ -144,10 +135,11 @@ const BalanceByYearsGrid: React.FC = () => {
               <DSMGrid
                 preferenceKey={"AGE_PartTime"}
                 isLoading={false}
-                handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: balanceByYearsPartTime?.response.results ?? [],
-                  columnDefs: columnDefsPartTime ?? []
+                  columnDefs: columnDefsPartTime ?? [],
+                  suppressHorizontalScroll: true,
+                  suppressColumnVirtualisation: true
                 }}
               />
             </Grid>

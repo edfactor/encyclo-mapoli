@@ -1,6 +1,7 @@
 import { Divider, Grid } from "@mui/material";
 import { useRef } from "react";
 import { Page } from "smart-ui-library";
+import { CAPTIONS } from "../../../constants";
 import PayBenReportGrid from "./PayBenReportGrid";
 import usePayBenReport from "./hooks/usePayBenReport";
 
@@ -11,7 +12,7 @@ const PayBenReport = () => {
   const recordCount = searchResults?.total || 0;
 
   return (
-    <Page label={`PAYROLL BENEFICIARY REPORT (PAYBEN/PAY495) (${recordCount} records)`}>
+    <Page label={`${CAPTIONS.PAYBEN_REPORT} (${recordCount} records)`}>
       <Grid
         container
         rowSpacing="24px">

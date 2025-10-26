@@ -166,7 +166,7 @@ public class MilitaryService : IMilitaryService
                 // get the correct fiscal end date for the contribution year
                 await GetCalendarProfitYearDateForResponses(results, cancellationToken);
                 return results;
-            });
+            }, cancellationToken);
 
             return Result<PaginatedResponseDto<MilitaryContributionResponse>>.Success(result);
         }

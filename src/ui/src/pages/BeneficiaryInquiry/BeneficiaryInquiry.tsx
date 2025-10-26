@@ -194,7 +194,7 @@ const BeneficiaryInquiry = () => {
 
   return (
     <MissiveAlertProvider>
-      <Page label="BENEFICIARY INQUIRY">
+      <Page label={CAPTIONS.BENEFICIARY_INQUIRY}>
         <>
           <Dialog
             open={open}

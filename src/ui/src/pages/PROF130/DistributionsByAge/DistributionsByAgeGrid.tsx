@@ -1,25 +1,15 @@
 import { Grid } from "@mui/material";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, TotalsGrid, numberToCurrency } from "smart-ui-library";
-import { useGridPagination } from "../../../hooks/useGridPagination";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
-import { GetDistributionsByAgeColumns } from "./DistributionByAgeGridColumns";
+import { GetDistributionsByAgeColumns } from "./DistributionsByAgeGridColumns";
 
 const DistributionByAgeGrid: React.FC = () => {
   const { distributionsByAgeTotal, distributionsByAgeFullTime, distributionsByAgePartTime } = useSelector(
     (state: RootState) => state.yearsEnd
   );
-
-  const { handleSortChange } = useGridPagination({
-    initialPageSize: 255,
-    initialSortBy: "badgeNumber",
-    initialSortDescending: false,
-    onPaginationChange: useCallback(() => {
-      // This component doesn't use pagination, only sorting
-    }, [])
-  });
 
   const columnDefsTotal = useMemo(() => GetDistributionsByAgeColumns(FrozenReportsByAgeRequestType.Total), []);
 
@@ -57,10 +47,11 @@ const DistributionByAgeGrid: React.FC = () => {
               <DSMGrid
                 preferenceKey={"DIST_AGE_Total"}
                 isLoading={false}
-                handleSortChanged={handleSortChange}
                 providedOptions={{
                   rowData: distributionsByAgeTotal?.response?.results ?? [],
-                  columnDefs: columnDefsTotal ?? []
+                  columnDefs: columnDefsTotal ?? [],
+                  suppressHorizontalScroll: true,
+                  suppressColumnVirtualisation: true
                 }}
               />
             </Grid>
@@ -89,10 +80,11 @@ const DistributionByAgeGrid: React.FC = () => {
               <DSMGrid
                 preferenceKey={"DIST_AGE_FullTime"}
                 isLoading={false}
-                handleSortChanged={handleSortChange}
                 providedOptions={{
                   rowData: distributionsByAgeFullTime?.response?.results ?? [],
-                  columnDefs: columnDefsTotal ?? []
+                  columnDefs: columnDefsTotal ?? [],
+                  suppressHorizontalScroll: true,
+                  suppressColumnVirtualisation: true
                 }}
               />
             </Grid>
@@ -121,10 +113,11 @@ const DistributionByAgeGrid: React.FC = () => {
               <DSMGrid
                 preferenceKey={"DIST_AGE_PartTime"}
                 isLoading={false}
-                handleSortChanged={handleSortChange}
                 providedOptions={{
                   rowData: distributionsByAgePartTime?.response?.results ?? [],
-                  columnDefs: columnDefsTotal ?? []
+                  columnDefs: columnDefsTotal ?? [],
+                  suppressHorizontalScroll: true,
+                  suppressColumnVirtualisation: true
                 }}
               />
             </Grid>

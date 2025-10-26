@@ -1,9 +1,7 @@
 import { Grid } from "@mui/material";
-import { useCallback } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, numberToCurrency, TotalsGrid } from "smart-ui-library";
-import { useGridPagination } from "../../../hooks/useGridPagination";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { GetBalanceByAgeColumns } from "./BalanceByAgeGridColumns";
 
@@ -11,15 +9,6 @@ const BalanceByAgeGrid: React.FC = () => {
   const { balanceByAgeTotal, balanceByAgeFullTime, balanceByAgePartTime } = useSelector(
     (state: RootState) => state.yearsEnd
   );
-
-  const { handleSortChange } = useGridPagination({
-    initialPageSize: 255,
-    initialSortBy: "badgeNumber",
-    initialSortDescending: false,
-    onPaginationChange: useCallback(() => {
-      // This component doesn't use pagination, only sorting
-    }, [])
-  });
 
   const columnDefsTotal = GetBalanceByAgeColumns(FrozenReportsByAgeRequestType.Total);
   const columnDefsFullTime = GetBalanceByAgeColumns(FrozenReportsByAgeRequestType.FullTime);
@@ -122,10 +111,11 @@ const BalanceByAgeGrid: React.FC = () => {
               <DSMGrid
                 preferenceKey={"AGE_Total"}
                 isLoading={false}
-                handleSortChanged={handleSortChange}
                 providedOptions={{
                   rowData: balanceByAgeTotal?.response.results ?? [],
-                  columnDefs: columnDefsTotal ?? []
+                  columnDefs: columnDefsTotal ?? [],
+                  suppressHorizontalScroll: true,
+                  suppressColumnVirtualisation: true
                 }}
               />
             </Grid>
@@ -133,10 +123,11 @@ const BalanceByAgeGrid: React.FC = () => {
               <DSMGrid
                 preferenceKey={"AGE_FullTime"}
                 isLoading={false}
-                handleSortChanged={handleSortChange}
                 providedOptions={{
                   rowData: balanceByAgeFullTime?.response.results ?? [],
-                  columnDefs: columnDefsFullTime ?? []
+                  columnDefs: columnDefsFullTime ?? [],
+                  suppressHorizontalScroll: true,
+                  suppressColumnVirtualisation: true
                 }}
               />
             </Grid>
@@ -144,10 +135,11 @@ const BalanceByAgeGrid: React.FC = () => {
               <DSMGrid
                 preferenceKey={"AGE_PartTime"}
                 isLoading={false}
-                handleSortChanged={handleSortChange}
                 providedOptions={{
                   rowData: balanceByAgePartTime?.response.results ?? [],
-                  columnDefs: columnDefsPartTime ?? []
+                  columnDefs: columnDefsPartTime ?? [],
+                  suppressHorizontalScroll: true,
+                  suppressColumnVirtualisation: true
                 }}
               />
             </Grid>

@@ -1,3 +1,4 @@
+import { CAPTIONS } from "@/constants.ts";
 import { Button, Divider, Grid, Typography } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
@@ -222,7 +223,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, fro
 
   return (
     <Page
-      label="Profit Summary"
+      label={CAPTIONS.PAY426_SUMMARY}
       actionNode={renderActionNode()}>
       <Grid
         container

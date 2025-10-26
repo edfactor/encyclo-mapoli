@@ -335,14 +335,15 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         // Act
         var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
 
+        // Assert
+        response.ShouldNotBeNull();
+
         // If we get a 400, log the error for debugging
         if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
         {
             var errorContent = await response.Response.Content.ReadAsStringAsync();
             throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
         }
-        // Assert
-        response.ShouldNotBeNull();
         response.Response.EnsureSuccessStatusCode();
         response.Result.ShouldNotBeNull();
         response.Result.Id.ShouldBe(request.Id);

@@ -1,8 +1,8 @@
-import { Divider } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useRef } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
+import { CAPTIONS } from "../../constants";
 import useYTDWages from "./hooks/useYTDWages";
 import YTDWagesGrid from "./YTDWagesGrid";
 import YTDWagesSearchFilter from "./YTDWagesSearchFilter";
@@ -15,11 +15,11 @@ const YTDWages: React.FC = () => {
     return <StatusDropdownActionNode />;
   };
 
-  const recordCount = searchResults?.response?.total || 0;
+  //const recordCount = searchResults?.response?.total || 0;
 
   return (
     <Page
-      label={`YTD Wages Extract (PROF-DOLLAR-EXTRACT) (${recordCount} records)`}
+      label={`${CAPTIONS.YTD_WAGES_EXTRACT}`}
       actionNode={renderActionNode()}>
       <Grid
         container
@@ -44,7 +44,7 @@ const YTDWages: React.FC = () => {
             data={searchResults}
             isLoading={isSearching}
             showData={showData}
-            hasResults={hasResults}
+            hasResults={hasResults ?? false}
             pagination={pagination}
             onPaginationChange={pagination.handlePaginationChange}
             onSortChange={pagination.handleSortChange}

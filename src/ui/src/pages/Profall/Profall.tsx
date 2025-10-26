@@ -1,10 +1,9 @@
-import { Divider } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Divider, Grid } from "@mui/material";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import { useState } from "react";
 import { Page } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import ProfallGrid from "./ProfallGrid";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { useState } from "react";
 
 const Profall = () => {
   const [pageNumberReset, setPageNumberReset] = useState(false);

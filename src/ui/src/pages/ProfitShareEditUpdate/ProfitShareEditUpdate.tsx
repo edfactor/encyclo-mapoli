@@ -33,6 +33,7 @@ import {
 } from "../../reduxstore/types";
 // usePrerequisiteNavigations now encapsulated by PrerequisiteGuard
 import PrerequisiteGuard from "../../components/PrerequisiteGuard";
+import { CAPTIONS } from "../../constants";
 import { MessageKeys, Messages } from "../../utils/messageDictonary";
 import ChangesList from "./ChangesList";
 import { MasterUpdateSummaryTable } from "./MasterUpdateSummaryTable";
@@ -59,9 +60,9 @@ const useRevertAction = (
     await trigger(params, false)
       .unwrap()
       .then((payload) => {
-        setEmployeesReverted(payload?.employeesEffected || 0);
-        setBeneficiariesReverted(payload?.beneficiariesEffected || 0);
-        setEtvasReverted(payload?.etvasEffected || 0);
+        //setEmployeesReverted(payload?.employeesEffected || 0);
+        //setBeneficiariesReverted(payload?.beneficiariesEffected || 0);
+        //setEtvasReverted(payload?.etvasEffected || 0);
         //dispatch(setMessage(successMessage));
         dispatch(setProfitEditUpdateChangesAvailable(false));
         dispatch(setProfitEditUpdateRevertChangesAvailable(false));
@@ -96,9 +97,9 @@ const useRevertAction = (
             }
           })
         );
-        setEmployeesReverted(0);
-        setBeneficiariesReverted(0);
-        setEtvasReverted(0);
+        //setEmployeesReverted(0);
+        //setBeneficiariesReverted(0);
+        //setEtvasReverted(0);
       });
   };
   return revertAction;
@@ -545,7 +546,7 @@ const ProfitShareEditUpdate = () => {
       messageTemplate={Messages.ProfitSharePrerequisiteIncomplete}>
       {({ prerequisitesComplete }) => (
         <Page
-          label="Master Update (PAY444|PAY447)"
+          label={`${CAPTIONS.PROFIT_SHARE_UPDATE}`}
           actionNode={
             <div className="flex items-center justify-end gap-2">
               {RenderRevertButton(setOpenRevertModal, isLoading, isReadOnly)}

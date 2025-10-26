@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { DSMGrid, numberToCurrency, Pagination, TotalsGrid, ISortParams } from "smart-ui-library";
+import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import ReportSummary from "../../components/ReportSummary";
 import { CAPTIONS } from "../../constants";
 import { useDynamicGridHeight } from "../../hooks/useDynamicGridHeight";
 import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
-import { useGridPagination, SortParams } from "../../hooks/useGridPagination";
+import { SortParams, useGridPagination } from "../../hooks/useGridPagination";
 import { useLazyGetForfeituresAndPointsQuery } from "../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../reduxstore/store";
 import { GetProfitShareForfeitColumns } from "./ForfeitGridColumns";

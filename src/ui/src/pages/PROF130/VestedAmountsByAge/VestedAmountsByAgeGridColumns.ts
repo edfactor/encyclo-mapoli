@@ -3,13 +3,23 @@ import { createAgeColumn, createCountColumn, createCurrencyColumn } from "../../
 
 export const GetVestedAmountsByAgeColumns = (countColName: string, amountColName: string): (ColDef | ColGroupDef)[] => {
   return [
-    createAgeColumn({}),
-    createCountColumn({
-      field: countColName
-    }),
-    createCurrencyColumn({
-      headerName: "Amount",
-      field: amountColName
-    })
+    {
+      ...createAgeColumn({}),
+      flex: 1
+    } as ColDef,
+    {
+      ...createCountColumn({
+        field: countColName,
+        headerName: "Count"
+      }),
+      flex: 1
+    } as ColDef,
+    {
+      ...createCurrencyColumn({
+        headerName: "Amount",
+        field: amountColName
+      }),
+      flex: 2
+    } as ColDef
   ];
 };

@@ -2,6 +2,7 @@ import { Divider, Grid } from "@mui/material";
 import { useState } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
 import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
+import { CAPTIONS } from "../../../constants";
 import DistributionsAndForfeituresGrid from "./DistributionAndForfeituresGrid";
 import DistributionsAndForfeituresSearchFilter from "./DistributionAndForfeituresSearchFilter";
 
@@ -14,7 +15,7 @@ const DistributionsAndForfeitures = () => {
 
   return (
     <Page
-      label="Distributions And Forfeitures (QPAY129)"
+      label={`${CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES}`}
       actionNode={renderActionNode()}>
       <Grid
         container

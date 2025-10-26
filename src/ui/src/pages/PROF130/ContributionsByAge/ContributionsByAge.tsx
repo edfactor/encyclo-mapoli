@@ -1,19 +1,19 @@
-import { Divider } from "@mui/material";
-import { Grid } from "@mui/material";
-import { Page } from "smart-ui-library";
-import ContributionsByAgeGrid from "./ContributionsByAgeGrid";
-import { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "reduxstore/store";
+import { Box, CircularProgress, Divider, Grid } from "@mui/material";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetContributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { setContributionsByAgeQueryParams } from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import { Page } from "smart-ui-library";
+import { CAPTIONS } from "../../../constants";
+import ContributionsByAgeGrid from "./ContributionsByAgeGrid";
 
 const ContributionsByAge = () => {
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [hasInitialSearchRun, setHasInitialSearchRun] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
@@ -42,11 +42,13 @@ const ContributionsByAge = () => {
         .then((results) => {
           if (results[0].data) {
             dispatch(setContributionsByAgeQueryParams(profitYear));
-            setInitialSearchLoaded(true);
           }
         })
         .catch((error) => {
           console.error("Initial contributions by age search failed:", error);
+        })
+        .finally(() => {
+          setInitialLoad(false);
         });
     }
   }, [hasToken, profitYear, hasInitialSearchRun, triggerSearch, dispatch]);
@@ -57,7 +59,7 @@ const ContributionsByAge = () => {
 
   return (
     <Page
-      label="Contributions By Age"
+      label={CAPTIONS.CONTRIBUTIONS_BY_AGE}
       actionNode={renderActionNode()}>
       <Grid
         container
@@ -66,9 +68,21 @@ const ContributionsByAge = () => {
           <Divider />
         </Grid>
 
-        <Grid width="100%">
-          <ContributionsByAgeGrid initialSearchLoaded={initialSearchLoaded} />
-        </Grid>
+        {initialLoad ? (
+          <Grid width="100%">
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              minHeight="200px">
+              <CircularProgress />
+            </Box>
+          </Grid>
+        ) : (
+          <Grid width="100%">
+            <ContributionsByAgeGrid />
+          </Grid>
+        )}
       </Grid>
     </Page>
   );
