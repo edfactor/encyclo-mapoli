@@ -74,7 +74,9 @@ if (!builder.Environment.IsTestEnvironment() && Environment.GetEnvironmentVariab
 }
 else
 {
-    builder.Services.AddModernTestingSecurity(builder.Configuration);
+#pragma warning disable CS0618 // Type or member is obsolete
+    builder.Services.AddTestingSecurity(builder.Configuration);
+#pragma warning restore CS0618 // Type or member is obsolete
 }
 
 builder.ConfigureSecurityPolicies();

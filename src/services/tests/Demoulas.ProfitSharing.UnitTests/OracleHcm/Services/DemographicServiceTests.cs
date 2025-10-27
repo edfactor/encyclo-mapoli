@@ -1,15 +1,12 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Mappers;
-using Demoulas.ProfitSharing.OracleHcm.Messaging;
 using Demoulas.ProfitSharing.OracleHcm.Services;
 using Demoulas.ProfitSharing.OracleHcm.Services.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
-using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 using Demoulas.ProfitSharing.UnitTests.Common.Helpers;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
@@ -22,7 +19,7 @@ using MockQueryable.Moq;
 using Moq;
 using System.ComponentModel;
 
-namespace Demoulas.ProfitSharing.UnitTests.Services;
+namespace Demoulas.ProfitSharing.UnitTests.OracleHcm.Services;
 
 public class DemographicsServiceTests
 {
@@ -599,8 +596,8 @@ public class DemographicsServiceTests
         var auditServiceMock = new Mock<IDemographicAuditService>();
         var historyServiceMock = new Mock<IDemographicHistoryService>();
 
-        totalServiceMock.Setup(t => t.GetVestingBalanceForSingleMemberAsync(It.IsAny<Demoulas.ProfitSharing.Common.Contracts.Request.SearchBy>(), It.IsAny<int>(), It.IsAny<short>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Demoulas.ProfitSharing.Common.Contracts.Response.BalanceEndpointResponse
+        totalServiceMock.Setup(t => t.GetVestingBalanceForSingleMemberAsync(It.IsAny<SearchBy>(), It.IsAny<int>(), It.IsAny<short>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ProfitSharing.Common.Contracts.Response.BalanceEndpointResponse
             {
                 Id = 123456789,
                 Ssn = "xxx-xx-6789",
@@ -730,8 +727,8 @@ public class DemographicsServiceTests
         var auditServiceMock = new Mock<IDemographicAuditService>();
         var historyServiceMock = new Mock<IDemographicHistoryService>();
 
-        totalServiceMock.Setup(t => t.GetVestingBalanceForSingleMemberAsync(It.IsAny<Demoulas.ProfitSharing.Common.Contracts.Request.SearchBy>(), It.IsAny<int>(), It.IsAny<short>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Demoulas.ProfitSharing.Common.Contracts.Response.BalanceEndpointResponse
+        totalServiceMock.Setup(t => t.GetVestingBalanceForSingleMemberAsync(It.IsAny<SearchBy>(), It.IsAny<int>(), It.IsAny<short>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ProfitSharing.Common.Contracts.Response.BalanceEndpointResponse
             {
                 Id = 123456789,
                 Ssn = "xxx-xx-6789",

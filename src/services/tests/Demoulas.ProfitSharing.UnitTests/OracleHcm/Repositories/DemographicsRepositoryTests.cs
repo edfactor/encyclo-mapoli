@@ -2,12 +2,10 @@
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Repositories;
 using Demoulas.ProfitSharing.UnitTests.Common.Fakes;
-using Demoulas.ProfitSharing.UnitTests.Common.Helpers;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using Shouldly;
-using Xunit;
 
-namespace Demoulas.ProfitSharing.UnitTests.Data.Repositories;
+namespace Demoulas.ProfitSharing.UnitTests.OracleHcm.Repositories;
 
 /// <summary>
 /// Unit tests for DemographicsRepository using in-memory database.

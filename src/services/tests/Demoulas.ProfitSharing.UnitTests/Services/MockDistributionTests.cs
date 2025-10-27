@@ -1,9 +1,7 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
-using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
-using Xunit;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services;
 

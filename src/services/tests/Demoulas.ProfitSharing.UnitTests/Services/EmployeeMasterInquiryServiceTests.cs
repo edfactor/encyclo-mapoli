@@ -1,7 +1,5 @@
-using System.ComponentModel;
-using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
+﻿using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;

@@ -1,8 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts;
-using Demoulas.ProfitSharing.Common.Extensions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Shouldly;
-using Xunit;
 
 namespace Demoulas.ProfitSharing.UnitTests;
 
