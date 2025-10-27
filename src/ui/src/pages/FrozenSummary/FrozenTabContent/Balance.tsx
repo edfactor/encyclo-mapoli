@@ -1,5 +1,5 @@
 import { Grid } from "@mui/material";
-import BalanceByAgeGrid from "pages/PROF130/BalanceByAge/BalanceByAgeGrid";
+import BalanceByAgeGrid from "../../../pages/FiscalClose/AgeReports/BalanceByAge/BalanceByAgeGrid";
 
 export const Balance = () => {
   return (
