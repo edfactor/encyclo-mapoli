@@ -30,7 +30,7 @@ const ForfeituresByAgeGrid: React.FC = () => {
             <Grid size={{ xs: 4 }}>
               <h2 className="px-[24px] text-dsm-secondary">Total</h2>
               <TotalsGrid
-                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
                 tablePadding="0px"
                 displayData={[
                   [forfeituresByAgeTotal?.totalEmployees || 0, numberToCurrency(forfeituresByAgeTotal?.totalAmount)]
@@ -41,7 +41,7 @@ const ForfeituresByAgeGrid: React.FC = () => {
             <Grid size={{ xs: 4 }}>
               <h2 className="text-dsm-secondary">Full-time</h2>
               <TotalsGrid
-                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
                 tablePadding="0px"
                 displayData={[
                   [
@@ -55,7 +55,7 @@ const ForfeituresByAgeGrid: React.FC = () => {
             <Grid size={{ xs: 4 }}>
               <h2 className="text-dsm-secondary">Part-time</h2>
               <TotalsGrid
-                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
                 tablePadding="0px"
                 displayData={[
                   [

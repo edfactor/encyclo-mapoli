@@ -1,9 +1,10 @@
+import { Typography } from "@mui/material";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetRecentlyTerminatedReportQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { DSMGrid, formatNumberWithComma, ISortParams, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { GetRecentlyTerminatedColumns } from "./RecentlyTerminatedGridColumns";
@@ -92,6 +93,14 @@ const RecentlyTerminatedGrid: React.FC<RecentlyTerminatedGridSearchProps> = ({
     <>
       {recentlyTerminated?.response && (
         <>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <Typography
+              variant="h6"
+              component="h2"
+              sx={{ marginLeft: "20px", marginRight: "10px" }}>
+              TERMINATED EMPLOYEES ({formatNumberWithComma(recentlyTerminated.response.total)} Records)
+            </Typography>
+          </div>
           <DSMGrid
             preferenceKey={CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES}
             isLoading={isFetching}
