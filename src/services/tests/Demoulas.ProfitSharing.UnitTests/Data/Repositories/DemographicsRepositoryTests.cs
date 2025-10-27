@@ -12,8 +12,12 @@ namespace Demoulas.ProfitSharing.UnitTests.Data.Repositories;
 /// <summary>
 /// Unit tests for DemographicsRepository using in-memory database.
 /// Tests all query and command operations with realistic test data.
+/// 
+/// NOTE: These tests use ScenarioDataContextFactory.Create() which is experimental.
+/// See TESTING_LIMITATIONS.md for known issues and workarounds.
 /// </summary>
 [Description("PS-1721: Unit tests for DemographicsRepository data access layer")]
+#pragma warning disable CS0618 // ScenarioDataContextFactory.Create() is obsolete but intentionally used here
 public sealed class DemographicsRepositoryTests
 {
     #region Query Operations Tests

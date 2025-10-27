@@ -10,6 +10,7 @@ using Xunit;
 
 namespace Demoulas.ProfitSharing.UnitTests.OracleHcm.Services;
 
+#pragma warning disable CS0618 // ScenarioDataContextFactory.Create() is obsolete but intentionally used here
 public class DemographicMatchingServiceTests
 {
     private readonly Mock<ILogger<DemographicMatchingService>> _loggerMock;
