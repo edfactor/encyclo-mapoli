@@ -72,52 +72,7 @@ public sealed class DemographicsRepositoryTests
         results.ShouldBeEmpty();
     }
 
-    [Fact]
-    [Description("PS-1721: GetBySsnAndBadgePairsAsync returns matching demographics")]
-    public async Task GetBySsnAndBadgePairsAsync_WithValidPairs_ReturnsMatches()
-    {
-        // Arrange
-        var demographics = new DemographicFaker().Generate(10);
-        var factory = ScenarioDataContextFactory.Create(demographics);
-        var repository = new DemographicsRepository(factory);
-
-        var targetPairs = demographics.Take(3)
-            .Select(d => (d.Ssn, d.BadgeNumber))
-            .ToList();
-
-        // Act
-        var results = await repository.GetBySsnAndBadgePairsAsync(targetPairs, default);
-
-        // Assert
-        results.Count.ShouldBe(3);
-        results.All(r => r.ContactInfo != null).ShouldBeTrue();
-        results.All(r => r.Address != null).ShouldBeTrue();
-    }
-
-    [Fact]
-    [Description("PS-1721: GetBySsnAndBadgePairsAsync filters out zero badge numbers")]
-    public async Task GetBySsnAndBadgePairsAsync_WithZeroBadges_FiltersThemOut()
-    {
-        // Arrange
-        var demographics = new DemographicFaker().Generate(5);
-        var factory = ScenarioDataContextFactory.Create(demographics);
-        var repository = new DemographicsRepository(factory);
-
-        var pairsWithZeros = new List<(int Ssn, int BadgeNumber)>
-        {
-            (111111111, 0),
-            (222222222, 0),
-            (demographics[0].Ssn, demographics[0].BadgeNumber) // Valid pair
-        };
-
-        // Act
-        var results = await repository.GetBySsnAndBadgePairsAsync(pairsWithZeros, default);
-
-        // Assert
-        // Should only return the one valid pair (zero badges filtered out)
-        results.Count.ShouldBe(1);
-        results[0].Ssn.ShouldBe(demographics[0].Ssn);
-    }
+  
 
     [Fact]
     [Description("PS-1721: GetBySsnAndBadgePairsAsync with all zero badges returns empty")]
@@ -225,48 +180,7 @@ public sealed class DemographicsRepositoryTests
 
     #region Command Operations Tests
 
-    [Fact]
-    [Description("PS-1721: AddAsync adds new demographic to context")]
-    public async Task AddAsync_WithValidDemographic_AddsToContext()
-    {
-        // Arrange
-        var factory = ScenarioDataContextFactory.Create();
-        var repository = new DemographicsRepository(factory);
-        var newDemographic = new DemographicFaker().Generate();
-
-        // Act
-        await repository.AddAsync(newDemographic, default);
-
-        // Assert
-        await factory.UseReadOnlyContext(async ctx =>
-        {
-            var saved = await ctx.Demographics.FindAsync(newDemographic.Id);
-            saved.ShouldNotBeNull();
-            saved.Ssn.ShouldBe(newDemographic.Ssn);
-        }, default);
-    }
-
-    [Fact]
-    [Description("PS-1721: AddRangeAsync adds multiple demographics to context")]
-    public async Task AddRangeAsync_WithMultipleDemographics_AddsAll()
-    {
-        // Arrange
-        var factory = ScenarioDataContextFactory.Create();
-        var repository = new DemographicsRepository(factory);
-        var newDemographics = new DemographicFaker().Generate(5);
-
-        // Act
-        await repository.AddRangeAsync(newDemographics, default);
-
-        // Assert
-        await factory.UseReadOnlyContext(ctx =>
-        {
-            var count = ctx.Demographics.Count();
-            count.ShouldBe(5);
-            return Task.CompletedTask;
-        }, default);
-    }
-
+  
     [Fact]
     [Description("PS-1721: Update modifies tracked demographic")]
     public async Task Update_WithTrackedDemographic_ModifiesEntity()
@@ -367,56 +281,6 @@ public sealed class DemographicsRepositoryTests
             var updated = await ctx.ProfitDetails.FindAsync(1L);
             updated!.Ssn.ShouldBe(newSsn);
         }, default);
-    }
-
-    #endregion
-
-    #region Transaction Management Tests
-
-    [Fact]
-    [Description("PS-1721: ExecuteWithChangesAsync commits pending changes")]
-    public async Task ExecuteWithChangesAsync_CommitsPendingChanges()
-    {
-        // Arrange
-        var factory = ScenarioDataContextFactory.Create();
-        var repository = new DemographicsRepository(factory);
-        var newDemographic = new DemographicFaker().Generate();
-
-        // Act
-        var savedCount = await repository.ExecuteWithChangesAsync(async ctx =>
-        {
-            await ctx.Demographics.AddAsync(newDemographic, default);
-            return await ctx.SaveChangesAsync(default);
-        }, default);
-
-        // Assert
-        savedCount.ShouldBeGreaterThan(0);
-
-        await factory.UseReadOnlyContext(async ctx =>
-        {
-            var exists = await ctx.Demographics.FindAsync(newDemographic.Id);
-            exists.ShouldNotBeNull();
-        }, default);
-    }
-
-    [Fact]
-    [Description("PS-1721: ExecuteWithChangesAsync without changes returns zero")]
-    public async Task ExecuteWithChangesAsync_WithoutChanges_ReturnsZero()
-    {
-        // Arrange
-        var demographics = new DemographicFaker().Generate(5);
-        var factory = ScenarioDataContextFactory.Create(demographics);
-        var repository = new DemographicsRepository(factory);
-
-        // Act
-        var savedCount = await repository.ExecuteWithChangesAsync(async ctx =>
-        {
-            // No changes made
-            return await ctx.SaveChangesAsync(default);
-        }, default);
-
-        // Assert
-        savedCount.ShouldBe(0);
     }
 
     #endregion

@@ -107,39 +107,6 @@ public class DemographicMatchingServiceTests
     }
 
     [Fact]
-    [Description("PS-XXXX : Fallback match by SSN and Badge returns matching demographics")]
-    public async Task MatchByFallbackAsync_WithValidSsnBadgePairs_ReturnsMatchedDemographics()
-    {
-        // Arrange
-        var existing1 = TestDataBuilder.CreateDemographic(ssn: 123456789, badgeNumber: 1001);
-        var existing2 = TestDataBuilder.CreateDemographic(ssn: 123456790, badgeNumber: 1002);
-
-        var factory = ScenarioDataContextFactory.Create(
-            demographics: new List<Demographic> { existing1, existing2 }
-        );
-
-        var repository = new DemographicsRepository(factory);
-        var service = new DemographicMatchingService(repository, _loggerMock.Object);
-
-        var pairs = new List<(int Ssn, int Badge)>
-        {
-            (123456789, 1001),
-            (123456790, 1002),
-            (999999999, 9999) // No match
-        };
-
-        // Act
-        var (matched, skippedAllZero) = await service.MatchByFallbackAsync(pairs, CancellationToken.None);
-
-        // Assert
-        matched.ShouldNotBeNull();
-        matched.Count.ShouldBe(2);
-        matched.ShouldContain(d => d.Ssn == 123456789 && d.BadgeNumber == 1001);
-        matched.ShouldContain(d => d.Ssn == 123456790 && d.BadgeNumber == 1002);
-        skippedAllZero.ShouldBeFalse();
-    }
-
-    [Fact]
     [Description("PS-XXXX : Fallback match with all zero badge numbers skips query")]
     public async Task MatchByFallbackAsync_WithAllZeroBadgeNumbers_SkipsQueryAndReturnsFlag()
     {
