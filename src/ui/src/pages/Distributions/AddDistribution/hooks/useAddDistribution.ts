@@ -274,11 +274,12 @@ export const useAddDistribution = () => {
         }).unwrap();
 
         // Find the maximum paymentSequence value and count existing distributions
+        // Only count distributions where frequencyId is not 'D'
         let maxSequence = 0;
         let distributionCount = 0;
         if (searchResponse?.results && searchResponse.results.length > 0) {
           maxSequence = Math.max(...searchResponse.results.map((d) => d.paymentSequence));
-          distributionCount = searchResponse.results.length;
+          distributionCount = searchResponse.results.filter((d) => d.frequencyId !== "D").length;
         }
 
         const nextSequence = maxSequence + 1;

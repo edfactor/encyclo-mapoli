@@ -53,7 +53,8 @@ describe("useAddDistribution - maximumReached logic", () => {
       // Mock API response with 8 distributions (sequences 1-8)
       const distributions = Array.from({ length: 8 }, (_, i) => ({
         paymentSequence: i + 1,
-        id: i + 1
+        id: i + 1,
+        frequencyId: "M" // Not 'D', so should be counted
       }));
 
       mockTriggerSearchDistributions.mockReturnValue({
@@ -77,7 +78,8 @@ describe("useAddDistribution - maximumReached logic", () => {
       // Mock API response with 9 distributions (sequences 1-9)
       const distributions = Array.from({ length: 9 }, (_, i) => ({
         paymentSequence: i + 1,
-        id: i + 1
+        id: i + 1,
+        frequencyId: "M" // Not 'D', so should be counted
       }));
 
       mockTriggerSearchDistributions.mockReturnValue({
@@ -101,7 +103,8 @@ describe("useAddDistribution - maximumReached logic", () => {
       // Mock API response with 10 distributions
       const distributions = Array.from({ length: 10 }, (_, i) => ({
         paymentSequence: i + 1,
-        id: i + 1
+        id: i + 1,
+        frequencyId: "M" // Not 'D', so should be counted
       }));
 
       mockTriggerSearchDistributions.mockReturnValue({
@@ -125,11 +128,11 @@ describe("useAddDistribution - maximumReached logic", () => {
       // Mock API response with 5 distributions but with gaps in sequence numbers
       // This tests the bug fix: sequences [1, 2, 3, 5, 9] should NOT trigger maximum
       const distributions = [
-        { paymentSequence: 1, id: 1 },
-        { paymentSequence: 2, id: 2 },
-        { paymentSequence: 3, id: 3 },
-        { paymentSequence: 5, id: 5 },
-        { paymentSequence: 9, id: 9 }
+        { paymentSequence: 1, id: 1, frequencyId: "M" },
+        { paymentSequence: 2, id: 2, frequencyId: "M" },
+        { paymentSequence: 3, id: 3, frequencyId: "M" },
+        { paymentSequence: 5, id: 5, frequencyId: "M" },
+        { paymentSequence: 9, id: 9, frequencyId: "M" }
       ];
 
       mockTriggerSearchDistributions.mockReturnValue({
@@ -155,15 +158,15 @@ describe("useAddDistribution - maximumReached logic", () => {
       // Mock API response with 9 distributions but with gaps in sequence numbers
       // Sequences: [1, 2, 3, 4, 5, 7, 8, 10, 12]
       const distributions = [
-        { paymentSequence: 1, id: 1 },
-        { paymentSequence: 2, id: 2 },
-        { paymentSequence: 3, id: 3 },
-        { paymentSequence: 4, id: 4 },
-        { paymentSequence: 5, id: 5 },
-        { paymentSequence: 7, id: 7 },
-        { paymentSequence: 8, id: 8 },
-        { paymentSequence: 10, id: 10 },
-        { paymentSequence: 12, id: 12 }
+        { paymentSequence: 1, id: 1, frequencyId: "M" },
+        { paymentSequence: 2, id: 2, frequencyId: "M" },
+        { paymentSequence: 3, id: 3, frequencyId: "M" },
+        { paymentSequence: 4, id: 4, frequencyId: "M" },
+        { paymentSequence: 5, id: 5, frequencyId: "M" },
+        { paymentSequence: 7, id: 7, frequencyId: "M" },
+        { paymentSequence: 8, id: 8, frequencyId: "M" },
+        { paymentSequence: 10, id: 10, frequencyId: "M" },
+        { paymentSequence: 12, id: 12, frequencyId: "M" }
       ];
 
       mockTriggerSearchDistributions.mockReturnValue({
@@ -208,11 +211,11 @@ describe("useAddDistribution - maximumReached logic", () => {
     it("should correctly calculate when distributions are out of order", async () => {
       // Mock API response with out-of-order sequences
       const distributions = [
-        { paymentSequence: 5, id: 5 },
-        { paymentSequence: 1, id: 1 },
-        { paymentSequence: 9, id: 9 },
-        { paymentSequence: 3, id: 3 },
-        { paymentSequence: 7, id: 7 }
+        { paymentSequence: 5, id: 5, frequencyId: "M" },
+        { paymentSequence: 1, id: 1, frequencyId: "M" },
+        { paymentSequence: 9, id: 9, frequencyId: "M" },
+        { paymentSequence: 3, id: 3, frequencyId: "M" },
+        { paymentSequence: 7, id: 7, frequencyId: "M" }
       ];
 
       mockTriggerSearchDistributions.mockReturnValue({
@@ -232,6 +235,78 @@ describe("useAddDistribution - maximumReached logic", () => {
       expect(result.current.sequenceNumber).toBe(10);
       // Only 5 distributions, so not at maximum
       expect(result.current.maximumReached).toBe(false);
+    });
+
+    it("should exclude distributions with frequencyId 'D' from count", async () => {
+      // Mock API response with 10 total distributions but 3 have frequencyId 'D'
+      // So only 7 should count toward the maximum
+      const distributions = [
+        { paymentSequence: 1, id: 1, frequencyId: "M" },
+        { paymentSequence: 2, id: 2, frequencyId: "D" }, // Should NOT count
+        { paymentSequence: 3, id: 3, frequencyId: "M" },
+        { paymentSequence: 4, id: 4, frequencyId: "M" },
+        { paymentSequence: 5, id: 5, frequencyId: "D" }, // Should NOT count
+        { paymentSequence: 6, id: 6, frequencyId: "M" },
+        { paymentSequence: 7, id: 7, frequencyId: "M" },
+        { paymentSequence: 8, id: 8, frequencyId: "D" }, // Should NOT count
+        { paymentSequence: 9, id: 9, frequencyId: "M" },
+        { paymentSequence: 10, id: 10, frequencyId: "M" }
+      ];
+
+      mockTriggerSearchDistributions.mockReturnValue({
+        unwrap: vi.fn().mockResolvedValue({
+          results: distributions,
+          total: 10
+        })
+      });
+
+      const { result } = renderHook(() => useAddDistribution());
+
+      await act(async () => {
+        await result.current.calculateSequenceNumber(12345, 1);
+      });
+
+      // Next sequence should be 11
+      expect(result.current.sequenceNumber).toBe(11);
+      // Only 7 non-'D' distributions, so maximum NOT reached
+      expect(result.current.maximumReached).toBe(false);
+    });
+
+    it("should reach maximum when 9 non-D distributions exist even with D distributions present", async () => {
+      // Mock API response with 12 total distributions but 3 have frequencyId 'D'
+      // So 9 should count toward the maximum
+      const distributions = [
+        { paymentSequence: 1, id: 1, frequencyId: "M" },
+        { paymentSequence: 2, id: 2, frequencyId: "M" },
+        { paymentSequence: 3, id: 3, frequencyId: "D" }, // Should NOT count
+        { paymentSequence: 4, id: 4, frequencyId: "M" },
+        { paymentSequence: 5, id: 5, frequencyId: "M" },
+        { paymentSequence: 6, id: 6, frequencyId: "M" },
+        { paymentSequence: 7, id: 7, frequencyId: "D" }, // Should NOT count
+        { paymentSequence: 8, id: 8, frequencyId: "M" },
+        { paymentSequence: 9, id: 9, frequencyId: "M" },
+        { paymentSequence: 10, id: 10, frequencyId: "M" },
+        { paymentSequence: 11, id: 11, frequencyId: "D" }, // Should NOT count
+        { paymentSequence: 12, id: 12, frequencyId: "M" }
+      ];
+
+      mockTriggerSearchDistributions.mockReturnValue({
+        unwrap: vi.fn().mockResolvedValue({
+          results: distributions,
+          total: 12
+        })
+      });
+
+      const { result } = renderHook(() => useAddDistribution());
+
+      await act(async () => {
+        await result.current.calculateSequenceNumber(12345, 1);
+      });
+
+      // Next sequence should be 13
+      expect(result.current.sequenceNumber).toBe(13);
+      // Exactly 9 non-'D' distributions, so maximum reached
+      expect(result.current.maximumReached).toBe(true);
     });
   });
 });
