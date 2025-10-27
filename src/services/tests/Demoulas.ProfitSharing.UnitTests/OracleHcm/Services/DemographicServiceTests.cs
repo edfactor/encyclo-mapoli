@@ -3,6 +3,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.OracleHcm.Commands;
 using Demoulas.ProfitSharing.OracleHcm.Mappers;
 using Demoulas.ProfitSharing.OracleHcm.Services;
 using Demoulas.ProfitSharing.OracleHcm.Services.Interfaces;
@@ -18,6 +19,7 @@ using Microsoft.Extensions.Logging;
 using MockQueryable.Moq;
 using Moq;
 using System.ComponentModel;
+using System.Linq;
 
 namespace Demoulas.ProfitSharing.UnitTests.OracleHcm.Services;
 
@@ -209,7 +211,76 @@ public class DemographicsServiceTests
         var auditServiceMock = new Mock<IDemographicAuditService>();
         var historyServiceMock = new Mock<IDemographicHistoryService>();
 
-        var service = new DemographicsService(
+        // Setup matching service mocks
+        matchingServiceMock
+            .Setup(m => m.MatchByOracleIdAsync(It.IsAny<Dictionary<long, Demographic>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Demographic>());
+
+        matchingServiceMock
+            .Setup(m => m.MatchByFallbackAsync(It.IsAny<List<(int, int)>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((new List<Demographic>(), false));
+
+        matchingServiceMock
+            .Setup(m => m.IdentifyNewDemographics(It.IsAny<List<Demographic>>(), It.IsAny<List<Demographic>>()))
+            .Returns((List<Demographic> incoming, List<Demographic> existing) => incoming);
+
+        // Setup audit service mocks
+        auditServiceMock
+            .Setup(m => m.DetectDuplicateSsns(It.IsAny<List<Demographic>>()))
+            .Returns(new List<IGrouping<int, Demographic>>());
+
+        auditServiceMock
+            .Setup(m => m.PrepareAuditDuplicateSsns(It.IsAny<List<IGrouping<int, Demographic>>>()))
+            .Returns(new List<Demoulas.ProfitSharing.OracleHcm.Commands.IDemographicCommand>());
+
+        auditServiceMock
+            .Setup(m => m.PrepareCheckSsnConflicts(It.IsAny<List<Demographic>>(), It.IsAny<List<Demographic>>()))
+            .Returns(new List<Demoulas.ProfitSharing.OracleHcm.Commands.IDemographicCommand>());
+
+        // Setup history service mocks - using actual command types to allow real execution
+        historyServiceMock
+            .Setup(m => m.PrepareInsertNewWithHistory(It.IsAny<List<Demographic>>()))
+            .Returns<List<Demographic>>(newDemographics =>
+            {
+                var commands = new List<Demoulas.ProfitSharing.OracleHcm.Commands.IDemographicCommand>();
+
+                // Create real commands that will actually add to the context
+                foreach (var demographic in newDemographics)
+                {
+                    commands.Add(new Demoulas.ProfitSharing.OracleHcm.Commands.AddDemographicCommand(demographic));
+
+                    var history = new DemographicHistory
+                    {
+                        OracleHcmId = demographic.OracleHcmId,
+                        BadgeNumber = demographic.BadgeNumber,
+                        DateOfBirth = demographic.DateOfBirth,
+                        StoreNumber = demographic.StoreNumber,
+                        DepartmentId = demographic.DepartmentId,
+                        PayClassificationId = demographic.PayClassificationId,
+                        HireDate = demographic.HireDate,
+                        EmploymentTypeId = demographic.EmploymentTypeId,
+                        PayFrequencyId = demographic.PayFrequencyId,
+                        EmploymentStatusId = demographic.EmploymentStatusId,
+                        ValidFrom = DateTimeOffset.UtcNow,
+                        ValidTo = new DateTimeOffset(new DateTime(2100, 1, 1, 0, 0, 0, DateTimeKind.Utc))
+                    };
+                    commands.Add(new Demoulas.ProfitSharing.OracleHcm.Commands.AddHistoryCommand(history));
+                }
+
+                return (newDemographics.Count, commands);
+            });
+
+        historyServiceMock
+            .Setup(m => m.PrepareUpdateExistingWithHistory(It.IsAny<List<Demographic>>(), It.IsAny<List<Demographic>>()))
+            .Returns((0, new List<Demoulas.ProfitSharing.OracleHcm.Commands.IDemographicCommand>()));
+
+        historyServiceMock
+            .Setup(m => m.DetectSsnChanges(It.IsAny<List<Demographic>>(), It.IsAny<Dictionary<long, Demographic>>()))
+            .Returns(new List<Demographic>());
+
+        historyServiceMock
+            .Setup(m => m.PrepareSsnUpdateCommands(It.IsAny<List<Demographic>>(), It.IsAny<Dictionary<long, Demographic>>()))
+            .Returns(new List<Demoulas.ProfitSharing.OracleHcm.Commands.IDemographicCommand>()); var service = new DemographicsService(
             scenarioFactory,
             repositoryMock.Object,
             matchingServiceMock.Object,
