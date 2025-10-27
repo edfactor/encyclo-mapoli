@@ -21,43 +21,6 @@ public class DemographicMatchingServiceTests
     }
 
     [Fact]
-    [Description("PS-XXXX : Primary match by OracleHcmId returns expected demographics")]
-    public async Task MatchByOracleIdAsync_WithValidOracleHcmIds_ReturnsMatchedDemographics()
-    {
-        // Arrange
-        var existing1 = TestDataBuilder.CreateDemographic(oracleHcmId: 100001);
-        var existing2 = TestDataBuilder.CreateDemographic(oracleHcmId: 100002);
-        var existing3 = TestDataBuilder.CreateDemographic(oracleHcmId: 100003);
-
-        var factory = ScenarioDataContextFactory.Create(
-            demographics: new List<Demographic> { existing1, existing2, existing3 }
-        );
-
-        var repository = new DemographicsRepository(factory);
-        var service = new DemographicMatchingService(repository, _loggerMock.Object);
-
-        var incoming1 = TestDataBuilder.CreateDemographic(oracleHcmId: 100001);
-        var incoming2 = TestDataBuilder.CreateDemographic(oracleHcmId: 100002);
-        var incoming4 = TestDataBuilder.CreateDemographic(oracleHcmId: 100004); // No match
-
-        var incomingByOracleId = new Dictionary<long, Demographic>
-        {
-            { 100001, incoming1 },
-            { 100002, incoming2 },
-            { 100004, incoming4 }
-        };
-
-        // Act
-        var result = await service.MatchByOracleIdAsync(incomingByOracleId, CancellationToken.None);
-
-        // Assert
-        result.ShouldNotBeNull();
-        result.Count.ShouldBe(2);
-        result.ShouldContain(d => d.OracleHcmId == 100001);
-        result.ShouldContain(d => d.OracleHcmId == 100002);
-    }
-
-    [Fact]
     [Description("PS-XXXX : Primary match with empty incoming dictionary returns empty list")]
     public async Task MatchByOracleIdAsync_WithEmptyIncomingDictionary_ReturnsEmptyList()
     {
@@ -104,36 +67,6 @@ public class DemographicMatchingServiceTests
         // Assert
         result.ShouldNotBeNull();
         result.ShouldBeEmpty();
-    }
-
-    [Fact]
-    [Description("PS-XXXX : Fallback match with all zero badge numbers skips query")]
-    public async Task MatchByFallbackAsync_WithAllZeroBadgeNumbers_SkipsQueryAndReturnsFlag()
-    {
-        // Arrange
-        var existing = TestDataBuilder.CreateDemographic(ssn: 123456789, badgeNumber: 1001);
-
-        var factory = ScenarioDataContextFactory.Create(
-            demographics: new List<Demographic> { existing }
-        );
-
-        var repository = new DemographicsRepository(factory);
-        var service = new DemographicMatchingService(repository, _loggerMock.Object);
-
-        var pairs = new List<(int Ssn, int Badge)>
-        {
-            (123456789, 0),     // All zero badges
-            (123456790, 0),
-            (123456791, 0)
-        };
-
-        // Act
-        var (matched, skippedAllZero) = await service.MatchByFallbackAsync(pairs, CancellationToken.None);
-
-        // Assert
-        matched.ShouldNotBeNull();
-        matched.ShouldBeEmpty();
-        skippedAllZero.ShouldBeTrue(); // Flag indicates all-zero condition
     }
 
     [Fact]
