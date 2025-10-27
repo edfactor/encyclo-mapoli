@@ -26,61 +26,66 @@ This document provides a detailed technical description of how page components a
 
 ```
 src/ui/src/pages/
-├── AddDistribution/           # Distribution creation workflow
-├── Adjustments/               # Adjustment forms
-├── BeneficiaryInquiry/       # Beneficiary search and details
+├── Beneficiaries/            # Beneficiary management pages
+│   ├── BeneficiaryInquiry.tsx
+│   ├── CreateBeneficiary.tsx
+│   └── Grid and filter components
 ├── DecemberActivities/        # Year-end December operations
 │   ├── DemographicBadgesNotInPayprofit/
 │   ├── DistributionsAndForfeitures/
 │   ├── DuplicateNamesAndBirthdays/
 │   ├── DuplicateSSNsOnDemographics/
+│   ├── Forfeit/
+│   ├── ManageExecutiveHoursAndDollars/
 │   ├── MilitaryContribution/
 │   ├── NegativeEtvaForSSNsOnPayprofit/
+│   ├── ProfitShareReport/
 │   ├── Termination/
 │   └── UnForfeit/
-├── DistributionInquiry/      # Distribution search and management
-├── Documentation/             # Application documentation viewer
-├── EditDistribution/          # Distribution editing workflow
-├── FiscalClose/               # Fiscal close operations
+├── Dev/                      # Development/testing pages
+├── Distributions/            # Distribution management
+│   ├── AddDistribution/
+│   ├── DistributionInquiry/
+│   ├── EditDistribution/
+│   └── ViewDistribution/
+├── Documentation/            # Application documentation viewer
+├── FiscalClose/              # Fiscal close operations
+│   ├── AgeReports/
 │   ├── EligibleEmployees/
-│   ├── ManageExecutiveHoursAndDollars/
+│   ├── ForfeituresAdjustment/
+│   ├── InfoCard.tsx
+│   ├── PAY426Reports/
+│   ├── PaymasterUpdate/
+│   ├── Profall/
 │   ├── ProfitShareByStore/
+│   ├── ProfitShareEditUpdate/
+│   ├── ProfitShareGrossReport/
+│   ├── ProfitShareTotals426/
+│   ├── QPAY066B/
+│   ├── ReprintCertificates/
+│   └── YTDWagesExtract/
+├── FrozenSummary/            # Frozen data summary views
+├── InquiriesAndAdjustments/  # Employee inquiries and adjustments
+│   ├── Adjustments.tsx
+│   ├── MasterInquiry/
+│   └── hooks/
+├── ITOperations/             # IT operations (demographic freeze, etc.)
+├── Reports/                  # Reporting pages
+│   ├── PayBeNext/
+│   ├── PayBenReport/
+│   ├── QPAY066AdHocReports/
+│   ├── QPAY600/
 │   ├── RecentlyTerminated/
 │   └── TerminatedLetters/
-├── FiscalFlow/                # Fiscal workflow management
-├── Forfeit/                   # Forfeiture operations
-├── ForfeituresAdjustment/    # Forfeiture adjustments
-├── FrozenSummary/            # Frozen data summary views
-├── ITOperations/             # IT operations (demographic freeze, etc.)
-├── MasterInquiry/            # Master inquiry (employee/beneficiary lookup)
-├── PAY426Reports/            # PAY426 series reports
-├── PaymasterUpdate/          # Paymaster update operations
-├── PROF130/                  # PROF130 series reports
-│   ├── BalanceByAge/
-│   ├── BalanceByYears/
-│   ├── ContributionsByAge/
-│   ├── DistributionByAge/
-│   ├── ForfeituresByAge/
-│   └── VestedAmountsByAge/
-├── Profall/                  # Employee listing report
-├── ProfitShareEditUpdate/    # Year-end profit share calculation and update
-├── ProfitShareGrossReport/   # Gross profit sharing report
-├── ProfitShareReport/        # Main profit share report
-├── ProfitShareTotals426/     # PAY426 totals report
-├── QPAY066AdHocReports/      # QPAY066 ad-hoc reports
-├── QPAY066B/                 # QPAY066B report
-├── QPAY600/                  # QPAY600 report
-├── ReprintCertificates/      # Certificate reprinting
-├── Unauthorized/             # Unauthorized access page
-├── ViewDistribution/         # Distribution viewing and disbursement tracking
-└── YTDWagesExtract/          # Year-to-date wages extract
+└── Unauthorized/             # Unauthorized access page
 ```
 
 ### Statistics
 
-- **Total page directories**: 33
-- **Total page component files**: ~94 `.tsx` files at depth 1-2
-- **Grid column definition files**: 49 files
+- **Total top-level page directories**: 12 (organized thematically)
+- **Total nested subdirectories**: 40+ component pages
+- **Total page component files**: ~130+ `.tsx` files across all levels
+- **Grid column definition files**: 50+ files
 
 ---
 

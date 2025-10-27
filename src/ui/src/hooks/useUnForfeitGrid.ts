@@ -8,7 +8,18 @@ import {
 } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { CalendarResponseDto, ForfeitureAdjustmentUpdateRequest, StartAndEndDateRequest } from "reduxstore/types";
-import { formatNumberWithComma, setMessage } from "smart-ui-library";
+import { setMessage } from "smart-ui-library";
+import { flattenMasterDetailData, generateRowKey } from "../utils/forfeitActivities/gridDataHelpers";
+import {
+  clearGridSelectionsForBadges,
+  formatApiError,
+  generateBulkSaveSuccessMessage,
+  generateSaveSuccessMessage,
+  getErrorMessage,
+  getRowKeysForRequests,
+  prepareBulkSaveRequests,
+  prepareSaveRequest
+} from "../utils/forfeitActivities/saveOperationHelpers";
 import { Messages } from "../utils/messageDictonary";
 import useDecemberFlowProfitYear from "./useDecemberFlowProfitYear";
 import { useEditState } from "./useEditState";
@@ -26,6 +37,12 @@ interface UnForfeitGridConfig {
   setHasUnsavedChanges: (hasChanges: boolean) => void;
   fiscalCalendarYear: CalendarResponseDto | null;
 }
+
+// Configuration for shared utilities
+const ACTIVITY_CONFIG = {
+  activityType: "unforfeit" as const,
+  rowKeyConfig: { type: "unforfeit" as const }
+};
 
 export const useUnForfeitGrid = ({
   initialSearchLoaded,
@@ -162,6 +179,9 @@ export const useUnForfeitGrid = ({
     async (request: ForfeitureAdjustmentUpdateRequest, name: string) => {
       const rowId = request.badgeNumber;
 
+      // Capture the CURRENT page number from the ref (not the stale closure value)
+      const actualCurrentPage = currentPageNumberRef.current;
+
       // Clear the selection immediately for the saved item
       const currentGridApi = gridRef.current?.api || gridApi;
       if (currentGridApi) {
@@ -177,27 +197,46 @@ export const useUnForfeitGrid = ({
       editState.addLoadingRow(rowId);
 
       try {
-        const result = await updateForfeitureAdjustment({ ...request, suppressAllToastErrors: true });
+        // Transform request using shared helper (negates the value for unforfeit)
+        const transformedRequest = prepareSaveRequest(ACTIVITY_CONFIG, request);
+        const result = await updateForfeitureAdjustment({ ...transformedRequest, suppressAllToastErrors: true });
+
         if (result?.error) {
           alert("Save failed. One or more unforfeits were related to a class action forfeit.");
         } else {
-          const rowKey = `${request.badgeNumber}-${request.profitYear}`;
+          // Generate row key using shared helper (uses profitDetailId for unforfeit)
+          const rowKey = generateRowKey(ACTIVITY_CONFIG.rowKeyConfig, {
+            badgeNumber: request.badgeNumber,
+            profitYear: request.profitYear,
+            profitDetailId: request.offsettingProfitDetailId
+          });
           editState.removeEditedValue(rowKey);
 
-          const employeeName = name || "the selected employee";
-          const successMessage = `The unforfeiture amount of $${formatNumberWithComma(request.forfeitureAmount)} for ${employeeName} saved successfully`;
+          // Generate success message using shared helper
+          const successMessage = generateSaveSuccessMessage(
+            ACTIVITY_CONFIG.activityType,
+            name || "the selected employee",
+            request.forfeitureAmount
+          );
 
           if (unForfeitsQueryParams) {
-            const searchRequest = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);
+            // Use the captured page number to stay on the same page
+            const skip = actualCurrentPage * pageSize;
+            const searchRequest = createRequest(skip, sortParams.sortBy, sortParams.isSortDescending);
             if (searchRequest) {
               await triggerSearch(searchRequest, false);
+
+              // Restore the page number in pagination state
+              handlePaginationChange(actualCurrentPage, pageSize);
+
               setPendingSuccessMessage(successMessage);
             }
           }
         }
       } catch (error) {
         console.error("Failed to save forfeiture adjustment:", error);
-        alert("Failed to save adjustment. Please try again.");
+        const errorMessage = formatApiError(error, getErrorMessage(ACTIVITY_CONFIG.activityType, "save"));
+        alert(errorMessage);
       } finally {
         editState.removeLoadingRow(rowId);
       }
@@ -207,11 +246,11 @@ export const useUnForfeitGrid = ({
       editState,
       selectionState,
       unForfeitsQueryParams,
-      pageNumber,
       pageSize,
       sortParams,
       createRequest,
       triggerSearch,
+      handlePaginationChange,
       gridApi
     ]
   );
@@ -238,13 +277,25 @@ export const useUnForfeitGrid = ({
       setIsBulkSaveInProgress(true);
 
       try {
-        await updateForfeitureAdjustmentBulk(requests);
-        const rowKeys = requests.map((request) => `${request.badgeNumber}-${request.profitYear}`);
+        // Transform all requests using shared helper (negates values for unforfeit)
+        const transformedRequests = prepareBulkSaveRequests(ACTIVITY_CONFIG, requests);
+        await updateForfeitureAdjustmentBulk(transformedRequests);
+
+        // Generate row keys using shared helper (uses profitDetailId for unforfeit)
+        const rowKeys = getRowKeysForRequests(ACTIVITY_CONFIG, requests);
         editState.clearEditedValues(rowKeys);
         selectionState.clearSelection();
 
+        // Clear selections in grid using shared helper
+        clearGridSelectionsForBadges(gridRef.current?.api || gridApi, badgeNumbers);
+
+        // Generate bulk success message using shared helper
         const employeeNames = names.map((name) => name || "Unknown Employee");
-        const bulkSuccessMessage = `Members affected: ${employeeNames.join("; ")}`;
+        const bulkSuccessMessage = generateBulkSaveSuccessMessage(
+          ACTIVITY_CONFIG.activityType,
+          requests.length,
+          employeeNames
+        );
 
         if (unForfeitsQueryParams) {
           // Use the captured page number, not the current one (which may have been reset)
@@ -263,7 +314,8 @@ export const useUnForfeitGrid = ({
         }
       } catch (error) {
         console.error("Failed to save forfeiture adjustments:", error);
-        alert("Failed to save one or more adjustments. Please try again.");
+        const errorMessage = formatApiError(error, getErrorMessage(ACTIVITY_CONFIG.activityType, "bulkSave"));
+        alert(errorMessage);
       } finally {
         editState.removeLoadingRows(badgeNumbers);
         pageNumberAtBulkSaveRef.current = null;
@@ -280,7 +332,8 @@ export const useUnForfeitGrid = ({
       sortParams,
       createRequest,
       triggerSearch,
-      handlePaginationChange
+      handlePaginationChange,
+      gridApi
     ]
   );
 
@@ -379,42 +432,30 @@ export const useUnForfeitGrid = ({
     }));
   };
 
-  // Create the grid data with expandable rows
+  // Create the grid data with expandable rows using shared helper
   const gridData = useMemo(() => {
     if (!unForfeits?.response?.results) return [];
 
-    const rows = [];
+    // Convert expandedRows Record<string, boolean> to Set<string>
+    const expandedRowsSet = new Set(
+      Object.entries(expandedRows)
+        .filter(([_, isExpanded]) => isExpanded)
+        .map(([key, _]) => key)
+    );
 
-    for (const row of unForfeits.response.results) {
-      const hasDetails = row.details && row.details.length > 0;
-
-      // Add main row
-      rows.push({
-        ...row,
-        isExpandable: hasDetails,
-        isExpanded: hasDetails && Boolean(expandedRows[row.badgeNumber.toString()]),
-        isDetail: false
-      });
-
-      // Add detail rows if expanded
-      if (hasDetails && expandedRows[row.badgeNumber.toString()]) {
-        let index = 0;
-        for (const detail of row.details) {
-          rows.push({
-            ...row,
-            ...detail,
-            isDetail: true,
-            isExpandable: false,
-            isExpanded: false,
-            parentId: row.badgeNumber,
-            index: index
-          });
-          index++;
-        }
-      }
-    }
-
-    return rows;
+    return flattenMasterDetailData(unForfeits.response.results, expandedRowsSet, {
+      getKey: (row) => row.badgeNumber.toString(),
+      getDetails: (row) => {
+        // For unforfeit, we need to merge parent data with detail data
+        return (row.details || []).map((detail, index) => ({
+          ...row,
+          ...detail,
+          parentId: row.badgeNumber,
+          index
+        }));
+      },
+      hasDetails: (row) => Boolean(row.details && row.details.length > 0)
+    });
   }, [unForfeits, expandedRows]);
 
   const paginationHandlers = {

@@ -7,7 +7,7 @@ import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveA
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { GridPaginationState, GridPaginationActions } from "../../../hooks/useGridPagination";
-import StandaloneMemberDetails from "../../MasterInquiry/StandaloneMemberDetails";
+import StandaloneMemberDetails from "../../InquiriesAndAdjustments/MasterInquiry/StandaloneMemberDetails";
 import { GetMilitaryContributionColumns } from "./MilitaryContributionFormGridColumns";
 
 interface MilitaryContributionResponse {

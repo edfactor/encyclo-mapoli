@@ -7,6 +7,7 @@ AI Assistant Project Instructions for Claude Code (claude.ai/code) when working 
 - Monorepo with two primary roots:
   - `src/services/` (.NET 9) multi-project solution `Demoulas.ProfitSharing.slnx` (FastEndpoints, EF Core 9 + Oracle, Aspire, Serilog, Feature Flags, RabbitMQ, Mapperly, Shouldly)
   - `src/ui/` (Vite + React + TypeScript + Tailwind + Redux Toolkit + internal `smart-ui-library`)
+  - redux related files are in src/ui/src/reduxstore
 - Database: Oracle 19. EF Core migrations via `ProfitSharingDbContext`; CLI utility project `Demoulas.ProfitSharing.Data.Cli` performs schema ops & imports from legacy READY system
 - Cross-cutting: Central package mgmt (`Directory.Packages.props`), shared build config (`Directory.Build.props`), global SDK pin (`global.json`)
 
@@ -79,7 +80,6 @@ await _context.Records
 ```
 
 ### Performance Patterns
-**Read-only (preferred)**:
 **Read-only (preferred)**:
 ```csharp
 await using var ctx = await _factory.CreateDbContextAsync(ct);

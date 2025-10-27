@@ -1,703 +1,1077 @@
-# UnForfeit (Rehire Forfeitures) Page - Technical Documentation
+# UnForfeit Feature - Technical Implementation Guide
 
 ## Overview
 
-The UnForfeit page (labeled "Rehire Forfeitures") is a December Activities workflow page for reversing forfeitures when employees are rehired. It uses the same master-detail grid pattern as the Termination page but with critical differences in data handling, validation rules, and business logic.
+The UnForfeit (Rehire Forfeitures) feature is a December year-end activity that allows users to reverse forfeitures for rehired employees. It implements a master-detail grid pattern with inline editing, bulk save operations, comprehensive state management, and real-time validation.
 
-### Key Features
-
-- **Rehire-Specific Search**: Date range filter for rehire dates with validation
-- **Zero Balance Exclusion**: Optional filter to hide employees with no balances
-- **Master-Detail Grid**: Expandable rows showing year-by-year forfeiture history
-- **Inline Editing**: "Suggested Unforfeiture" field with negative value handling
-- **Individual & Bulk Save**: Save single rows or multiple selected rows
-- **Frozen Year Warning**: Alert when working with frozen profit year
-- **Read-Only Mode**: Permission-based access control
-- **Archive Support**: Handle archived forfeiture data
+**Purpose**: Reverse profit-sharing forfeitures for employees who were previously terminated and have been rehired within a specified date range during the year-end closing process.
 
 ---
 
-## Architecture Overview
+## Architecture Summary
 
 ### Component Hierarchy
 
 ```
-UnForfeit (Page Wrapper)
-├── FrozenYearWarning (Conditional alert)
-├── StatusDropdownActionNode (Navigation status)
-├── ApiMessageAlert (Save messages)
-├── UnForfeitSearchFilter (Rehire date range + exclusion checkbox)
-│   └── React Hook Form (yup validation)
-└── UnForfeitGrid (Master-detail AG Grid)
-    ├── useUnForfeitGrid (Custom hook - main logic)
-    ├── ReportSummary (Record count)
+UnForfeit.tsx (Page Container)
+├── ApiMessageAlert (Error/success messages)
+├── FrozenYearWarning (Conditional - shown if year is frozen)
+├── DSMAccordion (Collapsible filter section)
+│   └── UnForfeitSearchFilter
+│       ├── DsmDatePicker (Rehire Begin Date)
+│       ├── DsmDatePicker (Rehire End Date)
+│       ├── Checkbox (Exclude zero balance employees)
+│       └── SearchAndReset (Action buttons with loading state)
+└── UnForfeitGrid
+    ├── ReportSummary (Total record counts)
     ├── DSMGrid (AG Grid wrapper)
-    │   ├── Expansion Column (▼/► icons)
-    │   ├── Main Columns (Badge, Name, SSN, Dates, Balances)
-    │   └── Detail Columns (Year-specific forfeiture data + save controls)
+    │   ├── Expansion column (►/▼)
+    │   ├── Main row columns (10 columns - badge, name, SSN, dates, balances, etc.)
+    │   └── Detail row columns (6 columns with inline editing)
     └── Pagination
 ```
 
-### File Structure
+### Key Design Patterns
 
-```
-DecemberActivities/UnForfeit/
-├── UnForfeit.tsx                           # Main page component
-├── UnForfeitSearchFilter.tsx               # Rehire date range filter
-├── UnForfeitGrid.tsx                       # Master-detail grid display
-├── UnForfeitGridColumns.ts                 # Main row column definitions
-├── UnForfeitProfitDetailGridColumns.tsx    # Detail row columns (forfeiture data + controls)
-└── UnForfeitHeaderComponent.tsx            # Bulk save header
-```
-
-### Custom Hooks Used
-
-```
-hooks/
-├── useUnForfeitState.ts            # State management (search params, unsaved changes, archive)
-├── useUnForfeitGrid.ts             # Grid logic (expansion, editing, save operations)
-├── useFiscalCalendarYear.ts        # Fiscal date range fetching
-├── useDecemberFlowProfitYear.ts    # Current profit year
-├── useIsProfitYearFrozen.ts        # Frozen year checking
-├── useUnsavedChangesGuard.ts       # Navigation blocking
-├── useReadOnlyNavigation.ts        # Permission checking
-└── useDynamicGridHeight.ts         # Responsive grid sizing
-```
+1. **Master-Detail Grid**: Employees (master) expand to show profit year records (detail)
+2. **Inline Editing**: Direct cell editing for "Suggested Unforfeiture" amounts
+3. **Bulk Operations**: Select multiple rows and save them simultaneously
+4. **Shared Components**: Uses refactored shared components from `/src/ui/src/components/ForfeitActivities/`
+5. **Auto-Archive**: Automatically refreshes data when status changes to "Complete"
+6. **Frozen Year Warning**: Displays warning banner when profit year is frozen
+7. **Read-Only Mode**: Comprehensive support for read-only navigation contexts
 
 ---
 
-## Key Differences from Termination
+## File Structure
 
-### 1. Data Source & Business Logic
+### 1. **UnForfeit.tsx** (Page Container - 100 lines)
 
-**Termination**:
+**Purpose**: Main orchestrator for the UnForfeit feature
 
-- Employees who have **terminated employment**
-- "Suggested Forfeit": Amount to forfeit (positive values)
-- Creates forfeitures
+**Key Responsibilities**:
 
-**UnForfeit**:
+- Page layout and structure using `Page` component from smart-ui-library
+- Fiscal calendar data fetching
+- Status change handling via `StatusDropdownActionNode`
+- Frozen year warning display
+- Navigation guard for unsaved changes
+- Auto-trigger search when archive mode activated
 
-- Employees who have been **rehired** after termination
-- "Suggested Unforfeiture": Amount to reverse/restore (positive input, **negated** on save)
-- Reverses existing forfeitures
-
-### 2. Search Parameters
-
-**Termination**:
-
-```typescript
-{
-  beginningDate: "01/01/2025",
-  endingDate: "12/31/2025",
-  forfeitureStatus: "showAll"
-}
-```
-
-**UnForfeit**:
-
-```typescript
-{
-  beginningDate: "01/01/2025",    // Rehire begin date
-  endingDate: "12/31/2025",       // Rehire ending date
-  excludeZeroBalance: true        // Optional exclusion filter
-}
-```
-
-### 3. Value Negation
-
-**Critical Difference**: UnForfeit **negates** the value on save:
-
-```typescript
-// Termination: Save as-is
-forfeitureAmount: currentValue;
-
-// UnForfeit: Negate the value
-forfeitureAmount: -(currentValue || 0);
-```
-
-**Why**: Forfeiture adjustments in the backend are:
-
-- **Positive** = forfeit (reduce balance)
-- **Negative** = unforfeit (restore balance)
-
-UI shows positive "suggested unforfeiture" amounts for clarity, but negates before saving.
-
-### 4. Editable Field Name
-
-**Termination**: `suggestedForfeit`
-**UnForfeit**: `suggestedUnforfeiture`
-
-### 5. Profit Detail ID Tracking
-
-**UnForfeit** includes `offsettingProfitDetailId` for tracking which forfeiture is being reversed:
-
-```typescript
-{
-  badgeNumber: 123456,
-  profitYear: 2025,
-  forfeitureAmount: -1500,
-  offsettingProfitDetailId: 789,  // <-- References original forfeiture
-  classAction: false
-}
-```
-
-### 6. Validation Rules
-
-**UnForfeit** has stricter date validation:
-
-```typescript
-endingDate: endDateStringAfterStartDateValidator(/* ... */)
-  .required("Ending Date is required")
-  .test("is-too-early", "Insufficient data for dates before 2024", function (value) {
-    return new Date(value) > new Date(2024, 1, 1); // <-- Extra validation
-  });
-```
-
-**Reason**: Historical data limitations for rehire records.
-
----
-
-## State Management
-
-### useUnForfeitState Hook
-
-Similar to `useTerminationState` but tailored for unforfeit workflow:
+**State Management**:
 
 ```typescript
 const { state, actions } = useUnForfeitState();
-
-// State shape
-interface UnForfeitState {
-  initialSearchLoaded: boolean;
-  resetPageFlag: boolean;
-  hasUnsavedChanges: boolean;
-  shouldArchive: boolean;
-}
-
-// Actions
-actions.handleSearch(); // Execute search (no params - uses Redux state)
-actions.setInitialSearchLoaded(true);
-actions.handleUnsavedChanges(true);
-actions.handleStatusChange();
-actions.handleArchiveHandled();
+// state.initialSearchLoaded - Whether first search performed
+// state.resetPageFlag - Triggers pagination reset
+// state.hasUnsavedChanges - Tracks pending edits
+// state.shouldBlock - Whether to block navigation
+// state.previousStatus - Previously selected status
+// state.shouldArchive - Archive mode flag
 ```
 
-**Key Difference**: `handleSearch` takes no parameters (relies on Redux for search params).
+**Key Hooks Used**:
 
-### Auto-Trigger Search on Archive
+- `useLazyGetAccountingRangeToCurrent(6)` - Fetches fiscal calendar data
+- `useUnForfeitState()` - Page-level state management
+- `useIsProfitYearFrozen(profitYear)` - Check if year is frozen
+- `useUnsavedChangesGuard()` - Blocks navigation with unsaved changes
+- `useDecemberFlowProfitYear()` - Get active profit year
+
+**Auto-Archive Pattern**:
 
 ```typescript
-// In UnForfeit.tsx
 useEffect(() => {
   if (state.shouldArchive) {
-    actions.handleSearch(); // Auto-search when archive mode activated
+    actions.handleSearch(); // Auto-trigger search
   }
 }, [state.shouldArchive, actions]);
 ```
 
-**User Flow**: Change navigation status → Archive mode activates → Search runs automatically.
+**Purpose**: When status changes to "Complete", automatically refresh data without manual search click.
+
+**Frozen Year Warning**:
+
+```typescript
+{isFrozen && <FrozenYearWarning profitYear={profitYear} />}
+```
+
+**Props Flow**:
+
+```typescript
+// To UnForfeitSearchFilter
+<UnForfeitSearchFilter
+  setInitialSearchLoaded={actions.setInitialSearchLoaded}
+  fiscalData={fiscalCalendarYear}
+  onSearch={actions.handleSearch}
+  hasUnsavedChanges={state.hasUnsavedChanges}
+  setHasUnsavedChanges={actions.handleUnsavedChanges}
+/>
+
+// To UnForfeitGrid
+<UnForfeitGrid
+  initialSearchLoaded={state.initialSearchLoaded}
+  setInitialSearchLoaded={actions.setInitialSearchLoaded}
+  resetPageFlag={state.resetPageFlag}
+  onUnsavedChanges={actions.handleUnsavedChanges}
+  hasUnsavedChanges={state.hasUnsavedChanges}
+  shouldArchive={state.shouldArchive}
+  onArchiveHandled={actions.handleArchiveHandled}
+  setHasUnsavedChanges={actions.handleUnsavedChanges}
+  fiscalCalendarYear={fiscalCalendarYear}
+/>
+```
+
+**File Location**: `/src/ui/src/pages/DecemberActivities/UnForfeit/UnForfeit.tsx`
 
 ---
 
-## Search Filter
+### 2. **UnForfeitSearchFilter.tsx** (Search Form - 251 lines)
 
-### Filter Component
+**Purpose**: Date-based search filter with validation and zero-balance exclusion
 
-**File**: `UnForfeitSearchFilter.tsx`
+**Key Features**:
+
+- Date range selection (rehire begin/end dates within fiscal year)
+- Form validation using React Hook Form + Yup
+- "Exclude zero balance" checkbox filter
+- Loading state feedback on search button (built-in via `useLazyGetUnForfeitsQuery`)
+- Redux state persistence for search parameters
+
+**Validation Schema**:
 
 ```typescript
 const schema = yup.object().shape({
-  beginningDate: dateStringValidator(2000, 2099, "Beginning Date")
-    .required("Beginning Date is required"),
-
+  beginningDate: dateStringValidator(2000, 2099, "Beginning Date").required(),
   endingDate: endDateStringAfterStartDateValidator(
     "beginningDate",
     tryddmmyyyyToDate,
     "Ending date must be the same or after the beginning date"
   )
-    .required("Ending Date is required")
-    .test("is-too-early", "Insufficient data for dates before 2024", function (value) {
+    .required()
+    .test("is-too-early", "Insufficient data for dates before 2024", (value) => {
       return new Date(value) > new Date(2024, 1, 1);
     }),
-
-  pagination: yup.object({ skip, take, sortBy, isSortDescending }).required(),
   profitYear: profitYearValidator()
 });
+```
 
-const UnForfeitSearchFilter = ({
-  fiscalData,
-  onSearch,
-  hasUnsavedChanges,
-  setHasUnsavedChanges
-}) => {
-  const { control, handleSubmit, formState: { errors, isValid } } = useForm({
-    resolver: yupResolver(schema),
-    defaultValues: {
-      beginningDate: fiscalData.fiscalBeginDate,
-      endingDate: fiscalData.fiscalEndDate,
-      excludeZeroBalance: false,
-      pagination: { skip: 0, take: 25, sortBy: "fullName", isSortDescending: false }
-    }
-  });
+**Date Validation**: Rejects dates before February 2024 (insufficient historical data).
 
-  const validateAndSubmit = (data) => {
-    if (hasUnsavedChanges) {
-      alert("Please save your changes.");
-      return;
-    }
+**Date Range Constraints**:
 
-    dispatch(setUnForfeitsQueryParams(data));
-    triggerSearch(data);
-    if (onSearch) onSearch();
-  };
+- Rehire Begin Date: Min = fiscal begin, Max = fiscal end
+- Rehire End Date: Min = max(begin date, fiscal begin), Max = fiscal end
+- Both dates use `DsmDatePicker` with `disableFuture`
 
-  return (
-    <form onSubmit={handleSubmit(validateAndSubmit)}>
-      <DsmDatePicker
-        name="beginningDate"
-        control={control}
-        label="Rehire Begin Date"
-        minDate={fiscalData.fiscalBeginDate}
-        maxDate={fiscalData.fiscalEndDate}
-      />
+**Exclude Zero Balance Checkbox**:
 
-      <DsmDatePicker
-        name="endingDate"
-        control={control}
-        label="Rehire Ending Date"
-        minDate={beginningDateValue || fiscalData.fiscalBeginDate}
-        maxDate={fiscalData.fiscalEndDate}
-      />
+```typescript
+<FormControlLabel
+  control={
+    <Checkbox
+      checked={field.value || false}
+      onChange={(e) => field.onChange(e.target.checked)}
+    />
+  }
+  label="Exclude employees with no current or vested balance"
+/>
+```
 
-      <Controller
-        name="excludeZeroBalance"
-        control={control}
-        render={({ field }) => (
-          <FormControlLabel
-            control={<Checkbox checked={field.value || false} onChange={(e) => field.onChange(e.target.checked)} />}
-            label="Exclude employees with no current balance and no vested balance"
-          />
-        )}
-      />
+**Purpose**: Filter out employees with zero balances to focus on actionable unforfeitures.
 
-      <SearchAndReset
-        handleSearch={handleSubmit(validateAndSubmit)}
-        handleReset={handleReset}
-        disabled={!isValid || isFetching}
-      />
-    </form>
-  );
+**Loading State** (Built-in):
+
+```typescript
+const [triggerSearch, { isFetching }] = useLazyGetUnForfeitsQuery();
+
+<SearchAndReset
+  handleReset={handleReset}
+  handleSearch={validateAndSearch}
+  isFetching={isFetching}  // Built into search filter
+  disabled={!isValid || isFetching}
+/>
+```
+
+**Key Difference from Termination**: UnForfeit has built-in loading state because search trigger happens in filter component, not parent.
+
+**Validation and Submit**:
+
+```typescript
+const validateAndSubmit = (data: StartAndEndDateRequest) => {
+  if (hasUnsavedChanges) {
+    alert("Please save your changes.");
+    return;
+  }
+
+  if (isValid && hasToken) {
+    const updatedData = {
+      ...data,
+      beginningDate: mmDDYYFormat(beginDate),
+      endingDate: mmDDYYFormat(endDate),
+      profitYear: selectedProfitYear
+    };
+
+    dispatch(setUnForfeitsQueryParams(updatedData)); // Redux persistence
+    triggerSearch(updatedData); // RTK Query
+    if (onSearch) onSearch(); // Notify parent
+  }
 };
 ```
+
+**Redux Persistence**:
+
+- Stores search parameters in Redux `yearsEndSlice`
+- Allows restoring search state on page refresh
+- Enables navigation away and back without losing search
+
+**Reset Functionality**:
+
+- Clears all form fields
+- Resets to fiscal year defaults
+- Clears Redux search params (`clearUnForfeitsQueryParams`)
+- Clears Redux results (`clearUnForfeitsDetails`)
+- Marks search as not loaded
+- Clears validation errors
+
+**File Location**: `/src/ui/src/pages/DecemberActivities/UnForfeit/UnForfeitSearchFilter.tsx`
+
+---
+
+### 3. **UnForfeitGrid.tsx** (Grid Display - 231 lines)
+
+**Purpose**: Master-detail grid with inline editing
 
 **Key Features**:
 
-1. **Rehire Date Labels**: "Rehire Begin Date" vs "Begin Date"
-2. **Zero Balance Exclusion**: Checkbox to filter out employees with no balance
-3. **Stricter Validation**: Must be after 2024-02-01
-4. **Dynamic End Date Min**: End date minimum is the greater of fiscal begin or selected begin date
+- Dynamic grid height calculation
+- Master-detail row expansion/collapse
+- Read-only mode support
+- Inline editing for all detail rows
+- Pagination
+- Custom CSS for detail row styling
+
+**Custom Styling** (Inline):
 
 ```typescript
-const minDateFromBeginning = beginningDateValue ? tryddmmyyyyToDate(beginningDateValue) : null;
-const fiscalMinDate = tryddmmyyyyToDate(fiscalData.fiscalBeginDate);
-const effectiveMinDate =
-  minDateFromBeginning && fiscalMinDate
-    ? minDateFromBeginning > fiscalMinDate
-      ? minDateFromBeginning
-      : fiscalMinDate
-    : (minDateFromBeginning ?? fiscalMinDate ?? undefined);
-```
-
----
-
-## Grid Columns
-
-### Main Columns
-
-**File**: `UnForfeitGridColumns.ts`
-
-```typescript
-export const UnForfeitGridColumns = (): ColDef[] => {
-  return [
-    createBadgeColumn({}),
-    createNameColumn({ field: "fullName" }),
-    createSSNColumn({}),
-
-    createDateColumn({
-      headerName: "Hire Date",
-      field: "hireDate"
-    }),
-
-    createDateColumn({
-      headerName: "Rehired Date",
-      field: "reHiredDate" // <-- Key difference
-    }),
-
-    createCurrencyColumn({
-      headerName: "Current Balance",
-      field: "netBalanceLastYear"
-    }),
-
-    createCurrencyColumn({
-      headerName: "Vested Balance",
-      field: "vestedBalanceLastYear"
-    }),
-
-    createStoreColumn({}),
-
-    createCountColumn({
-      headerName: "Years",
-      field: "companyContributionYears"
-    }),
-
-    {
-      headerName: "Enrollment",
-      field: "enrollmentId",
-      valueGetter: (params) => {
-        const id = params.data?.enrollmentId;
-        const name = params.data?.enrollmentName;
-        if (!id || !name) return "-";
-        return `[${id}] ${name}`;
-      }
+<style>
+  {`
+    .detail-row {
+      background-color: #f5f5f5;
     }
-  ];
-};
+    .invalid-cell {
+      background-color: #fff6f6;
+    }
+  `}
+</style>
 ```
 
-**Key Fields**:
+**Detail rows**: Gray background (`#f5f5f5`)
+**Invalid cells**: Light red background (`#fff6f6`)
 
-- `reHiredDate`: Date employee was rehired (critical for unforfeit eligibility)
-- `netBalanceLastYear`: Current balance (for exclusion filter)
-- `vestedBalanceLastYear`: Vested balance (for exclusion filter)
-
-### Detail Columns
-
-**File**: `UnForfeitProfitDetailGridColumns.tsx`
+**Hook Integration**:
 
 ```typescript
-export const GetProfitDetailColumns = (
-  addRowToSelectedRows,
-  removeRowFromSelectedRows,
+const {
+  pageNumber,
+  pageSize,
+  gridData,
+  unForfeits,
   selectedProfitYear,
-  onSave,
-  onBulkSave,
-  isReadOnly = false
-): ColDef[] => {
-  return [
-    createYearColumn({ field: "profitYear" }),
-
-    createHoursColumn({
-      field: "hoursTransactionYear",
-      valueGetter: (params) => {
-        // Hide zeros (no data for many years)
-        const value = params.data?.hoursTransactionYear;
-        return value == null || value == 0 ? null : value;
-      }
-    }),
-
-    createCurrencyColumn({
-      headerName: "Wages",
-      field: "wagesTransactionYear",
-      valueGetter: (params) => {
-        // Hide zeros (no data for many years)
-        const value = params.data?.wagesTransactionYear;
-        return value == null || value == 0 ? null : value;
-      }
-    }),
-
-    createCurrencyColumn({
-      headerName: "Forfeiture",
-      field: "forfeiture"
-    }),
-
-    // EDITABLE FIELD
-    {
-      headerName: "Suggested Unforfeiture",
-      field: "suggestedUnforfeit",
-      pinned: "right",
-      editable: (params) => params.data.suggestedUnforfeiture != null && !isReadOnly,
-      cellEditor: SuggestedForfeitEditor,
-      cellRenderer: (params) => SuggestedForfeitCellRenderer({ ...params, selectedProfitYear }, false, true),
-      valueFormatter: (params) => numberToCurrency(params.data.suggestedUnforfeiture)
-    },
-
-    createCommentColumn({
-      headerName: "Remark",
-      field: "remark"
-    }),
-
-    // SAVE CONTROLS
-    {
-      headerName: "Save Button",
-      field: "saveButton",
-      pinned: "right",
-      headerComponent: HeaderComponent,
-      cellRenderer: SaveButtonCellRenderer
-    }
-  ];
-};
+  selectionState,
+  handleSave,
+  handleBulkSave,
+  handleRowExpansion,
+  sortEventHandler,
+  onGridReady,
+  paginationHandlers,
+  gridRef,
+  gridContext
+} = useUnForfeitGrid({
+  initialSearchLoaded,
+  setInitialSearchLoaded,
+  resetPageFlag,
+  onUnsavedChanges,
+  hasUnsavedChanges,
+  shouldArchive,
+  onArchiveHandled,
+  setHasUnsavedChanges,
+  fiscalCalendarYear
+});
 ```
 
-**Key Differences**:
-
-- **Hours/Wages**: Use `valueGetter` to hide zeros (many years have no data)
-- **Editable Condition**: `suggestedUnforfeiture != null` (simpler than Termination's year check)
-- **Field Name**: `suggestedUnforfeiture` vs `suggestedForfeit`
-
----
-
-## Save Operations
-
-### Individual Save
-
-**Save Button Cell Renderer**:
+**Master-Detail Column Composition** (Same as Termination):
 
 ```typescript
-cellRenderer: (params: UnForfeitsSaveButtonCellParams) => {
-  if (!isTransactionEditable(params, isReadOnly)) {
-    return "";
-  }
+const columnDefs = useMemo(() => {
+  // Expansion column (►/▼)
+  const expansionColumn = { ... };
 
-  const rowKey = params.data.profitDetailId;  // <-- Uses profitDetailId, not badge-year
-  const currentValue = params.context?.editedValues?.[rowKey]?.value
-    ?? params.data.suggestedUnforfeiture;
-  const isLoading = params.context?.loadingRowIds?.has(params.data.badgeNumber);
-  const isDisabled = (currentValue || 0) === 0 || isLoading || isReadOnly;
+  // Main columns: Hide content for detail rows (unless shared)
+  const visibleColumns = mainColumns.map(column => ({
+    ...column,
+    cellRenderer: (params) => {
+      if (params.data?.isDetail) {
+        const hideInDetails = !detailColumns.some(
+          col => col.field === column.field
+        );
+        if (hideInDetails) return "";
+      }
+      return /* render value */;
+    }
+  }));
 
-  return (
-    <div>
-      <Checkbox /* ... */ />
-      <IconButton
-        onClick={async () => {
-          if (!isReadOnly && params.onSave) {
-            const request: ForfeitureAdjustmentUpdateRequest = {
-              badgeNumber: params.data.badgeNumber,
-              forfeitureAmount: -(currentValue || 0),         // <-- NEGATED
-              profitYear: selectedProfitYear,
-              offsettingProfitDetailId: params.data.profitDetailId,  // <-- Track source
-              classAction: false
-            };
-            await params.onSave(request, params.data.fullName);
-          }
-        }}
-        disabled={isDisabled}>
-        {isLoading ? <CircularProgress size={20} /> : <SaveOutlined />}
-      </IconButton>
-    </div>
-  );
+  // Detail-only columns: Only visible for detail rows
+  const detailOnlyColumns = detailColumns
+    .filter(col => !mainColumns.some(mainCol => mainCol.field === col.field))
+    .map(column => ({
+      ...column,
+      cellRenderer: (params) => !params.data?.isDetail ? "" : /* value */
+    }));
+
+  return [expansionColumn, ...visibleColumns, ...detailOnlyColumns];
+}, [mainColumns, detailColumns, handleRowExpansion]);
+```
+
+**Grid Context** (Shared State):
+
+```typescript
+context: {
+  editedValues: Record<number, { value: number }>,  // Key is profitDetailId
+  loadingRowIds: Set<string>
 }
 ```
 
-**Critical Differences**:
+**Key Difference from Termination**: Uses `profitDetailId` as key (number) instead of composite string.
 
-1. **Row Key**: Uses `profitDetailId` instead of `${badgeNumber}-${profitYear}`
+**File Location**: `/src/ui/src/pages/DecemberActivities/UnForfeit/UnForfeitGrid.tsx`
 
-   - **Why**: Forfeiture records have unique IDs, multiple forfeitures can exist per year
+---
 
-2. **Value Negation**: `forfeitureAmount: -(currentValue || 0)`
+### 4. **UnForfeitGridColumns.ts** (Main Columns - 58 lines)
 
-   - **Why**: Unforfeit = negative forfeiture adjustment
+**Purpose**: Column definitions for master (employee summary) rows
 
-3. **Offsetting Profit Detail ID**: Tracks which forfeiture is being reversed
-   - **Why**: Audit trail and data integrity
+**Comprehensive Master Columns** (10 total):
 
-### Bulk Save Header
+| Column          | Field                            | Type     | Description                |
+| --------------- | -------------------------------- | -------- | -------------------------- |
+| Badge Number    | `badgeNumber`                    | Number   | Employee badge (navigable) |
+| Full Name       | `fullName`                       | String   | Employee full name         |
+| SSN             | `ssn`                            | String   | Social security (masked)   |
+| Hire Date       | `hireDate`                       | Date     | Original hire date         |
+| Rehired Date    | `reHiredDate`                    | Date     | Rehire date                |
+| Current Balance | `netBalanceLastYear`             | Currency | Current balance            |
+| Vested Balance  | `vestedBalanceLastYear`          | Currency | Vested balance             |
+| Store           | `store`                          | Number   | Store number               |
+| Years           | `companyContributionYears`       | Count    | Contribution years         |
+| Enrollment      | `enrollmentId`, `enrollmentName` | String   | Formatted as `[id] name`   |
 
-**File**: `UnForfeitHeaderComponent.tsx`
+**Key Difference from Termination**: Much more comprehensive master columns showing employee context and balances.
+
+**Column Factories** (from `/src/ui/src/utils/gridColumnFactory`):
+
+- `createBadgeColumn()` - Badge number with navigation
+- `createNameColumn()` - Employee full name
+- `createSSNColumn()` - Masked SSN display
+- `createDateColumn()` - Date formatting
+- `createCurrencyColumn()` - Currency formatting
+- `createStoreColumn()` - Store number
+- `createCountColumn()` - Numeric count
+
+**Enrollment Column** (Custom formatter):
+
+```typescript
+{
+  headerName: "Enrollment",
+  field: "enrollmentId",
+  colId: "enrollmentId",
+  width: 120,
+  valueGetter: (params) => {
+    const id = params.data?.enrollmentId;
+    const name = params.data?.enrollmentName;
+    if (!id || !name) return "-";
+    return `[${id}] ${name}`;
+  }
+}
+```
+
+**File Location**: `/src/ui/src/pages/DecemberActivities/UnForfeit/UnForfeitGridColumns.ts`
+
+---
+
+### 5. **UnForfeitProfitDetailGridColumns.tsx** (Detail Columns - 108 lines)
+
+**Purpose**: Column definitions for detail (profit year) rows with inline editing
+
+**Column Structure** (7 total columns):
+
+| Column                     | Field                   | Type     | Editable | Description                           |
+| -------------------------- | ----------------------- | -------- | -------- | ------------------------------------- |
+| Profit Year                | `profitYear`            | Year     | No       | Year of profit record                 |
+| Hours                      | `hoursTransactionYear`  | Hours    | No       | Transaction year hours (zeros hidden) |
+| Wages                      | `wagesTransactionYear`  | Currency | No       | Transaction year wages (zeros hidden) |
+| Forfeiture                 | `forfeiture`            | Currency | No       | Original forfeiture amount            |
+| **Suggested Unforfeiture** | `suggestedUnforfeiture` | Currency | **Yes**  | Amount to reverse (editable)          |
+| Remark                     | `remark`                | String   | No       | Comment/note                          |
+| Save Button                | (special)               | Action   | N/A      | Checkbox + Save button                |
+
+**Zeros Hidden Pattern** (Hours and Wages):
+
+```typescript
+valueGetter: (params) => {
+  // Do not show zeros, for many years we only have zero (aka no data)
+  const value = params.data?.hoursTransactionYear;
+  return value == null || value == 0 ? null : value;
+};
+```
+
+**Purpose**: Historical years often have zero hours/wages (no data available). Hiding zeros improves readability.
+
+**Editable Check Function**:
+
+```typescript
+function isTransactionEditable(params, isReadOnly: boolean = false): boolean {
+  return params.data.suggestedUnforfeiture != null && !isReadOnly;
+}
+```
+
+**Key Difference from Termination**: All years are editable (not just current year), as long as they have a suggested unforfeiture value.
+
+**Suggested Unforfeiture Column** (Inline Editing):
+
+```typescript
+{
+  headerName: "Suggested Unforfeiture",
+  field: "suggestedUnforfeit",
+  width: 150,
+  pinned: "right",
+  editable: (params) => isTransactionEditable(params, isReadOnly),
+  cellEditor: SuggestedForfeitEditor,
+  cellRenderer: (params) => SuggestedForfeitCellRenderer(
+    { ...params, selectedProfitYear },
+    false,  // isTermination = false
+    true    // isUnforfeit = true
+  ),
+  valueFormatter: (params) => numberToCurrency(params.data.suggestedUnforfeiture)
+}
+```
+
+**Row Key Pattern**: `profitDetailId` (Unique ID)
+
+- Single numeric ID per profit year record
+- Used to track edited values before save
+- Different from Termination (which uses composite key)
+
+**Save Button Column** (Refactored):
+
+```typescript
+{
+  headerName: "Save Button",
+  field: "saveButton",
+  pinned: "right",
+  lockPinned: true,
+  headerComponent: HeaderComponent, // Bulk save checkbox
+  cellRenderer: createSaveButtonCellRenderer({
+    activityType: "unforfeit",
+    selectedProfitYear,
+    isReadOnly
+  })
+}
+```
+
+**Uses Shared Component**: `createSaveButtonCellRenderer` from `/src/ui/src/components/ForfeitActivities/`
+
+**Features**:
+
+- Checkbox for bulk selection
+- Individual save button with loading spinner
+- Disabled when value is zero, invalid, or read-only
+- Tooltips for disabled states
+- Calls `params.api.refreshCells({ force: true })` on checkbox change (UnForfeit-specific)
+
+**File Location**: `/src/ui/src/pages/DecemberActivities/UnForfeit/UnForfeitProfitDetailGridColumns.tsx`
+
+---
+
+### 6. **UnForfeitHeaderComponent.tsx** (Bulk Save Header - 13 lines)
+
+**Purpose**: Custom header for save button column with bulk save functionality
+
+**Refactored Implementation** (Uses Shared Component):
 
 ```typescript
 export const HeaderComponent: React.FC<UnForfeitHeaderComponentProps> = (params) => {
-  const profitYear = useDecemberFlowProfitYear();
-
-  const isNodeEligible = (nodeData, context) => {
-    if (!nodeData.isDetail) return false;
-
-    // Use profitDetailId as key (not badge-year)
-    const baseRowKey = nodeData.profitDetailId;
-    const editedValues = context?.editedValues || {};
-    const matchingKey = baseRowKey in editedValues ? baseRowKey : undefined;
-    const currentValue = matchingKey
-      ? editedValues[matchingKey]?.value
-      : nodeData.suggestedUnforfeiture;
-
-    return (currentValue || 0) !== 0;
-  };
-
-  const createUpdatePayload = (nodeData, context) => {
-    const baseRowKey = nodeData.profitDetailId;
-    const editedValues = context?.editedValues || {};
-    const matchingKey = baseRowKey in editedValues ? baseRowKey : undefined;
-    const currentValue = matchingKey
-      ? editedValues[matchingKey]?.value
-      : nodeData.suggestedUnforfeiture;
-
-    return {
-      badgeNumber: Number(nodeData.badgeNumber),
-      profitYear: profitYear,
-      forfeitureAmount: -(currentValue || 0),    // <-- NEGATED
-      classAction: false
-    };
-  };
-
   return (
-    <SelectableGridHeader
+    <SharedForfeitHeaderComponent
       {...params}
-      isNodeEligible={isNodeEligible}
-      createUpdatePayload={createUpdatePayload}
-      isBulkSaving={hasSavingInProgress}
-      isReadOnly={params.isReadOnly}
+      config={{
+        activityType: "unforfeit"
+      }}
     />
   );
 };
 ```
 
-**Key Points**:
+**Uses**: `SharedForfeitHeaderComponent` from `/src/ui/src/components/ForfeitActivities/`
 
-- Uses `profitDetailId` for row tracking
-- Negates value in `createUpdatePayload`
-- Does NOT use `offsettingProfitDetailId` in bulk operations (backend handles it)
+**Shared Component Handles**:
+
+- Bulk save checkbox rendering
+- Row eligibility determination (`isNodeEligible`)
+- Payload creation (`createUpdatePayload`)
+- Loading state tracking (`hasSavingInProgress`)
+
+**Activity-Specific Behavior** (UnForfeit):
+
+- **Row Key**: Single `profitDetailId`
+- **Value Transformation**: NEGATED (sent as negative to API)
+- **Eligibility**: All detail rows with non-zero values
+- **Requires `offsettingProfitDetailId`**: Must link to original forfeiture
+
+**File Location**: `/src/ui/src/pages/DecemberActivities/UnForfeit/UnForfeitHeaderComponent.tsx`
 
 ---
 
-## Frozen Year Warning
+## Data Flow
 
-### Conditional Display
+### Search Flow
 
-```typescript
-// In UnForfeit.tsx
-const profitYear = useDecemberFlowProfitYear();
-const isFrozen = useIsProfitYearFrozen(profitYear);
-
-return (
-  <Page label="Rehire Forfeitures" actionNode={<StatusDropdownActionNode />}>
-    {isFrozen && <FrozenYearWarning profitYear={profitYear} />}
-    {/* ... rest of page */}
-  </Page>
-);
+```
+User clicks "SEARCH"
+    ↓
+UnForfeitSearchFilter validates form (React Hook Form + Yup)
+    ↓
+triggerSearch() called directly in filter (RTK Query lazy query)
+    ↓
+dispatch(setUnForfeitsQueryParams(params)) - Store in Redux
+    ↓
+API request to /api/unforfeits
+    ↓
+Response cached by RTK Query
+    ↓
+onSearch() callback notifies parent
+    ↓
+actions.handleSearch() toggles resetPageFlag
+    ↓
+UnForfeitGrid receives resetPageFlag change
+    ↓
+useUnForfeitGrid detects resetPageFlag change
+    ↓
+Fetches data from Redux selector
+    ↓
+flattenMasterDetailData() transforms hierarchical data to flat structure
+    ↓
+Grid displays master rows (badge, name, SSN, dates, balances, etc.)
+    ↓
+User clicks expansion arrow (►)
+    ↓
+handleRowExpansion() updates expandedRows state
+    ↓
+flattenMasterDetailData() re-runs with updated expansion state
+    ↓
+Detail rows inserted after master row
+    ↓
+Grid displays detail rows (profit years with gray background)
 ```
 
-**FrozenYearWarning Component**:
+**Key Difference from Termination**: Search happens IN the filter component, not in the grid hook.
 
-```typescript
-<Alert severity="warning" sx={{ margin: "16px" }}>
-  <AlertTitle>Frozen Year Warning</AlertTitle>
-  Profit year {profitYear} is frozen. Changes may be restricted or require approval.
-</Alert>
+### Save Flow (Individual)
+
+```
+User edits "Suggested Unforfeiture" cell
+    ↓
+SuggestedForfeitEditor captures value
+    ↓
+editedValues context updated: editedValues[profitDetailId] = { value: newValue }
+    ↓
+onUnsavedChanges(true) - Enables navigation guard
+    ↓
+Cell re-renders with edited value (from context)
+    ↓
+User clicks individual save button
+    ↓
+handleSave() called from useUnForfeitGrid
+    ↓
+prepareSaveRequest() creates ForfeitureAdjustmentUpdateRequest
+    ↓
+Value NEGATED (unforfeit sends negative values)
+    ↓
+offsettingProfitDetailId added (links to original forfeiture)
+    ↓
+updateForfeiture mutation (RTK Query)
+    ↓
+API request to /api/forfeiture-adjustments
+    ↓
+Success:
+  - generateSaveSuccessMessage() creates message
+  - Remove edited value from context
+  - Trigger data refresh (re-fetch)
+  - Clear row selection
+  - Display success message via ApiMessageAlert
+  - onUnsavedChanges(false)
+    ↓
+Error:
+  - Display error message via ApiMessageAlert
+  - Keep edited value in context
+  - Row remains selected
+  - onUnsavedChanges remains true
 ```
 
-**User Experience**: Warning appears at top of page when working with frozen year. Does NOT block operations (read-only mode handles that).
+### Bulk Save Flow
+
+```
+User edits multiple cells
+    ↓
+Each edit tracked in editedValues context (keyed by profitDetailId)
+    ↓
+User clicks checkboxes for rows to save
+    ↓
+selectedRowIds Set updated via selectionState
+    ↓
+User clicks bulk save checkbox in header
+    ↓
+handleBulkSave() called from useUnForfeitGrid
+    ↓
+Filter selected rows using isNodeEligible():
+  - Must be detail row (isDetail === true)
+  - Must have non-zero value
+    ↓
+Create payloads using createUpdatePayload() for each eligible row
+    ↓
+Execute saves with handleBatchOperations() (batches of 5)
+    ↓
+For each row in batch:
+  - Mark as loading (add badgeNumber to loadingRowIds)
+  - Call updateForfeiture mutation
+  - Handle success/error individually
+  - Remove from loading set
+    ↓
+After all complete:
+  - Display summary message (X succeeded, Y failed)
+  - Refresh grid data
+  - Clear all selections
+  - Clear all edited values
+  - onUnsavedChanges(false)
+```
+
+### Archive Flow
+
+```
+User changes status to "Complete"
+    ↓
+StatusDropdownActionNode calls handleStatusChange("complete", "Complete")
+    ↓
+useUnForfeitState reducer:
+  - Detects status contains "complete"
+  - Sets shouldArchive = true
+    ↓
+UnForfeit.tsx useEffect detects shouldArchive
+    ↓
+actions.handleSearch() called automatically (no user click needed)
+    ↓
+toggles resetPageFlag in reducer
+    ↓
+UnForfeitGrid detects resetPageFlag change
+    ↓
+Grid refetches data from Redux
+    ↓
+Grid displays current data (archive mode is implicit)
+    ↓
+actions.handleArchiveHandled() called
+    ↓
+shouldArchive reset to false
+```
+
+**Key Difference from Termination**: No explicit archive flag in search params. Archive is implicit in status change.
+
+---
+
+## State Management
+
+### Page-Level State (useUnForfeitState)
+
+**Hook Location**: `/src/ui/src/hooks/useUnForfeitState.ts`
+
+**State Structure**:
+
+```typescript
+interface UnForfeitState {
+  initialSearchLoaded: boolean;
+  resetPageFlag: boolean;
+  hasUnsavedChanges: boolean;
+  shouldBlock: boolean;
+  previousStatus: string | null;
+  shouldArchive: boolean;
+}
+```
+
+**Actions**:
+
+- `setInitialSearchLoaded(loaded)` - Mark search as performed
+- `handleSearch()` - Toggle resetPageFlag
+- `handleUnsavedChanges(hasChanges)` - Track unsaved edits
+- `setShouldBlock(shouldBlock)` - Set navigation block flag
+- `handleStatusChange(status, statusName)` - Handle status change, trigger archive
+- `handleArchiveHandled()` - Clear archive flag
+
+**Archive Mode Logic**:
+
+```typescript
+case "SET_STATUS_CHANGE": {
+  const { status, statusName } = action.payload;
+  const isCompleteLike = (statusName ?? "").toLowerCase().includes("complete");
+  const isChangingToComplete = isCompleteLike && state.previousStatus !== status;
+
+  return {
+    ...state,
+    previousStatus: status,
+    shouldArchive: isChangingToComplete // Trigger archive refresh
+  };
+}
+```
+
+**Simpler than Termination**: No explicit archive flag in search params. Just triggers a refresh.
+
+### Grid State (useUnForfeitGrid)
+
+**Hook Location**: `/src/ui/src/hooks/useUnForfeitGrid.ts`
+
+**Key State Variables**:
+
+```typescript
+// Expansion state
+const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
+
+// Message pending state
+const [pendingSuccessMessage, setPendingSuccessMessage] = useState<string | null>(null);
+const [isPendingBulkMessage, setIsPendingBulkMessage] = useState<boolean>(false);
+
+// RTK Query state
+const [triggerSearch, { isFetching }] = useLazyGetUnForfeitsQuery();
+
+// Edit state (from useEditState hook)
+editState: {
+  editedValues: Record<number, { value: number }>,  // Key is profitDetailId (number)
+  loadingRowIds: Set<string>
+}
+
+// Selection state (from useRowSelection hook)
+selectionState: {
+  selectedRowIds: Set<number>,
+  addRowToSelection: (id: number) => void,
+  removeRowFromSelection: (id: number) => void,
+  clearSelections: () => void
+}
+
+// Pagination state (from useGridPagination hook)
+{
+  pageNumber: number,
+  pageSize: number,
+  sortParams: SortParams,
+  setPageNumber: (page: number) => void,
+  setPageSize: (size: number) => void
+}
+```
+
+**Composite Hooks Pattern** (Same as Termination):
+
+- `useEditState()` - Inline editing and validation
+- `useRowSelection()` - Checkbox selection tracking
+- `useGridPagination()` - Pagination and sorting
+
+### Redux State (yearsEndSlice)
+
+**Search Parameters**:
+
+```typescript
+unForfeitsQueryParams: {
+  beginningDate: string,
+  endingDate: string,
+  excludeZeroBalance: boolean,
+  profitYear: number,
+  pagination: { skip, take, sortBy, isSortDescending }
+}
+```
+
+**Search Results**:
+
+```typescript
+unForfeitsDetails: {
+  response: {
+    results: UnForfeitMasterDto[],
+    total: number
+  }
+}
+```
+
+**Actions**:
+
+- `setUnForfeitsQueryParams(params)` - Store search parameters
+- `clearUnForfeitsQueryParams()` - Clear search parameters
+- `clearUnForfeitsDetails()` - Clear search results
+
+**Why Store in Redux?**
+
+- Persist search parameters across component re-renders
+- Restore search state on page refresh
+- Share data across components
 
 ---
 
 ## API Integration
 
-### Endpoints
+### Search Endpoint
 
-**1. Search UnForfeits**:
+**RTK Query Hook**: `useLazyGetUnForfeitsQuery()`
+
+**Request**:
 
 ```typescript
-useLazyGetUnForfeitsQuery()
-
-// Request
-{
-  beginningDate: "01/01/2025",
-  endingDate: "12/31/2025",
-  excludeZeroBalance: true,
-  profitYear: 2025,
-  pagination: { skip: 0, take: 25, sortBy: "fullName", isSortDescending: false }
+interface StartAndEndDateRequest {
+  beginningDate: string; // Format: "MM/DD/YYYY"
+  endingDate: string; // Format: "MM/DD/YYYY"
+  excludeZeroBalance?: boolean;
+  profitYear?: number;
+  pagination?: {
+    skip: number;
+    take: number;
+    sortBy: string;
+    isSortDescending: boolean;
+  };
 }
+```
 
-// Response
-{
+**Response**:
+
+```typescript
+interface UnForfeitsResponse {
   response: {
-    results: [
-      {
-        badgeNumber: 123456,
-        fullName: "Doe, John",
-        ssn: "***-**-1234",
-        hireDate: "2020-01-15",
-        reHiredDate: "2025-03-01",      // <-- Rehire date
-        netBalanceLastYear: 5000,
-        vestedBalanceLastYear: 4000,
-        storeNumber: 42,
-        companyContributionYears: 3,
-        enrollmentId: 1,
-        enrollmentName: "Enrolled",
-        profitDetails: [
-          {
-            profitDetailId: 789,        // <-- Unique ID for this forfeiture
-            profitYear: 2024,
-            hoursTransactionYear: 1200,
-            wagesTransactionYear: 35000,
-            forfeiture: 1500,
-            suggestedUnforfeiture: 1500,  // <-- Amount to reverse
-            remark: "Rehired after termination"
-          }
-        ]
-      }
-    ],
-    total: 45
-  }
+    results: UnForfeitMasterDto[];
+    total: number;
+  };
+}
+
+interface UnForfeitMasterDto {
+  badgeNumber: number;
+  fullName: string;
+  ssn: string;
+  hireDate: string;
+  reHiredDate: string;
+  netBalanceLastYear: number;
+  vestedBalanceLastYear: number;
+  store: number;
+  companyContributionYears: number;
+  enrollmentId: number;
+  enrollmentName: string;
+  profitYearDetails: UnForfeitDetailDto[];
+}
+
+interface UnForfeitDetailDto {
+  profitDetailId: number; // Unique ID for this record
+  profitYear: number;
+  hoursTransactionYear: number;
+  wagesTransactionYear: number;
+  forfeiture: number;
+  suggestedUnforfeiture: number;
+  remark: string;
 }
 ```
 
-**2. Save Forfeiture Adjustment** (Same as Termination):
+### Update Endpoint
+
+**RTK Query Hook**: `useUpdateForfeitureAdjustmentMutation()`
+
+**Request**:
 
 ```typescript
-useSaveForfeitureAdjustmentMutation()
-
-// Request
-{
-  badgeNumber: 123456,
-  profitYear: 2025,
-  forfeitureAmount: -1500,            // <-- NEGATIVE (unforfeit)
-  offsettingProfitDetailId: 789,      // <-- References source forfeiture
-  classAction: false
-}
-
-// Response
-{
-  success: true,
-  message: "Forfeiture adjustment saved"
+interface ForfeitureAdjustmentUpdateRequest {
+  badgeNumber: number;
+  profitYear: number;
+  forfeitureAmount: number; // NEGATED for unforfeit
+  offsettingProfitDetailId: number; // Required - links to original forfeiture
+  classAction: boolean; // Always false for manual operations
 }
 ```
+
+**Critical**: UnForfeit NEGATES the value and REQUIRES `offsettingProfitDetailId`.
+
+**Response**: Success/error status
+
+### Bulk Update Endpoint
+
+**RTK Query Hook**: `useUpdateForfeitureAdjustmentBulkMutation()`
+
+**Request**: Array of `ForfeitureAdjustmentUpdateRequest`
+
+**Response**: Success/error status
 
 ---
 
-## Key Patterns
+## Key Features
 
-### 1. Profit Detail ID as Row Key
+### 1. Value Transformation (Critical)
 
-**UnForfeit**:
-
-```typescript
-const rowKey = params.data.profitDetailId; // Unique ID
-```
-
-**Termination**:
+**UnForfeit Pattern**: **Negates values**
 
 ```typescript
-const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`; // Composite key
+// User enters: 1000.00
+// API receives: -1000.00 (negated)
+
+transformForfeitureValue("unforfeit", 1000.0); // Returns: -1000.00
 ```
 
-**Why Different**:
+**Why?**
 
-- UnForfeit: Multiple forfeiture records can exist per badge/year (due to multiple terminations/rehires)
-- Termination: One record per badge/year (current status)
+- Forfeitures are stored as negative values in database
+- Unforfeitures reverse forfeitures by adding positive offsetting entries
+- Negation converts user-entered positive values to required format
 
-### 2. Value Negation for UnForfeit
-
-Always negate before saving:
+**Contrast with Termination**:
 
 ```typescript
-forfeitureAmount: -(currentValue || 0);
+transformForfeitureValue("termination", 2000.0); // Returns: 2000.00 (no negation)
 ```
 
-**UI Display**: Positive numbers (easier to understand)
-**Backend**: Negative numbers (standard forfeiture adjustment semantics)
+### 2. Row Keys and Tracking
 
-### 3. Zero Value Hiding in Hours/Wages
+**UnForfeit uses `profitDetailId` as row key**: Single numeric ID
+
+```typescript
+generateRowKey(
+  { type: "unforfeit" },
+  {
+    badgeNumber: 12345,
+    profitYear: 2021,
+    profitDetailId: 98765
+  }
+);
+// Returns: "98765"
+```
+
+**Why `profitDetailId`?**
+
+- Each profit year record has unique `profitDetailId`
+- Needed to track which specific forfeiture is being reversed
+- Sent as `offsettingProfitDetailId` in API request
+- Backend uses this to link unforfeit to original forfeiture
+
+**Usage**:
+
+```typescript
+// In editedValues context
+context.editedValues[profitDetailId] = { value: 1000.00 };
+
+// In API request
+{
+  badgeNumber: 12345,
+  profitYear: 2021,
+  forfeitureAmount: -1000.00,
+  offsettingProfitDetailId: 98765, // Links to original forfeiture
+  classAction: false
+}
+```
+
+**Contrast with Termination**: Uses composite key `${badgeNumber}-${profitYear}`
+
+### 3. Editable Criteria
+
+**UnForfeit Pattern**: All years with suggested unforfeiture value
+
+```typescript
+function isTransactionEditable(params, isReadOnly: boolean = false): boolean {
+  return params.data.suggestedUnforfeiture != null && !isReadOnly;
+}
+```
+
+**Key Difference from Termination**: Can edit any historical year (not just current year).
+
+**Why?**
+
+- Unforfeitures can reverse forfeitures from any past year
+- Terminations only create new forfeitures for current year
+
+### 4. Exclude Zero Balance Filter
+
+**Feature**: Checkbox to exclude employees with no balance
+
+**Implementation**:
+
+```typescript
+<FormControlLabel
+  control={
+    <Checkbox
+      checked={field.value || false}
+      onChange={(e) => field.onChange(e.target.checked)}
+    />
+  }
+  label="Exclude employees with no current or vested balance"
+/>
+```
+
+**Sent to API**: `excludeZeroBalance: true/false`
+
+**Purpose**: Focus on actionable unforfeitures by hiding employees with no balances.
+
+**Not in Termination**: Termination doesn't have this filter.
+
+### 5. Frozen Year Warning
+
+**Feature**: Warning banner when profit year is frozen
+
+**Implementation**:
+
+```typescript
+const isFrozen = useIsProfitYearFrozen(profitYear);
+
+{isFrozen && <FrozenYearWarning profitYear={profitYear} />}
+```
+
+**Purpose**: Alert users that year is locked, preventing accidental edits during frozen periods.
+
+**Not in Termination**: Termination doesn't show frozen warning (different business rules).
+
+### 6. Auto-Archive on Status Change
+
+**Feature**: Automatically refreshes data when status changes to "Complete"
+
+**Implementation**:
+
+```typescript
+useEffect(() => {
+  if (state.shouldArchive) {
+    actions.handleSearch(); // Auto-trigger
+  }
+}, [state.shouldArchive, actions]);
+```
+
+**Purpose**: Seamless transition to viewing archived data without manual search.
+
+**Contrast with Termination**: Termination adds explicit archive flag to search params.
+
+### 7. Loading State (Built-in)
+
+**Feature**: Search button disables and shows spinner during fetch
+
+**Implementation**: Built directly into search filter component
+
+```typescript
+const [triggerSearch, { isFetching }] = useLazyGetUnForfeitsQuery();
+
+<SearchAndReset
+  isFetching={isFetching}
+  disabled={!isValid || isFetching}
+/>
+```
+
+**Key Difference from Termination**: UnForfeit has built-in loading state because search trigger is in filter, not grid.
+
+### 8. Zeros Hidden (Hours/Wages)
+
+**Feature**: Hours and wages columns hide zero values
+
+**Implementation**:
 
 ```typescript
 valueGetter: (params) => {
@@ -706,34 +1080,297 @@ valueGetter: (params) => {
 };
 ```
 
-**Why**: Historical data often has zeros (missing data). Hiding zeros reduces visual clutter.
+**Purpose**: Many historical years have zero hours/wages (no data available). Hiding improves readability.
 
-### 4. Simplified Editability Check
+**Not in Termination**: Termination shows all values.
+
+### 9. Grid Cell Refresh on Checkbox
+
+**Feature**: Forces grid refresh when checkbox state changes
+
+**Implementation**:
 
 ```typescript
-function isTransactionEditable(params, isReadOnly: boolean = false): boolean {
-  return params.data.suggestedUnforfeiture != null && !isReadOnly;
-}
+onChange={() => {
+  if (!isReadOnly) {
+    if (isSelected) {
+      params.removeRowFromSelectedRows(id);
+      params.node?.setSelected(false);
+    } else {
+      params.addRowToSelectedRows(id);
+      params.node?.setSelected(true);
+    }
+    params.api.refreshCells({ force: true }); // Force refresh
+  }
+}}
 ```
 
-**Why**: Unlike Termination (which restricts to current profit year), UnForfeit allows editing any row where `suggestedUnforfeiture` is present.
+**Purpose**: Ensures checkbox state syncs properly with AG Grid selection state.
+
+**UnForfeit-Specific**: Termination doesn't need this due to different selection handling.
+
+### 10. Comprehensive Master Columns
+
+**Feature**: 10 master columns showing complete employee context
+
+**Columns**: Badge, Name, SSN, Hire Date, Rehire Date, Current Balance, Vested Balance, Store, Years, Enrollment
+
+**Contrast with Termination**: Termination only shows Badge and Name (minimal master columns).
+
+**Why?**
+
+- UnForfeit needs more context to assess rehire unforfeitures
+- Users need balances and dates visible before expanding rows
+- Termination focuses on detail rows for financial data
 
 ---
 
-## Comparison Table: Termination vs UnForfeit
+## Shared Components
 
-| Feature                | Termination                                  | UnForfeit                                              |
-| ---------------------- | -------------------------------------------- | ------------------------------------------------------ |
-| **Purpose**            | Process forfeitures for terminated employees | Reverse forfeitures for rehired employees              |
-| **Search Criteria**    | Termination date range + forfeiture status   | Rehire date range + zero balance exclusion             |
-| **Editable Field**     | `suggestedForfeit`                           | `suggestedUnforfeiture`                                |
-| **Row Key**            | `${badgeNumber}-${profitYear}`               | `profitDetailId`                                       |
-| **Value on Save**      | As-is (positive)                             | Negated (negative)                                     |
-| **Offsetting ID**      | Not used                                     | `offsettingProfitDetailId`                             |
-| **Editability**        | Current profit year only                     | Any row with suggested value                           |
-| **Date Validation**    | >= fiscal begin                              | >= fiscal begin AND >= 2024-02-01                      |
-| **Zero Value Display** | Show zeros                                   | Hide zeros (hours/wages)                               |
-| **Warning Display**    | None                                         | FrozenYearWarning if year frozen                       |
-| **Main Columns**       | Badge, Name                                  | Badge, Name, SSN, Hire Date, **Rehire Date**, Balances |
+The UnForfeit feature uses shared components from `/src/ui/src/components/ForfeitActivities/` to maintain consistency with Termination.
+
+### 1. SharedForfeitHeaderComponent
+
+**Purpose**: Generic bulk save header for forfeit activities
+
+**Usage in UnForfeit**:
+
+```typescript
+<SharedForfeitHeaderComponent
+  {...params}
+  config={{
+    activityType: "unforfeit"
+  }}
+/>
+```
+
+**Activity-Specific Behavior**:
+
+- Row key generation: Single `profitDetailId`
+- Value transformation: Negation
+- Eligibility: All years, non-zero values
+- Requires `offsettingProfitDetailId`
+
+### 2. createSaveButtonCellRenderer
+
+**Purpose**: Factory function for save button cell renderers
+
+**Usage in UnForfeit**:
+
+```typescript
+cellRenderer: createSaveButtonCellRenderer({
+  activityType: "unforfeit",
+  selectedProfitYear,
+  isReadOnly
+});
+```
+
+**Features**:
+
+- Checkbox for bulk selection
+- Individual save button with spinner
+- Tooltips for disabled states
+- Activity-specific payload creation
+- Loading state management
+- Grid refresh on checkbox change (UnForfeit-specific)
+
+### Benefits of Shared Components
+
+1. **Consistency**: Termination and UnForfeit stay in sync
+2. **Maintainability**: Changes in one place affect both features
+3. **Type Safety**: Shared components fully typed
+4. **Testability**: Can unit test utilities independently
+5. **DRY Principle**: Eliminated ~148 lines of duplicated code
+
+---
+
+## Differences from Termination
+
+| Aspect                       | UnForfeit                          | Termination                                |
+| ---------------------------- | ---------------------------------- | ------------------------------------------ |
+| **Value Transformation**     | Negates (sends negative)           | No negation (sends positive)               |
+| **Row Key**                  | `profitDetailId` (single numeric)  | `${badgeNumber}-${profitYear}` (composite) |
+| **offsettingProfitDetailId** | Required (links to original)       | Omitted (new forfeitures)                  |
+| **Editable Criteria**        | All years with non-zero            | Current year only                          |
+| **Master Columns**           | 10 columns (comprehensive)         | 2 columns (minimal)                        |
+| **Financial Summaries**      | No                                 | Yes (4 totals grids)                       |
+| **Frozen Warning**           | Yes                                | No                                         |
+| **Exclude Zero Filter**      | Yes                                | No                                         |
+| **Loading State**            | Built-in (filter component)        | Lifted to parent                           |
+| **Archive Mode**             | Auto-refresh on status change      | Explicit archive flag                      |
+| **Zero Hiding**              | Yes (hours/wages)                  | No                                         |
+| **Grid Refresh**             | Calls `refreshCells()` on checkbox | Not needed                                 |
+| **Search Location**          | In filter component                | In grid hook                               |
+| **Redux Persistence**        | Search params + results            | Just results                               |
+
+---
+
+## Type Definitions
+
+### Request Types
+
+```typescript
+interface StartAndEndDateRequest {
+  beginningDate: string; // "MM/DD/YYYY"
+  endingDate: string; // "MM/DD/YYYY"
+  excludeZeroBalance?: boolean;
+  profitYear?: number;
+  pagination?: {
+    skip: number;
+    take: number;
+    sortBy: string;
+    isSortDescending: boolean;
+  };
+}
+
+interface ForfeitureAdjustmentUpdateRequest {
+  badgeNumber: number;
+  profitYear: number;
+  forfeitureAmount: number; // NEGATED for unforfeit
+  offsettingProfitDetailId: number; // Required for unforfeit
+  classAction: boolean;
+}
+```
+
+### Response Types
+
+```typescript
+interface UnForfeitsResponse {
+  response: {
+    results: UnForfeitMasterDto[];
+    total: number;
+  };
+}
+
+interface UnForfeitMasterDto {
+  badgeNumber: number;
+  fullName: string;
+  ssn: string;
+  hireDate: string;
+  reHiredDate: string;
+  netBalanceLastYear: number;
+  vestedBalanceLastYear: number;
+  store: number;
+  companyContributionYears: number;
+  enrollmentId: number;
+  enrollmentName: string;
+  profitYearDetails: UnForfeitDetailDto[];
+}
+
+interface UnForfeitDetailDto {
+  profitDetailId: number;
+  profitYear: number;
+  hoursTransactionYear: number;
+  wagesTransactionYear: number;
+  forfeiture: number;
+  suggestedUnforfeiture: number;
+  remark: string;
+}
+```
+
+### Grid Types
+
+```typescript
+interface MasterRow {
+  badgeNumber: number;
+  fullName: string;
+  ssn: string;
+  hireDate: string;
+  reHiredDate: string;
+  netBalanceLastYear: number;
+  vestedBalanceLastYear: number;
+  store: number;
+  companyContributionYears: number;
+  enrollmentId: number;
+  enrollmentName: string;
+  isExpandable: boolean;
+  isExpanded: boolean;
+  isDetail: false;
+}
+
+interface DetailRow {
+  badgeNumber: number;
+  fullName: string; // Copied from master
+  profitDetailId: number;
+  profitYear: number;
+  hoursTransactionYear: number;
+  wagesTransactionYear: number;
+  forfeiture: number;
+  suggestedUnforfeiture: number;
+  remark: string;
+  isDetail: true;
+}
+```
+
+---
+
+## Common Patterns
+
+### 1. Error Handling
+
+**Pattern**: All errors displayed via `ApiMessageAlert` with common key
+
+```typescript
+// In component
+<ApiMessageAlert commonKey="UnforfeitSave" />
+
+// In hook
+try {
+  await updateForfeiture(request).unwrap();
+} catch (error) {
+  setMessage(dispatch, {
+    commonKey: "UnforfeitSave",
+    type: "error",
+    message: `Failed to save unforfeiture for ${name}`,
+    description: error.message || "Unknown error"
+  });
+}
+```
+
+### 2. Loading States
+
+**Pattern**: Multiple loading indicators
+
+```typescript
+// Search loading (built-in)
+const [triggerSearch, { isFetching }] = useLazyGetUnForfeitsQuery();
+
+// Individual row loading
+const [loadingRowIds, setLoadingRowIds] = useState<Set<string>>(new Set());
+
+// Mutation loading
+const { isLoading } = useUpdateForfeitureAdjustmentMutation();
+```
+
+### 3. Memoization
+
+**Pattern**: Memoize expensive computations
+
+```typescript
+const mainColumns = useMemo(() => UnForfeitGridColumns(), []);
+const detailColumns = useMemo(
+  () => GetProfitDetailColumns(/* ... */),
+  [
+    /* dependencies */
+  ]
+);
+```
+
+### 4. Conditional Rendering
+
+**Pattern**: Progressive disclosure
+
+```typescript
+{!isCalendarDataLoaded ? (
+  <CircularProgress />
+) : (
+  <>
+    <UnForfeitSearchFilter />
+    <UnForfeitGrid />
+  </>
+)}
+
+{isFrozen && <FrozenYearWarning profitYear={profitYear} />}
+```
 
 ---

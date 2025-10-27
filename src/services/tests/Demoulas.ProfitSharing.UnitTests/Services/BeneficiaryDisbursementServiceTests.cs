@@ -544,6 +544,10 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         var result = await _service.DisburseFundsToBeneficiaries(request, CancellationToken.None);
 
         // Assert
+        if (!result.IsSuccess)
+        {
+            throw new Exception($"DisburseFundsToBeneficiaries failed with error code {result.Error?.Code.ToString() ?? "Unknown"}: {result.Error?.Description ?? "No description"}");
+        }
         result.IsSuccess.ShouldBeTrue();
         _beneficiaryEmployee.payprofit[0].Etva.ShouldBe(initialEtva + transferAmount);
     }

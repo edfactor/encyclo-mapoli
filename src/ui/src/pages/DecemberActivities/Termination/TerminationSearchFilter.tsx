@@ -193,7 +193,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
               handleReset={handleReset}
               handleSearch={validateAndSearch}
               isFetching={isFetching}
-              disabled={!isValid || !prerequisitesComplete}
+              disabled={!isValid || !prerequisitesComplete || isFetching}
             />
           )}
         </DuplicateSsnGuard>

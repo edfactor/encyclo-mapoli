@@ -1,6 +1,7 @@
 import { Divider, Grid } from "@mui/material";
 import { useState } from "react";
 import { Page } from "smart-ui-library";
+import { CAPTIONS } from "../../../constants";
 import DemographicFreezeGrid from "./DemographicFreezeGrid";
 import DemographicFreezeManager from "./DemographicFreezeManager";
 
@@ -9,7 +10,7 @@ const DemographicFreeze = () => {
   const [pageNumberReset, setPageNumberReset] = useState(false);
 
   return (
-    <Page label="IT Commands - Demographic Freeze">
+    <Page label={`${CAPTIONS.DEMOGRAPHIC_FREEZE}`}>
       <Grid
         container
         rowSpacing={3}>
