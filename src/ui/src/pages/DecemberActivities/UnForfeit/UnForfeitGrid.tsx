@@ -43,6 +43,7 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
     pageNumber,
     pageSize,
     gridData,
+    isFetching,
 
     unForfeits,
     selectedProfitYear,
@@ -186,7 +187,7 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
 
           <DSMGrid
             preferenceKey={"REHIRE-FORFEITURES"}
-            isLoading={false}
+            isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             maxHeight={gridMaxHeight}
             providedOptions={{

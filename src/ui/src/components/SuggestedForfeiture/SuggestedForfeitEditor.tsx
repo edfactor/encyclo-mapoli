@@ -16,6 +16,15 @@ export function SuggestedForfeitEditor(props: ICellEditorParams) {
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const rawInput = event.target.value;
+
+    // Prevent more than 2 decimal places for currency (dollars and cents)
+    if (rawInput.includes('.')) {
+      const parts = rawInput.split('.');
+      if (parts[1] && parts[1].length > 2) {
+        return; // Don't update if trying to add a third decimal place
+      }
+    }
+
     setInputValue(rawInput);
 
     const numericValue = rawInput === "" ? 0 : parseFloat(rawInput) || 0;
@@ -59,6 +68,12 @@ export function SuggestedForfeitEditor(props: ICellEditorParams) {
         error={!!error}
         variant="outlined"
         fullWidth
+        slotProps={{
+          htmlInput: {
+            step: "0.01",
+            min: "0"
+          }
+        }}
       />
     </div>
   );

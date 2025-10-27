@@ -1,8 +1,8 @@
-import { CAPTIONS } from "@/constants";
 import { CircularProgress, Divider, Grid } from "@mui/material";
 import { memo } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
+import { CAPTIONS } from "../../../constants";
 import useMasterInquiry from "./hooks/useMasterInquiry";
 import MasterInquiryGrid from "./MasterInquiryDetailsGrid";
 import MasterInquiryMemberDetails from "./MasterInquiryMemberDetails";
