@@ -9,6 +9,8 @@ using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Common.Telemetry;
+using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Data.Repositories;
 using Demoulas.ProfitSharing.OracleHcm.Clients;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Factories;
@@ -17,11 +19,13 @@ using Demoulas.ProfitSharing.OracleHcm.HostedServices;
 using Demoulas.ProfitSharing.OracleHcm.Jobs;
 using Demoulas.ProfitSharing.OracleHcm.Messaging;
 using Demoulas.ProfitSharing.OracleHcm.Services;
+using Demoulas.ProfitSharing.OracleHcm.Services.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.ItDevOps;
+using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.Util.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -84,9 +88,7 @@ public static class OracleHcmExtension
 
         builder.Services.AddHostedService<EmployeeDeltaSyncService>();
 
-        builder.Services.AddScoped<ITotalService, TotalService>();
         builder.Services.AddSingleton<ICalendarService, CalendarService>();
-        builder.Services.AddScoped<ITotalService, TotalService>();
         builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
         builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
@@ -103,16 +105,15 @@ public static class OracleHcmExtension
         // Register null navigation service for console app context (navigation concepts don't apply)
         builder.Services.AddScoped<INavigationService, NullNavigationService>();
 
-        builder.Services.AddScoped<ITotalService, TotalService>();
+        builder.AddOracleHcmSynchronization(oracleHcmConfig);
+        builder.Services.AddHostedService<EmployeeFullSyncService>();
+
         builder.Services.AddSingleton<ICalendarService, CalendarService>();
-        builder.Services.AddScoped<ITotalService, TotalService>();
         builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
         builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
         builder.Services.AddScoped<IFrozenService, FrozenService>();
 
-        builder.AddOracleHcmSynchronization(oracleHcmConfig);
-        builder.Services.AddHostedService<EmployeeFullSyncService>();
         return builder;
     }
 
@@ -127,9 +128,7 @@ public static class OracleHcmExtension
         builder.AddOracleHcmSynchronization(oracleHcmConfig);
         builder.Services.AddHostedService<EmployeePayrollSyncService>();
 
-        builder.Services.AddScoped<ITotalService, TotalService>();
         builder.Services.AddSingleton<ICalendarService, CalendarService>();
-        builder.Services.AddScoped<ITotalService, TotalService>();
         builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
         builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
@@ -170,7 +169,7 @@ public static class OracleHcmExtension
 
         builder.Services.AddHealthChecks().AddCheck<OracleHcmHealthCheck>("OracleHcm")
             .AddProcessAllocatedMemoryHealthCheck(maximumMegabytesAllocated: 1024);
-        builder.AddProjectCachingServices();
+        builder.AddMinimalCachingServices();
         builder.AddOracleHcmMessaging();
 
         builder.Services.AddOpenTelemetry().WithTracing(tracing =>
@@ -210,6 +209,13 @@ public static class OracleHcmExtension
         services.AddTransient<AddressMapper>();
         services.AddTransient<ContactInfoMapper>();
 
+        // Repositories
+        services.AddScoped<IDemographicsRepository, DemographicsRepository>();
+
+        // Domain services (business logic)
+        services.AddScoped<IDemographicMatchingService, DemographicMatchingService>();
+        services.AddScoped<IDemographicAuditService, DemographicAuditService>();
+        services.AddScoped<IDemographicHistoryService, DemographicHistoryService>();
 
         // Internal services
         services.AddTransient<IDemographicsServiceInternal, DemographicsService>();

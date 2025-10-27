@@ -1,7 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Endpoints.Validation;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using FluentValidation.TestHelper;
-using Xunit;
 using System.ComponentModel;
 
 namespace Demoulas.ProfitSharing.UnitTests.Validation;

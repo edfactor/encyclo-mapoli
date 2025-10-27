@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Text;
 using System.Text.Json;
-using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Report;
 using Demoulas.ProfitSharing.Common.Contracts.Request;

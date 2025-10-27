@@ -13,8 +13,6 @@ using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interceptors;
 using Demoulas.ProfitSharing.Endpoints.HealthCheck;
-using Demoulas.ProfitSharing.OracleHcm.Configuration;
-using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Security.Extensions;
 using Demoulas.ProfitSharing.Services.Extensions;
@@ -74,7 +72,9 @@ if (!builder.Environment.IsTestEnvironment() && Environment.GetEnvironmentVariab
 }
 else
 {
+#pragma warning disable CS0618 // Type or member is obsolete
     builder.Services.AddTestingSecurity(builder.Configuration);
+#pragma warning restore CS0618 // Type or member is obsolete
 }
 
 builder.ConfigureSecurityPolicies();
@@ -107,11 +107,6 @@ builder.Services.AddCors(options =>
         }
     });
 });
-
-OracleHcmConfig oracleHcmConfig = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>()
-                                  ?? new OracleHcmConfig { BaseAddress = string.Empty, DemographicUrl = string.Empty };
-
-builder.AddOracleHcmSynchronization(oracleHcmConfig);
 
 // Configure JSON serialization with source generation for better performance
 builder.Services.ConfigureHttpJsonOptions(o =>

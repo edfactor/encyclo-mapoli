@@ -143,16 +143,15 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext = new Mock<ProfitSharingReadOnlyDbContext>();
         _storeInfoDbContext = new Mock<DemoulasCommonDataContext>();
 
-        // Assuming you have a DbContext type called ProfitSharingReadOnlyDbContext
-        var mockContext = new Mock<ProfitSharingReadOnlyDbContext>( /* options if needed */ );
-        var mockDatabaseFacade = new Mock<DatabaseFacade>(mockContext.Object);
+        // Setup Database facade for the read-only context
+        var mockDatabaseFacade = new Mock<DatabaseFacade>(_profitSharingReadOnlyDbContext.Object);
 
         // Setup the ProviderName property to return the in-memory provider value
         mockDatabaseFacade.SetupGet(db => db.ProviderName)
             .Returns("Microsoft.EntityFrameworkCore.InMemory");
 
         // Make sure that when your context.Database is accessed, it returns our mocked DatabaseFacade
-        mockContext.SetupGet(ctx => ctx.Database)
+        _profitSharingReadOnlyDbContext.SetupGet(ctx => ctx.Database)
             .Returns(mockDatabaseFacade.Object);
 
 
@@ -340,7 +339,39 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.Departments).Returns(mockDepartments.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Departments).Returns(mockDepartments.Object);
 
-        // Create reference data first - DistributionFrequencies
+        // Create distribution payees first
+        var distributionPayees = new List<DistributionPayee>
+        {
+            new DistributionPayee
+            {
+                Id = 1,
+                Ssn = 123456789,
+                Name = "John Payee",
+                Address = new Address { Street = "123 Main St", City = "Boston", State = "MA", PostalCode = "02101" },
+                Memo = "Primary Payee"
+            },
+            new DistributionPayee
+            {
+                Id = 2,
+                Ssn = 987654321,
+                Name = "Jane Payee",
+                Address = new Address { Street = "456 Oak Ave", City = "Cambridge", State = "MA", PostalCode = "02142" },
+                Memo = "Alternate Payee"
+            },
+            new DistributionPayee
+            {
+                Id = 3,
+                Ssn = 555123456,
+                Name = "Bob Payee",
+                Address = new Address { Street = "789 Pine Rd", City = "Somerville", State = "MA", PostalCode = "02145" },
+                Memo = "Backup Payee"
+            }
+        };
+        var mockDistributionPayees = distributionPayees.BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.DistributionPayees).Returns(mockDistributionPayees.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.DistributionPayees).Returns(mockDistributionPayees.Object);
+
+        // Create distribution frequencies
         var distributionFrequencies = new List<DistributionFrequency>()
         {
             new DistributionFrequency() {Id=DistributionFrequency.Constants.Hardship,Name=DistributionFrequency.Constants.Hardship.ToString() },
@@ -354,6 +385,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.DistributionFrequencies).Returns(mockDistributionFrequencies.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.DistributionFrequencies).Returns(mockDistributionFrequencies.Object);
 
+        // Create distribution statuses
         var distributionStatuses = new List<DistributionStatus>()
         {
             new DistributionStatus() {Id=DistributionStatus.Constants.ManualCheck,Name=DistributionStatus.Constants.ManualCheck.ToString() },
@@ -368,6 +400,12 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         var mockDistributionStatuses = distributionStatuses.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.DistributionStatuses).Returns(mockDistributionStatuses.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.DistributionStatuses).Returns(mockDistributionStatuses.Object);
+
+        // Now create distributions with all related entities provided
+        var distributions = new DistributionFaker(distributionFrequencies, distributionStatuses, taxCodesList, distributionPayees).Generate(500);
+        var mockDistributions = BuildMockDbSetWithBackingList(distributions);
+        _profitSharingDbContext.Setup(m => m.Distributions).Returns(mockDistributions.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.Distributions).Returns(mockDistributions.Object);
 
         var commentTypes = new List<CommentType>()
         {
@@ -400,41 +438,6 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         var mockCommentTypes = commentTypes.BuildMockDbSet();
         // CommentTypes is read-only, only on ReadOnlyDbContext
         _profitSharingReadOnlyDbContext.Setup(m => m.CommentTypes).Returns(mockCommentTypes.Object);
-
-        // Create DistributionPayees
-        var distributionPayees = new List<DistributionPayee>
-        {
-            new DistributionPayee
-            {
-                Id = 1,
-                Ssn = 123456789,
-                Name = "John Doe",
-                Address = new Address { Street = "123 Main St", City = "Boston", State = "MA", PostalCode = "02101" },
-                Memo = "Primary Payee"
-            },
-            new DistributionPayee
-            {
-                Id = 2,
-                Ssn = 987654321,
-                Name = "Jane Smith",
-                Address = new Address { Street = "456 Oak Ave", City = "Cambridge", State = "MA", PostalCode = "02139" },
-                Memo = "Secondary Payee"
-            }
-        };
-        var mockDistributionPayees = distributionPayees.BuildMockDbSet();
-        _profitSharingDbContext.Setup(m => m.DistributionPayees).Returns(mockDistributionPayees.Object);
-        _profitSharingReadOnlyDbContext.Setup(m => m.DistributionPayees).Returns(mockDistributionPayees.Object);
-
-        // Create Distributions with navigation properties using enhanced faker
-        var distributions = new DistributionFaker(
-            distributionFrequencies,
-            distributionStatuses,
-            taxCodesList,
-            distributionPayees).Generate(500);
-
-        var mockDistributions = BuildMockDbSetWithBackingList(distributions);
-        _profitSharingDbContext.Setup(m => m.Distributions).Returns(mockDistributions.Object);
-        _profitSharingReadOnlyDbContext.Setup(m => m.Distributions).Returns(mockDistributions.Object);
 
         // Setup generic Set<T>() method for LookupCache support
         _profitSharingReadOnlyDbContext.Setup(m => m.Set<StateTax>()).Returns(mockStateTaxes.Object);
@@ -522,6 +525,11 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
     /// </summary>
     public async Task<T> UseReadOnlyContext<T>(Func<ProfitSharingReadOnlyDbContext, Task<T>> func, CancellationToken cancellationToken = default)
     {
+        if (_profitSharingReadOnlyDbContext == null)
+        {
+            throw new InvalidOperationException("_profitSharingReadOnlyDbContext is null. Mock initialization failed.");
+        }
+
         try
         {
             return await func.Invoke(_profitSharingReadOnlyDbContext.Object);
@@ -536,6 +544,11 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
                     throw ex.InnerException;
             }
         }
+    }
+
+    public Task UseReadOnlyContext(Func<ProfitSharingReadOnlyDbContext, Task> func, CancellationToken cancellationToken = new CancellationToken())
+    {
+        throw new NotImplementedException();
     }
 
 

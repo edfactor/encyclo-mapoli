@@ -1,8 +1,12 @@
 ﻿using System.Reflection;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using MockQueryable;
+using MockQueryable.Moq;
 using Moq;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Mocks;
@@ -19,6 +23,70 @@ public class ScenarioDataContextFactory : IProfitSharingDataContextFactory
         ProfitSharingDbContext = new Mock<ProfitSharingDbContext>();
         ProfitSharingReadOnlyDbContext = new Mock<ProfitSharingReadOnlyDbContext>();
         StoreInfoDbContext = new Mock<DemoulasCommonDataContext>();
+    }
+
+    /// <summary>
+    /// Creates a factory with mocked DbSets populated with test data.
+    /// </summary>
+    /// <param name="demographics">Demographics to seed</param>
+    /// <param name="histories">Demographic histories to seed</param>
+    /// <param name="audits">Demographic sync audits to seed</param>
+    /// <param name="beneficiaryContacts">Beneficiary contacts to seed</param>
+    /// <param name="profitDetails">Profit details to seed</param>
+    /// <returns>Configured factory ready for testing</returns>
+    public static ScenarioDataContextFactory Create(
+        List<Demographic>? demographics = null,
+        List<DemographicHistory>? histories = null,
+        List<DemographicSyncAudit>? audits = null,
+        List<BeneficiaryContact>? beneficiaryContacts = null,
+        List<ProfitDetail>? profitDetails = null)
+    {
+        var factory = new ScenarioDataContextFactory();
+
+        // Setup Demographics DbSet
+        var demographicsList = demographics ?? new List<Demographic>();
+        var demographicsMock = demographicsList.BuildMockDbSet();
+        factory.ProfitSharingDbContext
+            .Setup(x => x.Demographics)
+            .Returns(demographicsMock.Object);
+        factory.ProfitSharingReadOnlyDbContext
+            .Setup(x => x.Demographics)
+            .Returns(demographicsMock.Object);
+
+        // Setup DemographicHistories DbSet
+        var historiesList = histories ?? new List<DemographicHistory>();
+        var historiesMock = historiesList.BuildMockDbSet();
+        factory.ProfitSharingDbContext
+            .Setup(x => x.DemographicHistories)
+            .Returns(historiesMock.Object);
+
+        // Setup DemographicSyncAudit DbSet
+        var auditsList = audits ?? new List<DemographicSyncAudit>();
+        var auditsMock = auditsList.BuildMockDbSet();
+        factory.ProfitSharingDbContext
+            .Setup(x => x.DemographicSyncAudit)
+            .Returns(auditsMock.Object);
+
+        // Setup BeneficiaryContacts DbSet
+        var beneficiaryContactsList = beneficiaryContacts ?? new List<BeneficiaryContact>();
+        var beneficiaryContactsMock = beneficiaryContactsList.BuildMockDbSet();
+        factory.ProfitSharingDbContext
+            .Setup(x => x.BeneficiaryContacts)
+            .Returns(beneficiaryContactsMock.Object);
+
+        // Setup ProfitDetails DbSet
+        var profitDetailsList = profitDetails ?? new List<ProfitDetail>();
+        var profitDetailsMock = profitDetailsList.BuildMockDbSet();
+        factory.ProfitSharingDbContext
+            .Setup(x => x.ProfitDetails)
+            .Returns(profitDetailsMock.Object);
+
+        // Setup SaveChangesAsync to return success
+        factory.ProfitSharingDbContext
+            .Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync((CancellationToken ct) => demographicsList.Count + historiesList.Count);
+
+        return factory;
     }
 
     /// <summary>
@@ -85,7 +153,7 @@ public class ScenarioDataContextFactory : IProfitSharingDataContextFactory
         }
     }
 
-    public async Task<T> UseReadOnlyContext<T>(Func<ProfitSharingReadOnlyDbContext, Task<T>> func, CancellationToken cancellationToken = default)   
+    public async Task<T> UseReadOnlyContext<T>(Func<ProfitSharingReadOnlyDbContext, Task<T>> func, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -103,6 +171,25 @@ public class ScenarioDataContextFactory : IProfitSharingDataContextFactory
         }
     }
 
+#pragma warning disable RCS1229
+    public Task UseReadOnlyContext(Func<ProfitSharingReadOnlyDbContext, Task> func, CancellationToken cancellationToken = new CancellationToken())
+#pragma warning restore RCS1229
+    {
+        try
+        {
+            return func.Invoke(ProfitSharingReadOnlyDbContext.Object);
+        }
+        catch (TargetInvocationException ex)
+        {
+            switch (ex.InnerException)
+            {
+                case null:
+                    throw;
+                default:
+                    throw ex.InnerException;
+            }
+        }
+    }
 
     public async Task<T> UseStoreInfoContext<T>(Func<DemoulasCommonDataContext, Task<T>> func)
     {
