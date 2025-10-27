@@ -49,6 +49,7 @@ interface TerminationGridConfig {
   shouldArchive?: boolean;
   onArchiveHandled?: () => void;
   onErrorOccurred?: () => void;
+  onLoadingChange?: (isLoading: boolean) => void;
 }
 
 // Configuration for shared utilities
@@ -67,7 +68,8 @@ export const useTerminationGrid = ({
   fiscalData,
   shouldArchive,
   onArchiveHandled,
-  onErrorOccurred
+  onErrorOccurred,
+  onLoadingChange
 }: TerminationGridConfig) => {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [pendingSuccessMessage, setPendingSuccessMessage] = useState<string | null>(null);
@@ -87,6 +89,13 @@ export const useTerminationGrid = ({
   const gridRef = useRef<{ api: GridApi } | null>(null);
   const prevTermination = useRef<typeof termination | null>(null);
   const lastRequestKeyRef = useRef<string | null>(null);
+
+  // Notify parent component of loading state changes
+  useEffect(() => {
+    if (onLoadingChange) {
+      onLoadingChange(isFetching);
+    }
+  }, [isFetching, onLoadingChange]);
 
   // Create a request object based on current parameters
   const createRequest = useCallback(

@@ -1,0 +1,190 @@
+import { SaveOutlined } from "@mui/icons-material";
+import { Checkbox, CircularProgress, IconButton, Tooltip } from "@mui/material";
+import { ICellRendererParams } from "ag-grid-community";
+import { ForfeitureAdjustmentUpdateRequest } from "../../types";
+
+export type ActivityType = "termination" | "unforfeit";
+
+export interface SaveButtonCellParams extends ICellRendererParams {
+  removeRowFromSelectedRows: (id: number) => void;
+  addRowToSelectedRows: (id: number) => void;
+  onSave?: (request: ForfeitureAdjustmentUpdateRequest, name: string) => Promise<void>;
+}
+
+export interface SaveButtonConfig {
+  activityType: ActivityType;
+  selectedProfitYear: number;
+  isReadOnly: boolean;
+}
+
+interface RowData {
+  badgeNumber: string | number;
+  profitYear: number;
+  profitDetailId?: number;
+  suggestedForfeit?: number;
+  suggestedUnforfeiture?: number;
+  isDetail: boolean;
+  fullName?: string;
+  name?: string;
+}
+
+/**
+ * Generate row key based on activity type
+ */
+function generateRowKey(activityType: ActivityType, data: RowData): string {
+  if (activityType === "unforfeit") {
+    return data.profitDetailId?.toString() || "";
+  }
+  return `${data.badgeNumber}-${data.profitYear}`;
+}
+
+/**
+ * Get current value from edited values or original data
+ */
+function getCurrentValue(
+  activityType: ActivityType,
+  params: SaveButtonCellParams,
+  rowKey: string
+): number {
+  const editedValue = params.context?.editedValues?.[rowKey]?.value;
+  if (editedValue !== undefined) {
+    return editedValue;
+  }
+
+  return activityType === "unforfeit"
+    ? params.data.suggestedUnforfeiture
+    : params.data.suggestedForfeit ?? 0;
+}
+
+/**
+ * Transform forfeiture value based on activity type
+ */
+function transformForfeitureValue(activityType: ActivityType, value: number): number {
+  if (activityType === "unforfeit") {
+    return -(value || 0); // NEGATE for unforfeit
+  }
+  return value || 0; // No transformation for termination
+}
+
+/**
+ * Check if transaction is editable based on activity type
+ */
+function isTransactionEditable(
+  activityType: ActivityType,
+  params: SaveButtonCellParams,
+  selectedProfitYear: number,
+  isReadOnly: boolean
+): boolean {
+  if (!params.data.isDetail || isReadOnly) {
+    return false;
+  }
+
+  if (activityType === "termination") {
+    // Termination: only current year is editable
+    return params.data.profitYear === selectedProfitYear;
+  } else {
+    // UnForfeit: all rows with non-null suggestedUnforfeiture are editable
+    return params.data.suggestedUnforfeiture != null;
+  }
+}
+
+/**
+ * Shared save button cell renderer for forfeit activities
+ * Provides checkbox + save button with activity-specific behavior
+ */
+export function createSaveButtonCellRenderer(config: SaveButtonConfig) {
+  return (params: SaveButtonCellParams) => {
+    const { activityType, selectedProfitYear, isReadOnly } = config;
+
+    if (!isTransactionEditable(activityType, params, selectedProfitYear, isReadOnly)) {
+      return "";
+    }
+
+    const id = Number(params.node?.id) || -1;
+    const isSelected = params.node?.isSelected() || false;
+    const rowKey = generateRowKey(activityType, params.data);
+    const hasError = params.context?.editedValues?.[rowKey]?.hasError;
+    const currentValue = getCurrentValue(activityType, params, rowKey);
+    const isLoading = params.context?.loadingRowIds?.has(params.data.badgeNumber);
+    const isZeroValue = currentValue === 0 || currentValue === null || currentValue === undefined;
+    const isDisabled = hasError || isLoading || isZeroValue || isReadOnly;
+    const readOnlyTooltip = "You are in read-only mode and cannot save changes.";
+
+    const checkboxElement = (
+      <Checkbox
+        checked={isSelected}
+        disabled={isDisabled}
+        onChange={() => {
+          if (!isReadOnly) {
+            if (isSelected) {
+              params.removeRowFromSelectedRows(id);
+              params.node?.setSelected(false);
+            } else {
+              params.addRowToSelectedRows(id);
+              params.node?.setSelected(true);
+            }
+            // Refresh cells for unforfeit (needed for proper state sync)
+            if (activityType === "unforfeit") {
+              params.api.refreshCells({ force: true });
+            }
+          }
+        }}
+      />
+    );
+
+    const saveButtonElement = (
+      <IconButton
+        onClick={async () => {
+          if (!isReadOnly && params.data.isDetail && params.onSave) {
+            const transformedValue = transformForfeitureValue(activityType, currentValue);
+
+            const request: ForfeitureAdjustmentUpdateRequest = {
+              badgeNumber: params.data.badgeNumber,
+              profitYear: activityType === "unforfeit" ? selectedProfitYear : params.data.profitYear,
+              forfeitureAmount: transformedValue,
+              classAction: false
+            };
+
+            // UnForfeit requires offsettingProfitDetailId
+            if (activityType === "unforfeit") {
+              request.offsettingProfitDetailId = params.data.profitDetailId;
+            }
+
+            const employeeName = params.data.fullName || params.data.name || "Unknown Employee";
+            await params.onSave(request, employeeName);
+          }
+        }}
+        disabled={isDisabled}>
+        {isLoading ? <CircularProgress size={20} /> : <SaveOutlined />}
+      </IconButton>
+    );
+
+    // Render with appropriate tooltips
+    return (
+      <div>
+        {isReadOnly || isZeroValue ? (
+          <Tooltip
+            title={
+              isZeroValue
+                ? activityType === "termination"
+                  ? "Forfeit cannot be zero."
+                  : "Unforfeiture cannot be zero."
+                : readOnlyTooltip
+            }
+            arrow>
+            <span>{checkboxElement}</span>
+          </Tooltip>
+        ) : (
+          checkboxElement
+        )}
+        {isReadOnly ? (
+          <Tooltip title={readOnlyTooltip}>
+            <span>{saveButtonElement}</span>
+          </Tooltip>
+        ) : (
+          saveButtonElement
+        )}
+      </div>
+    );
+  };
+}

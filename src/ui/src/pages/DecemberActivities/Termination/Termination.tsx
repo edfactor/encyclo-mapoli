@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ApiMessageAlert, DSMAccordion, Page } from "smart-ui-library";
 import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
 
@@ -20,6 +20,7 @@ export interface TerminationSearchRequest extends StartAndEndDateRequest {
 const Termination = () => {
   const [fetchAccountingRange, { data: fiscalData }] = useLazyGetAccountingRangeToCurrent(6);
   const { state, actions } = useTerminationState();
+  const [isFetching, setIsFetching] = useState(false);
 
   // Function to scroll to top - only used for error cases
   const scrollToTop = useCallback(() => {
@@ -88,6 +89,7 @@ const Termination = () => {
                     onSearch={actions.handleSearch}
                     setInitialSearchLoaded={actions.setInitialSearchLoaded}
                     hasUnsavedChanges={state.hasUnsavedChanges}
+                    isFetching={isFetching}
                   />
                 </DSMAccordion>
               </Grid>
@@ -103,6 +105,7 @@ const Termination = () => {
                   shouldArchive={state.shouldArchive}
                   onArchiveHandled={actions.handleArchiveHandled}
                   onErrorOccurred={scrollToTop}
+                  onLoadingChange={setIsFetching}
                 />
               </Grid>
             </>
