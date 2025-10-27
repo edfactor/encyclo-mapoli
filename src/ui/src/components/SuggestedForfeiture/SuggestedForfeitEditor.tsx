@@ -19,15 +19,17 @@ export function SuggestedForfeitEditor(props: ICellEditorParams) {
     setInputValue(rawInput);
 
     const numericValue = rawInput === "" ? 0 : parseFloat(rawInput) || 0;
+    // Round to 2 decimal places for currency (dollars and cents)
+    const roundedValue = Math.round(numericValue * 100) / 100;
     const forfeitValue = props.data.forfeit || props.data.forfeiture || 0;
-    const newError = validateSuggestedForfeit(numericValue, Math.abs(forfeitValue));
+    const newError = validateSuggestedForfeit(roundedValue, Math.abs(forfeitValue));
     setError(newError);
 
     const rowKey = props.data.profitDetailId
       ? props.data.profitDetailId
       : `${props.data.badgeNumber}-${props.data.profitYear}${props.data.enrollmentId ? `-${props.data.enrollmentId}` : ""}-${props.node?.id || "unknown"}`;
 
-    props.context?.updateEditedValue?.(rowKey, numericValue, !!newError);
+    props.context?.updateEditedValue?.(rowKey, roundedValue, !!newError);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -59,6 +61,12 @@ export function SuggestedForfeitEditor(props: ICellEditorParams) {
         error={!!error}
         variant="outlined"
         fullWidth
+        slotProps={{
+          htmlInput: {
+            step: "0.01",
+            min: "0"
+          }
+        }}
       />
     </div>
   );
