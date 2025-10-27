@@ -1,6 +1,6 @@
 # Forfeit Activities Shared Utilities
 
-This directory contains shared utility functions for December Activities master-detail grid screens (Termination and UnForfeit).
+This directory contains shared utility functions for Forfeit-related Activities master-detail grid screens (Termination and UnForfeit).
 
 ## Files
 
@@ -71,8 +71,8 @@ import {
   getRowKeysForRequests,
   prepareBulkSaveRequests,
   prepareSaveRequest
-} from "../utils/decemberActivities/saveOperationHelpers";
-import { flattenMasterDetailData, generateRowKey } from "../utils/decemberActivities/gridDataHelpers";
+} from "../utils/forfeitActivities/saveOperationHelpers";
+import { flattenMasterDetailData, generateRowKey } from "../utils/forfeitActivities/gridDataHelpers";
 
 // Configuration for shared utilities
 const ACTIVITY_CONFIG = {

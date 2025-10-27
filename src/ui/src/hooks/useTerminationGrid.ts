@@ -9,6 +9,22 @@ import {
 import { RootState } from "reduxstore/store";
 import { CalendarResponseDto, ForfeitureAdjustmentUpdateRequest, StartAndEndDateRequest } from "reduxstore/types";
 import { formatNumberWithComma, setMessage } from "smart-ui-library";
+import {
+  flattenMasterDetailData,
+  generateRowKey,
+  getEditedValue,
+  hasRowError
+} from "../utils/forfeitActivities/gridDataHelpers";
+import {
+  clearGridSelectionsForBadges,
+  formatApiError,
+  generateBulkSaveSuccessMessage,
+  generateSaveSuccessMessage,
+  getErrorMessage,
+  getRowKeysForRequests,
+  prepareBulkSaveRequests,
+  prepareSaveRequest
+} from "../utils/forfeitActivities/saveOperationHelpers";
 import { Messages } from "../utils/messageDictonary";
 import useDecemberFlowProfitYear from "./useDecemberFlowProfitYear";
 import { useEditState } from "./useEditState";
@@ -40,6 +56,12 @@ interface TerminationGridConfig {
   onErrorOccurred?: () => void;
   onLoadingChange?: (isLoading: boolean) => void;
 }
+
+// Configuration for shared utilities
+const ACTIVITY_CONFIG = {
+  activityType: "termination" as const,
+  rowKeyConfig: { type: "termination" as const }
+};
 
 export const useTerminationGrid = ({
   initialSearchLoaded,
@@ -286,17 +308,27 @@ export const useTerminationGrid = ({
       editState.addLoadingRow(rowId);
 
       try {
-        await updateForfeitureAdjustment(request);
-        const rowKey = `${request.badgeNumber}-${request.profitYear}`;
+        // Transform request using shared helper (no transformation for termination, but keeps consistent)
+        const transformedRequest = prepareSaveRequest(ACTIVITY_CONFIG, request);
+        await updateForfeitureAdjustment(transformedRequest);
+
+        // Generate row key using shared helper
+        const rowKey = generateRowKey(ACTIVITY_CONFIG.rowKeyConfig, {
+          badgeNumber: request.badgeNumber,
+          profitYear: request.profitYear
+        });
         editState.removeEditedValue(rowKey);
 
         // Check for remaining edits after removing this one
         const remainingEdits = Object.keys(editState.editedValues).filter((key) => key !== rowKey).length > 0;
         onUnsavedChanges(remainingEdits);
 
-        // Prepare success message
-        const employeeName = name || "the selected employee";
-        const successMessage = `The forfeiture adjustment of amount $${formatNumberWithComma(request.forfeitureAmount)} for ${employeeName} saved successfully`;
+        // Generate success message using shared helper
+        const successMessage = generateSaveSuccessMessage(
+          ACTIVITY_CONFIG.activityType,
+          name || "the selected employee",
+          request.forfeitureAmount
+        );
 
         // Refresh grid and show success message after data loads
         if (searchParams) {
@@ -325,11 +357,12 @@ export const useTerminationGrid = ({
       } catch (error) {
         console.error("Failed to save forfeiture adjustment:", error);
 
+        const errorMessage = formatApiError(error, getErrorMessage(ACTIVITY_CONFIG.activityType, "save"));
         dispatch(
           setMessage({
             key: "TerminationSave",
             message: {
-              message: `Failed to save adjustment for ${name || "employee"}.`,
+              message: errorMessage,
               type: "error"
             }
           })
@@ -369,19 +402,29 @@ export const useTerminationGrid = ({
       setIsBulkSaveInProgress(true);
 
       try {
-        await updateForfeitureAdjustmentBulk(requests);
+        // Transform all requests using shared helper
+        const transformedRequests = prepareBulkSaveRequests(ACTIVITY_CONFIG, requests);
+        await updateForfeitureAdjustmentBulk(transformedRequests);
 
-        const rowKeys = requests.map((request) => `${request.badgeNumber}-${request.profitYear}`);
+        // Generate row keys using shared helper
+        const rowKeys = getRowKeysForRequests(ACTIVITY_CONFIG, requests);
         editState.clearEditedValues(rowKeys);
         selectionState.clearSelection();
+
+        // Clear selections in grid using shared helper
+        clearGridSelectionsForBadges(gridRef.current?.api, badgeNumbers);
 
         // Check for remaining edits
         const remainingEditKeys = Object.keys(editState.editedValues).filter((key) => !rowKeys.includes(key));
         onUnsavedChanges(remainingEditKeys.length > 0);
 
-        // Prepare bulk success message
+        // Generate bulk success message using shared helper
         const employeeNames = names.map((name) => name || "Unknown Employee");
-        const bulkSuccessMessage = `Members affected: ${employeeNames.join("; ")}`;
+        const bulkSuccessMessage = generateBulkSaveSuccessMessage(
+          ACTIVITY_CONFIG.activityType,
+          requests.length,
+          employeeNames
+        );
 
         if (searchParams) {
           // Use the captured page number to stay on the same page
@@ -406,11 +449,12 @@ export const useTerminationGrid = ({
       } catch (error) {
         console.error("Failed to save forfeiture adjustments:", error);
 
+        const errorMessage = formatApiError(error, getErrorMessage(ACTIVITY_CONFIG.activityType, "bulkSave"));
         dispatch(
           setMessage({
             key: "TerminationSave",
             message: {
-              message: `Failed to save bulk adjustments.`,
+              message: errorMessage,
               type: "error"
             }
           })
@@ -474,40 +518,30 @@ export const useTerminationGrid = ({
     }));
   };
 
-  // Build grid data with expandable rows
+  // Build grid data with expandable rows using shared helper
   const gridData = useMemo(() => {
     if (!termination?.response?.results) return [];
-    const rows = [];
-    for (const row of termination.response.results) {
-      const hasDetails = row.yearDetails && row.yearDetails.length > 0;
 
-      // Add main row
-      rows.push({
-        ...row,
-        isExpandable: hasDetails,
-        isExpanded: hasDetails && Boolean(expandedRows[row.badgeNumber.toString()]),
-        isDetail: false
-      });
+    // Convert expandedRows Record<string, boolean> to Set<string>
+    const expandedRowsSet = new Set(
+      Object.entries(expandedRows)
+        .filter(([_, isExpanded]) => isExpanded)
+        .map(([key, _]) => key)
+    );
 
-      // Add detail rows if expanded
-      if (hasDetails && expandedRows[row.badgeNumber.toString()]) {
-        let index = 0;
-        for (const detail of row.yearDetails) {
-          rows.push({
-            ...row,
-            ...detail,
-            isDetail: true,
-            isExpandable: false,
-            isExpanded: false,
-            parentId: row.badgeNumber,
-            index: index
-          });
-          index++;
-        }
-      }
-    }
-
-    return rows;
+    return flattenMasterDetailData(termination.response.results, expandedRowsSet, {
+      getKey: (row) => row.badgeNumber.toString(),
+      getDetails: (row) => {
+        // For termination, we need to merge parent data with detail data
+        return (row.yearDetails || []).map((detail, index) => ({
+          ...row,
+          ...detail,
+          parentId: row.badgeNumber,
+          index
+        }));
+      },
+      hasDetails: (row) => Boolean(row.yearDetails && row.yearDetails.length > 0)
+    });
   }, [termination, expandedRows]);
 
   const paginationHandlers = {
