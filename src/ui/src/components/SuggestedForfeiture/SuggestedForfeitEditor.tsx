@@ -16,20 +16,27 @@ export function SuggestedForfeitEditor(props: ICellEditorParams) {
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const rawInput = event.target.value;
+
+    // Prevent more than 2 decimal places for currency (dollars and cents)
+    if (rawInput.includes('.')) {
+      const parts = rawInput.split('.');
+      if (parts[1] && parts[1].length > 2) {
+        return; // Don't update if trying to add a third decimal place
+      }
+    }
+
     setInputValue(rawInput);
 
     const numericValue = rawInput === "" ? 0 : parseFloat(rawInput) || 0;
-    // Round to 2 decimal places for currency (dollars and cents)
-    const roundedValue = Math.round(numericValue * 100) / 100;
     const forfeitValue = props.data.forfeit || props.data.forfeiture || 0;
-    const newError = validateSuggestedForfeit(roundedValue, Math.abs(forfeitValue));
+    const newError = validateSuggestedForfeit(numericValue, Math.abs(forfeitValue));
     setError(newError);
 
     const rowKey = props.data.profitDetailId
       ? props.data.profitDetailId
       : `${props.data.badgeNumber}-${props.data.profitYear}${props.data.enrollmentId ? `-${props.data.enrollmentId}` : ""}-${props.node?.id || "unknown"}`;
 
-    props.context?.updateEditedValue?.(rowKey, roundedValue, !!newError);
+    props.context?.updateEditedValue?.(rowKey, numericValue, !!newError);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
