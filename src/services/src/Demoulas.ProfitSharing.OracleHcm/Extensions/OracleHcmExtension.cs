@@ -88,17 +88,11 @@ public static class OracleHcmExtension
 
         builder.Services.AddHostedService<EmployeeDeltaSyncService>();
 
-        // Register as Transient to satisfy singleton hosted service dependencies while allowing scoped service consumption
-        builder.Services.AddTransient<TotalService>();
-        builder.Services.AddTransient<ITotalService>(sp => sp.GetRequiredService<TotalService>());
         builder.Services.AddSingleton<ICalendarService, CalendarService>();
         builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
         builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
         builder.Services.AddScoped<IFrozenService, FrozenService>();
-
-        // Register report services needed by caching hosted services (as Transient to satisfy singleton lifetime while allowing scoped dependencies)
-        builder.Services.AddTransient<IDuplicateNamesAndBirthdaysService, DuplicateNamesAndBirthdaysService>();
 
         return builder;
     }
@@ -111,20 +105,15 @@ public static class OracleHcmExtension
         // Register null navigation service for console app context (navigation concepts don't apply)
         builder.Services.AddScoped<INavigationService, NullNavigationService>();
 
-        // Register as Transient to satisfy singleton hosted service dependencies while allowing scoped service consumption
-        builder.Services.AddTransient<TotalService>();
-        builder.Services.AddTransient<ITotalService>(sp => sp.GetRequiredService<TotalService>());
+        builder.AddOracleHcmSynchronization(oracleHcmConfig);
+        builder.Services.AddHostedService<EmployeeFullSyncService>();
+
         builder.Services.AddSingleton<ICalendarService, CalendarService>();
         builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
         builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
         builder.Services.AddScoped<IFrozenService, FrozenService>();
 
-        // Register report services needed by caching hosted services (as Transient to satisfy singleton lifetime while allowing scoped dependencies)
-        builder.Services.AddTransient<IDuplicateNamesAndBirthdaysService, DuplicateNamesAndBirthdaysService>();
-
-        builder.AddOracleHcmSynchronization(oracleHcmConfig);
-        builder.Services.AddHostedService<EmployeeFullSyncService>();
         return builder;
     }
 
@@ -139,17 +128,11 @@ public static class OracleHcmExtension
         builder.AddOracleHcmSynchronization(oracleHcmConfig);
         builder.Services.AddHostedService<EmployeePayrollSyncService>();
 
-        // Register as Transient to satisfy singleton hosted service dependencies while allowing scoped service consumption
-        builder.Services.AddTransient<TotalService>();
-        builder.Services.AddTransient<ITotalService>(sp => sp.GetRequiredService<TotalService>());
         builder.Services.AddSingleton<ICalendarService, CalendarService>();
         builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
         builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
         builder.Services.AddScoped<IFrozenService, FrozenService>();
-
-        // Register report services needed by caching hosted services (as Transient to satisfy singleton lifetime while allowing scoped dependencies)
-        builder.Services.AddTransient<IDuplicateNamesAndBirthdaysService, DuplicateNamesAndBirthdaysService>();
 
         return builder;
     }
@@ -186,7 +169,7 @@ public static class OracleHcmExtension
 
         builder.Services.AddHealthChecks().AddCheck<OracleHcmHealthCheck>("OracleHcm")
             .AddProcessAllocatedMemoryHealthCheck(maximumMegabytesAllocated: 1024);
-        builder.AddProjectCachingServices();
+        builder.AddMinimalCachingServices();
         builder.AddOracleHcmMessaging();
 
         builder.Services.AddOpenTelemetry().WithTracing(tracing =>

@@ -41,7 +41,6 @@ public sealed class DemographicsService : IDemographicsServiceInternal
         IDemographicHistoryService historyService,
         DemographicMapper mapper,
         ILogger<DemographicsService> logger,
-        ITotalService totalService,
         IFakeSsnService fakeSsnService)
     {
         _dataContextFactory = dataContextFactory;

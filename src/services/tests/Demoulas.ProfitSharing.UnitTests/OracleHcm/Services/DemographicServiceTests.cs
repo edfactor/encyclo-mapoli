@@ -130,7 +130,6 @@ public class DemographicsServiceTests
             historyServiceMock.Object,
             mapper,
             loggerMock.Object,
-            totalServiceMock.Object,
             fakeSsnService.Object
         );
 
@@ -288,7 +287,6 @@ public class DemographicsServiceTests
             historyServiceMock.Object,
             mapper,
             loggerMock.Object,
-            totalServiceMock.Object,
             fakeSsnService.Object
         );
 
@@ -566,7 +564,6 @@ public class DemographicsServiceTests
             historyServiceMock.Object,
             mapper,
             loggerMock.Object,
-            totalServiceMock.Object,
             fakeSsnService.Object
         );
 
@@ -695,7 +692,6 @@ public class DemographicsServiceTests
             historyServiceMock.Object,
             mapper,
             loggerMock.Object,
-            totalServiceMock.Object,
             fakeSsnService.Object
         );
 
@@ -829,7 +825,6 @@ public class DemographicsServiceTests
             historyServiceMock.Object,
             mapper,
             loggerMock.Object,
-            totalServiceMock.Object,
             fakeSsnService.Object
         );
 
@@ -910,7 +905,6 @@ public class DemographicsServiceTests
             historyServiceMock.Object,
             mapper,
             loggerMock.Object,
-            totalServiceMock.Object,
             fakeSsnService.Object
         );
 
@@ -998,7 +992,6 @@ public class DemographicsServiceTests
             historyServiceMock.Object,
             mapper,
             loggerMock.Object,
-            totalServiceMock.Object,
             fakeSsnService.Object
         );
 
