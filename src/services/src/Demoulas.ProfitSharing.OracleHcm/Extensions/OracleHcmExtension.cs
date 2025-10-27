@@ -88,9 +88,9 @@ public static class OracleHcmExtension
 
         builder.Services.AddHostedService<EmployeeDeltaSyncService>();
 
-        builder.Services.AddScoped<ITotalService, TotalService>();
+        builder.Services.AddScoped<TotalService>();
+        builder.Services.AddScoped<ITotalService>(sp => sp.GetRequiredService<TotalService>());
         builder.Services.AddSingleton<ICalendarService, CalendarService>();
-        builder.Services.AddScoped<ITotalService, TotalService>();
         builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
         builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
@@ -110,9 +110,9 @@ public static class OracleHcmExtension
         // Register null navigation service for console app context (navigation concepts don't apply)
         builder.Services.AddScoped<INavigationService, NullNavigationService>();
 
-        builder.Services.AddScoped<ITotalService, TotalService>();
+        builder.Services.AddScoped<TotalService>();
+        builder.Services.AddScoped<ITotalService>(sp => sp.GetRequiredService<TotalService>());
         builder.Services.AddSingleton<ICalendarService, CalendarService>();
-        builder.Services.AddScoped<ITotalService, TotalService>();
         builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
         builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
@@ -137,9 +137,9 @@ public static class OracleHcmExtension
         builder.AddOracleHcmSynchronization(oracleHcmConfig);
         builder.Services.AddHostedService<EmployeePayrollSyncService>();
 
-        builder.Services.AddScoped<ITotalService, TotalService>();
+        builder.Services.AddScoped<TotalService>();
+        builder.Services.AddScoped<ITotalService>(sp => sp.GetRequiredService<TotalService>());
         builder.Services.AddSingleton<ICalendarService, CalendarService>();
-        builder.Services.AddScoped<ITotalService, TotalService>();
         builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
         builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
