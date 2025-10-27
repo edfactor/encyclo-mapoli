@@ -217,15 +217,18 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
             name="excludeZeroBalance"
             control={control}
             render={({ field }) => (
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={field.value || false}
-                    onChange={(e) => field.onChange(e.target.checked)}
-                  />
-                }
-                label="Exclude employees with no current balance and no vested balance"
-              />
+              <>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={field.value || false}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                    />
+                  }
+                  label="Exclude employees with no current or vested balance"
+                />
+                <FormHelperText>{" "}</FormHelperText>
+              </>
             )}
           />
         </Grid>

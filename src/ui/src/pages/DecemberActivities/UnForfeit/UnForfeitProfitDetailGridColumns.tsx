@@ -1,9 +1,8 @@
-import { SaveOutlined } from "@mui/icons-material";
-import { Checkbox, CircularProgress, IconButton, Tooltip } from "@mui/material";
 import { ColDef, EditableCallbackParams, ICellRendererParams } from "ag-grid-community";
 import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "components/SuggestedForfeiture";
 import { numberToCurrency } from "smart-ui-library";
-import { ForfeitureAdjustmentUpdateRequest, UnForfeitsSaveButtonCellParams } from "types";
+import { createSaveButtonCellRenderer } from "../../../components/ForfeitActivities";
+import { ForfeitureAdjustmentUpdateRequest } from "types";
 import {
   createCommentColumn,
   createCurrencyColumn,
@@ -98,77 +97,11 @@ export const GetProfitDetailColumns = (
         removeRowFromSelectedRows,
         onSave
       },
-      cellRenderer: (params: UnForfeitsSaveButtonCellParams) => {
-        if (!isTransactionEditable(params, isReadOnly)) {
-          return "";
-        }
-
-        const id = Number(params.node?.id) || -1;
-        const isSelected = params.node?.isSelected() || false;
-        const rowKey = params.data.profitDetailId;
-        const currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedUnforfeiture;
-        const isLoading = params.context?.loadingRowIds?.has(params.data.badgeNumber);
-        const isDisabled = (currentValue || 0) === 0 || isLoading || isReadOnly;
-        const readOnlyTooltip = "You are in read-only mode and cannot save changes.";
-
-        const checkboxElement = (
-          <Checkbox
-            checked={isSelected}
-            disabled={isDisabled}
-            onChange={() => {
-              if (!isReadOnly) {
-                if (isSelected) {
-                  params.removeRowFromSelectedRows(id);
-                  params.node?.setSelected(false);
-                } else {
-                  params.addRowToSelectedRows(id);
-                  params.node?.setSelected(true);
-                }
-                params.api.refreshCells({ force: true });
-              }
-            }}
-          />
-        );
-
-        const saveButtonElement = (
-          <IconButton
-            onClick={async () => {
-              if (!isReadOnly && params.data.isDetail && params.onSave) {
-                const request: ForfeitureAdjustmentUpdateRequest = {
-                  badgeNumber: params.data.badgeNumber,
-                  forfeitureAmount: -(currentValue || 0),
-                  profitYear: selectedProfitYear,
-                  offsettingProfitDetailId: params.data.profitDetailId,
-                  classAction: false
-                };
-                const employeeName = params.data.fullName || params.data.name || "Unknown Employee";
-                await params.onSave(request, employeeName);
-              }
-            }}
-            disabled={isDisabled}>
-            {isLoading ? <CircularProgress size={20} /> : <SaveOutlined />}
-          </IconButton>
-        );
-
-        return (
-          <div>
-            {isReadOnly ? (
-              <Tooltip title={readOnlyTooltip}>
-                <span>{checkboxElement}</span>
-              </Tooltip>
-            ) : (
-              checkboxElement
-            )}
-            {isReadOnly ? (
-              <Tooltip title={readOnlyTooltip}>
-                <span>{saveButtonElement}</span>
-              </Tooltip>
-            ) : (
-              saveButtonElement
-            )}
-          </div>
-        );
-      }
+      cellRenderer: createSaveButtonCellRenderer({
+        activityType: "unforfeit",
+        selectedProfitYear,
+        isReadOnly
+      })
     }
   ];
 };

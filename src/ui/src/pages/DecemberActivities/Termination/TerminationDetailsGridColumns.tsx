@@ -1,8 +1,7 @@
-import { SaveOutlined } from "@mui/icons-material";
-import { Checkbox, CircularProgress, IconButton, Tooltip } from "@mui/material";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { numberToCurrency } from "smart-ui-library";
 import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "../../../components/SuggestedForfeiture";
+import { createSaveButtonCellRenderer } from "../../../components/ForfeitActivities";
 import { ForfeitureAdjustmentUpdateRequest } from "../../../types";
 import {
   createAgeColumn,
@@ -13,12 +12,6 @@ import {
   createYesOrNoColumn
 } from "../../../utils/gridColumnFactory";
 import { HeaderComponent } from "./TerminationHeaderComponent";
-
-interface SaveButtonCellParams extends ICellRendererParams {
-  removeRowFromSelectedRows: (id: number) => void;
-  addRowToSelectedRows: (id: number) => void;
-  onSave?: (request: ForfeitureAdjustmentUpdateRequest, name: string) => Promise<void>;
-}
 
 // Separate function for detail columns that will be used for master-detail view
 export const GetDetailColumns = (
@@ -159,77 +152,11 @@ export const GetDetailColumns = (
         removeRowFromSelectedRows,
         onSave
       },
-      cellRenderer: (params: SaveButtonCellParams) => {
-        if (!params.data.isDetail || params.data.profitYear !== selectedProfitYear) {
-          return "";
-        }
-        const id = Number(params.node?.id) || -1;
-        const isSelected = params.node?.isSelected() || false;
-        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
-        const hasError = params.context?.editedValues?.[rowKey]?.hasError;
-        const currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedForfeit;
-        const isLoading = params.context?.loadingRowIds?.has(params.data.badgeNumber);
-        const isZeroValue = currentValue === 0 || currentValue === null || currentValue === undefined;
-        const isDisabled = hasError || isLoading || isZeroValue || isReadOnly;
-        const readOnlyTooltip = "You are in read-only mode and cannot save changes.";
-
-        const checkboxElement = (
-          <Tooltip
-            title={isZeroValue ? "Forfeit cannot be zero." : isReadOnly ? readOnlyTooltip : ""}
-            arrow>
-            <span>
-              <Checkbox
-                checked={isSelected}
-                disabled={isDisabled}
-                onChange={() => {
-                  if (!isReadOnly) {
-                    if (isSelected) {
-                      params.removeRowFromSelectedRows(id);
-                    } else {
-                      params.addRowToSelectedRows(id);
-                    }
-                    params.node?.setSelected(!isSelected);
-                  }
-                }}
-              />
-            </span>
-          </Tooltip>
-        );
-
-        const saveButtonElement = (
-          <IconButton
-            onClick={async () => {
-              if (!isReadOnly && params.data.isDetail && params.onSave) {
-                const request: ForfeitureAdjustmentUpdateRequest = {
-                  badgeNumber: params.data.badgeNumber,
-                  profitYear: params.data.profitYear,
-                  forfeitureAmount: currentValue || 0,
-                  classAction: false,
-                  offsettingProfitDetailId: undefined
-                };
-
-                const employeeName = params.data.fullName || params.data.name || "the selected employee";
-                await params.onSave(request, employeeName);
-              }
-            }}
-            disabled={isDisabled}>
-            {isLoading ? <CircularProgress size={20} /> : <SaveOutlined />}
-          </IconButton>
-        );
-
-        return (
-          <div>
-            {checkboxElement}
-            {isReadOnly ? (
-              <Tooltip title={readOnlyTooltip}>
-                <span>{saveButtonElement}</span>
-              </Tooltip>
-            ) : (
-              saveButtonElement
-            )}
-          </div>
-        );
-      }
+      cellRenderer: createSaveButtonCellRenderer({
+        activityType: "termination",
+        selectedProfitYear,
+        isReadOnly
+      })
     }
   ];
 };

@@ -42,9 +42,7 @@ test.describe("Unforfeitures landing page: ", () => {
   });
 
   test("check Exclude employee with no current balance and click on search", async ({ page }) => {
-    await page
-      .getByRole("checkbox", { name: "Exclude employees with no current balance and no vested balance" })
-      .check();
+    await page.getByRole("checkbox", { name: "Exclude employees with no current or vested balance" }).check();
     await page.getByTestId("searchButton").click();
     const [response] = await Promise.all([
       page.waitForResponse((resp) => resp.url().includes("yearend/unforfeitures"))

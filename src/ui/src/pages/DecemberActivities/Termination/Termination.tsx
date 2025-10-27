@@ -20,16 +20,11 @@ export interface TerminationSearchRequest extends StartAndEndDateRequest {
 const Termination = () => {
   const [fetchAccountingRange, { data: fiscalData }] = useLazyGetAccountingRangeToCurrent(6);
   const { state, actions } = useTerminationState();
-  const [isDataFetching, setIsDataFetching] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
   // Function to scroll to top - only used for error cases
   const scrollToTop = useCallback(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
-
-  // Handle loading state changes from TerminationGrid
-  const handleLoadingChange = useCallback((isLoading: boolean) => {
-    setIsDataFetching(isLoading);
   }, []);
 
   // Use the navigation guard hook
@@ -48,17 +43,20 @@ const Termination = () => {
 
   // Add listener for error messages to scroll to top
   useEffect(() => {
-    const handleMessageEvent = (event: CustomEvent) => {
+    const handleMessageEvent = (event: Event) => {
       // Check if the message is an error related to Termination
-      if (event.detail?.key === "TerminationSave" && event.detail?.message?.type === "error") {
+      const customEvent = event as CustomEvent;
+      if (customEvent.detail?.key === "TerminationSave" && customEvent.detail?.message?.type === "error") {
         scrollToTop();
       }
     };
 
-    window.addEventListener("dsmMessage" as unknown as string, handleMessageEvent);
+    // These event listeneres are global to the window so that
+    // when there is a message for the user, we can scroll to top to show it
+    window.addEventListener("dsmMessage", handleMessageEvent);
 
     return () => {
-      window.removeEventListener("dsmMessage" as unknown as string, handleMessageEvent);
+      window.removeEventListener("dsmMessage", handleMessageEvent);
     };
   }, [scrollToTop]);
 
@@ -91,7 +89,7 @@ const Termination = () => {
                     onSearch={actions.handleSearch}
                     setInitialSearchLoaded={actions.setInitialSearchLoaded}
                     hasUnsavedChanges={state.hasUnsavedChanges}
-                    isFetching={isDataFetching}
+                    isFetching={isFetching}
                   />
                 </DSMAccordion>
               </Grid>
@@ -106,8 +104,8 @@ const Termination = () => {
                   fiscalData={fiscalData}
                   shouldArchive={state.shouldArchive}
                   onArchiveHandled={actions.handleArchiveHandled}
-                  onErrorOccurred={scrollToTop} // Pass down the error handler
-                  onLoadingChange={handleLoadingChange}
+                  onErrorOccurred={scrollToTop}
+                  onLoadingChange={setIsFetching}
                 />
               </Grid>
             </>
