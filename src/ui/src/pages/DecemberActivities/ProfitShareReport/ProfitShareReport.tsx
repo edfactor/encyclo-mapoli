@@ -142,7 +142,7 @@ const ProfitShareReport = () => {
               <Typography
                 variant="h2"
                 sx={{ color: "#0258A5" }}>
-                {`${CAPTIONS.PROFIT_SHARE_TOTALS}`}
+                {`Totals`}
               </Typography>
             </div>
 

@@ -18,7 +18,7 @@ const DuplicateSSNsOnDemographics = () => {
 
   return (
     <Page
-      label={`$${CAPTIONS.DUPLICATE_SSNS} (${recordCount} records)`}
+      label={`${CAPTIONS.DUPLICATE_SSNS} (${recordCount} records)`}
       actionNode={renderActionNode()}>
       <Grid
         container
