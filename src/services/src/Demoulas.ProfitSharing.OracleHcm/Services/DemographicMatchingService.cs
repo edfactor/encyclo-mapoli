@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Extensions;
+﻿using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Metrics;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -30,7 +30,7 @@ public sealed class DemographicMatchingService : IDemographicMatchingService
     {
         var oracleIds = incomingByOracleId.Keys.ToList();
 
-        var matched = await _repository.GetByOracleIdsAsync(oracleIds, ct);
+        var matched = await _repository.GetByOracleIdsAsync(oracleIds, ct).ConfigureAwait(false);
 
         if (matched.Count > 0)
         {
@@ -64,7 +64,7 @@ public sealed class DemographicMatchingService : IDemographicMatchingService
             return (new List<Demographic>(), true);
         }
 
-        var matched = await _repository.GetBySsnAndBadgePairsAsync(fallbackPairs, ct);
+        var matched = await _repository.GetBySsnAndBadgePairsAsync(fallbackPairs, ct).ConfigureAwait(false);
 
         if (matched.Count > 0)
         {

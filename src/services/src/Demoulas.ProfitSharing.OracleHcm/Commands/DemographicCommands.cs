@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Data.Contexts;
+﻿using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,7 +18,7 @@ public sealed class AddAuditCommand : IDemographicCommand
 
     public async Task ExecuteAsync(ProfitSharingDbContext context, CancellationToken ct)
     {
-        await context.DemographicSyncAudit.AddAsync(_auditRecord, ct);
+        await context.DemographicSyncAudit.AddAsync(_auditRecord, ct).ConfigureAwait(false);
     }
 }
 
@@ -36,7 +36,7 @@ public sealed class AddHistoryCommand : IDemographicCommand
 
     public async Task ExecuteAsync(ProfitSharingDbContext context, CancellationToken ct)
     {
-        await context.DemographicHistories.AddAsync(_historyRecord, ct);
+        await context.DemographicHistories.AddAsync(_historyRecord, ct).ConfigureAwait(false);
     }
 }
 
@@ -54,7 +54,7 @@ public sealed class AddDemographicCommand : IDemographicCommand
 
     public async Task ExecuteAsync(ProfitSharingDbContext context, CancellationToken ct)
     {
-        await context.Demographics.AddAsync(_demographic, ct);
+        await context.Demographics.AddAsync(_demographic, ct).ConfigureAwait(false);
     }
 }
 

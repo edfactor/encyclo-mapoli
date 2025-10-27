@@ -72,7 +72,7 @@ public sealed class DemographicsService : IDemographicsServiceInternal
 
         // Step 1: Primary matching by OracleHcmId
         List<Demographic> existingByPrimary = await _matchingService.MatchByOracleIdAsync(
-            incomingByOracleId, cancellationToken).ConfigureAwait(false);
+            incomingByOracleId, cancellationToken).ConfigureAwait(false) ?? [];
 
         HashSet<long> matchedOracleIds = existingByPrimary.Select(e => e.OracleHcmId).ToHashSet();
 
@@ -83,8 +83,9 @@ public sealed class DemographicsService : IDemographicsServiceInternal
             .Distinct()
             .ToList();
 
-        (List<Demographic> existingByFallback, bool skippedAllZeroBadge) =
-            await _matchingService.MatchByFallbackAsync(fallbackPairs, cancellationToken).ConfigureAwait(false);
+        var fallbackResult = await _matchingService.MatchByFallbackAsync(fallbackPairs, cancellationToken).ConfigureAwait(false);
+        List<Demographic> existingByFallback = fallbackResult.Matched ?? [];
+        bool skippedAllZeroBadge = fallbackResult.SkippedAllZeroBadge;
 
         // Combine all existing records (deduplicate by Id)
         List<Demographic> existing = existingByPrimary

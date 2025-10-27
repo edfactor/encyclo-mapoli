@@ -555,6 +555,9 @@ public class DemographicsServiceTests
         var auditServiceMock = new Mock<IDemographicAuditService>();
         var historyServiceMock = new Mock<IDemographicHistoryService>();
 
+        // Setup default mocks for services
+        SetupDefaultServiceMocks(matchingServiceMock, auditServiceMock, historyServiceMock);
+
         var service = new DemographicsService(
             scenarioFactory,
             repositoryMock.Object,
@@ -666,6 +669,9 @@ public class DemographicsServiceTests
         var matchingServiceMock = new Mock<IDemographicMatchingService>();
         var auditServiceMock = new Mock<IDemographicAuditService>();
         var historyServiceMock = new Mock<IDemographicHistoryService>();
+
+        // Setup default mocks for services that don't have specific setup
+        SetupDefaultServiceMocks(matchingServiceMock, auditServiceMock, historyServiceMock);
 
         totalServiceMock.Setup(t => t.GetVestingBalanceForSingleMemberAsync(It.IsAny<SearchBy>(), It.IsAny<int>(), It.IsAny<short>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProfitSharing.Common.Contracts.Response.BalanceEndpointResponse
@@ -797,6 +803,9 @@ public class DemographicsServiceTests
         var matchingServiceMock = new Mock<IDemographicMatchingService>();
         var auditServiceMock = new Mock<IDemographicAuditService>();
         var historyServiceMock = new Mock<IDemographicHistoryService>();
+
+        // Setup default mocks for services that don't have specific setup
+        SetupDefaultServiceMocks(matchingServiceMock, auditServiceMock, historyServiceMock);
 
         totalServiceMock.Setup(t => t.GetVestingBalanceForSingleMemberAsync(It.IsAny<SearchBy>(), It.IsAny<int>(), It.IsAny<short>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProfitSharing.Common.Contracts.Response.BalanceEndpointResponse
@@ -1006,5 +1015,58 @@ public class DemographicsServiceTests
                 It.IsAny<Exception>(),
                 It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)),
             Times.Once);
+    }
+
+    /// <summary>
+    /// Helper method to set up default mock returns for matching, audit, and history services.
+    /// Used by tests that create mocks but don't define specific behaviors.
+    /// </summary>
+    private static void SetupDefaultServiceMocks(
+        Mock<IDemographicMatchingService> matchingServiceMock,
+        Mock<IDemographicAuditService> auditServiceMock,
+        Mock<IDemographicHistoryService> historyServiceMock)
+    {
+        // Setup matching service mocks with empty/default returns
+        matchingServiceMock
+            .Setup(m => m.MatchByOracleIdAsync(It.IsAny<Dictionary<long, Demographic>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Demographic>());
+
+        matchingServiceMock
+            .Setup(m => m.MatchByFallbackAsync(It.IsAny<List<(int, int)>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((new List<Demographic>(), false));
+
+        matchingServiceMock
+            .Setup(m => m.IdentifyNewDemographics(It.IsAny<List<Demographic>>(), It.IsAny<List<Demographic>>()))
+            .Returns<List<Demographic>, List<Demographic>>((incoming, existing) => incoming);
+
+        // Setup audit service mocks with empty/default returns
+        auditServiceMock
+            .Setup(m => m.DetectDuplicateSsns(It.IsAny<List<Demographic>>()))
+            .Returns(new List<IGrouping<int, Demographic>>());
+
+        auditServiceMock
+            .Setup(m => m.PrepareAuditDuplicateSsns(It.IsAny<List<IGrouping<int, Demographic>>>()))
+            .Returns(new List<IDemographicCommand>());
+
+        auditServiceMock
+            .Setup(m => m.PrepareCheckSsnConflicts(It.IsAny<List<Demographic>>(), It.IsAny<List<Demographic>>()))
+            .Returns(new List<IDemographicCommand>());
+
+        // Setup history service mocks with empty/default returns
+        historyServiceMock
+            .Setup(m => m.PrepareInsertNewWithHistory(It.IsAny<List<Demographic>>()))
+            .Returns((0, new List<IDemographicCommand>()));
+
+        historyServiceMock
+            .Setup(m => m.PrepareUpdateExistingWithHistory(It.IsAny<List<Demographic>>(), It.IsAny<List<Demographic>>()))
+            .Returns((0, new List<IDemographicCommand>()));
+
+        historyServiceMock
+            .Setup(m => m.DetectSsnChanges(It.IsAny<List<Demographic>>(), It.IsAny<Dictionary<long, Demographic>>()))
+            .Returns(new List<Demographic>());
+
+        historyServiceMock
+            .Setup(m => m.PrepareSsnUpdateCommands(It.IsAny<List<Demographic>>(), It.IsAny<Dictionary<long, Demographic>>()))
+            .Returns(new List<IDemographicCommand>());
     }
 }
