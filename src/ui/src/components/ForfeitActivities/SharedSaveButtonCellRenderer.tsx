@@ -41,19 +41,13 @@ function generateRowKey(activityType: ActivityType, data: RowData): string {
 /**
  * Get current value from edited values or original data
  */
-function getCurrentValue(
-  activityType: ActivityType,
-  params: SaveButtonCellParams,
-  rowKey: string
-): number {
+function getCurrentValue(activityType: ActivityType, params: SaveButtonCellParams, rowKey: string): number {
   const editedValue = params.context?.editedValues?.[rowKey]?.value;
   if (editedValue !== undefined) {
     return editedValue;
   }
 
-  return activityType === "unforfeit"
-    ? params.data.suggestedUnforfeiture
-    : params.data.suggestedForfeit ?? 0;
+  return activityType === "unforfeit" ? params.data.suggestedUnforfeiture : (params.data.suggestedForfeit ?? 0);
 }
 
 /**
@@ -103,7 +97,6 @@ export function createSaveButtonCellRenderer(config: SaveButtonConfig) {
     const id = Number(params.node?.id) || -1;
     const isSelected = params.node?.isSelected() || false;
     const rowKey = generateRowKey(activityType, params.data);
-    const hasError = params.context?.editedValues?.[rowKey]?.hasError;
     const currentValue = getCurrentValue(activityType, params, rowKey);
     const isLoading = params.context?.loadingRowIds?.has(params.data.badgeNumber);
     const isZeroValue = currentValue === 0 || currentValue === null || currentValue === undefined;
