@@ -258,7 +258,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
             // Line N: Non-employee beneficiaries (from BeneficiaryContacts, NOT in Demographics)
             // Matches COBOL Report 10 logic - LEFT JOIN anti-join pattern
-            var demographicQueryForBeneficiaries = await _demographicReaderService.BuildDemographicQuery(ctx, req.UseFrozenData);
+            var demographicQueryForBeneficiaries = await _demographicReaderService.BuildDemographicQuery(ctx, false);
             var beneData = await (
                 from bc in ctx.BeneficiaryContacts
                 join d in demographicQueryForBeneficiaries on bc.Ssn equals d.Ssn into demoJoin
