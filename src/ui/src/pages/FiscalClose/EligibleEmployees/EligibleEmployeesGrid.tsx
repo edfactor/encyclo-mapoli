@@ -2,12 +2,12 @@ import { RefObject, useMemo } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
-import { EligibleEmployeesResponse } from "../../../reduxstore/types";
+import { EligibleEmployeeResponseDto } from "../../../reduxstore/types";
 import { GetEligibleEmployeesColumns } from "./EligibleEmployeesGridColumns";
 
 interface EligibleEmployeesGridProps {
   innerRef: RefObject<HTMLDivElement | null>;
-  data: EligibleEmployeesResponse | null;
+  data: EligibleEmployeeResponseDto | null;
   isLoading: boolean;
   showData: boolean;
   hasResults: boolean;
@@ -28,7 +28,7 @@ const EligibleEmployeesGrid = ({
 }: EligibleEmployeesGridProps) => {
   // I need to clone the data object, but alter the reportName. I need to keep the year from the end
   // of the existing report name, but add "Eligible Employees " to the front.
-  const clonedData = data ? ({ ...data } as EligibleEmployeesResponse) : null;
+  const clonedData = data ? ({ ...data } as EligibleEmployeeResponseDto) : null;
   const year = clonedData?.reportName?.match(/\d{4}$/)?.[0];
   if (clonedData && year) {
     clonedData.reportName = `Eligible Employees ${year}`;
