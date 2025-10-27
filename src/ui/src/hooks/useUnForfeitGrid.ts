@@ -8,13 +8,8 @@ import {
 } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { CalendarResponseDto, ForfeitureAdjustmentUpdateRequest, StartAndEndDateRequest } from "reduxstore/types";
-import { formatNumberWithComma, setMessage } from "smart-ui-library";
-import {
-  flattenMasterDetailData,
-  generateRowKey,
-  getEditedValue,
-  hasRowError
-} from "../utils/forfeitActivities/gridDataHelpers";
+import { setMessage } from "smart-ui-library";
+import { flattenMasterDetailData, generateRowKey } from "../utils/forfeitActivities/gridDataHelpers";
 import {
   clearGridSelectionsForBadges,
   formatApiError,

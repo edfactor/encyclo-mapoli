@@ -26,7 +26,7 @@ vi.mock("./ForfeitSearchFilter", () => ({
   ))
 }));
 
-vi.mock("../../components/StatusDropdownActionNode", () => ({
+vi.mock("../../../components/StatusDropdownActionNode", () => ({
   default: vi.fn(({ onStatusChange, onSearchClicked }) => (
     <div data-testid="status-dropdown">
       <button

@@ -8,13 +8,8 @@ import {
 } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { CalendarResponseDto, ForfeitureAdjustmentUpdateRequest, StartAndEndDateRequest } from "reduxstore/types";
-import { formatNumberWithComma, setMessage } from "smart-ui-library";
-import {
-  flattenMasterDetailData,
-  generateRowKey,
-  getEditedValue,
-  hasRowError
-} from "../utils/forfeitActivities/gridDataHelpers";
+import { setMessage } from "smart-ui-library";
+import { flattenMasterDetailData, generateRowKey } from "../utils/forfeitActivities/gridDataHelpers";
 import {
   clearGridSelectionsForBadges,
   formatApiError,
@@ -54,7 +49,6 @@ interface TerminationGridConfig {
   shouldArchive?: boolean;
   onArchiveHandled?: () => void;
   onErrorOccurred?: () => void;
-  onLoadingChange?: (isLoading: boolean) => void;
 }
 
 // Configuration for shared utilities
@@ -73,8 +67,7 @@ export const useTerminationGrid = ({
   fiscalData,
   shouldArchive,
   onArchiveHandled,
-  onErrorOccurred,
-  onLoadingChange
+  onErrorOccurred
 }: TerminationGridConfig) => {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [pendingSuccessMessage, setPendingSuccessMessage] = useState<string | null>(null);
@@ -172,10 +165,6 @@ export const useTerminationGrid = ({
     }
   }, [isFetching, pendingSuccessMessage, isPendingBulkMessage, dispatch]);
 
-  // Notify parent component about loading state changes
-  useEffect(() => {
-    onLoadingChange?.(isFetching);
-  }, [isFetching, onLoadingChange]);
 
   // Need a useEffect to reset the page number when total count changes (new search, not pagination)
   // Don't reset during or immediately after bulk save operations to preserve grid position
