@@ -27,6 +27,7 @@ interface AddDistributionState {
     value: number | null;
     isLoading: boolean;
     error: string | null;
+    maximumReached: boolean;
   };
   submission: {
     isSubmitting: boolean;
@@ -44,7 +45,7 @@ type AddDistributionAction =
   | { type: "STATE_TAX_FETCH_SUCCESS"; payload: { rate: number } }
   | { type: "STATE_TAX_FETCH_FAILURE"; payload: { error: string } }
   | { type: "SEQUENCE_NUMBER_FETCH_START" }
-  | { type: "SEQUENCE_NUMBER_FETCH_SUCCESS"; payload: { value: number } }
+  | { type: "SEQUENCE_NUMBER_FETCH_SUCCESS"; payload: { value: number; maximumReached: boolean } }
   | { type: "SEQUENCE_NUMBER_FETCH_FAILURE"; payload: { error: string } }
   | { type: "SUBMISSION_START" }
   | { type: "SUBMISSION_SUCCESS" }
@@ -67,7 +68,8 @@ const initialState: AddDistributionState = {
   sequenceNumber: {
     value: null,
     isLoading: false,
-    error: null
+    error: null,
+    maximumReached: false
   },
   submission: {
     isSubmitting: false,
@@ -155,7 +157,8 @@ const addDistributionReducer = (state: AddDistributionState, action: AddDistribu
         sequenceNumber: {
           value: action.payload.value,
           isLoading: false,
-          error: null
+          error: null,
+          maximumReached: action.payload.maximumReached
         }
       };
 
@@ -270,17 +273,20 @@ export const useAddDistribution = () => {
           take: 1000 // Get all distributions to find max sequence
         }).unwrap();
 
-        // Find the maximum paymentSequence value
+        // Find the maximum paymentSequence value and count existing distributions
         let maxSequence = 0;
+        let distributionCount = 0;
         if (searchResponse?.results && searchResponse.results.length > 0) {
           maxSequence = Math.max(...searchResponse.results.map((d) => d.paymentSequence));
+          distributionCount = searchResponse.results.length;
         }
 
         const nextSequence = maxSequence + 1;
+        const maximumReached = distributionCount >= 9;
 
         dispatch({
           type: "SEQUENCE_NUMBER_FETCH_SUCCESS",
-          payload: { value: nextSequence }
+          payload: { value: nextSequence, maximumReached }
         });
 
         return nextSequence;
@@ -291,7 +297,7 @@ export const useAddDistribution = () => {
         // Default to 1 if we can't calculate
         dispatch({
           type: "SEQUENCE_NUMBER_FETCH_SUCCESS",
-          payload: { value: 1 }
+          payload: { value: 1, maximumReached: false }
         });
         return 1;
       }
@@ -374,14 +380,14 @@ export const useAddDistribution = () => {
 
   // Submit distribution
   const submitDistribution = useCallback(
-    async (request: CreateDistributionRequest & { onlyNetworkToastErrors: boolean }) => {
+    async (request: CreateDistributionRequest) => {
       try {
         dispatch({ type: "SUBMISSION_START" });
 
         // add the onlyNetworkToastErrors flag to the request
-        request.onlyNetworkToastErrors = true;
+        const requestWithFlag = { ...request, onlyNetworkToastErrors: true };
 
-        const response = await createDistribution(request).unwrap();
+        const response = await createDistribution(requestWithFlag).unwrap();
 
         dispatch({ type: "SUBMISSION_SUCCESS" });
 
@@ -430,6 +436,7 @@ export const useAddDistribution = () => {
     sequenceNumber: state.sequenceNumber.value,
     isSequenceNumberLoading: state.sequenceNumber.isLoading,
     sequenceNumberError: state.sequenceNumber.error,
+    maximumReached: state.sequenceNumber.maximumReached,
 
     isSubmitting: state.submission.isSubmitting,
     submissionError: state.submission.error,

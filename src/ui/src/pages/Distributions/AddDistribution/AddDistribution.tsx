@@ -36,6 +36,7 @@ const AddDistributionContent = () => {
     sequenceNumber,
     isSequenceNumberLoading,
     sequenceNumberError,
+    maximumReached,
     isSubmitting,
     submissionError,
     submissionSuccess,
@@ -107,9 +108,9 @@ const AddDistributionContent = () => {
   const [thirdPartyAddressRequired, setThirdPartyAddressRequired] = useState(false);
 
   // Determine validation errors
-  const maxDistributionsReached = sequenceNumber === 10;
+
   const noAvailableBalance = memberData?.currentVestedAmount === 0;
-  const validationError = maxDistributionsReached
+  const validationError = maximumReached
     ? "Member has reached maximum of nine distributions."
     : noAvailableBalance
       ? "Member has no available balance to distribute."
