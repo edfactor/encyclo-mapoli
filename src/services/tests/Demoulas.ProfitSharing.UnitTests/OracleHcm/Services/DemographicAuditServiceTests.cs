@@ -142,7 +142,7 @@ public class DemographicAuditServiceTests
         var incomingList = new List<Demographic> { incoming1, incoming2 };
 
         // Act
-        var result = service.PrepareCheckSsnConflicts(incomingList, existingList);
+        var result = service.PrepareCheckSsnConflicts(existingList, incomingList);
 
         // Assert
         result.ShouldNotBeNull();
@@ -168,7 +168,7 @@ public class DemographicAuditServiceTests
         var incomingList = new List<Demographic> { incoming };
 
         // Act
-        var result = service.PrepareCheckSsnConflicts(incomingList, existingList);
+        var result = service.PrepareCheckSsnConflicts(existingList, incomingList);
 
         // Assert
         result.ShouldNotBeNull();
@@ -192,7 +192,7 @@ public class DemographicAuditServiceTests
         var incomingList = new List<Demographic> { incoming1, incoming2 };
 
         // Act
-        var result = service.PrepareCheckSsnConflicts(incomingList, existingList);
+        var result = service.PrepareCheckSsnConflicts(existingList, incomingList);
 
         // Assert
         result.ShouldNotBeNull();
@@ -216,7 +216,7 @@ public class DemographicAuditServiceTests
         var incomingList = new List<Demographic> { incoming1, incoming2 };
 
         // Act
-        var result = service.PrepareCheckSsnConflicts(incomingList, existingList);
+        var result = service.PrepareCheckSsnConflicts(existingList, incomingList);
 
         // Assert
         result.ShouldNotBeNull();
@@ -256,7 +256,7 @@ public class DemographicAuditServiceTests
         var incomingList = new List<Demographic> { incoming };
 
         // Act
-        var result = service.PrepareCheckSsnConflicts(incomingList, existingList);
+        var result = service.PrepareCheckSsnConflicts(existingList, incomingList);
 
         // Assert
         result.ShouldNotBeNull();
