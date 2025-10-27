@@ -7,6 +7,8 @@ import { SortParams, useGridPagination } from "../../../hooks/useGridPagination"
 import { GetProfitShareReportColumns } from "./ProfitShareReportGridColumns";
 
 interface ProfitShareReportSearchParams {
+  reportId: number;
+  badgeNumber?: number | null;
   [key: string]: unknown;
 }
 

@@ -19,7 +19,7 @@ import {
   useLazyGetTerminatedLettersReportQuery
 } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { DSMGrid, formatNumberWithComma, ISortParams, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import { GetTerminatedLettersColumns } from "./TerminatedLettersGridColumns";
 
@@ -231,7 +231,8 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridSearchProps> = ({
               variant="h6"
               component="h2"
               sx={{ marginLeft: "20px", marginRight: "10px" }}>
-              EMPLOYEE INSTRUCTIONS ON HOW TO WITHDRAW VESTED SAVINGS
+              EMPLOYEES NEEDING INSTRUCTIONS TO WITHDRAW VESTED SAVINGS (
+              {formatNumberWithComma(terminatedLetters.response.total)} Records)
             </Typography>
             {renderPrintButton()}
           </div>

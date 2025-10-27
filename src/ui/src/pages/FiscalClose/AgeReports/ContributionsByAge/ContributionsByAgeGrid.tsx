@@ -27,87 +27,78 @@ const ContributionsByAgeGrid: React.FC = () => {
               rowSpacing={0}
               columnSpacing={2}>
               <Grid size={{ xs: 4 }}>
-                <div>
-                  <h2 className="px-[24px] text-dsm-secondary">Total</h2>
-                  <div style={{ width: "100%", overflow: "hidden" }}>
-                    <TotalsGrid
-                      tablePadding="0px"
-                      displayData={[
-                        [
-                          contributionsByAgeTotal?.totalEmployees || 0,
-                          numberToCurrency(contributionsByAgeTotal?.totalAmount || 0)
-                        ]
-                      ]}
-                      leftColumnHeaders={["Amount"]}
-                      topRowHeaders={["Total", "EMPS", "Amount"]}></TotalsGrid>
-                  </div>
-                  <DSMGrid
-                    preferenceKey={"CONT_AGE_Total"}
-                    isLoading={false}
-                    providedOptions={{
-                      rowData: contributionsByAgeTotal?.response?.results ?? [],
-                      columnDefs: columnDefsTotal ?? [],
-                      suppressHorizontalScroll: true,
-                      suppressColumnVirtualisation: true
-                    }}
-                  />
-                </div>
+                <h2 className="px-[24px] text-dsm-secondary">Total</h2>
+                <TotalsGrid
+                  breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
+                  tablePadding="0px"
+                  displayData={[
+                    [
+                      contributionsByAgeTotal?.totalEmployees || 0,
+                      numberToCurrency(contributionsByAgeTotal?.totalAmount || 0)
+                    ]
+                  ]}
+                  leftColumnHeaders={["Amount"]}
+                  topRowHeaders={["Total", "EMPS", "Amount"]}></TotalsGrid>
+                <DSMGrid
+                  preferenceKey={"CONT_AGE_Total"}
+                  isLoading={false}
+                  providedOptions={{
+                    rowData: contributionsByAgeTotal?.response?.results ?? [],
+                    columnDefs: columnDefsTotal ?? [],
+                    suppressHorizontalScroll: true,
+                    suppressColumnVirtualisation: true
+                  }}
+                />
               </Grid>
 
               <Grid size={{ xs: 4 }}>
-                <div>
-                  <h2 className="text-dsm-secondary">Full-time</h2>
-                  <div style={{ width: "100%", overflow: "hidden" }}>
-                    <TotalsGrid
-                      tablePadding="0px"
-                      displayData={[
-                        [
-                          contributionsByAgeFullTime?.totalEmployees || 0,
-                          numberToCurrency(contributionsByAgeFullTime?.totalAmount || 0)
-                        ]
-                      ]}
-                      leftColumnHeaders={["Amount"]}
-                      topRowHeaders={["FullTime", "EMPS", "Amount"]}></TotalsGrid>
-                  </div>
-                  <DSMGrid
-                    preferenceKey={"CONT_AGE_FullTime"}
-                    isLoading={false}
-                    providedOptions={{
-                      rowData: contributionsByAgeFullTime?.response?.results ?? [],
-                      columnDefs: columnDefsTotal ?? [],
-                      suppressHorizontalScroll: true,
-                      suppressColumnVirtualisation: true
-                    }}
-                  />
-                </div>
+                <h2 className="text-dsm-secondary">Full-time</h2>
+                <TotalsGrid
+                  breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
+                  tablePadding="0px"
+                  displayData={[
+                    [
+                      contributionsByAgeFullTime?.totalEmployees || 0,
+                      numberToCurrency(contributionsByAgeFullTime?.totalAmount || 0)
+                    ]
+                  ]}
+                  leftColumnHeaders={["Amount"]}
+                  topRowHeaders={["FullTime", "EMPS", "Amount"]}></TotalsGrid>
+                <DSMGrid
+                  preferenceKey={"CONT_AGE_FullTime"}
+                  isLoading={false}
+                  providedOptions={{
+                    rowData: contributionsByAgeFullTime?.response?.results ?? [],
+                    columnDefs: columnDefsTotal ?? [],
+                    suppressHorizontalScroll: true,
+                    suppressColumnVirtualisation: true
+                  }}
+                />
               </Grid>
 
               <Grid size={{ xs: 4 }}>
-                <div>
-                  <h2 className="text-dsm-secondary">Part-time</h2>
-                  <div style={{ width: "100%", overflow: "hidden" }}>
-                    <TotalsGrid
-                      tablePadding="0px"
-                      displayData={[
-                        [
-                          contributionsByAgePartTime?.totalEmployees || 0,
-                          numberToCurrency(contributionsByAgePartTime?.totalAmount || 0)
-                        ]
-                      ]}
-                      leftColumnHeaders={["Amount"]}
-                      topRowHeaders={["Total", "EMPS", "Amount"]}></TotalsGrid>
-                  </div>
-                  <DSMGrid
-                    preferenceKey={"CONT_AGE_PartTime"}
-                    isLoading={false}
-                    providedOptions={{
-                      rowData: contributionsByAgePartTime?.response?.results ?? [],
-                      columnDefs: columnDefsTotal ?? [],
-                      suppressHorizontalScroll: true,
-                      suppressColumnVirtualisation: true
-                    }}
-                  />
-                </div>
+                <h2 className="text-dsm-secondary">Part-time</h2>
+                <TotalsGrid
+                  breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
+                  tablePadding="0px"
+                  displayData={[
+                    [
+                      contributionsByAgePartTime?.totalEmployees || 0,
+                      numberToCurrency(contributionsByAgePartTime?.totalAmount || 0)
+                    ]
+                  ]}
+                  leftColumnHeaders={["Amount"]}
+                  topRowHeaders={["Total", "EMPS", "Amount"]}></TotalsGrid>
+                <DSMGrid
+                  preferenceKey={"CONT_AGE_PartTime"}
+                  isLoading={false}
+                  providedOptions={{
+                    rowData: contributionsByAgePartTime?.response?.results ?? [],
+                    columnDefs: columnDefsTotal ?? [],
+                    suppressHorizontalScroll: true,
+                    suppressColumnVirtualisation: true
+                  }}
+                />
               </Grid>
             </Grid>
           </>
