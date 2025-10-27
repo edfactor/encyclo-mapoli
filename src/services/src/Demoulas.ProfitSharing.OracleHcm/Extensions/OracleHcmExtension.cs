@@ -25,6 +25,7 @@ using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.ItDevOps;
+using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.Util.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -95,6 +96,9 @@ public static class OracleHcmExtension
         builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
         builder.Services.AddScoped<IFrozenService, FrozenService>();
 
+        // Register report services needed by caching hosted services
+        builder.Services.AddScoped<IDuplicateNamesAndBirthdaysService, DuplicateNamesAndBirthdaysService>();
+
         return builder;
     }
 
@@ -113,6 +117,9 @@ public static class OracleHcmExtension
         builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
         builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
         builder.Services.AddScoped<IFrozenService, FrozenService>();
+
+        // Register report services needed by caching hosted services
+        builder.Services.AddScoped<IDuplicateNamesAndBirthdaysService, DuplicateNamesAndBirthdaysService>();
 
         builder.AddOracleHcmSynchronization(oracleHcmConfig);
         builder.Services.AddHostedService<EmployeeFullSyncService>();
@@ -137,6 +144,9 @@ public static class OracleHcmExtension
         builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
         builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
         builder.Services.AddScoped<IFrozenService, FrozenService>();
+
+        // Register report services needed by caching hosted services
+        builder.Services.AddScoped<IDuplicateNamesAndBirthdaysService, DuplicateNamesAndBirthdaysService>();
 
         return builder;
     }
