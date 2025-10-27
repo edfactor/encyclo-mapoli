@@ -1,5 +1,5 @@
 import { Grid } from "@mui/material";
-import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { CellClickedEvent, ColDef, ICellRendererParams } from "ag-grid-community";
 import React, { useMemo } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
@@ -103,7 +103,7 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
         }
         return "";
       },
-      onCellClicked: (event: ICellRendererParams) => {
+      onCellClicked: (event: CellClickedEvent) => {
         if (event.data && !event.data.isDetail && event.data.isExpandable) {
           handleRowExpansion(event.data.badgeNumber.toString());
         }

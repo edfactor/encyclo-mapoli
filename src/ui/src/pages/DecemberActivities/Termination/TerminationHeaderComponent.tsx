@@ -52,7 +52,7 @@ export const HeaderComponent: React.FC<HeaderComponentProps> = (params: HeaderCo
     return {
       badgeNumber: Number(nodeData.badgeNumber),
       profitYear: nodeData.profitYear,
-      forfeitureAmount: -(currentValue || 0),
+      forfeitureAmount: currentValue || 0, // Termination does NOT negate (only UnForfeit negates)
       classAction: false
     };
   };
@@ -67,6 +67,7 @@ export const HeaderComponent: React.FC<HeaderComponentProps> = (params: HeaderCo
       {...params}
       isNodeEligible={isNodeEligible}
       createUpdatePayload={createUpdatePayload}
+      onBulkSave={params.onBulkSave}
       isBulkSaving={hasSavingInProgress}
       isReadOnly={params.isReadOnly}
     />

@@ -50,6 +50,7 @@ export const HeaderComponent: React.FC<UnForfeitHeaderComponentProps> = (params:
       badgeNumber: Number(nodeData.badgeNumber),
       profitYear: profitYear, // use active profit year.
       forfeitureAmount: -(currentValue || 0),
+      offsettingProfitDetailId: nodeData.profitDetailId, // Required for tracking which forfeiture is being reversed
       classAction: false
     };
   };

@@ -224,7 +224,7 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
                     onChange={(e) => field.onChange(e.target.checked)}
                   />
                 }
-                label="Exclude employees with no current balance and no vested balance"
+                label="Exclude employees with no current or vested balance"
               />
             )}
           />

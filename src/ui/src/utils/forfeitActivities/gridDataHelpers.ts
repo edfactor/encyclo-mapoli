@@ -131,11 +131,11 @@ export function isDetailRowEditable(
 /**
  * Configuration for flattening master-detail data
  */
-export interface FlattenConfig<TMaster> {
+export interface FlattenConfig<TMaster, TDetail = Record<string, unknown>> {
   /** Get unique key for master row */
   getKey: (master: TMaster) => string;
   /** Get detail rows for a master */
-  getDetails: (master: TMaster) => unknown[];
+  getDetails: (master: TMaster) => TDetail[];
   /** Check if master has details */
   hasDetails: (master: TMaster) => boolean;
 }
@@ -159,11 +159,11 @@ export interface FlattenConfig<TMaster> {
  *   }
  * );
  */
-export function flattenMasterDetailData<TMaster>(
+export function flattenMasterDetailData<TMaster extends Record<string, unknown>, TDetail = Record<string, unknown>>(
   masterData: TMaster[],
   expandedRows: Set<string>,
-  config: FlattenConfig<TMaster>
-): unknown[] {
+  config: FlattenConfig<TMaster, TDetail>
+): Array<TMaster & { isExpandable: boolean; isExpanded: boolean; isDetail: boolean } | TDetail & { isDetail: boolean }> {
   if (!masterData) return [];
 
   return masterData.flatMap((master) => {
