@@ -107,7 +107,8 @@ export function createSaveButtonCellRenderer(config: SaveButtonConfig) {
     const currentValue = getCurrentValue(activityType, params, rowKey);
     const isLoading = params.context?.loadingRowIds?.has(params.data.badgeNumber);
     const isZeroValue = currentValue === 0 || currentValue === null || currentValue === undefined;
-    const isDisabled = hasError || isLoading || isZeroValue || isReadOnly;
+    // Allow saving even with validation warnings (hasError is just a warning, not blocking)
+    const isDisabled = isLoading || isZeroValue || isReadOnly;
     const readOnlyTooltip = "You are in read-only mode and cannot save changes.";
 
     const checkboxElement = (

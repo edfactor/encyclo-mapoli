@@ -303,6 +303,10 @@ export const useTerminationGrid = ({
   const handleSave = useCallback(
     async (request: ForfeitureAdjustmentUpdateRequest, name: string) => {
       const rowId = request.badgeNumber;
+
+      // Capture the CURRENT page number from the ref (not the stale closure value)
+      const actualCurrentPage = currentPageNumberRef.current;
+
       editState.addLoadingRow(rowId);
 
       try {
@@ -330,8 +334,10 @@ export const useTerminationGrid = ({
 
         // Refresh grid and show success message after data loads
         if (searchParams) {
+          // Use the captured page number to stay on the same page
+          const skip = actualCurrentPage * pageSize;
           const params = createRequest(
-            pageNumber * pageSize,
+            skip,
             sortParams.sortBy,
             sortParams.isSortDescending,
             selectedProfitYear,
@@ -339,6 +345,10 @@ export const useTerminationGrid = ({
           );
           if (params) {
             await triggerSearch(params, false);
+
+            // Restore the page number in pagination state
+            handlePaginationChange(actualCurrentPage, pageSize);
+
             setPendingSuccessMessage(successMessage);
           }
         } else {
@@ -378,12 +388,12 @@ export const useTerminationGrid = ({
       editState,
       onUnsavedChanges,
       searchParams,
-      pageNumber,
       pageSize,
       sortParams,
       selectedProfitYear,
       createRequest,
       triggerSearch,
+      handlePaginationChange,
       dispatch,
       onErrorOccurred
     ]

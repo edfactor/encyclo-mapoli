@@ -179,6 +179,9 @@ export const useUnForfeitGrid = ({
     async (request: ForfeitureAdjustmentUpdateRequest, name: string) => {
       const rowId = request.badgeNumber;
 
+      // Capture the CURRENT page number from the ref (not the stale closure value)
+      const actualCurrentPage = currentPageNumberRef.current;
+
       // Clear the selection immediately for the saved item
       const currentGridApi = gridRef.current?.api || gridApi;
       if (currentGridApi) {
@@ -217,9 +220,15 @@ export const useUnForfeitGrid = ({
           );
 
           if (unForfeitsQueryParams) {
-            const searchRequest = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);
+            // Use the captured page number to stay on the same page
+            const skip = actualCurrentPage * pageSize;
+            const searchRequest = createRequest(skip, sortParams.sortBy, sortParams.isSortDescending);
             if (searchRequest) {
               await triggerSearch(searchRequest, false);
+
+              // Restore the page number in pagination state
+              handlePaginationChange(actualCurrentPage, pageSize);
+
               setPendingSuccessMessage(successMessage);
             }
           }
@@ -237,11 +246,11 @@ export const useUnForfeitGrid = ({
       editState,
       selectionState,
       unForfeitsQueryParams,
-      pageNumber,
       pageSize,
       sortParams,
       createRequest,
       triggerSearch,
+      handlePaginationChange,
       gridApi
     ]
   );
