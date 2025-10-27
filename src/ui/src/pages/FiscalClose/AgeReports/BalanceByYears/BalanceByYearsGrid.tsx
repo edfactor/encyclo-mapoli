@@ -20,9 +20,6 @@ const BalanceByYearsGrid: React.FC = () => {
     <>
       {balanceByYearsTotal?.response && (
         <>
-          <div className="px-[24px]">
-            <h2 className="text-dsm-secondary">Summary</h2>
-          </div>
           <Grid
             size={{ xs: 12 }}
             container
