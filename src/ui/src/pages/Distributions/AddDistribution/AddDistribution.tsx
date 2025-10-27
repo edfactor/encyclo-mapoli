@@ -256,8 +256,8 @@ const AddDistributionContent = () => {
             <Divider />
           </Grid>
           <MasterInquiryMemberDetails
-            //memberType={parseInt(memberType || "0", 10)}
-            //id={memberId as string}
+            memberType={parseInt(memberType || "0", 10)}
+            id={memberId as string}
             profitYear={profitYear || 0}
             memberDetails={memberData}
             isLoading={isLoading}
