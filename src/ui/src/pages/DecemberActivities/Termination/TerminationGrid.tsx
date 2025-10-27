@@ -47,6 +47,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     pageNumber,
     pageSize,
     gridData,
+    isFetching,
 
     termination,
     selectedProfitYear,
@@ -209,7 +210,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
             preferenceKey={"TERMINATION"}
             handleSortChanged={sortEventHandler}
             maxHeight={gridMaxHeight}
-            isLoading={false}
+            isLoading={isFetching}
             providedOptions={{
               onGridReady: (params) => {
                 gridRef.current = params;
