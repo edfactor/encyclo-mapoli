@@ -88,16 +88,17 @@ public static class OracleHcmExtension
 
         builder.Services.AddHostedService<EmployeeDeltaSyncService>();
 
-        builder.Services.AddScoped<TotalService>();
-        builder.Services.AddScoped<ITotalService>(sp => sp.GetRequiredService<TotalService>());
+        // Register as Transient to satisfy singleton hosted service dependencies while allowing scoped service consumption
+        builder.Services.AddTransient<TotalService>();
+        builder.Services.AddTransient<ITotalService>(sp => sp.GetRequiredService<TotalService>());
         builder.Services.AddSingleton<ICalendarService, CalendarService>();
         builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
         builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
         builder.Services.AddScoped<IFrozenService, FrozenService>();
 
-        // Register report services needed by caching hosted services
-        builder.Services.AddScoped<IDuplicateNamesAndBirthdaysService, DuplicateNamesAndBirthdaysService>();
+        // Register report services needed by caching hosted services (as Transient to satisfy singleton lifetime while allowing scoped dependencies)
+        builder.Services.AddTransient<IDuplicateNamesAndBirthdaysService, DuplicateNamesAndBirthdaysService>();
 
         return builder;
     }
@@ -110,16 +111,17 @@ public static class OracleHcmExtension
         // Register null navigation service for console app context (navigation concepts don't apply)
         builder.Services.AddScoped<INavigationService, NullNavigationService>();
 
-        builder.Services.AddScoped<TotalService>();
-        builder.Services.AddScoped<ITotalService>(sp => sp.GetRequiredService<TotalService>());
+        // Register as Transient to satisfy singleton hosted service dependencies while allowing scoped service consumption
+        builder.Services.AddTransient<TotalService>();
+        builder.Services.AddTransient<ITotalService>(sp => sp.GetRequiredService<TotalService>());
         builder.Services.AddSingleton<ICalendarService, CalendarService>();
         builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
         builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
         builder.Services.AddScoped<IFrozenService, FrozenService>();
 
-        // Register report services needed by caching hosted services
-        builder.Services.AddScoped<IDuplicateNamesAndBirthdaysService, DuplicateNamesAndBirthdaysService>();
+        // Register report services needed by caching hosted services (as Transient to satisfy singleton lifetime while allowing scoped dependencies)
+        builder.Services.AddTransient<IDuplicateNamesAndBirthdaysService, DuplicateNamesAndBirthdaysService>();
 
         builder.AddOracleHcmSynchronization(oracleHcmConfig);
         builder.Services.AddHostedService<EmployeeFullSyncService>();
@@ -137,16 +139,17 @@ public static class OracleHcmExtension
         builder.AddOracleHcmSynchronization(oracleHcmConfig);
         builder.Services.AddHostedService<EmployeePayrollSyncService>();
 
-        builder.Services.AddScoped<TotalService>();
-        builder.Services.AddScoped<ITotalService>(sp => sp.GetRequiredService<TotalService>());
+        // Register as Transient to satisfy singleton hosted service dependencies while allowing scoped service consumption
+        builder.Services.AddTransient<TotalService>();
+        builder.Services.AddTransient<ITotalService>(sp => sp.GetRequiredService<TotalService>());
         builder.Services.AddSingleton<ICalendarService, CalendarService>();
         builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
         builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
         builder.Services.AddScoped<IFrozenService, FrozenService>();
 
-        // Register report services needed by caching hosted services
-        builder.Services.AddScoped<IDuplicateNamesAndBirthdaysService, DuplicateNamesAndBirthdaysService>();
+        // Register report services needed by caching hosted services (as Transient to satisfy singleton lifetime while allowing scoped dependencies)
+        builder.Services.AddTransient<IDuplicateNamesAndBirthdaysService, DuplicateNamesAndBirthdaysService>();
 
         return builder;
     }
