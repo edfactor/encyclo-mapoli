@@ -29,6 +29,14 @@ const YTDWagesGrid = ({
   onPaginationChange,
   onSortChange
 }: YTDWagesGridProps) => {
+  // I need to clone the data object, but alter the reportName. I need to keep the year from the end
+  // of the existing report name, but add "YTD Wages Extract " to the front.
+  const clonedData = data ? ({ ...data } as EmployeeWagesForYearResponse) : null;
+  const year = clonedData?.reportName?.match(/\d{4}$/)?.[0];
+  if (clonedData && year) {
+    clonedData.reportName = `YTD Wages Extract ${year}`;
+  }
+
   const columnDefs = useMemo(() => GetYTDWagesColumns(), []);
 
   // Use dynamic grid height utility hook
@@ -36,16 +44,16 @@ const YTDWagesGrid = ({
 
   return (
     <div className="relative">
-      {showData && data?.response && (
+      {showData && clonedData?.response && (
         <div ref={innerRef}>
-          <ReportSummary report={data} />
+          <ReportSummary report={clonedData} />
           <DSMGrid
             preferenceKey={"TERM"}
             isLoading={isLoading}
             maxHeight={gridMaxHeight}
             handleSortChanged={onSortChange}
             providedOptions={{
-              rowData: data.response.results,
+              rowData: clonedData.response.results,
               columnDefs: columnDefs
             }}
           />
