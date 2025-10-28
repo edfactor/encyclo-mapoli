@@ -19,7 +19,7 @@ import { SortParams, useGridPagination } from "../../../hooks/useGridPagination"
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
 import { InquiryApi } from "../../../reduxstore/api/InquiryApi";
 import { clearForfeitureAdjustmentData } from "../../../reduxstore/slices/forfeituresAdjustmentSlice";
-import { MasterInquiryResponseDto } from "../../types/master-inquiry/master-inquiry";
+import { MasterInquiryResponseDto } from "../../../types/master-inquiry/master-inquiry";
 import AddForfeitureModal from "./AddForfeitureModal";
 import ForfeituresAdjustmentPanel from "./ForfeituresAdjustmentPanel";
 import ForfeituresAdjustmentSearchFilter from "./ForfeituresAdjustmentSearchFilter";
