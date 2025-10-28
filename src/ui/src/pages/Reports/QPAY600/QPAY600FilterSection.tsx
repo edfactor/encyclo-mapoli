@@ -5,20 +5,23 @@ import React from "react";
 import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import { endDateAfterStartDateValidator } from "../../../utils/FormValidators";
 
 export interface QPAY600FilterParams {
-  startDate?: Date | null;
-  endDate?: Date | null;
-  employeeStatus: string;
+  profitYear?: Date | null;
   employeeType: string;
 }
 
 const schema = yup.object().shape({
-  startDate: yup.date().nullable(),
-  endDate: endDateAfterStartDateValidator("startDate").nullable(),
-  employeeStatus: yup.string().oneOf(["Full time", "Part time"]).default("Full time"),
-  employeeType: yup.string().oneOf(["", "Hourly", "Salary"]).default("")
+  profitYear: yup.date().nullable().required("Profit Year is required"),
+  employeeType: yup
+    .string()
+    .oneOf([
+      "parttime",
+      "fulltimesalaried",
+      "fulltimehourlyearned",
+      "fulltimehourlyaccrued"
+    ])
+    .default("parttime")
 });
 
 interface QPAY600FilterSectionProps {
@@ -37,26 +40,27 @@ const QPAY600FilterSection: React.FC<QPAY600FilterSectionProps> = ({ onFilterCha
   } = useForm<QPAY600FilterParams>({
     resolver: yupResolver(schema) as Resolver<QPAY600FilterParams>,
     defaultValues: {
-      startDate: null,
-      endDate: null,
-      employeeStatus: "Full time",
-      employeeType: ""
+      profitYear: new Date(new Date().getFullYear() - 1, 0, 1),
+      employeeType: "parttime"
     }
   });
 
   const validateAndSubmit = handleSubmit((data) => {
-    onFilterChange(data);
+    const dataCopy: QPAY600FilterParams = {
+      profitYear: data.profitYear ? new Date(data.profitYear.getTime()) : null,
+      employeeType: data.employeeType
+    };
+
+    onFilterChange(dataCopy);
   });
 
   const watchedValues = useWatch({ control });
-  const isSearchEnabled = watchedValues.startDate && watchedValues.endDate && !errors.startDate && !errors.endDate;
+  const isSearchEnabled = watchedValues.profitYear && !errors.profitYear;
 
   const handleReset = () => {
     reset({
-      startDate: null,
-      endDate: null,
-      employeeStatus: "Full time",
-      employeeType: ""
+      profitYear: new Date(new Date().getFullYear() - 1, 0, 1),
+      employeeType: "parttime"
     });
     onReset();
   };
@@ -72,66 +76,25 @@ const QPAY600FilterSection: React.FC<QPAY600FilterSectionProps> = ({ onFilterCha
           width="100%">
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Controller
-              name="startDate"
+              name="profitYear"
               control={control}
               render={({ field }) => (
                 <DsmDatePicker
-                  id="startDate"
+                  id="profitYear"
                   onChange={(value: Date | null) => {
                     field.onChange(value);
-                    trigger("endDate");
+                    trigger("profitYear");
                   }}
                   value={field.value || null}
-                  required={false}
-                  label="Start Date"
+                  required={true}
+                  label="Profit Year"
+                  views={["year"]}
                   disableFuture
-                  error={errors.startDate?.message}
+                  error={errors.profitYear?.message}
                 />
               )}
             />
-            {errors.startDate && <FormHelperText error>{errors.startDate.message}</FormHelperText>}
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <Controller
-              name="endDate"
-              control={control}
-              render={({ field }) => (
-                <DsmDatePicker
-                  id="endDate"
-                  onChange={(value: Date | null) => {
-                    field.onChange(value);
-                    trigger("endDate");
-                  }}
-                  value={field.value || null}
-                  required={false}
-                  label="End Date"
-                  disableFuture
-                  error={errors.endDate?.message}
-                />
-              )}
-            />
-            {errors.endDate && <FormHelperText error>{errors.endDate.message}</FormHelperText>}
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <Controller
-              name="employeeStatus"
-              control={control}
-              render={({ field }) => (
-                <>
-                  <FormLabel>Employee Status</FormLabel>
-                  <FormControl fullWidth>
-                    <Select
-                      {...field}
-                      size="small"
-                      error={!!errors.employeeStatus}>
-                      <MenuItem value="Full time">Full time</MenuItem>
-                      <MenuItem value="Part time">Part time</MenuItem>
-                    </Select>
-                  </FormControl>
-                </>
-              )}
-            />
-            {errors.employeeStatus && <FormHelperText error>{errors.employeeStatus.message}</FormHelperText>}
+            {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Controller
@@ -144,11 +107,11 @@ const QPAY600FilterSection: React.FC<QPAY600FilterSectionProps> = ({ onFilterCha
                     <Select
                       {...field}
                       size="small"
-                      displayEmpty
                       error={!!errors.employeeType}>
-                      <MenuItem value="">All</MenuItem>
-                      <MenuItem value="Hourly">Hourly</MenuItem>
-                      <MenuItem value="Salary">Salary</MenuItem>
+                      <MenuItem value="parttime">Part Time Hourly</MenuItem>
+                      <MenuItem value="fulltimesalaried">Full Time Salaried</MenuItem>
+                      <MenuItem value="fulltimehourlyearned">Full Time Hourly Earned Holidays</MenuItem>
+                      <MenuItem value="fulltimehourlyaccrued">Full Time Hourly Accrued Holidays</MenuItem>
                     </Select>
                   </FormControl>
                 </>

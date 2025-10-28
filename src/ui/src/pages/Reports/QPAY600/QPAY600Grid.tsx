@@ -1,149 +1,131 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { useGridPagination } from "../../../hooks/useGridPagination";
-import { RootState } from "../../../reduxstore/store";
+import {
+  useGetFullTimeAccruedPaidHolidaysPayServicesQuery,
+  useGetFullTimeEightPaidHolidaysPayServicesQuery,
+  useGetFullTimeStraightSalaryPayServicesQuery,
+  useGetPartTimePayServicesQuery
+} from "../../../reduxstore/api/PayServicesApi";
 import { QPAY600FilterParams } from "./QPAY600FilterSection";
 import { GetQPAY600GridColumns } from "./QPAY600GridColumns";
 
 interface QPAY600GridProps {
   filterParams: QPAY600FilterParams;
-  employeeStatus: "Full time" | "Part time";
   onLoadingChange?: (isLoading: boolean) => void;
 }
 
-const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, employeeStatus, onLoadingChange }) => {
-  const hasToken = useSelector((state: RootState) => !!state.security.token);
-  const [isFetching, setIsFetching] = useState(false);
+const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, onLoadingChange }) => {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const profitYear = filterParams.profitYear?.getFullYear() || 0;
+
+  // Use regular query hooks with skip option - they maintain cache across remounts
+  const partTimeResult = useGetPartTimePayServicesQuery(
+    { profitYear },
+    { skip: filterParams.employeeType !== "parttime" || !profitYear }
+  );
+  const fullTimeAccruedResult = useGetFullTimeAccruedPaidHolidaysPayServicesQuery(
+    { profitYear },
+    { skip: filterParams.employeeType !== "fulltimehourlyaccrued" || !profitYear }
+  );
+  const fullTimeEightPaidHolidaysResult = useGetFullTimeEightPaidHolidaysPayServicesQuery(
+    { profitYear },
+    { skip: filterParams.employeeType !== "fulltimehourlyearned" || !profitYear }
+  );
+  const fullTimeStraightSalaryResult = useGetFullTimeStraightSalaryPayServicesQuery(
+    { profitYear },
+    { skip: filterParams.employeeType !== "fulltimesalaried" || !profitYear }
+  );
+
+  // Determine which result to use based on employee type
+  const currentResult =
+    filterParams.employeeType === "parttime"
+      ? partTimeResult
+      : filterParams.employeeType === "fulltimesalaried"
+      ? fullTimeStraightSalaryResult
+      : filterParams.employeeType === "fulltimehourlyaccrued"
+      ? fullTimeAccruedResult
+      : fullTimeEightPaidHolidaysResult;
+
+  const { data: apiData, isFetching, error, isError } = currentResult;
 
   // Use dynamic grid height utility hook
   const gridMaxHeight = useDynamicGridHeight();
 
-  const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
+  const { pageNumber, pageSize, handlePaginationChange } = useGridPagination({
     initialPageSize: 25,
     initialSortBy: "employeeName",
     initialSortDescending: false,
     onPaginationChange: () => {
-      // This component uses mock data, no API calls needed
+      // Pagination handled by backend API
     }
   });
-
-  const mockData = useMemo(() => {
-    return {
-      fullTime: {
-        results: [
-          {
-            yearsOfService: 5,
-            employees: 1250,
-            totalWeeklyPay: 87500.0,
-            lastYearWages: 2450000.0
-          },
-          {
-            yearsOfService: 3,
-            employees: 980,
-            totalWeeklyPay: 68600.0,
-            lastYearWages: 1940000.0
-          },
-          {
-            yearsOfService: 1,
-            employees: 750,
-            totalWeeklyPay: 52500.0,
-            lastYearWages: 1500000.0
-          }
-        ],
-        total: 3,
-        totalEmployees: 2980,
-        totalWeeklyPay: 208600.0,
-        totalLastYearWages: 5890000.0
-      },
-      partTime: {
-        results: [
-          {
-            yearsOfService: 2,
-            employees: 650,
-            totalWeeklyPay: 19500.0,
-            lastYearWages: 975000.0
-          },
-          {
-            yearsOfService: 4,
-            employees: 420,
-            totalWeeklyPay: 12600.0,
-            lastYearWages: 630000.0
-          },
-          {
-            yearsOfService: 1,
-            employees: 380,
-            totalWeeklyPay: 11400.0,
-            lastYearWages: 570000.0
-          }
-        ],
-        total: 3,
-        totalEmployees: 1450,
-        totalWeeklyPay: 43500.0,
-        totalLastYearWages: 2175000.0
-      }
-    };
-  }, []);
 
   useEffect(() => {
     onLoadingChange?.(isFetching);
   }, [isFetching, onLoadingChange]);
 
+  // Handle API errors
   useEffect(() => {
-    if (hasToken && filterParams && (filterParams.startDate || filterParams.endDate)) {
-      setIsFetching(true);
-      const timer = setTimeout(() => {
-        setIsFetching(false);
-      }, 500);
-
-      return () => clearTimeout(timer);
+    if (isError && error) {
+      console.error("QPAY600 API error:", error);
+      setErrorMessage("Failed to load pay services data. Please try again.");
+    } else if (!isFetching && apiData) {
+      setErrorMessage(null);
     }
-  }, [hasToken, filterParams]);
-
-  const sortEventHandler = (update: ISortParams) => {
-    handleSortChange(update);
-  };
+  }, [isError, error, isFetching, apiData]);
 
   const columnDefs = useMemo(() => GetQPAY600GridColumns(), []);
 
-  const data = employeeStatus === "Full time" ? mockData.fullTime : mockData.partTime;
+  const data = apiData || {
+    payServicesForYear: { results: [], total: 0 },
+    totalEmployeeNumber: 0,
+    totalEmployeesWages: 0
+  };
 
   const getTitle = () => {
-    const baseTitle = `Employees - ${employeeStatus}`;
-    const employeeTypeFilter = filterParams.employeeType;
+    const titles = {
+      parttime: "Part Time Hourly",
+      fulltimesalaried: "Full Time Salaried",
+      fulltimehourlyaccrued: "Full Time Hourly Accrued Holidays",
+      fulltimehourlyearned: "Full Time Hourly Earned Holidays"
+    };
 
-    if (employeeTypeFilter && employeeTypeFilter !== "") {
-      return `${baseTitle} (${employeeTypeFilter})`;
-    }
-
-    return baseTitle;
+    return `Employees - ${titles[filterParams.employeeType as keyof typeof titles] || filterParams.employeeType}`;
   };
 
   const pinnedBottomRowData = useMemo(() => {
-    if (!data) return [];
+    if (!apiData) return [];
 
     return [
       {
-        yearsOfService: null,
-        employees: data.totalEmployees,
-        totalWeeklyPay: data.totalWeeklyPay,
-        lastYearWages: data.totalLastYearWages,
+        yearsOfServiceLabel: "Total",
+        employees: apiData.totalEmployeeNumber ?? 0,
+        weeklyPay: apiData.totalWeeklyPay ?? null,
+        yearsWages: apiData.totalEmployeesWages ?? 0,
         _isTotal: true
       }
     ];
-  }, [data]);
+  }, [apiData]);
 
   return (
     <div className="relative">
-      <div style={{ padding: "0 24px 0 24px" }}>
+      <Box sx={{ padding: "0 24px 0 24px" }}>
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
           {getTitle()}
         </Typography>
-      </div>
+      </Box>
+
+      {errorMessage && (
+        <Box sx={{ padding: "24px", color: "error.main" }}>
+          <Typography color="error">{errorMessage}</Typography>
+        </Box>
+      )}
 
       {isFetching ? (
         <Box
@@ -153,30 +135,29 @@ const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, employeeStatus,
           py={4}>
           <CircularProgress />
         </Box>
-      ) : (
+      ) : apiData && !errorMessage ? (
         <>
           <DSMGrid
-            preferenceKey={`QPAY600_${employeeStatus.toUpperCase().replace(" ", "_")}`}
+            preferenceKey={`QPAY600_${filterParams.employeeType.toUpperCase()}`}
             isLoading={isFetching}
             maxHeight={gridMaxHeight}
-            handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: data.results || [],
+              rowData: data.payServicesForYear?.results || [],
               columnDefs: columnDefs,
               pinnedBottomRowData: pinnedBottomRowData
             }}
           />
-          {!!data && data.results.length > 0 && (
+          {!!data.payServicesForYear && data.payServicesForYear.results && data.payServicesForYear.results.length > 0 && (
             <Pagination
               pageNumber={pageNumber}
               setPageNumber={(value: number) => handlePaginationChange(value - 1, pageSize)}
               pageSize={pageSize}
               setPageSize={(value: number) => handlePaginationChange(0, value)}
-              recordCount={data.total}
+              recordCount={data.payServicesForYear.total || 0}
             />
           )}
         </>
-      )}
+      ) : null}
     </div>
   );
 };
