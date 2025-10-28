@@ -32,7 +32,7 @@ describe("MasterInquiryMemberDetails", () => {
     fullTimeDate: "2010-06-01",
     employmentStatus: "Active",
     department: "Grocery",
-    PayClassification: "Full Time",
+    payClassification: "Full Time",
     gender: "M",
     terminationReason: "",
     yearToDateProfitSharingHours: 1200.5,
@@ -77,7 +77,7 @@ describe("MasterInquiryMemberDetails", () => {
     fullTimeDate: "",
     employmentStatus: undefined,
     department: "",
-    PayClassification: "",
+    payClassification: "",
     gender: "F",
     terminationReason: "",
     yearToDateProfitSharingHours: 0,
@@ -423,5 +423,49 @@ describe("MasterInquiryMemberDetails", () => {
     expect(screen.getByText("Begin Vested Balance")).toBeInTheDocument();
     expect(screen.getByText("Current Balance")).toBeInTheDocument();
     expect(screen.getByText("Current Vested Balance")).toBeInTheDocument();
+  });
+
+  // PS-1899: Verify payClassification property is correctly cased
+  it("should display payClassification with correct casing (PS-1899)", () => {
+    // This test ensures the property is camelCase (payClassification) not PascalCase (PayClassification)
+    const employeeWithClassification = {
+      ...mockEmployeeDetails,
+      payClassification: "Supervisor"
+    };
+    renderWithProvider(
+      <MasterInquiryMemberDetails
+        memberType={1}
+        id={1}
+        profitYear={2025}
+        memberDetails={employeeWithClassification}
+        isLoading={false}
+      />
+    );
+
+    // Should display the pay classification value
+    expect(screen.getByText("Supervisor")).toBeInTheDocument();
+    // Should have the label "Class"
+    expect(screen.getByText("Class")).toBeInTheDocument();
+  });
+
+  // PS-1899: Regression test for casing issues in type definitions
+  it("should accept payClassification property (camelCase) not PayClassification (PS-1899)", () => {
+    // Verify the mock uses correct camelCase
+    const validEmployeeData = {
+      ...mockEmployeeDetails,
+      payClassification: "Full Time Manager" // Correct: camelCase
+    };
+
+    renderWithProvider(
+      <MasterInquiryMemberDetails
+        memberType={1}
+        id={1}
+        profitYear={2025}
+        memberDetails={validEmployeeData}
+        isLoading={false}
+      />
+    );
+
+    expect(screen.getByText("Full Time Manager")).toBeInTheDocument();
   });
 });
