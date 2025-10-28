@@ -3,8 +3,6 @@ import { FormHelperText, Grid } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { Controller, useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
-import { setUpdateSummary } from "reduxstore/slices/yearsEndSlice";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { profitYearValidator } from "../../../utils/FormValidators";
@@ -18,19 +16,13 @@ const schema = yup.object().shape({
 });
 
 interface ProfitYearSearchFilterProps {
-  onSearch?: (data: ProfitYearSearch) => void;
-  isFetching?: boolean;
+  onSearch: (data: ProfitYearSearch) => void;
+  onReset: () => void;
   setPageReset: (reset: boolean) => void;
 }
 
-const PayMasterUpdateSearchFilters: React.FC<ProfitYearSearchFilterProps> = ({
-  onSearch,
-  isFetching = false,
-  setPageReset
-}) => {
+const PayMasterUpdateSearchFilters: React.FC<ProfitYearSearchFilterProps> = ({ onSearch, onReset, setPageReset }) => {
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
-
-  const dispatch = useDispatch();
 
   const {
     control,
@@ -45,7 +37,7 @@ const PayMasterUpdateSearchFilters: React.FC<ProfitYearSearchFilterProps> = ({
   });
 
   const validateAndSubmit = handleSubmit((data) => {
-    if (isValid && onSearch) {
+    if (isValid) {
       setPageReset(true);
       onSearch(data);
     }
@@ -56,7 +48,7 @@ const PayMasterUpdateSearchFilters: React.FC<ProfitYearSearchFilterProps> = ({
     reset({
       profitYear: fiscalCloseProfitYear
     });
-    dispatch(setUpdateSummary(null));
+    onReset();
   };
 
   return (
@@ -88,15 +80,8 @@ const PayMasterUpdateSearchFilters: React.FC<ProfitYearSearchFilterProps> = ({
         </Grid>
       </Grid>
 
-      <Grid
-        width="100%"
-        paddingX="24px">
-        <SearchAndReset
-          handleReset={handleReset}
-          handleSearch={validateAndSubmit}
-          isFetching={isFetching}
-          disabled={!isValid}
-        />
+      <Grid width="100%" paddingX="24px">
+        <SearchAndReset handleReset={handleReset} handleSearch={validateAndSubmit} disabled={!isValid} />
       </Grid>
     </form>
   );

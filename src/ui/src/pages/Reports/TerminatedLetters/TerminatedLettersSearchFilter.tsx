@@ -1,18 +1,10 @@
-import { useLazyGetTerminatedLettersReportQuery } from "@/reduxstore/api/YearsEndApi";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, Grid } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { useLazyGetAccountingRangeToCurrent } from "hooks/useFiscalCalendarYear";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  clearTerminatedLetters,
-  clearTerminatedLettersQueryParams,
-  setTerminatedLettersQueryParams
-} from "reduxstore/slices/yearsEndSlice";
-import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "utils/dateUtils";
 import * as yup from "yup";
@@ -39,16 +31,15 @@ const schema = yup.object().shape({
 });
 
 interface TerminatedLettersSearchFilterProps {
-  setInitialSearchLoaded: (include: boolean) => void;
+  onSearch: (beginningDate: string, endingDate: string) => Promise<boolean>;
+  onReset: () => void;
 }
 
-const TerminatedLettersSearchFilter: React.FC<TerminatedLettersSearchFilterProps> = ({ setInitialSearchLoaded }) => {
-  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-  const [triggerSearch, { isFetching }] = useLazyGetTerminatedLettersReportQuery();
+const TerminatedLettersSearchFilter: React.FC<TerminatedLettersSearchFilterProps> = ({ onSearch, onReset }) => {
   const [fetchAccountingRange, { data: fiscalData }] = useLazyGetAccountingRangeToCurrent(6);
-  const dispatch = useDispatch();
-  const { terminatedLettersQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const profitYear = useDecemberFlowProfitYear();
+  const [isSearching, setIsSearching] = useState(false);
+
   const {
     control,
     handleSubmit,
@@ -58,54 +49,30 @@ const TerminatedLettersSearchFilter: React.FC<TerminatedLettersSearchFilterProps
   } = useForm<TerminatedLettersSearch>({
     resolver: yupResolver(schema) as Resolver<TerminatedLettersSearch>,
     defaultValues: {
-      profitYear: profitYear || terminatedLettersQueryParams?.profitYear || undefined,
-      beginningDate:
-        terminatedLettersQueryParams?.beginningDate ||
-        (fiscalData ? mmDDYYFormat(fiscalData.fiscalBeginDate) : "") ||
-        "",
-      endingDate:
-        terminatedLettersQueryParams?.endingDate || (fiscalData ? mmDDYYFormat(fiscalData.fiscalEndDate) : "") || ""
+      profitYear: profitYear || undefined,
+      beginningDate: "",
+      endingDate: ""
     }
   });
 
   const validateAndSearch = handleSubmit(async (data) => {
-    if (isValid && hasToken) {
-      const pagination = { skip: 0, take: 50, sortBy: "fullName", isSortDescending: false };
-
-      dispatch(
-        setTerminatedLettersQueryParams({
-          profitYear: data.profitYear,
-          beginningDate: data.beginningDate,
-          endingDate: data.endingDate,
-          pagination
-        })
-      );
-
-      // Perform the search
-      await triggerSearch({
-        profitYear: data.profitYear,
-        beginningDate: data.beginningDate,
-        endingDate: data.endingDate,
-        pagination
-      });
-
-      setInitialSearchLoaded(true);
+    if (isValid) {
+      setIsSearching(true);
+      await onSearch(data.beginningDate, data.endingDate);
+      setIsSearching(false);
     }
   });
 
   const handleReset = () => {
-    setInitialSearchLoaded(false);
-
     // Clear the form fields
     reset({
       profitYear: profitYear || undefined,
-      beginningDate: fiscalData ? (fiscalData ? mmDDYYFormat(fiscalData.fiscalBeginDate) : "") : "",
-      endingDate: fiscalData ? (fiscalData ? mmDDYYFormat(fiscalData.fiscalEndDate) : "") : ""
+      beginningDate: fiscalData ? mmDDYYFormat(fiscalData.fiscalBeginDate) : "",
+      endingDate: fiscalData ? mmDDYYFormat(fiscalData.fiscalEndDate) : ""
     });
 
-    // Clear the data in Redux store
-    dispatch(clearTerminatedLetters());
-    dispatch(clearTerminatedLettersQueryParams());
+    // Call parent reset
+    onReset();
     trigger();
   };
 
@@ -116,13 +83,13 @@ const TerminatedLettersSearchFilter: React.FC<TerminatedLettersSearchFilterProps
   useEffect(() => {
     if (fiscalData && fiscalData.fiscalBeginDate && fiscalData.fiscalEndDate) {
       reset({
-        profitYear: profitYear || terminatedLettersQueryParams?.profitYear || undefined,
-        beginningDate: terminatedLettersQueryParams?.beginningDate || mmDDYYFormat(fiscalData.fiscalBeginDate),
-        endingDate: terminatedLettersQueryParams?.endingDate || mmDDYYFormat(fiscalData.fiscalEndDate)
+        profitYear: profitYear || undefined,
+        beginningDate: mmDDYYFormat(fiscalData.fiscalBeginDate),
+        endingDate: mmDDYYFormat(fiscalData.fiscalEndDate)
       });
       trigger();
     }
-  }, [fiscalData, profitYear, terminatedLettersQueryParams, reset, trigger]);
+  }, [fiscalData, profitYear, reset, trigger]);
 
   return (
     <form onSubmit={validateAndSearch}>
@@ -203,8 +170,8 @@ const TerminatedLettersSearchFilter: React.FC<TerminatedLettersSearchFilterProps
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSearch}
-          isFetching={isFetching}
-          disabled={!isValid || isFetching}
+          isFetching={isSearching}
+          disabled={!isValid}
         />
       </Grid>
     </form>

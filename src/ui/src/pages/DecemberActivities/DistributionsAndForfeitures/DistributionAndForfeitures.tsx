@@ -8,6 +8,7 @@ import DistributionsAndForfeituresSearchFilter from "./DistributionAndForfeiture
 
 const DistributionsAndForfeitures = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
@@ -25,7 +26,10 @@ const DistributionsAndForfeitures = () => {
         </Grid>
         <Grid width={"100%"}>
           <DSMAccordion title="Filter">
-            <DistributionsAndForfeituresSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
+            <DistributionsAndForfeituresSearchFilter
+              setInitialSearchLoaded={setInitialSearchLoaded}
+              isFetching={isFetching}
+            />
           </DSMAccordion>
         </Grid>
 
@@ -33,6 +37,7 @@ const DistributionsAndForfeitures = () => {
           <DistributionsAndForfeituresGrid
             setInitialSearchLoaded={setInitialSearchLoaded}
             initialSearchLoaded={initialSearchLoaded}
+            onLoadingChange={setIsFetching}
           />
         </Grid>
       </Grid>

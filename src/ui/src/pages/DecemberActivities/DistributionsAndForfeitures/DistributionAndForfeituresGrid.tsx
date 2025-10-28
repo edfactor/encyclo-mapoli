@@ -23,11 +23,13 @@ interface DistributionsAndForfeituresQueryParams {
 interface DistributionsAndForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
+  onLoadingChange?: (isLoading: boolean) => void;
 }
 
 const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridSearchProps> = ({
   initialSearchLoaded,
-  setInitialSearchLoaded
+  setInitialSearchLoaded,
+  onLoadingChange
 }) => {
   const [showStateTaxTooltip, setShowStateTaxTooltip] = useState(false);
   const [showForfeitureTooltip, setShowForfeitureTooltip] = useState(false);
@@ -38,7 +40,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     (state: RootState) => state.yearsEnd
   );
   const profitYear = useDecemberFlowProfitYear();
-  const [triggerSearch] = useLazyGetDistributionsAndForfeituresQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
 
   // Make the initial page size configurable via state so it can be updated if needed
   const [initialPageSize, setInitialPageSize] = useState<number>(25);
@@ -192,6 +194,11 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
       onSearch();
     }
   }, [initialSearchLoaded, onSearch, hasToken]);
+
+  // Notify parent of loading state changes
+  useEffect(() => {
+    onLoadingChange?.(isFetching);
+  }, [isFetching, onLoadingChange]);
 
   // Cleanup timeouts on unmount
   useEffect(() => {
