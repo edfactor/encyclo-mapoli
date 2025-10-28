@@ -1,3 +1,7 @@
+---
+applyTo: "src/ui/src/pages/FiscalClose/ProfitShareEditUpdate/**/*.*"
+---
+
 # ProfitShareEditUpdate Component Architecture
 
 ## Overview
@@ -47,6 +51,7 @@ ProfitShareEditUpdate/
 ---
 
 ## Architecture Pattern
+
 
 ---
 
@@ -99,7 +104,7 @@ const {
   adjustedBadgeOneValid,
   adjustedBadgeTwoValid,
   updatedBy,
-  updatedTime
+  updatedTime,
   // ... 20+ more values from hook
 } = useProfitShareEditUpdate();
 ```
@@ -139,7 +144,6 @@ interface ProfitShareEditUpdateState {
 #### Key Functions
 
 **saveAction()** - Apply changes to year-end master data:
-
 1. Build request parameters from Redux query params
 2. Call `applyMaster` mutation
 3. Update local state (SAVE_SUCCESS)
@@ -147,14 +151,12 @@ interface ProfitShareEditUpdateState {
 5. Show success/failure message with employee/beneficiary counts
 
 **revertAction()** - Revert previous changes:
-
 1. Call `triggerRevert` with profit year
 2. Update local state (REVERT_SUCCESS)
 3. Dispatch Redux actions to clear all data
 4. Show success/failure message with affected counts
 
 **validateForm()** - Check form field validity:
-
 1. Check minimum fields: contribution%, earnings%, max allowed contributions
 2. Check badge 1 adjustment: if badge present, all adjustment fields required
 3. Check badge 2 adjustment: if badge present, earnings amount required
@@ -162,7 +164,6 @@ interface ProfitShareEditUpdateState {
 5. Return true/false for overall form validity
 
 **onStatusSearch()** - Fetch current master status:
-
 1. Trigger status query with profit year
 2. Update local status fields (updatedBy, updatedTime)
 3. If changes were previously applied, set changesApplied = true
@@ -170,20 +171,19 @@ interface ProfitShareEditUpdateState {
 #### Reducer Actions
 
 ```typescript
-OPEN_SAVE_MODAL / CLOSE_SAVE_MODAL;
-OPEN_REVERT_MODAL / CLOSE_REVERT_MODAL;
-OPEN_EMPTY_MODAL / CLOSE_EMPTY_MODAL;
-SET_CHANGES_APPLIED;
-SET_VALIDATION;
-SET_STATUS;
-SAVE_SUCCESS;
-REVERT_SUCCESS;
+OPEN_SAVE_MODAL / CLOSE_SAVE_MODAL
+OPEN_REVERT_MODAL / CLOSE_REVERT_MODAL
+OPEN_EMPTY_MODAL / CLOSE_EMPTY_MODAL
+SET_CHANGES_APPLIED
+SET_VALIDATION
+SET_STATUS
+SAVE_SUCCESS
+REVERT_SUCCESS
 ```
 
 #### Redux Integration
 
 **Selectors** (read from store):
-
 - `profitEditUpdateChangesAvailable`
 - `profitEditUpdateRevertChangesAvailable`
 - `profitShareEditUpdateShowSearch`
@@ -196,7 +196,6 @@ REVERT_SUCCESS;
 - `profitMasterStatus`
 
 **Dispatches**:
-
 - `setProfitShareApplyOrRevertLoading`
 - `setProfitEditUpdateChangesAvailable`
 - `setProfitEditUpdateRevertChangesAvailable`
@@ -219,7 +218,6 @@ const [triggerStatus] = useLazyGetProfitMasterStatusQuery();
 #### Additional Hooks
 
 **useChecksumValidation**: Validates accounting balances
-
 - Input: profitYear and current totals
 - Output: validationData and getFieldValidation function
 
@@ -235,15 +233,15 @@ const [triggerStatus] = useLazyGetProfitMasterStatusQuery();
 
 **Test Coverage**:
 
-| Category          | Tests | Focus                                    |
-| ----------------- | ----- | ---------------------------------------- |
-| Initial State     | 2     | Hook initialization, redux defaults      |
-| Form Validation   | 6     | Minimum fields, badge validations        |
-| Modal Management  | 5     | Open/close behavior, empty validation    |
-| Save Action       | 3     | Success, failure, API interaction        |
-| Revert Action     | 3     | Success, failure, state cleanup          |
-| Status Fetching   | 3     | Fetch, update state, apply detection     |
-| Redux Integration | 2     | State passthrough, dispatch verification |
+| Category | Tests | Focus |
+|----------|-------|-------|
+| Initial State | 2 | Hook initialization, redux defaults |
+| Form Validation | 6 | Minimum fields, badge validations |
+| Modal Management | 5 | Open/close behavior, empty validation |
+| Save Action | 3 | Success, failure, API interaction |
+| Revert Action | 3 | Success, failure, state cleanup |
+| Status Fetching | 3 | Fetch, update state, apply detection |
+| Redux Integration | 2 | State passthrough, dispatch verification |
 
 **Test Example** (Form Validation):
 
@@ -254,7 +252,7 @@ it("should validate minimum required fields", () => {
       profitSharingEditQueryParams: {
         contributionPercent: 0,
         earningsPercent: 0,
-        maxAllowedContributions: 0
+        maxAllowedContributions: 0,
         // ... all zero
       }
     })
@@ -267,7 +265,6 @@ it("should validate minimum required fields", () => {
 ```
 
 **Type Safety**: All `any` types replaced with proper TypeScript interfaces:
-
 - `MockedYearsEndState`
 - `MockedSecurityState`
 - `MockedRootState`
@@ -279,40 +276,33 @@ it("should validate minimum required fields", () => {
 ### 4. Supporting Components
 
 #### ProfitShareEditUpdateSearchFilter.tsx
-
 - Form to enter profit-sharing parameters
 - Collapsible accordion section
 - Triggers search which populates edit/update grids
 
 #### ProfitShareEditUpdateTabs.tsx
-
 - Two tabs: "Edit" and "Update"
 - Uses tabbed grids for data entry
 
 #### ProfitShareEditConfirmation.tsx
-
 - Modal for confirming save/revert actions
 - Displays what will change
 - Warning message before execution
 
 #### MasterUpdateSummaryTable.tsx
-
 - Summary table of totals (PAY444)
 - Displays validation details
 - Collapsible validation sections
 
 #### ChangesList.tsx
-
 - Shows previously applied changes
 - Displays badge adjustments
 
 #### ProfitShareSaveButton.tsx & ProfitShareRevertButton.tsx
-
 - Action buttons in page header
 - Validation before enabling
 
 #### Grid Components
-
 - `ProfitShareEditGrid` / `ProfitShareEditGridColumns` - Edit data grid
 - `ProfitShareUpdateGrid` / `ProfitShareUpdateGridColumns` - Update data grid
 - Both support pagination and column sorting
@@ -394,20 +384,17 @@ If changesApplied found:
 The component depends on these Redux selectors from `yearsEnd` slice:
 
 ```typescript
-profitEditUpdateChangesAvailable: boolean;
-profitEditUpdateRevertChangesAvailable: boolean;
-profitShareEditUpdateShowSearch: boolean;
-profitSharingEdit: ProfitSharingEditData | null;
-profitSharingUpdate: ProfitSharingUpdateData | null;
-profitSharingEditQueryParams: ProfitShareEditUpdateQueryParams | null;
-profitShareApplyOrRevertLoading: boolean;
-totalForfeituresGreaterThanZero: boolean;
-invalidProfitShareEditYear: boolean;
-profitMasterStatus: {
-  updatedBy: string | null;
-  updatedTime: string | null;
-}
-profitSharingUpdateAdjustmentSummary: AdjustmentSummary | null;
+profitEditUpdateChangesAvailable: boolean
+profitEditUpdateRevertChangesAvailable: boolean
+profitShareEditUpdateShowSearch: boolean
+profitSharingEdit: ProfitSharingEditData | null
+profitSharingUpdate: ProfitSharingUpdateData | null
+profitSharingEditQueryParams: ProfitShareEditUpdateQueryParams | null
+profitShareApplyOrRevertLoading: boolean
+totalForfeituresGreaterThanZero: boolean
+invalidProfitShareEditYear: boolean
+profitMasterStatus: { updatedBy: string | null; updatedTime: string | null }
+profitSharingUpdateAdjustmentSummary: AdjustmentSummary | null
 ```
 
 ### Actions Dispatched
@@ -429,19 +416,16 @@ profitSharingUpdateAdjustmentSummary: AdjustmentSummary | null;
 ### Form Validation Rules
 
 **Minimum Fields Required**:
-
 - `contributionPercent > 0`
 - `earningsPercent > 0`
 - `maxAllowedContributions > 0`
 
 **Badge 1 Adjustment** (if `badgeToAdjust > 0`):
-
 - `adjustContributionAmount > 0`
 - `adjustEarningsAmount > 0`
 - `adjustIncomingForfeitAmount > 0`
 
 **Badge 2 Adjustment** (if `badgeToAdjust2 > 0`):
-
 - `adjustEarningsSecondaryAmount > 0`
 
 ### Utility Function: wasFormUsed()
@@ -449,16 +433,17 @@ profitSharingUpdateAdjustmentSummary: AdjustmentSummary | null;
 Located in `utils/formValidation.ts`:
 
 ```typescript
-export const wasFormUsed = (profitSharingEditQueryParams: ProfitShareEditUpdateQueryParams | null): boolean => {
+export const wasFormUsed = (
+  profitSharingEditQueryParams: ProfitShareEditUpdateQueryParams | null
+): boolean => {
   // Returns true if ANY field > 0
   // Used to detect if user has interacted with form
-};
+}
 ```
 
 ### Checksum Validation
 
 Integrated via `useChecksumValidation` hook:
-
 - Validates accounting balance (PAY444)
 - Maps form values to checksum fields
 - Provides `getFieldValidation(fieldName)` method
@@ -471,7 +456,6 @@ Integrated via `useChecksumValidation` hook:
 ### Mutations
 
 **useGetMasterApplyMutation()**:
-
 - Endpoint: Apply changes to profit-sharing master
 - Request: `ProfitShareMasterApplyRequest`
 - Response: Employee/beneficiary/ETVA counts affected
@@ -480,13 +464,11 @@ Integrated via `useChecksumValidation` hook:
 ### Lazy Queries
 
 **useLazyGetMasterRevertQuery()**:
-
 - Endpoint: Revert previous changes
 - Request: `{ profitYear: number }`
 - Response: Employee/beneficiary/ETVA counts affected
 
 **useLazyGetProfitMasterStatusQuery()**:
-
 - Endpoint: Fetch current status
 - Request: `{ profitYear: number }`
 - Response: `{ updatedBy: string; updatedTime: string }`
@@ -497,41 +479,36 @@ Integrated via `useChecksumValidation` hook:
 ## Key Features
 
 ### 1. Change Detection
-
 - On mount, checks if changes were previously applied
 - Shows alert banner with update timestamp
 - Disables search to prevent new changes while showing previous ones
 
 ### 2. Multi-Step Validation
-
 - Client-side validation before confirmation modal
 - Server-side validation during API call
 - Detailed validation messages in modal
 - Empty modal for insufficient data
 
 ### 3. Dual Badging System
-
 - Primary badge adjustment (Badge 1)
 - Secondary badge adjustment (Badge 2)
 - Independent validation for each
 
 ### 4. Summary Displays
-
 - PAY444: Master file totals (contribution, earnings, forfeitures)
 - PAY447: Grand totals and adjustments
 - Checksum validation alerts
 - Previous changes list
 
 ### 5. Revert Capability
-
 - Undo previous changes
 - Only available when changes exist
 - Clears all related data from Redux
 
 ### 6. Year Validation
-
 - Only allows current fiscal year (year-1)
 - Shows warning if wrong year selected
 - Prevents operations on invalid years
 
 ---
+
