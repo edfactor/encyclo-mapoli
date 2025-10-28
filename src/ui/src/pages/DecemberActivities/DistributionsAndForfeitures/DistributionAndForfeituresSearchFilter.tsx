@@ -91,7 +91,13 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
         startDate: formatDateOnly(data.startDate),
         endDate: formatDateOnly(data.endDate),
         states: data.states || [],
-        taxCodes: data.taxCodes || []
+        taxCodes: data.taxCodes || [],
+        pagination: {
+          skip: 0,
+          take: 50,
+          sortBy: "badgeNumber",
+          isSortDescending: false
+        }
       };
 
       // Store query params in Redux
