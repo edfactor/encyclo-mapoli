@@ -56,16 +56,20 @@ const createMockRecentlyTerminatedResponse = (items: RecentlyTerminatedDetail[] 
   createMockPagedData(items);
 
 // Helper to create RTK Query-like promise with unwrap method
-const createMockRTKQueryPromise = (data: any = null, error: unknown = null) => {
-  const promise = error ? Promise.reject(error) : Promise.resolve({ data } as any);
+interface RTKQueryPromise<T> extends Promise<{ data: T }> {
+  unwrap: () => Promise<T>;
+}
+
+const createMockRTKQueryPromise = (data: Paged<RecentlyTerminatedDetail> | null = null, error: unknown = null): RTKQueryPromise<Paged<RecentlyTerminatedDetail> | null> => {
+  const promise = error ? Promise.reject(error) : Promise.resolve({ data });
 
   if (error) {
-    promise.unwrap = () => Promise.reject(error);
+    (promise as RTKQueryPromise<Paged<RecentlyTerminatedDetail> | null>).unwrap = () => Promise.reject(error);
   } else {
-    promise.unwrap = () => Promise.resolve(data);
+    (promise as RTKQueryPromise<Paged<RecentlyTerminatedDetail> | null>).unwrap = () => Promise.resolve(data);
   }
 
-  return promise as any;
+  return promise as RTKQueryPromise<Paged<RecentlyTerminatedDetail> | null>;
 };
 
 // Mock hooks
@@ -186,9 +190,9 @@ describe("useRecentlyTerminated", () => {
 
     it("should set isSearching to true during search", async () => {
       mockTriggerSearch.mockImplementation(() => {
-        const delayedPromise = new Promise((resolve) =>
+        const delayedPromise = new Promise<Paged<RecentlyTerminatedDetail>>((resolve) =>
           setTimeout(() => resolve(createMockRecentlyTerminatedResponse()), 100)
-        ) as any;
+        ) as RTKQueryPromise<Paged<RecentlyTerminatedDetail>>;
         delayedPromise.unwrap = () => delayedPromise;
         return delayedPromise;
       });

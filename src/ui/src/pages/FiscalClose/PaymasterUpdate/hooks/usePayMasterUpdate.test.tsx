@@ -70,18 +70,22 @@ const createMockUpdateSummaryResponse = (
 });
 
 // Helper to create RTK Query-like promise with unwrap method
-const createMockRTKQueryPromise = (data: UpdateSummaryResponse | null = null, error: unknown = null) => {
+interface RTKQueryPromise<T> extends Promise<{ data: T }> {
+  unwrap: () => Promise<T>;
+}
+
+const createMockRTKQueryPromise = (data: UpdateSummaryResponse | null = null, error: unknown = null): RTKQueryPromise<UpdateSummaryResponse | null> => {
   const promise = error
     ? Promise.reject(error)
-    : Promise.resolve({ data } as any);
+    : Promise.resolve({ data });
 
   if (error) {
-    promise.unwrap = () => Promise.reject(error);
+    (promise as RTKQueryPromise<UpdateSummaryResponse | null>).unwrap = () => Promise.reject(error);
   } else {
-    promise.unwrap = () => Promise.resolve(data);
+    (promise as RTKQueryPromise<UpdateSummaryResponse | null>).unwrap = () => Promise.resolve(data);
   }
 
-  return promise as any;
+  return promise as RTKQueryPromise<UpdateSummaryResponse | null>;
 };
 
 // Mock hooks

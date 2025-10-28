@@ -56,16 +56,22 @@ const createMockTerminatedLettersResponse = (items: TerminatedLettersDetail[] = 
   createMockPagedData(items);
 
 // Helper to create RTK Query-like promise with unwrap method
-const createMockRTKQueryPromise = (data: any = null, error: unknown = null) => {
-  const promise = error ? Promise.reject(error) : Promise.resolve({ data } as any);
+interface RTKQueryPromise<T> extends Promise<{ data: T }> {
+  unwrap: () => Promise<T>;
+}
+
+type TerminatedLettersData = Paged<TerminatedLettersDetail> | Blob | null;
+
+const createMockRTKQueryPromise = (data: TerminatedLettersData = null, error: unknown = null): RTKQueryPromise<TerminatedLettersData> => {
+  const promise = error ? Promise.reject(error) : Promise.resolve({ data });
 
   if (error) {
-    promise.unwrap = () => Promise.reject(error);
+    (promise as RTKQueryPromise<TerminatedLettersData>).unwrap = () => Promise.reject(error);
   } else {
-    promise.unwrap = () => Promise.resolve(data);
+    (promise as RTKQueryPromise<TerminatedLettersData>).unwrap = () => Promise.resolve(data);
   }
 
-  return promise as any;
+  return promise as RTKQueryPromise<TerminatedLettersData>;
 };
 
 // Create a mock Blob with text() method for testing
@@ -235,9 +241,9 @@ describe("useTerminatedLetters", () => {
 
     it("should set isSearching to true during search", async () => {
       mockTriggerSearch.mockImplementation(() => {
-        const delayedPromise = new Promise((resolve) =>
+        const delayedPromise = new Promise<Paged<TerminatedLettersDetail>>((resolve) =>
           setTimeout(() => resolve(createMockTerminatedLettersResponse()), 100)
-        ) as any;
+        ) as RTKQueryPromise<Paged<TerminatedLettersDetail>>;
         delayedPromise.unwrap = () => delayedPromise;
         return delayedPromise;
       });
