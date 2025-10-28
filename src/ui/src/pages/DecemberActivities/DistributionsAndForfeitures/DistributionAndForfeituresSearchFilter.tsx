@@ -41,13 +41,15 @@ const schema = yup.object().shape({
 
 interface DistributionsAndForfeituresSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
+  isFetching?: boolean;
 }
 
 const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeituresSearchFilterProps> = ({
-  setInitialSearchLoaded
+  setInitialSearchLoaded,
+  isFetching: isFetchingProp = false
 }) => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-  const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
+  const [triggerSearch, { isFetching: isSearchFetching }] = useLazyGetDistributionsAndForfeituresQuery();
   const { data: statesData, isLoading: isLoadingStates } = useGetStatesQuery();
   const { data: taxCodesData, isLoading: isLoadingTaxCodes } = useGetTaxCodesQuery();
   const dispatch = useDispatch();
@@ -303,7 +305,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSearch}
-          isFetching={isFetching}
+          isFetching={isFetchingProp || isSearchFetching}
           disabled={!isValid}
         />
       </Grid>
