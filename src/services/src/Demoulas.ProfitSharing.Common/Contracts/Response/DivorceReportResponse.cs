@@ -30,47 +30,47 @@ public class DivorceReportResponse
     public int ProfitYear { get; set; }
 
     /// <summary>
-    /// Total contributions (employer) for the plan year in cents.
+    /// Total contributions (employer) for the plan year.
     /// </summary>
-    public long TotalContributions { get; set; }
+    public decimal TotalContributions { get; set; }
 
     /// <summary>
-    /// Total withdrawals/loans for the plan year in cents.
+    /// Total withdrawals/loans for the plan year.
     /// </summary>
-    public long TotalWithdrawals { get; set; }
+    public decimal TotalWithdrawals { get; set; }
 
     /// <summary>
-    /// Total distributions for the plan year in cents.
+    /// Total distributions for the plan year.
     /// </summary>
-    public long TotalDistributions { get; set; }
+    public decimal TotalDistributions { get; set; }
 
     /// <summary>
-    /// Total dividends/earnings for the plan year in cents.
+    /// Total dividends/earnings for the plan year.
     /// </summary>
-    public long TotalDividends { get; set; }
+    public decimal TotalDividends { get; set; }
 
     /// <summary>
-    /// Total forfeitures for the plan year in cents.
+    /// Total forfeitures for the plan year.
     /// </summary>
-    public long TotalForfeitures { get; set; }
+    public decimal TotalForfeitures { get; set; }
 
     /// <summary>
-    /// Ending balance at the end of the plan year in cents.
+    /// Ending balance at the end of the plan year.
     /// </summary>
-    public long EndingBalance { get; set; }
+    public decimal EndingBalance { get; set; }
 
     /// <summary>
-    /// Cumulative contribution amount from start date through end of this year in cents.
+    /// Cumulative contribution amount from start date through end of this year.
     /// </summary>
-    public long CumulativeContributions { get; set; }
+    public decimal CumulativeContributions { get; set; }
 
     /// <summary>
-    /// Cumulative withdrawals from start date through end of this year in cents.
+    /// Cumulative withdrawals from start date through end of this year.
     /// </summary>
-    public long CumulativeWithdrawals { get; set; }
+    public decimal CumulativeWithdrawals { get; set; }
 
     /// <summary>
-    /// Cumulative distributions from start date through end of this year in cents.
+    /// Cumulative distributions from start date through end of this year.
     /// </summary>
-    public long CumulativeDistributions { get; set; }
+    public decimal CumulativeDistributions { get; set; }
 }

@@ -4,6 +4,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -12,18 +13,22 @@ namespace Demoulas.ProfitSharing.Services.Reports;
 
 /// <summary>
 /// Service for generating divorce reports with member account activity by profit year.
+/// Uses TotalService for consistent profit code filtering and calculation logic.
 /// </summary>
 public class DivorceReportService : IDivorceReportService
 {
     private readonly IProfitSharingDataContextFactory _contextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
+    private readonly TotalService _totalService;
 
     public DivorceReportService(
         IProfitSharingDataContextFactory contextFactory,
-        IDemographicReaderService demographicReaderService)
+        IDemographicReaderService demographicReaderService,
+        TotalService totalService)
     {
         _contextFactory = contextFactory;
         _demographicReaderService = demographicReaderService;
+        _totalService = totalService;
     }
 
     public async Task<ReportResponseBase<DivorceReportResponse>> GetDivorceReportAsync(
@@ -43,94 +48,69 @@ public class DivorceReportService : IDivorceReportService
                 return new List<DivorceReportResponse>();
             }
 
-            // Query profit details for the member within the date range
-            var profitDetails = await ctx.ProfitDetails
+            // Get all profit years for this member
+            var profitYears = await ctx.ProfitDetails
+                .TagWith($"DivorceReport-{demographic.BadgeNumber}")
                 .Where(pd => pd.Ssn == demographic.Ssn)
-                .OrderBy(pd => pd.ProfitYear)
+                .Select(pd => pd.ProfitYear)
+                .Distinct()
+                .OrderBy(py => py)
                 .ToListAsync(cancellationToken);
 
-            if (!profitDetails.Any())
+            if (!profitYears.Any())
             {
                 return new List<DivorceReportResponse>();
             }
 
-            // Group by profit year and calculate totals
             var reportData = new List<DivorceReportResponse>();
-            long cumulativeContributions = 0;
-            long cumulativeWithdrawals = 0;
-            long cumulativeDistributions = 0;
+            decimal cumulativeContributions = 0;
+            decimal cumulativeWithdrawals = 0;
+            decimal cumulativeDistributions = 0;
 
-            foreach (var yearGroup in profitDetails.GroupBy(pd => pd.ProfitYear).OrderBy(g => g.Key))
+            // Process each year using TotalService calculations
+            foreach (var year in profitYears.Where(y => y >= request.BeginningDate.Year && y <= request.EndingDate.Year))
             {
-                var year = yearGroup.Key;
-                var yearDetails = yearGroup.ToList();
+                // Get transactions for this year using TotalService's Oracle query which has all profit code filtering built in
+                var yearTransactions = await _totalService
+                    .GetTransactionsBySsnForProfitYearForOracle(ctx, year)
+                    .Where(t => t.Ssn == demographic.Ssn)
+                    .FirstOrDefaultAsync(cancellationToken);
 
-                // Calculate year totals by profit code
-                long yearContributions = 0;
-                long yearWithdrawals = 0;
-                long yearDistributions = 0;
-                long yearDividends = 0;
-                long yearForfeitures = 0;
-
-                foreach (var detail in yearDetails)
+                if (yearTransactions is null)
                 {
-                    var contributionInCents = (long)(detail.Contribution * 100);
-                    var earningsInCents = (long)(detail.Earnings * 100);
-                    var forfeitureInCents = (long)(detail.Forfeiture * 100);
-
-                    // Categorize by profit code
-                    // This is a simplified approach - actual profit codes should determine categorization
-                    switch (detail.ProfitCodeId)
-                    {
-                        case (byte)'C': // Contribution
-                            yearContributions += contributionInCents;
-                            yearDividends += earningsInCents;
-                            break;
-                        case (byte)'W': // Withdrawal/Loan
-                            yearWithdrawals += contributionInCents;
-                            break;
-                        case (byte)'D': // Distribution
-                            yearDistributions += contributionInCents;
-                            break;
-                        case (byte)'F': // Forfeiture
-                            yearForfeitures += forfeitureInCents;
-                            break;
-                        default:
-                            // General contribution/earnings
-                            yearContributions += contributionInCents;
-                            yearDividends += earningsInCents;
-                            break;
-                    }
+                    continue;
                 }
 
-                // Only include years within the requested date range
-                if (year >= request.BeginningDate.Year && year <= request.EndingDate.Year)
+                decimal yearContributions = yearTransactions.TotalContributions;
+                decimal yearWithdrawals = yearTransactions.AllocationsTotal;
+                decimal yearDistributions = yearTransactions.DistributionsTotal;
+                decimal yearDividends = yearTransactions.TotalEarnings;
+                decimal yearForfeitures = yearTransactions.ForfeitsTotal;
+
+                // Accumulate totals
+                cumulativeContributions += yearContributions;
+                cumulativeWithdrawals += yearWithdrawals;
+                cumulativeDistributions += yearDistributions;
+
+                // Calculate ending balance for the year
+                decimal endingBalance = yearTransactions.CurrentBalance;
+
+                reportData.Add(new DivorceReportResponse
                 {
-                    cumulativeContributions += yearContributions;
-                    cumulativeWithdrawals += yearWithdrawals;
-                    cumulativeDistributions += yearDistributions;
-
-                    // Calculate ending balance for the year
-                    // Simple formula: contributions + earnings - withdrawals - distributions - forfeitures
-                    long endingBalance = cumulativeContributions + yearDividends - cumulativeWithdrawals - cumulativeDistributions - yearForfeitures;
-
-                    reportData.Add(new DivorceReportResponse
-                    {
-                        BadgeNumber = demographic.BadgeNumber,
-                        FullName = demographic.ContactInfo.FullName ?? string.Empty,
-                        Ssn = demographic.Ssn.MaskSsn(),
-                        ProfitYear = year,
-                        TotalContributions = yearContributions,
-                        TotalWithdrawals = yearWithdrawals,
-                        TotalDistributions = yearDistributions,
-                        TotalDividends = yearDividends,
-                        TotalForfeitures = yearForfeitures,
-                        EndingBalance = endingBalance,
-                        CumulativeContributions = cumulativeContributions,
-                        CumulativeWithdrawals = cumulativeWithdrawals,
-                        CumulativeDistributions = cumulativeDistributions
-                    });
-                }
+                    BadgeNumber = demographic.BadgeNumber,
+                    FullName = demographic.ContactInfo.FullName ?? string.Empty,
+                    Ssn = demographic.Ssn.MaskSsn(),
+                    ProfitYear = year,
+                    TotalContributions = yearContributions,
+                    TotalWithdrawals = yearWithdrawals,
+                    TotalDistributions = yearDistributions,
+                    TotalDividends = yearDividends,
+                    TotalForfeitures = yearForfeitures,
+                    EndingBalance = endingBalance,
+                    CumulativeContributions = cumulativeContributions,
+                    CumulativeWithdrawals = cumulativeWithdrawals,
+                    CumulativeDistributions = cumulativeDistributions
+                });
             }
 
             return reportData;
