@@ -15,29 +15,11 @@ public class TinkerRun : Runnable
     public override async Task Exec()
     {
         await Run(Specify(
-
-            // Test the Enrollment change issue.
-
-            "R0", // import obfuscated
-            nameof(DropBadBenesReady),
-            nameof(FixFrozenReady),
-            "R15",
-            "R16",
-            "R17",
-            "R18",
-            "R19",
-            "R20",
-            "R21",
-            "R22",
-            "R23",
-            "R24",
-            "R24B",
-            "R25",
-            "R26",
-            "R27",
-            "R28"
+            "P0", // Initialize both databases in parallel
+            nameof(DropBadBenesReady), // Fix bene in READY (already handled in SMART)
+            "R3",  // Run and Gather PROF-TERM report
+            "MasterInquiryDumper",
+            nameof(IntTerminatedEmployee)
             ));
-
-        // use sql to compare proftitshare2 vs tbherrmann for py_enrollment
     }
 }

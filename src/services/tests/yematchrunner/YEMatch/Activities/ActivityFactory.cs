@@ -82,6 +82,6 @@ public sealed class ActivityFactory
     public static bool isNewScramble()
     {
         ReadyActivity ra = (ReadyActivity)ActivityFactory.AllActivtiesByName()["R0"];
-        return ra.Args == "profitshare";
+        return ra.Args == "" || ra.Args == "profitshare";
     }
 }

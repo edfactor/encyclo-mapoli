@@ -15,7 +15,6 @@ public class SevenRun : Runnable
         await Run(Specify(
             "R0", // Start by importing the READY database from the scramble data.
             nameof(DropBadBenesReady), // Git rid of the two Bene/Employees w/o Demographics rows
-            nameof(FixFrozenReady),
             nameof(ImportReadyDbToSmartDb), // Import SMART database from READY   database
             "S12", // Freeze on Smart
             "SanityCheckEmployeeAndBenes",

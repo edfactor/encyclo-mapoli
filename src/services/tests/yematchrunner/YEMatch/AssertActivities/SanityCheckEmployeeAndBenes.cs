@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Oracle.ManagedDataAccess.Client;
 using Shouldly;
+#pragma warning disable CS0162 // Unreachable code detected
 
 namespace YEMatch.YEMatch.AssertActivities;
 
@@ -16,6 +17,12 @@ public class SanityCheckEmployeeAndBenes : BaseSqlActivity
             rdy.ShouldBe(smrt);
         }
 
+        {
+            int rdy = await RdySql("select count(*) from payprofit");
+            int smrt = await SmtSql("select count(*) from pay_profit where profit_year = 2025");
+            rdy.ShouldBe(smrt);
+        }
+
         // Lets ensure the number of benes match    
         {
             int rdy = await RdySql("select count(*) from payben");
@@ -23,8 +30,8 @@ public class SanityCheckEmployeeAndBenes : BaseSqlActivity
             rdy.ShouldBe(smrt);
         }
 
-        // Check the rehire guy
-        {
+        // Check the rehire guy - we are switching years, so these people have moved along.
+        if (false){
             var smrtRehire = await SmtQuery(
                 """
                     select * from (

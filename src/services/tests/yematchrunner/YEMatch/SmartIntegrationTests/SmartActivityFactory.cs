@@ -9,7 +9,8 @@ public static class IntegrationTestFactory
         return
         [
             // Test
-            new IntPay443()
+            new IntPay443(),
+            new IntTerminatedEmployee()
         ];
     }
 }
