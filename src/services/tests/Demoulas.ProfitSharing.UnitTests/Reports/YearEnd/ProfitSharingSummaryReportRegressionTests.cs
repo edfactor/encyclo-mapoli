@@ -1,14 +1,11 @@
 ﻿using System.ComponentModel;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Interfaces;
-using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services;
-using Demoulas.ProfitSharing.Services.Internal;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.ItDevOps;
 using Demoulas.ProfitSharing.Services.Reports;

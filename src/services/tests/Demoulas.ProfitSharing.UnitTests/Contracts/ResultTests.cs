@@ -1,8 +1,7 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Shouldly;
-using Xunit;
 
 namespace Demoulas.ProfitSharing.UnitTests.Contracts;
 

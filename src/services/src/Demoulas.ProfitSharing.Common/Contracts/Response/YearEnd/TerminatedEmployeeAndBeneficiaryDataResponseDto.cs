@@ -8,9 +8,7 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto : IIsExecut
     public required int BadgeNumber { get; set; }
     public required short PsnSuffix { get; set; }
 
-    [MaskSensitive]
-    public required string? Name { get; set; }
-    public bool IsExecutive { get; set; }
+    [MaskSensitive] public required string? Name { get; set; }
 
     public string BadgePSn
     {
@@ -20,11 +18,12 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto : IIsExecut
             {
                 return BadgeNumber.ToString();
             }
-            return $"{BadgeNumber}{PsnSuffix}";
+            return $"{BadgeNumber}{PsnSuffix:0000}";
         }
     }
 
     public List<TerminatedEmployeeAndBeneficiaryYearDetailDto> YearDetails { get; set; } = [];
+    public bool IsExecutive { get; set; }
 
     public static TerminatedEmployeeAndBeneficiaryDataResponseDto ResponseExample()
     {
@@ -57,7 +56,6 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto : IIsExecut
 
 public sealed record TerminatedEmployeeAndBeneficiaryYearDetailDto : IIsExecutive, IProfitYearRequest
 {
-    public short ProfitYear { get; set; }
     public decimal BeginningBalance { get; set; }
     public decimal BeneficiaryAllocation { get; set; }
     public decimal DistributionAmount { get; set; }
@@ -71,4 +69,6 @@ public sealed record TerminatedEmployeeAndBeneficiaryYearDetailDto : IIsExecutiv
     public bool HasForfeited { get; set; }
     public decimal? SuggestedForfeit { get; set; }
     public bool IsExecutive { get; set; }
+    public short ProfitYear { get; set; }
+    public byte EnrollmentId { get; set; }
 }

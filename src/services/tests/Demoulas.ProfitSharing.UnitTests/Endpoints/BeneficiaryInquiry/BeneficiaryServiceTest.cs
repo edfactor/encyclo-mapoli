@@ -5,7 +5,6 @@ using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Microsoft.Extensions.DependencyInjection;
-using Quartz.Listener;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.BeneficiaryInquiry;
 

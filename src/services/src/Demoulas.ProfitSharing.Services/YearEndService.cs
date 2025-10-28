@@ -187,7 +187,20 @@ public sealed class YearEndService : IYearEndService
         return _payProfitUpdateService.SetEnrollmentId(profitYear, ct);
     }
 
-
+    public async Task<short> GetCompletedYearEnd(CancellationToken ct)
+    {
+        return await _profitSharingDataContextFactory.UseReadOnlyContext(
+            async ctx =>
+            {
+                var maxYear = await ctx.YearEndUpdateStatuses
+                    .Where(st => st.IsYearEndCompleted == true)
+                    .Select(st => (short?)st.ProfitYear)  // Make it nullable
+                    .MaxAsync(ct);
+            
+                return maxYear ?? (short)(ReferenceData.SmartTransitionYear - 1);
+            });
+    }
+    
     // Calculates the Year End Change for a single employee.
     //  Very closely follows PAY456.cbl, 405-calculate-points
     private YearEndChange ComputeChange(short profitYear, short? firstContributionYear, short age, decimal currentBalance, PayProfitDto employee, DateOnly fiscalEnd)

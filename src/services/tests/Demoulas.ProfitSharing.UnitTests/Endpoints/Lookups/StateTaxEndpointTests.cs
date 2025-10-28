@@ -2,15 +2,11 @@
 using System.Net;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Lookups;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
-using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
-using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Lookups;

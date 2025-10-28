@@ -8,7 +8,6 @@ using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
 using Shouldly;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Beneficiaries;

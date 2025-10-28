@@ -19,7 +19,7 @@ public class TestPayProfitSelectedColumns : BaseSqlActivity
 
     public override Task<Outcome> Execute()
     {
-        const short profitYear = 2024;
+        const short profitYear = 2025;
 
         // Get Ready's rows (expected) for PayProfit
         Dictionary<int, YearEndChange> readyRowsBySsn = GetReadyPayProfit().GetAwaiter().GetResult();
@@ -41,7 +41,7 @@ public class TestPayProfitSelectedColumns : BaseSqlActivity
             if (ready != smart)
             {
                 badRows++;
-                if (badRows < 300)
+                if (badRows < 20)
                 {
                     Console.WriteLine($"Ssn {ssn} r:{ready} s:{smart}");
                 }
