@@ -1,6 +1,7 @@
 import { CircularProgress, Divider, Grid } from "@mui/material";
 import { memo } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
+import MissiveAlerts from "../../../components/MissiveAlerts/MissiveAlerts";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import { CAPTIONS } from "../../../constants";
 import useMasterInquiry from "./hooks/useMasterInquiry";
@@ -23,7 +24,6 @@ const MasterInquiryContent = memo(() => {
     showMemberGrid,
     showMemberDetails,
     showProfitDetails,
-    noResultsMessage,
     memberGridPagination,
     profitGridPagination,
     executeSearch,
@@ -37,6 +37,11 @@ const MasterInquiryContent = memo(() => {
         size={{ xs: 12 }}
         width={"100%"}>
         <Divider />
+      </Grid>
+      <Grid
+        size={{ xs: 12 }}
+        width={"100%"}>
+        <MissiveAlerts />
       </Grid>
       <Grid
         size={{ xs: 12 }}
@@ -118,14 +123,6 @@ const MasterInquiryContent = memo(() => {
               <CircularProgress />
             </Grid>
           )}
-        </Grid>
-      )}
-
-      {noResultsMessage && !showMemberGrid && !showMemberDetails && (
-        <Grid
-          size={{ xs: 12 }}
-          sx={{ padding: "24px" }}>
-          <div>{noResultsMessage}</div>
         </Grid>
       )}
     </Grid>
