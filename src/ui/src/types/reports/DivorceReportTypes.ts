@@ -20,10 +20,23 @@ export interface DivorceReportResponse {
   cumulativeDistributions: number;
 }
 
+export interface PaginatedResponseDto<T> {
+  pageSize: number | null;
+  currentPage: number | null;
+  totalPages: number | null;
+  resultHash: string | null;
+  total: number;
+  isPartialResult: boolean;
+  timeoutOccurred: boolean;
+  results: T[];
+}
+
 export interface ReportResponseBase<T> {
-  data: T[];
-  message?: string;
-  isSuccess: boolean;
+  reportName: string;
+  reportDate: string;
+  startDate: string;
+  endDate: string;
+  response: PaginatedResponseDto<T>;
 }
 
 export interface DivorceReportFilterParams {

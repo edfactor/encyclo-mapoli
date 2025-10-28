@@ -54,7 +54,7 @@ const DivorceReportTable: React.FC<DivorceReportTableProps> = ({ data, isLoading
     );
   }
 
-  const rows = data?.data || [];
+  const rows = data?.response?.results || [];
 
   if (rows.length === 0) {
     return (
