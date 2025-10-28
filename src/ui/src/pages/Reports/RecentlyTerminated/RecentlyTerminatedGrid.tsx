@@ -1,13 +1,13 @@
 import { Typography } from "@mui/material";
 import React, { useMemo } from "react";
-import { RecentlyTerminatedRecord } from "reduxstore/types";
-import { DSMGrid, formatNumberWithComma, ISortParams, Paged, Pagination } from "smart-ui-library";
+import { RecentlyTerminatedResponse } from "reduxstore/types";
+import { DSMGrid, formatNumberWithComma, ISortParams, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 import { GetRecentlyTerminatedColumns } from "./RecentlyTerminatedGridColumns";
 
 interface RecentlyTerminatedGridProps {
-  reportData: Paged<RecentlyTerminatedRecord> | null;
+  reportData: RecentlyTerminatedResponse | null;
   isLoading: boolean;
   gridPagination: ReturnType<typeof useGridPagination>;
 }
@@ -20,11 +20,14 @@ const RecentlyTerminatedGrid: React.FC<RecentlyTerminatedGridProps> = ({ reportD
 
   return (
     <>
-      {reportData && (
+      {reportData && reportData.response && (
         <>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <Typography variant="h6" component="h2" sx={{ marginLeft: "20px", marginRight: "10px" }}>
-              TERMINATED EMPLOYEES ({formatNumberWithComma(reportData.total)} Records)
+            <Typography
+              variant="h6"
+              component="h2"
+              sx={{ marginLeft: "20px", marginRight: "10px" }}>
+              TERMINATED EMPLOYEES ({formatNumberWithComma(reportData.response.total)} Records)
             </Typography>
           </div>
           <DSMGrid
@@ -32,14 +35,14 @@ const RecentlyTerminatedGrid: React.FC<RecentlyTerminatedGridProps> = ({ reportD
             isLoading={isLoading}
             handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: reportData.results,
+              rowData: reportData.response.results,
               columnDefs: columnDefs,
               suppressMultiSort: true
             }}
           />
         </>
       )}
-      {reportData && reportData.results.length > 0 && (
+      {reportData && reportData.response && reportData.response.results && reportData.response.results.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
@@ -49,7 +52,7 @@ const RecentlyTerminatedGrid: React.FC<RecentlyTerminatedGridProps> = ({ reportD
           setPageSize={(value: number) => {
             handlePaginationChange(0, value);
           }}
-          recordCount={reportData.total}
+          recordCount={reportData.response.total}
         />
       )}
     </>

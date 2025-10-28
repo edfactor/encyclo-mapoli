@@ -1,15 +1,24 @@
 import { Print } from "@mui/icons-material";
-import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Tooltip, Typography } from "@mui/material";
+import {
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Tooltip,
+  Typography
+} from "@mui/material";
 import { SelectionChangedEvent } from "ag-grid-community";
 import React, { useCallback, useMemo } from "react";
-import { TerminatedLettersDetail } from "reduxstore/types";
-import { DSMGrid, formatNumberWithComma, ISortParams, Paged, Pagination } from "smart-ui-library";
+import { TerminatedLettersDetail, TerminatedLettersResponse } from "reduxstore/types";
+import { DSMGrid, formatNumberWithComma, ISortParams, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import { useGridPagination } from "../../../hooks/useGridPagination";
 import { GetTerminatedLettersColumns } from "./TerminatedLettersGridColumns";
 
 interface TerminatedLettersGridProps {
-  reportData: Paged<TerminatedLettersDetail> | null;
+  reportData: TerminatedLettersResponse | null;
   isLoading: boolean;
   gridPagination: ReturnType<typeof useGridPagination>;
   selectedRows: TerminatedLettersDetail[];
@@ -79,12 +88,15 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
 
   return (
     <div style={{ marginRight: "24px" }}>
-      {reportData && (
+      {reportData && reportData.response && (
         <>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <Typography variant="h6" component="h2" sx={{ marginLeft: "20px", marginRight: "10px" }}>
-              EMPLOYEES NEEDING INSTRUCTIONS TO WITHDRAW VESTED SAVINGS ({formatNumberWithComma(reportData.total)}{" "}
-              Records)
+            <Typography
+              variant="h6"
+              component="h2"
+              sx={{ marginLeft: "20px", marginRight: "10px" }}>
+              EMPLOYEES NEEDING INSTRUCTIONS TO WITHDRAW VESTED SAVINGS (
+              {formatNumberWithComma(reportData.response.total)} Records)
             </Typography>
             {renderPrintButton()}
           </div>
@@ -93,7 +105,7 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
             isLoading={isLoading}
             handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: reportData.results,
+              rowData: reportData.response.results,
               columnDefs: columnDefs,
               suppressMultiSort: true,
               rowSelection: {
@@ -108,7 +120,7 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
           />
         </>
       )}
-      {reportData && reportData.results.length > 0 && (
+      {reportData && reportData.response && reportData.response.results && reportData.response.results.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
@@ -118,18 +130,24 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
           setPageSize={(value: number) => {
             handlePaginationChange(0, value);
           }}
-          recordCount={reportData.total}
+          recordCount={reportData.response.total}
         />
       )}
 
-      <Dialog open={isPrintDialogOpen} onClose={() => setIsPrintDialogOpen(false)} maxWidth="lg" fullWidth>
+      <Dialog
+        open={isPrintDialogOpen}
+        onClose={() => setIsPrintDialogOpen(false)}
+        maxWidth="lg"
+        fullWidth>
         <DialogTitle>Print Preview - Terminated Letters</DialogTitle>
         <DialogContent>
           <pre style={{ whiteSpace: "pre-wrap", fontFamily: "monospace", fontSize: "12px" }}>{printContent}</pre>
         </DialogContent>
         <DialogActions sx={{ paddingRight: "25px" }}>
           <Button onClick={() => setIsPrintDialogOpen(false)}>Close</Button>
-          <Button onClick={() => printTerminatedLetters(printContent)} variant="contained">
+          <Button
+            onClick={() => printTerminatedLetters(printContent)}
+            variant="contained">
             Print
           </Button>
         </DialogActions>
