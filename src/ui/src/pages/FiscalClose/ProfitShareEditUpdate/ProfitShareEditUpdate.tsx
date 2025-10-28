@@ -1,32 +1,13 @@
 import { Alert, AlertTitle, Grid, Typography } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { DSMAccordion, numberToCurrency, Page, setMessage, SmartModal, TotalsGrid } from "smart-ui-library";
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import { DSMAccordion, numberToCurrency, Page, SmartModal, TotalsGrid } from "smart-ui-library";
 import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
-import { useChecksumValidation } from "../../../hooks/useChecksumValidation";
-import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
-import {
-  useGetMasterApplyMutation,
-  useLazyGetMasterRevertQuery,
-  useLazyGetProfitMasterStatusQuery
-} from "../../../reduxstore/api/YearsEndApi";
-import {
-  clearProfitSharingEdit,
-  clearProfitSharingEditQueryParams,
-  clearProfitSharingUpdate,
-  setInvalidProfitShareEditYear,
-  setProfitEditUpdateChangesAvailable,
-  setProfitEditUpdateRevertChangesAvailable,
-  setProfitShareApplyOrRevertLoading,
-  setProfitShareEditUpdateShowSearch,
-  setResetYearEndPage
-} from "../../../reduxstore/slices/yearsEndSlice";
 import { RootState } from "../../../reduxstore/store";
-import { ProfitShareMasterApplyRequest, ProfitShareMasterResponse, ProfitYearRequest } from "../../../reduxstore/types";
 import PrerequisiteGuard from "../../../components/PrerequisiteGuard";
 import { CAPTIONS } from "../../../constants";
-import { MessageKeys, Messages } from "../../../utils/messageDictonary";
+import { Messages } from "../../../utils/messageDictonary";
 import ChangesList from "./ChangesList";
 import { MasterUpdateSummaryTable } from "./MasterUpdateSummaryTable";
 import ProfitShareEditConfirmation from "./ProfitShareEditConfirmation";
@@ -34,331 +15,55 @@ import ProfitShareEditUpdateSearchFilter from "./ProfitShareEditUpdateSearchFilt
 import ProfitShareEditUpdateTabs from "./ProfitShareEditUpdateTabs";
 import ProfitShareRevertButton from "./ProfitShareRevertButton";
 import ProfitShareSaveButton from "./ProfitShareSaveButton";
-
-const useRevertAction = (
-  //setEmployeesReverted: (count: number) => void,
-  //setBeneficiariesReverted: (count: number) => void,
-  //setEtvasReverted: (count: number) => void,
-  setChangesApplied: (changes: boolean) => void
-) => {
-  const [trigger] = useLazyGetMasterRevertQuery();
-  const dispatch = useDispatch();
-  const profitYear = useFiscalCloseProfitYear();
-  //const { profitSharingEdit, profitSharingUpdate } = useSelector((state: RootState) => state.yearsEnd);
-
-  const revertAction = async (): Promise<void> => {
-    const params: ProfitYearRequest = {
-      profitYear: profitYear ?? 0
-    };
-
-    await trigger(params, false)
-      .unwrap()
-      .then((payload) => {
-        //setEmployeesReverted(payload?.employeesEffected || 0);
-        //setBeneficiariesReverted(payload?.beneficiariesEffected || 0);
-        //setEtvasReverted(payload?.etvasEffected || 0);
-        //dispatch(setMessage(successMessage));
-        dispatch(setProfitEditUpdateChangesAvailable(false));
-        dispatch(setProfitEditUpdateRevertChangesAvailable(false));
-        dispatch(clearProfitSharingEditQueryParams());
-        dispatch(
-          setMessage({
-            ...Messages.ProfitShareRevertSuccess,
-            message: {
-              ...Messages.ProfitShareRevertSuccess.message,
-              message: `Employees affected: ${payload?.employeesEffected} | Beneficiaries: ${payload?.beneficiariesEffected} | ETVAs: ${payload?.etvasEffected} `
-            }
-          })
-        );
-        // Clear form and grids (we need to call reset on the search filter page)
-        dispatch(setResetYearEndPage(true));
-        // Bring search filters back
-        dispatch(setProfitShareEditUpdateShowSearch(true));
-        dispatch(clearProfitSharingEdit());
-        dispatch(clearProfitSharingUpdate());
-        // Set the changes applied to false
-        setChangesApplied(false);
-      })
-      .catch((error) => {
-        console.error("ERROR: Did not revert changes to year end", error);
-        //dispatch(setMessage(failMessage));
-        dispatch(
-          setMessage({
-            ...Messages.ProfitShareRevertFail,
-            message: {
-              ...Messages.ProfitShareRevertFail.message,
-              message: `Employees affected: 0 | Beneficiaries: 0, | ETVAs: 0 `
-            }
-          })
-        );
-        //setEmployeesReverted(0);
-        //setBeneficiariesReverted(0);
-        //setEtvasReverted(0);
-      });
-  };
-  return revertAction;
-};
-
-const useSaveAction = () =>
-  //setEmployeesReverted: (count: number) => void,
-  //setBeneficiariesReverted: (count: number) => void,
-  //setEtvasReverted: (count: number) => void
-  // NOTE: Removed setValidationResponse parameter - now using useChecksumValidation hook
-  {
-    const { profitSharingEditQueryParams } = useSelector((state: RootState) => state.yearsEnd);
-    const [applyMaster] = useGetMasterApplyMutation();
-    const dispatch = useDispatch();
-    const profitYear = useFiscalCloseProfitYear();
-
-    const saveAction = async (): Promise<void> => {
-      const params: ProfitShareMasterApplyRequest = {
-        profitYear: profitYear ?? 0,
-        contributionPercent: profitSharingEditQueryParams?.contributionPercent ?? 0,
-        earningsPercent: profitSharingEditQueryParams?.earningsPercent ?? 0,
-        incomingForfeitPercent: profitSharingEditQueryParams?.incomingForfeitPercent ?? 0,
-        secondaryEarningsPercent: profitSharingEditQueryParams?.secondaryEarningsPercent ?? 0,
-        maxAllowedContributions: profitSharingEditQueryParams?.maxAllowedContributions ?? 0,
-        badgeToAdjust: profitSharingEditQueryParams?.badgeToAdjust ?? 0,
-        adjustContributionAmount: profitSharingEditQueryParams?.adjustContributionAmount ?? 0,
-        adjustEarningsAmount: profitSharingEditQueryParams?.adjustEarningsAmount ?? 0,
-        adjustIncomingForfeitAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0,
-        badgeToAdjust2: profitSharingEditQueryParams?.badgeToAdjust2 ?? 0,
-        adjustEarningsSecondaryAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0
-      };
-
-      dispatch(setProfitShareApplyOrRevertLoading(true));
-
-      await applyMaster(params)
-        .unwrap()
-        .then((payload: ProfitShareMasterResponse) => {
-          dispatch(setProfitEditUpdateChangesAvailable(false));
-
-          console.log("Successfully applied changes to year end: ", payload);
-          console.log("Employees affected: ", payload?.employeesEffected);
-
-          // NOTE: Removed setValidationResponse call - useChecksumValidation hook handles this
-          // Cross-reference validation will auto-refresh via the hook after save
-          if (payload.crossReferenceValidation) {
-            console.log("Cross-reference validation:", payload.crossReferenceValidation);
-          }
-
-          //setEmployeesReverted(payload?.employeesEffected ?? 0);
-          //setBeneficiariesReverted(payload?.beneficiariesEffected ?? 0);
-          //setEtvasReverted(payload?.etvasEffected ?? 0);
-          dispatch(
-            setMessage({
-              ...Messages.ProfitShareApplySuccess,
-              message: {
-                ...Messages.ProfitShareApplySuccess.message,
-                message: `Employees affected: ${payload?.employeesEffected} | Beneficiaries: ${payload?.beneficiariesEffected} | ETVAs: ${payload?.etvasEffected} `
-              }
-            })
-          );
-          dispatch(setResetYearEndPage(true));
-          dispatch(setProfitEditUpdateRevertChangesAvailable(true));
-          dispatch(setProfitShareEditUpdateShowSearch(false));
-          // Clear the grids
-          dispatch(clearProfitSharingUpdate());
-        })
-        .catch((error) => {
-          console.error("ERROR: Did not apply changes to year end", error);
-          dispatch(
-            setMessage({
-              ...Messages.ProfitShareApplyFail,
-              message: {
-                ...Messages.ProfitShareApplyFail.message,
-                message: `Employees affected: 0 | Beneficiaries: 0, | ETVAs: 0 `
-              }
-            })
-          );
-        });
-      dispatch(setProfitShareApplyOrRevertLoading(false));
-    };
-
-    return saveAction;
-  };
+import useProfitShareEditUpdate from "./hooks/useProfitShareEditUpdate";
 
 
 const ProfitShareEditUpdate = () => {
-  //const [beneficiariesAffected, setBeneficiariesAffected] = useState(0);
-  //const [employeesAffected, setEmployeesAffected] = useState(0);
-  //const [etvasAffected, setEtvasAffected] = useState(0);
-  //const [beneficiariesReverted, setBeneficiariesReverted] = useState(0);
-  //const [employeesReverted, setEmployeesReverted] = useState(0);
-  //const [etvasReverted, setEtvasReverted] = useState(0);
-  const [updatedBy, setUpdatedBy] = useState<string | null>(null);
-  const [updatedTime, setUpdatedTime] = useState<string | null>(null);
+  // Use custom hook to manage all business logic and state
+  const {
+    changesApplied,
+    openSaveModal,
+    openRevertModal,
+    openEmptyModal,
+    minimumFieldsEntered,
+    adjustedBadgeOneValid,
+    adjustedBadgeTwoValid,
+    updatedBy,
+    updatedTime,
+    profitEditUpdateRevertChangesAvailable,
+    profitShareEditUpdateShowSearch,
+    profitSharingEdit,
+    profitSharingUpdate,
+    profitSharingEditQueryParams,
+    profitMasterStatus,
+    totalForfeituresGreaterThanZero,
+    validationData: validationResponse,
+    getFieldValidation,
+    saveAction,
+    revertAction,
+    handleOpenSaveModal,
+    handleCloseSaveModal,
+    handleOpenRevertModal,
+    handleCloseRevertModal,
+    handleCloseEmptyModal
+  } = useProfitShareEditUpdate();
 
-  // State for validation popup - track which field popup is open
+  // Local state for UI concerns only
+  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const [pageNumberReset, setPageNumberReset] = useState(false);
   const [openValidationField, setOpenValidationField] = useState<string | null>(null);
 
   const handleValidationToggle = (fieldName: string) => {
     setOpenValidationField(openValidationField === fieldName ? null : fieldName);
   };
 
-  // Helper to render validation icon with popup for a specific field (legacy - replaced by renderValidationIconInGrid)
-
-  // This is a flag used to indicate that the year end change have been made
-  // and a banner should be shown indicating this
-  const [changesApplied, setChangesApplied] = useState<boolean>(false);
-
-  const revertAction = useRevertAction(
-    //setEmployeesReverted,
-    // setBeneficiariesReverted,
-    // setEtvasReverted,
-    setChangesApplied
-  );
-  const saveAction = useSaveAction();
-  //setEmployeesAffected,
-  //setBeneficiariesAffected,
-  //setEtvasAffected
-  // NOTE: Removed setValidationResponse - now using useChecksumValidation hook
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
-  const [pageNumberReset, setPageNumberReset] = useState(false);
-  const hasToken = !!useSelector((state: RootState) => state.security.token);
-
-  // These are to track validity of fields in the search filter
-  const [minimumFieldsEntered, setMinimumFieldsEntered] = useState(false);
-  const [adjustedBadgeOneValid, setAdjustedBadgeOneValid] = useState(true);
-  const [adjustedBadgeTwoValid, setAdjustedBadgeTwoValid] = useState(true);
-
-  const {
-    profitSharingUpdateAdjustmentSummary,
-    profitSharingUpdate,
-    profitSharingEdit,
-    profitSharingEditQueryParams,
-    profitMasterStatus,
-    profitShareEditUpdateShowSearch,
-    profitEditUpdateRevertChangesAvailable,
-    totalForfeituresGreaterThanZero
-  } = useSelector((state: RootState) => state.yearsEnd);
-  const [openSaveModal, setOpenSaveModal] = useState<boolean>(false);
-  const [openRevertModal, setOpenRevertModal] = useState<boolean>(false);
-  const [openEmptyModal, setOpenEmptyModal] = useState<boolean>(false);
-
-  const [triggerStatusUpdate, { isLoading }] = useLazyGetProfitMasterStatusQuery();
-
-  const profitYear = useFiscalCloseProfitYear();
-  const dispatch = useDispatch();
   const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
   const isReadOnly = useReadOnlyNavigation();
+  const { profitSharingUpdateAdjustmentSummary } = useSelector((state: RootState) => state.yearsEnd);
 
-  // Use checksum validation hook to fetch validation data independently from any page
-  const {
-    validationData: validationResponse,
-    //isLoading: isValidationLoading,
-    //error: validationError,
-    //refetch: refetchValidation,
-    getFieldValidation
-  } = useChecksumValidation({
-    profitYear: profitYear || 0,
-    autoFetch: true,
-    // Pass current values from PAY444 for client-side comparison with PAY443 archived values
-    currentValues: profitSharingUpdate?.profitShareUpdateTotals
-      ? {
-          TotalProfitSharingBalance: profitSharingUpdate.profitShareUpdateTotals.beginningBalance,
-          DistributionTotals: profitSharingUpdate.profitShareUpdateTotals.distributions,
-          ForfeitureTotals: profitSharingUpdate.profitShareUpdateTotals.forfeiture,
-          ContributionTotals: profitSharingUpdate.profitShareUpdateTotals.totalContribution,
-          EarningsTotals: profitSharingUpdate.profitShareUpdateTotals.earnings,
-          IncomingAllocations: profitSharingUpdate.profitShareUpdateTotals.allocations,
-          OutgoingAllocations: profitSharingUpdate.profitShareUpdateTotals.paidAllocations,
-          // NetAllocTransfer is calculated field: allocations + paidAllocations
-          // Note: paidAllocations is already stored as a NEGATIVE value in the database
-          NetAllocTransfer:
-            (profitSharingUpdate.profitShareUpdateTotals.allocations || 0) +
-            (profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0)
-        }
-      : undefined
-  });
-
-  // Helper to render validation icon positioned absolutely in a TotalsGrid (like State Taxes pattern)
-  // IMPORTANT: Must be declared AFTER getFieldValidation helper
-
-  // Extract cross-reference validation from profitSharingUpdate response
-  // NOTE: This useEffect is now DISABLED because we're using the useChecksumValidation hook
-  // which auto-fetches validation data independently based on profitYear.
-  // Keeping this commented for reference in case we need to revert.
-  /*
-  useEffect(() => {
-    if (profitSharingUpdate?.crossReferenceValidation) {
-      setValidationResponse(profitSharingUpdate.crossReferenceValidation);
-      console.log("Loaded cross-reference validation from GET response:", profitSharingUpdate.crossReferenceValidation);
-    }
-  }, [profitSharingUpdate]);
-  */
-
-  useEffect(() => {
-    const currentYear = new Date().getFullYear();
-    if (profitYear !== currentYear - 1) {
-      dispatch(setInvalidProfitShareEditYear(true));
-      dispatch(
-        setMessage({
-          key: MessageKeys.ProfitShareEditUpdate,
-          message: {
-            type: "warning",
-            title: "Invalid Year Selected",
-            message: `Please select a ${currentYear - 1} date in the drawer menu to proceed.`
-          }
-        })
-      );
-    } else {
-      dispatch(setInvalidProfitShareEditYear(false));
-    }
-  }, [profitYear, dispatch]);
-
-  const onStatusSearch = useCallback(async () => {
-    const request: ProfitYearRequest = {
-      profitYear: profitYear ?? 0
-    };
-
-    await triggerStatusUpdate(request, false)
-      .unwrap()
-      .then((payload) => {
-        if (payload?.updatedBy) {
-          setUpdatedBy(payload.updatedBy);
-
-          // Since we have something to revert, set this to button appears
-          dispatch(setProfitEditUpdateRevertChangesAvailable(true));
-          // Hide the search filters
-          dispatch(setProfitShareEditUpdateShowSearch(false));
-        }
-
-        if (payload?.updatedTime) {
-          setUpdatedTime(
-            new Date(payload.updatedTime).toLocaleString("en-US", {
-              month: "long",
-              day: "numeric",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit"
-            })
-          );
-        } else {
-          dispatch(setProfitEditUpdateRevertChangesAvailable(false));
-        }
-      })
-      .catch((error) => {
-        console.error("ERROR: Did not revert changes to year end", error);
-      });
-  }, [profitYear, triggerStatusUpdate, dispatch]);
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
   };
-
-  useEffect(() => {
-    if (hasToken) {
-      onStatusSearch();
-      if (updatedTime) {
-        setChangesApplied(true);
-        dispatch(setProfitEditUpdateChangesAvailable(false));
-        dispatch(setProfitEditUpdateRevertChangesAvailable(true));
-      } else {
-        setChangesApplied(false);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onStatusSearch, hasToken, updatedTime, updatedBy]);
 
   return (
     <PrerequisiteGuard
@@ -369,12 +74,16 @@ const ProfitShareEditUpdate = () => {
           label={`${CAPTIONS.PROFIT_SHARE_UPDATE}`}
           actionNode={
             <div className="flex items-center justify-end gap-2">
-              <ProfitShareRevertButton setOpenRevertModal={setOpenRevertModal} isLoading={isLoading} isReadOnly={isReadOnly} />
+              <ProfitShareRevertButton
+                setOpenRevertModal={handleOpenRevertModal}
+                isLoading={false}
+                isReadOnly={isReadOnly}
+              />
               <ProfitShareSaveButton
-                setOpenSaveModal={setOpenSaveModal}
-                setOpenEmptyModal={setOpenEmptyModal}
+                setOpenSaveModal={handleOpenSaveModal}
+                setOpenEmptyModal={handleCloseEmptyModal}
                 status={profitMasterStatus}
-                isLoading={isLoading}
+                isLoading={false}
                 minimumFieldsEntered={minimumFieldsEntered}
                 adjustedBadgeOneValid={adjustedBadgeOneValid}
                 adjustedBadgeTwoValid={adjustedBadgeTwoValid}
@@ -408,9 +117,6 @@ const ProfitShareEditUpdate = () => {
                 <ProfitShareEditUpdateSearchFilter
                   setInitialSearchLoaded={setInitialSearchLoaded}
                   setPageReset={setPageNumberReset}
-                  setMinimumFieldsEntered={setMinimumFieldsEntered}
-                  setAdjustedBadgeOneValid={setAdjustedBadgeOneValid}
-                  setAdjustedBadgeTwoValid={setAdjustedBadgeTwoValid}
                 />
               </DSMAccordion>
             </Grid>
@@ -549,15 +255,15 @@ const ProfitShareEditUpdate = () => {
             key={"saveModal"}
             maxWidth="sm"
             open={openSaveModal}
-            onClose={() => setOpenSaveModal(false)}>
+            onClose={handleCloseSaveModal}>
             <ProfitShareEditConfirmation
               key={"saveConfirmation"}
               performLabel="YES, SAVE"
               closeLabel="NO, CANCEL"
-              setOpenModal={setOpenSaveModal}
-              actionFunction={() => {
-                saveAction();
-                setOpenSaveModal(false);
+              setOpenModal={handleCloseSaveModal}
+              actionFunction={async () => {
+                await saveAction();
+                handleCloseSaveModal();
               }}
               messageType="confirmation"
               messageHeadline="You are about to apply the following changes:"
@@ -569,15 +275,15 @@ const ProfitShareEditUpdate = () => {
             key={"revertModal"}
             maxWidth="sm"
             open={openRevertModal}
-            onClose={() => setOpenRevertModal(false)}>
+            onClose={handleCloseRevertModal}>
             <ProfitShareEditConfirmation
               key={"revertConfirmation"}
               performLabel="YES, REVERT"
               closeLabel="NO, CANCEL"
-              setOpenModal={setOpenRevertModal}
-              actionFunction={() => {
-                revertAction();
-                setOpenRevertModal(false);
+              setOpenModal={handleCloseRevertModal}
+              actionFunction={async () => {
+                await revertAction();
+                handleCloseRevertModal();
               }}
               messageType="warning"
               messageHeadline="Reverting to the last update will modify the following:"
@@ -590,12 +296,12 @@ const ProfitShareEditUpdate = () => {
             key={"emptyModal"}
             open={openEmptyModal}
             maxWidth="sm"
-            onClose={() => setOpenEmptyModal(false)}>
+            onClose={handleCloseEmptyModal}>
             <ProfitShareEditConfirmation
               key={"emptyConfirmation"}
               performLabel="OK"
               closeLabel=""
-              setOpenModal={setOpenEmptyModal}
+              setOpenModal={handleCloseEmptyModal}
               actionFunction={() => {}}
               messageType="info"
               messageHeadline={
