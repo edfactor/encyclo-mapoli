@@ -102,6 +102,7 @@ DECLARE
     BENEFICIARY_INQUIRY_PAGE CONSTANT NUMBER :=158;
     EDIT_DISTRIBUTION_PAGE CONSTANT NUMBER := 159;
     DISTTRIBUTION_EDIT_RUN CONSTANT NUMBER := 160;
+    DIVORCE_REPORT CONSTANT NUMBER := 161;
 
 
     --- These are the role IDs from the ROLES table
@@ -214,6 +215,7 @@ BEGIN
     insert_navigation_item(RECENTLY_TERMINATED, ADHOC_GROUP, 'Recently Terminated', 'PROF-VESTED|PAY508', 'recently-terminated', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(QPAY066_AD_HOC_REPORTS, ADHOC_GROUP, 'QPAY066* Ad Hoc Reports', 'QPAY066*', 'qpay066-adhoc', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(QPAY066_UNDR21, ADHOC_GROUP, 'QPAY066-UNDR21', '', 'qpay066-under21', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(DIVORCE_REPORT, ADHOC_GROUP, 'Divorce Report', '', 'divorce-report', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
 
 --beneficiary items
     insert_navigation_item(BENEFICIARY_INQUIRY_PAGE, BENEFICIARIES_MENU, 'Beneficiary Inquiry', '', 'beneficiary', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
@@ -525,6 +527,9 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(PROFIT_SUMMARY, FINANCE_MANAGER);
     assign_navigation_role(QPAY600, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(QPAY600, FINANCE_MANAGER);
+    assign_navigation_role(DIVORCE_REPORT, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(DIVORCE_REPORT, FINANCE_MANAGER);
+    assign_navigation_role(DIVORCE_REPORT, DISTRIBUTIONS_CLERK);
     -- assign_navigation_role(PAY426N_FROZEN, SYSTEM_ADMINISTRATOR); -- COMMENTED OUT - navigation item doesn't exist
     -- assign_navigation_role(PAY426N_FROZEN, FINANCE_MANAGER); -- COMMENTED OUT - navigation item doesn't exist
     assign_navigation_role(PAY426_2, SYSTEM_ADMINISTRATOR);
@@ -596,6 +601,7 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(ADHOC_BENEFICIARIES_REPORT, IT_DEVOPS);
     -- assign_navigation_role(UNDER_21_REPORT, IT_DEVOPS); -- COMMENTED OUT - navigation item doesn't exist
     assign_navigation_role(QPAY600, IT_DEVOPS);
+    assign_navigation_role(DIVORCE_REPORT, IT_DEVOPS);
     assign_navigation_role(PROFIT_SUMMARY, IT_DEVOPS);
 
 

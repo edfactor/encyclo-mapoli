@@ -88,7 +88,8 @@ export const ROUTES = {
   DEV_DEBUG: "dev-debug",
   DOCUMENTATION: "documentation",
   PROFIT_SHARE_EDIT: "profit-share-edit",
-  SAVE_PROF_PAYMSTR: "save-prof-paymstr"
+  SAVE_PROF_PAYMSTR: "save-prof-paymstr",
+  DIVORCE_REPORT: "divorce-report"
 } as const;
 
 export const CAPTIONS = {
@@ -164,7 +165,8 @@ export const CAPTIONS = {
   YTD_WAGES_EXTRACT: "YTD Wages Extract (PROF-DOLLAR-EXTRACT)",
   BREAKDOWN_REPORT: "Breakdown Report (QPAY066TA)",
   DEMOGRAPHIC_FREEZE: "Demographic Freeze",
-  DEV_DEBUG: "Dev Debug"
+  DEV_DEBUG: "Dev Debug",
+  DIVORCE_REPORT: "Divorce Report"
 } as const;
 
 export const VIEW = "View";

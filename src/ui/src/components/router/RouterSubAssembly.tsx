@@ -53,17 +53,18 @@ import { MenuBar } from "../../components/MenuBar/MenuBar";
 import DistributionInquiry from "../../pages//Distributions/DistributionInquiry/DistributionInquiry";
 import EditDistribution from "../../pages//Distributions/EditDistribution/EditDistribution";
 import BeneficiaryInquiry from "../../pages/Beneficiaries/BeneficiaryInquiry";
+import ForfeituresAdjustment from "../../pages/DecemberActivities/ForfeituresAdjustment/ForfeituresAdjustment";
 import MilitaryContribution from "../../pages/DecemberActivities/MilitaryContribution/MilitaryContribution";
 import DevDebug from "../../pages/Dev/DevDebug";
 import AddDistribution from "../../pages/Distributions/AddDistribution/AddDistribution";
 import ViewDistribution from "../../pages/Distributions/ViewDistribution/ViewDistribution";
 import Documentation from "../../pages/Documentation/Documentation";
-import ForfeituresAdjustment from "../../pages/DecemberActivities/ForfeituresAdjustment/ForfeituresAdjustment";
 import PAY426N from "../../pages/FiscalClose/PAY426Reports/PAY426N/PAY426N";
 import ProfitSummary from "../../pages/FiscalClose/PAY426Reports/ProfitSummary/ProfitSummary";
 import QPAY066B from "../../pages/FiscalClose/QPAY066B/QPAY066B";
 import ReprintCertificates from "../../pages/FiscalClose/ReprintCertificates/ReprintCertificates";
 import Adjustments from "../../pages/InquiriesAndAdjustments/Adjustments";
+import DivorceReport from "../../pages/Reports/DivorceReport/DivorceReport";
 import PayBeNext from "../../pages/Reports/PayBeNext/PayBeNext";
 import PayBenReport from "../../pages/Reports/PayBenReport/PayBenReport";
 import QPAY066AdHocReports from "../../pages/Reports/QPAY066AdHocReports/QPAY066AdHocReports";
@@ -427,6 +428,10 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={ROUTES.TERMINATED_LETTERS}
                   element={<TerminatedLetters />}
+                />
+                <Route
+                  path={ROUTES.DIVORCE_REPORT}
+                  element={<DivorceReport />}
                 />
               </Routes>
             </Box>
