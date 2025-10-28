@@ -12,7 +12,6 @@ import { RootState } from "reduxstore/store";
 import { ApiMessageAlert, DSMAccordion, formatNumberWithComma, Page, setMessage } from "smart-ui-library";
 import { MessageKeys, Messages } from "utils/messageDictonary";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
-import MissiveAlerts from "../../../components/MissiveAlerts/MissiveAlerts";
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
@@ -202,7 +201,6 @@ const ForfeituresAdjustment = () => {
               <ForfeituresAdjustmentSearchFilter setInitialSearchLoaded={handleSearchComplete} />
             </DSMAccordion>
           </Grid>
-          <MissiveAlerts />
 
           {forfeitureAdjustmentData && profitYear && (
             <StandaloneMemberDetails
