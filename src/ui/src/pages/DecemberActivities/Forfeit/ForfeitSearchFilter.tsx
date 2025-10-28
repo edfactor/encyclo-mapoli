@@ -1,43 +1,25 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
-import { useDispatch, useSelector } from "react-redux";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import DuplicateSsnGuard from "../../../components/DuplicateSsnGuard";
 import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
-import { useLazyGetForfeituresAndPointsQuery } from "../../../reduxstore/api/YearsEndApi";
-import {
-  clearForfeituresAndPoints,
-  clearForfeituresAndPointsQueryParams,
-  setForfeituresAndPointsQueryParams
-} from "../../../reduxstore/slices/yearsEndSlice";
-import { RootState } from "../../../reduxstore/store";
 import { profitYearValidator } from "../../../utils/FormValidators";
-
-interface ForfeitSearchParams {
-  profitYear: number;
-}
+import { ForfeitSearchParams } from "./hooks/useForfeit";
 
 interface ForfeitSearchParametersProps {
-  setInitialSearchLoaded: (loaded: boolean) => void;
-  setPageReset: (reset: boolean) => void;
-  onSearchClicked?: () => void;
+  onSearch: (params: ForfeitSearchParams) => void;
+  onReset: () => void;
+  isSearching: boolean;
 }
 
 const schema = yup.object().shape({
   profitYear: profitYearValidator()
 });
 
-const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({
-  setInitialSearchLoaded,
-  setPageReset,
-  onSearchClicked
-}) => {
-  const [triggerSearch, { isFetching }] = useLazyGetForfeituresAndPointsQuery();
-  const { forfeituresAndPointsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({ onSearch, onReset, isSearching }) => {
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
-  const dispatch = useDispatch();
 
   const {
     control,
@@ -47,44 +29,21 @@ const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({
   } = useForm<ForfeitSearchParams>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: fiscalCloseProfitYear || forfeituresAndPointsQueryParams?.profitYear || undefined
+      profitYear: fiscalCloseProfitYear || undefined
     }
   });
 
-  const validateAndSearch = handleSubmit((_data) => {
+  const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
-      // Call the parent callback to potentially change status
-      if (onSearchClicked) {
-        onSearchClicked();
-      }
-
-      setPageReset(true);
-      triggerSearch(
-        {
-          profitYear: fiscalCloseProfitYear,
-          useFrozenData: true,
-          archive: false, // Always use archive=false for search button
-          pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
-        },
-        false
-      );
-      dispatch(
-        setForfeituresAndPointsQueryParams({
-          profitYear: fiscalCloseProfitYear,
-          useFrozenData: true
-        })
-      );
-      setInitialSearchLoaded(true);
+      onSearch({ profitYear: data.profitYear });
     }
   });
 
-  const handleReset = () => {
-    setPageReset(true);
-    dispatch(clearForfeituresAndPoints());
-    dispatch(clearForfeituresAndPointsQueryParams());
+  const handleResetClick = () => {
     reset({
       profitYear: fiscalCloseProfitYear
     });
+    onReset();
   };
 
   return (
@@ -126,9 +85,9 @@ const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({
         <DuplicateSsnGuard>
           {({ prerequisitesComplete }) => (
             <SearchAndReset
-              handleReset={handleReset}
+              handleReset={handleResetClick}
               handleSearch={validateAndSearch}
-              isFetching={isFetching}
+              isFetching={isSearching}
               disabled={!isValid || !prerequisitesComplete}
             />
           )}

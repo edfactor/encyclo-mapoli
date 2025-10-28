@@ -51,7 +51,7 @@ src/ui/src/pages/
 │   ├── ForfeituresAdjustment/
 │   ├── InfoCard.tsx
 │   ├── PAY426Reports/
-│   ├── PaymasterUpdate/
+│   ├── PayMasterUpdate/
 │   ├── Profall/
 │   ├── ProfitShareByStore/
 │   ├── ProfitShareEditUpdate/

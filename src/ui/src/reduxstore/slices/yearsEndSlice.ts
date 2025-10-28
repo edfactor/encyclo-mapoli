@@ -21,8 +21,8 @@ import {
   ExecutiveHoursAndDollars,
   ExecutiveHoursAndDollarsGrid,
   ExecutiveHoursAndDollarsQueryParams,
-  ForfeituresAndPoints,
   ForfeituresAndPointsQueryParams,
+  ForfeituresAndPointsResponse,
   ForfeituresByAge,
   FrozenReportsByAgeRequestType,
   GrandTotalsByStoreResponseDto,
@@ -104,7 +104,7 @@ export interface YearsEndState {
   executiveHoursAndDollarsQueryParams: ExecutiveHoursAndDollarsQueryParams | null;
   executiveHoursAndDollarsAddQueryParams: ExecutiveHoursAndDollarsQueryParams | null;
   executiveRowsSelected: ExecutiveHoursAndDollars[] | null;
-  forfeituresAndPoints: ForfeituresAndPoints | null;
+  forfeituresAndPoints: ForfeituresAndPointsResponse | null;
   forfeituresAndPointsQueryParams: ForfeituresAndPointsQueryParams | null;
   forfeituresByAgeFullTime: ForfeituresByAge | null;
   forfeituresByAgePartTime: ForfeituresByAge | null;
@@ -539,7 +539,7 @@ export const yearsEndSlice = createSlice({
     clearDuplicateNamesAndBirthdaysQueryParams: (state) => {
       state.duplicateNamesAndBirthdaysQueryParams = null;
     },
-    setForfeituresAndPoints: (state, action: PayloadAction<ForfeituresAndPoints>) => {
+    setForfeituresAndPoints: (state, action: PayloadAction<ForfeituresAndPointsResponse>) => {
       state.forfeituresAndPoints = action.payload;
     },
     clearForfeituresAndPoints: (state) => {

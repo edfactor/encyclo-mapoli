@@ -91,7 +91,7 @@ import {
   ExecutiveHoursAndDollarsRequestDto,
   ForfeitureAdjustmentDetail,
   ForfeitureAdjustmentUpdateRequest,
-  ForfeituresAndPoints,
+  ForfeituresAndPointsResponse,
   ForfeituresByAge,
   FrozenReportsByAgeRequest,
   FrozenReportsForfeituresAndPointsRequest,
@@ -170,7 +170,7 @@ export const YearsEndApi = createApi({
       // after we do the update. Yet the working copy in the grid is
       // the correct data, a refresh is not needed.
     }),
-    updateEnrollment: builder.mutation<void, {ProfitYearRequest}>({
+    updateEnrollment: builder.mutation<void, { ProfitYearRequest }>({
       query: (params) => ({
         url: `yearend/update-enrollment`,
         method: "POST",
@@ -577,7 +577,7 @@ export const YearsEndApi = createApi({
       }
     }),
     getForfeituresAndPoints: builder.query<
-      ForfeituresAndPoints,
+      ForfeituresAndPointsResponse,
       FrozenReportsForfeituresAndPointsRequest & {
         suppressAllToastErrors?: boolean;
         onlyNetworkToastErrors?: boolean;
