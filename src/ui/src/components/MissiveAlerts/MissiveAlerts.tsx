@@ -1,7 +1,7 @@
 import { Grid, Typography } from "@mui/material";
 import React from "react";
-import { MissiveResponse } from "types";
 import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
+import { MissiveResponse } from "../../reduxstore/types";
 
 const MissiveAlerts: React.FC = () => {
   const { missiveAlerts } = useMissiveAlerts();

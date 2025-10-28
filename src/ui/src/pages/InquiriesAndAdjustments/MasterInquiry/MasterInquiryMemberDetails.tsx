@@ -258,7 +258,9 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
 
           {/* Missive Alerts - Display at bottom of member details */}
           {missiveAlerts.length > 0 && (
-            <Grid size={{ xs: 12 }}>
+            <Grid
+              size={{ xs: 12 }}
+              sx={{ marginTop: "14px" }}>
               <MissiveAlerts />
             </Grid>
           )}

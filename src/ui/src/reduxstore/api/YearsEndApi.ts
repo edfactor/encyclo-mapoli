@@ -91,7 +91,7 @@ import {
   ExecutiveHoursAndDollarsRequestDto,
   ForfeitureAdjustmentDetail,
   ForfeitureAdjustmentUpdateRequest,
-  ForfeituresAndPoints,
+  ForfeituresAndPointsResponse,
   ForfeituresByAge,
   FrozenReportsByAgeRequest,
   FrozenReportsForfeituresAndPointsRequest,
@@ -170,7 +170,7 @@ export const YearsEndApi = createApi({
       // after we do the update. Yet the working copy in the grid is
       // the correct data, a refresh is not needed.
     }),
-    updateEnrollment: builder.mutation<void, {ProfitYearRequest}>({
+    updateEnrollment: builder.mutation<void, { ProfitYearRequest }>({
       query: (params) => ({
         url: `yearend/update-enrollment`,
         method: "POST",
@@ -577,7 +577,7 @@ export const YearsEndApi = createApi({
       }
     }),
     getForfeituresAndPoints: builder.query<
-      ForfeituresAndPoints,
+      ForfeituresAndPointsResponse,
       FrozenReportsForfeituresAndPointsRequest & {
         suppressAllToastErrors?: boolean;
         onlyNetworkToastErrors?: boolean;
@@ -1220,20 +1220,27 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getForfeitureAdjustments: builder.query<SuggestedForfeitResponse, SuggestForfeitureAdjustmentRequest>({
-      query: (params) => ({
-        url: "yearend/forfeiture-adjustments",
-        method: "GET",
-        params: {
-          ssn: params.ssn,
-          badge: params.badge,
-          profitYear: params.profitYear,
-          skip: params.skip || 0,
-          take: params.take || 255,
-          sortBy: params.sortBy,
-          isSortDescending: params.isSortDescending
-        }
-      }),
+    getForfeitureAdjustments: builder.query<
+      SuggestedForfeitResponse,
+      SuggestForfeitureAdjustmentRequest & { onlyNetworkToastErrors?: boolean }
+    >({
+      query: (params) => {
+        const { onlyNetworkToastErrors, ...requestParams } = params;
+        return {
+          url: "yearend/forfeiture-adjustments",
+          method: "GET",
+          params: {
+            ssn: requestParams.ssn,
+            badge: requestParams.badge,
+            profitYear: requestParams.profitYear,
+            skip: requestParams.skip || 0,
+            take: requestParams.take || 255,
+            sortBy: requestParams.sortBy,
+            isSortDescending: requestParams.isSortDescending
+          },
+          meta: { onlyNetworkToastErrors }
+        };
+      },
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;

@@ -31,7 +31,7 @@ src/ui/src/pages/
 │   ├── DistributionsAndForfeitures/
 │   ├── DuplicateNamesAndBirthdays/
 │   ├── DuplicateSSNsOnDemographics/
-│   ├── Forfeit/
+│   ├── ForfeituresAdjustment/
 │   ├── ManageExecutiveHoursAndDollars/
 │   ├── MilitaryContribution/
 │   ├── NegativeEtvaForSSNsOnPayprofit/
@@ -48,10 +48,10 @@ src/ui/src/pages/
 ├── FiscalClose/              # Fiscal close operations
 │   ├── AgeReports/
 │   ├── EligibleEmployees/
-│   ├── ForfeituresAdjustment/
+│   ├── Forfeit/
 │   ├── InfoCard.tsx
 │   ├── PAY426Reports/
-│   ├── PaymasterUpdate/
+│   ├── PayMasterUpdate/
 │   ├── Profall/
 │   ├── ProfitShareByStore/
 │   ├── ProfitShareEditUpdate/

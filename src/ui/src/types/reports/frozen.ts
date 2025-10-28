@@ -72,7 +72,7 @@ export interface ForfeituresAndPointsDetail {
   beneficiaryPsn: number;
 }
 
-export interface ForfeituresAndPoints extends PagedReportResponse<ForfeituresAndPointsDetail> {
+export interface ForfeituresAndPointsResponse extends PagedReportResponse<ForfeituresAndPointsDetail> {
   useFrozenData: boolean;
   totalEarningPoints: number;
   totalForfeitPoints: number;
