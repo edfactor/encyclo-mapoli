@@ -15,10 +15,53 @@ vi.mock("../../../../reduxstore/api/YearsEndApi");
 vi.mock("../../../../hooks/useFiscalCloseProfitYear");
 vi.mock("../../../../hooks/useChecksumValidation");
 
-describe("useProfitShareEditUpdate", () => {
-  let store: ReturnType<typeof configureStore>;
+// Type definitions
+interface MockedYearsEndState {
+  profitSharingEditQueryParams: {
+    contributionPercent: number;
+    earningsPercent: number;
+    maxAllowedContributions: number;
+    badgeToAdjust: number;
+    badgeToAdjust2: number;
+    adjustContributionAmount: number;
+    adjustEarningsAmount: number;
+    adjustIncomingForfeitAmount: number;
+    adjustEarningsSecondaryAmount: number;
+    incomingForfeitPercent: number;
+    secondaryEarningsPercent: number;
+  };
+  profitSharingUpdate: null;
+  profitSharingEdit: null;
+  profitMasterStatus: { updatedBy: null; updatedTime: null };
+  profitShareEditUpdateShowSearch: boolean;
+  profitEditUpdateRevertChangesAvailable: boolean;
+  profitEditUpdateChangesAvailable: boolean;
+  totalForfeituresGreaterThanZero: boolean;
+  invalidProfitShareEditYear: boolean;
+  profitSharingUpdateAdjustmentSummary: null;
+}
 
-  const createStore = (preloadedState?: PreloadedState<any>) => {
+interface MockedSecurityState {
+  token: string;
+}
+
+interface MockedRootState {
+  yearsEnd: MockedYearsEndState;
+  security: MockedSecurityState;
+}
+
+interface ValidationFieldResult {
+  hasError: boolean;
+}
+
+interface ChecksumValidationResult {
+  validationData: null;
+  getFieldValidation: ReturnType<typeof vi.fn>;
+}
+
+
+describe("useProfitShareEditUpdate", () => {
+  const createStore = (preloadedState?: PreloadedState<MockedRootState>) => {
     return configureStore({
       reducer: {
         yearsEnd: yearsEndReducer,
@@ -28,7 +71,9 @@ describe("useProfitShareEditUpdate", () => {
     });
   };
 
-  const renderHookWithProvider = (hook: () => any) => {
+  const renderHookWithProvider = (
+    hook: () => ReturnType<typeof useProfitShareEditUpdate>
+  ) => {
     const store = createStore({
       yearsEnd: {
         profitSharingEditQueryParams: {
@@ -53,10 +98,10 @@ describe("useProfitShareEditUpdate", () => {
         totalForfeituresGreaterThanZero: false,
         invalidProfitShareEditYear: false,
         profitSharingUpdateAdjustmentSummary: null
-      } as any,
+      } as MockedYearsEndState,
       security: {
         token: "test-token"
-      } as any
+      } as MockedSecurityState
     });
 
     const wrapper = ({ children }: { children: ReactNode }) => (
@@ -70,18 +115,24 @@ describe("useProfitShareEditUpdate", () => {
     vi.clearAllMocks();
 
     // Mock useFiscalCloseProfitYear
-    (useFiscalCloseProfitYearModule.default as any).mockReturnValue(2024);
+    (useFiscalCloseProfitYearModule.default as ReturnType<typeof vi.fn>).mockReturnValue(2024);
 
     // Mock useChecksumValidation
-    (useChecksumValidationModule.useChecksumValidation as any).mockReturnValue({
+    (useChecksumValidationModule.useChecksumValidation as ReturnType<typeof vi.fn>).mockReturnValue({
       validationData: null,
       getFieldValidation: vi.fn(() => ({ hasError: false }))
-    });
+    } as ChecksumValidationResult);
 
     // Mock API hooks
-    (YearsEndApi.useGetMasterApplyMutation as any).mockReturnValue([vi.fn()]);
-    (YearsEndApi.useLazyGetMasterRevertQuery as any).mockReturnValue([vi.fn()]);
-    (YearsEndApi.useLazyGetProfitMasterStatusQuery as any).mockReturnValue([vi.fn()]);
+    (YearsEndApi.useGetMasterApplyMutation as ReturnType<typeof vi.fn>).mockReturnValue([
+      vi.fn()
+    ]);
+    (YearsEndApi.useLazyGetMasterRevertQuery as ReturnType<typeof vi.fn>).mockReturnValue([
+      vi.fn()
+    ]);
+    (YearsEndApi.useLazyGetProfitMasterStatusQuery as ReturnType<typeof vi.fn>).mockReturnValue([
+      vi.fn()
+    ]);
   });
 
   describe("Initial State", () => {
@@ -92,7 +143,7 @@ describe("useProfitShareEditUpdate", () => {
       expect(result.current.openSaveModal).toBe(false);
       expect(result.current.openRevertModal).toBe(false);
       expect(result.current.openEmptyModal).toBe(false);
-      expect(result.current.minimumFieldsEntered).toBe(true); // Should be true with default params
+      expect(result.current.minimumFieldsEntered).toBe(true);
       expect(result.current.updatedBy).toBe(null);
       expect(result.current.updatedTime).toBe(null);
     });
@@ -100,18 +151,17 @@ describe("useProfitShareEditUpdate", () => {
     it("should calculate minimumFieldsEntered correctly on mount", () => {
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
-      // With default params (contribution: 5, earnings: 3, max: 10000), should be true
       expect(result.current.minimumFieldsEntered).toBe(true);
     });
   });
 
   describe("Form Validation", () => {
     it("should fail validation when minimum fields missing (earnings = 0)", () => {
-      const preloadedState = {
+      const preloadedState: MockedRootState = {
         yearsEnd: {
           profitSharingEditQueryParams: {
             contributionPercent: 5,
-            earningsPercent: 0, // Missing earnings
+            earningsPercent: 0,
             maxAllowedContributions: 10000,
             badgeToAdjust: 0,
             badgeToAdjust2: 0,
@@ -131,8 +181,8 @@ describe("useProfitShareEditUpdate", () => {
           totalForfeituresGreaterThanZero: false,
           invalidProfitShareEditYear: false,
           profitSharingUpdateAdjustmentSummary: null
-        } as any,
-        security: { token: "test-token" } as any
+        },
+        security: { token: "test-token" }
       };
 
       const storeWithoutMinFields = createStore(preloadedState);
@@ -146,12 +196,12 @@ describe("useProfitShareEditUpdate", () => {
     });
 
     it("should fail validation when max allowed contributions = 0", () => {
-      const preloadedState = {
+      const preloadedState: MockedRootState = {
         yearsEnd: {
           profitSharingEditQueryParams: {
             contributionPercent: 5,
             earningsPercent: 3,
-            maxAllowedContributions: 0, // Missing max allowed
+            maxAllowedContributions: 0,
             badgeToAdjust: 0,
             badgeToAdjust2: 0,
             adjustContributionAmount: 0,
@@ -170,8 +220,8 @@ describe("useProfitShareEditUpdate", () => {
           totalForfeituresGreaterThanZero: false,
           invalidProfitShareEditYear: false,
           profitSharingUpdateAdjustmentSummary: null
-        } as any,
-        security: { token: "test-token" } as any
+        },
+        security: { token: "test-token" }
       };
 
       const storeWithoutMinFields = createStore(preloadedState);
@@ -185,7 +235,7 @@ describe("useProfitShareEditUpdate", () => {
     });
 
     it("should validate badge 1 adjustments correctly", () => {
-      const preloadedState = {
+      const preloadedState: MockedRootState = {
         yearsEnd: {
           profitSharingEditQueryParams: {
             contributionPercent: 5,
@@ -209,8 +259,8 @@ describe("useProfitShareEditUpdate", () => {
           totalForfeituresGreaterThanZero: false,
           invalidProfitShareEditYear: false,
           profitSharingUpdateAdjustmentSummary: null
-        } as any,
-        security: { token: "test-token" } as any
+        },
+        security: { token: "test-token" }
       };
 
       const storeWithBadge1 = createStore(preloadedState);
@@ -224,7 +274,7 @@ describe("useProfitShareEditUpdate", () => {
     });
 
     it("should fail badge 1 validation when earnings adjustment missing", () => {
-      const preloadedState = {
+      const preloadedState: MockedRootState = {
         yearsEnd: {
           profitSharingEditQueryParams: {
             contributionPercent: 5,
@@ -233,7 +283,7 @@ describe("useProfitShareEditUpdate", () => {
             badgeToAdjust: 12345,
             badgeToAdjust2: 0,
             adjustContributionAmount: 100,
-            adjustEarningsAmount: 0, // Missing earnings adjustment
+            adjustEarningsAmount: 0,
             adjustIncomingForfeitAmount: 25,
             adjustEarningsSecondaryAmount: 0,
             incomingForfeitPercent: 0,
@@ -248,8 +298,8 @@ describe("useProfitShareEditUpdate", () => {
           totalForfeituresGreaterThanZero: false,
           invalidProfitShareEditYear: false,
           profitSharingUpdateAdjustmentSummary: null
-        } as any,
-        security: { token: "test-token" } as any
+        },
+        security: { token: "test-token" }
       };
 
       const storeWithIncompleteBadge1 = createStore(preloadedState);
@@ -263,7 +313,7 @@ describe("useProfitShareEditUpdate", () => {
     });
 
     it("should validate badge 2 adjustments correctly", () => {
-      const preloadedState = {
+      const preloadedState: MockedRootState = {
         yearsEnd: {
           profitSharingEditQueryParams: {
             contributionPercent: 5,
@@ -287,8 +337,8 @@ describe("useProfitShareEditUpdate", () => {
           totalForfeituresGreaterThanZero: false,
           invalidProfitShareEditYear: false,
           profitSharingUpdateAdjustmentSummary: null
-        } as any,
-        security: { token: "test-token" } as any
+        },
+        security: { token: "test-token" }
       };
 
       const storeWithBadge2 = createStore(preloadedState);
@@ -302,7 +352,7 @@ describe("useProfitShareEditUpdate", () => {
     });
 
     it("should fail badge 2 validation when secondary earnings missing", () => {
-      const preloadedState = {
+      const preloadedState: MockedRootState = {
         yearsEnd: {
           profitSharingEditQueryParams: {
             contributionPercent: 5,
@@ -313,7 +363,7 @@ describe("useProfitShareEditUpdate", () => {
             adjustContributionAmount: 0,
             adjustEarningsAmount: 0,
             adjustIncomingForfeitAmount: 0,
-            adjustEarningsSecondaryAmount: 0, // Missing secondary earnings
+            adjustEarningsSecondaryAmount: 0,
             incomingForfeitPercent: 0,
             secondaryEarningsPercent: 0
           },
@@ -326,8 +376,8 @@ describe("useProfitShareEditUpdate", () => {
           totalForfeituresGreaterThanZero: false,
           invalidProfitShareEditYear: false,
           profitSharingUpdateAdjustmentSummary: null
-        } as any,
-        security: { token: "test-token" } as any
+        },
+        security: { token: "test-token" }
       };
 
       const storeWithIncompleteBadge2 = createStore(preloadedState);
@@ -356,93 +406,7 @@ describe("useProfitShareEditUpdate", () => {
     });
 
     it("should open empty modal when validation fails", () => {
-      const preloadedState = {
-        yearsEnd: {
-          profitSharingEditQueryParams: {
-            contributionPercent: 0, // Invalid
-            earningsPercent: 0, // Invalid
-            maxAllowedContributions: 0, // Invalid
-            badgeToAdjust: 0,
-            badgeToAdjust2: 0,
-            adjustContributionAmount: 0,
-            adjustEarningsAmount: 0,
-            adjustIncomingForfeitAmount: 0,
-            adjustEarningsSecondaryAmount: 0,
-            incomingForfeitPercent: 0,
-            secondaryEarningsPercent: 0
-          },
-          profitSharingUpdate: null,
-          profitSharingEdit: null,
-          profitMasterStatus: { updatedBy: null, updatedTime: null },
-          profitShareEditUpdateShowSearch: true,
-          profitEditUpdateRevertChangesAvailable: false,
-          profitEditUpdateChangesAvailable: false,
-          totalForfeituresGreaterThanZero: false,
-          invalidProfitShareEditYear: false,
-          profitSharingUpdateAdjustmentSummary: null
-        } as any,
-        security: { token: "test-token" } as any
-      };
-
-      const storeWithInvalidForm = createStore(preloadedState);
-      const wrapper = ({ children }: { children: ReactNode }) => (
-        <Provider store={storeWithInvalidForm}>{children}</Provider>
-      );
-
-      const { result } = renderHook(() => useProfitShareEditUpdate(), { wrapper });
-
-      act(() => {
-        result.current.handleOpenSaveModal();
-      });
-
-      expect(result.current.openEmptyModal).toBe(true);
-      expect(result.current.openSaveModal).toBe(false);
-    });
-
-    it("should close save modal when handler called", () => {
-      const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
-
-      // Open save modal
-      act(() => {
-        result.current.handleOpenSaveModal();
-      });
-      expect(result.current.openSaveModal).toBe(true);
-
-      // Close save modal
-      act(() => {
-        result.current.handleCloseSaveModal();
-      });
-      expect(result.current.openSaveModal).toBe(false);
-    });
-
-    it("should open and close revert modal", () => {
-      const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
-
-      expect(result.current.openRevertModal).toBe(false);
-
-      act(() => {
-        result.current.handleOpenRevertModal();
-      });
-      expect(result.current.openRevertModal).toBe(true);
-
-      act(() => {
-        result.current.handleCloseRevertModal();
-      });
-      expect(result.current.openRevertModal).toBe(false);
-    });
-
-    it("should close empty modal", () => {
-      const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
-
-      expect(result.current.openEmptyModal).toBe(false);
-
-      // Manually set to open (via direct action)
-      act(() => {
-        result.current.handleOpenSaveModal(); // With invalid form, opens empty modal
-      });
-
-      // Create a store with invalid form to open empty modal
-      const preloadedState = {
+      const preloadedState: MockedRootState = {
         yearsEnd: {
           profitSharingEditQueryParams: {
             contributionPercent: 0,
@@ -466,8 +430,8 @@ describe("useProfitShareEditUpdate", () => {
           totalForfeituresGreaterThanZero: false,
           invalidProfitShareEditYear: false,
           profitSharingUpdateAdjustmentSummary: null
-        } as any,
-        security: { token: "test-token" } as any
+        },
+        security: { token: "test-token" }
       };
 
       const storeWithInvalidForm = createStore(preloadedState);
@@ -475,17 +439,91 @@ describe("useProfitShareEditUpdate", () => {
         <Provider store={storeWithInvalidForm}>{children}</Provider>
       );
 
-      const { result: resultWithInvalidForm } = renderHook(() => useProfitShareEditUpdate(), { wrapper });
+      const { result } = renderHook(() => useProfitShareEditUpdate(), { wrapper });
 
       act(() => {
-        resultWithInvalidForm.current.handleOpenSaveModal();
+        result.current.handleOpenSaveModal();
       });
-      expect(resultWithInvalidForm.current.openEmptyModal).toBe(true);
+
+      expect(result.current.openEmptyModal).toBe(true);
+      expect(result.current.openSaveModal).toBe(false);
+    });
+
+    it("should close save modal when handler called", () => {
+      const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
       act(() => {
-        resultWithInvalidForm.current.handleCloseEmptyModal();
+        result.current.handleOpenSaveModal();
       });
-      expect(resultWithInvalidForm.current.openEmptyModal).toBe(false);
+      expect(result.current.openSaveModal).toBe(true);
+
+      act(() => {
+        result.current.handleCloseSaveModal();
+      });
+      expect(result.current.openSaveModal).toBe(false);
+    });
+
+    it("should open and close revert modal", () => {
+      const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
+
+      expect(result.current.openRevertModal).toBe(false);
+
+      act(() => {
+        result.current.handleOpenRevertModal();
+      });
+      expect(result.current.openRevertModal).toBe(true);
+
+      act(() => {
+        result.current.handleCloseRevertModal();
+      });
+      expect(result.current.openRevertModal).toBe(false);
+    });
+
+    it("should close empty modal", () => {
+      const preloadedState: MockedRootState = {
+        yearsEnd: {
+          profitSharingEditQueryParams: {
+            contributionPercent: 0,
+            earningsPercent: 0,
+            maxAllowedContributions: 0,
+            badgeToAdjust: 0,
+            badgeToAdjust2: 0,
+            adjustContributionAmount: 0,
+            adjustEarningsAmount: 0,
+            adjustIncomingForfeitAmount: 0,
+            adjustEarningsSecondaryAmount: 0,
+            incomingForfeitPercent: 0,
+            secondaryEarningsPercent: 0
+          },
+          profitSharingUpdate: null,
+          profitSharingEdit: null,
+          profitMasterStatus: { updatedBy: null, updatedTime: null },
+          profitShareEditUpdateShowSearch: true,
+          profitEditUpdateRevertChangesAvailable: false,
+          profitEditUpdateChangesAvailable: false,
+          totalForfeituresGreaterThanZero: false,
+          invalidProfitShareEditYear: false,
+          profitSharingUpdateAdjustmentSummary: null
+        },
+        security: { token: "test-token" }
+      };
+
+      const storeWithInvalidForm = createStore(preloadedState);
+      const wrapper = ({ children }: { children: ReactNode }) => (
+        <Provider store={storeWithInvalidForm}>{children}</Provider>
+      );
+
+      const { result } = renderHook(() => useProfitShareEditUpdate(), { wrapper });
+
+      act(() => {
+        result.current.handleOpenSaveModal();
+      });
+      expect(result.current.openEmptyModal).toBe(true);
+
+      act(() => {
+        result.current.handleCloseEmptyModal();
+      });
+      expect(result.current.openEmptyModal).toBe(false);
     });
   });
 
@@ -499,7 +537,9 @@ describe("useProfitShareEditUpdate", () => {
         })
       });
 
-      (YearsEndApi.useGetMasterApplyMutation as any).mockReturnValue([mockApplyMaster]);
+      (YearsEndApi.useGetMasterApplyMutation as ReturnType<typeof vi.fn>).mockReturnValue([
+        mockApplyMaster
+      ]);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
@@ -526,7 +566,9 @@ describe("useProfitShareEditUpdate", () => {
         })
       });
 
-      (YearsEndApi.useGetMasterApplyMutation as any).mockReturnValue([mockApplyMaster]);
+      (YearsEndApi.useGetMasterApplyMutation as ReturnType<typeof vi.fn>).mockReturnValue([
+        mockApplyMaster
+      ]);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
@@ -537,7 +579,6 @@ describe("useProfitShareEditUpdate", () => {
         await result.current.saveAction();
       });
 
-      // After save succeeds, changesApplied should be true and modal should close
       expect(result.current.changesApplied).toBe(true);
       expect(result.current.openSaveModal).toBe(false);
     });
@@ -547,11 +588,15 @@ describe("useProfitShareEditUpdate", () => {
         unwrap: vi.fn().mockRejectedValue(new Error("API Error"))
       });
 
-      (YearsEndApi.useGetMasterApplyMutation as any).mockReturnValue([mockApplyMaster]);
+      (YearsEndApi.useGetMasterApplyMutation as ReturnType<typeof vi.fn>).mockReturnValue([
+        mockApplyMaster
+      ]);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
-      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {
+        // Mock implementation
+      });
 
       await act(async () => {
         await result.current.saveAction();
@@ -562,7 +607,6 @@ describe("useProfitShareEditUpdate", () => {
         expect.any(Error)
       );
 
-      // Should not mark as applied on error
       expect(result.current.changesApplied).toBe(false);
 
       consoleErrorSpy.mockRestore();
@@ -579,7 +623,9 @@ describe("useProfitShareEditUpdate", () => {
         })
       });
 
-      (YearsEndApi.useLazyGetMasterRevertQuery as any).mockReturnValue([mockRevert]);
+      (YearsEndApi.useLazyGetMasterRevertQuery as ReturnType<typeof vi.fn>).mockReturnValue([
+        mockRevert
+      ]);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
@@ -604,12 +650,12 @@ describe("useProfitShareEditUpdate", () => {
         })
       });
 
-      (YearsEndApi.useLazyGetMasterRevertQuery as any).mockReturnValue([mockRevert]);
+      (YearsEndApi.useLazyGetMasterRevertQuery as ReturnType<typeof vi.fn>).mockReturnValue([
+        mockRevert
+      ]);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
-      // Manually set changesApplied to true to simulate state after save
-      // (in real usage, this would come from Redux state)
       await act(async () => {
         await result.current.revertAction();
       });
@@ -623,11 +669,15 @@ describe("useProfitShareEditUpdate", () => {
         unwrap: vi.fn().mockRejectedValue(new Error("API Error"))
       });
 
-      (YearsEndApi.useLazyGetMasterRevertQuery as any).mockReturnValue([mockRevert]);
+      (YearsEndApi.useLazyGetMasterRevertQuery as ReturnType<typeof vi.fn>).mockReturnValue([
+        mockRevert
+      ]);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
-      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {
+        // Mock implementation
+      });
 
       await act(async () => {
         await result.current.revertAction();
@@ -651,7 +701,9 @@ describe("useProfitShareEditUpdate", () => {
         })
       });
 
-      (YearsEndApi.useLazyGetProfitMasterStatusQuery as any).mockReturnValue([mockTriggerStatus]);
+      (YearsEndApi.useLazyGetProfitMasterStatusQuery as ReturnType<typeof vi.fn>).mockReturnValue([
+        mockTriggerStatus
+      ]);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
@@ -669,7 +721,9 @@ describe("useProfitShareEditUpdate", () => {
         })
       });
 
-      (YearsEndApi.useLazyGetProfitMasterStatusQuery as any).mockReturnValue([mockTriggerStatus]);
+      (YearsEndApi.useLazyGetProfitMasterStatusQuery as ReturnType<typeof vi.fn>).mockReturnValue([
+        mockTriggerStatus
+      ]);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
@@ -683,11 +737,15 @@ describe("useProfitShareEditUpdate", () => {
         unwrap: vi.fn().mockRejectedValue(new Error("Status fetch failed"))
       });
 
-      (YearsEndApi.useLazyGetProfitMasterStatusQuery as any).mockReturnValue([mockTriggerStatus]);
+      (YearsEndApi.useLazyGetProfitMasterStatusQuery as ReturnType<typeof vi.fn>).mockReturnValue([
+        mockTriggerStatus
+      ]);
 
-      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {
+        // Mock implementation
+      });
 
-      const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
+      renderHookWithProvider(() => useProfitShareEditUpdate());
 
       await waitFor(() => {
         expect(consoleErrorSpy).toHaveBeenCalled();
@@ -708,11 +766,11 @@ describe("useProfitShareEditUpdate", () => {
 
   describe("Validation Data Integration", () => {
     it("should integrate with useChecksumValidation hook", () => {
-      const mockGetFieldValidation = vi.fn().mockReturnValue({ hasError: false });
-      (useChecksumValidationModule.useChecksumValidation as any).mockReturnValue({
+      const mockGetFieldValidation = vi.fn().mockReturnValue({ hasError: false } as ValidationFieldResult);
+      (useChecksumValidationModule.useChecksumValidation as ReturnType<typeof vi.fn>).mockReturnValue({
         validationData: { field1: { hasError: false } },
         getFieldValidation: mockGetFieldValidation
-      });
+      } as ChecksumValidationResult);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
