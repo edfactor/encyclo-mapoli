@@ -19,14 +19,28 @@ public class GoldenExpressRun : Runnable
     {
         // YE Express runs though frozen to End for both READY and SMART
         await Run(Specify(
-            "R0", // Start by importing the READY database from the scramble data.
+            "P0",
             nameof(DropBadBenesReady), // Git rid of the two Bene/Employees w/o Demographics rows
-            nameof(FixFrozenReady),
-            nameof(ImportReadyDbToSmartDb), // Import SMART database from READY   database
+            nameof(TestPayProfitSelectedColumns), // VERIFY: Test PayProfit Updates; EarnPoints, ZeroCont, New Employee, CertDate
+            // Import SMART database from READY   database
+            "R13A", // PAYPROFIT-SHIFT
+            "R13B", // PAYPROFIT-SHIFT
+            nameof(TestPayProfitSelectedColumns), // VERIFY: Test PayProfit Updates; EarnPoints, ZeroCont, New Employee, CertDate
+            "R14", // ZERO-PY-PD-PAYPROFIT   <--- oh boy
             "S12", // Freeze on Smart
-            "SanityCheckEmployeeAndBenes",
-            "P18", // Run YearEndService on SMART and "PROF-SHARE sw[2]=1 CDATE=250104 YEAREND=Y" on READY
-            "TestPayProfitSelectedColumns", // VERIFY: Test PayProfit Updates; EarnPoints, ZeroCont, New Employee, CertDate
+            nameof(SanityCheckEmployeeAndBenes),
+            nameof(TestPayProfitSelectedColumns), // VERIFY: Test PayProfit Updates; EarnPoints, ZeroCont, New Employee, CertDate
+            "R18",   // "PROF-SHARE sw[2]=1 CDATE=251227 YEAREND=Y" on READY    
+                     // will clear Earnpoints, fiddle with zerocont, clear new employee, clear certdate
+
+            // Clear all
+            nameof(SmartPay456), // in SMART 2025 payprofit clear 3 columns, fiddle with one. - as if we rolled the year.
+            // build some
+            "S18", // Run YearEndService on SMART and
+            // Should match
+            nameof(TestPayProfitSelectedColumns) // VERIFY: Test PayProfit Updates; EarnPoints, ZeroCont, New Employee, CertDate
+
+#if false
             "R20", // PAY443    - Updates Earning points ?
             nameof(IntPay443), // Runs the SMART Integration test 
             "R21", // PAY444 - update intermediate values
@@ -38,7 +52,8 @@ public class GoldenExpressRun : Runnable
             "TestEtvaPrior", // Verify correct ETVA for 2024
             "P24", // Create PAY450 report on READY does enrollment update on SMART
             "P24B" // Updates the YEARS, and enrollment on READY, NOP on SMART
+                
+#endif
         ));
-
     }
 }

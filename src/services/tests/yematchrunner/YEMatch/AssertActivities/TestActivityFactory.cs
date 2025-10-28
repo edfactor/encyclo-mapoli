@@ -1,5 +1,6 @@
 ﻿using YEMatch.YEMatch.Activities;
 using YEMatch.YEMatch.ArrangeActivites;
+using YEMatch.YEMatch.ReadyActivities;
 
 namespace YEMatch.YEMatch.AssertActivities;
 
@@ -21,12 +22,13 @@ internal static class TestActivityFactory
             new ImportReadyDbToSmartDb(),
             new TrimTo14Employees(),
             new DropBadBenesReady(),
-            new FixFrozenReady(),
             new SanityCheckEmployeeAndBenes(),
             new OverwriteBadges(),
             new SetDateOfBirthTo19YearsAgo(),
-            new UpdateNavigation()
-            , new Give2023Hours()
+            new UpdateNavigation(),
+            new SmartPay456(),
+            new ReadyActivity(ReadyActivityFactory.sshClient!, ReadyActivityFactory.SftpClient!, true, "MasterInquiryDumper", "THA-8-10", "", dataDirectory),
+
         ];
     }
 }

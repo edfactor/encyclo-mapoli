@@ -12,7 +12,7 @@ namespace YEMatch.YEMatch.ReadyActivities;
 public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty, string AName, string ksh, string _args, string dataDirectory) : IActivity
 {
     public const string OptionalLocalResourceBase = "/Users/robertherrmann/prj/smart-profit-sharing/src/services/tests/Demoulas.ProfitSharing.IntegrationTests/Resources/";
-    private const bool UpdateIntegrationTestResources = false;
+    private const bool UpdateIntegrationTestResources = true;
     public string Args = _args;
 
     public string Name()
@@ -81,49 +81,6 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
             }
 
             IfChatty($"Log file copied to: file:///{localPath}");
-
-            Match matchTermReport = Regex.Match(result.Result.Trim(), @" JOB: YE-PROF-TERM \((\d+)\) COMPLETED");
-            if (matchTermReport.Success)
-            {
-                // Go grab prof term report.
-                string unixProcessId = matchTermReport.Groups[1].Value;
-                string qpay066Remote = "/dsmdev/data/PAYROLL/SYS/PVTSYSOUT/QPAY066-" + unixProcessId;
-                string qpay066Local = Path.Combine(dataDirectory, "READY-QPAY066.txt");
-                await using (FileStream fileStream = File.OpenWrite(qpay066Local))
-                {
-                    sftpClient.DownloadFile(qpay066Remote, fileStream);
-                }
-
-                IfChatty($"copied {qpay066Remote} to $qpay066Local");
-                string testingFile2 = OptionalLocalResourceBase + "terminatedEmployeeAndBeneficiaryReport-correct.txt";
-                if (HasDirectory(testingFile2) && UpdateIntegrationTestResources)
-                {
-                    File.Copy(qpay066Local, testingFile2, true);
-                    IfChatty($"NOTE::: Updated {testingFile2}");
-                }
-            }
-
-            Match matchTermReport2 = Regex.Match(result.Result.Trim(), @" JOB: YE-PROF-EDIT \((\d+)\) COMPLETED");
-            if (matchTermReport2.Success)
-            {
-                // Go grab prof term report.
-                string unixProcessId = matchTermReport2.Groups[1].Value;
-                string remote = "/dsmdev/data/PAYROLL/SYS/PVTSYSOUT/PAY447-" + unixProcessId;
-                string local = Path.Combine(dataDirectory, "READY-PAY447.txt");
-                await using (FileStream fileStream = File.OpenWrite(local))
-                {
-                    sftpClient.DownloadFile(remote, fileStream);
-                }
-
-                IfChatty($"copied {remote} to {local}");
-
-                string testingFile3 = OptionalLocalResourceBase + "pay447.txt";
-                if (HasDirectory(testingFile3) && UpdateIntegrationTestResources)
-                {
-                    File.Copy(local, testingFile3, true);
-                    IfChatty($"NOTE::: Updated {testingFile3}");
-                }
-            }
 
             // #######  LP WAS CALLED WITH ARGS :-d plaser5 /dsmdev/data/PAYROLL/SYS/PVTSYSOUT/PAY444A-25103 
             MatchCollection matches = Regex.Matches(result.Result, @"#######  LP WAS CALLED WITH ARGS :-d \w+ (/.+?-\d+)");
