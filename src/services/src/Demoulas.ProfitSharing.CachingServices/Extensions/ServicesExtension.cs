@@ -31,4 +31,24 @@ public static class ServicesExtension
 
         return builder;
     }
+
+    /// <summary>
+    /// Adds minimal caching services suitable for background sync services (without DuplicateNamesAndBirthdaysHostedService).
+    /// Used by EmployeeFull.Sync, EmployeeDelta.Sync, and EmployeePayroll.Sync which don't need report caching.
+    /// </summary>
+    public static IHostApplicationBuilder AddMinimalCachingServices(this IHostApplicationBuilder builder)
+    {
+        _ = builder.Services.AddKeyedSingleton<IBaseCacheService<LookupTableCache<string>>, PayClassificationHostedService>(nameof(PayClassificationHostedService));
+        _ = builder.Services.AddKeyedSingleton<IBaseCacheService<LookupTableCache<byte>>, DepartmentHostedService>(nameof(DepartmentHostedService));
+
+        _ = builder.Services.AddDistributedMemoryCache();
+
+        if (!builder.Environment.IsTestEnvironment())
+        {
+            _ = builder.Services.AddHostedService<PayClassificationHostedService>();
+            _ = builder.Services.AddHostedService<DepartmentHostedService>();
+        }
+
+        return builder;
+    }
 }

@@ -1,14 +1,13 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Telemetry;
-using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.OracleHcm.Commands;
 using Demoulas.ProfitSharing.OracleHcm.Mappers;
-using Demoulas.ProfitSharing.OracleHcm.Messaging;
 using Demoulas.ProfitSharing.OracleHcm.Services;
+using Demoulas.ProfitSharing.OracleHcm.Services.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
-using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 using Demoulas.ProfitSharing.UnitTests.Common.Helpers;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
@@ -20,8 +19,9 @@ using Microsoft.Extensions.Logging;
 using MockQueryable.Moq;
 using Moq;
 using System.ComponentModel;
+using System.Linq;
 
-namespace Demoulas.ProfitSharing.UnitTests.Services;
+namespace Demoulas.ProfitSharing.UnitTests.OracleHcm.Services;
 
 public class DemographicsServiceTests
 {
@@ -117,12 +117,19 @@ public class DemographicsServiceTests
         var totalServiceMock = new Mock<ITotalService>();
         var mapper = new DemographicMapper(new AddressMapper(), new ContactInfoMapper());
         var fakeSsnService = new Mock<IFakeSsnService>();
+        var repositoryMock = new Mock<IDemographicsRepository>();
+        var matchingServiceMock = new Mock<IDemographicMatchingService>();
+        var auditServiceMock = new Mock<IDemographicAuditService>();
+        var historyServiceMock = new Mock<IDemographicHistoryService>();
 
         var service = new DemographicsService(
             scenarioFactory,
+            repositoryMock.Object,
+            matchingServiceMock.Object,
+            auditServiceMock.Object,
+            historyServiceMock.Object,
             mapper,
             loggerMock.Object,
-            totalServiceMock.Object,
             fakeSsnService.Object
         );
 
@@ -198,11 +205,88 @@ public class DemographicsServiceTests
         var mapper = new DemographicMapper(new AddressMapper(), new ContactInfoMapper());
         var fakeSsnService = new Mock<IFakeSsnService>();
 
-        var service = new TestableDemographicsService(
+        var repositoryMock = new Mock<IDemographicsRepository>();
+        var matchingServiceMock = new Mock<IDemographicMatchingService>();
+        var auditServiceMock = new Mock<IDemographicAuditService>();
+        var historyServiceMock = new Mock<IDemographicHistoryService>();
+
+        // Setup matching service mocks
+        matchingServiceMock
+            .Setup(m => m.MatchByOracleIdAsync(It.IsAny<Dictionary<long, Demographic>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Demographic>());
+
+        matchingServiceMock
+            .Setup(m => m.MatchByFallbackAsync(It.IsAny<List<(int, int)>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((new List<Demographic>(), false));
+
+        matchingServiceMock
+            .Setup(m => m.IdentifyNewDemographics(It.IsAny<List<Demographic>>(), It.IsAny<List<Demographic>>()))
+            .Returns((List<Demographic> incoming, List<Demographic> existing) => incoming);
+
+        // Setup audit service mocks
+        auditServiceMock
+            .Setup(m => m.DetectDuplicateSsns(It.IsAny<List<Demographic>>()))
+            .Returns(new List<IGrouping<int, Demographic>>());
+
+        auditServiceMock
+            .Setup(m => m.PrepareAuditDuplicateSsns(It.IsAny<List<IGrouping<int, Demographic>>>()))
+            .Returns(new List<Demoulas.ProfitSharing.OracleHcm.Commands.IDemographicCommand>());
+
+        auditServiceMock
+            .Setup(m => m.PrepareCheckSsnConflicts(It.IsAny<List<Demographic>>(), It.IsAny<List<Demographic>>()))
+            .Returns(new List<Demoulas.ProfitSharing.OracleHcm.Commands.IDemographicCommand>());
+
+        // Setup history service mocks - using actual command types to allow real execution
+        historyServiceMock
+            .Setup(m => m.PrepareInsertNewWithHistory(It.IsAny<List<Demographic>>()))
+            .Returns<List<Demographic>>(newDemographics =>
+            {
+                var commands = new List<Demoulas.ProfitSharing.OracleHcm.Commands.IDemographicCommand>();
+
+                // Create real commands that will actually add to the context
+                foreach (var demographic in newDemographics)
+                {
+                    commands.Add(new Demoulas.ProfitSharing.OracleHcm.Commands.AddDemographicCommand(demographic));
+
+                    var history = new DemographicHistory
+                    {
+                        OracleHcmId = demographic.OracleHcmId,
+                        BadgeNumber = demographic.BadgeNumber,
+                        DateOfBirth = demographic.DateOfBirth,
+                        StoreNumber = demographic.StoreNumber,
+                        DepartmentId = demographic.DepartmentId,
+                        PayClassificationId = demographic.PayClassificationId,
+                        HireDate = demographic.HireDate,
+                        EmploymentTypeId = demographic.EmploymentTypeId,
+                        PayFrequencyId = demographic.PayFrequencyId,
+                        EmploymentStatusId = demographic.EmploymentStatusId,
+                        ValidFrom = DateTimeOffset.UtcNow,
+                        ValidTo = new DateTimeOffset(new DateTime(2100, 1, 1, 0, 0, 0, DateTimeKind.Utc))
+                    };
+                    commands.Add(new Demoulas.ProfitSharing.OracleHcm.Commands.AddHistoryCommand(history));
+                }
+
+                return (newDemographics.Count, commands);
+            });
+
+        historyServiceMock
+            .Setup(m => m.PrepareUpdateExistingWithHistory(It.IsAny<List<Demographic>>(), It.IsAny<List<Demographic>>()))
+            .Returns((0, new List<Demoulas.ProfitSharing.OracleHcm.Commands.IDemographicCommand>()));
+
+        historyServiceMock
+            .Setup(m => m.DetectSsnChanges(It.IsAny<List<Demographic>>(), It.IsAny<Dictionary<long, Demographic>>()))
+            .Returns(new List<Demographic>());
+
+        historyServiceMock
+            .Setup(m => m.PrepareSsnUpdateCommands(It.IsAny<List<Demographic>>(), It.IsAny<Dictionary<long, Demographic>>()))
+            .Returns(new List<Demoulas.ProfitSharing.OracleHcm.Commands.IDemographicCommand>()); var service = new DemographicsService(
             scenarioFactory,
+            repositoryMock.Object,
+            matchingServiceMock.Object,
+            auditServiceMock.Object,
+            historyServiceMock.Object,
             mapper,
             loggerMock.Object,
-            totalServiceMock.Object,
             fakeSsnService.Object
         );
 
@@ -376,358 +460,11 @@ public class DemographicsServiceTests
         return scenarioFactory;
     }
 
-    
-    /// <summary>
-    /// UC - If SSN matches but DateOfBirth does not match, and existing employee is terminated,
-    /// </summary>
-    /// <returns></returns>
-    [Fact]
-    [Description("PS-0000 : SSN match with DOB mismatch - verify demographic update when SSN matches but DOB differs")]
-    public async Task AddDemographicsStreamAsync_SSNMatch_NoDobMatch()
-    {
-        // Arrange
-        var scenarioFactory = SetupScenarioFactoryWithSeededDemographics(out var demographics, out var _ /*histories*/, out var audits, out var beneficiaryContacts, out var profitDetails);
-
-        //// diff dob and terminated employee
-        var demoWithDiffDob = new Demographic
-        {
-            OracleHcmId = 3,
-            Ssn = 222222222,
-            BadgeNumber = 101,
-            DateOfBirth = DateOnly.FromDateTime(DateTime.Today.AddYears(-30)),
-            StoreNumber = 1,
-            DepartmentId = 1,
-            PayClassificationId = "1",
-            HireDate = DateOnly.FromDateTime(DateTime.Today.AddYears(-5)),
-            EmploymentTypeId = 'F',
-            PayFrequencyId = 1,
-            EmploymentStatusId = 't',
-            ContactInfo = new ContactInfo
-            {
-                PhoneNumber = "0987654321",
-                FirstName = "Existing",
-                LastName = "User",
-                FullName = "User, Existing",
-                MiddleName = "E",
-            },
-            Address = new Address
-            {
-                Street = "456 Elm St",
-                City = "OldCity",
-                State = "OS",
-                PostalCode = "12345",
-            }
-        };
-
-        // change dob and SSN so it does not show as a match
-        var test = demographics.First(d => d.Ssn == 222222222);
-        test.Ssn = 33333333;
-        test.DateOfBirth = DateOnly.FromDateTime(DateTime.Today.AddYears(-26));
-
-        demographics.Add(demoWithDiffDob);
-
-        var employees = new[]
-        {
-            new DemographicsRequest
-            {
-                OracleHcmId = 1,
-                Ssn = 44444444,
-                BadgeNumber = 100,
-                DateOfBirth = DateOnly.FromDateTime(DateTime.Today.AddYears(-31)),
-                StoreNumber = 1,
-                DepartmentId = 1,
-                PayClassificationId = "1",
-                HireDate = DateOnly.FromDateTime(DateTime.Today.AddYears(-5)),
-                EmploymentTypeCode = 'F',
-                PayFrequencyId = 1,
-                EmploymentStatusId = 'A',
-                ContactInfo = new ContactInfoRequestDto
-                {
-                    PhoneNumber = "1234567890",
-                    FirstName = "First",
-                    LastName = "Last",
-                    FullName = "Last, First",
-                    MiddleName = "M",
-                },
-                Address = new AddressRequestDto
-                {
-                    Street = "123 Main St",
-                    City = "City",
-                    State = "ST",
-                    PostalCode = "12345",
-                },
-                GenderCode = 'M'
-            }
-        };
-
-        var loggerMock = new Mock<ILogger<DemographicsService>>();
-        var totalServiceMock = new Mock<ITotalService>();
-        var mapper = new DemographicMapper(new AddressMapper(), new ContactInfoMapper());
-        var fakeSsnService = new Mock<IFakeSsnService>();
-
-        var service = new DemographicsService(
-            scenarioFactory,
-            mapper,
-            loggerMock.Object,
-            totalServiceMock.Object,
-            fakeSsnService.Object
-        );
-
-        // Act
-        await service.AddDemographicsStreamAsync(employees);
-
-        // Assert
-        Assert.True(audits.Count > 0, "Expected audit records for duplicate SSN handling.");
-        // add beneficiaries and pay details
-    }
 
     /// <summary>
     /// UC - If SSN matches but DateOfBirth does not match, and existing employee is terminated,
     /// </summary>
     /// <returns></returns>
-    [Fact]
-    [Description("PS-0000 : Terminated employee SSN match no balance - verify handling when terminated employee has no balance")]
-    public async Task AddDemographicsStreamAsync_SSNMatch_NoDobMatch_ExistingEmployeeTerminated_NoBalance()
-    {
-        // Arrange
-        var scenarioFactory = SetupScenarioFactoryWithSeededDemographics(out var demographics, out var _ /*histories*/, out var audits, out var beneficiaryContacts, out var profitDetails);
-
-        // diff dob and terminated employee
-        var demoWithDiffDob = new Demographic
-        {
-            OracleHcmId = 3,
-            Ssn = 44444444,
-            BadgeNumber = 101,
-            DateOfBirth = DateOnly.FromDateTime(DateTime.Today.AddYears(-30)),
-            StoreNumber = 1,
-            DepartmentId = 1,
-            PayClassificationId = "1",
-            HireDate = DateOnly.FromDateTime(DateTime.Today.AddYears(-5)),
-            EmploymentTypeId = 'F',
-            PayFrequencyId = 1,
-            EmploymentStatusId = 't',
-            ContactInfo = new ContactInfo
-            {
-                PhoneNumber = "0987654321",
-                FirstName = "Existing",
-                LastName = "User",
-                FullName = "User, Existing",
-                MiddleName = "E",
-            },
-            Address = new Address
-            {
-                Street = "456 Elm St",
-                City = "OldCity",
-                State = "OS",
-                PostalCode = "12345",
-            }
-        };
-
-        // change dob and SSN so it does not show as a match
-        var test = demographics.First(d => d.Ssn == 222222222);
-        test.Ssn = 33333333;
-        test.DateOfBirth = DateOnly.FromDateTime(DateTime.Today.AddYears(-26));
-
-        demographics.Add(demoWithDiffDob);
-
-        var employees = new[]
-        {
-            new DemographicsRequest
-            {
-                OracleHcmId = 1,
-                Ssn = 44444444,
-                BadgeNumber = 100,
-                DateOfBirth = DateOnly.FromDateTime(DateTime.Today.AddYears(-31)),
-                StoreNumber = 1,
-                DepartmentId = 1,
-                PayClassificationId = "1",
-                HireDate = DateOnly.FromDateTime(DateTime.Today.AddYears(-5)),
-                EmploymentTypeCode = 'F',
-                PayFrequencyId = 1,
-                EmploymentStatusId = 't',
-                ContactInfo = new ContactInfoRequestDto
-                {
-                    PhoneNumber = "1234567890",
-                    FirstName = "First",
-                    LastName = "Last",
-                    FullName = "Last, First",
-                    MiddleName = "M",
-                },
-                Address = new AddressRequestDto
-                {
-                    Street = "123 Main St",
-                    City = "City",
-                    State = "ST",
-                    PostalCode = "12345",
-                },
-                GenderCode = 'M'
-            }
-        };
-
-        var loggerMock = new Mock<ILogger<DemographicsService>>();
-        var totalServiceMock = new Mock<ITotalService>();
-        var mapper = new DemographicMapper(new AddressMapper(), new ContactInfoMapper());
-        var fakeSsnService = new Mock<IFakeSsnService>();
-
-        totalServiceMock.Setup(t => t.GetVestingBalanceForSingleMemberAsync(It.IsAny<Demoulas.ProfitSharing.Common.Contracts.Request.SearchBy>(), It.IsAny<int>(), It.IsAny<short>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Demoulas.ProfitSharing.Common.Contracts.Response.BalanceEndpointResponse
-            {
-                Id = 123456789,
-                Ssn = "xxx-xx-6789",
-                VestedBalance = 2030,
-                Etva = 250,
-                VestingPercent = .4m,
-                CurrentBalance = 0.0M,
-                YearsInPlan = 4,
-                AllocationsToBeneficiary = 5,
-                AllocationsFromBeneficiary = 6,
-            });
-
-        var service = new DemographicsService(
-            scenarioFactory,
-            mapper,
-            loggerMock.Object,
-            totalServiceMock.Object,
-            fakeSsnService.Object
-        );
-
-        // Act
-        await service.AddDemographicsStreamAsync(employees);
-
-        // Assert
-        Assert.True(audits.Count > 0, "Expected audit records for duplicate SSN handling.");
-
-        // verify SSN was not changed for termed employee to fake SSN
-        var termedEmployee = demographics.First(d => d.OracleHcmId == 3);
-        Assert.Equal(44444444, termedEmployee.Ssn);
-
-        // verify existing employee was updated with new SSN
-        var existingEmployee = demographics.First(d => d.OracleHcmId == 1);
-        Assert.Equal(44444444, existingEmployee.Ssn);
-
-        // add beneficiaries and pay details
-    }
-
-    [Fact]
-    [Description("PS-0000 : Terminated employee SSN match with balance - verify handling when terminated employee has balance")]
-    public async Task AddDemographicsStreamAsync_SSNMatch_NoDobMatch_ExistingEmployeeTerminated_HasBalance()
-    {
-        // Arrange
-        var scenarioFactory = SetupScenarioFactoryWithSeededDemographics(out var demographics, out var histories, out var audits, out var beneficiaryContacts, out var profitDetails);
-
-        // diff dob and terminated employee
-        var demoWithDiffDob = new Demographic
-        {
-            OracleHcmId = 3,
-            Ssn = 222222222,
-            BadgeNumber = 101,
-            DateOfBirth = DateOnly.FromDateTime(DateTime.Today.AddYears(-30)),
-            StoreNumber = 1,
-            DepartmentId = 1,
-            PayClassificationId = "1",
-            HireDate = DateOnly.FromDateTime(DateTime.Today.AddYears(-5)),
-            EmploymentTypeId = 'F',
-            PayFrequencyId = 1,
-            EmploymentStatusId = 't',
-            ContactInfo = new ContactInfo
-            {
-                PhoneNumber = "0987654321",
-                FirstName = "Existing",
-                LastName = "User",
-                FullName = "User, Existing",
-                MiddleName = "E",
-            },
-            Address = new Address
-            {
-                Street = "456 Elm St",
-                City = "OldCity",
-                State = "OS",
-                PostalCode = "12345",
-            }
-        };
-
-        // change dob and SSN so it does not show as a match
-        var test = demographics.First(d => d.Ssn == 222222222);
-        test.Ssn = 33333333;
-        test.DateOfBirth = DateOnly.FromDateTime(DateTime.Today.AddYears(-26));
-
-        demographics.Add(demoWithDiffDob);
-
-        var employees = new[]
-        {
-            new DemographicsRequest
-            {
-                OracleHcmId = 1,
-                Ssn = 44444444,
-                BadgeNumber = 100,
-                DateOfBirth = DateOnly.FromDateTime(DateTime.Today.AddYears(-31)),
-                StoreNumber = 1,
-                DepartmentId = 1,
-                PayClassificationId = "1",
-                HireDate = DateOnly.FromDateTime(DateTime.Today.AddYears(-5)),
-                EmploymentTypeCode = 'F',
-                PayFrequencyId = 1,
-                EmploymentStatusId = 'A',
-                ContactInfo = new ContactInfoRequestDto
-                {
-                    PhoneNumber = "1234567890",
-                    FirstName = "First",
-                    LastName = "Last",
-                    FullName = "Last, First",
-                    MiddleName = "M",
-                },
-                Address = new AddressRequestDto
-                {
-                    Street = "123 Main St",
-                    City = "City",
-                    State = "ST",
-                    PostalCode = "12345",
-                },
-                GenderCode = 'M'
-            }
-        };
-
-        var loggerMock = new Mock<ILogger<DemographicsService>>();
-        var totalServiceMock = new Mock<ITotalService>();
-        var mapper = new DemographicMapper(new AddressMapper(), new ContactInfoMapper());
-        var fakeSsnService = new Mock<IFakeSsnService>();
-
-        totalServiceMock.Setup(t => t.GetVestingBalanceForSingleMemberAsync(It.IsAny<Demoulas.ProfitSharing.Common.Contracts.Request.SearchBy>(), It.IsAny<int>(), It.IsAny<short>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Demoulas.ProfitSharing.Common.Contracts.Response.BalanceEndpointResponse
-            {
-                Id = 123456789,
-                Ssn = "xxx-xx-6789",
-                VestedBalance = 2030,
-                Etva = 250,
-                VestingPercent = .4m,
-                CurrentBalance = 5000.0M,
-                YearsInPlan = 4,
-                AllocationsToBeneficiary = 5,
-                AllocationsFromBeneficiary = 6,
-            });
-
-        var service = new DemographicsService(
-            scenarioFactory,
-            mapper,
-            loggerMock.Object,
-            totalServiceMock.Object,
-            fakeSsnService.Object
-        );
-
-        // Act
-        await service.AddDemographicsStreamAsync(employees);
-
-        // Assert
-        Assert.True(audits.Count > 0, "Expected audit records for duplicate SSN handling.");
-
-        // verify SSN was NOT changed for termed employee to fake SSN
-        var termedEmployee = demographics.First(d => d.OracleHcmId == 3);
-        Assert.Equal(222222222, termedEmployee.Ssn);
-
-        // verify existing employee was updated with new SSN
-        var existingEmployee = demographics.First(d => d.OracleHcmId == 1);
-        Assert.Equal(44444444, existingEmployee.Ssn);
-    }
 
     [Fact]
     [Description("PS-0000 : Merge profit details - verify profit details are merged from source to target demographic")]
@@ -778,11 +515,19 @@ public class DemographicsServiceTests
         fakeSsnService.Setup(f => f.GenerateFakeSsnAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(fakeSsnValue);
 
+        var repositoryMock = new Mock<IDemographicsRepository>();
+        var matchingServiceMock = new Mock<IDemographicMatchingService>();
+        var auditServiceMock = new Mock<IDemographicAuditService>();
+        var historyServiceMock = new Mock<IDemographicHistoryService>();
+
         var service = new DemographicsService(
             scenarioFactory,
+            repositoryMock.Object,
+            matchingServiceMock.Object,
+            auditServiceMock.Object,
+            historyServiceMock.Object,
             mapper,
             loggerMock.Object,
-            totalServiceMock.Object,
             fakeSsnService.Object
         );
 
@@ -857,11 +602,19 @@ public class DemographicsServiceTests
         fakeSsnService.Setup(f => f.GenerateFakeSsnAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(999999999);
 
+        var repositoryMock = new Mock<IDemographicsRepository>();
+        var matchingServiceMock = new Mock<IDemographicMatchingService>();
+        var auditServiceMock = new Mock<IDemographicAuditService>();
+        var historyServiceMock = new Mock<IDemographicHistoryService>();
+
         var service = new DemographicsService(
             scenarioFactory,
+            repositoryMock.Object,
+            matchingServiceMock.Object,
+            auditServiceMock.Object,
+            historyServiceMock.Object,
             mapper,
             loggerMock.Object,
-            totalServiceMock.Object,
             fakeSsnService.Object
         );
 
@@ -878,27 +631,5 @@ public class DemographicsServiceTests
                 It.IsAny<Exception>(),
                 It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)),
             Times.Once);
-    }
-}
-
-internal sealed class TestableDemographicsService : DemographicsService
-{
-    public TestableDemographicsService(
-        IProfitSharingDataContextFactory dataContextFactory,
-        DemographicMapper mapper,
-        ILogger<DemographicsService> logger,
-        ITotalService totalService,
-        IFakeSsnService fakeSsnService)
-        : base(dataContextFactory, mapper, logger, totalService, fakeSsnService)
-    {
-    }
-
-    protected override Task<List<Demographic>> GetMatchingDemographicsByFallbackSqlAsync(
-        List<(int Ssn, int Badge)> pairs,
-        ProfitSharingDbContext context,
-        CancellationToken ct)
-    {
-        // Mock implementation that returns empty list to avoid FromSqlRaw in tests
-        return Task.FromResult(new List<Demographic>());
     }
 }

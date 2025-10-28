@@ -14,11 +14,9 @@ const EligibleEmployees = () => {
     return <StatusDropdownActionNode />;
   };
 
-  const recordCount = searchResults?.response?.total || 0;
-
   return (
     <Page
-      label={`${CAPTIONS.ELIGIBLE_EMPLOYEES} (${recordCount} records)`}
+      label={`${CAPTIONS.ELIGIBLE_EMPLOYEES}`}
       actionNode={renderActionNode()}>
       <Grid
         container
