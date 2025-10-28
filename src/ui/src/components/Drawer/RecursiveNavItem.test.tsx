@@ -250,7 +250,7 @@ describe("RecursiveNavItem - Collapsible Menu Tests", () => {
     expect(storedValue).toBe("false");
   });
 
-  it("should respect maxAutoExpandDepth prop", () => {
+  it("should start collapsed regardless of maxAutoExpandDepth prop (collapsed by default behavior)", () => {
     const deeplyNestedItem: NavigationDto = {
       id: 1,
       parentId: 0,
@@ -300,8 +300,9 @@ describe("RecursiveNavItem - Collapsible Menu Tests", () => {
       </MemoryRouter>
     );
 
-    // Level 0 should be auto-expanded (level 0 <= maxAutoExpandDepth 1)
-    expect(screen.getByText("Level 1")).toBeInTheDocument();
+    // All levels should be collapsed by default, even with maxAutoExpandDepth set
+    expect(screen.queryByText("Level 1")).not.toBeInTheDocument();
+    expect(screen.queryByText("Level 2")).not.toBeInTheDocument();
   });
 
   it("should call onNavigate callback when navigable item is clicked", () => {
