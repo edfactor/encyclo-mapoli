@@ -1,49 +1,70 @@
-import { renderHook, act } from "@testing-library/react";
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { configureStore } from "@reduxjs/toolkit";
+import { act, renderHook } from "@testing-library/react";
+import { ReactNode } from "react";
 import { Provider } from "react-redux";
-import { configureStore, PreloadedState } from "@reduxjs/toolkit";
-import usePayMasterUpdate from "./usePayMasterUpdate";
-import * as useLazyGetUpdateSummaryQuery from "reduxstore/api/YearsEndApi";
-import * as useUpdateEnrollmentMutation from "reduxstore/api/YearsEndApi";
+import { UpdateSummaryResponse, UpdateSummaryEmployee } from "reduxstore/types";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as useFiscalCloseProfitYear from "../../../../hooks/useFiscalCloseProfitYear";
 import * as useGridPagination from "../../../../hooks/useGridPagination";
-import navigationReducer from "reduxstore/slices/navigationSlice";
-import messageReducer from "reduxstore/slices/messageSlice";
-import { UpdateSummaryResponse } from "reduxstore/types";
-import { ReactNode } from "react";
+import * as useLazyGetUpdateSummaryQuery from "../../../../reduxstore/api/YearsEndApi";
+import * as useUpdateEnrollmentMutation from "../../../../reduxstore/api/YearsEndApi";
+import { messageSlice } from "../../../../reduxstore/slices/messageSlice";
+import navigationReducer, { NavigationState } from "../../../../reduxstore/slices/navigationSlice";
+import usePayMasterUpdate from "./usePayMasterUpdate";
+import { MessagesState } from "../../../../reduxstore/slices/messageSlice";
 
-// Mock Redux state types
-interface MockNavigationState {
-  navigationData: {
-    navigation: Array<{
-      id: number;
-      statusName?: string;
-      items?: Array<{
-        id: number;
-        statusName?: string;
-        items?: unknown[];
-      }>;
-    }>;
-  };
-}
+type MockRootState = {
+  navigation: NavigationState;
+  message: MessagesState;
+};
 
-interface MockMessageState {
-  messages: Record<string, unknown>;
-}
-
-interface MockRootState {
-  navigation: MockNavigationState;
-  message: MockMessageState;
-}
+// Helper to create minimal navigation item for testing
+const createMockNavigationItem = (overrides?: Partial<any>) => ({
+  id: 1,
+  parentId: 0,
+  title: "Test",
+  subTitle: "",
+  url: "/test",
+  statusId: 1,
+  statusName: "Not Started",
+  orderNumber: 1,
+  icon: "icon",
+  requiredRoles: [],
+  disabled: false,
+  items: [],
+  ...overrides
+});
 
 // Mock data creation
-const createMockUpdateSummaryResponse = (overrides?: Partial<UpdateSummaryResponse>): UpdateSummaryResponse => ({
-  items: [],
+const createMockPagedData = (items: UpdateSummaryEmployee[] = []) => ({
+  items,
   pageNumber: 0,
   pageSize: 25,
-  totalCount: 0,
+  totalCount: items.length,
   hasNextPage: false,
   hasPreviousPage: false,
+  total: items.length,
+  totalPages: Math.ceil(items.length / 25),
+  currentPage: 1,
+  results: items
+});
+
+const createMockUpdateSummaryResponse = (
+  items: UpdateSummaryEmployee[] = [],
+  overrides?: Partial<UpdateSummaryResponse>
+): UpdateSummaryResponse => ({
+  reportName: "Update Summary",
+  reportDate: new Date().toISOString(),
+  startDate: new Date().toISOString(),
+  endDate: new Date().toISOString(),
+  dataSource: "Live",
+  response: createMockPagedData(items),
+  totalNumberOfEmployees: 0,
+  totalNumberOfBeneficiaries: 0,
+  totalBeforeProfitSharingAmount: 0,
+  totalBeforeVestedAmount: 0,
+  totalAfterProfitSharingAmount: 0,
+  totalAfterVestedAmount: 0,
   ...overrides
 });
 
@@ -53,13 +74,13 @@ const mockUpdateEnrollment = vi.fn();
 const mockResetPagination = vi.fn();
 
 // Create store wrapper
-const createWrapper = (initialState?: PreloadedState<MockRootState>) => {
-  const store = configureStore({
+const createWrapper = (initialState?: Partial<MockRootState>) => {
+  const store = configureStore<MockRootState>({
     reducer: {
       navigation: navigationReducer,
-      message: messageReducer
+      message: messageSlice
     },
-    preloadedState: initialState as PreloadedState<any>
+    preloadedState: initialState as Partial<MockRootState>
   });
 
   return ({ children }: { children: ReactNode }) => <Provider store={store}>{children}</Provider>;
@@ -79,19 +100,18 @@ describe("usePayMasterUpdate", () => {
     vi.spyOn(useGridPagination, "useGridPagination").mockReturnValue({
       pageNumber: 0,
       pageSize: 25,
-      sortBy: "name",
-      isSortDescending: false,
-      resetPagination: mockResetPagination,
-      goToPage: vi.fn(),
-      onPaginationChange: vi.fn()
+      sortParams: {
+        sortBy: "name",
+        isSortDescending: false
+      },
+      handlePaginationChange: vi.fn(),
+      handleSortChange: vi.fn(),
+      resetPagination: mockResetPagination
     } as ReturnType<typeof useGridPagination.useGridPagination>);
 
     // Mock lazy query
     mockTriggerGetSummary.mockResolvedValue({
-      data: createMockUpdateSummaryResponse({
-        items: [],
-        totalCount: 0
-      })
+      data: createMockUpdateSummaryResponse([])
     });
 
     // Mock mutation
@@ -100,13 +120,41 @@ describe("usePayMasterUpdate", () => {
     });
 
     vi.spyOn(useLazyGetUpdateSummaryQuery, "useLazyGetUpdateSummaryQuery").mockReturnValue([
-      mockTriggerGetSummary
-    ] as ReturnType<typeof useLazyGetUpdateSummaryQuery.useLazyGetUpdateSummaryQuery>);
+      mockTriggerGetSummary,
+      {
+        data: undefined,
+        isLoading: false,
+        isSuccess: false,
+        isError: false,
+        error: null,
+        isFetching: false,
+        isUninitialized: true,
+        currentData: undefined,
+        requestId: undefined,
+        endpointName: "getUpdateSummary",
+        startedTimeStamp: undefined,
+        fulfilledTimeStamp: undefined
+      },
+      { lastArg: undefined, requestStatus: "uninitialized" }
+    ] as unknown as ReturnType<typeof useLazyGetUpdateSummaryQuery.useLazyGetUpdateSummaryQuery>);
 
     vi.spyOn(useUpdateEnrollmentMutation, "useUpdateEnrollmentMutation").mockReturnValue([
       mockUpdateEnrollment,
-      { isLoading: false }
-    ] as ReturnType<typeof useUpdateEnrollmentMutation.useUpdateEnrollmentMutation>);
+      {
+        isLoading: false,
+        isSuccess: false,
+        isError: false,
+        isUninitialized: true,
+        endpointName: "updateEnrollment",
+        status: "uninitialized",
+        originalArgs: undefined,
+        startedTimeStamp: undefined,
+        fulfilledTimeStamp: undefined,
+        requestId: undefined,
+        error: null,
+        data: undefined
+      }
+    ] as unknown as ReturnType<typeof useUpdateEnrollmentMutation.useUpdateEnrollmentMutation>);
   });
 
   describe("Initial State", () => {
@@ -221,10 +269,9 @@ describe("usePayMasterUpdate", () => {
     });
 
     it("should populate summary data on successful search", async () => {
-      const mockData = createMockUpdateSummaryResponse({
-        items: [{ name: "Employee 1", items: [] }] as any[],
-        totalCount: 1
-      });
+      const mockData = createMockUpdateSummaryResponse(
+        [{ name: "Employee 1", items: [] }] as any[] as UpdateSummaryEmployee[]
+      );
 
       mockTriggerGetSummary.mockResolvedValue({ data: mockData });
 
@@ -276,19 +323,20 @@ describe("usePayMasterUpdate", () => {
     });
 
     it("should preserve current status on reset", async () => {
-      const initialState: PreloadedState<MockRootState> = {
+      const initialState: Partial<MockRootState> = {
         navigation: {
           navigationData: {
             navigation: [
-              {
+              createMockNavigationItem({
                 id: 123,
-                statusName: "In Progress",
-                items: []
-              }
+                statusName: "In Progress"
+              })
             ]
-          }
+          },
+          error: null,
+          currentNavigationId: null
         },
-        message: { messages: {} }
+        message: {}
       };
 
       localStorage.setItem("navigationId", "123");
@@ -462,19 +510,20 @@ describe("usePayMasterUpdate", () => {
 
   describe("Navigation Status Initialization", () => {
     it("should initialize current status from navigation", async () => {
-      const initialState: PreloadedState<MockRootState> = {
+      const initialState: Partial<MockRootState> = {
         navigation: {
           navigationData: {
             navigation: [
-              {
+              createMockNavigationItem({
                 id: 123,
-                statusName: "In Progress",
-                items: []
-              }
+                statusName: "In Progress"
+              })
             ]
-          }
+          },
+          error: null,
+          currentNavigationId: null
         },
-        message: { messages: {} }
+        message: {}
       };
 
       localStorage.setItem("navigationId", "123");
@@ -492,25 +541,26 @@ describe("usePayMasterUpdate", () => {
     });
 
     it("should find nested navigation items", async () => {
-      const initialState: PreloadedState<MockRootState> = {
+      const initialState: Partial<MockRootState> = {
         navigation: {
           navigationData: {
             navigation: [
-              {
+              createMockNavigationItem({
                 id: 1,
                 statusName: "Parent",
                 items: [
-                  {
+                  createMockNavigationItem({
                     id: 123,
-                    statusName: "Child Status",
-                    items: []
-                  }
+                    statusName: "Child Status"
+                  })
                 ]
-              }
+              })
             ]
-          }
+          },
+          error: null,
+          currentNavigationId: null
         },
-        message: { messages: {} }
+        message: {}
       };
 
       localStorage.setItem("navigationId", "123");
@@ -541,13 +591,15 @@ describe("usePayMasterUpdate", () => {
     });
 
     it("should handle missing navigation data", async () => {
-      const initialState: PreloadedState<MockRootState> = {
+      const initialState: Partial<MockRootState> = {
         navigation: {
           navigationData: {
             navigation: []
-          }
+          },
+          error: null,
+          currentNavigationId: null
         },
-        message: { messages: {} }
+        message: {}
       };
 
       localStorage.setItem("navigationId", "999");

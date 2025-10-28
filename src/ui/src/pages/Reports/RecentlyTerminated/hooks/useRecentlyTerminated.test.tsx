@@ -1,19 +1,12 @@
-import { renderHook, act } from "@testing-library/react";
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import useRecentlyTerminated from "./useRecentlyTerminated";
+import { act, renderHook } from "@testing-library/react";
 import * as useLazyGetRecentlyTerminatedReportQuery from "reduxstore/api/YearsEndApi";
+import { RecentlyTerminatedDetail } from "reduxstore/types";
+import { Paged } from "smart-ui-library";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import * as useGridPagination from "../../../../hooks/useGridPagination";
 import * as useMissiveAlerts from "../../../../hooks/useMissiveAlerts";
-import { RecentlyTerminatedRecord, Paged } from "reduxstore/types";
-
-// Mock data types
-interface MockRecentlyTerminatedRecord extends RecentlyTerminatedRecord {
-  fullName: string;
-  terminationDate: string;
-  badgeNumber: number;
-  [key: string]: unknown;
-}
+import useRecentlyTerminated from "./useRecentlyTerminated";
 
 interface MockPaged<T> extends Paged<T> {
   items: T[];
@@ -26,26 +19,39 @@ interface MockPaged<T> extends Paged<T> {
 
 // Create mock data
 const createMockRecentlyTerminatedRecord = (
-  overrides?: Partial<MockRecentlyTerminatedRecord>
-): MockRecentlyTerminatedRecord => ({
-  fullName: "Jane Doe",
-  terminationDate: "2024-01-15",
+  overrides?: Partial<RecentlyTerminatedDetail>
+): RecentlyTerminatedDetail => ({
   badgeNumber: 12345,
+  fullName: "Jane Doe",
+  firstName: "Jane",
+  lastName: "Doe",
+  middleInitial: "M",
+  ssn: "123-45-6789",
+  terminationDate: "2024-01-15",
+  terminationCodeId: "1",
+  address: "123 Main St",
+  address2: "",
+  city: "Springfield",
+  state: "IL",
+  postalCode: "62701",
+  isExecutive: false,
   ...overrides
 });
 
-const createMockPagedData = (
-  items: MockRecentlyTerminatedRecord[] = []
-): MockPaged<RecentlyTerminatedRecord> => ({
+const createMockPagedData = (items: RecentlyTerminatedDetail[] = []): MockPaged<RecentlyTerminatedDetail> => ({
   items,
   pageNumber: 0,
   pageSize: 25,
   totalCount: items.length,
   hasNextPage: false,
-  hasPreviousPage: false
+  hasPreviousPage: false,
+  total: items.length,
+  totalPages: Math.ceil(items.length / 25),
+  currentPage: 1,
+  results: items
 });
 
-const createMockRecentlyTerminatedResponse = (items: MockRecentlyTerminatedRecord[] = []) => ({
+const createMockRecentlyTerminatedResponse = (items: RecentlyTerminatedDetail[] = []) => ({
   reportName: "Recently Terminated Report",
   reportDate: "2024-01-20",
   startDate: "2024-01-01",
@@ -338,8 +344,8 @@ describe("useRecentlyTerminated", () => {
       mockTriggerSearch.mockClear();
 
       // Simulate pagination change
-      const paginationCallback = (useGridPagination.useGridPagination as ReturnType<typeof vi.spyOn>).mock
-        .results[0].value.onPaginationChange;
+      const paginationCallback = (useGridPagination.useGridPagination as ReturnType<typeof vi.spyOn>).mock.results[0]
+        .value.onPaginationChange;
 
       await act(async () => {
         await paginationCallback(1, 25, { sortBy: "fullName, terminationDate", isSortDescending: false });
@@ -360,8 +366,8 @@ describe("useRecentlyTerminated", () => {
 
       mockTriggerSearch.mockClear();
 
-      const paginationCallback = (useGridPagination.useGridPagination as ReturnType<typeof vi.spyOn>).mock
-        .results[0].value.onPaginationChange;
+      const paginationCallback = (useGridPagination.useGridPagination as ReturnType<typeof vi.spyOn>).mock.results[0]
+        .value.onPaginationChange;
 
       await act(async () => {
         await paginationCallback(1, 25, { sortBy: "fullName, terminationDate", isSortDescending: false });
@@ -385,8 +391,8 @@ describe("useRecentlyTerminated", () => {
       expect(result.current.searchParams).toEqual({ beginningDate, endingDate });
 
       // Simulate pagination to next page
-      const paginationCallback = (useGridPagination.useGridPagination as ReturnType<typeof vi.spyOn>).mock
-        .results[0].value.onPaginationChange;
+      const paginationCallback = (useGridPagination.useGridPagination as ReturnType<typeof vi.spyOn>).mock.results[0]
+        .value.onPaginationChange;
 
       mockTriggerSearch.mockClear();
 
@@ -425,8 +431,8 @@ describe("useRecentlyTerminated", () => {
       });
 
       // Simulate pagination that fails
-      const paginationCallback = (useGridPagination.useGridPagination as ReturnType<typeof vi.spyOn>).mock
-        .results[0].value.onPaginationChange;
+      const paginationCallback = (useGridPagination.useGridPagination as ReturnType<typeof vi.spyOn>).mock.results[0]
+        .value.onPaginationChange;
 
       await act(async () => {
         await paginationCallback(1, 25, { sortBy: "fullName, terminationDate", isSortDescending: false });
@@ -457,8 +463,8 @@ describe("useRecentlyTerminated", () => {
       mockTriggerSearch.mockClear();
       mockAddAlert.mockClear();
 
-      const paginationCallback = (useGridPagination.useGridPagination as ReturnType<typeof vi.spyOn>).mock
-        .results[0].value.onPaginationChange;
+      const paginationCallback = (useGridPagination.useGridPagination as ReturnType<typeof vi.spyOn>).mock.results[0]
+        .value.onPaginationChange;
 
       await act(async () => {
         await paginationCallback(0, 25, { sortBy: "fullName, terminationDate", isSortDescending: false });
@@ -511,8 +517,8 @@ describe("useRecentlyTerminated", () => {
       });
       mockAddAlert.mockClear();
 
-      const paginationCallback = (useGridPagination.useGridPagination as ReturnType<typeof vi.spyOn>).mock
-        .results[0].value.onPaginationChange;
+      const paginationCallback = (useGridPagination.useGridPagination as ReturnType<typeof vi.spyOn>).mock.results[0]
+        .value.onPaginationChange;
 
       await act(async () => {
         await paginationCallback(1, 25, { sortBy: "fullName, terminationDate", isSortDescending: false });
@@ -568,8 +574,8 @@ describe("useRecentlyTerminated", () => {
       // Paginate
       mockTriggerSearch.mockClear();
 
-      const paginationCallback = (useGridPagination.useGridPagination as ReturnType<typeof vi.spyOn>).mock
-        .results[0].value.onPaginationChange;
+      const paginationCallback = (useGridPagination.useGridPagination as ReturnType<typeof vi.spyOn>).mock.results[0]
+        .value.onPaginationChange;
 
       await act(async () => {
         await paginationCallback(1, 25, { sortBy: "fullName, terminationDate", isSortDescending: false });

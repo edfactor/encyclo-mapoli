@@ -276,7 +276,7 @@ export const usePayMasterUpdate = () => {
   }, []);
 
   const handleStatusChange = useCallback(
-    (newStatus: string, statusName?: string) => {
+    (_newStatus: string, statusName?: string) => {
       // Only trigger archive when status is changing TO "Complete" (not already "Complete")
       if (statusName === "Complete" && state.currentStatus !== "Complete") {
         dispatch({ type: "SET_CURRENT_STATUS", payload: { status: "Complete" } });

@@ -1,14 +1,14 @@
-import React, { ReactNode } from "react";
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { renderHook, act, waitFor } from "@testing-library/react";
+import { configureStore } from "@reduxjs/toolkit";
+import { act, renderHook, waitFor } from "@testing-library/react";
+import { ReactNode } from "react";
 import { Provider } from "react-redux";
-import { configureStore, PreloadedState } from "@reduxjs/toolkit";
-import useProfitShareEditUpdate from "./useProfitShareEditUpdate";
-import yearsEndReducer from "../../../../reduxstore/slices/yearsEndSlice";
-import securityReducer from "../../../../reduxstore/slices/securitySlice";
-import * as YearsEndApi from "../../../../reduxstore/api/YearsEndApi";
-import * as useFiscalCloseProfitYearModule from "../../../../hooks/useFiscalCloseProfitYear";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as useChecksumValidationModule from "../../../../hooks/useChecksumValidation";
+import * as useFiscalCloseProfitYearModule from "../../../../hooks/useFiscalCloseProfitYear";
+import * as YearsEndApi from "../../../../reduxstore/api/YearsEndApi";
+import securityReducer from "../../../../reduxstore/slices/securitySlice";
+import yearsEndReducer from "../../../../reduxstore/slices/yearsEndSlice";
+import useProfitShareEditUpdate from "./useProfitShareEditUpdate";
 
 // Mock the API hooks
 vi.mock("../../../../reduxstore/api/YearsEndApi");
@@ -59,21 +59,18 @@ interface ChecksumValidationResult {
   getFieldValidation: ReturnType<typeof vi.fn>;
 }
 
-
 describe("useProfitShareEditUpdate", () => {
-  const createStore = (preloadedState?: PreloadedState<MockedRootState>) => {
+  const createStore = (preloadedState?: Partial<MockedRootState>) => {
     return configureStore({
       reducer: {
         yearsEnd: yearsEndReducer,
         security: securityReducer
       },
-      preloadedState
+      preloadedState: preloadedState as Partial<MockedRootState>
     });
   };
 
-  const renderHookWithProvider = (
-    hook: () => ReturnType<typeof useProfitShareEditUpdate>
-  ) => {
+  const renderHookWithProvider = (hook: () => ReturnType<typeof useProfitShareEditUpdate>) => {
     const store = createStore({
       yearsEnd: {
         profitSharingEditQueryParams: {
@@ -104,9 +101,7 @@ describe("useProfitShareEditUpdate", () => {
       } as MockedSecurityState
     });
 
-    const wrapper = ({ children }: { children: ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
-    );
+    const wrapper = ({ children }: { children: ReactNode }) => <Provider store={store}>{children}</Provider>;
 
     return renderHook(() => hook(), { wrapper });
   };
@@ -124,15 +119,9 @@ describe("useProfitShareEditUpdate", () => {
     } as ChecksumValidationResult);
 
     // Mock API hooks
-    (YearsEndApi.useGetMasterApplyMutation as ReturnType<typeof vi.fn>).mockReturnValue([
-      vi.fn()
-    ]);
-    (YearsEndApi.useLazyGetMasterRevertQuery as ReturnType<typeof vi.fn>).mockReturnValue([
-      vi.fn()
-    ]);
-    (YearsEndApi.useLazyGetProfitMasterStatusQuery as ReturnType<typeof vi.fn>).mockReturnValue([
-      vi.fn()
-    ]);
+    (YearsEndApi.useGetMasterApplyMutation as ReturnType<typeof vi.fn>).mockReturnValue([vi.fn()]);
+    (YearsEndApi.useLazyGetMasterRevertQuery as ReturnType<typeof vi.fn>).mockReturnValue([vi.fn()]);
+    (YearsEndApi.useLazyGetProfitMasterStatusQuery as ReturnType<typeof vi.fn>).mockReturnValue([vi.fn()]);
   });
 
   describe("Initial State", () => {
@@ -537,9 +526,7 @@ describe("useProfitShareEditUpdate", () => {
         })
       });
 
-      (YearsEndApi.useGetMasterApplyMutation as ReturnType<typeof vi.fn>).mockReturnValue([
-        mockApplyMaster
-      ]);
+      (YearsEndApi.useGetMasterApplyMutation as ReturnType<typeof vi.fn>).mockReturnValue([mockApplyMaster]);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
@@ -566,9 +553,7 @@ describe("useProfitShareEditUpdate", () => {
         })
       });
 
-      (YearsEndApi.useGetMasterApplyMutation as ReturnType<typeof vi.fn>).mockReturnValue([
-        mockApplyMaster
-      ]);
+      (YearsEndApi.useGetMasterApplyMutation as ReturnType<typeof vi.fn>).mockReturnValue([mockApplyMaster]);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
@@ -588,9 +573,7 @@ describe("useProfitShareEditUpdate", () => {
         unwrap: vi.fn().mockRejectedValue(new Error("API Error"))
       });
 
-      (YearsEndApi.useGetMasterApplyMutation as ReturnType<typeof vi.fn>).mockReturnValue([
-        mockApplyMaster
-      ]);
+      (YearsEndApi.useGetMasterApplyMutation as ReturnType<typeof vi.fn>).mockReturnValue([mockApplyMaster]);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
@@ -602,10 +585,7 @@ describe("useProfitShareEditUpdate", () => {
         await result.current.saveAction();
       });
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "ERROR: Did not apply changes to year end",
-        expect.any(Error)
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith("ERROR: Did not apply changes to year end", expect.any(Error));
 
       expect(result.current.changesApplied).toBe(false);
 
@@ -623,9 +603,7 @@ describe("useProfitShareEditUpdate", () => {
         })
       });
 
-      (YearsEndApi.useLazyGetMasterRevertQuery as ReturnType<typeof vi.fn>).mockReturnValue([
-        mockRevert
-      ]);
+      (YearsEndApi.useLazyGetMasterRevertQuery as ReturnType<typeof vi.fn>).mockReturnValue([mockRevert]);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
@@ -650,9 +628,7 @@ describe("useProfitShareEditUpdate", () => {
         })
       });
 
-      (YearsEndApi.useLazyGetMasterRevertQuery as ReturnType<typeof vi.fn>).mockReturnValue([
-        mockRevert
-      ]);
+      (YearsEndApi.useLazyGetMasterRevertQuery as ReturnType<typeof vi.fn>).mockReturnValue([mockRevert]);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
@@ -669,9 +645,7 @@ describe("useProfitShareEditUpdate", () => {
         unwrap: vi.fn().mockRejectedValue(new Error("API Error"))
       });
 
-      (YearsEndApi.useLazyGetMasterRevertQuery as ReturnType<typeof vi.fn>).mockReturnValue([
-        mockRevert
-      ]);
+      (YearsEndApi.useLazyGetMasterRevertQuery as ReturnType<typeof vi.fn>).mockReturnValue([mockRevert]);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
@@ -683,10 +657,7 @@ describe("useProfitShareEditUpdate", () => {
         await result.current.revertAction();
       });
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "ERROR: Did not revert changes to year end",
-        expect.any(Error)
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith("ERROR: Did not revert changes to year end", expect.any(Error));
 
       consoleErrorSpy.mockRestore();
     });
@@ -701,9 +672,7 @@ describe("useProfitShareEditUpdate", () => {
         })
       });
 
-      (YearsEndApi.useLazyGetProfitMasterStatusQuery as ReturnType<typeof vi.fn>).mockReturnValue([
-        mockTriggerStatus
-      ]);
+      (YearsEndApi.useLazyGetProfitMasterStatusQuery as ReturnType<typeof vi.fn>).mockReturnValue([mockTriggerStatus]);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
@@ -721,9 +690,7 @@ describe("useProfitShareEditUpdate", () => {
         })
       });
 
-      (YearsEndApi.useLazyGetProfitMasterStatusQuery as ReturnType<typeof vi.fn>).mockReturnValue([
-        mockTriggerStatus
-      ]);
+      (YearsEndApi.useLazyGetProfitMasterStatusQuery as ReturnType<typeof vi.fn>).mockReturnValue([mockTriggerStatus]);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
@@ -737,9 +704,7 @@ describe("useProfitShareEditUpdate", () => {
         unwrap: vi.fn().mockRejectedValue(new Error("Status fetch failed"))
       });
 
-      (YearsEndApi.useLazyGetProfitMasterStatusQuery as ReturnType<typeof vi.fn>).mockReturnValue([
-        mockTriggerStatus
-      ]);
+      (YearsEndApi.useLazyGetProfitMasterStatusQuery as ReturnType<typeof vi.fn>).mockReturnValue([mockTriggerStatus]);
 
       const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {
         // Mock implementation
