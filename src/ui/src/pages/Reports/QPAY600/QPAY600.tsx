@@ -8,10 +8,8 @@ import QPAY600Grid from "./QPAY600Grid";
 
 const QPAY600: React.FC = () => {
   const [filterParams, setFilterParams] = useState<QPAY600FilterParams>({
-    startDate: null,
-    endDate: null,
-    employeeStatus: "Full time",
-    employeeType: ""
+    profitYear: new Date(2024, 0, 1),
+    employeeType: "parttime"
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -21,10 +19,8 @@ const QPAY600: React.FC = () => {
 
   const handleReset = () => {
     setFilterParams({
-      startDate: null,
-      endDate: null,
-      employeeStatus: "Full time",
-      employeeType: ""
+      profitYear: new Date(2024, 0, 1),
+      employeeType: "parttime"
     });
   };
 
@@ -56,25 +52,12 @@ const QPAY600: React.FC = () => {
           </DSMAccordion>
         </Grid>
 
-        {filterParams.employeeStatus === "Full time" && (
-          <Grid width="100%">
-            <QPAY600Grid
-              filterParams={filterParams}
-              employeeStatus="Full time"
-              onLoadingChange={handleLoadingChange}
-            />
-          </Grid>
-        )}
-
-        {filterParams.employeeStatus === "Part time" && (
-          <Grid width="100%">
-            <QPAY600Grid
-              filterParams={filterParams}
-              employeeStatus="Part time"
-              onLoadingChange={handleLoadingChange}
-            />
-          </Grid>
-        )}
+        <Grid width="100%">
+          <QPAY600Grid
+            filterParams={filterParams}
+            onLoadingChange={handleLoadingChange}
+          />
+        </Grid>
       </Grid>
     </Page>
   );

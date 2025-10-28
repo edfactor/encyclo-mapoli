@@ -103,7 +103,7 @@ public sealed class PayService : IPayService
                 var payServicesDtos = aggregatedData.Select(s => new PayServicesDto
                 {
                     Employees = s.Employees,
-                    YearsOfServiceLabel = s.YearsSinceHire != -1 && s.YearsSinceHire != -2 ? $"{s.YearsSinceHire} yrs" : 
+                    YearsOfServiceLabel = s.YearsSinceHire != -1 && s.YearsSinceHire != -2 ? $"{s.YearsSinceHire}" : 
                         (s.YearsSinceHire == -1 ? "> 6 mos" : "< 6 mos"),
                     YearsOfService = s.YearsSinceHire,
                     YearsWages = s.TotalWages
@@ -120,7 +120,8 @@ public sealed class PayService : IPayService
                     ProfitYear = request.ProfitYear,
                     PayServicesForYear = paginatedResults,
                     Description = $"Successfully retrieved {payServicesDtos.Count} pay service records for employment type '{employmentType}' (aggregated by years since hire).",
-                    TotalEmployeeNumber = aggregatedData.Sum(s => s.Employees)
+                    TotalEmployeeNumber = aggregatedData.Sum(s => s.Employees),
+                    TotalEmployeesWages = aggregatedData.Sum(s => s.TotalWages)
                 };
 
                 _logger.LogInformation(

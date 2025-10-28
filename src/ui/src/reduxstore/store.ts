@@ -13,6 +13,7 @@ import { LookupsApi } from "./api/LookupsApi";
 import { MilitaryApi } from "./api/MilitaryApi";
 import { NavigationApi } from "./api/NavigationApi";
 import { NavigationStatusApi } from "./api/NavigationStatusApi";
+import { PayServicesApi } from "./api/PayServicesApi";
 import { SecurityApi } from "./api/SecurityApi";
 import { validationApi } from "./api/ValidationApi";
 import { YearsEndApi } from "./api/YearsEndApi";
@@ -65,6 +66,7 @@ export const store = configureStore({
     [BeneficiariesApi.reducerPath]: BeneficiariesApi.reducer,
     [AdjustmentsApi.reducerPath]: AdjustmentsApi.reducer,
     [DistributionApi.reducerPath]: DistributionApi.reducer,
+    [PayServicesApi.reducerPath]: PayServicesApi.reducer,
     [validationApi.reducerPath]: validationApi.reducer
   },
 
@@ -86,6 +88,7 @@ export const store = configureStore({
       .concat(BeneficiariesApi.middleware)
       .concat(AdjustmentsApi.middleware)
       .concat(DistributionApi.middleware)
+      .concat(PayServicesApi.middleware)
       .concat(validationApi.middleware)
 });
 
