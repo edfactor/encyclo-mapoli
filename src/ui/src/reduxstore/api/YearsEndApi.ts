@@ -1220,20 +1220,27 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getForfeitureAdjustments: builder.query<SuggestedForfeitResponse, SuggestForfeitureAdjustmentRequest>({
-      query: (params) => ({
-        url: "yearend/forfeiture-adjustments",
-        method: "GET",
-        params: {
-          ssn: params.ssn,
-          badge: params.badge,
-          profitYear: params.profitYear,
-          skip: params.skip || 0,
-          take: params.take || 255,
-          sortBy: params.sortBy,
-          isSortDescending: params.isSortDescending
-        }
-      }),
+    getForfeitureAdjustments: builder.query<
+      SuggestedForfeitResponse,
+      SuggestForfeitureAdjustmentRequest & { onlyNetworkToastErrors?: boolean }
+    >({
+      query: (params) => {
+        const { onlyNetworkToastErrors, ...requestParams } = params;
+        return {
+          url: "yearend/forfeiture-adjustments",
+          method: "GET",
+          params: {
+            ssn: requestParams.ssn,
+            badge: requestParams.badge,
+            profitYear: requestParams.profitYear,
+            skip: requestParams.skip || 0,
+            take: requestParams.take || 255,
+            sortBy: requestParams.sortBy,
+            isSortDescending: requestParams.isSortDescending
+          },
+          meta: { onlyNetworkToastErrors }
+        };
+      },
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;

@@ -7,10 +7,10 @@ import { SortParams, useGridPagination } from "../../../../hooks/useGridPaginati
 import { useMissiveAlerts } from "../../../../hooks/useMissiveAlerts";
 import { useReadOnlyNavigation } from "../../../../hooks/useReadOnlyNavigation";
 import {
+  InquiryApi,
   useLazyGetProfitMasterInquiryMemberDetailsQuery,
   useLazyGetProfitMasterInquiryMemberQuery
 } from "../../../../reduxstore/api/InquiryApi";
-import { InquiryApi } from "../../../../reduxstore/api/InquiryApi";
 import { useLazyGetForfeitureAdjustmentsQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { MasterInquiryResponseDto } from "../../../../types/master-inquiry/master-inquiry";
 import {
@@ -123,26 +123,44 @@ const useForfeituresAdjustment = () => {
       dispatch({ type: "SEARCH_START", payload: { params: searchParams } });
 
       try {
-        const employeeData = await triggerSearch(searchParams).unwrap();
+        // Add onlyNetworkToastErrors flag to suppress validation error toasts
+        const searchParamsWithFlag = { ...searchParams, onlyNetworkToastErrors: true };
+        const employeeData = await triggerSearch(searchParamsWithFlag).unwrap();
+
+        // Check if employee was found
+        if (!employeeData || !employeeData.demographicId) {
+          // No employee found - show alert
+          dispatch({ type: "SEARCH_SUCCESS", payload: { employeeData: null } });
+          addAlert(FORFEITURES_ADJUSTMENT_MESSAGES.MEMBER_NOT_FOUND);
+          return;
+        }
+
         dispatch({ type: "SEARCH_SUCCESS", payload: { employeeData } });
 
         // Auto-fetch member details after successful search
-        if (employeeData?.demographicId && profitYear) {
+        if (profitYear) {
           fetchMemberDetails(employeeData.demographicId);
         }
       } catch (error: unknown) {
+        // Check if it's a 404 error (employee not found)
+        if (error && typeof error === "object" && "status" in error && error.status === 404) {
+          dispatch({ type: "SEARCH_FAILURE", payload: { error: "Member not found" } });
+          addAlert(FORFEITURES_ADJUSTMENT_MESSAGES.MEMBER_NOT_FOUND);
+        }
         // Check if it's a 500 error with "Employee not found" message
-        if (error && typeof error === "object" && "status" in error && error.status === 500 && "data" in error) {
+        else if (error && typeof error === "object" && "status" in error && error.status === 500 && "data" in error) {
           const errorData = error as { data?: { title?: string } };
           if (errorData.data?.title === "Employee not found.") {
-            addAlert(FORFEITURES_ADJUSTMENT_MESSAGES.EMPLOYEE_NOT_FOUND);
+            dispatch({ type: "SEARCH_FAILURE", payload: { error: "Employee not found" } });
+            addAlert(FORFEITURES_ADJUSTMENT_MESSAGES.MEMBER_NOT_FOUND);
           } else {
             console.error("Forfeitures adjustment employee search error:", error);
+            dispatch({ type: "SEARCH_FAILURE", payload: { error: error?.toString() || "Unknown error" } });
           }
         } else {
           console.error("Forfeitures adjustment employee search error:", error);
+          dispatch({ type: "SEARCH_FAILURE", payload: { error: error?.toString() || "Unknown error" } });
         }
-        dispatch({ type: "SEARCH_FAILURE", payload: { error: error?.toString() || "Unknown error" } });
       }
     },
     [triggerSearch, clearAlerts, addAlert, profitYear, fetchMemberDetails]
@@ -161,8 +179,9 @@ const useForfeituresAdjustment = () => {
       dispatch({ type: "CLOSE_ADD_FORFEITURE_MODAL" });
 
       try {
-        // Refresh search to get updated data
-        const refreshedData = await triggerSearch(searchParams).unwrap();
+        // Refresh search to get updated data (with onlyNetworkToastErrors flag)
+        const searchParamsWithFlag = { ...searchParams, onlyNetworkToastErrors: true };
+        const refreshedData = await triggerSearch(searchParamsWithFlag).unwrap();
         dispatch({ type: "SEARCH_SUCCESS", payload: { employeeData: refreshedData } });
 
         // Invalidate member details cache to force refresh
