@@ -107,8 +107,8 @@ const StandaloneMemberDetails: React.FC<StandaloneMemberDetailsProps> = ({
 
   return (
     <MasterInquiryMemberDetails
-      //memberType={memberType}
-      //id={id}
+      memberType={memberType}
+      id={id}
       profitYear={profitYear}
       memberDetails={memberDetails}
       isLoading={isFetching}
