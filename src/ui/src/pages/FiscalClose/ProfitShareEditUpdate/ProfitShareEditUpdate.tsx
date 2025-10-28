@@ -1,5 +1,4 @@
-import { Replay } from "@mui/icons-material";
-import { Alert, AlertTitle, Button, CircularProgress, Grid, Tooltip, Typography } from "@mui/material";
+import { Alert, AlertTitle, Grid, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DSMAccordion, numberToCurrency, Page, setMessage, SmartModal, TotalsGrid } from "smart-ui-library";
@@ -24,14 +23,7 @@ import {
   setResetYearEndPage
 } from "../../../reduxstore/slices/yearsEndSlice";
 import { RootState } from "../../../reduxstore/store";
-import {
-  ProfitMasterStatus,
-  ProfitShareEditUpdateQueryParams,
-  ProfitShareMasterApplyRequest,
-  ProfitShareMasterResponse,
-  ProfitYearRequest
-} from "../../../reduxstore/types";
-// usePrerequisiteNavigations now encapsulated by PrerequisiteGuard
+import { ProfitShareMasterApplyRequest, ProfitShareMasterResponse, ProfitYearRequest } from "../../../reduxstore/types";
 import PrerequisiteGuard from "../../../components/PrerequisiteGuard";
 import { CAPTIONS } from "../../../constants";
 import { MessageKeys, Messages } from "../../../utils/messageDictonary";
@@ -40,6 +32,8 @@ import { MasterUpdateSummaryTable } from "./MasterUpdateSummaryTable";
 import ProfitShareEditConfirmation from "./ProfitShareEditConfirmation";
 import ProfitShareEditUpdateSearchFilter from "./ProfitShareEditUpdateSearchFilter";
 import ProfitShareEditUpdateTabs from "./ProfitShareEditUpdateTabs";
+import ProfitShareRevertButton from "./ProfitShareRevertButton";
+import ProfitShareSaveButton from "./ProfitShareSaveButton";
 
 const useRevertAction = (
   //setEmployeesReverted: (count: number) => void,
@@ -184,180 +178,6 @@ const useSaveAction = () =>
     return saveAction;
   };
 
-const wasFormUsed = (profitSharingEditQueryParams: ProfitShareEditUpdateQueryParams) => {
-  return (
-    (profitSharingEditQueryParams?.contributionPercent ?? 0) > 0 ||
-    (profitSharingEditQueryParams?.earningsPercent ?? 0) > 0 ||
-    (profitSharingEditQueryParams?.incomingForfeitPercent ?? 0) > 0 ||
-    (profitSharingEditQueryParams?.maxAllowedContributions ?? 0) > 0 ||
-    (profitSharingEditQueryParams?.badgeToAdjust ?? 0) > 0 ||
-    (profitSharingEditQueryParams?.adjustContributionAmount ?? 0) > 0 ||
-    (profitSharingEditQueryParams?.adjustEarningsAmount ?? 0) > 0 ||
-    (profitSharingEditQueryParams?.adjustIncomingForfeitAmount ?? 0) > 0 ||
-    (profitSharingEditQueryParams?.badgeToAdjust2 ?? 0) > 0 ||
-    (profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0) > 0
-  );
-};
-
-// This really just opens the modal. The modal for this has the function to call
-// the back end
-const RenderSaveButton = (
-  setOpenSaveModal: (open: boolean) => void,
-  setOpenEmptyModal: (open: boolean) => void,
-  status: ProfitMasterStatus | null,
-  isLoading: boolean,
-  minimumFieldsEntered: boolean = false,
-  adjustedBadgeOneValid: boolean = true,
-  adjustedBadgeTwoValid: boolean = true,
-  prerequisitesComplete: boolean = true,
-  isReadOnly: boolean = false
-) => {
-  // The incoming status field is about whether or not changes have already been applied
-  const {
-    profitEditUpdateChangesAvailable,
-    profitSharingEditQueryParams,
-    profitShareApplyOrRevertLoading,
-    totalForfeituresGreaterThanZero,
-    invalidProfitShareEditYear
-  } = useSelector((state: RootState) => state.yearsEnd);
-  //const navigationList = useSelector((state: RootState) => state.navigation.navigationData);
-  //const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
-  // Determine tooltip reason when disabled by prerequisites
-  const prereqTooltip = !prerequisitesComplete
-    ? "All prerequisite navigations must be complete before saving."
-    : undefined;
-  const saveButton = (
-    <Button
-      disabled={
-        (!profitEditUpdateChangesAvailable && status?.updatedTime !== null) ||
-        isLoading ||
-        totalForfeituresGreaterThanZero ||
-        invalidProfitShareEditYear ||
-        !prerequisitesComplete ||
-        isReadOnly
-      }
-      variant="outlined"
-      color="primary"
-      size="medium"
-      onClick={
-        isReadOnly
-          ? undefined
-          : async () => {
-              if (
-                profitSharingEditQueryParams &&
-                wasFormUsed(profitSharingEditQueryParams) &&
-                adjustedBadgeOneValid &&
-                adjustedBadgeTwoValid &&
-                minimumFieldsEntered &&
-                prerequisitesComplete
-              ) {
-                setOpenSaveModal(true);
-              } else {
-                setOpenEmptyModal(true);
-              }
-            }
-      }>
-      {isLoading || profitShareApplyOrRevertLoading ? (
-        //Prevent loading spinner from shrinking button
-        <div className="spinner">
-          <CircularProgress
-            color="inherit"
-            size="20px"
-          />
-        </div>
-      ) : (
-        "Save Updates"
-      )}
-    </Button>
-  );
-
-  if (
-    !profitEditUpdateChangesAvailable ||
-    invalidProfitShareEditYear ||
-    totalForfeituresGreaterThanZero ||
-    !prerequisitesComplete ||
-    isReadOnly
-  ) {
-    return (
-      <Tooltip
-        placement="top"
-        title={
-          isReadOnly
-            ? "You are in read-only mode and cannot apply changes."
-            : invalidProfitShareEditYear
-              ? "Invalid year for saving changes"
-              : totalForfeituresGreaterThanZero == true
-                ? "Total forfeitures is greater than zero."
-                : !prerequisitesComplete
-                  ? prereqTooltip
-                  : "You must have previewed data before saving."
-        }>
-        <span>{saveButton}</span>
-      </Tooltip>
-    );
-  } else {
-    return saveButton;
-  }
-};
-
-// This really just opens the modal. The modal for this has the function to call
-// the back end
-const RenderRevertButton = (
-  setOpenRevertModal: (open: boolean) => void,
-  isLoading: boolean,
-  isReadOnly: boolean = false
-) => {
-  // The incoming status field is about whether or not changes have already been applied
-  const { profitEditUpdateRevertChangesAvailable, profitShareApplyOrRevertLoading } = useSelector(
-    (state: RootState) => state.yearsEnd
-  );
-
-  const revertButton = (
-    <Button
-      disabled={!profitEditUpdateRevertChangesAvailable || isLoading || isReadOnly}
-      variant="outlined"
-      color="primary"
-      size="medium"
-      startIcon={
-        isLoading ? null : (
-          <Replay color={profitEditUpdateRevertChangesAvailable && !isReadOnly ? "primary" : "disabled"} />
-        )
-      }
-      onClick={
-        isReadOnly
-          ? undefined
-          : async () => {
-              setOpenRevertModal(true);
-            }
-      }>
-      {isLoading || profitShareApplyOrRevertLoading ? (
-        //Prevent loading spinner from shrinking button
-        <div className="spinner">
-          <CircularProgress
-            color="inherit"
-            size="20px"
-          />
-        </div>
-      ) : (
-        "Revert"
-      )}
-    </Button>
-  );
-
-  if (!profitEditUpdateRevertChangesAvailable || isReadOnly) {
-    return (
-      <Tooltip
-        placement="top"
-        title={
-          isReadOnly ? "You are in read-only mode and cannot revert changes." : "You must have applied data to revert."
-        }>
-        <span>{revertButton}</span>
-      </Tooltip>
-    );
-  } else {
-    return revertButton;
-  }
-};
 
 const ProfitShareEditUpdate = () => {
   //const [beneficiariesAffected, setBeneficiariesAffected] = useState(0);
@@ -549,18 +369,18 @@ const ProfitShareEditUpdate = () => {
           label={`${CAPTIONS.PROFIT_SHARE_UPDATE}`}
           actionNode={
             <div className="flex items-center justify-end gap-2">
-              {RenderRevertButton(setOpenRevertModal, isLoading, isReadOnly)}
-              {RenderSaveButton(
-                setOpenSaveModal,
-                setOpenEmptyModal,
-                profitMasterStatus,
-                isLoading,
-                minimumFieldsEntered,
-                adjustedBadgeOneValid,
-                adjustedBadgeTwoValid,
-                prerequisitesComplete,
-                isReadOnly
-              )}
+              <ProfitShareRevertButton setOpenRevertModal={setOpenRevertModal} isLoading={isLoading} isReadOnly={isReadOnly} />
+              <ProfitShareSaveButton
+                setOpenSaveModal={setOpenSaveModal}
+                setOpenEmptyModal={setOpenEmptyModal}
+                status={profitMasterStatus}
+                isLoading={isLoading}
+                minimumFieldsEntered={minimumFieldsEntered}
+                adjustedBadgeOneValid={adjustedBadgeOneValid}
+                adjustedBadgeTwoValid={adjustedBadgeTwoValid}
+                prerequisitesComplete={prerequisitesComplete}
+                isReadOnly={isReadOnly}
+              />
               {renderActionNode()}
             </div>
           }>
