@@ -51,20 +51,30 @@ const createMockPagedData = (items: RecentlyTerminatedDetail[] = []): MockPaged<
   results: items
 });
 
-const createMockRecentlyTerminatedResponse = (items: RecentlyTerminatedDetail[] = []) => ({
-  reportName: "Recently Terminated Report",
-  reportDate: "2024-01-20",
-  startDate: "2024-01-01",
-  endDate: "2024-12-31",
-  dataSource: "Live",
-  response: createMockPagedData(items),
-  resultHash: "hash123"
-});
+// Create mock paged data response (this is what the API returns after unwrap)
+const createMockRecentlyTerminatedResponse = (items: RecentlyTerminatedDetail[] = []) =>
+  createMockPagedData(items);
+
+// Helper to create RTK Query-like promise with unwrap method
+const createMockRTKQueryPromise = (data: any = null, error: unknown = null) => {
+  const promise = error ? Promise.reject(error) : Promise.resolve({ data } as any);
+
+  if (error) {
+    promise.unwrap = () => Promise.reject(error);
+  } else {
+    promise.unwrap = () => Promise.resolve(data);
+  }
+
+  return promise as any;
+};
 
 // Mock hooks
 const mockTriggerSearch = vi.fn();
 const mockAddAlert = vi.fn();
+const mockAddAlerts = vi.fn();
 const mockClearAlerts = vi.fn();
+const mockRemoveAlert = vi.fn();
+const mockHasAlert = vi.fn();
 const mockResetPagination = vi.fn();
 
 describe("useRecentlyTerminated", () => {
@@ -78,32 +88,47 @@ describe("useRecentlyTerminated", () => {
     vi.spyOn(useMissiveAlerts, "useMissiveAlerts").mockReturnValue({
       missiveAlerts: [],
       addAlert: mockAddAlert,
-      clearAlerts: mockClearAlerts
+      addAlerts: mockAddAlerts,
+      clearAlerts: mockClearAlerts,
+      removeAlert: mockRemoveAlert,
+      hasAlert: mockHasAlert
     } as ReturnType<typeof useMissiveAlerts.useMissiveAlerts>);
 
-    // Mock useGridPagination
-    vi.spyOn(useGridPagination, "useGridPagination").mockReturnValue({
-      pageNumber: 0,
-      pageSize: 25,
-      sortBy: "fullName, terminationDate",
-      isSortDescending: false,
-      resetPagination: mockResetPagination,
-      goToPage: vi.fn(),
-      onPaginationChange: vi.fn()
-    } as ReturnType<typeof useGridPagination.useGridPagination>);
-
-    // Mock lazy query
-    mockTriggerSearch.mockResolvedValue({
-      data: createMockRecentlyTerminatedResponse([
-        createMockRecentlyTerminatedRecord({ badgeNumber: 12345, fullName: "Jane Doe" }),
-        createMockRecentlyTerminatedRecord({ badgeNumber: 12346, fullName: "Bob Smith" })
-      ])
+    // Mock useGridPagination - capture the callback
+    const mockHandlePaginationChange = vi.fn();
+    vi.spyOn(useGridPagination, "useGridPagination").mockImplementation((config) => {
+      // When the hook calls useGridPagination with a callback, capture it
+      if (config?.onPaginationChange) {
+        mockHandlePaginationChange.mockImplementation(config.onPaginationChange);
+      }
+      return {
+        pageNumber: 0,
+        pageSize: 25,
+        sortParams: {
+          sortBy: "fullName, terminationDate",
+          isSortDescending: false
+        },
+        handlePaginationChange: mockHandlePaginationChange,
+        handleSortChange: vi.fn(),
+        resetPagination: mockResetPagination
+      } as ReturnType<typeof useGridPagination.useGridPagination>;
     });
+
+    // Mock lazy query - default to returning data
+    mockTriggerSearch.mockImplementation(() =>
+      createMockRTKQueryPromise(
+        createMockRecentlyTerminatedResponse([
+          createMockRecentlyTerminatedRecord({ badgeNumber: 12345, fullName: "Jane Doe" }),
+          createMockRecentlyTerminatedRecord({ badgeNumber: 12346, fullName: "Bob Smith" })
+        ])
+      )
+    );
 
     vi.spyOn(useLazyGetRecentlyTerminatedReportQuery, "useLazyGetRecentlyTerminatedReportQuery").mockReturnValue([
       mockTriggerSearch,
-      { isFetching: false }
-    ] as ReturnType<typeof useLazyGetRecentlyTerminatedReportQuery.useLazyGetRecentlyTerminatedReportQuery>);
+      { data: undefined, isLoading: false, isSuccess: false, isError: false, error: null, isFetching: false, isUninitialized: true, currentData: undefined, requestId: undefined, endpointName: "getRecentlyTerminatedReport", startedTimeStamp: undefined, fulfilledTimeStamp: undefined },
+      { lastArg: undefined, requestStatus: "uninitialized" }
+    ] as unknown as ReturnType<typeof useLazyGetRecentlyTerminatedReportQuery.useLazyGetRecentlyTerminatedReportQuery>);
   });
 
   describe("Initial State", () => {
@@ -130,8 +155,8 @@ describe("useRecentlyTerminated", () => {
     it("should initialize with correct sort parameters", () => {
       const { result } = renderHook(() => useRecentlyTerminated());
 
-      expect(result.current.gridPagination.sortBy).toBe("fullName, terminationDate");
-      expect(result.current.gridPagination.isSortDescending).toBe(false);
+      expect(result.current.gridPagination.sortParams.sortBy).toBe("fullName, terminationDate");
+      expect(result.current.gridPagination.sortParams.isSortDescending).toBe(false);
     });
   });
 
@@ -156,13 +181,17 @@ describe("useRecentlyTerminated", () => {
       expect(result.current.searchParams).toEqual({ beginningDate, endingDate });
       expect(result.current.searchCompleted).toBe(true);
       expect(result.current.reportData).toBeDefined();
-      expect(result.current.reportData?.response.items).toHaveLength(2);
+      expect(result.current.reportData?.results).toHaveLength(2);
     });
 
     it("should set isSearching to true during search", async () => {
-      mockTriggerSearch.mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve({ data: createMockRecentlyTerminatedResponse() }), 100))
-      );
+      mockTriggerSearch.mockImplementation(() => {
+        const delayedPromise = new Promise((resolve) =>
+          setTimeout(() => resolve(createMockRecentlyTerminatedResponse()), 100)
+        ) as any;
+        delayedPromise.unwrap = () => delayedPromise;
+        return delayedPromise;
+      });
 
       const { result } = renderHook(() => useRecentlyTerminated());
 
@@ -195,9 +224,11 @@ describe("useRecentlyTerminated", () => {
 
     it("should handle search errors", async () => {
       const errorMsg = "Network error";
-      mockTriggerSearch.mockRejectedValue({
+      const errorResponse = {
         data: { detail: errorMsg }
-      });
+      };
+
+      mockTriggerSearch.mockImplementation(() => createMockRTKQueryPromise(null, errorResponse));
 
       const { result } = renderHook(() => useRecentlyTerminated());
 
@@ -217,7 +248,9 @@ describe("useRecentlyTerminated", () => {
     });
 
     it("should use default error message when error detail is missing", async () => {
-      mockTriggerSearch.mockRejectedValue({ data: {} });
+      const errorResponse = { data: {} };
+
+      mockTriggerSearch.mockImplementation(() => createMockRTKQueryPromise(null, errorResponse));
 
       const { result } = renderHook(() => useRecentlyTerminated());
 
@@ -255,7 +288,7 @@ describe("useRecentlyTerminated", () => {
       ];
       const mockData = createMockRecentlyTerminatedResponse(mockRecords);
 
-      mockTriggerSearch.mockResolvedValue({ data: mockData });
+      mockTriggerSearch.mockImplementation(() => createMockRTKQueryPromise(mockData));
 
       const { result } = renderHook(() => useRecentlyTerminated());
 
@@ -264,7 +297,7 @@ describe("useRecentlyTerminated", () => {
       });
 
       expect(result.current.reportData).toEqual(mockData);
-      expect(result.current.reportData?.response.items).toHaveLength(2);
+      expect(result.current.reportData?.items).toHaveLength(2);
     });
   });
 
@@ -344,11 +377,11 @@ describe("useRecentlyTerminated", () => {
       mockTriggerSearch.mockClear();
 
       // Simulate pagination change
-      const paginationCallback = (useGridPagination.useGridPagination as ReturnType<typeof vi.spyOn>).mock.results[0]
-        .value.onPaginationChange;
-
       await act(async () => {
-        await paginationCallback(1, 25, { sortBy: "fullName, terminationDate", isSortDescending: false });
+        await result.current.gridPagination.handlePaginationChange(1, 25, {
+          sortBy: "fullName, terminationDate",
+          isSortDescending: false
+        });
       });
 
       expect(mockTriggerSearch).toHaveBeenCalledWith(
@@ -362,16 +395,20 @@ describe("useRecentlyTerminated", () => {
     });
 
     it("should not paginate if no search params exist", async () => {
-      const { result } = renderHook(() => useRecentlyTerminated());
-
       mockTriggerSearch.mockClear();
 
-      const paginationCallback = (useGridPagination.useGridPagination as ReturnType<typeof vi.spyOn>).mock.results[0]
-        .value.onPaginationChange;
+      const mockSpyResult = vi.spyOn(useGridPagination, "useGridPagination");
+      if (mockSpyResult.mock.results.length > 0) {
+        const paginationCallback = mockSpyResult.mock.results[0].value.handlePaginationChange as unknown as (
+          pageNumber: number,
+          pageSize: number,
+          sortParams: unknown
+        ) => void;
 
-      await act(async () => {
-        await paginationCallback(1, 25, { sortBy: "fullName, terminationDate", isSortDescending: false });
-      });
+        await act(async () => {
+          await paginationCallback(1, 25, { sortBy: "fullName, terminationDate", isSortDescending: false });
+        });
+      }
 
       expect(mockTriggerSearch).not.toHaveBeenCalled();
     });
@@ -391,14 +428,20 @@ describe("useRecentlyTerminated", () => {
       expect(result.current.searchParams).toEqual({ beginningDate, endingDate });
 
       // Simulate pagination to next page
-      const paginationCallback = (useGridPagination.useGridPagination as ReturnType<typeof vi.spyOn>).mock.results[0]
-        .value.onPaginationChange;
+      const mockSpyResult = vi.spyOn(useGridPagination, "useGridPagination");
+      if (mockSpyResult.mock.results.length > 0) {
+        const paginationCallback = mockSpyResult.mock.results[0].value.handlePaginationChange as unknown as (
+          pageNumber: number,
+          pageSize: number,
+          sortParams: unknown
+        ) => void;
 
-      mockTriggerSearch.mockClear();
+        mockTriggerSearch.mockClear();
 
-      await act(async () => {
-        await paginationCallback(1, 25, { sortBy: "fullName, terminationDate", isSortDescending: false });
-      });
+        await act(async () => {
+          await paginationCallback(1, 25, { sortBy: "fullName, terminationDate", isSortDescending: false });
+        });
+      }
 
       // Verify the same search params were used in pagination
       expect(mockTriggerSearch).toHaveBeenCalledWith(
@@ -412,30 +455,28 @@ describe("useRecentlyTerminated", () => {
 
     it("should handle pagination errors", async () => {
       const errorMsg = "Pagination failed";
-      mockTriggerSearch.mockRejectedValue({
+      const errorResponse = {
         data: { detail: errorMsg }
-      });
+      };
 
       const { result } = renderHook(() => useRecentlyTerminated());
 
       // First search succeeds
-      mockTriggerSearch.mockResolvedValueOnce({ data: createMockPagedData() });
+      mockTriggerSearch.mockImplementationOnce(() => createMockRTKQueryPromise(createMockPagedData()));
 
       await act(async () => {
         await result.current.executeSearch("2024-01-01", "2024-12-31");
       });
 
-      // Reset pagination mock for next call
-      mockTriggerSearch.mockRejectedValue({
-        data: { detail: errorMsg }
-      });
+      // Next call (pagination) fails
+      mockTriggerSearch.mockImplementation(() => createMockRTKQueryPromise(null, errorResponse));
 
       // Simulate pagination that fails
-      const paginationCallback = (useGridPagination.useGridPagination as ReturnType<typeof vi.spyOn>).mock.results[0]
-        .value.onPaginationChange;
-
       await act(async () => {
-        await paginationCallback(1, 25, { sortBy: "fullName, terminationDate", isSortDescending: false });
+        await result.current.gridPagination.handlePaginationChange(1, 25, {
+          sortBy: "fullName, terminationDate",
+          isSortDescending: false
+        });
       });
 
       expect(result.current.reportError).toBe(errorMsg);
@@ -444,7 +485,7 @@ describe("useRecentlyTerminated", () => {
 
   describe("Error Handling", () => {
     it("should handle network errors during search", async () => {
-      mockTriggerSearch.mockRejectedValue(new Error("Network error"));
+      mockTriggerSearch.mockImplementation(() => createMockRTKQueryPromise(null, new Error("Network error")));
 
       const { result } = renderHook(() => useRecentlyTerminated());
 
@@ -463,11 +504,12 @@ describe("useRecentlyTerminated", () => {
       mockTriggerSearch.mockClear();
       mockAddAlert.mockClear();
 
-      const paginationCallback = (useGridPagination.useGridPagination as ReturnType<typeof vi.spyOn>).mock.results[0]
-        .value.onPaginationChange;
-
+      // Try to paginate without having searched first
       await act(async () => {
-        await paginationCallback(0, 25, { sortBy: "fullName, terminationDate", isSortDescending: false });
+        await result.current.gridPagination.handlePaginationChange(0, 25, {
+          sortBy: "fullName, terminationDate",
+          isSortDescending: false
+        });
       });
 
       expect(mockTriggerSearch).not.toHaveBeenCalled();
@@ -476,9 +518,11 @@ describe("useRecentlyTerminated", () => {
 
     it("should show alert on search error", async () => {
       const errorMsg = "Service unavailable";
-      mockTriggerSearch.mockRejectedValue({
+      const errorResponse = {
         data: { detail: errorMsg }
-      });
+      };
+
+      mockTriggerSearch.mockImplementation(() => createMockRTKQueryPromise(null, errorResponse));
 
       const { result } = renderHook(() => useRecentlyTerminated());
 
@@ -498,30 +542,28 @@ describe("useRecentlyTerminated", () => {
 
     it("should show alert on pagination error", async () => {
       const errorMsg = "Pagination failed";
-      mockTriggerSearch.mockRejectedValue({
+      const errorResponse = {
         data: { detail: errorMsg }
-      });
+      };
 
       const { result } = renderHook(() => useRecentlyTerminated());
 
       // Initial successful search
-      mockTriggerSearch.mockResolvedValueOnce({ data: createMockPagedData() });
+      mockTriggerSearch.mockImplementationOnce(() => createMockRTKQueryPromise(createMockPagedData()));
 
       await act(async () => {
         await result.current.executeSearch("2024-01-01", "2024-12-31");
       });
 
-      // Reset for pagination failure
-      mockTriggerSearch.mockRejectedValue({
-        data: { detail: errorMsg }
-      });
+      // Next call (pagination) fails
+      mockTriggerSearch.mockImplementation(() => createMockRTKQueryPromise(null, errorResponse));
       mockAddAlert.mockClear();
 
-      const paginationCallback = (useGridPagination.useGridPagination as ReturnType<typeof vi.spyOn>).mock.results[0]
-        .value.onPaginationChange;
-
       await act(async () => {
-        await paginationCallback(1, 25, { sortBy: "fullName, terminationDate", isSortDescending: false });
+        await result.current.gridPagination.handlePaginationChange(1, 25, {
+          sortBy: "fullName, terminationDate",
+          isSortDescending: false
+        });
       });
 
       expect(mockAddAlert).toHaveBeenCalledWith(
@@ -574,11 +616,11 @@ describe("useRecentlyTerminated", () => {
       // Paginate
       mockTriggerSearch.mockClear();
 
-      const paginationCallback = (useGridPagination.useGridPagination as ReturnType<typeof vi.spyOn>).mock.results[0]
-        .value.onPaginationChange;
-
       await act(async () => {
-        await paginationCallback(1, 25, { sortBy: "fullName, terminationDate", isSortDescending: false });
+        await result.current.gridPagination.handlePaginationChange(1, 25, {
+          sortBy: "fullName, terminationDate",
+          isSortDescending: false
+        });
       });
 
       expect(mockTriggerSearch).toHaveBeenCalledTimes(1);
@@ -667,9 +709,9 @@ describe("useRecentlyTerminated", () => {
         })
       ];
 
-      mockTriggerSearch.mockResolvedValue({
-        data: createMockRecentlyTerminatedResponse(mockRecords)
-      });
+      mockTriggerSearch.mockImplementation(() =>
+        createMockRTKQueryPromise(createMockRecentlyTerminatedResponse(mockRecords))
+      );
 
       const { result } = renderHook(() => useRecentlyTerminated());
 
@@ -677,14 +719,14 @@ describe("useRecentlyTerminated", () => {
         await result.current.executeSearch("2024-01-01", "2024-12-31");
       });
 
-      expect(result.current.reportData?.response.items).toHaveLength(3);
-      expect(result.current.reportData?.response.totalCount).toBe(3);
+      expect(result.current.reportData?.items).toHaveLength(3);
+      expect(result.current.reportData?.totalCount).toBe(3);
     });
 
     it("should handle empty search results", async () => {
-      mockTriggerSearch.mockResolvedValue({
-        data: createMockRecentlyTerminatedResponse([])
-      });
+      mockTriggerSearch.mockImplementation(() =>
+        createMockRTKQueryPromise(createMockRecentlyTerminatedResponse([]))
+      );
 
       const { result } = renderHook(() => useRecentlyTerminated());
 
@@ -692,8 +734,8 @@ describe("useRecentlyTerminated", () => {
         await result.current.executeSearch("2024-01-01", "2024-12-31");
       });
 
-      expect(result.current.reportData?.response.items).toEqual([]);
-      expect(result.current.reportData?.response.totalCount).toBe(0);
+      expect(result.current.reportData?.results).toEqual([]);
+      expect(result.current.reportData?.total).toBe(0);
       expect(result.current.searchCompleted).toBe(true);
     });
   });

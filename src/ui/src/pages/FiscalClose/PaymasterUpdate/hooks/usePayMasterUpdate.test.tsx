@@ -12,6 +12,7 @@ import { messageSlice } from "../../../../reduxstore/slices/messageSlice";
 import navigationReducer, { NavigationState } from "../../../../reduxstore/slices/navigationSlice";
 import usePayMasterUpdate from "./usePayMasterUpdate";
 import { MessagesState } from "../../../../reduxstore/slices/messageSlice";
+import type { NavigationDto } from "../../../../types/navigation/navigation";
 
 type MockRootState = {
   navigation: NavigationState;
@@ -19,7 +20,7 @@ type MockRootState = {
 };
 
 // Helper to create minimal navigation item for testing
-const createMockNavigationItem = (overrides?: Partial<any>) => ({
+const createMockNavigationItem = (overrides?: Partial<NavigationDto>): NavigationDto => ({
   id: 1,
   parentId: 0,
   title: "Test",
@@ -68,6 +69,21 @@ const createMockUpdateSummaryResponse = (
   ...overrides
 });
 
+// Helper to create RTK Query-like promise with unwrap method
+const createMockRTKQueryPromise = (data: UpdateSummaryResponse | null = null, error: unknown = null) => {
+  const promise = error
+    ? Promise.reject(error)
+    : Promise.resolve({ data } as any);
+
+  if (error) {
+    promise.unwrap = () => Promise.reject(error);
+  } else {
+    promise.unwrap = () => Promise.resolve(data);
+  }
+
+  return promise as any;
+};
+
 // Mock hooks
 const mockTriggerGetSummary = vi.fn();
 const mockUpdateEnrollment = vi.fn();
@@ -109,10 +125,10 @@ describe("usePayMasterUpdate", () => {
       resetPagination: mockResetPagination
     } as ReturnType<typeof useGridPagination.useGridPagination>);
 
-    // Mock lazy query
-    mockTriggerGetSummary.mockResolvedValue({
-      data: createMockUpdateSummaryResponse([])
-    });
+    // Mock lazy query - default to returning empty data
+    mockTriggerGetSummary.mockImplementation(() =>
+      createMockRTKQueryPromise(createMockUpdateSummaryResponse([]))
+    );
 
     // Mock mutation
     mockUpdateEnrollment.mockResolvedValue({
@@ -225,9 +241,13 @@ describe("usePayMasterUpdate", () => {
 
     it("should handle search errors", async () => {
       const errorMsg = "Network error";
-      mockTriggerGetSummary.mockRejectedValue({
+      const errorResponse = {
         data: { detail: errorMsg }
-      });
+      };
+
+      mockTriggerGetSummary.mockImplementation(() =>
+        createMockRTKQueryPromise(null, errorResponse)
+      );
 
       const { result } = renderHook(() => usePayMasterUpdate(), {
         wrapper: createWrapper()
@@ -243,7 +263,11 @@ describe("usePayMasterUpdate", () => {
     });
 
     it("should use default error message when error detail is missing", async () => {
-      mockTriggerGetSummary.mockRejectedValue({ data: {} });
+      const errorResponse = { data: {} };
+
+      mockTriggerGetSummary.mockImplementation(() =>
+        createMockRTKQueryPromise(null, errorResponse)
+      );
 
       const { result } = renderHook(() => usePayMasterUpdate(), {
         wrapper: createWrapper()
@@ -269,11 +293,31 @@ describe("usePayMasterUpdate", () => {
     });
 
     it("should populate summary data on successful search", async () => {
-      const mockData = createMockUpdateSummaryResponse(
-        [{ name: "Employee 1", items: [] }] as any[] as UpdateSummaryEmployee[]
-      );
+      const mockEmployee: UpdateSummaryEmployee = {
+        badgeNumber: 12345,
+        storeNumber: 1,
+        psnSuffix: 0,
+        name: "Employee 1",
+        isEmployee: true,
+        before: {
+          profitSharingAmount: 1000,
+          vestedProfitSharingAmount: 800,
+          yearsInPlan: 5,
+          enrollmentId: 1
+        },
+        after: {
+          profitSharingAmount: 1200,
+          vestedProfitSharingAmount: 1000,
+          yearsInPlan: 5,
+          enrollmentId: 1
+        }
+      };
 
-      mockTriggerGetSummary.mockResolvedValue({ data: mockData });
+      const mockData = createMockUpdateSummaryResponse([mockEmployee]);
+
+      mockTriggerGetSummary.mockImplementation(() =>
+        createMockRTKQueryPromise(mockData)
+      );
 
       const { result } = renderHook(() => usePayMasterUpdate(), {
         wrapper: createWrapper()
@@ -618,16 +662,32 @@ describe("usePayMasterUpdate", () => {
 
   describe("Complex Scenarios", () => {
     it("should handle search -> status change -> update workflow", async () => {
+      // Setup mock to return data with searchCompleted flag
+      const mockData = createMockUpdateSummaryResponse([
+        {
+          id: 1,
+          badgeNumber: 12345,
+          employeeName: "John Doe",
+          participationStatus: "Active"
+        }
+      ]);
+
+      mockTriggerGetSummary.mockImplementation(() =>
+        createMockRTKQueryPromise(mockData)
+      );
+
       const { result } = renderHook(() => usePayMasterUpdate(), {
         wrapper: createWrapper()
       });
 
       // Search
       await act(async () => {
-        await result.current.executeSearch(2024, false);
+        const searchResult = await result.current.executeSearch(2024, false);
+        expect(searchResult).toBe(true);
       });
 
       expect(result.current.searchCompleted).toBe(true);
+      expect(result.current.summaryData).toBeDefined();
 
       // Change status
       act(() => {
@@ -649,13 +709,28 @@ describe("usePayMasterUpdate", () => {
     });
 
     it("should handle search -> reset -> search workflow", async () => {
+      // Setup mock to return data
+      const mockData = createMockUpdateSummaryResponse([
+        {
+          id: 1,
+          badgeNumber: 12345,
+          employeeName: "John Doe",
+          participationStatus: "Active"
+        }
+      ]);
+
+      mockTriggerGetSummary.mockImplementation(() =>
+        createMockRTKQueryPromise(mockData)
+      );
+
       const { result } = renderHook(() => usePayMasterUpdate(), {
         wrapper: createWrapper()
       });
 
       // First search
       await act(async () => {
-        await result.current.executeSearch(2024, false);
+        const searchResult = await result.current.executeSearch(2024, false);
+        expect(searchResult).toBe(true);
       });
 
       expect(result.current.searchCompleted).toBe(true);
@@ -669,7 +744,8 @@ describe("usePayMasterUpdate", () => {
 
       // Second search
       await act(async () => {
-        await result.current.executeSearch(2023, false);
+        const searchResult = await result.current.executeSearch(2023, false);
+        expect(searchResult).toBe(true);
       });
 
       expect(result.current.searchCompleted).toBe(true);
@@ -679,16 +755,22 @@ describe("usePayMasterUpdate", () => {
 
   describe("Error Handling", () => {
     it("should handle pagination errors", async () => {
-      mockTriggerGetSummary.mockRejectedValue({
+      // Create a proper error object that mimics RTK Query's rejection
+      const errorResponse = {
         data: { detail: "Pagination failed" }
-      });
+      };
+
+      mockTriggerGetSummary.mockImplementation(() =>
+        createMockRTKQueryPromise(null, errorResponse)
+      );
 
       const { result } = renderHook(() => usePayMasterUpdate(), {
         wrapper: createWrapper()
       });
 
       await act(async () => {
-        await result.current.executeSearch(2024, false);
+        const searchResult = await result.current.executeSearch(2024, false);
+        expect(searchResult).toBe(false);
       });
 
       expect(result.current.summaryError).toBe("Pagination failed");

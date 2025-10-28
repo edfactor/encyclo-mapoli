@@ -51,15 +51,36 @@ const createMockPagedData = (items: TerminatedLettersDetail[] = []): MockPaged<T
   results: items
 });
 
-const createMockTerminatedLettersResponse = (items: TerminatedLettersDetail[] = []) => ({
-  reportName: "Terminated Letters Report",
-  reportDate: "2024-01-20",
-  startDate: "2024-01-01",
-  endDate: "2024-12-31",
-  dataSource: "Live",
-  response: createMockPagedData(items),
-  resultHash: "hash123"
-});
+// Create mock paged data response (this is what the API returns after unwrap)
+const createMockTerminatedLettersResponse = (items: TerminatedLettersDetail[] = []) =>
+  createMockPagedData(items);
+
+// Helper to create RTK Query-like promise with unwrap method
+const createMockRTKQueryPromise = (data: any = null, error: unknown = null) => {
+  const promise = error ? Promise.reject(error) : Promise.resolve({ data } as any);
+
+  if (error) {
+    promise.unwrap = () => Promise.reject(error);
+  } else {
+    promise.unwrap = () => Promise.resolve(data);
+  }
+
+  return promise as any;
+};
+
+// Create a mock Blob with text() method for testing
+class MockBlob extends Blob {
+  private content: string;
+
+  constructor(parts: BlobPart[]) {
+    super(parts);
+    this.content = parts.join("");
+  }
+
+  text(): Promise<string> {
+    return Promise.resolve(this.content);
+  }
+}
 
 // Mock hooks
 const mockTriggerSearch = vi.fn();
@@ -70,7 +91,6 @@ const mockClearAlerts = vi.fn();
 const mockRemoveAlert = vi.fn();
 const mockHasAlert = vi.fn();
 const mockResetPagination = vi.fn();
-const mockGridPaginationChange = vi.fn();
 
 describe("useTerminatedLetters", () => {
   beforeEach(() => {
@@ -89,30 +109,39 @@ describe("useTerminatedLetters", () => {
       hasAlert: mockHasAlert
     } as ReturnType<typeof useMissiveAlerts.useMissiveAlerts>);
 
-    // Mock useGridPagination
-    vi.spyOn(useGridPagination, "useGridPagination").mockReturnValue({
-      pageNumber: 0,
-      pageSize: 50,
-      sortParams: {
-        sortBy: "fullName",
-        isSortDescending: false
-      },
-      handlePaginationChange: vi.fn(),
-      handleSortChange: vi.fn(),
-      resetPagination: mockResetPagination
-    } as ReturnType<typeof useGridPagination.useGridPagination>);
-
-    // Mock lazy query
-    mockTriggerSearch.mockResolvedValue({
-      data: createMockTerminatedLettersResponse([
-        createMockTerminatedLetter({ badgeNumber: 12345, fullName: "John Doe" }),
-        createMockTerminatedLetter({ badgeNumber: 12346, fullName: "Jane Smith" })
-      ])
+    // Mock useGridPagination - capture the callback
+    const mockHandlePaginationChange = vi.fn();
+    vi.spyOn(useGridPagination, "useGridPagination").mockImplementation((config) => {
+      // When the hook calls useGridPagination with a callback, capture it
+      if (config?.onPaginationChange) {
+        mockHandlePaginationChange.mockImplementation(config.onPaginationChange);
+      }
+      return {
+        pageNumber: 0,
+        pageSize: 50,
+        sortParams: {
+          sortBy: "fullName",
+          isSortDescending: false
+        },
+        handlePaginationChange: mockHandlePaginationChange,
+        handleSortChange: vi.fn(),
+        resetPagination: mockResetPagination
+      } as ReturnType<typeof useGridPagination.useGridPagination>;
     });
 
-    mockTriggerDownload.mockResolvedValue({
-      data: new Blob(["Terminated Letters Content"])
-    });
+    // Mock lazy query - default to returning data
+    mockTriggerSearch.mockImplementation(() =>
+      createMockRTKQueryPromise(
+        createMockTerminatedLettersResponse([
+          createMockTerminatedLetter({ badgeNumber: 12345, fullName: "John Doe" }),
+          createMockTerminatedLetter({ badgeNumber: 12346, fullName: "Jane Smith" })
+        ])
+      )
+    );
+
+    mockTriggerDownload.mockImplementation(() =>
+      createMockRTKQueryPromise(new MockBlob(["Terminated Letters Content"]))
+    );
 
     vi.spyOn(useLazyGetTerminatedLettersReportQuery, "useLazyGetTerminatedLettersReportQuery").mockReturnValue([
       mockTriggerSearch,
@@ -205,9 +234,13 @@ describe("useTerminatedLetters", () => {
     });
 
     it("should set isSearching to true during search", async () => {
-      mockTriggerSearch.mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve({ data: createMockTerminatedLettersResponse() }), 100))
-      );
+      mockTriggerSearch.mockImplementation(() => {
+        const delayedPromise = new Promise((resolve) =>
+          setTimeout(() => resolve(createMockTerminatedLettersResponse()), 100)
+        ) as any;
+        delayedPromise.unwrap = () => delayedPromise;
+        return delayedPromise;
+      });
 
       const { result } = renderHook(() => useTerminatedLetters());
 
@@ -221,9 +254,11 @@ describe("useTerminatedLetters", () => {
 
     it("should handle search errors", async () => {
       const errorMsg = "Network error";
-      mockTriggerSearch.mockRejectedValue({
+      const errorResponse = {
         data: { detail: errorMsg }
-      });
+      };
+
+      mockTriggerSearch.mockImplementation(() => createMockRTKQueryPromise(null, errorResponse));
 
       const { result } = renderHook(() => useTerminatedLetters());
 
@@ -243,7 +278,9 @@ describe("useTerminatedLetters", () => {
     });
 
     it("should use default error message when error detail is missing", async () => {
-      mockTriggerSearch.mockRejectedValue({ data: {} });
+      const errorResponse = { data: {} };
+
+      mockTriggerSearch.mockImplementation(() => createMockRTKQueryPromise(null, errorResponse));
 
       const { result } = renderHook(() => useTerminatedLetters());
 
@@ -383,19 +420,13 @@ describe("useTerminatedLetters", () => {
       // Reset mock to track pagination calls
       mockTriggerSearch.mockClear();
 
-      // Simulate pagination change using the mock's handlePaginationChange
-      const mockSpyResult = vi.spyOn(useGridPagination, "useGridPagination");
-      if (mockSpyResult.mock.results.length > 0) {
-        const paginationCallback = mockSpyResult.mock.results[0].value.handlePaginationChange as unknown as (
-          pageNumber: number,
-          pageSize: number,
-          sortParams: unknown
-        ) => void;
-
-        await act(async () => {
-          await paginationCallback(1, 50, { sortBy: "fullName", isSortDescending: false });
+      // Simulate pagination change
+      await act(async () => {
+        await result.current.gridPagination.handlePaginationChange(1, 50, {
+          sortBy: "fullName",
+          isSortDescending: false
         });
-      }
+      });
 
       expect(mockTriggerSearch).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -547,9 +578,11 @@ describe("useTerminatedLetters", () => {
   describe("Error Handling", () => {
     it("should handle pagination fetch errors", async () => {
       const errorMsg = "Pagination fetch failed";
-      mockTriggerSearch.mockRejectedValue({
+      const errorResponse = {
         data: { detail: errorMsg }
-      });
+      };
+
+      mockTriggerSearch.mockImplementation(() => createMockRTKQueryPromise(null, errorResponse));
 
       const { result } = renderHook(() => useTerminatedLetters());
 
@@ -572,11 +605,12 @@ describe("useTerminatedLetters", () => {
       mockTriggerSearch.mockClear();
       mockAddAlert.mockClear();
 
-      const paginationCallback = (useGridPagination.useGridPagination as ReturnType<typeof vi.spyOn>).mock.results[0]
-        .value.onPaginationChange;
-
+      // Try to paginate without having searched first
       await act(async () => {
-        await paginationCallback(0, 50, { sortBy: "fullName", isSortDescending: false });
+        await result.current.gridPagination.handlePaginationChange(0, 50, {
+          sortBy: "fullName",
+          isSortDescending: false
+        });
       });
 
       expect(mockTriggerSearch).not.toHaveBeenCalled();
