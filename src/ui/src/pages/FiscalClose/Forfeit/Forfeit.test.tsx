@@ -1,45 +1,80 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { describe, expect, it, vi } from "vitest";
 import Forfeit from "./Forfeit";
 
+// Mock the useForfeit hook
+const mockExecuteSearch = vi.fn();
+const mockHandleStatusChange = vi.fn();
+const mockHandleReset = vi.fn();
+
+vi.mock("./hooks/useForfeit", () => ({
+  default: vi.fn(() => ({
+    searchResults: {
+      response: {
+        results: [{ badgeNumber: 123, employeeName: "Test User" }],
+        total: 1
+      }
+    },
+    isSearching: false,
+    showData: true,
+    pagination: {
+      pageNumber: 0,
+      pageSize: 25,
+      sortParams: { sortBy: "badgeNumber", isSortDescending: false },
+      handlePaginationChange: vi.fn(),
+      handleSortChange: vi.fn(),
+      resetPagination: vi.fn()
+    },
+    executeSearch: mockExecuteSearch,
+    handleStatusChange: mockHandleStatusChange,
+    handleReset: mockHandleReset
+  }))
+}));
+
 // Mock the child components
 vi.mock("./ForfeitGrid", () => ({
-  default: vi.fn(({ shouldArchive, initialSearchLoaded }) => (
+  default: vi.fn(({ searchResults, pagination, isSearching }) => (
     <div data-testid="forfeit-grid">
-      <div data-testid="should-archive">{shouldArchive.toString()}</div>
-      <div data-testid="initial-search-loaded">{initialSearchLoaded.toString()}</div>
+      <div data-testid="has-results">{searchResults ? "true" : "false"}</div>
+      <div data-testid="grid-is-searching">{isSearching.toString()}</div>
+      <div data-testid="page-size">{pagination?.pageSize}</div>
     </div>
   ))
 }));
 
 vi.mock("./ForfeitSearchFilter", () => ({
-  default: vi.fn(({ onSearchClicked }) => (
+  default: vi.fn(({ onSearch, onReset, isSearching }) => (
     <div data-testid="forfeit-search-filter">
       <button
         data-testid="search-button"
-        onClick={onSearchClicked}>
+        onClick={() => onSearch({ profitYear: 2024 })}>
         Search
       </button>
+      <button
+        data-testid="reset-button"
+        onClick={onReset}>
+        Reset
+      </button>
+      <div data-testid="filter-is-searching">{isSearching.toString()}</div>
     </div>
   ))
 }));
 
 vi.mock("../../../components/StatusDropdownActionNode", () => ({
-  default: vi.fn(({ onStatusChange, onSearchClicked }) => (
+  default: vi.fn(({ onStatusChange }) => (
     <div data-testid="status-dropdown">
       <button
         data-testid="change-to-complete"
-        onClick={() => onStatusChange("4", "Complete")}>
+        onClick={() => onStatusChange?.("4", "Complete")}>
         Change to Complete
       </button>
       <button
         data-testid="change-to-in-progress"
-        onClick={() => onStatusChange("2", "In Progress")}>
+        onClick={() => onStatusChange?.("2", "In Progress")}>
         Change to In Progress
       </button>
-      <div data-testid="on-search-clicked">{onSearchClicked ? "enabled" : "disabled"}</div>
     </div>
   ))
 }));
@@ -71,101 +106,60 @@ describe("Forfeit", () => {
     expect(screen.getByTestId("forfeit-grid")).toBeInTheDocument();
   });
 
-  it("should set shouldArchive to true when status changes to Complete", async () => {
+  it("should call handleStatusChange when status changes to Complete", () => {
     const mockStore = createMockStore();
     render(<Forfeit />, { wrapper: wrapper(mockStore) });
 
     const completeButton = screen.getByTestId("change-to-complete");
     fireEvent.click(completeButton);
 
-    await waitFor(() => {
-      const shouldArchive = screen.getByTestId("should-archive");
-      expect(shouldArchive.textContent).toBe("true");
-    });
+    expect(mockHandleStatusChange).toHaveBeenCalledWith("4", "Complete");
   });
 
-  it("should reset shouldArchive to false after timeout", async () => {
-    const mockStore = createMockStore();
-    render(<Forfeit />, { wrapper: wrapper(mockStore) });
-
-    const completeButton = screen.getByTestId("change-to-complete");
-    fireEvent.click(completeButton);
-
-    await waitFor(() => {
-      const shouldArchive = screen.getByTestId("should-archive");
-      expect(shouldArchive.textContent).toBe("true");
-    });
-
-    // Wait for the 100ms timeout
-    await waitFor(
-      () => {
-        const shouldArchive = screen.getByTestId("should-archive");
-        expect(shouldArchive.textContent).toBe("false");
-      },
-      { timeout: 200 }
-    );
-  });
-
-  it("should NOT set shouldArchive when status changes to In Progress", () => {
+  it("should call handleStatusChange when status changes to In Progress", () => {
     const mockStore = createMockStore();
     render(<Forfeit />, { wrapper: wrapper(mockStore) });
 
     const inProgressButton = screen.getByTestId("change-to-in-progress");
     fireEvent.click(inProgressButton);
 
-    const shouldArchive = screen.getByTestId("should-archive");
-    expect(shouldArchive.textContent).toBe("false");
+    expect(mockHandleStatusChange).toHaveBeenCalledWith("2", "In Progress");
   });
 
-  it("should increment searchClickedTrigger when search button is clicked", () => {
-    const mockStore = createMockStore();
-    render(<Forfeit />, { wrapper: wrapper(mockStore) });
-
-    const onSearchClickedStatus = screen.getByTestId("on-search-clicked");
-    expect(onSearchClickedStatus.textContent).toBe("disabled");
-
-    const searchButton = screen.getByTestId("search-button");
-    fireEvent.click(searchButton);
-
-    expect(onSearchClickedStatus.textContent).toBe("enabled");
-  });
-
-  it("should pass onSearchClicked prop to StatusDropdownActionNode after first search", () => {
+  it("should call executeSearch when search button is clicked", () => {
     const mockStore = createMockStore();
     render(<Forfeit />, { wrapper: wrapper(mockStore) });
 
     const searchButton = screen.getByTestId("search-button");
-
-    // Before search - onSearchClicked should be undefined
-    let onSearchClickedStatus = screen.getByTestId("on-search-clicked");
-    expect(onSearchClickedStatus.textContent).toBe("disabled");
-
-    // Click search
     fireEvent.click(searchButton);
 
-    // After search - onSearchClicked should be defined
-    onSearchClickedStatus = screen.getByTestId("on-search-clicked");
-    expect(onSearchClickedStatus.textContent).toBe("enabled");
+    expect(mockExecuteSearch).toHaveBeenCalledWith({ profitYear: 2024 });
   });
 
-  it("should handle multiple status changes correctly", async () => {
+  it("should call handleReset when reset button is clicked", () => {
     const mockStore = createMockStore();
     render(<Forfeit />, { wrapper: wrapper(mockStore) });
 
-    // Change to In Progress - should NOT trigger archive
-    const inProgressButton = screen.getByTestId("change-to-in-progress");
-    fireEvent.click(inProgressButton);
+    const resetButton = screen.getByTestId("reset-button");
+    fireEvent.click(resetButton);
 
-    let shouldArchive = screen.getByTestId("should-archive");
-    expect(shouldArchive.textContent).toBe("false");
+    expect(mockHandleReset).toHaveBeenCalled();
+  });
 
-    // Change to Complete - SHOULD trigger archive
-    const completeButton = screen.getByTestId("change-to-complete");
-    fireEvent.click(completeButton);
+  it("should pass correct props to ForfeitGrid", () => {
+    const mockStore = createMockStore();
+    render(<Forfeit />, { wrapper: wrapper(mockStore) });
 
-    await waitFor(() => {
-      shouldArchive = screen.getByTestId("should-archive");
-      expect(shouldArchive.textContent).toBe("true");
-    });
+    expect(screen.getByTestId("has-results")).toHaveTextContent("true");
+    expect(screen.getByTestId("grid-is-searching")).toHaveTextContent("false");
+    expect(screen.getByTestId("page-size")).toHaveTextContent("25");
+  });
+
+  it("should pass correct props to ForfeitSearchFilter", () => {
+    const mockStore = createMockStore();
+    render(<Forfeit />, { wrapper: wrapper(mockStore) });
+
+    const searchFilterIsSearching = screen.getByTestId("filter-is-searching");
+    expect(searchFilterIsSearching).toHaveTextContent("false");
   });
 });
