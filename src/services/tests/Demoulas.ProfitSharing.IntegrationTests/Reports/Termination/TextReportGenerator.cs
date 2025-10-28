@@ -50,6 +50,11 @@ BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFE
             PrintHeader();
         }
 
+        if (wEnrolled == 2 || wEnrolled == 0)
+        {
+            wEnrolled = null;
+        }
+
         _lineCounter++;
         string termDate = wsDoTerm == null || wsDoTerm == DateOnly.MinValue
             ? "".PadRight(6)
@@ -71,7 +76,7 @@ BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFE
                                 $"{r2PsHrs:0.00}".PadLeft(7) + " " +
                                 wVestPertStr.PadLeft(3) + " " +
                                 ageStr.PadLeft(3) +
-                                (wEnrolled == 0 ? "" : " " + wEnrolled));
+                                (wEnrolled == null ? "" : " " + wEnrolled));
     }
 
     // In order to print nicely, values over 1 million do not have a second comma.

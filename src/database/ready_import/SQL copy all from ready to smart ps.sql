@@ -359,8 +359,8 @@ BEGIN
         PY_PH_LASTYR as CURRENT_HOURS_YEAR, -- Pull the prior year hours as "last year"
         PY_PD_LASTYR AS CURRENT_INCOME_YEAR, -- Pull the prior year income as "last year"
         PY_WEEKS_WORK_LAST AS WEEKS_WORKED_YEAR,
-        CASE -- pull in the cert as the prior year's cert
-            WHEN PY_PROF_CERT = 1 THEN TRUNC(SYSDATE, 'YEAR')
+        CASE -- pull in the cert as the prior year's cert.  We use a DATE in SMART, but READY only has a boolean so we fudge it here.
+            WHEN PY_PROF_CERT = 1 THEN TO_DATE('12/31/' || last_year, 'MM/DD/YYYY')
             ELSE NULL
         END as PS_CERTIFICATE_ISSUED_DATE,
         -- We will recompute this in RebuildEnrollmentAndZeroContService for most employees when we first run.
@@ -1399,7 +1399,7 @@ INSERT ALL
 -- get rid of any history of YE Updates, as all the data is wiped
 delete from ye_update_status;
 
-------------  These are users in the scramble, their ssn's are not present UAT/PROD
+------------  These are bad members (benes) in the scramble, their ssn's are not present UAT/PROD
     
 -- We remove benes who are "not complete", namely either
 --     1) their PAYBEN balance does not match their PROFIT_DETAIL rows

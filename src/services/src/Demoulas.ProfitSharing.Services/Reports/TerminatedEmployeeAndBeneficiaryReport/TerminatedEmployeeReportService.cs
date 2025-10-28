@@ -26,18 +26,21 @@ public sealed class TerminatedEmployeeReportService
     private readonly IProfitSharingDataContextFactory _factory;
     private readonly ILogger<TerminatedEmployeeReportService> _logger;
     private readonly TotalService _totalService;
+    private readonly IYearEndService _yearEndService;
 
     public TerminatedEmployeeReportService(IProfitSharingDataContextFactory factory,
         TotalService totalService,
         IDemographicReaderService demographicReaderService,
         ILogger<TerminatedEmployeeReportService> logger,
-        ICalendarService calendarService)
+        ICalendarService calendarService,
+        IYearEndService yearEndService)
     {
         _factory = factory;
         _totalService = totalService;
         _demographicReaderService = demographicReaderService;
         _logger = logger;
         _calendarService = calendarService;
+        _yearEndService = yearEndService;
     }
 
     public Task<TerminatedEmployeeAndBeneficiaryResponse> CreateDataAsync(StartAndEndDateRequest req, CancellationToken cancellationToken)
@@ -109,21 +112,23 @@ public sealed class TerminatedEmployeeReportService
                                            (x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0))
             }, cancellationToken);
 
-        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
-        short lastYear = (short)(profitYearRange.endProfitYear - 1);
-        CalendarResponseDto priorYearDateRange = await _calendarService.GetYearStartAndEndAccountingDatesAsync(lastYear, cancellationToken);
+        // This report is always giving values about today for the members current status.
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today); 
+        // The "Begin" values always refer to the prior completed year.  "Begin" is the "end" of the last completed YE.
+        short lastCompletedYearEnd = await _yearEndService.GetCompletedYearEnd(cancellationToken);
+        CalendarResponseDto priorYearDateRange = await _calendarService.GetYearStartAndEndAccountingDatesAsync(lastCompletedYearEnd, cancellationToken);
 
         Dictionary<int, ParticipantTotalVestingBalance> thisYearBalancesDict = await _totalService
             .TotalVestingBalance(ctx, profitYearRange.beginProfitYear, profitYearRange.endProfitYear, today)
             .Where(x => ssns.Contains(x.Ssn))
             .ToDictionaryAsync(x => x.Ssn, x => x, cancellationToken);
 
-        Dictionary<int, ParticipantTotal> lastYearBalancesDict = await _totalService.GetTotalBalanceSet(ctx, lastYear)
+        Dictionary<int, ParticipantTotal> lastYearBalancesDict = await _totalService.GetTotalBalanceSet(ctx, lastCompletedYearEnd)
             .Where(x => ssns.Contains(x.Ssn))
             .ToDictionaryAsync(x => x.Ssn, x => x, cancellationToken);
 
         Dictionary<int, ParticipantTotalVestingBalance> lastYearVestedBalancesDict = await _totalService
-            .TotalVestingBalance(ctx, /*PayProfit Year*/lastYear, /*Desired Year*/lastYear, priorYearDateRange.FiscalEndDate)
+            .TotalVestingBalance(ctx, /*PayProfit Year*/lastCompletedYearEnd, /*Desired Year*/lastCompletedYearEnd, priorYearDateRange.FiscalEndDate)
             .Where(x => ssns.Contains(x.Ssn))
             .ToDictionaryAsync(x => x.Ssn, x => x, cancellationToken);
 
@@ -189,17 +194,19 @@ public sealed class TerminatedEmployeeReportService
                 ? Enrollment.Constants.NotEnrolled
                 : member.EnrollmentId;
 
+            // If retired, then they get it all.
             if (member.ZeroCont == ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested)
             {
-                // vestedBalance = member.EndingBalance;
                 vestedRatio = 1;
             }
 
+            // If bene, they get it all
             if (memberSlice.IsOnlyBeneficiary)
             {
                 vestedRatio = 1;
             }
 
+            // If there is no money, then the ratio is meaningless - follow how READY reports it as 0
             if (member.EndingBalance == 0)
             {
                 vestedRatio = 0;
@@ -225,7 +232,8 @@ public sealed class TerminatedEmployeeReportService
                 Age = age,
                 HasForfeited = enrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords ||
                                enrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords,
-                SuggestedForfeit = member.ProfitYear == req.ProfitYear ? member.EndingBalance - vestedBalance : null
+                SuggestedForfeit = member.ProfitYear == req.ProfitYear ? member.EndingBalance - vestedBalance : null,
+                EnrollmentId = member.EnrollmentId
             };
 
             yearDetailsList.Add((member.BadgeNumber, member.PsnSuffix, member.FullName, yearDetail));
@@ -275,16 +283,12 @@ public sealed class TerminatedEmployeeReportService
     /// <returns>True if the member should be included in the report</returns>
     private static bool IsInteresting(Member member)
     {
-        if (member.YearsInPlan == 2 && member.HoursCurrentYear >= /*1000*/ ReferenceData.MinimumHoursForContribution())
+        // If you are not past your second year, you have no money in profit sharing so lets move along
+        if (member.YearsInPlan <= 2 && member.HoursCurrentYear >= /*1000*/ ReferenceData.MinimumHoursForContribution())
         {
             return false;
         }
-
-        if (member.YearsInPlan == 1 && member.HoursCurrentYear < /*1000*/ ReferenceData.MinimumHoursForContribution())
-        {
-            return false;
-        }
-
+        
         // Beginning balance (most important filter)
         if (member.BeginningAmount != 0)
         {

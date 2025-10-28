@@ -18,5 +18,5 @@ public sealed record QPay066Record
     public required decimal YtdVstPsHours { get; init; }
     public required decimal VestedPercent { get; init; }
     public int? Age { get; init; }
-    public char? ExecutiveCode { get; init; }
+    public char? EnrollmentCode { get; init; }
 }

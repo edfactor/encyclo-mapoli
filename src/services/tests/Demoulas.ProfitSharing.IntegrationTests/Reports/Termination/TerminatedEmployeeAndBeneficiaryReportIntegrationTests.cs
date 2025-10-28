@@ -5,7 +5,6 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
 using Shouldly;
@@ -35,7 +34,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         });
 
         TerminatedEmployeeService mockService =
-            new(DbFactory, TotalService, DemographicReaderService, _loggerFactory.CreateLogger<TerminatedEmployeeReportService>(), CalendarService);
+            new(DbFactory, TotalService, DemographicReaderService, _loggerFactory.CreateLogger<TerminatedEmployeeReportService>(), CalendarService, YearEndService);
 
         TerminatedEmployeeAndBeneficiaryResponse data = await mockService.GetReportAsync(
             new StartAndEndDateRequest { SortBy = "Name", BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue },
@@ -138,70 +137,165 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         // Lets check the totals.
         a.ShouldBeEquivalentTo(e);
 
-        // Flip == to !=  to see visual diff vs report 
-        if (actualText.Length != 0)
-        {
-            //  ---- Use this for the Visual diff
-            ProfitShareUpdateTests.AssertReportsAreEquivalent(expectedText, actualText);
-        }
-        else
-        {
-            // ----  Use this for the text report showing differences
+        // Uncomment to for the Visual diff
+        // ProfitShareUpdateTests.AssertReportsAreEquivalent(expectedText, actualText)
+        
+        Dictionary<long, QPay066Record> expectedMap = AsDict(QPay066ReportParser.ParseRecords(expectedText));
+        Dictionary<long, QPay066Record> actualMap = AsDict(QPay066ReportParser.ParseRecords(actualText));
+        actualMap.Keys.ShouldBe(expectedMap.Keys, true);
 
-            Dictionary<int, decimal> expectedMap = QPay066ReportParser.ParseBadgeToVestedBalance(expectedText);
-            Dictionary<int, decimal> actualMap = QPay066ReportParser.ParseBadgeToVestedBalance(actualText);
-            expectedMap.Count.ShouldBe(actualMap.Count);
-            TestOutputHelper.WriteLine($"Total rows {actualMap.Count} (Benes are not parsed)");
+        // Get employee badges (not beneficiaries) to query READY authoritative data
+        HashSet<int> employeeBadges = expectedMap.Values
+            .Where(r => r.PsnSuffix == 0)
+            .Select(r => r.BadgeNumber)
+            .ToHashSet();
 
-            // Find mismatches
-            List<(int Badge, decimal Ready, decimal Smart)> mismatches = new();
-            foreach (KeyValuePair<int, decimal> kvp in expectedMap)
+        // Query READY pscalcview2 for authoritative vested balance and percent
+        Dictionary<int, (decimal VestedBalance, decimal VestedPercent)> readyVestingData =
+            await GetReadyVestedBalancesByBadge(employeeBadges, DbFactory.ConnectionString);
+
+#if false
+        // Alternative: Use MasterInquiry OutFL data (currently commented out - suspected data issues)
+        Dictionary<int, int> badgeToSsn = await DbFactory.UseReadOnlyContext(async ctx =>
+            await ctx.Demographics
+                .Where(d => employeeBadges.Contains(d.BadgeNumber))
+                .ToDictionaryAsync(d => d.BadgeNumber, d => d.Ssn));
+#endif
+
+        // Compare the values for each matching key
+        List<string> differences = new();
+        List<string> acceptedDifferences = new();
+
+        foreach (long key in expectedMap.Keys)
+        {
+            QPay066Record expected = expectedMap[key];
+            QPay066Record actual = actualMap[key];
+
+            List<string> fieldDiffs = new();
+            bool vestedBalanceDiff = false;
+            bool vestedPercentDiff = false;
+
+            if (actual.BeginningBalance != expected.BeginningBalance)
             {
-                if (actualMap.TryGetValue(kvp.Key, out decimal actualValue) && kvp.Value != actualValue)
-                {
-                    mismatches.Add((kvp.Key, kvp.Value, actualValue));
-                }
+                fieldDiffs.Add($"BeginningBalance {actual.BeginningBalance}/{expected.BeginningBalance}");
             }
 
-            Dictionary<int, (int Ssn, decimal hours)> badge2Details = await
-                DbFactory.UseReadOnlyContext(async ctx => await ctx.Demographics.Join(ctx.PayProfits, d => d.Id, pp => pp.DemographicId, (d, p) => new { d, p })
-                    .Where(d => actualMap.Keys.Contains(d.d.BadgeNumber) && d.p.ProfitYear == 2025)
-                    .ToDictionaryAsync(d => d.d.BadgeNumber, d => (d.d.Ssn, d.p.CurrentHoursYear + d.p.HoursExecutive)));
-
-            TestOutputHelper.WriteLine($"\nMismatches: {mismatches.Count}");
-            if (mismatches.Count > 0)
+            if (actual.BeneficiaryAllocation != expected.BeneficiaryAllocation)
             {
-                Dictionary<int, decimal> readyBalancesPsCalcView = await GetReadyVestedBalancesByBadge(mismatches.Select(f => f.Badge).ToHashSet(), DbFactory.ConnectionString);
+                fieldDiffs.Add($"BeneficiaryAllocation {actual.BeneficiaryAllocation}/{expected.BeneficiaryAllocation}");
+            }
 
-                AsciiTable table = new("BADGE", "READY QPAY066", "SMART QPAY066", "READY MstrInqry", "READY MstrInqry Hours", "SMART QPAY066 and READY MstrInqry agree?");
+            if (actual.DistributionAmount != expected.DistributionAmount)
+            {
+                fieldDiffs.Add($"DistributionAmount {actual.DistributionAmount}/{expected.DistributionAmount}");
+            }
 
-                foreach ((int Badge, decimal Ready, decimal Smart) mismatch in mismatches)
+            if (actual.Forfeit != expected.Forfeit)
+            {
+                fieldDiffs.Add($"Forfeit {actual.Forfeit}/{expected.Forfeit}");
+            }
+
+            if (actual.EndingBalance != expected.EndingBalance)
+            {
+                fieldDiffs.Add($"EndingBalance {actual.EndingBalance}/{expected.EndingBalance}");
+            }
+
+            if (actual.VestedBalance != expected.VestedBalance)
+            {
+                vestedBalanceDiff = true;
+                fieldDiffs.Add($"VestedBalance {actual.VestedBalance}/{expected.VestedBalance}");
+            }
+
+            if (actual.DateTerm != expected.DateTerm)
+            {
+                fieldDiffs.Add($"DateTerm {actual.DateTerm}/{expected.DateTerm}");
+            }
+
+            if (actual.YtdVstPsHours != expected.YtdVstPsHours)
+            {
+                fieldDiffs.Add($"YtdVstPsHours {actual.YtdVstPsHours}/{expected.YtdVstPsHours}");
+            }
+
+            if (actual.VestedPercent != expected.VestedPercent)
+            {
+                vestedPercentDiff = true;
+                fieldDiffs.Add($"VestedPercent {actual.VestedPercent}/{expected.VestedPercent}");
+            }
+
+            if (actual.Age != expected.Age)
+            {
+                fieldDiffs.Add($"Age {actual.Age}/{expected.Age}");
+            }
+
+            if (actual.EnrollmentCode != expected.EnrollmentCode)
+            {
+                fieldDiffs.Add($"EnrollmentCode {actual.EnrollmentCode}/{expected.EnrollmentCode}");
+            }
+
+            if (fieldDiffs.Count > 0)
+            {
+                string psnDisplay = expected.PsnSuffix > 0 ? $"{expected.BadgeNumber:D6}{expected.PsnSuffix:D4}" : expected.BadgeNumber.ToString();
+
+                // Check if ONLY VestedBalance and VestedPercent differ, and if SMART matches READY pscalcview2
+                bool smartMatchesReady = false;
+
+                bool onlyVestingDiffs = fieldDiffs.Count == 2 && vestedBalanceDiff && vestedPercentDiff;
+                if (onlyVestingDiffs && expected.PsnSuffix == 0 && readyVestingData.TryGetValue(expected.BadgeNumber, out (decimal VestedBalance, decimal VestedPercent) readyData))
                 {
-                    OutFL masterInquiryData = outtieBySsn[badge2Details[mismatch.Badge].Ssn];
-                    decimal? masterInquiryVestedBalance = masterInquiryData.OUT_VESTING_AMT; // CURRENT VESTING AMOUNT
-
-                    // We ignore QPAY066 in favor of the MasterInquiry as being authoritative
-                    if (mismatch.Smart == masterInquiryVestedBalance)
+                    // Check if SMART values match READY pscalcview2 (authoritative)
+                    if (actual.VestedBalance == decimal.Round(readyData.VestedBalance, 2) &&
+                        actual.VestedPercent == readyData.VestedPercent * 100)
                     {
-                        continue;
+                        smartMatchesReady = true;
+                        acceptedDifferences.Add($"PSN: {psnDisplay} ({expected.EmployeeName})  {string.Join(", ", fieldDiffs)} [SMART matches READY - OK]");
                     }
 
-                    decimal horus = badge2Details[mismatch.Badge].hours;
-
-                    table.Add(
-                        mismatch.Badge,
-                        mismatch.Ready,
-                        mismatch.Smart,
-                        masterInquiryVestedBalance,
-                        horus,
-                        mismatch.Smart == masterInquiryVestedBalance ? "Y" : "<------ No"
-                    );
+                    // If the balance is 0, then ignore the percent
+                    if (actual.VestedBalance == 0 && decimal.Round(readyData.VestedBalance, 2) == 0)
+                    {
+                        smartMatchesReady = true;
+                        acceptedDifferences.Add($"PSN: {psnDisplay} ({expected.EmployeeName})  {string.Join(", ", fieldDiffs)} [SMART matches READY - OK]");
+                    }
                 }
 
-                TestOutputHelper.WriteLine(table.ToString());
-                table.RowCount.ShouldBeLessThan(3); // Is there a problem in THA008-10 ?
+                if (fieldDiffs.Count == 1 && vestedBalanceDiff && readyVestingData.TryGetValue(expected.BadgeNumber, out (decimal VestedBalance, decimal VestedPercent) rreadyData) && actual.VestedBalance == decimal.Round(rreadyData.VestedBalance, 2))
+                {
+                    smartMatchesReady = true;
+                    acceptedDifferences.Add($"PSN: {psnDisplay} ({expected.EmployeeName})  {string.Join(", ", fieldDiffs)} [SMART matches READY - OK]");
+                }
+
+                if (!smartMatchesReady)
+                {
+                    differences.Add($"PSN: {psnDisplay} ({expected.EmployeeName})  {string.Join(", ", fieldDiffs)}");
+                }
             }
         }
+
+        if (acceptedDifferences.Count > 0)
+        {
+            TestOutputHelper.WriteLine($"\n=== Accepted Differences (SMART matches READY pscalcview2): {acceptedDifferences.Count} records    ACTUAL / EXPECTED  ===");
+        }
+
+        if (differences.Count > 0)
+        {
+            TestOutputHelper.WriteLine($"\n=== Field Mismatches: {differences.Count} records ===");
+            foreach (string diff in differences)
+            {
+                TestOutputHelper.WriteLine(diff);
+            }
+        }
+
+        differences.Count.ShouldBe(0, $"{differences.Count} records have field mismatches");
+    }
+
+    private static Dictionary<long, QPay066Record> AsDict(List<QPay066Record> parseRecords)
+    {
+        return parseRecords
+            .ToDictionary(
+                qp => qp.PsnSuffix == 0
+                    ? qp.BadgeNumber
+                    : (long)qp.BadgeNumber * 10_000 + qp.PsnSuffix,
+                qp => qp);
     }
 
     public static string ReadEmbeddedResource(string resourceName)
@@ -211,32 +305,30 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         return reader.ReadToEnd();
     }
 
-
     /// <summary>
-    ///     Queries the READY schema's pscalcview2 view to get vested balances for a set of badge numbers.
+    ///     Queries the READY schema's pscalcview2 view to get vested balances and vested percent for a set of badge numbers.
     /// </summary>
     /// <param name="badges">HashSet of badge numbers to query</param>
     /// <param name="connectionString">Connection string to the database</param>
-    /// <returns>Dictionary mapping badge number to vested balance</returns>
-    private static async Task<Dictionary<int, decimal>> GetReadyVestedBalancesByBadge(HashSet<int> badges, string connectionString)
+    /// <returns>Dictionary mapping badge number to (VestedBalance, VestedPercent)</returns>
+    private static async Task<Dictionary<int, (decimal VestedBalance, decimal VestedPercent)>> GetReadyVestedBalancesByBadge(
+        HashSet<int> badges, string connectionString)
     {
-        if (badges == null || badges.Count == 0)
+        if (badges.Count == 0)
         {
-            return new Dictionary<int, decimal>();
+            return new Dictionary<int, (decimal, decimal)>();
         }
 
         await using OracleConnection connection = new(connectionString);
         await connection.OpenAsync();
 
-        // Query the READY schema's pscalcview2 view
-        // This view returns SSN, VESTED_PERCENT, TOTAL_BALANCE, VESTED_BALANCE
         string query = @"
-            SELECT d.DEM_BADGE, v.VESTED_BALANCE 
+            SELECT d.DEM_BADGE, v.VESTED_BALANCE, v.VESTED_PERCENT
             FROM tbherrmann.pscalcview2 v
             INNER JOIN tbherrmann.DEMOGRAPHICS d ON v.SSN = d.DEM_SSN
             WHERE d.DEM_BADGE IN (" + string.Join(",", badges) + ")";
 
-        Dictionary<int, decimal> result = new();
+        Dictionary<int, (decimal, decimal)> result = new();
 
         await using OracleCommand command = new(query, connection);
         await using OracleDataReader? reader = await command.ExecuteReaderAsync();
@@ -245,7 +337,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         {
             int badge = reader.GetInt32(0);
             decimal vestedBalance = reader.GetDecimal(1);
-            result[badge] = vestedBalance;
+            decimal vestedPercent = reader.GetDecimal(2);
+            result[badge] = (vestedBalance, vestedPercent);
         }
 
         return result;
@@ -263,7 +356,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
                 textReportGenerator.PrintDetails(ms.BadgePSn, ms.Name, yd.BeginningBalance,
                     yd.BeneficiaryAllocation, yd.DistributionAmount, yd.Forfeit,
                     yd.EndingBalance, yd.VestedBalance, yd.DateTerm, yd.YtdPsHours, yd.VestedPercent, yd.Age,
-                    yd.HasForfeited ? (byte)4 : (byte)0);
+                    yd.EnrollmentId);
             }
         }
 

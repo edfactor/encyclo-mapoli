@@ -70,4 +70,5 @@ public sealed record TerminatedEmployeeAndBeneficiaryYearDetailDto : IIsExecutiv
     public decimal? SuggestedForfeit { get; set; }
     public bool IsExecutive { get; set; }
     public short ProfitYear { get; set; }
+    public byte EnrollmentId { get; set; }
 }

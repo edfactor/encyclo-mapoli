@@ -130,7 +130,7 @@ public class QPay066ReportParserTests
         record.YtdVstPsHours.ShouldBe(697.00m);
         record.VestedPercent.ShouldBe(40m);
         record.Age.ShouldBe(36);
-        record.ExecutiveCode.ShouldBeNull();
+        record.EnrollmentCode.ShouldBeNull();
     }
 
     private static void ValidateEmployee_709150_AliAyla(List<QPay066Record> records)
@@ -152,7 +152,7 @@ public class QPay066ReportParserTests
         record.YtdVstPsHours.ShouldBe(234.50m);
         record.VestedPercent.ShouldBe(20m);
         record.Age.ShouldBe(45);
-        record.ExecutiveCode.ShouldBeNull();
+        record.EnrollmentCode.ShouldBeNull();
     }
 
     private static void ValidateEmployee_701539_AliBella(List<QPay066Record> records)
@@ -174,7 +174,7 @@ public class QPay066ReportParserTests
         record.YtdVstPsHours.ShouldBe(144.50m);
         record.VestedPercent.ShouldBe(40m);
         record.Age.ShouldBe(24);
-        record.ExecutiveCode.ShouldBeNull();
+        record.EnrollmentCode.ShouldBeNull();
     }
 
     #endregion
@@ -200,7 +200,7 @@ public class QPay066ReportParserTests
         record.YtdVstPsHours.ShouldBe(0.00m);
         record.VestedPercent.ShouldBe(100m);
         record.Age.ShouldBe(58);
-        record.ExecutiveCode.ShouldBeNull();
+        record.EnrollmentCode.ShouldBeNull();
     }
 
     private static void ValidateBeneficiary_7026461000_AvilaSavannah(List<QPay066Record> records)
@@ -222,7 +222,7 @@ public class QPay066ReportParserTests
         record.YtdVstPsHours.ShouldBe(0.00m);
         record.VestedPercent.ShouldBe(0m);
         record.Age.ShouldBe(55);
-        record.ExecutiveCode.ShouldBeNull();
+        record.EnrollmentCode.ShouldBeNull();
     }
 
     private static void ValidateBeneficiary_7024451000_BartlettAtlas(List<QPay066Record> records)
@@ -244,7 +244,7 @@ public class QPay066ReportParserTests
         record.YtdVstPsHours.ShouldBe(0.00m);
         record.VestedPercent.ShouldBe(100m);
         record.Age.ShouldBe(57);
-        record.ExecutiveCode.ShouldBeNull();
+        record.EnrollmentCode.ShouldBeNull();
     }
 
     #endregion

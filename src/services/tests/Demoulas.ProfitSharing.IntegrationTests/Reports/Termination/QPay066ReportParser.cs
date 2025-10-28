@@ -107,7 +107,7 @@ public static class QPay066ReportParser
             // These fields are space-delimited at the end of the line
             decimal vestedPercent = 0m;
             int? age = null;
-            char? executiveCode = null;
+            char? enrollmentCode = null;
 
             if (line.Length > 125)
             {
@@ -126,10 +126,10 @@ public static class QPay066ReportParser
                     age = ageValue;
                 }
 
-                // Executive code is third (single character), optional
+                // Enrollment code is third (single character), optional
                 if (parts.Length > 2 && parts[2].Length > 0)
                 {
-                    executiveCode = parts[2][0];
+                    enrollmentCode = parts[2][0];
                 }
             }
 
@@ -148,7 +148,7 @@ public static class QPay066ReportParser
                 YtdVstPsHours = ytdVstPsHours,
                 VestedPercent = vestedPercent,
                 Age = age,
-                ExecutiveCode = executiveCode
+                EnrollmentCode = enrollmentCode
             });
         }
 
