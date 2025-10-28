@@ -11,38 +11,22 @@ interface TransactionData {
 }
 
 interface ForfeituresTransactionGridProps {
-  transactionData?: TransactionData | null;
-  isLoading?: boolean;
-  onPaginationChange?: (pageNumber: number, pageSize: number, sortParams: SortParams) => void;
-  onSortChange?: (sortParams: SortParams) => void;
+  transactionData: TransactionData | null;
+  isLoading: boolean;
+  pagination: ReturnType<typeof useGridPagination>;
+  onPaginationChange: (pageNumber: number, pageSize: number, sortParams: SortParams) => void;
+  onSortChange: (sortParams: SortParams) => void;
 }
 
 const ForfeituresTransactionGrid: React.FC<ForfeituresTransactionGridProps> = memo(
-  ({ transactionData, isLoading, onPaginationChange, onSortChange }) => {
+  ({ transactionData, isLoading, pagination, onPaginationChange, onSortChange }) => {
     const columnDefs = useMemo(() => GetForfeituresTransactionGridColumns(), []);
-
-    const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
-      initialPageSize: 25,
-      initialSortBy: "transactionDate",
-      initialSortDescending: true,
-      onPaginationChange: useCallback(
-        (pageNum: number, pageSz: number, sortPrms: SortParams) => {
-          if (onPaginationChange) {
-            onPaginationChange(pageNum, pageSz, sortPrms);
-          }
-        },
-        [onPaginationChange]
-      )
-    });
 
     const handleSortChangeInternal = useCallback(
       (sortParams: ISortParams) => {
-        handleSortChange(sortParams);
-        if (onSortChange) {
-          onSortChange(sortParams);
-        }
+        onSortChange(sortParams);
       },
-      [handleSortChange, onSortChange]
+      [onSortChange]
     );
 
     if (isLoading) {
@@ -77,19 +61,17 @@ const ForfeituresTransactionGrid: React.FC<ForfeituresTransactionGridProps> = me
               }
             }}
           />
-          {onPaginationChange && (
-            <Pagination
-              pageNumber={pageNumber}
-              setPageNumber={(value: number) => {
-                handlePaginationChange(value - 1, pageSize);
-              }}
-              pageSize={pageSize}
-              setPageSize={(value: number) => {
-                handlePaginationChange(0, value);
-              }}
-              recordCount={displayData.total}
-            />
-          )}
+          <Pagination
+            pageNumber={pagination.pageNumber}
+            setPageNumber={(value: number) => {
+              onPaginationChange(value - 1, pagination.pageSize, pagination.sortParams);
+            }}
+            pageSize={pagination.pageSize}
+            setPageSize={(value: number) => {
+              onPaginationChange(0, value, pagination.sortParams);
+            }}
+            recordCount={displayData.total}
+          />
         </div>
       </>
     );
@@ -99,6 +81,9 @@ const ForfeituresTransactionGrid: React.FC<ForfeituresTransactionGridProps> = me
       prevProps.transactionData?.results === nextProps.transactionData?.results &&
       prevProps.transactionData?.total === nextProps.transactionData?.total &&
       prevProps.isLoading === nextProps.isLoading &&
+      prevProps.pagination.pageNumber === nextProps.pagination.pageNumber &&
+      prevProps.pagination.pageSize === nextProps.pagination.pageSize &&
+      prevProps.pagination.sortParams === nextProps.pagination.sortParams &&
       prevProps.onPaginationChange === nextProps.onPaginationChange &&
       prevProps.onSortChange === nextProps.onSortChange
     );
