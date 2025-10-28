@@ -4,7 +4,6 @@ using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.Common.Logging.Extensions;
 using Demoulas.ProfitSharing.Api;
-using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Metrics;
 using Demoulas.ProfitSharing.Common.Telemetry;
@@ -66,18 +65,6 @@ _ = builder.SetDefaultLoggerConfiguration(logConfig);
 
 _ = builder.AddSecurityServices();
 
-if (!builder.Environment.IsTestEnvironment() && Environment.GetEnvironmentVariable("YEMATCH_USE_TEST_CERTS") == null)
-{
-    builder.Services.AddOktaSecurity(builder.Configuration);
-}
-else
-{
-#pragma warning disable CS0618 // Type or member is obsolete
-    builder.Services.AddTestingSecurity(builder.Configuration);
-#pragma warning restore CS0618 // Type or member is obsolete
-}
-
-builder.ConfigureSecurityPolicies();
 
 string[] allowedOrigins = [
         "https://ps.qa.demoulas.net",

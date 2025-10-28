@@ -1,7 +1,7 @@
-﻿using Demoulas.ProfitSharing.Api.Security;
-using Demoulas.ProfitSharing.Security;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Demoulas.ProfitSharing.Api.Extensions;
+namespace Demoulas.ProfitSharing.Security.Extensions;
 
 internal static class PolicyExtensions
 {
