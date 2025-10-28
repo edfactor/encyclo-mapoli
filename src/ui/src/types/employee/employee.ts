@@ -38,7 +38,7 @@ export interface EmployeeDetails {
   previousEtva: number;
   employmentStatus?: string;
   department: string;
-  PayClassification: string;
+  payClassification: string;
   gender: string;
   phoneNumber: string;
   workLocation: string;
