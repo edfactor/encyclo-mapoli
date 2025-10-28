@@ -75,10 +75,10 @@ export const RecursiveNavItem: FC<RecursiveNavItemProps> = ({ item, level, maxAu
 
     // Don't override user's manual collapse/expand choices unless necessary
     if (level <= maxAutoExpandDepth && !storedExpanded) {
-      setExpanded(true);
+      setExpanded(false);
     } else if (hasActiveChild && !isActive && !storedExpanded) {
       // Auto-expand parent items that contain the active child
-      setExpanded(true);
+      setExpanded(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]); // Only re-run when location changes
