@@ -40,7 +40,7 @@ const QPAY600FilterSection: React.FC<QPAY600FilterSectionProps> = ({ onFilterCha
   } = useForm<QPAY600FilterParams>({
     resolver: yupResolver(schema) as Resolver<QPAY600FilterParams>,
     defaultValues: {
-      profitYear: new Date(2024, 0, 1), // Default to last year (2024)
+      profitYear: new Date(new Date().getFullYear() - 1, 0, 1),
       employeeType: "parttime"
     }
   });
@@ -59,7 +59,7 @@ const QPAY600FilterSection: React.FC<QPAY600FilterSectionProps> = ({ onFilterCha
 
   const handleReset = () => {
     reset({
-      profitYear: new Date(2024, 0, 1),
+      profitYear: new Date(new Date().getFullYear() - 1, 0, 1),
       employeeType: "parttime"
     });
     onReset();

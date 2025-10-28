@@ -1,5 +1,6 @@
-import { ColDef } from "ag-grid-community";
+import { ColDef, IRowNode } from "ag-grid-community";
 import { createCountColumn, createCurrencyColumn, createPointsColumn } from "../../../utils/gridColumnFactory";
+import { PayServicesDto } from "../../../types/reports/payservices";
 
 export const GetQPAY600GridColumns = (): ColDef[] => {
   return [
@@ -14,7 +15,7 @@ export const GetQPAY600GridColumns = (): ColDef[] => {
           return params.value?.toString() || "";
         }
       }),
-      comparator: (_valueA: string, _valueB: string, nodeA: any, nodeB: any) => {
+      comparator: (_valueA: string, _valueB: string, nodeA: IRowNode<PayServicesDto>, nodeB: IRowNode<PayServicesDto>) => {
         // Use the numeric yearsOfService for sorting instead of the label
         const numA = nodeA.data?.yearsOfService ?? 0;
         const numB = nodeB.data?.yearsOfService ?? 0;

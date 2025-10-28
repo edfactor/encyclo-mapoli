@@ -7,10 +7,7 @@ import QPAY600FilterSection, { QPAY600FilterParams } from "./QPAY600FilterSectio
 import QPAY600Grid from "./QPAY600Grid";
 
 const QPAY600: React.FC = () => {
-  const [filterParams, setFilterParams] = useState<QPAY600FilterParams>({
-    profitYear: new Date(2024, 0, 1),
-    employeeType: "parttime"
-  });
+  const [filterParams, setFilterParams] = useState<QPAY600FilterParams | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleFilterChange = (params: QPAY600FilterParams) => {
@@ -18,10 +15,7 @@ const QPAY600: React.FC = () => {
   };
 
   const handleReset = () => {
-    setFilterParams({
-      profitYear: new Date(2024, 0, 1),
-      employeeType: "parttime"
-    });
+    setFilterParams(null);
   };
 
   const handleLoadingChange = (loading: boolean) => {
@@ -52,12 +46,14 @@ const QPAY600: React.FC = () => {
           </DSMAccordion>
         </Grid>
 
-        <Grid width="100%">
-          <QPAY600Grid
-            filterParams={filterParams}
-            onLoadingChange={handleLoadingChange}
-          />
-        </Grid>
+        {filterParams && (
+          <Grid width="100%">
+            <QPAY600Grid
+              filterParams={filterParams}
+              onLoadingChange={handleLoadingChange}
+            />
+          </Grid>
+        )}
       </Grid>
     </Page>
   );
