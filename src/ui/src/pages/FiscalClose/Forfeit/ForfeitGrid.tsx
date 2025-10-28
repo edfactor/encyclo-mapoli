@@ -45,19 +45,19 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, is
           <div className="sticky top-0 z-10 flex bg-white">
             <TotalsGrid
               displayData={[[numberToCurrency(searchResults.totalProfitSharingBalance || 0)]]}
-              leftColumnHeaders={["Amount in Profit Sharing"]}
+              leftColumnHeaders={["Profit Sharing Amount"]}
               topRowHeaders={[]}></TotalsGrid>
             <TotalsGrid
               displayData={[[numberToCurrency(searchResults.distributionTotals || 0)]]}
-              leftColumnHeaders={["Amount in Profit Sharing"]}
+              leftColumnHeaders={["Distribution Amount"]}
               topRowHeaders={[]}></TotalsGrid>
             <TotalsGrid
               displayData={[[numberToCurrency(searchResults.allocationToTotals || 0)]]}
-              leftColumnHeaders={["Amount in Profit Sharing"]}
+              leftColumnHeaders={["Allocations To"]}
               topRowHeaders={[]}></TotalsGrid>
             <TotalsGrid
               displayData={[[numberToCurrency(searchResults.allocationsFromTotals || 0)]]}
-              leftColumnHeaders={["Amount in Profit Sharing"]}
+              leftColumnHeaders={["Allocations From"]}
               topRowHeaders={[]}></TotalsGrid>
           </div>
 
