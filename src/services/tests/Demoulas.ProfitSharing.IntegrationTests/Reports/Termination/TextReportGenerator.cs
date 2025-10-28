@@ -1,21 +1,19 @@
-﻿
-namespace Demoulas.ProfitSharing.IntegrationTests.Reports;
+﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.Termination;
 
 /// <summary>
-/// Produces a paper report identical to the QPAY066.pco program.
-///
-/// This class is only used in testing.
+///     Produces a paper report identical to the QPAY066.pco program.
+///     This class is only used in testing.
 /// </summary>
 public class TextReportGenerator
 {
     private const int LinesOnPage = 52;
-    private readonly StringWriter _reportWriter = new StringWriter();
-    private int _lineCounter = 0;
-    private int _pageCounter = 1;
     private readonly string _effectiveRunDateFormatted;
-    private readonly string _profitShareYearFormatted;
-    private readonly string _fiscalYearStartDateFormatted;
     private readonly string _fiscalYearEndDateFormatted;
+    private readonly string _fiscalYearStartDateFormatted;
+    private readonly string _profitShareYearFormatted;
+    private readonly StringWriter _reportWriter = new();
+    private int _lineCounter;
+    private int _pageCounter = 1;
 
     public TextReportGenerator(DateOnly effectiveRunDate, DateOnly startDate, DateOnly endDate, decimal profitSharingYearWithIteration)
     {
@@ -33,15 +31,8 @@ public class TextReportGenerator
     public void PrintPageHeader()
     {
         _reportWriter.WriteLine("DON MULLIGAN");
-        _reportWriter.WriteLine(string.Format(
-            "{0,-39}{1,24} {2}  {3}   {4}                         {5}   {6}",
-            /*0*/ "QPAY066    TERMINATION - PROFIT SHARING",
-            /*1*/ "DATE",
-            /*2*/ _effectiveRunDateFormatted,
-            /*3*/ "YEAR:",
-            /*4*/ _profitShareYearFormatted,
-            /*5*/ "PAGE:",
-            /*6*/ $"{_pageCounter:000000}"));
+        _reportWriter.WriteLine("{0,-39}{1,24} {2}  {3}   {4}                         {5}   {6}", "QPAY066    TERMINATION - PROFIT SHARING", "DATE", _effectiveRunDateFormatted,
+            "YEAR:", _profitShareYearFormatted, "PAGE:", $"{_pageCounter:000000}");
         _reportWriter.WriteLine($"    {"FROM",11} {_fiscalYearStartDateFormatted} TO {_fiscalYearEndDateFormatted}");
         _reportWriter.WriteLine("");
         _reportWriter.WriteLine(
@@ -58,14 +49,23 @@ BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFE
         {
             PrintHeader();
         }
+
+        if (wEnrolled == 2 || wEnrolled == 0)
+        {
+            wEnrolled = null;
+        }
+
         _lineCounter++;
         string termDate = wsDoTerm == null || wsDoTerm == DateOnly.MinValue
             ? "".PadRight(6)
             : $"{wsDoTerm.Value.Year - 2000:00}{wsDoTerm.Value.Month:00}{wsDoTerm.Value.Day:00}";
         string ageStr = age.HasValue ? $"{age:00}" : "";
+        string wVestPertStr = wVestPert == 100 ? "100" : $"{wVestPert:00}";
+
+        string? name = r2EmployeeName?.PadRight(19).Substring(0, 19);
 
         _reportWriter.WriteLine(r2BadgePsnNp.PadLeft(11) + " " + // fmt
-                                r2EmployeeName?.PadRight(19) + " " +
+                                name + " " +
                                 FormatWithSingleComma(r2PsAmt).PadLeft(12) + " " +
                                 FormatWithSingleComma(r2BenAlloc).PadLeft(12) + " " +
                                 FormatWithSingleComma(r2PsLoan).PadLeft(12) + " " +
@@ -74,9 +74,9 @@ BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFE
                                 FormatWithSingleComma(r2Vest).PadLeft(12) + " " +
                                 termDate + " " +
                                 $"{r2PsHrs:0.00}".PadLeft(7) + " " +
-                                $"{wVestPert:00}".PadLeft(3) + " " +
+                                wVestPertStr.PadLeft(3) + " " +
                                 ageStr.PadLeft(3) +
-                                ((wEnrolled == 0) ? "" : " " + wEnrolled));
+                                (wEnrolled == null ? "" : " " + wEnrolled));
     }
 
     // In order to print nicely, values over 1 million do not have a second comma.
@@ -92,6 +92,7 @@ BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFE
         {
             return $"{parts[0]}{parts[1]},{parts[2]}";
         }
+
         return numberStr;
     }
 
@@ -106,7 +107,7 @@ BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFE
         _reportWriter.WriteLine(("TOTAL FORFEITURES".PadRight(34) + totalForfeitures.ToString(" #,##0.00 ;#,##0.00-").PadLeft(14)).Trim());
         // holding on to the misspelling of ALLOCTIONS to match the Ready system.
         _reportWriter.WriteLine(("TOTAL BENEFICIARY ALLOCTIONS".PadRight(34) + totalBeneficiaryAllocations.ToString("#,##0.00 ;#,##0.00-").PadLeft(14)).Trim());
-        _reportWriter.WriteLine("\f");
+        _reportWriter.WriteLine("\n\f");
     }
 
     public string GetReport()
@@ -118,14 +119,14 @@ BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFE
     {
         if (_lineCounter != 0)
         {
-            _reportWriter.WriteLine("\f");
+            _reportWriter.WriteLine("\n\f");
         }
         else
         {
             PrintReportHeader();
         }
+
         PrintPageHeader();
         _pageCounter++;
     }
 }
-

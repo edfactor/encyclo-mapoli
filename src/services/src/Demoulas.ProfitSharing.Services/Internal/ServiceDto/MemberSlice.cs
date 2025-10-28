@@ -4,14 +4,13 @@ using System.Text;
 namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 
 /// <summary>
-/// A slice of a member in the profit sharing system. An instance of this slice is either employee
-/// information or beneficiary information.  People are grouped by their full name.
+///     A slice of a member in the profit sharing system. An instance of this slice is either employee
+///     information or beneficiary information.  People are grouped by their full name.
 /// </summary>
 internal sealed record MemberSlice
 {
     internal short PsnSuffix { get; init; }
     internal required int BadgeNumber { get; init; }
-    internal required int Id { get; init; }
     internal int Ssn { get; init; }
     internal decimal HoursCurrentYear { get; init; }
     internal char EmploymentStatusCode { get; init; }
@@ -36,7 +35,7 @@ internal sealed record MemberSlice
         get
         {
             byte[] bytes = Encoding.UTF8.GetBytes(
-                $"{PsnSuffix}{BadgeNumber}{Id}{Ssn}{HoursCurrentYear}{EmploymentStatusCode}{FullName}{FirstName}{LastName}{YearsInPs}{BirthDate}{TerminationDate}{IncomeRegAndExecCurrentYear}{TerminationCode}{ZeroCont}{EnrollmentId}{Etva}{IsBeneficiaryAndEmployee}{IsOnlyBeneficiary}{ProfitYear}");
+                $"{PsnSuffix}{BadgeNumber}{Ssn}{HoursCurrentYear}{EmploymentStatusCode}{FullName}{FirstName}{LastName}{YearsInPs}{BirthDate}{TerminationDate}{IncomeRegAndExecCurrentYear}{TerminationCode}{ZeroCont}{EnrollmentId}{Etva}{IsBeneficiaryAndEmployee}{IsOnlyBeneficiary}{ProfitYear}");
             return SHA256.HashData(bytes);
         }
     }
