@@ -63,9 +63,6 @@ public class DivorceReportService : IDivorceReportService
             }
 
             var reportData = new List<DivorceReportResponse>();
-            decimal cumulativeContributions = 0;
-            decimal cumulativeWithdrawals = 0;
-            decimal cumulativeDistributions = 0;
 
             // Process each year using TotalService calculations
             foreach (var year in profitYears.Where(y => y >= request.BeginningDate.Year && y <= request.EndingDate.Year))
@@ -81,35 +78,18 @@ public class DivorceReportService : IDivorceReportService
                     continue;
                 }
 
-                decimal yearContributions = yearTransactions.TotalContributions;
-                decimal yearWithdrawals = yearTransactions.AllocationsTotal;
-                decimal yearDistributions = yearTransactions.DistributionsTotal;
-                decimal yearDividends = yearTransactions.TotalEarnings;
-                decimal yearForfeitures = yearTransactions.ForfeitsTotal;
-
-                // Accumulate totals
-                cumulativeContributions += yearContributions;
-                cumulativeWithdrawals += yearWithdrawals;
-                cumulativeDistributions += yearDistributions;
-
-                // Calculate ending balance for the year
-                decimal endingBalance = yearTransactions.CurrentBalance;
-
+                // Map to simplified response showing only essential fields
                 reportData.Add(new DivorceReportResponse
                 {
                     BadgeNumber = demographic.BadgeNumber,
                     FullName = demographic.ContactInfo.FullName ?? string.Empty,
                     Ssn = demographic.Ssn.MaskSsn(),
                     ProfitYear = year,
-                    TotalContributions = yearContributions,
-                    TotalWithdrawals = yearWithdrawals,
-                    TotalDistributions = yearDistributions,
-                    TotalDividends = yearDividends,
-                    TotalForfeitures = yearForfeitures,
-                    EndingBalance = endingBalance,
-                    CumulativeContributions = cumulativeContributions,
-                    CumulativeWithdrawals = cumulativeWithdrawals,
-                    CumulativeDistributions = cumulativeDistributions
+                    Contributions = yearTransactions.TotalContributions,
+                    Earnings = yearTransactions.TotalEarnings,
+                    Forfeitures = yearTransactions.ForfeitsTotal,
+                    Withdrawals = yearTransactions.AllocationsTotal,
+                    EndingBalance = yearTransactions.CurrentBalance
                 });
             }
 

@@ -35,8 +35,8 @@ public sealed class DivorceReportEndpoint : ProfitSharingEndpoint<DivorceReportR
         Group<AdhocReportsGroup>();
         Summary(s =>
         {
-            s.Summary = "Divorce Report";
-            s.Description = "Returns a report of member account activity condensed by profit year, suitable for divorce proceedings. Includes contributions, withdrawals, distributions, and ending balances for each plan year.";
+            s.Summary = "Account History Report";
+            s.Description = "Returns a report of member account activity condensed by profit year. Includes contributions, earnings, forfeitures, withdrawals, and ending balances for each plan year.";
             s.ExampleRequest = new DivorceReportRequest
             {
                 BadgeNumber = 700006,
@@ -49,7 +49,7 @@ public sealed class DivorceReportEndpoint : ProfitSharingEndpoint<DivorceReportR
                     200,
                     new ReportResponseBase<DivorceReportResponse>
                     {
-                        ReportName = "Divorce Report",
+                        ReportName = "Account History Report",
                         ReportDate = DateTimeOffset.Now,
                         StartDate = new DateOnly(2007, 1, 1),
                         EndDate = new DateOnly(2024, 12, 31),
@@ -61,33 +61,27 @@ public sealed class DivorceReportEndpoint : ProfitSharingEndpoint<DivorceReportR
                                 {
                                     BadgeNumber = 700006,
                                     FullName = "John Doe",
-                                    Ssn = "123-45-6789",
+                                    Ssn = "***-**-6789",
                                     ProfitYear = 2007,
-                                    TotalContributions = 50000,
-                                    TotalWithdrawals = 0,
-                                    TotalDistributions = 0,
-                                    TotalDividends = 5000,
-                                    TotalForfeitures = 0,
+                                    Contributions = 50000,
+                                    Earnings = 5000,
+                                    Forfeitures = 0,
+                                    Withdrawals = 0,
                                     EndingBalance = 55000,
-                                    CumulativeContributions = 50000,
-                                    CumulativeWithdrawals = 0,
-                                    CumulativeDistributions = 0
+                                    Comment = null
                                 },
                                 new DivorceReportResponse
                                 {
                                     BadgeNumber = 700006,
                                     FullName = "John Doe",
-                                    Ssn = "123-45-6789",
+                                    Ssn = "***-**-6789",
                                     ProfitYear = 2008,
-                                    TotalContributions = 55000,
-                                    TotalWithdrawals = 0,
-                                    TotalDistributions = 0,
-                                    TotalDividends = 6000,
-                                    TotalForfeitures = 0,
+                                    Contributions = 55000,
+                                    Earnings = 6000,
+                                    Forfeitures = 0,
+                                    Withdrawals = 0,
                                     EndingBalance = 116000,
-                                    CumulativeContributions = 105000,
-                                    CumulativeWithdrawals = 0,
-                                    CumulativeDistributions = 0
+                                    Comment = null
                                 }
                             },
                             Total = 2
@@ -109,12 +103,12 @@ public sealed class DivorceReportEndpoint : ProfitSharingEndpoint<DivorceReportR
 
             if (req.BadgeNumber == 0)
             {
-                _logger.LogWarning("Divorce report requested without valid badge number (correlation: {CorrelationId})",
+                _logger.LogWarning("Account history report requested without valid badge number (correlation: {CorrelationId})",
                     HttpContext.TraceIdentifier);
 
                 var emptyResult = new ReportResponseBase<DivorceReportResponse>
                 {
-                    ReportName = "Divorce Report",
+                    ReportName = "Account History Report",
                     StartDate = req.StartDate ?? new DateOnly(2007, 1, 1),
                     EndDate = req.EndDate ?? DateOnly.FromDateTime(DateTime.Today),
                     Response = new PaginatedResponseDto<DivorceReportResponse> { Results = [] }
@@ -139,19 +133,19 @@ public sealed class DivorceReportEndpoint : ProfitSharingEndpoint<DivorceReportR
 
             var result = await _divorceReportService.GetDivorceReportAsync(req.BadgeNumber, serviceRequest, ct);
 
-            // Record divorce report business metrics
+            // Record account history report business metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,
-                new("operation", "divorce-report-generation"),
+                new("operation", "account-history-report-generation"),
                 new("endpoint", "DivorceReportEndpoint"),
-                new("report_type", "divorce"),
+                new("report_type", "account-history"),
                 new("date_range_years", $"{serviceRequest.BeginningDate.Year}-{serviceRequest.EndingDate.Year}"));
 
             var recordCount = result?.Response?.Results?.Count() ?? 0;
             EndpointTelemetry.RecordCountsProcessed.Record(recordCount,
-                new("record_type", "divorce-report-years"),
+                new("record_type", "account-history-report-years"),
                 new("endpoint", "DivorceReportEndpoint"));
 
-            _logger.LogInformation("Divorce report generated for badge {BadgeNumber}, returned {Count} years of activity (correlation: {CorrelationId})",
+            _logger.LogInformation("Account history report generated for badge {BadgeNumber}, returned {Count} years of activity (correlation: {CorrelationId})",
                 req.BadgeNumber, recordCount, HttpContext.TraceIdentifier);
 
             if (result != null)
@@ -163,7 +157,7 @@ public sealed class DivorceReportEndpoint : ProfitSharingEndpoint<DivorceReportR
 
             var emptyReportResult = new ReportResponseBase<DivorceReportResponse>
             {
-                ReportName = "Divorce Report",
+                ReportName = "Account History Report",
                 StartDate = serviceRequest.BeginningDate,
                 EndDate = serviceRequest.EndingDate,
                 Response = new PaginatedResponseDto<DivorceReportResponse> { Results = [] }

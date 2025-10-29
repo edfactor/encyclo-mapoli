@@ -9,15 +9,12 @@ export interface DivorceReportResponse {
   fullName: string;
   ssn: string; // Masked for security
   profitYear: number;
-  totalContributions: number;
-  totalWithdrawals: number;
-  totalDistributions: number;
-  totalDividends: number;
-  totalForfeitures: number;
+  contributions: number;
+  earnings: number;
+  forfeitures: number;
+  withdrawals: number;
   endingBalance: number;
-  cumulativeContributions: number;
-  cumulativeWithdrawals: number;
-  cumulativeDistributions: number;
+  comment?: string;
 }
 
 export interface PaginatedResponseDto<T> {

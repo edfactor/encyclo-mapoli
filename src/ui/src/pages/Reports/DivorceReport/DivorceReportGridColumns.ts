@@ -14,59 +14,39 @@ export const GetDivorceReportColumns = (): ColDef[] => {
     }),
     createSSNColumn({ minWidth: 170, sortable: false }),
     {
-      headerName: "Profit Year",
+      headerName: "Year",
       field: "profitYear",
       colId: "profitYear",
       headerClass: "left-align",
       cellClass: "left-align",
-      minWidth: 100,
+      minWidth: 80,
       sortable: true,
       resizable: true
     },
     createCurrencyColumn({
-      headerName: "Total Contributions",
-      field: "totalContributions",
-      minWidth: 150
+      headerName: "Contributions",
+      field: "contributions",
+      minWidth: 120
     }),
     createCurrencyColumn({
-      headerName: "Total Withdrawals",
-      field: "totalWithdrawals",
-      minWidth: 150
+      headerName: "Earnings/(Loss)",
+      field: "earnings",
+      minWidth: 130
     }),
     createCurrencyColumn({
-      headerName: "Total Distributions",
-      field: "totalDistributions",
-      minWidth: 150
+      headerName: "Forfeitures",
+      field: "forfeitures",
+      minWidth: 120
     }),
     createCurrencyColumn({
-      headerName: "Total Dividends",
-      field: "totalDividends",
-      minWidth: 150
-    }),
-    createCurrencyColumn({
-      headerName: "Total Forfeitures",
-      field: "totalForfeitures",
-      minWidth: 150
+      headerName: "Withdrawals",
+      field: "withdrawals",
+      minWidth: 120
     }),
     createCurrencyColumn({
       headerName: "Ending Balance",
       field: "endingBalance",
-      minWidth: 150
-    }),
-    createCurrencyColumn({
-      headerName: "Cumulative Contributions",
-      field: "cumulativeContributions",
-      minWidth: 180
-    }),
-    createCurrencyColumn({
-      headerName: "Cumulative Withdrawals",
-      field: "cumulativeWithdrawals",
-      minWidth: 180
-    }),
-    createCurrencyColumn({
-      headerName: "Cumulative Distributions",
-      field: "cumulativeDistributions",
-      minWidth: 180
+      minWidth: 130
     })
   ];
 };

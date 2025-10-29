@@ -215,7 +215,7 @@ BEGIN
     insert_navigation_item(RECENTLY_TERMINATED, ADHOC_GROUP, 'Recently Terminated', 'PROF-VESTED|PAY508', 'recently-terminated', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(QPAY066_AD_HOC_REPORTS, ADHOC_GROUP, 'QPAY066* Ad Hoc Reports', 'QPAY066*', 'qpay066-adhoc', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(QPAY066_UNDR21, ADHOC_GROUP, 'QPAY066-UNDR21', '', 'qpay066-under21', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(DIVORCE_REPORT, ADHOC_GROUP, 'Divorce Report', '', 'divorce-report', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(DIVORCE_REPORT, ADHOC_GROUP, 'Account History Report', '', 'divorce-report', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
 
 --beneficiary items
     insert_navigation_item(BENEFICIARY_INQUIRY_PAGE, BENEFICIARIES_MENU, 'Beneficiary Inquiry', '', 'beneficiary', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);

@@ -4,7 +4,8 @@ using Demoulas.ProfitSharing.Common.Attributes;
 namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
 /// <summary>
-/// DTO for Divorce Report response, displaying member account activity condensed by profit year.
+/// DTO for Divorce Report response, displaying member account activity by profit year.
+/// Shows condensed yearly summaries for use in divorce proceedings.
 /// </summary>
 [NoMemberDataExposed]
 public class DivorceReportResponse
@@ -32,45 +33,30 @@ public class DivorceReportResponse
     /// <summary>
     /// Total contributions (employer) for the plan year.
     /// </summary>
-    public decimal TotalContributions { get; set; }
+    public decimal Contributions { get; set; }
 
     /// <summary>
-    /// Total withdrawals/loans for the plan year.
+    /// Total earnings (dividends) for the plan year.
     /// </summary>
-    public decimal TotalWithdrawals { get; set; }
-
-    /// <summary>
-    /// Total distributions for the plan year.
-    /// </summary>
-    public decimal TotalDistributions { get; set; }
-
-    /// <summary>
-    /// Total dividends/earnings for the plan year.
-    /// </summary>
-    public decimal TotalDividends { get; set; }
+    public decimal Earnings { get; set; }
 
     /// <summary>
     /// Total forfeitures for the plan year.
     /// </summary>
-    public decimal TotalForfeitures { get; set; }
+    public decimal Forfeitures { get; set; }
 
     /// <summary>
-    /// Ending balance at the end of the plan year.
+    /// Total withdrawals/allocations for the plan year.
+    /// </summary>
+    public decimal Withdrawals { get; set; }
+
+    /// <summary>
+    /// Ending balance at the end of the plan year (12/31).
     /// </summary>
     public decimal EndingBalance { get; set; }
 
     /// <summary>
-    /// Cumulative contribution amount from start date through end of this year.
+    /// Optional comment or special notes for this record.
     /// </summary>
-    public decimal CumulativeContributions { get; set; }
-
-    /// <summary>
-    /// Cumulative withdrawals from start date through end of this year.
-    /// </summary>
-    public decimal CumulativeWithdrawals { get; set; }
-
-    /// <summary>
-    /// Cumulative distributions from start date through end of this year.
-    /// </summary>
-    public decimal CumulativeDistributions { get; set; }
+    public string? Comment { get; set; }
 }
