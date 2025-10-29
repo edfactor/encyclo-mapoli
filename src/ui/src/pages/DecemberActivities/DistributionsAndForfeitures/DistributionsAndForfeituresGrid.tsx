@@ -10,7 +10,7 @@ import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { useLazyGetDistributionsAndForfeituresQuery } from "../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../reduxstore/store";
-import { GetDistributionsAndForfeituresColumns } from "./DistributionAndForfeituresGridColumns";
+import { GetDistributionsAndForfeituresColumns } from "./DistributionsAndForfeituresGridColumns";
 
 interface DistributionsAndForfeituresQueryParams {
   startDate?: string;
