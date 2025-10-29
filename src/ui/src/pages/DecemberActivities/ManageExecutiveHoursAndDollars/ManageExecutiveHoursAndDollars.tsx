@@ -1,10 +1,11 @@
 import { SaveOutlined } from "@mui/icons-material";
-import { Box, Button, Divider, Grid, Tooltip } from "@mui/material";
+import { Box, Button, CircularProgress, Divider, Grid, Tooltip } from "@mui/material";
 import FrozenYearWarning from "components/FrozenYearWarning";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import StatusReadOnlyInfo from "components/StatusReadOnlyInfo";
 import { memo, useCallback } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
+import MissiveAlerts from "../../../components/MissiveAlerts/MissiveAlerts";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import { EXECUTIVE_HOURS_AND_DOLLARS_MESSAGES } from "../../../components/MissiveAlerts/MissiveMessages";
 import { CAPTIONS } from "../../../constants";
@@ -111,6 +112,11 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
       <Grid width={"100%"}>
         <Divider />
       </Grid>
+      <Grid
+        size={{ xs: 12 }}
+        width={"100%"}>
+        <MissiveAlerts />
+      </Grid>
       <Grid width={"100%"}>
         <DSMAccordion title="Filter">
           <ManageExecutiveHoursAndDollarsSearchFilter
@@ -120,7 +126,16 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
           />
         </DSMAccordion>
       </Grid>
-      {showGrid && (
+      
+      {isSearching && (
+        <Grid
+          size={{ xs: 12 }}
+          sx={{ display: "flex", justifyContent: "center", padding: "24px" }}>
+          <CircularProgress />
+        </Grid>
+      )}
+
+      {!isSearching && showGrid && (
         <Grid width="100%">
           <ManageExecutiveHoursAndDollarsGrid
             gridData={gridData}
@@ -147,10 +162,10 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
 });
 
 const ManageExecutiveHoursAndDollarsInner = () => {
-  const hookData = useManageExecutiveHoursAndDollars();
+  const { addAlert, clearAlerts } = useMissiveAlerts();
+  const hookData = useManageExecutiveHoursAndDollars({ addAlert, clearAlerts });
   const { hasPendingChanges, saveChanges } = hookData;
   const isReadOnly = useReadOnlyNavigation();
-  const { addAlert } = useMissiveAlerts();
 
   const handleSave = useCallback(async () => {
     try {

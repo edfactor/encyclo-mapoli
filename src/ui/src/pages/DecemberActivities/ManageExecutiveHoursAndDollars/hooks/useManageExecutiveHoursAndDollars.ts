@@ -14,10 +14,12 @@ import {
   updateExecutiveHoursAndDollarsGridRow
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
-import { ExecutiveHoursAndDollars, ExecutiveHoursAndDollarsGrid } from "reduxstore/types";
+import { ExecutiveHoursAndDollars, ExecutiveHoursAndDollarsGrid, MissiveResponse } from "reduxstore/types";
 import { ISortParams } from "smart-ui-library";
+import { EXECUTIVE_HOURS_AND_DOLLARS_MESSAGES } from "../../../../components/MissiveAlerts/MissiveMessages";
 import { useGridPagination } from "../../../../hooks/useGridPagination";
 import { ExecutiveHoursAndDollarsRequestDto } from "../../../../types/fiscal/executive";
+import { isSimpleSearch } from "../utils/ManageExecutiveHoursAndDollarsUtils";
 import {
   initialState,
   manageExecutiveHoursAndDollarsReducer,
@@ -31,12 +33,17 @@ import {
 interface ExecutiveSearchForm {
   badgeNumber?: number;
   socialSecurity?: string;
-  fullNameContains?: string;
+  fullNameContains?: string | null;
   hasExecutiveHoursAndDollars?: boolean;
   isMonthlyPayroll?: boolean;
 }
 
-const useManageExecutiveHoursAndDollars = () => {
+interface UseManageExecutiveHoursAndDollarsProps {
+  addAlert: (alert: MissiveResponse) => void;
+  clearAlerts: () => void;
+}
+
+const useManageExecutiveHoursAndDollars = ({ addAlert, clearAlerts }: UseManageExecutiveHoursAndDollarsProps) => {
   const [state, dispatch] = useReducer(manageExecutiveHoursAndDollarsReducer, initialState);
   const reduxDispatch = useDispatch();
   const profitYear = useFiscalCloseProfitYear();
@@ -151,17 +158,42 @@ const useManageExecutiveHoursAndDollars = () => {
 
       try {
         dispatch({ type: "SEARCH_START", payload: { params: searchParams } });
+        clearAlerts();
 
         const response = await triggerSearch(searchParams).unwrap();
-        dispatch({ type: "SEARCH_SUCCESS", payload: { results: response } });
+        
+        // Check if we have results
+        const hasResults = response?.response?.results?.length > 0;
+        
+        if (hasResults) {
+          dispatch({ type: "SEARCH_SUCCESS", payload: { results: response } });
+        } else {
+          // No results found
+          dispatch({ type: "SEARCH_SUCCESS", payload: { results: response } });
+          
+          // Determine which message to show based on search type
+          const isSimple = isSimpleSearch(searchParams);
+          
+          if (isSimple) {
+            addAlert(EXECUTIVE_HOURS_AND_DOLLARS_MESSAGES.MEMBER_NOT_FOUND);
+          } else {
+            addAlert(EXECUTIVE_HOURS_AND_DOLLARS_MESSAGES.NO_RESULTS_FOUND);
+          }
+        }
 
         reduxDispatch(setExecutiveHoursAndDollarsGridYear(profitYear));
         dispatch({ type: "CLEAR_ADDITIONAL_EXECUTIVES" });
       } catch (error) {
         dispatch({ type: "SEARCH_FAILURE", payload: { error: error?.toString() || "Search failed" } });
+        addAlert({
+          id: 974,
+          severity: "Error",
+          message: "Search Failed",
+          description: error?.toString() || "An error occurred while searching. Please try again."
+        } as MissiveResponse);
       }
     },
-    [triggerSearch, profitYear, reduxDispatch, mainGridPagination]
+    [triggerSearch, profitYear, reduxDispatch, mainGridPagination, addAlert, clearAlerts]
   );
 
   const executeModalSearch = useCallback(
