@@ -1,5 +1,5 @@
-using System;
-using Demoulas.ProfitSharing.Common.Attributes;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Shared;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
@@ -7,8 +7,7 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 /// DTO for Account History Report response, displaying member account activity by profit year.
 /// Shows condensed yearly summaries of account balances and transactions.
 /// </summary>
-[NoMemberDataExposed]
-public class AccountHistoryReportResponse
+public sealed record AccountHistoryReportResponse : ProfitYearRequest, IFullNameProperty
 {
     /// <summary>
     /// Employee badge number (identifier in payroll system).
@@ -24,11 +23,6 @@ public class AccountHistoryReportResponse
     /// Masked SSN for security (displays as XXX-XX-####).
     /// </summary>
     public string Ssn { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Plan year (calendar year) for this row of account activity.
-    /// </summary>
-    public int ProfitYear { get; set; }
 
     /// <summary>
     /// Total contributions (employer) for the plan year.
@@ -54,9 +48,4 @@ public class AccountHistoryReportResponse
     /// Ending balance at the end of the plan year (12/31).
     /// </summary>
     public decimal EndingBalance { get; set; }
-
-    /// <summary>
-    /// Optional comment or special notes for this record.
-    /// </summary>
-    public string? Comment { get; set; }
 }

@@ -1,4 +1,4 @@
-using CsvHelper.Configuration;
+﻿using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -23,7 +23,7 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
     private readonly ILogger<AccountHistoryReportEndpoint> _logger;
 
     public AccountHistoryReportEndpoint(IAccountHistoryReportService accountHistoryReportService, ILogger<AccountHistoryReportEndpoint> logger)
-        : base(Navigation.Constants.DivorceReport)
+        : base(Navigation.Constants.AccountHistoryReport)
     {
         _accountHistoryReportService = accountHistoryReportService;
         _logger = logger;
@@ -67,8 +67,7 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
                                     Earnings = 5000,
                                     Forfeitures = 0,
                                     Withdrawals = 0,
-                                    EndingBalance = 55000,
-                                    Comment = null
+                                    EndingBalance = 55000
                                 },
                                 new AccountHistoryReportResponse
                                 {
@@ -80,8 +79,7 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
                                     Earnings = 6000,
                                     Forfeitures = 0,
                                     Withdrawals = 0,
-                                    EndingBalance = 116000,
-                                    Comment = null
+                                    EndingBalance = 116000
                                 }
                             },
                             Total = 2
@@ -92,7 +90,7 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
         });
     }
 
-    public override async Task HandleAsync(AccountHistoryReportRequest req, CancellationToken ct)
+    public override async Task<ReportResponseBase<AccountHistoryReportResponse>> ExecuteAsync(AccountHistoryReportRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 
@@ -115,8 +113,7 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
                 };
 
                 this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
-                Response = emptyResult;
-                return;
+                return emptyResult;
             }
 
             // Build the StartAndEndDateRequest from the AccountHistoryReportRequest
@@ -151,8 +148,7 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
             if (result != null)
             {
                 this.RecordResponseMetrics(HttpContext, _logger, result);
-                Response = result;
-                return;
+                return result;
             }
 
             var emptyReportResult = new ReportResponseBase<AccountHistoryReportResponse>
@@ -164,7 +160,7 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
             };
 
             this.RecordResponseMetrics(HttpContext, _logger, emptyReportResult);
-            Response = emptyReportResult;
+            return emptyReportResult;
         }
         catch (Exception ex)
         {

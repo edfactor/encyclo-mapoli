@@ -85,7 +85,7 @@ public sealed class Navigation
         public const short AddDistribution = 157;
 
         public const short DistributionEditRunReport = 160;
-        public const short DivorceReport = 161;
+        public const short AccountHistoryReport = 161;
     }
 
     public short Id { get; set; }

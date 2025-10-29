@@ -11,15 +11,15 @@ public record AccountHistoryReportRequest
     /// <summary>
     /// The badge number of the employee/member to generate the report for.
     /// </summary>
-    public int BadgeNumber { get; set; }
+    public required int BadgeNumber { get; init; }
 
     /// <summary>
     /// The beginning date for the report date range (optional, defaults to 1/1/2007 or earliest record).
     /// </summary>
-    public DateOnly? StartDate { get; set; }
+    public DateOnly? StartDate { get; init; }
 
     /// <summary>
     /// The ending date for the report date range (optional, defaults to today).
     /// </summary>
-    public DateOnly? EndDate { get; set; }
+    public DateOnly? EndDate { get; init; }
 }

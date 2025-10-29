@@ -1,6 +1,5 @@
 ﻿
 using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 

@@ -1,4 +1,4 @@
-using Demoulas.Common.Data.Contexts.Extensions;
+﻿using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -50,7 +50,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
 
             // Get all profit years for this member
             var profitYears = await ctx.ProfitDetails
-                .TagWith($"DivorceReport-{demographic.BadgeNumber}")
+                .TagWith($"AccountHistoryReport-{demographic.BadgeNumber}")
                 .Where(pd => pd.Ssn == demographic.Ssn)
                 .Select(pd => pd.ProfitYear)
                 .Distinct()

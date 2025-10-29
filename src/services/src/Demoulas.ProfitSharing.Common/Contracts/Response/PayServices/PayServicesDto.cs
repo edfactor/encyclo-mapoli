@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Demoulas.ProfitSharing.Common.Contracts.Response.PayServices;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.PayServices;
 public class PayServicesDto
 {
     public int Employees { get; set; } = 0;
