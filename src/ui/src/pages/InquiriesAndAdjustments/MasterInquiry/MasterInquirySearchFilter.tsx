@@ -11,7 +11,7 @@ import {
   TextField
 } from "@mui/material";
 import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -35,7 +35,7 @@ import {
 } from "../../../utils/FormValidators";
 import { transformSearchParams } from "./utils/transformSearchParams";
 
-const schema = yup.object().shape({
+const schema: yup.ObjectSchema<MasterInquirySearch> = yup.object().shape({
   endProfitYear: profitYearNullableValidator.test(
     "greater-than-start",
     "End year must be after start year",
@@ -57,7 +57,15 @@ const schema = yup.object().shape({
   earnings: positiveNumberValidator("Earnings"),
   forfeiture: positiveNumberValidator("Forfeiture"),
   payment: positiveNumberValidator("Payment"),
-  voids: yup.boolean().default(false).required()
+  voids: yup.boolean().default(false).required(),
+  pagination: yup
+    .object({
+      skip: yup.number().required(),
+      take: yup.number().required(),
+      sortBy: yup.string().required(),
+      isSortDescending: yup.boolean().required()
+    })
+    .required()
 });
 
 interface MasterInquirySearchFilterProps {
@@ -95,7 +103,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       reset,
       setValue
     } = useForm<MasterInquirySearch>({
-      resolver: yupResolver(schema) as Resolver<MasterInquirySearch>,
+      resolver: yupResolver(schema),
       mode: "onBlur",
       defaultValues: {
         endProfitYear: profitYear,
