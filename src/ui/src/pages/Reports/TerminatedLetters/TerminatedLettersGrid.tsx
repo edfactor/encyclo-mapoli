@@ -108,12 +108,7 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
               rowData: reportData.response.results,
               columnDefs: columnDefs,
               suppressMultiSort: true,
-              rowSelection: {
-                mode: "multiRow",
-                checkboxes: false,
-                headerCheckbox: false,
-                enableClickSelection: false
-              },
+              rowSelection: "multiple",
               onSelectionChanged: handleSelectionChanged
             }}
           />
