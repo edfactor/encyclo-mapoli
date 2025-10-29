@@ -17,7 +17,7 @@ import { DivorceReportResponse, ReportResponseBase } from "../../../types/report
 interface DivorceReportTableProps {
   data: ReportResponseBase<DivorceReportResponse> | undefined;
   isLoading: boolean;
-  error: any;
+  error: Error | undefined;
   onLoadingChange?: (isLoading: boolean) => void;
 }
 
