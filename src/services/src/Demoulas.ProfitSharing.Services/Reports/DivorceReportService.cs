@@ -12,16 +12,16 @@ using Microsoft.EntityFrameworkCore;
 namespace Demoulas.ProfitSharing.Services.Reports;
 
 /// <summary>
-/// Service for generating divorce reports with member account activity by profit year.
+/// Service for generating account history reports with member account activity by profit year.
 /// Uses TotalService for consistent profit code filtering and calculation logic.
 /// </summary>
-public class DivorceReportService : IDivorceReportService
+public class AccountHistoryReportService : IAccountHistoryReportService
 {
     private readonly IProfitSharingDataContextFactory _contextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly TotalService _totalService;
 
-    public DivorceReportService(
+    public AccountHistoryReportService(
         IProfitSharingDataContextFactory contextFactory,
         IDemographicReaderService demographicReaderService,
         TotalService totalService)
@@ -31,7 +31,7 @@ public class DivorceReportService : IDivorceReportService
         _totalService = totalService;
     }
 
-    public async Task<ReportResponseBase<DivorceReportResponse>> GetDivorceReportAsync(
+    public async Task<ReportResponseBase<AccountHistoryReportResponse>> GetAccountHistoryReportAsync(
         int memberId,
         StartAndEndDateRequest request,
         CancellationToken cancellationToken)
@@ -45,7 +45,7 @@ public class DivorceReportService : IDivorceReportService
 
             if (demographic is null)
             {
-                return new List<DivorceReportResponse>();
+                return new List<AccountHistoryReportResponse>();
             }
 
             // Get all profit years for this member
@@ -59,10 +59,10 @@ public class DivorceReportService : IDivorceReportService
 
             if (!profitYears.Any())
             {
-                return new List<DivorceReportResponse>();
+                return new List<AccountHistoryReportResponse>();
             }
 
-            var reportData = new List<DivorceReportResponse>();
+            var reportData = new List<AccountHistoryReportResponse>();
 
             // Process each year using TotalService calculations
             foreach (var year in profitYears.Where(y => y >= request.BeginningDate.Year && y <= request.EndingDate.Year))
@@ -79,7 +79,7 @@ public class DivorceReportService : IDivorceReportService
                 }
 
                 // Map to simplified response showing only essential fields
-                reportData.Add(new DivorceReportResponse
+                reportData.Add(new AccountHistoryReportResponse
                 {
                     BadgeNumber = demographic.BadgeNumber,
                     FullName = demographic.ContactInfo.FullName ?? string.Empty,
@@ -100,13 +100,13 @@ public class DivorceReportService : IDivorceReportService
             ? (request.BeginningDate, request.EndingDate)
             : (request.EndingDate, request.BeginningDate);
 
-        return new ReportResponseBase<DivorceReportResponse>
+        return new ReportResponseBase<AccountHistoryReportResponse>
         {
             ReportName = "Account History Report",
             ReportDate = DateTimeOffset.UtcNow,
             StartDate = dateRange.Item1,
             EndDate = dateRange.Item2,
-            Response = new PaginatedResponseDto<DivorceReportResponse>
+            Response = new PaginatedResponseDto<AccountHistoryReportResponse>
             {
                 Results = result,
                 Total = result.Count

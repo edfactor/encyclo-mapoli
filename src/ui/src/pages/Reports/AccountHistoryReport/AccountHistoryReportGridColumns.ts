@@ -6,7 +6,7 @@ import {
   createSSNColumn
 } from "../../../utils/gridColumnFactory";
 
-export const GetDivorceReportColumns = (): ColDef[] => {
+export const GetAccountHistoryReportColumns = (): ColDef[] => {
   return [
     createBadgeColumn({}),
     createNameColumn({

@@ -64,7 +64,7 @@ import ProfitSummary from "../../pages/FiscalClose/PAY426Reports/ProfitSummary/P
 import QPAY066B from "../../pages/FiscalClose/QPAY066B/QPAY066B";
 import ReprintCertificates from "../../pages/FiscalClose/ReprintCertificates/ReprintCertificates";
 import Adjustments from "../../pages/InquiriesAndAdjustments/Adjustments";
-import DivorceReport from "../../pages/Reports/DivorceReport/DivorceReport";
+import AccountHistoryReport from "../../pages/Reports/AccountHistoryReport/AccountHistoryReport";
 import PayBeNext from "../../pages/Reports/PayBeNext/PayBeNext";
 import PayBenReport from "../../pages/Reports/PayBenReport/PayBenReport";
 import QPAY066AdHocReports from "../../pages/Reports/QPAY066AdHocReports/QPAY066AdHocReports";
@@ -431,7 +431,7 @@ const RouterSubAssembly: React.FC = () => {
                 />
                 <Route
                   path={ROUTES.DIVORCE_REPORT}
-                  element={<DivorceReport />}
+                  element={<AccountHistoryReport />}
                 />
               </Routes>
             </Box>

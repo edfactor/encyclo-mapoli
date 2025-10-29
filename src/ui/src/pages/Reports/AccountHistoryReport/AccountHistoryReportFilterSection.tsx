@@ -6,7 +6,7 @@ import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
-export interface DivorceReportFilterParams {
+export interface AccountHistoryReportFilterParams {
   badgeNumber: string;
   startDate: Date | null;
   endDate: Date | null;
@@ -23,13 +23,13 @@ const schema = yup.object().shape({
   endDate: yup.date().nullable().required("End Date is required")
 });
 
-interface DivorceReportFilterSectionProps {
-  onFilterChange: (params: DivorceReportFilterParams) => void;
+interface AccountHistoryReportFilterSectionProps {
+  onFilterChange: (params: AccountHistoryReportFilterParams) => void;
   onReset: () => void;
   isLoading?: boolean;
 }
 
-const DivorceReportFilterSection: React.FC<DivorceReportFilterSectionProps> = ({
+const AccountHistoryReportFilterSection: React.FC<AccountHistoryReportFilterSectionProps> = ({
   onFilterChange,
   onReset,
   isLoading = false
@@ -42,8 +42,8 @@ const DivorceReportFilterSection: React.FC<DivorceReportFilterSectionProps> = ({
     formState: { errors },
     reset,
     trigger
-  } = useForm<DivorceReportFilterParams>({
-    resolver: yupResolver(schema) as Resolver<DivorceReportFilterParams>,
+  } = useForm<AccountHistoryReportFilterParams>({
+    resolver: yupResolver(schema) as Resolver<AccountHistoryReportFilterParams>,
     defaultValues: {
       badgeNumber: "",
       startDate: new Date(currentYear - 1, 0, 1),
@@ -52,7 +52,7 @@ const DivorceReportFilterSection: React.FC<DivorceReportFilterSectionProps> = ({
   });
 
   const validateAndSubmit = handleSubmit((data) => {
-    const dataCopy: DivorceReportFilterParams = {
+    const dataCopy: AccountHistoryReportFilterParams = {
       badgeNumber: data.badgeNumber,
       startDate: data.startDate ? new Date(data.startDate.getTime()) : null,
       endDate: data.endDate ? new Date(data.endDate.getTime()) : null
@@ -168,4 +168,4 @@ const DivorceReportFilterSection: React.FC<DivorceReportFilterSectionProps> = ({
   );
 };
 
-export default DivorceReportFilterSection;
+export default AccountHistoryReportFilterSection;

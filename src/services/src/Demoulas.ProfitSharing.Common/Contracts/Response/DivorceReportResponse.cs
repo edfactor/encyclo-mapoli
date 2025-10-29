@@ -4,11 +4,11 @@ using Demoulas.ProfitSharing.Common.Attributes;
 namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
 /// <summary>
-/// DTO for Divorce Report response, displaying member account activity by profit year.
-/// Shows condensed yearly summaries for use in divorce proceedings.
+/// DTO for Account History Report response, displaying member account activity by profit year.
+/// Shows condensed yearly summaries of account balances and transactions.
 /// </summary>
 [NoMemberDataExposed]
-public class DivorceReportResponse
+public class AccountHistoryReportResponse
 {
     /// <summary>
     /// Employee badge number (identifier in payroll system).

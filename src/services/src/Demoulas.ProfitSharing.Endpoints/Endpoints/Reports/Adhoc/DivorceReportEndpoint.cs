@@ -14,18 +14,18 @@ using Microsoft.Extensions.Logging;
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
 
 /// <summary>
-/// Endpoint for generating divorce reports showing member account activity by profit year.
+/// Endpoint for generating account history reports showing member account activity by profit year.
 /// Allows users to set start and end dates for export and condense data into one line per plan year.
 /// </summary>
-public sealed class DivorceReportEndpoint : ProfitSharingEndpoint<DivorceReportRequest, ReportResponseBase<DivorceReportResponse>>
+public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<AccountHistoryReportRequest, ReportResponseBase<AccountHistoryReportResponse>>
 {
-    private readonly IDivorceReportService _divorceReportService;
-    private readonly ILogger<DivorceReportEndpoint> _logger;
+    private readonly IAccountHistoryReportService _accountHistoryReportService;
+    private readonly ILogger<AccountHistoryReportEndpoint> _logger;
 
-    public DivorceReportEndpoint(IDivorceReportService divorceReportService, ILogger<DivorceReportEndpoint> logger)
+    public AccountHistoryReportEndpoint(IAccountHistoryReportService accountHistoryReportService, ILogger<AccountHistoryReportEndpoint> logger)
         : base(Navigation.Constants.DivorceReport)
     {
-        _divorceReportService = divorceReportService;
+        _accountHistoryReportService = accountHistoryReportService;
         _logger = logger;
     }
 
@@ -37,7 +37,7 @@ public sealed class DivorceReportEndpoint : ProfitSharingEndpoint<DivorceReportR
         {
             s.Summary = "Account History Report";
             s.Description = "Returns a report of member account activity condensed by profit year. Includes contributions, earnings, forfeitures, withdrawals, and ending balances for each plan year.";
-            s.ExampleRequest = new DivorceReportRequest
+            s.ExampleRequest = new AccountHistoryReportRequest
             {
                 BadgeNumber = 700006,
                 StartDate = new DateOnly(2007, 1, 1),
@@ -47,17 +47,17 @@ public sealed class DivorceReportEndpoint : ProfitSharingEndpoint<DivorceReportR
             {
                 {
                     200,
-                    new ReportResponseBase<DivorceReportResponse>
+                    new ReportResponseBase<AccountHistoryReportResponse>
                     {
                         ReportName = "Account History Report",
                         ReportDate = DateTimeOffset.Now,
                         StartDate = new DateOnly(2007, 1, 1),
                         EndDate = new DateOnly(2024, 12, 31),
-                        Response = new PaginatedResponseDto<DivorceReportResponse>
+                        Response = new PaginatedResponseDto<AccountHistoryReportResponse>
                         {
-                            Results = new List<DivorceReportResponse>
+                            Results = new List<AccountHistoryReportResponse>
                             {
-                                new DivorceReportResponse
+                                new AccountHistoryReportResponse
                                 {
                                     BadgeNumber = 700006,
                                     FullName = "John Doe",
@@ -70,7 +70,7 @@ public sealed class DivorceReportEndpoint : ProfitSharingEndpoint<DivorceReportR
                                     EndingBalance = 55000,
                                     Comment = null
                                 },
-                                new DivorceReportResponse
+                                new AccountHistoryReportResponse
                                 {
                                     BadgeNumber = 700006,
                                     FullName = "John Doe",
@@ -92,7 +92,7 @@ public sealed class DivorceReportEndpoint : ProfitSharingEndpoint<DivorceReportR
         });
     }
 
-    public override async Task HandleAsync(DivorceReportRequest req, CancellationToken ct)
+    public override async Task HandleAsync(AccountHistoryReportRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 
@@ -106,12 +106,12 @@ public sealed class DivorceReportEndpoint : ProfitSharingEndpoint<DivorceReportR
                 _logger.LogWarning("Account history report requested without valid badge number (correlation: {CorrelationId})",
                     HttpContext.TraceIdentifier);
 
-                var emptyResult = new ReportResponseBase<DivorceReportResponse>
+                var emptyResult = new ReportResponseBase<AccountHistoryReportResponse>
                 {
                     ReportName = "Account History Report",
                     StartDate = req.StartDate ?? new DateOnly(2007, 1, 1),
                     EndDate = req.EndDate ?? DateOnly.FromDateTime(DateTime.Today),
-                    Response = new PaginatedResponseDto<DivorceReportResponse> { Results = [] }
+                    Response = new PaginatedResponseDto<AccountHistoryReportResponse> { Results = [] }
                 };
 
                 this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
@@ -119,7 +119,7 @@ public sealed class DivorceReportEndpoint : ProfitSharingEndpoint<DivorceReportR
                 return;
             }
 
-            // Build the StartAndEndDateRequest from the DivorceReportRequest
+            // Build the StartAndEndDateRequest from the AccountHistoryReportRequest
             var serviceRequest = new StartAndEndDateRequest
             {
                 ProfitYear = (short)DateTime.Now.Year,
@@ -131,12 +131,12 @@ public sealed class DivorceReportEndpoint : ProfitSharingEndpoint<DivorceReportR
                 EndingDate = req.EndDate ?? DateOnly.FromDateTime(DateTime.Today)
             };
 
-            var result = await _divorceReportService.GetDivorceReportAsync(req.BadgeNumber, serviceRequest, ct);
+            var result = await _accountHistoryReportService.GetAccountHistoryReportAsync(req.BadgeNumber, serviceRequest, ct);
 
             // Record account history report business metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,
                 new("operation", "account-history-report-generation"),
-                new("endpoint", "DivorceReportEndpoint"),
+                new("endpoint", "AccountHistoryReportEndpoint"),
                 new("report_type", "account-history"),
                 new("date_range_years", $"{serviceRequest.BeginningDate.Year}-{serviceRequest.EndingDate.Year}"));
 
@@ -155,12 +155,12 @@ public sealed class DivorceReportEndpoint : ProfitSharingEndpoint<DivorceReportR
                 return;
             }
 
-            var emptyReportResult = new ReportResponseBase<DivorceReportResponse>
+            var emptyReportResult = new ReportResponseBase<AccountHistoryReportResponse>
             {
                 ReportName = "Account History Report",
                 StartDate = serviceRequest.BeginningDate,
                 EndDate = serviceRequest.EndingDate,
-                Response = new PaginatedResponseDto<DivorceReportResponse> { Results = [] }
+                Response = new PaginatedResponseDto<AccountHistoryReportResponse> { Results = [] }
             };
 
             this.RecordResponseMetrics(HttpContext, _logger, emptyReportResult);

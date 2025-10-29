@@ -2,12 +2,14 @@ import { Divider, Grid } from "@mui/material";
 import React, { useState } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
-import { useGetDivorceReportQuery } from "../../../reduxstore/api/DivorceReportApi";
-import DivorceReportFilterSection, { DivorceReportFilterParams } from "./DivorceReportFilterSection";
-import DivorceReportTable from "./DivorceReportTable";
+import { useGetAccountHistoryReportQuery } from "../../../reduxstore/api/AccountHistoryReportApi";
+import AccountHistoryReportFilterSection, {
+  AccountHistoryReportFilterParams
+} from "./AccountHistoryReportFilterSection";
+import AccountHistoryReportTable from "./AccountHistoryReportTable";
 
-const DivorceReport: React.FC = () => {
-  const [filterParams, setFilterParams] = useState<DivorceReportFilterParams | null>(null);
+const AccountHistoryReport: React.FC = () => {
+  const [filterParams, setFilterParams] = useState<AccountHistoryReportFilterParams | null>(null);
 
   // Construct the query parameters
   const queryParams = filterParams
@@ -23,11 +25,11 @@ const DivorceReport: React.FC = () => {
     data,
     isLoading: isQueryLoading,
     error
-  } = useGetDivorceReportQuery(queryParams || { badgeNumber: 0, startDate: undefined, endDate: undefined }, {
+  } = useGetAccountHistoryReportQuery(queryParams || { badgeNumber: 0, startDate: undefined, endDate: undefined }, {
     skip: !queryParams
   });
 
-  const handleFilterChange = (params: DivorceReportFilterParams) => {
+  const handleFilterChange = (params: AccountHistoryReportFilterParams) => {
     setFilterParams(params);
   };
 
@@ -45,7 +47,7 @@ const DivorceReport: React.FC = () => {
         </Grid>
         <Grid width={"100%"}>
           <DSMAccordion title="Filter">
-            <DivorceReportFilterSection
+            <AccountHistoryReportFilterSection
               onFilterChange={handleFilterChange}
               onReset={handleReset}
               isLoading={isQueryLoading}
@@ -55,7 +57,7 @@ const DivorceReport: React.FC = () => {
 
         {filterParams && (
           <Grid width="100%">
-            <DivorceReportTable
+            <AccountHistoryReportTable
               data={data}
               isLoading={isQueryLoading}
               error={error}
@@ -68,4 +70,4 @@ const DivorceReport: React.FC = () => {
   );
 };
 
-export default DivorceReport;
+export default AccountHistoryReport;

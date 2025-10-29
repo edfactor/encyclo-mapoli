@@ -1,18 +1,21 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import {
-  DivorceReportRequest,
-  DivorceReportResponse,
+  AccountHistoryReportRequest,
+  AccountHistoryReportResponse,
   ReportResponseBase
-} from "../../types/reports/DivorceReportTypes";
+} from "../../types/reports/AccountHistoryReportTypes";
 import { createDataSourceAwareBaseQuery } from "./api";
 
 const baseQuery = createDataSourceAwareBaseQuery();
 
-export const DivorceReportApi = createApi({
+export const AccountHistoryReportApi = createApi({
   baseQuery: baseQuery,
-  reducerPath: "divorceReportApi",
+  reducerPath: "accountHistoryReportApi",
   endpoints: (builder) => ({
-    getDivorceReport: builder.query<ReportResponseBase<DivorceReportResponse>, DivorceReportRequest>({
+    getAccountHistoryReport: builder.query<
+      ReportResponseBase<AccountHistoryReportResponse>,
+      AccountHistoryReportRequest
+    >({
       query: (params) => {
         return {
           url: "/adhoc/divorce-report",
@@ -28,4 +31,4 @@ export const DivorceReportApi = createApi({
   })
 });
 
-export const { useGetDivorceReportQuery } = DivorceReportApi;
+export const { useGetAccountHistoryReportQuery } = AccountHistoryReportApi;

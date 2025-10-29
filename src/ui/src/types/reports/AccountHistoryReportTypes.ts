@@ -1,10 +1,10 @@
-export interface DivorceReportRequest {
+export interface AccountHistoryReportRequest {
   badgeNumber: number;
   startDate?: string; // ISO format date
   endDate?: string; // ISO format date
 }
 
-export interface DivorceReportResponse {
+export interface AccountHistoryReportResponse {
   badgeNumber: number;
   fullName: string;
   ssn: string; // Masked for security
@@ -37,7 +37,7 @@ export interface ReportResponseBase<T> {
   response: PaginatedResponseDto<T>;
 }
 
-export interface DivorceReportFilterParams {
+export interface AccountHistoryReportFilterParams {
   badgeNumber: string;
   startDate: string; // ISO format
   endDate: string; // ISO format

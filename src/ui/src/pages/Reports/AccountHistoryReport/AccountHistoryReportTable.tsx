@@ -2,19 +2,19 @@ import { useMemo } from "react";
 import { DSMGrid } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
-import { DivorceReportResponse, ReportResponseBase } from "../../../types/reports/DivorceReportTypes";
-import { GetDivorceReportColumns } from "./DivorceReportGridColumns";
+import { AccountHistoryReportResponse, ReportResponseBase } from "../../../types/reports/AccountHistoryReportTypes";
+import { GetAccountHistoryReportColumns } from "./AccountHistoryReportGridColumns";
 
-interface DivorceReportTableProps {
-  data: ReportResponseBase<DivorceReportResponse> | undefined;
+interface AccountHistoryReportTableProps {
+  data: ReportResponseBase<AccountHistoryReportResponse> | undefined;
   isLoading: boolean;
   error: unknown;
   showData: boolean;
 }
 
-const DivorceReportTable: React.FC<DivorceReportTableProps> = ({ data, isLoading, showData }) => {
+const AccountHistoryReportTable: React.FC<AccountHistoryReportTableProps> = ({ data, isLoading, showData }) => {
   const gridMaxHeight = useDynamicGridHeight();
-  const columnDefs = useMemo(() => GetDivorceReportColumns(), []);
+  const columnDefs = useMemo(() => GetAccountHistoryReportColumns(), []);
 
   return (
     <>
@@ -36,4 +36,4 @@ const DivorceReportTable: React.FC<DivorceReportTableProps> = ({ data, isLoading
   );
 };
 
-export default DivorceReportTable;
+export default AccountHistoryReportTable;
