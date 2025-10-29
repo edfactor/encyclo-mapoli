@@ -9,8 +9,8 @@ import {
   useGetFullTimeStraightSalaryPayServicesQuery,
   useGetPartTimePayServicesQuery
 } from "../../../reduxstore/api/PayServicesApi";
-import { QPAY600FilterParams } from "./QPAY600FilterSection";
 import { GetQPAY600GridColumns } from "./QPAY600GridColumns";
+import { QPAY600FilterParams } from "./QPAY600SearchFilter";
 
 interface QPAY600GridProps {
   filterParams: QPAY600FilterParams;
@@ -45,10 +45,10 @@ const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, onLoadingChange
     filterParams.employeeType === "parttime"
       ? partTimeResult
       : filterParams.employeeType === "fulltimesalaried"
-      ? fullTimeStraightSalaryResult
-      : filterParams.employeeType === "fulltimehourlyaccrued"
-      ? fullTimeAccruedResult
-      : fullTimeEightPaidHolidaysResult;
+        ? fullTimeStraightSalaryResult
+        : filterParams.employeeType === "fulltimehourlyaccrued"
+          ? fullTimeAccruedResult
+          : fullTimeEightPaidHolidaysResult;
 
   const { data: apiData, isFetching, error, isError } = currentResult;
 
@@ -147,15 +147,17 @@ const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, onLoadingChange
               pinnedBottomRowData: pinnedBottomRowData
             }}
           />
-          {!!data.payServicesForYear && data.payServicesForYear.results && data.payServicesForYear.results.length > 0 && (
-            <Pagination
-              pageNumber={pageNumber}
-              setPageNumber={(value: number) => handlePaginationChange(value - 1, pageSize)}
-              pageSize={pageSize}
-              setPageSize={(value: number) => handlePaginationChange(0, value)}
-              recordCount={data.payServicesForYear.total || 0}
-            />
-          )}
+          {!!data.payServicesForYear &&
+            data.payServicesForYear.results &&
+            data.payServicesForYear.results.length > 0 && (
+              <Pagination
+                pageNumber={pageNumber}
+                setPageNumber={(value: number) => handlePaginationChange(value - 1, pageSize)}
+                pageSize={pageSize}
+                setPageSize={(value: number) => handlePaginationChange(0, value)}
+                recordCount={data.payServicesForYear.total || 0}
+              />
+            )}
         </>
       ) : null}
     </div>

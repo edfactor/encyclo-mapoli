@@ -3,8 +3,8 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import React, { useState } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
-import QPAY600FilterSection, { QPAY600FilterParams } from "./QPAY600FilterSection";
 import QPAY600Grid from "./QPAY600Grid";
+import QPAY600FilterSection, { QPAY600FilterParams } from "./QPAY600SearchFilter";
 
 const QPAY600: React.FC = () => {
   const [filterParams, setFilterParams] = useState<QPAY600FilterParams | null>(null);
