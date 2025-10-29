@@ -22,7 +22,7 @@ const DivorceReportTable: React.FC<DivorceReportTableProps> = ({ data, isLoading
         <>
           <ReportSummary report={data} />
           <DSMGrid
-            preferenceKey="DIVORCE_REPORT"
+            preferenceKey="Account_History_Report"
             isLoading={isLoading}
             maxHeight={gridMaxHeight}
             providedOptions={{

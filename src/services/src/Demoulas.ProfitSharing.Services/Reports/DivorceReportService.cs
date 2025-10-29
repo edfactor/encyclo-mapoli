@@ -102,8 +102,8 @@ public class DivorceReportService : IDivorceReportService
 
         return new ReportResponseBase<DivorceReportResponse>
         {
-            ReportName = "Divorce Report",
-            ReportDate = DateTimeOffset.Now,
+            ReportName = "Account History Report",
+            ReportDate = DateTimeOffset.UtcNow,
             StartDate = dateRange.Item1,
             EndDate = dateRange.Item2,
             Response = new PaginatedResponseDto<DivorceReportResponse>
