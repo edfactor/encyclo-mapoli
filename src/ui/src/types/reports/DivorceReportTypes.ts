@@ -36,6 +36,7 @@ export interface ReportResponseBase<T> {
   reportDate: string;
   startDate: string;
   endDate: string;
+  dataSource?: string;
   response: PaginatedResponseDto<T>;
 }
 

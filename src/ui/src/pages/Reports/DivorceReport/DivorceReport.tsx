@@ -35,11 +35,6 @@ const DivorceReport: React.FC = () => {
     setFilterParams(null);
   };
 
-  const handleLoadingChange = (loading: boolean) => {
-    // Used by DivorceReportTable to track loading state if needed
-    void loading;
-  };
-
   return (
     <Page label={CAPTIONS.DIVORCE_REPORT}>
       <Grid
@@ -64,7 +59,7 @@ const DivorceReport: React.FC = () => {
               data={data}
               isLoading={isQueryLoading}
               error={error}
-              onLoadingChange={handleLoadingChange}
+              showData={!!filterParams}
             />
           </Grid>
         )}
