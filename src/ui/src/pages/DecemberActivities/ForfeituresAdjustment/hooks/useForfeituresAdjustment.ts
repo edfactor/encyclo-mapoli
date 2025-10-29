@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer } from "react";
+import { useCallback, useEffect, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import { formatNumberWithComma } from "smart-ui-library";
 import { FORFEITURES_ADJUSTMENT_MESSAGES } from "../../../../components/MissiveAlerts/MissiveMessages";
@@ -30,6 +30,7 @@ interface SaveForfeitureFormData {
 
 const useForfeituresAdjustment = () => {
   const [state, dispatch] = useReducer(forfeituresAdjustmentReducer, initialState);
+  const [memberDetailsRefreshTrigger, setMemberDetailsRefreshTrigger] = useState(0);
 
   const [triggerSearch, { isFetching: isSearching }] = useLazyGetForfeitureAdjustmentsQuery();
   const [triggerMemberDetails] = useLazyGetProfitMasterInquiryMemberQuery();
@@ -185,7 +186,10 @@ const useForfeituresAdjustment = () => {
         dispatch({ type: "SEARCH_SUCCESS", payload: { employeeData: refreshedData } });
 
         // Invalidate member details cache to force refresh
-        reduxDispatch(InquiryApi.util.invalidateTags(["memberDetails"]));
+        reduxDispatch(InquiryApi.util.invalidateTags(["MemberDetails"]));
+
+        // Trigger refresh of member details component
+        setMemberDetailsRefreshTrigger(prev => prev + 1);
 
         // Fetch member details for name
         const memberDetails = await triggerMemberDetails({
@@ -285,7 +289,8 @@ const useForfeituresAdjustment = () => {
 
     // Other
     profitYear,
-    isReadOnly
+    isReadOnly,
+    memberDetailsRefreshTrigger
   };
 };
 
