@@ -265,40 +265,104 @@ public class CleanupReportService : ICleanupReportService
                     .Select(g => new { State = g.Key, Total = g.Sum(x => x.StateTax) })
                     .ToDictionaryAsync(x => x.State ?? string.Empty, x => x.Total, cancellationToken);
 
-                var paginated = await query.ToPaginationResultsAsync(req, cancellationToken);
-
-                var apiResponse = paginated.Results.Select(pd => new DistributionsAndForfeitureResponse
+                // Check if sorting by Age - if so, we need to handle pagination manually since Age can't be calculated in SQL
+                PaginatedResponseDto<DistributionsAndForfeitureResponse> paginatedResponse;
+                
+                if ("Age".Equals(req.SortBy, StringComparison.OrdinalIgnoreCase))
                 {
-                    BadgeNumber = pd.BadgeNumber,
-                    PsnSuffix = pd.PsnSuffix,
-                    Ssn = pd.Ssn.MaskSsn(),
-                    EmployeeName = pd.EmployeeName,
-                    DistributionAmount = pd.DistributionAmount,
-                    TaxCode = pd.TaxCode,
-                    StateTax = pd.StateTax,
-                    State = pd.State,
-                    FederalTax = pd.FederalTax,
-                    ForfeitAmount = pd.ForfeitAmount,
-                    // MAIN-2170: Determine forfeit type indicator
-                    ForfeitType = pd.ForfeitAmount != 0
-                        ? (pd.CommentTypeId == CommentType.Constants.ForfeitAdministrative.Id ||
-                           (pd.Remark != null && pd.Remark.Contains("ADMINISTRATIVE")))
-                            ? 'A'
-                            : (pd.CommentTypeId == CommentType.Constants.ForfeitClassAction.Id ||
-                               (pd.Remark != null && (pd.Remark.Contains("FORFEIT CA") || pd.Remark.Contains("UN-FORFEIT CA"))))
-                                ? 'C'
-                                : (char?)null
-                        : null,
-                    Date = pd.MonthToDate is > 0 and <= 12 ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1) : pd.Date.ToDateOnly(),
-                    // Note, this computes "Age" at time of transaction, or "Age @ Txn"
-                    Age = (byte)(pd.MonthToDate is > 0 and < 13
-                        ? pd.DateOfBirth.Age(
-                            new DateOnly(pd.YearToDate, pd.MonthToDate, 1).ToDateTime(TimeOnly.MinValue))
-                        : pd.DateOfBirth.Age(endDate.ToDateTime(TimeOnly.MinValue))),
-                    HasForfeited = pd.HasForfeited,
-                    IsExecutive = pd.PayFrequencyId == PayFrequency.Constants.Monthly
-                });
+                    // Retrieve all data for Age-based sorting (client-side evaluation required)
+                    var allData = await query.ToListAsync(cancellationToken);
+                    
+                    // Map to DTO and calculate Age
+                    var allMapped = allData.Select(pd => new DistributionsAndForfeitureResponse
+                    {
+                        BadgeNumber = pd.BadgeNumber,
+                        PsnSuffix = pd.PsnSuffix,
+                        Ssn = pd.Ssn.MaskSsn(),
+                        EmployeeName = pd.EmployeeName,
+                        DistributionAmount = pd.DistributionAmount,
+                        TaxCode = pd.TaxCode,
+                        StateTax = pd.StateTax,
+                        State = pd.State,
+                        FederalTax = pd.FederalTax,
+                        ForfeitAmount = pd.ForfeitAmount,
+                        ForfeitType = pd.ForfeitAmount != 0
+                            ? (pd.CommentTypeId == CommentType.Constants.ForfeitAdministrative.Id ||
+                               (pd.Remark != null && pd.Remark.Contains("ADMINISTRATIVE")))
+                                ? 'A'
+                                : (pd.CommentTypeId == CommentType.Constants.ForfeitClassAction.Id ||
+                                   (pd.Remark != null && (pd.Remark.Contains("FORFEIT CA") || pd.Remark.Contains("UN-FORFEIT CA"))))
+                                    ? 'C'
+                                    : (char?)null
+                            : null,
+                        Date = pd.MonthToDate is > 0 and <= 12 ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1) : pd.Date.ToDateOnly(),
+                        Age = (byte)(pd.MonthToDate is > 0 and < 13
+                            ? pd.DateOfBirth.Age(
+                                new DateOnly(pd.YearToDate, pd.MonthToDate, 1).ToDateTime(TimeOnly.MinValue))
+                            : pd.DateOfBirth.Age(endDate.ToDateTime(TimeOnly.MinValue))),
+                        HasForfeited = pd.HasForfeited,
+                        IsExecutive = pd.PayFrequencyId == PayFrequency.Constants.Monthly
+                    }).ToList();
+                    
+                    // Sort by Age
+                    var sorted = req.IsSortDescending == true
+                        ? allMapped.OrderByDescending(x => x.Age).ToList()
+                        : allMapped.OrderBy(x => x.Age).ToList();
+                    
+                    // Apply pagination
+                    var total = sorted.Count;
+                    var paged = sorted
+                        .Skip(req.Skip ?? 0)
+                        .Take(req.Take ?? 255)
+                        .ToList();
+                    
+                    paginatedResponse = new PaginatedResponseDto<DistributionsAndForfeitureResponse>(req)
+                    {
+                        Results = paged,
+                        Total = total
+                    };
+                }
+                else
+                {
+                    // Normal database-level pagination for other sort fields
+                    var paginated = await query.ToPaginationResultsAsync(req, cancellationToken);
 
+                    var apiResponse = paginated.Results.Select(pd => new DistributionsAndForfeitureResponse
+                    {
+                        BadgeNumber = pd.BadgeNumber,
+                        PsnSuffix = pd.PsnSuffix,
+                        Ssn = pd.Ssn.MaskSsn(),
+                        EmployeeName = pd.EmployeeName,
+                        DistributionAmount = pd.DistributionAmount,
+                        TaxCode = pd.TaxCode,
+                        StateTax = pd.StateTax,
+                        State = pd.State,
+                        FederalTax = pd.FederalTax,
+                        ForfeitAmount = pd.ForfeitAmount,
+                        ForfeitType = pd.ForfeitAmount != 0
+                            ? (pd.CommentTypeId == CommentType.Constants.ForfeitAdministrative.Id ||
+                               (pd.Remark != null && pd.Remark.Contains("ADMINISTRATIVE")))
+                                ? 'A'
+                                : (pd.CommentTypeId == CommentType.Constants.ForfeitClassAction.Id ||
+                                   (pd.Remark != null && (pd.Remark.Contains("FORFEIT CA") || pd.Remark.Contains("UN-FORFEIT CA"))))
+                                    ? 'C'
+                                    : (char?)null
+                            : null,
+                        Date = pd.MonthToDate is > 0 and <= 12 ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1) : pd.Date.ToDateOnly(),
+                        Age = (byte)(pd.MonthToDate is > 0 and < 13
+                            ? pd.DateOfBirth.Age(
+                                new DateOnly(pd.YearToDate, pd.MonthToDate, 1).ToDateTime(TimeOnly.MinValue))
+                            : pd.DateOfBirth.Age(endDate.ToDateTime(TimeOnly.MinValue))),
+                        HasForfeited = pd.HasForfeited,
+                        IsExecutive = pd.PayFrequencyId == PayFrequency.Constants.Monthly
+                    });
+
+                    paginatedResponse = new PaginatedResponseDto<DistributionsAndForfeitureResponse>(req)
+                    {
+                        Results = apiResponse.ToList(),
+                        Total = paginated.Total
+                    };
+                }
 
                 var response = new DistributionsAndForfeitureTotalsResponse()
                 {
@@ -314,11 +378,7 @@ public class CleanupReportService : ICleanupReportService
                     ForfeitureAdministrativeTotal = totals.ForfeitureAdministrative,
                     ForfeitureClassActionTotal = totals.ForfeitureClassAction,
                     StateTaxTotals = stateTaxTotals,
-                    Response = new PaginatedResponseDto<DistributionsAndForfeitureResponse>(req)
-                    {
-                        Results = apiResponse.ToList(),
-                        Total = paginated.Total
-                    }
+                    Response = paginatedResponse
                 };
 
                 return Result<DistributionsAndForfeitureTotalsResponse>.Success(response);
