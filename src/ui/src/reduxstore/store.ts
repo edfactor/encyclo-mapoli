@@ -7,6 +7,7 @@ import { AppSupportApi } from "./api/AppSupportApi";
 import { BeneficiariesApi } from "./api/BeneficiariesApi";
 import { CommonApi } from "./api/CommonApi";
 import { DistributionApi } from "./api/DistributionApi";
+import { DivorceReportApi } from "./api/DivorceReportApi";
 import { InquiryApi } from "./api/InquiryApi";
 import { ItOperationsApi } from "./api/ItOperationsApi";
 import { LookupsApi } from "./api/LookupsApi";
@@ -67,6 +68,7 @@ export const store = configureStore({
     [AdjustmentsApi.reducerPath]: AdjustmentsApi.reducer,
     [DistributionApi.reducerPath]: DistributionApi.reducer,
     [PayServicesApi.reducerPath]: PayServicesApi.reducer,
+    [DivorceReportApi.reducerPath]: DivorceReportApi.reducer,
     [validationApi.reducerPath]: validationApi.reducer
   },
 
@@ -89,6 +91,7 @@ export const store = configureStore({
       .concat(AdjustmentsApi.middleware)
       .concat(DistributionApi.middleware)
       .concat(PayServicesApi.middleware)
+      .concat(DivorceReportApi.middleware)
       .concat(validationApi.middleware)
 });
 

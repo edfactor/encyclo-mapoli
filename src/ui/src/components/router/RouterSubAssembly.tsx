@@ -15,8 +15,6 @@ import BalanceByYears from "../../pages/FiscalClose/AgeReports/BalanceByYears/Ba
 import VestedAmountsByAge from "../../pages/FiscalClose/AgeReports/VestedAmountsByAge/VestedAmountsByAge";
 import EligibleEmployees from "../../pages/FiscalClose/EligibleEmployees/EligibleEmployees";
 import Forfeit from "../../pages/FiscalClose/Forfeit/Forfeit";
-import Pay450Summary from "../../pages/FiscalClose/PayMasterUpdate/PayMasterUpdateSummary";
-import ProfitSharingControlSheet from "../../pages/FiscalClose/PayMasterUpdate/ProfitSharingControlSheet";
 import Profall from "../../pages/FiscalClose/Profall/Profall";
 import QPAY066TA from "../../pages/FiscalClose/ProfitShareByStore/BreakdownReport/QPAY066TA";
 import NewPSLabels from "../../pages/FiscalClose/ProfitShareByStore/NewPSLabels";
@@ -48,22 +46,25 @@ import EnvironmentUtils from "../../utils/environmentUtils";
 import { createUnauthorizedParams, isPathAllowedInNavigation } from "../../utils/navigationAccessUtils";
 import { validateImpersonationRoles, validateRoleRemoval } from "../../utils/roleUtils";
 
+import PayMasterUpdateSummary from "@/pages/FiscalClose/PaymasterUpdate/PayMasterUpdateSummary";
+import ProfitSharingControlSheet from "@/pages/FiscalClose/PaymasterUpdate/ProfitSharingControlSheet";
 import { ImpersonationMultiSelect } from "../../components/MenuBar/ImpersonationMultiSelect";
 import { MenuBar } from "../../components/MenuBar/MenuBar";
 import DistributionInquiry from "../../pages//Distributions/DistributionInquiry/DistributionInquiry";
 import EditDistribution from "../../pages//Distributions/EditDistribution/EditDistribution";
 import BeneficiaryInquiry from "../../pages/Beneficiaries/BeneficiaryInquiry";
+import ForfeituresAdjustment from "../../pages/DecemberActivities/ForfeituresAdjustment/ForfeituresAdjustment";
 import MilitaryContribution from "../../pages/DecemberActivities/MilitaryContribution/MilitaryContribution";
 import DevDebug from "../../pages/Dev/DevDebug";
 import AddDistribution from "../../pages/Distributions/AddDistribution/AddDistribution";
 import ViewDistribution from "../../pages/Distributions/ViewDistribution/ViewDistribution";
 import Documentation from "../../pages/Documentation/Documentation";
-import ForfeituresAdjustment from "../../pages/DecemberActivities/ForfeituresAdjustment/ForfeituresAdjustment";
 import PAY426N from "../../pages/FiscalClose/PAY426Reports/PAY426N/PAY426N";
 import ProfitSummary from "../../pages/FiscalClose/PAY426Reports/ProfitSummary/ProfitSummary";
 import QPAY066B from "../../pages/FiscalClose/QPAY066B/QPAY066B";
 import ReprintCertificates from "../../pages/FiscalClose/ReprintCertificates/ReprintCertificates";
 import Adjustments from "../../pages/InquiriesAndAdjustments/Adjustments";
+import DivorceReport from "../../pages/Reports/DivorceReport/DivorceReport";
 import PayBeNext from "../../pages/Reports/PayBeNext/PayBeNext";
 import PayBenReport from "../../pages/Reports/PayBenReport/PayBenReport";
 import QPAY066AdHocReports from "../../pages/Reports/QPAY066AdHocReports/QPAY066AdHocReports";
@@ -339,7 +340,7 @@ const RouterSubAssembly: React.FC = () => {
                   element={<ProfitShareGrossReport />}></Route>
                 <Route
                   path={ROUTES.PAY450_SUMMARY}
-                  element={<Pay450Summary />}></Route>
+                  element={<PayMasterUpdateSummary />}></Route>
                 <Route
                   path={ROUTES.PROF_CTRLSHEET}
                   element={<ProfitSharingControlSheet />}></Route>
@@ -427,6 +428,10 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={ROUTES.TERMINATED_LETTERS}
                   element={<TerminatedLetters />}
+                />
+                <Route
+                  path={ROUTES.DIVORCE_REPORT}
+                  element={<DivorceReport />}
                 />
               </Routes>
             </Box>
