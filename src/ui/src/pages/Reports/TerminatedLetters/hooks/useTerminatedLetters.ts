@@ -3,8 +3,7 @@ import {
   useLazyGetTerminatedLettersDownloadQuery,
   useLazyGetTerminatedLettersReportQuery
 } from "reduxstore/api/YearsEndApi";
-import { TerminatedLettersDetail } from "reduxstore/types";
-import { Paged } from "smart-ui-library";
+import { TerminatedLettersDetail, TerminatedLettersResponse } from "reduxstore/types";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useMissiveAlerts } from "../../../../hooks/useMissiveAlerts";
@@ -23,7 +22,7 @@ interface TerminatedLettersState {
     error: string | null;
   };
   report: {
-    data: Paged<TerminatedLettersDetail> | null;
+    data: TerminatedLettersResponse | null;
     isLoading: boolean;
     error: string | null;
   };
@@ -32,11 +31,11 @@ interface TerminatedLettersState {
 
 type TerminatedLettersAction =
   | { type: "SEARCH_START"; payload: { params: SearchParams } }
-  | { type: "SEARCH_SUCCESS"; payload: { data: Paged<TerminatedLettersDetail> } }
+  | { type: "SEARCH_SUCCESS"; payload: { data: TerminatedLettersResponse } }
   | { type: "SEARCH_FAILURE"; payload: { error: string } }
   | { type: "SEARCH_RESET" }
   | { type: "REPORT_FETCH_START" }
-  | { type: "REPORT_FETCH_SUCCESS"; payload: { data: Paged<TerminatedLettersDetail> } }
+  | { type: "REPORT_FETCH_SUCCESS"; payload: { data: TerminatedLettersResponse } }
   | { type: "REPORT_FETCH_FAILURE"; payload: { error: string } }
   | { type: "SET_SELECTED_ROWS"; payload: { rows: TerminatedLettersDetail[] } }
   | { type: "CLEAR_SELECTED_ROWS" };
