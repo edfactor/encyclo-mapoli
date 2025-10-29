@@ -15,8 +15,6 @@ import BalanceByYears from "../../pages/FiscalClose/AgeReports/BalanceByYears/Ba
 import VestedAmountsByAge from "../../pages/FiscalClose/AgeReports/VestedAmountsByAge/VestedAmountsByAge";
 import EligibleEmployees from "../../pages/FiscalClose/EligibleEmployees/EligibleEmployees";
 import Forfeit from "../../pages/FiscalClose/Forfeit/Forfeit";
-import Pay450Summary from "../../pages/FiscalClose/PayMasterUpdate/PayMasterUpdateSummary";
-import ProfitSharingControlSheet from "../../pages/FiscalClose/PayMasterUpdate/ProfitSharingControlSheet";
 import Profall from "../../pages/FiscalClose/Profall/Profall";
 import QPAY066TA from "../../pages/FiscalClose/ProfitShareByStore/BreakdownReport/QPAY066TA";
 import NewPSLabels from "../../pages/FiscalClose/ProfitShareByStore/NewPSLabels";
@@ -48,6 +46,8 @@ import EnvironmentUtils from "../../utils/environmentUtils";
 import { createUnauthorizedParams, isPathAllowedInNavigation } from "../../utils/navigationAccessUtils";
 import { validateImpersonationRoles, validateRoleRemoval } from "../../utils/roleUtils";
 
+import PayMasterUpdateSummary from "@/pages/FiscalClose/PaymasterUpdate/PayMasterUpdateSummary";
+import ProfitSharingControlSheet from "@/pages/FiscalClose/PaymasterUpdate/ProfitSharingControlSheet";
 import { ImpersonationMultiSelect } from "../../components/MenuBar/ImpersonationMultiSelect";
 import { MenuBar } from "../../components/MenuBar/MenuBar";
 import DistributionInquiry from "../../pages//Distributions/DistributionInquiry/DistributionInquiry";
@@ -340,7 +340,7 @@ const RouterSubAssembly: React.FC = () => {
                   element={<ProfitShareGrossReport />}></Route>
                 <Route
                   path={ROUTES.PAY450_SUMMARY}
-                  element={<Pay450Summary />}></Route>
+                  element={<PayMasterUpdateSummary />}></Route>
                 <Route
                   path={ROUTES.PROF_CTRLSHEET}
                   element={<ProfitSharingControlSheet />}></Route>
