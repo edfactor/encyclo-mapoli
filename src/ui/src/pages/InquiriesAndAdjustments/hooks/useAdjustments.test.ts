@@ -6,26 +6,26 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import inquiryReducer, { type InquiryState } from "../../../reduxstore/slices/inquirySlice";
 import securityReducer, { type SecurityState } from "../../../reduxstore/slices/securitySlice";
 import { useAdjustments } from "./useAdjustments";
+import * as useMissiveAlertsModule from "../../../hooks/useMissiveAlerts";
 
 // Create mock functions for triggers/actions
 const mockMergeProfitsDetail = vi.fn();
-const mockTriggerSearchMember = vi.fn();
-const mockTriggerGetMemberDetails = vi.fn();
-const mockMissiveAlertsHook = vi.fn();
+const mockTriggerSearchFunction = vi.fn();
+const mockTriggerDetailsFunction = vi.fn();
 
 // Mock the APIs
 vi.mock("../../../reduxstore/api/AdjustmentsApi", () => ({
-  useMergeProfitsDetailMutation: () => [mockMergeProfitsDetail, {}]
+  useMergeProfitsDetailMutation: () => [mockMergeProfitsDetail, { isLoading: false }]
 }));
 
 vi.mock("../../../reduxstore/api/InquiryApi", () => ({
-  useLazySearchProfitMasterInquiryQuery: () => [mockTriggerSearchMember, {}],
-  useLazyGetProfitMasterInquiryMemberDetailsQuery: () => [mockTriggerGetMemberDetails, {}]
+  useLazySearchProfitMasterInquiryQuery: () => [mockTriggerSearchFunction, {}],
+  useLazyGetProfitMasterInquiryMemberDetailsQuery: () => [mockTriggerDetailsFunction, {}]
 }));
 
-// Mock the hooks
+// Mock the hooks - use vi.fn() directly in the factory
 vi.mock("../../../hooks/useMissiveAlerts", () => ({
-  useMissiveAlerts: mockMissiveAlertsHook
+  useMissiveAlerts: vi.fn()
 }));
 
 const mockMember = {
@@ -82,9 +82,13 @@ describe("useAdjustments", () => {
     vi.clearAllMocks();
   });
 
+  const getMissiveAlertsMock = () => {
+    return vi.mocked(useMissiveAlertsModule.useMissiveAlerts);
+  };
+
   describe("initial state", () => {
     it("should initialize with default values", () => {
-      mockMissiveAlertsHook.mockReturnValue({
+      getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: vi.fn(),
         clearAlerts: vi.fn()
@@ -93,11 +97,11 @@ describe("useAdjustments", () => {
       const { result } = renderHookWithProvider(() => useAdjustments());
 
       expect(result.current.isMerging).toBe(false);
-      expect(result.current.canMerge).toBe(false);
+      expect(result.current.canMerge).toBeFalsy();
     });
 
     it("should expose executeSearch function", () => {
-      mockMissiveAlertsHook.mockReturnValue({
+      getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: vi.fn(),
         clearAlerts: vi.fn()
@@ -109,7 +113,7 @@ describe("useAdjustments", () => {
     });
 
     it("should expose executeMerge function", () => {
-      mockMissiveAlertsHook.mockReturnValue({
+      getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: vi.fn(),
         clearAlerts: vi.fn()
@@ -121,7 +125,7 @@ describe("useAdjustments", () => {
     });
 
     it("should expose resetSearch function", () => {
-      mockMissiveAlertsHook.mockReturnValue({
+      getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: vi.fn(),
         clearAlerts: vi.fn()
@@ -137,14 +141,15 @@ describe("useAdjustments", () => {
     it("should call clearAlerts when search starts", async () => {
       const mockClearAlerts = vi.fn();
       const mockAddAlert = vi.fn();
-      const mockTriggerSearch = vi.fn().mockReturnValue({
+
+      mockTriggerSearchFunction.mockReturnValue({
+        unwrap: vi.fn().mockResolvedValue({ results: [] })
+      });
+      mockTriggerDetailsFunction.mockReturnValue({
         unwrap: vi.fn().mockResolvedValue({ results: [] })
       });
 
-      mockTriggerSearchMember.mockReturnValue([mockTriggerSearch, {}]);
-      mockTriggerGetMemberDetails.mockReturnValue([vi.fn(), {}]);
-
-      mockMissiveAlertsHook.mockReturnValue({
+      getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: mockAddAlert,
         clearAlerts: mockClearAlerts
@@ -161,14 +166,15 @@ describe("useAdjustments", () => {
 
     it("should add alert when source SSN not found", async () => {
       const mockAddAlert = vi.fn();
-      const mockTriggerSearch = vi.fn().mockReturnValue({
+
+      mockTriggerSearchFunction.mockReturnValue({
+        unwrap: vi.fn().mockResolvedValue({ results: [] })
+      });
+      mockTriggerDetailsFunction.mockReturnValue({
         unwrap: vi.fn().mockResolvedValue({ results: [] })
       });
 
-      mockTriggerSearchMember.mockReturnValue([mockTriggerSearch, {}]);
-      mockTriggerGetMemberDetails.mockReturnValue([vi.fn(), {}]);
-
-      mockMissiveAlertsHook.mockReturnValue({
+      getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: mockAddAlert,
         clearAlerts: vi.fn()
@@ -195,18 +201,15 @@ describe("useAdjustments", () => {
 
       const mockUnwrapDetails = vi.fn().mockResolvedValue(mockProfitDetails);
 
-      const mockTriggerSearch = vi.fn().mockReturnValue({
+      mockTriggerSearchFunction.mockReturnValue({
         unwrap: mockUnwrapSearch
       });
 
-      const mockTriggerDetails = vi.fn().mockReturnValue({
+      mockTriggerDetailsFunction.mockReturnValue({
         unwrap: mockUnwrapDetails
       });
 
-      mockTriggerSearchMember.mockReturnValue([mockTriggerSearch, {}]);
-      mockTriggerGetMemberDetails.mockReturnValue([mockTriggerDetails, {}]);
-
-      mockMissiveAlertsHook.mockReturnValue({
+      getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: vi.fn(),
         clearAlerts: vi.fn()
@@ -219,22 +222,23 @@ describe("useAdjustments", () => {
       });
 
       await waitFor(() => {
-        expect(mockTriggerDetails).toHaveBeenCalled();
+        expect(mockTriggerDetailsFunction).toHaveBeenCalled();
       });
     });
 
     it("should handle API errors gracefully", async () => {
       const mockAddAlert = vi.fn();
-      const mockTriggerSearch = vi.fn().mockReturnValue({
+
+      mockTriggerSearchFunction.mockReturnValue({
         unwrap: vi.fn().mockRejectedValue(new Error("Network error"))
+      });
+      mockTriggerDetailsFunction.mockReturnValue({
+        unwrap: vi.fn().mockResolvedValue({ results: [] })
       });
 
       const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-      mockTriggerSearchMember.mockReturnValue([mockTriggerSearch, {}]);
-      mockTriggerGetMemberDetails.mockReturnValue([vi.fn(), {}]);
-
-      mockMissiveAlertsHook.mockReturnValue({
+      getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: mockAddAlert,
         clearAlerts: vi.fn()
@@ -262,7 +266,7 @@ describe("useAdjustments", () => {
     it("should require both source and destination members", async () => {
       const mockAddAlert = vi.fn();
 
-      mockMissiveAlertsHook.mockReturnValue({
+      getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: mockAddAlert,
         clearAlerts: vi.fn()
@@ -286,7 +290,7 @@ describe("useAdjustments", () => {
     it("should validate SSN format", async () => {
       const mockAddAlert = vi.fn();
 
-      mockMissiveAlertsHook.mockReturnValue({
+      getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: mockAddAlert,
         clearAlerts: vi.fn()
@@ -306,13 +310,19 @@ describe("useAdjustments", () => {
     it("should reject identical source and destination SSNs", async () => {
       const mockAddAlert = vi.fn();
 
-      mockMissiveAlertsHook.mockReturnValue({
+      getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: mockAddAlert,
         clearAlerts: vi.fn()
       });
 
-      const { result } = renderHookWithProvider(() => useAdjustments());
+      const { result } = renderHookWithProvider(() => useAdjustments(), {
+        security: { token: "mock-token", user: null },
+        inquiry: {
+          masterInquiryMemberDetails: mockMember,
+          masterInquiryMemberDetailsSecondary: mockMember
+        }
+      });
 
       let mergeResult;
       await act(async () => {
@@ -337,7 +347,7 @@ describe("useAdjustments", () => {
 
       mockMergeProfitsDetail.mockImplementation(mockMerge);
 
-      mockMissiveAlertsHook.mockReturnValue({
+      getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: mockAddAlert,
         clearAlerts: vi.fn()
@@ -367,7 +377,7 @@ describe("useAdjustments", () => {
     it("should clear alerts when resetting", () => {
       const mockClearAlerts = vi.fn();
 
-      mockMissiveAlertsHook.mockReturnValue({
+      getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: vi.fn(),
         clearAlerts: mockClearAlerts
@@ -384,8 +394,8 @@ describe("useAdjustments", () => {
   });
 
   describe("canMerge", () => {
-    it("should be false when members are not selected", () => {
-      mockMissiveAlertsHook.mockReturnValue({
+    it("should be falsy when members are not selected", () => {
+      getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: vi.fn(),
         clearAlerts: vi.fn()
@@ -393,11 +403,11 @@ describe("useAdjustments", () => {
 
       const { result } = renderHookWithProvider(() => useAdjustments());
 
-      expect(result.current.canMerge).toBe(false);
+      expect(result.current.canMerge).toBeFalsy();
     });
 
-    it("should be true when both members are selected", () => {
-      mockMissiveAlertsHook.mockReturnValue({
+    it("should be truthy when both members are selected", () => {
+      getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: vi.fn(),
         clearAlerts: vi.fn()
@@ -411,7 +421,7 @@ describe("useAdjustments", () => {
         }
       });
 
-      expect(result.current.canMerge).toBe(true);
+      expect(result.current.canMerge).toBeTruthy();
     });
   });
 });
