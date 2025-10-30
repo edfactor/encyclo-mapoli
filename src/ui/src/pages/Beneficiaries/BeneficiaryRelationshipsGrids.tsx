@@ -4,7 +4,11 @@ import { Alert, Button, TextField, Typography } from "@mui/material";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { FocusEvent, JSX, useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetBeneficiariesQuery, useLazyUpdateBeneficiaryQuery } from "reduxstore/api/BeneficiariesApi";
+import {
+  useLazyDeleteBeneficiaryQuery,
+  useLazyGetBeneficiariesQuery,
+  useLazyUpdateBeneficiaryQuery
+} from "reduxstore/api/BeneficiariesApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, Paged, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
@@ -12,19 +16,18 @@ import { SortParams, useGridPagination } from "../../hooks/useGridPagination";
 import { BeneficiaryDetail, BeneficiaryDto } from "../../types";
 import { BeneficiaryInquiryGridColumns } from "./BeneficiaryInquiryGridColumns";
 import { GetBeneficiaryOfGridColumns } from "./BeneficiaryOfGridColumns";
+import DeleteBeneficiaryDialog from "./DeleteBeneficiaryDialog";
 
 interface BeneficiaryRelationshipsProps {
   selectedMember: BeneficiaryDetail | null;
   count: number;
-  createOrUpdateBeneficiary: (selectedMember: BeneficiaryDto | undefined) => void;
-  deleteBeneficiary: (id: number) => void;
+  onEditBeneficiary: (selectedMember: BeneficiaryDto | undefined) => void;
 }
 
-const BeneficiaryRelationships: React.FC<BeneficiaryRelationshipsProps> = ({
+const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = ({
   selectedMember,
   count,
-  createOrUpdateBeneficiary,
-  deleteBeneficiary
+  onEditBeneficiary
 }) => {
   const [errorPercentage, setErrorPercentage] = useState<boolean>(false);
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
@@ -32,6 +35,11 @@ const BeneficiaryRelationships: React.FC<BeneficiaryRelationshipsProps> = ({
   const [beneficiaryOfList, setBeneficiaryOfList] = useState<Paged<BeneficiaryDto> | undefined>();
   const [triggerSearch, { isFetching }] = useLazyGetBeneficiariesQuery();
   const [triggerUpdate] = useLazyUpdateBeneficiaryQuery();
+  const [triggerDeleteBeneficiary] = useLazyDeleteBeneficiaryQuery();
+  const [openDeleteConfirmationDialog, setOpenDeleteConfirmationDialog] = useState(false);
+  const [deleteBeneficiaryId, setDeleteBeneficiaryId] = useState<number>(0);
+  const [deleteInProgress, setDeleteInProgress] = useState<boolean>(false);
+  const [internalChange, setInternalChange] = useState<number>(0);
 
   const createBeneficiaryInquiryRequest = (
     skip: number,
@@ -91,12 +99,43 @@ const BeneficiaryRelationships: React.FC<BeneficiaryRelationshipsProps> = ({
     }
     handleSortChange(update);
   };
+  const deleteBeneficiary = (id: number) => {
+    setDeleteBeneficiaryId(id);
+    setOpenDeleteConfirmationDialog(true);
+  };
+
+  const handleDeleteConfirmationDialog = (del: boolean) => {
+    if (del) {
+      setDeleteInProgress(true);
+      triggerDeleteBeneficiary({ id: deleteBeneficiaryId })
+        .unwrap()
+        .then(() => {
+          setInternalChange((prev) => prev + 1);
+        })
+        .catch((err: unknown) => {
+          if (err && typeof err === "object" && "data" in err) {
+            const errorData = err as { data?: { title?: string } };
+            console.error(`Something went wrong! Error: ${errorData.data?.title}`);
+          } else {
+            console.error("Something went wrong!");
+          }
+        })
+        .finally(() => {
+          setOpenDeleteConfirmationDialog(false);
+          setDeleteBeneficiaryId(0);
+          setDeleteInProgress(false);
+        });
+    } else {
+      setOpenDeleteConfirmationDialog(false);
+    }
+  };
+
   const actionButtons = (data: BeneficiaryDto): JSX.Element => {
     return (
       <>
         <Button
           onClick={() => {
-            createOrUpdateBeneficiary(data);
+            onEditBeneficiary(data);
           }}
           size="small"
           color="primary">
@@ -212,17 +251,22 @@ const BeneficiaryRelationships: React.FC<BeneficiaryRelationshipsProps> = ({
     if (hasToken) {
       onSearch();
     }
-  }, [selectedMember, count, onSearch, hasToken]);
+  }, [selectedMember, count, internalChange, onSearch, hasToken]);
 
   return (
     <>
+      <DeleteBeneficiaryDialog
+        open={openDeleteConfirmationDialog}
+        onConfirm={() => handleDeleteConfirmationDialog(true)}
+        onCancel={() => handleDeleteConfirmationDialog(false)}
+        isDeleting={deleteInProgress}
+      />
       {beneficiaryOfList && beneficiaryOfList.results.length > 0 && (
         <>
-          <p>BENEFICIARY OF GRID</p>
           <div className="beneficiary-of-header">
             <Typography
               variant="h2"
-              sx={{ color: "#0258A5" }}>
+              sx={{ color: "#0258A5", paddingX: "24px", marginY: "8px" }}>
               {`Beneficiary Of (${beneficiaryOfList?.total || 0} ${beneficiaryOfList?.total === 1 ? "Record" : "Records"})`}
             </Typography>
           </div>
@@ -248,16 +292,16 @@ const BeneficiaryRelationships: React.FC<BeneficiaryRelationshipsProps> = ({
           ) : (
             <></>
           )}
-          <p>BENEFICIARY LIST GRID</p>
+
           <div className="beneficiaries-list-header">
             <Typography
               variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`Beneficiary (${beneficiaryList?.total || 0} ${beneficiaryList?.total === 1 ? "Record" : "Records"})`}
+              sx={{ color: "#0258A5", paddingX: "24px", marginY: "8px" }}>
+              {`Beneficiaries (${beneficiaryList?.total || 0} ${beneficiaryList?.total === 1 ? "Record" : "Records"})`}
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={CAPTIONS.BENEFICIARY_INQUIRY}
+            preferenceKey={CAPTIONS.BENEFICIARIES_LIST}
             isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
@@ -285,4 +329,4 @@ const BeneficiaryRelationships: React.FC<BeneficiaryRelationshipsProps> = ({
   );
 };
 
-export default BeneficiaryRelationships;
+export default BeneficiaryRelationshipsGrids;

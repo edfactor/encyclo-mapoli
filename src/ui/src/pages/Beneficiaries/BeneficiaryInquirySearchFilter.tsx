@@ -1,51 +1,97 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
+import {
+  FormControl,
+  FormControlLabel,
+  FormHelperText,
+  FormLabel,
+  Grid,
+  Radio,
+  RadioGroup,
+  TextField
+} from "@mui/material";
 import { useCallback, useMemo } from "react";
 import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../constants";
-import { BeneficiarySearchAPIRequest } from "../../types";
+import { BeneficiarySearchAPIRequest, BeneficiarySearchForm } from "../../types";
 import { badgeNumberOrPSNValidator, ssnValidator } from "../../utils/FormValidators";
 
 const schema = yup.object().shape({
-  badgePsn: badgeNumberOrPSNValidator,
+  badgeNumber: badgeNumberOrPSNValidator,
   name: yup.string().nullable(),
-  socialSecurity: ssnValidator,
-  memberType: yup.string().oneOf(["beneficiaries"]).default("beneficiaries").required()
+  ssn: ssnValidator,
+  memberType: yup.number().oneOf([0, 1, 2]).default(0).required()
 });
-interface beneficiaryRequest {
-  badgePsn?: number | null;
-  name?: string | null;
-  socialSecurity?: string | null;
-  memberType: string;
-}
+
 // Define the type of props
 type BeneficiaryInquirySearchFilterProps = {
   onSearch: (params: BeneficiarySearchAPIRequest | undefined) => void;
+  onMemberTypeChange: (type: number | undefined) => void;
+  onReset: () => void;
+  isSearching?: boolean;
 };
 
-const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterProps> = ({ onSearch }) => {
+const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterProps> = ({
+  onSearch,
+  onMemberTypeChange,
+  onReset,
+  isSearching = false
+}) => {
   const {
     control,
     formState: { errors, isValid },
     handleSubmit,
-    reset
-  } = useForm<beneficiaryRequest>({
-    resolver: yupResolver(schema) as Resolver<beneficiaryRequest>,
+    reset,
+    setValue
+  } = useForm<BeneficiarySearchForm>({
+    resolver: yupResolver(schema) as Resolver<BeneficiarySearchForm>,
     mode: "onBlur",
     defaultValues: {
-      badgePsn: undefined,
+      badgeNumber: undefined,
       name: undefined,
-      socialSecurity: undefined,
-      memberType: "beneficiaries"
+      ssn: undefined,
+      memberType: 0
     }
   });
 
   // Watch the three mutually exclusive fields
-  const socialSecurityValue = useWatch({ control, name: "socialSecurity" });
+  const ssnValue = useWatch({ control, name: "ssn" });
   const nameValue = useWatch({ control, name: "name" });
-  const badgeNumberValue = useWatch({ control, name: "badgePsn" });
+  const badgeNumberValue = useWatch({ control, name: "badgeNumber" });
+
+  // Auto-detect member type based on badge number length
+  const handleBadgeNumberChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const badgeStr = e.target.value;
+      let memberType: number;
+
+      if (badgeStr.length === 0) {
+        memberType = 0; // all
+      } else if (badgeStr.length >= 8) {
+        memberType = 2; // beneficiaries
+      } else {
+        memberType = 1; // employees
+      }
+
+      setValue("memberType", memberType as 0 | 1 | 2);
+      onMemberTypeChange(memberType);
+    },
+    [setValue, onMemberTypeChange]
+  );
+
+  // Member type options
+  const memberTypeOptions = useMemo(
+    () => [
+      { value: 0, label: "All" },
+      { value: 1, label: "Employees" },
+      { value: 2, label: "Beneficiaries" }
+    ],
+    []
+  );
+
+  // Disable member type radio when badge number has a value
+  const isMemberTypeDisabled = badgeNumberValue !== null && badgeNumberValue !== undefined;
 
   // Helper function to check if a value is non-empty
   const hasValue = useCallback(
@@ -54,14 +100,14 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
   );
 
   // Determine which fields should be disabled based on which have values
-  const hasSocialSecurity = hasValue(socialSecurityValue);
+  const hasSSN = hasValue(ssnValue);
   const hasName = hasValue(nameValue);
   const hasBadgeNumber = hasValue(badgeNumberValue);
 
   // Disable other fields when one has a value
-  const isSocialSecurityDisabled = hasName || hasBadgeNumber;
-  const isNameDisabled = hasSocialSecurity || hasBadgeNumber;
-  const isBadgeNumberDisabled = hasSocialSecurity || hasName;
+  const isSSNDisabled = hasName || hasBadgeNumber;
+  const isNameDisabled = hasSSN || hasBadgeNumber;
+  const isBadgeNumberDisabled = hasSSN || hasName;
 
   // Helper text for mutual exclusion
   const getExclusionHelperText = useCallback(
@@ -73,41 +119,45 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
         if (hasBadgeNumber) return "Disabled: Badge/PSN field is in use. Press Reset to clear and re-enable.";
       }
       if (fieldName === "name") {
-        if (hasSocialSecurity) return "Disabled: SSN field is in use. Press Reset to clear and re-enable.";
+        if (hasSSN) return "Disabled: SSN field is in use. Press Reset to clear and re-enable.";
         if (hasBadgeNumber) return "Disabled: Badge/PSN field is in use. Press Reset to clear and re-enable.";
       }
-      if (fieldName === "badgePsn") {
-        if (hasSocialSecurity) return "Disabled: SSN field is in use. Press Reset to clear and re-enable.";
+      if (fieldName === "badgeNumber") {
+        if (hasSSN) return "Disabled: SSN field is in use. Press Reset to clear and re-enable.";
         if (hasName) return "Disabled: Name field is in use. Press Reset to clear and re-enable.";
       }
 
       return undefined;
     },
-    [hasSocialSecurity, hasName, hasBadgeNumber]
+    [hasSSN, hasName, hasBadgeNumber]
   );
 
-  const onSubmit = (data: beneficiaryRequest) => {
-    const { badgePsn, name, socialSecurity: ssn } = data;
+  const onSubmit = (data: BeneficiarySearchForm) => {
+    console.log("Submitted data:", data);
+    const { badgeNumber, name, ssn, memberType } = data;
     let badge: number | undefined = undefined;
     let psn: number | undefined = undefined;
 
-    if (badgePsn) {
-      const badgeStr = badgePsn.toString();
+    if (badgeNumber) {
+      console.log("Processing badge number:", badgeNumber);
+      const badgeStr = badgeNumber.toString();
       if (badgeStr.length <= MAX_EMPLOYEE_BADGE_LENGTH) {
         // Badge only (7 digits or less)
-        badge = Number(badgePsn);
+        badge = Number(badgeNumber);
       } else {
         // Badge + PSN (more than 7 digits)
-        badge = parseInt(badgeStr.slice(0, MAX_EMPLOYEE_BADGE_LENGTH));
-        psn = parseInt(badgeStr.slice(MAX_EMPLOYEE_BADGE_LENGTH));
+        badge = parseInt(badgeStr.slice(0, MAX_EMPLOYEE_BADGE_LENGTH - 1));
+        psn = parseInt(badgeStr.slice(MAX_EMPLOYEE_BADGE_LENGTH - 1));
+        console.log(`Parsed badge: ${badge}, PSN: ${psn}`);
       }
     }
 
     if (isValid) {
+      console.log("Form is valid, proceeding with search.");
       const beneficiarySearchFilterRequest: BeneficiarySearchAPIRequest = {
         badgeNumber: badge,
-        psn: psn,
-        memberType: 2, // Always beneficiaries
+        psnSuffix: psn,
+        memberType: memberType,
         name: name || undefined,
         ssn: ssn || undefined,
         skip: 0,
@@ -116,23 +166,26 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
         isSortDescending: true
       };
       onSearch(beneficiarySearchFilterRequest);
+    } else {
+      console.log("Form is invalid, cannot submit.");
     }
   };
   const validateAndSubmit = handleSubmit(onSubmit);
 
   const handleReset = () => {
     reset({
-      badgePsn: undefined,
+      badgeNumber: undefined,
       name: undefined,
-      socialSecurity: undefined,
-      memberType: "beneficiaries"
+      ssn: undefined,
+      memberType: 0
     });
+    onReset();
   };
 
   // Check if search button should be enabled
   const hasSearchCriteria = useMemo(() => {
-    return hasSocialSecurity || hasName || hasBadgeNumber;
-  }, [hasSocialSecurity, hasName, hasBadgeNumber]);
+    return hasSSN || hasName || hasBadgeNumber;
+  }, [hasSSN, hasName, hasBadgeNumber]);
 
   return (
     <form onSubmit={validateAndSubmit}>
@@ -146,7 +199,7 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
           <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Social Security Number</FormLabel>
             <Controller
-              name="socialSecurity"
+              name="ssn"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -158,8 +211,8 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
                   size="small"
                   variant="outlined"
                   value={field.value ?? ""}
-                  error={!!errors.socialSecurity}
-                  disabled={isSocialSecurityDisabled}
+                  error={!!errors.ssn}
+                  disabled={isSSNDisabled}
                   onChange={(e) => {
                     const value = e.target.value;
                     // Only allow numeric input
@@ -174,7 +227,7 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
                     field.onChange(parsedValue);
                   }}
                   sx={
-                    isSocialSecurityDisabled
+                    isSSNDisabled
                       ? {
                           "& .MuiOutlinedInput-root": {
                             backgroundColor: "#f5f5f5"
@@ -185,10 +238,10 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
                 />
               )}
             />
-            {errors?.socialSecurity && <FormHelperText error>{errors.socialSecurity.message}</FormHelperText>}
-            {!errors.socialSecurity && getExclusionHelperText("socialSecurity", isSocialSecurityDisabled) && (
+            {errors?.ssn && <FormHelperText error>{errors.ssn.message}</FormHelperText>}
+            {!errors.ssn && getExclusionHelperText("ssn", isSSNDisabled) && (
               <FormHelperText sx={{ color: "info.main", fontSize: "0.75rem", marginTop: "4px" }}>
-                {getExclusionHelperText("socialSecurity", isSocialSecurityDisabled)}
+                {getExclusionHelperText("ssn", isSSNDisabled)}
               </FormHelperText>
             )}
           </Grid>
@@ -236,7 +289,7 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
           <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Badge/PSN Number</FormLabel>
             <Controller
-              name="badgePsn"
+              name="badgeNumber"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -248,7 +301,7 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
                   size="small"
                   variant="outlined"
                   value={field.value ?? ""}
-                  error={!!errors.badgePsn}
+                  error={!!errors.badgeNumber}
                   disabled={isBadgeNumberDisabled}
                   onChange={(e) => {
                     const value = e.target.value;
@@ -262,6 +315,8 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
                     }
                     const parsedValue = value === "" ? null : Number(value);
                     field.onChange(parsedValue);
+                    // Auto-update memberType when badgeNumber changes
+                    handleBadgeNumberChange(e);
                   }}
                   sx={
                     isBadgeNumberDisabled
@@ -275,10 +330,49 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
                 />
               )}
             />
-            {errors?.badgePsn && <FormHelperText error>{errors.badgePsn.message}</FormHelperText>}
-            {!errors.badgePsn && getExclusionHelperText("badgePsn", isBadgeNumberDisabled) && (
+            {errors?.badgeNumber && <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>}
+            {!errors.badgeNumber && getExclusionHelperText("badgeNumber", isBadgeNumberDisabled) && (
               <FormHelperText sx={{ color: "info.main", fontSize: "0.75rem", marginTop: "4px" }}>
-                {getExclusionHelperText("badgePsn", isBadgeNumberDisabled)}
+                {getExclusionHelperText("badgeNumber", isBadgeNumberDisabled)}
+              </FormHelperText>
+            )}
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+            <FormControl error={!!errors.memberType}>
+              <FormLabel>Member Type</FormLabel>
+              <Controller
+                name="memberType"
+                control={control}
+                render={({ field }) => (
+                  <RadioGroup
+                    {...field}
+                    onChange={(event) => {
+                      field.onChange(event);
+                      onMemberTypeChange(Number(event.target.value));
+                    }}
+                    row>
+                    {memberTypeOptions.map((option) => (
+                      <FormControlLabel
+                        key={option.value}
+                        value={option.value}
+                        control={
+                          <Radio
+                            size="small"
+                            disabled={isMemberTypeDisabled}
+                          />
+                        }
+                        label={option.label}
+                        disabled={isMemberTypeDisabled}
+                      />
+                    ))}
+                  </RadioGroup>
+                )}
+              />
+            </FormControl>
+            {isMemberTypeDisabled && (
+              <FormHelperText sx={{ color: "info.main", fontSize: "0.75rem", marginTop: "4px" }}>
+                Member Type set based on Badge/PSN length. Clear Badge/PSN to manually select.
               </FormHelperText>
             )}
           </Grid>
@@ -292,8 +386,8 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
             <SearchAndReset
               handleReset={handleReset}
               handleSearch={validateAndSubmit}
-              isFetching={false}
-              disabled={!isValid || !hasSearchCriteria}
+              isFetching={isSearching}
+              disabled={!isValid || isSearching || !hasSearchCriteria}
             />
           </Grid>
         </Grid>

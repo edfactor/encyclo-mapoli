@@ -55,7 +55,7 @@ export interface BeneficiarySearchForm {
   psn?: number;
   name?: string;
   ssn?: string;
-  memberType: string;
+  memberType: 0 | 1 | 2; // 0=all, 1=employees, 2=beneficiaries
 }
 
 export interface BeneficiaryDetailAPIRequest extends SortedPaginationRequestDto {
@@ -77,7 +77,7 @@ export interface BeneficiaryDetail {
 
 export interface BeneficiarySearchAPIRequest extends SortedPaginationRequestDto {
   badgeNumber?: number;
-  psn?: number;
+  psnSuffix?: number;
   name?: string;
   ssn?: string;
   memberType: number;
