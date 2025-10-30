@@ -33,6 +33,8 @@ export const GetTerminatedLettersColumns = (): ColDef[] => {
     }),
     {
       headerName: "Print",
+      field: "print",
+      colId: "print",
       checkboxSelection: true,
       headerCheckboxSelection: true,
       width: 95,
@@ -40,11 +42,9 @@ export const GetTerminatedLettersColumns = (): ColDef[] => {
       minWidth: 95,
       pinned: "right",
       lockPosition: "right",
-
       suppressSizeToFit: true,
       suppressAutoSize: true,
       suppressColumnsToolPanel: true,
-
       suppressMovable: true
     }
   ];

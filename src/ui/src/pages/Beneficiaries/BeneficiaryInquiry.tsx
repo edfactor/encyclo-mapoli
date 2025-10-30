@@ -1,87 +1,44 @@
-import { CloseSharp } from "@mui/icons-material";
-import { Button, CircularProgress, Divider, Grid, IconButton, Typography } from "@mui/material";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import { Paged } from "components/DSMGrid/types";
-import { useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
-import {
-  useLazyBeneficiarySearchFilterQuery,
-  useLazyDeleteBeneficiaryQuery,
-  useLazyGetBeneficiaryDetailQuery,
-  useLazyGetBeneficiaryKindQuery,
-  useLazyGetBeneficiarytypesQuery
-} from "reduxstore/api/BeneficiariesApi";
-import { RootState } from "reduxstore/store";
-import {
-  BeneficiaryDetailRequest,
-  BeneficiaryDetailResponse,
-  BeneficiaryDto,
-  BeneficiaryKindDto,
-  BeneficiarySearchFilterRequest,
-  BeneficiarySearchFilterResponse,
-  BeneficiaryTypeDto
-} from "reduxstore/types";
-import { DSMAccordion, DSMGrid, ISortParams, Page, Pagination } from "smart-ui-library";
+import { Divider, Grid } from "@mui/material";
+import { useEffect, useState } from "react";
+import { useLazyBeneficiarySearchFilterQuery, useLazyGetBeneficiaryDetailQuery } from "reduxstore/api/BeneficiariesApi";
+
+import { DSMAccordion, Page, Paged } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
 import { CAPTIONS } from "../../constants";
-import { BeneficiaryGridColumns } from "./BeneficiaryGridColumns";
-import BeneficiaryInquiryGrid from "./BeneficiaryInquiryGrid";
 import BeneficiaryInquirySearchFilter from "./BeneficiaryInquirySearchFilter";
-import CreateBeneficiary from "./CreateBeneficiary";
+import IndividualBeneficiaryView from "./IndividualBeneficiaryView";
+import MemberResultsGrid from "./MemberResultsGrid";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface SelectedMember {
-  memberType: number;
-  id: number;
-  ssn: number;
-  badgeNumber: number;
-  psnSuffix: number;
-}
+import { BeneficiaryDetail, BeneficiaryDetailAPIRequest, BeneficiarySearchAPIRequest } from "@/types";
 
 const BeneficiaryInquiry = () => {
-  const { token } = useSelector((state: RootState) => state.security);
-  const [triggerGetBeneficiaryKind] = useLazyGetBeneficiaryKindQuery();
-  const [triggerGetBeneficiaryType] = useLazyGetBeneficiarytypesQuery();
-  const [triggerDeleteBeneficiary] = useLazyDeleteBeneficiaryQuery();
   const [triggerBeneficiaryDetail, { isSuccess }] = useLazyGetBeneficiaryDetailQuery();
-  const [open, setOpen] = useState(false);
-  const [openDeleteConfirmationDialog, setOpenDeleteConfirmationDialog] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [badgeNumber, setBadgeNumber] = useState(0);
-  const [beneficiaryKind, setBeneficiaryKind] = useState<BeneficiaryKindDto[]>([]);
-  const [beneficiaryType, setBeneficiaryType] = useState<BeneficiaryTypeDto[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<BeneficiaryDetail | null>();
 
-  const [selectedMember, setSelectedMember] = useState<BeneficiaryDetailResponse | null>();
-
-  const [change, setChange] = useState<number>(0);
-  const [selectedBeneficiary, setSelectedBeneficiary] = useState<BeneficiaryDto | undefined>();
-  const [deleteBeneficiaryId, setDeleteBeneficairyId] = useState<number>(0);
-  const [deleteInProgress, setDeleteInProgress] = useState<boolean>(false);
-  const [beneficiaryDialogTitle, setBeneficiaryDialogTitle] = useState<string>();
-  const [beneficiarySearchFilterResponse, setBeneficiarySearchFilterResponse] =
-    useState<Paged<BeneficiarySearchFilterResponse>>();
+  const [sortParams, _setSortParams] = useState<{ sortBy: string; isSortDescending: boolean }>({
+    sortBy: "name",
+    isSortDescending: false
+  });
+  const [beneficiarySearchFilterResponse, setBeneficiarySearchFilterResponse] = useState<Paged<BeneficiaryDetail>>();
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "name",
-    isSortDescending: true
-  });
+  const [memberType, setMemberType] = useState<number | undefined>(undefined);
+
   const [initialSearch, setInitateSearch] = useState<number>(0);
   const [beneficiarySearchFilterRequest, setBeneficiarySearchFilterRequest] = useState<
-    BeneficiarySearchFilterRequest | undefined
+    BeneficiarySearchAPIRequest | undefined
   >();
   const [triggerSearch, { isFetching }] = useLazyBeneficiarySearchFilterQuery();
-  const onBadgeClick = (data: BeneficiarySearchFilterResponse) => {
+
+  const onBadgeClick = (data: BeneficiaryDetail) => {
     if (data) {
-      const request: BeneficiaryDetailRequest = {
+      const request: BeneficiaryDetailAPIRequest = {
         badgeNumber: data.badgeNumber,
-        psnSuffix: data.psn
+        psnSuffix: data.psnSuffix,
+        isSortDescending: sortParams.isSortDescending,
+        skip: 0,
+        sortBy: sortParams.sortBy,
+        take: pageSize
       };
       triggerBeneficiaryDetail(request)
         .unwrap()
@@ -95,10 +52,11 @@ const BeneficiaryInquiry = () => {
     if (beneficiarySearchFilterRequest) {
       const updatedRequest = {
         ...beneficiarySearchFilterRequest,
-        isSortDescending: _sortParams.isSortDescending,
+        isSortDescending: sortParams.isSortDescending,
         skip: pageNumber * pageSize,
-        sortBy: _sortParams.sortBy,
-        take: pageSize
+        sortBy: sortParams.sortBy,
+        take: pageSize,
+        memberType: memberType ?? beneficiarySearchFilterRequest.memberType
       };
       triggerSearch(updatedRequest)
         .unwrap()
@@ -107,65 +65,9 @@ const BeneficiaryInquiry = () => {
         });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialSearch, pageSize, pageNumber, _sortParams, beneficiarySearchFilterRequest, triggerSearch]);
+  }, [initialSearch, pageSize, pageNumber, sortParams, beneficiarySearchFilterRequest, triggerSearch]);
 
-  const RefreshBeneficiaryGrid = () => {
-    setChange((prev) => prev + 1);
-  };
-
-  const columnDefs = useMemo(() => {
-    const columns = BeneficiaryGridColumns();
-    return columns;
-  }, []);
-
-  const deleteBeneficiary = (id: number) => {
-    setDeleteBeneficairyId(id);
-    setOpenDeleteConfirmationDialog(true);
-  };
-  const handleDeleteConfirmationDialog = (del: boolean) => {
-    if (del) {
-      setDeleteInProgress(true);
-      triggerDeleteBeneficiary({ id: deleteBeneficiaryId })
-        .unwrap()
-        .then(() => {
-          setChange((prev) => prev + 1);
-        })
-        .catch((err: unknown) => {
-          if (err && typeof err === "object" && "data" in err) {
-            const errorData = err as { data?: { title?: string } };
-            console.error(`Something went wrong! Error: ${errorData.data?.title}`);
-          } else {
-            console.error("Something went wrong!");
-          }
-        })
-        .finally(() => {
-          setOpenDeleteConfirmationDialog(false);
-          setDeleteBeneficairyId(0);
-          setDeleteInProgress(false);
-        });
-    } else {
-      setOpenDeleteConfirmationDialog(false);
-    }
-  };
-
-  const currentBadge = (badgeNumber: number) => {
-    setBadgeNumber(badgeNumber);
-  };
-  const onBeneficiarySaveSuccess = () => {
-    setOpen(false);
-    setChange((prev) => prev + 1);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-  const createOrUpdateBeneficiary = (data?: BeneficiaryDto) => {
-    setSelectedBeneficiary(data);
-    setBeneficiaryDialogTitle(data ? "Edit Beneficiary" : "Add Beneficiary");
-    setOpen(true);
-  };
-
-  const onSearch = (res: Paged<BeneficiarySearchFilterResponse> | undefined) => {
+  const onSearch = (res: Paged<BeneficiaryDetail> | undefined) => {
     setBeneficiarySearchFilterResponse(res);
     if (res?.total == 1) {
       //only 1 record
@@ -173,80 +75,15 @@ const BeneficiaryInquiry = () => {
     }
   };
 
-  useEffect(() => {
-    if (token) {
-      triggerGetBeneficiaryKind({})
-        .unwrap()
-        .then((data) => {
-          setBeneficiaryKind(data.beneficiaryKindList ?? []);
-        })
-        .catch((reason) => {
-          console.error(reason);
-        });
-      triggerGetBeneficiaryType({})
-        .unwrap()
-        .then((data) => {
-          setBeneficiaryType(data.beneficiaryTypeList ?? []);
-        })
-        .catch((reason) => console.error(reason));
-    }
-  }, [beneficiaryKind, token, triggerGetBeneficiaryKind, triggerGetBeneficiaryType]);
+  const handleReset = () => {
+    setBeneficiarySearchFilterResponse(undefined);
+    setSelectedMember(null);
+    setMemberType(undefined);
+  };
 
   return (
     <MissiveAlertProvider>
       <Page label={CAPTIONS.BENEFICIARY_INQUIRY}>
-        <>
-          <Dialog
-            open={open}
-            onClose={handleClose}>
-            <DialogTitle>{beneficiaryDialogTitle}</DialogTitle>
-            <IconButton
-              aria-label="close"
-              onClick={handleClose}
-              sx={(theme) => ({
-                position: "absolute",
-                right: 8,
-                top: 8,
-                color: theme.palette.grey[500]
-              })}>
-              <CloseSharp />
-            </IconButton>
-            <DialogContent>
-              <CreateBeneficiary
-                selectedBeneficiary={selectedBeneficiary}
-                beneficiaryKind={beneficiaryKind}
-                badgeNumber={selectedMember?.badgeNumber ?? 0}
-                psnSuffix={selectedMember?.psnSuffix ?? 0}
-                onSaveSuccess={onBeneficiarySaveSuccess}></CreateBeneficiary>
-            </DialogContent>
-          </Dialog>
-          <Dialog open={openDeleteConfirmationDialog}>
-            <DialogTitle>Confirmation</DialogTitle>
-            <DialogContent>
-              <p>Are you sure you want to delete ?</p>
-            </DialogContent>
-            <DialogActions>
-              <Button
-                autoFocus
-                onClick={() => handleDeleteConfirmationDialog(false)}>
-                Cancel
-              </Button>
-              <Button
-                color={"error"}
-                onClick={() => handleDeleteConfirmationDialog(true)}>
-                Delete it! &nbsp;
-                {deleteInProgress ? (
-                  <CircularProgress
-                    size={"15px"}
-                    color={"error"}
-                  />
-                ) : (
-                  <></>
-                )}
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </>
         <Grid
           container
           rowSpacing="24px">
@@ -260,111 +97,40 @@ const BeneficiaryInquiry = () => {
             width={"100%"}>
             <DSMAccordion title="Filter">
               <BeneficiaryInquirySearchFilter
-                setInitialSearchLoaded={setInitialSearchLoaded}
                 onSearch={(req) => {
                   setBeneficiarySearchFilterRequest(req);
+                  setSelectedMember(null);
                   setInitateSearch((param) => param + 1);
                 }}
-                beneficiaryType={beneficiaryType}
-                searchClicked={currentBadge}></BeneficiaryInquirySearchFilter>
+                onMemberTypeChange={(type) => {
+                  setMemberType(type);
+                }}
+                onReset={handleReset}
+                isSearching={isFetching}
+              />
             </DSMAccordion>
           </Grid>
 
           <Grid
             size={{ xs: 12 }}
             width="100%">
-            {beneficiarySearchFilterResponse && beneficiarySearchFilterResponse?.total > 0 && (
-              <>
-                <DSMGrid
-                  preferenceKey={CAPTIONS.BENEFICIARY_SEARCH_FILTER}
-                  isLoading={isFetching}
-                  providedOptions={{
-                    rowData: beneficiarySearchFilterResponse.results,
-                    columnDefs: columnDefs,
-                    suppressMultiSort: true,
-                    onRowClicked: (event) => {
-                      if (event.data) {
-                        onBadgeClick(event.data); // or pass whatever field you need
-                      }
-                    }
-                  }}
-                />
-
-                <Pagination
-                  pageNumber={pageNumber}
-                  setPageNumber={(value: number) => {
-                    setPageNumber(value - 1);
-
-                    //setInitialSearchLoaded(true);
-                  }}
-                  pageSize={pageSize}
-                  setPageSize={(value: number) => {
-                    setPageSize(value);
-                    setPageNumber(1);
-
-                    //setInitialSearchLoaded(true);
-                  }}
-                  recordCount={beneficiarySearchFilterResponse?.total}
-                />
-              </>
+            {beneficiarySearchFilterResponse && beneficiarySearchFilterResponse?.total > 1 && (
+              <MemberResultsGrid
+                searchResults={beneficiarySearchFilterResponse}
+                isLoading={isFetching}
+                pageNumber={pageNumber}
+                pageSize={pageSize}
+                onRowClick={onBadgeClick}
+                onPageNumberChange={setPageNumber}
+                onPageSizeChange={setPageSize}
+              />
             )}
 
-            {/* Render employee details if identifiers are present in selectedMember, or show missive if noResults */}
             {isSuccess && selectedMember && (
-              <>
-                <Typography
-                  variant="h2"
-                  sx={{ color: "#0258A5", paddingTop: 10 }}>
-                  {`Beneficiary Details`}
-                </Typography>
-                <Grid
-                  container
-                  spacing={5}>
-                  <Grid size={6}>
-                    <p>
-                      <strong>{selectedMember?.name}</strong>
-                    </p>
-                    <p>
-                      {selectedMember?.street}
-                      <br />
-                      {selectedMember?.city} {selectedMember?.state} {selectedMember?.zip}
-                    </p>
-                  </Grid>
-                  <Grid size={6}>
-                    <p>
-                      <strong>DOB</strong> {selectedMember.dateOfBirth}
-                    </p>
-                    <p>
-                      <strong>SSN</strong> {selectedMember.ssn}
-                    </p>
-                    <p>
-                      <strong>Balance</strong> {selectedMember.currentBalance}
-                    </p>
-                  </Grid>
-                </Grid>
-                <div
-                  style={{
-                    padding: "24px",
-                    display: "flex",
-                    justifyContent: "right",
-                    alignItems: "center"
-                  }}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => createOrUpdateBeneficiary(undefined)}>
-                    Add Beneficiary
-                  </Button>
-                </div>
-
-                <BeneficiaryInquiryGrid
-                  refresh={RefreshBeneficiaryGrid}
-                  count={change}
-                  selectedMember={selectedMember}
-                  createOrUpdateBeneficiary={createOrUpdateBeneficiary}
-                  deleteBeneficiary={deleteBeneficiary}
-                />
-              </>
+              <IndividualBeneficiaryView
+                selectedMember={selectedMember}
+                memberType={memberType}
+              />
             )}
           </Grid>
         </Grid>

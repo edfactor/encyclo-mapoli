@@ -3,7 +3,7 @@ import SmartPSDrawer from "../../components/Drawer/SmartPSDrawer";
 import DSMDynamicBreadcrumbs from "../../components/DSMDynamicBreadcrumbs/DSMDynamicBreadcrumbs";
 import ProtectedRoute from "../../components/ProtectedRoute/ProtectedRoute";
 import DemographicBadgesNotInPayprofit from "../../pages/DecemberActivities/DemographicBadgesNotInPayprofit/DemographicBadgesNotInPayprofit";
-import DistributionsAndForfeitures from "../../pages/DecemberActivities/DistributionsAndForfeitures/DistributionAndForfeitures";
+import DistributionsAndForfeitures from "../../pages/DecemberActivities/DistributionsAndForfeitures/DistributionsAndForfeitures";
 import DuplicateNamesAndBirthdays from "../../pages/DecemberActivities/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdays";
 import DuplicateSSNsOnDemographics from "../../pages/DecemberActivities/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographics";
 import ManageExecutiveHoursAndDollars from "../../pages/DecemberActivities/ManageExecutiveHoursAndDollars/ManageExecutiveHoursAndDollars";
