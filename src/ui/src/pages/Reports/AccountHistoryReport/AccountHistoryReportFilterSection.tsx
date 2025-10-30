@@ -123,7 +123,7 @@ const AccountHistoryReportFilterSection: React.FC<AccountHistoryReportFilterSect
                 required={true}
                 label="Start Date"
                 disableFuture
-                minDate={new Date(1990, 0)}
+                minDate={new Date(1980, 0)}
                 error={errors.startDate?.message}
               />
             )}
