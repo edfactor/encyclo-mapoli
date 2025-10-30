@@ -1,5 +1,4 @@
 import { FormLabel, Grid, MenuItem, Select, TextField } from "@mui/material";
-import { useEffect, useState } from "react";
 
 import { yupResolver } from "@hookform/resolvers/yup";
 import Checkbox from "@mui/material/Checkbox";
@@ -7,18 +6,14 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { Controller, Resolver, useForm } from "react-hook-form";
-import { useSelector } from "react-redux";
 import {
   useLazyCreateBeneficiariesQuery,
   useLazyCreateBeneficiaryContactQuery,
-  useLazyGetBeneficiaryKindQuery,
   useLazyUpdateBeneficiaryQuery
 } from "reduxstore/api/BeneficiariesApi";
-import { RootState } from "reduxstore/store";
 import {
   BeneficiaryDetail,
   BeneficiaryDto,
-  BeneficiaryKindDto,
   CreateBeneficiaryContactRequest,
   CreateBeneficiaryContactResponse,
   CreateBeneficiaryRequest,
@@ -29,6 +24,7 @@ import { SearchAndReset } from "smart-ui-library";
 import { tryddmmyyyyToDate } from "utils/dateUtils";
 import { ssnValidator } from "utils/FormValidators";
 import * as yup from "yup";
+import { useBeneficiaryKinds } from "./hooks/useBeneficiaryKinds";
 
 const schema = yup.object().shape({
   beneficiarySsn: ssnValidator.required("SSN is required"),
@@ -74,26 +70,11 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
   selectedBeneficiary,
   selectedMember
 }) => {
-  const { token } = useSelector((state: RootState) => state.security);
-  const [triggerGetBeneficiaryKind] = useLazyGetBeneficiaryKindQuery();
-  const [beneficiaryKind, setBeneficiaryKind] = useState<BeneficiaryKindDto[]>([]);
+  const { beneficiaryKinds } = useBeneficiaryKinds();
 
   const [triggerAdd, { isFetching }] = useLazyCreateBeneficiariesQuery();
   const [triggerCreateBeneficiaryContact] = useLazyCreateBeneficiaryContactQuery();
   const [triggerUpdateBeneficiary] = useLazyUpdateBeneficiaryQuery();
-
-  useEffect(() => {
-    if (token) {
-      triggerGetBeneficiaryKind({})
-        .unwrap()
-        .then((data) => {
-          setBeneficiaryKind(data.beneficiaryKindList ?? []);
-        })
-        .catch((reason) => {
-          console.error(reason);
-        });
-    }
-  }, [beneficiaryKind, token, triggerGetBeneficiaryKind]);
 
   const {
     control,
@@ -121,7 +102,6 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
       : {
           beneficiarySsn: "",
           relationship: "",
-          //percentage: 0,
           dateOfBirth: undefined,
           street: "",
           city: "",
@@ -226,7 +206,6 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
       });
   };
   const validateAndSubmit = handleSubmit(onSubmit);
-  useEffect(() => {}, []);
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -454,8 +433,12 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
                     value={field.value}
                     label="Beneficiary Kind"
                     onChange={(e) => field.onChange(e.target.value)}>
-                    {beneficiaryKind.map((d) => (
-                      <MenuItem value={d.id}>{d.name}</MenuItem>
+                    {beneficiaryKinds.map((d) => (
+                      <MenuItem
+                        key={d.id}
+                        value={d.id}>
+                        {d.name}
+                      </MenuItem>
                     ))}
                   </Select>
                 )}

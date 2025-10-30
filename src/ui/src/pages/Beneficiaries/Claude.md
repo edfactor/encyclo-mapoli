@@ -1,736 +1,980 @@
-# Beneficiaries Page - Technical Architecture
+# Beneficiaries Module - Technical Summary
+
+A comprehensive reference guide for the Beneficiaries page component and its ecosystem.
+
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Component Architecture](#component-architecture)
+3. [Custom Hooks](#custom-hooks)
+4. [Utilities & Helpers](#utilities--helpers)
+5. [State Management](#state-management)
+6. [Data Structures](#data-structures)
+7. [API Integration](#api-integration)
+8. [Core Workflows](#core-workflows)
+9. [File Structure](#file-structure)
+10. [Dependencies](#dependencies)
+
+---
 
 ## Overview
 
-The Beneficiaries module provides a comprehensive interface for searching, viewing, and managing beneficiary records in the Demoulas Profit Sharing system. It follows a component-based architecture with clear separation of concerns between search, display, and data management functionality.
+The Beneficiaries module enables complex member relationship management within the profit-sharing system. It provides:
 
-**Location**: `src/ui/src/pages/Beneficiaries/`
+- **Member Search**: Find employees or beneficiaries by SSN, name, or badge/PSN number
+- **Detail View**: Display comprehensive member information and relationship data
+- **Beneficiary Management**: Create, update, and delete beneficiary records
+- **Relationship Tracking**: View and manage "beneficiary of" and "beneficiaries" relationships
+- **Percentage Allocation**: Track and validate beneficiary allocation percentages
 
----
+### Key Features
 
-## Architecture Overview
-
-### Component Hierarchy
-
-```
-BeneficiaryInquiry (Main Page)
-├── MissiveAlertProvider (Context for alerts)
-├── BeneficiaryInquirySearchFilter (Search form)
-├── MemberResultsGrid (Multiple results - 2+ records)
-│   └── MemberResultsGridColumns (Column definitions)
-└── IndividualBeneficiaryView (Single member selected)
-    ├── CreateBeneficiaryDialog (Add/Edit modal)
-    │   └── CreateBeneficiary (Form component)
-    ├── MemberDetailsPanel (Member information display)
-    ├── BeneficiaryRelationshipsGrids (Relationships)
-    │   ├── BeneficiaryOfGridColumns (Column definitions)
-    │   ├── BeneficiaryInquiryGridColumns (Column definitions)
-    │   └── DeleteBeneficiaryDialog (Delete confirmation)
-    └── "Add Beneficiary" Button
-```
+- Auto-detection of member type (employee vs beneficiary) based on badge number
+- Real-time percentage validation (must sum ≤ 100%)
+- Two-step beneficiary creation (contact + beneficiary record)
+- Pagination and sorting for large datasets
+- Comprehensive form validation (SSN, dates, addresses)
 
 ---
 
-## File Structure & Responsibilities
+## Component Architecture
 
-### 1. **BeneficiaryInquiry.tsx** - Main Page Component
+### Main Page Container
 
-**Purpose**: Top-level orchestration component that manages overall page state and navigation flow.
+#### `BeneficiaryInquiry.tsx`
 
-**Key Responsibilities**:
+The primary orchestrator component that manages the search-and-detail workflow.
 
-- Manages search state and results
-- Handles member selection logic
-- Coordinates between search and detail views
-- Manages pagination state
-- Clears state on reset and new searches
+**Responsibilities**:
 
-**Key State**:
+- Manages three sub-workflows: search filter, member results, and detail view
+- Tracks search request state and selected member
+- Handles auto-selection when single member found
+- Implements page reset functionality
+- Uses `useBeneficiarySearch` hook for pagination/sorting state
 
-```typescript
-selectedMember: BeneficiaryDetail | null; // Currently selected member
-beneficiarySearchFilterResponse: Paged<BeneficiaryDetail>; // Search results
-memberType: number | undefined; // 0=all, 1=employees, 2=beneficiaries
-pageNumber: number; // Current page
-pageSize: number; // Results per page
-beneficiarySearchFilterRequest: BeneficiarySearchAPIRequest; // Current search params
+**Component Tree**:
+
 ```
-
-**Search Flow Logic**:
-
-1. User submits search → `onSearch` called
-2. `selectedMember` cleared immediately (prevents showing stale data)
-3. Search executes via RTK Query
-4. If 1 result → Auto-select and load details
-5. If 2+ results → Show grid for user selection
-
-**API Integration**:
-
-- `useLazyBeneficiarySearchFilterQuery()` - Search for members
-- `useLazyGetBeneficiaryDetailQuery()` - Get detailed member info
+BeneficiaryInquiry
+├── BeneficiaryInquirySearchFilter
+├── MemberResultsGrid
+└── IndividualBeneficiaryView
+    ├── MemberDetailsPanel
+    ├── BeneficiaryRelationshipsGrids
+    │   ├── BeneficiariesListGrid
+    │   └── BeneficiaryOfGrid
+    └── CreateBeneficiaryDialog
+```
 
 ---
 
-### 2. **BeneficiaryInquirySearchFilter.tsx** - Search Form
+### Search & Filtering Components
 
-**Purpose**: Search form with mutual exclusivity and auto-detection features.
+#### `BeneficiaryInquirySearchFilter.tsx`
 
-**Key Features**:
+Complex search form with three mutually-exclusive search criteria.
 
-- **Mutual Exclusivity**: SSN, Name, and Badge/PSN fields disable each other
-- **Auto Member Type Detection**: Badge length determines member type
-  - Empty badge → "All"
-  - Badge ≥ 8 digits → "Beneficiaries" (PSN numbers)
-  - Badge < 8 digits → "Employees"
-- **Loading State**: Disables form and shows spinner during search
-- **Helper Text**: Explains why fields are disabled
+**Features**:
+
+- **Search Modes**: SSN, Name, or Badge/PSN number
+- **Auto-Detection**: Determines member type from badge length
+  - 1-7 digits: Employee
+  - 8+ digits: Beneficiary
+- **Field Disabling**: Prevents simultaneous use of multiple search fields
+- **Validation**: Yup schema for SSN (9 digits) and badge format
+- **Pagination**: Includes page size and sort parameters in submission
 
 **Props**:
 
-```typescript
-interface BeneficiaryInquirySearchFilterProps {
-  onSearch: (params: BeneficiarySearchAPIRequest | undefined) => void;
-  onMemberTypeChange: (type: number | undefined) => void;
-  onReset: () => void;
-  isSearching?: boolean; // Controls loading state
-}
-```
+- `onSearchChange?: (request: BeneficiarySearchAPIRequest) => void`
+- `isLoading?: boolean`
 
-**Form Fields**:
-
-- Social Security Number (numeric, max 9 digits)
-- Name (text)
-- Badge/PSN Number (numeric, max 11 digits)
-- Member Type (radio buttons: All, Employees, Beneficiaries)
-
-**Validation**:
-
-- At least one search criterion required
-- Form must be valid to enable search
-- Fields validate on blur
+**Output**:
+Returns `BeneficiarySearchAPIRequest` with search criteria, pagination, and sorting.
 
 ---
 
-### 3. **MemberResultsGrid.tsx** - Search Results Grid
+#### `MemberResultsGrid.tsx`
 
-**Purpose**: Displays grid of 2+ search results for user selection.
+Paginated display of search results with row selection.
 
-**Key Features**:
+**Features**:
 
-- Pagination support (default 10 per page)
-- Row click to select member
-- Responsive column definitions
-- Loading state indicator
+- AG Grid with configurable column definitions
+- Row click triggers detail fetch
+- Pagination controls integrated with search state
+- Auto-row-select when single result
+- Loading state during fetch
 
 **Props**:
 
-```typescript
-interface MemberResultsGridProps {
-  searchResults: Paged<BeneficiaryDetail>;
-  isLoading: boolean;
-  pageNumber: number;
-  pageSize: number;
-  onRowClick: (data: BeneficiaryDetail) => void;
-  onPageNumberChange: (page: number) => void;
-  onPageSizeChange: (size: number) => void;
-}
-```
-
-**Grid Columns** (defined in `MemberResultsGridColumns.tsx`):
-
-- Badge Number (clickable)
-- PSN Suffix
-- Name
-- SSN
-- Date of Birth
-- Address (Street, City, State, Zip)
+- `members: BeneficiaryDetail[]`
+- `totalCount: number`
+- `isLoading: boolean`
+- `onRowClick: (member: BeneficiaryDetail) => void`
+- `pageNumber, pageSize, onPaginationChange`
 
 ---
 
-### 4. **IndividualBeneficiaryView.tsx** - Selected Member Container
+### Detail View Components
 
-**Purpose**: Container component that displays all information and relationships for a selected member.
+#### `IndividualBeneficiaryView.tsx`
 
-**Key Responsibilities**:
+Top-level wrapper for member detail workflow.
 
-- Manages "Add Beneficiary" dialog state
-- Handles beneficiary save success (refreshes data)
-- Coordinates between member details and relationships
+**Responsibilities**:
 
-**State Management**:
-
-```typescript
-openCreateDialog: boolean; // Dialog open/closed
-selectedBeneficiary: BeneficiaryDto; // Beneficiary being edited (undefined for new)
-beneficiaryDialogTitle: string; // "Add Beneficiary" or "Edit Beneficiary"
-change: number; // Increment to trigger refresh
-```
+- Manages dialog state for create/update operations
+- Coordinates between detail panel, relationship grids, and dialogs
+- Tracks refresh triggers via counter
+- Passes member data to child components
 
 **Child Components**:
 
-1. `CreateBeneficiaryDialog` - Modal for add/edit
-2. `MemberDetailsPanel` - Member information display
-3. "Add Beneficiary" Button
-4. `BeneficiaryRelationshipsGrids` - Relationship grids
+- `MemberDetailsPanel`: Read-only member info
+- `BeneficiaryRelationshipsGrids`: Two relationship grids
+- `CreateBeneficiaryDialog`: Create/edit form
+- `DeleteBeneficiaryDialog`: Delete confirmation
 
 ---
 
-### 5. **MemberDetailsPanel.tsx** - Member Information Display
+#### `MemberDetailsPanel.tsx`
 
-**Purpose**: Displays basic member information in a clean, organized layout.
+Read-only display of selected member information.
 
-**Layout**:
+**Displayed Fields**:
 
-- Two-column responsive grid
-- Left column: Name, Address, City, State, Zip
-- Right column: SSN, Badge Number, Age
+- Full name
+- Address (street, city, state, zip)
+- Social Security Number
+- Badge/PSN numbers
+- Age
+
+**Layout**: Uses `LabelValueSection` component for consistent info display
+
+---
+
+### Grid & Relationship Components
+
+#### `BeneficiaryRelationshipsGrids.tsx`
+
+Complex grid manager for bidirectional beneficiary relationships.
+
+**Manages Two Sections**:
+
+1. **"Beneficiary Of"**: People who list this member as beneficiary
+2. **"Beneficiaries"**: People this member is beneficiary for
+
+**Features**:
+
+- **Percentage Editing**: Inline percentage field with real-time validation
+- **Validation**: Sum of percentages must not exceed 100%
+- **Actions**: Edit/Delete buttons per row
+- **Pagination**: Configurable page size with totals
+- **Sorting**: Support for multiple sort fields
+- **Counts**: Display total counts for each relationship type
+- **Error Recovery**: Failed updates restore previous value
+
+**Custom Hooks Used**:
+
+- `useBeneficiaryRelationshipData`: Data fetching and pagination
+- `useBeneficiaryPercentageUpdate`: Validation and update
 
 **Props**:
 
-```typescript
-interface MemberDetailsPanelProps {
-  selectedMember: BeneficiaryDetail;
-  memberType: number; // 1=Employee, 2=Beneficiary
-}
-```
-
-**Styling**:
-
-- `paddingX="24px"` for horizontal padding
-- `marginY="8px"` for vertical spacing
-- Consistent with MasterInquiry design patterns
+- `selectedMember: BeneficiaryDetail`
+- `externalRefreshTrigger: number` (counter for forced refresh)
+- `onAddBeneficiary: () => void`
+- `onEditBeneficiary: (dto: BeneficiaryDto) => void`
 
 ---
 
-### 6. **BeneficiaryRelationshipsGrids.tsx** - Relationships Management
+#### Grid Column Definitions
 
-**Purpose**: Displays and manages two types of beneficiary relationships with full CRUD operations.
+##### `MemberResultsGridColumns.tsx`
 
-**Two Grid Sections**:
+Search results grid (8 columns):
 
-#### Beneficiary Of Grid
+- Badge, PSN Suffix, Name, SSN, City, State, Zip, Age
 
-Shows employees/members for whom the selected person is a beneficiary.
+##### `BeneficiariesListGridColumns.ts`
 
-- Read-only view
-- Columns: Badge, PSN_SUFFIX, Name, SSN, Date of Birth, Address
+Beneficiary list grid (14 columns):
 
-#### Beneficiaries Grid
+- Badge, PSN, Full Name, SSN, Percentage (editable), Kind, Current Balance
+- Street, City, State, Zip, DOB, Relationship, Phone
 
-Shows beneficiaries of the selected member.
+##### `BeneficiaryOfGridColumns.tsx`
 
-- Full CRUD operations (Create, Read, Update, Delete)
-- Editable percentage field with validation
-- Actions column: Edit and Delete buttons
-- Pagination support (25 per page)
-- Sorting support
+"Beneficiary of" grid (11 columns):
 
-**Key Features**:
-
-- **Percentage Validation**: Sum of beneficiary percentages must equal 100%
-- **Inline Percentage Editing**: Text field with blur-to-save
-- **Auto-refresh**: Uses `count` prop to trigger data refresh
-- **Delete Confirmation**: Modal dialog before deletion
-- **Self-contained State**: Manages own delete/edit state
-
-**Props**:
-
-```typescript
-interface BeneficiaryRelationshipsProps {
-  selectedMember: BeneficiaryDetail | null;
-  count: number; // External trigger for refresh
-  onEditBeneficiary: (beneficiary?: BeneficiaryDto) => void;
-}
-```
-
-**Internal State**:
-
-```typescript
-beneficiaryList: Paged<BeneficiaryDto>; // Beneficiaries list
-beneficiaryOfList: Paged<BeneficiaryDto>; // Beneficiary of list
-errorPercentage: boolean; // Percentage validation error
-openDeleteConfirmationDialog: boolean; // Delete modal state
-deleteBeneficiaryId: number; // ID to delete
-deleteInProgress: boolean; // Delete loading state
-internalChange: number; // Internal refresh trigger
-```
-
-**API Integration**:
-
-- `useLazyGetBeneficiariesQuery()` - Fetch both relationship lists
-- `useLazyUpdateBeneficiaryQuery()` - Update beneficiary (percentage)
-- `useLazyDeleteBeneficiaryQuery()` - Delete beneficiary
+- Badge, PSN, Full Name, SSN, DOB, Street, City, State, Percentage, Zip, Current Balance
 
 ---
 
-### 7. **CreateBeneficiaryDialog.tsx** - Add/Edit Modal Wrapper
+### Dialog Components
 
-**Purpose**: Modal wrapper for the beneficiary creation/edit form.
+#### `CreateBeneficiaryDialog.tsx`
 
-**Key Features**:
+Material-UI Dialog wrapper for beneficiary creation/editing.
 
-- Material-UI Dialog component
-- Close button (X) in top-right
-- Dynamic title ("Add Beneficiary" or "Edit Beneficiary")
-- Passes through all form props
+**Responsibilities**:
 
-**Props**:
-
-```typescript
-interface CreateBeneficiaryDialogProps {
-  open: boolean;
-  onClose: () => void;
-  title: string;
-  selectedBeneficiary?: BeneficiaryDto;
-  badgeNumber: number;
-  psnSuffix: number;
-  onSaveSuccess: () => void;
-}
-```
+- Manages dialog lifecycle (open/close)
+- Passes form logic to child `CreateBeneficiary` component
+- Provides close button and title
 
 ---
 
-### 8. **CreateBeneficiary.tsx** - Beneficiary Form
+#### `CreateBeneficiary.tsx`
 
-**Purpose**: Form component for creating or editing beneficiary records.
-
-**Key Responsibilities**:
-
-- Manages beneficiary kind lookup data (self-contained)
-- Handles form validation with yup
-- Creates beneficiary contact and beneficiary records
-- Updates existing beneficiary records
+Complex form component for creating and updating beneficiary records.
 
 **Form Fields**:
 
-- First Name, Last Name (text, required)
-- SSN (numeric, required)
-- Date of Birth (date picker, required)
-- Address fields: Street, City, State, Zipcode (text, required)
-- "Address same as employee" checkbox
-- Beneficiary Kind (dropdown, required)
-- Relationship (text, required)
+- First Name (required)
+- Last Name (required)
+- Beneficiary SSN (required, 9 digits)
+- Date of Birth (required, no future dates)
+- Address (street, city, state, zip)
+- Copy Address from Employee (checkbox)
+- Beneficiary Kind (dropdown, fetched via `useBeneficiaryKinds`)
+- Relationship (dropdown)
+- Phone Number (optional, 9 digits max)
 
-**State Management**:
+**Implementation Pattern**:
 
-```typescript
-beneficiaryKind: BeneficiaryKindDto[]  // Self-fetched lookup data
-```
+- Uses React Hook Form with Yup schema validation
+- Creation flow: Creates contact record first, then beneficiary record (2 API calls)
+- Update flow: Uses single update query
+- Phone validation: 9 digits maximum, numeric only
+- Error handling: Displays field-level validation errors
 
-**Validation Schema**:
+**Hooks Used**:
 
-```typescript
-const schema = yup.object().shape({
-  beneficiarySsn: yup.number().required(),
-  relationship: yup.string().required(),
-  dateOfBirth: yup.date().required(),
-  street: yup.string().required(),
-  city: yup.string().required(),
-  state: yup.string().required(),
-  postalCode: yup.string().required(),
-  firstName: yup.string().required(),
-  lastName: yup.string().required(),
-  addressSameAsBeneficiary: yup.boolean().notRequired(),
-  kindId: yup.string().required()
-});
-```
-
-**API Integration**:
-
-- `useLazyGetBeneficiaryKindQuery()` - Fetch beneficiary kinds
-- `useLazyCreateBeneficiaryContactQuery()` - Create contact record
-- `useLazyCreateBeneficiariesQuery()` - Create beneficiary record
-- `useLazyUpdateBeneficiaryQuery()` - Update beneficiary record
-
-**Create Flow**:
-
-1. User fills form and clicks Submit
-2. Create beneficiary contact (personal info)
-3. Receive contact ID from response
-4. Create beneficiary record (relationship + contact ID)
-5. Call `onSaveSuccess()` to close dialog and refresh parent
-
-**Edit Flow**:
-
-1. Form pre-populated with existing beneficiary data
-2. User modifies fields and clicks Submit
-3. Update beneficiary record (includes contact info)
-4. Call `onSaveSuccess()` to close dialog and refresh parent
-
----
-
-### 9. **DeleteBeneficiaryDialog.tsx** - Delete Confirmation
-
-**Purpose**: Confirmation modal for beneficiary deletion.
-
-**Key Features**:
-
-- Simple yes/no confirmation
-- Shows loading spinner during delete
-- Red "Delete it!" button for emphasis
+- `useForm` (React Hook Form)
+- `useLazyCreateBeneficiaryContactQuery`
+- `useLazyCreateBeneficiariesQuery`
+- `useLazyUpdateBeneficiaryQuery`
+- `useBeneficiaryKinds`
 
 **Props**:
 
+- `initialData?: BeneficiaryDetail` (for edit mode)
+- `onSuccess: () => void`
+- `employeeAddress?: Address` (for address copy)
+
+---
+
+#### `DeleteBeneficiaryDialog.tsx`
+
+Simple confirmation dialog for beneficiary deletion.
+
+**Features**:
+
+- Confirmation prompt
+- Loading state during deletion
+- Success/error handling
+
+---
+
+## Custom Hooks
+
+### `useBeneficiarySearch.ts`
+
+**Purpose**: Encapsulates pagination and sorting state for member search
+
+**Returns**:
+
 ```typescript
-interface DeleteBeneficiaryDialogProps {
-  open: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
-  isDeleting: boolean;
+{
+  pageNumber: number
+  pageSize: number
+  sortParams: SortParam[]
+  handlePaginationChange: (pageNumber: number, pageSize: number) => void
+  handleSortChange: (sortParams: SortParam[]) => void
+  reset: () => void
+}
+```
+
+**Key Characteristics**:
+
+- Manages pagination state independent of search execution
+- Parent component retains control over when search is triggered
+- Supports multi-column sorting
+- Reset clears pagination to defaults
+
+**Usage Pattern**:
+
+```typescript
+const search = useBeneficiarySearch({ defaultPageSize: 50 });
+// Parent component calls search.handlePaginationChange() when needed
+```
+
+---
+
+### `useBeneficiaryKinds.ts`
+
+**Purpose**: Fetches and caches beneficiary kind lookup data
+
+**Returns**:
+
+```typescript
+{
+  beneficiaryKinds: BeneficiaryKindDto[]
+  isLoading: boolean
+  error: string | null
+}
+```
+
+**Implementation Details**:
+
+- Uses RTK Query's `useLazyGetBeneficiaryKindQuery` hook
+- Single-fetch guarantee via `hasAttempted` ref flag (prevents duplicate API calls)
+- Local state caching (candidate for Redux optimization)
+- Token-dependent: only fetches if user is authenticated
+- Error handling: Logs errors to console and returns error state
+
+**Performance**: Once fetched, data is cached for the component lifecycle
+
+---
+
+### `useBeneficiaryRelationshipData.ts`
+
+**Purpose**: Manages bidirectional beneficiary relationship data fetching with pagination
+
+**Returns**:
+
+```typescript
+{
+  beneficiaryList: {
+    data: BeneficiaryDto[]
+    totalCount: number
+    isLoading: boolean
+  }
+  beneficiaryOfList: {
+    data: BeneficiaryDto[]
+    totalCount: number
+    isLoading: boolean
+  }
+  refresh: () => void
+}
+```
+
+**Features**:
+
+- Lazy evaluation: only fetches when member and token available
+- Handles two simultaneous API queries (beneficiaries + beneficiary-of)
+- Supports pagination and sorting for each relationship type
+- Manual refresh via `refresh()` method
+- External refresh trigger via `externalRefreshTrigger` prop (counter pattern)
+
+**Validation**:
+
+- Requires valid `badgeNumber` and `psnSuffix`
+- Skips fetch if identifiers missing
+
+**Configuration**:
+
+```typescript
+useBeneficiaryRelationshipData({
+  selectedMember: BeneficiaryDetail
+  pageNumber: number
+  pageSize: number
+  sortParams: SortParam[]
+  externalRefreshTrigger?: number  // Increment to trigger refresh
+})
+```
+
+---
+
+### `useBeneficiaryPercentageUpdate.ts`
+
+**Purpose**: Validates and updates beneficiary percentage allocation with business rule enforcement
+
+**Returns**:
+
+```typescript
+{
+  validateAndUpdate: (beneficiaryId: number, newPercentage: number, currentBeneficiaries: BeneficiaryDto[]) =>
+    Promise<ValidationResult>;
+  isUpdating: boolean;
+}
+```
+
+**Validation Process**:
+
+1. Calculates new sum with proposed percentage
+2. Validates sum ≤ 100%
+3. Returns validation result with error message if invalid
+4. Returns previous value for UI restoration on failure
+5. Executes API update if valid
+6. Calls optional `onUpdateSuccess` callback after successful update
+
+**Error Handling**:
+
+- Catches API failures and returns error message
+- Does NOT throw exceptions (error returned in result)
+- Provides previous value for UI rollback
+
+**Result Structure**:
+
+```typescript
+{
+  valid: boolean
+  sum?: number
+  previousValue?: number
+  error?: string
 }
 ```
 
 ---
 
-### 10. **Grid Column Definition Files**
+## Utilities & Helpers
 
-#### BeneficiaryInquiryGridColumns.ts
+### `badgeUtils.ts`
 
-Defines columns for beneficiaries list grid (used in BeneficiaryRelationshipsGrids).
+Badge/PSN parsing and member type detection utilities.
 
-**Columns**:
+#### `parseBadgeAndPSN(badgeInput: string)`
 
-- Store
-- Badge (clickable link)
-- Name
-- Address (Street, City, State, Zip)
-- SSN
-- Date of Birth
-- Kind (Beneficiary type)
-- Relationship
-- Percentage (editable)
-- Actions (Edit/Delete buttons)
+Separates combined badge/PSN number into components.
 
-#### BeneficiaryOfGridColumns.tsx
+**Logic**:
 
-Defines columns for "Beneficiary Of" grid (read-only).
+- Badges: 1-7 digits
+- PSNs: 8+ digits (badge + suffix)
 
-**Columns**:
-
-- Badge
-- PSN_SUFFIX
-- Name
-- SSN
-- Date of Birth
-- Address
-
-#### MemberResultsGridColumns.tsx
-
-Defines columns for search results grid.
-
-**Columns**:
-
-- Badge Number
-- PSN Suffix
-- Name
-- SSN
-- Date of Birth
-- Street, City, State, Zip
-
----
-
-## State Management Architecture
-
-### Local State (React useState)
-
-Used for UI state and temporary data:
-
-- Dialog open/close states
-- Form field values
-- Selected items
-- Pagination state
-- Loading indicators
-
-### RTK Query (Redux Toolkit Query)
-
-Used for server state and API caching:
-
-- Search queries (with automatic caching)
-- CRUD operations (mutations)
-- Loading and error states
-- Automatic refetching
-
-**Key API Hooks**:
+**Example**:
 
 ```typescript
-// Queries
-useLazyBeneficiarySearchFilterQuery();
-useLazyGetBeneficiaryDetailQuery();
-useLazyGetBeneficiariesQuery();
-useLazyGetBeneficiaryKindQuery();
-
-// Mutations
-useLazyCreateBeneficiariesQuery();
-useLazyCreateBeneficiaryContactQuery();
-useLazyUpdateBeneficiaryQuery();
-useLazyDeleteBeneficiaryQuery();
+parseBadgeAndPSN("12345678");
+// Returns: { badge: 1234567, psn: 8 }
 ```
 
-### Context (React Context)
+#### `detectMemberTypeFromBadge(badge: number)`
 
-- `MissiveAlertProvider` - Application-wide alert system
+Determines member type based on badge length.
 
----
+**Returns**:
 
-## Data Flow Patterns
+- `0`: All (no specific type)
+- `1`: Employees (1-7 digits)
+- `2`: Beneficiaries (8+ digits)
 
-### 1. Search Flow
+**Usage**: Auto-detect in search filter when user enters badge
 
-```
-User enters search criteria
-    ↓
-BeneficiaryInquirySearchFilter validates form
-    ↓
-onSearch callback with BeneficiarySearchAPIRequest
-    ↓
-BeneficiaryInquiry sets request state
-    ↓
-selectedMember cleared (hides detail view)
-    ↓
-useEffect triggers search
-    ↓
-RTK Query executes API call
-    ↓
-Results returned
-    ↓
-If 1 result: Auto-select and load details
-If 2+ results: Show MemberResultsGrid
-```
+#### `isValidBadgeIdentifiers(badgeNumber: number, psnSuffix: number)`
 
-### 2. Member Selection Flow
+Validates both badge and PSN identifiers.
 
-```
-User clicks row in MemberResultsGrid
-    ↓
-onRowClick callback with BeneficiaryDetail
-    ↓
-BeneficiaryInquiry.onBadgeClick()
-    ↓
-Trigger detail query with badge/PSN
-    ↓
-Set selectedMember state
-    ↓
-IndividualBeneficiaryView renders
-    ↓
-Shows MemberDetailsPanel
-    ↓
-Shows BeneficiaryRelationshipsGrids
+**Rules**:
+
+- Both must be present and non-null
+- Badge must be > 0
+- PSN can be 0
+
+#### `decomposePSNSuffix(psnSuffix: number)`
+
+Breaks PSN into three beneficiary hierarchy levels.
+
+**Returns**:
+
+```typescript
+{
+  firstLevel: number;
+  secondLevel: number;
+  thirdLevel: number;
+}
 ```
 
-### 3. Add Beneficiary Flow
+**Usage**: Constructs beneficiary payload during creation
 
-```
-User clicks "Add Beneficiary" button
-    ↓
-IndividualBeneficiaryView sets dialog state
-    ↓
-CreateBeneficiaryDialog opens
-    ↓
-CreateBeneficiary form renders
-    ↓
-User fills form and submits
-    ↓
-Create beneficiary contact (API)
-    ↓
-Create beneficiary record (API)
-    ↓
-onSaveSuccess callback
-    ↓
-Dialog closes
-    ↓
-Increment change counter
-    ↓
-BeneficiaryRelationshipsGrids refreshes
-```
+**Example**:
 
-### 4. Edit Beneficiary Flow
-
-```
-User clicks Edit button in grid
-    ↓
-BeneficiaryRelationshipsGrids calls onEditBeneficiary
-    ↓
-IndividualBeneficiaryView opens dialog with data
-    ↓
-CreateBeneficiary form pre-populated
-    ↓
-User modifies and submits
-    ↓
-Update beneficiary (API)
-    ↓
-onSaveSuccess callback
-    ↓
-Dialog closes and data refreshes
-```
-
-### 5. Delete Beneficiary Flow
-
-```
-User clicks Delete button
-    ↓
-BeneficiaryRelationshipsGrids shows confirmation
-    ↓
-DeleteBeneficiaryDialog opens
-    ↓
-User confirms
-    ↓
-Delete beneficiary (API)
-    ↓
-Increment internalChange counter
-    ↓
-Grid refreshes
-    ↓
-Dialog closes
+```typescript
+decomposePSNSuffix(123);
+// Returns: { firstLevel: 1, secondLevel: 2, thirdLevel: 3 }
 ```
 
 ---
 
-## Key Design Patterns
+### `percentageUtils.ts`
 
-### 1. Progressive Disclosure
+Percentage validation utilities for beneficiary allocation.
 
-- Search → Results → Details
-- Only show relevant UI based on current state
-- Clear state on new searches to prevent confusion
+#### `calculatePercentageSum(items: BeneficiaryDto[], updatedId: number, newPercentage: number)`
 
-### 2. Component Composition
+Computes sum with one item's percentage changed.
 
-- Small, focused components
-- Clear props interfaces
-- Separation of concerns (display vs. logic)
+**Returns**:
 
-### 3. Self-Contained State
+```typescript
+{
+  sum: number;
+  previousValue: number;
+}
+```
 
-- Components manage their own internal state
-- Use callbacks for parent communication
-- Minimize prop drilling
+**Purpose**: Allows validation of proposed change before API call
 
-### 4. Mutual Exclusivity (Search Form)
+#### `validatePercentageAllocation(sum: number)`
 
-- SSN, Name, and Badge fields disable each other
-- Helper text explains why fields are disabled
-- Reset button clears all fields
+Validates percentage sum constraint.
 
-### 5. Auto-Detection (Member Type)
+**Rules**:
 
-- Badge length automatically sets member type
-- Radio buttons disabled when badge has value
-- Clear badge to manually select member type
+- Sum must be ≤ 100%
 
-### 6. Refresh Patterns
+**Returns**:
 
-- Parent passes `count` prop to trigger child refresh
-- Child manages `internalChange` for self-triggered refresh
-- Both patterns work with useEffect dependencies
+```typescript
+{
+  sum: number
+  valid: boolean
+  error?: string
+}
+```
 
-### 7. Loading States
+---
 
-- Search button shows spinner during search
-- Delete button shows spinner during delete
-- Form disabled during submission
+## State Management
+
+### Redux Integration
+
+#### RTK Query Hooks (from `reduxstore/api/BeneficiariesApi`)
+
+**Query Hooks (Read Operations)**:
+
+- `useLazyBeneficiarySearchFilterQuery` - Primary search endpoint
+- `useLazyGetBeneficiaryDetailQuery` - Fetch single member details
+- `useLazyGetBeneficiariesQuery` - Fetch beneficiary relationships
+- `useLazyGetBeneficiaryKindQuery` - Fetch beneficiary kinds lookup
+
+**Mutation Hooks (Write Operations)**:
+
+- `useLazyCreateBeneficiariesQuery` - Create new beneficiary
+- `useLazyCreateBeneficiaryContactQuery` - Create contact record
+- `useLazyUpdateBeneficiaryQuery` - Update beneficiary percentage/info
+- `useLazyDeleteBeneficiaryQuery` - Delete beneficiary record
+
+#### Redux Store Access
+
+- **Authentication**: `state.security.token` (via `useSelector`)
+- All hooks check for valid token before API calls
+
+### State Management Pattern
+
+**Local Component State** (React `useState`):
+
+- Dialog open/close state
+- Form data (Create/Edit form)
+- Member selection
+- Search criteria
+
+**RTK Query Cache** (Distributed):
+
+- Server data (automatic deduplication)
+- Automatic cache invalidation on mutations
+- Manual refresh via hook `refresh()` method
+
+**Custom Hooks** (Business Logic):
+
+- Encapsulate complex state logic (pagination, validation)
+- Promote code reuse across components
+- Facilitate unit testing
+
+---
+
+## Data Structures
+
+### Request DTOs
+
+#### `BeneficiarySearchAPIRequest`
+
+Primary search filter request.
+
+```typescript
+{
+  ssn?: string
+  firstName?: string
+  lastName?: string
+  badgeInput?: string
+  memberType: number  // 0=All, 1=Employee, 2=Beneficiary
+  pageNumber: number
+  pageSize: number
+  sortParams: SortParam[]
+}
+```
+
+#### `BeneficiaryDetailAPIRequest`
+
+Request for single member details.
+
+```typescript
+{
+  badgeNumber: number;
+  psnSuffix: number;
+}
+```
+
+#### `CreateBeneficiaryRequest`
+
+Beneficiary creation payload.
+
+```typescript
+{
+  badgeNumber: number
+  psnSuffix: number
+  psnFirstLevel: number
+  psnSecondLevel: number
+  psnThirdLevel: number
+  firstName: string
+  lastName: string
+  ssn: string
+  dateOfBirth: DateTime
+  relationship: string
+  beneficiaryKind: string
+  currentBalance: decimal?
+}
+```
+
+#### `CreateBeneficiaryContactRequest`
+
+Contact information creation.
+
+```typescript
+{
+  phone?: string
+  street?: string
+  city?: string
+  state?: string
+  zip?: string
+}
+```
+
+#### `UpdateBeneficiaryRequest`
+
+Beneficiary update payload.
+
+```typescript
+{
+  badgeNumber: number
+  psnSuffix: number
+  psnFirstLevel: number
+  psnSecondLevel: number
+  psnThirdLevel: number
+  percentage?: decimal
+  phone?: string
+  street?: string
+  city?: string
+  state?: string
+  zip?: string
+}
+```
+
+### Response DTOs
+
+#### `BeneficiaryDetail`
+
+Member search result.
+
+```typescript
+{
+  badgeNumber: number
+  psnSuffix: number
+  firstName: string
+  lastName: string
+  ssn: string
+  street?: string
+  city?: string
+  state?: string
+  zip?: string
+  dateOfBirth: DateTime
+  age: number
+}
+```
+
+#### `BeneficiaryDto`
+
+Beneficiary relationship record.
+
+```typescript
+{
+  id: number
+  badgeNumber: number
+  psnSuffix: number
+  firstName: string
+  lastName: string
+  ssn: string
+  percentage?: decimal
+  relationship?: string
+  kind?: string
+  currentBalance?: decimal
+  street?: string
+  city?: string
+  state?: string
+  zip?: string
+  dateOfBirth: DateTime
+  phone?: string
+}
+```
+
+#### `Paged<T>`
+
+Paginated response wrapper.
+
+```typescript
+{
+  results: T[]
+  totalCount: number
+}
+```
+
+#### `BeneficiaryKindDto`
+
+Beneficiary kind lookup.
+
+```typescript
+{
+  id: number;
+  name: string;
+}
+```
 
 ---
 
 ## API Integration
 
-### Request/Response Types
+### Lazy Query Pattern
 
-All types defined in `src/ui/src/types/beneficiary/beneficiary.ts`
-
-**Key Types**:
+All API calls use RTK Query's lazy query pattern for manual trigger control.
 
 ```typescript
-// Search
-BeneficiarySearchForm; // Form shape (0|1|2 for memberType)
-BeneficiarySearchAPIRequest; // API request (includes pagination)
-BeneficiaryDetail; // Search result item
+const [trigger, { isFetching, data, error }] = useLazyXxxQuery();
 
-// Details
-BeneficiaryDto; // Full beneficiary record
-BeneficiaryKindDto; // Beneficiary kind lookup
-
-// CRUD
-CreateBeneficiaryRequest; // Create beneficiary
-CreateBeneficiaryContactRequest; // Create contact
-UpdateBeneficiaryRequest; // Update beneficiary
-DeleteBeneficiaryRequest; // Delete beneficiary
-
-// Grid
-BeneficiariesGetAPIResponse; // Contains beneficiaries + beneficiaryOf
+// Later: trigger(params).unwrap().then(res => {
+//   // handle response
+// }).catch(err => {
+//   // handle error
+// })
 ```
 
-### Badge/PSN Handling
+**Advantages**:
 
-**Badge Numbers**:
+- Component controls when API calls execute
+- No automatic fetches on mount
+- Clear error handling with `.unwrap()` + `.catch()`
 
-- Employee badges: ≤ 7 digits
-- PSN (Profit Sharing Number): 8+ digits
-- PSN = Badge + Suffix
+### Error Handling Strategy
 
-**Parsing Logic**:
+**Error Handling Pattern**:
 
 ```typescript
-if (badgeStr.length <= MAX_EMPLOYEE_BADGE_LENGTH) {
-  badge = Number(badgeNumber);
-} else {
-  badge = parseInt(badgeStr.slice(0, MAX_EMPLOYEE_BADGE_LENGTH - 1));
-  psn = parseInt(badgeStr.slice(MAX_EMPLOYEE_BADGE_LENGTH - 1));
-}
+trigger(params)
+  .unwrap()
+  .then((response) => {
+    // Success path
+    onSuccess?.(response);
+  })
+  .catch((error) => {
+    // Error path - both network and API errors
+    console.error("API failed:", error);
+    setErrorMessage(error.message || "Operation failed");
+  });
 ```
 
----
+**Current Implementation**:
 
-## Styling & Layout
+- Console error logging (candidate for improvement)
+- Error messages propagated to UI (toasts or inline messages)
+- No automatic retry (user-initiated retry via re-trigger)
 
-### Grid System
+### Data Refresh Strategy
 
-- Uses Material-UI Grid v2 with `size` prop
-- Responsive breakpoints: `xs`, `sm`, `md`
-- Consistent spacing: `spacing={3}` for grids
+**Pattern 1: Custom Hook Refresh**
 
-### Typography
+```typescript
+const { data, refresh } = useBeneficiaryRelationshipData(...)
+// After mutation: refresh()
+```
 
-- `variant="h2"` for section headers
-- Color: `#0258A5` (blue) for headers
-- Padding: `paddingX="24px"` for consistent left/right padding
-- Margin: `marginY="8px"` for vertical spacing
+**Pattern 2: External Trigger Counter**
 
-### Form Layout
+```typescript
+const [refreshCounter, setRefreshCounter] = useState(0);
+const data = useBeneficiaryRelationshipData({
+  externalRefreshTrigger: refreshCounter
+});
+// After mutation: setRefreshCounter(c => c + 1)
+```
 
-- Two-column responsive layout on desktop
-- Full-width on mobile
-- Consistent field sizing (`size="small"`)
-- Helper text for validation and exclusions
+**Pattern 3: RTK Query Auto-Invalidation**
 
-### Disabled States
-
-- Grey background (`backgroundColor: "#f5f5f5"`)
-- Disabled attribute on form controls
-- Info-colored helper text (`color: "info.main"`)
-
----
-
-## Validation & Error Handling
-
-### Form Validation
-
-- yup schemas for all forms
-- Validation on blur
-- Field-level error messages
-- Form-level disabled state
-
-### Percentage Validation
-
-- Beneficiary percentages must sum to 100%
-- Alert banner shown if validation fails
-- Previous value restored on error
-- Inline validation on blur
-
-### API Error Handling
-
-- Errors logged to console
-- User-friendly error messages (when available)
-- Loading states prevent duplicate submissions
-- Graceful degradation on failures
+- Mutations automatically invalidate related queries
+- Manual cache control via tag-based invalidation (if configured)
 
 ---
+
+## Core Workflows
+
+### Workflow 1: Search Member
+
+**Steps**:
+
+1. User enters search criteria (SSN, Name, or Badge/PSN) in `BeneficiaryInquirySearchFilter`
+2. Form validates inputs (SSN format, badge format)
+3. User submits form
+4. `BeneficiaryInquiry` calls search API with pagination/sort params
+5. Results displayed in `MemberResultsGrid` with pagination controls
+6. **Auto-select**: If single result, automatically selects member and fetches details
+7. **Manual select**: If multiple results, user clicks row to fetch details
+
+---
+
+### Workflow 2: View Member Details
+
+**Precondition**: Member selected from search results
+
+**Steps**:
+
+1. User clicks row in `MemberResultsGrid`
+2. `BeneficiaryInquiry` triggers detail fetch for selected badge/PSN
+3. `IndividualBeneficiaryView` displays:
+   - Member demographics via `MemberDetailsPanel` (name, address, SSN, age)
+   - Two relationship grids via `BeneficiaryRelationshipsGrids`:
+     - **"Beneficiary Of"**: People who have this member as beneficiary
+     - **"Beneficiaries"**: People this member is beneficiary for
+4. Grids display with pagination and sorting support
+5. User can edit percentage, add new, or delete relationships
+
+---
+
+### Workflow 3: Create Beneficiary
+
+**Precondition**: Member selected with detail view displayed
+
+**Steps**:
+
+1. User clicks "Add Beneficiary" button in detail view
+2. `CreateBeneficiaryDialog` opens with `CreateBeneficiary` form
+3. User fills form fields:
+   - Personal info (name, SSN, DOB)
+   - Address (optionally copy from employee)
+   - Relationship and kind
+4. Form validates on blur and submit:
+   - SSN: 9 digits required
+   - DOB: No future dates
+   - Address: Optional but if provided, all fields required
+5. **On Submit**:
+   - Step 1: Create contact record via `useLazyCreateBeneficiaryContactQuery`
+   - Step 2: Create beneficiary record via `useLazyCreateBeneficiariesQuery`
+   - Both must succeed (sequential API calls)
+6. **On Success**:
+   - Dialog closes
+   - Beneficiary grids refresh via `refresh()` call
+   - New beneficiary appears in grid
+7. **On Error**:
+   - Error message displayed
+   - Dialog remains open for retry
+
+---
+
+### Workflow 4: Update Percentage Allocation
+
+**Precondition**: Beneficiary grid visible with edit-enabled cells
+
+**Steps**:
+
+1. User clicks percentage field in beneficiary grid
+2. User enters new percentage value
+3. User tabs/clicks away (blur event)
+4. `BeneficiaryRelationshipsGrids` calls `useBeneficiaryPercentageUpdate.validateAndUpdate()`
+5. **Validation**:
+   - Hook calculates: new percentage + sum of other percentages
+   - Validates: sum ≤ 100%
+   - Returns `{ valid: boolean, error?: string, previousValue: number }`
+6. **If Invalid**:
+   - Field reverts to previous value
+   - Error message displayed below field
+   - No API call made
+7. **If Valid**:
+   - API update triggered via `useLazyUpdateBeneficiaryQuery`
+   - Loading state shown
+   - Grid data refreshed after success
+8. **On Error**:
+   - Field reverts to previous value
+   - Error message displayed
+
+---
+
+### Workflow 5: Delete Beneficiary
+
+**Precondition**: Beneficiary grid visible with delete button per row
+
+**Steps**:
+
+1. User clicks delete icon in beneficiary grid row
+2. `DeleteBeneficiaryDialog` opens with confirmation prompt
+3. User clicks "Confirm Delete"
+4. `useLazyDeleteBeneficiaryQuery` triggered
+5. Loading state displayed during deletion
+6. **On Success**:
+   - Dialog closes
+   - Grid refreshes via `refresh()` call
+   - Deleted beneficiary removed from grid
+7. **On Error**:
+   - Error message displayed
+   - Dialog remains open for retry
+
+---
+
+### Workflow 6: Edit Beneficiary Details
+
+**Similar to Create Workflow but**:
+
+- Form pre-populated with existing beneficiary data
+- Uses `useLazyUpdateBeneficiaryQuery` instead of create queries
+- Single API call instead of two
+
+---
+
+## File Structure
+
+```
+Beneficiaries/
+│
+├── BeneficiaryInquiry.tsx                 # Main page orchestrator
+├── BeneficiaryInquirySearchFilter.tsx     # Search form component
+├── IndividualBeneficiaryView.tsx          # Member detail wrapper
+├── MemberDetailsPanel.tsx                 # Read-only member info display
+├── MemberResultsGrid.tsx                  # Search results grid display
+├── MemberResultsGridColumns.tsx           # Search grid column definitions
+│
+├── BeneficiaryRelationshipsGrids.tsx      # Bidirectional relationship grids
+├── BeneficiariesListGridColumns.ts        # Beneficiary list column definitions
+├── BeneficiaryOfGridColumns.tsx           # "Beneficiary of" column definitions
+│
+├── CreateBeneficiary.tsx                  # Create/edit form component
+├── CreateBeneficiaryDialog.tsx            # Dialog wrapper for form
+├── DeleteBeneficiaryDialog.tsx            # Delete confirmation dialog
+│
+├── hooks/
+│   ├── index.ts                           # Hook exports
+│   ├── useBeneficiarySearch.ts            # Pagination/sort state hook
+│   ├── useBeneficiarySearch.test.ts       # Tests (3 test cases)
+│   ├── useBeneficiaryKinds.ts             # Lookup data fetching hook
+│   ├── useBeneficiaryKinds.test.ts        # Tests (7+ test cases)
+│   ├── useBeneficiaryRelationshipData.ts  # Data fetching + pagination hook
+│   ├── useBeneficiaryRelationshipData.test.ts  # Tests
+│   ├── useBeneficiaryPercentageUpdate.ts  # Validation + update hook
+│   └── useBeneficiaryPercentageUpdate.test.ts  # Tests
+│
+└── utils/
+    ├── index.ts                           # Utility exports
+    ├── badgeUtils.ts                      # Badge parsing + validation
+    ├── badgeUtils.test.ts                 # Tests (58 test cases)
+    ├── percentageUtils.ts                 # Percentage validation utilities
+    └── percentageUtils.test.ts            # Tests (39 test cases)
+```

@@ -1,5 +1,5 @@
 import { Divider, Grid } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useLazyBeneficiarySearchFilterQuery, useLazyGetBeneficiaryDetailQuery } from "reduxstore/api/BeneficiariesApi";
 
 import { DSMAccordion, Page, Paged } from "smart-ui-library";
@@ -8,54 +8,63 @@ import { CAPTIONS } from "../../constants";
 import BeneficiaryInquirySearchFilter from "./BeneficiaryInquirySearchFilter";
 import IndividualBeneficiaryView from "./IndividualBeneficiaryView";
 import MemberResultsGrid from "./MemberResultsGrid";
+import { useBeneficiarySearch } from "./hooks/useBeneficiarySearch";
 
 import { BeneficiaryDetail, BeneficiaryDetailAPIRequest, BeneficiarySearchAPIRequest } from "@/types";
 
 const BeneficiaryInquiry = () => {
   const [triggerBeneficiaryDetail, { isSuccess }] = useLazyGetBeneficiaryDetailQuery();
   const [selectedMember, setSelectedMember] = useState<BeneficiaryDetail | null>();
-
-  const [sortParams, _setSortParams] = useState<{ sortBy: string; isSortDescending: boolean }>({
-    sortBy: "name",
-    isSortDescending: false
-  });
   const [beneficiarySearchFilterResponse, setBeneficiarySearchFilterResponse] = useState<Paged<BeneficiaryDetail>>();
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
   const [memberType, setMemberType] = useState<number | undefined>(undefined);
-
-  const [initialSearch, setInitateSearch] = useState<number>(0);
   const [beneficiarySearchFilterRequest, setBeneficiarySearchFilterRequest] = useState<
     BeneficiarySearchAPIRequest | undefined
   >();
   const [triggerSearch, { isFetching }] = useLazyBeneficiarySearchFilterQuery();
 
-  const onBadgeClick = (data: BeneficiaryDetail) => {
-    if (data) {
-      const request: BeneficiaryDetailAPIRequest = {
-        badgeNumber: data.badgeNumber,
-        psnSuffix: data.psnSuffix,
-        isSortDescending: sortParams.isSortDescending,
-        skip: 0,
-        sortBy: sortParams.sortBy,
-        take: pageSize
-      };
-      triggerBeneficiaryDetail(request)
-        .unwrap()
-        .then((res) => {
-          setSelectedMember(res);
-        });
-    }
-  };
+  // Use custom hook for pagination and sort state
+  const search = useBeneficiarySearch({ defaultPageSize: 10, defaultSortBy: "name" });
+
+  const onBadgeClick = useCallback(
+    (data: BeneficiaryDetail) => {
+      if (data) {
+        const request: BeneficiaryDetailAPIRequest = {
+          badgeNumber: data.badgeNumber,
+          psnSuffix: data.psnSuffix,
+          isSortDescending: search.sortParams.isSortDescending,
+          skip: 0,
+          sortBy: search.sortParams.sortBy,
+          take: search.pageSize
+        };
+        triggerBeneficiaryDetail(request)
+          .unwrap()
+          .then((res) => {
+            setSelectedMember(res);
+          });
+      }
+    },
+    [search.sortParams, search.pageSize, triggerBeneficiaryDetail]
+  );
+
+  const onSearch = useCallback(
+    (res: Paged<BeneficiaryDetail> | undefined) => {
+      setBeneficiarySearchFilterResponse(res);
+      if (res?.total == 1) {
+        // Only 1 record - auto-select
+        onBadgeClick(res.results[0]);
+      }
+    },
+    [onBadgeClick]
+  );
 
   useEffect(() => {
     if (beneficiarySearchFilterRequest) {
       const updatedRequest = {
         ...beneficiarySearchFilterRequest,
-        isSortDescending: sortParams.isSortDescending,
-        skip: pageNumber * pageSize,
-        sortBy: sortParams.sortBy,
-        take: pageSize,
+        isSortDescending: search.sortParams.isSortDescending,
+        skip: search.pageNumber * search.pageSize,
+        sortBy: search.sortParams.sortBy,
+        take: search.pageSize,
         memberType: memberType ?? beneficiarySearchFilterRequest.memberType
       };
       triggerSearch(updatedRequest)
@@ -65,21 +74,14 @@ const BeneficiaryInquiry = () => {
         });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialSearch, pageSize, pageNumber, sortParams, beneficiarySearchFilterRequest, triggerSearch]);
+  }, [search.pageNumber, search.pageSize, search.sortParams, beneficiarySearchFilterRequest, triggerSearch, memberType]);
 
-  const onSearch = (res: Paged<BeneficiaryDetail> | undefined) => {
-    setBeneficiarySearchFilterResponse(res);
-    if (res?.total == 1) {
-      //only 1 record
-      onBadgeClick(res.results[0]);
-    }
-  };
-
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setBeneficiarySearchFilterResponse(undefined);
     setSelectedMember(null);
     setMemberType(undefined);
-  };
+    search.reset();
+  }, [search]);
 
   return (
     <MissiveAlertProvider>
@@ -100,7 +102,7 @@ const BeneficiaryInquiry = () => {
                 onSearch={(req) => {
                   setBeneficiarySearchFilterRequest(req);
                   setSelectedMember(null);
-                  setInitateSearch((param) => param + 1);
+                  search.reset();
                 }}
                 onMemberTypeChange={(type) => {
                   setMemberType(type);
@@ -118,11 +120,11 @@ const BeneficiaryInquiry = () => {
               <MemberResultsGrid
                 searchResults={beneficiarySearchFilterResponse}
                 isLoading={isFetching}
-                pageNumber={pageNumber}
-                pageSize={pageSize}
+                pageNumber={search.pageNumber}
+                pageSize={search.pageSize}
                 onRowClick={onBadgeClick}
-                onPageNumberChange={setPageNumber}
-                onPageSizeChange={setPageSize}
+                onPageNumberChange={(page) => search.handlePaginationChange(page, search.pageSize)}
+                onPageSizeChange={(size) => search.handlePaginationChange(0, size)}
               />
             )}
 
