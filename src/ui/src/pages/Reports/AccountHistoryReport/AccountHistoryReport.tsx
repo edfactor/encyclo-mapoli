@@ -14,14 +14,14 @@ const AccountHistoryReport: React.FC = () => {
 
   const handleFilterChange = (params: AccountHistoryReportFilterParams) => {
     setFilterParams(params);
-    
+
     // Trigger the query immediately with the search params
     const queryParams = {
       badgeNumber: parseInt(params.badgeNumber, 10),
       startDate: params.startDate ? params.startDate.toISOString().split("T")[0] : undefined,
       endDate: params.endDate ? params.endDate.toISOString().split("T")[0] : undefined
     };
-    
+
     triggerSearch(queryParams);
   };
 
