@@ -1,5 +1,5 @@
 import { FormLabel, Grid, MenuItem, Select, TextField } from "@mui/material";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { yupResolver } from "@hookform/resolvers/yup";
 import Checkbox from "@mui/material/Checkbox";
@@ -7,11 +7,14 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { Controller, Resolver, useForm } from "react-hook-form";
+import { useSelector } from "react-redux";
 import {
   useLazyCreateBeneficiariesQuery,
   useLazyCreateBeneficiaryContactQuery,
+  useLazyGetBeneficiaryKindQuery,
   useLazyUpdateBeneficiaryQuery
 } from "reduxstore/api/BeneficiariesApi";
+import { RootState } from "reduxstore/store";
 import {
   BeneficiaryDto,
   BeneficiaryKindDto,
@@ -54,25 +57,39 @@ export interface cb {
   addressSameAsBeneficiary: boolean;
   kindId: string;
 }
-type Props = {
+type CreateBeneficiaryProps = {
   badgeNumber: number;
   psnSuffix: number;
-  beneficiaryKind: BeneficiaryKindDto[];
   onSaveSuccess: () => void;
   selectedBeneficiary?: BeneficiaryDto;
 };
 
-const CreateBeneficiary: React.FC<Props> = ({
+const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
   badgeNumber,
   onSaveSuccess,
-  beneficiaryKind,
   psnSuffix,
   selectedBeneficiary
 }) => {
-  const [triggerAdd, { isFetching }] = useLazyCreateBeneficiariesQuery();
+  const { token } = useSelector((state: RootState) => state.security);
+  const [triggerGetBeneficiaryKind] = useLazyGetBeneficiaryKindQuery();
+  const [beneficiaryKind, setBeneficiaryKind] = useState<BeneficiaryKindDto[]>([]);
 
+  const [triggerAdd, { isFetching }] = useLazyCreateBeneficiariesQuery();
   const [triggerCreateBeneficiaryContact] = useLazyCreateBeneficiaryContactQuery();
   const [triggerUpdateBeneficiary] = useLazyUpdateBeneficiaryQuery();
+
+  useEffect(() => {
+    if (token) {
+      triggerGetBeneficiaryKind({})
+        .unwrap()
+        .then((data) => {
+          setBeneficiaryKind(data.beneficiaryKindList ?? []);
+        })
+        .catch((reason) => {
+          console.error(reason);
+        });
+    }
+  }, [beneficiaryKind, token, triggerGetBeneficiaryKind]);
 
   const {
     control,
@@ -316,7 +333,7 @@ const CreateBeneficiary: React.FC<Props> = ({
                   />
                 )}
               />
-              Address the same as beneficiary ?
+              Address the same as employee ?
             </FormLabel>
           </Grid>
           <Grid size={{ md: 5, xs: 12 }}>

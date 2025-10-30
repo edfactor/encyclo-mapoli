@@ -2,14 +2,12 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 
 import { setBeneficiaryError } from "reduxstore/slices/beneficiarySlice";
 import {
-  BeneficiaryDetailRequest,
-  BeneficiaryDetailResponse,
+  BeneficiariesGetAPIResponse,
+  BeneficiaryDetail,
+  BeneficiaryDetailAPIRequest,
   BeneficiaryKindRequestDto,
   BeneficiaryKindResponseDto,
-  BeneficiaryRequestDto,
-  BeneficiaryResponse,
-  BeneficiarySearchFilterRequest,
-  BeneficiarySearchFilterResponse,
+  BeneficiarySearchAPIRequest,
   BeneficiaryTypesRequestDto,
   BeneficiaryTypesResponseDto,
   CreateBeneficiaryContactRequest,
@@ -28,7 +26,7 @@ export const BeneficiariesApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "beneficiariesApi",
   endpoints: (builder) => ({
-    getBeneficiaries: builder.query<BeneficiaryResponse, BeneficiaryRequestDto>({
+    getBeneficiaries: builder.query<BeneficiariesGetAPIResponse, BeneficiaryDetailAPIRequest>({
       query: (request) => ({
         url: `/beneficiaries`,
         method: "GET",
@@ -44,7 +42,7 @@ export const BeneficiariesApi = createApi({
         }
       }
     }),
-    beneficiarySearchFilter: builder.query<Paged<BeneficiarySearchFilterResponse>, BeneficiarySearchFilterRequest>({
+    beneficiarySearchFilter: builder.query<Paged<BeneficiaryDetail>, BeneficiarySearchAPIRequest>({
       query: (request) => ({
         url: `/beneficiaries/search`,
         method: "GET",
@@ -84,8 +82,8 @@ export const BeneficiariesApi = createApi({
         try {
           await queryFulfilled;
         } catch (err) {
-          console.error("Failed to fetch beneficiaries:", err);
-          dispatch(setBeneficiaryError("Failed to fetch beneficiaries"));
+          console.error("Failed to fetch kinds of beneficiaries:", err);
+          dispatch(setBeneficiaryError("Failed to fetch kinds of beneficiaries"));
         }
       }
     }),
@@ -134,7 +132,7 @@ export const BeneficiariesApi = createApi({
         }
       }
     }),
-    getBeneficiaryDetail: builder.query<BeneficiaryDetailResponse, BeneficiaryDetailRequest>({
+    getBeneficiaryDetail: builder.query<BeneficiaryDetail, BeneficiaryDetailAPIRequest>({
       query: (request) => ({
         url: `/beneficiaries/detail`,
         method: "GET",

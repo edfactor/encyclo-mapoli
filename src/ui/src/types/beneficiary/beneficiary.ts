@@ -45,12 +45,12 @@ export interface BeneficiaryDto {
   currentBalance?: number;
 }
 
-export interface BeneficiaryResponse {
+export interface BeneficiariesGetAPIResponse {
   beneficiaries: Paged<BeneficiaryDto>;
   beneficiaryOf: Paged<BeneficiaryDto>;
 }
 
-export interface BeneficiarySearchFilterRequest extends SortedPaginationRequestDto {
+export interface BeneficiarySearchForm {
   badgeNumber?: number;
   psn?: number;
   name?: string;
@@ -58,25 +58,29 @@ export interface BeneficiarySearchFilterRequest extends SortedPaginationRequestD
   memberType: string;
 }
 
-export interface BeneficiarySearchFilterResponse {
+export interface BeneficiaryDetailAPIRequest extends SortedPaginationRequestDto {
   badgeNumber: number;
-  psn: number;
+  psnSuffix: number;
+}
+
+export interface BeneficiaryDetail {
+  badgeNumber: number;
+  psnSuffix: number;
+  name?: string | null;
+  ssn?: string | null;
+  street?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zip?: string | null;
+  age?: number | null;
+}
+
+export interface BeneficiarySearchAPIRequest extends SortedPaginationRequestDto {
+  badgeNumber?: number;
+  psn?: number;
   name?: string;
   ssn?: string;
-  street?: string;
-  city?: string;
-  state?: string;
-  zip?: string;
-  age?: string;
-}
-
-export interface BeneficiaryRequestDto extends SortedPaginationRequestDto {
-  badgeNumber?: number;
-  psnSuffix?: number;
-}
-
-export interface BeneficiaryResponseDto {
-  beneficiaryList?: Paged<BeneficiaryDto>;
+  memberType: number;
 }
 
 export interface CreateBeneficiaryRequest {

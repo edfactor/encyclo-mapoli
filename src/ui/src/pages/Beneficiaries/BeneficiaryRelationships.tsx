@@ -1,27 +1,26 @@
+import { BeneficiaryDetailAPIRequest } from "@/types";
 import { Delete, Edit } from "@mui/icons-material";
 import { Alert, Button, TextField, Typography } from "@mui/material";
-import { ICellRendererParams } from "ag-grid-community";
+import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { FocusEvent, JSX, useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetBeneficiariesQuery, useLazyUpdateBeneficiaryQuery } from "reduxstore/api/BeneficiariesApi";
 import { RootState } from "reduxstore/store";
-import { BeneficiaryDto, BeneficiaryRequestDto } from "reduxstore/types";
 import { DSMGrid, Paged, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import { SortParams, useGridPagination } from "../../hooks/useGridPagination";
+import { BeneficiaryDetail, BeneficiaryDto } from "../../types";
 import { BeneficiaryInquiryGridColumns } from "./BeneficiaryInquiryGridColumns";
-import { BeneficiaryOfGridColumns } from "./BeneficiaryOfGridColumns";
+import { GetBeneficiaryOfGridColumns } from "./BeneficiaryOfGridColumns";
 
-interface BeneficiaryInquiryGridProps {
-  selectedMember: BeneficiaryDto | null;
+interface BeneficiaryRelationshipsProps {
+  selectedMember: BeneficiaryDetail | null;
   count: number;
   createOrUpdateBeneficiary: (selectedMember: BeneficiaryDto | undefined) => void;
   deleteBeneficiary: (id: number) => void;
-  //refresh: () => void;
 }
 
-const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
-  //refresh,
+const BeneficiaryRelationships: React.FC<BeneficiaryRelationshipsProps> = ({
   selectedMember,
   count,
   createOrUpdateBeneficiary,
@@ -33,6 +32,28 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
   const [beneficiaryOfList, setBeneficiaryOfList] = useState<Paged<BeneficiaryDto> | undefined>();
   const [triggerSearch, { isFetching }] = useLazyGetBeneficiariesQuery();
   const [triggerUpdate] = useLazyUpdateBeneficiaryQuery();
+
+  const createBeneficiaryInquiryRequest = (
+    skip: number,
+    sortBy: string,
+    isSortDescending: boolean,
+    take: number,
+    badgeNumber?: number,
+    psnSuffix?: number
+  ): BeneficiaryDetailAPIRequest | null => {
+    // if either identifier is missing return null so callers can guard on that
+    if (badgeNumber == null || psnSuffix == null) return null;
+
+    const request: BeneficiaryDetailAPIRequest = {
+      badgeNumber: badgeNumber,
+      psnSuffix: psnSuffix,
+      isSortDescending: isSortDescending,
+      skip: skip,
+      sortBy: sortBy,
+      take: take
+    };
+    return request;
+  };
 
   const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange } = useGridPagination({
     initialPageSize: 25,
@@ -62,25 +83,6 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
       [selectedMember?.badgeNumber, selectedMember?.psnSuffix, triggerSearch]
     )
   });
-
-  const createBeneficiaryInquiryRequest = (
-    skip: number,
-    sortBy: string,
-    isSortDescending: boolean,
-    take: number,
-    badgeNumber: number,
-    psnSuffix: number
-  ): BeneficiaryRequestDto | null => {
-    const request: BeneficiaryRequestDto = {
-      badgeNumber: badgeNumber,
-      psnSuffix: psnSuffix,
-      isSortDescending: isSortDescending,
-      skip: skip,
-      sortBy: sortBy,
-      take: take
-    };
-    return request;
-  };
 
   const sortEventHandler = (update: SortParams) => {
     if (update.sortBy === "") {
@@ -148,9 +150,7 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
     );
   };
 
-  const beneficiaryOfColumnDefs = useMemo(() => {
-    return BeneficiaryOfGridColumns();
-  }, []);
+  const beneficiaryOfColumnDefs = useMemo(() => GetBeneficiaryOfGridColumns(), []);
 
   const columnDefs = useMemo(() => {
     const columns = BeneficiaryInquiryGridColumns();
@@ -171,7 +171,7 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
         headerName: "Actions",
         field: "actions",
         lockPinned: true,
-        pinned: "right",
+        pinned: "right" as const,
         resizable: false,
         sortable: false,
         cellStyle: { backgroundColor: "#E8E8E8" },
@@ -181,12 +181,14 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
         cellRenderer: (params: ICellRendererParams) => {
           return actionButtons(params.data);
         }
-      }
+      } satisfies ColDef
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionButtons]);
 
   const onSearch = useCallback(() => {
+    console.log("Beneficiary Inquiry Grid - onSearch called");
+    console.log("Selected Member:", selectedMember);
     const request = createBeneficiaryInquiryRequest(
       pageNumber * pageSize,
       sortParams.sortBy,
@@ -200,6 +202,7 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
     triggerSearch(request, false)
       .unwrap()
       .then((res) => {
+        console.log("Beneficiary Inquiry Search Result:", res);
         setBeneficiaryList(res.beneficiaries);
         setBeneficiaryOfList(res.beneficiaryOf);
       });
@@ -215,7 +218,8 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
     <>
       {beneficiaryOfList && beneficiaryOfList.results.length > 0 && (
         <>
-          <div className="master-inquiry-header">
+          <p>BENEFICIARY OF GRID</p>
+          <div className="beneficiary-of-header">
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
@@ -244,7 +248,8 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
           ) : (
             <></>
           )}
-          <div className="master-inquiry-header">
+          <p>BENEFICIARY LIST GRID</p>
+          <div className="beneficiaries-list-header">
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
@@ -263,7 +268,7 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
           />
         </>
       )}
-      {!!beneficiaryList && beneficiaryList && beneficiaryList?.results.length > 0 && (
+      {!!beneficiaryList && beneficiaryList.results && beneficiaryList?.results.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
@@ -280,4 +285,4 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
   );
 };
 
-export default BeneficiaryInquiryGrid;
+export default BeneficiaryRelationships;

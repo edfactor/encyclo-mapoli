@@ -8,7 +8,7 @@ import {
   createStateColumn
 } from "../../utils/gridColumnFactory";
 
-export const BeneficiaryOfGridColumns = (): ColDef[] => {
+export const GetBeneficiaryOfGridColumns = (): ColDef[] => {
   return [
     createBadgeColumn({}),
     {
@@ -27,7 +27,7 @@ export const BeneficiaryOfGridColumns = (): ColDef[] => {
       }
     }),
     createSSNColumn({}),
-    createDateColumn({ headerName: "Date of Birth", field: "dateOfBirth", colId: "dateOfBirth" }),
+    createDateColumn({ headerName: "Date of Birth", field: "dateOfBirth" }),
     {
       headerName: "Address",
       field: "street",
