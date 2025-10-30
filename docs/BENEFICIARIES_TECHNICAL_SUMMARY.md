@@ -1,6 +1,3 @@
----
-applyTo: "src/ui/src/pages/Beneficiaries/**/*.*"
----
 # Beneficiaries Module - Technical Summary
 
 A comprehensive reference guide for the Beneficiaries page component and its ecosystem.

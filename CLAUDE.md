@@ -632,6 +632,9 @@ dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
 - READ_ONLY_QUICK_REFERENCE.md (`src/ui/public/docs/`) - Developer cheat sheet with copy-paste code examples
 - PS-1623_READ_ONLY_SUMMARY.md - Executive summary of read-only role implementation
 
+**Writing unit tests for react hooks** (read when needed):
+- fe-write-unit-tests-for-hooks.md ('ai-templates/front-end/') Guide to writing tests for react hooks
+
 These documents contain essential patterns and examples for implementing telemetry, caching, and read-only functionality correctly across all components. Reference them when creating new endpoints or troubleshooting issues.
 
 ## Changing Directories

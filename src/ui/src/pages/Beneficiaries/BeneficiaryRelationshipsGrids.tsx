@@ -1,21 +1,18 @@
-import { BeneficiaryDetailAPIRequest } from "@/types";
 import { Delete, Edit } from "@mui/icons-material";
-import { Alert, Button, TextField, Typography } from "@mui/material";
-import { FocusEvent, JSX, useCallback, useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
+import { Button, TextField, Typography } from "@mui/material";
+import { FocusEvent, JSX, useCallback, useMemo, useState } from "react";
 import {
-  useLazyDeleteBeneficiaryQuery,
-  useLazyGetBeneficiariesQuery,
-  useLazyUpdateBeneficiaryQuery
+  useLazyDeleteBeneficiaryQuery
 } from "reduxstore/api/BeneficiariesApi";
-import { RootState } from "reduxstore/store";
-import { DSMGrid, Paged, Pagination } from "smart-ui-library";
+import { DSMGrid, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import { SortParams, useGridPagination } from "../../hooks/useGridPagination";
 import { BeneficiaryDetail, BeneficiaryDto } from "../../types";
 import { GetBeneficiariesListGridColumns } from "./BeneficiariesListGridColumns";
 import { GetBeneficiaryOfGridColumns } from "./BeneficiaryOfGridColumns";
 import DeleteBeneficiaryDialog from "./DeleteBeneficiaryDialog";
+import { useBeneficiaryRelationshipData } from "./hooks/useBeneficiaryRelationshipData";
+import { useBeneficiaryPercentageUpdate } from "./hooks/useBeneficiaryPercentageUpdate";
 
 interface BeneficiaryRelationshipsProps {
   selectedMember: BeneficiaryDetail | null;
@@ -28,67 +25,28 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
   count,
   onEditBeneficiary
 }) => {
-  const [errorPercentage, setErrorPercentage] = useState<boolean>(false);
-  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-  const [beneficiaryList, setBeneficiaryList] = useState<Paged<BeneficiaryDto> | undefined>();
-  const [beneficiaryOfList, setBeneficiaryOfList] = useState<Paged<BeneficiaryDto> | undefined>();
-  const [triggerSearch, { isFetching }] = useLazyGetBeneficiariesQuery();
-  const [triggerUpdate] = useLazyUpdateBeneficiaryQuery();
-  const [triggerDeleteBeneficiary] = useLazyDeleteBeneficiaryQuery();
   const [openDeleteConfirmationDialog, setOpenDeleteConfirmationDialog] = useState(false);
   const [deleteBeneficiaryId, setDeleteBeneficiaryId] = useState<number>(0);
   const [deleteInProgress, setDeleteInProgress] = useState<boolean>(false);
-  const [internalChange, setInternalChange] = useState<number>(0);
+  const [triggerDeleteBeneficiary] = useLazyDeleteBeneficiaryQuery();
 
-  const createBeneficiaryInquiryRequest = (
-    skip: number,
-    sortBy: string,
-    isSortDescending: boolean,
-    take: number,
-    badgeNumber?: number,
-    psnSuffix?: number
-  ): BeneficiaryDetailAPIRequest | null => {
-    // if either identifier is missing return null so callers can guard on that
-    if (badgeNumber == null || psnSuffix == null) return null;
-
-    const request: BeneficiaryDetailAPIRequest = {
-      badgeNumber: badgeNumber,
-      psnSuffix: psnSuffix,
-      isSortDescending: isSortDescending,
-      skip: skip,
-      sortBy: sortBy,
-      take: take
-    };
-    return request;
-  };
-
+  // Use custom hooks for data fetching and percentage update
   const { pageNumber, pageSize, sortParams, handlePaginationChange, handleSortChange } = useGridPagination({
     initialPageSize: 25,
     initialSortBy: "psnSuffix",
-    initialSortDescending: true,
-    onPaginationChange: useCallback(
-      (pageNum: number, pageSz: number, sortPrms: SortParams) => {
-        if (selectedMember?.badgeNumber && selectedMember?.psnSuffix) {
-          const request = createBeneficiaryInquiryRequest(
-            pageNum * pageSz,
-            sortPrms.sortBy,
-            sortPrms.isSortDescending,
-            pageSz,
-            selectedMember?.badgeNumber,
-            selectedMember?.psnSuffix
-          );
-          if (request) {
-            triggerSearch(request, false)
-              .unwrap()
-              .then((res) => {
-                setBeneficiaryList(res.beneficiaries);
-                setBeneficiaryOfList(res.beneficiaryOf);
-              });
-          }
-        }
-      },
-      [selectedMember?.badgeNumber, selectedMember?.psnSuffix, triggerSearch]
-    )
+    initialSortDescending: true
+  });
+
+  const relationships = useBeneficiaryRelationshipData({
+    selectedMember,
+    pageNumber,
+    pageSize,
+    sortParams,
+    externalRefreshTrigger: count
+  });
+
+  const percentageUpdate = useBeneficiaryPercentageUpdate(() => {
+    relationships.refresh();
   });
 
   const sortEventHandler = (update: SortParams) => {
@@ -109,7 +67,7 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
       triggerDeleteBeneficiary({ id: deleteBeneficiaryId })
         .unwrap()
         .then(() => {
-          setInternalChange((prev) => prev + 1);
+          relationships.refresh();
         })
         .catch((err: unknown) => {
           if (err && typeof err === "object" && "data" in err) {
@@ -150,28 +108,27 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
     );
   };
 
-  const validatePercentageOfBeneficiaries = (e: FocusEvent<HTMLInputElement | HTMLTextAreaElement>, id: number) => {
-    let sum: number = 0;
-    const currentValue = e.target.value ? parseInt(e.target.value) : 0;
-    beneficiaryList?.results.forEach((value) => {
-      sum += value.id == id ? currentValue : value.percent;
-    });
-    const prevObj = beneficiaryList?.results.filter((x) => x.id == id);
+  const validatePercentageOfBeneficiaries = useCallback(
+    async (e: FocusEvent<HTMLInputElement | HTMLTextAreaElement>, id: number) => {
+      const currentValue = e.target.value ? parseInt(e.target.value) : 0;
 
-    if (sum <= 100) {
-      setErrorPercentage(false);
-      //call api to save the percentage.
+      if (!relationships.beneficiaryList?.results) {
+        return;
+      }
 
-      triggerUpdate({ id: id, percentage: currentValue }, false)
-        .unwrap()
-        .then((_res) => {
-          if (hasToken) onSearch();
-        });
-    } else {
-      setErrorPercentage(true);
-      e.target.value = prevObj ? prevObj[0].percent + "" : "";
-    }
-  };
+      const result = await percentageUpdate.validateAndUpdate(
+        id,
+        currentValue,
+        relationships.beneficiaryList.results
+      );
+
+      if (!result.success && e.target.value) {
+        // Restore previous value on validation failure
+        e.target.value = result.previousValue?.toString() || "";
+      }
+    },
+    [relationships.beneficiaryList, percentageUpdate]
+  );
 
   const percentageFieldRenderer = (percentage: number, id: number) => {
     return (
@@ -192,31 +149,6 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionButtons]);
 
-  const onSearch = useCallback(() => {
-    const request = createBeneficiaryInquiryRequest(
-      pageNumber * pageSize,
-      sortParams.sortBy,
-      sortParams.isSortDescending,
-      pageSize,
-      selectedMember?.badgeNumber,
-      selectedMember?.psnSuffix
-    );
-    if (!request) return;
-
-    triggerSearch(request, false)
-      .unwrap()
-      .then((res) => {
-        setBeneficiaryList(res.beneficiaries);
-        setBeneficiaryOfList(res.beneficiaryOf);
-      });
-  }, [selectedMember, sortParams, pageNumber, pageSize, triggerSearch]);
-
-  useEffect(() => {
-    if (hasToken) {
-      onSearch();
-    }
-  }, [selectedMember, count, internalChange, onSearch, hasToken]);
-
   return (
     <>
       <DeleteBeneficiaryDialog
@@ -225,58 +157,48 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
         onCancel={() => handleDeleteConfirmationDialog(false)}
         isDeleting={deleteInProgress}
       />
-      {beneficiaryOfList && beneficiaryOfList.results.length > 0 && (
+      {relationships.beneficiaryOfList && relationships.beneficiaryOfList.results.length > 0 && (
         <>
           <div className="beneficiary-of-header">
             <Typography
               variant="h2"
               sx={{ color: "#0258A5", paddingX: "24px", marginY: "8px" }}>
-              {`Beneficiary Of (${beneficiaryOfList?.total || 0} ${beneficiaryOfList?.total === 1 ? "Record" : "Records"})`}
+              {`Beneficiary Of (${relationships.beneficiaryOfList?.total || 0} ${relationships.beneficiaryOfList?.total === 1 ? "Record" : "Records"})`}
             </Typography>
           </div>
           <DSMGrid
             preferenceKey={CAPTIONS.BENEFICIARY_OF}
-            isLoading={isFetching}
+            isLoading={relationships.isLoading}
             providedOptions={{
-              rowData: beneficiaryOfList?.results,
+              rowData: relationships.beneficiaryOfList?.results,
               columnDefs: beneficiaryOfColumnDefs,
               suppressMultiSort: true
             }}
           />
         </>
       )}
-      {!!beneficiaryList && (
+      {!!relationships.beneficiaryList && (
         <>
-          {errorPercentage ? (
-            <Alert
-              variant="filled"
-              severity="error">
-              % Percentage should be equal to 100%
-            </Alert>
-          ) : (
-            <></>
-          )}
-
           <div className="beneficiaries-list-header">
             <Typography
               variant="h2"
               sx={{ color: "#0258A5", paddingX: "24px", marginY: "8px" }}>
-              {`Beneficiaries (${beneficiaryList?.total || 0} ${beneficiaryList?.total === 1 ? "Record" : "Records"})`}
+              {`Beneficiaries (${relationships.beneficiaryList?.total || 0} ${relationships.beneficiaryList?.total === 1 ? "Record" : "Records"})`}
             </Typography>
           </div>
           <DSMGrid
             preferenceKey={CAPTIONS.BENEFICIARIES_LIST}
-            isLoading={isFetching}
+            isLoading={relationships.isLoading}
             handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: beneficiaryList?.results,
+              rowData: relationships.beneficiaryList?.results,
               columnDefs: columnDefs,
               suppressMultiSort: true
             }}
           />
         </>
       )}
-      {!!beneficiaryList && beneficiaryList.results && beneficiaryList?.results.length > 0 && (
+      {!!relationships.beneficiaryList && relationships.beneficiaryList.results && relationships.beneficiaryList?.results.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
@@ -286,7 +208,7 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
           setPageSize={(value: number) => {
             handlePaginationChange(0, value);
           }}
-          recordCount={beneficiaryList?.total}
+          recordCount={relationships.beneficiaryList?.total}
         />
       )}
     </>
