@@ -353,9 +353,9 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Theory(DisplayName = "UpdateDistribution - Should accept valid status ID updates")]
-    [InlineData('C')] // ManualCheck
-    [InlineData('D')] // PurgeRecord
-    [InlineData('H')] // RequestOnHold
+    [InlineData(DistributionStatus.Constants.ManualCheck)] // ManualCheck
+    [InlineData(DistributionStatus.Constants.PurgeRecord)] // PurgeRecord
+    [InlineData(DistributionStatus.Constants.RequestOnHold)] // RequestOnHold
     public async Task UpdateDistribution_WithValidStatusIdUpdates_ShouldReturnSuccess(char statusId)
     {
         // Arrange
@@ -368,14 +368,14 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
             Id = distributionId,
             BadgeNumber = validBadgeNumber,
             StatusId = statusId,
-            FrequencyId = 'M',
+            FrequencyId = DistributionFrequency.Constants.Monthly,
             FederalTaxPercentage = 15.0m,
             FederalTaxAmount = 150.00m,
             StateTaxPercentage = 5.0m,
             StateTaxAmount = 50.00m,
             GrossAmount = 1000.00m,
             CheckAmount = 800.00m,
-            TaxCodeId = '1'
+            TaxCodeId = TaxCode.Constants.EarlyDistributionNoException.Id
         };
 
         // Act
@@ -396,10 +396,10 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Theory(DisplayName = "UpdateDistribution - Should accept valid frequency ID updates")]
-    [InlineData('M')]
-    [InlineData('Q')]
-    [InlineData('H')]
-    [InlineData('R')]
+    [InlineData(DistributionFrequency.Constants.Monthly)]
+    [InlineData(DistributionFrequency.Constants.Quarterly)]
+    [InlineData(DistributionFrequency.Constants.Annually)]
+    [InlineData(DistributionFrequency.Constants.PayDirect)]
     public async Task UpdateDistribution_WithValidFrequencyIdUpdates_ShouldReturnSuccess(char frequencyId)
     {
         // Arrange

@@ -248,7 +248,7 @@ public sealed class DistributionService : IDistributionService
                 request.CheckAmount = request.GrossAmount;
             }
 
-            var maxSequence = await ctx.Distributions.Where(d => d.Ssn == dem.Ssn).MaxAsync(d => (byte?)d.PaymentSequence) ?? 0;
+            var maxSequence = await ctx.Distributions.Where(d => d.Ssn == dem.Ssn).MaxAsync(d => (byte?)d.PaymentSequence, cancellationToken: cancellationToken) ?? 0;
             var distribution = new Distribution
             {
                 Ssn = dem.Ssn,

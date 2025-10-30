@@ -1,12 +1,13 @@
+﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 
 /// <summary>
-/// Request DTO for divorce report queries.
-/// Accepts request body with badge number and date range.
+/// Request DTO for account history report queries.
+/// Accepts request body with badge number, date range, and pagination parameters.
 /// </summary>
-public record DivorceReportRequest
+public record AccountHistoryReportRequest : SortedPaginationRequestDto
 {
     /// <summary>
     /// The badge number of the employee/member to generate the report for.

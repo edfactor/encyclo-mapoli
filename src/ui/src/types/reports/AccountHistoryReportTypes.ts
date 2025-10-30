@@ -1,23 +1,23 @@
-export interface DivorceReportRequest {
+import { SortedPaginationRequestDto } from "../common/api";
+
+export interface AccountHistoryReportRequest {
   badgeNumber: number;
   startDate?: string; // ISO format date
   endDate?: string; // ISO format date
+  pagination: SortedPaginationRequestDto;
 }
 
-export interface DivorceReportResponse {
+export interface AccountHistoryReportResponse {
   badgeNumber: number;
   fullName: string;
   ssn: string; // Masked for security
   profitYear: number;
-  totalContributions: number;
-  totalWithdrawals: number;
-  totalDistributions: number;
-  totalDividends: number;
-  totalForfeitures: number;
+  contributions: number;
+  earnings: number;
+  forfeitures: number;
+  withdrawals: number;
   endingBalance: number;
-  cumulativeContributions: number;
-  cumulativeWithdrawals: number;
-  cumulativeDistributions: number;
+  comment?: string;
 }
 
 export interface PaginatedResponseDto<T> {
@@ -36,10 +36,11 @@ export interface ReportResponseBase<T> {
   reportDate: string;
   startDate: string;
   endDate: string;
+  dataSource?: string;
   response: PaginatedResponseDto<T>;
 }
 
-export interface DivorceReportFilterParams {
+export interface AccountHistoryReportFilterParams {
   badgeNumber: string;
   startDate: string; // ISO format
   endDate: string; // ISO format

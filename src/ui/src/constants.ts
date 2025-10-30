@@ -167,7 +167,7 @@ export const CAPTIONS = {
   BREAKDOWN_REPORT: "Breakdown Report (QPAY066TA)",
   DEMOGRAPHIC_FREEZE: "Demographic Freeze",
   DEV_DEBUG: "Dev Debug",
-  DIVORCE_REPORT: "Divorce Report"
+  DIVORCE_REPORT: "Account History Report"
 } as const;
 
 export const VIEW = "View";

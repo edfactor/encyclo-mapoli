@@ -9,7 +9,7 @@
     <PackageVersion Include="Aspire.Oracle.EntityFrameworkCore" Version="9.5.2" />
     <PackageVersion Include="AspNetCore.HealthChecks.System" Version="9.0.0" />
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.NodeJS.Extensions" Version="9.8.0" />
-    <PackageVersion Include="Demoulas.Common.Logging" Version="2.0.1-alpha.2" />
+    <PackageVersion Include="Demoulas.Common.Logging" Version="2.0.1-alpha.3" />
     <PackageVersion Include="ErikEJ.EntityFrameworkCore.DgmlBuilder" Version="6.0.0" />
     <PackageVersion Include="FastEndpoints.AspVersioning" Version="7.1.0" />
     <PackageVersion Include="FastEndpoints.Swagger" Version="7.1.0" />

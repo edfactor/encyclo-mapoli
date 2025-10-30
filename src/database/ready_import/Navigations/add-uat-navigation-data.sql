@@ -35,6 +35,7 @@ DECLARE
     -- Groups under INQUIRIES
     INQUIRIES_GROUP CONSTANT NUMBER := 13;
     -- ADJUSTMENTS_GROUP CONSTANT NUMBER := 14; -- REMOVED
+    ADHOC_GROUP CONSTANT NUMBER := 15;
 
     -- AVAILABLE PAGES (ids starting at 100)
 
@@ -96,6 +97,13 @@ DECLARE
     -- PROFIT_DETAILS_REVERSAL CONSTANT NUMBER := 154; -- REMOVED (was under FISCAL_CLOSE)
     -- PRINT_PS_JOBS CONSTANT NUMBER :=155; -- REMOVED
 
+    -- Adhoc Reports
+    QPAY600 CONSTANT NUMBER := 137;
+    TERMINATED_LETTERS CONSTANT NUMBER := 136;
+    RECENTLY_TERMINATED CONSTANT NUMBER := 133;
+    QPAY066_AD_HOC_REPORTS CONSTANT NUMBER := 132;
+    QPAY066_UNDR21 CONSTANT NUMBER := 123;
+    DIVORCE_REPORT CONSTANT NUMBER := 161;
 
     --- These are the role IDs from the ROLES table
     SYSTEM_ADMINISTRATOR CONSTANT NUMBER := 1;
@@ -228,6 +236,15 @@ BEGIN
     insert_navigation_item(MANAGE_EXECUTIVE_HOURS_PAGE, DECEMBER_ACTIVITIES, 'Manage Executive Hours', 'PROF-DOLLAR-EXEC-EXTRACT, TPR008-09', 'manage-executive-hours-and-dollars', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(PROFIT_SHARE_REPORT, DECEMBER_ACTIVITIES, 'Profit Share Report', 'PAY426', 'profit-share-report', STATUS_NORMAL, ORDER_NINTH, '', ENABLED, IS_NAVIGABLE);
 
+-- Adhoc Reports Group
+    insert_navigation_item(ADHOC_GROUP, INQUIRIES_MENU, 'Adhoc Reports', '', '', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(QPAY600, ADHOC_GROUP, 'QPAY600', '', 'qpay600', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(TERMINATED_LETTERS, ADHOC_GROUP, 'Terminated Letters', 'QPROF003-1', 'terminated-letters', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(RECENTLY_TERMINATED, ADHOC_GROUP, 'Recently Terminated', 'PROF-VESTED|PAY508', 'recently-terminated', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(QPAY066_AD_HOC_REPORTS, ADHOC_GROUP, 'QPAY066* Ad Hoc Reports', 'QPAY066*', 'qpay066-adhoc', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(QPAY066_UNDR21, ADHOC_GROUP, 'QPAY066-UNDR21', '', 'qpay066-under21', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(DIVORCE_REPORT, ADHOC_GROUP, 'Account History Report', '', 'divorce-report', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
+
 -- FISCAL_CLOSE and all children REMOVED
 
 -- Inserting value for IT Operation for role management
@@ -265,6 +282,11 @@ BEGIN
     assign_navigation_role(INQUIRIES_GROUP, SYSTEM_ADMINISTRATOR); 
     assign_navigation_role(INQUIRIES_GROUP, FINANCE_MANAGER); 
     assign_navigation_role(INQUIRIES_GROUP, DISTRIBUTIONS_CLERK);
+
+-- Assign roles for ADHOC_GROUP
+    assign_navigation_role(ADHOC_GROUP, SYSTEM_ADMINISTRATOR); 
+    assign_navigation_role(ADHOC_GROUP, FINANCE_MANAGER); 
+    assign_navigation_role(ADHOC_GROUP, DISTRIBUTIONS_CLERK);
 
 -- Assign roles for MASTER INQUIRY (Endpoints base -> Navigation.Constants.MasterInquiry; Policy -> CanRunMasterInquiry)
     assign_navigation_role(MASTER_INQUIRY_PAGE, SYSTEM_ADMINISTRATOR); 
@@ -391,6 +413,31 @@ BEGIN
     assign_navigation_role(MANAGE_EXECUTIVE_HOURS_PAGE, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(MANAGE_EXECUTIVE_HOURS_PAGE, FINANCE_MANAGER);
 
+    -- Adhoc Reports role assignments
+    assign_navigation_role(QPAY600, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(QPAY600, FINANCE_MANAGER);
+    assign_navigation_role(QPAY600, DISTRIBUTIONS_CLERK);
+    
+    assign_navigation_role(TERMINATED_LETTERS, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(TERMINATED_LETTERS, FINANCE_MANAGER);
+    assign_navigation_role(TERMINATED_LETTERS, DISTRIBUTIONS_CLERK);
+    
+    assign_navigation_role(RECENTLY_TERMINATED, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(RECENTLY_TERMINATED, FINANCE_MANAGER);
+    assign_navigation_role(RECENTLY_TERMINATED, DISTRIBUTIONS_CLERK);
+    
+    assign_navigation_role(QPAY066_AD_HOC_REPORTS, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(QPAY066_AD_HOC_REPORTS, FINANCE_MANAGER);
+    assign_navigation_role(QPAY066_AD_HOC_REPORTS, DISTRIBUTIONS_CLERK);
+    
+    assign_navigation_role(QPAY066_UNDR21, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(QPAY066_UNDR21, FINANCE_MANAGER);
+    assign_navigation_role(QPAY066_UNDR21, DISTRIBUTIONS_CLERK);
+    
+    assign_navigation_role(DIVORCE_REPORT, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(DIVORCE_REPORT, FINANCE_MANAGER);
+    assign_navigation_role(DIVORCE_REPORT, DISTRIBUTIONS_CLERK);
+
     -- IT Devops role assignments
     assign_navigation_role(INQUIRIES_MENU, IT_DEVOPS);
     assign_navigation_role(INQUIRIES_GROUP, IT_DEVOPS);
@@ -415,6 +462,16 @@ BEGIN
     assign_navigation_role(DISTRIBUTIONS_AND_FORFEITURES, IT_DEVOPS);
     assign_navigation_role(PROFIT_SHARE_REPORT, IT_DEVOPS);
     assign_navigation_role(MANAGE_EXECUTIVE_HOURS_PAGE, IT_DEVOPS);
+
+    -- Adhoc Reports IT_DEVOPS role assignments
+    assign_navigation_role(ADHOC_GROUP, IT_DEVOPS);
+    assign_navigation_role(QPAY600, IT_DEVOPS);
+    assign_navigation_role(TERMINATED_LETTERS, IT_DEVOPS);
+    assign_navigation_role(RECENTLY_TERMINATED, IT_DEVOPS);
+    assign_navigation_role(QPAY066_AD_HOC_REPORTS, IT_DEVOPS);
+    assign_navigation_role(QPAY066_UNDR21, IT_DEVOPS);
+    assign_navigation_role(DIVORCE_REPORT, IT_DEVOPS);
+
     -- FISCAL_CLOSE IT_DEVOPS role assignments - REMOVED
     -- assign_navigation_role(FISCAL_CLOSE, IT_DEVOPS);
     -- assign_navigation_role(YTD_WAGES_EXTRACT, IT_DEVOPS);
