@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -127,12 +127,14 @@ public class AccountHistoryReportService : IAccountHistoryReportService
             ReportDate = DateTimeOffset.UtcNow,
             StartDate = dateRange.Item1,
             EndDate = dateRange.Item2,
-            Response = new PaginatedResponseDto<AccountHistoryReportResponse>
+            Response = new PaginatedResponseDto<AccountHistoryReportResponse>(request)
             {
                 Results = paginatedResult,
                 Total = totalCount
             }
         };
+        // Note: PageSize, CurrentPage, and TotalPages are computed properties on PaginatedResponseDto
+        // and are automatically calculated based on Results and Total during serialization
     }
 
     /// <summary>

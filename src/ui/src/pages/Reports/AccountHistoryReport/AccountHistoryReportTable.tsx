@@ -50,7 +50,7 @@ const AccountHistoryReportTable: React.FC<AccountHistoryReportTableProps> = ({
           {recordCount > 0 && (
             <Grid width="100%">
               <Pagination
-                pageNumber={pageNumber + 1}
+                pageNumber={pageNumber}
                 setPageNumber={(value: number) => handlePaginationChange(value - 1, pageSize)}
                 pageSize={pageSize}
                 setPageSize={(value: number) => {
