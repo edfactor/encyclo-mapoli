@@ -1,3 +1,4 @@
+using System.Linq;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -99,15 +100,19 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         }, cancellationToken);
 
         // Apply sorting based on request parameters
-        var sortedResult = ApplySorting(result, request.SortBy, request.IsSortDescending);
+        var sortBy = request.SortBy ?? "ProfitYear";
+        var isSortDescending = request.IsSortDescending ?? true;
+        var sortedResult = ApplySorting(result, sortBy, isSortDescending).ToList();
 
         // Calculate total count before pagination
         var totalCount = sortedResult.Count;
 
         // Apply pagination
+        var skip = request.Skip ?? 0;
+        var take = request.Take ?? 25;
         var paginatedResult = sortedResult
-            .Skip(request.Skip)
-            .Take(request.Take)
+            .Skip(skip)
+            .Take(take)
             .ToList();
 
         var startDate = request.StartDate ?? new DateOnly(2007, 1, 1);

@@ -146,8 +146,8 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
             var emptyReportResult = new ReportResponseBase<AccountHistoryReportResponse>
             {
                 ReportName = "Account History Report",
-                StartDate = serviceRequest.BeginningDate,
-                EndDate = serviceRequest.EndingDate,
+                StartDate = req.StartDate ?? new DateOnly(2007, 1, 1),
+                EndDate = req.EndDate ?? DateOnly.FromDateTime(DateTime.Today),
                 Response = new PaginatedResponseDto<AccountHistoryReportResponse> { Results = [] }
             };
 
