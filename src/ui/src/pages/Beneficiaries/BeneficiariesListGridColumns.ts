@@ -1,17 +1,31 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import {
+  createAgeColumn,
+  createBadgeColumn,
   createCityColumn,
-  createCurrencyColumn,
-  createDateColumn,
   createNameColumn,
   createPSNColumn,
-  createSSNColumn,
   createStateColumn,
   createZipColumn
 } from "../../utils/gridColumnFactory";
 
-export const BeneficiaryInquiryGridColumns = (percentageFieldRenderer: (arg0: any, arg1: any) => any): ColDef[] => {
+/*
+
+badgeNumber: number;
+  psnSuffix: number;
+  name?: string | null;
+  ssn?: string | null;
+  street?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zip?: string | null;
+  age?: number | null;
+
+  */
+
+export const GetBeneficiariesListGridColumns = (percentageFieldRenderer: (arg0: any, arg1: any) => any): ColDef[] => {
   return [
+    createBadgeColumn({}),
     createPSNColumn({
       headerName: "Psn",
       field: "psnSuffix",
@@ -19,14 +33,12 @@ export const BeneficiaryInquiryGridColumns = (percentageFieldRenderer: (arg0: an
       enableLinking: true,
       linkingStyle: "simple"
     }),
-    createCurrencyColumn({
-      headerName: "Current Balance",
-      field: "currentBalance"
-    }),
-    createSSNColumn({}),
-    createDateColumn({
-      headerName: "Date of birth",
-      field: "dateOfBirth"
+    createNameColumn({
+      field: "fullName",
+
+      valueFormatter: (params) => {
+        return `${params.data.lastName}, ${params.data.firstName}`;
+      }
     }),
     {
       headerName: "Street",
@@ -49,30 +61,7 @@ export const BeneficiaryInquiryGridColumns = (percentageFieldRenderer: (arg0: an
     createZipColumn({
       field: "postalCode"
     }),
-    createZipColumn({
-      field: "postalCode",
-      headerName: "Postal Code"
-    }),
-    {
-      headerName: "Country Iso",
-      field: "countryIso",
-      colId: "countryIso",
-      minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      sortable: false,
-      valueFormatter: (params) => {
-        return `${params.data.countryIso}`;
-      }
-    },
-    createNameColumn({
-      field: "fullName",
-
-      valueFormatter: (params) => {
-        return `${params.data.lastName}, ${params.data.firstName}`;
-      }
-    }),
+    createAgeColumn({}),
     {
       headerName: "Percentage",
       field: "percentage",

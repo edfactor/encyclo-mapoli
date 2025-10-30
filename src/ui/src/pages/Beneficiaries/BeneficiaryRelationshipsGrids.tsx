@@ -13,7 +13,7 @@ import { DSMGrid, Paged, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import { SortParams, useGridPagination } from "../../hooks/useGridPagination";
 import { BeneficiaryDetail, BeneficiaryDto } from "../../types";
-import { BeneficiaryInquiryGridColumns } from "./BeneficiaryInquiryGridColumns";
+import { GetBeneficiariesListGridColumns } from "./BeneficiariesListGridColumns";
 import { GetBeneficiaryOfGridColumns } from "./BeneficiaryOfGridColumns";
 import DeleteBeneficiaryDialog from "./DeleteBeneficiaryDialog";
 
@@ -188,7 +188,7 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
   const beneficiaryOfColumnDefs = useMemo(() => GetBeneficiaryOfGridColumns(), []);
 
   const columnDefs = useMemo(() => {
-    const columns = BeneficiaryInquiryGridColumns(percentageFieldRenderer);
+    const columns = GetBeneficiariesListGridColumns(percentageFieldRenderer);
     return [...columns];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionButtons]);

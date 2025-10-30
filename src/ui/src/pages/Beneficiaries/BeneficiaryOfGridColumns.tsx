@@ -4,22 +4,20 @@ import {
   createCurrencyColumn,
   createDateColumn,
   createNameColumn,
+  createPSNColumn,
   createSSNColumn,
-  createStateColumn
+  createStateColumn,
+  createZipColumn
 } from "../../utils/gridColumnFactory";
 
 export const GetBeneficiaryOfGridColumns = (): ColDef[] => {
   return [
     createBadgeColumn({}),
-    {
-      headerName: "PSN_SUFFIX",
+    createPSNColumn({
+      headerName: "Psn Suffix",
       field: "psnSuffix",
-      colId: "psnSuffix",
-      flex: 1,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true
-    },
+      enableLinking: false
+    }),
     createNameColumn({
       field: "fullName",
       valueFormatter: (params) => {
@@ -54,7 +52,7 @@ export const GetBeneficiaryOfGridColumns = (): ColDef[] => {
     },
     createStateColumn({}),
     {
-      headerName: "Percent",
+      headerName: "Percentage",
       field: "percent",
       colId: "percent",
       flex: 1,
@@ -62,6 +60,7 @@ export const GetBeneficiaryOfGridColumns = (): ColDef[] => {
       cellClass: "center-align",
       resizable: true
     },
-    createCurrencyColumn({ headerName: "Current", field: "currentBalance", colId: "currentBalance" })
+    createZipColumn({ field: "postalCode" }),
+    createCurrencyColumn({ headerName: "Current Balance", field: "currentBalance", colId: "currentBalance" })
   ];
 };
