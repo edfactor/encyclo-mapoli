@@ -1,7 +1,6 @@
 import { Grid } from "@mui/material";
 import { useMemo } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
-import ReportSummary from "../../../components/ReportSummary";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { GridPaginationActions, GridPaginationState } from "../../../hooks/useGridPagination";
 import { AccountHistoryReportResponse, ReportResponseBase } from "../../../types/reports/AccountHistoryReportTypes";
@@ -33,9 +32,6 @@ const AccountHistoryReportTable: React.FC<AccountHistoryReportTableProps> = ({
         <Grid
           container
           rowSpacing="24px">
-          <Grid width="100%">
-            <ReportSummary report={data as any} />
-          </Grid>
           <Grid width="100%">
             <DSMGrid
               preferenceKey="Account_History_Report"
