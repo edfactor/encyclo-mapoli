@@ -681,6 +681,7 @@ export const YearsEndApi = createApi({
           sortBy?: string;
           isSortDescending?: boolean;
           profitYear?: number;
+          excludeZeroAndFullyVested?: boolean;
         } = {
           beginningDate: params.beginningDate,
           endingDate: params.endingDate,
@@ -692,6 +693,10 @@ export const YearsEndApi = createApi({
 
         if (params.profitYear) {
           body.profitYear = params.profitYear;
+        }
+
+        if (params.excludeZeroAndFullyVested !== undefined) {
+          body.excludeZeroAndFullyVested = params.excludeZeroAndFullyVested;
         }
 
         return {

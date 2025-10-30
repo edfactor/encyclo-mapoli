@@ -19,6 +19,7 @@ export interface SaveButtonConfig {
 
 interface RowData {
   badgeNumber: string | number;
+  psn: number;
   profitYear: number;
   profitDetailId?: number;
   suggestedForfeit?: number;
@@ -35,7 +36,7 @@ function generateRowKey(activityType: ActivityType, data: RowData): string {
   if (activityType === "unforfeit") {
     return data.profitDetailId?.toString() || "";
   }
-  return `${data.badgeNumber}-${data.profitYear}`;
+  return String(data.psn);
 }
 
 /**
@@ -74,8 +75,8 @@ function isTransactionEditable(
   }
 
   if (activityType === "termination") {
-    // Termination: only current year is editable
-    return params.data.profitYear === selectedProfitYear;
+    // Termination: if backend gives us a value, then we allow it
+    return params.data.suggestedForfeit != null;
   } else {
     // UnForfeit: all rows with non-null suggestedUnforfeiture are editable
     return params.data.suggestedUnforfeiture != null;
@@ -98,7 +99,10 @@ export function createSaveButtonCellRenderer(config: SaveButtonConfig) {
     const isSelected = params.node?.isSelected() || false;
     const rowKey = generateRowKey(activityType, params.data);
     const currentValue = getCurrentValue(activityType, params, rowKey);
-    const isLoading = params.context?.loadingRowIds?.has(params.data.badgeNumber);
+    const isLoading =
+      activityType === "termination"
+        ? params.context?.loadingRowIds?.has(params.data.psn)
+        : params.context?.loadingRowIds?.has(params.data.badgeNumber);
     const isZeroValue = currentValue === 0 || currentValue === null || currentValue === undefined;
     // Allow saving even with validation warnings (hasError is just a warning, not blocking)
     const isDisabled = isLoading || isZeroValue || isReadOnly;
@@ -133,7 +137,7 @@ export function createSaveButtonCellRenderer(config: SaveButtonConfig) {
             const transformedValue = transformForfeitureValue(activityType, currentValue);
 
             const request: ForfeitureAdjustmentUpdateRequest = {
-              badgeNumber: params.data.badgeNumber,
+              badgeNumber: activityType === "unforfeit" ? params.data.badgeNumber : params.data.psn,
               profitYear: activityType === "unforfeit" ? selectedProfitYear : params.data.profitYear,
               forfeitureAmount: transformedValue,
               classAction: false

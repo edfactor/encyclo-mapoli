@@ -38,6 +38,7 @@ export interface StartAndEndDateRequest extends ProfitYearRequest {
   endingDate: string;
   pagination: SortedPaginationRequestDto;
   excludeZeroBalance?: boolean;
+  excludeZeroAndFullyVested?: boolean;
 }
 
 export interface FilterParams {

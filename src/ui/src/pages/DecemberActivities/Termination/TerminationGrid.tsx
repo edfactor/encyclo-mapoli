@@ -112,7 +112,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       },
       onCellClicked: (event: CellClickedEvent) => {
         if (event.data && !event.data.isDetail && event.data.isExpandable) {
-          handleRowExpansion(event.data.badgeNumber.toString());
+          handleRowExpansion(String(event.data.psn));
         }
       },
       suppressSizeToFit: true,

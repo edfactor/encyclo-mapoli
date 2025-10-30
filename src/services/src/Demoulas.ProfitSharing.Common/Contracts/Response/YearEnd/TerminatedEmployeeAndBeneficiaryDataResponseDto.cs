@@ -5,22 +5,9 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto : IIsExecutive
 {
-    public required int BadgeNumber { get; set; }
-    public required short PsnSuffix { get; set; }
+    public required long PSN { get; set; }
 
     [MaskSensitive] public required string? Name { get; set; }
-
-    public string BadgePSn
-    {
-        get
-        {
-            if (PsnSuffix == 0)
-            {
-                return BadgeNumber.ToString();
-            }
-            return $"{BadgeNumber}{PsnSuffix:0000}";
-        }
-    }
 
     public List<TerminatedEmployeeAndBeneficiaryYearDetailDto> YearDetails { get; set; } = [];
     public bool IsExecutive { get; set; }
@@ -29,8 +16,7 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto : IIsExecut
     {
         return new TerminatedEmployeeAndBeneficiaryDataResponseDto
         {
-            BadgeNumber = 777123,
-            PsnSuffix = 100,
+            PSN = 7771230100, // ie. Bene or Empl
             Name = "Example, Joe F",
             YearDetails =
             [

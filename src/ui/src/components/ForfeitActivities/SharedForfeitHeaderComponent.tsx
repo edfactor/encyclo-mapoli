@@ -13,6 +13,7 @@ export interface RowData {
   isDetail: boolean;
   profitYear: number;
   badgeNumber: string;
+  psn: number;
   enrollmentId?: string;
   suggestedForfeit?: number;
   suggestedUnforfeiture?: number;
@@ -45,17 +46,13 @@ function generateRowKey(activityType: ActivityType, nodeData: RowData): string {
   if (activityType === "unforfeit") {
     return nodeData.profitDetailId?.toString() || "";
   }
-  return `${nodeData.badgeNumber}-${nodeData.profitYear}`;
+  return String(nodeData.psn);
 }
 
 /**
  * Get current value from edited values or original data
  */
-function getCurrentValue(
-  activityType: ActivityType,
-  nodeData: RowData,
-  context: GridContext
-): number | undefined {
+function getCurrentValue(activityType: ActivityType, nodeData: RowData, context: GridContext): number | undefined {
   const rowKey = generateRowKey(activityType, nodeData);
   const editedValue = context?.editedValues?.[rowKey]?.value;
 
@@ -90,10 +87,6 @@ export const SharedForfeitHeaderComponent: React.FC<HeaderComponentProps> = (par
     // For unforfeit: all detail rows
     if (!nodeData.isDetail) return false;
 
-    if (activityType === "termination" && nodeData.profitYear !== selectedProfitYear) {
-      return false;
-    }
-
     const currentValue = getCurrentValue(activityType, nodeData, context);
     return (currentValue || 0) !== 0;
   };
@@ -103,8 +96,8 @@ export const SharedForfeitHeaderComponent: React.FC<HeaderComponentProps> = (par
     const transformedValue = transformForfeitureValue(activityType, currentValue || 0);
 
     const basePayload: ForfeitureAdjustmentUpdateRequest = {
-      badgeNumber: Number(nodeData.badgeNumber),
-      profitYear: activityType === "unforfeit" ? selectedProfitYear : nodeData.profitYear,
+      badgeNumber: activityType === "unforfeit" ? Number(nodeData.badgeNumber) : nodeData.psn,
+      profitYear: selectedProfitYear,
       forfeitureAmount: transformedValue,
       classAction: false
     };

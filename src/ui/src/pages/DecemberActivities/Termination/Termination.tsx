@@ -15,6 +15,7 @@ import TerminationSearchFilter from "./TerminationSearchFilter";
 export interface TerminationSearchRequest extends StartAndEndDateRequest {
   forfeitureStatus: string;
   archive?: boolean;
+  excludeZeroAndFullyVested?: boolean;
 }
 
 const Termination = () => {
