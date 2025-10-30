@@ -119,26 +119,15 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
                 return TypedResults.Ok(emptyResult);
             }
 
-            // Build the StartAndEndDateRequest from the AccountHistoryReportRequest
-            var serviceRequest = new StartAndEndDateRequest
-            {
-                ProfitYear = (short)DateTime.Now.Year,
-                Skip = 0,
-                Take = 1000,
-                SortBy = "ProfitYear",
-                IsSortDescending = true,
-                BeginningDate = req.StartDate ?? new DateOnly(2007, 1, 1),
-                EndingDate = req.EndDate ?? DateOnly.FromDateTime(DateTime.Today)
-            };
-
-            var result = await _accountHistoryReportService.GetAccountHistoryReportAsync(req.BadgeNumber, serviceRequest, ct);
+            // Pass the request directly to the service with pagination parameters
+            var result = await _accountHistoryReportService.GetAccountHistoryReportAsync(req.BadgeNumber, req, ct);
 
             // Record account history report business metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,
                 new("operation", "account-history-report-generation"),
                 new("endpoint", "AccountHistoryReportEndpoint"),
                 new("report_type", "account-history"),
-                new("date_range_years", $"{serviceRequest.BeginningDate.Year}-{serviceRequest.EndingDate.Year}"));
+                new("date_range_years", $"{(req.StartDate?.Year ?? 2007)}-{(req.EndDate?.Year ?? DateTime.Today.Year)}"));
 
             var recordCount = result?.Response?.Results?.Count() ?? 0;
             EndpointTelemetry.RecordCountsProcessed.Record(recordCount,

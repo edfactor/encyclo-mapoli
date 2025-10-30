@@ -23,7 +23,11 @@ export const AccountHistoryReportApi = createApi({
           body: {
             badgeNumber: params.badgeNumber,
             startDate: params.startDate,
-            endDate: params.endDate
+            endDate: params.endDate,
+            skip: params.pagination.skip ?? 0,
+            take: params.pagination.take ?? 25,
+            sortBy: params.pagination.sortBy ?? "profitYear",
+            isSortDescending: params.pagination.isSortDescending ?? true
           }
         };
       }

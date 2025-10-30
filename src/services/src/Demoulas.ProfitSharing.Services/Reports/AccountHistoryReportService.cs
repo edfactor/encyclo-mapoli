@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -13,6 +13,7 @@ namespace Demoulas.ProfitSharing.Services.Reports;
 
 /// <summary>
 /// Service for generating account history reports with member account activity by profit year.
+/// Supports pagination and sorting of results.
 /// Uses TotalService for consistent profit code filtering and calculation logic.
 /// </summary>
 public class AccountHistoryReportService : IAccountHistoryReportService
@@ -33,7 +34,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
 
     public async Task<ReportResponseBase<AccountHistoryReportResponse>> GetAccountHistoryReportAsync(
         int memberId,
-        StartAndEndDateRequest request,
+        AccountHistoryReportRequest request,
         CancellationToken cancellationToken)
     {
         var result = await _contextFactory.UseReadOnlyContext(async ctx =>
@@ -41,6 +42,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
             // Get member demographic information
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
             var demographic = await demographicQuery
+                .TagWith($"AccountHistoryReport-Demographics-{memberId}")
                 .FirstOrDefaultAsync(d => d.BadgeNumber == memberId, cancellationToken);
 
             if (demographic is null)
@@ -50,7 +52,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
 
             // Get all profit years for this member
             var profitYears = await ctx.ProfitDetails
-                .TagWith($"AccountHistoryReport-{demographic.BadgeNumber}")
+                .TagWith($"AccountHistoryReport-ProfitYears-{demographic.BadgeNumber}")
                 .Where(pd => pd.Ssn == demographic.Ssn)
                 .Select(pd => pd.ProfitYear)
                 .Distinct()
@@ -65,7 +67,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
             var reportData = new List<AccountHistoryReportResponse>();
 
             // Process each year using TotalService calculations
-            foreach (var year in profitYears.Where(y => y >= request.BeginningDate.Year && y <= request.EndingDate.Year))
+            foreach (var year in profitYears.Where(y => y >= (request.StartDate?.Year ?? 2007) && y <= (request.EndDate?.Year ?? DateTime.Today.Year)))
             {
                 // Get transactions for this year using TotalService's Oracle query which has all profit code filtering built in
                 var yearTransactions = await _totalService
@@ -96,9 +98,23 @@ public class AccountHistoryReportService : IAccountHistoryReportService
             return reportData;
         }, cancellationToken);
 
-        var dateRange = request.BeginningDate <= request.EndingDate
-            ? (request.BeginningDate, request.EndingDate)
-            : (request.EndingDate, request.BeginningDate);
+        // Apply sorting based on request parameters
+        var sortedResult = ApplySorting(result, request.SortBy, request.IsSortDescending);
+
+        // Calculate total count before pagination
+        var totalCount = sortedResult.Count;
+
+        // Apply pagination
+        var paginatedResult = sortedResult
+            .Skip(request.Skip)
+            .Take(request.Take)
+            .ToList();
+
+        var startDate = request.StartDate ?? new DateOnly(2007, 1, 1);
+        var endDate = request.EndDate ?? DateOnly.FromDateTime(DateTime.Today);
+        var dateRange = startDate <= endDate
+            ? (startDate, endDate)
+            : (endDate, startDate);
 
         return new ReportResponseBase<AccountHistoryReportResponse>
         {
@@ -108,9 +124,49 @@ public class AccountHistoryReportService : IAccountHistoryReportService
             EndDate = dateRange.Item2,
             Response = new PaginatedResponseDto<AccountHistoryReportResponse>
             {
-                Results = result,
-                Total = result.Count
+                Results = paginatedResult,
+                Total = totalCount
             }
         };
+    }
+
+    /// <summary>
+    /// Applies sorting to the account history report data.
+    /// </summary>
+    /// <param name="data">The data to sort</param>
+    /// <param name="sortBy">The field to sort by (e.g., "ProfitYear")</param>
+    /// <param name="descending">Whether to sort in descending order</param>
+    /// <returns>Sorted IEnumerable of AccountHistoryReportResponse</returns>
+    private static IEnumerable<AccountHistoryReportResponse> ApplySorting(
+        List<AccountHistoryReportResponse> data,
+        string sortBy,
+        bool descending)
+    {
+        var sorted = sortBy.ToLowerInvariant() switch
+        {
+            "profityear" => descending
+                ? data.OrderByDescending(x => x.ProfitYear)
+                : data.OrderBy(x => x.ProfitYear),
+            "badgenumber" => descending
+                ? data.OrderByDescending(x => x.BadgeNumber)
+                : data.OrderBy(x => x.BadgeNumber),
+            "fullname" => descending
+                ? data.OrderByDescending(x => x.FullName)
+                : data.OrderBy(x => x.FullName),
+            "contributions" => descending
+                ? data.OrderByDescending(x => x.Contributions)
+                : data.OrderBy(x => x.Contributions),
+            "earnings" => descending
+                ? data.OrderByDescending(x => x.Earnings)
+                : data.OrderBy(x => x.Earnings),
+            "endingbalance" => descending
+                ? data.OrderByDescending(x => x.EndingBalance)
+                : data.OrderBy(x => x.EndingBalance),
+            _ => descending
+                ? data.OrderByDescending(x => x.ProfitYear)
+                : data.OrderBy(x => x.ProfitYear)
+        };
+
+        return sorted;
     }
 }

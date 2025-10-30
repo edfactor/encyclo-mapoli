@@ -1,7 +1,10 @@
+import { SortedPaginationRequestDto } from "../common/api";
+
 export interface AccountHistoryReportRequest {
   badgeNumber: number;
   startDate?: string; // ISO format date
   endDate?: string; // ISO format date
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface AccountHistoryReportResponse {
