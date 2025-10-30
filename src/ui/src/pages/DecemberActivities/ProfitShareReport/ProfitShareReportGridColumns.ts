@@ -46,7 +46,7 @@ export const GetProfitShareReportColumns = (): ColDef[] => {
     createHoursColumn({}),
     createPointsColumn({}),
     {
-      headerName: "",
+      headerName: "Notes",
       colId: "isNew",
 
       headerClass: "center-align",
