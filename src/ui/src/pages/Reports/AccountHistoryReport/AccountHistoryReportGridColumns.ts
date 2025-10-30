@@ -3,7 +3,8 @@ import {
   createBadgeColumn,
   createCurrencyColumn,
   createNameColumn,
-  createSSNColumn
+  createSSNColumn,
+  createYearColumn
 } from "../../../utils/gridColumnFactory";
 
 export const GetAccountHistoryReportColumns = (): ColDef[] => {
@@ -13,16 +14,14 @@ export const GetAccountHistoryReportColumns = (): ColDef[] => {
       field: "fullName"
     }),
     createSSNColumn({ minWidth: 170, sortable: false }),
-    {
-      headerName: "Year",
+    createYearColumn({
+      headerName: "Profit Year",
       field: "profitYear",
-      colId: "profitYear",
-      headerClass: "left-align",
-      cellClass: "left-align",
-      minWidth: 80,
+      alignment: "right",
       sortable: true,
-      resizable: true
-    },
+      minWidth: 100,
+      maxWidth: 120
+    }),
     createCurrencyColumn({
       headerName: "Contributions",
       field: "contributions",

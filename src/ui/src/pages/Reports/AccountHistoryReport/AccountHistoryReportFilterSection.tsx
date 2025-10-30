@@ -1,5 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormHelperText, Grid, TextField } from "@mui/material";
+import { FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import React from "react";
 import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
@@ -85,22 +85,21 @@ const AccountHistoryReportFilterSection: React.FC<AccountHistoryReportFilterSect
         container
         paddingX="24px"
         gap="24px">
-        <Grid size={{ xs: 12, sm: 4, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 4, md: 2 }}>
+          <FormLabel required={true}>Badge Number</FormLabel>
           <Controller
             name="badgeNumber"
             control={control}
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Badge Number"
-                type="number"
-                placeholder="Enter badge number"
-                required={true}
+                type="text"
                 fullWidth
                 size="small"
+                variant="outlined"
                 error={!!errors.badgeNumber}
                 helperText={errors.badgeNumber?.message}
-                inputProps={{ min: "1", max: "9999999" }}
+                inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   field.onChange(e.target.value);
                   trigger("badgeNumber");
@@ -109,7 +108,7 @@ const AccountHistoryReportFilterSection: React.FC<AccountHistoryReportFilterSect
             )}
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 4, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 4, md: 2 }}>
           <Controller
             name="startDate"
             control={control}
@@ -124,13 +123,14 @@ const AccountHistoryReportFilterSection: React.FC<AccountHistoryReportFilterSect
                 required={true}
                 label="Start Date"
                 disableFuture
+                minDate={new Date(1990, 0)}
                 error={errors.startDate?.message}
               />
             )}
           />
           {errors.startDate && <FormHelperText error={true}>{errors.startDate.message}</FormHelperText>}
         </Grid>
-        <Grid size={{ xs: 12, sm: 4, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 4, md: 2 }}>
           <Controller
             name="endDate"
             control={control}
