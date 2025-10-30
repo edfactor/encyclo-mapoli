@@ -259,8 +259,6 @@ public sealed class TerminatedEmployeeReportService
             totalBeneficiaryAllocation += member.BeneficiaryAllocation;
         }
 
-        // Group by BadgeNumber, PsnSuffix, Name and create response
-        // PSN = BadgeNumber * 10000 + PsnSuffix for proper numeric sorting
         PaginatedResponseDto<TerminatedEmployeeAndBeneficiaryDataResponseDto> grouped = await yearDetailsList
             .GroupBy(x => new { x.BadgeNumber, x.PsnSuffix, x.Name })
             .Select(g => new TerminatedEmployeeAndBeneficiaryDataResponseDto
