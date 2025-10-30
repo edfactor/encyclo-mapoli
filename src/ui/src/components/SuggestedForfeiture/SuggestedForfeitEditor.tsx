@@ -18,8 +18,8 @@ export function SuggestedForfeitEditor(props: ICellEditorParams) {
     const rawInput = event.target.value;
 
     // Prevent more than 2 decimal places for currency (dollars and cents)
-    if (rawInput.includes('.')) {
-      const parts = rawInput.split('.');
+    if (rawInput.includes(".")) {
+      const parts = rawInput.split(".");
       if (parts[1] && parts[1].length > 2) {
         return; // Don't update if trying to add a third decimal place
       }
@@ -32,9 +32,13 @@ export function SuggestedForfeitEditor(props: ICellEditorParams) {
     const newError = validateSuggestedForfeit(numericValue, Math.abs(forfeitValue));
     setError(newError);
 
-    const rowKey = props.data.profitDetailId
+    let rowKey = props.data.profitDetailId
       ? props.data.profitDetailId
       : `${props.data.badgeNumber}-${props.data.profitYear}${props.data.enrollmentId ? `-${props.data.enrollmentId}` : ""}-${props.node?.id || "unknown"}`;
+    const isTerminations = props.data.suggestedForfeit != null;
+    if (isTerminations) {
+      rowKey = String(props.data.psn);
+    }
 
     props.context?.updateEditedValue?.(rowKey, numericValue, !!newError);
   };

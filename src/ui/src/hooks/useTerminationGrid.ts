@@ -174,7 +174,6 @@ export const useTerminationGrid = ({
     }
   }, [isFetching, pendingSuccessMessage, isPendingBulkMessage, dispatch]);
 
-
   // Need a useEffect to reset the page number when total count changes (new search, not pagination)
   // Don't reset during or immediately after bulk save operations to preserve grid position
   useEffect(() => {
@@ -203,7 +202,7 @@ export const useTerminationGrid = ({
       const initialExpandState: Record<string, boolean> = {};
       termination.response.results.forEach((row) => {
         if (row.yearDetails && row.yearDetails.length > 0) {
-          initialExpandState[row.badgeNumber.toString()] = true;
+          initialExpandState[String(row.psn)] = true;
         }
       });
       setExpandedRows(initialExpandState);
@@ -230,9 +229,11 @@ export const useTerminationGrid = ({
       pageSz: number,
       beginningDate?: string,
       endingDate?: string,
-      archive?: boolean
+      archive?: boolean,
+      excludeZeroAndFullyVested?: boolean,
+      excludeAlreadyForfeited?: boolean
     ) =>
-      `${skip}|${pageSz}|${sortBy}|${isSortDescending}|${profitYear}|${beginningDate ?? ""}|${endingDate ?? ""}|${archive ? "1" : "0"}`,
+      `${skip}|${pageSz}|${sortBy}|${isSortDescending}|${profitYear}|${beginningDate ?? ""}|${endingDate ?? ""}|${archive ? "1" : "0"}|${excludeZeroAndFullyVested ? "1" : "0"}|${excludeAlreadyForfeited ? "1" : "0"}`,
     []
   );
 
@@ -258,7 +259,8 @@ export const useTerminationGrid = ({
           pageSize,
           params.beginningDate,
           params.endingDate,
-          (params as StartAndEndDateRequest & { archive?: boolean }).archive
+          (params as StartAndEndDateRequest & { archive?: boolean }).archive,
+          (params as StartAndEndDateRequest & { excludeZeroAndFullyVested?: boolean }).excludeZeroAndFullyVested
         );
 
         // Allow re-search with same parameters (consistent with all other search pages)
@@ -531,13 +533,16 @@ export const useTerminationGrid = ({
     );
 
     return flattenMasterDetailData(termination.response.results, expandedRowsSet, {
-      getKey: (row) => row.badgeNumber.toString(),
+      getKey: (row) => String(row.psn),
       getDetails: (row) => {
         // For termination, we need to merge parent data with detail data
+        // Extract badgeNumber from PSN (PSN = badgeNumber * 10000 + psnSuffix)
+        const badgeNumber = row.psn;
         return (row.yearDetails || []).map((detail, index) => ({
           ...row,
           ...detail,
-          parentId: row.badgeNumber,
+          badgeNumber, // Add badgeNumber for row key generation and save operations
+          parentId: badgeNumber,
           index
         }));
       },

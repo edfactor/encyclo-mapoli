@@ -99,11 +99,11 @@ export const GetDetailColumns = (
       sortable: false,
       cellClass: (params) => {
         if (!params.data.isDetail) return "";
-        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
+        const rowKey = String(params.data.psn);
         const hasError = params.context?.editedValues?.[rowKey]?.hasError;
         return hasError ? "bg-red-50" : "";
       },
-      editable: ({ node }) => node.data.isDetail && node.data.profitYear === selectedProfitYear,
+      editable: ({ node }) => node.data.isDetail,
       flex: 1,
       cellEditor: SuggestedForfeitEditor,
       cellRenderer: (params: ICellRendererParams) =>
@@ -118,7 +118,7 @@ export const GetDetailColumns = (
       valueFormatter: (params) => numberToCurrency(params.value),
       valueGetter: (params) => {
         if (!params.data.isDetail) return params.data.suggestedForfeit;
-        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
+        const rowKey = String(params.data.psn);
         const editedValue = params.context?.editedValues?.[rowKey]?.value;
         return editedValue ?? params.data.suggestedForfeit ?? 0;
       }
@@ -136,10 +136,10 @@ export const GetDetailColumns = (
       headerComponent: HeaderComponent,
       valueGetter: (params) => {
         if (!params.data.isDetail) return "";
-        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
+        const rowKey = String(params.data.psn);
         const editedValue = params.context?.editedValues?.[rowKey]?.value;
         const currentValue = editedValue ?? params.data.suggestedForfeit ?? 0;
-        return `${currentValue}-${params.context?.loadingRowIds?.has(params.data.badgeNumber)}-${params.node?.isSelected()}`;
+        return `${currentValue}-${params.context?.loadingRowIds?.has(params.data.psn)}-${params.node?.isSelected()}`;
       },
       headerComponentParams: {
         addRowToSelectedRows,

@@ -41,7 +41,7 @@ BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFE
         _reportWriter.WriteLine();
     }
 
-    public void PrintDetails(string r2BadgePsnNp, string? r2EmployeeName, decimal r2PsAmt, decimal r2BenAlloc, decimal r2PsLoan,
+    public void PrintDetails(long r2BadgePsnNp, string? r2EmployeeName, decimal r2PsAmt, decimal r2BenAlloc, decimal r2PsLoan,
         decimal r2PsForf, decimal r2PsDol, decimal r2Vest, DateOnly? wsDoTerm, decimal r2PsHrs,
         decimal wVestPert, int? age, byte? wEnrolled)
     {
@@ -64,7 +64,7 @@ BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFE
 
         string? name = r2EmployeeName?.PadRight(19).Substring(0, 19);
 
-        _reportWriter.WriteLine(r2BadgePsnNp.PadLeft(11) + " " + // fmt
+        _reportWriter.WriteLine(r2BadgePsnNp.ToString().PadLeft(11) + " " + // fmt
                                 name + " " +
                                 FormatWithSingleComma(r2PsAmt).PadLeft(12) + " " +
                                 FormatWithSingleComma(r2BenAlloc).PadLeft(12) + " " +

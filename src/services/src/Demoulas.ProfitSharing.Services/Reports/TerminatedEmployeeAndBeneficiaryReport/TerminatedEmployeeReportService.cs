@@ -74,7 +74,11 @@ public sealed class TerminatedEmployeeReportService
         HashSet<int> ssns = memberSliceUnion.Select(ms => ms.Ssn).ToHashSet();
 
         // COBOL Transaction Year Boundary: Does NOT process transactions after the entered year
-        int transactionYearBoundary = req.EndingDate.Year;
+        // This is the YDATE in Cobol.  in December it is the current year, in January it is the previous year.
+        var yearEnd = await _yearEndService.GetCompletedYearEnd(cancellationToken);
+        // We presume we are here working on the not yet complted year end.   Which is the next year end
+        // after the last completed one.    So we add 1 year to the completed year end.
+        int transactionYearBoundary = yearEnd + 1;
 
         // Load profit detail transactions
         IQueryable<ProfitDetail> profitDetailsRaw = ctx.ProfitDetails
@@ -215,6 +219,10 @@ public sealed class TerminatedEmployeeReportService
             // Calculate age if birthdate available
             int? age = member.Birthday?.Age();
 
+            var hasForfeited = enrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords ||
+                               enrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
+            var suggestedForfeit = hasForfeited ? (decimal?) 0 : Math.Round(member.EndingBalance - vestedBalance, 2, MidpointRounding.AwayFromZero);
+
             // Create year detail record
             TerminatedEmployeeAndBeneficiaryYearDetailDto yearDetail = new()
             {
@@ -230,11 +238,17 @@ public sealed class TerminatedEmployeeReportService
                 IsExecutive = member.IsExecutive,
                 VestedPercent = vestedRatio * 100,
                 Age = age,
-                HasForfeited = enrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords ||
-                               enrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords,
-                SuggestedForfeit = member.ProfitYear == req.ProfitYear ? member.EndingBalance - vestedBalance : null,
+                HasForfeited = hasForfeited,
+                SuggestedForfeit = suggestedForfeit,
                 EnrollmentId = member.EnrollmentId
             };
+
+            // Apply user-requested exclusion filters
+            // Exclude members with 0 balance OR 100% vested (no forfeiture opportunity)
+            if (req.ExcludeZeroAndFullyVested && (member.EndingBalance == 0 || vestedRatio == 1.0m || hasForfeited))
+            {
+                continue;
+            }
 
             yearDetailsList.Add((member.BadgeNumber, member.PsnSuffix, member.FullName, yearDetail));
 
@@ -245,13 +259,11 @@ public sealed class TerminatedEmployeeReportService
             totalBeneficiaryAllocation += member.BeneficiaryAllocation;
         }
 
-        // Group by BadgeNumber, PsnSuffix, Name and create response
         PaginatedResponseDto<TerminatedEmployeeAndBeneficiaryDataResponseDto> grouped = await yearDetailsList
             .GroupBy(x => new { x.BadgeNumber, x.PsnSuffix, x.Name })
             .Select(g => new TerminatedEmployeeAndBeneficiaryDataResponseDto
             {
-                BadgeNumber = g.Key.BadgeNumber,
-                PsnSuffix = g.Key.PsnSuffix,
+                PSN = g.Key.PsnSuffix == 0 ? (long) g.Key.BadgeNumber : (long)g.Key.BadgeNumber * 10000 + g.Key.PsnSuffix,
                 Name = g.Key.Name,
                 YearDetails = g.Select(x => x.YearDetail).OrderByDescending(y => y.ProfitYear).ToList()
             }).AsQueryable().ToPaginationResultsAsync(req, cancellationToken);
@@ -344,7 +356,6 @@ public sealed class TerminatedEmployeeReportService
         IQueryable<TerminatedEmployeeDto> terminatedEmployees = await GetTerminatedEmployees(ctx, request);
         IQueryable<MemberSlice> terminatedWithContributions = GetEmployeesAsMembers(ctx, request, terminatedEmployees, request.EndingDate);
         IQueryable<MemberSlice> beneficiaries = await GetBeneficiaries(ctx, request);
-
         return await CombineEmployeeAndBeneficiarySlices(terminatedWithContributions, beneficiaries, cancellationToken);
     }
 

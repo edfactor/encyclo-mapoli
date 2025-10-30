@@ -6,6 +6,8 @@ public record StartAndEndDateRequest : ProfitYearRequest
     public DateOnly BeginningDate { get; set; }
     public DateOnly EndingDate { get; set; }
     public bool ExcludeZeroBalance { get; set; } = false;
+    public bool ExcludeZeroAndFullyVested { get; set; } = false;
+    
     public static new StartAndEndDateRequest RequestExample()
     {
         return new StartAndEndDateRequest
