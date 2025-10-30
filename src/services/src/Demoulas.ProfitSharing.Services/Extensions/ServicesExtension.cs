@@ -104,6 +104,7 @@ public static class ServicesExtension
 
         _ = builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
         _ = builder.Services.AddScoped<IPayBenReportService, PayBenReportService>();
+        _ = builder.Services.AddScoped<IDivorceReportService, DivorceReportService>();
 
         _ = builder.Services.AddScoped<IReportRunnerService, ReportRunnerService>();
         _ = builder.Services.AddScoped<IStateTaxLookupService, StateTaxLookupService>();

@@ -28,7 +28,8 @@ const ForfeituresAdjustmentContent = memo(() => {
     closeAddForfeitureModal,
     transactionPagination,
     profitYear,
-    isReadOnly
+    isReadOnly,
+    memberDetailsRefreshTrigger
   } = useForfeituresAdjustment();
 
   return (
@@ -58,6 +59,7 @@ const ForfeituresAdjustmentContent = memo(() => {
           memberType={1}
           id={employeeData.demographicId}
           profitYear={profitYear}
+          refreshTrigger={memberDetailsRefreshTrigger}
         />
       )}
 

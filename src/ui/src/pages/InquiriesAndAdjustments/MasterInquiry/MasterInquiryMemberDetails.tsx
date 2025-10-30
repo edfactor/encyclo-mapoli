@@ -110,7 +110,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
           duplicateBadgeLink.push({
             label: "Duplicate SSN with",
             value: viewBadgeLinkRenderer(badge),
-            labelColor: "error"
+            labelColor: "error" as const
           });
         }
       }
