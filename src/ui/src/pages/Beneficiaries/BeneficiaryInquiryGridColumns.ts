@@ -1,17 +1,16 @@
-import { ColDef } from "ag-grid-community";
+import { ColDef, ICellRendererParams } from "ag-grid-community";
 import {
   createCityColumn,
   createCurrencyColumn,
   createDateColumn,
   createNameColumn,
-  createPhoneColumn,
   createPSNColumn,
   createSSNColumn,
   createStateColumn,
   createZipColumn
 } from "../../utils/gridColumnFactory";
 
-export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
+export const BeneficiaryInquiryGridColumns = (percentageFieldRenderer: (arg0: any, arg1: any) => any): ColDef[] => {
   return [
     createPSNColumn({
       headerName: "Psn",
@@ -74,30 +73,16 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
         return `${params.data.lastName}, ${params.data.firstName}`;
       }
     }),
-    createPhoneColumn({
-      headerName: "Phone Number",
-      field: "phoneNumber"
-    }),
-    createPhoneColumn({
-      headerName: "Mobile Number",
-      field: "mobileNumber"
-    }),
     {
-      headerName: "Email Address",
-      field: "emailAddress",
-      colId: "emailAddress",
-      minWidth: 130,
-      headerClass: "left-align",
-      cellClass: "left-align",
+      headerName: "Percentage",
+      field: "percentage",
+      colId: "percentage",
+      minWidth: 120,
+      headerClass: "center-align",
+      cellClass: "center-align",
+      sortable: false,
       resizable: true,
-      valueFormatter: (params) => {
-        return `${params.data.emailAddress ?? ""}`;
-      }
-    },
-    createDateColumn({
-      headerName: "Created Date",
-      field: "createdDate",
-      minWidth: 170
-    })
+      cellRenderer: (params: ICellRendererParams) => percentageFieldRenderer(params.data.percent, params.data.id)
+    }
   ];
 };

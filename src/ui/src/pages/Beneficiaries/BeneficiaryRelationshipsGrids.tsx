@@ -1,8 +1,7 @@
 import { BeneficiaryDetailAPIRequest } from "@/types";
 import { Delete, Edit } from "@mui/icons-material";
 import { Alert, Button, TextField, Typography } from "@mui/material";
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { FocusEvent, JSX, useCallback, useEffect, useMemo, useState } from "react";
+import { JSX, useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import {
   useLazyDeleteBeneficiaryQuery,
@@ -192,36 +191,8 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
   const beneficiaryOfColumnDefs = useMemo(() => GetBeneficiaryOfGridColumns(), []);
 
   const columnDefs = useMemo(() => {
-    const columns = BeneficiaryInquiryGridColumns();
-    columns.splice(6, 0, {
-      headerName: "Percentage",
-      field: "percentage",
-      colId: "percentage",
-      minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      sortable: false,
-      resizable: true,
-      cellRenderer: (params: ICellRendererParams) => percentageFieldRenderer(params.data.percent, params.data.id)
-    });
-    return [
-      ...columns,
-      {
-        headerName: "Actions",
-        field: "actions",
-        lockPinned: true,
-        pinned: "right" as const,
-        resizable: false,
-        sortable: false,
-        cellStyle: { backgroundColor: "#E8E8E8" },
-        minWidth: 200,
-        headerClass: "center-align",
-        cellClass: "center-align",
-        cellRenderer: (params: ICellRendererParams) => {
-          return actionButtons(params.data);
-        }
-      } satisfies ColDef
-    ];
+    const columns = BeneficiaryInquiryGridColumns(percentageFieldRenderer);
+    return [...columns];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionButtons]);
 
