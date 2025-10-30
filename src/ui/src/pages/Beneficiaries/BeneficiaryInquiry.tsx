@@ -49,11 +49,7 @@ const BeneficiaryInquiry = () => {
   };
 
   useEffect(() => {
-    console.log(
-      "Effect triggered: initialSearch, pageSize, pageNumber, sortParams, beneficiarySearchFilterRequest changed"
-    );
     if (beneficiarySearchFilterRequest) {
-      console.log("Performing search with request:", beneficiarySearchFilterRequest);
       const updatedRequest = {
         ...beneficiarySearchFilterRequest,
         isSortDescending: sortParams.isSortDescending,
@@ -62,11 +58,9 @@ const BeneficiaryInquiry = () => {
         take: pageSize,
         memberType: memberType ?? beneficiarySearchFilterRequest.memberType
       };
-      console.log("Updated request for search:", updatedRequest);
       triggerSearch(updatedRequest)
         .unwrap()
         .then((res) => {
-          console.log("Search results:", res);
           onSearch(res);
         });
     }
@@ -109,7 +103,6 @@ const BeneficiaryInquiry = () => {
                   setInitateSearch((param) => param + 1);
                 }}
                 onMemberTypeChange={(type) => {
-                  console.log("Member type changed to:", type);
                   setMemberType(type);
                 }}
                 onReset={handleReset}

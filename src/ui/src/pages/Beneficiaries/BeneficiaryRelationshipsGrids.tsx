@@ -179,8 +179,7 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
         <TextField
           type="number"
           defaultValue={percentage}
-          onBlur={(e) => validatePercentageOfBeneficiaries(e, id)}
-          onClick={() => console.log(id)}></TextField>
+          onBlur={(e) => validatePercentageOfBeneficiaries(e, id)}></TextField>
       </>
     );
   };
@@ -194,8 +193,6 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
   }, [actionButtons]);
 
   const onSearch = useCallback(() => {
-    console.log("Beneficiary Inquiry Grid - onSearch called");
-    console.log("Selected Member:", selectedMember);
     const request = createBeneficiaryInquiryRequest(
       pageNumber * pageSize,
       sortParams.sortBy,
@@ -209,7 +206,6 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
     triggerSearch(request, false)
       .unwrap()
       .then((res) => {
-        console.log("Beneficiary Inquiry Search Result:", res);
         setBeneficiaryList(res.beneficiaries);
         setBeneficiaryOfList(res.beneficiaryOf);
       });

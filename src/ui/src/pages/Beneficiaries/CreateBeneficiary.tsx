@@ -82,8 +82,6 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
   const [triggerCreateBeneficiaryContact] = useLazyCreateBeneficiaryContactQuery();
   const [triggerUpdateBeneficiary] = useLazyUpdateBeneficiaryQuery();
 
-  console.log("selectedBeneficiary", selectedBeneficiary);
-
   useEffect(() => {
     if (token) {
       triggerGetBeneficiaryKind({})
@@ -159,11 +157,9 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
       street3: "",
       street4: ""
     };
-    console.log(request);
     triggerCreateBeneficiaryContact(request)
       .unwrap()
       .then((res: CreateBeneficiaryContactResponse) => {
-        console.log(res);
         saveBeneficiary(res.id, data);
       })
       .catch((err) => {
@@ -197,7 +193,6 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
     triggerUpdateBeneficiary(request)
       .unwrap()
       .then((_res: UpdateBeneficiaryResponse) => {
-        console.log("update successfully");
         onSaveSuccess();
       });
   };
@@ -224,7 +219,6 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
     triggerAdd(request)
       .unwrap()
       .then((_value) => {
-        console.log("saved successfully");
         onSaveSuccess();
       })
       .catch((err) => {

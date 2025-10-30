@@ -133,13 +133,11 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
   );
 
   const onSubmit = (data: BeneficiarySearchForm) => {
-    console.log("Submitted data:", data);
     const { badgeNumber, name, ssn, memberType } = data;
     let badge: number | undefined = undefined;
     let psn: number | undefined = undefined;
 
     if (badgeNumber) {
-      console.log("Processing badge number:", badgeNumber);
       const badgeStr = badgeNumber.toString();
       if (badgeStr.length <= MAX_EMPLOYEE_BADGE_LENGTH) {
         // Badge only (7 digits or less)
@@ -148,12 +146,10 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
         // Badge + PSN (more than 7 digits)
         badge = parseInt(badgeStr.slice(0, MAX_EMPLOYEE_BADGE_LENGTH - 1));
         psn = parseInt(badgeStr.slice(MAX_EMPLOYEE_BADGE_LENGTH - 1));
-        console.log(`Parsed badge: ${badge}, PSN: ${psn}`);
       }
     }
 
     if (isValid) {
-      console.log("Form is valid, proceeding with search.");
       const beneficiarySearchFilterRequest: BeneficiarySearchAPIRequest = {
         badgeNumber: badge,
         psnSuffix: psn,
@@ -166,8 +162,6 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
         isSortDescending: true
       };
       onSearch(beneficiarySearchFilterRequest);
-    } else {
-      console.log("Form is invalid, cannot submit.");
     }
   };
   const validateAndSubmit = handleSubmit(onSubmit);

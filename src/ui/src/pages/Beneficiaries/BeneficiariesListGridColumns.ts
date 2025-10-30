@@ -10,20 +10,6 @@ import {
   createZipColumn
 } from "../../utils/gridColumnFactory";
 
-/*
-
-badgeNumber: number;
-  psnSuffix: number;
-  name?: string | null;
-  ssn?: string | null;
-  street?: string | null;
-  city?: string | null;
-  state?: string | null;
-  zip?: string | null;
-  age?: number | null;
-
-  */
-
 export const GetBeneficiariesListGridColumns = (
   percentageFieldRenderer: (percentage: number, id: number) => React.JSX.Element
 ): ColDef[] => {
