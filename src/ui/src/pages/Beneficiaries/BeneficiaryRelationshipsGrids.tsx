@@ -1,7 +1,7 @@
 import { BeneficiaryDetailAPIRequest } from "@/types";
 import { Delete, Edit } from "@mui/icons-material";
 import { Alert, Button, TextField, Typography } from "@mui/material";
-import { JSX, useCallback, useEffect, useMemo, useState } from "react";
+import { FocusEvent, JSX, useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import {
   useLazyDeleteBeneficiaryQuery,
@@ -150,10 +150,7 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
     );
   };
 
-  const validatePercentageOfBeneficiaries = (
-    e: FocusEvent<HTMLInputElement | HTMLTextAreaElement, Element>,
-    id: number
-  ) => {
+  const validatePercentageOfBeneficiaries = (e: FocusEvent<HTMLInputElement | HTMLTextAreaElement>, id: number) => {
     let sum: number = 0;
     const currentValue = e.target.value ? parseInt(e.target.value) : 0;
     beneficiaryList?.results.forEach((value) => {
