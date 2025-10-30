@@ -25,8 +25,12 @@ export interface BeneficiaryDto {
   // Contact information
   ssn: string;
   dateOfBirth: Date;
-  address?: AddressDto;
   contactInfo?: ContactInfoDto;
+
+  street?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
   createdDate: Date;
   // Contact Info fields
   fullName?: string;

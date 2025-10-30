@@ -1,9 +1,9 @@
+import { BeneficiaryDetail, BeneficiaryDto } from "@/types";
 import { CloseSharp } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
-import { BeneficiaryDto } from "@/types";
 import CreateBeneficiary from "./CreateBeneficiary";
 
 interface CreateBeneficiaryDialogProps {
@@ -11,6 +11,7 @@ interface CreateBeneficiaryDialogProps {
   onClose: () => void;
   title: string;
   selectedBeneficiary?: BeneficiaryDto;
+  selectedMember: BeneficiaryDetail;
   badgeNumber: number;
   psnSuffix: number;
   onSaveSuccess: () => void;
@@ -21,12 +22,15 @@ const CreateBeneficiaryDialog: React.FC<CreateBeneficiaryDialogProps> = ({
   onClose,
   title,
   selectedBeneficiary,
+  selectedMember,
   badgeNumber,
   psnSuffix,
   onSaveSuccess
 }) => {
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog
+      open={open}
+      onClose={onClose}>
       <DialogTitle>{title}</DialogTitle>
       <IconButton
         aria-label="close"
@@ -42,6 +46,7 @@ const CreateBeneficiaryDialog: React.FC<CreateBeneficiaryDialogProps> = ({
       <DialogContent>
         <CreateBeneficiary
           selectedBeneficiary={selectedBeneficiary}
+          selectedMember={selectedMember}
           badgeNumber={badgeNumber}
           psnSuffix={psnSuffix}
           onSaveSuccess={onSaveSuccess}

@@ -38,6 +38,7 @@ const IndividualBeneficiaryView: React.FC<IndividualBeneficiaryViewProps> = ({ s
         onClose={handleClose}
         title={beneficiaryDialogTitle ?? ""}
         selectedBeneficiary={selectedBeneficiary}
+        selectedMember={selectedMember}
         badgeNumber={selectedMember?.badgeNumber ?? 0}
         psnSuffix={selectedMember?.psnSuffix ?? 0}
         onSaveSuccess={onBeneficiarySaveSuccess}

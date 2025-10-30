@@ -27,7 +27,7 @@ export const GetBeneficiaryOfGridColumns = (): ColDef[] => {
     createSSNColumn({}),
     createDateColumn({ headerName: "Date of Birth", field: "dateOfBirth" }),
     {
-      headerName: "Address",
+      headerName: "Street",
       field: "street",
       colId: "street",
       flex: 1,
