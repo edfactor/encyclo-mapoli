@@ -18,7 +18,6 @@ public sealed class AdhocReportsGroup : GroupBase
         {
             ep.Description(x => x
                 .ProducesProblemFE<ProblemDetails>()
-                .Accepts<object>("application/json")
                 .Produces<object>(StatusCodes.Status200OK)
                 .Produces<object>(StatusCodes.Status400BadRequest)
                 .Produces<object>(StatusCodes.Status401Unauthorized)

@@ -7,6 +7,8 @@ using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
@@ -15,7 +17,7 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
 /// Endpoint for generating account history reports showing member account activity by profit year.
 /// Allows users to set start and end dates for export and condense data into one line per plan year.
 /// </summary>
-public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<AccountHistoryReportRequest, ReportResponseBase<AccountHistoryReportResponse>>
+public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<AccountHistoryReportRequest, Results<Ok<ReportResponseBase<AccountHistoryReportResponse>>, ProblemHttpResult>>
 {
     private readonly IAccountHistoryReportService _accountHistoryReportService;
     private readonly ILogger<AccountHistoryReportEndpoint> _logger;
@@ -85,10 +87,13 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
                     }
                 }
             };
+            s.Responses[200] = "Account history report generated successfully";
+            s.Responses[400] = "Bad Request. Invalid badge number or date range.";
+            s.Responses[500] = "Internal Server Error.";
         });
     }
 
-    public override async Task<ReportResponseBase<AccountHistoryReportResponse>> ExecuteAsync(AccountHistoryReportRequest req, CancellationToken ct)
+    public override async Task<Results<Ok<ReportResponseBase<AccountHistoryReportResponse>>, ProblemHttpResult>> ExecuteAsync(AccountHistoryReportRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 
@@ -111,7 +116,7 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
                 };
 
                 this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
-                return emptyResult;
+                return TypedResults.Ok(emptyResult);
             }
 
             // Build the StartAndEndDateRequest from the AccountHistoryReportRequest
@@ -146,7 +151,7 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
             if (result != null)
             {
                 this.RecordResponseMetrics(HttpContext, _logger, result);
-                return result;
+                return TypedResults.Ok(result);
             }
 
             var emptyReportResult = new ReportResponseBase<AccountHistoryReportResponse>
@@ -158,7 +163,7 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
             };
 
             this.RecordResponseMetrics(HttpContext, _logger, emptyReportResult);
-            return emptyReportResult;
+            return TypedResults.Ok(emptyReportResult);
         }
         catch (Exception ex)
         {
