@@ -261,14 +261,7 @@ export const useTerminationGrid = ({
           (params as StartAndEndDateRequest & { archive?: boolean }).archive
         );
 
-        // Prevent duplicate requests
-        if (lastRequestKeyRef.current === key) {
-          if (shouldArchive) {
-            onArchiveHandled?.();
-          }
-          return;
-        }
-
+        // Allow re-search with same parameters (consistent with all other search pages)
         lastRequestKeyRef.current = key;
         await triggerSearch(params, false);
 

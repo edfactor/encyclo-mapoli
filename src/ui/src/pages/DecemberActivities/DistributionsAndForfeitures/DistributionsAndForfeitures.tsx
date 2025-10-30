@@ -3,8 +3,8 @@ import { useState } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
 import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
 import { CAPTIONS } from "../../../constants";
-import DistributionsAndForfeituresGrid from "./DistributionAndForfeituresGrid";
-import DistributionsAndForfeituresSearchFilter from "./DistributionAndForfeituresSearchFilter";
+import DistributionsAndForfeituresGrid from "./DistributionsAndForfeituresGrid";
+import DistributionsAndForfeituresSearchFilter from "./DistributionsAndForfeituresSearchFilter";
 
 const DistributionsAndForfeitures = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);

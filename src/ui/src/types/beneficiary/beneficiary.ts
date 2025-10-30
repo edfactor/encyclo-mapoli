@@ -25,8 +25,12 @@ export interface BeneficiaryDto {
   // Contact information
   ssn: string;
   dateOfBirth: Date;
-  address?: AddressDto;
   contactInfo?: ContactInfoDto;
+
+  street?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
   createdDate: Date;
   // Contact Info fields
   fullName?: string;
@@ -45,38 +49,42 @@ export interface BeneficiaryDto {
   currentBalance?: number;
 }
 
-export interface BeneficiaryResponse {
+export interface BeneficiariesGetAPIResponse {
   beneficiaries: Paged<BeneficiaryDto>;
   beneficiaryOf: Paged<BeneficiaryDto>;
 }
 
-export interface BeneficiarySearchFilterRequest extends SortedPaginationRequestDto {
+export interface BeneficiarySearchForm {
   badgeNumber?: number;
   psn?: number;
   name?: string;
   ssn?: string;
-  memberType: string;
+  memberType: 0 | 1 | 2; // 0=all, 1=employees, 2=beneficiaries
 }
 
-export interface BeneficiarySearchFilterResponse {
+export interface BeneficiaryDetailAPIRequest extends SortedPaginationRequestDto {
   badgeNumber: number;
-  psn: number;
-  name?: string;
-  ssn?: string;
-  street?: string;
-  city?: string;
-  state?: string;
-  zip?: string;
-  age?: string;
+  psnSuffix: number;
 }
 
-export interface BeneficiaryRequestDto extends SortedPaginationRequestDto {
+export interface BeneficiaryDetail {
+  badgeNumber: number;
+  psnSuffix: number;
+  name?: string | null;
+  ssn?: string | null;
+  street?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zip?: string | null;
+  age?: number | null;
+}
+
+export interface BeneficiarySearchAPIRequest extends SortedPaginationRequestDto {
   badgeNumber?: number;
   psnSuffix?: number;
-}
-
-export interface BeneficiaryResponseDto {
-  beneficiaryList?: Paged<BeneficiaryDto>;
+  name?: string;
+  ssn?: string;
+  memberType: number;
 }
 
 export interface CreateBeneficiaryRequest {

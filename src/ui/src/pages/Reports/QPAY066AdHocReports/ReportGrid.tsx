@@ -30,7 +30,7 @@ interface ReportGridProps {
 const dummyData = [
   {
     badgeNumber: 47425,
-    name: "Wilkins, A...",
+    employeeName: "Wilkins, A...",
     beginningBalance: 4781.67,
     beneficiaryAllocation: 0.0,
     distributionAmount: 0.0,
@@ -45,7 +45,7 @@ const dummyData = [
   },
   {
     badgeNumber: 82424,
-    name: "Potts, Aria",
+    employeeName: "Potts, Aria",
     beginningBalance: 2221.96,
     beneficiaryAllocation: 0.0,
     distributionAmount: 500.0,
@@ -60,7 +60,7 @@ const dummyData = [
   },
   {
     badgeNumber: 85744,
-    name: "Lewis, Ami...",
+    employeeName: "Lewis, Ami...",
     beginningBalance: 1801.33,
     beneficiaryAllocation: 0.0,
     distributionAmount: 0.0,
@@ -75,7 +75,7 @@ const dummyData = [
   },
   {
     badgeNumber: 94861,
-    name: "Curtis, John",
+    employeeName: "Curtis, John",
     beginningBalance: 2922.24,
     beneficiaryAllocation: 0.0,
     distributionAmount: 0.0,

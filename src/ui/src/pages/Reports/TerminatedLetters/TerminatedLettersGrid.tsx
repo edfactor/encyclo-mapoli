@@ -95,8 +95,8 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
               variant="h6"
               component="h2"
               sx={{ marginLeft: "20px", marginRight: "10px" }}>
-              EMPLOYEES NEEDING INSTRUCTIONS TO WITHDRAW VESTED SAVINGS (
-              {formatNumberWithComma(reportData.response.total)} Records)
+              EMPLOYEES NEEDING INSTRUCTIONS TO WITHDRAW VESTED SAVINGS ({formatNumberWithComma(reportData.response.total)}{" "}
+              Records)
             </Typography>
             {renderPrintButton()}
           </div>
@@ -108,14 +108,8 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
               rowData: reportData.response.results,
               columnDefs: columnDefs,
               suppressMultiSort: true,
-              rowSelection: {
-                mode: "multiRow",
-                checkboxes: false,
-                headerCheckbox: false,
-                enableClickSelection: false
-              },
-              onSelectionChanged: handleSelectionChanged,
-              suppressRowClickSelection: true
+              rowSelection: "multiple",
+              onSelectionChanged: handleSelectionChanged
             }}
           />
         </>

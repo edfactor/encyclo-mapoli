@@ -1,5 +1,5 @@
 import { FormLabel, Grid, MenuItem, Select, TextField } from "@mui/material";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { yupResolver } from "@hookform/resolvers/yup";
 import Checkbox from "@mui/material/Checkbox";
@@ -7,12 +7,16 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { Controller, Resolver, useForm } from "react-hook-form";
+import { useSelector } from "react-redux";
 import {
   useLazyCreateBeneficiariesQuery,
   useLazyCreateBeneficiaryContactQuery,
+  useLazyGetBeneficiaryKindQuery,
   useLazyUpdateBeneficiaryQuery
 } from "reduxstore/api/BeneficiariesApi";
+import { RootState } from "reduxstore/store";
 import {
+  BeneficiaryDetail,
   BeneficiaryDto,
   BeneficiaryKindDto,
   CreateBeneficiaryContactRequest,
@@ -23,17 +27,18 @@ import {
 } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import { tryddmmyyyyToDate } from "utils/dateUtils";
+import { ssnValidator } from "utils/FormValidators";
 import * as yup from "yup";
 
 const schema = yup.object().shape({
-  beneficiarySsn: yup.number().required(),
+  beneficiarySsn: ssnValidator.required("SSN is required"),
   relationship: yup.string().required(),
   //percentage: yup.number().required(),
   dateOfBirth: yup.date().required(),
-  street: yup.string().required(),
-  city: yup.string().required(),
-  state: yup.string().required(),
-  postalCode: yup.string().required(),
+  street: yup.string().optional(),
+  city: yup.string().optional(),
+  state: yup.string().optional(),
+  postalCode: yup.string().optional(),
   firstName: yup.string().required(),
   lastName: yup.string().required(),
   addressSameAsBeneficiary: yup.boolean().notRequired(),
@@ -41,7 +46,7 @@ const schema = yup.object().shape({
 });
 
 export interface cb {
-  beneficiarySsn: number;
+  beneficiarySsn: string | null | undefined;
   relationship: string;
   //percentage: number;
   dateOfBirth?: Date;
@@ -54,25 +59,41 @@ export interface cb {
   addressSameAsBeneficiary: boolean;
   kindId: string;
 }
-type Props = {
+type CreateBeneficiaryProps = {
   badgeNumber: number;
   psnSuffix: number;
-  beneficiaryKind: BeneficiaryKindDto[];
   onSaveSuccess: () => void;
   selectedBeneficiary?: BeneficiaryDto;
+  selectedMember: BeneficiaryDetail;
 };
 
-const CreateBeneficiary: React.FC<Props> = ({
+const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
   badgeNumber,
   onSaveSuccess,
-  beneficiaryKind,
   psnSuffix,
-  selectedBeneficiary
+  selectedBeneficiary,
+  selectedMember
 }) => {
-  const [triggerAdd, { isFetching }] = useLazyCreateBeneficiariesQuery();
+  const { token } = useSelector((state: RootState) => state.security);
+  const [triggerGetBeneficiaryKind] = useLazyGetBeneficiaryKindQuery();
+  const [beneficiaryKind, setBeneficiaryKind] = useState<BeneficiaryKindDto[]>([]);
 
+  const [triggerAdd, { isFetching }] = useLazyCreateBeneficiariesQuery();
   const [triggerCreateBeneficiaryContact] = useLazyCreateBeneficiaryContactQuery();
   const [triggerUpdateBeneficiary] = useLazyUpdateBeneficiaryQuery();
+
+  useEffect(() => {
+    if (token) {
+      triggerGetBeneficiaryKind({})
+        .unwrap()
+        .then((data) => {
+          setBeneficiaryKind(data.beneficiaryKindList ?? []);
+        })
+        .catch((reason) => {
+          console.error(reason);
+        });
+    }
+  }, [beneficiaryKind, token, triggerGetBeneficiaryKind]);
 
   const {
     control,
@@ -81,6 +102,7 @@ const CreateBeneficiary: React.FC<Props> = ({
     reset
   } = useForm<cb>({
     resolver: yupResolver(schema) as Resolver<cb>,
+    mode: "onBlur",
     defaultValues: selectedBeneficiary
       ? {
           beneficiarySsn: undefined,
@@ -97,7 +119,7 @@ const CreateBeneficiary: React.FC<Props> = ({
           kindId: selectedBeneficiary.kindId + ""
         }
       : {
-          beneficiarySsn: 0,
+          beneficiarySsn: "",
           relationship: "",
           //percentage: 0,
           dateOfBirth: undefined,
@@ -118,8 +140,8 @@ const CreateBeneficiary: React.FC<Props> = ({
 
   const createBeneficiary = (data: cb) => {
     const request: CreateBeneficiaryContactRequest = {
-      contactSsn: data.beneficiarySsn,
-      city: data.city,
+      contactSsn: Number(data.beneficiarySsn),
+      city: data.city || selectedMember?.city || "",
       countryIso: "",
       dateOfBirth: data.dateOfBirth ? data.dateOfBirth.toISOString().split("T")[0] : "",
       emailAddress: "",
@@ -128,9 +150,9 @@ const CreateBeneficiary: React.FC<Props> = ({
       middleName: "",
       mobileNumber: "",
       phoneNumber: "",
-      postalCode: data.postalCode,
-      state: data.state,
-      street: data.street,
+      postalCode: data.postalCode || selectedMember?.zip || "",
+      state: data.state || selectedMember?.state || "",
+      street: data.street || selectedMember?.street || "",
       street2: "",
       street3: "",
       street4: ""
@@ -138,7 +160,6 @@ const CreateBeneficiary: React.FC<Props> = ({
     triggerCreateBeneficiaryContact(request)
       .unwrap()
       .then((res: CreateBeneficiaryContactResponse) => {
-        console.log(res);
         saveBeneficiary(res.id, data);
       })
       .catch((err) => {
@@ -148,7 +169,7 @@ const CreateBeneficiary: React.FC<Props> = ({
 
   const updateBeneficiary = (data: cb) => {
     const request: UpdateBeneficiaryRequest = {
-      contactSsn: data.beneficiarySsn,
+      contactSsn: Number(data.beneficiarySsn),
       city: data.city,
       countryIso: null,
       dateOfBirth: data.dateOfBirth ? data.dateOfBirth.toISOString().split("T")[0] : "",
@@ -172,7 +193,6 @@ const CreateBeneficiary: React.FC<Props> = ({
     triggerUpdateBeneficiary(request)
       .unwrap()
       .then((_res: UpdateBeneficiaryResponse) => {
-        console.log("update successfully");
         onSaveSuccess();
       });
   };
@@ -199,7 +219,6 @@ const CreateBeneficiary: React.FC<Props> = ({
     triggerAdd(request)
       .unwrap()
       .then((_value) => {
-        console.log("saved successfully");
         onSaveSuccess();
       })
       .catch((err) => {
@@ -267,13 +286,23 @@ const CreateBeneficiary: React.FC<Props> = ({
                 <TextField
                   {...field}
                   fullWidth
+                  type="text"
                   size="small"
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.beneficiarySsn}
+                  helperText={errors.beneficiarySsn?.message}
                   onChange={(e) => {
-                    const parsedValue = e.target.value === "" ? null : Number(e.target.value);
-                    field.onChange(parsedValue);
+                    const value = e.target.value;
+                    // Only allow numeric input
+                    if (value !== "" && !/^\d*$/.test(value)) {
+                      return;
+                    }
+                    // Prevent input beyond 9 characters
+                    if (value.length > 9) {
+                      return;
+                    }
+                    field.onChange(value === "" ? null : value);
                   }}
                 />
               )}
@@ -316,7 +345,7 @@ const CreateBeneficiary: React.FC<Props> = ({
                   />
                 )}
               />
-              Address the same as beneficiary ?
+              Address the same as employee ?
             </FormLabel>
           </Grid>
           <Grid size={{ md: 5, xs: 12 }}>
