@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { createPointsColumn } from "./gridColumnFactory";
 
+interface ValueFormatterParams {
+  value: string | number | null | undefined;
+}
+
 describe("gridColumnFactory - createPointsColumn", () => {
   it("should create a points column with default settings", () => {
     const column = createPointsColumn();
@@ -15,7 +19,7 @@ describe("gridColumnFactory - createPointsColumn", () => {
 
   it("should format numeric values with comma formatting", () => {
     const column = createPointsColumn();
-    const valueFormatter = column.valueFormatter as any;
+    const valueFormatter = column.valueFormatter as (params: ValueFormatterParams) => string;
 
     expect(valueFormatter({ value: 1000 })).toBe("1,000");
     expect(valueFormatter({ value: 1000000 })).toBe("1,000,000");
@@ -24,55 +28,55 @@ describe("gridColumnFactory - createPointsColumn", () => {
 
   it("should handle masked points value 'X' (uppercase)", () => {
     const column = createPointsColumn();
-    const valueFormatter = column.valueFormatter as any;
+    const valueFormatter = column.valueFormatter as (params: ValueFormatterParams) => string;
 
     expect(valueFormatter({ value: "X" })).toBe("X");
   });
 
   it("should handle masked points value 'x' (lowercase) and normalize to uppercase", () => {
     const column = createPointsColumn();
-    const valueFormatter = column.valueFormatter as any;
+    const valueFormatter = column.valueFormatter as (params: ValueFormatterParams) => string;
 
     expect(valueFormatter({ value: "x" })).toBe("X");
   });
 
   it("should handle null values", () => {
     const column = createPointsColumn();
-    const valueFormatter = column.valueFormatter as any;
+    const valueFormatter = column.valueFormatter as (params: ValueFormatterParams) => string;
 
     expect(valueFormatter({ value: null })).toBe("");
   });
 
   it("should handle undefined values", () => {
     const column = createPointsColumn();
-    const valueFormatter = column.valueFormatter as any;
+    const valueFormatter = column.valueFormatter as (params: ValueFormatterParams) => string;
 
     expect(valueFormatter({ value: undefined })).toBe("");
   });
 
   it("should handle zero values", () => {
     const column = createPointsColumn();
-    const valueFormatter = column.valueFormatter as any;
+    const valueFormatter = column.valueFormatter as (params: ValueFormatterParams) => string;
 
     expect(valueFormatter({ value: 0 })).toBe("0");
   });
 
   it("should handle decimal values", () => {
     const column = createPointsColumn();
-    const valueFormatter = column.valueFormatter as any;
+    const valueFormatter = column.valueFormatter as (params: ValueFormatterParams) => string;
 
     expect(valueFormatter({ value: 1234.56 })).toBe("1,234.56");
   });
 
   it("should handle NaN values gracefully", () => {
     const column = createPointsColumn();
-    const valueFormatter = column.valueFormatter as any;
+    const valueFormatter = column.valueFormatter as (params: ValueFormatterParams) => string;
 
     expect(valueFormatter({ value: NaN })).toBe("");
   });
 
   it("should allow custom valueFormatter to override default behavior", () => {
-    const customFormatter = (params: any) => `Custom: ${params.value}`;
+    const customFormatter = (params: ValueFormatterParams): string => `Custom: ${params.value}`;
     const column = createPointsColumn({ valueFormatter: customFormatter });
 
     expect(column.valueFormatter).toBe(customFormatter);
@@ -80,7 +84,7 @@ describe("gridColumnFactory - createPointsColumn", () => {
 
   it("should allow disabling comma formatting", () => {
     const column = createPointsColumn({ includeCommaFormatting: false });
-    const valueFormatter = column.valueFormatter as any;
+    const valueFormatter = column.valueFormatter as (params: ValueFormatterParams) => string | undefined;
 
     // When includeCommaFormatting is false, valueFormatter should be undefined
     // and ag-grid will use default formatting
@@ -124,7 +128,7 @@ describe("gridColumnFactory - createPointsColumn", () => {
 
   it("should handle mixed masked and numeric values in sequence", () => {
     const column = createPointsColumn();
-    const valueFormatter = column.valueFormatter as any;
+    const valueFormatter = column.valueFormatter as (params: ValueFormatterParams) => string;
 
     const testCases = [
       { input: "X", expected: "X" },
@@ -141,7 +145,7 @@ describe("gridColumnFactory - createPointsColumn", () => {
 
   it("should handle string numeric values", () => {
     const column = createPointsColumn();
-    const valueFormatter = column.valueFormatter as any;
+    const valueFormatter = column.valueFormatter as (params: ValueFormatterParams) => string;
 
     // String numeric values should be returned as-is (not formatted)
     expect(valueFormatter({ value: "1000" })).toBe("1000");
