@@ -830,87 +830,65 @@ pipelines:
             default: ""
       - step:
           name: Create Git Tag
-          runs-on:
-            - windows
-            - self.hosted
           script:
             - |
-              if (-not $env:TagName) {
-                Write-Error "TagName is required"
+              if [ -z "$TagName" ]; then
+                echo "Error: TagName is required"
                 exit 1
-              }
-              if ($env:TagName -notmatch '^[a-zA-Z0-9._/-]+$') {
-                Write-Error "Invalid tag name format. Use only alphanumeric characters, dots, underscores, slashes, or hyphens."
+              fi
+              if ! echo "$TagName" | grep -qE '^[a-zA-Z0-9._/-]+$'; then
+                echo "Error: Invalid tag name format. Use only alphanumeric characters, dots, underscores, slashes, or hyphens."
                 exit 1
-              }
-              Write-Host "Creating Git tag: $env:TagName" -ForegroundColor Cyan
-              Write-Host "Message: $env:TagMessage" -ForegroundColor Cyan
-              $targetCommit = if ($env:CommitHash) { $env:CommitHash } else { "HEAD" }
-              Write-Host "Target commit: $targetCommit" -ForegroundColor Cyan
+              fi
+              echo "Creating Git tag: $TagName"
+              echo "Message: $TagMessage"
+              TARGET_COMMIT="${CommitHash:-HEAD}"
+              echo "Target commit: $TARGET_COMMIT"
               git config user.email "bitbucket-pipeline@demoulas.com"
               git config user.name "Bitbucket Pipeline"
-              Write-Host "Configuring Git remote for SSH..." -ForegroundColor Yellow
-              if ($env:BITBUCKET_GIT_SSH_ORIGIN) {
-                Write-Host "Using SSH origin: $env:BITBUCKET_GIT_SSH_ORIGIN" -ForegroundColor Green
-                git remote set-url origin $env:BITBUCKET_GIT_SSH_ORIGIN
-              } else {
-                Write-Warning "BITBUCKET_GIT_SSH_ORIGIN not available, using current remote"
-              }
-              Write-Host "Git remote configuration:" -ForegroundColor Yellow
+              echo "Git remote configuration:"
               git remote -v
-              Write-Host "Current branch:" -ForegroundColor Yellow
+              echo "Current branch:"
               git branch --show-current
-              $existingTag = git tag -l $env:TagName
-              if ($existingTag) {
-                Write-Error "Tag '$env:TagName' already exists locally. Delete it first or use a different name."
+              if git tag -l | grep -q "^${TagName}$"; then
+                echo "Error: Tag '$TagName' already exists locally. Delete it first or use a different name."
                 exit 1
-              }
-              Write-Host "Checking if tag exists on remote..." -ForegroundColor Yellow
-              try {
-                $ErrorActionPreference = 'Stop'
-                $remoteTags = git ls-remote --tags origin 2>&1 | Select-String $env:TagName
-                if ($remoteTags) {
-                  Write-Error "Tag '$env:TagName' already exists on remote. Delete it first or use a different name."
-                  exit 1
-                }
-                Write-Host "Tag does not exist on remote" -ForegroundColor Green
-              } catch {
-                Write-Warning "Could not check remote tags: $_"
-                Write-Host "Continuing anyway..." -ForegroundColor Yellow
-              }
-              $ErrorActionPreference = 'Continue'
-              Write-Host "Creating local tag..." -ForegroundColor Cyan
-              if ($env:TagMessage) {
-                git tag -a $env:TagName -m $env:TagMessage $targetCommit
-              } else {
-                git tag $env:TagName $targetCommit
-              }
-              if ($LASTEXITCODE -ne 0) {
-                Write-Error "Failed to create tag"
+              fi
+              echo "Checking if tag exists on remote..."
+              if git ls-remote --tags origin | grep -q "refs/tags/${TagName}$"; then
+                echo "Error: Tag '$TagName' already exists on remote. Delete it first or use a different name."
                 exit 1
-              }
-              Write-Host "Tag created successfully" -ForegroundColor Green
-              $verifyTag = git tag -l $env:TagName
-              if (-not $verifyTag) {
-                Write-Error "Tag was not created successfully"
+              fi
+              echo "Tag does not exist on remote"
+              echo "Creating local tag..."
+              if [ -n "$TagMessage" ]; then
+                git tag -a "$TagName" -m "$TagMessage" "$TARGET_COMMIT"
+              else
+                git tag "$TagName" "$TARGET_COMMIT"
+              fi
+              if [ $? -ne 0 ]; then
+                echo "Error: Failed to create tag"
                 exit 1
-              }
-              Write-Host "Pushing tag to origin..." -ForegroundColor Cyan
-              git push origin "refs/tags/$env:TagName"
-              if ($LASTEXITCODE -ne 0) {
-                Write-Error "Failed to push tag to remote"
-                Write-Host "If this persists, you may need to push manually: git push origin $env:TagName" -ForegroundColor Yellow
+              fi
+              echo "Tag created successfully"
+              if ! git tag -l | grep -q "^${TagName}$"; then
+                echo "Error: Tag was not created successfully"
                 exit 1
-              }
-              Write-Host "Tag pushed successfully" -ForegroundColor Green
-              Write-Host "Verifying tag on remote..." -ForegroundColor Cyan
-              $remoteCheck = git ls-remote --tags origin $env:TagName
-              if ($remoteCheck) {
-                Write-Host "Tag '$env:TagName' verified on remote" -ForegroundColor Green
-              } else {
-                Write-Warning "Could not verify tag on remote, but push command succeeded"
-              }
-              Write-Host "Tag '$env:TagName' created and pushed successfully" -ForegroundColor Green
+              fi
+              echo "Pushing tag to origin..."
+              git push origin "refs/tags/$TagName"
+              if [ $? -ne 0 ]; then
+                echo "Error: Failed to push tag to remote"
+                exit 1
+              fi
+              echo "Tag pushed successfully"
+              echo "Verifying tag on remote..."
+              if git ls-remote --tags origin | grep -q "refs/tags/${TagName}$"; then
+                echo "✓ Tag '$TagName' verified on remote"
+              else
+                echo "Warning: Could not verify tag on remote, but push command succeeded"
+              fi
+              echo "✓ Tag '$TagName' created and pushed successfully"
 
     profitsharing_database:
       - variables: # https://bitbucket.org/blog/predefine-values-of-custom-pipeline-variables
