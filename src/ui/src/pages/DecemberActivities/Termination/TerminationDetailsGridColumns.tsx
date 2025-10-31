@@ -98,29 +98,33 @@ export const GetDetailColumns = (
       resizable: true,
       sortable: false,
       cellClass: (params) => {
-        if (!params.data.isDetail) return "";
+        if (!params.data.isDetail || params.data.suggestedForfeit === null) return "";
         const rowKey = String(params.data.psn);
         const hasError = params.context?.editedValues?.[rowKey]?.hasError;
-        return hasError ? "bg-red-50" : "";
+        return hasError ? "bg-blue-50" : "";
       },
-      editable: ({ node }) => node.data.isDetail,
+      editable: ({ node }) => node.data.isDetail && node.data.suggestedForfeit !== null,
       flex: 1,
       cellEditor: SuggestedForfeitEditor,
-      cellRenderer: (params: ICellRendererParams) =>
-        SuggestedForfeitCellRenderer(
+      cellRenderer: (params: ICellRendererParams) => {
+        if (params.data.suggestedForfeit === null) {
+          return null;
+        }
+        return SuggestedForfeitCellRenderer(
           {
             ...params,
             selectedProfitYear
           },
           true,
           false
-        ),
-      valueFormatter: (params) => numberToCurrency(params.value),
+        );
+      },
+      valueFormatter: (params) => (params.value !== null ? numberToCurrency(params.value) : null),
       valueGetter: (params) => {
-        if (!params.data.isDetail) return params.data.suggestedForfeit;
+        if (!params.data.isDetail) return null;
         const rowKey = String(params.data.psn);
         const editedValue = params.context?.editedValues?.[rowKey]?.value;
-        return editedValue ?? params.data.suggestedForfeit ?? 0;
+        return editedValue ?? params.data.suggestedForfeit;
       }
     },
     {

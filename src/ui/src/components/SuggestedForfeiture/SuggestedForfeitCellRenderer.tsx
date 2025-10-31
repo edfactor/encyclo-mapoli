@@ -67,10 +67,10 @@ export function SuggestedForfeitCellRenderer(
         <Tooltip
           title={errorMessage}
           placement="top">
-          <ErrorOutline sx={{ color: "#d32f2f", fontSize: 16, marginRight: "4px" }} />
+          <ErrorOutline sx={{ color: "#1976d2", fontSize: 16, marginRight: "4px" }} />
         </Tooltip>
       )}
-      {!isClassAction && <span style={{ color: hasError ? "#d32f2f" : "inherit" }}>{formattedValue}</span>}
+      {!isClassAction && <span style={{ color: hasError ? "#1976d2" : "inherit" }}>{formattedValue}</span>}
     </div>
   );
 }
