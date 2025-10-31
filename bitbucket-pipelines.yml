@@ -866,21 +866,19 @@ pipelines:
                 exit 1
               }
               Write-Host "Checking if tag exists on remote..." -ForegroundColor Yellow
-              $currentDir = Get-Location
-              $remoteCheckJob = Start-Job -ScriptBlock { param($dir) Set-Location $dir; git ls-remote --tags origin 2>&1 } -ArgumentList $currentDir
-              $remoteCheckCompleted = Wait-Job -Job $remoteCheckJob -Timeout 10
-              if ($remoteCheckCompleted) {
-                $remoteTags = Receive-Job -Job $remoteCheckJob | Select-String $env:TagName
-                Remove-Job -Job $remoteCheckJob
+              try {
+                $ErrorActionPreference = 'Stop'
+                $remoteTags = git ls-remote --tags origin 2>&1 | Select-String $env:TagName
                 if ($remoteTags) {
                   Write-Error "Tag '$env:TagName' already exists on remote. Delete it first or use a different name."
                   exit 1
                 }
                 Write-Host "Tag does not exist on remote" -ForegroundColor Green
-              } else {
-                Remove-Job -Job $remoteCheckJob -Force
-                Write-Warning "Remote check timed out after 10 seconds, continuing anyway..."
+              } catch {
+                Write-Warning "Could not check remote tags: $_"
+                Write-Host "Continuing anyway..." -ForegroundColor Yellow
               }
+              $ErrorActionPreference = 'Continue'
               Write-Host "Creating local tag..." -ForegroundColor Cyan
               if ($env:TagMessage) {
                 git tag -a $env:TagName -m $env:TagMessage $targetCommit
@@ -898,28 +896,13 @@ pipelines:
                 exit 1
               }
               Write-Host "Pushing tag to origin..." -ForegroundColor Cyan
-              $currentDir = Get-Location
-              $pushJob = Start-Job -ScriptBlock { param($dir, $tag) Set-Location $dir; git push origin "refs/tags/$tag" 2>&1 } -ArgumentList $currentDir, $env:TagName
-              $pushCompleted = Wait-Job -Job $pushJob -Timeout 30
-              if ($pushCompleted) {
-                $pushOutput = Receive-Job -Job $pushJob
-                Remove-Job -Job $pushJob
-                Write-Host "Push output: $pushOutput" -ForegroundColor Yellow
-                $errorLines = $pushOutput | Where-Object { $_ -match "error|fatal|rejected" }
-                if ($errorLines) {
-                  Write-Error "Failed to push tag. Errors: $errorLines"
-                  exit 1
-                }
-                Write-Host "Tag pushed successfully" -ForegroundColor Green
-              } else {
-                Remove-Job -Job $pushJob -Force
-                Write-Error "Push timed out after 30 seconds. Tag created locally but not pushed."
-                Write-Host "Possible issues:" -ForegroundColor Yellow
-                Write-Host "  - SSH key not configured properly" -ForegroundColor Yellow
-                Write-Host "  - Network connectivity issues" -ForegroundColor Yellow
-                Write-Host "  - Remote repository permissions" -ForegroundColor Yellow
+              git push origin "refs/tags/$env:TagName"
+              if ($LASTEXITCODE -ne 0) {
+                Write-Error "Failed to push tag to remote"
+                Write-Host "If this persists, you may need to push manually: git push origin $env:TagName" -ForegroundColor Yellow
                 exit 1
               }
+              Write-Host "Tag pushed successfully" -ForegroundColor Green
               Write-Host "Verifying tag on remote..." -ForegroundColor Cyan
               $remoteCheck = git ls-remote --tags origin $env:TagName
               if ($remoteCheck) {
