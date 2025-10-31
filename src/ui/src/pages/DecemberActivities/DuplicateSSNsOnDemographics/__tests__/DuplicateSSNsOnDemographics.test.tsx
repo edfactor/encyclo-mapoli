@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import DuplicateSSNsOnDemographics from "../DuplicateSSNsOnDemographics";
+import useDuplicateSSNsOnDemographics from "../hooks/useDuplicateSSNsOnDemographics";
+import DuplicateSSNsOnDemographicsGrid from "../DuplicateSSNsOnDemographicsGrid";
 
 vi.mock("../hooks/useDuplicateSSNsOnDemographics", () => ({
   default: vi.fn(() => ({
@@ -76,8 +78,6 @@ describe("DuplicateSSNsOnDemographics", () => {
     });
 
     it("should display zero records when no results", () => {
-      const useDuplicateSSNsOnDemographics = vi.mocked(require("../hooks/useDuplicateSSNsOnDemographics").default);
-
       vi.mocked(useDuplicateSSNsOnDemographics).mockReturnValueOnce({
         searchResults: null,
         isSearching: false,
@@ -104,8 +104,7 @@ describe("DuplicateSSNsOnDemographics", () => {
 
     it("should pass pagination handlers to grid", () => {
       render(<DuplicateSSNsOnDemographics />);
-      const DuplicateSSNsOnDemographicsGrid = vi.mocked(require("../DuplicateSSNsOnDemographicsGrid").default);
-      expect(DuplicateSSNsOnDemographicsGrid).toHaveBeenCalledWith(
+      expect(vi.mocked(DuplicateSSNsOnDemographicsGrid)).toHaveBeenCalledWith(
         expect.objectContaining({
           pagination: expect.any(Object)
         }),
@@ -123,7 +122,6 @@ describe("DuplicateSSNsOnDemographics", () => {
 
   describe("Auto-load functionality", () => {
     it("should initialize hook on mount", () => {
-      const useDuplicateSSNsOnDemographics = vi.mocked(require("../hooks/useDuplicateSSNsOnDemographics").default);
       render(<DuplicateSSNsOnDemographics />);
       expect(useDuplicateSSNsOnDemographics).toHaveBeenCalled();
     });

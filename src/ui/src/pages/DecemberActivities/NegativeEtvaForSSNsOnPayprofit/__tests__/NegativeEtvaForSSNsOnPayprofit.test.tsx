@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import NegativeEtvaForSSNsOnPayprofit from "../NegativeEtvaForSSNsOnPayprofit";
+import useNegativeEtvaForSSNsOnPayprofit from "../hooks/useNegativeEtvaForSSNsOnPayprofit";
+import NegativeEtvaForSSNsOnPayprofitGrid from "../NegativeEtvaForSSNsOnPayprofitGrid";
 
 vi.mock("../hooks/useNegativeEtvaForSSNsOnPayprofit", () => ({
   default: vi.fn(() => ({
@@ -86,7 +88,6 @@ describe("NegativeEtvaForSSNsOnPayprofit", () => {
     });
 
     it("should display zero records when no results", async () => {
-      const useNegativeEtvaForSSNsOnPayprofit = vi.mocked(require("../hooks/useNegativeEtvaForSSNsOnPayprofit").default);
 
       vi.mocked(useNegativeEtvaForSSNsOnPayprofit).mockReturnValueOnce({
         searchResults: null,
@@ -107,7 +108,6 @@ describe("NegativeEtvaForSSNsOnPayprofit", () => {
     });
 
     it("should display multiple record count", async () => {
-      const useNegativeEtvaForSSNsOnPayprofit = vi.mocked(require("../hooks/useNegativeEtvaForSSNsOnPayprofit").default);
 
       vi.mocked(useNegativeEtvaForSSNsOnPayprofit).mockReturnValueOnce({
         searchResults: {
@@ -146,7 +146,6 @@ describe("NegativeEtvaForSSNsOnPayprofit", () => {
 
   describe("Auto-load functionality", () => {
     it("should initialize hook on mount", () => {
-      const useNegativeEtvaForSSNsOnPayprofit = vi.mocked(require("../hooks/useNegativeEtvaForSSNsOnPayprofit").default);
       render(<NegativeEtvaForSSNsOnPayprofit />);
 
       expect(useNegativeEtvaForSSNsOnPayprofit).toHaveBeenCalled();
@@ -157,9 +156,7 @@ describe("NegativeEtvaForSSNsOnPayprofit", () => {
     it("should pass pagination handlers to grid", () => {
       render(<NegativeEtvaForSSNsOnPayprofit />);
 
-      const { NegativeEtvaForSSNsOnPayprofitGrid } = require("../NegativeEtvaForSSNsOnPayprofitGrid");
-
-      expect(NegativeEtvaForSSNsOnPayprofitGrid).toHaveBeenCalledWith(
+      expect(vi.mocked(NegativeEtvaForSSNsOnPayprofitGrid)).toHaveBeenCalledWith(
         expect.objectContaining({
           onPaginationChange: expect.any(Function),
           onSortChange: expect.any(Function)
@@ -185,7 +182,6 @@ describe("NegativeEtvaForSSNsOnPayprofit", () => {
     });
 
     it("should handle large number of records", async () => {
-      const useNegativeEtvaForSSNsOnPayprofit = vi.mocked(require("../hooks/useNegativeEtvaForSSNsOnPayprofit").default);
 
       const largeResults = Array.from({ length: 100 }, (_, i) => ({
         ssn: `xxx-xx-${String(i).padStart(4, "0")}`,

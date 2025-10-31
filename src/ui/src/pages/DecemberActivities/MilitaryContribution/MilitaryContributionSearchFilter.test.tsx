@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import MilitaryContributionSearchFilter from "./MilitaryContributionSearchFilter";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 
 // Mock validators
 vi.mock("../../../utils/FormValidators", () => ({
@@ -326,8 +327,6 @@ describe("MilitaryContributionSearchFilter", () => {
 
   describe("Profit year integration", () => {
     it("should use profit year from hook", () => {
-      const { default: useDecemberFlowProfitYear } = require("../../../hooks/useDecemberFlowProfitYear");
-
       render(<MilitaryContributionSearchFilter />);
 
       expect(useDecemberFlowProfitYear).toHaveBeenCalled();

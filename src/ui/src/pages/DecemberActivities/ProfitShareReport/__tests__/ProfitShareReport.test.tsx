@@ -1,9 +1,13 @@
 import { render, screen, waitFor } from "@testing-library/react";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import ProfitShareReport from "../ProfitShareReport";
+import ProfitShareReportSearchFilter from "../ProfitShareReportSearchFilter";
+import ProfitShareReportGrid from "../ProfitShareReportGrid";
 
 vi.mock("../ProfitShareReportSearchFilter", () => ({
-  default: vi.fn(({ onSearch, setInitialSearchLoaded, isFetching }) => (
+  default: vi.fn(({ onSearch, setInitialSearchLoaded: _setInitialSearchLoaded, isFetching }) => (
     <div data-testid="search-filter">
       <button
         data-testid="search-btn"
@@ -17,7 +21,7 @@ vi.mock("../ProfitShareReportSearchFilter", () => ({
 }));
 
 vi.mock("../ProfitShareReportGrid", () => ({
-  default: vi.fn(({ initialSearchLoaded, searchParams, onLoadingChange }) => (
+  default: vi.fn(({ initialSearchLoaded, searchParams: _searchParams, onLoadingChange }) => (
     <div data-testid="grid">
       {!initialSearchLoaded && <div data-testid="no-search">No search performed</div>}
       {initialSearchLoaded && <div data-testid="has-search">Search performed</div>}
@@ -58,42 +62,36 @@ describe("ProfitShareReport", () => {
 
   describe("Rendering", () => {
     it("should render the page component", () => {
-      const ProfitShareReport = require("../ProfitShareReport").default;
       render(<ProfitShareReport />);
 
       expect(screen.getByTestId("page")).toBeInTheDocument();
     });
 
     it("should render page with correct label", () => {
-      const ProfitShareReport = require("../ProfitShareReport").default;
       render(<ProfitShareReport />);
 
       expect(screen.getByText(/PROFIT SHARE REPORT/i)).toBeInTheDocument();
     });
 
     it("should render StatusDropdownActionNode", () => {
-      const ProfitShareReport = require("../ProfitShareReport").default;
       render(<ProfitShareReport />);
 
       expect(screen.getByTestId("status-dropdown")).toBeInTheDocument();
     });
 
     it("should render filter accordion", () => {
-      const ProfitShareReport = require("../ProfitShareReport").default;
       render(<ProfitShareReport />);
 
       expect(screen.getByTestId("accordion")).toBeInTheDocument();
     });
 
     it("should render search filter", () => {
-      const ProfitShareReport = require("../ProfitShareReport").default;
       render(<ProfitShareReport />);
 
       expect(screen.getByTestId("search-filter")).toBeInTheDocument();
     });
 
     it("should render grid component", () => {
-      const ProfitShareReport = require("../ProfitShareReport").default;
       render(<ProfitShareReport />);
 
       expect(screen.getByTestId("grid")).toBeInTheDocument();
@@ -102,14 +100,12 @@ describe("ProfitShareReport", () => {
 
   describe("State management", () => {
     it("should initialize with initialSearchLoaded false", () => {
-      const ProfitShareReport = require("../ProfitShareReport").default;
       render(<ProfitShareReport />);
 
       expect(screen.getByTestId("no-search")).toBeInTheDocument();
     });
 
     it("should initialize with isFetching false", () => {
-      const ProfitShareReport = require("../ProfitShareReport").default;
       render(<ProfitShareReport />);
 
       expect(screen.queryByTestId("fetching")).not.toBeInTheDocument();
@@ -118,7 +114,6 @@ describe("ProfitShareReport", () => {
 
   describe("Search workflow", () => {
     it("should trigger search with form data", async () => {
-      const ProfitShareReport = require("../ProfitShareReport").default;
       render(<ProfitShareReport />);
 
       const searchBtn = screen.getByTestId("search-btn");
@@ -131,7 +126,6 @@ describe("ProfitShareReport", () => {
     });
 
     it("should disable search button during fetch", async () => {
-      const ProfitShareReport = require("../ProfitShareReport").default;
       const { rerender } = render(<ProfitShareReport />);
 
       const startLoadingBtn = screen.getByTestId("start-loading");
@@ -144,7 +138,6 @@ describe("ProfitShareReport", () => {
     });
 
     it("should update grid when search completes", async () => {
-      const ProfitShareReport = require("../ProfitShareReport").default;
       const { rerender } = render(<ProfitShareReport />);
 
       const searchBtn = screen.getByTestId("search-btn");
@@ -160,12 +153,9 @@ describe("ProfitShareReport", () => {
 
   describe("Loading state coordination", () => {
     it("should pass setInitialSearchLoaded to search filter", () => {
-      const ProfitShareReport = require("../ProfitShareReport").default;
       render(<ProfitShareReport />);
 
-      const { ProfitShareReportSearchFilter } = require("../ProfitShareReportSearchFilter");
-
-      expect(ProfitShareReportSearchFilter).toHaveBeenCalledWith(
+      expect(vi.mocked(ProfitShareReportSearchFilter)).toHaveBeenCalledWith(
         expect.objectContaining({
           setInitialSearchLoaded: expect.any(Function)
         }),
@@ -174,12 +164,9 @@ describe("ProfitShareReport", () => {
     });
 
     it("should pass isFetching to search filter", () => {
-      const ProfitShareReport = require("../ProfitShareReport").default;
       render(<ProfitShareReport />);
 
-      const { ProfitShareReportSearchFilter } = require("../ProfitShareReportSearchFilter");
-
-      expect(ProfitShareReportSearchFilter).toHaveBeenCalledWith(
+      expect(vi.mocked(ProfitShareReportSearchFilter)).toHaveBeenCalledWith(
         expect.objectContaining({
           isFetching: expect.any(Boolean)
         }),
@@ -188,12 +175,9 @@ describe("ProfitShareReport", () => {
     });
 
     it("should pass onLoadingChange to grid", () => {
-      const ProfitShareReport = require("../ProfitShareReport").default;
       render(<ProfitShareReport />);
 
-      const { ProfitShareReportGrid } = require("../ProfitShareReportGrid");
-
-      expect(ProfitShareReportGrid).toHaveBeenCalledWith(
+      expect(vi.mocked(ProfitShareReportGrid)).toHaveBeenCalledWith(
         expect.objectContaining({
           onLoadingChange: expect.any(Function)
         }),
@@ -204,7 +188,6 @@ describe("ProfitShareReport", () => {
 
   describe("Multi-step loading", () => {
     it("should handle loading state transitions", async () => {
-      const ProfitShareReport = require("../ProfitShareReport").default;
       const { rerender } = render(<ProfitShareReport />);
 
       const startLoadingBtn = screen.getByTestId("start-loading");
@@ -227,7 +210,6 @@ describe("ProfitShareReport", () => {
 
   describe("Component integration", () => {
     it("should render all major sections", () => {
-      const ProfitShareReport = require("../ProfitShareReport").default;
       render(<ProfitShareReport />);
 
       expect(screen.getByTestId("page")).toBeInTheDocument();
@@ -238,7 +220,6 @@ describe("ProfitShareReport", () => {
     });
 
     it("should maintain proper component hierarchy", () => {
-      const ProfitShareReport = require("../ProfitShareReport").default;
       render(<ProfitShareReport />);
 
       const page = screen.getByTestId("page");
@@ -251,12 +232,9 @@ describe("ProfitShareReport", () => {
 
   describe("Search parameter handling", () => {
     it("should pass initialSearchLoaded to grid", () => {
-      const ProfitShareReport = require("../ProfitShareReport").default;
       render(<ProfitShareReport />);
 
-      const { ProfitShareReportGrid } = require("../ProfitShareReportGrid");
-
-      expect(ProfitShareReportGrid).toHaveBeenCalledWith(
+      expect(vi.mocked(ProfitShareReportGrid)).toHaveBeenCalledWith(
         expect.objectContaining({
           initialSearchLoaded: expect.any(Boolean)
         }),
@@ -265,12 +243,9 @@ describe("ProfitShareReport", () => {
     });
 
     it("should pass searchParams to grid", () => {
-      const ProfitShareReport = require("../ProfitShareReport").default;
       render(<ProfitShareReport />);
 
-      const { ProfitShareReportGrid } = require("../ProfitShareReportGrid");
-
-      expect(ProfitShareReportGrid).toHaveBeenCalledWith(
+      expect(vi.mocked(ProfitShareReportGrid)).toHaveBeenCalledWith(
         expect.objectContaining({
           searchParams: expect.any(Object)
         }),
@@ -281,7 +256,6 @@ describe("ProfitShareReport", () => {
 
   describe("Edge cases", () => {
     it("should handle rapid search submissions", async () => {
-      const ProfitShareReport = require("../ProfitShareReport").default;
       render(<ProfitShareReport />);
 
       const searchBtn = screen.getByTestId("search-btn");
@@ -296,7 +270,6 @@ describe("ProfitShareReport", () => {
     });
 
     it("should handle multiple loading cycles", async () => {
-      const ProfitShareReport = require("../ProfitShareReport").default;
       const { rerender } = render(<ProfitShareReport />);
 
       for (let i = 0; i < 3; i++) {
@@ -321,7 +294,6 @@ describe("ProfitShareReport", () => {
 
   describe("Responsive layout", () => {
     it("should render with Material-UI Grid layout", () => {
-      const ProfitShareReport = require("../ProfitShareReport").default;
       render(<ProfitShareReport />);
 
       expect(screen.getByTestId("page")).toBeInTheDocument();

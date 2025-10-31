@@ -1,6 +1,11 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import UnForfeit from "./UnForfeit";
+import { useLazyGetAccountingRangeToCurrent } from "../../../hooks/useFiscalCalendarYear";
+import { useUnForfeitState } from "../../../hooks/useUnForfeitState";
+
+type MockFiscalData = ReturnType<typeof useLazyGetAccountingRangeToCurrent>;
+type MockUnForfeitState = ReturnType<typeof useUnForfeitState>;
 
 // Mock the hook dependencies
 vi.mock("../../../hooks/useFiscalCalendarYear", () => ({
@@ -131,7 +136,7 @@ describe("UnForfeit", () => {
             fiscalEndDate: null
           }
         }
-      ] as any);
+      ] as MockFiscalData);
 
       render(<UnForfeit />);
 
@@ -192,7 +197,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as any);
+      } as MockUnForfeitState);
 
       render(<UnForfeit />);
 
@@ -225,7 +230,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as any);
+      } as MockUnForfeitState);
 
       render(<UnForfeit />);
 
@@ -259,7 +264,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as any);
+      } as MockUnForfeitState);
 
       render(<UnForfeit />);
 
@@ -291,7 +296,7 @@ describe("UnForfeit", () => {
           handleStatusChange: mockHandleStatusChange,
           handleArchiveHandled: vi.fn()
         }
-      } as any);
+      } as MockUnForfeitState);
 
       render(<UnForfeit />);
 
@@ -321,7 +326,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as any);
+      } as MockUnForfeitState);
 
       render(<UnForfeit />);
 
@@ -351,7 +356,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as any);
+      } as MockUnForfeitState);
 
       render(<UnForfeit />);
 
@@ -381,7 +386,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as any);
+      } as MockUnForfeitState);
 
       render(<UnForfeit />);
 
@@ -415,7 +420,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as any);
+      } as MockUnForfeitState);
 
       render(<UnForfeit />);
 
@@ -449,7 +454,7 @@ describe("UnForfeit", () => {
             fiscalEndDate: "2024-12-31"
           }
         }
-      ] as any);
+      ] as MockFiscalData);
 
       render(<UnForfeit />);
 

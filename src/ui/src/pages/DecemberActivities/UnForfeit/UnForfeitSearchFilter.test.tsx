@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import UnForfeitSearchFilter from "./UnForfeitSearchFilter";
+import { CalendarResponseDto } from "../../../reduxstore/types";
 
 // Mock date picker
 vi.mock("../../../components/DsmDatePicker/DsmDatePicker", () => ({
@@ -54,7 +55,7 @@ vi.mock("smart-ui-library", () => ({
 }));
 
 describe("UnForfeitSearchFilter", () => {
-  const mockFiscalData = {
+  const mockFiscalData: CalendarResponseDto = {
     fiscalBeginDate: "2024-01-01",
     fiscalEndDate: "2024-12-31"
   };
@@ -71,7 +72,7 @@ describe("UnForfeitSearchFilter", () => {
     it("should render the form with all fields", () => {
       render(
         <UnForfeitSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -87,7 +88,7 @@ describe("UnForfeitSearchFilter", () => {
     it("should render search and reset buttons", () => {
       render(
         <UnForfeitSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -102,7 +103,7 @@ describe("UnForfeitSearchFilter", () => {
     it("should render exclude zero balance checkbox", () => {
       render(
         <UnForfeitSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -120,7 +121,7 @@ describe("UnForfeitSearchFilter", () => {
     it("should enforce fiscal year date constraints", () => {
       render(
         <UnForfeitSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -138,7 +139,7 @@ describe("UnForfeitSearchFilter", () => {
     it("should validate end date is after begin date", async () => {
       render(
         <UnForfeitSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -160,7 +161,7 @@ describe("UnForfeitSearchFilter", () => {
     it("should reject dates before February 2024", async () => {
       render(
         <UnForfeitSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -182,7 +183,7 @@ describe("UnForfeitSearchFilter", () => {
     it("should call onSearch when search button is clicked", async () => {
       render(
         <UnForfeitSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -201,7 +202,7 @@ describe("UnForfeitSearchFilter", () => {
     it("should call setInitialSearchLoaded when search is executed", async () => {
       render(
         <UnForfeitSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -220,7 +221,7 @@ describe("UnForfeitSearchFilter", () => {
     it("should disable search when hasUnsavedChanges is true", () => {
       render(
         <UnForfeitSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={true}
@@ -237,7 +238,7 @@ describe("UnForfeitSearchFilter", () => {
 
       render(
         <UnForfeitSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={true}
@@ -258,7 +259,7 @@ describe("UnForfeitSearchFilter", () => {
       const user = userEvent.setup();
       render(
         <UnForfeitSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -285,7 +286,7 @@ describe("UnForfeitSearchFilter", () => {
     it("should toggle checkbox when reset", async () => {
       render(
         <UnForfeitSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -305,7 +306,7 @@ describe("UnForfeitSearchFilter", () => {
     it("should include excludeZeroBalance in search parameters", async () => {
       render(
         <UnForfeitSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -325,7 +326,7 @@ describe("UnForfeitSearchFilter", () => {
       const user = userEvent.setup();
       render(
         <UnForfeitSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -347,7 +348,7 @@ describe("UnForfeitSearchFilter", () => {
     it("should dispatch Redux action to store search parameters", async () => {
       render(
         <UnForfeitSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -369,7 +370,7 @@ describe("UnForfeitSearchFilter", () => {
     it("should track form validity", async () => {
       render(
         <UnForfeitSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -386,7 +387,7 @@ describe("UnForfeitSearchFilter", () => {
     it("should set min/max dates based on fiscal data", () => {
       render(
         <UnForfeitSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -408,7 +409,7 @@ describe("UnForfeitSearchFilter", () => {
       // which is mocked, so we test that the component exists
       render(
         <UnForfeitSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}

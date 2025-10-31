@@ -1,6 +1,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import DistributionsAndForfeitures from "../DistributionsAndForfeitures";
+import DistributionsAndForfeituresGrid from "../DistributionsAndForfeituresGrid";
+import DistributionsAndForfeituresSearchFilter from "../DistributionsAndForfeituresSearchFilter";
 
 // Mock child components
 vi.mock("../DistributionsAndForfeituresSearchFilter", () => ({
@@ -96,10 +98,8 @@ describe("DistributionsAndForfeitures", () => {
     it("should initialize with initialSearchLoaded false", () => {
       render(<DistributionsAndForfeitures />);
 
-      const DistributionsAndForfeituresGrid = vi.mocked(require("../DistributionsAndForfeituresGrid").default);
-
       // Verify grid receives initialSearchLoaded prop
-      expect(DistributionsAndForfeituresGrid).toHaveBeenCalledWith(
+      expect(vi.mocked(DistributionsAndForfeituresGrid)).toHaveBeenCalledWith(
         expect.objectContaining({
           initialSearchLoaded: false
         }),
@@ -110,10 +110,8 @@ describe("DistributionsAndForfeitures", () => {
     it("should initialize with isFetching false", () => {
       render(<DistributionsAndForfeitures />);
 
-      const DistributionsAndForfeituresSearchFilter = vi.mocked(require("../DistributionsAndForfeituresSearchFilter").default);
-
       // Verify search filter receives isFetching prop
-      expect(DistributionsAndForfeituresSearchFilter).toHaveBeenCalledWith(
+      expect(vi.mocked(DistributionsAndForfeituresSearchFilter)).toHaveBeenCalledWith(
         expect.objectContaining({
           isFetching: false
         }),
@@ -126,10 +124,8 @@ describe("DistributionsAndForfeitures", () => {
     it("should pass setInitialSearchLoaded to search filter", async () => {
       render(<DistributionsAndForfeitures />);
 
-      const DistributionsAndForfeituresSearchFilter = vi.mocked(require("../DistributionsAndForfeituresSearchFilter").default);
-
       await waitFor(() => {
-        expect(DistributionsAndForfeituresSearchFilter).toHaveBeenCalledWith(
+        expect(vi.mocked(DistributionsAndForfeituresSearchFilter)).toHaveBeenCalledWith(
           expect.objectContaining({
             setInitialSearchLoaded: expect.any(Function)
           }),
@@ -141,10 +137,8 @@ describe("DistributionsAndForfeitures", () => {
     it("should pass setInitialSearchLoaded to grid", async () => {
       render(<DistributionsAndForfeitures />);
 
-      const DistributionsAndForfeituresGrid = vi.mocked(require("../DistributionsAndForfeituresGrid").default);
-
       await waitFor(() => {
-        expect(DistributionsAndForfeituresGrid).toHaveBeenCalledWith(
+        expect(vi.mocked(DistributionsAndForfeituresGrid)).toHaveBeenCalledWith(
           expect.objectContaining({
             setInitialSearchLoaded: expect.any(Function)
           }),
@@ -156,10 +150,8 @@ describe("DistributionsAndForfeitures", () => {
     it("should pass onLoadingChange callback to grid", async () => {
       render(<DistributionsAndForfeitures />);
 
-      const DistributionsAndForfeituresGrid = vi.mocked(require("../DistributionsAndForfeituresGrid").default);
-
       await waitFor(() => {
-        expect(DistributionsAndForfeituresGrid).toHaveBeenCalledWith(
+        expect(vi.mocked(DistributionsAndForfeituresGrid)).toHaveBeenCalledWith(
           expect.objectContaining({
             onLoadingChange: expect.any(Function)
           }),
@@ -238,8 +230,7 @@ describe("DistributionsAndForfeitures", () => {
       searchBtn.click();
 
       await waitFor(() => {
-        const DistributionsAndForfeituresGrid = vi.mocked(require("../DistributionsAndForfeituresGrid").default);
-        expect(DistributionsAndForfeituresGrid).toHaveBeenCalledWith(
+        expect(vi.mocked(DistributionsAndForfeituresGrid)).toHaveBeenCalledWith(
           expect.objectContaining({
             initialSearchLoaded: expect.any(Boolean)
           }),

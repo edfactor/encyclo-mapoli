@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import TerminationSearchFilter from "./TerminationSearchFilter";
+import { CalendarResponseDto } from "../../../reduxstore/types";
 
 // Mock date picker and validators
 vi.mock("../../../components/DsmDatePicker/DsmDatePicker", () => ({
@@ -58,7 +59,7 @@ vi.mock("smart-ui-library", () => ({
 }));
 
 describe("TerminationSearchFilter", () => {
-  const mockFiscalData = {
+  const mockFiscalData: CalendarResponseDto = {
     fiscalBeginDate: "2024-01-01",
     fiscalEndDate: "2024-12-31"
   };
@@ -74,7 +75,7 @@ describe("TerminationSearchFilter", () => {
     it("should render the form with all fields", () => {
       render(
         <TerminationSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -90,7 +91,7 @@ describe("TerminationSearchFilter", () => {
     it("should render search and reset buttons", () => {
       render(
         <TerminationSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -105,7 +106,7 @@ describe("TerminationSearchFilter", () => {
     it("should display loading state when isFetching is true", () => {
       render(
         <TerminationSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -122,7 +123,7 @@ describe("TerminationSearchFilter", () => {
     it("should enforce fiscal year date constraints", () => {
       render(
         <TerminationSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -141,7 +142,7 @@ describe("TerminationSearchFilter", () => {
     it("should validate end date is after begin date", async () => {
       render(
         <TerminationSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -168,7 +169,7 @@ describe("TerminationSearchFilter", () => {
     it("should call onSearch when search button is clicked", async () => {
       render(
         <TerminationSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -187,7 +188,7 @@ describe("TerminationSearchFilter", () => {
     it("should call setInitialSearchLoaded when search is executed", async () => {
       render(
         <TerminationSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -206,7 +207,7 @@ describe("TerminationSearchFilter", () => {
     it("should disable search when hasUnsavedChanges is true", () => {
       render(
         <TerminationSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={true}
@@ -222,7 +223,7 @@ describe("TerminationSearchFilter", () => {
     it("should disable search button during fetch", () => {
       render(
         <TerminationSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -241,7 +242,7 @@ describe("TerminationSearchFilter", () => {
       // but reset button should trigger form reset
       render(
         <TerminationSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -261,7 +262,7 @@ describe("TerminationSearchFilter", () => {
     it("should include forfeiture status filter options", () => {
       render(
         <TerminationSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -279,7 +280,7 @@ describe("TerminationSearchFilter", () => {
     it("should track form validity", async () => {
       render(
         <TerminationSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -299,7 +300,7 @@ describe("TerminationSearchFilter", () => {
     it("should render DuplicateSsnGuard component", () => {
       render(
         <TerminationSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -314,7 +315,7 @@ describe("TerminationSearchFilter", () => {
     it("should pass prerequisite completion to search button", () => {
       render(
         <TerminationSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -331,7 +332,7 @@ describe("TerminationSearchFilter", () => {
     it("should set min/max dates based on fiscal data", () => {
       render(
         <TerminationSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
@@ -352,7 +353,7 @@ describe("TerminationSearchFilter", () => {
     it("should include correct default values in search request", async () => {
       render(
         <TerminationSearchFilter
-          fiscalData={mockFiscalData as any}
+          fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}

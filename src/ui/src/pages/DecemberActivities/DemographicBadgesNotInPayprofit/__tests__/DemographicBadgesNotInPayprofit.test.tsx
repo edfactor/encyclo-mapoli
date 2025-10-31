@@ -365,7 +365,7 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
       const mockHandleSortChange = vi.fn();
 
       vi.mocked(useDemographicBadgesNotInPayprofit).mockReturnValue({
-        searchResults: mockResults as any,
+        searchResults: mockResults as MockSearchResults,
         isSearching: false,
         pagination: {
           pageNumber: 0,

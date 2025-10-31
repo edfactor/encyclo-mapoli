@@ -5,6 +5,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import MilitaryContribution from "./MilitaryContribution";
 
+interface MissiveAlert {
+  id: number;
+  message: string;
+}
+
 // Mock child components
 vi.mock("components/FrozenYearWarning", () => ({
   default: vi.fn(() => <div data-testid="frozen-warning">Frozen Year Warning</div>)
@@ -366,7 +371,7 @@ describe("MilitaryContribution", () => {
     it("should display missive alerts when present", async () => {
       const { useMissiveAlerts } = await import("../../../hooks/useMissiveAlerts");
       vi.mocked(useMissiveAlerts).mockReturnValueOnce({
-        missiveAlerts: [{ id: 1, message: "Test Alert" }] as any,
+        missiveAlerts: [{ id: 1, message: "Test Alert" }] as MissiveAlert[],
         addAlert: vi.fn(),
         clearAlerts: vi.fn()
       });

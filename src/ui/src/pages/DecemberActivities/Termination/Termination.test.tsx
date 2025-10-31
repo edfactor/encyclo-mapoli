@@ -1,6 +1,17 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import Termination from "./Termination";
+import { useLazyGetAccountingRangeToCurrent } from "../../../hooks/useFiscalCalendarYear";
+import { useTerminationState } from "../../../hooks/useTerminationState";
+
+type MockFiscalData = ReturnType<typeof useLazyGetAccountingRangeToCurrent>;
+type MockTerminationState = ReturnType<typeof useTerminationState>;
+type MockSearchParams = {
+  beginningDate?: string;
+  endingDate?: string;
+  forfeitureStatus?: string;
+  archive?: boolean;
+};
 
 // Mock the hook dependencies
 vi.mock("../../../hooks/useFiscalCalendarYear", () => ({
@@ -132,7 +143,7 @@ describe("Termination", () => {
             fiscalEndDate: null
           }
         }
-      ] as any);
+      ] as MockFiscalData);
 
       render(<Termination />);
 
@@ -174,7 +185,7 @@ describe("Termination", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as any);
+      } as MockTerminationState);
 
       render(<Termination />);
 
@@ -213,7 +224,7 @@ describe("Termination", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as any);
+      } as MockTerminationState);
 
       render(<Termination />);
 
@@ -244,7 +255,7 @@ describe("Termination", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as any);
+      } as MockTerminationState);
 
       render(<Termination />);
 
@@ -279,7 +290,7 @@ describe("Termination", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as any);
+      } as MockTerminationState);
 
       render(<Termination />);
 
@@ -312,7 +323,7 @@ describe("Termination", () => {
           handleStatusChange: mockHandleStatusChange,
           handleArchiveHandled: vi.fn()
         }
-      } as any);
+      } as MockTerminationState);
 
       render(<Termination />);
 
@@ -398,7 +409,7 @@ describe("Termination", () => {
   describe("Grid and Filter integration", () => {
     it("should pass searchParams to TerminationGrid", async () => {
       const { useTerminationState } = await import("../../../hooks/useTerminationState");
-      const mockSearchParams = {
+      const mockSearchParams: MockSearchParams = {
         beginningDate: "01/01/2024",
         endingDate: "12/31/2024",
         forfeitureStatus: "showAll"
@@ -406,7 +417,7 @@ describe("Termination", () => {
 
       vi.mocked(useTerminationState).mockReturnValueOnce({
         state: {
-          searchParams: mockSearchParams as any,
+          searchParams: mockSearchParams,
           initialSearchLoaded: true,
           hasUnsavedChanges: false,
           resetPageFlag: false,
@@ -422,7 +433,7 @@ describe("Termination", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as any);
+      } as MockTerminationState);
 
       render(<Termination />);
 
@@ -444,7 +455,7 @@ describe("Termination", () => {
 
       vi.mocked(useTerminationState).mockReturnValueOnce({
         state: {
-          searchParams: { archive: true } as any,
+          searchParams: { archive: true } as MockSearchParams,
           initialSearchLoaded: true,
           hasUnsavedChanges: false,
           resetPageFlag: false,
@@ -460,7 +471,7 @@ describe("Termination", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: mockHandleArchiveHandled
         }
-      } as any);
+      } as MockTerminationState);
 
       render(<Termination />);
 

@@ -133,7 +133,7 @@ describe("ForfeituresTransactionGridColumns", () => {
 
   describe("Column factories usage", () => {
     it("should use createBadgeColumn factory", () => {
-      const { createBadgeColumn } = vi.hoisted(() => ({
+      const { createBadgeColumn: _createBadgeColumn } = vi.hoisted(() => ({
         createBadgeColumn: vi.fn()
       }));
 

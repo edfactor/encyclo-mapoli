@@ -1,4 +1,8 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import { useSelector } from "react-redux";
+import { useGridPagination } from "../../../../hooks/useGridPagination";
+import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { useLazyGetDuplicateSSNsOnDemographicsQuery } from "../../../../reduxstore/api/YearsEndApi";
 
 vi.mock("../../../../hooks/useDecemberFlowProfitYear", () => ({
   default: vi.fn(() => 2024)
@@ -20,7 +24,7 @@ vi.mock("react-redux", () => ({
 
 vi.mock("../../../../reduxstore/api/YearsEndApi", () => ({
   useLazyGetDuplicateSSNsOnDemographicsQuery: vi.fn(() => [
-    vi.fn(async (request) => ({
+    vi.fn(async (_request) => ({
       response: {
         results: [{ ssn: "123-45-6789", badgeNumber: 12345, employeeName: "John Doe" }],
         total: 1
@@ -53,10 +57,6 @@ describe("useDuplicateSSNsOnDemographics Hook", () => {
 
   describe("Search functionality", () => {
     it("should trigger search with profit year", async () => {
-      const { useLazyGetDuplicateSSNsOnDemographicsQuery } = require(
-        "../../../../reduxstore/api/YearsEndApi"
-      );
-
       const [triggerSearch] = useLazyGetDuplicateSSNsOnDemographicsQuery();
       const request = {
         pagination: { skip: 0, take: 25, sortBy: "ssn", isSortDescending: true },
@@ -71,7 +71,6 @@ describe("useDuplicateSSNsOnDemographics Hook", () => {
 
   describe("Profit year handling", () => {
     it("should use current December flow profit year", () => {
-      const useDecemberFlowProfitYear = require("../../../../hooks/useDecemberFlowProfitYear").default;
       const profitYear = useDecemberFlowProfitYear();
       expect(profitYear).toBe(2024);
     });
@@ -79,15 +78,13 @@ describe("useDuplicateSSNsOnDemographics Hook", () => {
 
   describe("Token validation", () => {
     it("should check for security token before searching", () => {
-      const { useSelector } = require("react-redux");
-      const hasToken = useSelector((state: any) => state.security.token);
+      const hasToken = useSelector((state: { security: { token: string } }) => state.security.token);
       expect(hasToken).toBe(true);
     });
   });
 
   describe("Pagination state management", () => {
     it("should initialize pagination with default values", () => {
-      const { useGridPagination } = require("../../../../hooks/useGridPagination");
       const pagination = useGridPagination({
         initialPageSize: 25,
         initialSortBy: "ssn",
@@ -102,11 +99,6 @@ describe("useDuplicateSSNsOnDemographics Hook", () => {
 
   describe("Auto-search on mount", () => {
     it("should trigger initial search when profit year is available", async () => {
-      const useDecemberFlowProfitYear = require("../../../../hooks/useDecemberFlowProfitYear").default;
-      const { useLazyGetDuplicateSSNsOnDemographicsQuery } = require(
-        "../../../../reduxstore/api/YearsEndApi"
-      );
-
       const profitYear = useDecemberFlowProfitYear();
       expect(profitYear).toBe(2024);
 
@@ -117,16 +109,12 @@ describe("useDuplicateSSNsOnDemographics Hook", () => {
 
   describe("Error handling", () => {
     it("should handle search errors gracefully", async () => {
-      const { useLazyGetDuplicateSSNsOnDemographicsQuery } = require(
-        "../../../../reduxstore/api/YearsEndApi"
-      );
-
       vi.mocked(useLazyGetDuplicateSSNsOnDemographicsQuery).mockReturnValueOnce([
         vi.fn(async () => {
           throw new Error("API Error");
         }),
         { isFetching: false }
-      ] as any);
+      ] as ReturnType<typeof useLazyGetDuplicateSSNsOnDemographicsQuery>);
 
       const [triggerSearch] = useLazyGetDuplicateSSNsOnDemographicsQuery();
       const request = {
@@ -144,16 +132,12 @@ describe("useDuplicateSSNsOnDemographics Hook", () => {
 
   describe("Edge cases", () => {
     it("should handle empty search results", async () => {
-      const { useLazyGetDuplicateSSNsOnDemographicsQuery } = require(
-        "../../../../reduxstore/api/YearsEndApi"
-      );
-
       vi.mocked(useLazyGetDuplicateSSNsOnDemographicsQuery).mockReturnValueOnce([
         vi.fn(async () => ({
           response: { results: [], total: 0 }
         })),
         { isFetching: false }
-      ] as any);
+      ] as ReturnType<typeof useLazyGetDuplicateSSNsOnDemographicsQuery>);
 
       const [triggerSearch] = useLazyGetDuplicateSSNsOnDemographicsQuery();
       const result = await triggerSearch({

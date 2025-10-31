@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import DuplicateSSNsOnDemographicsGrid from "../DuplicateSSNsOnDemographicsGrid";
 
 vi.mock("smart-ui-library", () => ({
   DSMGrid: vi.fn(({ isLoading, providedOptions }) => (
@@ -58,54 +59,47 @@ describe("DuplicateSSNsOnDemographicsGrid", () => {
 
   describe("Rendering", () => {
     it("should render grid when showData is true", () => {
-      const Grid = require("../DuplicateSSNsOnDemographicsGrid").default;
-      render(<Grid {...defaultProps} />);
+      render(<DuplicateSSNsOnDemographicsGrid {...defaultProps} />);
       expect(screen.getByTestId("grid")).toBeInTheDocument();
     });
 
     it("should not render grid when showData is false", () => {
-      const Grid = require("../DuplicateSSNsOnDemographicsGrid").default;
-      render(<Grid {...defaultProps} showData={false} />);
+      render(<DuplicateSSNsOnDemographicsGrid {...defaultProps} showData={false} />);
       expect(screen.queryByTestId("grid")).not.toBeInTheDocument();
     });
 
     it("should display loading state", () => {
-      const Grid = require("../DuplicateSSNsOnDemographicsGrid").default;
-      render(<Grid {...defaultProps} isLoading={true} />);
+      render(<DuplicateSSNsOnDemographicsGrid {...defaultProps} isLoading={true} />);
       expect(screen.getByTestId("loading")).toBeInTheDocument();
     });
   });
 
   describe("Pagination", () => {
     it("should render pagination when hasResults is true", () => {
-      const Grid = require("../DuplicateSSNsOnDemographicsGrid").default;
-      render(<Grid {...defaultProps} hasResults={true} />);
+      render(<DuplicateSSNsOnDemographicsGrid {...defaultProps} hasResults={true} />);
       expect(screen.getByTestId("pagination")).toBeInTheDocument();
     });
 
     it("should not render pagination when hasResults is false", () => {
-      const Grid = require("../DuplicateSSNsOnDemographicsGrid").default;
-      render(<Grid {...defaultProps} hasResults={false} />);
+      render(<DuplicateSSNsOnDemographicsGrid {...defaultProps} hasResults={false} />);
       expect(screen.queryByTestId("pagination")).not.toBeInTheDocument();
     });
   });
 
   describe("Data handling", () => {
     it("should handle empty results", () => {
-      const Grid = require("../DuplicateSSNsOnDemographicsGrid").default;
       const emptyData = {
         response: {
           results: [],
           total: 0
         }
       };
-      render(<Grid {...defaultProps} data={emptyData} hasResults={false} />);
+      render(<DuplicateSSNsOnDemographicsGrid {...defaultProps} data={emptyData} hasResults={false} />);
       expect(screen.getByTestId("grid")).toBeInTheDocument();
     });
 
     it("should handle null data", () => {
-      const Grid = require("../DuplicateSSNsOnDemographicsGrid").default;
-      render(<Grid {...defaultProps} data={null} showData={false} />);
+      render(<DuplicateSSNsOnDemographicsGrid {...defaultProps} data={null} showData={false} />);
       expect(screen.queryByTestId("grid")).not.toBeInTheDocument();
     });
   });
