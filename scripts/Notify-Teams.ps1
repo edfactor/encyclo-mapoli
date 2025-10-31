@@ -22,19 +22,88 @@ if (-not $emoji) { $emoji = "[INFO]" }
 
 $title = "$emoji $Environment $Step - $Status"
 
-# Power Automate Workflow format
+# Power Automate Adaptive Card format
 $payload = @{
-    title = $title
-    status = $Status
-    environment = $Environment
-    buildNumber = $BuildNumber
-    branch = $Branch
-    commit = $Commit
-    timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss UTC")
-    errorMessage = $ErrorMessage
-    buildUrl = $env:BITBUCKET_BUILD_URL
-    step = $Step
-} | ConvertTo-Json
+    type = "message"
+    attachments = @(
+        @{
+            contentType = "application/vnd.microsoft.card.adaptive"
+            content = @{
+                type = "AdaptiveCard"
+                body = @(
+                    @{
+                        type = "TextBlock"
+                        size = "Large"
+                        weight = "Bolder"
+                        text = $title
+                        wrap = $true
+                    }
+                    @{
+                        type = "FactSet"
+                        facts = @(
+                            @{
+                                title = "Environment:"
+                                value = $Environment
+                            }
+                            @{
+                                title = "Status:"
+                                value = $Status
+                            }
+                            @{
+                                title = "Build:"
+                                value = $BuildNumber
+                            }
+                            @{
+                                title = "Branch:"
+                                value = $Branch
+                            }
+                            @{
+                                title = "Step:"
+                                value = $Step
+                            }
+                            @{
+                                title = "Commit:"
+                                value = $Commit.Substring(0, [Math]::Min(8, $Commit.Length))
+                            }
+                            @{
+                                title = "Timestamp:"
+                                value = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss UTC")
+                            }
+                        )
+                    }
+                )
+                '$schema' = "http://adaptivecards.io/schemas/adaptive-card.json"
+                version = "1.4"
+            }
+        }
+    )
+} 
+
+# Add error message if present
+if (-not [string]::IsNullOrWhiteSpace($ErrorMessage)) {
+    $payload.attachments[0].content.body += @{
+        type = "TextBlock"
+        text = "**Error:** $ErrorMessage"
+        wrap = $true
+        color = "Attention"
+    }
+}
+
+# Add build URL if present
+if (-not [string]::IsNullOrWhiteSpace($env:BITBUCKET_BUILD_URL)) {
+    $payload.attachments[0].content.body += @{
+        type = "ActionSet"
+        actions = @(
+            @{
+                type = "Action.OpenUrl"
+                title = "View Build"
+                url = $env:BITBUCKET_BUILD_URL
+            }
+        )
+    }
+}
+
+$payloadJson = $payload | ConvertTo-Json -Depth 10
 
 try {
     if ([string]::IsNullOrWhiteSpace($WebhookUrl)) {
@@ -44,9 +113,9 @@ try {
     }
     
     Write-Host "Sending payload to Power Automate:"
-    Write-Host $payload
+    Write-Host $payloadJson
     
-    $response = Invoke-WebRequest -Uri $WebhookUrl -Method Post -Body $payload -ContentType "application/json; charset=utf-8" -ErrorAction Stop
+    $response = Invoke-WebRequest -Uri $WebhookUrl -Method Post -Body $payloadJson -ContentType "application/json; charset=utf-8" -ErrorAction Stop
     Write-Host "[OK] Teams notification sent successfully"
     Write-Host "Response Status Code: $($response.StatusCode)"
     Write-Host "Response Content: $($response.Content)"
