@@ -1,28 +1,32 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createMockStoreAndWrapper } from "../../../test";
 import MilitaryContributionSearchFilter from "./MilitaryContributionSearchFilter";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 
 // Mock validators
-vi.mock("../../../utils/FormValidators", () => ({
-  ssnValidator: vi.fn(),
-  badgeNumberStringValidator: vi.fn(),
-  handleSsnInput: (value: string) => {
-    const cleaned = value.replace(/\D/g, "");
-    if (cleaned.length <= 9) {
-      const match = cleaned.match(/^(\d{0,3})(\d{0,2})(\d{0,4})$/);
-      if (match) {
-        const parts = [match[1], match[2], match[3]].filter(Boolean);
-        return parts.join("-") || "";
+vi.mock("../../../utils/FormValidators", async () => {
+  const yup = await import("yup");
+  return {
+    ssnValidator: yup.default.string().nullable(),
+    badgeNumberStringValidator: yup.default.string().nullable(),
+    handleSsnInput: (value: string) => {
+      const cleaned = value.replace(/\D/g, "");
+      if (cleaned.length <= 9) {
+        const match = cleaned.match(/^(\d{0,3})(\d{0,2})(\d{0,4})$/);
+        if (match) {
+          const parts = [match[1], match[2], match[3]].filter(Boolean);
+          return parts.join("-") || "";
+        }
       }
+      return value;
+    },
+    handleBadgeNumberStringInput: (value: string) => {
+      return value.replace(/\D/g, "");
     }
-    return value;
-  },
-  handleBadgeNumberStringInput: (value: string) => {
-    return value.replace(/\D/g, "");
-  }
-}));
+  };
+});
 
 vi.mock("../../../hooks/useDecemberFlowProfitYear", () => ({
   default: vi.fn(() => 2024)
@@ -56,30 +60,33 @@ vi.mock("smart-ui-library", () => ({
 }));
 
 describe("MilitaryContributionSearchFilter", () => {
-  //const mockExecuteSearch = vi.fn();
-  //const mockResetSearch = vi.fn();
+  let wrapper: ReturnType<typeof createMockStoreAndWrapper>["wrapper"];
 
   beforeEach(() => {
     vi.clearAllMocks();
+    const storeAndWrapper = createMockStoreAndWrapper({
+      yearsEnd: { selectedProfitYear: 2024 }
+    });
+    wrapper = storeAndWrapper.wrapper;
   });
 
   describe("Rendering", () => {
     it("should render search and reset buttons", () => {
-      render(<MilitaryContributionSearchFilter />);
+      render(<MilitaryContributionSearchFilter />, { wrapper });
 
       expect(screen.getByTestId("search-btn")).toBeInTheDocument();
       expect(screen.getByTestId("reset-btn")).toBeInTheDocument();
     });
 
     it("should render SSN and Badge input fields", () => {
-      render(<MilitaryContributionSearchFilter />);
+      render(<MilitaryContributionSearchFilter />, { wrapper });
 
       const inputs = screen.getAllByPlaceholderText(/SSN|Badge/i);
       expect(inputs.length).toBeGreaterThan(0);
     });
 
     it("should display required asterisks", () => {
-      render(<MilitaryContributionSearchFilter />);
+      render(<MilitaryContributionSearchFilter />, { wrapper });
 
       const requiredLabels = screen.getAllByText("*");
       expect(requiredLabels.length).toBeGreaterThan(0);
@@ -89,7 +96,7 @@ describe("MilitaryContributionSearchFilter", () => {
   describe("Field mutual exclusion", () => {
     it("should disable badge field when SSN is entered", async () => {
       const user = userEvent.setup();
-      render(<MilitaryContributionSearchFilter />);
+      render(<MilitaryContributionSearchFilter />, { wrapper });
 
       const inputs = screen.getAllByRole("textbox");
       const ssnInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("SSN"));
@@ -106,7 +113,7 @@ describe("MilitaryContributionSearchFilter", () => {
 
     it("should disable SSN field when Badge is entered", async () => {
       const user = userEvent.setup();
-      render(<MilitaryContributionSearchFilter />);
+      render(<MilitaryContributionSearchFilter />, { wrapper });
 
       const inputs = screen.getAllByRole("textbox");
       const ssnInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("SSN"));
@@ -123,7 +130,7 @@ describe("MilitaryContributionSearchFilter", () => {
 
     it("should enable both fields when one is cleared", async () => {
       const user = userEvent.setup();
-      render(<MilitaryContributionSearchFilter />);
+      render(<MilitaryContributionSearchFilter />, { wrapper });
 
       const inputs = screen.getAllByRole("textbox");
       const ssnInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("SSN"));
@@ -150,7 +157,7 @@ describe("MilitaryContributionSearchFilter", () => {
 
   describe("Search button behavior", () => {
     it("should disable search button when no criteria entered", () => {
-      render(<MilitaryContributionSearchFilter />);
+      render(<MilitaryContributionSearchFilter />, { wrapper });
 
       const searchButton = screen.getByTestId("search-btn");
       expect(searchButton).toBeDisabled();
@@ -158,7 +165,7 @@ describe("MilitaryContributionSearchFilter", () => {
 
     it("should enable search button when SSN is entered", async () => {
       const user = userEvent.setup();
-      render(<MilitaryContributionSearchFilter />);
+      render(<MilitaryContributionSearchFilter />, { wrapper });
 
       const inputs = screen.getAllByRole("textbox");
       const ssnInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("SSN"));
@@ -176,7 +183,7 @@ describe("MilitaryContributionSearchFilter", () => {
 
     it("should enable search button when Badge is entered", async () => {
       const user = userEvent.setup();
-      render(<MilitaryContributionSearchFilter />);
+      render(<MilitaryContributionSearchFilter />, { wrapper });
 
       const inputs = screen.getAllByRole("textbox");
       const badgeInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("Badge"));
@@ -196,7 +203,7 @@ describe("MilitaryContributionSearchFilter", () => {
   describe("Reset button behavior", () => {
     it("should clear form fields when reset is clicked", async () => {
       const user = userEvent.setup();
-      render(<MilitaryContributionSearchFilter />);
+      render(<MilitaryContributionSearchFilter />, { wrapper });
 
       const inputs = screen.getAllByRole("textbox");
       const ssnInput = inputs.find((input) =>
@@ -218,7 +225,7 @@ describe("MilitaryContributionSearchFilter", () => {
 
     it("should enable both fields after reset", async () => {
       const user = userEvent.setup();
-      render(<MilitaryContributionSearchFilter />);
+      render(<MilitaryContributionSearchFilter />, { wrapper });
 
       const inputs = screen.getAllByRole("textbox");
       const ssnInput = inputs.find((input) =>
@@ -248,7 +255,7 @@ describe("MilitaryContributionSearchFilter", () => {
 
   describe("Form validation", () => {
     it("should validate that at least one field is required", () => {
-      render(<MilitaryContributionSearchFilter />);
+      render(<MilitaryContributionSearchFilter />, { wrapper });
 
       const searchButton = screen.getByTestId("search-btn");
       expect(searchButton).toBeDisabled();
@@ -256,7 +263,7 @@ describe("MilitaryContributionSearchFilter", () => {
 
     it("should validate SSN format", async () => {
       const user = userEvent.setup();
-      render(<MilitaryContributionSearchFilter />);
+      render(<MilitaryContributionSearchFilter />, { wrapper });
 
       const inputs = screen.getAllByRole("textbox");
       const ssnInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("SSN"));
@@ -273,7 +280,7 @@ describe("MilitaryContributionSearchFilter", () => {
   describe("Form submission", () => {
     it("should submit form with SSN", async () => {
       const user = userEvent.setup();
-      render(<MilitaryContributionSearchFilter />);
+      render(<MilitaryContributionSearchFilter />, { wrapper });
 
       const inputs = screen.getAllByRole("textbox");
       const ssnInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("SSN"));
@@ -296,7 +303,7 @@ describe("MilitaryContributionSearchFilter", () => {
 
     it("should submit form with Badge", async () => {
       const user = userEvent.setup();
-      render(<MilitaryContributionSearchFilter />);
+      render(<MilitaryContributionSearchFilter />, { wrapper });
 
       const inputs = screen.getAllByRole("textbox");
       const badgeInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("Badge"));
@@ -319,7 +326,7 @@ describe("MilitaryContributionSearchFilter", () => {
 
   describe("Loading state", () => {
     it("should show loading state when searching", () => {
-      render(<MilitaryContributionSearchFilter />);
+      render(<MilitaryContributionSearchFilter />, { wrapper });
 
       expect(screen.getByTestId("search-and-reset")).toBeInTheDocument();
     });
@@ -327,7 +334,7 @@ describe("MilitaryContributionSearchFilter", () => {
 
   describe("Profit year integration", () => {
     it("should use profit year from hook", () => {
-      render(<MilitaryContributionSearchFilter />);
+      render(<MilitaryContributionSearchFilter />, { wrapper });
 
       expect(useDecemberFlowProfitYear).toHaveBeenCalled();
     });

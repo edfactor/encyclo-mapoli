@@ -17,7 +17,7 @@
  */
 
 import { configureStore, PreloadedState } from "@reduxjs/toolkit";
-import { PropsWithChildren, ReactNode } from "react";
+import React, { PropsWithChildren, ReactNode } from "react";
 import { Provider } from "react-redux";
 
 /**
@@ -53,6 +53,10 @@ interface MockRootState {
   distribution?: {
     [key: string]: unknown;
   };
+  inquiry?: {
+    masterInquiryMemberDetails?: unknown;
+    [key: string]: unknown;
+  };
   [key: string]: unknown;
 }
 
@@ -86,7 +90,10 @@ export const createMockStore = (preloadedState?: PreloadedState<MockRootState>) 
     yearsEnd: {
       selectedProfitYear: 2024
     },
-    distribution: {}
+    distribution: {},
+    inquiry: {
+      masterInquiryMemberDetails: null
+    }
   };
 
   // Create simple reducers that just return state
@@ -96,21 +103,40 @@ export const createMockStore = (preloadedState?: PreloadedState<MockRootState>) 
     _action: unknown
   ) => state;
 
+  const baseReducers = {
+    security: createSliceReducer(preloadedState?.security ?? defaultState.security),
+    navigation: createSliceReducer(
+      preloadedState?.navigation ?? defaultState.navigation
+    ),
+    yearsEnd: createSliceReducer(
+      preloadedState?.yearsEnd ?? defaultState.yearsEnd
+    ),
+    distribution: createSliceReducer(
+      preloadedState?.distribution ?? defaultState.distribution
+    ),
+    inquiry: createSliceReducer(preloadedState?.inquiry ?? defaultState.inquiry)
+  };
+
+  // Add lookupsApi reducer and middleware if mocked in tests
+  // This allows tests that mock lookupsApi to work properly
+  const reducers: { [key: string]: unknown } = baseReducers;
+  const lookupsApiReducerPath = "lookupsApi";
+
+  // Provide fallback for lookupsApi that tests can mock
+  // When tests mock lookupsApi with vi.mock(), these will be replaced
+  const defaultLookupsApiReducer = (state = {}) => state;
+  reducers[lookupsApiReducerPath] = defaultLookupsApiReducer;
+
   return configureStore({
-    reducer: {
-      security: createSliceReducer(preloadedState?.security ?? defaultState.security),
-      navigation: createSliceReducer(
-        preloadedState?.navigation ?? defaultState.navigation
-      ),
-      yearsEnd: createSliceReducer(
-        preloadedState?.yearsEnd ?? defaultState.yearsEnd
-      ),
-      distribution: createSliceReducer(
-        preloadedState?.distribution ?? defaultState.distribution
-      )
+    reducer: reducers,
+    middleware: (getDefaultMiddleware) => {
+      // Return default middleware - mocked lookupsApi middleware will be added by test mocks
+      return getDefaultMiddleware();
     }
   });
 };
+
+type MockStore = ReturnType<typeof createMockStore>;
 
 /**
  * Creates a wrapper component that provides Redux store
@@ -123,10 +149,13 @@ export const createMockStore = (preloadedState?: PreloadedState<MockRootState>) 
  * const wrapper = createProviderWrapper(store);
  * render(<Component />, { wrapper });
  */
-export const createProviderWrapper = (store: ReturnType<typeof createMockStore>) => {
-  return ({ children }: PropsWithChildren<Record<string, unknown>>) => (
-    <Provider store={store}>{children}</Provider>
-  );
+type ProviderProps = PropsWithChildren<Record<string, unknown>>;
+
+export const createProviderWrapper = (store: MockStore) => {
+  const Wrapper = ({ children }: ProviderProps) => {
+    return React.createElement(Provider, { store }, children);
+  };
+  return Wrapper;
 };
 
 /**
@@ -163,16 +192,16 @@ export const createMockStoreAndWrapper = (
  * render(<Component />, { wrapper });
  */
 export const createTestWrapper = (
-  store: ReturnType<typeof createMockStore>,
+  store: MockStore,
   additionalProviders?: Array<(props: { children: ReactNode }) => ReactNode>
 ) => {
-  return ({ children }: PropsWithChildren<Record<string, unknown>>) => {
-    let content: ReactNode = <Provider store={store}>{children}</Provider>;
+  return ({ children }: ProviderProps) => {
+    let content: ReactNode = React.createElement(Provider, { store }, children);
 
     // Wrap with additional providers in order
     if (additionalProviders) {
-      for (const Provider of additionalProviders) {
-        content = <Provider>{content}</Provider>;
+      for (const ProviderComponent of additionalProviders) {
+        content = React.createElement(ProviderComponent, undefined, content);
       }
     }
 

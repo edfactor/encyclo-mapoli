@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import { createMockStoreAndWrapper } from "../../../test";
 import ForfeituresAdjustmentSearchFilter from "./ForfeituresAdjustmentSearchFilter";
 
 // Mock the form validators - must use factory function to avoid hoisting issues
@@ -43,9 +44,14 @@ vi.mock("../../../utils/FormValidators", async () => {
 describe("ForfeituresAdjustmentSearchFilter", () => {
   const mockOnSearch = vi.fn();
   const mockOnReset = vi.fn();
+  let wrapper: ReturnType<typeof createMockStoreAndWrapper>["wrapper"];
 
   beforeEach(() => {
     vi.clearAllMocks();
+    const storeAndWrapper = createMockStoreAndWrapper({
+      yearsEnd: { selectedProfitYear: 2024 }
+    });
+    wrapper = storeAndWrapper.wrapper;
   });
 
   describe("Rendering", () => {
@@ -55,7 +61,8 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
           onSearch={mockOnSearch}
           onReset={mockOnReset}
           isSearching={false}
-        />
+        />,
+        { wrapper }
       );
 
       expect(screen.getByRole("button", { name: /search/i })).toBeInTheDocument();
@@ -68,7 +75,8 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
           onSearch={mockOnSearch}
           onReset={mockOnReset}
           isSearching={false}
-        />
+        />,
+        { wrapper }
       );
 
       expect(screen.getByPlaceholderText("SSN")).toBeInTheDocument();
@@ -81,7 +89,8 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
           onSearch={mockOnSearch}
           onReset={mockOnReset}
           isSearching={false}
-        />
+        />,
+        { wrapper }
       );
 
       const labels = screen.getAllByText("*");
@@ -97,7 +106,8 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
           onSearch={mockOnSearch}
           onReset={mockOnReset}
           isSearching={false}
-        />
+        />,
+        { wrapper }
       );
 
       const ssnInput = screen.getByPlaceholderText("SSN") as HTMLInputElement;
@@ -117,7 +127,8 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
           onSearch={mockOnSearch}
           onReset={mockOnReset}
           isSearching={false}
-        />
+        />,
+        { wrapper }
       );
 
       const ssnInput = screen.getByPlaceholderText("SSN") as HTMLInputElement;
@@ -137,7 +148,8 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
           onSearch={mockOnSearch}
           onReset={mockOnReset}
           isSearching={false}
-        />
+        />,
+        { wrapper }
       );
 
       const ssnInput = screen.getByPlaceholderText("SSN") as HTMLInputElement;
@@ -165,7 +177,8 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
           onSearch={mockOnSearch}
           onReset={mockOnReset}
           isSearching={false}
-        />
+        />,
+        { wrapper }
       );
 
       const searchButton = screen.getByRole("button", { name: /search/i });
@@ -179,7 +192,8 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
           onSearch={mockOnSearch}
           onReset={mockOnReset}
           isSearching={false}
-        />
+        />,
+        { wrapper }
       );
 
       const ssnInput = screen.getByPlaceholderText("SSN");
@@ -199,7 +213,8 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
           onSearch={mockOnSearch}
           onReset={mockOnReset}
           isSearching={false}
-        />
+        />,
+        { wrapper }
       );
 
       const badgeInput = screen.getByPlaceholderText("Badge");
@@ -219,7 +234,8 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
           onSearch={mockOnSearch}
           onReset={mockOnReset}
           isSearching={false}
-        />
+        />,
+        { wrapper }
       );
 
       const ssnInput = screen.getByPlaceholderText("SSN");
@@ -270,7 +286,8 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
           onSearch={mockOnSearch}
           onReset={mockOnReset}
           isSearching={false}
-        />
+        />,
+        { wrapper }
       );
 
       const ssnInput = screen.getByPlaceholderText("SSN") as HTMLInputElement;
@@ -297,7 +314,8 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
           onSearch={mockOnSearch}
           onReset={mockOnReset}
           isSearching={false}
-        />
+        />,
+        { wrapper }
       );
 
       const ssnInput = screen.getByPlaceholderText("SSN");
@@ -316,7 +334,8 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
           onSearch={mockOnSearch}
           onReset={mockOnReset}
           isSearching={false}
-        />
+        />,
+        { wrapper }
       );
 
       const ssnInput = screen.getByPlaceholderText("SSN") as HTMLInputElement;
@@ -346,7 +365,8 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
           onSearch={mockOnSearch}
           onReset={mockOnReset}
           isSearching={false}
-        />
+        />,
+        { wrapper }
       );
 
       const ssnInput = screen.getByPlaceholderText("SSN");
@@ -367,7 +387,8 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
           onSearch={mockOnSearch}
           onReset={mockOnReset}
           isSearching={false}
-        />
+        />,
+        { wrapper }
       );
 
       const searchButton = screen.getByRole("button", { name: /search/i });
@@ -384,7 +405,8 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
           onSearch={mockOnSearch}
           onReset={mockOnReset}
           isSearching={false}
-        />
+        />,
+        { wrapper }
       );
 
       const badgeInput = screen.getByPlaceholderText("Badge");

@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import { createMockStoreAndWrapper } from "../../../test";
 import UnForfeit from "./UnForfeit";
 import { useLazyGetAccountingRangeToCurrent } from "../../../hooks/useFiscalCalendarYear";
 import { useUnForfeitState } from "../../../hooks/useUnForfeitState";
@@ -96,32 +97,38 @@ vi.mock("smart-ui-library", () => ({
 }));
 
 describe("UnForfeit", () => {
+  let wrapper: ReturnType<typeof createMockStoreAndWrapper>["wrapper"];
+
   beforeEach(() => {
     vi.clearAllMocks();
+    const storeAndWrapper = createMockStoreAndWrapper({
+      yearsEnd: { selectedProfitYear: 2024 }
+    });
+    wrapper = storeAndWrapper.wrapper;
   });
 
   describe("Rendering", () => {
     it("should render the page component", () => {
-      render(<UnForfeit />);
+      render(<UnForfeit />, { wrapper });
 
       expect(screen.getByTestId("page")).toBeInTheDocument();
     });
 
     it("should render page with correct label", () => {
-      render(<UnForfeit />);
+      render(<UnForfeit />, { wrapper });
 
       // The label should be "UnForfeit (QPREV-PROF)"
       expect(screen.getByText("UnForfeit (QPREV-PROF)")).toBeInTheDocument();
     });
 
     it("should render ApiMessageAlert", () => {
-      render(<UnForfeit />);
+      render(<UnForfeit />, { wrapper });
 
       expect(screen.getByTestId("api-message-alert")).toBeInTheDocument();
     });
 
     it("should render StatusDropdownActionNode in action node", () => {
-      render(<UnForfeit />);
+      render(<UnForfeit />, { wrapper });
 
       expect(screen.getByTestId("status-dropdown")).toBeInTheDocument();
     });
@@ -138,7 +145,7 @@ describe("UnForfeit", () => {
         }
       ] as MockFiscalData);
 
-      render(<UnForfeit />);
+      render(<UnForfeit />, { wrapper });
 
       await waitFor(() => {
         expect(screen.getByRole("progressbar")).toBeInTheDocument();
@@ -146,7 +153,7 @@ describe("UnForfeit", () => {
     });
 
     it("should render search filter and grid when fiscal data is loaded", async () => {
-      render(<UnForfeit />);
+      render(<UnForfeit />, { wrapper });
 
       await waitFor(() => {
         expect(screen.getByTestId("search-filter")).toBeInTheDocument();
@@ -160,7 +167,7 @@ describe("UnForfeit", () => {
       const { useIsProfitYearFrozen } = await import("../../../hooks/useIsProfitYearFrozen");
       vi.mocked(useIsProfitYearFrozen).mockReturnValueOnce(true);
 
-      render(<UnForfeit />);
+      render(<UnForfeit />, { wrapper });
 
       expect(screen.getByTestId("frozen-warning")).toBeInTheDocument();
     });
@@ -169,7 +176,7 @@ describe("UnForfeit", () => {
       const { useIsProfitYearFrozen } = await import("../../../hooks/useIsProfitYearFrozen");
       vi.mocked(useIsProfitYearFrozen).mockReturnValueOnce(false);
 
-      render(<UnForfeit />);
+      render(<UnForfeit />, { wrapper });
 
       expect(screen.queryByTestId("frozen-warning")).not.toBeInTheDocument();
     });
@@ -199,7 +206,7 @@ describe("UnForfeit", () => {
         }
       } as MockUnForfeitState);
 
-      render(<UnForfeit />);
+      render(<UnForfeit />, { wrapper });
 
       const searchButton = await screen.findByTestId("search-button");
       fireEvent.click(searchButton);
@@ -232,7 +239,7 @@ describe("UnForfeit", () => {
         }
       } as MockUnForfeitState);
 
-      render(<UnForfeit />);
+      render(<UnForfeit />, { wrapper });
 
       const searchButton = await screen.findByTestId("search-button");
 
@@ -266,7 +273,7 @@ describe("UnForfeit", () => {
         }
       } as MockUnForfeitState);
 
-      render(<UnForfeit />);
+      render(<UnForfeit />, { wrapper });
 
       await waitFor(() => {
         expect(useUnsavedChangesGuard).toHaveBeenCalledWith(true);
@@ -298,7 +305,7 @@ describe("UnForfeit", () => {
         }
       } as MockUnForfeitState);
 
-      render(<UnForfeit />);
+      render(<UnForfeit />, { wrapper });
 
       expect(screen.getByTestId("status-dropdown")).toBeInTheDocument();
     });
@@ -328,7 +335,7 @@ describe("UnForfeit", () => {
         }
       } as MockUnForfeitState);
 
-      render(<UnForfeit />);
+      render(<UnForfeit />, { wrapper });
 
       await waitFor(() => {
         expect(mockHandleSearch).toHaveBeenCalled();
@@ -358,7 +365,7 @@ describe("UnForfeit", () => {
         }
       } as MockUnForfeitState);
 
-      render(<UnForfeit />);
+      render(<UnForfeit />, { wrapper });
 
       // Auto-search should not be triggered
       expect(mockHandleSearch).not.toHaveBeenCalled();
@@ -388,13 +395,13 @@ describe("UnForfeit", () => {
         }
       } as MockUnForfeitState);
 
-      render(<UnForfeit />);
+      render(<UnForfeit />, { wrapper });
 
       expect(screen.getByTestId("unforfeit-grid")).toBeInTheDocument();
     });
 
     it("should pass fiscal data to UnForfeitSearchFilter", async () => {
-      render(<UnForfeit />);
+      render(<UnForfeit />, { wrapper });
 
       // Verify search filter is rendered with fiscal data available
       expect(screen.getByTestId("search-filter")).toBeInTheDocument();
@@ -422,7 +429,7 @@ describe("UnForfeit", () => {
         }
       } as MockUnForfeitState);
 
-      render(<UnForfeit />);
+      render(<UnForfeit />, { wrapper });
 
       const searchButton = await screen.findByTestId("search-button");
       expect(searchButton).toBeDisabled();
@@ -433,7 +440,7 @@ describe("UnForfeit", () => {
     it("should use profit year from hook", async () => {
       const { useIsProfitYearFrozen } = await import("../../../hooks/useIsProfitYearFrozen");
 
-      render(<UnForfeit />);
+      render(<UnForfeit />, { wrapper });
 
       await waitFor(() => {
         expect(useIsProfitYearFrozen).toHaveBeenCalledWith(2024);
@@ -456,7 +463,7 @@ describe("UnForfeit", () => {
         }
       ] as MockFiscalData);
 
-      render(<UnForfeit />);
+      render(<UnForfeit />, { wrapper });
 
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalled();
@@ -466,7 +473,7 @@ describe("UnForfeit", () => {
     it("should pass (6) to useLazyGetAccountingRangeToCurrent", async () => {
       const { useLazyGetAccountingRangeToCurrent } = await import("../../../hooks/useFiscalCalendarYear");
 
-      render(<UnForfeit />);
+      render(<UnForfeit />, { wrapper });
 
       await waitFor(() => {
         expect(useLazyGetAccountingRangeToCurrent).toHaveBeenCalledWith(6);

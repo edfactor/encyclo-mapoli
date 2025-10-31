@@ -100,24 +100,18 @@ describe("DistributionsAndForfeitures", () => {
       render(<DistributionsAndForfeitures />);
 
       // Verify grid receives initialSearchLoaded prop
-      expect(vi.mocked(DistributionsAndForfeituresGrid)).toHaveBeenCalledWith(
-        expect.objectContaining({
-          initialSearchLoaded: false
-        }),
-        expect.anything()
-      );
+      const calls = vi.mocked(DistributionsAndForfeituresGrid).mock.calls;
+      expect(calls.length).toBeGreaterThan(0);
+      expect(calls[0][0]).toHaveProperty('initialSearchLoaded', false);
     });
 
     it("should initialize with isFetching false", () => {
       render(<DistributionsAndForfeitures />);
 
       // Verify search filter receives isFetching prop
-      expect(vi.mocked(DistributionsAndForfeituresSearchFilter)).toHaveBeenCalledWith(
-        expect.objectContaining({
-          isFetching: false
-        }),
-        expect.anything()
-      );
+      const calls = vi.mocked(DistributionsAndForfeituresSearchFilter).mock.calls;
+      expect(calls.length).toBeGreaterThan(0);
+      expect(calls[0][0]).toHaveProperty('isFetching', false);
     });
   });
 
@@ -126,12 +120,10 @@ describe("DistributionsAndForfeitures", () => {
       render(<DistributionsAndForfeitures />);
 
       await waitFor(() => {
-        expect(vi.mocked(DistributionsAndForfeituresSearchFilter)).toHaveBeenCalledWith(
-          expect.objectContaining({
-            setInitialSearchLoaded: expect.any(Function)
-          }),
-          expect.anything()
-        );
+        const calls = vi.mocked(DistributionsAndForfeituresSearchFilter).mock.calls;
+        expect(calls.length).toBeGreaterThan(0);
+        expect(calls[0][0]).toHaveProperty('setInitialSearchLoaded');
+        expect(typeof calls[0][0].setInitialSearchLoaded).toBe('function');
       });
     });
 
@@ -139,12 +131,10 @@ describe("DistributionsAndForfeitures", () => {
       render(<DistributionsAndForfeitures />);
 
       await waitFor(() => {
-        expect(vi.mocked(DistributionsAndForfeituresGrid)).toHaveBeenCalledWith(
-          expect.objectContaining({
-            setInitialSearchLoaded: expect.any(Function)
-          }),
-          expect.anything()
-        );
+        const calls = vi.mocked(DistributionsAndForfeituresGrid).mock.calls;
+        expect(calls.length).toBeGreaterThan(0);
+        expect(calls[0][0]).toHaveProperty('setInitialSearchLoaded');
+        expect(typeof calls[0][0].setInitialSearchLoaded).toBe('function');
       });
     });
 
@@ -152,12 +142,10 @@ describe("DistributionsAndForfeitures", () => {
       render(<DistributionsAndForfeitures />);
 
       await waitFor(() => {
-        expect(vi.mocked(DistributionsAndForfeituresGrid)).toHaveBeenCalledWith(
-          expect.objectContaining({
-            onLoadingChange: expect.any(Function)
-          }),
-          expect.anything()
-        );
+        const calls = vi.mocked(DistributionsAndForfeituresGrid).mock.calls;
+        expect(calls.length).toBeGreaterThan(0);
+        expect(calls[0][0]).toHaveProperty('onLoadingChange');
+        expect(typeof calls[0][0].onLoadingChange).toBe('function');
       });
     });
   });
@@ -233,18 +221,20 @@ describe("DistributionsAndForfeitures", () => {
 
   describe("Search button interaction", () => {
     it("should update initialSearchLoaded when search is triggered", async () => {
+      const user = userEvent.setup();
       render(<DistributionsAndForfeitures />);
 
       const searchBtn = screen.getByTestId("search-btn");
-      searchBtn.click();
+      await act(async () => {
+        await user.click(searchBtn);
+      });
 
       await waitFor(() => {
-        expect(vi.mocked(DistributionsAndForfeituresGrid)).toHaveBeenCalledWith(
-          expect.objectContaining({
-            initialSearchLoaded: expect.any(Boolean)
-          }),
-          expect.anything()
-        );
+        const calls = vi.mocked(DistributionsAndForfeituresGrid).mock.calls;
+        expect(calls.length).toBeGreaterThan(0);
+        // Find a call where initialSearchLoaded is true
+        const callWithTrue = calls.find(call => call[0].initialSearchLoaded === true);
+        expect(callWithTrue).toBeDefined();
       });
     });
   });
@@ -261,7 +251,8 @@ describe("DistributionsAndForfeitures", () => {
       render(<DistributionsAndForfeitures />);
 
       const page = screen.getByTestId("page");
-      expect(page).toHaveClass("div");
+      expect(page).toBeInTheDocument();
+      expect(page.tagName).toBe("DIV");
     });
   });
 

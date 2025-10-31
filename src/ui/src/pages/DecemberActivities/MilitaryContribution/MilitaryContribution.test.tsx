@@ -1,7 +1,6 @@
-import { configureStore } from "@reduxjs/toolkit";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { Provider } from "react-redux";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createMockStoreAndWrapper } from "../../../test";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import MilitaryContribution from "./MilitaryContribution";
 
@@ -129,42 +128,34 @@ vi.mock("smart-ui-library", () => ({
 }));
 
 describe("MilitaryContribution", () => {
-  const createMockStore = () => {
-    return configureStore({
-      reducer: {
-        security: () => ({ token: "mock-token" }),
-        navigation: () => ({ navigationData: null }),
-        inquiry: () => ({
-          masterInquiryMemberDetails: {
-            badgeNumber: 12345,
-            firstName: "John",
-            lastName: "Doe"
-          }
-        }),
-        yearsEnd: () => ({
-          selectedProfitYearForFiscalClose: 2024
-        }),
-        message: () => ({}) // Add message reducer
-      }
-    });
-  };
-
-  const wrapper =
-    (store: ReturnType<typeof configureStore>) =>
-    ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>
-        <MissiveAlertProvider>{children}</MissiveAlertProvider>
-      </Provider>
-    );
+  let customWrapper: ({ children }: { children: React.ReactNode }) => React.ReactElement;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    const mockState = {
+      yearsEnd: {
+        selectedProfitYear: 2024
+      },
+      inquiry: {
+        masterInquiryMemberDetails: {
+          badgeNumber: 12345,
+          firstName: "John",
+          lastName: "Doe"
+        }
+      }
+    };
+    const { wrapper } = createMockStoreAndWrapper(mockState);
+    // Wrap with MissiveAlertProvider for this component
+    customWrapper = ({ children }: { children: React.ReactNode }) => (
+      <MissiveAlertProvider>
+        {wrapper({ children })}
+      </MissiveAlertProvider>
+    );
   });
 
   describe("Rendering", () => {
     it("should render the page with all components", () => {
-      const mockStore = createMockStore();
-      render(<MilitaryContribution />, { wrapper: wrapper(mockStore) });
+      render(<MilitaryContribution />, { wrapper: customWrapper });
 
       expect(screen.getByTestId("page")).toBeInTheDocument();
       expect(screen.getByTestId("status-dropdown")).toBeInTheDocument();
@@ -173,15 +164,13 @@ describe("MilitaryContribution", () => {
     });
 
     it("should render search filter accordion", () => {
-      const mockStore = createMockStore();
-      render(<MilitaryContribution />, { wrapper: wrapper(mockStore) });
+      render(<MilitaryContribution />, { wrapper: customWrapper });
 
       expect(screen.getByTestId("search-filter")).toBeInTheDocument();
     });
 
     it("should render military contribution grid when member selected", () => {
-      const mockStore = createMockStore();
-      render(<MilitaryContribution />, { wrapper: wrapper(mockStore) });
+      render(<MilitaryContribution />, { wrapper: customWrapper });
 
       expect(screen.getByTestId("military-grid")).toBeInTheDocument();
     });
@@ -190,20 +179,25 @@ describe("MilitaryContribution", () => {
       const useDecemberFlowProfitYear = await import("../../../hooks/useDecemberFlowProfitYear");
       vi.mocked(useDecemberFlowProfitYear.default).mockReturnValueOnce(2024);
 
-      const mockStore = configureStore({
-        reducer: {
-          security: () => ({ token: "mock-token" }),
-          navigation: () => ({ navigationData: null }),
-          inquiry: () => ({
-            masterInquiryMemberDetails: null // No member selected
-          }),
-          yearsEnd: () => ({
-            selectedProfitYearForFiscalClose: 2024
-          })
+      const noMemberState = {
+        security: { token: "mock-token" },
+        navigation: { navigationData: null },
+        inquiry: {
+          masterInquiryMemberDetails: null // No member selected
+        },
+        yearsEnd: {
+          selectedProfitYear: 2024
         }
-      });
+      };
+      const { wrapper: mockWrapper } = createMockStoreAndWrapper(noMemberState);
 
-      render(<MilitaryContribution />, { wrapper: wrapper(mockStore) });
+      const testWrapper = ({ children }: { children: React.ReactNode }) => (
+        <MissiveAlertProvider>
+          {mockWrapper({ children })}
+        </MissiveAlertProvider>
+      );
+
+      render(<MilitaryContribution />, { wrapper: testWrapper });
 
       expect(screen.getByText(/Please search for and select an employee/)).toBeInTheDocument();
     });
@@ -214,8 +208,7 @@ describe("MilitaryContribution", () => {
       const { useIsProfitYearFrozen } = await import("../../../hooks/useIsProfitYearFrozen");
       vi.mocked(useIsProfitYearFrozen).mockReturnValueOnce(true);
 
-      const mockStore = createMockStore();
-      render(<MilitaryContribution />, { wrapper: wrapper(mockStore) });
+      render(<MilitaryContribution />, { wrapper: customWrapper });
 
       expect(screen.getByTestId("frozen-warning")).toBeInTheDocument();
     });
@@ -224,8 +217,7 @@ describe("MilitaryContribution", () => {
       const { useIsProfitYearFrozen } = await import("../../../hooks/useIsProfitYearFrozen");
       vi.mocked(useIsProfitYearFrozen).mockReturnValueOnce(false);
 
-      const mockStore = createMockStore();
-      render(<MilitaryContribution />, { wrapper: wrapper(mockStore) });
+      render(<MilitaryContribution />, { wrapper: customWrapper });
 
       expect(screen.queryByTestId("frozen-warning")).not.toBeInTheDocument();
     });
@@ -236,8 +228,7 @@ describe("MilitaryContribution", () => {
       const { useIsReadOnlyByStatus } = await import("../../../hooks/useIsReadOnlyByStatus");
       vi.mocked(useIsReadOnlyByStatus).mockReturnValueOnce(true);
 
-      const mockStore = createMockStore();
-      render(<MilitaryContribution />, { wrapper: wrapper(mockStore) });
+      render(<MilitaryContribution />, { wrapper: customWrapper });
 
       expect(screen.getByTestId("readonly-info")).toBeInTheDocument();
     });
@@ -246,8 +237,7 @@ describe("MilitaryContribution", () => {
       const { useReadOnlyNavigation } = await import("../../../hooks/useReadOnlyNavigation");
       vi.mocked(useReadOnlyNavigation).mockReturnValueOnce(true);
 
-      const mockStore = createMockStore();
-      render(<MilitaryContribution />, { wrapper: wrapper(mockStore) });
+      render(<MilitaryContribution />, { wrapper: customWrapper });
 
       const addBtn = screen.getByTestId("add-contribution-btn");
       expect(addBtn).toBeDisabled();
@@ -257,8 +247,7 @@ describe("MilitaryContribution", () => {
       const { useReadOnlyNavigation } = await import("../../../hooks/useReadOnlyNavigation");
       vi.mocked(useReadOnlyNavigation).mockReturnValueOnce(false);
 
-      const mockStore = createMockStore();
-      render(<MilitaryContribution />, { wrapper: wrapper(mockStore) });
+      render(<MilitaryContribution />, { wrapper: customWrapper });
 
       const addBtn = screen.getByTestId("add-contribution-btn");
       expect(addBtn).not.toBeDisabled();
@@ -267,8 +256,27 @@ describe("MilitaryContribution", () => {
 
   describe("Add contribution dialog", () => {
     it("should open dialog when add contribution button is clicked", async () => {
-      const mockStore = createMockStore();
-      const { rerender } = render(<MilitaryContribution />, { wrapper: wrapper(mockStore) });
+      const memberState = {
+        yearsEnd: {
+          selectedProfitYear: 2024
+        },
+        inquiry: {
+          masterInquiryMemberDetails: {
+            badgeNumber: 12345,
+            firstName: "John",
+            lastName: "Doe"
+          }
+        }
+      };
+      const { wrapper: mockWrapper } = createMockStoreAndWrapper(memberState);
+
+      const testWrapper = ({ children }: { children: React.ReactNode }) => (
+        <MissiveAlertProvider>
+          {mockWrapper({ children })}
+        </MissiveAlertProvider>
+      );
+
+      const { rerender } = render(<MilitaryContribution />, { wrapper: testWrapper });
 
       const addBtn = screen.getByTestId("add-contribution-btn");
       fireEvent.click(addBtn);
@@ -283,8 +291,7 @@ describe("MilitaryContribution", () => {
     });
 
     it("should close dialog when form is submitted", async () => {
-      const mockStore = createMockStore();
-      render(<MilitaryContribution />, { wrapper: wrapper(mockStore) });
+      render(<MilitaryContribution />, { wrapper: customWrapper });
 
       const addBtn = screen.getByTestId("add-contribution-btn");
       fireEvent.click(addBtn);
@@ -305,8 +312,7 @@ describe("MilitaryContribution", () => {
     });
 
     it("should close dialog when cancel is clicked", async () => {
-      const mockStore = createMockStore();
-      render(<MilitaryContribution />, { wrapper: wrapper(mockStore) });
+      render(<MilitaryContribution />, { wrapper: customWrapper });
 
       const addBtn = screen.getByTestId("add-contribution-btn");
       fireEvent.click(addBtn);
@@ -327,8 +333,7 @@ describe("MilitaryContribution", () => {
   describe("Contribution saved message", () => {
     it("should display success message when contribution is saved", async () => {
       const { setMessage } = await import("smart-ui-library");
-      const mockStore = createMockStore();
-      render(<MilitaryContribution />, { wrapper: wrapper(mockStore) });
+      render(<MilitaryContribution />, { wrapper: customWrapper });
 
       const addBtn = screen.getByTestId("add-contribution-btn");
       fireEvent.click(addBtn);
@@ -348,8 +353,7 @@ describe("MilitaryContribution", () => {
 
   describe("Member details synchronization", () => {
     it("should fetch contributions when member details change", () => {
-      const mockStore = createMockStore();
-      render(<MilitaryContribution />, { wrapper: wrapper(mockStore) });
+      render(<MilitaryContribution />, { wrapper: customWrapper });
 
       expect(screen.getByTestId("military-grid")).toBeInTheDocument();
     });
@@ -357,8 +361,15 @@ describe("MilitaryContribution", () => {
 
   describe("Component cleanup", () => {
     it("should reset search on unmount", () => {
-      const mockStore = createMockStore();
-      const { unmount } = render(<MilitaryContribution />, { wrapper: wrapper(mockStore) });
+      const { wrapper: mockWrapper } = createMockStoreAndWrapper();
+
+      const testWrapper = ({ children }: { children: React.ReactNode }) => (
+        <MissiveAlertProvider>
+          {mockWrapper({ children })}
+        </MissiveAlertProvider>
+      );
+
+      const { unmount } = render(<MilitaryContribution />, { wrapper: testWrapper });
 
       // The component should call resetSearch on unmount
       unmount();
@@ -377,8 +388,7 @@ describe("MilitaryContribution", () => {
         clearAlerts: vi.fn()
       });
 
-      const mockStore = createMockStore();
-      render(<MilitaryContribution />, { wrapper: wrapper(mockStore) });
+      render(<MilitaryContribution />, { wrapper: customWrapper });
 
       expect(screen.getByTestId("missive-alerts")).toBeInTheDocument();
     });

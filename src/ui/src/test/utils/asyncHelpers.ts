@@ -14,7 +14,7 @@
  *   await waitForText("Success!");
  */
 
-import { waitFor, screen, within, ByRoleOptions } from "@testing-library/react";
+import { waitFor, screen, ByRoleOptions } from "@testing-library/react";
 import { act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -433,7 +433,10 @@ export const waitForRole = async (
 
   await waitFor(
     () => {
-      element = screen.getByRole(role as any, roleOptions);
+      element = screen.getByRole(
+        role as Parameters<typeof screen.getByRole>[0],
+        roleOptions
+      );
       expect(element).toBeInTheDocument();
     },
     { timeout }
