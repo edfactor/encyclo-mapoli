@@ -654,6 +654,52 @@ definitions:
 
           Write-Host "[8] Finalize with exit code $pwExit" -ForegroundColor Cyan
           exit $pwExit
+
+    create-release-tag: &create-release-tag
+      name: Create Release Tag
+      script:
+        - |
+          echo "Reading build information..."
+          if [ ! -f ".buildinfo.json" ]; then
+            echo "Error: .buildinfo.json not found"
+            exit 1
+          fi
+          
+          # Parse buildNumber and buildId from JSON
+          BUILD_NUMBER=$(grep -o '"buildNumber":"[^"]*"' .buildinfo.json | cut -d'"' -f4)
+          BUILD_ID=$(grep -o '"buildId":[0-9]*' .buildinfo.json | cut -d':' -f2)
+          
+          if [ -z "$BUILD_NUMBER" ] || [ -z "$BUILD_ID" ]; then
+            echo "Error: Could not parse buildNumber or buildId from .buildinfo.json"
+            cat .buildinfo.json
+            exit 1
+          fi
+          
+          TAG_NAME="${BUILD_NUMBER}.${BUILD_ID}"
+          TAG_MESSAGE="Release build ${BUILD_NUMBER}.${BUILD_ID} deployed to QA"
+          
+          echo "Creating release tag: $TAG_NAME"
+          echo "Message: $TAG_MESSAGE"
+          
+          git config user.email "bitbucket-pipeline@demoulas.com"
+          git config user.name "Bitbucket Pipeline"
+          
+          # Check if tag already exists
+          if git tag -l | grep -q "^${TAG_NAME}$"; then
+            echo "Warning: Tag '$TAG_NAME' already exists locally. Skipping tag creation."
+            exit 0
+          fi
+          
+          if git ls-remote --tags origin | grep -q "refs/tags/${TAG_NAME}$"; then
+            echo "Warning: Tag '$TAG_NAME' already exists on remote. Skipping tag creation."
+            exit 0
+          fi
+          
+          # Create and push tag
+          git tag -a "$TAG_NAME" -m "$TAG_MESSAGE"
+          git push origin "refs/tags/$TAG_NAME"
+          
+          echo "✓ Release tag '$TAG_NAME' created and pushed successfully"
           
 
 pipelines:
@@ -725,7 +771,10 @@ pipelines:
                 exit 1
               }
 
-      # Stage 4: UAT Promotion Gate
+      # Stage 5: Create Release Tag
+      - step: *create-release-tag
+
+      # Stage 6: UAT Promotion Gate
       - step:
           name: "Gate: Promote to UAT"
           runs-on:
@@ -755,7 +804,7 @@ pipelines:
               Write-Host "  4) Parallel: Validate import + UAT API health check"
 
       - step: *create-frontend-artifact-uat
-      # Stage 5: UAT Deployment (reuses artifacts from Stage 3)
+      # Stage 7: UAT Deployment (reuses artifacts from Stage 3)
       - parallel:
           - step: *uat-drop-recreate-db
           - step:
@@ -818,6 +867,80 @@ pipelines:
           - step: *secret-scan
   
   custom:
+    create_git_tag:
+      - variables:
+          - name: TagName
+            description: "Tag name (e.g., v1.0.0, release-2025-10-31)"
+          - name: TagMessage
+            description: "Tag annotation message (optional)"
+            default: "Release tag created via pipeline"
+          - name: CommitHash
+            description: "Commit hash to tag (leave empty for HEAD)"
+            default: ""
+      - step:
+          name: Create Git Tag
+          script:
+            - |
+              if [ -z "$TagName" ]; then
+                echo "Error: TagName is required"
+                exit 1
+              fi
+              if ! echo "$TagName" | grep -qE '^[a-zA-Z0-9._/-]+$'; then
+                echo "Error: Invalid tag name format. Use only alphanumeric characters, dots, underscores, slashes, or hyphens."
+                exit 1
+              fi
+              echo "Creating Git tag: $TagName"
+              echo "Message: $TagMessage"
+              TARGET_COMMIT="${CommitHash:-HEAD}"
+              echo "Target commit: $TARGET_COMMIT"
+              git config user.email "bitbucket-pipeline@demoulas.com"
+              git config user.name "Bitbucket Pipeline"
+              echo "Git version:"
+              git --version
+              echo "Git remote configuration:"
+              git remote -v
+              echo "Current branch:"
+              git rev-parse --abbrev-ref HEAD
+              if git tag -l | grep -q "^${TagName}$"; then
+                echo "Error: Tag '$TagName' already exists locally. Delete it first or use a different name."
+                exit 1
+              fi
+              echo "Checking if tag exists on remote..."
+              if git ls-remote --tags origin | grep -q "refs/tags/${TagName}$"; then
+                echo "Error: Tag '$TagName' already exists on remote. Delete it first or use a different name."
+                exit 1
+              fi
+              echo "Tag does not exist on remote"
+              echo "Creating local tag..."
+              if [ -n "$TagMessage" ]; then
+                git tag -a "$TagName" -m "$TagMessage" "$TARGET_COMMIT"
+              else
+                git tag "$TagName" "$TARGET_COMMIT"
+              fi
+              if [ $? -ne 0 ]; then
+                echo "Error: Failed to create tag"
+                exit 1
+              fi
+              echo "Tag created successfully"
+              if ! git tag -l | grep -q "^${TagName}$"; then
+                echo "Error: Tag was not created successfully"
+                exit 1
+              fi
+              echo "Pushing tag to origin..."
+              git push origin "refs/tags/$TagName"
+              if [ $? -ne 0 ]; then
+                echo "Error: Failed to push tag to remote"
+                exit 1
+              fi
+              echo "Tag pushed successfully"
+              echo "Verifying tag on remote..."
+              if git ls-remote --tags origin | grep -q "refs/tags/${TagName}$"; then
+                echo "✓ Tag '$TagName' verified on remote"
+              else
+                echo "Warning: Could not verify tag on remote, but push command succeeded"
+              fi
+              echo "✓ Tag '$TagName' created and pushed successfully"
+
     profitsharing_database:
       - variables: # https://bitbucket.org/blog/predefine-values-of-custom-pipeline-variables
           - name: Environment
