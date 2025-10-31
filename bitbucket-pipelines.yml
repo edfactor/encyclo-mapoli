@@ -684,17 +684,26 @@ pipelines:
           script:
             - $env:ENV = "QA"
             - $env:API_SERVER_QA = "appt23d"
-            - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
-            - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
-            - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/NextGenApplications/ps/Payroll'
-            - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/inetpub/wwwroot/api'
-            - echo "Deploying web application..."
-            # Reuse the same API artifact built once in Stage 2
-            - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
-            - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.QA.zip"
-            - pwsh .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_QA $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
-            - echo "Deploying background service..."
-            - pwsh .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_QA
+            - |
+              try {
+                pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
+                pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
+                pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/NextGenApplications/ps/Payroll'
+                pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/inetpub/wwwroot/api'
+                Write-Host "Deploying web application..." -ForegroundColor Cyan
+                $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
+                $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.QA.zip"
+                pwsh .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_QA $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
+                Write-Host "Deploying background service..." -ForegroundColor Cyan
+                pwsh .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_QA
+                Write-Host "✓ QA deployment completed successfully" -ForegroundColor Green
+                pwsh .\scripts\Notify-Teams.ps1 -Status "SUCCESS" -Environment "QA" -Step "Deployment"
+              }
+              catch {
+                Write-Host "✗ QA deployment failed: $_" -ForegroundColor Red
+                pwsh .\scripts\Notify-Teams.ps1 -Status "FAILURE" -Environment "QA" -Step "Deployment" -ErrorMessage $_.Exception.Message
+                exit 1
+              }
       - step: *upgrade-database
   
       - step:
@@ -703,8 +712,18 @@ pipelines:
             - windows
             - self.hosted
           script:
-            - $env:API_SERVER_QA = "appt23d"
-            - pwsh -File ./scripts/Check-Health.ps1 -Url $env:QA_BASE_URL -envServerName $env:API_SERVER_QA
+            - |
+              $env:API_SERVER_QA = "appt23d"
+              try {
+                pwsh -File ./scripts/Check-Health.ps1 -Url $env:QA_BASE_URL -envServerName $env:API_SERVER_QA
+                Write-Host "✓ API health check passed" -ForegroundColor Green
+                pwsh .\scripts\Notify-Teams.ps1 -Status "SUCCESS" -Environment "QA" -Step "Health Check"
+              }
+              catch {
+                Write-Host "✗ API health check failed: $_" -ForegroundColor Red
+                pwsh .\scripts\Notify-Teams.ps1 -Status "FAILURE" -Environment "QA" -Step "Health Check" -ErrorMessage $_.Exception.Message
+                exit 1
+              }
 
       # Stage 4: UAT Promotion Gate
       - step:
@@ -746,33 +765,33 @@ pipelines:
                 - self.hosted
               deployment: UAT
               script:
-                - echo "Deploying application to UAT (reusing API artifact from Stage 2)..."
-                - $env:API_SERVER_UAT = "appt24d"
-                - $env:ENV = "UAT"
-                - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
-                - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
-                - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/NextGenApplications/ps/Payroll'
-                - pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/inetpub/wwwroot/api'
-                - echo "Deploying web application..."
-                # Reuse the same API artifact built once in Stage 2
-                - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
-                - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.UAT.zip"
-                - pwsh .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_UAT $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
-                - echo "Deploying background service..."
-                - pwsh .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_UAT
+                - |
+                  try {
+                    Write-Host "Deploying application to UAT (reusing API artifact from Stage 2)..." -ForegroundColor Cyan
+                    $env:API_SERVER_UAT = "appt24d"
+                    $env:ENV = "UAT"
+                    pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
+                    pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
+                    pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/NextGenApplications/ps/Payroll'
+                    pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.uat.json' -RemoteServer $env:API_SERVER_UAT -RemotePath 'C:/inetpub/wwwroot/api'
+                    Write-Host "Deploying web application..." -ForegroundColor Cyan
+                    $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
+                    $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.UAT.zip"
+                    pwsh .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_UAT $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
+                    Write-Host "Deploying background service..." -ForegroundColor Cyan
+                    pwsh .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_UAT
+                    Write-Host "✓ UAT deployment completed successfully" -ForegroundColor Green
+                    pwsh .\scripts\Notify-Teams.ps1 -Status "SUCCESS" -Environment "UAT" -Step "Deployment"
+                  }
+                  catch {
+                    Write-Host "✗ UAT deployment failed: $_" -ForegroundColor Red
+                    pwsh .\scripts\Notify-Teams.ps1 -Status "FAILURE" -Environment "UAT" -Step "Deployment" -ErrorMessage $_.Exception.Message
+                    exit 1
+                  }
       # Stage 6: UAT Database Import (must run AFTER drop-recreate completes)
       - step: *uat-import-from-ready
       - step: *uat-import-uat-navigation
-      - parallel:
-          - step: *uat-validate-import
-          - step:
-              name: "Checking API Health (UAT)"
-              runs-on:
-                - windows
-                - self.hosted
-              script:
-                - $env:API_SERVER_UAT = "appt24d"
-                - pwsh -File ./scripts/Check-Health.ps1 -Url $env:UAT_BASE_URL -envServerName $env:API_SERVER_UAT
+      - step: *uat-validate-import
 
 
     develop:
