@@ -10,13 +10,13 @@ param(
 )
 
 $statusEmoji = @{
-    "SUCCESS" = "✅"
-    "FAILURE" = "❌"
-    "IN_PROGRESS" = "🔄"
+    "SUCCESS" = "[SUCCESS]"
+    "FAILURE" = "[FAILURE]"
+    "IN_PROGRESS" = "[IN PROGRESS]"
 }
 
 $emoji = $statusEmoji[$Status]
-if (-not $emoji) { $emoji = "ℹ️" }
+if (-not $emoji) { $emoji = "[INFO]" }
 
 $title = "$emoji $Environment $Step - $Status"
 
@@ -42,7 +42,7 @@ try {
     }
     
     Invoke-WebRequest -Uri $WebhookUrl -Method Post -Body $payload -ContentType "application/json" -ErrorAction Stop | Out-Null
-    Write-Host "✓ Teams notification sent successfully"
+    Write-Host "[OK] Teams notification sent successfully"
 }
 catch {
     Write-Error "Failed to send Teams notification: $_"
