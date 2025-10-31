@@ -230,11 +230,16 @@ FROM FILTERED_DEMOGRAPHIC p1
                 return null;
             }
 
-            // Apply pagination to the cached data
+            // Apply sorting based on request parameters
+            var sortBy = request.SortBy ?? "name";
+            var isSortDescending = request.IsSortDescending ?? false;
+            var sortedResults = ApplySorting(cachedResponse.Data.Results.ToList(), sortBy, isSortDescending);
+
+            // Apply pagination to the sorted data
             var skip = request.Skip ?? 0;
             var take = request.Take ?? byte.MaxValue; // Default to byte.MaxValue if not specified
 
-            var paginatedResults = cachedResponse.Data.Results
+            var paginatedResults = sortedResults
                 .Skip(skip)
                 .Take(take)
                 .ToList();
@@ -287,5 +292,69 @@ FROM FILTERED_DEMOGRAPHIC p1
             _logger.LogError(ex, "Failed to force refresh duplicate names and birthdays cache");
             throw;
         }
+    }
+
+    /// <summary>
+    /// Applies sorting to the duplicate names and birthdays data.
+    /// </summary>
+    /// <param name="data">The data to sort</param>
+    /// <param name="sortBy">The field to sort by</param>
+    /// <param name="descending">Whether to sort in descending order</param>
+    /// <returns>Sorted IEnumerable of DuplicateNamesAndBirthdaysResponse</returns>
+    private static IEnumerable<DuplicateNamesAndBirthdaysResponse> ApplySorting(
+        List<DuplicateNamesAndBirthdaysResponse> data,
+        string sortBy,
+        bool descending)
+    {
+        var sorted = sortBy.ToLowerInvariant() switch
+        {
+            "badgenumber" => descending
+                ? data.OrderByDescending(x => x.BadgeNumber)
+                : data.OrderBy(x => x.BadgeNumber),
+            "name" => descending
+                ? data.OrderByDescending(x => x.Name)
+                : data.OrderBy(x => x.Name),
+            "dateofbirth" => descending
+                ? data.OrderByDescending(x => x.DateOfBirth)
+                : data.OrderBy(x => x.DateOfBirth),
+            "years" => descending
+                ? data.OrderByDescending(x => x.Years)
+                : data.OrderBy(x => x.Years),
+            "hiredate" => descending
+                ? data.OrderByDescending(x => x.HireDate)
+                : data.OrderBy(x => x.HireDate),
+            "terminationdate" => descending
+                ? data.OrderByDescending(x => x.TerminationDate)
+                : data.OrderBy(x => x.TerminationDate),
+            "status" => descending
+                ? data.OrderByDescending(x => x.Status)
+                : data.OrderBy(x => x.Status),
+            "storenumber" => descending
+                ? data.OrderByDescending(x => x.StoreNumber)
+                : data.OrderBy(x => x.StoreNumber),
+            "count" => descending
+                ? data.OrderByDescending(x => x.Count)
+                : data.OrderBy(x => x.Count),
+            "netbalance" => descending
+                ? data.OrderByDescending(x => x.NetBalance)
+                : data.OrderBy(x => x.NetBalance),
+            "hourscurrentyear" => descending
+                ? data.OrderByDescending(x => x.HoursCurrentYear)
+                : data.OrderBy(x => x.HoursCurrentYear),
+            "incomecurrentyear" => descending
+                ? data.OrderByDescending(x => x.IncomeCurrentYear)
+                : data.OrderBy(x => x.IncomeCurrentYear),
+            "employmentstatusname" => descending
+                ? data.OrderByDescending(x => x.EmploymentStatusName)
+                : data.OrderBy(x => x.EmploymentStatusName),
+            "isexecutive" => descending
+                ? data.OrderByDescending(x => x.IsExecutive)
+                : data.OrderBy(x => x.IsExecutive),
+            _ => descending
+                ? data.OrderByDescending(x => x.BadgeNumber)
+                : data.OrderBy(x => x.BadgeNumber)
+        };
+
+        return sorted;
     }
 }
