@@ -1,5 +1,5 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import Termination from "./Termination";
 
 // Mock the hook dependencies
@@ -46,11 +46,22 @@ vi.mock("components/StatusDropdownActionNode", () => ({
 }));
 
 vi.mock("./TerminationSearchFilter", () => ({
-  default: vi.fn(({ onSearch, setInitialSearchLoaded, hasUnsavedChanges, isFetching }) => (
+  default: vi.fn(({ onSearch, hasUnsavedChanges, isFetching }) => (
     <div data-testid="search-filter">
       <button
         data-testid="search-button"
-        onClick={() => onSearch({ beginningDate: "01/01/2024", endingDate: "12/31/2024", forfeitureStatus: "showAll", profitYear: 2024, skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false })}
+        onClick={() =>
+          onSearch({
+            beginningDate: "01/01/2024",
+            endingDate: "12/31/2024",
+            forfeitureStatus: "showAll",
+            profitYear: 2024,
+            skip: 0,
+            take: 25,
+            sortBy: "badgeNumber",
+            isSortDescending: false
+          })
+        }
         disabled={isFetching || hasUnsavedChanges}>
         Search
       </button>

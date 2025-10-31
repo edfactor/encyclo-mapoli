@@ -1,11 +1,11 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import UnForfeitSearchFilter from "./UnForfeitSearchFilter";
 
 // Mock date picker
 vi.mock("../../../components/DsmDatePicker/DsmDatePicker", () => ({
-  default: vi.fn(({ label, onChange, disabled, minDate, maxDate, ...props }) => (
+  default: vi.fn(({ label, onChange, disabled, ...props }) => (
     <input
       data-testid={`date-picker-${label}`}
       onChange={(e) => onChange(e.target.value)}
@@ -43,7 +43,9 @@ vi.mock("smart-ui-library", () => ({
         disabled={disabled || isFetching}>
         Search
       </button>
-      <button data-testid="reset-btn" onClick={handleReset}>
+      <button
+        data-testid="reset-btn"
+        onClick={handleReset}>
         Reset
       </button>
       {isFetching && <span data-testid="loading">Loading...</span>}

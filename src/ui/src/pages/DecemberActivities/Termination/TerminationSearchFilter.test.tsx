@@ -1,11 +1,11 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import TerminationSearchFilter from "./TerminationSearchFilter";
 
 // Mock date picker and validators
 vi.mock("../../../components/DsmDatePicker/DsmDatePicker", () => ({
-  default: vi.fn(({ label, onChange, disabled, minDate, maxDate, ...props }) => (
+  default: vi.fn(({ label, onChange, disabled, ...props }) => (
     <input
       data-testid={`date-picker-${label}`}
       onChange={(e) => onChange(e.target.value)}
@@ -17,7 +17,7 @@ vi.mock("../../../components/DsmDatePicker/DsmDatePicker", () => ({
 }));
 
 vi.mock("../../../components/ForfeitActivities/DuplicateSsnGuard", () => ({
-  DuplicateSsnGuard: vi.fn(({ children, mode }) => children({ prerequisitesComplete: true }))
+  DuplicateSsnGuard: vi.fn(({ children }) => children({ prerequisitesComplete: true }))
 }));
 
 vi.mock("../../../utils/FormValidators", () => ({
@@ -47,7 +47,9 @@ vi.mock("smart-ui-library", () => ({
         disabled={disabled || isFetching}>
         Search
       </button>
-      <button data-testid="reset-btn" onClick={handleReset}>
+      <button
+        data-testid="reset-btn"
+        onClick={handleReset}>
         Reset
       </button>
       {isFetching && <span data-testid="loading">Loading...</span>}
@@ -275,7 +277,6 @@ describe("TerminationSearchFilter", () => {
 
   describe("Form state management", () => {
     it("should track form validity", async () => {
-      const user = userEvent.setup();
       render(
         <TerminationSearchFilter
           fiscalData={mockFiscalData as any}

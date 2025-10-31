@@ -1,6 +1,6 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import MilitaryContributionSearchFilter from "./MilitaryContributionSearchFilter";
 
 // Mock validators
@@ -44,7 +44,9 @@ vi.mock("smart-ui-library", () => ({
         disabled={disabled || isFetching}>
         Search
       </button>
-      <button data-testid="reset-btn" onClick={handleReset}>
+      <button
+        data-testid="reset-btn"
+        onClick={handleReset}>
         Reset
       </button>
       {isFetching && <span data-testid="loading">Loading...</span>}
@@ -53,8 +55,8 @@ vi.mock("smart-ui-library", () => ({
 }));
 
 describe("MilitaryContributionSearchFilter", () => {
-  const mockExecuteSearch = vi.fn();
-  const mockResetSearch = vi.fn();
+  //const mockExecuteSearch = vi.fn();
+  //const mockResetSearch = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -89,8 +91,8 @@ describe("MilitaryContributionSearchFilter", () => {
       render(<MilitaryContributionSearchFilter />);
 
       const inputs = screen.getAllByRole("textbox");
-      const ssnInput = inputs.find(input => (input as HTMLInputElement).placeholder?.includes("SSN"));
-      const badgeInput = inputs.find(input => (input as HTMLInputElement).placeholder?.includes("Badge"));
+      const ssnInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("SSN"));
+      const badgeInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("Badge"));
 
       if (ssnInput && badgeInput) {
         await user.type(ssnInput, "123-45-6789");
@@ -106,8 +108,8 @@ describe("MilitaryContributionSearchFilter", () => {
       render(<MilitaryContributionSearchFilter />);
 
       const inputs = screen.getAllByRole("textbox");
-      const ssnInput = inputs.find(input => (input as HTMLInputElement).placeholder?.includes("SSN"));
-      const badgeInput = inputs.find(input => (input as HTMLInputElement).placeholder?.includes("Badge"));
+      const ssnInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("SSN"));
+      const badgeInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("Badge"));
 
       if (ssnInput && badgeInput) {
         await user.type(badgeInput, "12345");
@@ -123,8 +125,8 @@ describe("MilitaryContributionSearchFilter", () => {
       render(<MilitaryContributionSearchFilter />);
 
       const inputs = screen.getAllByRole("textbox");
-      const ssnInput = inputs.find(input => (input as HTMLInputElement).placeholder?.includes("SSN"));
-      const badgeInput = inputs.find(input => (input as HTMLInputElement).placeholder?.includes("Badge"));
+      const ssnInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("SSN"));
+      const badgeInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("Badge"));
 
       if (ssnInput && badgeInput) {
         // Type in SSN
@@ -158,7 +160,7 @@ describe("MilitaryContributionSearchFilter", () => {
       render(<MilitaryContributionSearchFilter />);
 
       const inputs = screen.getAllByRole("textbox");
-      const ssnInput = inputs.find(input => (input as HTMLInputElement).placeholder?.includes("SSN"));
+      const ssnInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("SSN"));
 
       if (ssnInput) {
         await user.type(ssnInput, "123-45-6789");
@@ -176,7 +178,7 @@ describe("MilitaryContributionSearchFilter", () => {
       render(<MilitaryContributionSearchFilter />);
 
       const inputs = screen.getAllByRole("textbox");
-      const badgeInput = inputs.find(input => (input as HTMLInputElement).placeholder?.includes("Badge"));
+      const badgeInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("Badge"));
 
       if (badgeInput) {
         await user.type(badgeInput, "12345");
@@ -196,7 +198,9 @@ describe("MilitaryContributionSearchFilter", () => {
       render(<MilitaryContributionSearchFilter />);
 
       const inputs = screen.getAllByRole("textbox");
-      const ssnInput = inputs.find(input => (input as HTMLInputElement).placeholder?.includes("SSN")) as HTMLInputElement;
+      const ssnInput = inputs.find((input) =>
+        (input as HTMLInputElement).placeholder?.includes("SSN")
+      ) as HTMLInputElement;
 
       if (ssnInput) {
         await user.type(ssnInput, "123-45-6789");
@@ -216,8 +220,12 @@ describe("MilitaryContributionSearchFilter", () => {
       render(<MilitaryContributionSearchFilter />);
 
       const inputs = screen.getAllByRole("textbox");
-      const ssnInput = inputs.find(input => (input as HTMLInputElement).placeholder?.includes("SSN")) as HTMLInputElement;
-      const badgeInput = inputs.find(input => (input as HTMLInputElement).placeholder?.includes("Badge")) as HTMLInputElement;
+      const ssnInput = inputs.find((input) =>
+        (input as HTMLInputElement).placeholder?.includes("SSN")
+      ) as HTMLInputElement;
+      const badgeInput = inputs.find((input) =>
+        (input as HTMLInputElement).placeholder?.includes("Badge")
+      ) as HTMLInputElement;
 
       if (ssnInput && badgeInput) {
         await user.type(ssnInput, "123-45-6789");
@@ -250,7 +258,7 @@ describe("MilitaryContributionSearchFilter", () => {
       render(<MilitaryContributionSearchFilter />);
 
       const inputs = screen.getAllByRole("textbox");
-      const ssnInput = inputs.find(input => (input as HTMLInputElement).placeholder?.includes("SSN"));
+      const ssnInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("SSN"));
 
       if (ssnInput) {
         await user.type(ssnInput, "invalid");
@@ -267,7 +275,7 @@ describe("MilitaryContributionSearchFilter", () => {
       render(<MilitaryContributionSearchFilter />);
 
       const inputs = screen.getAllByRole("textbox");
-      const ssnInput = inputs.find(input => (input as HTMLInputElement).placeholder?.includes("SSN"));
+      const ssnInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("SSN"));
 
       if (ssnInput) {
         await user.type(ssnInput, "123-45-6789");
@@ -290,7 +298,7 @@ describe("MilitaryContributionSearchFilter", () => {
       render(<MilitaryContributionSearchFilter />);
 
       const inputs = screen.getAllByRole("textbox");
-      const badgeInput = inputs.find(input => (input as HTMLInputElement).placeholder?.includes("Badge"));
+      const badgeInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("Badge"));
 
       if (badgeInput) {
         await user.type(badgeInput, "12345");

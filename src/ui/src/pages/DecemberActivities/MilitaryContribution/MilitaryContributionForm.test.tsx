@@ -1,6 +1,6 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import MilitaryContributionForm from "./MilitaryContributionForm";
 
 // Mock form validators
@@ -207,7 +207,6 @@ describe("MilitaryContributionForm", () => {
 
   describe("Contribution type selection", () => {
     it("should allow selecting contribution type", async () => {
-      const user = userEvent.setup();
       render(
         <MilitaryContributionForm
           onSubmit={mockOnSubmit}

@@ -1,9 +1,9 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
-import MilitaryContribution from "./MilitaryContribution";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { Provider } from "react-redux";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
+import MilitaryContribution from "./MilitaryContribution";
 
 // Mock child components
 vi.mock("components/FrozenYearWarning", () => ({
@@ -53,7 +53,9 @@ vi.mock("./MilitaryContributionForm", () => ({
         }>
         Submit
       </button>
-      <button data-testid="form-cancel-btn" onClick={onCancel}>
+      <button
+        data-testid="form-cancel-btn"
+        onClick={onCancel}>
         Cancel
       </button>
     </div>
@@ -197,9 +199,7 @@ describe("MilitaryContribution", () => {
 
       render(<MilitaryContribution />, { wrapper: wrapper(mockStore) });
 
-      expect(
-        screen.getByText(/Please search for and select an employee/)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/Please search for and select an employee/)).toBeInTheDocument();
     });
   });
 
@@ -342,24 +342,6 @@ describe("MilitaryContribution", () => {
 
   describe("Member details synchronization", () => {
     it("should fetch contributions when member details change", () => {
-      const useMilitaryContribution = vi.hoisted(() => ({
-        default: vi.fn(() => ({
-          contributionsData: null,
-          isLoadingContributions: false,
-          contributionsGridPagination: {
-            pageNumber: 0,
-            pageSize: 25,
-            sortParams: { sortBy: "year", isSortDescending: false },
-            handlePaginationChange: vi.fn(),
-            handleSortChange: vi.fn()
-          },
-          fetchMilitaryContributions: vi.fn(),
-          resetSearch: vi.fn(),
-          isSearching: false,
-          executeSearch: vi.fn()
-        }))
-      }));
-
       const mockStore = createMockStore();
       render(<MilitaryContribution />, { wrapper: wrapper(mockStore) });
 
