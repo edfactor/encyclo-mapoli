@@ -22,6 +22,39 @@ if (-not $emoji) { $emoji = "[INFO]" }
 
 $title = "$emoji $Environment $Step - $Status"
 
+# Extract Jira ticket numbers from branch name and commit message
+$jiraTickets = @()
+$jiraPattern = 'PS-\d+'
+
+# Check branch name
+if ($Branch -match $jiraPattern) {
+    $jiraTickets += $matches[0]
+}
+
+# Get commit message if available
+if ($Commit -and $env:BITBUCKET_CLONE_DIR) {
+    try {
+        Push-Location $env:BITBUCKET_CLONE_DIR
+        $commitMessage = git log -1 --pretty=%B $Commit 2>$null
+        if ($commitMessage -match $jiraPattern) {
+            $ticket = $matches[0]
+            if ($ticket -notin $jiraTickets) {
+                $jiraTickets += $ticket
+            }
+        }
+        Pop-Location
+    }
+    catch {
+        # Silently continue if git command fails
+        if ((Get-Location).Path -ne $PWD.Path) {
+            Pop-Location
+        }
+    }
+}
+
+# Remove duplicates and sort
+$jiraTickets = $jiraTickets | Select-Object -Unique | Sort-Object
+
 # Power Automate Adaptive Card format
 $payload = @{
     type = "message"
@@ -79,6 +112,17 @@ $payload = @{
     )
 } 
 
+# Add Jira tickets if found
+if ($jiraTickets.Count -gt 0) {
+    $jiraText = ($jiraTickets | ForEach-Object { "**$_**" }) -join ", "
+    $payload.attachments[0].content.body += @{
+        type = "TextBlock"
+        text = "**Jira Tickets:** $jiraText"
+        wrap = $true
+        spacing = "Medium"
+    }
+}
+
 # Add error message if present
 if (-not [string]::IsNullOrWhiteSpace($ErrorMessage)) {
     $payload.attachments[0].content.body += @{
@@ -89,17 +133,32 @@ if (-not [string]::IsNullOrWhiteSpace($ErrorMessage)) {
     }
 }
 
-# Add build URL if present
+# Add action buttons (Build URL and Jira tickets)
+$actions = @()
+
+# Add build URL button
 if (-not [string]::IsNullOrWhiteSpace($env:BITBUCKET_BUILD_URL)) {
+    $actions += @{
+        type = "Action.OpenUrl"
+        title = "View Build"
+        url = $env:BITBUCKET_BUILD_URL
+    }
+}
+
+# Add Jira ticket buttons
+foreach ($ticket in $jiraTickets) {
+    $actions += @{
+        type = "Action.OpenUrl"
+        title = $ticket
+        url = "https://demoulas.atlassian.net/browse/$ticket"
+    }
+}
+
+# Add action set if we have any actions
+if ($actions.Count -gt 0) {
     $payload.attachments[0].content.body += @{
         type = "ActionSet"
-        actions = @(
-            @{
-                type = "Action.OpenUrl"
-                title = "View Build"
-                url = $env:BITBUCKET_BUILD_URL
-            }
-        )
+        actions = $actions
     }
 }
 
