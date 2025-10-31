@@ -718,12 +718,10 @@ pipelines:
               try {
                 pwsh -File ./scripts/Check-Health.ps1 -Url $env:QA_BASE_URL -envServerName $env:API_SERVER_QA
                 Write-Host "API health check passed" -ForegroundColor Green
-                pwsh .\scripts\Notify-Teams.ps1 -Status SUCCESS -Environment QA -Step HealthCheck
               }
               catch {
-                $env:HEALTH_ERROR = $_.Exception.Message
                 Write-Host "API health check failed" -ForegroundColor Red
-                pwsh .\scripts\Notify-Teams.ps1 -Status FAILURE -Environment QA -Step HealthCheck -ErrorMessage $env:HEALTH_ERROR
+                pwsh .\scripts\Notify-Teams.ps1 -Status FAILURE -Environment QA -Step HealthCheck -ErrorMessage $_.Exception.Message
                 exit 1
               }
 
@@ -886,64 +884,6 @@ pipelines:
       - step: *upgrade-database
     playwright_e2e_qa:
       - step: *run-playwright-tests
-    
-    test-teams-notifications:
-      - variables:
-          - name: Status
-            default: SUCCESS
-            allowed-values:
-              - SUCCESS
-              - FAILURE
-              - IN_PROGRESS
-          - name: Environment
-            default: QA
-            allowed-values:
-              - QA
-              - UAT
-              - PROD
-          - name: Step
-            default: Test Notification
-          - name: ErrorMessage
-            default: ""
-      - step:
-          name: Test MS Teams Notification
-          runs-on:
-            - windows
-            - self.hosted
-          script:
-            - echo "Testing MS Teams notification..."
-            - echo "Status:" $env:Status
-            - echo "Environment:" $env:Environment
-            - echo "Step:" $env:Step
-            - echo "Error Message:" $env:ErrorMessage
-            
-            # Run the Teams notification script
-            - |
-              $params = @{
-                Status = $env:Status
-                Environment = $env:Environment
-                Step = $env:Step
-                ErrorMessage = $env:ErrorMessage
-                BuildNumber = $env:BITBUCKET_BUILD_NUMBER
-                Branch = $env:BITBUCKET_BRANCH
-                Commit = $env:BITBUCKET_COMMIT
-              }
-              
-              # Only add WebhookUrl if it exists (from repository variable)
-              if ($env:TEAMS_WEBHOOK_URL) {
-                $params['WebhookUrl'] = $env:TEAMS_WEBHOOK_URL
-                Write-Host "Using TEAMS_WEBHOOK_URL from repository variable"
-              } else {
-                Write-Warning "TEAMS_WEBHOOK_URL not found in repository variables"
-                Write-Host "Please add TEAMS_WEBHOOK_URL as a repository variable to test notifications"
-              }
-              
-              Write-Host "Calling Notify-Teams.ps1 with parameters:"
-              $params | Format-Table -AutoSize
-              
-              .\scripts\Notify-Teams.ps1 @params
-            
-            - echo "Teams notification test completed!"
 
 
 

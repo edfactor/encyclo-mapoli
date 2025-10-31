@@ -59,8 +59,18 @@ $Deployments = @(
 )
 
 $Failed = $false
-try {
-    $Session = New-PSSession $envServerName
+$RetryCount = 0
+$MaxRetries = 1
+$RetryDelaySeconds = 15
+
+while ($RetryCount -le $MaxRetries) {
+    try {
+        if ($RetryCount -gt 0) {
+            Write-Host "Retrying deployment (attempt $($RetryCount + 1) of $($MaxRetries + 1))..." -ForegroundColor Yellow
+            Start-Sleep -Seconds $RetryDelaySeconds
+        }
+        
+        $Session = New-PSSession $envServerName
 
 
     foreach ($Deploy in $Deployments)
@@ -142,10 +152,20 @@ try {
             $Failed = $true; break
         }
     }
+    
+    # If we got here without failure, break out of retry loop
+    if (-not $Failed) {
+        Write-Host "Service deployment completed successfully" -ForegroundColor Green
+        break
+    }
 }
 catch
 {
     $Failed = $true
+    $RetryCount++
+    if ($RetryCount -gt $MaxRetries) {
+        Write-Host "Service deployment failed after $($MaxRetries + 1) attempts" -ForegroundColor Red
+    }
 }
 finally
 {
@@ -154,6 +174,12 @@ finally
         Remove-PSSession -Session $Session
         $Session = $null
     }
+}
+
+# Exit retry loop if we've exceeded max retries
+if ($Failed -and $RetryCount -gt $MaxRetries) {
+    break
+}
 }
 
 if ($Failed)
