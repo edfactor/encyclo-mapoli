@@ -858,15 +858,42 @@ pipelines:
               git config user.email "bitbucket-pipeline@demoulas.com"
               git config user.name "Bitbucket Pipeline"
 
-              # Check if tag already exists
+              # Configure remote URL with authentication token for push
+              Write-Host "Configuring Git remote with authentication..." -ForegroundColor Yellow
+              if ($env:REPOSITORY_OAUTH_ACCESS_TOKEN -and $env:BITBUCKET_REPO_FULL_NAME) {
+                $authenticatedUrl = "https://x-token-auth:$($env:REPOSITORY_OAUTH_ACCESS_TOKEN)@bitbucket.org/$($env:BITBUCKET_REPO_FULL_NAME).git"
+                git remote set-url origin $authenticatedUrl
+                Write-Host "Remote URL configured with token authentication" -ForegroundColor Green
+              } else {
+                Write-Warning "REPOSITORY_OAUTH_ACCESS_TOKEN or BITBUCKET_REPO_FULL_NAME not available"
+                Write-Host "Git remote configuration:" -ForegroundColor Yellow
+                git remote -v
+              }
+              
+              Write-Host "Current branch:" -ForegroundColor Yellow
+              git branch --show-current
+              
+              # Check if tag already exists locally
               $existingTag = git tag -l $env:TagName
               if ($existingTag) {
-                Write-Error "Tag '$env:TagName' already exists. Delete it first or use a different name."
+                Write-Error "Tag '$env:TagName' already exists locally. Delete it first or use a different name."
                 exit 1
+              }
+
+              # Check if tag already exists on remote
+              Write-Host "Checking if tag exists on remote..." -ForegroundColor Yellow
+              git ls-remote --tags origin $env:TagName 2>&1 | Out-Null
+              if ($LASTEXITCODE -eq 0) {
+                $remoteTags = git ls-remote --tags origin | Select-String $env:TagName
+                if ($remoteTags) {
+                  Write-Error "Tag '$env:TagName' already exists on remote. Delete it first or use a different name."
+                  exit 1
+                }
               }
 
               # Create annotated tag
               try {
+                Write-Host "Creating local tag..." -ForegroundColor Cyan
                 if ($env:TagMessage) {
                   git tag -a $env:TagName -m $env:TagMessage $targetCommit
                 } else {
@@ -880,20 +907,67 @@ pipelines:
 
                 Write-Host "Tag created successfully" -ForegroundColor Green
 
-                # Push tag to remote
-                Write-Host "Pushing tag to origin..." -ForegroundColor Cyan
-                git push origin $env:TagName
-
-                if ($LASTEXITCODE -ne 0) {
-                  Write-Error "Failed to push tag to remote"
+                # Verify tag was created
+                $verifyTag = git tag -l $env:TagName
+                if (-not $verifyTag) {
+                  Write-Error "Tag was not created successfully"
                   exit 1
                 }
 
-                Write-Host "Tag pushed successfully" -ForegroundColor Green
-                Write-Host "Tag '$env:TagName' created and pushed" -ForegroundColor Green
+                # Push tag to remote with timeout
+                Write-Host "Pushing tag to origin..." -ForegroundColor Cyan
+                
+                # Direct push with timeout - authentication is handled by the remote URL
+                $pushJob = Start-Job -ScriptBlock {
+                  param($tagName)
+                  $ErrorActionPreference = 'Continue'
+                  git push origin "refs/tags/$tagName" 2>&1
+                } -ArgumentList $env:TagName
+                
+                # Wait for push with timeout (30 seconds)
+                $completed = Wait-Job -Job $pushJob -Timeout 30
+                
+                if ($completed) {
+                  $output = Receive-Job -Job $pushJob
+                  Write-Host "Push output:" -ForegroundColor Yellow
+                  Write-Host $output
+                  Remove-Job -Job $pushJob
+                  
+                  # Check for errors in output
+                  $errorLines = $output | Where-Object { $_ -match "error:|fatal:|rejected" }
+                  if ($errorLines) {
+                    Write-Error "Failed to push tag to remote. Errors found in output."
+                    exit 1
+                  }
+                  
+                  Write-Host "Tag pushed successfully" -ForegroundColor Green
+                  
+                  # Verify tag exists on remote
+                  Write-Host "Verifying tag on remote..." -ForegroundColor Cyan
+                  $remoteCheck = git ls-remote --tags origin $env:TagName
+                  if ($remoteCheck) {
+                    Write-Host "✓ Tag '$env:TagName' verified on remote" -ForegroundColor Green
+                  } else {
+                    Write-Warning "Could not verify tag on remote, but push command succeeded"
+                  }
+                } else {
+                  Remove-Job -Job $pushJob -Force
+                  Write-Error "Push operation timed out after 30 seconds."
+                  Write-Host "This may indicate:" -ForegroundColor Yellow
+                  Write-Host "  - Network connectivity issues" -ForegroundColor Yellow
+                  Write-Host "  - Remote server problems" -ForegroundColor Yellow
+                  Write-Host "  - Authentication token issues" -ForegroundColor Yellow
+                  Write-Host "" 
+                  Write-Host "Tag exists locally but was not pushed to remote." -ForegroundColor Yellow
+                  Write-Host "You may need to push it manually using: git push origin $env:TagName" -ForegroundColor Yellow
+                  exit 1
+                }
+                
+                Write-Host "✓ Tag '$env:TagName' created and pushed successfully" -ForegroundColor Green
               }
               catch {
                 Write-Error "Error creating or pushing tag: $_"
+                Write-Host "Stack trace: $($_.ScriptStackTrace)" -ForegroundColor Red
                 exit 1
               }
 
