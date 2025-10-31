@@ -1,4 +1,6 @@
 param(
+    [Parameter(Mandatory=$false)]
+    [ValidateNotNullOrEmpty()]
     [string]$WebhookUrl = $env:TEAMS_WEBHOOK_URL,
     [string]$Status = "SUCCESS",
     [string]$Environment = "QA",
@@ -41,10 +43,20 @@ try {
         return
     }
     
-    Invoke-WebRequest -Uri $WebhookUrl -Method Post -Body $payload -ContentType "application/json" -ErrorAction Stop | Out-Null
+    Write-Host "Sending payload to Power Automate:"
+    Write-Host $payload
+    
+    $response = Invoke-WebRequest -Uri $WebhookUrl -Method Post -Body $payload -ContentType "application/json; charset=utf-8" -ErrorAction Stop
     Write-Host "[OK] Teams notification sent successfully"
+    Write-Host "Response Status Code: $($response.StatusCode)"
+    Write-Host "Response Content: $($response.Content)"
 }
 catch {
     Write-Error "Failed to send Teams notification: $_"
+    if ($_.Exception.Response) {
+        $reader = [System.IO.StreamReader]::new($_.Exception.Response.GetResponseStream())
+        $responseBody = $reader.ReadToEnd()
+        Write-Error "Response Body: $responseBody"
+    }
     # Don't exit on notification failure - deployment might have succeeded
 }
