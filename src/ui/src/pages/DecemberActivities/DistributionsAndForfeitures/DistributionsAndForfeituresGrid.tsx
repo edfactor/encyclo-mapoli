@@ -1,5 +1,5 @@
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import { Typography } from "@mui/material";
+import { CircularProgress, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
@@ -364,20 +364,32 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
           </div>
 
           <ReportSummary report={distributionsAndForfeitures} />
-          <DSMGrid
-            preferenceKey={CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES}
-            isLoading={false}
-            handleSortChanged={sortEventHandler}
-            maxHeight={gridMaxHeight}
-            providedOptions={{
-              rowData: distributionsAndForfeitures?.response.results,
-              columnDefs: columnDefs,
-              suppressMultiSort: true
-            }}
-          />
+
+          {isFetching ? (
+            <div className="flex flex-col items-center justify-center gap-4 py-16">
+              <CircularProgress />
+              <Typography
+                variant="body1"
+                color="textSecondary">
+                Searching...
+              </Typography>
+            </div>
+          ) : (
+            <DSMGrid
+              preferenceKey={CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES}
+              isLoading={false}
+              handleSortChanged={sortEventHandler}
+              maxHeight={gridMaxHeight}
+              providedOptions={{
+                rowData: distributionsAndForfeitures?.response.results,
+                columnDefs: columnDefs,
+                suppressMultiSort: true
+              }}
+            />
+          )}
         </>
       )}
-      {!!distributionsAndForfeitures && distributionsAndForfeitures.response.results.length > 0 && (
+      {!isFetching && !!distributionsAndForfeitures && distributionsAndForfeitures.response.results.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
