@@ -35,6 +35,12 @@ $payload = @{
 } | ConvertTo-Json
 
 try {
+    if ([string]::IsNullOrWhiteSpace($WebhookUrl)) {
+        Write-Warning "TEAMS_WEBHOOK_URL environment variable is not set. Skipping Teams notification."
+        Write-Host "To enable Teams notifications, add TEAMS_WEBHOOK_URL as a Bitbucket repository variable."
+        return
+    }
+    
     Invoke-WebRequest -Uri $WebhookUrl -Method Post -Body $payload -ContentType "application/json" -ErrorAction Stop | Out-Null
     Write-Host "✓ Teams notification sent successfully"
 }
