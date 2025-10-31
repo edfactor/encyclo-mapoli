@@ -886,6 +886,87 @@ pipelines:
       - step: *upgrade-database
     playwright_e2e_qa:
       - step: *run-playwright-tests
+    
+    custom-test:
+      - variables:
+          - name: TestType
+            default: backend
+            allowed-values:
+              - backend
+              - frontend
+              - both
+              - playwright
+          - name: TestFilter
+            default: ""
+      - step:
+          name: Custom Test Runner
+          runs-on:
+            - windows
+            - self.hosted
+          script:
+            - echo "Running custom test pipeline..."
+            - echo "Test Type:" $env:TestType
+            - echo "Test Filter:" $env:TestFilter
+            
+            # Backend tests
+            - |
+              if ($env:TestType -eq "backend" -or $env:TestType -eq "both") {
+                Write-Host "=== Running Backend Tests ==="
+                cd src/services
+                
+                if ([string]::IsNullOrWhiteSpace($env:TestFilter)) {
+                  Write-Host "Running all backend tests..."
+                  dotnet test tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitSharing.UnitTests.csproj --configuration Release
+                } else {
+                  Write-Host "Running filtered backend tests: $env:TestFilter"
+                  dotnet test tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitSharing.UnitTests.csproj --configuration Release --filter "$env:TestFilter"
+                }
+                
+                cd ../..
+              }
+            
+            # Frontend tests
+            - |
+              if ($env:TestType -eq "frontend" -or $env:TestType -eq "both") {
+                Write-Host "=== Running Frontend Tests ==="
+                cd src/ui
+                
+                if ([string]::IsNullOrWhiteSpace($env:TestFilter)) {
+                  Write-Host "Running all frontend tests..."
+                  npm ci
+                  npm run test
+                } else {
+                  Write-Host "Running filtered frontend tests: $env:TestFilter"
+                  npm ci
+                  npm run test -- --testNamePattern="$env:TestFilter"
+                }
+                
+                cd ../..
+              }
+            
+            # Playwright E2E tests
+            - |
+              if ($env:TestType -eq "playwright") {
+                Write-Host "=== Running Playwright E2E Tests ==="
+                cd src/ui
+                
+                if ([string]::IsNullOrWhiteSpace($env:TestFilter)) {
+                  Write-Host "Running all Playwright tests..."
+                  npx playwright test
+                } else {
+                  Write-Host "Running filtered Playwright tests: $env:TestFilter"
+                  npx playwright test -g "$env:TestFilter"
+                }
+                
+                cd ../..
+              }
+            
+            - Write-Host "Custom test pipeline completed!"
+          artifacts:
+            - test-reports/**
+            - src/ui/coverage/**
+            - src/ui/playwright-report/**
+            - src/ui/test-results/**
 
 
 
