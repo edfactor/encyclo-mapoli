@@ -846,10 +846,12 @@ pipelines:
               echo "Target commit: $TARGET_COMMIT"
               git config user.email "bitbucket-pipeline@demoulas.com"
               git config user.name "Bitbucket Pipeline"
+              echo "Git version:"
+              git --version
               echo "Git remote configuration:"
               git remote -v
               echo "Current branch:"
-              git branch --show-current
+              git rev-parse --abbrev-ref HEAD
               if git tag -l | grep -q "^${TagName}$"; then
                 echo "Error: Tag '$TagName' already exists locally. Delete it first or use a different name."
                 exit 1
