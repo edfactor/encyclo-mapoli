@@ -818,6 +818,85 @@ pipelines:
           - step: *secret-scan
   
   custom:
+    create_git_tag:
+      - variables:
+          - name: TagName
+            description: "Tag name (e.g., v1.0.0, release-2025-10-31)"
+          - name: TagMessage
+            description: "Tag annotation message (optional)"
+            default: "Release tag created via pipeline"
+          - name: CommitHash
+            description: "Commit hash to tag (leave empty for HEAD)"
+            default: ""
+      - step:
+          name: Create Git Tag
+          runs-on:
+            - windows
+            - self.hosted
+          script:
+            - |
+              # Validate tag name
+              if (-not $env:TagName) {
+                Write-Error "TagName is required"
+                exit 1
+              }
+
+              # Validate tag name format (basic validation)
+              if ($env:TagName -notmatch '^[a-zA-Z0-9._/-]+$') {
+                Write-Error "Invalid tag name format. Use only alphanumeric characters, dots, underscores, slashes, or hyphens."
+                exit 1
+              }
+
+              Write-Host "Creating Git tag: $env:TagName" -ForegroundColor Cyan
+              Write-Host "Message: $env:TagMessage" -ForegroundColor Cyan
+              
+              # Determine target commit
+              $targetCommit = if ($env:CommitHash) { $env:CommitHash } else { "HEAD" }
+              Write-Host "Target commit: $targetCommit" -ForegroundColor Cyan
+
+              # Configure Git (ensure user identity is set)
+              git config user.email "bitbucket-pipeline@demoulas.com"
+              git config user.name "Bitbucket Pipeline"
+
+              # Check if tag already exists
+              $existingTag = git tag -l $env:TagName
+              if ($existingTag) {
+                Write-Error "Tag '$env:TagName' already exists. Delete it first or use a different name."
+                exit 1
+              }
+
+              # Create annotated tag
+              try {
+                if ($env:TagMessage) {
+                  git tag -a $env:TagName -m $env:TagMessage $targetCommit
+                } else {
+                  git tag $env:TagName $targetCommit
+                }
+                
+                if ($LASTEXITCODE -ne 0) {
+                  Write-Error "Failed to create tag"
+                  exit 1
+                }
+
+                Write-Host "Tag created successfully" -ForegroundColor Green
+
+                # Push tag to remote
+                Write-Host "Pushing tag to origin..." -ForegroundColor Cyan
+                git push origin $env:TagName
+
+                if ($LASTEXITCODE -ne 0) {
+                  Write-Error "Failed to push tag to remote"
+                  exit 1
+                }
+
+                Write-Host "Tag pushed successfully" -ForegroundColor Green
+                Write-Host "Tag '$env:TagName' created and pushed" -ForegroundColor Green
+              }
+              catch {
+                Write-Error "Error creating or pushing tag: $_"
+                exit 1
+              }
+
     profitsharing_database:
       - variables: # https://bitbucket.org/blog/predefine-values-of-custom-pipeline-variables
           - name: Environment
