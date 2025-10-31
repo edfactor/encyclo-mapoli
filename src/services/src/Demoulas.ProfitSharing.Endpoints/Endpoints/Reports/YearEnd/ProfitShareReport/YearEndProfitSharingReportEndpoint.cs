@@ -88,7 +88,6 @@ public class YearEndProfitSharingReportEndpoint : EndpointWithCsvTotalsBase<Year
 
             // Record counts processed
             var recordCount = response.Response?.Results?.Count() ?? 0;
-            var totalCount = response.Response?.Total ?? 0;
 
             EndpointTelemetry.RecordCountsProcessed.Record(recordCount,
                 new("endpoint", "YearEndProfitSharingReportEndpoint"),
