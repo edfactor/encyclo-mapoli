@@ -222,6 +222,11 @@ public sealed class TerminatedEmployeeReportService
             var hasForfeited = enrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords ||
                                enrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
             var suggestedForfeit = hasForfeited ? (decimal?) 0 : Math.Round(member.EndingBalance - vestedBalance, 2, MidpointRounding.AwayFromZero);
+            if (member.PsnSuffix > 0)
+            {
+                // You can not forfeit a pure bene
+                suggestedForfeit = null;
+            }
 
             // Create year detail record
             TerminatedEmployeeAndBeneficiaryYearDetailDto yearDetail = new()

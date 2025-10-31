@@ -59,7 +59,7 @@ export function SuggestedForfeitEditor(props: ICellEditorParams) {
         <Tooltip
           title={error}
           placement="top">
-          <ErrorOutline sx={{ color: "#d32f2f", fontSize: 20, marginRight: "8px" }} />
+          <ErrorOutline sx={{ color: "#1976d2", fontSize: 20, marginRight: "8px" }} />
         </Tooltip>
       )}
       <TextField
