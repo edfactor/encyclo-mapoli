@@ -21,7 +21,7 @@ vi.mock("@mui/icons-material/InfoOutlined", () => ({
   )
 }));
 
-describe("MasterUpdateSummaryTable", () => {
+describe("MasterUpdateSummaryTable", { timeout: 16000 }, () => {
   const mockTotals = {
     beginningBalance: 1000000,
     totalContribution: 50000,

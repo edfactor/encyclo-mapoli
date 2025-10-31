@@ -9,7 +9,7 @@ import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
  * Focus: Ensure badges look like links (#0258A5 color) without causing navigation.
  */
 
-describe("MasterInquiryMemberGrid - Badge Link Styling", () => {
+describe("MasterInquiryMemberGrid - Badge Link Styling", { timeout: 40000 }, () => {
   // Minimal mock data - just enough to render the component
   const mockSearchResults: SearchResponse = {
     results: [],

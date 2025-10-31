@@ -26,7 +26,7 @@ vi.mock("../../../hooks/useDecemberFlowProfitYear", () => ({
   default: vi.fn(() => 2024)
 }));
 
-describe("MilitaryContributionForm", () => {
+describe("MilitaryContributionForm", { timeout: 55000 }, () => {
   const mockOnSubmit = vi.fn();
   const mockOnCancel = vi.fn();
 

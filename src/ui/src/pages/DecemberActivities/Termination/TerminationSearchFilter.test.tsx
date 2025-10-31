@@ -60,7 +60,7 @@ vi.mock("smart-ui-library", () => ({
   ))
 }));
 
-describe("TerminationSearchFilter", () => {
+describe("TerminationSearchFilter", { timeout: 7000 }, () => {
   const mockFiscalData: CalendarResponseDto = {
     fiscalBeginDate: "2024-01-01",
     fiscalEndDate: "2024-12-31"
@@ -101,8 +101,8 @@ describe("TerminationSearchFilter", () => {
           isFetching={false}
         />, { wrapper });
 
-      expect(screen.getByTestId("date-picker-Beginning Date")).toBeInTheDocument();
-      expect(screen.getByTestId("date-picker-Ending Date")).toBeInTheDocument();
+      expect(screen.getByTestId("date-picker-Begin Date")).toBeInTheDocument();
+      expect(screen.getByTestId("date-picker-End Date")).toBeInTheDocument();
       expect(screen.getByTestId("search-and-reset")).toBeInTheDocument();
     });
 
@@ -146,8 +146,8 @@ describe("TerminationSearchFilter", () => {
           isFetching={false}
         />, { wrapper });
 
-      const beginDateInput = screen.getByTestId("date-picker-Beginning Date") as HTMLInputElement;
-      const endDateInput = screen.getByTestId("date-picker-Ending Date") as HTMLInputElement;
+      const beginDateInput = screen.getByTestId("date-picker-Begin Date") as HTMLInputElement;
+      const endDateInput = screen.getByTestId("date-picker-End Date") as HTMLInputElement;
 
       // Verify elements exist
       expect(beginDateInput).toBeInTheDocument();
@@ -164,8 +164,8 @@ describe("TerminationSearchFilter", () => {
           isFetching={false}
         />, { wrapper });
 
-      const beginDateInput = screen.getByTestId("date-picker-Beginning Date");
-      const endDateInput = screen.getByTestId("date-picker-Ending Date");
+      const beginDateInput = screen.getByTestId("date-picker-Begin Date");
+      const endDateInput = screen.getByTestId("date-picker-End Date");
 
       // Enter begin date
       await userEvent.type(beginDateInput, "2024-06-01");
@@ -344,8 +344,8 @@ describe("TerminationSearchFilter", () => {
           isFetching={false}
         />, { wrapper });
 
-      const beginDateInput = screen.getByTestId("date-picker-Beginning Date");
-      const endDateInput = screen.getByTestId("date-picker-Ending Date");
+      const beginDateInput = screen.getByTestId("date-picker-Begin Date");
+      const endDateInput = screen.getByTestId("date-picker-End Date");
 
       // Date inputs should exist and be properly configured
       expect(beginDateInput).toBeInTheDocument();

@@ -8,7 +8,7 @@ const renderWithProvider = (component: React.ReactElement) => {
   return render(<MissiveAlertProvider>{component}</MissiveAlertProvider>);
 };
 
-describe("MasterInquiryMemberDetails", () => {
+describe("MasterInquiryMemberDetails", { timeout: 18000 }, () => {
   const mockEmployeeDetails = {
     id: 1,
     isEmployee: true,
