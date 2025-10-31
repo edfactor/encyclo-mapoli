@@ -295,9 +295,9 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                 leftColumnHeaders={["Forfeitures"]}
                 topRowHeaders={[]}
                 breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}></TotalsGrid>
-              {(distributionsAndForfeitures.forfeitureRegularTotal ||
-                distributionsAndForfeitures.forfeitureAdministrativeTotal ||
-                distributionsAndForfeitures.forfeitureClassActionTotal) && (
+              {((distributionsAndForfeitures.forfeitureRegularTotal || 0) > 0 ||
+                (distributionsAndForfeitures.forfeitureAdministrativeTotal || 0) > 0 ||
+                (distributionsAndForfeitures.forfeitureClassActionTotal || 0) > 0) && (
                 <div
                   className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
                   onMouseEnter={handleForfeiturePopoverOpen}
@@ -363,8 +363,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
             </div>
           </div>
 
-          <ReportSummary report={distributionsAndForfeitures} />
-
+          {!isFetching && <ReportSummary report={distributionsAndForfeitures} />}
           {isFetching ? (
             <div className="flex flex-col items-center justify-center gap-4 py-16">
               <CircularProgress />
