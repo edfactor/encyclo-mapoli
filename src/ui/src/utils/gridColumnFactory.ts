@@ -922,8 +922,11 @@ export const createPointsColumn = (options: PointsColumnOptions = {}): ColDef =>
         return value.toUpperCase();
       }
 
-      // Handle numeric values
-      if (typeof value === "number" && !isNaN(value)) {
+      // Handle numeric values (excluding NaN)
+      if (typeof value === "number") {
+        if (isNaN(value)) {
+          return "";
+        }
         return formatNumberWithComma(value);
       }
 
