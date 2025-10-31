@@ -106,7 +106,9 @@ describe("DuplicateSSNsOnDemographics", () => {
       render(<DuplicateSSNsOnDemographics />);
       expect(vi.mocked(DuplicateSSNsOnDemographicsGrid)).toHaveBeenCalledWith(
         expect.objectContaining({
-          pagination: expect.any(Object)
+          pagination: expect.any(Object),
+          onPaginationChange: expect.any(Function),
+          onSortChange: expect.any(Function)
         }),
         expect.anything()
       );

@@ -1,4 +1,5 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import DistributionsAndForfeitures from "../DistributionsAndForfeitures";
 import DistributionsAndForfeituresGrid from "../DistributionsAndForfeituresGrid";
@@ -6,9 +7,9 @@ import DistributionsAndForfeituresSearchFilter from "../DistributionsAndForfeitu
 
 // Mock child components
 vi.mock("../DistributionsAndForfeituresSearchFilter", () => ({
-  default: vi.fn(({ setInitialSearchLoaded: _setInitialSearchLoaded, isFetching }: { setInitialSearchLoaded: (val: boolean) => void; isFetching: boolean }) => (
+  default: vi.fn(({ setInitialSearchLoaded: _setInitialSearchLoaded, isFetching }: Record<string, unknown>) => (
     <div data-testid="search-filter">
-      <button onClick={() => _setInitialSearchLoaded(true)} data-testid="search-btn">
+      <button onClick={() => (_setInitialSearchLoaded as (val: boolean) => void)(true)} data-testid="search-btn">
         Search
       </button>
       {isFetching && <div data-testid="fetching">Fetching...</div>}
@@ -17,12 +18,12 @@ vi.mock("../DistributionsAndForfeituresSearchFilter", () => ({
 }));
 
 vi.mock("../DistributionsAndForfeituresGrid", () => ({
-  default: vi.fn(({ setInitialSearchLoaded: _setInitialSearchLoaded, initialSearchLoaded: _initialSearchLoaded, onLoadingChange }: { setInitialSearchLoaded: (val: boolean) => void; initialSearchLoaded: boolean; onLoadingChange: (val: boolean) => void }) => (
+  default: vi.fn(({ setInitialSearchLoaded: _setInitialSearchLoaded, initialSearchLoaded: _initialSearchLoaded, onLoadingChange }: Record<string, unknown>) => (
     <div data-testid="grid">
-      <button onClick={() => onLoadingChange(true)} data-testid="start-loading">
+      <button onClick={() => (onLoadingChange as (val: boolean) => void)(true)} data-testid="start-loading">
         Start Loading
       </button>
-      <button onClick={() => onLoadingChange(false)} data-testid="stop-loading">
+      <button onClick={() => (onLoadingChange as (val: boolean) => void)(false)} data-testid="stop-loading">
         Stop Loading
       </button>
       Grid Component
@@ -163,10 +164,13 @@ describe("DistributionsAndForfeitures", () => {
 
   describe("Loading state propagation", () => {
     it("should update isFetching when grid calls onLoadingChange", async () => {
+      const user = userEvent.setup();
       const { rerender } = render(<DistributionsAndForfeitures />);
 
       const startLoadingBtn = screen.getByTestId("start-loading");
-      startLoadingBtn.click();
+      await act(async () => {
+        await user.click(startLoadingBtn);
+      });
 
       await waitFor(() => {
         rerender(<DistributionsAndForfeitures />);
@@ -175,10 +179,13 @@ describe("DistributionsAndForfeitures", () => {
     });
 
     it("should clear isFetching when grid signals loading complete", async () => {
+      const user = userEvent.setup();
       const { rerender } = render(<DistributionsAndForfeitures />);
 
       const startLoadingBtn = screen.getByTestId("start-loading");
-      startLoadingBtn.click();
+      await act(async () => {
+        await user.click(startLoadingBtn);
+      });
 
       await waitFor(() => {
         rerender(<DistributionsAndForfeitures />);
@@ -186,7 +193,9 @@ describe("DistributionsAndForfeitures", () => {
       });
 
       const stopLoadingBtn = screen.getByTestId("stop-loading");
-      stopLoadingBtn.click();
+      await act(async () => {
+        await user.click(stopLoadingBtn);
+      });
 
       await waitFor(() => {
         rerender(<DistributionsAndForfeitures />);

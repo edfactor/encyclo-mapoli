@@ -117,8 +117,9 @@ describe("Termination", () => {
     it("should render page with correct label", () => {
       render(<Termination />);
 
-      // The label should contain "TERMINATIONS" or similar
-      expect(screen.getByText(/TERMINATION/i)).toBeInTheDocument();
+      // The label should contain "TERMINATIONS" with records count
+      const pageLabel = screen.getByText(/TERMINATIONS.*records/i);
+      expect(pageLabel).toBeInTheDocument();
     });
 
     it("should render ApiMessageAlert", () => {

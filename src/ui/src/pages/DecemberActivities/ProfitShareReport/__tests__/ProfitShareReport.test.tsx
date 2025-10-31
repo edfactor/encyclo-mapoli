@@ -4,9 +4,12 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import ProfitShareReport from "../ProfitShareReport";
 import ProfitShareReportSearchFilter from "../ProfitShareReportSearchFilter";
 import ProfitShareReportGrid from "../ProfitShareReportGrid";
+import securitySlice from "../../../../../reduxstore/slices/securitySlice";
+import yearsEndSlice from "../../../../../reduxstore/slices/yearsEndSlice";
 
 vi.mock("../ProfitShareReportSearchFilter", () => ({
   default: vi.fn(({ onSearch, setInitialSearchLoaded: _setInitialSearchLoaded, isFetching }) => (
@@ -62,15 +65,23 @@ vi.mock("smart-ui-library", () => ({
 }));
 
 describe("ProfitShareReport", () => {
+  // Create a minimal mock API for yearsEndApi
+  const mockYearsEndApi = createApi({
+    reducerPath: "yearsEndApi",
+    baseQuery: fetchBaseQuery({ baseUrl: "/" }),
+    endpoints: () => ({})
+  });
+
   // Create a minimal mock store
   const createMockStore = () => {
     return configureStore({
       reducer: {
-        security: () => ({ token: "mock-token" }),
-        yearsEnd: () => ({
-          yearEndProfitSharingReportTotals: null
-        })
-      }
+        security: securitySlice,
+        yearsEnd: yearsEndSlice,
+        [mockYearsEndApi.reducerPath]: mockYearsEndApi.reducer
+      },
+      middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({ serializableCheck: false }).concat(mockYearsEndApi.middleware)
     });
   };
 

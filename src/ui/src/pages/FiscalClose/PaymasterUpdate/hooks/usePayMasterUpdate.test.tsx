@@ -134,10 +134,12 @@ describe("usePayMasterUpdate", () => {
       createMockRTKQueryPromise(createMockUpdateSummaryResponse([]))
     );
 
-    // Mock mutation
-    mockUpdateEnrollment.mockResolvedValue({
+    // Mock mutation with unwrap method
+    const mockMutationPromise = Promise.resolve({
       data: { success: true }
     });
+    (mockMutationPromise as Record<string, unknown>).unwrap = () => Promise.resolve({ success: true });
+    mockUpdateEnrollment.mockReturnValue(mockMutationPromise as unknown as ReturnType<typeof useUpdateEnrollmentMutation.useUpdateEnrollmentMutation>[0]);
 
     vi.spyOn(useLazyGetUpdateSummaryQuery, "useLazyGetUpdateSummaryQuery").mockReturnValue([
       mockTriggerGetSummary,

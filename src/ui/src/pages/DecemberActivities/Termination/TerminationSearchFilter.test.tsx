@@ -8,13 +8,13 @@ import { CalendarResponseDto } from "../../../reduxstore/types";
 
 // Mock date picker and validators
 vi.mock("../../../components/DsmDatePicker/DsmDatePicker", () => ({
-  default: vi.fn(({ label, onChange, disabled, ...props }) => (
+  default: vi.fn(({ label, onChange, disabled }) => (
     <input
       data-testid={`date-picker-${label}`}
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}
       placeholder={label}
-      {...props}
+      type="text"
     />
   ))
 }));

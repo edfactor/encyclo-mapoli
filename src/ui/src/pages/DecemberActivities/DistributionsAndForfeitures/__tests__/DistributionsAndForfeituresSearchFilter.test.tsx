@@ -3,13 +3,13 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 
 // Mock dependencies
 vi.mock("components/DsmDatePicker/DsmDatePicker", () => ({
-  default: vi.fn(({ label, onChange, value, ...props }) => (
+  default: vi.fn(({ label, onChange, value }) => (
     <input
       data-testid={`date-picker-${label}`}
       onChange={(e) => onChange(e.target.value)}
       value={value ? new Date(value).toISOString().split("T")[0] : ""}
       placeholder={label}
-      {...props}
+      type="date"
     />
   ))
 }));
