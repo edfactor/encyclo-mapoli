@@ -48,14 +48,14 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
     });
 
     vi.mocked(useLazyGetDemographicBadgesNotInPayprofitQuery).mockReturnValue([
-      vi.fn(async () => ({
-        response: {
+      vi.fn().mockReturnValue({
+        unwrap: vi.fn().mockResolvedValue({
           results: [
             { badgeNumber: 12345, storeName: "Store 1", employeeName: "John Doe" }
           ],
           total: 1
-        }
-      })),
+        })
+      }),
       { isFetching: false }
     ] as unknown as ReturnType<typeof useLazyGetDemographicBadgesNotInPayprofitQuery>);
   });
