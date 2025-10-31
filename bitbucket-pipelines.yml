@@ -849,16 +849,15 @@ pipelines:
               Write-Host "Target commit: $targetCommit" -ForegroundColor Cyan
               git config user.email "bitbucket-pipeline@demoulas.com"
               git config user.name "Bitbucket Pipeline"
-              Write-Host "Configuring Git remote with authentication..." -ForegroundColor Yellow
-              if ($env:REPOSITORY_OAUTH_ACCESS_TOKEN -and $env:BITBUCKET_REPO_FULL_NAME) {
-                $authenticatedUrl = "https://x-token-auth:$($env:REPOSITORY_OAUTH_ACCESS_TOKEN)@bitbucket.org/$($env:BITBUCKET_REPO_FULL_NAME).git"
-                git remote set-url origin $authenticatedUrl
-                Write-Host "Remote URL configured with token authentication" -ForegroundColor Green
+              Write-Host "Configuring Git remote for SSH..." -ForegroundColor Yellow
+              if ($env:BITBUCKET_GIT_SSH_ORIGIN) {
+                Write-Host "Using SSH origin: $env:BITBUCKET_GIT_SSH_ORIGIN" -ForegroundColor Green
+                git remote set-url origin $env:BITBUCKET_GIT_SSH_ORIGIN
               } else {
-                Write-Warning "REPOSITORY_OAUTH_ACCESS_TOKEN or BITBUCKET_REPO_FULL_NAME not available"
-                Write-Host "Git remote configuration:" -ForegroundColor Yellow
-                git remote -v
+                Write-Warning "BITBUCKET_GIT_SSH_ORIGIN not available, using current remote"
               }
+              Write-Host "Git remote configuration:" -ForegroundColor Yellow
+              git remote -v
               Write-Host "Current branch:" -ForegroundColor Yellow
               git branch --show-current
               $existingTag = git tag -l $env:TagName
@@ -867,13 +866,19 @@ pipelines:
                 exit 1
               }
               Write-Host "Checking if tag exists on remote..." -ForegroundColor Yellow
-              git ls-remote --tags origin $env:TagName 2>&1 | Out-Null
-              if ($LASTEXITCODE -eq 0) {
-                $remoteTags = git ls-remote --tags origin | Select-String $env:TagName
+              $remoteCheckJob = Start-Job -ScriptBlock { git ls-remote --tags origin 2>&1 }
+              $remoteCheckCompleted = Wait-Job -Job $remoteCheckJob -Timeout 10
+              if ($remoteCheckCompleted) {
+                $remoteTags = Receive-Job -Job $remoteCheckJob | Select-String $env:TagName
+                Remove-Job -Job $remoteCheckJob
                 if ($remoteTags) {
                   Write-Error "Tag '$env:TagName' already exists on remote. Delete it first or use a different name."
                   exit 1
                 }
+                Write-Host "Tag does not exist on remote" -ForegroundColor Green
+              } else {
+                Remove-Job -Job $remoteCheckJob -Force
+                Write-Warning "Remote check timed out after 10 seconds, continuing anyway..."
               }
               Write-Host "Creating local tag..." -ForegroundColor Cyan
               if ($env:TagMessage) {
@@ -892,12 +897,27 @@ pipelines:
                 exit 1
               }
               Write-Host "Pushing tag to origin..." -ForegroundColor Cyan
-              git push origin "refs/tags/$env:TagName"
-              if ($LASTEXITCODE -ne 0) {
-                Write-Error "Failed to push tag to remote"
+              $pushJob = Start-Job -ScriptBlock { param($tag) git push origin "refs/tags/$tag" 2>&1 } -ArgumentList $env:TagName
+              $pushCompleted = Wait-Job -Job $pushJob -Timeout 30
+              if ($pushCompleted) {
+                $pushOutput = Receive-Job -Job $pushJob
+                Remove-Job -Job $pushJob
+                Write-Host "Push output: $pushOutput" -ForegroundColor Yellow
+                $errorLines = $pushOutput | Where-Object { $_ -match "error|fatal|rejected" }
+                if ($errorLines) {
+                  Write-Error "Failed to push tag. Errors: $errorLines"
+                  exit 1
+                }
+                Write-Host "Tag pushed successfully" -ForegroundColor Green
+              } else {
+                Remove-Job -Job $pushJob -Force
+                Write-Error "Push timed out after 30 seconds. Tag created locally but not pushed."
+                Write-Host "Possible issues:" -ForegroundColor Yellow
+                Write-Host "  - SSH key not configured properly" -ForegroundColor Yellow
+                Write-Host "  - Network connectivity issues" -ForegroundColor Yellow
+                Write-Host "  - Remote repository permissions" -ForegroundColor Yellow
                 exit 1
               }
-              Write-Host "Tag pushed successfully" -ForegroundColor Green
               Write-Host "Verifying tag on remote..." -ForegroundColor Cyan
               $remoteCheck = git ls-remote --tags origin $env:TagName
               if ($remoteCheck) {
