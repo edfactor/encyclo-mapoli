@@ -125,7 +125,7 @@ vi.mock("smart-ui-library", () => ({
     </div>
   )),
   formatNumberWithComma: vi.fn((num) => num.toString()),
-  setMessage: vi.fn()
+  setMessage: vi.fn((payload) => ({ type: "message/setMessage", payload }))
 }));
 
 describe("MilitaryContribution", () => {
@@ -143,7 +143,8 @@ describe("MilitaryContribution", () => {
         }),
         yearsEnd: () => ({
           selectedProfitYearForFiscalClose: 2024
-        })
+        }),
+        message: () => ({}) // Add message reducer
       }
     });
   };
@@ -185,7 +186,7 @@ describe("MilitaryContribution", () => {
       expect(screen.getByTestId("military-grid")).toBeInTheDocument();
     });
 
-    it("should display message when no member selected", () => {
+    it("should display message when no member selected", async () => {
       const useDecemberFlowProfitYear = await import("../../../hooks/useDecemberFlowProfitYear");
       vi.mocked(useDecemberFlowProfitYear.default).mockReturnValueOnce(2024);
 

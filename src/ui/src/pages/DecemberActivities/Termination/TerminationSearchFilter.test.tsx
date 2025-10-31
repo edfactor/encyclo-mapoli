@@ -1,5 +1,7 @@
+import { configureStore } from "@reduxjs/toolkit";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Provider } from "react-redux";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import TerminationSearchFilter from "./TerminationSearchFilter";
 import { CalendarResponseDto } from "../../../reduxstore/types";
@@ -67,6 +69,23 @@ describe("TerminationSearchFilter", () => {
   const mockOnSearch = vi.fn();
   const mockSetInitialSearchLoaded = vi.fn();
 
+  // Create a minimal mock store
+  const createMockStore = () => {
+    return configureStore({
+      reducer: {
+        security: () => ({ token: "mock-token" }),
+        yearsEnd: () => ({
+          termination: null
+        })
+      }
+    });
+  };
+
+  // Create a wrapper with Provider
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <Provider store={createMockStore()}>{children}</Provider>
+  );
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -80,8 +99,7 @@ describe("TerminationSearchFilter", () => {
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
           isFetching={false}
-        />
-      );
+        />, { wrapper });
 
       expect(screen.getByTestId("date-picker-Beginning Date")).toBeInTheDocument();
       expect(screen.getByTestId("date-picker-Ending Date")).toBeInTheDocument();
@@ -96,8 +114,7 @@ describe("TerminationSearchFilter", () => {
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
           isFetching={false}
-        />
-      );
+        />, { wrapper });
 
       expect(screen.getByTestId("search-btn")).toBeInTheDocument();
       expect(screen.getByTestId("reset-btn")).toBeInTheDocument();
@@ -111,8 +128,7 @@ describe("TerminationSearchFilter", () => {
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
           isFetching={true}
-        />
-      );
+        />, { wrapper });
 
       expect(screen.getByTestId("loading")).toBeInTheDocument();
       expect(screen.getByTestId("search-btn")).toBeDisabled();
@@ -128,8 +144,7 @@ describe("TerminationSearchFilter", () => {
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
           isFetching={false}
-        />
-      );
+        />, { wrapper });
 
       const beginDateInput = screen.getByTestId("date-picker-Beginning Date") as HTMLInputElement;
       const endDateInput = screen.getByTestId("date-picker-Ending Date") as HTMLInputElement;
@@ -147,8 +162,7 @@ describe("TerminationSearchFilter", () => {
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
           isFetching={false}
-        />
-      );
+        />, { wrapper });
 
       const beginDateInput = screen.getByTestId("date-picker-Beginning Date");
       const endDateInput = screen.getByTestId("date-picker-Ending Date");
@@ -174,8 +188,7 @@ describe("TerminationSearchFilter", () => {
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
           isFetching={false}
-        />
-      );
+        />, { wrapper });
 
       const searchButton = screen.getByTestId("search-btn");
       fireEvent.click(searchButton);
@@ -193,8 +206,7 @@ describe("TerminationSearchFilter", () => {
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
           isFetching={false}
-        />
-      );
+        />, { wrapper });
 
       const searchButton = screen.getByTestId("search-btn");
       fireEvent.click(searchButton);
@@ -212,8 +224,7 @@ describe("TerminationSearchFilter", () => {
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={true}
           isFetching={false}
-        />
-      );
+        />, { wrapper });
 
       const searchButton = screen.getByTestId("search-btn");
       // Button should be disabled when there are unsaved changes
@@ -228,8 +239,7 @@ describe("TerminationSearchFilter", () => {
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
           isFetching={true}
-        />
-      );
+        />, { wrapper });
 
       const searchButton = screen.getByTestId("search-btn");
       expect(searchButton).toBeDisabled();
@@ -247,8 +257,7 @@ describe("TerminationSearchFilter", () => {
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
           isFetching={false}
-        />
-      );
+        />, { wrapper });
 
       const resetButton = screen.getByTestId("reset-btn");
       fireEvent.click(resetButton);
@@ -267,8 +276,7 @@ describe("TerminationSearchFilter", () => {
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
           isFetching={false}
-        />
-      );
+        />, { wrapper });
 
       // The component should contain status selection
       // This may be a select, radio, or checkbox group
@@ -285,8 +293,7 @@ describe("TerminationSearchFilter", () => {
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
           isFetching={false}
-        />
-      );
+        />, { wrapper });
 
       const searchButton = screen.getByTestId("search-btn");
 
@@ -305,8 +312,7 @@ describe("TerminationSearchFilter", () => {
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
           isFetching={false}
-        />
-      );
+        />, { wrapper });
 
       // Verify search component exists (guard wraps it)
       expect(screen.getByTestId("search-and-reset")).toBeInTheDocument();
@@ -320,8 +326,7 @@ describe("TerminationSearchFilter", () => {
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
           isFetching={false}
-        />
-      );
+        />, { wrapper });
 
       // Guard component should allow search when prerequisites complete
       expect(screen.getByTestId("search-btn")).toBeInTheDocument();
@@ -337,8 +342,7 @@ describe("TerminationSearchFilter", () => {
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
           isFetching={false}
-        />
-      );
+        />, { wrapper });
 
       const beginDateInput = screen.getByTestId("date-picker-Beginning Date");
       const endDateInput = screen.getByTestId("date-picker-Ending Date");
@@ -358,8 +362,7 @@ describe("TerminationSearchFilter", () => {
           setInitialSearchLoaded={mockSetInitialSearchLoaded}
           hasUnsavedChanges={false}
           isFetching={false}
-        />
-      );
+        />, { wrapper });
 
       const searchButton = screen.getByTestId("search-btn");
       fireEvent.click(searchButton);

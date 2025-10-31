@@ -110,8 +110,8 @@ describe("UnForfeit", () => {
     it("should render page with correct label", () => {
       render(<UnForfeit />);
 
-      // The label should contain "REHIRE" or "UNFORFEIT"
-      expect(screen.getByText(/REHIRE|UNFORFEIT/i)).toBeInTheDocument();
+      // The label should be "UnForfeit (QPREV-PROF)"
+      expect(screen.getByText("UnForfeit (QPREV-PROF)")).toBeInTheDocument();
     });
 
     it("should render ApiMessageAlert", () => {

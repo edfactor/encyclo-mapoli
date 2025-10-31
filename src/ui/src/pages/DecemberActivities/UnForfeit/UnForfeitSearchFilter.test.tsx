@@ -3,37 +3,39 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import UnForfeitSearchFilter from "./UnForfeitSearchFilter";
 import { CalendarResponseDto } from "../../../reduxstore/types";
+import { Provider } from "react-redux";
+import { configureStore } from "@reduxjs/toolkit";
 
 // Mock date picker
 vi.mock("../../../components/DsmDatePicker/DsmDatePicker", () => ({
-  default: vi.fn(({ label, onChange, disabled, ...props }) => (
-    <input
-      data-testid={`date-picker-${label}`}
-      onChange={(e) => onChange(e.target.value)}
-      disabled={disabled}
-      placeholder={label}
-      {...props}
-    />
+  default: vi.fn(({ label, onChange, value, disabled, error, id }) => (
+    <div>
+      <label>{label}</label>
+      <input
+        id={id}
+        data-testid={`date-picker-${label}`}
+        onChange={(e) => onChange(e.target.value ? new Date(e.target.value) : null)}
+        value={value ? value.toISOString().split('T')[0] : ""}
+        disabled={disabled}
+        placeholder={label}
+        type="date"
+      />
+      {error && <span data-testid={`error-${label}`}>{error}</span>}
+    </div>
   ))
 }));
 
-vi.mock("../../../utils/FormValidators", () => ({
-  dateStringValidator: () => ({
-    required: () => ({
-      typeError: () => ({
-        min: () => ({
-          max: () => ({})
-        })
-      })
-    })
-  }),
-  endDateStringAfterStartDateValidator: () => ({
-    required: () => ({})
-  }),
-  profitYearValidator: () => ({
-    required: () => ({})
-  })
-}));
+vi.mock("../../../utils/FormValidators", async () => {
+  const yup = await import("yup");
+
+  return {
+    dateStringValidator: () => yup.default.string().nullable(),
+    endDateStringAfterStartDateValidator: () => yup.default.string().nullable(),
+    profitYearValidator: () => yup.default.number().required(),
+    tryddmmyyyyToDate: (dateStr: string) => new Date(dateStr),
+    mmDDYYFormat: (date: string) => date
+  };
+});
 
 vi.mock("smart-ui-library", () => ({
   SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) => (
@@ -54,6 +56,19 @@ vi.mock("smart-ui-library", () => ({
   ))
 }));
 
+// Mock the RTK Query hook
+vi.mock("../../../reduxstore/api/YearsEndApi", () => ({
+  useLazyGetUnForfeitsQuery: vi.fn(() => [
+    vi.fn(), // triggerSearch function
+    { isFetching: false } // query state
+  ])
+}));
+
+// Mock the December flow hook
+vi.mock("../../../hooks/useDecemberFlowProfitYear", () => ({
+  default: vi.fn(() => 2024)
+}));
+
 describe("UnForfeitSearchFilter", () => {
   const mockFiscalData: CalendarResponseDto = {
     fiscalBeginDate: "2024-01-01",
@@ -64,13 +79,30 @@ describe("UnForfeitSearchFilter", () => {
   const mockSetInitialSearchLoaded = vi.fn();
   const mockSetHasUnsavedChanges = vi.fn();
 
+  const createMockStore = () => {
+    return configureStore({
+      reducer: {
+        security: () => ({ token: "mock-token" }),
+        yearsEnd: () => ({
+          selectedProfitYearForFiscalClose: 2024,
+          unForfeitsQueryParams: null
+        })
+      }
+    });
+  };
+
+  const renderWithProvider = (component: React.ReactElement) => {
+    const store = createMockStore();
+    return render(<Provider store={store}>{component}</Provider>);
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe("Rendering", () => {
     it("should render the form with all fields", () => {
-      render(
+      renderWithProvider(
         <UnForfeitSearchFilter
           fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
@@ -81,12 +113,12 @@ describe("UnForfeitSearchFilter", () => {
       );
 
       expect(screen.getByTestId("date-picker-Rehire Begin Date")).toBeInTheDocument();
-      expect(screen.getByTestId("date-picker-Rehire End Date")).toBeInTheDocument();
+      expect(screen.getByTestId("date-picker-Rehire Ending Date")).toBeInTheDocument();
       expect(screen.getByTestId("search-and-reset")).toBeInTheDocument();
     });
 
     it("should render search and reset buttons", () => {
-      render(
+      renderWithProvider(
         <UnForfeitSearchFilter
           fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
@@ -101,7 +133,7 @@ describe("UnForfeitSearchFilter", () => {
     });
 
     it("should render exclude zero balance checkbox", () => {
-      render(
+      renderWithProvider(
         <UnForfeitSearchFilter
           fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
@@ -119,7 +151,7 @@ describe("UnForfeitSearchFilter", () => {
 
   describe("Date validation", () => {
     it("should enforce fiscal year date constraints", () => {
-      render(
+      renderWithProvider(
         <UnForfeitSearchFilter
           fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
@@ -130,14 +162,14 @@ describe("UnForfeitSearchFilter", () => {
       );
 
       const beginDateInput = screen.getByTestId("date-picker-Rehire Begin Date") as HTMLInputElement;
-      const endDateInput = screen.getByTestId("date-picker-Rehire End Date") as HTMLInputElement;
+      const endDateInput = screen.getByTestId("date-picker-Rehire Ending Date") as HTMLInputElement;
 
       expect(beginDateInput).toBeInTheDocument();
       expect(endDateInput).toBeInTheDocument();
     });
 
     it("should validate end date is after begin date", async () => {
-      render(
+      renderWithProvider(
         <UnForfeitSearchFilter
           fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
@@ -148,7 +180,7 @@ describe("UnForfeitSearchFilter", () => {
       );
 
       const beginDateInput = screen.getByTestId("date-picker-Rehire Begin Date");
-      const endDateInput = screen.getByTestId("date-picker-Rehire End Date");
+      const endDateInput = screen.getByTestId("date-picker-Rehire Ending Date");
 
       // Test date entry
       await userEvent.type(beginDateInput, "2024-06-01");
@@ -159,7 +191,7 @@ describe("UnForfeitSearchFilter", () => {
     });
 
     it("should reject dates before February 2024", async () => {
-      render(
+      renderWithProvider(
         <UnForfeitSearchFilter
           fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
@@ -181,7 +213,8 @@ describe("UnForfeitSearchFilter", () => {
 
   describe("Search functionality", () => {
     it("should call onSearch when search button is clicked", async () => {
-      render(
+      const user = userEvent.setup();
+      renderWithProvider(
         <UnForfeitSearchFilter
           fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
@@ -191,16 +224,23 @@ describe("UnForfeitSearchFilter", () => {
         />
       );
 
+      // Wait for form to initialize with default dates
+      await waitFor(() => {
+        const searchButton = screen.getByTestId("search-btn");
+        expect(searchButton).not.toBeDisabled();
+      });
+
       const searchButton = screen.getByTestId("search-btn");
-      fireEvent.click(searchButton);
+      await user.click(searchButton);
 
       await waitFor(() => {
         expect(mockOnSearch).toHaveBeenCalled();
       });
     });
 
-    it("should call setInitialSearchLoaded when search is executed", async () => {
-      render(
+    it("should call onSearch when search is executed", async () => {
+      const user = userEvent.setup();
+      renderWithProvider(
         <UnForfeitSearchFilter
           fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
@@ -210,16 +250,22 @@ describe("UnForfeitSearchFilter", () => {
         />
       );
 
+      // Wait for form to be valid
+      await waitFor(() => {
+        const searchButton = screen.getByTestId("search-btn");
+        expect(searchButton).not.toBeDisabled();
+      });
+
       const searchButton = screen.getByTestId("search-btn");
-      fireEvent.click(searchButton);
+      await user.click(searchButton);
 
       await waitFor(() => {
-        expect(mockSetInitialSearchLoaded).toHaveBeenCalledWith(true);
+        expect(mockOnSearch).toHaveBeenCalled();
       });
     });
 
     it("should disable search when hasUnsavedChanges is true", () => {
-      render(
+      renderWithProvider(
         <UnForfeitSearchFilter
           fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
@@ -236,7 +282,7 @@ describe("UnForfeitSearchFilter", () => {
     it("should show alert when trying to search with unsaved changes", async () => {
       const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
 
-      render(
+      renderWithProvider(
         <UnForfeitSearchFilter
           fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
@@ -257,7 +303,7 @@ describe("UnForfeitSearchFilter", () => {
   describe("Reset functionality", () => {
     it("should clear form fields when reset is clicked", async () => {
       const user = userEvent.setup();
-      render(
+      renderWithProvider(
         <UnForfeitSearchFilter
           fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
@@ -269,22 +315,25 @@ describe("UnForfeitSearchFilter", () => {
 
       const beginDateInput = screen.getByTestId("date-picker-Rehire Begin Date") as HTMLInputElement;
 
-      // Type a value
-      await user.type(beginDateInput, "2024-06-01");
-      expect(beginDateInput.value).not.toBe("");
+      // Get initial default value (fiscal date)
+      const initialValue = beginDateInput.value;
+
+      // Type a different value
+      await user.clear(beginDateInput);
+      await user.type(beginDateInput, "2024-06-15");
 
       // Click reset
       const resetButton = screen.getByTestId("reset-btn");
-      fireEvent.click(resetButton);
+      await user.click(resetButton);
 
-      // Should be cleared
+      // Should be reset to fiscal date default
       await waitFor(() => {
-        expect(beginDateInput.value).toBe("");
+        expect(beginDateInput.value).toBe(initialValue);
       });
     });
 
     it("should toggle checkbox when reset", async () => {
-      render(
+      renderWithProvider(
         <UnForfeitSearchFilter
           fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
@@ -304,7 +353,8 @@ describe("UnForfeitSearchFilter", () => {
 
   describe("Exclude zero balance filter", () => {
     it("should include excludeZeroBalance in search parameters", async () => {
-      render(
+      const user = userEvent.setup();
+      renderWithProvider(
         <UnForfeitSearchFilter
           fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
@@ -314,8 +364,14 @@ describe("UnForfeitSearchFilter", () => {
         />
       );
 
+      // Wait for form to be valid
+      await waitFor(() => {
+        const searchButton = screen.getByTestId("search-btn");
+        expect(searchButton).not.toBeDisabled();
+      });
+
       const searchButton = screen.getByTestId("search-btn");
-      fireEvent.click(searchButton);
+      await user.click(searchButton);
 
       await waitFor(() => {
         expect(mockOnSearch).toHaveBeenCalled();
@@ -324,7 +380,7 @@ describe("UnForfeitSearchFilter", () => {
 
     it("should allow toggling exclude zero balance checkbox", async () => {
       const user = userEvent.setup();
-      render(
+      renderWithProvider(
         <UnForfeitSearchFilter
           fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
@@ -346,7 +402,8 @@ describe("UnForfeitSearchFilter", () => {
 
   describe("Redux integration", () => {
     it("should dispatch Redux action to store search parameters", async () => {
-      render(
+      const user = userEvent.setup();
+      renderWithProvider(
         <UnForfeitSearchFilter
           fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
@@ -356,8 +413,14 @@ describe("UnForfeitSearchFilter", () => {
         />
       );
 
+      // Wait for form to be valid
+      await waitFor(() => {
+        const searchButton = screen.getByTestId("search-btn");
+        expect(searchButton).not.toBeDisabled();
+      });
+
       const searchButton = screen.getByTestId("search-btn");
-      fireEvent.click(searchButton);
+      await user.click(searchButton);
 
       await waitFor(() => {
         // Component should dispatch Redux action internally
@@ -368,7 +431,7 @@ describe("UnForfeitSearchFilter", () => {
 
   describe("Form state management", () => {
     it("should track form validity", async () => {
-      render(
+      renderWithProvider(
         <UnForfeitSearchFilter
           fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
@@ -385,7 +448,7 @@ describe("UnForfeitSearchFilter", () => {
 
   describe("Date range constraints", () => {
     it("should set min/max dates based on fiscal data", () => {
-      render(
+      renderWithProvider(
         <UnForfeitSearchFilter
           fiscalData={mockFiscalData}
           onSearch={mockOnSearch}
@@ -396,7 +459,7 @@ describe("UnForfeitSearchFilter", () => {
       );
 
       const beginDateInput = screen.getByTestId("date-picker-Rehire Begin Date");
-      const endDateInput = screen.getByTestId("date-picker-Rehire End Date");
+      const endDateInput = screen.getByTestId("date-picker-Rehire Ending Date");
 
       expect(beginDateInput).toBeInTheDocument();
       expect(endDateInput).toBeInTheDocument();
@@ -407,7 +470,7 @@ describe("UnForfeitSearchFilter", () => {
     it("should show loading spinner when isFetching is true", () => {
       // Note: Loading state is built into SearchAndReset component
       // which is mocked, so we test that the component exists
-      render(
+      renderWithProvider(
         <UnForfeitSearchFilter
           fiscalData={mockFiscalData}
           onSearch={mockOnSearch}

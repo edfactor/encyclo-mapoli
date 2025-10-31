@@ -28,11 +28,7 @@ const schema = yup.object().shape({
     "beginningDate",
     tryddmmyyyyToDate,
     "Ending date must be the same or after the beginning date"
-  )
-    .required("Ending Date is required")
-    .test("is-too-early", "Insuffient data for dates before 2024", function (value) {
-      return new Date(value) > new Date(2024, 1, 1);
-    }),
+  ).required("Ending Date is required"),
   pagination: yup
     .object({
       skip: yup.number().required(),

@@ -1,6 +1,8 @@
+import { configureStore } from "@reduxjs/toolkit";
 import { render, screen, waitFor } from "@testing-library/react";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import userEvent from "@testing-library/user-event";
+import { Provider } from "react-redux";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import ProfitShareReport from "../ProfitShareReport";
 import ProfitShareReportSearchFilter from "../ProfitShareReportSearchFilter";
@@ -46,53 +48,74 @@ vi.mock("smart-ui-library", () => ({
       {children}
     </div>
   )),
+  DSMGrid: vi.fn(() => <div data-testid="dsmgrid">DSMGrid</div>),
   Page: vi.fn(({ label, actionNode, children }) => (
     <div data-testid="page">
       <div>{label}</div>
       {actionNode}
       {children}
     </div>
-  ))
+  )),
+  SmartModal: vi.fn(() => <div data-testid="smartmodal">SmartModal</div>),
+  SearchAndReset: vi.fn(() => <div data-testid="searchandreset">SearchAndReset</div>),
+  TotalsGrid: vi.fn(() => <div data-testid="totalsgrid">TotalsGrid</div>)
 }));
 
 describe("ProfitShareReport", () => {
+  // Create a minimal mock store
+  const createMockStore = () => {
+    return configureStore({
+      reducer: {
+        security: () => ({ token: "mock-token" }),
+        yearsEnd: () => ({
+          yearEndProfitSharingReportTotals: null
+        })
+      }
+    });
+  };
+
+  // Create a wrapper with Provider
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <Provider store={createMockStore()}>{children}</Provider>
+  );
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe("Rendering", () => {
     it("should render the page component", () => {
-      render(<ProfitShareReport />);
+      render(<ProfitShareReport />, { wrapper });
 
       expect(screen.getByTestId("page")).toBeInTheDocument();
     });
 
     it("should render page with correct label", () => {
-      render(<ProfitShareReport />);
+      render(<ProfitShareReport />, { wrapper });
 
       expect(screen.getByText(/PROFIT SHARE REPORT/i)).toBeInTheDocument();
     });
 
     it("should render StatusDropdownActionNode", () => {
-      render(<ProfitShareReport />);
+      render(<ProfitShareReport />, { wrapper });
 
       expect(screen.getByTestId("status-dropdown")).toBeInTheDocument();
     });
 
     it("should render filter accordion", () => {
-      render(<ProfitShareReport />);
+      render(<ProfitShareReport />, { wrapper });
 
       expect(screen.getByTestId("accordion")).toBeInTheDocument();
     });
 
     it("should render search filter", () => {
-      render(<ProfitShareReport />);
+      render(<ProfitShareReport />, { wrapper });
 
       expect(screen.getByTestId("search-filter")).toBeInTheDocument();
     });
 
     it("should render grid component", () => {
-      render(<ProfitShareReport />);
+      render(<ProfitShareReport />, { wrapper });
 
       expect(screen.getByTestId("grid")).toBeInTheDocument();
     });
@@ -100,13 +123,13 @@ describe("ProfitShareReport", () => {
 
   describe("State management", () => {
     it("should initialize with initialSearchLoaded false", () => {
-      render(<ProfitShareReport />);
+      render(<ProfitShareReport />, { wrapper });
 
       expect(screen.getByTestId("no-search")).toBeInTheDocument();
     });
 
     it("should initialize with isFetching false", () => {
-      render(<ProfitShareReport />);
+      render(<ProfitShareReport />, { wrapper });
 
       expect(screen.queryByTestId("fetching")).not.toBeInTheDocument();
     });
@@ -114,7 +137,7 @@ describe("ProfitShareReport", () => {
 
   describe("Search workflow", () => {
     it("should trigger search with form data", async () => {
-      render(<ProfitShareReport />);
+      render(<ProfitShareReport />, { wrapper });
 
       const searchBtn = screen.getByTestId("search-btn");
       searchBtn.click();
@@ -126,7 +149,7 @@ describe("ProfitShareReport", () => {
     });
 
     it("should disable search button during fetch", async () => {
-      const { rerender } = render(<ProfitShareReport />);
+      const { rerender } = render(<ProfitShareReport />, { wrapper });
 
       const startLoadingBtn = screen.getByTestId("start-loading");
       startLoadingBtn.click();
@@ -138,7 +161,7 @@ describe("ProfitShareReport", () => {
     });
 
     it("should update grid when search completes", async () => {
-      const { rerender } = render(<ProfitShareReport />);
+      const { rerender } = render(<ProfitShareReport />, { wrapper });
 
       const searchBtn = screen.getByTestId("search-btn");
       searchBtn.click();
@@ -153,7 +176,7 @@ describe("ProfitShareReport", () => {
 
   describe("Loading state coordination", () => {
     it("should pass setInitialSearchLoaded to search filter", () => {
-      render(<ProfitShareReport />);
+      render(<ProfitShareReport />, { wrapper });
 
       expect(vi.mocked(ProfitShareReportSearchFilter)).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -164,7 +187,7 @@ describe("ProfitShareReport", () => {
     });
 
     it("should pass isFetching to search filter", () => {
-      render(<ProfitShareReport />);
+      render(<ProfitShareReport />, { wrapper });
 
       expect(vi.mocked(ProfitShareReportSearchFilter)).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -175,7 +198,7 @@ describe("ProfitShareReport", () => {
     });
 
     it("should pass onLoadingChange to grid", () => {
-      render(<ProfitShareReport />);
+      render(<ProfitShareReport />, { wrapper });
 
       expect(vi.mocked(ProfitShareReportGrid)).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -188,7 +211,7 @@ describe("ProfitShareReport", () => {
 
   describe("Multi-step loading", () => {
     it("should handle loading state transitions", async () => {
-      const { rerender } = render(<ProfitShareReport />);
+      const { rerender } = render(<ProfitShareReport />, { wrapper });
 
       const startLoadingBtn = screen.getByTestId("start-loading");
       startLoadingBtn.click();
@@ -210,7 +233,7 @@ describe("ProfitShareReport", () => {
 
   describe("Component integration", () => {
     it("should render all major sections", () => {
-      render(<ProfitShareReport />);
+      render(<ProfitShareReport />, { wrapper });
 
       expect(screen.getByTestId("page")).toBeInTheDocument();
       expect(screen.getByTestId("status-dropdown")).toBeInTheDocument();
@@ -220,7 +243,7 @@ describe("ProfitShareReport", () => {
     });
 
     it("should maintain proper component hierarchy", () => {
-      render(<ProfitShareReport />);
+      render(<ProfitShareReport />, { wrapper });
 
       const page = screen.getByTestId("page");
       const accordion = screen.getByTestId("accordion");
@@ -232,7 +255,7 @@ describe("ProfitShareReport", () => {
 
   describe("Search parameter handling", () => {
     it("should pass initialSearchLoaded to grid", () => {
-      render(<ProfitShareReport />);
+      render(<ProfitShareReport />, { wrapper });
 
       expect(vi.mocked(ProfitShareReportGrid)).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -243,7 +266,7 @@ describe("ProfitShareReport", () => {
     });
 
     it("should pass searchParams to grid", () => {
-      render(<ProfitShareReport />);
+      render(<ProfitShareReport />, { wrapper });
 
       expect(vi.mocked(ProfitShareReportGrid)).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -256,7 +279,7 @@ describe("ProfitShareReport", () => {
 
   describe("Edge cases", () => {
     it("should handle rapid search submissions", async () => {
-      render(<ProfitShareReport />);
+      render(<ProfitShareReport />, { wrapper });
 
       const searchBtn = screen.getByTestId("search-btn");
 
@@ -270,7 +293,7 @@ describe("ProfitShareReport", () => {
     });
 
     it("should handle multiple loading cycles", async () => {
-      const { rerender } = render(<ProfitShareReport />);
+      const { rerender } = render(<ProfitShareReport />, { wrapper });
 
       for (let i = 0; i < 3; i++) {
         const startLoadingBtn = screen.getByTestId("start-loading");
@@ -294,7 +317,7 @@ describe("ProfitShareReport", () => {
 
   describe("Responsive layout", () => {
     it("should render with Material-UI Grid layout", () => {
-      render(<ProfitShareReport />);
+      render(<ProfitShareReport />, { wrapper });
 
       expect(screen.getByTestId("page")).toBeInTheDocument();
       expect(screen.getByTestId("accordion")).toBeInTheDocument();

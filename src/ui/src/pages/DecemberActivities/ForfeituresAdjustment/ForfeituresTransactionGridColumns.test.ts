@@ -37,6 +37,26 @@ vi.mock("../../../utils/gridColumnFactory", () => ({
     colId: config.field || "status",
     field: config.field || "status",
     ...config
+  })),
+  createYearColumn: vi.fn((config) => ({
+    colId: config.field || "year",
+    field: config.field || "year",
+    ...config
+  })),
+  createHoursColumn: vi.fn((config) => ({
+    colId: config.field || "hours",
+    field: config.field || "hours",
+    ...config
+  })),
+  createStateColumn: vi.fn((config) => ({
+    colId: config.field || "state",
+    field: config.field || "state",
+    ...config
+  })),
+  createYesOrNoColumn: vi.fn((config) => ({
+    colId: config.field || "yesOrNo",
+    field: config.field || "yesOrNo",
+    ...config
   }))
 }));
 
@@ -44,69 +64,61 @@ describe("ForfeituresTransactionGridColumns", () => {
   describe("Column definitions", () => {
     it("should export a function that returns column definitions", () => {
       const columns = GetForfeituresTransactionGridColumns();
-      expect(typeof columns).toBe("function");
-    });
-
-    it("should return an array of column definitions", () => {
-      const getColumns = GetForfeituresTransactionGridColumns();
-      const columns = getColumns();
       expect(Array.isArray(columns)).toBe(true);
     });
 
-    it("should include badge number column", () => {
-      const getColumns = GetForfeituresTransactionGridColumns();
-      const columns = getColumns();
-      const badgeColumn = columns.find((col) => col.colId === "badgeNumber");
-      expect(badgeColumn).toBeDefined();
+    it("should return an array of column definitions", () => {
+      const columns = GetForfeituresTransactionGridColumns();
+      expect(Array.isArray(columns)).toBe(true);
+      expect(columns.length).toBeGreaterThan(0);
     });
 
-    it("should include employee name column", () => {
-      const getColumns = GetForfeituresTransactionGridColumns();
-      const columns = getColumns();
-      const nameColumn = columns.find((col) => col.colId === "fullName");
-      expect(nameColumn).toBeDefined();
+    it("should include profit year column", () => {
+      const columns = GetForfeituresTransactionGridColumns();
+      const yearColumn = columns.find((col) => col.field === "profitYear");
+      expect(yearColumn).toBeDefined();
     });
 
-    it("should include store column", () => {
-      const getColumns = GetForfeituresTransactionGridColumns();
-      const columns = getColumns();
-      const storeColumn = columns.find((col) => col.colId === "store");
-      expect(storeColumn).toBeDefined();
+    it("should include profit code column", () => {
+      const columns = GetForfeituresTransactionGridColumns();
+      const codeColumn = columns.find((col) => col.field === "profitCodeId");
+      expect(codeColumn).toBeDefined();
     });
 
-    it("should include SSN column", () => {
-      const getColumns = GetForfeituresTransactionGridColumns();
-      const columns = getColumns();
-      const ssnColumn = columns.find((col) => col.colId === "ssn");
-      expect(ssnColumn).toBeDefined();
+    it("should include forfeiture column", () => {
+      const columns = GetForfeituresTransactionGridColumns();
+      const forfeitureColumn = columns.find((col) => col.field === "forfeiture");
+      expect(forfeitureColumn).toBeDefined();
     });
 
-    it("should include transaction date column", () => {
-      const getColumns = GetForfeituresTransactionGridColumns();
-      const columns = getColumns();
-      const dateColumn = columns.find((col) => col.field === "profitSharingYear" || col.field === "transactionDate");
-      expect(dateColumn).toBeDefined();
+    it("should include contribution column", () => {
+      const columns = GetForfeituresTransactionGridColumns();
+      const contributionColumn = columns.find((col) => col.field === "contribution");
+      expect(contributionColumn).toBeDefined();
     });
 
-    it("should include amount column", () => {
-      const getColumns = GetForfeituresTransactionGridColumns();
-      const columns = getColumns();
-      const amountColumn = columns.find((col) => col.field === "amount" || col.field === "forfeitureAmount");
-      expect(amountColumn).toBeDefined();
+    it("should include hours column", () => {
+      const columns = GetForfeituresTransactionGridColumns();
+      const hoursColumn = columns.find((col) => col.field === "currentHoursYear");
+      expect(hoursColumn).toBeDefined();
+    });
+
+    it("should include wages column", () => {
+      const columns = GetForfeituresTransactionGridColumns();
+      const wagesColumn = columns.find((col) => col.field === "currentIncomeYear");
+      expect(wagesColumn).toBeDefined();
     });
   });
 
   describe("Column configuration", () => {
     it("should have sortable columns", () => {
-      const getColumns = GetForfeituresTransactionGridColumns();
-      const columns = getColumns();
+      const columns = GetForfeituresTransactionGridColumns();
       const sortableColumns = columns.filter((col) => col.sortable !== false);
       expect(sortableColumns.length).toBeGreaterThan(0);
     });
 
     it("should have proper column widths", () => {
-      const getColumns = GetForfeituresTransactionGridColumns();
-      const columns = getColumns();
+      const columns = GetForfeituresTransactionGridColumns();
       columns.forEach((col) => {
         if (col.minWidth) {
           expect(typeof col.minWidth).toBe("number");
@@ -116,15 +128,13 @@ describe("ForfeituresTransactionGridColumns", () => {
     });
 
     it("should have resizable columns", () => {
-      const getColumns = GetForfeituresTransactionGridColumns();
-      const columns = getColumns();
+      const columns = GetForfeituresTransactionGridColumns();
       const resizableColumns = columns.filter((col) => col.resizable !== false);
       expect(resizableColumns.length).toBeGreaterThan(0);
     });
 
     it("should not have editable amount columns", () => {
-      const getColumns = GetForfeituresTransactionGridColumns();
-      const columns = getColumns();
+      const columns = GetForfeituresTransactionGridColumns();
       const editableColumns = columns.filter((col) => col.editable === true);
       // Transaction grid should be read-only
       expect(editableColumns.length).toBe(0);
@@ -132,41 +142,36 @@ describe("ForfeituresTransactionGridColumns", () => {
   });
 
   describe("Column factories usage", () => {
-    it("should use createBadgeColumn factory", () => {
-      const { createBadgeColumn: _createBadgeColumn } = vi.hoisted(() => ({
-        createBadgeColumn: vi.fn()
-      }));
-
-      // Test that the factory was called during column creation
-      const getColumns = GetForfeituresTransactionGridColumns();
-      const columns = getColumns();
-
-      // Verify badge column exists
-      const badgeColumn = columns.find((col) => col.colId === "badgeNumber");
-      expect(badgeColumn).toBeDefined();
+    it("should use createYearColumn factory", () => {
+      const columns = GetForfeituresTransactionGridColumns();
+      // Verify year column exists (uses createYearColumn)
+      const yearColumn = columns.find((col) => col.field === "profitYear");
+      expect(yearColumn).toBeDefined();
     });
 
-    it("should use createNameColumn factory", () => {
-      const getColumns = GetForfeituresTransactionGridColumns();
-      const columns = getColumns();
-
-      const nameColumn = columns.find((col) => col.colId === "fullName");
-      expect(nameColumn).toBeDefined();
-    });
-
-    it("should use createCurrencyColumn for amounts", () => {
-      const getColumns = GetForfeituresTransactionGridColumns();
-      const columns = getColumns();
-
-      const currencyColumns = columns.filter((col) => col.field === "amount" || col.field === "forfeitureAmount");
+    it("should use createCurrencyColumn factory", () => {
+      const columns = GetForfeituresTransactionGridColumns();
+      // Multiple currency columns should exist
+      const currencyColumns = columns.filter((col) =>
+        col.field === "forfeiture" ||
+        col.field === "contribution" ||
+        col.field === "earnings" ||
+        col.field === "payment" ||
+        col.field === "currentIncomeYear"
+      );
       expect(currencyColumns.length).toBeGreaterThan(0);
+    });
+
+    it("should use createHoursColumn factory", () => {
+      const columns = GetForfeituresTransactionGridColumns();
+      const hoursColumn = columns.find((col) => col.field === "currentHoursYear");
+      expect(hoursColumn).toBeDefined();
     });
   });
 
   describe("Column metadata", () => {
     it("should have proper headerName for display", () => {
-      const getColumns = GetForfeituresTransactionGridColumns();
-      const columns = getColumns();
+      const columns = GetForfeituresTransactionGridColumns();
       columns.forEach((col) => {
         if (col.headerName) {
           expect(typeof col.headerName).toBe("string");
@@ -176,16 +181,14 @@ describe("ForfeituresTransactionGridColumns", () => {
     });
 
     it("should have field property for data binding", () => {
-      const getColumns = GetForfeituresTransactionGridColumns();
-      const columns = getColumns();
+      const columns = GetForfeituresTransactionGridColumns();
       columns.forEach((col) => {
         expect(col.field).toBeDefined();
       });
     });
 
     it("should have colId property for identification", () => {
-      const getColumns = GetForfeituresTransactionGridColumns();
-      const columns = getColumns();
+      const columns = GetForfeituresTransactionGridColumns();
       columns.forEach((col) => {
         expect(col.colId).toBeDefined();
       });

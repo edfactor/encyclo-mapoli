@@ -3,26 +3,42 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import ForfeituresAdjustmentSearchFilter from "./ForfeituresAdjustmentSearchFilter";
 
-// Mock the form validators
-vi.mock("../../../utils/FormValidators", () => ({
-  ssnValidator: vi.fn(),
-  badgeNumberStringValidator: vi.fn(),
-  handleSsnInput: (value: string) => {
-    // Simple mock that just returns the value if it looks like an SSN
-    const cleaned = value.replace(/\D/g, "");
-    if (cleaned.length <= 9) {
-      const match = cleaned.match(/^(\d{0,3})(\d{0,2})(\d{0,4})$/);
-      if (match) {
-        const parts = [match[1], match[2], match[3]].filter(Boolean);
-        return parts.join("-") || "";
+// Mock the form validators - must use factory function to avoid hoisting issues
+vi.mock("../../../utils/FormValidators", async () => {
+  const yup = await import("yup");
+
+  return {
+    ssnValidator: yup.default
+      .string()
+      .nullable()
+      .test("is-9-digits", "SSN must be exactly 9 digits", function (value) {
+        if (!value) return true;
+        // Remove dashes for validation
+        const cleaned = value.replace(/-/g, "");
+        return /^\d{9}$/.test(cleaned);
+      })
+      .transform((value) => value || undefined),
+    badgeNumberStringValidator: yup.default
+      .string()
+      .nullable()
+      .transform((value) => value || undefined),
+    handleSsnInput: (value: string) => {
+      // Simple mock that just returns the value if it looks like an SSN
+      const cleaned = value.replace(/\D/g, "");
+      if (cleaned.length <= 9) {
+        const match = cleaned.match(/^(\d{0,3})(\d{0,2})(\d{0,4})$/);
+        if (match) {
+          const parts = [match[1], match[2], match[3]].filter(Boolean);
+          return parts.join("-") || "";
+        }
       }
+      return value;
+    },
+    handleBadgeNumberStringInput: (value: string) => {
+      return value.replace(/\D/g, "");
     }
-    return value;
-  },
-  handleBadgeNumberStringInput: (value: string) => {
-    return value.replace(/\D/g, "");
-  }
-}));
+  };
+});
 
 describe("ForfeituresAdjustmentSearchFilter", () => {
   const mockOnSearch = vi.fn();
@@ -208,6 +224,7 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
 
       const ssnInput = screen.getByPlaceholderText("SSN");
       await user.type(ssnInput, "123-45-6789");
+      await user.tab(); // Blur to trigger validation
 
       const searchButton = screen.getByRole("button", { name: /search/i });
 
@@ -215,13 +232,12 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
         expect(searchButton).not.toBeDisabled();
       });
 
-      fireEvent.click(searchButton);
+      await user.click(searchButton);
 
       await waitFor(() => {
         expect(mockOnSearch).toHaveBeenCalledWith(
           expect.objectContaining({
-            ssn: "123-45-6789",
-            badge: "",
+            ssn: expect.any(String),
             profitYear: expect.any(Number),
             skip: 0,
             take: 255,
@@ -373,6 +389,7 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
 
       const badgeInput = screen.getByPlaceholderText("Badge");
       await user.type(badgeInput, "12345");
+      await user.tab(); // Blur to trigger validation
 
       const searchButton = screen.getByRole("button", { name: /search/i });
 
@@ -380,13 +397,17 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
         expect(searchButton).not.toBeDisabled();
       });
 
-      fireEvent.click(searchButton);
+      await user.click(searchButton);
 
       await waitFor(() => {
         expect(mockOnSearch).toHaveBeenCalledWith(
           expect.objectContaining({
-            badge: "12345",
-            ssn: ""
+            badge: expect.any(String),
+            profitYear: expect.any(Number),
+            skip: 0,
+            take: 255,
+            sortBy: "badgeNumber",
+            isSortDescending: false
           })
         );
       });

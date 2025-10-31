@@ -156,13 +156,14 @@ describe("NegativeEtvaForSSNsOnPayprofit", () => {
     it("should pass pagination handlers to grid", () => {
       render(<NegativeEtvaForSSNsOnPayprofit />);
 
-      expect(vi.mocked(NegativeEtvaForSSNsOnPayprofitGrid)).toHaveBeenCalledWith(
-        expect.objectContaining({
-          onPaginationChange: expect.any(Function),
-          onSortChange: expect.any(Function)
-        }),
-        expect.anything()
-      );
+      const mockCalls = vi.mocked(NegativeEtvaForSSNsOnPayprofitGrid).mock.calls;
+      expect(mockCalls.length).toBeGreaterThan(0);
+
+      const firstCallProps = mockCalls[0][0];
+      expect(firstCallProps.onPaginationChange).toBeDefined();
+      expect(firstCallProps.onSortChange).toBeDefined();
+      expect(typeof firstCallProps.onPaginationChange).toBe("function");
+      expect(typeof firstCallProps.onSortChange).toBe("function");
     });
   });
 
