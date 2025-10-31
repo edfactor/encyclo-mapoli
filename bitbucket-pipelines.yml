@@ -866,7 +866,8 @@ pipelines:
                 exit 1
               }
               Write-Host "Checking if tag exists on remote..." -ForegroundColor Yellow
-              $remoteCheckJob = Start-Job -ScriptBlock { git ls-remote --tags origin 2>&1 }
+              $currentDir = Get-Location
+              $remoteCheckJob = Start-Job -ScriptBlock { param($dir) Set-Location $dir; git ls-remote --tags origin 2>&1 } -ArgumentList $currentDir
               $remoteCheckCompleted = Wait-Job -Job $remoteCheckJob -Timeout 10
               if ($remoteCheckCompleted) {
                 $remoteTags = Receive-Job -Job $remoteCheckJob | Select-String $env:TagName
@@ -897,7 +898,8 @@ pipelines:
                 exit 1
               }
               Write-Host "Pushing tag to origin..." -ForegroundColor Cyan
-              $pushJob = Start-Job -ScriptBlock { param($tag) git push origin "refs/tags/$tag" 2>&1 } -ArgumentList $env:TagName
+              $currentDir = Get-Location
+              $pushJob = Start-Job -ScriptBlock { param($dir, $tag) Set-Location $dir; git push origin "refs/tags/$tag" 2>&1 } -ArgumentList $currentDir, $env:TagName
               $pushCompleted = Wait-Job -Job $pushJob -Timeout 30
               if ($pushCompleted) {
                 $pushOutput = Receive-Job -Job $pushJob
