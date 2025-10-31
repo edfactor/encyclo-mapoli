@@ -33,7 +33,7 @@ vi.mock("components/StatusDropdownActionNode", () => ({
 }));
 
 vi.mock("smart-ui-library", () => ({
-  Page: vi.fn(({ label, actionNode, children }) => (
+  Page: vi.fn(({ label, actionNode, children }: { label: string; actionNode?: React.ReactNode; children?: React.ReactNode }) => (
     <div data-testid="page">
       <div>{label}</div>
       {actionNode}
@@ -76,7 +76,7 @@ describe("DuplicateSSNsOnDemographics", () => {
     });
 
     it("should display zero records when no results", () => {
-      const { useDuplicateSSNsOnDemographics } = require("../hooks/useDuplicateSSNsOnDemographics");
+      const useDuplicateSSNsOnDemographics = vi.mocked(require("../hooks/useDuplicateSSNsOnDemographics").default);
 
       vi.mocked(useDuplicateSSNsOnDemographics).mockReturnValueOnce({
         searchResults: null,
@@ -89,7 +89,7 @@ describe("DuplicateSSNsOnDemographics", () => {
         },
         showData: false,
         hasResults: false
-      } as any);
+      } as unknown as ReturnType<typeof useDuplicateSSNsOnDemographics>);
 
       render(<DuplicateSSNsOnDemographics />);
       expect(screen.getByText(/0 records/i)).toBeInTheDocument();
@@ -104,7 +104,7 @@ describe("DuplicateSSNsOnDemographics", () => {
 
     it("should pass pagination handlers to grid", () => {
       render(<DuplicateSSNsOnDemographics />);
-      const { DuplicateSSNsOnDemographicsGrid } = require("../DuplicateSSNsOnDemographicsGrid");
+      const DuplicateSSNsOnDemographicsGrid = vi.mocked(require("../DuplicateSSNsOnDemographicsGrid").default);
       expect(DuplicateSSNsOnDemographicsGrid).toHaveBeenCalledWith(
         expect.objectContaining({
           pagination: expect.any(Object)
@@ -123,7 +123,7 @@ describe("DuplicateSSNsOnDemographics", () => {
 
   describe("Auto-load functionality", () => {
     it("should initialize hook on mount", () => {
-      const { useDuplicateSSNsOnDemographics } = require("../hooks/useDuplicateSSNsOnDemographics");
+      const useDuplicateSSNsOnDemographics = vi.mocked(require("../hooks/useDuplicateSSNsOnDemographics").default);
       render(<DuplicateSSNsOnDemographics />);
       expect(useDuplicateSSNsOnDemographics).toHaveBeenCalled();
     });

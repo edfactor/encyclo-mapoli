@@ -140,7 +140,7 @@ describe("ForfeituresTransactionGridColumns", () => {
       // Test that the factory was called during column creation
       const getColumns = GetForfeituresTransactionGridColumns();
       const columns = getColumns();
-      1;
+
       // Verify badge column exists
       const badgeColumn = columns.find((col) => col.colId === "badgeNumber");
       expect(badgeColumn).toBeDefined();
