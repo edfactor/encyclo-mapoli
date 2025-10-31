@@ -24,8 +24,6 @@ public class CleanupReportService : ICleanupReportService
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ICalendarService _calendarService;
     private readonly ILogger<CleanupReportService> _logger;
-    private readonly TotalService _totalService;
-    private readonly IHostEnvironment _host;
     private readonly IDemographicReaderService _demographicReaderService;
 
     private readonly byte[] _distributionProfitCodes =
@@ -52,8 +50,6 @@ public class CleanupReportService : ICleanupReportService
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
-        _totalService = totalService;
-        _host = host;
         _demographicReaderService = demographicReaderService;
         _logger = factory.CreateLogger<CleanupReportService>();
     }
