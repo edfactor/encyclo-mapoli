@@ -685,7 +685,6 @@ pipelines:
             - $env:ENV = "QA"
             - $env:API_SERVER_QA = "appt23d"
             - |
-              $errorMsg = ""
               try {
                 pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
                 pwsh -File ./scripts/credsettings.ps1 -Environment ${env:ENV} -FilePath './src/services/configuration/credsettings.json' -OutputPath './src/services/configuration/credsettings.qa.json' -RemoteServer $env:API_SERVER_QA -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
@@ -697,13 +696,13 @@ pipelines:
                 pwsh .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_QA $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
                 Write-Host "Deploying background service..." -ForegroundColor Cyan
                 pwsh .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_QA
-                Write-Host "✓ QA deployment completed successfully" -ForegroundColor Green
-                pwsh .\scripts\Notify-Teams.ps1 -Status "SUCCESS" -Environment "QA" -Step "Deployment"
+                Write-Host "QA deployment completed successfully" -ForegroundColor Green
+                pwsh .\scripts\Notify-Teams.ps1 -Status SUCCESS -Environment QA -Step Deployment
               }
               catch {
-                $errorMsg = $_.Exception.Message
-                Write-Host "✗ QA deployment failed: $errorMsg" -ForegroundColor Red
-                pwsh .\scripts\Notify-Teams.ps1 -Status "FAILURE" -Environment "QA" -Step "Deployment" -ErrorMessage $errorMsg
+                $env:DEPLOY_ERROR = $_.Exception.Message
+                Write-Host "QA deployment failed" -ForegroundColor Red
+                pwsh .\scripts\Notify-Teams.ps1 -Status FAILURE -Environment QA -Step Deployment -ErrorMessage $env:DEPLOY_ERROR
                 exit 1
               }
       - step: *upgrade-database
@@ -715,17 +714,16 @@ pipelines:
             - self.hosted
           script:
             - |
-              $errorMsg = ""
               $env:API_SERVER_QA = "appt23d"
               try {
                 pwsh -File ./scripts/Check-Health.ps1 -Url $env:QA_BASE_URL -envServerName $env:API_SERVER_QA
-                Write-Host "✓ API health check passed" -ForegroundColor Green
-                pwsh .\scripts\Notify-Teams.ps1 -Status "SUCCESS" -Environment "QA" -Step "Health Check"
+                Write-Host "API health check passed" -ForegroundColor Green
+                pwsh .\scripts\Notify-Teams.ps1 -Status SUCCESS -Environment QA -Step HealthCheck
               }
               catch {
-                $errorMsg = $_.Exception.Message
-                Write-Host "✗ API health check failed: $errorMsg" -ForegroundColor Red
-                pwsh .\scripts\Notify-Teams.ps1 -Status "FAILURE" -Environment "QA" -Step "Health Check" -ErrorMessage $errorMsg
+                $env:HEALTH_ERROR = $_.Exception.Message
+                Write-Host "API health check failed" -ForegroundColor Red
+                pwsh .\scripts\Notify-Teams.ps1 -Status FAILURE -Environment QA -Step HealthCheck -ErrorMessage $env:HEALTH_ERROR
                 exit 1
               }
 
@@ -770,7 +768,6 @@ pipelines:
               deployment: UAT
               script:
                 - |
-                  $errorMsg = ""
                   try {
                     Write-Host "Deploying application to UAT (reusing API artifact from Stage 2)..." -ForegroundColor Cyan
                     $env:API_SERVER_UAT = "appt24d"
@@ -785,13 +782,13 @@ pipelines:
                     pwsh .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_UAT $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
                     Write-Host "Deploying background service..." -ForegroundColor Cyan
                     pwsh .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_UAT
-                    Write-Host "✓ UAT deployment completed successfully" -ForegroundColor Green
-                    pwsh .\scripts\Notify-Teams.ps1 -Status "SUCCESS" -Environment "UAT" -Step "Deployment"
+                    Write-Host "UAT deployment completed successfully" -ForegroundColor Green
+                    pwsh .\scripts\Notify-Teams.ps1 -Status SUCCESS -Environment UAT -Step Deployment
                   }
                   catch {
-                    $errorMsg = $_.Exception.Message
-                    Write-Host "✗ UAT deployment failed: $errorMsg" -ForegroundColor Red
-                    pwsh .\scripts\Notify-Teams.ps1 -Status "FAILURE" -Environment "UAT" -Step "Deployment" -ErrorMessage $errorMsg
+                    $env:DEPLOY_ERROR = $_.Exception.Message
+                    Write-Host "UAT deployment failed" -ForegroundColor Red
+                    pwsh .\scripts\Notify-Teams.ps1 -Status FAILURE -Environment UAT -Step Deployment -ErrorMessage $env:DEPLOY_ERROR
                     exit 1
                   }
       # Stage 6: UAT Database Import (must run AFTER drop-recreate completes)
