@@ -2,14 +2,14 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { createMockStoreAndWrapper } from "../../../../test";
 import UnForfeit from "../UnForfeit";
-import { useLazyGetAccountingRangeToCurrent } from "../../../hooks/useFiscalCalendarYear";
-import { useUnForfeitState } from "../../../hooks/useUnForfeitState";
+import { useLazyGetAccountingRangeToCurrent } from "../../../../hooks/useFiscalCalendarYear";
+import { useUnForfeitState } from "../../../../hooks/useUnForfeitState";
 
 type MockFiscalData = ReturnType<typeof useLazyGetAccountingRangeToCurrent>;
 type MockUnForfeitState = ReturnType<typeof useUnForfeitState>;
 
 // Mock the hook dependencies
-vi.mock("../../../hooks/useFiscalCalendarYear", () => ({
+vi.mock("../../../../hooks/useFiscalCalendarYear", () => ({
   useLazyGetAccountingRangeToCurrent: vi.fn(() => [
     vi.fn(),
     {
@@ -21,15 +21,15 @@ vi.mock("../../../hooks/useFiscalCalendarYear", () => ({
   ])
 }));
 
-vi.mock("../../../hooks/useDecemberFlowProfitYear", () => ({
+vi.mock("../../../../hooks/useDecemberFlowProfitYear", () => ({
   default: vi.fn(() => 2024)
 }));
 
-vi.mock("../../../hooks/useIsProfitYearFrozen", () => ({
+vi.mock("../../../../hooks/useIsProfitYearFrozen", () => ({
   useIsProfitYearFrozen: vi.fn(() => false)
 }));
 
-vi.mock("../../../hooks/useUnForfeitState", () => ({
+vi.mock("../../../../hooks/useUnForfeitState", () => ({
   useUnForfeitState: vi.fn(() => ({
     state: {
       initialSearchLoaded: false,
@@ -50,11 +50,11 @@ vi.mock("../../../hooks/useUnForfeitState", () => ({
   }))
 }));
 
-vi.mock("../../../hooks/useUnsavedChangesGuard", () => ({
+vi.mock("../../../../hooks/useUnsavedChangesGuard", () => ({
   useUnsavedChangesGuard: vi.fn()
 }));
 
-vi.mock("../../../components/FrozenYearWarning", () => ({
+vi.mock("../../../../components/FrozenYearWarning", () => ({
   default: vi.fn(() => <div data-testid="frozen-warning">Frozen Year Warning</div>)
 }));
 
@@ -134,7 +134,7 @@ describe("UnForfeit", () => {
     });
 
     it("should render loading spinner when fiscal data is not loaded", async () => {
-      const { useLazyGetAccountingRangeToCurrent } = await import("../../../hooks/useFiscalCalendarYear");
+      const { useLazyGetAccountingRangeToCurrent } = await import("../../../../hooks/useFiscalCalendarYear");
       vi.mocked(useLazyGetAccountingRangeToCurrent).mockReturnValueOnce([
         vi.fn(),
         {
@@ -164,7 +164,7 @@ describe("UnForfeit", () => {
 
   describe("Frozen year warning", () => {
     it("should display frozen year warning when year is frozen", async () => {
-      const { useIsProfitYearFrozen } = await import("../../../hooks/useIsProfitYearFrozen");
+      const { useIsProfitYearFrozen } = await import("../../../../hooks/useIsProfitYearFrozen");
       vi.mocked(useIsProfitYearFrozen).mockReturnValueOnce(true);
 
       render(<UnForfeit />, { wrapper });
@@ -173,7 +173,7 @@ describe("UnForfeit", () => {
     });
 
     it("should not display frozen year warning when year is not frozen", async () => {
-      const { useIsProfitYearFrozen } = await import("../../../hooks/useIsProfitYearFrozen");
+      const { useIsProfitYearFrozen } = await import("../../../../hooks/useIsProfitYearFrozen");
       vi.mocked(useIsProfitYearFrozen).mockReturnValueOnce(false);
 
       render(<UnForfeit />, { wrapper });
@@ -184,7 +184,7 @@ describe("UnForfeit", () => {
 
   describe("Search functionality", () => {
     it("should call handleSearch when search button is clicked", async () => {
-      const { useUnForfeitState } = await import("../../../hooks/useUnForfeitState");
+      const { useUnForfeitState } = await import("../../../../hooks/useUnForfeitState");
       const mockHandleSearch = vi.fn();
 
       vi.mocked(useUnForfeitState).mockReturnValueOnce({
@@ -218,7 +218,7 @@ describe("UnForfeit", () => {
     });
 
     it("should disable search button when unsaved changes exist", async () => {
-      const { useUnForfeitState } = await import("../../../hooks/useUnForfeitState");
+      const { useUnForfeitState } = await import("../../../../hooks/useUnForfeitState");
 
       vi.mocked(useUnForfeitState).mockReturnValueOnce({
         state: {
@@ -251,8 +251,8 @@ describe("UnForfeit", () => {
 
   describe("Unsaved changes guard", () => {
     it("should invoke useUnsavedChangesGuard with hasUnsavedChanges state", async () => {
-      const { useUnsavedChangesGuard } = await import("../../../hooks/useUnsavedChangesGuard");
-      const { useUnForfeitState } = await import("../../../hooks/useUnForfeitState");
+      const { useUnsavedChangesGuard } = await import("../../../../hooks/useUnsavedChangesGuard");
+      const { useUnForfeitState } = await import("../../../../hooks/useUnForfeitState");
 
       vi.mocked(useUnForfeitState).mockReturnValueOnce({
         state: {
@@ -283,7 +283,7 @@ describe("UnForfeit", () => {
 
   describe("Status change handling", () => {
     it("should pass handleStatusChange to StatusDropdownActionNode", async () => {
-      const { useUnForfeitState } = await import("../../../hooks/useUnForfeitState");
+      const { useUnForfeitState } = await import("../../../../hooks/useUnForfeitState");
       const mockHandleStatusChange = vi.fn();
 
       vi.mocked(useUnForfeitState).mockReturnValueOnce({
@@ -313,7 +313,7 @@ describe("UnForfeit", () => {
 
   describe("Auto-archive on status change", () => {
     it("should auto-trigger search when shouldArchive is true", async () => {
-      const { useUnForfeitState } = await import("../../../hooks/useUnForfeitState");
+      const { useUnForfeitState } = await import("../../../../hooks/useUnForfeitState");
       const mockHandleSearch = vi.fn();
 
       vi.mocked(useUnForfeitState).mockReturnValueOnce({
@@ -343,7 +343,7 @@ describe("UnForfeit", () => {
     });
 
     it("should not auto-trigger search when shouldArchive is false", async () => {
-      const { useUnForfeitState } = await import("../../../hooks/useUnForfeitState");
+      const { useUnForfeitState } = await import("../../../../hooks/useUnForfeitState");
       const mockHandleSearch = vi.fn();
 
       vi.mocked(useUnForfeitState).mockReturnValueOnce({
@@ -374,7 +374,7 @@ describe("UnForfeit", () => {
 
   describe("Grid and Filter integration", () => {
     it("should pass initialSearchLoaded to UnForfeitGrid", async () => {
-      const { useUnForfeitState } = await import("../../../hooks/useUnForfeitState");
+      const { useUnForfeitState } = await import("../../../../hooks/useUnForfeitState");
 
       vi.mocked(useUnForfeitState).mockReturnValueOnce({
         state: {
@@ -408,7 +408,7 @@ describe("UnForfeit", () => {
     });
 
     it("should pass hasUnsavedChanges to grid and filter", async () => {
-      const { useUnForfeitState } = await import("../../../hooks/useUnForfeitState");
+      const { useUnForfeitState } = await import("../../../../hooks/useUnForfeitState");
 
       vi.mocked(useUnForfeitState).mockReturnValueOnce({
         state: {
@@ -438,7 +438,7 @@ describe("UnForfeit", () => {
 
   describe("Profit year integration", () => {
     it("should use profit year from hook", async () => {
-      const { useIsProfitYearFrozen } = await import("../../../hooks/useIsProfitYearFrozen");
+      const { useIsProfitYearFrozen } = await import("../../../../hooks/useIsProfitYearFrozen");
 
       render(<UnForfeit />, { wrapper });
 
@@ -450,7 +450,7 @@ describe("UnForfeit", () => {
 
   describe("Accounting range fetch", () => {
     it("should fetch accounting range on mount", async () => {
-      const { useLazyGetAccountingRangeToCurrent } = await import("../../../hooks/useFiscalCalendarYear");
+      const { useLazyGetAccountingRangeToCurrent } = await import("../../../../hooks/useFiscalCalendarYear");
       const mockFetch = vi.fn();
 
       vi.mocked(useLazyGetAccountingRangeToCurrent).mockReturnValueOnce([
@@ -471,7 +471,7 @@ describe("UnForfeit", () => {
     });
 
     it("should pass (6) to useLazyGetAccountingRangeToCurrent", async () => {
-      const { useLazyGetAccountingRangeToCurrent } = await import("../../../hooks/useFiscalCalendarYear");
+      const { useLazyGetAccountingRangeToCurrent } = await import("../../../../hooks/useFiscalCalendarYear");
 
       render(<UnForfeit />, { wrapper });
 

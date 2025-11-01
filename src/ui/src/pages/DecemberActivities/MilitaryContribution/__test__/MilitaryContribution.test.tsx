@@ -66,19 +66,19 @@ vi.mock("./MilitaryContributionForm", () => ({
   ))
 }));
 
-vi.mock("../../../hooks/useDecemberFlowProfitYear", () => ({
+vi.mock("../../../../hooks/useDecemberFlowProfitYear", () => ({
   default: vi.fn(() => 2024)
 }));
 
-vi.mock("../../../hooks/useIsProfitYearFrozen", () => ({
+vi.mock("../../../../hooks/useIsProfitYearFrozen", () => ({
   useIsProfitYearFrozen: vi.fn(() => false)
 }));
 
-vi.mock("../../../hooks/useIsReadOnlyByStatus", () => ({
+vi.mock("../../../../hooks/useIsReadOnlyByStatus", () => ({
   useIsReadOnlyByStatus: vi.fn(() => false)
 }));
 
-vi.mock("../../../hooks/useMissiveAlerts", () => ({
+vi.mock("../../../../hooks/useMissiveAlerts", () => ({
   useMissiveAlerts: vi.fn(() => ({
     missiveAlerts: [],
     addAlert: vi.fn(),
@@ -86,7 +86,7 @@ vi.mock("../../../hooks/useMissiveAlerts", () => ({
   }))
 }));
 
-vi.mock("../../../hooks/useReadOnlyNavigation", () => ({
+vi.mock("../../../../hooks/useReadOnlyNavigation", () => ({
   useReadOnlyNavigation: vi.fn(() => false)
 }));
 
@@ -174,7 +174,7 @@ describe("MilitaryContribution", () => {
     });
 
     it("should display message when no member selected", async () => {
-      const useDecemberFlowProfitYear = await import("../../../hooks/useDecemberFlowProfitYear");
+      const useDecemberFlowProfitYear = await import("../../../../hooks/useDecemberFlowProfitYear");
       vi.mocked(useDecemberFlowProfitYear.default).mockReturnValueOnce(2024);
 
       const noMemberState = {
@@ -201,7 +201,7 @@ describe("MilitaryContribution", () => {
 
   describe("Frozen year warning", () => {
     it("should display frozen year warning when year is frozen", async () => {
-      const { useIsProfitYearFrozen } = await import("../../../hooks/useIsProfitYearFrozen");
+      const { useIsProfitYearFrozen } = await import("../../../../hooks/useIsProfitYearFrozen");
       vi.mocked(useIsProfitYearFrozen).mockReturnValueOnce(true);
 
       render(<MilitaryContribution />, { wrapper: customWrapper });
@@ -210,7 +210,7 @@ describe("MilitaryContribution", () => {
     });
 
     it("should not display frozen year warning when year is not frozen", async () => {
-      const { useIsProfitYearFrozen } = await import("../../../hooks/useIsProfitYearFrozen");
+      const { useIsProfitYearFrozen } = await import("../../../../hooks/useIsProfitYearFrozen");
       vi.mocked(useIsProfitYearFrozen).mockReturnValueOnce(false);
 
       render(<MilitaryContribution />, { wrapper: customWrapper });
@@ -221,7 +221,7 @@ describe("MilitaryContribution", () => {
 
   describe("Read-only mode", () => {
     it("should display read-only info when status is read-only", async () => {
-      const { useIsReadOnlyByStatus } = await import("../../../hooks/useIsReadOnlyByStatus");
+      const { useIsReadOnlyByStatus } = await import("../../../../hooks/useIsReadOnlyByStatus");
       vi.mocked(useIsReadOnlyByStatus).mockReturnValueOnce(true);
 
       render(<MilitaryContribution />, { wrapper: customWrapper });
@@ -230,7 +230,7 @@ describe("MilitaryContribution", () => {
     });
 
     it("should disable add contribution button in read-only mode", async () => {
-      const { useReadOnlyNavigation } = await import("../../../hooks/useReadOnlyNavigation");
+      const { useReadOnlyNavigation } = await import("../../../../hooks/useReadOnlyNavigation");
       vi.mocked(useReadOnlyNavigation).mockReturnValueOnce(true);
 
       render(<MilitaryContribution />, { wrapper: customWrapper });
@@ -240,7 +240,7 @@ describe("MilitaryContribution", () => {
     });
 
     it("should enable add contribution button when not read-only", async () => {
-      const { useReadOnlyNavigation } = await import("../../../hooks/useReadOnlyNavigation");
+      const { useReadOnlyNavigation } = await import("../../../../hooks/useReadOnlyNavigation");
       vi.mocked(useReadOnlyNavigation).mockReturnValueOnce(false);
 
       render(<MilitaryContribution />, { wrapper: customWrapper });
@@ -373,7 +373,7 @@ describe("MilitaryContribution", () => {
 
   describe("Missive alerts", () => {
     it("should display missive alerts when present", async () => {
-      const { useMissiveAlerts } = await import("../../../hooks/useMissiveAlerts");
+      const { useMissiveAlerts } = await import("../../../../hooks/useMissiveAlerts");
       vi.mocked(useMissiveAlerts).mockReturnValueOnce({
         missiveAlerts: [{ id: 1, message: "Test Alert" }] as MissiveAlert[],
         addAlert: vi.fn(),

@@ -3,10 +3,10 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import React from "react";
 import { Provider } from "react-redux";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import inquiryReducer, { type InquiryState } from "../../../reduxstore/slices/inquirySlice";
-import securityReducer, { type SecurityState } from "../../../reduxstore/slices/securitySlice";
+import inquiryReducer, { type InquiryState } from "../../../../reduxstore/slices/inquirySlice";
+import securityReducer, { type SecurityState } from "../../../../reduxstore/slices/securitySlice";
 import { useAdjustments } from "../useAdjustments";
-import * as useMissiveAlertsModule from "../../../hooks/useMissiveAlerts";
+import * as useMissiveAlertsModule from "../../../../hooks/useMissiveAlerts";
 
 // Create mock functions for triggers/actions
 const mockMergeProfitsDetail = vi.fn();
@@ -14,17 +14,17 @@ const mockTriggerSearchFunction = vi.fn();
 const mockTriggerDetailsFunction = vi.fn();
 
 // Mock the APIs
-vi.mock("../../../reduxstore/api/AdjustmentsApi", () => ({
+vi.mock("../../../../reduxstore/api/AdjustmentsApi", () => ({
   useMergeProfitsDetailMutation: () => [mockMergeProfitsDetail, { isLoading: false }]
 }));
 
-vi.mock("../../../reduxstore/api/InquiryApi", () => ({
+vi.mock("../../../../reduxstore/api/InquiryApi", () => ({
   useLazySearchProfitMasterInquiryQuery: () => [mockTriggerSearchFunction, {}],
   useLazyGetProfitMasterInquiryMemberDetailsQuery: () => [mockTriggerDetailsFunction, {}]
 }));
 
 // Mock the hooks - use vi.fn() directly in the factory
-vi.mock("../../../hooks/useMissiveAlerts", () => ({
+vi.mock("../../../../hooks/useMissiveAlerts", () => ({
   useMissiveAlerts: vi.fn()
 }));
 

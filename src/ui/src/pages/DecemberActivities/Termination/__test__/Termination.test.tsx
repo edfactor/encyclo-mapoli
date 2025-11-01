@@ -2,8 +2,8 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockStoreAndWrapper } from "../../../../test";
 import Termination from "../Termination";
-import { useLazyGetAccountingRangeToCurrent } from "../../../hooks/useFiscalCalendarYear";
-import { useTerminationState } from "../../../hooks/useTerminationState";
+import { useLazyGetAccountingRangeToCurrent } from "../../../../hooks/useFiscalCalendarYear";
+import { useTerminationState } from "../../../../hooks/useTerminationState";
 
 type MockFiscalData = ReturnType<typeof useLazyGetAccountingRangeToCurrent>;
 type MockTerminationState = ReturnType<typeof useTerminationState>;
@@ -15,7 +15,7 @@ type MockSearchParams = {
 };
 
 // Mock the hook dependencies
-vi.mock("../../../hooks/useFiscalCalendarYear", () => ({
+vi.mock("../../../../hooks/useFiscalCalendarYear", () => ({
   useLazyGetAccountingRangeToCurrent: vi.fn(() => [
     vi.fn(),
     {
@@ -27,7 +27,7 @@ vi.mock("../../../hooks/useFiscalCalendarYear", () => ({
   ])
 }));
 
-vi.mock("../../../hooks/useTerminationState", () => ({
+vi.mock("../../../../hooks/useTerminationState", () => ({
   useTerminationState: vi.fn(() => ({
     state: {
       searchParams: null,
@@ -49,7 +49,7 @@ vi.mock("../../../hooks/useTerminationState", () => ({
   }))
 }));
 
-vi.mock("../../../hooks/useUnsavedChangesGuard", () => ({
+vi.mock("../../../../hooks/useUnsavedChangesGuard", () => ({
   useUnsavedChangesGuard: vi.fn()
 }));
 
@@ -142,7 +142,7 @@ describe("Termination", () => {
     });
 
     it("should render loading spinner when fiscal data is not loaded", async () => {
-      const { useLazyGetAccountingRangeToCurrent } = await import("../../../hooks/useFiscalCalendarYear");
+      const { useLazyGetAccountingRangeToCurrent } = await import("../../../../hooks/useFiscalCalendarYear");
       vi.mocked(useLazyGetAccountingRangeToCurrent).mockReturnValueOnce([
         vi.fn(),
         {
@@ -172,7 +172,7 @@ describe("Termination", () => {
 
   describe("Search functionality", () => {
     it("should call handleSearch when search button is clicked", async () => {
-      const { useTerminationState } = await import("../../../hooks/useTerminationState");
+      const { useTerminationState } = await import("../../../../hooks/useTerminationState");
       const mockHandleSearch = vi.fn();
 
       vi.mocked(useTerminationState).mockReturnValueOnce({
@@ -212,7 +212,7 @@ describe("Termination", () => {
     });
 
     it("should disable search button during search", async () => {
-      const { useTerminationState } = await import("../../../hooks/useTerminationState");
+      const { useTerminationState } = await import("../../../../hooks/useTerminationState");
 
       vi.mocked(useTerminationState).mockReturnValueOnce({
         state: {
@@ -243,7 +243,7 @@ describe("Termination", () => {
     });
 
     it("should disable search button when unsaved changes exist", async () => {
-      const { useTerminationState } = await import("../../../hooks/useTerminationState");
+      const { useTerminationState } = await import("../../../../hooks/useTerminationState");
 
       vi.mocked(useTerminationState).mockReturnValueOnce({
         state: {
@@ -277,8 +277,8 @@ describe("Termination", () => {
 
   describe("Unsaved changes guard", () => {
     it("should invoke useUnsavedChangesGuard with hasUnsavedChanges state", async () => {
-      const { useUnsavedChangesGuard } = await import("../../../hooks/useUnsavedChangesGuard");
-      const { useTerminationState } = await import("../../../hooks/useTerminationState");
+      const { useUnsavedChangesGuard } = await import("../../../../hooks/useUnsavedChangesGuard");
+      const { useTerminationState } = await import("../../../../hooks/useTerminationState");
 
       vi.mocked(useTerminationState).mockReturnValueOnce({
         state: {
@@ -310,7 +310,7 @@ describe("Termination", () => {
 
   describe("Status change handling", () => {
     it("should pass handleStatusChange to StatusDropdownActionNode", async () => {
-      const { useTerminationState } = await import("../../../hooks/useTerminationState");
+      const { useTerminationState } = await import("../../../../hooks/useTerminationState");
       const mockHandleStatusChange = vi.fn();
 
       vi.mocked(useTerminationState).mockReturnValueOnce({
@@ -416,7 +416,7 @@ describe("Termination", () => {
 
   describe("Grid and Filter integration", () => {
     it("should pass searchParams to TerminationGrid", async () => {
-      const { useTerminationState } = await import("../../../hooks/useTerminationState");
+      const { useTerminationState } = await import("../../../../hooks/useTerminationState");
       const mockSearchParams: MockSearchParams = {
         beginningDate: "01/01/2024",
         endingDate: "12/31/2024",
@@ -458,7 +458,7 @@ describe("Termination", () => {
 
   describe("Archive mode", () => {
     it("should handle archive flag when shouldArchive is true", async () => {
-      const { useTerminationState } = await import("../../../hooks/useTerminationState");
+      const { useTerminationState } = await import("../../../../hooks/useTerminationState");
       const mockHandleArchiveHandled = vi.fn();
 
       vi.mocked(useTerminationState).mockReturnValueOnce({

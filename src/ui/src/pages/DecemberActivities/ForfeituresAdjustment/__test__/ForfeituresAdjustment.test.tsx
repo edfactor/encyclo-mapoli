@@ -79,7 +79,7 @@ vi.mock("components/StatusDropdownActionNode", () => ({
   default: vi.fn(() => <div data-testid="status-dropdown">Status Dropdown</div>)
 }));
 
-vi.mock("../../../hooks/useReadOnlyNavigation", () => ({
+vi.mock("../../../../hooks/useReadOnlyNavigation", () => ({
   useReadOnlyNavigation: vi.fn(() => false)
 }));
 
@@ -90,7 +90,7 @@ const mockOpenModal = vi.fn();
 const mockCloseModal = vi.fn();
 const mockHandleSaveForfeiture = vi.fn();
 
-vi.mock("./hooks/useForfeituresAdjustment", () => ({
+vi.mock("../hooks/useForfeituresAdjustment", () => ({
   default: vi.fn(() => ({
     employeeData: null,
     transactionData: null,
@@ -199,7 +199,7 @@ describe("ForfeituresAdjustment", () => {
     });
 
     it("should display loading state during search", async () => {
-      const useForfeituresAdjustment = await import("./hooks/useForfeituresAdjustment");
+      const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
       vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
         employeeData: null,
         transactionData: null,
@@ -235,7 +235,7 @@ describe("ForfeituresAdjustment", () => {
 
   describe("Employee data display", () => {
     it("should display employee data after search succeeds", async () => {
-      const useForfeituresAdjustment = await import("./hooks/useForfeituresAdjustment");
+      const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
       vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
         employeeData: { demographicId: 123, name: "John Doe" },
         transactionData: null,
@@ -270,7 +270,7 @@ describe("ForfeituresAdjustment", () => {
     });
 
     it("should display transaction grid when transactions are available", async () => {
-      const useForfeituresAdjustment = await import("./hooks/useForfeituresAdjustment");
+      const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
       vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
         employeeData: { demographicId: 123, name: "John Doe" },
         transactionData: { results: [{ id: 1 }], total: 1 },
@@ -306,7 +306,7 @@ describe("ForfeituresAdjustment", () => {
 
   describe("Modal functionality", () => {
     it("should open add forfeiture modal when button is clicked", async () => {
-      const useForfeituresAdjustment = await import("./hooks/useForfeituresAdjustment");
+      const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
       vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
         employeeData: { demographicId: 123, name: "John Doe" },
         transactionData: null,
@@ -340,7 +340,7 @@ describe("ForfeituresAdjustment", () => {
     });
 
     it("should close modal when close button is clicked", async () => {
-      const useForfeituresAdjustment = await import("./hooks/useForfeituresAdjustment");
+      const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
       vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
         employeeData: { demographicId: 123, name: "John Doe" },
         transactionData: null,
@@ -377,7 +377,7 @@ describe("ForfeituresAdjustment", () => {
     });
 
     it("should call handleSaveForfeiture when modal save is clicked", async () => {
-      const useForfeituresAdjustment = await import("./hooks/useForfeituresAdjustment");
+      const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
       vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
         employeeData: { demographicId: 123, name: "John Doe" },
         transactionData: null,
@@ -421,10 +421,10 @@ describe("ForfeituresAdjustment", () => {
 
   describe("Read-only mode", () => {
     it("should disable add forfeiture button in read-only mode", async () => {
-      const useReadOnlyNavigation = await import("../../../hooks/useReadOnlyNavigation");
+      const useReadOnlyNavigation = await import("../../../../hooks/useReadOnlyNavigation");
       vi.mocked(useReadOnlyNavigation.useReadOnlyNavigation).mockReturnValueOnce(true);
 
-      const useForfeituresAdjustment = await import("./hooks/useForfeituresAdjustment");
+      const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
       vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
         employeeData: { demographicId: 123, name: "John Doe" },
         transactionData: null,

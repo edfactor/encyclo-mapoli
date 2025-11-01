@@ -48,7 +48,7 @@ const mockSaveChanges = vi.fn();
 const mockExecuteSearch = vi.fn();
 const mockResetSearch = vi.fn();
 
-vi.mock("./hooks/useManageExecutiveHoursAndDollars", () => ({
+vi.mock("../hooks/useManageExecutiveHoursAndDollars", () => ({
   default: vi.fn(() => ({
     profitYear: 2024,
     executeSearch: mockExecuteSearch,
@@ -122,7 +122,7 @@ describe("ManageExecutiveHoursAndDollars", () => {
       mockSaveChanges.mockResolvedValueOnce(undefined);
 
       // Mock hook to return pending changes
-      const useManageExecutiveHoursAndDollars = await import("./hooks/useManageExecutiveHoursAndDollars");
+      const useManageExecutiveHoursAndDollars = await import("../hooks/useManageExecutiveHoursAndDollars");
       vi.mocked(useManageExecutiveHoursAndDollars.default).mockReturnValueOnce({
         profitYear: 2024,
         executeSearch: mockExecuteSearch,
@@ -164,7 +164,7 @@ describe("ManageExecutiveHoursAndDollars", () => {
       mockSaveChanges.mockRejectedValueOnce(new Error("Save failed"));
 
       // Mock hook to return pending changes
-      const useManageExecutiveHoursAndDollars = await import("./hooks/useManageExecutiveHoursAndDollars");
+      const useManageExecutiveHoursAndDollars = await import("../hooks/useManageExecutiveHoursAndDollars");
       vi.mocked(useManageExecutiveHoursAndDollars.default).mockReturnValueOnce({
         profitYear: 2024,
         executeSearch: mockExecuteSearch,
@@ -219,7 +219,7 @@ describe("ManageExecutiveHoursAndDollars", () => {
       const useReadOnlyNavigation = await import("../../../hooks/useReadOnlyNavigation");
       vi.mocked(useReadOnlyNavigation.useReadOnlyNavigation).mockReturnValueOnce(true);
 
-      const useManageExecutiveHoursAndDollars = await import("./hooks/useManageExecutiveHoursAndDollars");
+      const useManageExecutiveHoursAndDollars = await import("../hooks/useManageExecutiveHoursAndDollars");
       vi.mocked(useManageExecutiveHoursAndDollars.default).mockReturnValueOnce({
         profitYear: 2024,
         executeSearch: mockExecuteSearch,
