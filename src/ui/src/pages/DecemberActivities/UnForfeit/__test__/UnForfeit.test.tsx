@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { createMockStoreAndWrapper } from "../../../../test";
 import UnForfeit from "../UnForfeit";
@@ -55,44 +56,44 @@ vi.mock("../../../../hooks/useUnsavedChangesGuard", () => ({
 }));
 
 vi.mock("../../../../components/FrozenYearWarning", () => ({
-  default: vi.fn(() => <div data-testid="frozen-warning">Frozen Year Warning</div>)
+  default: vi.fn(() => <section aria-label="frozen year warning">Frozen Year Warning</section>)
 }));
 
 vi.mock("components/StatusDropdownActionNode", () => ({
-  default: vi.fn(() => <div data-testid="status-dropdown">Status Dropdown</div>)
+  default: vi.fn(() => <section aria-label="status dropdown">Status Dropdown</section>)
 }));
 
 vi.mock("./UnForfeitSearchFilter", () => ({
   default: vi.fn(({ onSearch, hasUnsavedChanges }) => (
-    <div data-testid="search-filter">
+    <section aria-label="search filter">
       <button
-        data-testid="search-button"
+        aria-label="search button"
         onClick={() => onSearch()}
         disabled={hasUnsavedChanges}>
         Search
       </button>
-    </div>
+    </section>
   ))
 }));
 
 vi.mock("./UnForfeitGrid", () => ({
-  default: vi.fn(() => <div data-testid="unforfeit-grid">UnForfeit Grid</div>)
+  default: vi.fn(() => <section aria-label="unforfeit grid">UnForfeit Grid</section>)
 }));
 
 vi.mock("smart-ui-library", () => ({
-  ApiMessageAlert: vi.fn(() => <div data-testid="api-message-alert">Message Alert</div>),
+  ApiMessageAlert: vi.fn(() => <section aria-label="api message alert">Message Alert</section>),
   DSMAccordion: vi.fn(({ title, children }) => (
-    <div data-testid="accordion">
+    <section aria-label="accordion">
       <div>{title}</div>
       {children}
-    </div>
+    </section>
   )),
   Page: vi.fn(({ label, actionNode, children }) => (
-    <div data-testid="page">
+    <section aria-label="page">
       <div>{label}</div>
       {actionNode}
       {children}
-    </div>
+    </section>
   ))
 }));
 
@@ -111,7 +112,7 @@ describe("UnForfeit", () => {
     it("should render the page component", () => {
       render(<UnForfeit />, { wrapper });
 
-      expect(screen.getByTestId("page")).toBeInTheDocument();
+      expect(screen.getByLabelText("page")).toBeInTheDocument();
     });
 
     it("should render page with correct label", () => {
@@ -124,13 +125,13 @@ describe("UnForfeit", () => {
     it("should render ApiMessageAlert", () => {
       render(<UnForfeit />, { wrapper });
 
-      expect(screen.getByTestId("api-message-alert")).toBeInTheDocument();
+      expect(screen.getByLabelText("api message alert")).toBeInTheDocument();
     });
 
     it("should render StatusDropdownActionNode in action node", () => {
       render(<UnForfeit />, { wrapper });
 
-      expect(screen.getByTestId("status-dropdown")).toBeInTheDocument();
+      expect(screen.getByLabelText("status dropdown")).toBeInTheDocument();
     });
 
     it("should render loading spinner when fiscal data is not loaded", async () => {
@@ -156,8 +157,8 @@ describe("UnForfeit", () => {
       render(<UnForfeit />, { wrapper });
 
       await waitFor(() => {
-        expect(screen.getByTestId("search-filter")).toBeInTheDocument();
-        expect(screen.getByTestId("unforfeit-grid")).toBeInTheDocument();
+        expect(screen.getByLabelText("search filter")).toBeInTheDocument();
+        expect(screen.getByLabelText("unforfeit grid")).toBeInTheDocument();
       });
     });
   });
@@ -169,7 +170,7 @@ describe("UnForfeit", () => {
 
       render(<UnForfeit />, { wrapper });
 
-      expect(screen.getByTestId("frozen-warning")).toBeInTheDocument();
+      expect(screen.getByLabelText("frozen year warning")).toBeInTheDocument();
     });
 
     it("should not display frozen year warning when year is not frozen", async () => {
@@ -178,7 +179,7 @@ describe("UnForfeit", () => {
 
       render(<UnForfeit />, { wrapper });
 
-      expect(screen.queryByTestId("frozen-warning")).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("frozen year warning")).not.toBeInTheDocument();
     });
   });
 
@@ -186,6 +187,7 @@ describe("UnForfeit", () => {
     it("should call handleSearch when search button is clicked", async () => {
       const { useUnForfeitState } = await import("../../../../hooks/useUnForfeitState");
       const mockHandleSearch = vi.fn();
+      const user = userEvent.setup();
 
       vi.mocked(useUnForfeitState).mockReturnValueOnce({
         state: {
@@ -208,12 +210,12 @@ describe("UnForfeit", () => {
 
       render(<UnForfeit />, { wrapper });
 
-      const searchButton = await screen.findByTestId("search-button");
-      fireEvent.click(searchButton);
+      const searchButton = screen.getByRole("button", { name: /search button/i });
+      await user.click(searchButton);
 
       await waitFor(() => {
         // handleSearch is called directly from search filter
-        expect(screen.getByTestId("search-filter")).toBeInTheDocument();
+        expect(screen.getByLabelText("search filter")).toBeInTheDocument();
       });
     });
 
@@ -241,7 +243,7 @@ describe("UnForfeit", () => {
 
       render(<UnForfeit />, { wrapper });
 
-      const searchButton = await screen.findByTestId("search-button");
+      const searchButton = screen.getByRole("button", { name: /search button/i });
 
       await waitFor(() => {
         expect(searchButton).toBeDisabled();
@@ -307,7 +309,7 @@ describe("UnForfeit", () => {
 
       render(<UnForfeit />, { wrapper });
 
-      expect(screen.getByTestId("status-dropdown")).toBeInTheDocument();
+      expect(screen.getByLabelText("status dropdown")).toBeInTheDocument();
     });
   });
 
@@ -397,14 +399,14 @@ describe("UnForfeit", () => {
 
       render(<UnForfeit />, { wrapper });
 
-      expect(screen.getByTestId("unforfeit-grid")).toBeInTheDocument();
+      expect(screen.getByLabelText("unforfeit grid")).toBeInTheDocument();
     });
 
     it("should pass fiscal data to UnForfeitSearchFilter", async () => {
       render(<UnForfeit />, { wrapper });
 
       // Verify search filter is rendered with fiscal data available
-      expect(screen.getByTestId("search-filter")).toBeInTheDocument();
+      expect(screen.getByLabelText("search filter")).toBeInTheDocument();
     });
 
     it("should pass hasUnsavedChanges to grid and filter", async () => {
@@ -431,7 +433,7 @@ describe("UnForfeit", () => {
 
       render(<UnForfeit />, { wrapper });
 
-      const searchButton = await screen.findByTestId("search-button");
+      const searchButton = screen.getByRole("button", { name: /search button/i });
       expect(searchButton).toBeDisabled();
     });
   });

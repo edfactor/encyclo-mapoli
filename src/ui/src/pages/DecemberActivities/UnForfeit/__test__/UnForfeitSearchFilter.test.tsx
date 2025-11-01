@@ -79,20 +79,20 @@ vi.mock("../../../utils/FormValidators", async () => {
 
 vi.mock("smart-ui-library", () => ({
   SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) => (
-    <div data-testid="search-and-reset">
+    <section aria-label="search and reset">
       <button
-        data-testid="search-btn"
+        aria-label="search button"
         onClick={handleSearch}
         disabled={disabled || isFetching}>
         Search
       </button>
       <button
-        data-testid="reset-btn"
+        aria-label="reset button"
         onClick={handleReset}>
         Reset
       </button>
-      {isFetching && <span data-testid="loading">Loading...</span>}
-    </div>
+      {isFetching && <span role="status" aria-label="loading">Loading...</span>}
+    </section>
   ))
 }));
 
@@ -145,7 +145,7 @@ describe("UnForfeitSearchFilter", () => {
       await waitFor(() => {
         expect(screen.getByText("Rehire Begin Date")).toBeInTheDocument();
         expect(screen.getByText("Rehire Ending Date")).toBeInTheDocument();
-        expect(screen.getByTestId("search-and-reset")).toBeInTheDocument();
+        expect(screen.getByLabelText("search and reset")).toBeInTheDocument();
       });
     });
 
@@ -162,8 +162,8 @@ describe("UnForfeitSearchFilter", () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId("search-btn")).toBeInTheDocument();
-        expect(screen.getByTestId("reset-btn")).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /search button/i })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /reset button/i })).toBeInTheDocument();
       });
     });
 
@@ -267,7 +267,7 @@ describe("UnForfeitSearchFilter", () => {
 
       // Search button should be present
       await waitFor(() => {
-        const searchButton = screen.getByTestId("search-btn");
+        const searchButton = screen.getByRole("button", { name: /search button/i });
         expect(searchButton).toBeInTheDocument();
       });
     });
@@ -289,7 +289,7 @@ describe("UnForfeitSearchFilter", () => {
       await waitFor(() => {
         expect(screen.getByText("Rehire Begin Date")).toBeInTheDocument();
         // If form is valid, search should be possible
-        expect(screen.getByTestId("search-btn")).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /search button/i })).toBeInTheDocument();
       });
     });
 
@@ -306,7 +306,7 @@ describe("UnForfeitSearchFilter", () => {
       );
 
       await waitFor(() => {
-        const searchButton = screen.getByTestId("search-btn");
+        const searchButton = screen.getByRole("button", { name: /search button/i });
         expect(searchButton).toBeDisabled();
       });
     });
@@ -326,7 +326,7 @@ describe("UnForfeitSearchFilter", () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId("search-btn")).toBeDisabled();
+        expect(screen.getByRole("button", { name: /search button/i })).toBeDisabled();
       });
 
       alertSpy.mockRestore();
@@ -335,7 +335,7 @@ describe("UnForfeitSearchFilter", () => {
 
   describe("Reset functionality", () => {
     it("should reset form when reset button is clicked", async () => {
-      const user = userEvent.setup(); // Used for user.click
+      const user = userEvent.setup();
       render(
         <UnForfeitSearchFilter
           fiscalData={mockFiscalData}
@@ -349,14 +349,16 @@ describe("UnForfeitSearchFilter", () => {
 
       // Wait for reset button to be available
       await waitFor(() => {
-        expect(screen.getByTestId("reset-btn")).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /reset button/i })).toBeInTheDocument();
       });
 
-      const resetButton = screen.getByTestId("reset-btn");
+      const resetButton = screen.getByRole("button", { name: /reset button/i });
       await user.click(resetButton);
 
       // After reset, form should be cleared
-      expect(resetButton).toBeInTheDocument();
+      await waitFor(() => {
+        expect(resetButton).toBeInTheDocument();
+      });
     });
 
     it("should reset checkbox when reset is clicked", async () => {
@@ -373,15 +375,17 @@ describe("UnForfeitSearchFilter", () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId("reset-btn")).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /reset button/i })).toBeInTheDocument();
       });
 
-      const resetButton = screen.getByTestId("reset-btn");
+      const resetButton = screen.getByRole("button", { name: /reset button/i });
       await user.click(resetButton);
 
       // Reset should clear all fields including checkbox state
-      expect(resetButton).toBeInTheDocument();
-      expect(screen.getByText("Exclude employees with no current or vested balance")).toBeInTheDocument();
+      await waitFor(() => {
+        expect(resetButton).toBeInTheDocument();
+        expect(screen.getByText("Exclude employees with no current or vested balance")).toBeInTheDocument();
+      });
     });
   });
 
@@ -451,7 +455,7 @@ describe("UnForfeitSearchFilter", () => {
 
       // Component should render successfully with Redux hooks
       await waitFor(() => {
-        expect(screen.getByTestId("search-and-reset")).toBeInTheDocument();
+        expect(screen.getByLabelText("search and reset")).toBeInTheDocument();
         // Form should be present with Redux-backed state
         expect(screen.getByText("Rehire Begin Date")).toBeInTheDocument();
       });
@@ -472,7 +476,7 @@ describe("UnForfeitSearchFilter", () => {
       );
 
       await waitFor(() => {
-        const searchButton = screen.getByTestId("search-btn");
+        const searchButton = screen.getByRole("button", { name: /search button/i });
         expect(searchButton).toBeInTheDocument();
       });
     });
@@ -515,7 +519,7 @@ describe("UnForfeitSearchFilter", () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId("search-and-reset")).toBeInTheDocument();
+        expect(screen.getByLabelText("search and reset")).toBeInTheDocument();
       });
     });
   });
