@@ -119,20 +119,17 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
             </Typography>
           </div>
           {grossWagesReport && (
-            <div className="w-full overflow-hidden">
-              <TotalsGrid
-                breakpoints={{ xs: 12, sm: 6, md: 3, lg: 3, xl: 3 }}
-                tablePadding="16px"
-                displayData={[
-                  [numberToCurrency(grossWagesReport?.totalGrossWages || 0)],
-                  [numberToCurrency(grossWagesReport?.totalProfitSharingAmount || 0)],
-                  [numberToCurrency(grossWagesReport?.totalLoans || 0)],
-                  [numberToCurrency(grossWagesReport?.totalForfeitures || 0)]
-                ]}
-                leftColumnHeaders={["Gross Wages", "Profit Sharing", "Loans", "Forfeitures"]}
-                topRowHeaders={["Totals"]}
-              />
-            </div>
+            <TotalsGrid
+              breakpoints={{ xs: 12, sm: 6, md: 3, lg: 3, xl: 3 }}
+              displayData={[
+                [numberToCurrency(grossWagesReport?.totalGrossWages || 0)],
+                [numberToCurrency(grossWagesReport?.totalProfitSharingAmount || 0)],
+                [numberToCurrency(grossWagesReport?.totalLoans || 0)],
+                [numberToCurrency(grossWagesReport?.totalForfeitures || 0)]
+              ]}
+              leftColumnHeaders={["Gross Wages", "Profit Sharing", "Loans", "Forfeitures"]}
+              topRowHeaders={["Totals"]}
+            />
           )}
           <DSMGrid
             preferenceKey={"PROFIT_SHARE_GROSS_REPORT"}
