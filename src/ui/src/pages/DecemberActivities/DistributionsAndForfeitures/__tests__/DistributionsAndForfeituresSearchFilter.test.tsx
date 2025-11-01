@@ -32,10 +32,7 @@ vi.mock("reduxstore/api/LookupsApi", () => ({
 }));
 
 vi.mock("reduxstore/api/YearsEndApi", () => ({
-  useLazyGetDistributionsAndForfeituresQuery: vi.fn(() => [
-    vi.fn(),
-    { isFetching: false }
-  ])
+  useLazyGetDistributionsAndForfeituresQuery: vi.fn(() => [vi.fn(), { isFetching: false }])
 }));
 
 vi.mock("reduxstore/slices/yearsEndSlice", () => ({
@@ -72,7 +69,6 @@ vi.mock("smart-ui-library", () => ({
 }));
 
 describe("DistributionsAndForfeituresSearchFilter", () => {
-
   beforeEach(() => {
     vi.clearAllMocks();
   });

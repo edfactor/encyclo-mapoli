@@ -3,16 +3,13 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import MilitaryContributionForm from "./MilitaryContributionForm";
+import MilitaryContributionForm from "../MilitaryContributionForm";
 
 // Mock the RTK Query mutation
 const mockCreateMilitaryContribution = vi.fn();
 
 vi.mock("../../../reduxstore/api/MilitaryApi", () => ({
-  useCreateMilitaryContributionMutation: () => [
-    mockCreateMilitaryContribution,
-    { isLoading: false }
-  ]
+  useCreateMilitaryContributionMutation: () => [mockCreateMilitaryContribution, { isLoading: false }]
 }));
 
 // Mock form validators

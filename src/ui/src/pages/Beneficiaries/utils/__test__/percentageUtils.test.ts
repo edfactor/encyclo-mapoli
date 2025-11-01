@@ -1,8 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  calculatePercentageSum,
-  validatePercentageAllocation
-} from "./percentageUtils";
+import { calculatePercentageSum, validatePercentageAllocation } from "../percentageUtils";
 
 describe("percentageUtils", () => {
   describe("calculatePercentageSum", () => {
@@ -263,9 +260,7 @@ describe("percentageUtils", () => {
 
     it("should have error message with standard format", () => {
       const result = validatePercentageAllocation(115);
-      expect(result.error).toBe(
-        "Total percentage would be 115%. Beneficiary percentages must sum to 100% or less."
-      );
+      expect(result.error).toBe("Total percentage would be 115%. Beneficiary percentages must sum to 100% or less.");
     });
 
     it("should not have error when valid", () => {

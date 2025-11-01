@@ -16,10 +16,7 @@ vi.mock("../../../reduxstore/api/LookupsApi", () => ({
     vi.fn(),
     { data: { fiscalBeginDate: "2024-01-01", fiscalEndDate: "2024-12-31" }, isLoading: false }
   ]),
-  useLazyGetDuplicateSsnExistsQuery: vi.fn(() => [
-    vi.fn(),
-    { data: { duplicateCount: 0 }, isLoading: false }
-  ])
+  useLazyGetDuplicateSsnExistsQuery: vi.fn(() => [vi.fn(), { data: { duplicateCount: 0 }, isLoading: false }])
 }));
 
 vi.mock("../../../components/DsmDatePicker/DsmDatePicker", () => ({
@@ -41,15 +38,13 @@ vi.mock("../../../components/ForfeitActivities/DuplicateSsnGuard", () => ({
 vi.mock("../../../utils/FormValidators", async () => {
   const yup = await import("yup");
   return {
-    dateStringValidator: (_min: number, _max: number, _fieldName: string) =>
-      yup.default.string().nullable(),
+    dateStringValidator: (_min: number, _max: number, _fieldName: string) => yup.default.string().nullable(),
     endDateStringAfterStartDateValidator: (
       _beginFieldName: string,
       _dateParser: (val: string) => Date,
       _message: string
     ) => yup.default.string().nullable(),
-    profitYearValidator: (_min: number, _max: number) =>
-      yup.default.number().nullable(),
+    profitYearValidator: (_min: number, _max: number) => yup.default.number().nullable(),
     mmDDYYFormat: (date: string) => date,
     tryddmmyyyyToDate: (dateStr: string) => new Date(dateStr)
   };

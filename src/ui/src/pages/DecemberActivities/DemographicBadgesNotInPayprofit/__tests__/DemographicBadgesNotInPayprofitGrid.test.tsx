@@ -12,16 +12,22 @@ vi.mock("smart-ui-library", () => ({
   )),
   Pagination: vi.fn(({ pageNumber, pageSize, recordCount, setPageNumber, setPageSize }) => (
     <div data-testid="pagination">
-      <button data-testid="prev-page" onClick={() => setPageNumber(pageNumber - 1)}>
+      <button
+        data-testid="prev-page"
+        onClick={() => setPageNumber(pageNumber - 1)}>
         Prev
       </button>
       <span data-testid="page-info">
         Page {pageNumber} - Size {pageSize} - Total {recordCount}
       </span>
-      <button data-testid="next-page" onClick={() => setPageNumber(pageNumber + 1)}>
+      <button
+        data-testid="next-page"
+        onClick={() => setPageNumber(pageNumber + 1)}>
         Next
       </button>
-      <button data-testid="size-50" onClick={() => setPageSize(50)}>
+      <button
+        data-testid="size-50"
+        onClick={() => setPageSize(50)}>
         50 per page
       </button>
     </div>
@@ -82,7 +88,12 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
     });
 
     it("should not render grid when showData is false", () => {
-      render(<DemographicBadgesNotInPayprofitGrid {...defaultProps} showData={false} />);
+      render(
+        <DemographicBadgesNotInPayprofitGrid
+          {...defaultProps}
+          showData={false}
+        />
+      );
 
       expect(screen.queryByTestId("grid")).not.toBeInTheDocument();
     });
@@ -98,13 +109,23 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
 
   describe("Pagination", () => {
     it("should render pagination when hasResults is true", () => {
-      render(<DemographicBadgesNotInPayprofitGrid {...defaultProps} hasResults={true} />);
+      render(
+        <DemographicBadgesNotInPayprofitGrid
+          {...defaultProps}
+          hasResults={true}
+        />
+      );
 
       expect(screen.getByTestId("pagination")).toBeInTheDocument();
     });
 
     it("should not render pagination when hasResults is false", () => {
-      render(<DemographicBadgesNotInPayprofitGrid {...defaultProps} hasResults={false} />);
+      render(
+        <DemographicBadgesNotInPayprofitGrid
+          {...defaultProps}
+          hasResults={false}
+        />
+      );
 
       expect(screen.queryByTestId("pagination")).not.toBeInTheDocument();
     });
@@ -136,13 +157,23 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
 
   describe("Loading states", () => {
     it("should display loading indicator when isLoading is true", () => {
-      render(<DemographicBadgesNotInPayprofitGrid {...defaultProps} isLoading={true} />);
+      render(
+        <DemographicBadgesNotInPayprofitGrid
+          {...defaultProps}
+          isLoading={true}
+        />
+      );
 
       expect(screen.getByTestId("loading")).toBeInTheDocument();
     });
 
     it("should not display loading indicator when isLoading is false", () => {
-      render(<DemographicBadgesNotInPayprofitGrid {...defaultProps} isLoading={false} />);
+      render(
+        <DemographicBadgesNotInPayprofitGrid
+          {...defaultProps}
+          isLoading={false}
+        />
+      );
 
       expect(screen.queryByTestId("loading")).not.toBeInTheDocument();
     });
@@ -158,7 +189,12 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
     });
 
     it("should reset pagination to page 0 when sorting changes", () => {
-      render(<DemographicBadgesNotInPayprofitGrid {...defaultProps} pagination={{ ...mockPagination, pageNumber: 5 }} />);
+      render(
+        <DemographicBadgesNotInPayprofitGrid
+          {...defaultProps}
+          pagination={{ ...mockPagination, pageNumber: 5 }}
+        />
+      );
 
       // The component should reset pagination on sort change
       // This is verified through callback invocation
@@ -196,7 +232,11 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
 
     it("should handle null data gracefully", () => {
       render(
-        <DemographicBadgesNotInPayprofitGrid {...defaultProps} data={null} showData={false} />
+        <DemographicBadgesNotInPayprofitGrid
+          {...defaultProps}
+          data={null}
+          showData={false}
+        />
       );
 
       expect(screen.queryByTestId("grid")).not.toBeInTheDocument();
@@ -210,7 +250,12 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
       const firstRender = screen.getByTestId("grid");
       expect(firstRender).toBeInTheDocument();
 
-      rerender(<DemographicBadgesNotInPayprofitGrid {...defaultProps} isLoading={true} />);
+      rerender(
+        <DemographicBadgesNotInPayprofitGrid
+          {...defaultProps}
+          isLoading={true}
+        />
+      );
 
       // Column definitions should remain stable (memoized)
       expect(screen.getByTestId("grid")).toBeInTheDocument();
@@ -221,7 +266,12 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
     it("should assign ref to grid container", () => {
       const refObj = { current: null };
 
-      render(<DemographicBadgesNotInPayprofitGrid {...defaultProps} innerRef={refObj} />);
+      render(
+        <DemographicBadgesNotInPayprofitGrid
+          {...defaultProps}
+          innerRef={refObj}
+        />
+      );
 
       // Ref should be assigned when grid renders
       expect(screen.getByTestId("grid")).toBeInTheDocument();
@@ -242,7 +292,10 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
       };
 
       render(
-        <DemographicBadgesNotInPayprofitGrid {...defaultProps} data={largeData} />
+        <DemographicBadgesNotInPayprofitGrid
+          {...defaultProps}
+          data={largeData}
+        />
       );
 
       expect(screen.getByTestId("page-info")).toHaveTextContent("Total 100000");

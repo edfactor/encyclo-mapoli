@@ -50,9 +50,7 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
     vi.mocked(useLazyGetDemographicBadgesNotInPayprofitQuery).mockReturnValue([
       vi.fn().mockReturnValue({
         unwrap: vi.fn().mockResolvedValue({
-          results: [
-            { badgeNumber: 12345, storeName: "Store 1", employeeName: "John Doe" }
-          ],
+          results: [{ badgeNumber: 12345, storeName: "Store 1", employeeName: "John Doe" }],
           total: 1
         })
       }),
@@ -63,9 +61,7 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
   describe("Hook initialization", () => {
     it("should initialize with correct structure", () => {
       const store = createMockStore();
-      const wrapper = ({ children }: PropsWithChildren) => (
-        <Provider store={store}>{children}</Provider>
-      );
+      const wrapper = ({ children }: PropsWithChildren) => <Provider store={store}>{children}</Provider>;
 
       const { result } = renderHook(() => useDemographicBadgesNotInPayprofit(), {
         wrapper
@@ -83,9 +79,7 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
   describe("Search functionality", () => {
     it("should initialize pagination correctly", () => {
       const store = createMockStore();
-      const wrapper = ({ children }: PropsWithChildren) => (
-        <Provider store={store}>{children}</Provider>
-      );
+      const wrapper = ({ children }: PropsWithChildren) => <Provider store={store}>{children}</Provider>;
 
       const { result } = renderHook(() => useDemographicBadgesNotInPayprofit(), {
         wrapper
@@ -98,9 +92,7 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
 
     it("should have executeSearch function", () => {
       const store = createMockStore();
-      const wrapper = ({ children }: PropsWithChildren) => (
-        <Provider store={store}>{children}</Provider>
-      );
+      const wrapper = ({ children }: PropsWithChildren) => <Provider store={store}>{children}</Provider>;
 
       const { result } = renderHook(() => useDemographicBadgesNotInPayprofit(), {
         wrapper
@@ -111,17 +103,13 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
 
     it("should have pagination handlers", () => {
       const store = createMockStore();
-      const wrapper = ({ children }: PropsWithChildren) => (
-        <Provider store={store}>{children}</Provider>
-      );
+      const wrapper = ({ children }: PropsWithChildren) => <Provider store={store}>{children}</Provider>;
 
       const { result } = renderHook(() => useDemographicBadgesNotInPayprofit(), {
         wrapper
       });
 
-      expect(typeof result.current.pagination.handlePaginationChange).toBe(
-        "function"
-      );
+      expect(typeof result.current.pagination.handlePaginationChange).toBe("function");
       expect(typeof result.current.pagination.handleSortChange).toBe("function");
     });
   });
@@ -129,9 +117,7 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
   describe("Profit year handling", () => {
     it("should use the profit year from useDecemberFlowProfitYear", () => {
       const store = createMockStore();
-      const wrapper = ({ children }: PropsWithChildren) => (
-        <Provider store={store}>{children}</Provider>
-      );
+      const wrapper = ({ children }: PropsWithChildren) => <Provider store={store}>{children}</Provider>;
 
       renderHook(() => useDemographicBadgesNotInPayprofit(), { wrapper });
 
@@ -142,9 +128,7 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
       vi.mocked(useDecemberFlowProfitYear).mockReturnValue(null);
 
       const store = createMockStore();
-      const wrapper = ({ children }: PropsWithChildren) => (
-        <Provider store={store}>{children}</Provider>
-      );
+      const wrapper = ({ children }: PropsWithChildren) => <Provider store={store}>{children}</Provider>;
 
       const { result } = renderHook(() => useDemographicBadgesNotInPayprofit(), {
         wrapper
@@ -158,9 +142,7 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
   describe("Security token validation", () => {
     it("should check for security token via Redux selector", () => {
       const store = createMockStore();
-      const wrapper = ({ children }: PropsWithChildren) => (
-        <Provider store={store}>{children}</Provider>
-      );
+      const wrapper = ({ children }: PropsWithChildren) => <Provider store={store}>{children}</Provider>;
 
       const { result } = renderHook(() => useDemographicBadgesNotInPayprofit(), {
         wrapper
@@ -171,9 +153,7 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
 
     it("should handle missing security token", () => {
       const store = createMockStore({ security: { token: null } });
-      const wrapper = ({ children }: PropsWithChildren) => (
-        <Provider store={store}>{children}</Provider>
-      );
+      const wrapper = ({ children }: PropsWithChildren) => <Provider store={store}>{children}</Provider>;
 
       const { result } = renderHook(() => useDemographicBadgesNotInPayprofit(), {
         wrapper
@@ -186,9 +166,7 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
   describe("Pagination state management", () => {
     it("should initialize pagination with default values", () => {
       const store = createMockStore();
-      const wrapper = ({ children }: PropsWithChildren) => (
-        <Provider store={store}>{children}</Provider>
-      );
+      const wrapper = ({ children }: PropsWithChildren) => <Provider store={store}>{children}</Provider>;
 
       const { result } = renderHook(() => useDemographicBadgesNotInPayprofit(), {
         wrapper
@@ -204,9 +182,7 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
   describe("Data selectors", () => {
     it("should provide showData boolean", () => {
       const store = createMockStore();
-      const wrapper = ({ children }: PropsWithChildren) => (
-        <Provider store={store}>{children}</Provider>
-      );
+      const wrapper = ({ children }: PropsWithChildren) => <Provider store={store}>{children}</Provider>;
 
       const { result } = renderHook(() => useDemographicBadgesNotInPayprofit(), {
         wrapper
@@ -217,9 +193,7 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
 
     it("should provide hasResults boolean", () => {
       const store = createMockStore();
-      const wrapper = ({ children }: PropsWithChildren) => (
-        <Provider store={store}>{children}</Provider>
-      );
+      const wrapper = ({ children }: PropsWithChildren) => <Provider store={store}>{children}</Provider>;
 
       const { result } = renderHook(() => useDemographicBadgesNotInPayprofit(), {
         wrapper
@@ -232,9 +206,7 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
   describe("Search results", () => {
     it("should have searchResults property", () => {
       const store = createMockStore();
-      const wrapper = ({ children }: PropsWithChildren) => (
-        <Provider store={store}>{children}</Provider>
-      );
+      const wrapper = ({ children }: PropsWithChildren) => <Provider store={store}>{children}</Provider>;
 
       const { result } = renderHook(() => useDemographicBadgesNotInPayprofit(), {
         wrapper
@@ -245,9 +217,7 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
 
     it("should have isSearching property", () => {
       const store = createMockStore();
-      const wrapper = ({ children }: PropsWithChildren) => (
-        <Provider store={store}>{children}</Provider>
-      );
+      const wrapper = ({ children }: PropsWithChildren) => <Provider store={store}>{children}</Provider>;
 
       const { result } = renderHook(() => useDemographicBadgesNotInPayprofit(), {
         wrapper
@@ -260,9 +230,7 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
   describe("Loading states", () => {
     it("should track isSearching state", () => {
       const store = createMockStore();
-      const wrapper = ({ children }: PropsWithChildren) => (
-        <Provider store={store}>{children}</Provider>
-      );
+      const wrapper = ({ children }: PropsWithChildren) => <Provider store={store}>{children}</Provider>;
 
       const { result } = renderHook(() => useDemographicBadgesNotInPayprofit(), {
         wrapper
@@ -275,9 +243,7 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
   describe("Edge cases", () => {
     it("should handle initial state correctly", () => {
       const store = createMockStore();
-      const wrapper = ({ children }: PropsWithChildren) => (
-        <Provider store={store}>{children}</Provider>
-      );
+      const wrapper = ({ children }: PropsWithChildren) => <Provider store={store}>{children}</Provider>;
 
       const { result } = renderHook(() => useDemographicBadgesNotInPayprofit(), {
         wrapper
@@ -285,17 +251,12 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
 
       // Initially, searchResults should be null (before auto-search)
       // or have data if auto-search was triggered
-      expect(
-        result.current.searchResults === null ||
-          typeof result.current.searchResults === "object"
-      ).toBe(true);
+      expect(result.current.searchResults === null || typeof result.current.searchResults === "object").toBe(true);
     });
 
     it("should handle executeSearch function properly", () => {
       const store = createMockStore();
-      const wrapper = ({ children }: PropsWithChildren) => (
-        <Provider store={store}>{children}</Provider>
-      );
+      const wrapper = ({ children }: PropsWithChildren) => <Provider store={store}>{children}</Provider>;
 
       const { result } = renderHook(() => useDemographicBadgesNotInPayprofit(), {
         wrapper

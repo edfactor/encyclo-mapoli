@@ -1,8 +1,8 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createMockStoreAndWrapper } from "../../../test";
-import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
-import MilitaryContribution from "./MilitaryContribution";
+import { createMockStoreAndWrapper } from "../../../../test";
+import { MissiveAlertProvider } from "../../../../components/MissiveAlerts/MissiveAlertContext";
+import MilitaryContribution from "../MilitaryContribution";
 
 interface MissiveAlert {
   id: number;
@@ -147,9 +147,7 @@ describe("MilitaryContribution", () => {
     const { wrapper } = createMockStoreAndWrapper(mockState);
     // Wrap with MissiveAlertProvider for this component
     customWrapper = ({ children }: { children: React.ReactNode }) => (
-      <MissiveAlertProvider>
-        {wrapper({ children })}
-      </MissiveAlertProvider>
+      <MissiveAlertProvider>{wrapper({ children })}</MissiveAlertProvider>
     );
   });
 
@@ -192,9 +190,7 @@ describe("MilitaryContribution", () => {
       const { wrapper: mockWrapper } = createMockStoreAndWrapper(noMemberState);
 
       const testWrapper = ({ children }: { children: React.ReactNode }) => (
-        <MissiveAlertProvider>
-          {mockWrapper({ children })}
-        </MissiveAlertProvider>
+        <MissiveAlertProvider>{mockWrapper({ children })}</MissiveAlertProvider>
       );
 
       render(<MilitaryContribution />, { wrapper: testWrapper });
@@ -271,9 +267,7 @@ describe("MilitaryContribution", () => {
       const { wrapper: mockWrapper } = createMockStoreAndWrapper(memberState);
 
       const testWrapper = ({ children }: { children: React.ReactNode }) => (
-        <MissiveAlertProvider>
-          {mockWrapper({ children })}
-        </MissiveAlertProvider>
+        <MissiveAlertProvider>{mockWrapper({ children })}</MissiveAlertProvider>
       );
 
       const { rerender } = render(<MilitaryContribution />, { wrapper: testWrapper });
@@ -364,9 +358,7 @@ describe("MilitaryContribution", () => {
       const { wrapper: mockWrapper } = createMockStoreAndWrapper();
 
       const testWrapper = ({ children }: { children: React.ReactNode }) => (
-        <MissiveAlertProvider>
-          {mockWrapper({ children })}
-        </MissiveAlertProvider>
+        <MissiveAlertProvider>{mockWrapper({ children })}</MissiveAlertProvider>
       );
 
       const { unmount } = render(<MilitaryContribution />, { wrapper: testWrapper });

@@ -40,13 +40,15 @@ vi.mock("components/StatusDropdownActionNode", () => ({
 }));
 
 vi.mock("smart-ui-library", () => ({
-  Page: vi.fn(({ label, actionNode, children }: { label: string; actionNode?: React.ReactNode; children?: React.ReactNode }) => (
-    <div data-testid="page">
-      <div>{label}</div>
-      {actionNode}
-      {children}
-    </div>
-  ))
+  Page: vi.fn(
+    ({ label, actionNode, children }: { label: string; actionNode?: React.ReactNode; children?: React.ReactNode }) => (
+      <div data-testid="page">
+        <div>{label}</div>
+        {actionNode}
+        {children}
+      </div>
+    )
+  )
 }));
 
 describe("NegativeEtvaForSSNsOnPayprofit", () => {
@@ -88,7 +90,6 @@ describe("NegativeEtvaForSSNsOnPayprofit", () => {
     });
 
     it("should display zero records when no results", async () => {
-
       vi.mocked(useNegativeEtvaForSSNsOnPayprofit).mockReturnValueOnce({
         searchResults: null,
         isSearching: false,
@@ -108,7 +109,6 @@ describe("NegativeEtvaForSSNsOnPayprofit", () => {
     });
 
     it("should display multiple record count", async () => {
-
       vi.mocked(useNegativeEtvaForSSNsOnPayprofit).mockReturnValueOnce({
         searchResults: {
           response: {
@@ -183,7 +183,6 @@ describe("NegativeEtvaForSSNsOnPayprofit", () => {
     });
 
     it("should handle large number of records", async () => {
-
       const largeResults = Array.from({ length: 100 }, (_, i) => ({
         ssn: `xxx-xx-${String(i).padStart(4, "0")}`,
         badgeNumber: 10000 + i,

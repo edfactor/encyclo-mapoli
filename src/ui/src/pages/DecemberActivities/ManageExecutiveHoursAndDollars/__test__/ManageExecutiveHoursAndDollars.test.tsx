@@ -2,8 +2,8 @@ import { configureStore } from "@reduxjs/toolkit";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { describe, expect, it, vi } from "vitest";
-import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
-import ManageExecutiveHoursAndDollars from "./ManageExecutiveHoursAndDollars";
+import { MissiveAlertProvider } from "../../../../components/MissiveAlerts/MissiveAlertContext";
+import ManageExecutiveHoursAndDollars from "../ManageExecutiveHoursAndDollars";
 
 // Mock the child components
 vi.mock("./ManageExecutiveHoursAndDollarsGrid", () => ({

@@ -5,7 +5,7 @@ import { Provider } from "react-redux";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import inquiryReducer, { type InquiryState } from "../../../reduxstore/slices/inquirySlice";
 import securityReducer, { type SecurityState } from "../../../reduxstore/slices/securitySlice";
-import { useAdjustments } from "./useAdjustments";
+import { useAdjustments } from "../useAdjustments";
 import * as useMissiveAlertsModule from "../../../hooks/useMissiveAlerts";
 
 // Create mock functions for triggers/actions
@@ -72,8 +72,7 @@ function createMockStore(preloadedState?: MockStoreState) {
 function renderHookWithProvider<T>(hook: () => T, preloadedState?: MockStoreState) {
   const store = createMockStore(preloadedState || { security: { token: "mock-token", user: null }, inquiry: {} });
   return renderHook(() => hook(), {
-    wrapper: ({ children }: { children: React.ReactNode }) =>
-      React.createElement(Provider, { store, children })
+    wrapper: ({ children }: { children: React.ReactNode }) => React.createElement(Provider, { store, children })
   });
 }
 

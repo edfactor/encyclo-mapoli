@@ -98,22 +98,16 @@ export const createMockStore = (preloadedState?: PreloadedState<MockRootState>) 
 
   // Create simple reducers that just return state
   // In real code, these would be actual slice reducers
-  const createSliceReducer = (initialState: unknown) => (
-    state = initialState,
-    _action: unknown
-  ) => state;
+  const createSliceReducer =
+    (initialState: unknown) =>
+    (state = initialState, _action: unknown) =>
+      state;
 
   const baseReducers = {
     security: createSliceReducer(preloadedState?.security ?? defaultState.security),
-    navigation: createSliceReducer(
-      preloadedState?.navigation ?? defaultState.navigation
-    ),
-    yearsEnd: createSliceReducer(
-      preloadedState?.yearsEnd ?? defaultState.yearsEnd
-    ),
-    distribution: createSliceReducer(
-      preloadedState?.distribution ?? defaultState.distribution
-    ),
+    navigation: createSliceReducer(preloadedState?.navigation ?? defaultState.navigation),
+    yearsEnd: createSliceReducer(preloadedState?.yearsEnd ?? defaultState.yearsEnd),
+    distribution: createSliceReducer(preloadedState?.distribution ?? defaultState.distribution),
     inquiry: createSliceReducer(preloadedState?.inquiry ?? defaultState.inquiry)
   };
 
@@ -170,9 +164,7 @@ export const createProviderWrapper = (store: MockStore) => {
  * });
  * render(<Component />, { wrapper });
  */
-export const createMockStoreAndWrapper = (
-  preloadedState?: PreloadedState<MockRootState>
-) => {
+export const createMockStoreAndWrapper = (preloadedState?: PreloadedState<MockRootState>) => {
   const store = createMockStore(preloadedState);
   const wrapper = createProviderWrapper(store);
 

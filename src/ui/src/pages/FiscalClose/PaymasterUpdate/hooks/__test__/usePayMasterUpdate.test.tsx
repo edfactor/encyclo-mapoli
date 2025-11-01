@@ -4,15 +4,15 @@ import { ReactNode } from "react";
 import { Provider } from "react-redux";
 import { UpdateSummaryResponse, UpdateSummaryEmployee } from "reduxstore/types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import * as useFiscalCloseProfitYear from "../../../../hooks/useFiscalCloseProfitYear";
-import * as useGridPagination from "../../../../hooks/useGridPagination";
-import * as useLazyGetUpdateSummaryQuery from "../../../../reduxstore/api/YearsEndApi";
-import * as useUpdateEnrollmentMutation from "../../../../reduxstore/api/YearsEndApi";
-import { messageSlice } from "../../../../reduxstore/slices/messageSlice";
-import navigationReducer, { NavigationState } from "../../../../reduxstore/slices/navigationSlice";
-import usePayMasterUpdate from "./usePayMasterUpdate";
-import { MessagesState } from "../../../../reduxstore/slices/messageSlice";
-import type { NavigationDto } from "../../../../types/navigation/navigation";
+import * as useFiscalCloseProfitYear from "../../../../../hooks/useFiscalCloseProfitYear";
+import * as useGridPagination from "../../../../../hooks/useGridPagination";
+import * as useLazyGetUpdateSummaryQuery from "../../../../../reduxstore/api/YearsEndApi";
+import * as useUpdateEnrollmentMutation from "../../../../../reduxstore/api/YearsEndApi";
+import { messageSlice } from "../../../../../reduxstore/slices/messageSlice";
+import navigationReducer, { NavigationState } from "../../../../../reduxstore/slices/navigationSlice";
+import usePayMasterUpdate from "../usePayMasterUpdate";
+import { MessagesState } from "../../../../../reduxstore/slices/messageSlice";
+import type { NavigationDto } from "../../../../../types/navigation/navigation";
 
 type MockRootState = {
   navigation: NavigationState;
@@ -74,10 +74,11 @@ interface RTKQueryPromise<T> extends Promise<{ data: T }> {
   unwrap: () => Promise<T>;
 }
 
-const createMockRTKQueryPromise = (data: UpdateSummaryResponse | null = null, error: unknown = null): RTKQueryPromise<UpdateSummaryResponse | null> => {
-  const promise = error
-    ? Promise.reject(error)
-    : Promise.resolve({ data });
+const createMockRTKQueryPromise = (
+  data: UpdateSummaryResponse | null = null,
+  error: unknown = null
+): RTKQueryPromise<UpdateSummaryResponse | null> => {
+  const promise = error ? Promise.reject(error) : Promise.resolve({ data });
 
   if (error) {
     (promise as RTKQueryPromise<UpdateSummaryResponse | null>).unwrap = () => Promise.reject(error);
@@ -130,16 +131,16 @@ describe("usePayMasterUpdate", () => {
     } as ReturnType<typeof useGridPagination.useGridPagination>);
 
     // Mock lazy query - default to returning empty data
-    mockTriggerGetSummary.mockImplementation(() =>
-      createMockRTKQueryPromise(createMockUpdateSummaryResponse([]))
-    );
+    mockTriggerGetSummary.mockImplementation(() => createMockRTKQueryPromise(createMockUpdateSummaryResponse([])));
 
     // Mock mutation with unwrap method
     const mockMutationPromise = Promise.resolve({
       data: { success: true }
     });
     (mockMutationPromise as Record<string, unknown>).unwrap = () => Promise.resolve({ success: true });
-    mockUpdateEnrollment.mockReturnValue(mockMutationPromise as unknown as ReturnType<typeof useUpdateEnrollmentMutation.useUpdateEnrollmentMutation>[0]);
+    mockUpdateEnrollment.mockReturnValue(
+      mockMutationPromise as unknown as ReturnType<typeof useUpdateEnrollmentMutation.useUpdateEnrollmentMutation>[0]
+    );
 
     vi.spyOn(useLazyGetUpdateSummaryQuery, "useLazyGetUpdateSummaryQuery").mockReturnValue([
       mockTriggerGetSummary,
@@ -251,9 +252,7 @@ describe("usePayMasterUpdate", () => {
         data: { detail: errorMsg }
       };
 
-      mockTriggerGetSummary.mockImplementation(() =>
-        createMockRTKQueryPromise(null, errorResponse)
-      );
+      mockTriggerGetSummary.mockImplementation(() => createMockRTKQueryPromise(null, errorResponse));
 
       const { result } = renderHook(() => usePayMasterUpdate(), {
         wrapper: createWrapper()
@@ -271,9 +270,7 @@ describe("usePayMasterUpdate", () => {
     it("should use default error message when error detail is missing", async () => {
       const errorResponse = { data: {} };
 
-      mockTriggerGetSummary.mockImplementation(() =>
-        createMockRTKQueryPromise(null, errorResponse)
-      );
+      mockTriggerGetSummary.mockImplementation(() => createMockRTKQueryPromise(null, errorResponse));
 
       const { result } = renderHook(() => usePayMasterUpdate(), {
         wrapper: createWrapper()
@@ -321,9 +318,7 @@ describe("usePayMasterUpdate", () => {
 
       const mockData = createMockUpdateSummaryResponse([mockEmployee]);
 
-      mockTriggerGetSummary.mockImplementation(() =>
-        createMockRTKQueryPromise(mockData)
-      );
+      mockTriggerGetSummary.mockImplementation(() => createMockRTKQueryPromise(mockData));
 
       const { result } = renderHook(() => usePayMasterUpdate(), {
         wrapper: createWrapper()
@@ -678,9 +673,7 @@ describe("usePayMasterUpdate", () => {
         }
       ]);
 
-      mockTriggerGetSummary.mockImplementation(() =>
-        createMockRTKQueryPromise(mockData)
-      );
+      mockTriggerGetSummary.mockImplementation(() => createMockRTKQueryPromise(mockData));
 
       const { result } = renderHook(() => usePayMasterUpdate(), {
         wrapper: createWrapper()
@@ -725,9 +718,7 @@ describe("usePayMasterUpdate", () => {
         }
       ]);
 
-      mockTriggerGetSummary.mockImplementation(() =>
-        createMockRTKQueryPromise(mockData)
-      );
+      mockTriggerGetSummary.mockImplementation(() => createMockRTKQueryPromise(mockData));
 
       const { result } = renderHook(() => usePayMasterUpdate(), {
         wrapper: createWrapper()
@@ -766,9 +757,7 @@ describe("usePayMasterUpdate", () => {
         data: { detail: "Pagination failed" }
       };
 
-      mockTriggerGetSummary.mockImplementation(() =>
-        createMockRTKQueryPromise(null, errorResponse)
-      );
+      mockTriggerGetSummary.mockImplementation(() => createMockRTKQueryPromise(null, errorResponse));
 
       const { result } = renderHook(() => usePayMasterUpdate(), {
         wrapper: createWrapper()

@@ -153,7 +153,7 @@ describe("saveOperationHelpers", () => {
       });
 
       it("should format amount with currency symbol", () => {
-        const result = generateSaveSuccessMessage("unforfeit", "Smith, Jane", 2500.50);
+        const result = generateSaveSuccessMessage("unforfeit", "Smith, Jane", 2500.5);
         expect(result).toBe("Successfully saved unforfeiture of $2,500.50 for Smith, Jane");
       });
 

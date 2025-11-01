@@ -9,10 +9,24 @@ import ForfeituresAdjustment from "./ForfeituresAdjustment";
 vi.mock("./ForfeituresAdjustmentSearchFilter", () => ({
   default: vi.fn(({ onSearch, onReset, isSearching }) => (
     <div data-testid="search-filter">
-      <button data-testid="search-button" onClick={() => onSearch({ ssn: "123-45-6789", badge: "", profitYear: 2024, skip: 0, take: 255, sortBy: "badgeNumber", isSortDescending: false })}>
+      <button
+        data-testid="search-button"
+        onClick={() =>
+          onSearch({
+            ssn: "123-45-6789",
+            badge: "",
+            profitYear: 2024,
+            skip: 0,
+            take: 255,
+            sortBy: "badgeNumber",
+            isSortDescending: false
+          })
+        }>
         Search
       </button>
-      <button data-testid="reset-button" onClick={onReset}>
+      <button
+        data-testid="reset-button"
+        onClick={onReset}>
         Reset
       </button>
       {isSearching && <span data-testid="searching">Searching...</span>}
@@ -38,18 +52,23 @@ vi.mock("./ForfeituresTransactionGrid", () => ({
 }));
 
 vi.mock("./AddForfeitureModal", () => ({
-  default: vi.fn(({ open, onClose, onSave }) => (
-    open && (
-      <div data-testid="add-forfeiture-modal">
-        <button data-testid="modal-close-btn" onClick={onClose}>
-          Close
-        </button>
-        <button data-testid="modal-save-btn" onClick={() => onSave({ forfeitureAmount: 1000, classAction: false })}>
-          Save
-        </button>
-      </div>
-    )
-  ))
+  default: vi.fn(
+    ({ open, onClose, onSave }) =>
+      open && (
+        <div data-testid="add-forfeiture-modal">
+          <button
+            data-testid="modal-close-btn"
+            onClick={onClose}>
+            Close
+          </button>
+          <button
+            data-testid="modal-save-btn"
+            onClick={() => onSave({ forfeitureAmount: 1000, classAction: false })}>
+            Save
+          </button>
+        </div>
+      )
+  )
 }));
 
 vi.mock("pages/InquiriesAndAdjustments/MasterInquiry/StandaloneMemberDetails", () => ({

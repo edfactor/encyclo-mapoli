@@ -1,8 +1,8 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createMockStoreAndWrapper } from "../../../test";
-import MilitaryContributionSearchFilter from "./MilitaryContributionSearchFilter";
+import { createMockStoreAndWrapper } from "../../../../test";
+import MilitaryContributionSearchFilter from "../MilitaryContributionSearchFilter";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 
 // Mock validators

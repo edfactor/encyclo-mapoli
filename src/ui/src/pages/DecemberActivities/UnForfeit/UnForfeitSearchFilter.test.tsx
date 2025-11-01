@@ -14,7 +14,7 @@ vi.mock("../../../components/DsmDatePicker/DsmDatePicker", () => ({
         id={id}
         data-testid={`date-picker-${label}`}
         onChange={(e) => onChange(e.target.value ? new Date(e.target.value) : null)}
-        value={value ? value.toISOString().split('T')[0] : ""}
+        value={value ? value.toISOString().split("T")[0] : ""}
         disabled={disabled}
         placeholder={label}
         type="date"

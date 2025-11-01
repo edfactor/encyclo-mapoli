@@ -142,13 +142,7 @@ const useForfeit = () => {
 
   // Auto-search on mount if profit year is available
   useEffect(() => {
-    if (
-      fiscalCloseProfitYear &&
-      !state.data &&
-      hasToken &&
-      !state.search.isLoading &&
-      !hasInitiallySearched.current
-    ) {
+    if (fiscalCloseProfitYear && !state.data && hasToken && !state.search.isLoading && !hasInitiallySearched.current) {
       hasInitiallySearched.current = true;
       executeSearch({ profitYear: fiscalCloseProfitYear });
     }

@@ -8,7 +8,7 @@ import {
   selectShowGrid,
   selectShowModal,
   type ManageExecutiveHoursAndDollarsState
-} from "./useManageExecutiveHoursAndDollarsReducer";
+} from "../useManageExecutiveHoursAndDollarsReducer";
 
 describe("useManageExecutiveHoursAndDollarsReducer", () => {
   describe("initialState", () => {

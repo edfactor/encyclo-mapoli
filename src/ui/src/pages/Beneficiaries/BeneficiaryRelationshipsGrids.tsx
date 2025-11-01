@@ -1,9 +1,7 @@
 import { Delete, Edit } from "@mui/icons-material";
 import { Button, TextField, Typography } from "@mui/material";
 import { FocusEvent, JSX, useCallback, useMemo, useState } from "react";
-import {
-  useLazyDeleteBeneficiaryQuery
-} from "reduxstore/api/BeneficiariesApi";
+import { useLazyDeleteBeneficiaryQuery } from "reduxstore/api/BeneficiariesApi";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import { SortParams, useGridPagination } from "../../hooks/useGridPagination";
@@ -116,11 +114,7 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
         return;
       }
 
-      const result = await percentageUpdate.validateAndUpdate(
-        id,
-        currentValue,
-        relationships.beneficiaryList.results
-      );
+      const result = await percentageUpdate.validateAndUpdate(id, currentValue, relationships.beneficiaryList.results);
 
       if (!result.success && e.target.value) {
         // Restore previous value on validation failure
@@ -198,19 +192,21 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
           />
         </>
       )}
-      {!!relationships.beneficiaryList && relationships.beneficiaryList.results && relationships.beneficiaryList?.results.length > 0 && (
-        <Pagination
-          pageNumber={pageNumber}
-          setPageNumber={(value: number) => {
-            handlePaginationChange(value - 1, pageSize);
-          }}
-          pageSize={pageSize}
-          setPageSize={(value: number) => {
-            handlePaginationChange(0, value);
-          }}
-          recordCount={relationships.beneficiaryList?.total}
-        />
-      )}
+      {!!relationships.beneficiaryList &&
+        relationships.beneficiaryList.results &&
+        relationships.beneficiaryList?.results.length > 0 && (
+          <Pagination
+            pageNumber={pageNumber}
+            setPageNumber={(value: number) => {
+              handlePaginationChange(value - 1, pageSize);
+            }}
+            pageSize={pageSize}
+            setPageSize={(value: number) => {
+              handlePaginationChange(0, value);
+            }}
+            recordCount={relationships.beneficiaryList?.total}
+          />
+        )}
     </>
   );
 };

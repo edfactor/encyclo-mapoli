@@ -8,8 +8,18 @@ vi.mock("../hooks/useDemographicBadgesNotInPayprofit");
 vi.mock("../DemographicBadgesNotInPayprofitGrid");
 vi.mock("components/StatusDropdownActionNode");
 vi.mock("smart-ui-library", () => ({
-  Page: ({ label, actionNode, children }: { label: string; actionNode?: React.ReactNode; children?: React.ReactNode }) => (
-    <div data-testid="page" data-label={label}>
+  Page: ({
+    label,
+    actionNode,
+    children
+  }: {
+    label: string;
+    actionNode?: React.ReactNode;
+    children?: React.ReactNode;
+  }) => (
+    <div
+      data-testid="page"
+      data-label={label}>
       <div>{label}</div>
       {actionNode}
       {children}
@@ -72,9 +82,7 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
       vi.mocked(useDemographicBadgesNotInPayprofit).mockReturnValue({
         searchResults: {
           response: {
-            results: [
-              { badgeNumber: 12345, storeName: "Store 1", employeeName: "John Doe" }
-            ],
+            results: [{ badgeNumber: 12345, storeName: "Store 1", employeeName: "John Doe" }],
             total: 1
           }
         },
@@ -92,13 +100,9 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
         executeSearch: vi.fn()
       } as MockHookReturn);
 
-      vi.mocked(DemographicBadgesNotInPayprofitGrid).mockReturnValue(
-        <div data-testid="grid">Grid Component</div>
-      );
+      vi.mocked(DemographicBadgesNotInPayprofitGrid).mockReturnValue(<div data-testid="grid">Grid Component</div>);
 
-      vi.mocked(StatusDropdownActionNode).mockReturnValue(
-        <div data-testid="status-dropdown">Status Dropdown</div>
-      );
+      vi.mocked(StatusDropdownActionNode).mockReturnValue(<div data-testid="status-dropdown">Status Dropdown</div>);
 
       const store = createMockStore();
       render(
@@ -114,9 +118,7 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
       vi.mocked(useDemographicBadgesNotInPayprofit).mockReturnValue({
         searchResults: {
           response: {
-            results: [
-              { badgeNumber: 12345, storeName: "Store 1", employeeName: "John Doe" }
-            ],
+            results: [{ badgeNumber: 12345, storeName: "Store 1", employeeName: "John Doe" }],
             total: 1
           }
         },
@@ -134,13 +136,9 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
         executeSearch: vi.fn()
       } as MockHookReturn);
 
-      vi.mocked(DemographicBadgesNotInPayprofitGrid).mockReturnValue(
-        <div data-testid="grid">Grid</div>
-      );
+      vi.mocked(DemographicBadgesNotInPayprofitGrid).mockReturnValue(<div data-testid="grid">Grid</div>);
 
-      vi.mocked(StatusDropdownActionNode).mockReturnValue(
-        <div data-testid="status-dropdown">Status</div>
-      );
+      vi.mocked(StatusDropdownActionNode).mockReturnValue(<div data-testid="status-dropdown">Status</div>);
 
       const store = createMockStore();
       render(
@@ -170,13 +168,9 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
         executeSearch: vi.fn()
       } as MockHookReturn);
 
-      vi.mocked(DemographicBadgesNotInPayprofitGrid).mockReturnValue(
-        <div data-testid="grid">Grid</div>
-      );
+      vi.mocked(DemographicBadgesNotInPayprofitGrid).mockReturnValue(<div data-testid="grid">Grid</div>);
 
-      vi.mocked(StatusDropdownActionNode).mockReturnValue(
-        <div data-testid="status-dropdown">Status Dropdown</div>
-      );
+      vi.mocked(StatusDropdownActionNode).mockReturnValue(<div data-testid="status-dropdown">Status Dropdown</div>);
 
       const store = createMockStore();
       render(
@@ -210,13 +204,9 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
         executeSearch: vi.fn()
       } as MockHookReturn);
 
-      vi.mocked(DemographicBadgesNotInPayprofitGrid).mockReturnValue(
-        <div data-testid="grid">Grid Component</div>
-      );
+      vi.mocked(DemographicBadgesNotInPayprofitGrid).mockReturnValue(<div data-testid="grid">Grid Component</div>);
 
-      vi.mocked(StatusDropdownActionNode).mockReturnValue(
-        <div data-testid="status-dropdown">Status</div>
-      );
+      vi.mocked(StatusDropdownActionNode).mockReturnValue(<div data-testid="status-dropdown">Status</div>);
 
       const store = createMockStore();
       render(
@@ -234,9 +224,7 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
       vi.mocked(useDemographicBadgesNotInPayprofit).mockReturnValue({
         searchResults: {
           response: {
-            results: [
-              { badgeNumber: 1, storeName: "Store", employeeName: "Name" }
-            ],
+            results: [{ badgeNumber: 1, storeName: "Store", employeeName: "Name" }],
             total: 1
           }
         },
@@ -254,13 +242,9 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
         executeSearch: vi.fn()
       } as MockHookReturn);
 
-      vi.mocked(DemographicBadgesNotInPayprofitGrid).mockReturnValue(
-        <div data-testid="grid">Grid</div>
-      );
+      vi.mocked(DemographicBadgesNotInPayprofitGrid).mockReturnValue(<div data-testid="grid">Grid</div>);
 
-      vi.mocked(StatusDropdownActionNode).mockReturnValue(
-        <div data-testid="status-dropdown">Status</div>
-      );
+      vi.mocked(StatusDropdownActionNode).mockReturnValue(<div data-testid="status-dropdown">Status</div>);
 
       const store = createMockStore();
       render(
@@ -289,13 +273,9 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
         executeSearch: vi.fn()
       } as MockHookReturn);
 
-      vi.mocked(DemographicBadgesNotInPayprofitGrid).mockReturnValue(
-        <div data-testid="grid">Grid</div>
-      );
+      vi.mocked(DemographicBadgesNotInPayprofitGrid).mockReturnValue(<div data-testid="grid">Grid</div>);
 
-      vi.mocked(StatusDropdownActionNode).mockReturnValue(
-        <div data-testid="status-dropdown">Status</div>
-      );
+      vi.mocked(StatusDropdownActionNode).mockReturnValue(<div data-testid="status-dropdown">Status</div>);
 
       const store = createMockStore();
       render(
@@ -333,13 +313,9 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
         executeSearch: vi.fn()
       } as MockHookReturn);
 
-      vi.mocked(DemographicBadgesNotInPayprofitGrid).mockReturnValue(
-        <div data-testid="grid">Grid</div>
-      );
+      vi.mocked(DemographicBadgesNotInPayprofitGrid).mockReturnValue(<div data-testid="grid">Grid</div>);
 
-      vi.mocked(StatusDropdownActionNode).mockReturnValue(
-        <div data-testid="status-dropdown">Status</div>
-      );
+      vi.mocked(StatusDropdownActionNode).mockReturnValue(<div data-testid="status-dropdown">Status</div>);
 
       const store = createMockStore();
       render(
@@ -380,13 +356,9 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
         executeSearch: vi.fn()
       } as MockHookReturn);
 
-      vi.mocked(DemographicBadgesNotInPayprofitGrid).mockReturnValue(
-        <div data-testid="grid">Grid</div>
-      );
+      vi.mocked(DemographicBadgesNotInPayprofitGrid).mockReturnValue(<div data-testid="grid">Grid</div>);
 
-      vi.mocked(StatusDropdownActionNode).mockReturnValue(
-        <div data-testid="status-dropdown">Status</div>
-      );
+      vi.mocked(StatusDropdownActionNode).mockReturnValue(<div data-testid="status-dropdown">Status</div>);
 
       const store = createMockStore();
       render(
@@ -429,13 +401,9 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
         executeSearch: vi.fn()
       } as MockHookReturn);
 
-      vi.mocked(DemographicBadgesNotInPayprofitGrid).mockReturnValue(
-        <div data-testid="grid">Grid</div>
-      );
+      vi.mocked(DemographicBadgesNotInPayprofitGrid).mockReturnValue(<div data-testid="grid">Grid</div>);
 
-      vi.mocked(StatusDropdownActionNode).mockReturnValue(
-        <div data-testid="status-dropdown">Status</div>
-      );
+      vi.mocked(StatusDropdownActionNode).mockReturnValue(<div data-testid="status-dropdown">Status</div>);
 
       const store = createMockStore();
       render(
@@ -447,7 +415,7 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
       const gridCalls = vi.mocked(DemographicBadgesNotInPayprofitGrid).mock.calls;
       expect(gridCalls.length).toBeGreaterThan(0);
       const lastCall = gridCalls[gridCalls.length - 1];
-      expect(lastCall[0]).toHaveProperty('isLoading', true);
+      expect(lastCall[0]).toHaveProperty("isLoading", true);
     });
   });
 });

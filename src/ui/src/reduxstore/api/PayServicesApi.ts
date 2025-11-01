@@ -8,7 +8,12 @@ const baseQuery = createDataSourceAwareBaseQuery();
 export const PayServicesApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "payServicesApi",
-  tagTypes: ["PayServicesPartTime", "PayServicesFullTimeSalary", "PayServicesFullTimeEightHolidays", "PayServicesFullTimeAccruedHolidays"],
+  tagTypes: [
+    "PayServicesPartTime",
+    "PayServicesFullTimeSalary",
+    "PayServicesFullTimeEightHolidays",
+    "PayServicesFullTimeAccruedHolidays"
+  ],
   keepUnusedDataFor: 0, // Don't cache unused data
   refetchOnMountOrArgChange: true, // Always refetch on mount or arg change
   refetchOnFocus: false, // Don't refetch when window regains focus

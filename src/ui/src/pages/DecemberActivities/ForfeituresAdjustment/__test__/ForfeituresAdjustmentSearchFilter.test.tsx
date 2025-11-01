@@ -1,8 +1,8 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { createMockStoreAndWrapper } from "../../../test";
-import ForfeituresAdjustmentSearchFilter from "./ForfeituresAdjustmentSearchFilter";
+import { createMockStoreAndWrapper } from "../../../../test";
+import ForfeituresAdjustmentSearchFilter from "../ForfeituresAdjustmentSearchFilter";
 
 // Mock the form validators - must use factory function to avoid hoisting issues
 vi.mock("../../../utils/FormValidators", async () => {

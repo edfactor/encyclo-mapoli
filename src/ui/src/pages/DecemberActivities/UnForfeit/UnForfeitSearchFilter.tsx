@@ -29,14 +29,15 @@ const schema = yup.object().shape({
     tryddmmyyyyToDate,
     "Ending date must be the same or after the beginning date"
   ).required("Ending Date is required"),
+  // Pagination is handled separately, not part of form validation
   pagination: yup
     .object({
-      skip: yup.number().required(),
-      take: yup.number().required(),
-      sortBy: yup.string().required(),
-      isSortDescending: yup.boolean().required()
+      skip: yup.number(),
+      take: yup.number(),
+      sortBy: yup.string(),
+      isSortDescending: yup.boolean()
     })
-    .required(),
+    .nullable(),
   // Hidden field: not shown in search filter, but required in data
   profitYear: profitYearValidator()
 });
@@ -223,7 +224,7 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
                   }
                   label="Exclude employees with no current or vested balance"
                 />
-                <FormHelperText>{" "}</FormHelperText>
+                <FormHelperText> </FormHelperText>
               </>
             )}
           />

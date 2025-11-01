@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { GetForfeituresTransactionGridColumns } from "./ForfeituresTransactionGridColumns";
+import { GetForfeituresTransactionGridColumns } from "../ForfeituresTransactionGridColumns";
 
 // Mock the column factory functions
 vi.mock("../../../utils/gridColumnFactory", () => ({
@@ -152,12 +152,13 @@ describe("ForfeituresTransactionGridColumns", () => {
     it("should use createCurrencyColumn factory", () => {
       const columns = GetForfeituresTransactionGridColumns();
       // Multiple currency columns should exist
-      const currencyColumns = columns.filter((col) =>
-        col.field === "forfeiture" ||
-        col.field === "contribution" ||
-        col.field === "earnings" ||
-        col.field === "payment" ||
-        col.field === "currentIncomeYear"
+      const currencyColumns = columns.filter(
+        (col) =>
+          col.field === "forfeiture" ||
+          col.field === "contribution" ||
+          col.field === "earnings" ||
+          col.field === "payment" ||
+          col.field === "currentIncomeYear"
       );
       expect(currencyColumns.length).toBeGreaterThan(0);
     });

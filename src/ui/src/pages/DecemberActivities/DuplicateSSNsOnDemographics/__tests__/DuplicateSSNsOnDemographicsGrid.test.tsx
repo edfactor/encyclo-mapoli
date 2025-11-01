@@ -27,9 +27,7 @@ vi.mock("../DuplicateSSNsOnDemographicsGridColumns", () => ({
 describe("DuplicateSSNsOnDemographicsGrid", () => {
   const mockData = {
     response: {
-      results: [
-        { ssn: "123-45-6789", badgeNumber: 12345, employeeName: "John Doe" }
-      ],
+      results: [{ ssn: "123-45-6789", badgeNumber: 12345, employeeName: "John Doe" }],
       total: 1
     }
   };
@@ -64,24 +62,44 @@ describe("DuplicateSSNsOnDemographicsGrid", () => {
     });
 
     it("should not render grid when showData is false", () => {
-      render(<DuplicateSSNsOnDemographicsGrid {...defaultProps} showData={false} />);
+      render(
+        <DuplicateSSNsOnDemographicsGrid
+          {...defaultProps}
+          showData={false}
+        />
+      );
       expect(screen.queryByTestId("grid")).not.toBeInTheDocument();
     });
 
     it("should display loading state", () => {
-      render(<DuplicateSSNsOnDemographicsGrid {...defaultProps} isLoading={true} />);
+      render(
+        <DuplicateSSNsOnDemographicsGrid
+          {...defaultProps}
+          isLoading={true}
+        />
+      );
       expect(screen.getByTestId("loading")).toBeInTheDocument();
     });
   });
 
   describe("Pagination", () => {
     it("should render pagination when hasResults is true", () => {
-      render(<DuplicateSSNsOnDemographicsGrid {...defaultProps} hasResults={true} />);
+      render(
+        <DuplicateSSNsOnDemographicsGrid
+          {...defaultProps}
+          hasResults={true}
+        />
+      );
       expect(screen.getByTestId("pagination")).toBeInTheDocument();
     });
 
     it("should not render pagination when hasResults is false", () => {
-      render(<DuplicateSSNsOnDemographicsGrid {...defaultProps} hasResults={false} />);
+      render(
+        <DuplicateSSNsOnDemographicsGrid
+          {...defaultProps}
+          hasResults={false}
+        />
+      );
       expect(screen.queryByTestId("pagination")).not.toBeInTheDocument();
     });
   });
@@ -94,12 +112,24 @@ describe("DuplicateSSNsOnDemographicsGrid", () => {
           total: 0
         }
       };
-      render(<DuplicateSSNsOnDemographicsGrid {...defaultProps} data={emptyData} hasResults={false} />);
+      render(
+        <DuplicateSSNsOnDemographicsGrid
+          {...defaultProps}
+          data={emptyData}
+          hasResults={false}
+        />
+      );
       expect(screen.getByTestId("grid")).toBeInTheDocument();
     });
 
     it("should handle null data", () => {
-      render(<DuplicateSSNsOnDemographicsGrid {...defaultProps} data={null} showData={false} />);
+      render(
+        <DuplicateSSNsOnDemographicsGrid
+          {...defaultProps}
+          data={null}
+          showData={false}
+        />
+      );
       expect(screen.queryByTestId("grid")).not.toBeInTheDocument();
     });
   });

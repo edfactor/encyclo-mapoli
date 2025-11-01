@@ -17,7 +17,6 @@ import ProfitShareRevertButton from "./ProfitShareRevertButton";
 import ProfitShareSaveButton from "./ProfitShareSaveButton";
 import useProfitShareEditUpdate from "./hooks/useProfitShareEditUpdate";
 
-
 const ProfitShareEditUpdate = () => {
   // Use custom hook to manage all business logic and state
   const {

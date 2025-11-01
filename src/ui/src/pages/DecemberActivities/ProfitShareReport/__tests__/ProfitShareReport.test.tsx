@@ -26,10 +26,14 @@ vi.mock("../ProfitShareReportGrid", () => ({
     <div data-testid="grid">
       {!initialSearchLoaded && <div data-testid="no-search">No search performed</div>}
       {initialSearchLoaded && <div data-testid="has-search">Search performed</div>}
-      <button onClick={() => onLoadingChange(true)} data-testid="start-loading">
+      <button
+        onClick={() => onLoadingChange(true)}
+        data-testid="start-loading">
         Start Loading
       </button>
-      <button onClick={() => onLoadingChange(false)} data-testid="stop-loading">
+      <button
+        onClick={() => onLoadingChange(false)}
+        data-testid="stop-loading">
         Stop Loading
       </button>
     </div>
@@ -69,8 +73,7 @@ vi.mock("../../../FiscalClose/PAY426Reports/ProfitSummary/ProfitSummary", () => 
     <div data-testid="profit-summary">
       <button
         data-testid="preset-btn"
-        onClick={() => onPresetParamsChange({ reportId: 1 })}
-      >
+        onClick={() => onPresetParamsChange({ reportId: 1 })}>
         Preset
       </button>
     </div>
@@ -114,9 +117,7 @@ describe("ProfitShareReport", () => {
     });
 
     // Create a wrapper with Provider
-    wrapper = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={mockStore}>{children}</Provider>
-    );
+    wrapper = ({ children }: { children: React.ReactNode }) => <Provider store={mockStore}>{children}</Provider>;
   });
 
   describe("Rendering", () => {

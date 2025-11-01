@@ -7,15 +7,8 @@ import ForfeitSearchFilter from "./ForfeitSearchFilter";
 import useForfeit from "./hooks/useForfeit";
 
 const Forfeit = () => {
-  const {
-    searchResults,
-    isSearching,
-    showData,
-    pagination,
-    executeSearch,
-    handleStatusChange,
-    handleReset
-  } = useForfeit();
+  const { searchResults, isSearching, showData, pagination, executeSearch, handleStatusChange, handleReset } =
+    useForfeit();
 
   const renderActionNode = () => {
     return <StatusDropdownActionNode onStatusChange={handleStatusChange} />;

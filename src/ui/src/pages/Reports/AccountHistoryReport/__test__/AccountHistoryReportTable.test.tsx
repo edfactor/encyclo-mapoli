@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
 import { AccountHistoryReportResponse, ReportResponseBase } from "../../../types/reports/AccountHistoryReportTypes";
-import AccountHistoryReportTable from "./AccountHistoryReportTable";
+import AccountHistoryReportTable from "../AccountHistoryReportTable";
 
 interface DSMGridProps {
   providedOptions?: { rowData?: AccountHistoryReportResponse[] };

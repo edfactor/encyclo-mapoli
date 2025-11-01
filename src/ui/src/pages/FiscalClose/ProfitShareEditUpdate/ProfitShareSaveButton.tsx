@@ -74,7 +74,10 @@ export const ProfitShareSaveButton: React.FC<ProfitShareSaveButtonProps> = ({
       onClick={isReadOnly ? undefined : handleClick}>
       {isLoading || profitShareApplyOrRevertLoading ? (
         <div className="spinner">
-          <CircularProgress color="inherit" size="20px" />
+          <CircularProgress
+            color="inherit"
+            size="20px"
+          />
         </div>
       ) : (
         "Save Updates"

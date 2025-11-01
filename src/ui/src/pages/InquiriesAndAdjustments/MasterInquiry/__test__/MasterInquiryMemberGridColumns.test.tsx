@@ -1,6 +1,6 @@
 import { ColDef } from "ag-grid-community";
 import { describe, expect, it } from "vitest";
-import { GetMasterInquiryMemberGridColumns } from "./MasterInquiryMemberGridColumns";
+import { GetMasterInquiryMemberGridColumns } from "../MasterInquiryMemberGridColumns";
 
 /**
  * Badge Column Styling Tests - Performance Fixes

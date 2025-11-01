@@ -2,17 +2,31 @@ import { configureStore } from "@reduxjs/toolkit";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
-import ForfeituresAdjustment from "./ForfeituresAdjustment";
+import { MissiveAlertProvider } from "../../../../components/MissiveAlerts/MissiveAlertContext";
+import ForfeituresAdjustment from "../ForfeituresAdjustment";
 
 // Mock child components
 vi.mock("./ForfeituresAdjustmentSearchFilter", () => ({
   default: vi.fn(({ onSearch, onReset, isSearching }) => (
     <div data-testid="search-filter">
-      <button data-testid="search-button" onClick={() => onSearch({ ssn: "123-45-6789", badge: "", profitYear: 2024, skip: 0, take: 255, sortBy: "badgeNumber", isSortDescending: false })}>
+      <button
+        data-testid="search-button"
+        onClick={() =>
+          onSearch({
+            ssn: "123-45-6789",
+            badge: "",
+            profitYear: 2024,
+            skip: 0,
+            take: 255,
+            sortBy: "badgeNumber",
+            isSortDescending: false
+          })
+        }>
         Search
       </button>
-      <button data-testid="reset-button" onClick={onReset}>
+      <button
+        data-testid="reset-button"
+        onClick={onReset}>
         Reset
       </button>
       {isSearching && <span data-testid="searching">Searching...</span>}
@@ -38,18 +52,23 @@ vi.mock("./ForfeituresTransactionGrid", () => ({
 }));
 
 vi.mock("./AddForfeitureModal", () => ({
-  default: vi.fn(({ open, onClose, onSave }) => (
-    open && (
-      <div data-testid="add-forfeiture-modal">
-        <button data-testid="modal-close-btn" onClick={onClose}>
-          Close
-        </button>
-        <button data-testid="modal-save-btn" onClick={() => onSave({ forfeitureAmount: 1000, classAction: false })}>
-          Save
-        </button>
-      </div>
-    )
-  ))
+  default: vi.fn(
+    ({ open, onClose, onSave }) =>
+      open && (
+        <div data-testid="add-forfeiture-modal">
+          <button
+            data-testid="modal-close-btn"
+            onClick={onClose}>
+            Close
+          </button>
+          <button
+            data-testid="modal-save-btn"
+            onClick={() => onSave({ forfeitureAmount: 1000, classAction: false })}>
+            Save
+          </button>
+        </div>
+      )
+  )
 }));
 
 vi.mock("pages/InquiriesAndAdjustments/MasterInquiry/StandaloneMemberDetails", () => ({

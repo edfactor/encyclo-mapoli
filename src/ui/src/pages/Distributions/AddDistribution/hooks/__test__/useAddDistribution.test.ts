@@ -22,7 +22,7 @@ vi.mock("../../../../reduxstore/api/LookupsApi", () => ({
   useLazyGetStateTaxQuery: () => [mockTriggerGetStateTax, {}]
 }));
 
-import { useAddDistribution } from "./useAddDistribution";
+import { useAddDistribution } from "../useAddDistribution";
 
 describe("useAddDistribution - maximumReached logic", () => {
   beforeEach(() => {

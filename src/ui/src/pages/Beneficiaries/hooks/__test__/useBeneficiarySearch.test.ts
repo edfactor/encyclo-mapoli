@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import { useBeneficiarySearch } from "./useBeneficiarySearch";
+import { useBeneficiarySearch } from "../useBeneficiarySearch";
 
 describe("useBeneficiarySearch", () => {
   it("should initialize with default values", () => {
@@ -101,12 +101,8 @@ describe("useBeneficiarySearch", () => {
   });
 
   it("should independently manage multiple instances", () => {
-    const { result: result1 } = renderHook(() =>
-      useBeneficiarySearch({ defaultPageSize: 10 })
-    );
-    const { result: result2 } = renderHook(() =>
-      useBeneficiarySearch({ defaultPageSize: 25 })
-    );
+    const { result: result1 } = renderHook(() => useBeneficiarySearch({ defaultPageSize: 10 }));
+    const { result: result2 } = renderHook(() => useBeneficiarySearch({ defaultPageSize: 25 }));
 
     act(() => {
       result1.current.handlePaginationChange(1, 15);
