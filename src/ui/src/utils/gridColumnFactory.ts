@@ -468,6 +468,10 @@ export const createDateColumn = (options: DateColumnOptions): ColDef => {
       if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
         return yyyyMMDDToMMDDYYYY(value);
       }
+      // Handle masked dates (e.g., "XXXX-XX-XX")
+      if (typeof value === "string" && /^[X\d]{4}-[X\d]{2}-[X\d]{2}$/.test(value)) {
+        return value;
+      }
       if (value instanceof Date && !isNaN(value.getTime())) {
         // Format as MM/DD/YYYY
         return value.toLocaleDateString("en-US");
@@ -910,7 +914,25 @@ export const createPointsColumn = (options: PointsColumnOptions = {}): ColDef =>
   if (valueFormatter) {
     column.valueFormatter = valueFormatter;
   } else if (includeCommaFormatting) {
-    column.valueFormatter = (params) => formatNumberWithComma(params.value);
+    column.valueFormatter = (params) => {
+      const value = params.value;
+
+      // Handle masked values (security rule: points may be masked as "X")
+      if (value === "X" || value === "x") {
+        return value.toUpperCase();
+      }
+
+      // Handle numeric values (excluding NaN)
+      if (typeof value === "number") {
+        if (isNaN(value)) {
+          return "";
+        }
+        return formatNumberWithComma(value);
+      }
+
+      // Return as-is for other string values or null/undefined
+      return value != null ? String(value) : "";
+    };
   }
 
   return column;

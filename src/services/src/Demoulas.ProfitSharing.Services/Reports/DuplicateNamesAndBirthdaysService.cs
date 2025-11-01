@@ -147,14 +147,11 @@ FROM FILTERED_DEMOGRAPHIC p1
                 Ssn = r.Ssn.MaskSsn(),
                 Name = r.Name,
                 DateOfBirth = r.DateOfBirth,
-                Address = new AddressResponseDto
-                {
-                    Street = r.Address,
-                    City = r.City,
-                    State = r.State,
-                    PostalCode = r.PostalCode,
-                    CountryIso = r.CountryIso
-                },
+                Address = r.Address,
+                City = r.City,
+                State = r.State,
+                PostalCode = r.PostalCode,
+                CountryIso = r.CountryIso,
                 Years = r.Years,
                 HireDate = r.HireDate,
                 TerminationDate = r.TerminationDate,
@@ -230,27 +227,17 @@ FROM FILTERED_DEMOGRAPHIC p1
                 return null;
             }
 
-            // Apply pagination to the cached data
+
+            // Apply pagination to the sorted data
             var skip = request.Skip ?? 0;
             var take = request.Take ?? byte.MaxValue; // Default to byte.MaxValue if not specified
 
-            var paginatedResults = cachedResponse.Data.Results
-                .Skip(skip)
-                .Take(take)
-                .ToList();
+            var paginatedResults = await cachedResponse.Data.Results.AsQueryable().ToPaginationResultsAsync(request, cancellationToken: cancellationToken);
 
             return new DuplicateNamesAndBirthdaysCachedResponse
             {
                 AsOfDate = cachedResponse.AsOfDate,
-                Data = new PaginatedResponseDto<DuplicateNamesAndBirthdaysResponse>(new PaginationRequestDto
-                {
-                    Skip = skip,
-                    Take = take
-                })
-                {
-                    Total = cachedResponse.Data.Results.Count(),
-                    Results = paginatedResults
-                }
+                Data = paginatedResults
             };
         }
         catch (Exception ex)

@@ -52,14 +52,11 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
                             {
                                 new DuplicateNamesAndBirthdaysResponse
                                 {
-                                    Address = new AddressResponseDto
-                                    {
-                                        State = "MA",
+                                    State = "MA",
                                         PostalCode = "01876",
                                         City = "Tewksbury",
-                                        Street = "1900 Main St",
-                                        CountryIso="US"
-                                    },
+                                        Address = "1900 Main St",
+                                        CountryIso="US",
                                     BadgeNumber = 100110,
                                     Count = 2,
                                     IncomeCurrentYear = 23003,
@@ -174,9 +171,9 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
             Map(m => m.Ssn).Index(3).Name("SSN");
             Map(m => m.Name).Index(4).Name("NAME");
             Map(m => m.DateOfBirth).Index(5).Name("DOB").TypeConverter<YearMonthDayTypeConverter>();
-            Map(m => m.Address.Street).Index(6).Name("ADDRESS");
-            Map(m => m.Address.City).Index(7).Name("CITY");
-            Map(m => m.Address.State).Index(8).Name("ST");
+            Map(m => m.Address).Index(6).Name("ADDRESS");
+            Map(m => m.City).Index(7).Name("CITY");
+            Map(m => m.State).Index(8).Name("ST");
             Map(m => m.Years).Index(9).Name("YRS");
             Map(m => m.HireDate).Index(10).Name("HIRE").TypeConverter<YearMonthDayTypeConverter>();
             Map(m => m.TerminationDate).Index(11).Name("TERM").TypeConverter<YearMonthDayTypeConverter>();

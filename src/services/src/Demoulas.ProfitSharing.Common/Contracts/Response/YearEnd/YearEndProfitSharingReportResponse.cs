@@ -3,6 +3,7 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+
 public sealed record YearEndProfitSharingReportResponse : ReportResponseBase<YearEndProfitSharingReportDetail>
 {
     [YearEndArchiveProperty]
@@ -10,6 +11,8 @@ public sealed record YearEndProfitSharingReportResponse : ReportResponseBase<Yea
 
     [YearEndArchiveProperty]
     public decimal HoursTotal { get; set; }
+
+    [YearEndArchiveProperty]
     public decimal PointsTotal { get; set; }
 
     [YearEndArchiveProperty]
