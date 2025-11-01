@@ -119,10 +119,10 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
             </Typography>
           </div>
           {grossWagesReport && (
-            <div className="px-6 py-4">
+            <div className="w-full overflow-hidden">
               <TotalsGrid
                 breakpoints={{ xs: 12, sm: 6, md: 3, lg: 3, xl: 3 }}
-                tablePadding="0px"
+                tablePadding="16px"
                 displayData={[
                   [numberToCurrency(grossWagesReport?.totalGrossWages || 0)],
                   [numberToCurrency(grossWagesReport?.totalProfitSharingAmount || 0)],
