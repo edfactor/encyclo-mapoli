@@ -3,10 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockStoreAndWrapper } from "../../../../test";
 import MilitaryContributionSearchFilter from "../MilitaryContributionSearchFilter";
-import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 
 // Mock validators
-vi.mock("../../../utils/FormValidators", async () => {
+vi.mock("../../../../utils/FormValidators", async () => {
   const yup = await import("yup");
   return {
     ssnValidator: yup.default.string().nullable(),
@@ -28,11 +28,11 @@ vi.mock("../../../utils/FormValidators", async () => {
   };
 });
 
-vi.mock("../../../hooks/useDecemberFlowProfitYear", () => ({
+vi.mock("../../../../hooks/useDecemberFlowProfitYear", () => ({
   default: vi.fn(() => 2024)
 }));
 
-vi.mock("./hooks/useMilitaryContribution", () => ({
+vi.mock("../hooks/useMilitaryContribution", () => ({
   default: vi.fn(() => ({
     isSearching: false,
     executeSearch: vi.fn(),

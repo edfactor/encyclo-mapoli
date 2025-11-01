@@ -111,20 +111,40 @@ export const createMockStore = (preloadedState?: PreloadedState<MockRootState>) 
     inquiry: createSliceReducer(preloadedState?.inquiry ?? defaultState.inquiry)
   };
 
-  // Add lookupsApi reducer and middleware if mocked in tests
-  // This allows tests that mock lookupsApi to work properly
+  // Add RTK Query API reducers that tests commonly mock
+  // When tests mock these APIs with vi.mock(), these fallback reducers prevent errors
   const reducers: { [key: string]: unknown } = baseReducers;
-  const lookupsApiReducerPath = "lookupsApi";
 
-  // Provide fallback for lookupsApi that tests can mock
-  // When tests mock lookupsApi with vi.mock(), these will be replaced
-  const defaultLookupsApiReducer = (state = {}) => state;
-  reducers[lookupsApiReducerPath] = defaultLookupsApiReducer;
+  // Common API reducer paths - add fallback for each
+  const apiReducerPaths = [
+    "lookupsApi",
+    "distributionApi",
+    "inquiryApi",
+    "yearsEndApi",
+    "securityApi",
+    "navigationApi",
+    "navigationStatusApi",
+    "ItOperationsApi",
+    "BeneficiariesApi",
+    "MilitaryApi",
+    "AdjustmentsApi",
+    "AccountHistoryReportApi",
+    "PayServicesApi",
+    "ValidationApi",
+    "AppSupportApi",
+    "CommonApi"
+  ];
+
+  // Provide fallback reducers for all common APIs
+  const defaultApiReducer = (state = {}) => state;
+  apiReducerPaths.forEach((path) => {
+    reducers[path] = defaultApiReducer;
+  });
 
   return configureStore({
     reducer: reducers,
     middleware: (getDefaultMiddleware) => {
-      // Return default middleware - mocked lookupsApi middleware will be added by test mocks
+      // Return default middleware - mocked API middleware will be added by test mocks
       return getDefaultMiddleware();
     }
   });
