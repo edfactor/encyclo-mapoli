@@ -9,9 +9,8 @@ import ForfeituresAdjustment from "../ForfeituresAdjustment";
 // Mock child components
 vi.mock("./ForfeituresAdjustmentSearchFilter", () => ({
   default: vi.fn(({ onSearch, onReset, isSearching }) => (
-    <div data-testid="search-filter">
+    <section aria-label="search filter">
       <button
-        data-testid="search-button"
         onClick={() =>
           onSearch({
             ssn: "123-45-6789",
@@ -26,58 +25,54 @@ vi.mock("./ForfeituresAdjustmentSearchFilter", () => ({
         Search
       </button>
       <button
-        data-testid="reset-button"
         onClick={onReset}>
         Reset
       </button>
-      {isSearching && <span data-testid="searching">Searching...</span>}
-    </div>
+      {isSearching && <span role="status">Searching...</span>}
+    </section>
   ))
 }));
 
 vi.mock("./ForfeituresAdjustmentPanel", () => ({
   default: vi.fn(({ onAddForfeiture, isReadOnly }) => (
-    <div data-testid="forfeiture-panel">
+    <section aria-label="forfeiture panel">
       <button
-        data-testid="add-forfeiture-btn"
         onClick={onAddForfeiture}
         disabled={isReadOnly}>
         Add Forfeiture
       </button>
-    </div>
+    </section>
   ))
 }));
 
 vi.mock("./ForfeituresTransactionGrid", () => ({
-  default: vi.fn(() => <div data-testid="transaction-grid">Transaction Grid</div>)
+  default: vi.fn(() => <section aria-label="transaction grid">Transaction Grid</section>)
 }));
 
 vi.mock("./AddForfeitureModal", () => ({
   default: vi.fn(
     ({ open, onClose, onSave }) =>
       open && (
-        <div data-testid="add-forfeiture-modal">
+        <section aria-label="add forfeiture modal">
           <button
-            data-testid="modal-close-btn"
             onClick={onClose}>
             Close
           </button>
           <button
-            data-testid="modal-save-btn"
             onClick={() => onSave({ forfeitureAmount: 1000, classAction: false })}>
             Save
           </button>
-        </div>
+        </section>
       )
   )
 }));
 
 vi.mock("pages/InquiriesAndAdjustments/MasterInquiry/StandaloneMemberDetails", () => ({
-  default: vi.fn(() => <div data-testid="member-details">Member Details</div>)
+  default: vi.fn(() => <section aria-label="member details">Member Details</section>)
 }));
 
 vi.mock("components/StatusDropdownActionNode", () => ({
-  default: vi.fn(() => <div data-testid="status-dropdown">Status Dropdown</div>)
+  default: vi.fn(() => <div role="status" aria-label="status dropdown">Status Dropdown</div>)
 }));
 
 vi.mock("../../../../hooks/useReadOnlyNavigation", () => ({
@@ -145,29 +140,33 @@ describe("ForfeituresAdjustment", () => {
   });
 
   describe("Rendering", () => {
-    it("should render the page with all major components", () => {
+    it("should render the page with all major components", async () => {
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
 
-      expect(screen.getByRole("button", { name: /search/i })).toBeInTheDocument();
-      expect(screen.getByText("Status Dropdown")).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: /search/i })).toBeInTheDocument();
+        expect(screen.getByLabelText("status dropdown")).toBeInTheDocument();
+      });
     });
 
-    it("should render the search filter accordion", () => {
+    it("should render the search filter accordion", async () => {
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
 
-      expect(screen.getByRole("button", { name: /search/i })).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /reset/i })).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: /search/i })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /reset/i })).toBeInTheDocument();
+      });
     });
 
     it("should hide employee data and transactions before search", () => {
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
 
-      expect(screen.queryByText("Member Details")).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("member details")).not.toBeInTheDocument();
       expect(screen.queryByRole("button", { name: /add forfeiture/i })).not.toBeInTheDocument();
-      expect(screen.queryByText("Transaction Grid")).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("transaction grid")).not.toBeInTheDocument();
     });
   });
 
@@ -189,14 +188,17 @@ describe("ForfeituresAdjustment", () => {
       });
     });
 
-    it("should call handleReset when reset button is clicked", () => {
+    it("should call handleReset when reset button is clicked", async () => {
+      const user = userEvent.setup();
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
 
       const resetButton = screen.getByRole("button", { name: /reset/i });
-      fireEvent.click(resetButton);
+      await user.click(resetButton);
 
-      expect(mockHandleReset).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(mockHandleReset).toHaveBeenCalled();
+      });
     });
 
     it("should display loading state during search", async () => {
@@ -231,7 +233,7 @@ describe("ForfeituresAdjustment", () => {
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
 
       await waitFor(() => {
-        expect(screen.getByTestId("searching")).toBeInTheDocument();
+        expect(screen.getByText("Searching...")).toBeInTheDocument();
       });
     });
   });
@@ -268,8 +270,10 @@ describe("ForfeituresAdjustment", () => {
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
 
-      expect(screen.getByText("Member Details")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /add forfeiture/i })).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByLabelText("member details")).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /add forfeiture/i })).toBeInTheDocument();
+      });
     });
 
     it("should display transaction grid when transactions are available", async () => {
@@ -303,7 +307,9 @@ describe("ForfeituresAdjustment", () => {
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
 
-      expect(screen.getByText("Transaction Grid")).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByLabelText("transaction grid")).toBeInTheDocument();
+      });
     });
   });
 
@@ -346,6 +352,7 @@ describe("ForfeituresAdjustment", () => {
     });
 
     it("should close modal when close button is clicked", async () => {
+      const user = userEvent.setup();
       const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
       vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
         employeeData: { demographicId: 123, name: "John Doe" },
@@ -377,9 +384,11 @@ describe("ForfeituresAdjustment", () => {
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
 
       const closeButton = screen.getByRole("button", { name: /close/i });
-      fireEvent.click(closeButton);
+      await user.click(closeButton);
 
-      expect(mockCloseModal).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(mockCloseModal).toHaveBeenCalled();
+      });
     });
 
     it("should call handleSaveForfeiture when modal save is clicked", async () => {
