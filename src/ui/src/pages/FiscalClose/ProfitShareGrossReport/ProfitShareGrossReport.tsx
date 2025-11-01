@@ -2,9 +2,9 @@ import { Alert, Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { DSMAccordion, Page } from "smart-ui-library";
 import { useLazyGetFrozenStateResponseQuery } from "reduxstore/api/ItOperationsApi";
 import { RootState } from "reduxstore/store";
+import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import ProfitShareGrossReportGrid from "./ProfitShareGrossReportGrid";
 import ProfitShareGrossReportParameters from "./ProfitShareGrossReportSearchFilter";
@@ -55,9 +55,8 @@ const ProfitShareGrossReport = () => {
         {frozenStateNotAvailable && (
           <Grid width={"100%"}>
             <Alert severity="warning">
-              Frozen data for profit year {grossWagesReportQueryParams?.profitYear} is not available. 
-              Year-end close processing may not be complete for this year. Please contact IT Operations 
-              if this is unexpected.
+              Frozen data for profit year {grossWagesReportQueryParams?.profitYear} is not available. Year-end close
+              processing may not be complete for this year. Please contact IT Operations if this is unexpected.
             </Alert>
           </Grid>
         )}
