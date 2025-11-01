@@ -56,12 +56,18 @@ vi.mock("smart-ui-library", () => ({
 }));
 
 // Mock the RTK Query hook
-vi.mock("../../../reduxstore/api/YearsEndApi", () => ({
-  useLazyGetUnForfeitsQuery: vi.fn(() => [
-    vi.fn(), // triggerSearch function
-    { isFetching: false } // query state
-  ])
-}));
+vi.mock("../../../reduxstore/api/YearsEndApi", async () => {
+  const actual = await vi.importActual<typeof import("../../../reduxstore/api/YearsEndApi")>(
+    "../../../reduxstore/api/YearsEndApi"
+  );
+  return {
+    ...actual,
+    useLazyGetUnForfeitsQuery: vi.fn(() => [
+      vi.fn(), // triggerSearch function
+      { isFetching: false } // query state
+    ])
+  };
+});
 
 // Mock the December flow hook
 vi.mock("../../../hooks/useDecemberFlowProfitYear", () => ({

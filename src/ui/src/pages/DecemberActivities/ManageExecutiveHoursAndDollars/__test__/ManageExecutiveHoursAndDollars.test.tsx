@@ -1,34 +1,32 @@
-import { configureStore } from "@reduxjs/toolkit";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { Provider } from "react-redux";
-import { describe, expect, it, vi } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createMockStoreAndWrapper } from "../../../../test";
 import { MissiveAlertProvider } from "../../../../components/MissiveAlerts/MissiveAlertContext";
 import ManageExecutiveHoursAndDollars from "../ManageExecutiveHoursAndDollars";
 
 // Mock the child components
 vi.mock("./ManageExecutiveHoursAndDollarsGrid", () => ({
-  default: vi.fn(() => <div data-testid="executive-grid">Grid Content</div>)
+  default: vi.fn(() => <section aria-label="executive grid">Grid Content</section>)
 }));
 
 vi.mock("./ManageExecutiveHoursAndDollarsSearchFilter", () => ({
   default: vi.fn(({ onSearch, onReset }) => (
-    <div data-testid="search-filter">
+    <section aria-label="search filter">
       <button
-        data-testid="search-button"
         onClick={() => onSearch({ badgeNumber: 12345 })}>
         Search
       </button>
       <button
-        data-testid="reset-button"
         onClick={onReset}>
         Reset
       </button>
-    </div>
+    </section>
   ))
 }));
 
 vi.mock("../../../components/StatusDropdownActionNode", () => ({
-  default: vi.fn(() => <div data-testid="status-dropdown">Status Dropdown</div>)
+  default: vi.fn(() => <div role="status" aria-label="status dropdown">Status Dropdown</div>)
 }));
 
 vi.mock("../../../../hooks/useReadOnlyNavigation", () => ({
@@ -75,43 +73,34 @@ vi.mock("../hooks/useManageExecutiveHoursAndDollars", () => ({
 }));
 
 describe("ManageExecutiveHoursAndDollars", () => {
-  const createMockStore = () => {
-    return configureStore({
-      reducer: {
-        security: () => ({ token: "mock-token" }),
-        navigation: () => ({ navigationData: null }),
-        yearsEnd: () => ({
-          selectedProfitYearForFiscalClose: 2024,
-          executiveHoursAndDollarsGrid: []
-        })
-      }
-    });
-  };
-
-  const wrapper =
-    (store: ReturnType<typeof configureStore>) =>
-    ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>
-        <MissiveAlertProvider>{children}</MissiveAlertProvider>
-      </Provider>
-    );
+  let customWrapper: ({ children }: { children: React.ReactNode }) => React.ReactElement;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    const mockState = {
+      security: { token: "mock-token" },
+      navigation: { navigationData: null },
+      yearsEnd: {
+        selectedProfitYearForFiscalClose: 2024,
+        executiveHoursAndDollarsGrid: []
+      }
+    };
+    const { wrapper } = createMockStoreAndWrapper(mockState);
+    customWrapper = ({ children }: { children: React.ReactNode }) => (
+      <MissiveAlertProvider>{wrapper({ children })}</MissiveAlertProvider>
+    );
   });
 
   it("should render the page with all components", () => {
-    const mockStore = createMockStore();
-    render(<ManageExecutiveHoursAndDollars />, { wrapper: wrapper(mockStore) });
+    render(<ManageExecutiveHoursAndDollars />, { wrapper: customWrapper });
 
-    expect(screen.getByTestId("search-filter")).toBeInTheDocument();
-    expect(screen.getByTestId("executive-grid")).toBeInTheDocument();
-    expect(screen.getByTestId("status-dropdown")).toBeInTheDocument();
+    expect(screen.getByLabelText("search filter")).toBeInTheDocument();
+    expect(screen.getByLabelText("executive grid")).toBeInTheDocument();
+    expect(screen.getByLabelText("status dropdown")).toBeInTheDocument();
   });
 
   it("should render save button in disabled state when no pending changes", () => {
-    const mockStore = createMockStore();
-    render(<ManageExecutiveHoursAndDollars />, { wrapper: wrapper(mockStore) });
+    render(<ManageExecutiveHoursAndDollars />, { wrapper: customWrapper });
 
     const saveButton = screen.getByRole("button", { name: /save/i });
     expect(saveButton).toBeDisabled();
@@ -119,6 +108,7 @@ describe("ManageExecutiveHoursAndDollars", () => {
 
   describe("Save button functionality", () => {
     it("should call saveChanges on successful save when button is enabled", async () => {
+      const user = userEvent.setup();
       mockSaveChanges.mockResolvedValueOnce(undefined);
 
       // Mock hook to return pending changes
@@ -147,13 +137,12 @@ describe("ManageExecutiveHoursAndDollars", () => {
         saveChanges: mockSaveChanges
       });
 
-      const mockStore = createMockStore();
-      render(<ManageExecutiveHoursAndDollars />, { wrapper: wrapper(mockStore) });
+      render(<ManageExecutiveHoursAndDollars />, { wrapper: customWrapper });
 
       const saveButton = screen.getByRole("button", { name: /save/i });
       expect(saveButton).not.toBeDisabled();
 
-      fireEvent.click(saveButton);
+      await user.click(saveButton);
 
       await waitFor(() => {
         expect(mockSaveChanges).toHaveBeenCalledTimes(1);
@@ -161,6 +150,7 @@ describe("ManageExecutiveHoursAndDollars", () => {
     });
 
     it("should call saveChanges even on save failure to handle error appropriately", async () => {
+      const user = userEvent.setup();
       mockSaveChanges.mockRejectedValueOnce(new Error("Save failed"));
 
       // Mock hook to return pending changes
@@ -189,11 +179,10 @@ describe("ManageExecutiveHoursAndDollars", () => {
         saveChanges: mockSaveChanges
       });
 
-      const mockStore = createMockStore();
-      render(<ManageExecutiveHoursAndDollars />, { wrapper: wrapper(mockStore) });
+      render(<ManageExecutiveHoursAndDollars />, { wrapper: customWrapper });
 
       const saveButton = screen.getByRole("button", { name: /save/i });
-      fireEvent.click(saveButton);
+      await user.click(saveButton);
 
       await waitFor(() => {
         expect(mockSaveChanges).toHaveBeenCalledTimes(1);
@@ -201,14 +190,10 @@ describe("ManageExecutiveHoursAndDollars", () => {
     });
 
     it("should not call saveChanges when button is disabled (no pending changes)", () => {
-      const mockStore = createMockStore();
-      render(<ManageExecutiveHoursAndDollars />, { wrapper: wrapper(mockStore) });
+      render(<ManageExecutiveHoursAndDollars />, { wrapper: customWrapper });
 
       const saveButton = screen.getByRole("button", { name: /save/i });
       expect(saveButton).toBeDisabled();
-
-      // Try to click disabled button (should not trigger save)
-      fireEvent.click(saveButton);
 
       expect(mockSaveChanges).not.toHaveBeenCalled();
     });
@@ -244,24 +229,23 @@ describe("ManageExecutiveHoursAndDollars", () => {
         saveChanges: mockSaveChanges
       });
 
-      const mockStore = createMockStore();
-      render(<ManageExecutiveHoursAndDollars />, { wrapper: wrapper(mockStore) });
+      render(<ManageExecutiveHoursAndDollars />, { wrapper: customWrapper });
 
       const saveButton = screen.getByRole("button", { name: /save/i });
       expect(saveButton).toBeDisabled();
     });
 
     it("should show read-only tooltip when hovering disabled save button in read-only mode", async () => {
+      const user = userEvent.setup();
       const useReadOnlyNavigation = await import("../../../../hooks/useReadOnlyNavigation");
       vi.mocked(useReadOnlyNavigation.useReadOnlyNavigation).mockReturnValueOnce(true);
 
-      const mockStore = createMockStore();
-      render(<ManageExecutiveHoursAndDollars />, { wrapper: wrapper(mockStore) });
+      render(<ManageExecutiveHoursAndDollars />, { wrapper: customWrapper });
 
       const saveButton = screen.getByRole("button", { name: /save/i });
 
       // Hover over the button
-      fireEvent.mouseOver(saveButton);
+      await user.hover(saveButton);
 
       await waitFor(() => {
         const tooltip = screen.getByText(/You are in read-only mode and cannot save changes/i);
@@ -272,13 +256,13 @@ describe("ManageExecutiveHoursAndDollars", () => {
 
   describe("Tooltip messages", () => {
     it("should show 'no pending changes' tooltip when save button is disabled due to no changes", async () => {
-      const mockStore = createMockStore();
-      render(<ManageExecutiveHoursAndDollars />, { wrapper: wrapper(mockStore) });
+      const user = userEvent.setup();
+      render(<ManageExecutiveHoursAndDollars />, { wrapper: customWrapper });
 
       const saveButton = screen.getByRole("button", { name: /save/i });
 
       // Hover over the button
-      fireEvent.mouseOver(saveButton);
+      await user.hover(saveButton);
 
       await waitFor(() => {
         const tooltip = screen.getByText(/You must change hours or dollars to save/i);

@@ -1,4 +1,5 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockStoreAndWrapper } from "../../../../test";
 import { MissiveAlertProvider } from "../../../../components/MissiveAlerts/MissiveAlertContext";
@@ -11,43 +12,41 @@ interface MissiveAlert {
 
 // Mock child components
 vi.mock("components/FrozenYearWarning", () => ({
-  default: vi.fn(() => <div data-testid="frozen-warning">Frozen Year Warning</div>)
+  default: vi.fn(() => <div role="alert" aria-label="frozen year warning">Frozen Year Warning</div>)
 }));
 
 vi.mock("components/StatusReadOnlyInfo", () => ({
-  default: vi.fn(() => <div data-testid="readonly-info">Read Only Info</div>)
+  default: vi.fn(() => <div role="status" aria-label="read only info">Read Only Info</div>)
 }));
 
 vi.mock("components/StatusDropdownActionNode", () => ({
-  default: vi.fn(() => <div data-testid="status-dropdown">Status Dropdown</div>)
+  default: vi.fn(() => <div role="status" aria-label="status dropdown">Status Dropdown</div>)
 }));
 
 vi.mock("components/MissiveAlerts/MissiveAlerts", () => ({
-  default: vi.fn(() => <div data-testid="missive-alerts">Missive Alerts</div>)
+  default: vi.fn(() => <div role="alert" aria-label="missive alerts">Missive Alerts</div>)
 }));
 
 vi.mock("./MilitaryContributionSearchFilter", () => ({
-  default: vi.fn(() => <div data-testid="search-filter">Search Filter</div>)
+  default: vi.fn(() => <section aria-label="search filter">Search Filter</section>)
 }));
 
 vi.mock("./MilitaryContributionFormGrid", () => ({
   default: vi.fn(({ onAddContribution, isReadOnly }) => (
-    <div data-testid="military-grid">
+    <section aria-label="military contribution grid">
       <button
-        data-testid="add-contribution-btn"
         onClick={onAddContribution}
         disabled={isReadOnly}>
         Add Contribution
       </button>
-    </div>
+    </section>
   ))
 }));
 
 vi.mock("./MilitaryContributionForm", () => ({
   default: vi.fn(({ onSubmit, onCancel }) => (
-    <div data-testid="military-form">
+    <form aria-label="military contribution form">
       <button
-        data-testid="form-submit-btn"
         onClick={() =>
           onSubmit({
             contributionAmount: 5000,
@@ -58,11 +57,10 @@ vi.mock("./MilitaryContributionForm", () => ({
         Submit
       </button>
       <button
-        data-testid="form-cancel-btn"
         onClick={onCancel}>
         Cancel
       </button>
-    </div>
+    </form>
   ))
 }));
 
@@ -109,34 +107,32 @@ vi.mock("./hooks/useMilitaryContribution", () => ({
 }));
 
 vi.mock("smart-ui-library", () => ({
-  ApiMessageAlert: vi.fn(() => <div data-testid="api-message-alert">Message Alert</div>),
+  ApiMessageAlert: vi.fn(() => <div role="alert">Message Alert</div>),
   DSMAccordion: vi.fn(({ title, children }) => (
-    <div data-testid="accordion">
-      <div>{title}</div>
+    <section aria-label={title}>
+      <h2>{title}</h2>
       {children}
-    </div>
+    </section>
   )),
   Page: vi.fn(({ label, actionNode, children }) => (
-    <div data-testid="page">
-      <div>{label}</div>
+    <main>
+      <h1>{label}</h1>
       {actionNode}
       {children}
-    </div>
+    </main>
   )),
   SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) => (
-    <div data-testid="search-and-reset">
+    <div role="group" aria-label="search and reset controls">
       <button
-        data-testid="search-btn"
         onClick={handleSearch}
         disabled={disabled || isFetching}>
         Search
       </button>
       <button
-        data-testid="reset-btn"
         onClick={handleReset}>
         Reset
       </button>
-      {isFetching && <span data-testid="loading">Loading...</span>}
+      {isFetching && <span role="status">Loading...</span>}
     </div>
   )),
   formatNumberWithComma: vi.fn((num) => num.toString()),
@@ -289,6 +285,7 @@ describe("MilitaryContribution", () => {
 
   describe("Add contribution dialog", () => {
     it("should open dialog when add contribution button is clicked", async () => {
+      const user = userEvent.setup();
       const memberState = {
         yearsEnd: {
           selectedProfitYear: 2024
@@ -313,7 +310,7 @@ describe("MilitaryContribution", () => {
       const { rerender } = render(<MilitaryContribution />, { wrapper: testWrapper });
 
       const addBtn = screen.getByRole("button", { name: /add contribution/i });
-      fireEvent.click(addBtn);
+      await user.click(addBtn);
 
       // Dialog should be visible
       rerender(<MilitaryContribution />);
@@ -325,10 +322,11 @@ describe("MilitaryContribution", () => {
     });
 
     it("should close dialog when form is submitted", async () => {
+      const user = userEvent.setup();
       render(<MilitaryContribution />, { wrapper: customWrapper });
 
       const addBtn = screen.getByRole("button", { name: /add contribution/i });
-      fireEvent.click(addBtn);
+      await user.click(addBtn);
 
       // Wait for dialog to appear
       await waitFor(() => {
@@ -337,7 +335,7 @@ describe("MilitaryContribution", () => {
 
       // Submit the form
       const submitBtn = screen.getByRole("button", { name: /submit/i });
-      fireEvent.click(submitBtn);
+      await user.click(submitBtn);
 
       // Dialog should close (form disappears)
       await waitFor(() => {
@@ -346,17 +344,18 @@ describe("MilitaryContribution", () => {
     });
 
     it("should close dialog when cancel is clicked", async () => {
+      const user = userEvent.setup();
       render(<MilitaryContribution />, { wrapper: customWrapper });
 
       const addBtn = screen.getByRole("button", { name: /add contribution/i });
-      fireEvent.click(addBtn);
+      await user.click(addBtn);
 
       await waitFor(() => {
         expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
       });
 
       const cancelBtn = screen.getByRole("button", { name: /cancel/i });
-      fireEvent.click(cancelBtn);
+      await user.click(cancelBtn);
 
       await waitFor(() => {
         expect(screen.queryByRole("button", { name: /cancel/i })).not.toBeInTheDocument();
@@ -366,18 +365,19 @@ describe("MilitaryContribution", () => {
 
   describe("Contribution saved message", () => {
     it("should display success message when contribution is saved", async () => {
+      const user = userEvent.setup();
       const { setMessage } = await import("smart-ui-library");
       render(<MilitaryContribution />, { wrapper: customWrapper });
 
       const addBtn = screen.getByRole("button", { name: /add contribution/i });
-      fireEvent.click(addBtn);
+      await user.click(addBtn);
 
       await waitFor(() => {
         expect(screen.getByRole("button", { name: /submit/i })).toBeInTheDocument();
       });
 
       const submitBtn = screen.getByRole("button", { name: /submit/i });
-      fireEvent.click(submitBtn);
+      await user.click(submitBtn);
 
       await waitFor(() => {
         expect(setMessage).toHaveBeenCalled();

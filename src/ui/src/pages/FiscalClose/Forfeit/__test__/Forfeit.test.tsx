@@ -3,6 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
 import { describe, expect, it, vi } from "vitest";
+import { fireEvent } from "@testing-library/react";
 import { CAPTIONS } from "../../../../constants";
 import Forfeit from "../Forfeit";
 
@@ -38,46 +39,42 @@ vi.mock("./hooks/useForfeit", () => ({
 // Mock the child components
 vi.mock("./ForfeitGrid", () => ({
   default: vi.fn(({ searchResults, pagination, isSearching }) => (
-    <div data-testid="forfeit-grid">
-      <div data-testid="has-results">{searchResults ? "true" : "false"}</div>
-      <div data-testid="grid-is-searching">{isSearching.toString()}</div>
-      <div data-testid="page-size">{pagination?.pageSize}</div>
-    </div>
+    <section aria-label="forfeit grid">
+      <div aria-live="polite">{searchResults ? "true" : "false"}</div>
+      <div>{isSearching.toString()}</div>
+      <div>{pagination?.pageSize}</div>
+    </section>
   ))
 }));
 
 vi.mock("./ForfeitSearchFilter", () => ({
   default: vi.fn(({ onSearch, onReset, isSearching }) => (
-    <div data-testid="forfeit-search-filter">
+    <section aria-label="forfeit search filter">
       <button
-        data-testid="search-button"
         onClick={() => onSearch({ profitYear: 2024 })}>
         Search
       </button>
       <button
-        data-testid="reset-button"
         onClick={onReset}>
         Reset
       </button>
-      <div data-testid="filter-is-searching">{isSearching.toString()}</div>
-    </div>
+      <div aria-live="polite">{isSearching.toString()}</div>
+    </section>
   ))
 }));
 
 vi.mock("../../../components/StatusDropdownActionNode", () => ({
   default: vi.fn(({ onStatusChange }) => (
-    <div data-testid="status-dropdown">
+    <section aria-label="status dropdown">
       <button
-        data-testid="change-to-complete"
         onClick={() => onStatusChange?.("4", "Complete")}>
         Change to Complete
       </button>
       <button
-        data-testid="change-to-in-progress"
         onClick={() => onStatusChange?.("2", "In Progress")}>
         Change to In Progress
       </button>
-    </div>
+    </section>
   ))
 }));
 
@@ -103,29 +100,35 @@ describe("Forfeit", () => {
     const mockStore = createMockStore();
     render(<Forfeit />, { wrapper: wrapper(mockStore) });
 
-    expect(screen.getByTestId("status-dropdown")).toBeInTheDocument();
-    expect(screen.getByTestId("forfeit-search-filter")).toBeInTheDocument();
-    expect(screen.getByTestId("forfeit-grid")).toBeInTheDocument();
+    expect(screen.getByLabelText("status dropdown")).toBeInTheDocument();
+    expect(screen.getByLabelText("forfeit search filter")).toBeInTheDocument();
+    expect(screen.getByLabelText("forfeit grid")).toBeInTheDocument();
   });
 
-  it("should call handleStatusChange when status changes to Complete", () => {
+  it("should call handleStatusChange when status changes to Complete", async () => {
+    const user = userEvent.setup();
     const mockStore = createMockStore();
     render(<Forfeit />, { wrapper: wrapper(mockStore) });
 
-    const completeButton = screen.getByTestId("change-to-complete");
-    fireEvent.click(completeButton);
+    const completeButton = screen.getByRole("button", { name: /change to complete/i });
+    await user.click(completeButton);
 
-    expect(mockHandleStatusChange).toHaveBeenCalledWith("4", "Complete");
+    await waitFor(() => {
+      expect(mockHandleStatusChange).toHaveBeenCalledWith("4", "Complete");
+    });
   });
 
-  it("should call handleStatusChange when status changes to In Progress", () => {
+  it("should call handleStatusChange when status changes to In Progress", async () => {
+    const user = userEvent.setup();
     const mockStore = createMockStore();
     render(<Forfeit />, { wrapper: wrapper(mockStore) });
 
-    const inProgressButton = screen.getByTestId("change-to-in-progress");
-    fireEvent.click(inProgressButton);
+    const inProgressButton = screen.getByRole("button", { name: /change to in progress/i });
+    await user.click(inProgressButton);
 
-    expect(mockHandleStatusChange).toHaveBeenCalledWith("2", "In Progress");
+    await waitFor(() => {
+      expect(mockHandleStatusChange).toHaveBeenCalledWith("2", "In Progress");
+    });
   });
 
   it("should call executeSearch when search button is clicked", async () => {
