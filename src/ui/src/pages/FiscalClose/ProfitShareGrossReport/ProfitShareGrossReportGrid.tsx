@@ -5,7 +5,7 @@ import { Path, useNavigate } from "react-router";
 import { useLazyGetGrossWagesReportQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { GrossWagesReportDto } from "reduxstore/types";
-import { DSMGrid, Pagination, TotalsGrid, numberToCurrency } from "smart-ui-library";
+import { DSMGrid, Pagination, numberToCurrency } from "smart-ui-library";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { GetProfitShareGrossReportColumns } from "./ProfitShareGrossReportColumns";
@@ -119,17 +119,24 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
             </Typography>
           </div>
           {grossWagesReport && (
-            <TotalsGrid
-              breakpoints={{ xs: 12, sm: 6, md: 3, lg: 3, xl: 3 }}
-              displayData={[
-                [numberToCurrency(grossWagesReport?.totalGrossWages || 0)],
-                [numberToCurrency(grossWagesReport?.totalProfitSharingAmount || 0)],
-                [numberToCurrency(grossWagesReport?.totalLoans || 0)],
-                [numberToCurrency(grossWagesReport?.totalForfeitures || 0)]
-              ]}
-              leftColumnHeaders={["Gross Wages", "Profit Sharing", "Loans", "Forfeitures"]}
-              topRowHeaders={["Totals"]}
-            />
+            <div className="grid grid-cols-4 gap-4 py-6 px-6">
+              <div>
+                <Typography variant="subtitle2">Gross Wages</Typography>
+                <Typography variant="h6">{numberToCurrency(grossWagesReport?.totalGrossWages || 0)}</Typography>
+              </div>
+              <div>
+                <Typography variant="subtitle2">Profit Sharing</Typography>
+                <Typography variant="h6">{numberToCurrency(grossWagesReport?.totalProfitSharingAmount || 0)}</Typography>
+              </div>
+              <div>
+                <Typography variant="subtitle2">Loans</Typography>
+                <Typography variant="h6">{numberToCurrency(grossWagesReport?.totalLoans || 0)}</Typography>
+              </div>
+              <div>
+                <Typography variant="subtitle2">Forfeitures</Typography>
+                <Typography variant="h6">{numberToCurrency(grossWagesReport?.totalForfeitures || 0)}</Typography>
+              </div>
+            </div>
           )}
           <DSMGrid
             preferenceKey={"PROFIT_SHARE_GROSS_REPORT"}
