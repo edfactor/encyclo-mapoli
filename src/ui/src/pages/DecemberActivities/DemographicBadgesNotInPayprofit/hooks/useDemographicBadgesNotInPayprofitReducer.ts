@@ -113,4 +113,4 @@ export const selectShowData = (state: DemographicBadgesNotInPayprofitState) =>
   state.data !== null && state.search.hasSearched;
 
 export const selectHasResults = (state: DemographicBadgesNotInPayprofitState) =>
-  state.data?.response?.results && state.data.response.results.length > 0;
+  !!(state.data?.response?.results && state.data.response.results.length > 0);
