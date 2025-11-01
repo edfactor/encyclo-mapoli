@@ -294,7 +294,9 @@ describe("MilitaryContributionSearchFilter", () => {
           expect(searchButton).not.toBeDisabled();
         });
 
-        fireEvent.click(searchButton);
+        await waitFor(async () => {
+          await user.click(searchButton);
+        });
 
         // Verify search was triggered
         expect(searchButton).toBeInTheDocument();
@@ -317,7 +319,9 @@ describe("MilitaryContributionSearchFilter", () => {
           expect(searchButton).not.toBeDisabled();
         });
 
-        fireEvent.click(searchButton);
+        await waitFor(async () => {
+          await user.click(searchButton);
+        });
 
         expect(searchButton).toBeInTheDocument();
       }

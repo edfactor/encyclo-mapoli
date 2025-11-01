@@ -123,6 +123,22 @@ vi.mock("smart-ui-library", () => ({
       {children}
     </div>
   )),
+  SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) => (
+    <div data-testid="search-and-reset">
+      <button
+        data-testid="search-btn"
+        onClick={handleSearch}
+        disabled={disabled || isFetching}>
+        Search
+      </button>
+      <button
+        data-testid="reset-btn"
+        onClick={handleReset}>
+        Reset
+      </button>
+      {isFetching && <span data-testid="loading">Loading...</span>}
+    </div>
+  )),
   formatNumberWithComma: vi.fn((num) => num.toString()),
   setMessage: vi.fn((payload) => ({ type: "message/setMessage", payload }))
 }));
@@ -142,6 +158,9 @@ describe("MilitaryContribution", () => {
           firstName: "John",
           lastName: "Doe"
         }
+      },
+      lookups: {
+        missives: []
       }
     };
     const { wrapper } = createMockStoreAndWrapper(mockState);
@@ -152,25 +171,30 @@ describe("MilitaryContribution", () => {
   });
 
   describe("Rendering", () => {
-    it("should render the page with all components", () => {
+    it("should render the page with all components", async () => {
       render(<MilitaryContribution />, { wrapper: customWrapper });
 
-      expect(screen.getByTestId("page")).toBeInTheDocument();
-      expect(screen.getByTestId("status-dropdown")).toBeInTheDocument();
-      expect(screen.getByTestId("api-message-alert")).toBeInTheDocument();
-      expect(screen.getByTestId("accordion")).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText("Status Dropdown")).toBeInTheDocument();
+        expect(screen.getByText("Message Alert")).toBeInTheDocument();
+        expect(screen.getByText("Search Filter")).toBeInTheDocument();
+      });
     });
 
-    it("should render search filter accordion", () => {
+    it("should render search filter accordion", async () => {
       render(<MilitaryContribution />, { wrapper: customWrapper });
 
-      expect(screen.getByTestId("search-filter")).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText("Search Filter")).toBeInTheDocument();
+      });
     });
 
-    it("should render military contribution grid when member selected", () => {
+    it("should render military contribution grid when member selected", async () => {
       render(<MilitaryContribution />, { wrapper: customWrapper });
 
-      expect(screen.getByTestId("military-grid")).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: /add contribution/i })).toBeInTheDocument();
+      });
     });
 
     it("should display message when no member selected", async () => {
@@ -185,6 +209,9 @@ describe("MilitaryContribution", () => {
         },
         yearsEnd: {
           selectedProfitYear: 2024
+        },
+        lookups: {
+          missives: []
         }
       };
       const { wrapper: mockWrapper } = createMockStoreAndWrapper(noMemberState);
@@ -206,7 +233,9 @@ describe("MilitaryContribution", () => {
 
       render(<MilitaryContribution />, { wrapper: customWrapper });
 
-      expect(screen.getByTestId("frozen-warning")).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText("Frozen Year Warning")).toBeInTheDocument();
+      });
     });
 
     it("should not display frozen year warning when year is not frozen", async () => {
@@ -215,7 +244,9 @@ describe("MilitaryContribution", () => {
 
       render(<MilitaryContribution />, { wrapper: customWrapper });
 
-      expect(screen.queryByTestId("frozen-warning")).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.queryByText("Frozen Year Warning")).not.toBeInTheDocument();
+      });
     });
   });
 
@@ -226,7 +257,9 @@ describe("MilitaryContribution", () => {
 
       render(<MilitaryContribution />, { wrapper: customWrapper });
 
-      expect(screen.getByTestId("readonly-info")).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText("Read Only Info")).toBeInTheDocument();
+      });
     });
 
     it("should disable add contribution button in read-only mode", async () => {
@@ -235,8 +268,10 @@ describe("MilitaryContribution", () => {
 
       render(<MilitaryContribution />, { wrapper: customWrapper });
 
-      const addBtn = screen.getByTestId("add-contribution-btn");
-      expect(addBtn).toBeDisabled();
+      await waitFor(() => {
+        const addBtn = screen.getByRole("button", { name: /add contribution/i });
+        expect(addBtn).toBeDisabled();
+      });
     });
 
     it("should enable add contribution button when not read-only", async () => {
@@ -245,8 +280,10 @@ describe("MilitaryContribution", () => {
 
       render(<MilitaryContribution />, { wrapper: customWrapper });
 
-      const addBtn = screen.getByTestId("add-contribution-btn");
-      expect(addBtn).not.toBeDisabled();
+      await waitFor(() => {
+        const addBtn = screen.getByRole("button", { name: /add contribution/i });
+        expect(addBtn).not.toBeDisabled();
+      });
     });
   });
 
@@ -262,6 +299,9 @@ describe("MilitaryContribution", () => {
             firstName: "John",
             lastName: "Doe"
           }
+        },
+        lookups: {
+          missives: []
         }
       };
       const { wrapper: mockWrapper } = createMockStoreAndWrapper(memberState);
@@ -272,7 +312,7 @@ describe("MilitaryContribution", () => {
 
       const { rerender } = render(<MilitaryContribution />, { wrapper: testWrapper });
 
-      const addBtn = screen.getByTestId("add-contribution-btn");
+      const addBtn = screen.getByRole("button", { name: /add contribution/i });
       fireEvent.click(addBtn);
 
       // Dialog should be visible
@@ -287,39 +327,39 @@ describe("MilitaryContribution", () => {
     it("should close dialog when form is submitted", async () => {
       render(<MilitaryContribution />, { wrapper: customWrapper });
 
-      const addBtn = screen.getByTestId("add-contribution-btn");
+      const addBtn = screen.getByRole("button", { name: /add contribution/i });
       fireEvent.click(addBtn);
 
       // Wait for dialog to appear
       await waitFor(() => {
-        expect(screen.getByTestId("military-form")).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /submit/i })).toBeInTheDocument();
       });
 
       // Submit the form
-      const submitBtn = screen.getByTestId("form-submit-btn");
+      const submitBtn = screen.getByRole("button", { name: /submit/i });
       fireEvent.click(submitBtn);
 
       // Dialog should close (form disappears)
       await waitFor(() => {
-        expect(screen.queryByTestId("military-form")).not.toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: /submit/i })).not.toBeInTheDocument();
       });
     });
 
     it("should close dialog when cancel is clicked", async () => {
       render(<MilitaryContribution />, { wrapper: customWrapper });
 
-      const addBtn = screen.getByTestId("add-contribution-btn");
+      const addBtn = screen.getByRole("button", { name: /add contribution/i });
       fireEvent.click(addBtn);
 
       await waitFor(() => {
-        expect(screen.getByTestId("military-form")).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
       });
 
-      const cancelBtn = screen.getByTestId("form-cancel-btn");
+      const cancelBtn = screen.getByRole("button", { name: /cancel/i });
       fireEvent.click(cancelBtn);
 
       await waitFor(() => {
-        expect(screen.queryByTestId("military-form")).not.toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: /cancel/i })).not.toBeInTheDocument();
       });
     });
   });
@@ -329,14 +369,14 @@ describe("MilitaryContribution", () => {
       const { setMessage } = await import("smart-ui-library");
       render(<MilitaryContribution />, { wrapper: customWrapper });
 
-      const addBtn = screen.getByTestId("add-contribution-btn");
+      const addBtn = screen.getByRole("button", { name: /add contribution/i });
       fireEvent.click(addBtn);
 
       await waitFor(() => {
-        expect(screen.getByTestId("military-form")).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /submit/i })).toBeInTheDocument();
       });
 
-      const submitBtn = screen.getByTestId("form-submit-btn");
+      const submitBtn = screen.getByRole("button", { name: /submit/i });
       fireEvent.click(submitBtn);
 
       await waitFor(() => {
@@ -346,10 +386,12 @@ describe("MilitaryContribution", () => {
   });
 
   describe("Member details synchronization", () => {
-    it("should fetch contributions when member details change", () => {
+    it("should fetch contributions when member details change", async () => {
       render(<MilitaryContribution />, { wrapper: customWrapper });
 
-      expect(screen.getByTestId("military-grid")).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: /add contribution/i })).toBeInTheDocument();
+      });
     });
   });
 
@@ -366,8 +408,8 @@ describe("MilitaryContribution", () => {
       // The component should call resetSearch on unmount
       unmount();
 
-      // Verify unmount completed
-      expect(screen.queryByTestId("page")).not.toBeInTheDocument();
+      // Verify unmount completed - component should no longer be in document
+      expect(screen.queryByText("Status Dropdown")).not.toBeInTheDocument();
     });
   });
 
@@ -382,7 +424,7 @@ describe("MilitaryContribution", () => {
 
       render(<MilitaryContribution />, { wrapper: customWrapper });
 
-      expect(screen.getByTestId("missive-alerts")).toBeInTheDocument();
+      expect(screen.getByText("Missive Alerts")).toBeInTheDocument();
     });
   });
 });

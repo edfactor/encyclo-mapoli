@@ -288,10 +288,9 @@ describe("UnForfeitSearchFilter", () => {
       // Component should render with form elements
       await waitFor(() => {
         expect(screen.getByText("Rehire Begin Date")).toBeInTheDocument();
+        // If form is valid, search should be possible
+        expect(screen.getByTestId("search-btn")).toBeInTheDocument();
       });
-
-      // If form is valid, search should be possible
-      expect(screen.getByTestId("search-btn")).toBeInTheDocument();
     });
 
     it("should disable search when hasUnsavedChanges is true", async () => {
@@ -453,10 +452,9 @@ describe("UnForfeitSearchFilter", () => {
       // Component should render successfully with Redux hooks
       await waitFor(() => {
         expect(screen.getByTestId("search-and-reset")).toBeInTheDocument();
+        // Form should be present with Redux-backed state
+        expect(screen.getByText("Rehire Begin Date")).toBeInTheDocument();
       });
-
-      // Form should be present with Redux-backed state
-      expect(screen.getByText("Rehire Begin Date")).toBeInTheDocument();
     });
   });
 

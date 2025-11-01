@@ -122,7 +122,7 @@ const MilitaryContributionForm = ({
       <Grid
         container
         spacing={3}>
-        <Grid xs={6}>
+        <Grid size={{ xs: 6 }}>
           <Controller
             name="contributionDate"
             control={control}
@@ -143,7 +143,7 @@ const MilitaryContributionForm = ({
           />
         </Grid>
 
-        <Grid xs={6}>
+        <Grid size={{ xs: 6 }}>
           <FormLabel>Contribution Amount</FormLabel>
           <Controller
             name="contributionAmount"
@@ -207,7 +207,7 @@ const MilitaryContributionForm = ({
           container
           spacing={2}
           paddingTop="8px">
-          <Grid>
+          <Grid size="auto">
             <Button
               type="submit"
               variant="contained"
@@ -215,7 +215,7 @@ const MilitaryContributionForm = ({
               Submit
             </Button>
           </Grid>
-          <Grid>
+          <Grid size="auto">
             <Button
               onClick={onCancel}
               variant="outlined">

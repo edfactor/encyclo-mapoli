@@ -121,16 +121,19 @@ describe("MilitaryContributionForm", { timeout: 55000 }, () => {
           onCancel={mockOnCancel}
           badgeNumber={12345}
           profitYear={2024}
-        />
+        />,
+        { wrapper }
       );
 
       // Try to submit without filling required fields
-      const submitButton = screen.getByRole("button", { name: /submit|save/i });
+      await waitFor(() => {
+        const submitButton = screen.getByRole("button", { name: /submit|save/i });
 
-      // Button may be disabled if no fields filled
-      if ((submitButton as HTMLButtonElement).disabled) {
-        expect((submitButton as HTMLButtonElement).disabled).toBe(true);
-      }
+        // Button may be disabled if no fields filled
+        if ((submitButton as HTMLButtonElement).disabled) {
+          expect((submitButton as HTMLButtonElement).disabled).toBe(true);
+        }
+      });
     });
   });
 
@@ -143,13 +146,16 @@ describe("MilitaryContributionForm", { timeout: 55000 }, () => {
           onCancel={mockOnCancel}
           badgeNumber={12345}
           profitYear={2024}
-        />
+        />,
+        { wrapper }
       );
 
       const cancelButton = screen.getByRole("button", { name: /cancel/i });
       await user.click(cancelButton);
 
-      expect(mockOnCancel).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(mockOnCancel).toHaveBeenCalled();
+      });
     });
 
     it("should clear form when cancel is clicked", async () => {
@@ -160,7 +166,8 @@ describe("MilitaryContributionForm", { timeout: 55000 }, () => {
           onCancel={mockOnCancel}
           badgeNumber={12345}
           profitYear={2024}
-        />
+        />,
+        { wrapper }
       );
 
       const inputs = screen.getAllByRole("textbox");
@@ -172,7 +179,9 @@ describe("MilitaryContributionForm", { timeout: 55000 }, () => {
       const cancelButton = screen.getByRole("button", { name: /cancel/i });
       await user.click(cancelButton);
 
-      expect(mockOnCancel).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(mockOnCancel).toHaveBeenCalled();
+      });
     });
   });
 

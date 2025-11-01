@@ -31,7 +31,7 @@ vi.mock("../../../components/StatusDropdownActionNode", () => ({
   default: vi.fn(() => <div data-testid="status-dropdown">Status Dropdown</div>)
 }));
 
-vi.mock("../../../hooks/useReadOnlyNavigation", () => ({
+vi.mock("../../../../hooks/useReadOnlyNavigation", () => ({
   useReadOnlyNavigation: vi.fn(() => false)
 }));
 
@@ -216,7 +216,7 @@ describe("ManageExecutiveHoursAndDollars", () => {
 
   describe("Read-only mode", () => {
     it("should disable save button in read-only mode even with pending changes", async () => {
-      const useReadOnlyNavigation = await import("../../../hooks/useReadOnlyNavigation");
+      const useReadOnlyNavigation = await import("../../../../hooks/useReadOnlyNavigation");
       vi.mocked(useReadOnlyNavigation.useReadOnlyNavigation).mockReturnValueOnce(true);
 
       const useManageExecutiveHoursAndDollars = await import("../hooks/useManageExecutiveHoursAndDollars");
@@ -252,7 +252,7 @@ describe("ManageExecutiveHoursAndDollars", () => {
     });
 
     it("should show read-only tooltip when hovering disabled save button in read-only mode", async () => {
-      const useReadOnlyNavigation = await import("../../../hooks/useReadOnlyNavigation");
+      const useReadOnlyNavigation = await import("../../../../hooks/useReadOnlyNavigation");
       vi.mocked(useReadOnlyNavigation.useReadOnlyNavigation).mockReturnValueOnce(true);
 
       const mockStore = createMockStore();

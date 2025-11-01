@@ -100,6 +100,17 @@ vi.mock("smart-ui-library", () => ({
       {actionNode}
       {children}
     </div>
+  )),
+  SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) => (
+    <div data-testid="search-and-reset">
+      <button data-testid="search-btn" onClick={handleSearch} disabled={disabled || isFetching}>
+        Search
+      </button>
+      <button data-testid="reset-btn" onClick={handleReset}>
+        Reset
+      </button>
+      {isFetching && <span data-testid="loading">Loading...</span>}
+    </div>
   ))
 }));
 
@@ -404,7 +415,7 @@ describe("Termination", () => {
     it("should clean up event listener on unmount", () => {
       const removeEventListenerSpy = vi.spyOn(window, "removeEventListener");
 
-      const { unmount } = render(<Termination />);
+      const { unmount } = render(<Termination />, { wrapper });
 
       unmount();
 

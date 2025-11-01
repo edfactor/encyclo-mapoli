@@ -1,5 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { MissiveAlertProvider } from "../../../../components/MissiveAlerts/MissiveAlertContext";
@@ -148,36 +149,36 @@ describe("ForfeituresAdjustment", () => {
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
 
-      expect(screen.getByTestId("search-filter")).toBeInTheDocument();
-      expect(screen.getByTestId("status-dropdown")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /search/i })).toBeInTheDocument();
+      expect(screen.getByText("Status Dropdown")).toBeInTheDocument();
     });
 
     it("should render the search filter accordion", () => {
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
 
-      expect(screen.getByTestId("search-filter")).toBeInTheDocument();
-      expect(screen.getByTestId("search-button")).toBeInTheDocument();
-      expect(screen.getByTestId("reset-button")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /search/i })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /reset/i })).toBeInTheDocument();
     });
 
     it("should hide employee data and transactions before search", () => {
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
 
-      expect(screen.queryByTestId("member-details")).not.toBeInTheDocument();
-      expect(screen.queryByTestId("forfeiture-panel")).not.toBeInTheDocument();
-      expect(screen.queryByTestId("transaction-grid")).not.toBeInTheDocument();
+      expect(screen.queryByText("Member Details")).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /add forfeiture/i })).not.toBeInTheDocument();
+      expect(screen.queryByText("Transaction Grid")).not.toBeInTheDocument();
     });
   });
 
   describe("Search functionality", () => {
     it("should call executeSearch when search button is clicked", async () => {
+      const user = userEvent.setup();
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
 
-      const searchButton = screen.getByTestId("search-button");
-      fireEvent.click(searchButton);
+      const searchButton = screen.getByRole("button", { name: /search/i });
+      await user.click(searchButton);
 
       await waitFor(() => {
         expect(mockExecuteSearch).toHaveBeenCalledWith(
@@ -192,7 +193,7 @@ describe("ForfeituresAdjustment", () => {
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
 
-      const resetButton = screen.getByTestId("reset-button");
+      const resetButton = screen.getByRole("button", { name: /reset/i });
       fireEvent.click(resetButton);
 
       expect(mockHandleReset).toHaveBeenCalled();
@@ -229,7 +230,9 @@ describe("ForfeituresAdjustment", () => {
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
 
-      expect(screen.getByTestId("searching")).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByTestId("searching")).toBeInTheDocument();
+      });
     });
   });
 
@@ -265,8 +268,8 @@ describe("ForfeituresAdjustment", () => {
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
 
-      expect(screen.getByTestId("member-details")).toBeInTheDocument();
-      expect(screen.getByTestId("forfeiture-panel")).toBeInTheDocument();
+      expect(screen.getByText("Member Details")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /add forfeiture/i })).toBeInTheDocument();
     });
 
     it("should display transaction grid when transactions are available", async () => {
@@ -300,7 +303,7 @@ describe("ForfeituresAdjustment", () => {
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
 
-      expect(screen.getByTestId("transaction-grid")).toBeInTheDocument();
+      expect(screen.getByText("Transaction Grid")).toBeInTheDocument();
     });
   });
 
@@ -336,7 +339,10 @@ describe("ForfeituresAdjustment", () => {
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
 
-      expect(screen.getByTestId("add-forfeiture-modal")).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: /close/i })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /save/i })).toBeInTheDocument();
+      });
     });
 
     it("should close modal when close button is clicked", async () => {
@@ -370,13 +376,14 @@ describe("ForfeituresAdjustment", () => {
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
 
-      const closeButton = screen.getByTestId("modal-close-btn");
+      const closeButton = screen.getByRole("button", { name: /close/i });
       fireEvent.click(closeButton);
 
       expect(mockCloseModal).toHaveBeenCalled();
     });
 
     it("should call handleSaveForfeiture when modal save is clicked", async () => {
+      const user = userEvent.setup();
       const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
       vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
         employeeData: { demographicId: 123, name: "John Doe" },
@@ -407,15 +414,17 @@ describe("ForfeituresAdjustment", () => {
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
 
-      const saveButton = screen.getByTestId("modal-save-btn");
-      fireEvent.click(saveButton);
+      const saveButton = screen.getByRole("button", { name: /save/i });
+      await user.click(saveButton);
 
-      expect(mockHandleSaveForfeiture).toHaveBeenCalledWith(
-        expect.objectContaining({
-          forfeitureAmount: 1000,
-          classAction: false
-        })
-      );
+      await waitFor(() => {
+        expect(mockHandleSaveForfeiture).toHaveBeenCalledWith(
+          expect.objectContaining({
+            forfeitureAmount: 1000,
+            classAction: false
+          })
+        );
+      });
     });
   });
 
@@ -454,7 +463,7 @@ describe("ForfeituresAdjustment", () => {
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
 
-      const addButton = screen.getByTestId("add-forfeiture-btn");
+      const addButton = screen.getByRole("button", { name: /add forfeiture/i });
       expect(addButton).toBeDisabled();
     });
   });
@@ -466,7 +475,7 @@ describe("ForfeituresAdjustment", () => {
 
       // MissiveAlerts is mocked in the actual implementation via MissiveAlertProvider
       // Just verify the page renders without error
-      expect(screen.getByTestId("search-filter")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /search/i })).toBeInTheDocument();
     });
   });
 });

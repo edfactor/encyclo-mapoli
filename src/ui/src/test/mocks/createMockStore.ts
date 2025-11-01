@@ -19,17 +19,30 @@
 import { configureStore, PreloadedState } from "@reduxjs/toolkit";
 import React, { PropsWithChildren, ReactNode } from "react";
 import { Provider } from "react-redux";
+import { AccountHistoryReportApi } from "../../reduxstore/api/AccountHistoryReportApi";
+import { AdjustmentsApi } from "../../reduxstore/api/AdjustmentsApi";
+import { AppSupportApi } from "../../reduxstore/api/AppSupportApi";
+import { BeneficiariesApi } from "../../reduxstore/api/BeneficiariesApi";
+import { CommonApi } from "../../reduxstore/api/CommonApi";
+import { DistributionApi } from "../../reduxstore/api/DistributionApi";
+import { InquiryApi } from "../../reduxstore/api/InquiryApi";
+import { ItOperationsApi } from "../../reduxstore/api/ItOperationsApi";
+import { LookupsApi } from "../../reduxstore/api/LookupsApi";
+import { MilitaryApi } from "../../reduxstore/api/MilitaryApi";
+import { NavigationApi } from "../../reduxstore/api/NavigationApi";
+import { NavigationStatusApi } from "../../reduxstore/api/NavigationStatusApi";
+import { PayServicesApi } from "../../reduxstore/api/PayServicesApi";
+import { SecurityApi } from "../../reduxstore/api/SecurityApi";
+import { validationApi } from "../../reduxstore/api/ValidationApi";
+import { YearsEndApi } from "../../reduxstore/api/YearsEndApi";
 
 /**
- * Minimal mock store for testing
+ * Mock store for testing with RTK Query support
  *
- * In real projects, you would import actual reducers:
- *   import securityReducer from "../../reduxstore/slices/securitySlice";
- *   import navigationReducer from "../../reduxstore/slices/navigationSlice";
- *   import yearsEndReducer from "../../reduxstore/slices/yearsEndSlice";
+ * Includes all RTK Query API middleware to prevent middleware warnings
+ * in tests that use RTK Query hooks.
  *
- * For now, we provide a factory that creates reducers on-the-fly
- * This is ideal for test isolation and doesn't require importing all slices
+ * For test isolation, we use simple reducers that return initial state.
  */
 
 interface MockRootState {
@@ -48,6 +61,9 @@ interface MockRootState {
   };
   yearsEnd?: {
     selectedProfitYear?: number | null;
+    selectedProfitYearForDecemberActivities?: number | null;
+    profitYearSelectorData?: unknown[];
+    yearsEndData?: unknown | null;
     [key: string]: unknown;
   };
   distribution?: {
@@ -55,6 +71,10 @@ interface MockRootState {
   };
   inquiry?: {
     masterInquiryMemberDetails?: unknown;
+    [key: string]: unknown;
+  };
+  lookups?: {
+    missives?: unknown[];
     [key: string]: unknown;
   };
   [key: string]: unknown;
@@ -88,11 +108,17 @@ export const createMockStore = (preloadedState?: PreloadedState<MockRootState>) 
       }
     },
     yearsEnd: {
-      selectedProfitYear: 2024
+      selectedProfitYear: 2024,
+      selectedProfitYearForDecemberActivities: 2024,
+      profitYearSelectorData: [],
+      yearsEndData: null
     },
     distribution: {},
     inquiry: {
       masterInquiryMemberDetails: null
+    },
+    lookups: {
+      missives: []
     }
   };
 
@@ -108,45 +134,53 @@ export const createMockStore = (preloadedState?: PreloadedState<MockRootState>) 
     navigation: createSliceReducer(preloadedState?.navigation ?? defaultState.navigation),
     yearsEnd: createSliceReducer(preloadedState?.yearsEnd ?? defaultState.yearsEnd),
     distribution: createSliceReducer(preloadedState?.distribution ?? defaultState.distribution),
-    inquiry: createSliceReducer(preloadedState?.inquiry ?? defaultState.inquiry)
+    inquiry: createSliceReducer(preloadedState?.inquiry ?? defaultState.inquiry),
+    lookups: createSliceReducer(preloadedState?.lookups ?? defaultState.lookups)
   };
 
   // Add RTK Query API reducers that tests commonly mock
   // When tests mock these APIs with vi.mock(), these fallback reducers prevent errors
   const reducers: { [key: string]: unknown } = baseReducers;
 
-  // Common API reducer paths - add fallback for each
-  const apiReducerPaths = [
-    "lookupsApi",
-    "distributionApi",
-    "inquiryApi",
-    "yearsEndApi",
-    "securityApi",
-    "navigationApi",
-    "navigationStatusApi",
-    "ItOperationsApi",
-    "BeneficiariesApi",
-    "MilitaryApi",
-    "AdjustmentsApi",
-    "AccountHistoryReportApi",
-    "PayServicesApi",
-    "ValidationApi",
-    "AppSupportApi",
-    "CommonApi"
-  ];
-
-  // Provide fallback reducers for all common APIs
-  const defaultApiReducer = (state = {}) => state;
-  apiReducerPaths.forEach((path) => {
-    reducers[path] = defaultApiReducer;
-  });
+  // Add RTK Query API reducers - must match real store configuration
+  reducers[SecurityApi.reducerPath] = SecurityApi.reducer;
+  reducers[YearsEndApi.reducerPath] = YearsEndApi.reducer;
+  reducers[ItOperationsApi.reducerPath] = ItOperationsApi.reducer;
+  reducers[MilitaryApi.reducerPath] = MilitaryApi.reducer;
+  reducers[InquiryApi.reducerPath] = InquiryApi.reducer;
+  reducers[LookupsApi.reducerPath] = LookupsApi.reducer;
+  reducers[CommonApi.reducerPath] = CommonApi.reducer;
+  reducers[NavigationApi.reducerPath] = NavigationApi.reducer;
+  reducers[AppSupportApi.reducerPath] = AppSupportApi.reducer;
+  reducers[NavigationStatusApi.reducerPath] = NavigationStatusApi.reducer;
+  reducers[BeneficiariesApi.reducerPath] = BeneficiariesApi.reducer;
+  reducers[AdjustmentsApi.reducerPath] = AdjustmentsApi.reducer;
+  reducers[DistributionApi.reducerPath] = DistributionApi.reducer;
+  reducers[PayServicesApi.reducerPath] = PayServicesApi.reducer;
+  reducers[AccountHistoryReportApi.reducerPath] = AccountHistoryReportApi.reducer;
+  reducers[validationApi.reducerPath] = validationApi.reducer;
 
   return configureStore({
     reducer: reducers,
-    middleware: (getDefaultMiddleware) => {
-      // Return default middleware - mocked API middleware will be added by test mocks
-      return getDefaultMiddleware();
-    }
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({ serializableCheck: false })
+        // Add all RTK Query API middleware - critical to prevent warnings
+        .concat(SecurityApi.middleware)
+        .concat(YearsEndApi.middleware)
+        .concat(ItOperationsApi.middleware)
+        .concat(MilitaryApi.middleware)
+        .concat(InquiryApi.middleware)
+        .concat(LookupsApi.middleware)
+        .concat(CommonApi.middleware)
+        .concat(NavigationApi.middleware)
+        .concat(AppSupportApi.middleware)
+        .concat(NavigationStatusApi.middleware)
+        .concat(BeneficiariesApi.middleware)
+        .concat(AdjustmentsApi.middleware)
+        .concat(DistributionApi.middleware)
+        .concat(PayServicesApi.middleware)
+        .concat(AccountHistoryReportApi.middleware)
+        .concat(validationApi.middleware)
   });
 };
 
