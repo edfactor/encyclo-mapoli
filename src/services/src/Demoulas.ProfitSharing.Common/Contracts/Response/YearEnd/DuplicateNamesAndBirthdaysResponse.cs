@@ -8,7 +8,12 @@ public sealed record DuplicateNamesAndBirthdaysResponse : IIsExecutive
     public required string Ssn { get; set; }
     [MaskSensitive] public string? Name { get; set; }
     [MaskSensitive] public required DateOnly DateOfBirth { get; set; }
-    public required AddressResponseDto Address { get; set; }
+    [MaskSensitive] public required string Address { get; init; }
+    public string? Street2 { get; init; }
+    [MaskSensitive] public required string? City { get; init; }
+    public required string? State { get; init; }
+    public required string? PostalCode { get; init; }
+    public required string CountryIso { get; init; }
     public byte Years { get; set; }
     public DateOnly HireDate { get; set; }
     public DateOnly? TerminationDate { get; set; }
