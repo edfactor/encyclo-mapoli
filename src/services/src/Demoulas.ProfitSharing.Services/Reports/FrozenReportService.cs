@@ -881,19 +881,14 @@ public class FrozenReportService : IFrozenReportService
     public async Task<GrossWagesReportResponse> GetGrossWagesReport(GrossWagesReportRequest req,
         CancellationToken cancellationToken = default)
     {
-        using (_logger.BeginScope("Request FORFEITURES AND POINTS FOR YEAR"))
+        using (_logger.BeginScope("REQUEST GROSS WAGES REPORT FOR YEAR: {ProfitYear}", req.ProfitYear))
         {
             var rslt = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                short lastProfitYear = (short)(req.ProfitYear - 1);
                 var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, true);
+
+                // Query for PayProfit data for the requested year
                 var baseQuery = (from d in demographics
-                                 join lyPP in ctx.PayProfits on new { d.Id, Year = lastProfitYear } equals new
-                                 {
-                                     Id = lyPP.DemographicId,
-                                     Year = lyPP.ProfitYear
-                                 } into lyPP_tmp
-                                 from lyPP in lyPP_tmp.DefaultIfEmpty()
                                  join pp in ctx.PayProfits on new { d.Id, Year = req.ProfitYear } equals new
                                  {
                                      Id = pp.DemographicId,
@@ -909,7 +904,7 @@ public class FrozenReportService : IFrozenReportService
                                  join lBal in _totalService.GetQuoteLoansUnQuote(ctx, req.ProfitYear) on d.Ssn equals lBal.Ssn into
                                      lBal_tmp
                                  from lBal_lj in lBal_tmp.DefaultIfEmpty()
-                                 where pp != null && pp.CurrentIncomeYear + pp.IncomeExecutive > req.MinGrossAmount
+                                 where pp != null && (pp.CurrentIncomeYear + pp.IncomeExecutive) >= req.MinGrossAmount
                                  orderby d.ContactInfo.FullName
                                  select new
                                  {

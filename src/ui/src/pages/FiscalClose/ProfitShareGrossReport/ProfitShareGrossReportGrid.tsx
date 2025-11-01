@@ -5,7 +5,7 @@ import { Path, useNavigate } from "react-router";
 import { useLazyGetGrossWagesReportQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { GrossWagesReportDto } from "reduxstore/types";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMGrid, Pagination, TotalsGrid, numberToCurrency } from "smart-ui-library";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { GetProfitShareGrossReportColumns } from "./ProfitShareGrossReportColumns";
@@ -111,13 +111,29 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
     <div className="relative">
       {!!grossWagesReport && (
         <>
-          <div style={{ padding: "0 24px 0 24px" }}>
+          <div className="px-6">
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`PROFIT SHARE GROSS REPORT (QPAY501) (${grossWagesReport?.response.total || 0} ${grossWagesReport?.response.total === 1 ? "Record" : "Records"})`}
+              {`PROFIT SHARE GROSS REPORT (QPAY501) (${(grossWagesReport?.response.total || 0).toLocaleString()} ${grossWagesReport?.response.total === 1 ? "Record" : "Records"})`}
             </Typography>
           </div>
+          {grossWagesReport && (
+            <div className="px-6 py-4">
+              <TotalsGrid
+                breakpoints={{ xs: 12, sm: 6, md: 3, lg: 3, xl: 3 }}
+                tablePadding="0px"
+                displayData={[
+                  [numberToCurrency(grossWagesReport?.totalGrossWages || 0)],
+                  [numberToCurrency(grossWagesReport?.totalProfitSharingAmount || 0)],
+                  [numberToCurrency(grossWagesReport?.totalLoans || 0)],
+                  [numberToCurrency(grossWagesReport?.totalForfeitures || 0)]
+                ]}
+                leftColumnHeaders={["Gross Wages", "Profit Sharing", "Loans", "Forfeitures"]}
+                topRowHeaders={["Totals"]}
+              />
+            </div>
+          )}
           <DSMGrid
             preferenceKey={"PROFIT_SHARE_GROSS_REPORT"}
             isLoading={isFetching}
@@ -125,14 +141,6 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
             handleSortChanged={handleSortChange}
             providedOptions={{
               rowData: grossWagesReport?.response.results,
-              pinnedTopRowData: [
-                {
-                  grossWages: grossWagesReport?.totalGrossWages,
-                  profitSharingAmount: grossWagesReport?.totalProfitSharingAmount,
-                  loans: grossWagesReport?.totalLoans,
-                  forfeitures: grossWagesReport?.totalForfeitures
-                }
-              ],
               columnDefs: columnDefs
             }}
           />
