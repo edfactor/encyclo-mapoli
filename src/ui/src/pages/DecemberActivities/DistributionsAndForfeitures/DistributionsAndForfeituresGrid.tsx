@@ -1,5 +1,5 @@
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import { Typography } from "@mui/material";
+import { CircularProgress, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
@@ -295,9 +295,9 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                 leftColumnHeaders={["Forfeitures"]}
                 topRowHeaders={[]}
                 breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}></TotalsGrid>
-              {(distributionsAndForfeitures.forfeitureRegularTotal ||
-                distributionsAndForfeitures.forfeitureAdministrativeTotal ||
-                distributionsAndForfeitures.forfeitureClassActionTotal) && (
+              {((distributionsAndForfeitures.forfeitureRegularTotal || 0) > 0 ||
+                (distributionsAndForfeitures.forfeitureAdministrativeTotal || 0) > 0 ||
+                (distributionsAndForfeitures.forfeitureClassActionTotal || 0) > 0) && (
                 <div
                   className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
                   onMouseEnter={handleForfeiturePopoverOpen}
@@ -363,21 +363,32 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
             </div>
           </div>
 
-          <ReportSummary report={distributionsAndForfeitures} />
-          <DSMGrid
-            preferenceKey={CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES}
-            isLoading={false}
-            handleSortChanged={sortEventHandler}
-            maxHeight={gridMaxHeight}
-            providedOptions={{
-              rowData: distributionsAndForfeitures?.response.results,
-              columnDefs: columnDefs,
-              suppressMultiSort: true
-            }}
-          />
+          {!isFetching && <ReportSummary report={distributionsAndForfeitures} />}
+          {isFetching ? (
+            <div className="flex flex-col items-center justify-center gap-4 py-16">
+              <CircularProgress />
+              <Typography
+                variant="body1"
+                color="textSecondary">
+                Searching...
+              </Typography>
+            </div>
+          ) : (
+            <DSMGrid
+              preferenceKey={CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES}
+              isLoading={false}
+              handleSortChanged={sortEventHandler}
+              maxHeight={gridMaxHeight}
+              providedOptions={{
+                rowData: distributionsAndForfeitures?.response.results,
+                columnDefs: columnDefs,
+                suppressMultiSort: true
+              }}
+            />
+          )}
         </>
       )}
-      {!!distributionsAndForfeitures && distributionsAndForfeitures.response.results.length > 0 && (
+      {!isFetching && !!distributionsAndForfeitures && distributionsAndForfeitures.response.results.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {

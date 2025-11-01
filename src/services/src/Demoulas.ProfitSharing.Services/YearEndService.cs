@@ -198,7 +198,7 @@ public sealed class YearEndService : IYearEndService
                     .MaxAsync(ct);
             
                 return maxYear ?? (short)(ReferenceData.SmartTransitionYear - 1);
-            });
+            }, ct);
     }
     
     // Calculates the Year End Change for a single employee.
