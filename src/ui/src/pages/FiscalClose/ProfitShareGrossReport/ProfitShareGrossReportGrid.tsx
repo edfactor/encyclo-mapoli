@@ -120,7 +120,7 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
           </div>
           {grossWagesReport && (
             <TotalsGrid
-              breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
+              breakpoints={{ xs: 12, sm: 6, md: 3, lg: 3, xl: 3 }}
               tablePadding="0px"
               displayData={[
                 [numberToCurrency(grossWagesReport?.totalGrossWages || 0)],
