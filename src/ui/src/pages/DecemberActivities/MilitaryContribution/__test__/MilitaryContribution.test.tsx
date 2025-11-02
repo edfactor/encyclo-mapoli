@@ -43,7 +43,10 @@ vi.mock("../../../../reduxstore/api/InquiryApi", () => ({
   InquiryApi: {
     reducerPath: "inquiryApi",
     reducer: (state = {}) => state,
-    middleware: []
+    middleware: [],
+    util: {
+      invalidateTags: vi.fn(() => ({ type: "inquiryApi/invalidateTags", payload: [] }))
+    }
   },
   useLazySearchProfitMasterInquiryQuery: vi.fn(() => [
     mockTriggerSearchMasterInquiry,

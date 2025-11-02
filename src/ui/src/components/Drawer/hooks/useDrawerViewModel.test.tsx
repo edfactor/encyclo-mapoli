@@ -55,7 +55,7 @@ const mockNavigationData: NavigationResponseDto = {
   navigation: [
     {
       id: 1,
-      parentId: 0,
+      parentId: null,
       title: "YEAR END",
       subTitle: "Year End",
       url: "",
