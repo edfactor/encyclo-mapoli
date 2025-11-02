@@ -6,19 +6,16 @@ import TerminationSearchFilter from "../TerminationSearchFilter";
 import { CalendarResponseDto } from "../../../reduxstore/types";
 
 // Mock date picker and validators
-vi.mock("../../../reduxstore/api/LookupsApi", async () => {
-  const actual = await vi.importActual<typeof import("../../../reduxstore/api/LookupsApi")>(
-    "../../../reduxstore/api/LookupsApi"
-  );
-  return {
-    ...actual,
-    useLazyGetAccountingYearQuery: vi.fn(() => [
-      vi.fn(),
-      { data: { fiscalBeginDate: "2024-01-01", fiscalEndDate: "2024-12-31" }, isLoading: false }
-    ]),
-    useLazyGetDuplicateSsnExistsQuery: vi.fn(() => [vi.fn(), { data: { duplicateCount: 0 }, isLoading: false }])
-  };
-});
+vi.mock("../../../reduxstore/api/LookupsApi", () => ({
+  useLazyGetAccountingYearQuery: vi.fn(() => [
+    vi.fn(),
+    { data: { fiscalBeginDate: "2024-01-01", fiscalEndDate: "2024-12-31" }, isLoading: false }
+  ]),
+  useLazyGetDuplicateSsnExistsQuery: vi.fn(() => [vi.fn(), { data: { duplicateCount: 0 }, isLoading: false }]),
+  LookupsApi: {
+    useGetAccountingYearQuery: vi.fn()
+  }
+}));
 
 vi.mock("../../../components/DsmDatePicker/DsmDatePicker", () => ({
   default: vi.fn(({ label, onChange, disabled }) => (
@@ -53,20 +50,18 @@ vi.mock("../../../utils/FormValidators", async () => {
 
 vi.mock("smart-ui-library", () => ({
   SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) => (
-    <div data-testid="search-and-reset">
+    <section aria-label="search and reset">
       <button
-        data-testid="search-btn"
         onClick={handleSearch}
         disabled={disabled || isFetching}>
         Search
       </button>
       <button
-        data-testid="reset-btn"
         onClick={handleReset}>
         Reset
       </button>
-      {isFetching && <span data-testid="loading">Loading...</span>}
-    </div>
+      {isFetching && <span role="status">Loading...</span>}
+    </section>
   ))
 }));
 
