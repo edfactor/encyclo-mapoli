@@ -94,6 +94,17 @@ vi.mock("smart-ui-library", () => ({
       {actionNode}
       {children}
     </section>
+  )),
+  SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) => (
+    <div role="group" aria-label="search and reset">
+      <button onClick={handleSearch} disabled={disabled || isFetching}>
+        Search
+      </button>
+      <button onClick={handleReset}>
+        Reset
+      </button>
+      {isFetching && <span role="status">Loading...</span>}
+    </div>
   ))
 }));
 

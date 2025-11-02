@@ -5,16 +5,27 @@ import { createMockStoreAndWrapper } from "../../../../test";
 import TerminationSearchFilter from "../TerminationSearchFilter";
 import { CalendarResponseDto } from "../../../reduxstore/types";
 
+// Hoist API mock functions
+const { mockTriggerAccountingYear, mockTriggerDuplicateSsn } = vi.hoisted(() => ({
+  mockTriggerAccountingYear: vi.fn(),
+  mockTriggerDuplicateSsn: vi.fn()
+}));
+
 // Mock date picker and validators
 vi.mock("../../../reduxstore/api/LookupsApi", () => ({
+  LookupsApi: {
+    reducerPath: "lookupsApi",
+    reducer: (state = {}) => state,
+    middleware: []
+  },
   useLazyGetAccountingYearQuery: vi.fn(() => [
-    vi.fn(),
+    mockTriggerAccountingYear,
     { data: { fiscalBeginDate: "2024-01-01", fiscalEndDate: "2024-12-31" }, isLoading: false }
   ]),
-  useLazyGetDuplicateSsnExistsQuery: vi.fn(() => [vi.fn(), { data: { duplicateCount: 0 }, isLoading: false }]),
-  LookupsApi: {
-    useGetAccountingYearQuery: vi.fn()
-  }
+  useLazyGetDuplicateSsnExistsQuery: vi.fn(() => [
+    mockTriggerDuplicateSsn,
+    { data: { duplicateCount: 0 }, isLoading: false }
+  ])
 }));
 
 vi.mock("../../../components/DsmDatePicker/DsmDatePicker", () => ({
@@ -79,6 +90,19 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Set up mock return values for API hooks
+    mockTriggerAccountingYear.mockReturnValue({
+      unwrap: vi.fn().mockResolvedValue({
+        fiscalBeginDate: "2024-01-01",
+        fiscalEndDate: "2024-12-31"
+      })
+    });
+
+    mockTriggerDuplicateSsn.mockReturnValue({
+      unwrap: vi.fn().mockResolvedValue({ duplicateCount: 0 })
+    });
+
     const storeAndWrapper = createMockStoreAndWrapper({
       yearsEnd: { selectedProfitYear: 2024 }
     });
