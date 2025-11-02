@@ -88,6 +88,7 @@ const ProfitShareGrossReportSearchFilter: React.FC<ProfitShareGrossReportSearchF
                 required={true}
                 label="Profit Year"
                 disableFuture
+                minDate={new Date(2024, 0, 1)}
                 views={["year"]}
                 error={errors.profitYear?.message}
               />
