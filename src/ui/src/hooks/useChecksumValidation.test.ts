@@ -19,6 +19,10 @@ describe("useChecksumValidation", () => {
     validationGroups: [
       {
         groupName: "Contributions",
+        description: null,
+        summary: null,
+        priority: "High",
+        validationRule: null,
         validations: [
           {
             reportCode: "PAY443",
@@ -27,13 +31,24 @@ describe("useChecksumValidation", () => {
             currentValue: null,
             isValid: false,
             variance: null,
-            message: "Pending validation"
+            message: "Pending validation",
+            archivedAt: null,
+            notes: null
           }
         ],
         isValid: true
       }
     ],
-    criticalIssues: []
+    criticalIssues: [],
+    isValid: true,
+    message: "All validations passed",
+    totalValidations: 1,
+    passedValidations: 1,
+    failedValidations: 0,
+    validatedReports: ["PAY443"],
+    blockMasterUpdate: false,
+    warnings: [],
+    validatedAt: "2024-01-01T00:00:00Z"
   };
 
   describe("initial state with autoFetch=false", () => {
@@ -114,6 +129,10 @@ describe("useChecksumValidation", () => {
         validationGroups: [
           {
             groupName: "Contributions",
+            description: null,
+            summary: null,
+            priority: "High" as const,
+            validationRule: null,
             validations: [
               {
                 reportCode: "PAY443",
@@ -122,13 +141,24 @@ describe("useChecksumValidation", () => {
                 currentValue: null,
                 isValid: false,
                 variance: null,
-                message: "Pending"
+                message: "Pending",
+                archivedAt: null,
+                notes: null
               }
             ],
             isValid: true
           }
         ],
-        criticalIssues: []
+        criticalIssues: [],
+        isValid: true,
+        message: "All validations passed",
+        totalValidations: 1,
+        passedValidations: 1,
+        failedValidations: 0,
+        validatedReports: ["PAY443"],
+        blockMasterUpdate: false,
+        warnings: [],
+        validatedAt: "2024-01-01T00:00:00Z"
       };
 
       mockUseGetMasterUpdateValidationQuery.mockReturnValue({
@@ -162,6 +192,10 @@ describe("useChecksumValidation", () => {
         validationGroups: [
           {
             groupName: "Distributions",
+            description: null,
+            summary: null,
+            priority: "High" as const,
+            validationRule: null,
             validations: [
               {
                 reportCode: "PAY443",
@@ -170,13 +204,24 @@ describe("useChecksumValidation", () => {
                 currentValue: null,
                 isValid: false,
                 variance: null,
-                message: "Pending"
+                message: "Pending",
+                archivedAt: null,
+                notes: null
               }
             ],
             isValid: true
           }
         ],
-        criticalIssues: []
+        criticalIssues: [],
+        isValid: true,
+        message: "All validations passed",
+        totalValidations: 1,
+        passedValidations: 1,
+        failedValidations: 0,
+        validatedReports: ["PAY443"],
+        blockMasterUpdate: false,
+        warnings: [],
+        validatedAt: "2024-01-01T00:00:00Z"
       };
 
       mockUseGetMasterUpdateValidationQuery.mockReturnValue({
@@ -210,6 +255,10 @@ describe("useChecksumValidation", () => {
         validationGroups: [
           {
             groupName: "Test",
+            description: null,
+            summary: null,
+            priority: "High" as const,
+            validationRule: null,
             validations: [
               {
                 reportCode: "PAY443",
@@ -218,13 +267,24 @@ describe("useChecksumValidation", () => {
                 currentValue: null,
                 isValid: false,
                 variance: null,
-                message: "Pending"
+                message: "Pending",
+                archivedAt: null,
+                notes: null
               }
             ],
             isValid: true
           }
         ],
-        criticalIssues: []
+        criticalIssues: [],
+        isValid: true,
+        message: "All validations passed",
+        totalValidations: 1,
+        passedValidations: 1,
+        failedValidations: 0,
+        validatedReports: ["PAY443"],
+        blockMasterUpdate: false,
+        warnings: [],
+        validatedAt: "2024-01-01T00:00:00Z"
       };
 
       mockUseGetMasterUpdateValidationQuery.mockReturnValue({
@@ -255,6 +315,10 @@ describe("useChecksumValidation", () => {
         validationGroups: [
           {
             groupName: "Test",
+            description: null,
+            summary: null,
+            priority: "High" as const,
+            validationRule: null,
             validations: [
               {
                 reportCode: "PAY443",
@@ -263,13 +327,24 @@ describe("useChecksumValidation", () => {
                 currentValue: null,
                 isValid: false,
                 variance: null,
-                message: "Pending"
+                message: "Pending",
+                archivedAt: null,
+                notes: null
               }
             ],
             isValid: true
           }
         ],
-        criticalIssues: []
+        criticalIssues: [],
+        isValid: true,
+        message: "All validations passed",
+        totalValidations: 1,
+        passedValidations: 1,
+        failedValidations: 0,
+        validatedReports: ["PAY443"],
+        blockMasterUpdate: false,
+        warnings: [],
+        validatedAt: "2024-01-01T00:00:00Z"
       };
 
       mockUseGetMasterUpdateValidationQuery.mockReturnValue({
@@ -301,6 +376,10 @@ describe("useChecksumValidation", () => {
         validationGroups: [
           {
             groupName: "Test",
+            description: null,
+            summary: null,
+            priority: "High" as const,
+            validationRule: null,
             validations: [
               {
                 reportCode: "PAY443",
@@ -309,13 +388,24 @@ describe("useChecksumValidation", () => {
                 currentValue: null,
                 isValid: false,
                 variance: null,
-                message: "Pending"
+                message: "Pending",
+                archivedAt: null,
+                notes: null
               }
             ],
             isValid: true
           }
         ],
-        criticalIssues: []
+        criticalIssues: [],
+        isValid: true,
+        message: "All validations passed",
+        totalValidations: 1,
+        passedValidations: 1,
+        failedValidations: 0,
+        validatedReports: ["PAY443"],
+        blockMasterUpdate: false,
+        warnings: [],
+        validatedAt: "2024-01-01T00:00:00Z"
       };
 
       mockUseGetMasterUpdateValidationQuery.mockReturnValue({
@@ -349,6 +439,10 @@ describe("useChecksumValidation", () => {
         validationGroups: [
           {
             groupName: "Test",
+            description: null,
+            summary: null,
+            priority: "High" as const,
+            validationRule: null,
             validations: [
               {
                 reportCode: "PAY443",
@@ -357,13 +451,24 @@ describe("useChecksumValidation", () => {
                 currentValue: null,
                 isValid: false,
                 variance: null,
-                message: "Pending"
+                message: "Pending",
+                archivedAt: null,
+                notes: null
               }
             ],
             isValid: true
           }
         ],
-        criticalIssues: []
+        criticalIssues: [],
+        isValid: true,
+        message: "All validations passed",
+        totalValidations: 1,
+        passedValidations: 1,
+        failedValidations: 0,
+        validatedReports: ["PAY443"],
+        blockMasterUpdate: false,
+        warnings: [],
+        validatedAt: "2024-01-01T00:00:00Z"
       };
 
       mockUseGetMasterUpdateValidationQuery.mockReturnValue({
@@ -398,6 +503,10 @@ describe("useChecksumValidation", () => {
         validationGroups: [
           {
             groupName: "Group 1",
+            description: null,
+            summary: null,
+            priority: "High" as const,
+            validationRule: null,
             validations: [
               {
                 reportCode: "PAY443",
@@ -406,13 +515,19 @@ describe("useChecksumValidation", () => {
                 currentValue: 1000,
                 isValid: true,
                 variance: 0,
-                message: "OK"
+                message: "OK",
+                archivedAt: null,
+                notes: null
               }
             ],
             isValid: true
           },
           {
             groupName: "Group 2",
+            description: null,
+            summary: null,
+            priority: "High" as const,
+            validationRule: null,
             validations: [
               {
                 reportCode: "PAY443",
@@ -421,13 +536,24 @@ describe("useChecksumValidation", () => {
                 currentValue: 2000,
                 isValid: true,
                 variance: 0,
-                message: "OK"
+                message: "OK",
+                archivedAt: null,
+                notes: null
               }
             ],
             isValid: true
           }
         ],
-        criticalIssues: []
+        criticalIssues: [],
+        isValid: true,
+        message: "All validations passed",
+        totalValidations: 1,
+        passedValidations: 1,
+        failedValidations: 0,
+        validatedReports: ["PAY443"],
+        blockMasterUpdate: false,
+        warnings: [],
+        validatedAt: "2024-01-01T00:00:00Z"
       };
 
       mockUseGetMasterUpdateValidationQuery.mockReturnValue({

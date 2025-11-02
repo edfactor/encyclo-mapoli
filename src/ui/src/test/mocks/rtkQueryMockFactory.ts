@@ -62,7 +62,7 @@ export const createRTKQueryLazyMock = <T, E = Error>(
       isSuccess: !options?.shouldFail,
       isError: options?.shouldFail ?? false,
       error: options?.error ?? null,
-      status: options?.shouldFail ? "rejected" : "fulfilled" as const
+      status: options?.shouldFail ? "rejected" : ("fulfilled" as const)
     };
 
     return {
@@ -111,7 +111,7 @@ export const createRTKQueryMock = <T, E = Error>(
     isError: options?.isError ?? false,
     isSuccess: options?.isSuccess ?? true,
     error: options?.error ?? null,
-    status: options?.isError ? "rejected" : "fulfilled" as const,
+    status: options?.isError ? "rejected" : ("fulfilled" as const),
     refetch: vi.fn()
   };
 };
@@ -157,10 +157,7 @@ export const createRTKQueryMutationMock = <T, E = Error>(
     };
   });
 
-  return [
-    mutationFn,
-    { isLoading: false, isSuccess: false, isError: false }
-  ] as const;
+  return [mutationFn, { isLoading: false, isSuccess: false, isError: false }] as const;
 };
 
 /**

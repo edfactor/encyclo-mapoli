@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import React from "react";
 import { Provider } from "react-redux";
-import { useBeneficiaryRelationshipData } from "./useBeneficiaryRelationshipData";
-import { BeneficiaryDetail, Paged, BeneficiaryDto } from "../../types";
+import { useBeneficiaryRelationshipData } from "../useBeneficiaryRelationshipData";
+import { BeneficiaryDetail, Paged, BeneficiaryDto } from "../../../types";
 import { configureStore, type PreloadedState } from "@reduxjs/toolkit";
 import securityReducer, { type SecurityState } from "reduxstore/slices/securitySlice";
 
@@ -80,14 +80,10 @@ function createMockStore(preloadedState?: MockStoreState) {
   });
 }
 
-function renderHookWithProvider<T>(
-  hook: () => T,
-  preloadedState?: MockStoreState
-) {
+function renderHookWithProvider<T>(hook: () => T, preloadedState?: MockStoreState) {
   const store = createMockStore(preloadedState || { security: { token: "mock-token", user: null } });
   return renderHook(() => hook(), {
-    wrapper: ({ children }: { children: React.ReactNode }) =>
-      React.createElement(Provider, { store, children })
+    wrapper: ({ children }: { children: React.ReactNode }) => React.createElement(Provider, { store, children })
   });
 }
 

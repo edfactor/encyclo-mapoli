@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { BeneficiaryDto } from "../../../types";
-import { useBeneficiaryPercentageUpdate } from "./useBeneficiaryPercentageUpdate";
+import { BeneficiaryDto } from "../../../../types";
+import { useBeneficiaryPercentageUpdate } from "../useBeneficiaryPercentageUpdate";
 
 interface ValidateAndUpdateResult {
   success: boolean;

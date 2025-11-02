@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { SearchResponse } from "./hooks/useMasterInquiryReducer";
-import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
+import { SearchResponse } from "../hooks/useMasterInquiryReducer";
+import MasterInquiryMemberGrid from "../MasterInquiryMemberGrid";
 
 /**
  * Master Inquiry Grid Tests - Performance Fixes

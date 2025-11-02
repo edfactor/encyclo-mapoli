@@ -55,9 +55,7 @@ interface UseBeneficiaryPercentageUpdateReturn {
  *   showError(result.error);
  * }
  */
-export const useBeneficiaryPercentageUpdate = (
-  onUpdateSuccess?: () => void
-): UseBeneficiaryPercentageUpdateReturn => {
+export const useBeneficiaryPercentageUpdate = (onUpdateSuccess?: () => void): UseBeneficiaryPercentageUpdateReturn => {
   const [triggerUpdate] = useLazyUpdateBeneficiaryQuery();
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -70,11 +68,7 @@ export const useBeneficiaryPercentageUpdate = (
    * @returns Result with success flag, error message, and previous value for restoration
    */
   const validateAndUpdate = useCallback(
-    async (
-      id: number,
-      newPercentage: number,
-      currentList: BeneficiaryDto[]
-    ): Promise<ValidateAndUpdateResult> => {
+    async (id: number, newPercentage: number, currentList: BeneficiaryDto[]): Promise<ValidateAndUpdateResult> => {
       // Calculate what the sum would be with the new percentage
       let sum = 0;
       let previousValue = 0;

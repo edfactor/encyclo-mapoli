@@ -71,8 +71,14 @@ export const GetForfeituresTransactionGridColumns = (): ColDef[] => {
       sortable: false,
       resizable: true,
       valueFormatter: (params) => {
-        const month = params.data.monthToDate;
-        const year = params.data.yearToDate;
+        const month = params.data?.monthToDate;
+        const year = params.data?.yearToDate;
+
+        // Guard against null/undefined values
+        if (month === null || month === undefined || year === null || year === undefined) {
+          return "";
+        }
+
         const formattedMonth = month.toString().padStart(2, "0");
 
         if (month === 0 && year === 0) {

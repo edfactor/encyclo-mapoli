@@ -189,7 +189,7 @@ const useForfeituresAdjustment = () => {
         reduxDispatch(InquiryApi.util.invalidateTags(["MemberDetails"]));
 
         // Trigger refresh of member details component
-        setMemberDetailsRefreshTrigger(prev => prev + 1);
+        setMemberDetailsRefreshTrigger((prev) => prev + 1);
 
         // Fetch member details for name
         const memberDetails = await triggerMemberDetails({

@@ -11,12 +11,7 @@ interface DeleteBeneficiaryDialogProps {
   isDeleting: boolean;
 }
 
-const DeleteBeneficiaryDialog: React.FC<DeleteBeneficiaryDialogProps> = ({
-  open,
-  onConfirm,
-  onCancel,
-  isDeleting
-}) => {
+const DeleteBeneficiaryDialog: React.FC<DeleteBeneficiaryDialogProps> = ({ open, onConfirm, onCancel, isDeleting }) => {
   return (
     <Dialog open={open}>
       <DialogTitle>Confirmation</DialogTitle>
@@ -24,12 +19,23 @@ const DeleteBeneficiaryDialog: React.FC<DeleteBeneficiaryDialogProps> = ({
         <p>Are you sure you want to delete ?</p>
       </DialogContent>
       <DialogActions>
-        <Button autoFocus onClick={onCancel}>
+        <Button
+          autoFocus
+          onClick={onCancel}>
           Cancel
         </Button>
-        <Button color="error" onClick={onConfirm}>
+        <Button
+          color="error"
+          onClick={onConfirm}>
           Delete it! &nbsp;
-          {isDeleting ? <CircularProgress size="15px" color="error" /> : <></>}
+          {isDeleting ? (
+            <CircularProgress
+              size="15px"
+              color="error"
+            />
+          ) : (
+            <></>
+          )}
         </Button>
       </DialogActions>
     </Dialog>

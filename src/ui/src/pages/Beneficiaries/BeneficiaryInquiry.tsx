@@ -74,7 +74,14 @@ const BeneficiaryInquiry = () => {
         });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search.pageNumber, search.pageSize, search.sortParams, beneficiarySearchFilterRequest, triggerSearch, memberType]);
+  }, [
+    search.pageNumber,
+    search.pageSize,
+    search.sortParams,
+    beneficiarySearchFilterRequest,
+    triggerSearch,
+    memberType
+  ]);
 
   const handleReset = useCallback(() => {
     setBeneficiarySearchFilterResponse(undefined);

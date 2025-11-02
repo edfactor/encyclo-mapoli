@@ -16,8 +16,7 @@ const mockTriggerFrozenStateSearch = vi.fn();
 const mockUseLazyGetProfitYearSelectorFrozenDataQuery = vi.fn();
 
 vi.mock("../reduxstore/api/ItOperationsApi", () => ({
-  useLazyGetProfitYearSelectorFrozenDataQuery: () =>
-    mockUseLazyGetProfitYearSelectorFrozenDataQuery()
+  useLazyGetProfitYearSelectorFrozenDataQuery: () => mockUseLazyGetProfitYearSelectorFrozenDataQuery()
 }));
 
 describe("useIsProfitYearFrozen", () => {

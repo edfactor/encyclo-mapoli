@@ -3,17 +3,50 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { ReactNode } from "react";
 import { Provider } from "react-redux";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import * as useChecksumValidationModule from "../../../../hooks/useChecksumValidation";
-import * as useFiscalCloseProfitYearModule from "../../../../hooks/useFiscalCloseProfitYear";
-import * as YearsEndApi from "../../../../reduxstore/api/YearsEndApi";
-import securityReducer from "../../../../reduxstore/slices/securitySlice";
-import yearsEndReducer from "../../../../reduxstore/slices/yearsEndSlice";
-import useProfitShareEditUpdate from "./useProfitShareEditUpdate";
+import securityReducer from "../../../../../reduxstore/slices/securitySlice";
+import yearsEndReducer from "../../../../../reduxstore/slices/yearsEndSlice";
+import useProfitShareEditUpdate from "../useProfitShareEditUpdate";
 
-// Mock the API hooks
-vi.mock("../../../../reduxstore/api/YearsEndApi");
-vi.mock("../../../../hooks/useFiscalCloseProfitYear");
-vi.mock("../../../../hooks/useChecksumValidation");
+// Hoist all mock functions before vi.mock() calls
+const {
+  mockApplyMaster,
+  mockTriggerRevert,
+  mockTriggerStatus,
+  mockUseFiscalCloseProfitYear,
+  mockGetFieldValidation,
+  mockUseChecksumValidation
+} = vi.hoisted(() => ({
+  mockApplyMaster: vi.fn(),
+  mockTriggerRevert: vi.fn(),
+  mockTriggerStatus: vi.fn(),
+  mockUseFiscalCloseProfitYear: vi.fn(() => 2024),
+  mockGetFieldValidation: vi.fn(() => ({ hasError: false })),
+  mockUseChecksumValidation: vi.fn(() => ({
+    validationData: null,
+    getFieldValidation: mockGetFieldValidation
+  }))
+}));
+
+// Mock RTK Query hooks - must return tuple format [triggerFunction, stateObject]
+// Use importOriginal to preserve the actual module exports for reducer matchers
+vi.mock("../../../../../reduxstore/api/YearsEndApi", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../../../../reduxstore/api/YearsEndApi")>();
+  return {
+    ...actual,
+    useGetMasterApplyMutation: vi.fn(() => [mockApplyMaster, { isLoading: false }]),
+    useLazyGetMasterRevertQuery: vi.fn(() => [mockTriggerRevert, { isFetching: false }]),
+    useLazyGetProfitMasterStatusQuery: vi.fn(() => [mockTriggerStatus, { isFetching: false }])
+  };
+});
+
+// Mock custom hooks
+vi.mock("../../../../../hooks/useFiscalCloseProfitYear", () => ({
+  default: mockUseFiscalCloseProfitYear
+}));
+
+vi.mock("../../../../../hooks/useChecksumValidation", () => ({
+  useChecksumValidation: mockUseChecksumValidation
+}));
 
 // Type definitions
 interface MockedYearsEndState {
@@ -64,7 +97,8 @@ describe("useProfitShareEditUpdate", () => {
     return configureStore({
       reducer: {
         yearsEnd: yearsEndReducer,
-        security: securityReducer
+        security: securityReducer,
+        yearsEndApi: () => ({ queries: {}, mutations: {}, provided: [], arg: [] })
       },
       preloadedState: preloadedState as Partial<MockedRootState>
     });
@@ -109,19 +143,39 @@ describe("useProfitShareEditUpdate", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Mock useFiscalCloseProfitYear
-    (useFiscalCloseProfitYearModule.default as ReturnType<typeof vi.fn>).mockReturnValue(2024);
+    // Reset all hoisted mocks to their default state
+    mockUseFiscalCloseProfitYear.mockReturnValue(2024);
 
-    // Mock useChecksumValidation
-    (useChecksumValidationModule.useChecksumValidation as ReturnType<typeof vi.fn>).mockReturnValue({
+    mockUseChecksumValidation.mockReturnValue({
       validationData: null,
-      getFieldValidation: vi.fn(() => ({ hasError: false }))
+      getFieldValidation: mockGetFieldValidation
     } as ChecksumValidationResult);
 
-    // Mock API hooks
-    (YearsEndApi.useGetMasterApplyMutation as ReturnType<typeof vi.fn>).mockReturnValue([vi.fn()]);
-    (YearsEndApi.useLazyGetMasterRevertQuery as ReturnType<typeof vi.fn>).mockReturnValue([vi.fn()]);
-    (YearsEndApi.useLazyGetProfitMasterStatusQuery as ReturnType<typeof vi.fn>).mockReturnValue([vi.fn()]);
+    mockGetFieldValidation.mockReturnValue({ hasError: false });
+
+    // Reset API mocks - they return [triggerFunction, stateObject] tuples
+    mockApplyMaster.mockReturnValue({
+      unwrap: vi.fn().mockResolvedValue({
+        employeesEffected: 0,
+        beneficiariesEffected: 0,
+        etvasEffected: 0
+      })
+    });
+
+    mockTriggerRevert.mockReturnValue({
+      unwrap: vi.fn().mockResolvedValue({
+        employeesEffected: 0,
+        beneficiariesEffected: 0,
+        etvasEffected: 0
+      })
+    });
+
+    mockTriggerStatus.mockReturnValue({
+      unwrap: vi.fn().mockResolvedValue({
+        updatedBy: null,
+        updatedTime: null
+      })
+    });
   });
 
   describe("Initial State", () => {
@@ -518,15 +572,13 @@ describe("useProfitShareEditUpdate", () => {
 
   describe("Save Action", () => {
     it("should call applyMaster with correct parameters", async () => {
-      const mockApplyMaster = vi.fn().mockReturnValue({
+      mockApplyMaster.mockReturnValue({
         unwrap: vi.fn().mockResolvedValue({
           employeesEffected: 100,
           beneficiariesEffected: 50,
           etvasEffected: 150
         })
       });
-
-      (YearsEndApi.useGetMasterApplyMutation as ReturnType<typeof vi.fn>).mockReturnValue([mockApplyMaster]);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
@@ -545,15 +597,13 @@ describe("useProfitShareEditUpdate", () => {
     });
 
     it("should handle save success", async () => {
-      const mockApplyMaster = vi.fn().mockReturnValue({
+      mockApplyMaster.mockReturnValue({
         unwrap: vi.fn().mockResolvedValue({
           employeesEffected: 100,
           beneficiariesEffected: 50,
           etvasEffected: 150
         })
       });
-
-      (YearsEndApi.useGetMasterApplyMutation as ReturnType<typeof vi.fn>).mockReturnValue([mockApplyMaster]);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
@@ -569,11 +619,9 @@ describe("useProfitShareEditUpdate", () => {
     });
 
     it("should handle save errors gracefully", async () => {
-      const mockApplyMaster = vi.fn().mockReturnValue({
+      mockApplyMaster.mockReturnValue({
         unwrap: vi.fn().mockRejectedValue(new Error("API Error"))
       });
-
-      (YearsEndApi.useGetMasterApplyMutation as ReturnType<typeof vi.fn>).mockReturnValue([mockApplyMaster]);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
@@ -595,7 +643,7 @@ describe("useProfitShareEditUpdate", () => {
 
   describe("Revert Action", () => {
     it("should call triggerRevert with correct parameters", async () => {
-      const mockRevert = vi.fn().mockReturnValue({
+      mockTriggerRevert.mockReturnValue({
         unwrap: vi.fn().mockResolvedValue({
           employeesEffected: 100,
           beneficiariesEffected: 50,
@@ -603,15 +651,13 @@ describe("useProfitShareEditUpdate", () => {
         })
       });
 
-      (YearsEndApi.useLazyGetMasterRevertQuery as ReturnType<typeof vi.fn>).mockReturnValue([mockRevert]);
-
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
       await act(async () => {
         await result.current.revertAction();
       });
 
-      expect(mockRevert).toHaveBeenCalledWith(
+      expect(mockTriggerRevert).toHaveBeenCalledWith(
         expect.objectContaining({
           profitYear: 2024
         }),
@@ -620,15 +666,13 @@ describe("useProfitShareEditUpdate", () => {
     });
 
     it("should handle revert success", async () => {
-      const mockRevert = vi.fn().mockReturnValue({
+      mockTriggerRevert.mockReturnValue({
         unwrap: vi.fn().mockResolvedValue({
           employeesEffected: 100,
           beneficiariesEffected: 50,
           etvasEffected: 150
         })
       });
-
-      (YearsEndApi.useLazyGetMasterRevertQuery as ReturnType<typeof vi.fn>).mockReturnValue([mockRevert]);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
@@ -641,11 +685,9 @@ describe("useProfitShareEditUpdate", () => {
     });
 
     it("should handle revert errors gracefully", async () => {
-      const mockRevert = vi.fn().mockReturnValue({
+      mockTriggerRevert.mockReturnValue({
         unwrap: vi.fn().mockRejectedValue(new Error("API Error"))
       });
-
-      (YearsEndApi.useLazyGetMasterRevertQuery as ReturnType<typeof vi.fn>).mockReturnValue([mockRevert]);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
@@ -665,14 +707,12 @@ describe("useProfitShareEditUpdate", () => {
 
   describe("Status Fetching", () => {
     it("should fetch profit master status on mount when token present", async () => {
-      const mockTriggerStatus = vi.fn().mockReturnValue({
+      mockTriggerStatus.mockReturnValue({
         unwrap: vi.fn().mockResolvedValue({
           updatedBy: "John Doe",
           updatedTime: "2024-01-15T10:30:00Z"
         })
       });
-
-      (YearsEndApi.useLazyGetProfitMasterStatusQuery as ReturnType<typeof vi.fn>).mockReturnValue([mockTriggerStatus]);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
@@ -683,14 +723,12 @@ describe("useProfitShareEditUpdate", () => {
     });
 
     it("should mark changes as applied when status has updatedTime", async () => {
-      const mockTriggerStatus = vi.fn().mockReturnValue({
+      mockTriggerStatus.mockReturnValue({
         unwrap: vi.fn().mockResolvedValue({
           updatedBy: "Jane Smith",
           updatedTime: "2024-01-15T14:45:00Z"
         })
       });
-
-      (YearsEndApi.useLazyGetProfitMasterStatusQuery as ReturnType<typeof vi.fn>).mockReturnValue([mockTriggerStatus]);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 
@@ -700,11 +738,9 @@ describe("useProfitShareEditUpdate", () => {
     });
 
     it("should handle status fetch errors gracefully", async () => {
-      const mockTriggerStatus = vi.fn().mockReturnValue({
+      mockTriggerStatus.mockReturnValue({
         unwrap: vi.fn().mockRejectedValue(new Error("Status fetch failed"))
       });
-
-      (YearsEndApi.useLazyGetProfitMasterStatusQuery as ReturnType<typeof vi.fn>).mockReturnValue([mockTriggerStatus]);
 
       const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {
         // Mock implementation
@@ -731,8 +767,8 @@ describe("useProfitShareEditUpdate", () => {
 
   describe("Validation Data Integration", () => {
     it("should integrate with useChecksumValidation hook", () => {
-      const mockGetFieldValidation = vi.fn().mockReturnValue({ hasError: false } as ValidationFieldResult);
-      (useChecksumValidationModule.useChecksumValidation as ReturnType<typeof vi.fn>).mockReturnValue({
+      mockGetFieldValidation.mockReturnValue({ hasError: false } as ValidationFieldResult);
+      mockUseChecksumValidation.mockReturnValue({
         validationData: { field1: { hasError: false } },
         getFieldValidation: mockGetFieldValidation
       } as ChecksumValidationResult);

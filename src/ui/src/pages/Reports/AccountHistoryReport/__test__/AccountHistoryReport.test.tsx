@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
-import { AccountHistoryReportRequest } from "../../../types/reports/AccountHistoryReportTypes";
+import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
+import { AccountHistoryReportRequest } from "../../../../types/reports/AccountHistoryReportTypes";
 
 /**
  * PS-#### : Unit tests for AccountHistoryReport pagination and filtering logic

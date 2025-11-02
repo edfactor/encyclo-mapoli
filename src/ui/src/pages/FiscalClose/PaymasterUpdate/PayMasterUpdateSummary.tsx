@@ -52,7 +52,9 @@ const PayMasterUpdateSummary = () => {
     );
 
     return (
-      <Stack direction="row" spacing={2}>
+      <Stack
+        direction="row"
+        spacing={2}>
         {isReadOnly ? (
           <Tooltip title="You are in read-only mode and cannot update enrollment.">
             <span>{updateButton}</span>
@@ -75,12 +77,20 @@ const PayMasterUpdateSummary = () => {
   };
 
   return (
-    <Page label={CAPTIONS.PAY450_SUMMARY} actionNode={renderActionNode()}>
+    <Page
+      label={CAPTIONS.PAY450_SUMMARY}
+      actionNode={renderActionNode()}>
       <ApiMessageAlert commonKey="UpdateEnrollment" />
-      <Grid container rowSpacing="24px">
+      <Grid
+        container
+        rowSpacing="24px">
         <Grid width="100%">
           <DSMAccordion title="Filter">
-            <PayMasterUpdateSearchFilters onSearch={onSearch} onReset={onReset} setPageReset={setPageNumberReset} />
+            <PayMasterUpdateSearchFilters
+              onSearch={onSearch}
+              onReset={onReset}
+              setPageReset={setPageNumberReset}
+            />
           </DSMAccordion>
         </Grid>
 
@@ -126,11 +136,24 @@ const PayMasterUpdateSummary = () => {
         open={isModalOpen}
         onClose={handleCancel}
         actions={[
-          <Button onClick={handleUpdate} variant="contained" color="primary" disabled={isUpdating} className="mr-2">
+          <Button
+            onClick={handleUpdate}
+            variant="contained"
+            color="primary"
+            disabled={isUpdating}
+            className="mr-2">
             Yes, Update
-            {isUpdating && <CircularProgress size={"15px"} color={"inherit"} />}
+            {isUpdating && (
+              <CircularProgress
+                size={"15px"}
+                color={"inherit"}
+              />
+            )}
           </Button>,
-          <Button onClick={handleCancel} variant="outlined" disabled={isUpdating}>
+          <Button
+            onClick={handleCancel}
+            variant="outlined"
+            disabled={isUpdating}>
             No, Cancel
           </Button>
         ]}

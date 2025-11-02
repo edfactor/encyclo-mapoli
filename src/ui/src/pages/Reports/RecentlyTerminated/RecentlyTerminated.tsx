@@ -15,7 +15,9 @@ const RecentlyTerminatedContent = () => {
   const { missiveAlerts } = useMissiveAlerts();
 
   return (
-    <Grid container rowSpacing="24px">
+    <Grid
+      container
+      rowSpacing="24px">
       <Grid width="100%">
         <Divider />
       </Grid>
@@ -24,7 +26,10 @@ const RecentlyTerminatedContent = () => {
 
       <Grid width="100%">
         <DSMAccordion title="Filter">
-          <RecentlyTerminatedSearchFilter onSearch={executeSearch} onReset={resetSearch} />
+          <RecentlyTerminatedSearchFilter
+            onSearch={executeSearch}
+            onReset={resetSearch}
+          />
         </DSMAccordion>
       </Grid>
 
@@ -47,7 +52,9 @@ const RecentlyTerminated = () => {
   };
 
   return (
-    <Page label={CAPTIONS.RECENTLY_TERMINATED} actionNode={renderActionNode()}>
+    <Page
+      label={CAPTIONS.RECENTLY_TERMINATED}
+      actionNode={renderActionNode()}>
       <MissiveAlertProvider>
         <RecentlyTerminatedContent />
       </MissiveAlertProvider>

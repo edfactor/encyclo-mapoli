@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import React from "react";
 import { Provider } from "react-redux";
-import { useBeneficiaryKinds } from "./useBeneficiaryKinds";
+import { useBeneficiaryKinds } from "../useBeneficiaryKinds";
 import { BeneficiaryKindDto } from "reduxstore/types";
 import { configureStore, type PreloadedState } from "@reduxjs/toolkit";
 import securityReducer, { type SecurityState } from "reduxstore/slices/securitySlice";
@@ -37,14 +37,10 @@ function createMockStore(preloadedState?: MockStoreState) {
   });
 }
 
-function renderHookWithProvider<T>(
-  hook: () => T,
-  preloadedState?: MockStoreState
-) {
+function renderHookWithProvider<T>(hook: () => T, preloadedState?: MockStoreState) {
   const store = createMockStore(preloadedState || { security: { token: "mock-token", user: null } });
   return renderHook(() => hook(), {
-    wrapper: ({ children }: { children: React.ReactNode }) =>
-      React.createElement(Provider, { store, children })
+    wrapper: ({ children }: { children: React.ReactNode }) => React.createElement(Provider, { store, children })
   });
 }
 
@@ -58,10 +54,7 @@ describe("useBeneficiaryKinds", () => {
       unwrap: vi.fn().mockResolvedValue({ beneficiaryKindList: mockBeneficiaryKinds })
     });
 
-    const { result } = renderHookWithProvider(
-      () => useBeneficiaryKinds(),
-      { security: { token: null, user: null } }
-    );
+    const { result } = renderHookWithProvider(() => useBeneficiaryKinds(), { security: { token: null, user: null } });
 
     expect(result.current.isLoading).toBe(false);
     expect(result.current.beneficiaryKinds).toEqual([]);
@@ -174,10 +167,7 @@ describe("useBeneficiaryKinds", () => {
       unwrap: vi.fn().mockResolvedValue({ beneficiaryKindList: mockBeneficiaryKinds })
     });
 
-    const { result } = renderHookWithProvider(
-      () => useBeneficiaryKinds(),
-      { security: { token: null, user: null } }
-    );
+    const { result } = renderHookWithProvider(() => useBeneficiaryKinds(), { security: { token: null, user: null } });
 
     expect(result.current.beneficiaryKinds).toEqual([]);
     expect(result.current.error).toBeNull();
@@ -202,9 +192,11 @@ describe("useBeneficiaryKinds", () => {
   });
 
   it("should match API loading state", async () => {
-    const mockUnwrap = vi.fn().mockImplementation(
-      () => new Promise((resolve) => setTimeout(() => resolve({ beneficiaryKindList: mockBeneficiaryKinds }), 100))
-    );
+    const mockUnwrap = vi
+      .fn()
+      .mockImplementation(
+        () => new Promise((resolve) => setTimeout(() => resolve({ beneficiaryKindList: mockBeneficiaryKinds }), 100))
+      );
 
     mockTriggerGetBeneficiaryKind.mockReturnValue({
       unwrap: mockUnwrap

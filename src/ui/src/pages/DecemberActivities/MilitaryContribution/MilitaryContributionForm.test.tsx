@@ -9,10 +9,7 @@ import MilitaryContributionForm from "./MilitaryContributionForm";
 const mockCreateMilitaryContribution = vi.fn();
 
 vi.mock("../../../reduxstore/api/MilitaryApi", () => ({
-  useCreateMilitaryContributionMutation: () => [
-    mockCreateMilitaryContribution,
-    { isLoading: false }
-  ]
+  useCreateMilitaryContributionMutation: () => [mockCreateMilitaryContribution, { isLoading: false }]
 }));
 
 // Mock form validators

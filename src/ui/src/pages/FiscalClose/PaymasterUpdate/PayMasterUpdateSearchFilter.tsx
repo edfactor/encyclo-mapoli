@@ -80,8 +80,14 @@ const PayMasterUpdateSearchFilters: React.FC<ProfitYearSearchFilterProps> = ({ o
         </Grid>
       </Grid>
 
-      <Grid width="100%" paddingX="24px">
-        <SearchAndReset handleReset={handleReset} handleSearch={validateAndSubmit} disabled={!isValid} />
+      <Grid
+        width="100%"
+        paddingX="24px">
+        <SearchAndReset
+          handleReset={handleReset}
+          handleSearch={validateAndSubmit}
+          disabled={!isValid}
+        />
       </Grid>
     </form>
   );

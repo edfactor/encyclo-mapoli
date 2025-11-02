@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
-import MasterInquiryMemberDetails from "./MasterInquiryMemberDetails";
+import { MissiveAlertProvider } from "../../../../components/MissiveAlerts/MissiveAlertContext";
+import MasterInquiryMemberDetails from "../MasterInquiryMemberDetails";
 
 // Helper function to render components with MissiveAlertProvider
 const renderWithProvider = (component: React.ReactElement) => {

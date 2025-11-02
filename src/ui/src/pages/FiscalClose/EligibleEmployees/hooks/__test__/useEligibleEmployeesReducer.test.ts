@@ -5,7 +5,7 @@ import {
   selectHasResults,
   selectShowData,
   type EligibleEmployeesState
-} from "./useEligibleEmployeesReducer";
+} from "../useEligibleEmployeesReducer";
 
 describe("useEligibleEmployeesReducer", () => {
   describe("initialState", () => {

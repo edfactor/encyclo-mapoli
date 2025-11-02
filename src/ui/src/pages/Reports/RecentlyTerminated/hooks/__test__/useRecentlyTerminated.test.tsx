@@ -3,10 +3,10 @@ import * as useLazyGetRecentlyTerminatedReportQuery from "reduxstore/api/YearsEn
 import { RecentlyTerminatedDetail } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import * as useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
-import * as useGridPagination from "../../../../hooks/useGridPagination";
-import * as useMissiveAlerts from "../../../../hooks/useMissiveAlerts";
-import useRecentlyTerminated from "./useRecentlyTerminated";
+import * as useDecemberFlowProfitYear from "../../../../../hooks/useDecemberFlowProfitYear";
+import * as useGridPagination from "../../../../../hooks/useGridPagination";
+import * as useMissiveAlerts from "../../../../../hooks/useMissiveAlerts";
+import useRecentlyTerminated from "../useRecentlyTerminated";
 
 interface MockPaged<T> extends Paged<T> {
   items: T[];
@@ -52,15 +52,17 @@ const createMockPagedData = (items: RecentlyTerminatedDetail[] = []): MockPaged<
 });
 
 // Create mock paged data response (this is what the API returns after unwrap)
-const createMockRecentlyTerminatedResponse = (items: RecentlyTerminatedDetail[] = []) =>
-  createMockPagedData(items);
+const createMockRecentlyTerminatedResponse = (items: RecentlyTerminatedDetail[] = []) => createMockPagedData(items);
 
 // Helper to create RTK Query-like promise with unwrap method
 interface RTKQueryPromise<T> extends Promise<{ data: T }> {
   unwrap: () => Promise<T>;
 }
 
-const createMockRTKQueryPromise = (data: Paged<RecentlyTerminatedDetail> | null = null, error: unknown = null): RTKQueryPromise<Paged<RecentlyTerminatedDetail> | null> => {
+const createMockRTKQueryPromise = (
+  data: Paged<RecentlyTerminatedDetail> | null = null,
+  error: unknown = null
+): RTKQueryPromise<Paged<RecentlyTerminatedDetail> | null> => {
   const promise = error ? Promise.reject(error) : Promise.resolve({ data });
 
   if (error) {
@@ -130,7 +132,20 @@ describe("useRecentlyTerminated", () => {
 
     vi.spyOn(useLazyGetRecentlyTerminatedReportQuery, "useLazyGetRecentlyTerminatedReportQuery").mockReturnValue([
       mockTriggerSearch,
-      { data: undefined, isLoading: false, isSuccess: false, isError: false, error: null, isFetching: false, isUninitialized: true, currentData: undefined, requestId: undefined, endpointName: "getRecentlyTerminatedReport", startedTimeStamp: undefined, fulfilledTimeStamp: undefined },
+      {
+        data: undefined,
+        isLoading: false,
+        isSuccess: false,
+        isError: false,
+        error: null,
+        isFetching: false,
+        isUninitialized: true,
+        currentData: undefined,
+        requestId: undefined,
+        endpointName: "getRecentlyTerminatedReport",
+        startedTimeStamp: undefined,
+        fulfilledTimeStamp: undefined
+      },
       { lastArg: undefined, requestStatus: "uninitialized" }
     ] as unknown as ReturnType<typeof useLazyGetRecentlyTerminatedReportQuery.useLazyGetRecentlyTerminatedReportQuery>);
   });
@@ -728,9 +743,7 @@ describe("useRecentlyTerminated", () => {
     });
 
     it("should handle empty search results", async () => {
-      mockTriggerSearch.mockImplementation(() =>
-        createMockRTKQueryPromise(createMockRecentlyTerminatedResponse([]))
-      );
+      mockTriggerSearch.mockImplementation(() => createMockRTKQueryPromise(createMockRecentlyTerminatedResponse([])));
 
       const { result } = renderHook(() => useRecentlyTerminated());
 

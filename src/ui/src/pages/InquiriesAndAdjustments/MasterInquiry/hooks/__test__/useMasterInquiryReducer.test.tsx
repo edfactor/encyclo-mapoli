@@ -7,7 +7,7 @@ import {
   selectShowProfitDetails,
   type MasterInquiryState,
   type SelectedMember
-} from "./useMasterInquiryReducer";
+} from "../useMasterInquiryReducer";
 
 describe("useMasterInquiryReducer", () => {
   describe("initialState", () => {

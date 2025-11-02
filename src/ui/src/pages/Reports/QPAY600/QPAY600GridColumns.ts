@@ -15,7 +15,12 @@ export const GetQPAY600GridColumns = (): ColDef[] => {
           return params.value?.toString() || "";
         }
       }),
-      comparator: (_valueA: string, _valueB: string, nodeA: IRowNode<PayServicesDto>, nodeB: IRowNode<PayServicesDto>) => {
+      comparator: (
+        _valueA: string,
+        _valueB: string,
+        nodeA: IRowNode<PayServicesDto>,
+        nodeB: IRowNode<PayServicesDto>
+      ) => {
         // Use the numeric yearsOfService for sorting instead of the label
         const numA = nodeA.data?.yearsOfService ?? 0;
         const numB = nodeB.data?.yearsOfService ?? 0;

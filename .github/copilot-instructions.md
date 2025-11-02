@@ -324,7 +324,7 @@ For comprehensive implementation details, see these dedicated guides:
 - Year-End-Testability-And-Acceptance-Criteria.md (`src/ui/public/docs/`) - Year-end processing tests
 
 ### Front End Tests
-- fe-write-unit-tests-for-hooks.md ('ai-templates/front-end/') Guide to writing tests for react hooks
+- fe-unit-tests.md ('ai-templates/front-end/') Guide to writing tests for react tests
 
 ## Quick Commands (PowerShell)
 ```pwsh

@@ -77,10 +77,7 @@ export function detectMemberTypeFromBadge(badge: string | number): 0 | 1 | 2 {
  * @param psnSuffix - PSN suffix (can be 0)
  * @returns true if both identifiers are valid
  */
-export function isValidBadgeIdentifiers(
-  badgeNumber?: number,
-  psnSuffix?: number
-): boolean {
+export function isValidBadgeIdentifiers(badgeNumber?: number, psnSuffix?: number): boolean {
   if (!badgeNumber || badgeNumber === null) return false;
   if (psnSuffix === null || psnSuffix === undefined) return false;
   return true;

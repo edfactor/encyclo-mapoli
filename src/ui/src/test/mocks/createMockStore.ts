@@ -19,17 +19,30 @@
 import { configureStore, PreloadedState } from "@reduxjs/toolkit";
 import React, { PropsWithChildren, ReactNode } from "react";
 import { Provider } from "react-redux";
+import { AccountHistoryReportApi } from "../../reduxstore/api/AccountHistoryReportApi";
+import { AdjustmentsApi } from "../../reduxstore/api/AdjustmentsApi";
+import { AppSupportApi } from "../../reduxstore/api/AppSupportApi";
+import { BeneficiariesApi } from "../../reduxstore/api/BeneficiariesApi";
+import { CommonApi } from "../../reduxstore/api/CommonApi";
+import { DistributionApi } from "../../reduxstore/api/DistributionApi";
+import { InquiryApi } from "../../reduxstore/api/InquiryApi";
+import { ItOperationsApi } from "../../reduxstore/api/ItOperationsApi";
+import { LookupsApi } from "../../reduxstore/api/LookupsApi";
+import { MilitaryApi } from "../../reduxstore/api/MilitaryApi";
+import { NavigationApi } from "../../reduxstore/api/NavigationApi";
+import { NavigationStatusApi } from "../../reduxstore/api/NavigationStatusApi";
+import { PayServicesApi } from "../../reduxstore/api/PayServicesApi";
+import { SecurityApi } from "../../reduxstore/api/SecurityApi";
+import { validationApi } from "../../reduxstore/api/ValidationApi";
+import { YearsEndApi } from "../../reduxstore/api/YearsEndApi";
 
 /**
- * Minimal mock store for testing
+ * Mock store for testing with RTK Query support
  *
- * In real projects, you would import actual reducers:
- *   import securityReducer from "../../reduxstore/slices/securitySlice";
- *   import navigationReducer from "../../reduxstore/slices/navigationSlice";
- *   import yearsEndReducer from "../../reduxstore/slices/yearsEndSlice";
+ * Includes all RTK Query API middleware to prevent middleware warnings
+ * in tests that use RTK Query hooks.
  *
- * For now, we provide a factory that creates reducers on-the-fly
- * This is ideal for test isolation and doesn't require importing all slices
+ * For test isolation, we use simple reducers that return initial state.
  */
 
 interface MockRootState {
@@ -45,9 +58,28 @@ interface MockRootState {
         isReadOnly?: boolean;
       }>;
     };
+    profitYearSelectorData?: {
+      profitYears?: Array<{
+        profitYear: number;
+        fiscalBeginDate: string;
+        fiscalEndDate: string;
+        isCurrent?: boolean;
+      }>;
+      currentProfitYear?: number;
+    };
+  };
+  frozen?: {
+    profitYearSelectorData?: Array<{
+      profitYear: number;
+      isFrozen?: boolean;
+    }> | null;
+    [key: string]: unknown;
   };
   yearsEnd?: {
     selectedProfitYear?: number | null;
+    selectedProfitYearForDecemberActivities?: number | null;
+    profitYearSelectorData?: unknown[];
+    yearsEndData?: unknown | null;
     [key: string]: unknown;
   };
   distribution?: {
@@ -55,6 +87,10 @@ interface MockRootState {
   };
   inquiry?: {
     masterInquiryMemberDetails?: unknown;
+    [key: string]: unknown;
+  };
+  lookups?: {
+    missives?: unknown[];
     [key: string]: unknown;
   };
   [key: string]: unknown;
@@ -85,54 +121,115 @@ export const createMockStore = (preloadedState?: PreloadedState<MockRootState>) 
     navigation: {
       navigationData: {
         navigation: []
+      },
+      profitYearSelectorData: {
+        profitYears: [
+          {
+            profitYear: 2024,
+            fiscalBeginDate: "2024-01-01",
+            fiscalEndDate: "2024-12-31",
+            isCurrent: true
+          }
+        ],
+        currentProfitYear: 2024
       }
     },
+    frozen: {
+      profitYearSelectorData: null
+    },
     yearsEnd: {
-      selectedProfitYear: 2024
+      selectedProfitYear: 2024,
+      selectedProfitYearForDecemberActivities: 2024,
+      profitYearSelectorData: [],
+      yearsEndData: null
     },
     distribution: {},
     inquiry: {
       masterInquiryMemberDetails: null
+    },
+    lookups: {
+      missives: []
     }
   };
 
   // Create simple reducers that just return state
   // In real code, these would be actual slice reducers
-  const createSliceReducer = (initialState: unknown) => (
-    state = initialState,
-    _action: unknown
-  ) => state;
+  const createSliceReducer =
+    (initialState: unknown) =>
+    (state = initialState, _action: unknown) =>
+      state;
 
-  const baseReducers = {
-    security: createSliceReducer(preloadedState?.security ?? defaultState.security),
-    navigation: createSliceReducer(
-      preloadedState?.navigation ?? defaultState.navigation
-    ),
-    yearsEnd: createSliceReducer(
-      preloadedState?.yearsEnd ?? defaultState.yearsEnd
-    ),
-    distribution: createSliceReducer(
-      preloadedState?.distribution ?? defaultState.distribution
-    ),
-    inquiry: createSliceReducer(preloadedState?.inquiry ?? defaultState.inquiry)
+  // Deep merge preloaded state with defaults to preserve nested properties
+  const mergedState: MockRootState = {
+    security: { ...defaultState.security, ...preloadedState?.security },
+    navigation: {
+      ...defaultState.navigation,
+      ...preloadedState?.navigation,
+      profitYearSelectorData: {
+        ...defaultState.navigation.profitYearSelectorData,
+        ...preloadedState?.navigation?.profitYearSelectorData
+      }
+    },
+    frozen: { ...defaultState.frozen, ...preloadedState?.frozen },
+    yearsEnd: { ...defaultState.yearsEnd, ...preloadedState?.yearsEnd },
+    distribution: { ...defaultState.distribution, ...preloadedState?.distribution },
+    inquiry: { ...defaultState.inquiry, ...preloadedState?.inquiry },
+    lookups: { ...defaultState.lookups, ...preloadedState?.lookups }
   };
 
-  // Add lookupsApi reducer and middleware if mocked in tests
-  // This allows tests that mock lookupsApi to work properly
-  const reducers: { [key: string]: unknown } = baseReducers;
-  const lookupsApiReducerPath = "lookupsApi";
+  const baseReducers = {
+    security: createSliceReducer(mergedState.security),
+    navigation: createSliceReducer(mergedState.navigation),
+    frozen: createSliceReducer(mergedState.frozen),
+    yearsEnd: createSliceReducer(mergedState.yearsEnd),
+    distribution: createSliceReducer(mergedState.distribution),
+    inquiry: createSliceReducer(mergedState.inquiry),
+    lookups: createSliceReducer(mergedState.lookups)
+  };
 
-  // Provide fallback for lookupsApi that tests can mock
-  // When tests mock lookupsApi with vi.mock(), these will be replaced
-  const defaultLookupsApiReducer = (state = {}) => state;
-  reducers[lookupsApiReducerPath] = defaultLookupsApiReducer;
+  // Add RTK Query API reducers that tests commonly mock
+  // When tests mock these APIs with vi.mock(), these fallback reducers prevent errors
+  const reducers: { [key: string]: unknown } = baseReducers;
+
+  // Add RTK Query API reducers - must match real store configuration
+  reducers[SecurityApi.reducerPath] = SecurityApi.reducer;
+  reducers[YearsEndApi.reducerPath] = YearsEndApi.reducer;
+  reducers[ItOperationsApi.reducerPath] = ItOperationsApi.reducer;
+  reducers[MilitaryApi.reducerPath] = MilitaryApi.reducer;
+  reducers[InquiryApi.reducerPath] = InquiryApi.reducer;
+  reducers[LookupsApi.reducerPath] = LookupsApi.reducer;
+  reducers[CommonApi.reducerPath] = CommonApi.reducer;
+  reducers[NavigationApi.reducerPath] = NavigationApi.reducer;
+  reducers[AppSupportApi.reducerPath] = AppSupportApi.reducer;
+  reducers[NavigationStatusApi.reducerPath] = NavigationStatusApi.reducer;
+  reducers[BeneficiariesApi.reducerPath] = BeneficiariesApi.reducer;
+  reducers[AdjustmentsApi.reducerPath] = AdjustmentsApi.reducer;
+  reducers[DistributionApi.reducerPath] = DistributionApi.reducer;
+  reducers[PayServicesApi.reducerPath] = PayServicesApi.reducer;
+  reducers[AccountHistoryReportApi.reducerPath] = AccountHistoryReportApi.reducer;
+  reducers[validationApi.reducerPath] = validationApi.reducer;
 
   return configureStore({
     reducer: reducers,
-    middleware: (getDefaultMiddleware) => {
-      // Return default middleware - mocked lookupsApi middleware will be added by test mocks
-      return getDefaultMiddleware();
-    }
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({ serializableCheck: false })
+        // Add all RTK Query API middleware - critical to prevent warnings
+        .concat(SecurityApi.middleware)
+        .concat(YearsEndApi.middleware)
+        .concat(ItOperationsApi.middleware)
+        .concat(MilitaryApi.middleware)
+        .concat(InquiryApi.middleware)
+        .concat(LookupsApi.middleware)
+        .concat(CommonApi.middleware)
+        .concat(NavigationApi.middleware)
+        .concat(AppSupportApi.middleware)
+        .concat(NavigationStatusApi.middleware)
+        .concat(BeneficiariesApi.middleware)
+        .concat(AdjustmentsApi.middleware)
+        .concat(DistributionApi.middleware)
+        .concat(PayServicesApi.middleware)
+        .concat(AccountHistoryReportApi.middleware)
+        .concat(validationApi.middleware)
   });
 };
 
@@ -170,9 +267,7 @@ export const createProviderWrapper = (store: MockStore) => {
  * });
  * render(<Component />, { wrapper });
  */
-export const createMockStoreAndWrapper = (
-  preloadedState?: PreloadedState<MockRootState>
-) => {
+export const createMockStoreAndWrapper = (preloadedState?: PreloadedState<MockRootState>) => {
   const store = createMockStore(preloadedState);
   const wrapper = createProviderWrapper(store);
 
