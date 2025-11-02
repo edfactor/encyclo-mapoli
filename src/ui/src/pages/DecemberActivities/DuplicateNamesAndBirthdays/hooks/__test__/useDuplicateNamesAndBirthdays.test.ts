@@ -1,29 +1,70 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
+import React from "react";
+import { Provider } from "react-redux";
+import { configureStore, type PreloadedState } from "@reduxjs/toolkit";
+import securityReducer, { type SecurityState } from "../../../../../reduxstore/slices/securitySlice";
+import yearsEndReducer, { type YearsEndState } from "../../../../../reduxstore/slices/yearsEndSlice";
 
-// Mock dependencies
-vi.mock("../../../../reduxstore/api/YearsEndApi", () => ({
-  useLazyGetDuplicateNamesAndBirthdaysQuery: vi.fn()
+// Hoist all mock variables to be accessible in vi.mock() calls
+const { mockTriggerSearch, mockUseGridPagination } = vi.hoisted(() => ({
+  mockTriggerSearch: vi.fn(),
+  mockUseGridPagination: vi.fn()
 }));
 
-vi.mock("../../../../hooks/useDecemberFlowProfitYear", () => ({
-  default: vi.fn()
+// Mock RTK Query hook - this must return [triggerFunction, stateObject]
+vi.mock("../../../../reduxstore/api/YearsEndApi", () => ({
+  useLazyGetDuplicateNamesAndBirthdaysQuery: vi.fn(() => [mockTriggerSearch, { isFetching: false }])
 }));
 
 vi.mock("../../../../hooks/useGridPagination", () => ({
-  useGridPagination: vi.fn()
+  useGridPagination: mockUseGridPagination
 }));
 
-vi.mock("react-redux", () => ({
-  useSelector: vi.fn(),
-  useDispatch: vi.fn()
-}));
+import useDuplicateNamesAndBirthdays from "../useDuplicateNamesAndBirthdays";
 
-import useDuplicateNamesAndBirthdays from "./useDuplicateNamesAndBirthdays";
-import * as YearsEndApi from "../../../../reduxstore/api/YearsEndApi";
-import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
-import { useGridPagination } from "../../../../hooks/useGridPagination";
-import { useSelector } from "react-redux";
+type RootState = {
+  security: SecurityState;
+  yearsEnd: YearsEndState;
+};
+
+type MockStoreState = PreloadedState<RootState>;
+
+function createMockStore(preloadedState?: MockStoreState) {
+  return configureStore<RootState>({
+    reducer: {
+      security: securityReducer,
+      yearsEnd: yearsEndReducer
+    } as const,
+    preloadedState: preloadedState as RootState | undefined
+  });
+}
+
+function renderHookWithProvider<T>(hook: () => T, preloadedState?: MockStoreState) {
+  const defaultState: MockStoreState = {
+    security: { token: "mock-token", user: null },
+    yearsEnd: {
+      selectedProfitYearForDecemberActivities: 2024,
+      yearsEndData: null,
+      yearsEndError: null,
+      yearsEndIsLoading: false
+    }
+  };
+
+  const store = createMockStore(preloadedState || defaultState);
+  return renderHook(() => hook(), {
+    wrapper: ({ children }: { children: React.ReactNode }) => React.createElement(Provider, { store, children })
+  });
+}
+
+const mockPaginationObject = {
+  pageNumber: 0,
+  pageSize: 25,
+  sortParams: { sortBy: "name", isSortDescending: false },
+  handlePaginationChange: vi.fn(),
+  handleSortChange: vi.fn(),
+  resetPagination: vi.fn()
+};
 
 const mockDuplicateData = {
   results: [
@@ -41,99 +82,63 @@ const mockDuplicateData = {
 describe("useDuplicateNamesAndBirthdays", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Reset RTK Query hook to return default state
+    mockTriggerSearch.mockReturnValue({
+      unwrap: vi.fn()
+    });
   });
 
   it("should not fetch when token is missing", () => {
-    const mockTriggerSearch = vi.fn();
-    vi.mocked(YearsEndApi.useLazyGetDuplicateNamesAndBirthdaysQuery).mockReturnValue([
-      mockTriggerSearch,
-      { isFetching: false }
-    ] as unknown as ReturnType<typeof vi.fn>);
+    // Setup mocks
+    mockUseGridPagination.mockReturnValue(mockPaginationObject);
 
-    vi.mocked(useSelector).mockReturnValue(null);
-    vi.mocked(useDecemberFlowProfitYear).mockReturnValue(2024);
-    vi.mocked(useGridPagination).mockReturnValue({
-      pageNumber: 0,
-      pageSize: 25,
-      sortParams: { sortBy: "name", isSortDescending: false },
-      handlePaginationChange: vi.fn(),
-      handleSortChange: vi.fn(),
-      resetPagination: vi.fn()
-    } as unknown as ReturnType<typeof useGridPagination>);
-
-    const { result } = renderHook(() => useDuplicateNamesAndBirthdays());
+    const { result } = renderHookWithProvider(() => useDuplicateNamesAndBirthdays(), {
+      security: { token: null, user: null },
+      yearsEnd: {
+        selectedProfitYearForDecemberActivities: 2024,
+        yearsEndData: null,
+        yearsEndError: null,
+        yearsEndIsLoading: false
+      }
+    });
 
     expect(result.current.isSearching).toBe(false);
   });
 
   it("should not fetch when profitYear is missing", () => {
-    const mockTriggerSearch = vi.fn();
-    vi.mocked(YearsEndApi.useLazyGetDuplicateNamesAndBirthdaysQuery).mockReturnValue([
-      mockTriggerSearch,
-      { isFetching: false }
-    ] as unknown as ReturnType<typeof vi.fn>);
+    // Setup mocks
+    mockUseGridPagination.mockReturnValue(mockPaginationObject);
 
-    vi.mocked(useSelector).mockReturnValue("mock-token");
-    vi.mocked(useDecemberFlowProfitYear).mockReturnValue(null);
-    vi.mocked(useGridPagination).mockReturnValue({
-      pageNumber: 0,
-      pageSize: 25,
-      sortParams: { sortBy: "name", isSortDescending: false },
-      handlePaginationChange: vi.fn(),
-      handleSortChange: vi.fn(),
-      resetPagination: vi.fn()
-    } as unknown as ReturnType<typeof useGridPagination>);
-
-    const { result } = renderHook(() => useDuplicateNamesAndBirthdays());
+    const { result } = renderHookWithProvider(() => useDuplicateNamesAndBirthdays(), {
+      security: { token: "mock-token", user: null },
+      yearsEnd: {
+        selectedProfitYearForDecemberActivities: null,
+        yearsEndData: null,
+        yearsEndError: null,
+        yearsEndIsLoading: false
+      }
+    });
 
     expect(result.current.isSearching).toBe(false);
   });
 
   it("should expose executeSearch function", () => {
-    const mockTriggerSearch = vi.fn().mockReturnValue({
+    // Setup mocks
+    mockTriggerSearch.mockReturnValue({
       unwrap: vi.fn().mockResolvedValue(mockDuplicateData)
     });
+    mockUseGridPagination.mockReturnValue(mockPaginationObject);
 
-    vi.mocked(YearsEndApi.useLazyGetDuplicateNamesAndBirthdaysQuery).mockReturnValue([
-      mockTriggerSearch,
-      { isFetching: false }
-    ] as unknown as ReturnType<typeof vi.fn>);
-
-    vi.mocked(useSelector).mockReturnValue("mock-token");
-    vi.mocked(useDecemberFlowProfitYear).mockReturnValue(2024);
-    vi.mocked(useGridPagination).mockReturnValue({
-      pageNumber: 0,
-      pageSize: 25,
-      sortParams: { sortBy: "name", isSortDescending: false },
-      handlePaginationChange: vi.fn(),
-      handleSortChange: vi.fn(),
-      resetPagination: vi.fn()
-    } as unknown as ReturnType<typeof useGridPagination>);
-
-    const { result } = renderHook(() => useDuplicateNamesAndBirthdays());
+    const { result } = renderHookWithProvider(() => useDuplicateNamesAndBirthdays());
 
     expect(typeof result.current.executeSearch).toBe("function");
   });
 
   it("should expose pagination object", () => {
-    const mockTriggerSearch = vi.fn();
-    vi.mocked(YearsEndApi.useLazyGetDuplicateNamesAndBirthdaysQuery).mockReturnValue([
-      mockTriggerSearch,
-      { isFetching: false }
-    ] as unknown as ReturnType<typeof vi.fn>);
+    // Setup mocks
+    mockUseGridPagination.mockReturnValue(mockPaginationObject);
 
-    vi.mocked(useSelector).mockReturnValue("mock-token");
-    vi.mocked(useDecemberFlowProfitYear).mockReturnValue(2024);
-    vi.mocked(useGridPagination).mockReturnValue({
-      pageNumber: 0,
-      pageSize: 25,
-      sortParams: { sortBy: "name", isSortDescending: false },
-      handlePaginationChange: vi.fn(),
-      handleSortChange: vi.fn(),
-      resetPagination: vi.fn()
-    } as unknown as ReturnType<typeof useGridPagination>);
-
-    const { result } = renderHook(() => useDuplicateNamesAndBirthdays());
+    const { result } = renderHookWithProvider(() => useDuplicateNamesAndBirthdays());
 
     expect(result.current.pagination).toBeDefined();
     expect(result.current.pagination.pageNumber).toBe(0);
@@ -141,110 +146,48 @@ describe("useDuplicateNamesAndBirthdays", () => {
   });
 
   it("should expose showData selector", () => {
-    const mockTriggerSearch = vi.fn();
-    vi.mocked(YearsEndApi.useLazyGetDuplicateNamesAndBirthdaysQuery).mockReturnValue([
-      mockTriggerSearch,
-      { isFetching: false }
-    ] as unknown as ReturnType<typeof vi.fn>);
+    // Setup mocks
+    mockUseGridPagination.mockReturnValue(mockPaginationObject);
 
-    vi.mocked(useSelector).mockReturnValue("mock-token");
-    vi.mocked(useDecemberFlowProfitYear).mockReturnValue(2024);
-    vi.mocked(useGridPagination).mockReturnValue({
-      pageNumber: 0,
-      pageSize: 25,
-      sortParams: { sortBy: "name", isSortDescending: false },
-      handlePaginationChange: vi.fn(),
-      handleSortChange: vi.fn(),
-      resetPagination: vi.fn()
-    } as unknown as ReturnType<typeof useGridPagination>);
-
-    const { result } = renderHook(() => useDuplicateNamesAndBirthdays());
+    const { result } = renderHookWithProvider(() => useDuplicateNamesAndBirthdays());
 
     expect(typeof result.current.showData).toBe("boolean");
   });
 
   it("should expose hasResults selector", () => {
-    const mockDuplicateData = {
-      response: {
-        results: [
-          {
-            id: 1,
-            firstName: "John",
-            lastName: "Smith",
-            dateOfBirth: "1990-01-15",
-            badgeNumber: 123456
-          }
-        ]
-      },
-      pageInfo: { pageNumber: 0, pageSize: 25, totalPages: 1, totalCount: 1 }
-    };
-
-    const mockTriggerSearch = vi.fn().mockReturnValue({
+    // Setup mocks
+    mockTriggerSearch.mockReturnValue({
       unwrap: vi.fn().mockResolvedValue(mockDuplicateData)
     });
-    vi.mocked(YearsEndApi.useLazyGetDuplicateNamesAndBirthdaysQuery).mockReturnValue([
-      mockTriggerSearch,
-      { isFetching: false }
-    ] as unknown as ReturnType<typeof vi.fn>);
+    mockUseGridPagination.mockReturnValue(mockPaginationObject);
 
-    vi.mocked(useSelector).mockReturnValue("mock-token");
-    vi.mocked(useDecemberFlowProfitYear).mockReturnValue(2024);
-    vi.mocked(useGridPagination).mockReturnValue({
-      pageNumber: 0,
-      pageSize: 25,
-      sortParams: { sortBy: "name", isSortDescending: false },
-      handlePaginationChange: vi.fn(),
-      handleSortChange: vi.fn(),
-      resetPagination: vi.fn()
-    } as unknown as ReturnType<typeof useGridPagination>);
-
-    const { result } = renderHook(() => useDuplicateNamesAndBirthdays());
+    const { result } = renderHookWithProvider(() => useDuplicateNamesAndBirthdays());
 
     expect(typeof result.current.hasResults).toBe("boolean");
   });
 
   it("should return null searchParams initially", () => {
-    const mockTriggerSearch = vi.fn();
-    vi.mocked(YearsEndApi.useLazyGetDuplicateNamesAndBirthdaysQuery).mockReturnValue([
-      mockTriggerSearch,
-      { isFetching: false }
-    ] as unknown as ReturnType<typeof vi.fn>);
+    // Setup mocks
+    mockUseGridPagination.mockReturnValue(mockPaginationObject);
 
-    vi.mocked(useSelector).mockReturnValue("mock-token");
-    vi.mocked(useDecemberFlowProfitYear).mockReturnValue(null);
-    vi.mocked(useGridPagination).mockReturnValue({
-      pageNumber: 0,
-      pageSize: 25,
-      sortParams: { sortBy: "name", isSortDescending: false },
-      handlePaginationChange: vi.fn(),
-      handleSortChange: vi.fn(),
-      resetPagination: vi.fn()
-    } as unknown as ReturnType<typeof useGridPagination>);
-
-    const { result } = renderHook(() => useDuplicateNamesAndBirthdays());
+    const { result } = renderHookWithProvider(() => useDuplicateNamesAndBirthdays(), {
+      security: { token: "mock-token", user: null },
+      yearsEnd: {
+        selectedProfitYearForDecemberActivities: null,
+        yearsEndData: null,
+        yearsEndError: null,
+        yearsEndIsLoading: false
+      }
+    });
 
     expect(result.current.searchParams).toBeNull();
   });
 
   it("should expose isSearching state", () => {
-    const mockTriggerSearch = vi.fn();
-    vi.mocked(YearsEndApi.useLazyGetDuplicateNamesAndBirthdaysQuery).mockReturnValue([
-      mockTriggerSearch,
-      { isFetching: true }
-    ] as unknown as ReturnType<typeof vi.fn>);
+    // Setup mocks - the hook returns isSearching || state.search.isLoading
+    mockUseGridPagination.mockReturnValue(mockPaginationObject);
 
-    vi.mocked(useSelector).mockReturnValue("mock-token");
-    vi.mocked(useDecemberFlowProfitYear).mockReturnValue(2024);
-    vi.mocked(useGridPagination).mockReturnValue({
-      pageNumber: 0,
-      pageSize: 25,
-      sortParams: { sortBy: "name", isSortDescending: false },
-      handlePaginationChange: vi.fn(),
-      handleSortChange: vi.fn(),
-      resetPagination: vi.fn()
-    } as unknown as ReturnType<typeof useGridPagination>);
-
-    const { result } = renderHook(() => useDuplicateNamesAndBirthdays());
+    const { result } = renderHookWithProvider(() => useDuplicateNamesAndBirthdays());
 
     expect(typeof result.current.isSearching).toBe("boolean");
   });

@@ -15,12 +15,7 @@ const schema = yup.object().shape({
   profitYear: yup.date().nullable().required("Profit Year is required"),
   employeeType: yup
     .string()
-    .oneOf([
-      "parttime",
-      "fulltimesalaried",
-      "fulltimehourlyearned",
-      "fulltimehourlyaccrued"
-    ])
+    .oneOf(["parttime", "fulltimesalaried", "fulltimehourlyearned", "fulltimehourlyaccrued"])
     .default("parttime")
 });
 

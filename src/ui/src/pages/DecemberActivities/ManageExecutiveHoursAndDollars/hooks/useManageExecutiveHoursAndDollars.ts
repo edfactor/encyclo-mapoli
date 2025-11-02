@@ -161,19 +161,19 @@ const useManageExecutiveHoursAndDollars = ({ addAlert, clearAlerts }: UseManageE
         clearAlerts();
 
         const response = await triggerSearch(searchParams).unwrap();
-        
+
         // Check if we have results
         const hasResults = response?.response?.results?.length > 0;
-        
+
         if (hasResults) {
           dispatch({ type: "SEARCH_SUCCESS", payload: { results: response } });
         } else {
           // No results found
           dispatch({ type: "SEARCH_SUCCESS", payload: { results: response } });
-          
+
           // Determine which message to show based on search type
           const isSimple = isSimpleSearch(searchParams);
-          
+
           if (isSimple) {
             addAlert(EXECUTIVE_HOURS_AND_DOLLARS_MESSAGES.MEMBER_NOT_FOUND);
           } else {

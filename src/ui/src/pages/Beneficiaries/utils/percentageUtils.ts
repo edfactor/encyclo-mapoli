@@ -67,15 +67,11 @@ export function calculatePercentageSum(
  * @param sum - Total percentage to validate
  * @returns Object with validation result and optional error message
  */
-export function validatePercentageAllocation(
-  sum: number
-): PercentageValidationResult {
+export function validatePercentageAllocation(sum: number): PercentageValidationResult {
   return {
     sum,
     valid: sum <= 100,
     error:
-      sum > 100
-        ? `Total percentage would be ${sum}%. Beneficiary percentages must sum to 100% or less.`
-        : undefined
+      sum > 100 ? `Total percentage would be ${sum}%. Beneficiary percentages must sum to 100% or less.` : undefined
   };
 }

@@ -4,7 +4,7 @@ import {
   detectMemberTypeFromBadge,
   isValidBadgeIdentifiers,
   decomposePSNSuffix
-} from "./badgeUtils";
+} from "../badgeUtils";
 
 describe("badgeUtils", () => {
   describe("parseBadgeAndPSN", () => {

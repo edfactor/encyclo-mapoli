@@ -93,11 +93,7 @@ export function prepareBulkSaveRequests(
  * generateSaveSuccessMessage("termination", "Smith, Jane", 2000)
  * // Returns: "Successfully saved forfeiture of $2,000.00 for Smith, Jane"
  */
-export function generateSaveSuccessMessage(
-  activityType: ActivityType,
-  memberName: string,
-  amount: number
-): string {
+export function generateSaveSuccessMessage(activityType: ActivityType, memberName: string, amount: number): string {
   const operationType = activityType === "unforfeit" ? "unforfeiture" : "forfeiture";
   const formattedAmount = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -160,10 +156,7 @@ export function generateBulkSaveSuccessMessage(
  * );
  * // Returns: ["123-2025"]
  */
-export function getRowKeysForRequests(
-  config: ActivityConfig,
-  requests: ForfeitureAdjustmentUpdateRequest[]
-): string[] {
+export function getRowKeysForRequests(config: ActivityConfig, requests: ForfeitureAdjustmentUpdateRequest[]): string[] {
   return requests.map((req) =>
     generateRowKey(config.rowKeyConfig, {
       badgeNumber: req.badgeNumber,

@@ -9,7 +9,9 @@ import DistributionsAndForfeituresSearchFilter from "../DistributionsAndForfeitu
 vi.mock("../DistributionsAndForfeituresSearchFilter", () => ({
   default: vi.fn(({ setInitialSearchLoaded: _setInitialSearchLoaded, isFetching }: Record<string, unknown>) => (
     <div data-testid="search-filter">
-      <button onClick={() => (_setInitialSearchLoaded as (val: boolean) => void)(true)} data-testid="search-btn">
+      <button
+        onClick={() => (_setInitialSearchLoaded as (val: boolean) => void)(true)}
+        data-testid="search-btn">
         Search
       </button>
       {isFetching && <div data-testid="fetching">Fetching...</div>}
@@ -18,17 +20,27 @@ vi.mock("../DistributionsAndForfeituresSearchFilter", () => ({
 }));
 
 vi.mock("../DistributionsAndForfeituresGrid", () => ({
-  default: vi.fn(({ setInitialSearchLoaded: _setInitialSearchLoaded, initialSearchLoaded: _initialSearchLoaded, onLoadingChange }: Record<string, unknown>) => (
-    <div data-testid="grid">
-      <button onClick={() => (onLoadingChange as (val: boolean) => void)(true)} data-testid="start-loading">
-        Start Loading
-      </button>
-      <button onClick={() => (onLoadingChange as (val: boolean) => void)(false)} data-testid="stop-loading">
-        Stop Loading
-      </button>
-      Grid Component
-    </div>
-  ))
+  default: vi.fn(
+    ({
+      setInitialSearchLoaded: _setInitialSearchLoaded,
+      initialSearchLoaded: _initialSearchLoaded,
+      onLoadingChange
+    }: Record<string, unknown>) => (
+      <div data-testid="grid">
+        <button
+          onClick={() => (onLoadingChange as (val: boolean) => void)(true)}
+          data-testid="start-loading">
+          Start Loading
+        </button>
+        <button
+          onClick={() => (onLoadingChange as (val: boolean) => void)(false)}
+          data-testid="stop-loading">
+          Stop Loading
+        </button>
+        Grid Component
+      </div>
+    )
+  )
 }));
 
 vi.mock("components/StatusDropdownActionNode", () => ({
@@ -42,13 +54,15 @@ vi.mock("smart-ui-library", () => ({
       {children}
     </div>
   )),
-  Page: vi.fn(({ label, actionNode, children }: { label: string; actionNode?: React.ReactNode; children?: React.ReactNode }) => (
-    <div data-testid="page">
-      <div>{label}</div>
-      {actionNode}
-      {children}
-    </div>
-  ))
+  Page: vi.fn(
+    ({ label, actionNode, children }: { label: string; actionNode?: React.ReactNode; children?: React.ReactNode }) => (
+      <div data-testid="page">
+        <div>{label}</div>
+        {actionNode}
+        {children}
+      </div>
+    )
+  )
 }));
 
 describe("DistributionsAndForfeitures", () => {
@@ -102,7 +116,7 @@ describe("DistributionsAndForfeitures", () => {
       // Verify grid receives initialSearchLoaded prop
       const calls = vi.mocked(DistributionsAndForfeituresGrid).mock.calls;
       expect(calls.length).toBeGreaterThan(0);
-      expect(calls[0][0]).toHaveProperty('initialSearchLoaded', false);
+      expect(calls[0][0]).toHaveProperty("initialSearchLoaded", false);
     });
 
     it("should initialize with isFetching false", () => {
@@ -111,7 +125,7 @@ describe("DistributionsAndForfeitures", () => {
       // Verify search filter receives isFetching prop
       const calls = vi.mocked(DistributionsAndForfeituresSearchFilter).mock.calls;
       expect(calls.length).toBeGreaterThan(0);
-      expect(calls[0][0]).toHaveProperty('isFetching', false);
+      expect(calls[0][0]).toHaveProperty("isFetching", false);
     });
   });
 
@@ -122,8 +136,8 @@ describe("DistributionsAndForfeitures", () => {
       await waitFor(() => {
         const calls = vi.mocked(DistributionsAndForfeituresSearchFilter).mock.calls;
         expect(calls.length).toBeGreaterThan(0);
-        expect(calls[0][0]).toHaveProperty('setInitialSearchLoaded');
-        expect(typeof calls[0][0].setInitialSearchLoaded).toBe('function');
+        expect(calls[0][0]).toHaveProperty("setInitialSearchLoaded");
+        expect(typeof calls[0][0].setInitialSearchLoaded).toBe("function");
       });
     });
 
@@ -133,8 +147,8 @@ describe("DistributionsAndForfeitures", () => {
       await waitFor(() => {
         const calls = vi.mocked(DistributionsAndForfeituresGrid).mock.calls;
         expect(calls.length).toBeGreaterThan(0);
-        expect(calls[0][0]).toHaveProperty('setInitialSearchLoaded');
-        expect(typeof calls[0][0].setInitialSearchLoaded).toBe('function');
+        expect(calls[0][0]).toHaveProperty("setInitialSearchLoaded");
+        expect(typeof calls[0][0].setInitialSearchLoaded).toBe("function");
       });
     });
 
@@ -144,8 +158,8 @@ describe("DistributionsAndForfeitures", () => {
       await waitFor(() => {
         const calls = vi.mocked(DistributionsAndForfeituresGrid).mock.calls;
         expect(calls.length).toBeGreaterThan(0);
-        expect(calls[0][0]).toHaveProperty('onLoadingChange');
-        expect(typeof calls[0][0].onLoadingChange).toBe('function');
+        expect(calls[0][0]).toHaveProperty("onLoadingChange");
+        expect(typeof calls[0][0].onLoadingChange).toBe("function");
       });
     });
   });
@@ -233,7 +247,7 @@ describe("DistributionsAndForfeitures", () => {
         const calls = vi.mocked(DistributionsAndForfeituresGrid).mock.calls;
         expect(calls.length).toBeGreaterThan(0);
         // Find a call where initialSearchLoaded is true
-        const callWithTrue = calls.find(call => call[0].initialSearchLoaded === true);
+        const callWithTrue = calls.find((call) => call[0].initialSearchLoaded === true);
         expect(callWithTrue).toBeDefined();
       });
     });

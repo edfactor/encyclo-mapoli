@@ -126,7 +126,7 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
           />
         </DSMAccordion>
       </Grid>
-      
+
       {isSearching && (
         <Grid
           size={{ xs: 12 }}

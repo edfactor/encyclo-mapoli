@@ -39,6 +39,10 @@ describe("useBalanceValidation", () => {
     it("should fetch validation data when profitYear is provided", async () => {
       const mockValidationData: CrossReferenceValidationGroup = {
         groupName: "ALLOC/PAID ALLOC Transfers",
+        description: null,
+        summary: null,
+        priority: "High",
+        validationRule: null,
         validations: [
           {
             reportCode: "PAY443",
@@ -47,7 +51,9 @@ describe("useBalanceValidation", () => {
             currentValue: 1500,
             isValid: true,
             variance: 0,
-            message: "PAY443.NetAllocTransfer matches archived value"
+            message: "PAY443.NetAllocTransfer matches archived value",
+            archivedAt: null,
+            notes: null
           }
         ],
         isValid: true
@@ -81,12 +87,20 @@ describe("useBalanceValidation", () => {
     it("should update validation data when profitYear changes", async () => {
       const mockData2024: CrossReferenceValidationGroup = {
         groupName: "Test 2024",
+        description: null,
+        summary: null,
+        priority: "High",
+        validationRule: null,
         validations: [],
         isValid: true
       };
 
       const mockData2025: CrossReferenceValidationGroup = {
         groupName: "Test 2025",
+        description: null,
+        summary: null,
+        priority: "High",
+        validationRule: null,
         validations: [],
         isValid: true
       };
@@ -96,8 +110,8 @@ describe("useBalanceValidation", () => {
         json: async () => mockData2024
       });
 
-      const { result, rerender } = renderHook(({ year }) => useBalanceValidation(year), {
-        initialProps: { year: 2024 }
+      const { result, rerender } = renderHook(({ year }: { year: number | null }) => useBalanceValidation(year), {
+        initialProps: { year: 2024 as number | null }
       });
 
       await waitFor(() => {
@@ -191,6 +205,10 @@ describe("useBalanceValidation", () => {
     it("should allow manual refetch via refetch function", async () => {
       const mockValidationData: CrossReferenceValidationGroup = {
         groupName: "Test",
+        description: null,
+        summary: null,
+        priority: "High",
+        validationRule: null,
         validations: [],
         isValid: true
       };
@@ -244,6 +262,10 @@ describe("useBalanceValidation", () => {
     it("should clear state when profitYear changes to null", async () => {
       const mockValidationData: CrossReferenceValidationGroup = {
         groupName: "Test",
+        description: null,
+        summary: null,
+        priority: "High",
+        validationRule: null,
         validations: [],
         isValid: true
       };
@@ -253,8 +275,8 @@ describe("useBalanceValidation", () => {
         json: async () => mockValidationData
       });
 
-      const { result, rerender } = renderHook(({ year }) => useBalanceValidation(year), {
-        initialProps: { year: 2024 }
+      const { result, rerender } = renderHook(({ year }: { year: number | null }) => useBalanceValidation(year), {
+        initialProps: { year: 2024 as number | null }
       });
 
       await waitFor(() => {
@@ -275,13 +297,17 @@ describe("useBalanceValidation", () => {
         ok: true,
         json: async () => ({
           groupName: "Test",
+          description: null,
+          summary: null,
+          priority: "High" as const,
+          validationRule: null,
           validations: [],
           isValid: true
         })
       });
 
-      const { rerender } = renderHook(({ year }) => useBalanceValidation(year), {
-        initialProps: { year: 2024 }
+      const { rerender } = renderHook(({ year }: { year: number | null }) => useBalanceValidation(year), {
+        initialProps: { year: 2024 as number | null }
       });
 
       rerender({ year: 2025 });
@@ -301,6 +327,10 @@ describe("useBalanceValidation", () => {
     it("should handle validation data with multiple validations", async () => {
       const mockValidationData: CrossReferenceValidationGroup = {
         groupName: "ALLOC/PAID ALLOC Transfers",
+        description: null,
+        summary: null,
+        priority: "High",
+        validationRule: null,
         validations: [
           {
             reportCode: "PAY443",
@@ -309,7 +339,9 @@ describe("useBalanceValidation", () => {
             currentValue: 5000,
             isValid: true,
             variance: 0,
-            message: "Match"
+            message: "Match",
+            archivedAt: null,
+            notes: null
           },
           {
             reportCode: "PAY443",
@@ -318,7 +350,9 @@ describe("useBalanceValidation", () => {
             currentValue: 3100,
             isValid: false,
             variance: 100,
-            message: "Does not match"
+            message: "Does not match",
+            archivedAt: null,
+            notes: null
           },
           {
             reportCode: "PAY443",
@@ -327,7 +361,9 @@ describe("useBalanceValidation", () => {
             currentValue: 1900,
             isValid: false,
             variance: -100,
-            message: "Does not match"
+            message: "Does not match",
+            archivedAt: null,
+            notes: null
           }
         ],
         isValid: false

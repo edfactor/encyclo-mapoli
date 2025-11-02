@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { GetMilitaryContributionColumns } from "./MilitaryContributionFormGridColumns";
+import { GetMilitaryContributionColumns } from "../MilitaryContributionFormGridColumns";
 
 // Mock the column factory functions
 vi.mock("../../../utils/gridColumnFactory", () => ({
@@ -113,9 +113,7 @@ describe("MilitaryContributionFormGridColumns", () => {
       // Should use year, currency, yes/no columns from factories
       const usingFactories = columns.filter(
         (col) =>
-          col.field === "contributionDate" ||
-          col.field === "amount" ||
-          col.field === "isSupplementalContribution"
+          col.field === "contributionDate" || col.field === "amount" || col.field === "isSupplementalContribution"
       );
 
       expect(usingFactories.length).toBeGreaterThan(0);

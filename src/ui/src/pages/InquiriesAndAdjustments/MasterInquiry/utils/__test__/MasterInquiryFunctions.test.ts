@@ -5,7 +5,7 @@ import {
   memberTypeGetNumberMap,
   paymentTypeGetNumberMap,
   splitFullPSN
-} from "./MasterInquiryFunctions";
+} from "../MasterInquiryFunctions";
 
 describe("MasterInquiryFunctions", () => {
   describe("paymentTypeGetNumberMap", () => {

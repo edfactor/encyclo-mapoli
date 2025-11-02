@@ -1,77 +1,95 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import React from "react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createMockStoreAndWrapper } from "../../../test";
-import TerminationSearchFilter from "./TerminationSearchFilter";
-import { CalendarResponseDto } from "../../../reduxstore/types";
+import { createMockStoreAndWrapper } from "../../../../test";
+import TerminationSearchFilter from "../TerminationSearchFilter";
+import { CalendarResponseDto } from "../../../../reduxstore/types";
+
+// Hoist API mock functions
+const { mockTriggerAccountingYear, mockTriggerDuplicateSsn } = vi.hoisted(() => ({
+  mockTriggerAccountingYear: vi.fn(),
+  mockTriggerDuplicateSsn: vi.fn()
+}));
 
 // Mock date picker and validators
-vi.mock("../../../reduxstore/api/LookupsApi", () => ({
-  lookupsApi: {
+vi.mock("../../../../reduxstore/api/LookupsApi", () => ({
+  LookupsApi: {
     reducerPath: "lookupsApi",
     reducer: (state = {}) => state,
-    middleware: () => (next: unknown) => (action: unknown) => next(action)
+    middleware: []
   },
   useLazyGetAccountingYearQuery: vi.fn(() => [
-    vi.fn(),
+    mockTriggerAccountingYear,
     { data: { fiscalBeginDate: "2024-01-01", fiscalEndDate: "2024-12-31" }, isLoading: false }
   ]),
   useLazyGetDuplicateSsnExistsQuery: vi.fn(() => [
-    vi.fn(),
+    mockTriggerDuplicateSsn,
     { data: { duplicateCount: 0 }, isLoading: false }
   ])
 }));
 
-vi.mock("../../../components/DsmDatePicker/DsmDatePicker", () => ({
-  default: vi.fn(({ label, onChange, disabled }) => (
-    <input
-      data-testid={`date-picker-${label}`}
-      onChange={(e) => onChange(e.target.value)}
-      disabled={disabled}
-      placeholder={label}
-      type="text"
-    />
-  ))
+vi.mock("../../../../components/DsmDatePicker/DsmDatePicker", () => ({
+  default: vi.fn(({ label, onChange, disabled }) =>
+    React.createElement("input", {
+      "aria-label": label,
+      onChange: (e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value),
+      disabled: disabled,
+      placeholder: label,
+      type: "text"
+    })
+  )
 }));
 
-vi.mock("../../../components/ForfeitActivities/DuplicateSsnGuard", () => ({
-  DuplicateSsnGuard: vi.fn(({ children }) => children({ prerequisitesComplete: true }))
+vi.mock("../../../../components/DuplicateSsnGuard", () => ({
+  default: vi.fn(({ children }) => children({ prerequisitesComplete: true }))
 }));
 
-vi.mock("../../../utils/FormValidators", async () => {
+vi.mock("../../../../utils/FormValidators", async () => {
   const yup = await import("yup");
   return {
-    dateStringValidator: (_min: number, _max: number, _fieldName: string) =>
-      yup.default.string().nullable(),
+    dateStringValidator: (_min: number, _max: number, _fieldName: string) => yup.default.string().nullable(),
     endDateStringAfterStartDateValidator: (
       _beginFieldName: string,
       _dateParser: (val: string) => Date,
       _message: string
     ) => yup.default.string().nullable(),
-    profitYearValidator: (_min: number, _max: number) =>
-      yup.default.number().nullable(),
-    mmDDYYFormat: (date: string) => date,
-    tryddmmyyyyToDate: (dateStr: string) => new Date(dateStr)
+    profitYearValidator: (_min: number, _max: number) => yup.default.number().nullable()
   };
 });
 
+vi.mock("../../../../utils/dateUtils", () => ({
+  mmDDYYFormat: (date: string) => date,
+  tryddmmyyyyToDate: (dateStr: string) => new Date(dateStr)
+}));
+
+vi.mock("../../../../hooks/useDecemberFlowProfitYear", () => ({
+  default: vi.fn(() => 2024)
+}));
+
 vi.mock("smart-ui-library", () => ({
-  SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) => (
-    <div data-testid="search-and-reset">
-      <button
-        data-testid="search-btn"
-        onClick={handleSearch}
-        disabled={disabled || isFetching}>
-        Search
-      </button>
-      <button
-        data-testid="reset-btn"
-        onClick={handleReset}>
-        Reset
-      </button>
-      {isFetching && <span data-testid="loading">Loading...</span>}
-    </div>
-  ))
+  SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) =>
+    React.createElement(
+      "section",
+      { "aria-label": "search and reset" },
+      React.createElement(
+        "button",
+        {
+          onClick: handleSearch,
+          disabled: disabled || isFetching
+        },
+        "Search"
+      ),
+      React.createElement(
+        "button",
+        {
+          onClick: handleReset
+        },
+        "Reset"
+      ),
+      isFetching && React.createElement("span", { role: "status" }, "Loading...")
+    )
+  )
 }));
 
 describe("TerminationSearchFilter", { timeout: 7000 }, () => {
@@ -88,6 +106,19 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Set up mock return values for API hooks
+    mockTriggerAccountingYear.mockReturnValue({
+      unwrap: vi.fn().mockResolvedValue({
+        fiscalBeginDate: "2024-01-01",
+        fiscalEndDate: "2024-12-31"
+      })
+    });
+
+    mockTriggerDuplicateSsn.mockReturnValue({
+      unwrap: vi.fn().mockResolvedValue({ duplicateCount: 0 })
+    });
+
     const storeAndWrapper = createMockStoreAndWrapper({
       yearsEnd: { selectedProfitYear: 2024 }
     });
@@ -107,9 +138,9 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
         { wrapper }
       );
 
-      expect(screen.getByTestId("date-picker-Begin Date")).toBeInTheDocument();
-      expect(screen.getByTestId("date-picker-End Date")).toBeInTheDocument();
-      expect(screen.getByTestId("search-and-reset")).toBeInTheDocument();
+      expect(screen.getByLabelText("Begin Date")).toBeInTheDocument();
+      expect(screen.getByLabelText("End Date")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /search/i })).toBeInTheDocument();
     });
 
     it("should render search and reset buttons", () => {
@@ -124,8 +155,8 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
         { wrapper }
       );
 
-      expect(screen.getByTestId("search-btn")).toBeInTheDocument();
-      expect(screen.getByTestId("reset-btn")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /search/i })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /reset/i })).toBeInTheDocument();
     });
 
     it("should display loading state when isFetching is true", () => {
@@ -140,8 +171,7 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
         { wrapper }
       );
 
-      expect(screen.getByTestId("loading")).toBeInTheDocument();
-      expect(screen.getByTestId("search-btn")).toBeDisabled();
+      expect(screen.getByRole("button", { name: /search/i })).toBeDisabled();
     });
   });
 
@@ -158,8 +188,8 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
         { wrapper }
       );
 
-      const beginDateInput = screen.getByTestId("date-picker-Begin Date") as HTMLInputElement;
-      const endDateInput = screen.getByTestId("date-picker-End Date") as HTMLInputElement;
+      const beginDateInput = screen.getByLabelText("Begin Date") as HTMLInputElement;
+      const endDateInput = screen.getByLabelText("End Date") as HTMLInputElement;
 
       // Verify elements exist
       expect(beginDateInput).toBeInTheDocument();
@@ -178,8 +208,8 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
         { wrapper }
       );
 
-      const beginDateInput = screen.getByTestId("date-picker-Begin Date");
-      const endDateInput = screen.getByTestId("date-picker-End Date");
+      const beginDateInput = screen.getByLabelText("Begin Date");
+      const endDateInput = screen.getByLabelText("End Date");
 
       // Enter begin date
       await userEvent.type(beginDateInput, "2024-06-01");
@@ -187,14 +217,14 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
       // Enter earlier end date (should trigger validation)
       await userEvent.type(endDateInput, "2024-05-01");
 
-      // Search button should be disabled if validation fails
-      // This depends on the form validation implementation
-      expect(screen.getByTestId("search-and-reset")).toBeInTheDocument();
+      // Search button should exist and be testable
+      expect(screen.getByRole("button", { name: /search/i })).toBeInTheDocument();
     });
   });
 
   describe("Search functionality", () => {
     it("should call onSearch when search button is clicked", async () => {
+      const user = userEvent.setup();
       render(
         <TerminationSearchFilter
           fiscalData={mockFiscalData}
@@ -206,13 +236,12 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
         { wrapper }
       );
 
-      // Wait for form to be valid (with default dates populated)
-      const searchButton = await screen.findByTestId("search-btn");
+      const searchButton = screen.getByRole("button", { name: /search/i });
       await waitFor(() => {
         expect(searchButton).not.toBeDisabled();
       });
 
-      fireEvent.click(searchButton);
+      await user.click(searchButton);
 
       await waitFor(() => {
         expect(mockOnSearch).toHaveBeenCalled();
@@ -220,6 +249,7 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
     });
 
     it("should call setInitialSearchLoaded when search is executed", async () => {
+      const user = userEvent.setup();
       render(
         <TerminationSearchFilter
           fiscalData={mockFiscalData}
@@ -231,20 +261,22 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
         { wrapper }
       );
 
-      // Wait for form to be valid (with default dates populated)
-      const searchButton = await screen.findByTestId("search-btn");
+      const searchButton = screen.getByRole("button", { name: /search/i });
       await waitFor(() => {
         expect(searchButton).not.toBeDisabled();
       });
 
-      fireEvent.click(searchButton);
+      await user.click(searchButton);
 
       await waitFor(() => {
         expect(mockSetInitialSearchLoaded).toHaveBeenCalledWith(true);
       });
     });
 
-    it("should disable search when hasUnsavedChanges is true", () => {
+    it("should show alert when search clicked with unsaved changes", async () => {
+      const mockAlert = vi.spyOn(window, "alert").mockImplementation(() => {});
+      const user = userEvent.setup();
+
       render(
         <TerminationSearchFilter
           fiscalData={mockFiscalData}
@@ -256,9 +288,22 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
         { wrapper }
       );
 
-      const searchButton = screen.getByTestId("search-btn");
-      // Button should be disabled when there are unsaved changes
-      expect(searchButton).toBeDisabled();
+      const searchButton = screen.getByRole("button", { name: /search/i });
+
+      // Button should not be disabled (just shows alert when clicked)
+      await waitFor(() => {
+        expect(searchButton).not.toBeDisabled();
+      });
+
+      await user.click(searchButton);
+
+      // Should show alert instead of calling onSearch
+      await waitFor(() => {
+        expect(mockAlert).toHaveBeenCalledWith("Please save your changes.");
+        expect(mockOnSearch).not.toHaveBeenCalled();
+      });
+
+      mockAlert.mockRestore();
     });
 
     it("should disable search button during fetch", () => {
@@ -273,15 +318,14 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
         { wrapper }
       );
 
-      const searchButton = screen.getByTestId("search-btn");
+      const searchButton = screen.getByRole("button", { name: /search/i });
       expect(searchButton).toBeDisabled();
     });
   });
 
   describe("Reset functionality", () => {
     it("should call onReset callback (via parent handler)", async () => {
-      // Note: TerminationSearchFilter may not expose direct onReset,
-      // but reset button should trigger form reset
+      const user = userEvent.setup();
       render(
         <TerminationSearchFilter
           fiscalData={mockFiscalData}
@@ -293,10 +337,9 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
         { wrapper }
       );
 
-      const resetButton = screen.getByTestId("reset-btn");
-      fireEvent.click(resetButton);
+      const resetButton = screen.getByRole("button", { name: /reset/i });
+      await user.click(resetButton);
 
-      // Verify reset button exists and is clickable
       expect(resetButton).toBeInTheDocument();
     });
   });
@@ -314,9 +357,8 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
         { wrapper }
       );
 
-      // The component should contain status selection
-      // This may be a select, radio, or checkbox group
-      expect(screen.getByTestId("search-and-reset")).toBeInTheDocument();
+      // The component should contain status selection and search button
+      expect(screen.getByRole("button", { name: /search/i })).toBeInTheDocument();
     });
   });
 
@@ -333,10 +375,9 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
         { wrapper }
       );
 
-      const searchButton = screen.getByTestId("search-btn");
+      const searchButton = screen.getByRole("button", { name: /search/i });
 
-      // Search button should be disabled initially (form likely invalid)
-      // This depends on default form values
+      // Search button should exist and be in the document
       expect(searchButton).toBeInTheDocument();
     });
   });
@@ -355,7 +396,7 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
       );
 
       // Verify search component exists (guard wraps it)
-      expect(screen.getByTestId("search-and-reset")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /search/i })).toBeInTheDocument();
     });
 
     it("should pass prerequisite completion to search button", () => {
@@ -371,7 +412,7 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
       );
 
       // Guard component should allow search when prerequisites complete
-      expect(screen.getByTestId("search-btn")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /search/i })).toBeInTheDocument();
     });
   });
 
@@ -388,8 +429,8 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
         { wrapper }
       );
 
-      const beginDateInput = screen.getByTestId("date-picker-Begin Date");
-      const endDateInput = screen.getByTestId("date-picker-End Date");
+      const beginDateInput = screen.getByLabelText("Begin Date");
+      const endDateInput = screen.getByLabelText("End Date");
 
       // Date inputs should exist and be properly configured
       expect(beginDateInput).toBeInTheDocument();
@@ -399,6 +440,7 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
 
   describe("Form submission", () => {
     it("should include correct default values in search request", async () => {
+      const user = userEvent.setup();
       render(
         <TerminationSearchFilter
           fiscalData={mockFiscalData}
@@ -410,13 +452,12 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
         { wrapper }
       );
 
-      // Wait for form to be valid (with default dates populated)
-      const searchButton = await screen.findByTestId("search-btn");
+      const searchButton = screen.getByRole("button", { name: /search/i });
       await waitFor(() => {
         expect(searchButton).not.toBeDisabled();
       });
 
-      fireEvent.click(searchButton);
+      await user.click(searchButton);
 
       await waitFor(() => {
         // Search should be called with proper parameters

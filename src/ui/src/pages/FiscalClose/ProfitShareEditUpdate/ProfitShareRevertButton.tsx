@@ -40,7 +40,10 @@ export const ProfitShareRevertButton: React.FC<ProfitShareRevertButtonProps> = (
       onClick={isReadOnly ? undefined : handleClick}>
       {isLoading || profitShareApplyOrRevertLoading ? (
         <div className="spinner">
-          <CircularProgress color="inherit" size="20px" />
+          <CircularProgress
+            color="inherit"
+            size="20px"
+          />
         </div>
       ) : (
         "Revert"

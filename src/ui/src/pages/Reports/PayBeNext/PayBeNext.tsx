@@ -237,8 +237,10 @@ const PayBeNext = () => {
                   </Grid>
                   <Grid size={{ xs: 12, sm: 3, md: 3 }}>
                     <FormLabel>&nbsp;</FormLabel>
-                    <div className="flex items-center" style={{ marginLeft: '5px' }}>
-                      <FormLabel style={{ marginRight: '8px' }}>Is Also Employee</FormLabel>
+                    <div
+                      className="flex items-center"
+                      style={{ marginLeft: "5px" }}>
+                      <FormLabel style={{ marginRight: "8px" }}>Is Also Employee</FormLabel>
                       <Controller
                         name="isAlsoEmployee"
                         control={control}

@@ -409,6 +409,8 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
 - Frontend: Add Playwright or component tests colocated (if pattern emerges) but keep end-to-end in `e2e/`
 - Security warnings/analyzers treated as errors; keep build green
 
+For testing of front end react components, see this file: @ai-templates/front-end/fe-unit-tests.md
+
 ## Logging & Observability
 
 - Use Serilog contextual logging. Critical issues (data mismatch / integrity) use `_logger.LogCritical` (see duplicate SSN guard). For expected fallbacks use Debug/Information

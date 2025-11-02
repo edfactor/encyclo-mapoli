@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { initialState, masterInquiryReducer } from "./useMasterInquiryReducer";
+import { initialState, masterInquiryReducer } from "../useMasterInquiryReducer";
 
 /**
  * Performance Fix Tests - PS-XXXX

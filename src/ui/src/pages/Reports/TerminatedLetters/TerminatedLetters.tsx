@@ -29,7 +29,9 @@ const TerminatedLettersContent = () => {
   const { missiveAlerts } = useMissiveAlerts();
 
   return (
-    <Grid container rowSpacing="24px">
+    <Grid
+      container
+      rowSpacing="24px">
       <Grid width="100%">
         <Divider />
       </Grid>
@@ -38,7 +40,10 @@ const TerminatedLettersContent = () => {
 
       <Grid width="100%">
         <DSMAccordion title="Filter">
-          <TerminatedLettersSearchFilter onSearch={executeSearch} onReset={resetSearch} />
+          <TerminatedLettersSearchFilter
+            onSearch={executeSearch}
+            onReset={resetSearch}
+          />
         </DSMAccordion>
       </Grid>
 
@@ -69,7 +74,9 @@ const TerminatedLetters = () => {
   };
 
   return (
-    <Page label={CAPTIONS.TERMINATED_LETTERS} actionNode={renderActionNode()}>
+    <Page
+      label={CAPTIONS.TERMINATED_LETTERS}
+      actionNode={renderActionNode()}>
       <MissiveAlertProvider>
         <TerminatedLettersContent />
       </MissiveAlertProvider>

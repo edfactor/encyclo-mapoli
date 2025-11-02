@@ -75,7 +75,9 @@ const PayMasterUpdateGrid: React.FC<PayMasterUpdateGridProps> = ({
       {summaryData?.response && (
         <>
           <div style={{ padding: "0 24px 0 24px" }}>
-            <Typography variant="h2" sx={{ color: "#0258A5" }}>
+            <Typography
+              variant="h2"
+              sx={{ color: "#0258A5" }}>
               {`UPDATE SUMMARY FOR PROFIT SHARING (${summaryData.response.total || 0} records)`}
             </Typography>
           </div>

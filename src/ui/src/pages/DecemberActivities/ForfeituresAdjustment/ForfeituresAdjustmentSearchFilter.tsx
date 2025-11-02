@@ -51,7 +51,7 @@ const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFil
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isValid },
     watch,
     reset
   } = useForm<ForfeituresAdjustmentSearchParams>({
@@ -60,7 +60,7 @@ const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFil
       ssn: "",
       badge: ""
     },
-    mode: "onBlur"
+    mode: "onChange"
   });
 
   const socialSecurity = watch("ssn");
@@ -138,6 +138,7 @@ const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFil
                     const validatedValue = handleSsnInput(e.target.value);
                     if (validatedValue !== null) {
                       field.onChange(validatedValue);
+                      if (validatedValue) setActiveField("ssn");
                     }
                   }}
                 />
@@ -164,6 +165,7 @@ const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFil
                     const validatedValue = handleBadgeNumberStringInput(e.target.value);
                     if (validatedValue !== null) {
                       field.onChange(validatedValue);
+                      if (e.target.value) setActiveField("badge");
                     }
                   }}
                 />
@@ -177,7 +179,7 @@ const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFil
         width="100%"
         paddingX="24px">
         <SearchAndReset
-          disabled={!hasSearchCriteria}
+          disabled={!isValid || !hasSearchCriteria}
           handleReset={handleResetLocal}
           handleSearch={validateAndSearch}
           isFetching={isSearching}

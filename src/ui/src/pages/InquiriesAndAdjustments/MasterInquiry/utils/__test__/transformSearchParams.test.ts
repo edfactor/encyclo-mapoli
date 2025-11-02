@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { MasterInquirySearch } from "reduxstore/types";
-import { transformSearchParams } from "./transformSearchParams";
+import { transformSearchParams } from "../transformSearchParams";
 
 describe("transformSearchParams", () => {
   const baseSearchData: MasterInquirySearch = {

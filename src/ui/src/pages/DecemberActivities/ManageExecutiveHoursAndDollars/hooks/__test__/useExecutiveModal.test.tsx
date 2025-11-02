@@ -1,7 +1,7 @@
 import { renderHook } from "@testing-library/react";
 import { act } from "react";
 import { describe, expect, it, vi } from "vitest";
-import useExecutiveModal from "./useExecutiveModal";
+import useExecutiveModal from "../useExecutiveModal";
 
 describe("useExecutiveModal", () => {
   const mockExecutive = {

@@ -378,6 +378,3 @@ test-results
 /src/ui/tsconfig.tsbuildinfo
 /src/services/tests/Demoulas.ProfitSharing.UnitTests/.vscode
 /.vscode/mcp.json
-
-# Local subagent files
-.claude/agents/**

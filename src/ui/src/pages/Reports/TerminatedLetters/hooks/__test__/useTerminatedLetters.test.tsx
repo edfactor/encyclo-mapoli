@@ -4,10 +4,10 @@ import * as useLazyGetTerminatedLettersReportQuery from "reduxstore/api/YearsEnd
 import { TerminatedLettersDetail } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import * as useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
-import * as useGridPagination from "../../../../hooks/useGridPagination";
-import * as useMissiveAlerts from "../../../../hooks/useMissiveAlerts";
-import useTerminatedLetters from "./useTerminatedLetters";
+import * as useDecemberFlowProfitYear from "../../../../../hooks/useDecemberFlowProfitYear";
+import * as useGridPagination from "../../../../../hooks/useGridPagination";
+import * as useMissiveAlerts from "../../../../../hooks/useMissiveAlerts";
+import useTerminatedLetters from "../useTerminatedLetters";
 
 // Mock data types
 interface MockPaged<T> extends Paged<T> {
@@ -52,8 +52,7 @@ const createMockPagedData = (items: TerminatedLettersDetail[] = []): MockPaged<T
 });
 
 // Create mock paged data response (this is what the API returns after unwrap)
-const createMockTerminatedLettersResponse = (items: TerminatedLettersDetail[] = []) =>
-  createMockPagedData(items);
+const createMockTerminatedLettersResponse = (items: TerminatedLettersDetail[] = []) => createMockPagedData(items);
 
 // Helper to create RTK Query-like promise with unwrap method
 interface RTKQueryPromise<T> extends Promise<{ data: T }> {
@@ -62,7 +61,10 @@ interface RTKQueryPromise<T> extends Promise<{ data: T }> {
 
 type TerminatedLettersData = Paged<TerminatedLettersDetail> | Blob | null;
 
-const createMockRTKQueryPromise = (data: TerminatedLettersData = null, error: unknown = null): RTKQueryPromise<TerminatedLettersData> => {
+const createMockRTKQueryPromise = (
+  data: TerminatedLettersData = null,
+  error: unknown = null
+): RTKQueryPromise<TerminatedLettersData> => {
   const promise = error ? Promise.reject(error) : Promise.resolve({ data });
 
   if (error) {

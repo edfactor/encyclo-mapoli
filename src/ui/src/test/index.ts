@@ -20,6 +20,11 @@ export {
   RTKQueryMockBuilder
 } from "./mocks/rtkQueryMockFactory";
 
+export {
+  createReactHookFormMock,
+  ReactHookFormMockBuilder
+} from "./mocks/reactHookFormMock";
+
 // Redux store utilities
 export {
   createMockStore,

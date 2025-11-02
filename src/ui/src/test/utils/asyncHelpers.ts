@@ -36,10 +36,7 @@ const defaultWaitOptions = { timeout: 2000 };
  * await clickAndWait("search-btn");
  * expect(screen.getByTestId("results")).toBeInTheDocument();
  */
-export const clickAndWait = async (
-  testId: string,
-  options?: { timeout?: number }
-) => {
+export const clickAndWait = async (testId: string, options?: { timeout?: number }) => {
   const user = userEvent.setup();
   const element = screen.getByTestId(testId);
 
@@ -68,10 +65,7 @@ export const clickAndWait = async (
  * await clickButtonAndWait("Search");
  * await clickButtonAndWait("Delete", { timeout: 3000 });
  */
-export const clickButtonAndWait = async (
-  buttonName: string,
-  options?: { timeout?: number }
-) => {
+export const clickButtonAndWait = async (buttonName: string, options?: { timeout?: number }) => {
   const user = userEvent.setup();
   const button = screen.getByRole("button", { name: new RegExp(buttonName, "i") });
 
@@ -98,11 +92,7 @@ export const clickButtonAndWait = async (
  * await fillField("search-input", "John Doe");
  * await fillField("email-input", "test@example.com");
  */
-export const fillField = async (
-  testId: string,
-  value: string,
-  options?: { timeout?: number }
-) => {
+export const fillField = async (testId: string, value: string, options?: { timeout?: number }) => {
   const user = userEvent.setup();
   const field = screen.getByTestId(testId) as HTMLInputElement;
 
@@ -132,15 +122,9 @@ export const fillField = async (
  * @example
  * await fillFieldByPlaceholder("Enter SSN", "123456789");
  */
-export const fillFieldByPlaceholder = async (
-  placeholder: string,
-  value: string,
-  options?: { timeout?: number }
-) => {
+export const fillFieldByPlaceholder = async (placeholder: string, value: string, options?: { timeout?: number }) => {
   const user = userEvent.setup();
-  const field = screen.getByPlaceholderText(
-    new RegExp(placeholder, "i")
-  ) as HTMLInputElement;
+  const field = screen.getByPlaceholderText(new RegExp(placeholder, "i")) as HTMLInputElement;
 
   await act(async () => {
     await user.clear(field);
@@ -165,11 +149,7 @@ export const fillFieldByPlaceholder = async (
  * @example
  * await selectOption("state-select", "MA");
  */
-export const selectOption = async (
-  testId: string,
-  value: string,
-  options?: { timeout?: number }
-) => {
+export const selectOption = async (testId: string, value: string, options?: { timeout?: number }) => {
   const user = userEvent.setup();
   const select = screen.getByTestId(testId) as HTMLSelectElement;
 
@@ -196,10 +176,7 @@ export const selectOption = async (
  * await waitForText(/Results for John/i);
  * await waitForText("Loading", { timeout: 3000 });
  */
-export const waitForText = async (
-  text: string | RegExp,
-  options?: { timeout?: number }
-) => {
+export const waitForText = async (text: string | RegExp, options?: { timeout?: number }) => {
   const pattern = typeof text === "string" ? new RegExp(text, "i") : text;
 
   await waitFor(
@@ -221,10 +198,7 @@ export const waitForText = async (
  * @example
  * await waitForTextToDisappear("Loading...");
  */
-export const waitForTextToDisappear = async (
-  text: string | RegExp,
-  options?: { timeout?: number }
-) => {
+export const waitForTextToDisappear = async (text: string | RegExp, options?: { timeout?: number }) => {
   const pattern = typeof text === "string" ? new RegExp(text, "i") : text;
 
   await waitFor(
@@ -244,10 +218,7 @@ export const waitForTextToDisappear = async (
  * @example
  * await waitForElement("results-grid");
  */
-export const waitForElement = async (
-  testId: string,
-  options?: { timeout?: number }
-) => {
+export const waitForElement = async (testId: string, options?: { timeout?: number }) => {
   await waitFor(
     () => {
       expect(screen.getByTestId(testId)).toBeInTheDocument();
@@ -267,10 +238,7 @@ export const waitForElement = async (
  * @example
  * await waitForElementToDisappear("loading-spinner");
  */
-export const waitForElementToDisappear = async (
-  testId: string,
-  options?: { timeout?: number }
-) => {
+export const waitForElementToDisappear = async (testId: string, options?: { timeout?: number }) => {
   await waitFor(
     () => {
       expect(screen.queryByTestId(testId)).not.toBeInTheDocument();
@@ -374,10 +342,7 @@ export const getElementText = (testId: string): string => {
  * @example
  * await waitForElementToBeEnabled("submit-btn");
  */
-export const waitForElementToBeEnabled = async (
-  testId: string,
-  options?: { timeout?: number }
-) => {
+export const waitForElementToBeEnabled = async (testId: string, options?: { timeout?: number }) => {
   await waitFor(
     () => {
       const element = screen.getByTestId(testId) as HTMLButtonElement;
@@ -398,10 +363,7 @@ export const waitForElementToBeEnabled = async (
  * @example
  * await waitForElementToBeDisabled("submit-btn");
  */
-export const waitForElementToBeDisabled = async (
-  testId: string,
-  options?: { timeout?: number }
-) => {
+export const waitForElementToBeDisabled = async (testId: string, options?: { timeout?: number }) => {
   await waitFor(
     () => {
       const element = screen.getByTestId(testId) as HTMLButtonElement;
@@ -423,20 +385,14 @@ export const waitForElementToBeDisabled = async (
  * @example
  * const button = await waitForRole("button", { name: /Submit/i });
  */
-export const waitForRole = async (
-  role: string,
-  options?: ByRoleOptions & { timeout?: number }
-) => {
+export const waitForRole = async (role: string, options?: ByRoleOptions & { timeout?: number }) => {
   const { timeout = defaultWaitOptions.timeout, ...roleOptions } = options ?? {};
 
   let element: HTMLElement | null = null;
 
   await waitFor(
     () => {
-      element = screen.getByRole(
-        role as Parameters<typeof screen.getByRole>[0],
-        roleOptions
-      );
+      element = screen.getByRole(role as Parameters<typeof screen.getByRole>[0], roleOptions);
       expect(element).toBeInTheDocument();
     },
     { timeout }
@@ -458,10 +414,7 @@ export const waitForRole = async (
  *   expect(store.getState().data).toEqual(expectedData);
  * });
  */
-export const waitForAsync = async (
-  callback: () => void | Promise<void>,
-  options?: { timeout?: number }
-) => {
+export const waitForAsync = async (callback: () => void | Promise<void>, options?: { timeout?: number }) => {
   await waitFor(callback, {
     timeout: options?.timeout ?? defaultWaitOptions.timeout
   });

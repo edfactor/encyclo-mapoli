@@ -7,10 +7,7 @@ interface ForfeituresAdjustmentPanelProps {
   isReadOnly: boolean;
 }
 
-const ForfeituresAdjustmentPanel: React.FC<ForfeituresAdjustmentPanelProps> = ({
-  onAddForfeiture,
-  isReadOnly
-}) => {
+const ForfeituresAdjustmentPanel: React.FC<ForfeituresAdjustmentPanelProps> = ({ onAddForfeiture, isReadOnly }) => {
   return (
     <div
       style={{

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { MasterUpdateSummaryTable } from "./MasterUpdateSummaryTable";
+import { MasterUpdateSummaryTable } from "../MasterUpdateSummaryTable";
 
 // Mock Material-UI Typography component
 vi.mock("@mui/material", () => ({

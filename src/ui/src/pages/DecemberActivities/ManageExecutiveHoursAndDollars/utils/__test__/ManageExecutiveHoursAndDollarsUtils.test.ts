@@ -1,5 +1,5 @@
-import { ExecutiveHoursAndDollarsRequestDto } from "../../../../types/fiscal/executive";
-import { isSimpleSearch } from "./ManageExecutiveHoursAndDollarsUtils";
+import { ExecutiveHoursAndDollarsRequestDto } from "../../../../../types/fiscal/executive";
+import { isSimpleSearch } from "../ManageExecutiveHoursAndDollarsUtils";
 
 describe("ManageExecutiveHoursAndDollarsUtils", () => {
   describe("isSimpleSearch", () => {

@@ -8,9 +8,7 @@ vi.mock("../hooks/useDuplicateSSNsOnDemographics", () => ({
   default: vi.fn(() => ({
     searchResults: {
       response: {
-        results: [
-          { ssn: "123-45-6789", badgeNumber: 12345, employeeName: "John Doe" }
-        ],
+        results: [{ ssn: "123-45-6789", badgeNumber: 12345, employeeName: "John Doe" }],
         total: 1
       }
     },
@@ -35,13 +33,15 @@ vi.mock("components/StatusDropdownActionNode", () => ({
 }));
 
 vi.mock("smart-ui-library", () => ({
-  Page: vi.fn(({ label, actionNode, children }: { label: string; actionNode?: React.ReactNode; children?: React.ReactNode }) => (
-    <div data-testid="page">
-      <div>{label}</div>
-      {actionNode}
-      {children}
-    </div>
-  ))
+  Page: vi.fn(
+    ({ label, actionNode, children }: { label: string; actionNode?: React.ReactNode; children?: React.ReactNode }) => (
+      <div data-testid="page">
+        <div>{label}</div>
+        {actionNode}
+        {children}
+      </div>
+    )
+  )
 }));
 
 describe("DuplicateSSNsOnDemographics", () => {
@@ -107,11 +107,11 @@ describe("DuplicateSSNsOnDemographics", () => {
       const calls = vi.mocked(DuplicateSSNsOnDemographicsGrid).mock.calls;
       expect(calls.length).toBeGreaterThan(0);
       const firstCallProps = calls[0][0];
-      expect(firstCallProps).toHaveProperty('pagination');
-      expect(firstCallProps).toHaveProperty('onPaginationChange');
-      expect(firstCallProps).toHaveProperty('onSortChange');
-      expect(typeof firstCallProps.onPaginationChange).toBe('function');
-      expect(typeof firstCallProps.onSortChange).toBe('function');
+      expect(firstCallProps).toHaveProperty("pagination");
+      expect(firstCallProps).toHaveProperty("onPaginationChange");
+      expect(firstCallProps).toHaveProperty("onSortChange");
+      expect(typeof firstCallProps.onPaginationChange).toBe("function");
+      expect(typeof firstCallProps.onSortChange).toBe("function");
     });
   });
 
