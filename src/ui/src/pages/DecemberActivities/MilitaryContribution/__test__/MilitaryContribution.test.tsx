@@ -5,6 +5,9 @@ import { createMockStoreAndWrapper } from "../../../../test";
 import { MissiveAlertProvider } from "../../../../components/MissiveAlerts/MissiveAlertContext";
 import MilitaryContribution from "../MilitaryContribution";
 
+// Mock environment variable for API baseURL
+vi.stubEnv("VITE_REACT_APP_PS_API", "http://localhost:3000");
+
 interface MissiveAlert {
   id: number;
   message: string;

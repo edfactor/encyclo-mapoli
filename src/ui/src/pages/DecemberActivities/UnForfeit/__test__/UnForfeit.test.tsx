@@ -112,7 +112,7 @@ describe("UnForfeit", () => {
     it("should render the page component", () => {
       render(<UnForfeit />, { wrapper });
 
-      expect(screen.getByLabelText("page")).toBeInTheDocument();
+      expect(screen.getByText("UnForfeit (QPREV-PROF)")).toBeInTheDocument();
     });
 
     it("should render page with correct label", () => {
@@ -125,13 +125,13 @@ describe("UnForfeit", () => {
     it("should render ApiMessageAlert", () => {
       render(<UnForfeit />, { wrapper });
 
-      expect(screen.getByLabelText("api message alert")).toBeInTheDocument();
+      expect(screen.getByRole("alert", { name: /message/i })).toBeInTheDocument();
     });
 
     it("should render StatusDropdownActionNode in action node", () => {
       render(<UnForfeit />, { wrapper });
 
-      expect(screen.getByLabelText("status dropdown")).toBeInTheDocument();
+      expect(screen.getByRole("status", { name: /dropdown/i })).toBeInTheDocument();
     });
 
     it("should render loading spinner when fiscal data is not loaded", async () => {
@@ -157,8 +157,8 @@ describe("UnForfeit", () => {
       render(<UnForfeit />, { wrapper });
 
       await waitFor(() => {
-        expect(screen.getByLabelText("search filter")).toBeInTheDocument();
-        expect(screen.getByLabelText("unforfeit grid")).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /search/i })).toBeInTheDocument();
+        expect(screen.getByText("UnForfeit Grid")).toBeInTheDocument();
       });
     });
   });
@@ -170,7 +170,7 @@ describe("UnForfeit", () => {
 
       render(<UnForfeit />, { wrapper });
 
-      expect(screen.getByLabelText("frozen year warning")).toBeInTheDocument();
+      expect(screen.getByText("Frozen Year Warning")).toBeInTheDocument();
     });
 
     it("should not display frozen year warning when year is not frozen", async () => {
@@ -179,7 +179,7 @@ describe("UnForfeit", () => {
 
       render(<UnForfeit />, { wrapper });
 
-      expect(screen.queryByLabelText("frozen year warning")).not.toBeInTheDocument();
+      expect(screen.queryByText("Frozen Year Warning")).not.toBeInTheDocument();
     });
   });
 
@@ -215,7 +215,7 @@ describe("UnForfeit", () => {
 
       await waitFor(() => {
         // handleSearch is called directly from search filter
-        expect(screen.getByLabelText("search filter")).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /search/i })).toBeInTheDocument();
       });
     });
 
@@ -309,7 +309,7 @@ describe("UnForfeit", () => {
 
       render(<UnForfeit />, { wrapper });
 
-      expect(screen.getByLabelText("status dropdown")).toBeInTheDocument();
+      expect(screen.getByRole("status", { name: /dropdown/i })).toBeInTheDocument();
     });
   });
 
@@ -399,14 +399,14 @@ describe("UnForfeit", () => {
 
       render(<UnForfeit />, { wrapper });
 
-      expect(screen.getByLabelText("unforfeit grid")).toBeInTheDocument();
+      expect(screen.getByText("UnForfeit Grid")).toBeInTheDocument();
     });
 
     it("should pass fiscal data to UnForfeitSearchFilter", async () => {
       render(<UnForfeit />, { wrapper });
 
       // Verify search filter is rendered with fiscal data available
-      expect(screen.getByLabelText("search filter")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /search/i })).toBeInTheDocument();
     });
 
     it("should pass hasUnsavedChanges to grid and filter", async () => {
