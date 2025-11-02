@@ -193,7 +193,8 @@ describe("MilitaryContributionForm", { timeout: 55000 }, () => {
           onCancel={mockOnCancel}
           badgeNumber={12345}
           profitYear={2024}
-        />
+        />,
+        { wrapper }
       );
 
       const submitButton = screen.getByRole("button", { name: /submit|save/i });
@@ -208,7 +209,8 @@ describe("MilitaryContributionForm", { timeout: 55000 }, () => {
           onCancel={mockOnCancel}
           badgeNumber={12345}
           profitYear={2024}
-        />
+        />,
+        { wrapper }
       );
 
       const inputs = screen.getAllByRole("textbox");
@@ -245,7 +247,8 @@ describe("MilitaryContributionForm", { timeout: 55000 }, () => {
           onCancel={mockOnCancel}
           badgeNumber={12345}
           profitYear={2024}
-        />
+        />,
+        { wrapper }
       );
 
       // Look for radio buttons or select for contribution type
@@ -312,7 +315,8 @@ describe("MilitaryContributionForm", { timeout: 55000 }, () => {
           onCancel={mockOnCancel}
           badgeNumber={12345}
           profitYear={2024}
-        />
+        />,
+        { wrapper }
       );
 
       // Callbacks should be callable
@@ -330,7 +334,8 @@ describe("MilitaryContributionForm", { timeout: 55000 }, () => {
           onCancel={mockOnCancel}
           badgeNumber={12345}
           profitYear={2024}
-        />
+        />,
+        { wrapper }
       );
 
       // Fill in form with test data

@@ -1,12 +1,8 @@
+import React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockStoreAndWrapper } from "../../../../test";
 import Termination from "../Termination";
-import { useLazyGetAccountingRangeToCurrent } from "../../../../hooks/useFiscalCalendarYear";
-import { useTerminationState } from "../../../../hooks/useTerminationState";
-
-type MockFiscalData = ReturnType<typeof useLazyGetAccountingRangeToCurrent>;
-type MockTerminationState = ReturnType<typeof useTerminationState>;
 type MockSearchParams = {
   beginningDate?: string;
   endingDate?: string;
@@ -53,65 +49,130 @@ vi.mock("../../../../hooks/useUnsavedChangesGuard", () => ({
   useUnsavedChangesGuard: vi.fn()
 }));
 
-vi.mock("components/StatusDropdownActionNode", () => ({
-  default: vi.fn(() => <div data-testid="status-dropdown">Status Dropdown</div>)
+vi.mock("../../../../hooks/useDecemberFlowProfitYear", () => ({
+  default: vi.fn(() => 2024)
 }));
 
-vi.mock("./TerminationSearchFilter", () => ({
-  default: vi.fn(({ onSearch, hasUnsavedChanges, isFetching }) => (
-    <div data-testid="search-filter">
-      <button
-        data-testid="search-button"
-        onClick={() =>
-          onSearch({
-            beginningDate: "01/01/2024",
-            endingDate: "12/31/2024",
-            forfeitureStatus: "showAll",
-            profitYear: 2024,
-            skip: 0,
-            take: 25,
-            sortBy: "badgeNumber",
-            isSortDescending: false
-          })
-        }
-        disabled={isFetching || hasUnsavedChanges}>
-        Search
-      </button>
-      {isFetching && <span data-testid="searching">Searching...</span>}
-    </div>
-  ))
+vi.mock("../../../../reduxstore/api/LookupsApi", () => ({
+  LookupsApi: {
+    reducerPath: "lookupsApi",
+    reducer: vi.fn((state = {}) => state),
+    middleware: vi.fn(() => (next: unknown) => (action: unknown) => (next as (action: unknown) => unknown)(action)),
+    util: { resetApiState: vi.fn() }
+  },
+  useLazyGetAccountingYearQuery: vi.fn(() => [
+    vi.fn(),
+    {
+      data: {
+        fiscalBeginDate: "2023-01-01",
+        fiscalEndDate: "2023-12-31"
+      }
+    }
+  ])
 }));
 
-vi.mock("./TerminationGrid", () => ({
-  default: vi.fn(() => <div data-testid="termination-grid">Termination Grid</div>)
+vi.mock("../../../../reduxstore/api/NavigationStatusApi", () => ({
+  NavigationStatusApi: {
+    reducerPath: "navigationStatusApi",
+    reducer: vi.fn((state = {}) => state),
+    middleware: vi.fn(() => (next: unknown) => (action: unknown) => (next as (action: unknown) => unknown)(action)),
+    util: { resetApiState: vi.fn() }
+  },
+  useLazyGetNavigationStatusQuery: vi.fn(() => [
+    vi.fn(),
+    {
+      data: {
+        navigationStatusList: [
+          { id: 1, name: "Not Started" },
+          { id: 2, name: "In Progress" },
+          { id: 3, name: "Complete" }
+        ]
+      },
+      isSuccess: true
+    }
+  ]),
+  useLazyUpdateNavigationStatusQuery: vi.fn(() => [vi.fn()])
+}));
+
+vi.mock("../../../../reduxstore/api/NavigationApi", () => ({
+  NavigationApi: {
+    reducerPath: "navigationApi",
+    reducer: vi.fn((state = {}) => state),
+    middleware: vi.fn(() => (next: unknown) => (action: unknown) => (next as (action: unknown) => unknown)(action)),
+    util: { resetApiState: vi.fn() }
+  },
+  useLazyGetNavigationQuery: vi.fn(() => [vi.fn()])
+}));
+
+vi.mock("../../../../components/StatusDropdownActionNode", () => ({
+  default: vi.fn(() => React.createElement("div", { "data-testid": "status-dropdown" }, "Status Dropdown"))
+}));
+
+vi.mock("../TerminationSearchFilter", () => ({
+  default: vi.fn(({ onSearch, hasUnsavedChanges, isFetching }) =>
+    React.createElement(
+      "div",
+      { "data-testid": "search-filter" },
+      React.createElement(
+        "button",
+        {
+          "data-testid": "search-button",
+          onClick: () =>
+            onSearch({
+              beginningDate: "01/01/2024",
+              endingDate: "12/31/2024",
+              forfeitureStatus: "showAll",
+              profitYear: 2024,
+              skip: 0,
+              take: 25,
+              sortBy: "badgeNumber",
+              isSortDescending: false
+            }),
+          disabled: isFetching || hasUnsavedChanges
+        },
+        "Search"
+      ),
+      isFetching && React.createElement("span", { "data-testid": "searching" }, "Searching...")
+    )
+  )
+}));
+
+vi.mock("../TerminationGrid", () => ({
+  default: vi.fn(() => React.createElement("div", { "data-testid": "termination-grid" }, "Termination Grid"))
 }));
 
 vi.mock("smart-ui-library", () => ({
-  ApiMessageAlert: vi.fn(() => <div data-testid="api-message-alert">Message Alert</div>),
-  DSMAccordion: vi.fn(({ title, children }) => (
-    <div data-testid="accordion">
-      <div>{title}</div>
-      {children}
-    </div>
-  )),
-  Page: vi.fn(({ label, actionNode, children }) => (
-    <div data-testid="page">
-      <div>{label}</div>
-      {actionNode}
-      {children}
-    </div>
-  )),
-  SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) => (
-    <div data-testid="search-and-reset">
-      <button data-testid="search-btn" onClick={handleSearch} disabled={disabled || isFetching}>
-        Search
-      </button>
-      <button data-testid="reset-btn" onClick={handleReset}>
-        Reset
-      </button>
-      {isFetching && <span data-testid="loading">Loading...</span>}
-    </div>
-  ))
+  ApiMessageAlert: vi.fn(() => React.createElement("div", { "data-testid": "api-message-alert" }, "Message Alert")),
+  DSMAccordion: vi.fn(({ title, children }) =>
+    React.createElement(
+      "div",
+      { "data-testid": "accordion" },
+      React.createElement("div", null, title),
+      children
+    )
+  ),
+  Page: vi.fn(({ label, actionNode, children }) =>
+    React.createElement(
+      "div",
+      { "data-testid": "page" },
+      React.createElement("div", null, label),
+      actionNode,
+      children
+    )
+  ),
+  SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) =>
+    React.createElement(
+      "div",
+      { "data-testid": "search-and-reset" },
+      React.createElement(
+        "button",
+        { "data-testid": "search-btn", onClick: handleSearch, disabled: disabled || isFetching },
+        "Search"
+      ),
+      React.createElement("button", { "data-testid": "reset-btn", onClick: handleReset }, "Reset"),
+      isFetching && React.createElement("span", { "data-testid": "loading" }, "Loading...")
+    )
+  )
 }));
 
 describe("Termination", () => {
@@ -162,7 +223,7 @@ describe("Termination", () => {
             fiscalEndDate: null
           }
         }
-      ] as MockFiscalData);
+      ] as unknown);
 
       render(<Termination />, { wrapper });
 
@@ -204,7 +265,7 @@ describe("Termination", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as MockTerminationState);
+      } as unknown);
 
       render(<Termination />, { wrapper });
 
@@ -243,7 +304,7 @@ describe("Termination", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as MockTerminationState);
+      } as unknown);
 
       render(<Termination />, { wrapper });
 
@@ -274,7 +335,7 @@ describe("Termination", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as MockTerminationState);
+      } as unknown);
 
       render(<Termination />, { wrapper });
 
@@ -309,7 +370,7 @@ describe("Termination", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as MockTerminationState);
+      } as unknown);
 
       render(<Termination />, { wrapper });
 
@@ -342,7 +403,7 @@ describe("Termination", () => {
           handleStatusChange: mockHandleStatusChange,
           handleArchiveHandled: vi.fn()
         }
-      } as MockTerminationState);
+      } as unknown);
 
       render(<Termination />, { wrapper });
 
@@ -452,7 +513,7 @@ describe("Termination", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as MockTerminationState);
+      } as unknown);
 
       render(<Termination />, { wrapper });
 
@@ -474,7 +535,7 @@ describe("Termination", () => {
 
       vi.mocked(useTerminationState).mockReturnValueOnce({
         state: {
-          searchParams: { archive: true } as MockSearchParams,
+          searchParams: { archive: true } as unknown,
           initialSearchLoaded: true,
           hasUnsavedChanges: false,
           resetPageFlag: false,
@@ -490,7 +551,7 @@ describe("Termination", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: mockHandleArchiveHandled
         }
-      } as MockTerminationState);
+      } as unknown);
 
       render(<Termination />, { wrapper });
 

@@ -1,9 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import React from "react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockStoreAndWrapper } from "../../../../test";
 import TerminationSearchFilter from "../TerminationSearchFilter";
-import { CalendarResponseDto } from "../../../reduxstore/types";
+import { CalendarResponseDto } from "../../../../reduxstore/types";
 
 // Hoist API mock functions
 const { mockTriggerAccountingYear, mockTriggerDuplicateSsn } = vi.hoisted(() => ({
@@ -12,7 +13,7 @@ const { mockTriggerAccountingYear, mockTriggerDuplicateSsn } = vi.hoisted(() => 
 }));
 
 // Mock date picker and validators
-vi.mock("../../../reduxstore/api/LookupsApi", () => ({
+vi.mock("../../../../reduxstore/api/LookupsApi", () => ({
   LookupsApi: {
     reducerPath: "lookupsApi",
     reducer: (state = {}) => state,
@@ -28,23 +29,23 @@ vi.mock("../../../reduxstore/api/LookupsApi", () => ({
   ])
 }));
 
-vi.mock("../../../components/DsmDatePicker/DsmDatePicker", () => ({
-  default: vi.fn(({ label, onChange, disabled }) => (
-    <input
-      aria-label={label}
-      onChange={(e) => onChange(e.target.value)}
-      disabled={disabled}
-      placeholder={label}
-      type="text"
-    />
-  ))
+vi.mock("../../../../components/DsmDatePicker/DsmDatePicker", () => ({
+  default: vi.fn(({ label, onChange, disabled }) =>
+    React.createElement("input", {
+      "aria-label": label,
+      onChange: (e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value),
+      disabled: disabled,
+      placeholder: label,
+      type: "text"
+    })
+  )
 }));
 
-vi.mock("../../../components/ForfeitActivities/DuplicateSsnGuard", () => ({
-  DuplicateSsnGuard: vi.fn(({ children }) => children({ prerequisitesComplete: true }))
+vi.mock("../../../../components/DuplicateSsnGuard", () => ({
+  default: vi.fn(({ children }) => children({ prerequisitesComplete: true }))
 }));
 
-vi.mock("../../../utils/FormValidators", async () => {
+vi.mock("../../../../utils/FormValidators", async () => {
   const yup = await import("yup");
   return {
     dateStringValidator: (_min: number, _max: number, _fieldName: string) => yup.default.string().nullable(),
@@ -53,27 +54,42 @@ vi.mock("../../../utils/FormValidators", async () => {
       _dateParser: (val: string) => Date,
       _message: string
     ) => yup.default.string().nullable(),
-    profitYearValidator: (_min: number, _max: number) => yup.default.number().nullable(),
-    mmDDYYFormat: (date: string) => date,
-    tryddmmyyyyToDate: (dateStr: string) => new Date(dateStr)
+    profitYearValidator: (_min: number, _max: number) => yup.default.number().nullable()
   };
 });
 
+vi.mock("../../../../utils/dateUtils", () => ({
+  mmDDYYFormat: (date: string) => date,
+  tryddmmyyyyToDate: (dateStr: string) => new Date(dateStr)
+}));
+
+vi.mock("../../../../hooks/useDecemberFlowProfitYear", () => ({
+  default: vi.fn(() => 2024)
+}));
+
 vi.mock("smart-ui-library", () => ({
-  SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) => (
-    <section aria-label="search and reset">
-      <button
-        onClick={handleSearch}
-        disabled={disabled || isFetching}>
-        Search
-      </button>
-      <button
-        onClick={handleReset}>
-        Reset
-      </button>
-      {isFetching && <span role="status">Loading...</span>}
-    </section>
-  ))
+  SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) =>
+    React.createElement(
+      "section",
+      { "aria-label": "search and reset" },
+      React.createElement(
+        "button",
+        {
+          onClick: handleSearch,
+          disabled: disabled || isFetching
+        },
+        "Search"
+      ),
+      React.createElement(
+        "button",
+        {
+          onClick: handleReset
+        },
+        "Reset"
+      ),
+      isFetching && React.createElement("span", { role: "status" }, "Loading...")
+    )
+  )
 }));
 
 describe("TerminationSearchFilter", { timeout: 7000 }, () => {
@@ -257,7 +273,10 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
       });
     });
 
-    it("should disable search when hasUnsavedChanges is true", () => {
+    it("should show alert when search clicked with unsaved changes", async () => {
+      const mockAlert = vi.spyOn(window, "alert").mockImplementation(() => {});
+      const user = userEvent.setup();
+
       render(
         <TerminationSearchFilter
           fiscalData={mockFiscalData}
@@ -270,7 +289,21 @@ describe("TerminationSearchFilter", { timeout: 7000 }, () => {
       );
 
       const searchButton = screen.getByRole("button", { name: /search/i });
-      expect(searchButton).toBeDisabled();
+
+      // Button should not be disabled (just shows alert when clicked)
+      await waitFor(() => {
+        expect(searchButton).not.toBeDisabled();
+      });
+
+      await user.click(searchButton);
+
+      // Should show alert instead of calling onSearch
+      await waitFor(() => {
+        expect(mockAlert).toHaveBeenCalledWith("Please save your changes.");
+        expect(mockOnSearch).not.toHaveBeenCalled();
+      });
+
+      mockAlert.mockRestore();
     });
 
     it("should disable search button during fetch", () => {

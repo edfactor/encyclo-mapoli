@@ -1,13 +1,9 @@
+import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { createMockStoreAndWrapper } from "../../../../test";
 import UnForfeit from "../UnForfeit";
-import { useLazyGetAccountingRangeToCurrent } from "../../../../hooks/useFiscalCalendarYear";
-import { useUnForfeitState } from "../../../../hooks/useUnForfeitState";
-
-type MockFiscalData = ReturnType<typeof useLazyGetAccountingRangeToCurrent>;
-type MockUnForfeitState = ReturnType<typeof useUnForfeitState>;
 
 // Mock the hook dependencies
 vi.mock("../../../../hooks/useFiscalCalendarYear", () => ({
@@ -56,56 +52,51 @@ vi.mock("../../../../hooks/useUnsavedChangesGuard", () => ({
 }));
 
 vi.mock("../../../../components/FrozenYearWarning", () => ({
-  default: vi.fn(() => <section aria-label="frozen year warning">Frozen Year Warning</section>)
+  default: vi.fn(() => React.createElement('section', { 'aria-label': 'frozen year warning' }, 'Frozen Year Warning'))
 }));
 
-vi.mock("components/StatusDropdownActionNode", () => ({
-  default: vi.fn(() => <section aria-label="status dropdown">Status Dropdown</section>)
+vi.mock("../../../../components/StatusDropdownActionNode", () => ({
+  default: vi.fn(() => React.createElement('section', { 'aria-label': 'status dropdown', role: 'status' }, 'Status Dropdown'))
 }));
 
-vi.mock("./UnForfeitSearchFilter", () => ({
-  default: vi.fn(({ onSearch, hasUnsavedChanges }) => (
-    <section aria-label="search filter">
-      <button
-        aria-label="search button"
-        onClick={() => onSearch()}
-        disabled={hasUnsavedChanges}>
-        Search
-      </button>
-    </section>
-  ))
+vi.mock("../UnForfeitSearchFilter", () => ({
+  default: vi.fn(({ onSearch, hasUnsavedChanges }) =>
+    React.createElement('section', { 'aria-label': 'search filter' },
+      React.createElement('button', {
+        'aria-label': 'search button',
+        onClick: () => onSearch(),
+        disabled: hasUnsavedChanges
+      }, 'Search')
+    )
+  )
 }));
 
-vi.mock("./UnForfeitGrid", () => ({
-  default: vi.fn(() => <section aria-label="unforfeit grid">UnForfeit Grid</section>)
+vi.mock("../UnForfeitGrid", () => ({
+  default: vi.fn(() => React.createElement('section', { 'aria-label': 'unforfeit grid' }, 'UnForfeit Grid'))
 }));
 
 vi.mock("smart-ui-library", () => ({
-  ApiMessageAlert: vi.fn(() => <section aria-label="api message alert">Message Alert</section>),
-  DSMAccordion: vi.fn(({ title, children }) => (
-    <section aria-label="accordion">
-      <div>{title}</div>
-      {children}
-    </section>
-  )),
-  Page: vi.fn(({ label, actionNode, children }) => (
-    <section aria-label="page">
-      <div>{label}</div>
-      {actionNode}
-      {children}
-    </section>
-  )),
-  SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) => (
-    <div role="group" aria-label="search and reset">
-      <button onClick={handleSearch} disabled={disabled || isFetching}>
-        Search
-      </button>
-      <button onClick={handleReset}>
-        Reset
-      </button>
-      {isFetching && <span role="status">Loading...</span>}
-    </div>
-  ))
+  ApiMessageAlert: vi.fn(() => React.createElement('section', { 'aria-label': 'api message alert', role: 'alert' }, 'Message Alert')),
+  DSMAccordion: vi.fn(({ title, children }) =>
+    React.createElement('section', { 'aria-label': 'accordion' },
+      React.createElement('div', null, title),
+      children
+    )
+  ),
+  Page: vi.fn(({ label, actionNode, children }) =>
+    React.createElement('section', { 'aria-label': 'page' },
+      React.createElement('div', null, label),
+      actionNode,
+      children
+    )
+  ),
+  SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) =>
+    React.createElement('div', { role: 'group', 'aria-label': 'search and reset' },
+      React.createElement('button', { onClick: handleSearch, disabled: disabled || isFetching }, 'Search'),
+      React.createElement('button', { onClick: handleReset }, 'Reset'),
+      isFetching && React.createElement('span', { role: 'status' }, 'Loading...')
+    )
+  )
 }));
 
 describe("UnForfeit", () => {
@@ -155,7 +146,7 @@ describe("UnForfeit", () => {
             fiscalEndDate: null
           }
         }
-      ] as MockFiscalData);
+      ] as unknown);
 
       render(<UnForfeit />, { wrapper });
 
@@ -217,16 +208,21 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as MockUnForfeitState);
+      } as unknown);
 
       render(<UnForfeit />, { wrapper });
+
+      // Wait for component to fully render
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: /search button/i })).toBeInTheDocument();
+      });
 
       const searchButton = screen.getByRole("button", { name: /search button/i });
       await user.click(searchButton);
 
       await waitFor(() => {
-        // handleSearch is called directly from search filter
-        expect(screen.getByRole("button", { name: /search/i })).toBeInTheDocument();
+        // Verify the button is still rendered (component didn't crash)
+        expect(screen.getByRole("button", { name: /search button/i })).toBeInTheDocument();
       });
     });
 
@@ -250,9 +246,14 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as MockUnForfeitState);
+      } as unknown);
 
       render(<UnForfeit />, { wrapper });
+
+      // Wait for button to render
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: /search button/i })).toBeInTheDocument();
+      });
 
       const searchButton = screen.getByRole("button", { name: /search button/i });
 
@@ -284,7 +285,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as MockUnForfeitState);
+      } as unknown);
 
       render(<UnForfeit />, { wrapper });
 
@@ -316,11 +317,13 @@ describe("UnForfeit", () => {
           handleStatusChange: mockHandleStatusChange,
           handleArchiveHandled: vi.fn()
         }
-      } as MockUnForfeitState);
+      } as unknown);
 
       render(<UnForfeit />, { wrapper });
 
-      expect(screen.getByRole("status", { name: /dropdown/i })).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByRole("status", { name: /dropdown/i })).toBeInTheDocument();
+      });
     });
   });
 
@@ -346,7 +349,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as MockUnForfeitState);
+      } as unknown);
 
       render(<UnForfeit />, { wrapper });
 
@@ -376,7 +379,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as MockUnForfeitState);
+      } as unknown);
 
       render(<UnForfeit />, { wrapper });
 
@@ -406,7 +409,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as MockUnForfeitState);
+      } as unknown);
 
       render(<UnForfeit />, { wrapper });
 
@@ -440,9 +443,13 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as MockUnForfeitState);
+      } as unknown);
 
       render(<UnForfeit />, { wrapper });
+
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: /search button/i })).toBeInTheDocument();
+      });
 
       const searchButton = screen.getByRole("button", { name: /search button/i });
       expect(searchButton).toBeDisabled();
@@ -474,7 +481,7 @@ describe("UnForfeit", () => {
             fiscalEndDate: "2024-12-31"
           }
         }
-      ] as MockFiscalData);
+      ] as unknown);
 
       render(<UnForfeit />, { wrapper });
 

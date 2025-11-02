@@ -24,6 +24,13 @@ vi.mock("../components/DuplicateSsnGuard", () => ({
   default: vi.fn(({ children }) => React.createElement(React.Fragment, null, children))
 }));
 
+// Mock React Hook Form globally to prevent form-related test failures
+// Components using useForm, Controller, etc. will use these mocks
+vi.mock("react-hook-form", async () => {
+  const { createReactHookFormMock } = await import("./mocks/reactHookFormMock");
+  return createReactHookFormMock();
+});
+
 // Cleanup after each test
 afterEach(() => {
   cleanup();

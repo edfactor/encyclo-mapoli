@@ -58,6 +58,22 @@ interface MockRootState {
         isReadOnly?: boolean;
       }>;
     };
+    profitYearSelectorData?: {
+      profitYears?: Array<{
+        profitYear: number;
+        fiscalBeginDate: string;
+        fiscalEndDate: string;
+        isCurrent?: boolean;
+      }>;
+      currentProfitYear?: number;
+    };
+  };
+  frozen?: {
+    profitYearSelectorData?: Array<{
+      profitYear: number;
+      isFrozen?: boolean;
+    }> | null;
+    [key: string]: unknown;
   };
   yearsEnd?: {
     selectedProfitYear?: number | null;
@@ -105,7 +121,21 @@ export const createMockStore = (preloadedState?: PreloadedState<MockRootState>) 
     navigation: {
       navigationData: {
         navigation: []
+      },
+      profitYearSelectorData: {
+        profitYears: [
+          {
+            profitYear: 2024,
+            fiscalBeginDate: "2024-01-01",
+            fiscalEndDate: "2024-12-31",
+            isCurrent: true
+          }
+        ],
+        currentProfitYear: 2024
       }
+    },
+    frozen: {
+      profitYearSelectorData: null
     },
     yearsEnd: {
       selectedProfitYear: 2024,
@@ -129,13 +159,32 @@ export const createMockStore = (preloadedState?: PreloadedState<MockRootState>) 
     (state = initialState, _action: unknown) =>
       state;
 
+  // Deep merge preloaded state with defaults to preserve nested properties
+  const mergedState: MockRootState = {
+    security: { ...defaultState.security, ...preloadedState?.security },
+    navigation: {
+      ...defaultState.navigation,
+      ...preloadedState?.navigation,
+      profitYearSelectorData: {
+        ...defaultState.navigation.profitYearSelectorData,
+        ...preloadedState?.navigation?.profitYearSelectorData
+      }
+    },
+    frozen: { ...defaultState.frozen, ...preloadedState?.frozen },
+    yearsEnd: { ...defaultState.yearsEnd, ...preloadedState?.yearsEnd },
+    distribution: { ...defaultState.distribution, ...preloadedState?.distribution },
+    inquiry: { ...defaultState.inquiry, ...preloadedState?.inquiry },
+    lookups: { ...defaultState.lookups, ...preloadedState?.lookups }
+  };
+
   const baseReducers = {
-    security: createSliceReducer(preloadedState?.security ?? defaultState.security),
-    navigation: createSliceReducer(preloadedState?.navigation ?? defaultState.navigation),
-    yearsEnd: createSliceReducer(preloadedState?.yearsEnd ?? defaultState.yearsEnd),
-    distribution: createSliceReducer(preloadedState?.distribution ?? defaultState.distribution),
-    inquiry: createSliceReducer(preloadedState?.inquiry ?? defaultState.inquiry),
-    lookups: createSliceReducer(preloadedState?.lookups ?? defaultState.lookups)
+    security: createSliceReducer(mergedState.security),
+    navigation: createSliceReducer(mergedState.navigation),
+    frozen: createSliceReducer(mergedState.frozen),
+    yearsEnd: createSliceReducer(mergedState.yearsEnd),
+    distribution: createSliceReducer(mergedState.distribution),
+    inquiry: createSliceReducer(mergedState.inquiry),
+    lookups: createSliceReducer(mergedState.lookups)
   };
 
   // Add RTK Query API reducers that tests commonly mock

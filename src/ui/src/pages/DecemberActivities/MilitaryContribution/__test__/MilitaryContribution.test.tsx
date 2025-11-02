@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import React from "react";
 import { createMockStoreAndWrapper } from "../../../../test";
 import { MissiveAlertProvider } from "../../../../components/MissiveAlerts/MissiveAlertContext";
 import MilitaryContribution from "../MilitaryContribution";
@@ -80,84 +81,51 @@ interface MissiveAlert {
 }
 
 // Mock child components
-vi.mock("components/FrozenYearWarning", () => ({
-  default: vi.fn(() => <div role="alert" aria-label="frozen year warning">Frozen Year Warning</div>)
+vi.mock("../../../../components/FrozenYearWarning", () => ({
+  default: vi.fn(() => React.createElement('div', { role: 'alert', 'aria-label': 'frozen year warning' }, 'Frozen Year Warning'))
 }));
 
-vi.mock("components/StatusReadOnlyInfo", () => ({
-  default: vi.fn(() => <div role="status" aria-label="read only info">Read Only Info</div>)
+vi.mock("../../../../components/StatusReadOnlyInfo", () => ({
+  default: vi.fn(() => React.createElement('div', { role: 'status', 'aria-label': 'read only info' }, 'Read Only Info'))
 }));
 
-vi.mock("components/StatusDropdownActionNode", () => ({
-  default: vi.fn(() => <div role="status" aria-label="status dropdown">Status Dropdown</div>)
+vi.mock("../../../../components/StatusDropdownActionNode", () => ({
+  default: vi.fn(() => React.createElement('div', { role: 'status', 'aria-label': 'status dropdown' }, 'Status Dropdown'))
 }));
 
-vi.mock("components/MissiveAlerts/MissiveAlerts", () => ({
-  default: vi.fn(() => <div role="alert" aria-label="missive alerts">Missive Alerts</div>)
+vi.mock("../../../../components/MissiveAlerts/MissiveAlerts", () => ({
+  default: vi.fn(() => React.createElement('div', { role: 'alert', 'aria-label': 'missive alerts' }, 'Missive Alerts'))
 }));
 
-vi.mock("./MilitaryContributionSearchFilter", () => ({
-  default: vi.fn(() => <section aria-label="search filter">Search Filter</section>)
+vi.mock("../MilitaryContributionSearchFilter", () => ({
+  default: vi.fn(() => React.createElement('section', { 'aria-label': 'search filter' }, 'Search Filter'))
 }));
 
-vi.mock("./MilitaryContributionFormGrid", () => ({
-  default: vi.fn(({ onAddContribution, isReadOnly }) => (
-    <section aria-label="military contribution grid">
-      <button
-        onClick={onAddContribution}
-        disabled={isReadOnly}>
-        Add Contribution
-      </button>
-    </section>
-  ))
+vi.mock("../MilitaryContributionFormGrid", () => ({
+  default: vi.fn(({ onAddContribution, isReadOnly }) =>
+    React.createElement('section', { 'aria-label': 'military contribution grid' },
+      React.createElement('button', { onClick: onAddContribution, disabled: isReadOnly }, 'Add Contribution')
+    )
+  )
 }));
 
-vi.mock("./MilitaryContributionForm", () => ({
-  default: vi.fn(({ onSubmit, onCancel }) => (
-    <form aria-label="military contribution form">
-      <button
-        onClick={() =>
-          onSubmit({
-            contributionAmount: 5000,
-            contributionYear: 2024,
-            isSupplementalContribution: false
-          })
-        }>
-        Submit
-      </button>
-      <button
-        onClick={onCancel}>
-        Cancel
-      </button>
-    </form>
-  ))
+vi.mock("../MilitaryContributionForm", () => ({
+  default: vi.fn(({ onSubmit, onCancel }) =>
+    React.createElement('form', { 'aria-label': 'military contribution form' },
+      React.createElement('button', {
+        onClick: () => onSubmit({
+          contributionAmount: 5000,
+          contributionYear: 2024,
+          isSupplementalContribution: false
+        })
+      }, 'Submit'),
+      React.createElement('button', { onClick: onCancel }, 'Cancel')
+    )
+  )
 }));
 
-vi.mock("../../../../hooks/useDecemberFlowProfitYear", () => ({
-  default: vi.fn(() => 2024)
-}));
-
-vi.mock("../../../../hooks/useIsProfitYearFrozen", () => ({
-  useIsProfitYearFrozen: vi.fn(() => false)
-}));
-
-vi.mock("../../../../hooks/useIsReadOnlyByStatus", () => ({
-  useIsReadOnlyByStatus: vi.fn(() => false)
-}));
-
-vi.mock("../../../../hooks/useMissiveAlerts", () => ({
-  useMissiveAlerts: vi.fn(() => ({
-    missiveAlerts: [],
-    addAlert: vi.fn(),
-    clearAlerts: vi.fn()
-  }))
-}));
-
-vi.mock("../../../../hooks/useReadOnlyNavigation", () => ({
-  useReadOnlyNavigation: vi.fn(() => false)
-}));
-
-vi.mock("./hooks/useMilitaryContribution", () => ({
+// useMilitaryContribution hook mock
+vi.mock("../hooks/useMilitaryContribution", () => ({
   default: vi.fn(() => ({
     contributionsData: null,
     isLoadingContributions: false,
@@ -176,35 +144,28 @@ vi.mock("./hooks/useMilitaryContribution", () => ({
 }));
 
 vi.mock("smart-ui-library", () => ({
-  ApiMessageAlert: vi.fn(() => <div role="alert">Message Alert</div>),
-  DSMAccordion: vi.fn(({ title, children }) => (
-    <section aria-label={title}>
-      <h2>{title}</h2>
-      {children}
-    </section>
-  )),
-  DSMGrid: vi.fn(() => <div role="grid">Grid</div>),
-  Page: vi.fn(({ label, actionNode, children }) => (
-    <main>
-      <h1>{label}</h1>
-      {actionNode}
-      {children}
-    </main>
-  )),
-  SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) => (
-    <div role="group" aria-label="search and reset controls">
-      <button
-        onClick={handleSearch}
-        disabled={disabled || isFetching}>
-        Search
-      </button>
-      <button
-        onClick={handleReset}>
-        Reset
-      </button>
-      {isFetching && <span role="status">Loading...</span>}
-    </div>
-  )),
+  ApiMessageAlert: vi.fn(() => React.createElement('div', { role: 'alert' }, 'Message Alert')),
+  DSMAccordion: vi.fn(({ title, children }) =>
+    React.createElement('section', { 'aria-label': title },
+      React.createElement('h2', null, title),
+      children
+    )
+  ),
+  DSMGrid: vi.fn(() => React.createElement('div', { role: 'grid' }, 'Grid')),
+  Page: vi.fn(({ label, actionNode, children }) =>
+    React.createElement('main', null,
+      React.createElement('h1', null, label),
+      actionNode,
+      children
+    )
+  ),
+  SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) =>
+    React.createElement('div', { role: 'group', 'aria-label': 'search and reset controls' },
+      React.createElement('button', { onClick: handleSearch, disabled: disabled || isFetching }, 'Search'),
+      React.createElement('button', { onClick: handleReset }, 'Reset'),
+      isFetching && React.createElement('span', { role: 'status' }, 'Loading...')
+    )
+  ),
   formatNumberWithComma: vi.fn((num) => num.toString()),
   setMessage: vi.fn((payload) => ({ type: "message/setMessage", payload }))
 }));

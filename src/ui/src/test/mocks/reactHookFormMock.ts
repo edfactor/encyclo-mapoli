@@ -72,12 +72,8 @@ export const createReactHookFormMock = (options?: {
         // Form submission handler
         handleSubmit: vi.fn((fn) => async (e?: React.BaseSyntheticEvent) => {
           e?.preventDefault?.();
-          try {
-            await fn(formDefaultValues);
-          } catch (error) {
-            // Allow tests to catch submission errors
-            throw error;
-          }
+          // Allow errors to propagate for test handling
+          await fn(formDefaultValues);
         }),
 
         // Form state
@@ -153,7 +149,7 @@ export const createReactHookFormMock = (options?: {
      * Renders the field using the render prop with properly-structured field props
      * This allows controlled components like MUI inputs to work correctly in tests
      */
-    Controller: vi.fn(({ render, name, defaultValue, control }) => {
+    Controller: vi.fn(({ render, name, defaultValue }) => {
       const value = defaultValues[name] ?? defaultValue ?? "";
       const error = errors[name];
 

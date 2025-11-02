@@ -1,18 +1,17 @@
-import { configureStore } from "@reduxjs/toolkit";
+import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Provider } from "react-redux";
-import { describe, expect, it, vi } from "vitest";
-import { fireEvent } from "@testing-library/react";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { CAPTIONS } from "../../../../constants";
 import Forfeit from "../Forfeit";
+import { createMockStoreAndWrapper } from "../../../../test";
 
 // Mock the useForfeit hook
 const mockExecuteSearch = vi.fn();
 const mockHandleStatusChange = vi.fn();
 const mockHandleReset = vi.fn();
 
-vi.mock("./hooks/useForfeit", () => ({
+vi.mock("../hooks/useForfeit", () => ({
   default: vi.fn(() => ({
     searchResults: {
       response: {
@@ -37,78 +36,74 @@ vi.mock("./hooks/useForfeit", () => ({
 }));
 
 // Mock the child components
-vi.mock("./ForfeitGrid", () => ({
-  default: vi.fn(({ searchResults, pagination, isSearching }) => (
-    <section aria-label="forfeit grid">
-      <div aria-live="polite">{searchResults ? "true" : "false"}</div>
-      <div>{isSearching.toString()}</div>
-      <div>{pagination?.pageSize}</div>
-    </section>
-  ))
+vi.mock("../ForfeitGrid", () => ({
+  default: vi.fn(({ searchResults, pagination, isSearching }) =>
+    React.createElement('section', { 'aria-label': 'forfeit grid' },
+      React.createElement('div', { 'aria-live': 'polite' }, searchResults ? "true" : "false"),
+      React.createElement('div', null, isSearching.toString()),
+      React.createElement('div', null, pagination?.pageSize)
+    )
+  )
 }));
 
-vi.mock("./ForfeitSearchFilter", () => ({
-  default: vi.fn(({ onSearch, onReset, isSearching }) => (
-    <section aria-label="forfeit search filter">
-      <button
-        onClick={() => onSearch({ profitYear: 2024 })}>
-        Search
-      </button>
-      <button
-        onClick={onReset}>
-        Reset
-      </button>
-      <div aria-live="polite">{isSearching.toString()}</div>
-    </section>
-  ))
+vi.mock("../ForfeitSearchFilter", () => ({
+  default: vi.fn(({ onSearch, onReset, isSearching }) =>
+    React.createElement('section', { 'aria-label': 'forfeit search filter' },
+      React.createElement('button', {
+        onClick: () => onSearch({ profitYear: 2024 })
+      }, 'Search'),
+      React.createElement('button', {
+        onClick: onReset
+      }, 'Reset'),
+      React.createElement('div', { 'aria-live': 'polite' }, isSearching.toString())
+    )
+  )
 }));
 
-vi.mock("../../../components/StatusDropdownActionNode", () => ({
-  default: vi.fn(({ onStatusChange }) => (
-    <section aria-label="status dropdown">
-      <button
-        onClick={() => onStatusChange?.("4", "Complete")}>
-        Change to Complete
-      </button>
-      <button
-        onClick={() => onStatusChange?.("2", "In Progress")}>
-        Change to In Progress
-      </button>
-    </section>
-  ))
+vi.mock("../../../../components/StatusDropdownActionNode", () => ({
+  default: vi.fn(({ onStatusChange }) =>
+    React.createElement('section', { 'aria-label': 'status dropdown' },
+      React.createElement('button', {
+        onClick: () => onStatusChange?.("4", "Complete")
+      }, 'Change to Complete'),
+      React.createElement('button', {
+        onClick: () => onStatusChange?.("2", "In Progress")
+      }, 'Change to In Progress')
+    )
+  )
 }));
 
 describe("Forfeit", () => {
-  const createMockStore = () => {
-    return configureStore({
-      reducer: {
-        security: () => ({ token: "mock-token" }),
-        navigation: () => ({ navigationData: null }),
-        yearsEnd: () => ({
-          selectedProfitYearForFiscalClose: 2024,
-          forfeituresAndPoints: null
-        })
+  let wrapper: ReturnType<typeof createMockStoreAndWrapper>["wrapper"];
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    const storeAndWrapper = createMockStoreAndWrapper({
+      yearsEnd: {
+        selectedProfitYearForFiscalClose: 2024,
+        forfeituresAndPoints: null
       }
     });
-  };
+    wrapper = storeAndWrapper.wrapper;
+  });
 
-  const wrapper =
-    (store: ReturnType<typeof configureStore>) =>
-    ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider>;
+  it("should render Forfeit page with all components", async () => {
+    render(<Forfeit />, { wrapper });
 
-  it("should render Forfeit page with all components", () => {
-    const mockStore = createMockStore();
-    render(<Forfeit />, { wrapper: wrapper(mockStore) });
-
-    expect(screen.getByLabelText("status dropdown")).toBeInTheDocument();
-    expect(screen.getByLabelText("forfeit search filter")).toBeInTheDocument();
-    expect(screen.getByLabelText("forfeit grid")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByLabelText("status dropdown")).toBeInTheDocument();
+      expect(screen.getByLabelText("forfeit search filter")).toBeInTheDocument();
+      expect(screen.getByLabelText("forfeit grid")).toBeInTheDocument();
+    });
   });
 
   it("should call handleStatusChange when status changes to Complete", async () => {
     const user = userEvent.setup();
-    const mockStore = createMockStore();
-    render(<Forfeit />, { wrapper: wrapper(mockStore) });
+    render(<Forfeit />, { wrapper });
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /change to complete/i })).toBeInTheDocument();
+    });
 
     const completeButton = screen.getByRole("button", { name: /change to complete/i });
     await user.click(completeButton);
@@ -120,8 +115,11 @@ describe("Forfeit", () => {
 
   it("should call handleStatusChange when status changes to In Progress", async () => {
     const user = userEvent.setup();
-    const mockStore = createMockStore();
-    render(<Forfeit />, { wrapper: wrapper(mockStore) });
+    render(<Forfeit />, { wrapper });
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /change to in progress/i })).toBeInTheDocument();
+    });
 
     const inProgressButton = screen.getByRole("button", { name: /change to in progress/i });
     await user.click(inProgressButton);
@@ -133,8 +131,11 @@ describe("Forfeit", () => {
 
   it("should call executeSearch when search button is clicked", async () => {
     const user = userEvent.setup();
-    const mockStore = createMockStore();
-    render(<Forfeit />, { wrapper: wrapper(mockStore) });
+    render(<Forfeit />, { wrapper });
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /search/i })).toBeInTheDocument();
+    });
 
     const searchButton = screen.getByRole("button", { name: /search/i });
     await user.click(searchButton);
@@ -146,8 +147,11 @@ describe("Forfeit", () => {
 
   it("should call handleReset when reset button is clicked", async () => {
     const user = userEvent.setup();
-    const mockStore = createMockStore();
-    render(<Forfeit />, { wrapper: wrapper(mockStore) });
+    render(<Forfeit />, { wrapper });
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /reset/i })).toBeInTheDocument();
+    });
 
     const resetButton = screen.getByRole("button", { name: /reset/i });
     await user.click(resetButton);
@@ -157,18 +161,18 @@ describe("Forfeit", () => {
     });
   });
 
-  it("should pass correct props to ForfeitGrid", () => {
-    const mockStore = createMockStore();
-    render(<Forfeit />, { wrapper: wrapper(mockStore) });
+  it("should pass correct props to ForfeitGrid", async () => {
+    render(<Forfeit />, { wrapper });
 
     // Verify that the page structure is rendered correctly
-    expect(screen.getByText(CAPTIONS.FORFEIT)).toBeInTheDocument();
-    expect(screen.getByText("Filter")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(CAPTIONS.FORFEIT)).toBeInTheDocument();
+      expect(screen.getByText("Filter")).toBeInTheDocument();
+    });
   });
 
   it("should pass correct props to ForfeitSearchFilter", async () => {
-    const mockStore = createMockStore();
-    render(<Forfeit />, { wrapper: wrapper(mockStore) });
+    render(<Forfeit />, { wrapper });
 
     // Verify that the search filter is rendered and the search button is initially not disabled
     // (indicating isSearching prop is false)
