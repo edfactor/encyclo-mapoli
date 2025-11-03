@@ -134,7 +134,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
     public async Task GetResponse_Should_HandleEmptyResults()
     {
         // Arrange
-        var request = StartAndEndDateRequest.RequestExample();
+        var request = FilterableStartAndEndDateRequest.RequestExample();
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<UnforfeituresResponse>
         {
@@ -157,7 +157,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
     public async Task GetResponse_Should_HandleNullResults()
     {
         // Arrange
-        var request = StartAndEndDateRequest.RequestExample();
+        var request = FilterableStartAndEndDateRequest.RequestExample();
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<UnforfeituresResponse>
         {

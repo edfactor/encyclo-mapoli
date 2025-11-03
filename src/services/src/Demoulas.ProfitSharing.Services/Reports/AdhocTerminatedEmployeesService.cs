@@ -14,7 +14,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
 {
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
-    
+
     public AdhocTerminatedEmployeesService(
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
         IDemographicReaderService demographicReaderService
@@ -61,7 +61,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
         };
     }
 
-    public async Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetTerminatedEmployeesNeedingFormLetter(StartAndEndDateRequest req, CancellationToken cancellationToken)
+    public async Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetTerminatedEmployeesNeedingFormLetter(FilterableStartAndEndDateRequest req, CancellationToken cancellationToken)
     {
         // Convert to TerminatedLettersRequest and delegate to the more flexible overload
         var terminatedLettersRequest = new TerminatedLettersRequest
@@ -130,7 +130,16 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
 
     public async Task<string> GetFormLetterForTerminatedEmployees(StartAndEndDateRequest startAndEndDateRequest, CancellationToken cancellationToken)
     {
-        var report = await GetTerminatedEmployeesNeedingFormLetter(startAndEndDateRequest, cancellationToken);
+        var filterableRequest = new FilterableStartAndEndDateRequest
+        {
+            BeginningDate = startAndEndDateRequest.BeginningDate,
+            EndingDate = startAndEndDateRequest.EndingDate,
+            Skip = startAndEndDateRequest.Skip,
+            Take = startAndEndDateRequest.Take,
+            SortBy = startAndEndDateRequest.SortBy,
+            IsSortDescending = startAndEndDateRequest.IsSortDescending
+        };
+        var report = await GetTerminatedEmployeesNeedingFormLetter(filterableRequest, cancellationToken);
         return GenerateFormLetterFromReport(report);
     }
 

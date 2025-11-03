@@ -34,7 +34,7 @@ public sealed class UnforfeitService : IUnforfeitService
         _totalService = totalService;
     }
 
-    public async Task<ReportResponseBase<UnforfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(StartAndEndDateRequest req,
+    public async Task<ReportResponseBase<UnforfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(FilterableStartAndEndDateRequest req,
         CancellationToken cancellationToken)
     {
         StartAndEndDateRequestValidator? validator = new();

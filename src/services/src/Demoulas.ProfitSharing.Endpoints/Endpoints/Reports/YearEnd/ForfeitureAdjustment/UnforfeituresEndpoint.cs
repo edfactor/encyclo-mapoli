@@ -18,7 +18,7 @@ using Microsoft.Extensions.Logging;
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ForfeitureAdjustment;
 
 public class UnforfeituresEndpoint :
-    EndpointWithCsvBase<StartAndEndDateRequest, UnforfeituresResponse, UnforfeituresEndpoint.RehireProfitSharingResponseMap>
+    EndpointWithCsvBase<FilterableStartAndEndDateRequest, UnforfeituresResponse, UnforfeituresEndpoint.RehireProfitSharingResponseMap>
 {
     private readonly IUnforfeitService _reportService;
     private readonly IAuditService _auditService;
@@ -68,7 +68,7 @@ public class UnforfeituresEndpoint :
     public override string ReportFileName => "REHIRE'S PROFIT SHARING DATA";
 
 #pragma warning disable AsyncFixer01 // The method does use async/await inside ExecuteWithTelemetry lambda
-    public override async Task<ReportResponseBase<UnforfeituresResponse>> GetResponse(StartAndEndDateRequest req, CancellationToken ct)
+    public override async Task<ReportResponseBase<UnforfeituresResponse>> GetResponse(FilterableStartAndEndDateRequest req, CancellationToken ct)
 #pragma warning restore AsyncFixer01
     {
         return await this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
