@@ -314,18 +314,51 @@ public sealed class MasterInquiryService : IMasterInquiryService
             query = query.Where(pd => pd.Ssn == req.Ssn);
         }
 
-        // PERFORMANCE FIX: If BadgeNumber is provided, filter by SSN from Demographics first
+        // PERFORMANCE FIX: If BadgeNumber is provided, filter by SSN from Demographics or Beneficiary first
         // This makes BadgeNumber searches as fast as SSN searches
+        // Critical fix (PS-1998): Handle both employees and beneficiaries
         if (req.BadgeNumber is > 0)
         {
-            // Get SSN from Demographics for this badge number
-            var demographicsForDup = await _demographicReaderService.BuildDemographicQuery(ctx);
-            var ssnFromBadge = demographicsForDup
-                .Where(d => d.BadgeNumber == req.BadgeNumber.Value)
-                .Select(d => d.Ssn)
-                .TagWith($"MasterInquiry: Get SSN for BadgeNumber {req.BadgeNumber.Value}");
+            IQueryable<int> ssnFromBadge;
+            
+            if (req.MemberType == 2) // Beneficiary only
+            {
+                // For beneficiaries, query the Beneficiary table
+                ssnFromBadge = ctx.Beneficiaries
+                    .Where(b => b.BadgeNumber == req.BadgeNumber.Value)
+                    .Include(b => b.Contact)
+                    .Select(b => b.Contact!.Ssn)
+                    .TagWith($"MasterInquiry: Get SSN for Beneficiary BadgeNumber {req.BadgeNumber.Value}");
+            }
+            else if (req.MemberType == 1) // Employee only
+            {
+                // For employees, query Demographics
+                var demographicsForDup = await _demographicReaderService.BuildDemographicQuery(ctx);
+                ssnFromBadge = demographicsForDup
+                    .Where(d => d.BadgeNumber == req.BadgeNumber.Value)
+                    .Select(d => d.Ssn)
+                    .TagWith($"MasterInquiry: Get SSN for Employee BadgeNumber {req.BadgeNumber.Value}");
+            }
+            else // Search both (MemberType == 0 or null)
+            {
+                // For both, query Beneficiary first, then employee Demographics
+                var beneficiarySSNs = ctx.Beneficiaries
+                    .Where(b => b.BadgeNumber == req.BadgeNumber.Value)
+                    .Include(b => b.Contact)
+                    .Select(b => b.Contact!.Ssn)
+                    .TagWith($"MasterInquiry: Get SSN for Beneficiary BadgeNumber {req.BadgeNumber.Value}");
 
-            // Filter ProfitDetails to only this SSN
+                var demographicsForDup = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var employeeSSNs = demographicsForDup
+                    .Where(d => d.BadgeNumber == req.BadgeNumber.Value)
+                    .Select(d => d.Ssn)
+                    .TagWith($"MasterInquiry: Get SSN for Employee BadgeNumber {req.BadgeNumber.Value}");
+
+                // Union both queries
+                ssnFromBadge = beneficiarySSNs.Union(employeeSSNs);
+            }
+
+            // Filter ProfitDetails to only these SSNs
             query = query.Where(pd => ssnFromBadge.Contains(pd.Ssn));
         }
 
