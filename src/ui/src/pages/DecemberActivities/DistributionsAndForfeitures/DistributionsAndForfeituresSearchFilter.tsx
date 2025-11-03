@@ -16,7 +16,6 @@ import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear.ts";
-import { getMonthEndDate, getMonthStartDate } from "../../../utils/dateRangeUtils.ts";
 import { tryddmmyyyyToDate } from "../../../utils/dateUtils.ts";
 import { endDateAfterStartDateValidator } from "../../../utils/FormValidators.ts";
 
@@ -152,9 +151,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
               <DsmDatePicker
                 id="startDate"
                 onChange={(value: Date | null) => {
-                  // Expand month selection to first day of month
-                  const expandedDate = getMonthStartDate(value);
-                  field.onChange(expandedDate);
+                  field.onChange(value);
                   trigger("endDate");
                 }}
                 value={field.value}
@@ -167,7 +164,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                   return month > endOfNextMonth;
                 }}
                 error={errors.startDate?.message}
-                views={["year", "month"]}
+                views={["year", "month", "day"]}
               />
             )}
           />
@@ -181,9 +178,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
               <DsmDatePicker
                 id="endDate"
                 onChange={(value: Date | null) => {
-                  // Expand month selection to last day of month
-                  const expandedDate = getMonthEndDate(value);
-                  field.onChange(expandedDate);
+                  field.onChange(value);
                   trigger("endDate");
                 }}
                 value={field.value}
@@ -196,7 +191,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                   return month > endOfNextMonth;
                 }}
                 error={errors.endDate?.message}
-                views={["year", "month"]}
+                views={["year", "month", "day"]}
               />
             )}
           />
