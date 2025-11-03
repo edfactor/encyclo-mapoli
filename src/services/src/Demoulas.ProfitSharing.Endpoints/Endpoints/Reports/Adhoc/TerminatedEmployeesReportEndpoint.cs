@@ -34,7 +34,6 @@ public sealed class TerminatedEmployeesReportEndpoint : EndpointWithCsvBase<Star
             s.Description = "Returns a report of terminated employees within a specified profit year.";
             s.ExampleRequest = new StartAndEndDateRequest
             {
-                ProfitYear = 2023,
                 Skip = 0,
                 Take = 100,
                 SortBy = "TerminationDate",

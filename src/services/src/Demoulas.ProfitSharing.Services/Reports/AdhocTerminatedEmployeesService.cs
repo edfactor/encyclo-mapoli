@@ -14,17 +14,14 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
 {
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
-    private readonly ICalendarService _calendarService;
 
     public AdhocTerminatedEmployeesService(
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
-        IDemographicReaderService demographicReaderService,
-        ICalendarService calendarService
+        IDemographicReaderService demographicReaderService
     )
     {
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
         _demographicReaderService = demographicReaderService;
-        _calendarService = calendarService;
     }
 
     public async Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetTerminatedEmployees(StartAndEndDateRequest req, CancellationToken cancellationToken)
@@ -35,10 +32,10 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
         var rslt = await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var demographic = await _demographicReaderService.BuildDemographicQuery(ctx, false);
-            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
             var query = (from d in demographic.Include(d => d.TerminationCode)
                          where d.TerminationDate != null
-                            && d.TerminationDate.Value <= calInfo.FiscalEndDate
+                            && d.TerminationDate.Value >= startDate
+                            && d.TerminationDate.Value <= endDate
                             && d.TerminationCodeId != TerminationCode.Constants.Retired
                          select new AdhocTerminatedEmployeeResponse
                          {
@@ -51,8 +48,6 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
                              IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly
                          }).ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
 
-            startDate = calInfo.FiscalBeginDate;
-            endDate = calInfo.FiscalEndDate;
             return await query;
         }, cancellationToken);
 
@@ -66,7 +61,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
         };
     }
 
-    public async Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetTerminatedEmployeesNeedingFormLetter(StartAndEndDateRequest req, CancellationToken cancellationToken)
+    public async Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetTerminatedEmployeesNeedingFormLetter(FilterableStartAndEndDateRequest req, CancellationToken cancellationToken)
     {
         // Convert to TerminatedLettersRequest and delegate to the more flexible overload
         var terminatedLettersRequest = new TerminatedLettersRequest
@@ -74,7 +69,6 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             BeginningDate = req.BeginningDate,
             EndingDate = req.EndingDate,
             ExcludeZeroBalance = req.ExcludeZeroBalance,
-            ProfitYear = req.ProfitYear,
             Skip = req.Skip,
             Take = req.Take,
             SortBy = req.SortBy,
@@ -136,7 +130,16 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
 
     public async Task<string> GetFormLetterForTerminatedEmployees(StartAndEndDateRequest startAndEndDateRequest, CancellationToken cancellationToken)
     {
-        var report = await GetTerminatedEmployeesNeedingFormLetter(startAndEndDateRequest, cancellationToken);
+        var filterableRequest = new FilterableStartAndEndDateRequest
+        {
+            BeginningDate = startAndEndDateRequest.BeginningDate,
+            EndingDate = startAndEndDateRequest.EndingDate,
+            Skip = startAndEndDateRequest.Skip,
+            Take = startAndEndDateRequest.Take,
+            SortBy = startAndEndDateRequest.SortBy,
+            IsSortDescending = startAndEndDateRequest.IsSortDescending
+        };
+        var report = await GetTerminatedEmployeesNeedingFormLetter(filterableRequest, cancellationToken);
         return GenerateFormLetterFromReport(report);
     }
 

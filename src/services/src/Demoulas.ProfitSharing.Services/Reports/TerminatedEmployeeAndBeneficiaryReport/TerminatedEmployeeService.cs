@@ -35,6 +35,18 @@ public class TerminatedEmployeeService : ITerminatedEmployeeService
     public Task<TerminatedEmployeeAndBeneficiaryResponse> GetReportAsync(StartAndEndDateRequest req, CancellationToken ct)
     {
         TerminatedEmployeeReportService reportServiceGenerator = new(_dataContextFactory, _totalService, _demographicReaderService, _logger, _calendarService, _yearEndService);
-        return reportServiceGenerator.CreateDataAsync(req, ct);
+
+        // Convert StartAndEndDateRequest to FilterableStartAndEndDateRequest
+        var filterableRequest = new FilterableStartAndEndDateRequest
+        {
+            BeginningDate = req.BeginningDate,
+            EndingDate = req.EndingDate,
+            Skip = req.Skip,
+            Take = req.Take,
+            SortBy = req.SortBy,
+            IsSortDescending = req.IsSortDescending
+        };
+
+        return reportServiceGenerator.CreateDataAsync(filterableRequest, ct);
     }
 }
