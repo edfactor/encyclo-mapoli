@@ -12,11 +12,10 @@ namespace Demoulas.ProfitSharing.UnitTests.Services.Reports;
 
 public sealed class AdhocTerminatedEmployeesServiceTests : ApiTestBase<Program>
 {
-    private readonly IAdhocTerminatedEmployeesService _service;
+    private IAdhocTerminatedEmployeesService Service => ServiceProvider?.GetRequiredService<IAdhocTerminatedEmployeesService>()!;
 
     public AdhocTerminatedEmployeesServiceTests()
     {
-        _service = ServiceProvider?.GetRequiredService<IAdhocTerminatedEmployeesService>()!;
     }
 
     [Fact]
@@ -31,20 +30,32 @@ public sealed class AdhocTerminatedEmployeesServiceTests : ApiTestBase<Program>
         var lateTerminationDate = new DateOnly(2026, 1, 10);  // Outside range (too late)
 
         var earlyEmployee = StockFactory.CreateEmployee(profitYear);
+        earlyEmployee.demographic.BadgeNumber = 1001;
         earlyEmployee.demographic.TerminationDate = earlyTerminationDate;
         earlyEmployee.demographic.EmploymentStatusId = EmploymentStatus.Constants.Terminated;
+        earlyEmployee.demographic.TerminationCodeId = TerminationCode.Constants.LeftOnOwn;
+        earlyEmployee.demographic.TerminationCode = new TerminationCode { Id = TerminationCode.Constants.LeftOnOwn, Name = "Left On Own" };
 
         var rangeEmployee1 = StockFactory.CreateEmployee(profitYear);
+        rangeEmployee1.demographic.BadgeNumber = 1002;
         rangeEmployee1.demographic.TerminationDate = withinRangeDate1;
         rangeEmployee1.demographic.EmploymentStatusId = EmploymentStatus.Constants.Terminated;
+        rangeEmployee1.demographic.TerminationCodeId = TerminationCode.Constants.Stealing;
+        rangeEmployee1.demographic.TerminationCode = new TerminationCode { Id = TerminationCode.Constants.Stealing, Name = "Stealing" };
 
         var rangeEmployee2 = StockFactory.CreateEmployee(profitYear);
+        rangeEmployee2.demographic.BadgeNumber = 1003;
         rangeEmployee2.demographic.TerminationDate = withinRangeDate2;
         rangeEmployee2.demographic.EmploymentStatusId = EmploymentStatus.Constants.Terminated;
+        rangeEmployee2.demographic.TerminationCodeId = TerminationCode.Constants.AnotherJob;
+        rangeEmployee2.demographic.TerminationCode = new TerminationCode { Id = TerminationCode.Constants.AnotherJob, Name = "Another Job" };
 
         var lateEmployee = StockFactory.CreateEmployee(profitYear);
+        lateEmployee.demographic.BadgeNumber = 1004;
         lateEmployee.demographic.TerminationDate = lateTerminationDate;
         lateEmployee.demographic.EmploymentStatusId = EmploymentStatus.Constants.Terminated;
+        lateEmployee.demographic.TerminationCodeId = TerminationCode.Constants.JobAbandonment;
+        lateEmployee.demographic.TerminationCode = new TerminationCode { Id = TerminationCode.Constants.JobAbandonment, Name = "Job Abandonment" };
 
         MockDbContextFactory = new ScenarioFactory
         {
@@ -68,7 +79,7 @@ public sealed class AdhocTerminatedEmployeesServiceTests : ApiTestBase<Program>
         };
 
         // Act
-        var result = await _service.GetTerminatedEmployees(request, CancellationToken.None);
+        var result = await Service.GetTerminatedEmployees(request, CancellationToken.None);
 
         // Assert
         result.ShouldNotBeNull();
@@ -104,6 +115,8 @@ public sealed class AdhocTerminatedEmployeesServiceTests : ApiTestBase<Program>
         var employee = StockFactory.CreateEmployee(profitYear);
         employee.demographic.TerminationDate = terminationDate;
         employee.demographic.EmploymentStatusId = EmploymentStatus.Constants.Terminated;
+        employee.demographic.TerminationCodeId = 'T';
+        employee.demographic.TerminationCode = new TerminationCode { Id = 'T', Name = "Terminated" };
 
         MockDbContextFactory = new ScenarioFactory
         {
@@ -121,7 +134,7 @@ public sealed class AdhocTerminatedEmployeesServiceTests : ApiTestBase<Program>
         };
 
         // Act
-        var result = await _service.GetTerminatedEmployees(request, CancellationToken.None);
+        var result = await Service.GetTerminatedEmployees(request, CancellationToken.None);
 
         // Assert
         result.ReportName.ShouldBe("Adhoc Terminated Employee Report");
@@ -139,14 +152,18 @@ public sealed class AdhocTerminatedEmployeesServiceTests : ApiTestBase<Program>
         var terminationDate = new DateOnly(2025, 6, 15);
 
         var terminatedEmployee = StockFactory.CreateEmployee(profitYear);
+        terminatedEmployee.demographic.BadgeNumber = 2001;
         terminatedEmployee.demographic.TerminationDate = terminationDate;
         terminatedEmployee.demographic.EmploymentStatusId = EmploymentStatus.Constants.Terminated;
         terminatedEmployee.demographic.TerminationCodeId = 'T';
+        terminatedEmployee.demographic.TerminationCode = new TerminationCode { Id = 'T', Name = "Terminated" };
 
         var retiredEmployee = StockFactory.CreateEmployee(profitYear);
+        retiredEmployee.demographic.BadgeNumber = 2002;
         retiredEmployee.demographic.TerminationDate = terminationDate;
         retiredEmployee.demographic.EmploymentStatusId = EmploymentStatus.Constants.Terminated;
         retiredEmployee.demographic.TerminationCodeId = TerminationCode.Constants.Retired;
+        retiredEmployee.demographic.TerminationCode = new TerminationCode { Id = TerminationCode.Constants.Retired, Name = "Retired" };
 
         MockDbContextFactory = new ScenarioFactory
         {
@@ -168,7 +185,7 @@ public sealed class AdhocTerminatedEmployeesServiceTests : ApiTestBase<Program>
         };
 
         // Act
-        var result = await _service.GetTerminatedEmployees(request, CancellationToken.None);
+        var result = await Service.GetTerminatedEmployees(request, CancellationToken.None);
 
         // Assert
         result.Response.Results.Count().ShouldBe(1);
@@ -184,6 +201,8 @@ public sealed class AdhocTerminatedEmployeesServiceTests : ApiTestBase<Program>
         var employee = StockFactory.CreateEmployee((short)terminationDate.Year);
         employee.demographic.TerminationDate = terminationDate;
         employee.demographic.EmploymentStatusId = EmploymentStatus.Constants.Terminated;
+        employee.demographic.TerminationCodeId = 'T';
+        employee.demographic.TerminationCode = new TerminationCode { Id = 'T', Name = "Terminated" };
 
         MockDbContextFactory = new ScenarioFactory
         {
@@ -201,14 +220,14 @@ public sealed class AdhocTerminatedEmployeesServiceTests : ApiTestBase<Program>
         };
 
         // Act
-        var result = await _service.GetTerminatedEmployees(request, CancellationToken.None);
+        var result = await Service.GetTerminatedEmployees(request, CancellationToken.None);
 
         // Assert
         result.Response.Results.Count().ShouldBe(1);
         var employeeSsn = result.Response.Results.First().Ssn;
 
-        // SSN should be masked (not contain actual digits in the format X***-**-XXXX)
+        // SSN should be masked in the format XXX-XX-####
         employeeSsn.ShouldNotBeNullOrEmpty();
-        employeeSsn.ShouldContain("*");
+        employeeSsn.ShouldStartWith("XXX-XX-");
     }
 }
