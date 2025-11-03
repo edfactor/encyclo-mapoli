@@ -1,5 +1,5 @@
+import ProfitShareTotalsDisplay from "@/components/ProfitShareTotalsDisplay";
 import { Box, Button, CircularProgress, Divider, Grid, Typography } from "@mui/material";
-import ProfitShareTotalsDisplay from "components/ProfitShareTotalsDisplay";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useState } from "react";

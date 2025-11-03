@@ -1,5 +1,4 @@
-import { Box, CircularProgress, Divider, Grid, Typography } from "@mui/material";
-import ProfitShareTotalsDisplay from "components/ProfitShareTotalsDisplay";
+import { Box, Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useState } from "react";
@@ -16,7 +15,7 @@ import ProfitShareReportSearchFilter from "./ProfitShareReportSearchFilter.tsx";
 
 interface SearchParams {
   [key: string]: unknown;
-  reportId?: number;
+  reportId: number;
   badgeNumber?: number;
   profitYear?: number;
 }
@@ -136,7 +135,9 @@ const ProfitShareReport = () => {
         <Grid width={"100%"}>
           <Divider />
         </Grid>
+        {/*}
         <Grid width="100%">
+         
           <Box sx={{ mb: 3 }}>
             <div style={{ padding: "0 24px 0 24px" }}>
               <Typography
@@ -156,8 +157,9 @@ const ProfitShareReport = () => {
               </Box>
             )}
           </Box>
+          
         </Grid>
-
+        */}
         <Grid width="100%">
           <ProfitSummary
             onPresetParamsChange={handlePresetParamsChange}

@@ -1,4 +1,3 @@
-import { CAPTIONS } from "@/constants.ts";
 import { Button, Divider, Grid, Typography } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
@@ -26,7 +25,10 @@ const activeInactivePlaceholders: YearEndProfitSharingReportSummaryLineItem[] = 
     lineItemTitle: "AGE 18-20 WITH >= 1000 PS HOURS",
     numberOfMembers: 0,
     totalWages: 0,
-    totalBalance: 0
+    totalBalance: 0,
+    totalHours: 0,
+    totalPoints: 0,
+    totalPriorBalance: 0
   },
   {
     subgroup: "ACTIVE AND INACTIVE",
@@ -34,7 +36,10 @@ const activeInactivePlaceholders: YearEndProfitSharingReportSummaryLineItem[] = 
     lineItemTitle: ">= AGE 21 WITH >= 1000 PS HOURS",
     numberOfMembers: 0,
     totalWages: 0,
-    totalBalance: 0
+    totalBalance: 0,
+    totalHours: 0,
+    totalPoints: 0,
+    totalPriorBalance: 0
   },
   {
     subgroup: "ACTIVE AND INACTIVE",
@@ -42,7 +47,10 @@ const activeInactivePlaceholders: YearEndProfitSharingReportSummaryLineItem[] = 
     lineItemTitle: "<  AGE 18",
     numberOfMembers: 0,
     totalWages: 0,
-    totalBalance: 0
+    totalBalance: 0,
+    totalHours: 0,
+    totalPoints: 0,
+    totalPriorBalance: 0
   },
   {
     subgroup: "ACTIVE AND INACTIVE",
@@ -50,7 +58,10 @@ const activeInactivePlaceholders: YearEndProfitSharingReportSummaryLineItem[] = 
     lineItemTitle: ">= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT",
     numberOfMembers: 0,
     totalWages: 0,
-    totalBalance: 0
+    totalBalance: 0,
+    totalHours: 0,
+    totalPoints: 0,
+    totalPriorBalance: 0
   },
   {
     subgroup: "ACTIVE AND INACTIVE",
@@ -58,7 +69,10 @@ const activeInactivePlaceholders: YearEndProfitSharingReportSummaryLineItem[] = 
     lineItemTitle: ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT",
     numberOfMembers: 0,
     totalWages: 0,
-    totalBalance: 0
+    totalBalance: 0,
+    totalHours: 0,
+    totalPoints: 0,
+    totalPriorBalance: 0
   }
 ];
 
@@ -92,7 +106,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, fro
     setIsModalOpen(false);
   };
 
-  const handleStatusChange = (newStatus: string, statusName?: string) => {
+  const handleStatusChange = (_newStatus: string, statusName?: string) => {
     // Only set shouldArchive to true when transitioning TO "Complete" status
     if (statusName === "Complete") {
       setShouldArchive(true);
@@ -203,7 +217,11 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, fro
     return [
       {
         lineItemTitle: "TOTAL",
-        numberOfMembers: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0)
+        numberOfMembers: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0),
+        totalWages: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.totalWages, 0),
+        totalBalance: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.totalBalance, 0),
+        totalHours: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.totalHours, 0),
+        totalPoints: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.totalPoints, 0)
       }
     ];
   }, [activeAndInactiveRowData]);
@@ -214,7 +232,11 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, fro
     return [
       {
         lineItemTitle: "TOTAL",
-        numberOfMembers: terminatedRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0)
+        numberOfMembers: terminatedRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0),
+        totalWages: terminatedRowData.reduce((acc, curr) => acc + curr.totalWages, 0),
+        totalBalance: terminatedRowData.reduce((acc, curr) => acc + curr.totalBalance, 0),
+        totalHours: terminatedRowData.reduce((acc, curr) => acc + curr.totalHours, 0),
+        totalPoints: terminatedRowData.reduce((acc, curr) => acc + curr.totalPoints, 0)
       }
     ];
   }, [terminatedRowData]);
@@ -223,7 +245,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, fro
 
   return (
     <Page
-      label={CAPTIONS.PAY426_SUMMARY}
+      label={`SUMMARY`}
       actionNode={renderActionNode()}>
       <Grid
         container

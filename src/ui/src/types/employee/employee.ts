@@ -140,6 +140,9 @@ export interface YearEndProfitSharingReportSummaryLineItem {
   numberOfMembers: number;
   totalWages: number;
   totalBalance: number;
+  totalHours: number;
+  totalPoints: number;
+  totalPriorBalance: number;
 }
 
 export interface YearEndProfitSharingReportSummaryResponse {
