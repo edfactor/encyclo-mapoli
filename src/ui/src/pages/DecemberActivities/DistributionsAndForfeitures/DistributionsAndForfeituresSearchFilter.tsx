@@ -161,8 +161,10 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                 required={false}
                 label="Start Date"
                 shouldDisableMonth={(month: Date) => {
-                  const currentYear = new Date().getFullYear();
-                  return month.getFullYear() > currentYear;
+                  const today = new Date();
+                  const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+                  const endOfNextMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0);
+                  return month > endOfNextMonth;
                 }}
                 error={errors.startDate?.message}
                 views={["year", "month"]}
@@ -188,8 +190,10 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                 required={false}
                 label="End Date"
                 shouldDisableMonth={(month: Date) => {
-                  const currentYear = new Date().getFullYear();
-                  return month.getFullYear() > currentYear;
+                  const today = new Date();
+                  const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+                  const endOfNextMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0);
+                  return month > endOfNextMonth;
                 }}
                 error={errors.endDate?.message}
                 views={["year", "month"]}
