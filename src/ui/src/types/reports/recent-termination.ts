@@ -9,6 +9,7 @@ export interface RecentlyTerminatedDetail {
   ssn: string;
   terminationDate: string;
   terminationCodeId: string;
+  terminationCode: string;
   address: string;
   address2: string;
   city: string;

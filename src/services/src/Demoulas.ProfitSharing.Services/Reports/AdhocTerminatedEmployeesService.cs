@@ -35,8 +35,8 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
         var rslt = await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var demographic = await _demographicReaderService.BuildDemographicQuery(ctx, false);
-            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear);
-            var query = (from d in demographic
+            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
+            var query = (from d in demographic.Include(d => d.TerminationCode)
                          where d.TerminationDate != null
                             && d.TerminationDate.Value <= calInfo.FiscalEndDate
                             && d.TerminationCodeId != TerminationCode.Constants.Retired
@@ -47,6 +47,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
                              Ssn = d.Ssn.MaskSsn(),
                              TerminationDate = d.TerminationDate!.Value,
                              TerminationCodeId = d.TerminationCodeId,
+                             TerminationCode = d.TerminationCode != null ? d.TerminationCode.Name : string.Empty,
                              IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly
                          }).ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
 
@@ -92,7 +93,9 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
         var rslt = await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var demographic = await _demographicReaderService.BuildDemographicQuery(ctx, false /*Want letter to be sent to the most current address*/);
-            var query = (from d in demographic.Include(x => x.Address)
+            var query = (from d in demographic
+                    .Include(x => x.Address)
+                    .Include(x => x.TerminationCode)
                          where d.TerminationDate != null
                             && d.TerminationDate.Value >= beginningDate && d.TerminationDate.Value <= endingDate
                             && d.EmploymentStatusId == EmploymentStatus.Constants.Terminated
@@ -112,6 +115,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
                              PostalCode = !string.IsNullOrEmpty(d.Address.PostalCode) ? d.Address.PostalCode : string.Empty,
                              TerminationDate = d.TerminationDate!.Value,
                              TerminationCodeId = d.TerminationCodeId,
+                             TerminationCode = d.TerminationCode != null ? d.TerminationCode.Name : string.Empty,
                              FirstName = d.ContactInfo.FirstName,
                              LastName = d.ContactInfo.LastName,
                              MiddleInitial = !string.IsNullOrEmpty(d.ContactInfo.MiddleName) ? d.ContactInfo.MiddleName[0].ToString() : string.Empty

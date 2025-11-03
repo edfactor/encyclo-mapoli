@@ -62,7 +62,8 @@ public sealed class TerminatedEmployeesReportEndpoint : EndpointWithCsvBase<Star
                                     FullName = "John Doe",
                                     Ssn = "123-45-6789",
                                     TerminationDate = new DateOnly(2023, 5, 15),
-                                    TerminationCodeId = 'A'
+                                    TerminationCodeId = 'A',
+                                    TerminationCode = "Active"
                                 }
                             },
                             Total = 1
