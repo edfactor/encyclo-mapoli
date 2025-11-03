@@ -49,7 +49,10 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
         dataSource: "test",
         response: {
           results: [{ badgeNumber: 12345, fullName: "John Doe", hoursExecutive: 40, incomeExecutive: 1000 }],
-          total: 1
+          total: 1,
+          totalPages: 1,
+          pageSize: 25,
+          currentPage: 0
         }
       };
 
@@ -75,7 +78,10 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
         dataSource: "test",
         response: {
           results: [],
-          total: 0
+          total: 0,
+          totalPages: 0,
+          pageSize: 25,
+          currentPage: 0
         }
       };
 
@@ -104,6 +110,8 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
         search: {
           params: {
             profitYear: 2024,
+            hasExecutiveHoursAndDollars: false,
+            isMonthlyPayroll: false,
             pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false }
           },
           results: { results: [], total: 0 },
@@ -118,7 +126,7 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
             startDate: "2024-01-01",
             endDate: "2024-12-31",
             dataSource: "test",
-            response: { results: [], total: 0 }
+            response: { results: [], total: 0, totalPages: 0, pageSize: 25, currentPage: 0 }
           },
           pendingChanges: null,
           additionalExecutives: [],
@@ -139,8 +147,8 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
     const mockExecutive = {
       badgeNumber: 12345,
       fullName: "John Doe",
-      hoursExecutive: 40,
-      incomeExecutive: 1000
+      executiveHours: 40,
+      executiveDollars: 1000
     };
 
     describe("ADD_PENDING_CHANGE", () => {
@@ -160,8 +168,8 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
         const existingExecutive = {
           badgeNumber: 11111,
           fullName: "Jane Smith",
-          hoursExecutive: 35,
-          incomeExecutive: 900
+          executiveHours: 35,
+          executiveDollars: 900
         };
 
         const stateWithChange: ManageExecutiveHoursAndDollarsState = {
@@ -202,7 +210,7 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
           }
         };
 
-        const updatedExecutive = { ...mockExecutive, hoursExecutive: 50 };
+        const updatedExecutive = { ...mockExecutive, executiveHours: 50 };
         const change = {
           profitYear: 2024,
           executiveHoursAndDollars: [updatedExecutive]
@@ -211,7 +219,7 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
         const action = { type: "UPDATE_PENDING_CHANGE" as const, payload: { change } };
         const newState = manageExecutiveHoursAndDollarsReducer(stateWithChange, action);
 
-        expect(newState.grid.pendingChanges?.executiveHoursAndDollars[0].hoursExecutive).toBe(50);
+        expect(newState.grid.pendingChanges?.executiveHoursAndDollars[0].executiveHours).toBe(50);
       });
     });
 
@@ -352,12 +360,14 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
             startDate: "2024-01-01",
             endDate: "2024-12-31",
             dataSource: "test",
-            response: { results: [], total: 0 }
+            response: { results: [], total: 0, totalPages: 0, pageSize: 25, currentPage: 0 }
           },
           selectedExecutives: [{ badgeNumber: 12345, fullName: "Test", hoursExecutive: 40, incomeExecutive: 1000 }],
           isSearching: false,
           searchParams: {
             profitYear: 2024,
+            hasExecutiveHoursAndDollars: false,
+            isMonthlyPayroll: false,
             pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false }
           }
         }
@@ -387,7 +397,7 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
         startDate: "2024-01-01",
         endDate: "2024-12-31",
         dataSource: "test",
-        response: { results: [], total: 0 }
+        response: { results: [], total: 0, totalPages: 0, pageSize: 25, currentPage: 0 }
       };
 
       const action = { type: "MODAL_SEARCH_SUCCESS" as const, payload: { results } };
@@ -467,6 +477,8 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
         search: {
           params: {
             profitYear: 2024,
+            hasExecutiveHoursAndDollars: false,
+            isMonthlyPayroll: false,
             pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false }
           },
           results: { results: [], total: 0 },
@@ -481,7 +493,7 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
             startDate: "2024-01-01",
             endDate: "2024-12-31",
             dataSource: "test",
-            response: { results: [], total: 0 }
+            response: { results: [], total: 0, totalPages: 0, pageSize: 25, currentPage: 0 }
           },
           pendingChanges: {
             profitYear: 2024,
@@ -500,12 +512,14 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
             startDate: "2024-01-01",
             endDate: "2024-12-31",
             dataSource: "test",
-            response: { results: [], total: 0 }
+            response: { results: [], total: 0, totalPages: 0, pageSize: 25, currentPage: 0 }
           },
           selectedExecutives: [],
           isSearching: false,
           searchParams: {
             profitYear: 2024,
+            hasExecutiveHoursAndDollars: false,
+            isMonthlyPayroll: false,
             pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false }
           }
         },
@@ -618,7 +632,10 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
           dataSource: "test",
           response: {
             results: [{ badgeNumber: 12345, fullName: "John", hoursExecutive: 40, incomeExecutive: 1000 }],
-            total: 1
+            total: 1,
+            totalPages: 1,
+            pageSize: 25,
+            currentPage: 0
           }
         };
 
@@ -640,7 +657,10 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
           dataSource: "test",
           response: {
             results: [{ badgeNumber: 12345, fullName: "John", hoursExecutive: 40, incomeExecutive: 1000 }],
-            total: 1
+            total: 1,
+            totalPages: 1,
+            pageSize: 25,
+            currentPage: 0
           }
         };
 
@@ -664,7 +684,10 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
           dataSource: "test",
           response: {
             results: [{ badgeNumber: 12345, fullName: "John", hoursExecutive: 40, incomeExecutive: 1000 }],
-            total: 1
+            total: 1,
+            totalPages: 1,
+            pageSize: 25,
+            currentPage: 0
           }
         };
 

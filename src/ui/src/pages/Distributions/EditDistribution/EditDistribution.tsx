@@ -295,6 +295,8 @@ const EditDistributionContent = () => {
             profitYear={profitYear || 0}
             memberDetails={memberData}
             isLoading={isLoading}
+            memberType={parseInt(memberType || "0")}
+            id={parseInt(memberId || "0")}
           />
           <Grid width="100%">
             <Divider />

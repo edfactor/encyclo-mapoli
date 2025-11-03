@@ -35,7 +35,11 @@ describe("MasterUpdateSummaryTable", { timeout: 16000 }, () => {
     allocations: 45000,
     maxPointsTotal: 9500,
     contributionPoints: 12000,
-    earningPoints: 6000
+    earningPoints: 6000,
+    classActionFund: 0,
+    maxOverTotal: 0,
+    totalEmployees: 100,
+    totalBeneficaries: 50
   };
 
   const mockValidationResponse = {

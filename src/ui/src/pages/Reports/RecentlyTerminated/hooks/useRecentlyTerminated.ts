@@ -20,7 +20,7 @@ interface RecentlyTerminatedState {
     error: string | null;
   };
   report: {
-    data: Paged<RecentlyTerminatedResponse> | null;
+    data: RecentlyTerminatedResponse | null;
     isLoading: boolean;
     error: string | null;
   };
@@ -28,11 +28,11 @@ interface RecentlyTerminatedState {
 
 type RecentlyTerminatedAction =
   | { type: "SEARCH_START"; payload: { params: SearchParams } }
-  | { type: "SEARCH_SUCCESS"; payload: { data: Paged<RecentlyTerminatedResponse> } }
+  | { type: "SEARCH_SUCCESS"; payload: { data: RecentlyTerminatedResponse } }
   | { type: "SEARCH_FAILURE"; payload: { error: string } }
   | { type: "SEARCH_RESET" }
   | { type: "REPORT_FETCH_START" }
-  | { type: "REPORT_FETCH_SUCCESS"; payload: { data: Paged<RecentlyTerminatedResponse> } }
+  | { type: "REPORT_FETCH_SUCCESS"; payload: { data: RecentlyTerminatedResponse } }
   | { type: "REPORT_FETCH_FAILURE"; payload: { error: string } };
 
 const initialState: RecentlyTerminatedState = {

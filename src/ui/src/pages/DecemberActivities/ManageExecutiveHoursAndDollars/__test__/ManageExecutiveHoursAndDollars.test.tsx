@@ -44,10 +44,16 @@ const mockResetSearch = vi.fn();
 // Create proper report data structure that ReportSummary expects
 const mockGridData = {
   reportName: "Executive Hours and Dollars",
+  reportDate: "2024-01-15",
+  startDate: "2024-01-01",
+  endDate: "2024-12-31",
   dataSource: "Test",
   response: {
     results: [],
-    total: 0
+    total: 0,
+    totalPages: 0,
+    pageSize: 25,
+    currentPage: 0
   }
 };
 
