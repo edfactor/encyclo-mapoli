@@ -68,6 +68,7 @@ public sealed class TerminatedEmployeesNeedingFormLetterEndpoint : EndpointWithC
                                     Ssn = "123-45-6789",
                                     TerminationDate = new DateOnly(2023, 5, 15),
                                     TerminationCodeId = 'A',
+                                    TerminationCode = "Active",
                                     Address = "123 Main St",
                                     State = "MA",
                                     City = "Andover",
