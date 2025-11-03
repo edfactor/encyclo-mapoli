@@ -1,4 +1,4 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { ColDef } from "ag-grid-community";
 import { formatNumberWithComma, numberToCurrency } from "smart-ui-library";
 import { createCurrencyColumn, createHoursColumn, createPointsColumn } from "../../../../utils/gridColumnFactory";
 
@@ -10,9 +10,10 @@ export const GetProfitSummaryGridColumns = (): ColDef[] => {
       colId: "lineItemTitle",
       minWidth: 400,
       headerClass: "left-align",
-      cellClass: "left-align h-5 normal-case underline decoration-blue-600 !outline-none !border-none focus:outline-none focus:border-none",
+      cellClass:
+        "left-align h-5 normal-case underline decoration-blue-600 !outline-none !border-none focus:outline-none focus:border-none",
       resizable: true,
-      suppressCellFocus: true,
+      //suppressCellFocus: true,
       valueFormatter: (params) => {
         return params.data.lineItemPrefix ? `${params.data.lineItemPrefix}. ${params.value}` : params.value;
       }
