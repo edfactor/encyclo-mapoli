@@ -16,7 +16,7 @@
  *   });
  */
 
-import { configureStore, PreloadedState } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import React, { PropsWithChildren, ReactNode } from "react";
 import { Provider } from "react-redux";
 import { AccountHistoryReportApi } from "../../reduxstore/api/AccountHistoryReportApi";
@@ -111,7 +111,7 @@ interface MockRootState {
  *   yearsEnd: { selectedProfitYear: 2024 }
  * });
  */
-export const createMockStore = (preloadedState?: PreloadedState<MockRootState>) => {
+export const createMockStore = (preloadedState?: Partial<MockRootState>) => {
   // Default state for each slice
   const defaultState: MockRootState = {
     security: {
@@ -267,7 +267,7 @@ export const createProviderWrapper = (store: MockStore) => {
  * });
  * render(<Component />, { wrapper });
  */
-export const createMockStoreAndWrapper = (preloadedState?: PreloadedState<MockRootState>) => {
+export const createMockStoreAndWrapper = (preloadedState?: Partial<MockRootState>) => {
   const store = createMockStore(preloadedState);
   const wrapper = createProviderWrapper(store);
 

@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { MasterUpdateCrossReferenceValidationResponse } from "smart-ui-library";
+import { MasterUpdateCrossReferenceValidationResponse } from "@/types/validation/cross-reference-validation";
 import { prepareHeaders, url } from "./api";
 
 /**

@@ -2,10 +2,10 @@ import { renderHook } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { PropsWithChildren } from "react";
 import { Provider } from "react-redux";
-import { configureStore, PreloadedState } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 
 // Setup store with minimal required reducers
-const createMockStore = (preloadedState?: PreloadedState<Record<string, unknown>>) => {
+const createMockStore = (preloadedState?: Partial<Record<string, unknown>>) => {
   return configureStore({
     reducer: {
       security: (state = { token: "mock-token" }) => state

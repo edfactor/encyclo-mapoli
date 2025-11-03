@@ -3,8 +3,9 @@ import { renderHook, act, waitFor } from "@testing-library/react";
 import React from "react";
 import { Provider } from "react-redux";
 import { useBeneficiaryRelationshipData } from "../useBeneficiaryRelationshipData";
-import { BeneficiaryDetail, Paged, BeneficiaryDto } from "../../../types";
-import { configureStore, type PreloadedState } from "@reduxjs/toolkit";
+import { BeneficiaryDetail, BeneficiaryDto } from "@/types/beneficiary/beneficiary";
+import { Paged } from "smart-ui-library";
+import { configureStore } from "@reduxjs/toolkit";
 import securityReducer, { type SecurityState } from "reduxstore/slices/securitySlice";
 
 // Create mock functions for triggers/actions
@@ -69,7 +70,7 @@ type RootState = {
   security: SecurityState;
 };
 
-type MockStoreState = PreloadedState<RootState>;
+type MockStoreState = Partial<RootState>;
 
 function createMockStore(preloadedState?: MockStoreState) {
   return configureStore<RootState>({

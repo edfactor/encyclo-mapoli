@@ -1,5 +1,5 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { MergeProfitsDetailRequest } from "../types/adjustment/adjustment";
+import { MergeProfitsDetailRequest } from "@/types/adjustment/adjustment";
 import { createDataSourceAwareBaseQuery } from "./api";
 
 const baseQuery = createDataSourceAwareBaseQuery();

@@ -1,4 +1,4 @@
-import { configureStore, type PreloadedState } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import React from "react";
 import { Provider } from "react-redux";
@@ -57,7 +57,7 @@ type RootState = {
   inquiry: InquiryState;
 };
 
-type MockStoreState = PreloadedState<RootState>;
+type MockStoreState = Partial<RootState>;
 
 function createMockStore(preloadedState?: MockStoreState) {
   return configureStore<RootState>({

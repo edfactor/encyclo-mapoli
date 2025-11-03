@@ -4,7 +4,7 @@ import React from "react";
 import { Provider } from "react-redux";
 import { useBeneficiaryKinds } from "../useBeneficiaryKinds";
 import { BeneficiaryKindDto } from "reduxstore/types";
-import { configureStore, type PreloadedState } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import securityReducer, { type SecurityState } from "reduxstore/slices/securitySlice";
 
 // Create mock functions for triggers/actions
@@ -26,7 +26,7 @@ type RootState = {
   security: SecurityState;
 };
 
-type MockStoreState = PreloadedState<RootState>;
+type MockStoreState = Partial<RootState>;
 
 function createMockStore(preloadedState?: MockStoreState) {
   return configureStore<RootState>({

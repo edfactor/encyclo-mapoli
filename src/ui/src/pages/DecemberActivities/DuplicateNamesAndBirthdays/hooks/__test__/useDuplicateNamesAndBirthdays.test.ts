@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
 import React from "react";
 import { Provider } from "react-redux";
-import { configureStore, type PreloadedState } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import securityReducer, { type SecurityState } from "../../../../../reduxstore/slices/securitySlice";
 import yearsEndReducer, { type YearsEndState } from "../../../../../reduxstore/slices/yearsEndSlice";
 
@@ -28,7 +28,7 @@ type RootState = {
   yearsEnd: YearsEndState;
 };
 
-type MockStoreState = PreloadedState<RootState>;
+type MockStoreState = Partial<RootState>;
 
 function createMockStore(preloadedState?: MockStoreState) {
   return configureStore<RootState>({

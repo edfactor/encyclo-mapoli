@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { useLazyUpdateBeneficiaryQuery } from "reduxstore/api/BeneficiariesApi";
-import { BeneficiaryDto } from "../../types";
+import { BeneficiaryDto } from "../../../types";
 
 /**
  * Result of a percentage validation and update attempt
@@ -14,7 +14,7 @@ interface ValidateAndUpdateResult {
 /**
  * Return type for useBeneficiaryPercentageUpdate hook
  */
-interface UseBeneficiaryPercentageUpdateReturn {
+export interface UseBeneficiaryPercentageUpdateReturn {
   validateAndUpdate: (
     id: number,
     newPercentage: number,

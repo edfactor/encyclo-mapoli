@@ -5,7 +5,7 @@ import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetYearEndProfitSharingReportLiveQuery } from "reduxstore/api/YearsEndApi";
 import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { Page } from "smart-ui-library";
@@ -18,8 +18,8 @@ const ProfitShareTotals426 = () => {
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
-  const [triggerSearch, { isLoading }] = useLazyGetYearEndProfitSharingReportQuery();
-  const { yearEndProfitSharingReport } = useSelector((state: RootState) => state.yearsEnd);
+  const [triggerSearch, { isLoading }] = useLazyGetYearEndProfitSharingReportLiveQuery();
+  const { yearEndProfitSharingReportTotals } = useSelector((state: RootState) => state.yearsEnd);
 
   useEffect(() => {
     if (hasToken && profitYear && !hasInitialSearchRun) {
@@ -100,7 +100,7 @@ const ProfitShareTotals426 = () => {
               </Box>
             ) : (
               <Box sx={{ px: 3, mt: 2 }}>
-                <ProfitShareTotalsDisplay data={yearEndProfitSharingReport} />
+                <ProfitShareTotalsDisplay totalsData={yearEndProfitSharingReportTotals} />
               </Box>
             )}
           </Box>
