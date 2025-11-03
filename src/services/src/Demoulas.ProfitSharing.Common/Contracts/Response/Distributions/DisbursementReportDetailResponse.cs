@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
-public sealed class DisbursementReportDetailResponse
+public sealed record DisbursementReportDetailResponse
 {
     public char DistributionFrequencyId { get; set; }
     public required string DistributionFrequencyName { get; set; }

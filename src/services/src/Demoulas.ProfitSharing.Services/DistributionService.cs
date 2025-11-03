@@ -733,7 +733,7 @@ public sealed class DistributionService : IDistributionService
         {
             var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
-            var distributionQuery = GetDistributionExtract(ctx, cancellationToken, new[] {'A','M','Q'} );
+            var distributionQuery = GetDistributionExtract(ctx, cancellationToken, new[] {DistributionFrequency.Constants.Annually, DistributionFrequency.Constants.Monthly, DistributionFrequency.Constants.Quarterly } );
             var query = from dist in distributionQuery
                         join dem in demographicQuery on dist.Ssn equals dem.Ssn into demJoin
                         from dem in demJoin.DefaultIfEmpty()
