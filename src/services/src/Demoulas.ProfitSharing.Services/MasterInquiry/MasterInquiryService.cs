@@ -354,7 +354,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 // CRITICAL: Beneficiaries MUST have both BadgeNumber and PsnSuffix to uniquely identify
                 IQueryable<int> beneficiarySSNs;
 
-                if (req.PsnSuffix.HasValue && req.PsnSuffix.Value > 0)
+                if (req.PsnSuffix is > 0)
                 {
                     // PsnSuffix provided - search for beneficiary with this specific PsnSuffix
                     beneficiarySSNs = ctx.Beneficiaries
