@@ -160,7 +160,10 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                 value={field.value}
                 required={false}
                 label="Start Date"
-                disableFuture
+                shouldDisableMonth={(month: Date) => {
+                  const currentYear = new Date().getFullYear();
+                  return month.getFullYear() > currentYear;
+                }}
                 error={errors.startDate?.message}
                 views={["year", "month"]}
               />
@@ -184,7 +187,10 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                 value={field.value}
                 required={false}
                 label="End Date"
-                disableFuture
+                shouldDisableMonth={(month: Date) => {
+                  const currentYear = new Date().getFullYear();
+                  return month.getFullYear() > currentYear;
+                }}
                 error={errors.endDate?.message}
                 views={["year", "month"]}
               />
