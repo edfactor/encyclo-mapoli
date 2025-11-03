@@ -67,7 +67,7 @@ function transformForfeitureValue(activityType: ActivityType, value: number): nu
 function isTransactionEditable(
   activityType: ActivityType,
   params: SaveButtonCellParams,
-  selectedProfitYear: number,
+  _selectedProfitYear: number,
   isReadOnly: boolean
 ): boolean {
   if (!params.data.isDetail || isReadOnly) {

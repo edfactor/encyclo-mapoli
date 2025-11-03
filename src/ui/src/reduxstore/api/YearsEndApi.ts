@@ -189,7 +189,7 @@ export const YearsEndApi = createApi({
           profitYear: params.profitYear
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setDuplicateSSNsData(data));
@@ -213,7 +213,7 @@ export const YearsEndApi = createApi({
           profitYear: params.profitYear
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setDemographicBadgesNotInPayprofitData(data));
@@ -240,7 +240,7 @@ export const YearsEndApi = createApi({
           isSortDescending: params.pagination.isSortDescending
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setDistributionsAndForfeitures(data));
@@ -264,7 +264,7 @@ export const YearsEndApi = createApi({
           isSortDescending: params.pagination.isSortDescending
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setDuplicateNamesAndBirthdays(data));
@@ -293,7 +293,7 @@ export const YearsEndApi = createApi({
           minGrossAmount: params.minGrossAmount
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setGrossWagesReport(data));
@@ -322,7 +322,7 @@ export const YearsEndApi = createApi({
           }
         };
       },
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setUnForfeitsDetails(data));
@@ -365,7 +365,7 @@ export const YearsEndApi = createApi({
           isSortDescending: params.pagination.isSortDescending
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setNegativeEtvaForSSNsOnPayprofit(data));
@@ -417,7 +417,7 @@ export const YearsEndApi = createApi({
           return response.json();
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setEmployeeWagesForYear(data));
@@ -445,7 +445,7 @@ export const YearsEndApi = createApi({
           hasExecutiveHoursAndDollars: params.hasExecutiveHoursAndDollars
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setAdditionalExecutivesGrid(data));
@@ -474,7 +474,7 @@ export const YearsEndApi = createApi({
           isMonthlyPayroll: params.isMonthlyPayroll
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setExecutiveHoursAndDollars(data));
@@ -514,7 +514,7 @@ export const YearsEndApi = createApi({
           reportType: params.reportType
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setDistributionsByAge(data));
@@ -544,7 +544,7 @@ export const YearsEndApi = createApi({
       transformResponse: (response: ContributionsByAge) => {
         return response;
       },
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           // Don't proceed with API call if validation failed
           if (arg.profitYear < 2020 || arg.profitYear > 2100) {
@@ -567,7 +567,7 @@ export const YearsEndApi = createApi({
           reportType: params.reportType
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setForfeituresByAge(data));
@@ -600,7 +600,7 @@ export const YearsEndApi = createApi({
           meta: { suppressAllToastErrors, onlyNetworkToastErrors }
         };
       },
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setForfeituresAndPoints(data));
@@ -618,7 +618,7 @@ export const YearsEndApi = createApi({
           reportType: params.reportType
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setBalanceByAge(data));
@@ -636,7 +636,7 @@ export const YearsEndApi = createApi({
           reportType: params.reportType
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setBalanceByYears(data));
@@ -662,7 +662,7 @@ export const YearsEndApi = createApi({
           return response.json();
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setVestedAmountsByAge(data));
@@ -705,7 +705,7 @@ export const YearsEndApi = createApi({
           body
         };
       },
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setTermination(data));
@@ -731,7 +731,7 @@ export const YearsEndApi = createApi({
           }
         };
       },
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setRecentlyTerminated(data));
@@ -758,7 +758,7 @@ export const YearsEndApi = createApi({
           }
         };
       },
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setTerminatedLetters(data));
@@ -808,7 +808,7 @@ export const YearsEndApi = createApi({
           //isSortDescending: params.pagination.isSortDescending
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setProfitSharingUpdate(data));
@@ -846,7 +846,7 @@ export const YearsEndApi = createApi({
           //isSortDescending: params.pagination.isSortDescending
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setProfitSharingEdit(data));
@@ -864,7 +864,7 @@ export const YearsEndApi = createApi({
           profitYear: params.profitYear
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setProfitMasterStatus(data));
@@ -890,7 +890,7 @@ export const YearsEndApi = createApi({
           isSortDescending: params.pagination.isSortDescending
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
 
@@ -917,7 +917,7 @@ export const YearsEndApi = createApi({
           isSortDescending: params.pagination.isSortDescending
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           dispatch(clearBreakdownByStoreTotals());
           const { data } = await queryFulfilled;
@@ -936,7 +936,7 @@ export const YearsEndApi = createApi({
           profitYear: params.profitYear
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           dispatch(clearBreakdownByStoreTotals());
           const { data } = await queryFulfilled;
@@ -959,7 +959,7 @@ export const YearsEndApi = createApi({
           isSortDescending: params.pagination.isSortDescending
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           dispatch(clearUnder21BreakdownByStore());
           const { data } = await queryFulfilled;
@@ -983,7 +983,7 @@ export const YearsEndApi = createApi({
           isSortDescending: params.pagination.isSortDescending
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           dispatch(clearUnder21Inactive());
           const { data } = await queryFulfilled;
@@ -1007,7 +1007,7 @@ export const YearsEndApi = createApi({
           skip: params.pagination.skip
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           dispatch(clearUnder21Totals());
           const { data } = await queryFulfilled;
@@ -1025,7 +1025,7 @@ export const YearsEndApi = createApi({
         method: "POST",
         body: params
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setProfitMasterApply(data));
@@ -1041,7 +1041,7 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: params
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setProfitMasterRevert(data));
@@ -1063,7 +1063,7 @@ export const YearsEndApi = createApi({
           isSortDescending: params.pagination.isSortDescending
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setProfitSharingLabels(data));
@@ -1092,7 +1092,7 @@ export const YearsEndApi = createApi({
           }
         };
       },
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           dispatch(clearYearEndProfitSharingReportLive());
           const { data } = await queryFulfilled;
@@ -1122,7 +1122,7 @@ export const YearsEndApi = createApi({
           }
         };
       },
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           dispatch(clearYearEndProfitSharingReportFrozen());
           const { data } = await queryFulfilled;
@@ -1144,7 +1144,7 @@ export const YearsEndApi = createApi({
           ...params
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           dispatch(clearYearEndProfitSharingReportTotals());
           const { data } = await queryFulfilled;
@@ -1170,7 +1170,7 @@ export const YearsEndApi = createApi({
           take: 255
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setProfitShareSummaryReport(data));
@@ -1195,7 +1195,7 @@ export const YearsEndApi = createApi({
           ...(params.archive && { archive: params.archive })
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setUpdateSummary(data));
@@ -1216,7 +1216,7 @@ export const YearsEndApi = createApi({
           sortBy: params.pagination.sortBy
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setControlSheet(data));
@@ -1246,7 +1246,7 @@ export const YearsEndApi = createApi({
           meta: { onlyNetworkToastErrors }
         };
       },
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setForfeitureAdjustmentData(data));
@@ -1326,8 +1326,7 @@ export const YearsEndApi = createApi({
           isSortDescending: params.isSortDescending
         }
       }),
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch: _dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
         } catch (err) {
@@ -1347,8 +1346,7 @@ export const YearsEndApi = createApi({
           isSortDescending: params.isSortDescending
         }
       }),
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch: _dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
         } catch (err) {
@@ -1386,7 +1384,7 @@ export const YearsEndApi = createApi({
           isSortDescending: params.isSortDescending
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setCertificates(data));
