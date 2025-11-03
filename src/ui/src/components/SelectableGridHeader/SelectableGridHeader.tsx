@@ -11,8 +11,11 @@ interface SelectableGridHeaderProps extends IHeaderParams {
       isDetail: boolean;
       profitYear: number;
       badgeNumber: string;
+      psn?: number;
       enrollmentId?: string;
       suggestedForfeit?: number;
+      suggestedUnforfeiture?: number;
+      profitDetailId?: number;
       remark?: string;
     },
     context: {
@@ -24,8 +27,11 @@ interface SelectableGridHeaderProps extends IHeaderParams {
       isDetail: boolean;
       profitYear: number;
       badgeNumber: string;
+      psn?: number;
       enrollmentId?: string;
       suggestedForfeit?: number;
+      suggestedUnforfeiture?: number;
+      profitDetailId?: number;
       remark?: string;
     },
     context: {

@@ -108,9 +108,12 @@ export const useTerminationGrid = ({
     ): (StartAndEndDateRequest & { archive?: boolean }) | null => {
       const base: StartAndEndDateRequest = searchParams
         ? {
-            ...searchParams,
+            beginningDate: searchParams.beginningDate || "",
+            endingDate: searchParams.endingDate || "",
             profitYear,
-            pagination: { skip, take: pageSz, sortBy, isSortDescending }
+            pagination: { skip, take: pageSz, sortBy, isSortDescending },
+            excludeZeroBalance: searchParams.excludeZeroBalance,
+            excludeZeroAndFullyVested: searchParams.excludeZeroAndFullyVested
           }
         : {
             beginningDate: fiscalData?.fiscalBeginDate || "",

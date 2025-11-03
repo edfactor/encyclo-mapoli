@@ -270,8 +270,8 @@ export const useDrawerViewModel = (
 
   return {
     // State
-    isOpen,
-    activeSubmenu,
+    isOpen: isOpen ?? false,
+    activeSubmenu: activeSubmenu ?? null,
     drawerItems,
     currentPath,
     drawerTitle: drawerRootItem?.subTitle || config.rootNavigationTitle, // Use subtitle from L0 item, fallback to title
@@ -283,7 +283,7 @@ export const useDrawerViewModel = (
     goBackToMainMenu,
 
     // Computed
-    activeTopLevelItem,
+    activeTopLevelItem: activeTopLevelItem ?? null,
     visibleItems,
     isInSubmenuView,
 
