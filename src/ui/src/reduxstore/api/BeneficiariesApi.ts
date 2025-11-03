@@ -32,7 +32,7 @@ export const BeneficiariesApi = createApi({
         method: "GET",
         params: request
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
           //dispatch(setBeneficiary(data));
@@ -48,7 +48,7 @@ export const BeneficiariesApi = createApi({
         method: "GET",
         params: request
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
         } catch (err) {
@@ -63,7 +63,7 @@ export const BeneficiariesApi = createApi({
         method: "GET",
         params: request
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
         } catch (err) {
@@ -78,7 +78,7 @@ export const BeneficiariesApi = createApi({
         method: "GET",
         params: request
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
         } catch (err) {
@@ -93,7 +93,7 @@ export const BeneficiariesApi = createApi({
         method: "POST",
         body: request
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
         } catch (err) {
@@ -108,7 +108,7 @@ export const BeneficiariesApi = createApi({
         method: "POST",
         body: request
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
         } catch (err) {
@@ -123,7 +123,7 @@ export const BeneficiariesApi = createApi({
         method: "PUT",
         body: request
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
         } catch (err) {
@@ -138,7 +138,7 @@ export const BeneficiariesApi = createApi({
         method: "GET",
         params: request
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
         } catch (err) {
@@ -153,7 +153,7 @@ export const BeneficiariesApi = createApi({
         url: `/beneficiaries/${request.id}`,
         method: "DELETE"
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
         } catch (err) {

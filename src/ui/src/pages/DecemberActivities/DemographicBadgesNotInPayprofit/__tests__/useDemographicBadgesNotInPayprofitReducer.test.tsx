@@ -1,4 +1,20 @@
 import { describe, expect, it, beforeEach } from "vitest";
+import { PagedReportResponse } from "../../../../types";
+
+const createMockPagedResponse = <T,>(results: T[], total: number): PagedReportResponse<T> => ({
+  reportName: "Demographic Badges Not In Payprofit",
+  reportDate: "2024-01-15",
+  startDate: "2024-01-01",
+  endDate: "2024-12-31",
+  dataSource: "Test Data",
+  response: {
+    results,
+    total,
+    totalPages: Math.ceil(total / 25) || 0,
+    pageSize: 25,
+    currentPage: 0
+  }
+});
 
 describe("useDemographicBadgesNotInPayprofitReducer", () => {
   // Mock reducer implementation for testing
@@ -9,7 +25,7 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
 
   interface ReducerState {
     search: { isLoading: boolean };
-    data: { response: { results: unknown[]; total: number } } | null;
+    data: PagedReportResponse<unknown> | null;
   }
 
   interface ReducerAction {
@@ -69,12 +85,7 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
     });
 
     it("should transition to success state on SEARCH_SUCCESS", () => {
-      const mockData = {
-        response: {
-          results: [{ badgeNumber: 12345, storeName: "Store", employeeName: "John" }],
-          total: 1
-        }
-      };
+      const mockData = createMockPagedResponse([{ badgeNumber: 12345, storeName: "Store", employeeName: "John" }], 1);
 
       const action = { type: "SEARCH_SUCCESS", payload: mockData };
 
@@ -111,12 +122,7 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
     it("should preserve existing data during loading", () => {
       const stateWithData = {
         search: { isLoading: false },
-        data: {
-          response: {
-            results: [{ badgeNumber: 1, storeName: "Store", employeeName: "Name" }],
-            total: 1
-          }
-        }
+        data: createMockPagedResponse([{ badgeNumber: 1, storeName: "Store", employeeName: "Name" }], 1)
       };
 
       const action = { type: "SEARCH_START", payload: { profitYear: 2025 } };
@@ -130,12 +136,7 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
 
   describe("SEARCH_SUCCESS action", () => {
     it("should set isLoading to false and store data", () => {
-      const mockData = {
-        response: {
-          results: [{ badgeNumber: 12345, storeName: "Store", employeeName: "John" }],
-          total: 1
-        }
-      };
+      const mockData = createMockPagedResponse([{ badgeNumber: 12345, storeName: "Store", employeeName: "John" }], 1);
 
       const action = { type: "SEARCH_SUCCESS", payload: mockData };
 
@@ -146,24 +147,14 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
     });
 
     it("should replace previous data with new search results", () => {
-      const previousData = {
-        response: {
-          results: [{ badgeNumber: 1, storeName: "Old Store", employeeName: "Old Name" }],
-          total: 1
-        }
-      };
+      const previousData = createMockPagedResponse([{ badgeNumber: 1, storeName: "Old Store", employeeName: "Old Name" }], 1);
 
       const stateWithData = {
         search: { isLoading: false },
         data: previousData
       };
 
-      const newData = {
-        response: {
-          results: [{ badgeNumber: 2, storeName: "New Store", employeeName: "New Name" }],
-          total: 1
-        }
-      };
+      const newData = createMockPagedResponse([{ badgeNumber: 2, storeName: "New Store", employeeName: "New Name" }], 1);
 
       const action = { type: "SEARCH_SUCCESS", payload: newData };
 
@@ -174,12 +165,7 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
     });
 
     it("should handle empty results", () => {
-      const emptyData = {
-        response: {
-          results: [],
-          total: 0
-        }
-      };
+      const emptyData = createMockPagedResponse([], 0);
 
       const action = { type: "SEARCH_SUCCESS", payload: emptyData };
 
@@ -190,16 +176,11 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
     });
 
     it("should handle large result sets", () => {
-      const largeData = {
-        response: {
-          results: Array.from({ length: 100 }, (_, i) => ({
-            badgeNumber: 10000 + i,
-            storeName: `Store ${i}`,
-            employeeName: `Employee ${i}`
-          })),
-          total: 100
-        }
-      };
+      const largeData = createMockPagedResponse(Array.from({ length: 100 }, (_, i) => ({
+        badgeNumber: 10000 + i,
+        storeName: `Store ${i}`,
+        employeeName: `Employee ${i}`
+      })), 100);
 
       const action = { type: "SEARCH_SUCCESS", payload: largeData };
 
@@ -214,12 +195,7 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
     it("should set isLoading to false and clear data", () => {
       const stateWithData = {
         search: { isLoading: true },
-        data: {
-          response: {
-            results: [{ badgeNumber: 1, storeName: "Store", employeeName: "Name" }],
-            total: 1
-          }
-        }
+        data: createMockPagedResponse([{ badgeNumber: 1, storeName: "Store", employeeName: "Name" }], 1)
       };
 
       const action = { type: "SEARCH_ERROR" };
@@ -233,12 +209,7 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
     it("should clear data on error even if previously had data", () => {
       const stateWithData = {
         search: { isLoading: false },
-        data: {
-          response: {
-            results: [{ badgeNumber: 1, storeName: "Store", employeeName: "Name" }],
-            total: 1
-          }
-        }
+        data: createMockPagedResponse([{ badgeNumber: 1, storeName: "Store", employeeName: "Name" }], 1)
       };
 
       const action = { type: "SEARCH_ERROR" };
@@ -272,12 +243,7 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
     it("should return true when data is loaded and not loading", () => {
       const stateWithData = {
         search: { isLoading: false },
-        data: {
-          response: {
-            results: [{ badgeNumber: 1, storeName: "Store", employeeName: "Name" }],
-            total: 1
-          }
-        }
+        data: createMockPagedResponse([{ badgeNumber: 1, storeName: "Store", employeeName: "Name" }], 1)
       };
 
       const result = selectShowData(stateWithData);
@@ -294,12 +260,7 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
     it("should return false when loading is true", () => {
       const loadingState = {
         search: { isLoading: true },
-        data: {
-          response: {
-            results: [{ badgeNumber: 1, storeName: "Store", employeeName: "Name" }],
-            total: 1
-          }
-        }
+        data: createMockPagedResponse([{ badgeNumber: 1, storeName: "Store", employeeName: "Name" }], 1)
       };
 
       const result = selectShowData(loadingState);
@@ -323,12 +284,7 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
     it("should return true when results array has items", () => {
       const stateWithResults = {
         search: { isLoading: false },
-        data: {
-          response: {
-            results: [{ badgeNumber: 1, storeName: "Store", employeeName: "Name" }],
-            total: 1
-          }
-        }
+        data: createMockPagedResponse([{ badgeNumber: 1, storeName: "Store", employeeName: "Name" }], 1)
       };
 
       const result = selectHasResults(stateWithResults);
@@ -339,12 +295,7 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
     it("should return false when results array is empty", () => {
       const stateWithEmptyResults = {
         search: { isLoading: false },
-        data: {
-          response: {
-            results: [],
-            total: 0
-          }
-        }
+        data: createMockPagedResponse([], 0)
       };
 
       const result = selectHasResults(stateWithEmptyResults);
@@ -372,16 +323,11 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
     it("should handle multiple results", () => {
       const stateWithMultipleResults = {
         search: { isLoading: false },
-        data: {
-          response: {
-            results: [
-              { badgeNumber: 1, storeName: "Store 1", employeeName: "Name 1" },
-              { badgeNumber: 2, storeName: "Store 2", employeeName: "Name 2" },
-              { badgeNumber: 3, storeName: "Store 3", employeeName: "Name 3" }
-            ],
-            total: 3
-          }
-        }
+        data: createMockPagedResponse([
+          { badgeNumber: 1, storeName: "Store 1", employeeName: "Name 1" },
+          { badgeNumber: 2, storeName: "Store 2", employeeName: "Name 2" },
+          { badgeNumber: 3, storeName: "Store 3", employeeName: "Name 3" }
+        ], 3)
       };
 
       const result = selectHasResults(stateWithMultipleResults);
