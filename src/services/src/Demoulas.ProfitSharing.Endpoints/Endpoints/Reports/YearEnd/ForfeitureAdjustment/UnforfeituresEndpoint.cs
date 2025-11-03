@@ -85,7 +85,6 @@ public class UnforfeituresEndpoint :
             EndpointTelemetry.BusinessOperationsTotal.Add(1,
                 new("operation", "year-end-unforfeitures-report"),
                 new("endpoint", nameof(UnforfeituresEndpoint)),
-                new("profit_year", req.ProfitYear.ToString()),
                 new("date_range", $"{req.BeginningDate:yyyy-MM-dd}_to_{req.EndingDate:yyyy-MM-dd}"));
 
             _logger.LogInformation(

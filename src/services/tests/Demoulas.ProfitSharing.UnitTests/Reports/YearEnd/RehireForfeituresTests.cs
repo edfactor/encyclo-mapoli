@@ -242,8 +242,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
                 Skip = 0,
                 Take = 10,
                 BeginningDate = example.ReHiredDate.AddDays(-5),
-                EndingDate = example.ReHiredDate.AddDays(5),
-                ProfitYear = profitYear
+                EndingDate = example.ReHiredDate.AddDays(5)
             }, example);
     }
 }

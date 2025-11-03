@@ -39,7 +39,6 @@ public sealed class TerminatedEmployeesNeedingFormLetterEndpoint : EndpointWithC
             s.Description = "Returns a report of terminated employees who have not yet been sent a form letter to accompany a set of forms to receive vested interest .";
             s.ExampleRequest = new StartAndEndDateRequest
             {
-                ProfitYear = 2023,
                 Skip = 0,
                 Take = 100,
                 SortBy = "TerminationDate",
