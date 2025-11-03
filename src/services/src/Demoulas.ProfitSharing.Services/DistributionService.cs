@@ -8,6 +8,7 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
@@ -27,13 +28,15 @@ public sealed class DistributionService : IDistributionService
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly IAppUser? _appUser;
     private readonly TotalService _totalService;
+    private readonly ICalendarService _calendarService;
 
-    public DistributionService(IProfitSharingDataContextFactory dataContextFactory, IDemographicReaderService demographicReaderService, IAppUser? appUser, TotalService totalService)
+    public DistributionService(IProfitSharingDataContextFactory dataContextFactory, IDemographicReaderService demographicReaderService, IAppUser? appUser, TotalService totalService, ICalendarService calendarService)
     {
         _dataContextFactory = dataContextFactory;
         _demographicReaderService = demographicReaderService;
         _appUser = appUser;
         _totalService = totalService;
+        _calendarService = calendarService;
     }
 
     public async Task<PaginatedResponseDto<DistributionSearchResponse>> SearchAsync(DistributionSearchRequest request, CancellationToken cancellationToken)
@@ -721,6 +724,38 @@ public sealed class DistributionService : IDistributionService
 
             var paginatedResults = await query.ToPaginationResultsAsync(request, cancellationToken);
             return Result<PaginatedResponseDto<DistributionRunReportDetail>>.Success(paginatedResults);
+        }, cancellationToken);
+    }
+
+    public async Task<Result<PaginatedResponseDto<DisbursementReportDetailResponse>>> GetDisbursementReport(ProfitYearRequest request, CancellationToken cancellationToken)
+    {
+        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
+            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+            var distributionQuery = GetDistributionExtract(ctx, cancellationToken, new[] {'A','M','Q'} );
+            var query = from dist in distributionQuery
+                        join dem in demographicQuery on dist.Ssn equals dem.Ssn into demJoin
+                        from dem in demJoin.DefaultIfEmpty()
+                        join bc in ctx.BeneficiaryContacts on dist.Ssn equals bc.Ssn into benJoin
+                        from ben in benJoin.DefaultIfEmpty()
+                        join vb in _totalService.TotalVestingBalance(ctx, request.ProfitYear, calInfo.FiscalEndDate) on dist.Ssn equals vb.Ssn into vbJoin
+                        from vest in vbJoin.DefaultIfEmpty()
+                        select new DisbursementReportDetailResponse
+                        {
+                            DistributionFrequencyId = dist.FrequencyId,
+                            DistributionFrequencyName = dist.Frequency!.Name,
+                            Ssn = dist.Ssn.MaskSsn(),
+                            BadgeNumber = dem != null ? dem.BadgeNumber : 0,
+                            EmployeeName = dem.ContactInfo!.FullName ?? ben.ContactInfo.FullName ?? "?",
+                            VestedBalance = vest != null ? vest.VestedBalance ?? 0 : 0,
+                            OriginalAmount = dist.GrossAmount,
+                            RemainingBalance = (vest != null ? vest.VestedBalance ?? 0 : 0) - dist.GrossAmount
+                        };
+            // Add query tagging for disbursement report
+            query = query.TagWith($"DisbursementReport-{DateTime.UtcNow:yyyyMMddHHmm}");
+            var paginatedResults = await query.ToPaginationResultsAsync(request, cancellationToken);
+            return Result<PaginatedResponseDto<DisbursementReportDetailResponse>>.Success(paginatedResults);
         }, cancellationToken);
     }
 

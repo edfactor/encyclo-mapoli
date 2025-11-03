@@ -1,6 +1,7 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 
@@ -15,4 +16,5 @@ public interface IDistributionService
     Task<Result<PaginatedResponseDto<DistributionsOnHoldResponse>>> GetDistributionsOnHold(SortedPaginationRequestDto request, CancellationToken cancellationToken);
     Task<Result<PaginatedResponseDto<ManualChecksWrittenResponse>>> GetManualCheckDistributions(SortedPaginationRequestDto request, CancellationToken cancellationToken);
     Task<Result<PaginatedResponseDto<DistributionRunReportDetail>>> GetDistributionRunReport(DistributionRunReportRequest request, CancellationToken cancellationToken);
+    Task<Result<PaginatedResponseDto<DisbursementReportDetailResponse>>> GetDisbursementReport(ProfitYearRequest request, CancellationToken cancellationToken);
 }
