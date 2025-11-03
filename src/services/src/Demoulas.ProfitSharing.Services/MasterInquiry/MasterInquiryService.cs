@@ -320,15 +320,24 @@ public sealed class MasterInquiryService : IMasterInquiryService
         if (req.BadgeNumber is > 0)
         {
             IQueryable<int> ssnFromBadge;
-            
+
             if (req.MemberType == 2) // Beneficiary only
             {
                 // For beneficiaries, query the Beneficiary table
-                ssnFromBadge = ctx.Beneficiaries
-                    .Where(b => b.BadgeNumber == req.BadgeNumber.Value)
-                    .Include(b => b.Contact)
-                    .Select(b => b.Contact!.Ssn)
-                    .TagWith($"MasterInquiry: Get SSN for Beneficiary BadgeNumber {req.BadgeNumber.Value}");
+                // CRITICAL: Beneficiaries MUST have both BadgeNumber and PsnSuffix to uniquely identify
+                if (req.PsnSuffix is not > 0)
+                {
+                    // Return empty query - beneficiary search requires PsnSuffix
+                    ssnFromBadge = ctx.ProfitDetails.Where(pd => false).Select(pd => pd.Ssn);
+                }
+                else
+                {
+                    ssnFromBadge = ctx.Beneficiaries
+                        .Where(b => b.BadgeNumber == req.BadgeNumber.Value && b.PsnSuffix == req.PsnSuffix.Value)
+                        .Include(b => b.Contact)
+                        .Select(b => b.Contact!.Ssn)
+                        .TagWith($"MasterInquiry: Get SSN for Beneficiary BadgeNumber {req.BadgeNumber.Value} PsnSuffix {req.PsnSuffix}");
+                }
             }
             else if (req.MemberType == 1) // Employee only
             {
@@ -341,12 +350,24 @@ public sealed class MasterInquiryService : IMasterInquiryService
             }
             else // Search both (MemberType == 0 or null)
             {
-                // For both, query Beneficiary first, then employee Demographics
-                var beneficiarySSNs = ctx.Beneficiaries
-                    .Where(b => b.BadgeNumber == req.BadgeNumber.Value)
-                    .Include(b => b.Contact)
-                    .Select(b => b.Contact!.Ssn)
-                    .TagWith($"MasterInquiry: Get SSN for Beneficiary BadgeNumber {req.BadgeNumber.Value}");
+                // For both, query Beneficiary and employee Demographics
+                // CRITICAL: Beneficiaries MUST have both BadgeNumber and PsnSuffix to uniquely identify
+                IQueryable<int> beneficiarySSNs;
+
+                if (req.PsnSuffix.HasValue && req.PsnSuffix.Value > 0)
+                {
+                    // PsnSuffix provided - search for beneficiary with this specific PsnSuffix
+                    beneficiarySSNs = ctx.Beneficiaries
+                        .Where(b => b.BadgeNumber == req.BadgeNumber.Value && b.PsnSuffix == req.PsnSuffix.Value)
+                        .Include(b => b.Contact)
+                        .Select(b => b.Contact!.Ssn)
+                        .TagWith($"MasterInquiry: Get SSN for Beneficiary BadgeNumber {req.BadgeNumber.Value} PsnSuffix {req.PsnSuffix}");
+                }
+                else
+                {
+                    // No PsnSuffix provided - skip beneficiary search in this path
+                    beneficiarySSNs = ctx.ProfitDetails.Where(pd => false).Select(pd => pd.Ssn);
+                }
 
                 var demographicsForDup = await _demographicReaderService.BuildDemographicQuery(ctx);
                 var employeeSSNs = demographicsForDup
