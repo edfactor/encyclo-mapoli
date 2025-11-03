@@ -101,7 +101,7 @@ DECLARE
     QPAY600 CONSTANT NUMBER := 137;
     TERMINATED_LETTERS CONSTANT NUMBER := 136;
     RECENTLY_TERMINATED CONSTANT NUMBER := 133;
-    QPAY066_AD_HOC_REPORTS CONSTANT NUMBER := 132;
+    -- QPAY066_AD_HOC_REPORTS CONSTANT NUMBER := 132; -- REMOVED
     QPAY066_UNDR21 CONSTANT NUMBER := 123;
     DIVORCE_REPORT CONSTANT NUMBER := 161;
 
@@ -193,7 +193,7 @@ BEGIN
     
 
 --Top level menus
-    insert_navigation_item(INQUIRIES_MENU, TOP_LEVEL_MENU, 'INQUIRIES', 'Inquiries', '', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(INQUIRIES_MENU, TOP_LEVEL_MENU, 'INQUIRIES & ADJUSTMENTS', 'Inquiries & Adjustments', '', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
 
     insert_navigation_item(BENEFICIARIES_MENU, TOP_LEVEL_MENU, 'BENEFICIARIES', 'Beneficiaries', '', STATUS_NORMAL, ORDER_SECOND, '', DISABLED, IS_NAVIGABLE);
     -- DISTRIBUTIONS_MENU REMOVED
@@ -241,7 +241,7 @@ BEGIN
     insert_navigation_item(QPAY600, ADHOC_GROUP, 'QPAY600', '', 'qpay600', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(TERMINATED_LETTERS, ADHOC_GROUP, 'Terminated Letters', 'QPROF003-1', 'terminated-letters', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(RECENTLY_TERMINATED, ADHOC_GROUP, 'Recently Terminated', 'PROF-VESTED|PAY508', 'recently-terminated', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(QPAY066_AD_HOC_REPORTS, ADHOC_GROUP, 'QPAY066* Ad Hoc Reports', 'QPAY066*', 'qpay066-adhoc', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
+    -- insert_navigation_item(QPAY066_AD_HOC_REPORTS, ADHOC_GROUP, 'QPAY066* Ad Hoc Reports', 'QPAY066*', 'qpay066-adhoc', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE); -- REMOVED
     insert_navigation_item(QPAY066_UNDR21, ADHOC_GROUP, 'QPAY066-UNDR21', '', 'qpay066-under21', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(DIVORCE_REPORT, ADHOC_GROUP, 'Account History Report', '', 'divorce-report', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
 
@@ -426,9 +426,9 @@ BEGIN
     assign_navigation_role(RECENTLY_TERMINATED, FINANCE_MANAGER);
     assign_navigation_role(RECENTLY_TERMINATED, DISTRIBUTIONS_CLERK);
     
-    assign_navigation_role(QPAY066_AD_HOC_REPORTS, SYSTEM_ADMINISTRATOR);
-    assign_navigation_role(QPAY066_AD_HOC_REPORTS, FINANCE_MANAGER);
-    assign_navigation_role(QPAY066_AD_HOC_REPORTS, DISTRIBUTIONS_CLERK);
+    -- assign_navigation_role(QPAY066_AD_HOC_REPORTS, SYSTEM_ADMINISTRATOR); -- REMOVED
+    -- assign_navigation_role(QPAY066_AD_HOC_REPORTS, FINANCE_MANAGER); -- REMOVED
+    -- assign_navigation_role(QPAY066_AD_HOC_REPORTS, DISTRIBUTIONS_CLERK); -- REMOVED
     
     assign_navigation_role(QPAY066_UNDR21, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(QPAY066_UNDR21, FINANCE_MANAGER);
@@ -468,7 +468,7 @@ BEGIN
     assign_navigation_role(QPAY600, IT_DEVOPS);
     assign_navigation_role(TERMINATED_LETTERS, IT_DEVOPS);
     assign_navigation_role(RECENTLY_TERMINATED, IT_DEVOPS);
-    assign_navigation_role(QPAY066_AD_HOC_REPORTS, IT_DEVOPS);
+    -- assign_navigation_role(QPAY066_AD_HOC_REPORTS, IT_DEVOPS); -- REMOVED
     assign_navigation_role(QPAY066_UNDR21, IT_DEVOPS);
     assign_navigation_role(DIVORCE_REPORT, IT_DEVOPS);
 
