@@ -171,10 +171,9 @@ public sealed class TerminatedEmployeeReportService
         var processingStart = DateTime.UtcNow;
         List<(int BadgeNumber, short PsnSuffix, string? Name, TerminatedEmployeeAndBeneficiaryYearDetailDto YearDetail)> yearDetailsList = new();
 
-        int processedCount = 0;
-        int filteredCount = 0;
-
-        foreach (MemberSlice memberSlice in memberSliceUnion)
+        var memberSliceCollection = await memberSliceUnion.Where(m => !(m.YearsInPs <= 2 && m.HoursCurrentYear >= /*1000*/ ReferenceData.MinimumHoursForContribution()))
+            .ToListAsync(cancellationToken);
+        foreach (MemberSlice memberSlice in memberSliceCollection)
         {
             // Get transactions for this member
             var key = new { memberSlice.Ssn, memberSlice.ProfitYear };
@@ -225,7 +224,6 @@ public sealed class TerminatedEmployeeReportService
             // Apply IsInteresting filter
             if (!IsInteresting(member))
             {
-                filteredCount++;
                 continue;
             }
 
@@ -288,13 +286,11 @@ public sealed class TerminatedEmployeeReportService
             // Exclude members with 0 balance OR 100% vested (no forfeiture opportunity)
             if (req.ExcludeZeroAndFullyVested && (member.EndingBalance == 0 || vestedRatio == 1.0m || hasForfeited))
             {
-                filteredCount++;
                 continue;
             }
 
             yearDetailsList.Add((member.BadgeNumber, member.PsnSuffix, member.FullName, yearDetail));
-            processedCount++;
-
+            
             // Accumulate totals
             totalVested += vestedBalance;
             totalForfeit += member.ForfeitAmount;
@@ -311,7 +307,7 @@ public sealed class TerminatedEmployeeReportService
                 PSN = g.Key.PsnSuffix == 0 ? (long)g.Key.BadgeNumber : (long)g.Key.BadgeNumber * 10000 + g.Key.PsnSuffix,
                 Name = g.Key.Name,
                 YearDetails = g.Select(x => x.YearDetail).OrderByDescending(y => y.ProfitYear).ToList()
-            }).AsQueryable().ToPaginationResultsAsync(req, cancellationToken);
+            }).ToPaginationResultsAsync(req, cancellationToken);
         var groupingDuration = (DateTime.UtcNow - groupingStart).TotalMilliseconds;
         int groupCount = grouped.Results != null ? grouped.Results.Count() : 0;
         _logger.LogInformation("Grouping and pagination completed in {DurationMs:F2}ms, returned {GroupCount} groups", groupingDuration, groupCount);
