@@ -214,7 +214,7 @@ describe("ForfeituresAdjustment", () => {
         profitYear: 2024,
         isReadOnly: false,
         memberDetailsRefreshTrigger: 0
-      });
+      } as any);
 
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
@@ -252,7 +252,7 @@ describe("ForfeituresAdjustment", () => {
         profitYear: 2024,
         isReadOnly: false,
         memberDetailsRefreshTrigger: 0
-      });
+      } as any);
 
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
@@ -289,7 +289,7 @@ describe("ForfeituresAdjustment", () => {
         profitYear: 2024,
         isReadOnly: false,
         memberDetailsRefreshTrigger: 0
-      });
+      } as any);
 
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
@@ -327,7 +327,7 @@ describe("ForfeituresAdjustment", () => {
         profitYear: 2024,
         isReadOnly: false,
         memberDetailsRefreshTrigger: 0
-      });
+      } as any);
 
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
@@ -365,7 +365,7 @@ describe("ForfeituresAdjustment", () => {
         profitYear: 2024,
         isReadOnly: false,
         memberDetailsRefreshTrigger: 0
-      });
+      } as any);
 
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
@@ -405,7 +405,7 @@ describe("ForfeituresAdjustment", () => {
         profitYear: 2024,
         isReadOnly: false,
         memberDetailsRefreshTrigger: 0
-      });
+      } as any);
 
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
@@ -454,7 +454,7 @@ describe("ForfeituresAdjustment", () => {
         profitYear: 2024,
         isReadOnly: true,
         memberDetailsRefreshTrigger: 0
-      });
+      } as any);
 
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });

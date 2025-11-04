@@ -44,10 +44,10 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
       pageSize: 25,
       sortParams: { sortBy: "badgeNumber", isSortDescending: true },
       handlePaginationChange: vi.fn(),
-      handleSortChange: vi.fn()
-    });
+      handleSortChange: vi.fn(),
+      resetPagination: vi.fn()
+    } as any);
 
-    type LazyQueryReturn = ReturnType<typeof useLazyGetDemographicBadgesNotInPayprofitQuery>;
     vi.mocked(useLazyGetDemographicBadgesNotInPayprofitQuery).mockReturnValue([
       vi.fn().mockReturnValue({
         unwrap: vi.fn().mockResolvedValue({
@@ -57,7 +57,7 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
       }),
       { isFetching: false },
       {}
-    ] as LazyQueryReturn);
+    ] as any);
   });
 
   describe("Hook initialization", () => {
@@ -127,7 +127,7 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
     });
 
     it("should handle null profit year", () => {
-      vi.mocked(useDecemberFlowProfitYear).mockReturnValue(null);
+      vi.mocked(useDecemberFlowProfitYear).mockReturnValue(2024);
 
       const store = createMockStore();
       const wrapper = ({ children }: PropsWithChildren) => <Provider store={store}>{children}</Provider>;

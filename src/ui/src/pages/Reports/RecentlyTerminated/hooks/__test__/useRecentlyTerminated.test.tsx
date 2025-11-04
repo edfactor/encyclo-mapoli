@@ -1,6 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import * as useLazyGetRecentlyTerminatedReportQuery from "reduxstore/api/YearsEndApi";
 import { RecentlyTerminatedDetail } from "reduxstore/types";
+import type { RecentlyTerminatedResponse } from "../../../../../types/reports/recent-termination";
 import { Paged } from "smart-ui-library";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as useDecemberFlowProfitYear from "../../../../../hooks/useDecemberFlowProfitYear";
@@ -209,7 +210,7 @@ describe("useRecentlyTerminated", () => {
       expect(result.current.searchParams).toEqual({ beginningDate, endingDate });
       expect(result.current.searchCompleted).toBe(true);
       expect(result.current.reportData).toBeDefined();
-      expect(result.current.reportData?.response.items).toHaveLength(2);
+      expect((result.current.reportData?.response as unknown as MockPaged<RecentlyTerminatedDetail>)?.items).toHaveLength(2);
     });
 
     it("should set isSearching to true during search", async () => {
@@ -217,7 +218,9 @@ describe("useRecentlyTerminated", () => {
         const delayedPromise = new Promise<RecentlyTerminatedResponse>((resolve) =>
           setTimeout(() => resolve(createMockRecentlyTerminatedResponse()), 100)
         ) as unknown as RTKQueryPromise<RecentlyTerminatedResponse>;
-        (delayedPromise as RTKQueryPromise<RecentlyTerminatedResponse>).unwrap = () => delayedPromise;
+        (delayedPromise as RTKQueryPromise<RecentlyTerminatedResponse>).unwrap = () => new Promise<RecentlyTerminatedResponse>((resolve) =>
+          setTimeout(() => resolve(createMockRecentlyTerminatedResponse()), 100)
+        );
         return delayedPromise;
       });
 
@@ -325,7 +328,7 @@ describe("useRecentlyTerminated", () => {
       });
 
       expect(result.current.reportData).toEqual(mockData);
-      expect(result.current.reportData?.response.items).toHaveLength(2);
+      expect((result.current.reportData?.response as unknown as MockPaged<RecentlyTerminatedDetail>)?.items).toHaveLength(2);
     });
   });
 
@@ -487,7 +490,7 @@ describe("useRecentlyTerminated", () => {
       const { result } = renderHook(() => useRecentlyTerminated());
 
       // First search succeeds
-      mockTriggerSearch.mockImplementationOnce(() => createMockRTKQueryPromise(createMockPagedData()));
+      mockTriggerSearch.mockImplementationOnce(() => createMockRTKQueryPromise(createMockRecentlyTerminatedResponse()));
 
       await act(async () => {
         await result.current.executeSearch("2024-01-01", "2024-12-31");
@@ -568,7 +571,7 @@ describe("useRecentlyTerminated", () => {
       const { result } = renderHook(() => useRecentlyTerminated());
 
       // Initial successful search
-      mockTriggerSearch.mockImplementationOnce(() => createMockRTKQueryPromise(createMockPagedData()));
+      mockTriggerSearch.mockImplementationOnce(() => createMockRTKQueryPromise(createMockRecentlyTerminatedResponse()));
 
       await act(async () => {
         await result.current.executeSearch("2024-01-01", "2024-12-31");
@@ -732,8 +735,8 @@ describe("useRecentlyTerminated", () => {
         await result.current.executeSearch("2024-01-01", "2024-12-31");
       });
 
-      expect(result.current.reportData?.response.items).toHaveLength(3);
-      expect(result.current.reportData?.response.total).toBe(3);
+      expect((result.current.reportData?.response as unknown as MockPaged<RecentlyTerminatedDetail>)?.items).toHaveLength(3);
+      expect((result.current.reportData?.response as unknown as MockPaged<RecentlyTerminatedDetail>)?.total).toBe(3);
     });
 
     it("should handle empty search results", async () => {
@@ -745,8 +748,8 @@ describe("useRecentlyTerminated", () => {
         await result.current.executeSearch("2024-01-01", "2024-12-31");
       });
 
-      expect(result.current.reportData?.response.items).toEqual([]);
-      expect(result.current.reportData?.response.total).toBe(0);
+      expect((result.current.reportData?.response as unknown as MockPaged<RecentlyTerminatedDetail>)?.items).toEqual([]);
+      expect((result.current.reportData?.response as unknown as MockPaged<RecentlyTerminatedDetail>)?.total).toBe(0);
       expect(result.current.searchCompleted).toBe(true);
     });
   });

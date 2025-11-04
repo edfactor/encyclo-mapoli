@@ -15,7 +15,7 @@ vi.mock("../../../../hooks/useFiscalCalendarYear", () => ({
         fiscalEndDate: "2024-12-31"
       }
     }
-  ])
+  ] as any)
 }));
 
 vi.mock("../../../../hooks/useDecemberFlowProfitYear", () => ({
@@ -146,7 +146,7 @@ describe("UnForfeit", () => {
             fiscalEndDate: null
           }
         }
-      ] as unknown);
+      ] as any);
 
       render(<UnForfeit />, { wrapper });
 
@@ -208,7 +208,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      } as any);
 
       render(<UnForfeit />, { wrapper });
 
@@ -246,7 +246,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      } as any);
 
       render(<UnForfeit />, { wrapper });
 
@@ -285,7 +285,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      } as any);
 
       render(<UnForfeit />, { wrapper });
 
@@ -317,7 +317,7 @@ describe("UnForfeit", () => {
           handleStatusChange: mockHandleStatusChange,
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      } as any);
 
       render(<UnForfeit />, { wrapper });
 
@@ -349,7 +349,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      } as any);
 
       render(<UnForfeit />, { wrapper });
 
@@ -379,7 +379,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      } as any);
 
       render(<UnForfeit />, { wrapper });
 
@@ -409,7 +409,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      } as any);
 
       render(<UnForfeit />, { wrapper });
 
@@ -443,7 +443,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      } as any);
 
       render(<UnForfeit />, { wrapper });
 
@@ -481,7 +481,7 @@ describe("UnForfeit", () => {
             fiscalEndDate: "2024-12-31"
           }
         }
-      ] as unknown);
+      ] as any);
 
       render(<UnForfeit />, { wrapper });
 

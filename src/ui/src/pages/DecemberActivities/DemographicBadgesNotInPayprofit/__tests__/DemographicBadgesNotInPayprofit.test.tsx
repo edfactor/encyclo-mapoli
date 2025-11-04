@@ -62,6 +62,9 @@ interface MockPagination {
   sortParams: { sortBy: string; isSortDescending: boolean };
   handlePaginationChange: ReturnType<typeof vi.fn>;
   handleSortChange: ReturnType<typeof vi.fn>;
+  setPageNumber: ReturnType<typeof vi.fn>;
+  setPageSize: ReturnType<typeof vi.fn>;
+  resetPagination: ReturnType<typeof vi.fn>;
 }
 
 interface MockHookReturn {
@@ -113,7 +116,10 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: vi.fn(),
-          handleSortChange: vi.fn()
+          handleSortChange: vi.fn(),
+          setPageNumber: vi.fn(),
+          setPageSize: vi.fn(),
+          resetPagination: vi.fn()
         },
         showData: true,
         hasResults: true,
@@ -144,7 +150,10 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: vi.fn(),
-          handleSortChange: vi.fn()
+          handleSortChange: vi.fn(),
+          setPageNumber: vi.fn(),
+          setPageSize: vi.fn(),
+          resetPagination: vi.fn()
         },
         showData: true,
         hasResults: true,
@@ -176,7 +185,10 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: vi.fn(),
-          handleSortChange: vi.fn()
+          handleSortChange: vi.fn(),
+          setPageNumber: vi.fn(),
+          setPageSize: vi.fn(),
+          resetPagination: vi.fn()
         },
         showData: false,
         hasResults: false,
@@ -207,7 +219,10 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: vi.fn(),
-          handleSortChange: vi.fn()
+          handleSortChange: vi.fn(),
+          setPageNumber: vi.fn(),
+          setPageSize: vi.fn(),
+          resetPagination: vi.fn()
         },
         showData: false,
         hasResults: false,
@@ -240,7 +255,10 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: vi.fn(),
-          handleSortChange: vi.fn()
+          handleSortChange: vi.fn(),
+          setPageNumber: vi.fn(),
+          setPageSize: vi.fn(),
+          resetPagination: vi.fn()
         },
         showData: true,
         hasResults: true,
@@ -271,7 +289,10 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: vi.fn(),
-          handleSortChange: vi.fn()
+          handleSortChange: vi.fn(),
+          setPageNumber: vi.fn(),
+          setPageSize: vi.fn(),
+          resetPagination: vi.fn()
         },
         showData: false,
         hasResults: false,
@@ -306,7 +327,10 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: vi.fn(),
-          handleSortChange: vi.fn()
+          handleSortChange: vi.fn(),
+          setPageNumber: vi.fn(),
+          setPageSize: vi.fn(),
+          resetPagination: vi.fn()
         },
         showData: true,
         hasResults: true,
@@ -384,7 +408,10 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
           pageSize: 25,
           sortParams: { sortBy: "badgeNumber", isSortDescending: true },
           handlePaginationChange: vi.fn(),
-          handleSortChange: vi.fn()
+          handleSortChange: vi.fn(),
+          setPageNumber: vi.fn(),
+          setPageSize: vi.fn(),
+          resetPagination: vi.fn()
         },
         showData: true,
         hasResults: false,

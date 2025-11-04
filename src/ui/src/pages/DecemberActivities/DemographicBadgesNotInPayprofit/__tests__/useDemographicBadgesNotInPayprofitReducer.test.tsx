@@ -152,7 +152,7 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
       const stateWithData = {
         search: { isLoading: false },
         data: previousData
-      };
+      } as ReducerState;
 
       const newData = createMockPagedResponse([{ badgeNumber: 2, storeName: "New Store", employeeName: "New Name" }], 1);
 
@@ -161,7 +161,7 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
       const newState = demographicBadgesNotInPayprofitReducer(stateWithData, action);
 
       expect(newState.data).toEqual(newData);
-      expect(newState.data!.response.results[0].badgeNumber).toBe(2);
+      expect((newState.data as typeof newData)?.response.results[0].badgeNumber).toBe(2);
     });
 
     it("should handle empty results", () => {
@@ -309,13 +309,13 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
       expect(result).toBe(false);
     });
 
-    it("should return false when data is undefined", () => {
-      const stateWithUndefinedData = {
+    it("should return false when data is null", () => {
+      const stateWithNullData = {
         search: { isLoading: false },
-        data: undefined
-      };
+        data: null
+      } as ReducerState;
 
-      const result = selectHasResults(stateWithUndefinedData);
+      const result = selectHasResults(stateWithNullData);
 
       expect(result).toBe(false);
     });
@@ -328,7 +328,7 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
           { badgeNumber: 2, storeName: "Store 2", employeeName: "Name 2" },
           { badgeNumber: 3, storeName: "Store 3", employeeName: "Name 3" }
         ], 3)
-      };
+      } as ReducerState;
 
       const result = selectHasResults(stateWithMultipleResults);
 
@@ -367,7 +367,7 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
 
   describe("Sequential state transitions", () => {
     it("should handle START -> SUCCESS -> START -> SUCCESS sequence", () => {
-      let state = initialState;
+      let state: ReducerState = initialState;
 
       // First search
       state = demographicBadgesNotInPayprofitReducer(state, { type: "SEARCH_START" });
@@ -378,7 +378,7 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
         payload: { response: { results: [{ badgeNumber: 1 }], total: 1 } }
       });
       expect(state.search.isLoading).toBe(false);
-      expect(state.data!.response.results).toHaveLength(1);
+      expect(state.data?.response.results).toHaveLength(1);
 
       // Second search
       state = demographicBadgesNotInPayprofitReducer(state, { type: "SEARCH_START" });
@@ -389,11 +389,11 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
         payload: { response: { results: [{ badgeNumber: 2 }, { badgeNumber: 3 }], total: 2 } }
       });
       expect(state.search.isLoading).toBe(false);
-      expect(state.data!.response.results).toHaveLength(2);
+      expect(state.data?.response.results).toHaveLength(2);
     });
 
     it("should handle START -> ERROR sequence", () => {
-      let state = initialState;
+      let state: ReducerState = initialState;
 
       state = demographicBadgesNotInPayprofitReducer(state, { type: "SEARCH_START" });
       expect(state.search.isLoading).toBe(true);
