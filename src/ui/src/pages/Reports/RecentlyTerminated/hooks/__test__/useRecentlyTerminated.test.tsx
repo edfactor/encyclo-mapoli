@@ -397,10 +397,7 @@ describe("useRecentlyTerminated", () => {
 
       // Simulate pagination change
       await act(async () => {
-        await result.current.gridPagination.handlePaginationChange(1, 25, {
-          sortBy: "fullName, terminationDate",
-          isSortDescending: false
-        });
+        await result.current.gridPagination.handlePaginationChange(1, 25);
       });
 
       expect(mockTriggerSearch).toHaveBeenCalledWith(
@@ -492,10 +489,7 @@ describe("useRecentlyTerminated", () => {
 
       // Simulate pagination that fails
       await act(async () => {
-        await result.current.gridPagination.handlePaginationChange(1, 25, {
-          sortBy: "fullName, terminationDate",
-          isSortDescending: false
-        });
+        await result.current.gridPagination.handlePaginationChange(1, 25);
       });
 
       expect(result.current.reportError).toBe(errorMsg);
@@ -525,10 +519,7 @@ describe("useRecentlyTerminated", () => {
 
       // Try to paginate without having searched first
       await act(async () => {
-        await result.current.gridPagination.handlePaginationChange(0, 25, {
-          sortBy: "fullName, terminationDate",
-          isSortDescending: false
-        });
+        await result.current.gridPagination.handlePaginationChange(0, 25);
       });
 
       expect(mockTriggerSearch).not.toHaveBeenCalled();
@@ -579,10 +570,7 @@ describe("useRecentlyTerminated", () => {
       mockAddAlert.mockClear();
 
       await act(async () => {
-        await result.current.gridPagination.handlePaginationChange(1, 25, {
-          sortBy: "fullName, terminationDate",
-          isSortDescending: false
-        });
+        await result.current.gridPagination.handlePaginationChange(1, 25);
       });
 
       expect(mockAddAlert).toHaveBeenCalledWith(
@@ -636,10 +624,7 @@ describe("useRecentlyTerminated", () => {
       mockTriggerSearch.mockClear();
 
       await act(async () => {
-        await result.current.gridPagination.handlePaginationChange(1, 25, {
-          sortBy: "fullName, terminationDate",
-          isSortDescending: false
-        });
+        await result.current.gridPagination.handlePaginationChange(1, 25);
       });
 
       expect(mockTriggerSearch).toHaveBeenCalledTimes(1);

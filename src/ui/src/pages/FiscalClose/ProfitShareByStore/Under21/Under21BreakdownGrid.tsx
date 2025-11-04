@@ -49,7 +49,7 @@ const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
     setInitialSearchLoaded(true);
   };
 
-  const columnDefs = useMemo(() => GetUnder21BreakdownColumnDefs(handleNavigation), [handleNavigation]);
+  const columnDefs = useMemo(() => GetUnder21BreakdownColumnDefs(), []);
 
   return (
     <Grid

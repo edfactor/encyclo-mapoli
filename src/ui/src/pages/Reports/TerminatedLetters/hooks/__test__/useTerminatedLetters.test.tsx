@@ -430,10 +430,7 @@ describe("useTerminatedLetters", () => {
 
       // Simulate pagination change
       await act(async () => {
-        await result.current.gridPagination.handlePaginationChange(1, 50, {
-          sortBy: "fullName",
-          isSortDescending: false
-        });
+        await result.current.gridPagination.handlePaginationChange(1, 50);
       });
 
       expect(mockTriggerSearch).toHaveBeenCalledWith(
@@ -615,10 +612,7 @@ describe("useTerminatedLetters", () => {
 
       // Try to paginate without having searched first
       await act(async () => {
-        await result.current.gridPagination.handlePaginationChange(0, 50, {
-          sortBy: "fullName",
-          isSortDescending: false
-        });
+        await result.current.gridPagination.handlePaginationChange(0, 50);
       });
 
       expect(mockTriggerSearch).not.toHaveBeenCalled();

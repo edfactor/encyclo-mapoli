@@ -161,7 +161,7 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
       const newState = demographicBadgesNotInPayprofitReducer(stateWithData, action);
 
       expect(newState.data).toEqual(newData);
-      expect(newState.data.response.results[0].badgeNumber).toBe(2);
+      expect(newState.data!.response.results[0].badgeNumber).toBe(2);
     });
 
     it("should handle empty results", () => {
@@ -171,8 +171,8 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
 
       const newState = demographicBadgesNotInPayprofitReducer(initialState, action);
 
-      expect(newState.data.response.results).toHaveLength(0);
-      expect(newState.data.response.total).toBe(0);
+      expect(newState.data!.response.results).toHaveLength(0);
+      expect(newState.data!.response.total).toBe(0);
     });
 
     it("should handle large result sets", () => {
@@ -186,8 +186,8 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
 
       const newState = demographicBadgesNotInPayprofitReducer(initialState, action);
 
-      expect(newState.data.response.results).toHaveLength(100);
-      expect(newState.data.response.total).toBe(100);
+      expect(newState.data!.response.results).toHaveLength(100);
+      expect(newState.data!.response.total).toBe(100);
     });
   });
 
@@ -378,7 +378,7 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
         payload: { response: { results: [{ badgeNumber: 1 }], total: 1 } }
       });
       expect(state.search.isLoading).toBe(false);
-      expect(state.data.response.results).toHaveLength(1);
+      expect(state.data!.response.results).toHaveLength(1);
 
       // Second search
       state = demographicBadgesNotInPayprofitReducer(state, { type: "SEARCH_START" });
@@ -389,7 +389,7 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
         payload: { response: { results: [{ badgeNumber: 2 }, { badgeNumber: 3 }], total: 2 } }
       });
       expect(state.search.isLoading).toBe(false);
-      expect(state.data.response.results).toHaveLength(2);
+      expect(state.data!.response.results).toHaveLength(2);
     });
 
     it("should handle START -> ERROR sequence", () => {

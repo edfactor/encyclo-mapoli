@@ -235,7 +235,7 @@ describe("useMasterInquiryReducer", () => {
         ...initialState,
         selection: {
           ...initialState.selection,
-          memberDetails: { firstName: "John", lastName: "Doe" },
+          memberDetails: { id: 1, badgeNumber: 123456, psnSuffix: 0, payFrequencyId: 1, isEmployee: true, firstName: "John", lastName: "Doe", address: "123 Main St", addressCity: "Boston", addressState: "MA", addressZipCode: "02101", dateOfBirth: "1990-01-01", ssn: "123-45-6789", yearToDateProfitSharingHours: 2080, yearsInPlan: 5, percentageVested: 100, contributionsLastYear: true, enrollmentId: 1, enrollment: "Active", hireDate: "2018-01-01", terminationDate: null, reHireDate: null, storeNumber: 1, beginPSAmount: 10000, currentPSAmount: 12000, beginVestedAmount: 10000, currentVestedAmount: 12000, currentEtva: 0, previousEtva: 0, employmentStatus: "Active", department: "IT", payClassification: "Salaried", gender: "M", phoneNumber: "617-555-1234", workLocation: "Boston HQ", receivedContributionsLastYear: true, fullTimeDate: "2018-01-01", terminationReason: "", missives: null, allocationFromAmount: 0, allocationToAmount: 0, badgesOfDuplicateSsns: [] },
           isFetchingMemberDetails: true
         }
       };
@@ -321,7 +321,7 @@ describe("useMasterInquiryReducer", () => {
         },
         selection: {
           selectedMember: { memberType: 1, id: 1, ssn: 123, badgeNumber: 111, psnSuffix: 0 },
-          memberDetails: { firstName: "John", lastName: "Doe" },
+          memberDetails: { id: 1, badgeNumber: 123456, psnSuffix: 0, payFrequencyId: 1, isEmployee: true, firstName: "John", lastName: "Doe", address: "123 Main St", addressCity: "Boston", addressState: "MA", addressZipCode: "02101", dateOfBirth: "1990-01-01", ssn: "123-45-6789", yearToDateProfitSharingHours: 2080, yearsInPlan: 5, percentageVested: 100, contributionsLastYear: true, enrollmentId: 1, enrollment: "Active", hireDate: "2018-01-01", terminationDate: null, reHireDate: null, storeNumber: 1, beginPSAmount: 10000, currentPSAmount: 12000, beginVestedAmount: 10000, currentVestedAmount: 12000, currentEtva: 0, previousEtva: 0, employmentStatus: "Active", department: "IT", payClassification: "Salaried", gender: "M", phoneNumber: "617-555-1234", workLocation: "Boston HQ", receivedContributionsLastYear: true, fullTimeDate: "2018-01-01", terminationReason: "", missives: null, allocationFromAmount: 0, allocationToAmount: 0, badgesOfDuplicateSsns: [] },
           memberProfitData: { results: [], total: 0 },
           isFetchingMemberDetails: true,
           isFetchingProfitData: true
@@ -343,7 +343,7 @@ describe("useMasterInquiryReducer", () => {
           ...initialState,
           search: {
             ...initialState.search,
-            results: { results: [{}, {}], total: 2 }
+            results: { results: [{ id: 1, badgeNumber: 123456, psnSuffix: 0, payFrequencyId: 1, isEmployee: true, firstName: "John", lastName: "Doe", address: "123 Main St", addressCity: "Boston", addressState: "MA", addressZipCode: "02101", dateOfBirth: "1990-01-01", ssn: "123-45-6789", yearToDateProfitSharingHours: 2080, yearsInPlan: 5, percentageVested: 100, contributionsLastYear: true, enrollmentId: 1, enrollment: "Active", hireDate: "2018-01-01", terminationDate: null, reHireDate: null, storeNumber: 1, beginPSAmount: 10000, currentPSAmount: 12000, beginVestedAmount: 10000, currentVestedAmount: 12000, currentEtva: 0, previousEtva: 0, employmentStatus: "Active", department: "IT", payClassification: "Salaried", gender: "M", phoneNumber: "617-555-1234", workLocation: "Boston HQ", receivedContributionsLastYear: true, fullTimeDate: "2018-01-01", terminationReason: "", missives: null, allocationFromAmount: 0, allocationToAmount: 0, badgesOfDuplicateSsns: [] }, { id: 2, badgeNumber: 123457, psnSuffix: 0, payFrequencyId: 1, isEmployee: true, firstName: "Jane", lastName: "Smith", address: "456 Oak Ave", addressCity: "Boston", addressState: "MA", addressZipCode: "02101", dateOfBirth: "1992-05-15", ssn: "987-65-4321", yearToDateProfitSharingHours: 2000, yearsInPlan: 3, percentageVested: 80, contributionsLastYear: true, enrollmentId: 1, enrollment: "Active", hireDate: "2020-03-01", terminationDate: null, reHireDate: null, storeNumber: 2, beginPSAmount: 8000, currentPSAmount: 10000, beginVestedAmount: 6400, currentVestedAmount: 8000, currentEtva: 0, previousEtva: 0, employmentStatus: "Active", department: "Sales", payClassification: "Hourly", gender: "F", phoneNumber: "617-555-5678", workLocation: "Boston HQ", receivedContributionsLastYear: true, fullTimeDate: "2020-03-01", terminationReason: "", missives: null, allocationFromAmount: 0, allocationToAmount: 0, badgesOfDuplicateSsns: [] }], total: 2 }
           },
           view: { mode: "multipleMembers" }
         };
@@ -356,7 +356,7 @@ describe("useMasterInquiryReducer", () => {
           ...initialState,
           search: {
             ...initialState.search,
-            results: { results: [{}], total: 1 }
+            results: { results: [{ id: 1, badgeNumber: 123456, psnSuffix: 0, payFrequencyId: 1, isEmployee: true, firstName: "John", lastName: "Doe", address: "123 Main St", addressCity: "Boston", addressState: "MA", addressZipCode: "02101", dateOfBirth: "1990-01-01", ssn: "123-45-6789", yearToDateProfitSharingHours: 2080, yearsInPlan: 5, percentageVested: 100, contributionsLastYear: true, enrollmentId: 1, enrollment: "Active", hireDate: "2018-01-01", terminationDate: null, reHireDate: null, storeNumber: 1, beginPSAmount: 10000, currentPSAmount: 12000, beginVestedAmount: 10000, currentVestedAmount: 12000, currentEtva: 0, previousEtva: 0, employmentStatus: "Active", department: "IT", payClassification: "Salaried", gender: "M", phoneNumber: "617-555-1234", workLocation: "Boston HQ", receivedContributionsLastYear: true, fullTimeDate: "2018-01-01", terminationReason: "", missives: null, allocationFromAmount: 0, allocationToAmount: 0, badgesOfDuplicateSsns: [] }], total: 1 }
           },
           view: { mode: "multipleMembers" }
         };
@@ -369,7 +369,7 @@ describe("useMasterInquiryReducer", () => {
           ...initialState,
           search: {
             ...initialState.search,
-            results: { results: [{}, {}], total: 2 }
+            results: { results: [{ id: 1, badgeNumber: 123456, psnSuffix: 0, payFrequencyId: 1, isEmployee: true, firstName: "John", lastName: "Doe", address: "123 Main St", addressCity: "Boston", addressState: "MA", addressZipCode: "02101", dateOfBirth: "1990-01-01", ssn: "123-45-6789", yearToDateProfitSharingHours: 2080, yearsInPlan: 5, percentageVested: 100, contributionsLastYear: true, enrollmentId: 1, enrollment: "Active", hireDate: "2018-01-01", terminationDate: null, reHireDate: null, storeNumber: 1, beginPSAmount: 10000, currentPSAmount: 12000, beginVestedAmount: 10000, currentVestedAmount: 12000, currentEtva: 0, previousEtva: 0, employmentStatus: "Active", department: "IT", payClassification: "Salaried", gender: "M", phoneNumber: "617-555-1234", workLocation: "Boston HQ", receivedContributionsLastYear: true, fullTimeDate: "2018-01-01", terminationReason: "", missives: null, allocationFromAmount: 0, allocationToAmount: 0, badgesOfDuplicateSsns: [] }, { id: 2, badgeNumber: 123457, psnSuffix: 0, payFrequencyId: 1, isEmployee: true, firstName: "Jane", lastName: "Smith", address: "456 Oak Ave", addressCity: "Boston", addressState: "MA", addressZipCode: "02101", dateOfBirth: "1992-05-15", ssn: "987-65-4321", yearToDateProfitSharingHours: 2000, yearsInPlan: 3, percentageVested: 80, contributionsLastYear: true, enrollmentId: 1, enrollment: "Active", hireDate: "2020-03-01", terminationDate: null, reHireDate: null, storeNumber: 2, beginPSAmount: 8000, currentPSAmount: 10000, beginVestedAmount: 6400, currentVestedAmount: 8000, currentEtva: 0, previousEtva: 0, employmentStatus: "Active", department: "Sales", payClassification: "Hourly", gender: "F", phoneNumber: "617-555-5678", workLocation: "Boston HQ", receivedContributionsLastYear: true, fullTimeDate: "2020-03-01", terminationReason: "", missives: null, allocationFromAmount: 0, allocationToAmount: 0, badgesOfDuplicateSsns: [] }], total: 2 }
           },
           view: { mode: "memberDetails" }
         };

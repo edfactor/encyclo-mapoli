@@ -364,8 +364,12 @@ describe("useAdjustments", () => {
           impersonating: []
         },
         inquiry: {
+          masterInquiryData: null,
           masterInquiryMemberDetails: mockMember,
-          masterInquiryMemberDetailsSecondary: mockMember
+          masterInquiryMemberDetailsSecondary: mockMember,
+          masterInquiryResults: null,
+          masterInquiryRequestParams: null,
+          masterInquiryGroupingData: null
         }
       });
 
@@ -410,8 +414,12 @@ describe("useAdjustments", () => {
           impersonating: []
         },
         inquiry: {
+          masterInquiryData: null,
           masterInquiryMemberDetails: mockMember,
-          masterInquiryMemberDetailsSecondary: mockMember
+          masterInquiryMemberDetailsSecondary: mockMember,
+          masterInquiryResults: null,
+          masterInquiryRequestParams: null,
+          masterInquiryGroupingData: null
         }
       });
 
@@ -479,8 +487,12 @@ describe("useAdjustments", () => {
           impersonating: []
         },
         inquiry: {
+          masterInquiryData: null,
           masterInquiryMemberDetails: mockMember,
-          masterInquiryMemberDetailsSecondary: mockMember
+          masterInquiryMemberDetailsSecondary: mockMember,
+          masterInquiryResults: null,
+          masterInquiryRequestParams: null,
+          masterInquiryGroupingData: null
         }
       });
 

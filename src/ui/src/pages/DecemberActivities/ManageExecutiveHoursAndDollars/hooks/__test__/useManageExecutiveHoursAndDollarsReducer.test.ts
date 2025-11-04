@@ -329,7 +329,7 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
         grid: {
           ...initialState.grid,
           additionalExecutives: [
-            { badgeNumber: 12345, fullName: "John Doe", hoursExecutive: 40, incomeExecutive: 1000 }
+            { badgeNumber: 12345, fullName: "John Doe", storeNumber: 1, socialSecurity: 123456789, hoursExecutive: 40, incomeExecutive: 1000, currentHoursYear: 35, currentIncomeYear: 900, payFrequencyId: 1, payFrequencyName: "Monthly", employmentStatusId: "1", employmentStatusName: "Active" }
           ]
         }
       };
@@ -362,7 +362,7 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
             dataSource: "test",
             response: { results: [], total: 0, totalPages: 0, pageSize: 25, currentPage: 0 }
           },
-          selectedExecutives: [{ badgeNumber: 12345, fullName: "Test", hoursExecutive: 40, incomeExecutive: 1000 }],
+          selectedExecutives: [{ badgeNumber: 12345, fullName: "Test", storeNumber: 1, socialSecurity: 123456789, hoursExecutive: 40, incomeExecutive: 1000, currentHoursYear: 35, currentIncomeYear: 900, payFrequencyId: 1, payFrequencyName: "Monthly", employmentStatusId: "1", employmentStatusName: "Active" }],
           isSearching: false,
           searchParams: {
             profitYear: 2024,
@@ -433,7 +433,7 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
         ...initialState,
         modal: {
           ...initialState.modal,
-          selectedExecutives: [{ badgeNumber: 12345, fullName: "Test", hoursExecutive: 40, incomeExecutive: 1000 }]
+          selectedExecutives: [{ badgeNumber: 12345, fullName: "Test", storeNumber: 1, socialSecurity: 123456789, hoursExecutive: 40, incomeExecutive: 1000, currentHoursYear: 35, currentIncomeYear: 900, payFrequencyId: 1, payFrequencyName: "Monthly", employmentStatusId: "1", employmentStatusName: "Active" }]
         }
       };
 
@@ -592,7 +592,7 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
           search: {
             ...initialState.search,
             results: {
-              results: [{ badgeNumber: 12345, fullName: "Test", hoursExecutive: 40, incomeExecutive: 1000 }],
+              results: [{ badgeNumber: 12345, fullName: "Test", storeNumber: 1, socialSecurity: 123456789, hoursExecutive: 40, incomeExecutive: 1000, currentHoursYear: 35, currentIncomeYear: 900, payFrequencyId: 1, payFrequencyName: "Monthly", employmentStatusId: "1", employmentStatusName: "Active" }],
               total: 1
             }
           },

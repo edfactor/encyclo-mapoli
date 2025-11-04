@@ -74,7 +74,7 @@ const usePayBenReport = () => {
   useEffect(() => {
     if (!state.data && hasToken && !state.search.isLoading && !hasInitiallySearched.current) {
       hasInitiallySearched.current = true;
-      executeSearch("auto-initial");
+      executeSearch();
     }
   }, [state.data, hasToken, state.search.isLoading, executeSearch]);
 
