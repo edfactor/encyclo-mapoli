@@ -5,16 +5,19 @@ import { Page } from "smart-ui-library";
 import StatusDropdownActionNode from "../../../../components/StatusDropdownActionNode";
 import { CAPTIONS } from "../../../../constants";
 import useFiscalCloseProfitYear from "../../../../hooks/useFiscalCloseProfitYear";
-import { useLazyGetUnder21InactiveQuery, useLazyGetUnder21TotalsQuery } from "../../../../reduxstore/api/YearsEndApi";
+import {
+  useLazyGetUnder21BreakdownByStoreQuery,
+  useLazyGetUnder21TotalsQuery
+} from "../../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../../reduxstore/store";
-import Under21InactiveGrid from "./Under21InactiveGrid";
+import Under21BreakdownGrid from "./Under21BreakdownGrid";
 import Under21Summary from "./Under21Summary";
 
 const Under21TA = () => {
   const [fetchUnder21Totals, { isLoading: isTotalsLoading }] = useLazyGetUnder21TotalsQuery();
-  const [fetchUnder21Inactive, { isLoading: isInactiveLoading }] = useLazyGetUnder21InactiveQuery();
+  const [fetchUnder21BreakdownByStore, { isLoading: isInactiveLoading }] = useLazyGetUnder21BreakdownByStoreQuery();
   const under21Totals = useSelector((state: RootState) => state.yearsEnd.under21Totals);
-  const under21Inactive = useSelector((state: RootState) => state.yearsEnd.under21Inactive);
+  const under21BreakdownByStore = useSelector((state: RootState) => state.yearsEnd.under21BreakdownByStore);
   const [initialLoad, setInitialLoad] = useState(true);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [pageNumber, setPageNumber] = useState<number>(0);
@@ -27,7 +30,7 @@ const Under21TA = () => {
 
   const isLoading = isTotalsLoading || isInactiveLoading;
 
-  const hasData = !!under21Totals && !!under21Inactive;
+  const hasData = !!under21Totals && !!under21BreakdownByStore;
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
   };
@@ -45,13 +48,13 @@ const Under21TA = () => {
         }
       };
 
-      await Promise.all([fetchUnder21Totals(queryParams), fetchUnder21Inactive(queryParams)]);
+      await Promise.all([fetchUnder21Totals(queryParams), fetchUnder21BreakdownByStore(queryParams)]);
 
       setInitialLoad(false);
     };
 
     fetchData();
-  }, [fetchUnder21Totals, fetchUnder21Inactive, pageNumber, pageSize, sortParams, profitYear]);
+  }, [fetchUnder21Totals, fetchUnder21BreakdownByStore, pageNumber, pageSize, sortParams, profitYear]);
 
   useEffect(() => {
     if (initialSearchLoaded) {
@@ -67,14 +70,22 @@ const Under21TA = () => {
       };
 
       fetchUnder21Totals(queryParams);
-      fetchUnder21Inactive(queryParams);
+      fetchUnder21BreakdownByStore(queryParams);
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, fetchUnder21Totals, fetchUnder21Inactive, profitYear]);
+  }, [
+    initialSearchLoaded,
+    pageNumber,
+    pageSize,
+    sortParams,
+    fetchUnder21Totals,
+    fetchUnder21BreakdownByStore,
+    profitYear
+  ]);
 
   // Need a useEffect to reset the page number when under21Totals or under21Inactive changes
   useEffect(() => {
     setPageNumber(0);
-  }, [under21Totals, under21Inactive]);
+  }, [under21Totals, under21BreakdownByStore]);
 
   /*
   const handleSearch = (profitYear: number, isSortDescending: boolean) => {
@@ -123,22 +134,15 @@ const Under21TA = () => {
                 <Under21Summary
                   totals={under21Totals}
                   isLoading={isTotalsLoading}
-                  title="UNDER 21 INACTIVE (QPAY066TA-UNDR21)"
+                  title="UNDER 21 (QPAY066TA-UNDR21)"
                 />
               </Grid>
             )}
 
             <Grid width="100%">
-              <Under21InactiveGrid
+              <Under21BreakdownGrid
                 isLoading={isInactiveLoading}
-                initialSearchLoaded={initialSearchLoaded}
                 setInitialSearchLoaded={setInitialSearchLoaded}
-                pageNumber={pageNumber}
-                setPageNumber={setPageNumber}
-                pageSize={pageSize}
-                setPageSize={setPageSize}
-                sortParams={sortParams}
-                setSortParams={setSortParams}
               />
             </Grid>
           </>
