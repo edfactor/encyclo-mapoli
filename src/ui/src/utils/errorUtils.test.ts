@@ -14,8 +14,7 @@ describe("errorUtils", () => {
             BadgeNumber: ["Badge number is required", "Badge number must be positive"],
             Name: ["Name is required"]
           }
-        },
-        status: 400
+        }
       };
 
       const result = createValidationErrorsMessage(errorResponse);
@@ -37,8 +36,7 @@ describe("errorUtils", () => {
           errors: {
             Email: ["Email format is invalid"]
           }
-        },
-        status: 400
+        }
       };
 
       const result = createValidationErrorsMessage(errorResponse);
@@ -54,8 +52,7 @@ describe("errorUtils", () => {
           title: "Bad Request",
           detail: "The request was malformed",
           status: 400
-        },
-        status: 400
+        }
       };
 
       const result = createValidationErrorsMessage(errorResponse);
@@ -70,8 +67,7 @@ describe("errorUtils", () => {
           title: "Error",
           detail: "Something went wrong",
           status: 500
-        },
-        status: 500
+        }
       };
 
       const result = createValidationErrorsMessage(errorResponse);
@@ -91,8 +87,7 @@ describe("errorUtils", () => {
             LastName: ["Last name is required", "Last name must be at least 2 characters"],
             Age: ["Age must be at least 18"]
           }
-        },
-        status: 400
+        }
       };
 
       const result = createValidationErrorsMessage(errorResponse);
@@ -115,8 +110,7 @@ describe("errorUtils", () => {
           detail: "No specific errors",
           status: 400,
           errors: {}
-        },
-        status: 400
+        }
       };
 
       const result = createValidationErrorsMessage(errorResponse);
@@ -136,8 +130,7 @@ describe("errorUtils", () => {
             "User.Email": ["Invalid email format"],
             "User.Password": ["Password too short", "Password must contain numbers"]
           }
-        },
-        status: 400
+        }
       };
 
       const result = createValidationErrorsMessage(errorResponse);
@@ -158,8 +151,7 @@ describe("errorUtils", () => {
           errors: {
             Field: ["Error with 'quotes' and \"double quotes\"", "Error with <tags>"]
           }
-        },
-        status: 400
+        }
       };
 
       const result = createValidationErrorsMessage(errorResponse);

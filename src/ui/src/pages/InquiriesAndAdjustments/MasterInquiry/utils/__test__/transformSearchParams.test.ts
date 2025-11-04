@@ -55,7 +55,7 @@ describe("transformSearchParams", () => {
   });
 
   it("should split badge number without PSN suffix", () => {
-    const data = { ...baseSearchData, badgeNumber: "1234567" };
+    const data = { ...baseSearchData, badgeNumber: 1234567 };
     const result = transformSearchParams(data, 2024);
 
     expect(result.badgeNumber).toBe(1234567);
@@ -63,7 +63,7 @@ describe("transformSearchParams", () => {
   });
 
   it("should split badge number with PSN suffix", () => {
-    const data = { ...baseSearchData, badgeNumber: "12345670001" };
+    const data = { ...baseSearchData, badgeNumber: 12345670001 };
     const result = transformSearchParams(data, 2024);
 
     expect(result.badgeNumber).toBe(1234567);
@@ -71,17 +71,17 @@ describe("transformSearchParams", () => {
   });
 
   it("should include startProfitMonth when provided", () => {
-    const data = { ...baseSearchData, startProfitMonth: "3" };
+    const data = { ...baseSearchData, startProfitMonth: 3 };
     const result = transformSearchParams(data, 2024);
 
-    expect(result.startProfitMonth).toBe("3");
+    expect(result.startProfitMonth).toBe(3);
   });
 
   it("should include endProfitMonth when provided", () => {
-    const data = { ...baseSearchData, endProfitMonth: "9" };
+    const data = { ...baseSearchData, endProfitMonth: 9 };
     const result = transformSearchParams(data, 2024);
 
-    expect(result.endProfitMonth).toBe("9");
+    expect(result.endProfitMonth).toBe(9);
   });
 
   it("should map paymentType to number", () => {
@@ -113,35 +113,35 @@ describe("transformSearchParams", () => {
   });
 
   it("should include contribution when provided", () => {
-    const data = { ...baseSearchData, contribution: "1000" };
+    const data = { ...baseSearchData, contribution: 1000 };
     const result = transformSearchParams(data, 2024);
 
-    expect(result.contributionAmount).toBe("1000");
+    expect(result.contributionAmount).toBe(1000);
   });
 
   it("should include earnings when provided", () => {
-    const data = { ...baseSearchData, earnings: "5000" };
+    const data = { ...baseSearchData, earnings: 5000 };
     const result = transformSearchParams(data, 2024);
 
-    expect(result.earningsAmount).toBe("5000");
+    expect(result.earningsAmount).toBe(5000);
   });
 
   it("should include forfeiture when provided", () => {
-    const data = { ...baseSearchData, forfeiture: "500" };
+    const data = { ...baseSearchData, forfeiture: 500 };
     const result = transformSearchParams(data, 2024);
 
-    expect(result.forfeitureAmount).toBe("500");
+    expect(result.forfeitureAmount).toBe(500);
   });
 
   it("should include payment when provided", () => {
-    const data = { ...baseSearchData, payment: "2000" };
+    const data = { ...baseSearchData, payment: 2000 };
     const result = transformSearchParams(data, 2024);
 
-    expect(result.paymentAmount).toBe("2000");
+    expect(result.paymentAmount).toBe(2000);
   });
 
   it("should use default pagination values when not provided", () => {
-    const data = { ...baseSearchData, pagination: undefined };
+    const data = { ...baseSearchData, pagination: undefined as unknown as  MasterInquirySearch["pagination"] };
     const result = transformSearchParams(data, 2024);
 
     expect(result.pagination).toEqual({
@@ -175,17 +175,17 @@ describe("transformSearchParams", () => {
   it("should handle complex search with multiple fields", () => {
     const data: MasterInquirySearch = {
       endProfitYear: 2024,
-      startProfitMonth: "1",
-      endProfitMonth: "12",
+      startProfitMonth: 1,
+      endProfitMonth: 12,
       socialSecurity: "987654321",
       name: "Jane Smith",
-      badgeNumber: "12345670002",
+      badgeNumber: 12345670002,
       paymentType: "hardship",
       memberType: "employees",
-      contribution: "1500",
-      earnings: "6000",
-      forfeiture: "750",
-      payment: "3000",
+      contribution: 1500,
+      earnings: 6000,
+      forfeiture: 750,
+      payment: 3000,
       voids: true,
       pagination: {
         skip: 20,
@@ -199,18 +199,18 @@ describe("transformSearchParams", () => {
 
     expect(result).toMatchObject({
       endProfitYear: 2024,
-      startProfitMonth: "1",
-      endProfitMonth: "12",
+      startProfitMonth: 1,
+      endProfitMonth: 12,
       ssn: 987654321,
       name: "Jane Smith",
       badgeNumber: 1234567,
       psnSuffix: 2,
       paymentType: 1,
       memberType: 1,
-      contributionAmount: "1500",
-      earningsAmount: "6000",
-      forfeitureAmount: "750",
-      paymentAmount: "3000",
+      contributionAmount: 1500,
+      earningsAmount: 6000,
+      forfeitureAmount: 750,
+      paymentAmount: 3000,
       pagination: {
         skip: 20,
         take: 50,
@@ -235,7 +235,7 @@ describe("transformSearchParams", () => {
   });
 
   it("should not include psnSuffix when badge number is short", () => {
-    const data = { ...baseSearchData, badgeNumber: "12345" };
+    const data = { ...baseSearchData, badgeNumber: 12345 };
     const result = transformSearchParams(data, 2024);
 
     expect(result.badgeNumber).toBe(12345);
@@ -243,7 +243,7 @@ describe("transformSearchParams", () => {
   });
 
   it("should handle numeric badge number", () => {
-    const data = { ...baseSearchData, badgeNumber: "9876543" };
+    const data = { ...baseSearchData, badgeNumber: 9876543 };
     const result = transformSearchParams(data, 2024);
 
     expect(result.badgeNumber).toBe(9876543);
@@ -257,6 +257,6 @@ describe("transformSearchParams", () => {
 
     expect(result1._timestamp).toBeDefined();
     expect(result2._timestamp).toBeDefined();
-    expect(result2._timestamp).toBeGreaterThan(result1._timestamp);
+    expect(result2._timestamp!).toBeGreaterThan(result1._timestamp!);
   });
 });

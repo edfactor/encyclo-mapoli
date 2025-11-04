@@ -287,7 +287,7 @@ export const useUnForfeitGrid = ({
         selectionState.clearSelection();
 
         // Clear selections in grid using shared helper
-        clearGridSelectionsForBadges(gridRef.current?.api || gridApi, badgeNumbers);
+        clearGridSelectionsForBadges(gridRef.current?.api ?? gridApi ?? undefined, badgeNumbers);
 
         // Generate bulk success message using shared helper
         const employeeNames = names.map((name) => name || "Unknown Employee");

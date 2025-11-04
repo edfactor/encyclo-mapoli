@@ -21,7 +21,7 @@ export const NavigationStatusApi = createApi({
         url: `/navigation/status`,
         method: "GET"
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setNavigationStatus(data));
@@ -37,7 +37,7 @@ export const NavigationStatusApi = createApi({
         method: "PUT",
         body: request
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           if (data.isSuccessful) {

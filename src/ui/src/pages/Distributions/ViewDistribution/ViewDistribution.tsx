@@ -170,8 +170,8 @@ const ViewDistributionContent = () => {
             <Divider />
           </Grid>
           <MasterInquiryMemberDetails
-            //memberType={currentMember.isEmployee ? 1 : 2}
-            //id={memberId as string}
+            memberType={parseInt(memberType || "0")}
+            id={parseInt(memberId || "0")}
             profitYear={profitYear}
             memberDetails={currentMember}
             isLoading={isLoading}

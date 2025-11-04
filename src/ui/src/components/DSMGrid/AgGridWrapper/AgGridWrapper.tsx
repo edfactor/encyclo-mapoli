@@ -99,9 +99,9 @@ const dsmGridTheme = themeQuartz.withPart(iconSetAlpine).withParams({
   fontSize: 14,
   headerBackgroundColor: colors["dsm-grid-header-bg"],
   headerFontSize: 14,
-  headerFontWeight: "bold",
-  pinnedRowBackgroundColor: colors["dsm-grid-header-bg"],
-  pinnedRowFontWeight: "bold"
+  headerFontWeight: "bold"
+  // Note: pinnedRowBackgroundColor removed - not supported in current AG Grid version
+  // Use CSS styling instead if pinned row styling is needed
 });
 
 /**
@@ -384,12 +384,12 @@ const AgGridWrapper: FC<AgGridWrapperOptions> = ({
           }}
           defaultColDef={
             handleSortChanged
-              ? {
+              ? ({
                   ...defaultColDef,
                   comparator: function (_valueA, _valueB, _nodeA, _nodeB, _isDescending) {
                     return 0;
                   }
-                }
+                } as typeof defaultColDef)
               : defaultColDef
           }
         />

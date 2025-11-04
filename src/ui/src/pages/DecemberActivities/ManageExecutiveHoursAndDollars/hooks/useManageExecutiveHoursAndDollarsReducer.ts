@@ -1,5 +1,5 @@
 import { ExecutiveHoursAndDollars, ExecutiveHoursAndDollarsGrid, PagedReportResponse } from "reduxstore/types";
-import { ExecutiveHoursAndDollarsRequestDto } from "types/fiscal/executive";
+import { ExecutiveHoursAndDollarsRequestDto } from "@/types/fiscal/executive";
 
 export interface ExecutiveSearchResults {
   results: ExecutiveHoursAndDollars[];

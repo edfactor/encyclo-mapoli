@@ -28,7 +28,7 @@ interface TestStoreState {
   };
 }
 
-const createMockStore = (initialState = {}) => {
+const createMockStore = (initialState: Record<string, unknown> = {}) => {
   return configureStore({
     reducer: {
       general: generalReducer
@@ -40,7 +40,7 @@ const createMockStore = (initialState = {}) => {
         ...initialState
       }
     }
-  });
+  } as never);
 };
 
 const createWrapper = (store: ReturnType<typeof createMockStore>) => {
@@ -55,7 +55,7 @@ const mockNavigationData: NavigationResponseDto = {
   navigation: [
     {
       id: 1,
-      parentId: null,
+      parentId: null as unknown as number,
       title: "YEAR END",
       subTitle: "Year End",
       url: "",

@@ -19,13 +19,15 @@ namespace YEMatch.YEMatch.SmartActivities;
 public static class SmartActivityFactory
 {
     private static readonly short _profitYear = 2025;
+    private static readonly bool _nuke = false;
 
     public static ApiClient? Client;
 
     public static List<IActivity> CreateActivities(string dataDirectory)
     {
         HttpClient httpClient = new() { Timeout = TimeSpan.FromHours(2) };
-        TestToken.CreateAndAssignTokenForClient(httpClient, "Executive-Administrator");
+        TestToken.CreateAndAssignTokenForClient(httpClient, "System-Administrator", "Executive-Administrator");
+
         Client = new ApiClient(httpClient);
 
         return
@@ -69,16 +71,20 @@ public static class SmartActivityFactory
     {
         try
         {
-#if false
-   IF-FALSEblock used if we need to nuke, then do this
-            AspireToAspire("drop-recreate-db --connection-name ProfitSharing");
+            if (_nuke)
+            {
+                AspireToAspire("drop-recreate-db --connection-name ProfitSharing");
+                AspireToAspire(
+                    "import-from-navigation --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"../../../../src/database/ready_import/Navigations/add-navigation-data.sql\"");
+
+                // If we wanted to simulate uat naviataion, we could do this.
+                // AspireToAspire(
+                //     "import-uat-navigation --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"../../../../src/database/ready_import/Navigations/add-uat-navigation-data.sql\"");
+            }
+
             AspireToAspire(
-                "import-from-navigation --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"../../../../src/database/ready_import/Navigations/add-navigation-data.sql\"");
-            AspireToAspire(
-                "import-uat-navigation --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"../../../../src/database/ready_import/Navigations/add-uat-navigation-data.sql\"");
-#endif
-            AspireToAspire(
-                "import-from-ready --connection-name ProfitSharing --source-schema PROFITSHARE --sql-file \"../../../../src/database/ready_import/SQL copy all from ready to smart ps.sql\"");
+                    "import-from-ready --connection-name ProfitSharing --source-schema PROFITSHARE --sql-file \"../../../../src/database/ready_import/SQL copy all from ready to smart ps.sql\"");
+            
         }
         catch (Exception ex)
         {
@@ -121,21 +127,24 @@ public static class SmartActivityFactory
     private static async Task<Outcome> A1_Profit_Sharing_Clean_up_Reports(ApiClient apiClient, string aname, string name)
     {
         StringBuilder sb = new();
+        
+    // ReportsYearEndCleanupNegativeEtvaForSsNsOnPayProfitEndPointAsync(int profitYear, string sortBy, bool? isSortDescending, int? skip, int? take, int? queryTimeoutSeconds, Impersonation52? impersonation)
 
         ReportResponseBaseOfNegativeEtvaForSsNsOnPayProfitResponse? r6 =
-            await apiClient.ReportsYearEndCleanupNegativeEtvaForSsNsOnPayProfitEndPointAsync(_profitYear, null, null, 0, int.MaxValue, null);
+            await apiClient.ReportsYearEndCleanupNegativeEtvaForSsNsOnPayProfitEndPointAsync(_profitYear, "", (bool?)null,  null, null, int.MaxValue, null);
         sb.Append($"Negative Etva for Ssns  - records loaded: {r6.Response.Results.Count}\n");
 
         ReportResponseBaseOfPayrollDuplicateSsnResponseDto? r4 =
-            await apiClient.ReportsYearEndCleanupGetDuplicateSsNsEndpointAsync(null, null, _profitYear, int.MaxValue, null);
+            // (int profitYear, string sortBy, bool? isSortDescending, int? skip, int? take, int? queryTimeoutSeconds, Impersonation51? impersonation)
+            await apiClient.ReportsYearEndCleanupGetDuplicateSsNsEndpointAsync((int)_profitYear, "", null, int.MaxValue, null, null, null);
         sb.Append($"Duplicate Ssns  - records loaded: {r4.Response.Results.Count}\n");
 
         ReportResponseBaseOfDemographicBadgesNotInPayProfitResponse? r = await apiClient
-            .ReportsYearEndCleanupDemographicBadgesNotInPayProfitEndpointAsync(null, null, 0, int.MaxValue, null);
+            .ReportsYearEndCleanupDemographicBadgesNotInPayProfitEndpointAsync(_profitYear, "", null,  0, int.MaxValue, null, null);
         sb.Append($"Badges Not In PayProfit - records loaded: {r.Response.Results.Count}\n");
 
         ReportResponseBaseOfDuplicateNamesAndBirthdaysResponse? r3 = await apiClient
-            .ReportsYearEndCleanupDuplicateNamesAndBirthdaysEndpointAsync(_profitYear, null, null, 0, int.MaxValue, null);
+            .ReportsYearEndCleanupDuplicateNamesAndBirthdaysEndpointAsync(_profitYear, "", null ,null, int.MaxValue, 0, null);
         sb.Append($"Duplicate Names And Birthdays - records loaded: {r3.Response.Results.Count}\n");
 
         return new Outcome(aname, name, "", OutcomeStatus.Ok, sb.ToString(), null, true);
@@ -191,9 +200,10 @@ public static class SmartActivityFactory
     private static async Task<Outcome> A4_Prof_Share_Loan_Balance_QPAY129(ApiClient apiClient, string aname, string name)
     {
         StringBuilder sb = new();
+        DistributionsAndForfeituresRequest dafr = new();
 
         ReportResponseBaseOfDistributionsAndForfeitureResponse? r2 = await apiClient
-            .ReportsYearEndCleanupDistributionsAndForfeitureEndpointAsync(null, null, _profitYear, null, null, null, null, null, CancellationToken.None);
+            .ReportsYearEndCleanupDistributionsAndForfeitureEndpointAsync(null, dafr);
         sb.Append($"Records Loaded {r2.Response.Results.Count}\n");
 
         return Ok(aname, name, sb);
@@ -202,7 +212,7 @@ public static class SmartActivityFactory
     private static async Task<Outcome> A5_Extract_Excutive_Hours_and_Dollars(ApiClient apiClient, string aname, string name)
     {
         ReportResponseBaseOfExecutiveHoursAndDollarsResponse? r2 = await apiClient
-            .ReportsYearEndExecutiveHoursAndDollarsExecutiveHoursAndDollarsEndpointAsync(null, null, "", true, false, _profitYear, null, null, 0, int.MaxValue, null);
+            .ReportsYearEndExecutiveHoursAndDollarsExecutiveHoursAndDollarsEndpointAsync(null, null, null, null, null,  _profitYear, null, null, null, int.MaxValue, 0,  null);
         return Ok(aname, name, $"Records Loaded = {r2.Response.Results.Count}\n");
     }
 
@@ -259,7 +269,7 @@ public static class SmartActivityFactory
 
     private static async Task<Outcome> A11_Profit_Sharing_YTD_Wages_Extract(ApiClient apiClient, string aname, string name)
     {
-        ReportResponseBaseOfWagesCurrentYearResponse? r = await apiClient.ReportsYearEndWagesCurrentYearWagesEndpointAsync(_profitYear, null, null, 0, int.MaxValue, null);
+        ReportResponseBaseOfWagesCurrentYearResponse? r = await apiClient.ReportsYearEndWagesCurrentYearWagesEndpointAsync(_profitYear, "", null, null, null, int.MaxValue, null);
         return Ok(aname, name, $"Record Count: {r.Response.Results.Count}");
     }
 
@@ -383,14 +393,14 @@ public static class SmartActivityFactory
 
     private static async Task<Outcome> A19_Get_Eligible_Employees(ApiClient apiClient, string aname, string name)
     {
-        GetEligibleEmployeesResponse? r = await apiClient.ReportsYearEndEligibilityGetEligibleEmployeesEndpointAsync(_profitYear, null, null, 0, int.MaxValue, null);
+        GetEligibleEmployeesResponse? r = await apiClient.ReportsYearEndEligibilityGetEligibleEmployeesEndpointAsync((int)_profitYear,"", null,  null, int.MaxValue, null, null);
         return Ok(aname, name, $"Records Loaded = {r.Response.Results.Count}");
     }
 
     private static async Task<Outcome> A20_Profit_Forfeit_PAY443(ApiClient apiClient, string aname, string name)
     {
         ReportResponseBaseOfForfeituresAndPointsForYearResponse? r =
-            await apiClient.ReportsYearEndFrozenForfeituresAndPointsForYearEndpointAsync(true, _profitYear, null, null, 0, int.MaxValue, null);
+            await apiClient.ReportsYearEndFrozenForfeituresAndPointsForYearEndpointAsync(true, _profitYear, "", null, null, int.MaxValue, null,  null);
         return Ok(aname, name, $"Records Loaded = {r.Response.Results.Count}");
     }
 
@@ -406,14 +416,14 @@ public static class SmartActivityFactory
             RefEarningsPercent,
             0, RefMaxAllowedContribution, 0, 0, 0, 0, 0, 0, _profitYear, null, null,
             0, int.MaxValue,
-            null);
+            null, null);
         return Ok(aname, name, $"Records Loaded = {r.Response.Results.Count}");
     }
 
     private static async Task<Outcome> A22_Profit_Share_Edit_PAY477(ApiClient apiClient, string aname, string name)
     {
         ProfitShareEditResponse? r = await apiClient.ReportsYearEndProfitShareEditEndpointAsync(RefContributionPercent, RefIncomingForfeitPercent, RefEarningsPercent, 0,
-            RefMaxAllowedContribution, 0, 0, 0, 0, 0, 0, _profitYear, null, null, 0, int.MaxValue, null);
+            RefMaxAllowedContribution, 0, 0, 0, 0, 0, 0, _profitYear, null, null, 0, int.MaxValue, null, null);
         return Ok(aname, name, $"Records Loaded = {r.Response.Results.Count}");
     }
 
@@ -521,7 +531,7 @@ public static class SmartActivityFactory
 
     private static async Task<Outcome> A27_Prof_Share_by_Store(ApiClient apiClient, string aname, string name)
     {
-        ReportResponseBaseOfMemberYearSummaryDto? r = await apiClient.ReportsYearEndBreakdownEndpointAsync(false, 1, null, null, 2025, "", null, null, null, null);
+        ReportResponseBaseOfMemberYearSummaryDto? r = await apiClient.ReportsYearEndBreakdownEndpointAsync(false, 1, null, null, 2025, "", null, null, null, null, null);
         return Ok(aname, name, $"records returned = {r.Response.Results.Count}");
     }
 

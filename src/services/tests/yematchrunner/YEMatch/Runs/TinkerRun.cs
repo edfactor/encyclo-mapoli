@@ -15,11 +15,39 @@ public class TinkerRun : Runnable
     public override async Task Exec()
     {
         await Run(Specify(
-            "P0", // Initialize both databases in parallel
-            nameof(DropBadBenesReady), // Fix bene in READY (already handled in SMART)
-            "R3",  // Run and Gather PROF-TERM report
-            "MasterInquiryDumper",
-            nameof(IntTerminatedEmployee)
+            #if false
+            "P0", // init both dbs
+            nameof(DropBadBenesReady), // in READY, get rid of the three Bene/Employees w/o Demographics rows
+            nameof(SanityCheckEmployeeAndBenes),
+            #endif
+            // Should -> RUN/Verify QPAY129 ?
+            
+            // Handle SHIFT Hours/Dollars
+            "R13A", // PAYPROFIT-SHIFT
+            "R13B", // PAYPROFIT-SHIFT
+            "R14", // ZERO-PY-PD-PAYPROFIT
+
+            "R17", // create PAY426 report on READY
+
+            "S12" // Freeze on Smart
+
+        #if false
+                     // runs PAY456.cbl and PAY426.cbl 
+            "R18",   // "PROF-SHARE sw[2]=1 CDATE=251227 YEAREND=Y" on READY    
+                     // will set Earnpoints, fiddle with zerocont, clear new employee, clear certdate
+            
+
+            // build some
+            "S18"  // Run YearEndService on SMART <-- Set EarnPoints, ZeroCont, New Employee, CertDate
+                      "R20", // 443
+
+        nameof(IntPay443),
+        "S20", // 443
+        nameof(IntPay443)
+
+            // Should match
+            nameof(TestPayProfitSelectedColumns) // VERIFY: Test PayProfit Updates; EarnPoints, ZeroCont, New Employee, CertDate
+#endif
             ));
     }
 }

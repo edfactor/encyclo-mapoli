@@ -109,12 +109,12 @@ public class TestMasterInquiry : BaseSqlActivity
         decimal outHrs = employeeDetails.YearToDateProfitSharingHours;
         int outYears = employeeDetails.YearsInPlan;
         string outEnrolled = EnrollmentToReady(employeeDetails.EnrollmentId);
-        decimal outBeginBal = employeeDetails.BeginPSAmount;
-        decimal outBeginVest = employeeDetails.BeginVestedAmount;
-        decimal outCurrentBal = employeeDetails.CurrentPSAmount;
+        decimal outBeginBal = (decimal)employeeDetails.BeginPSAmount!;
+        decimal outBeginVest = (decimal)employeeDetails.BeginVestedAmount!;
+        decimal outCurrentBal = (decimal)employeeDetails.CurrentPSAmount!;
         decimal outVestingPct = employeeDetails.PercentageVested;
-        decimal outVestingAmt = employeeDetails.CurrentVestedAmount;
-        bool outContLastYear = employeeDetails.ContributionsLastYear;
+        decimal outVestingAmt = (decimal)employeeDetails.CurrentVestedAmount!;
+//        bool outContLastYear = employeeDetails.ContributionsLastYear;
         decimal outEtva = employeeDetails.CurrentEtva;
         string outErrMesg = string.Join(",", employeeDetails.Missives);
 
@@ -129,7 +129,8 @@ public class TestMasterInquiry : BaseSqlActivity
             OUT_CURRENT_BAL = outCurrentBal,
             OUT_VESTING_PCT = outVestingPct,
             OUT_VESTING_AMT = outVestingAmt,
-            OUT_CONT_LAST_YEAR = outContLastYear,
+            // OUT_CONT_LAST_YEAR = outContLastYear,
+            OUT_CONT_LAST_YEAR = false,
             OUT_ETVA = outEtva,
             OUT_ERR_MESG = outErrMesg
         };
@@ -197,6 +198,7 @@ public class TestMasterInquiry : BaseSqlActivity
         }
 
         MemberDetails memberDetails = jresponse1.Results.First();
+        Console.WriteLine(memberDetails);
 
         /*
                 curl -X 'POST' \
@@ -215,7 +217,12 @@ public class TestMasterInquiry : BaseSqlActivity
                 "take": 255
             }'
             */
-        int demographicsId = memberDetails.id;
+        int demographicsId = 77;// memberDetails.id
+        if (demographicsId == 77)
+        {
+            throw new Exception("Not implemented");
+        }
+
         HttpRequestMessage request2 = new(HttpMethod.Post, apiClient.BaseUrl + "api/master/master-inquiry/member")
         {
             Content = new StringContent(

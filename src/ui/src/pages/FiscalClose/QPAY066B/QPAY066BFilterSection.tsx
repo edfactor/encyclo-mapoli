@@ -90,6 +90,7 @@ const QPAY066BFilterSection: React.FC<QPAY066BFilterSectionProps> = ({
                   value={field.value || null}
                   label="Start Date"
                   disableFuture
+                  required={false}
                 />
               )}
             />
@@ -105,6 +106,7 @@ const QPAY066BFilterSection: React.FC<QPAY066BFilterSectionProps> = ({
                   value={field.value || null}
                   label="End Date"
                   disableFuture
+                  required={false}
                 />
               )}
             />

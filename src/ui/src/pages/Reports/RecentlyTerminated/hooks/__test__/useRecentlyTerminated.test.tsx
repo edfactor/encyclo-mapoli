@@ -1,6 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import * as useLazyGetRecentlyTerminatedReportQuery from "reduxstore/api/YearsEndApi";
 import { RecentlyTerminatedDetail } from "reduxstore/types";
+import type { RecentlyTerminatedResponse } from "../../../../../types/reports/recent-termination";
 import { Paged } from "smart-ui-library";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as useDecemberFlowProfitYear from "../../../../../hooks/useDecemberFlowProfitYear";
@@ -29,6 +30,7 @@ const createMockRecentlyTerminatedRecord = (
   ssn: "123-45-6789",
   terminationDate: "2024-01-15",
   terminationCodeId: "1",
+  terminationCode: "RIF",
   address: "123 Main St",
   address2: "",
   city: "Springfield",
@@ -52,7 +54,15 @@ const createMockPagedData = (items: RecentlyTerminatedDetail[] = []): MockPaged<
 });
 
 // Create mock paged data response (this is what the API returns after unwrap)
-const createMockRecentlyTerminatedResponse = (items: RecentlyTerminatedDetail[] = []) => createMockPagedData(items);
+const createMockRecentlyTerminatedResponse = (items: RecentlyTerminatedDetail[] = []) => ({
+  reportName: "Recently Terminated Report",
+  reportDate: "2024-01-15",
+  startDate: "2024-01-01",
+  endDate: "2024-12-31",
+  dataSource: "Test Data",
+  response: createMockPagedData(items),
+  resultHash: "test-hash"
+});
 
 // Helper to create RTK Query-like promise with unwrap method
 interface RTKQueryPromise<T> extends Promise<{ data: T }> {
@@ -60,18 +70,18 @@ interface RTKQueryPromise<T> extends Promise<{ data: T }> {
 }
 
 const createMockRTKQueryPromise = (
-  data: Paged<RecentlyTerminatedDetail> | null = null,
+  data: RecentlyTerminatedResponse | null = null,
   error: unknown = null
-): RTKQueryPromise<Paged<RecentlyTerminatedDetail> | null> => {
+): RTKQueryPromise<RecentlyTerminatedResponse | null> => {
   const promise = error ? Promise.reject(error) : Promise.resolve({ data });
 
   if (error) {
-    (promise as RTKQueryPromise<Paged<RecentlyTerminatedDetail> | null>).unwrap = () => Promise.reject(error);
+    (promise as RTKQueryPromise<RecentlyTerminatedResponse | null>).unwrap = () => Promise.reject(error);
   } else {
-    (promise as RTKQueryPromise<Paged<RecentlyTerminatedDetail> | null>).unwrap = () => Promise.resolve(data);
+    (promise as RTKQueryPromise<RecentlyTerminatedResponse | null>).unwrap = () => Promise.resolve(data);
   }
 
-  return promise as RTKQueryPromise<Paged<RecentlyTerminatedDetail> | null>;
+  return promise as RTKQueryPromise<RecentlyTerminatedResponse | null>;
 };
 
 // Mock hooks
@@ -117,7 +127,7 @@ describe("useRecentlyTerminated", () => {
         handlePaginationChange: mockHandlePaginationChange,
         handleSortChange: vi.fn(),
         resetPagination: mockResetPagination
-      } as ReturnType<typeof useGridPagination.useGridPagination>;
+      } as unknown as ReturnType<typeof useGridPagination.useGridPagination>;
     });
 
     // Mock lazy query - default to returning data
@@ -130,24 +140,26 @@ describe("useRecentlyTerminated", () => {
       )
     );
 
-    vi.spyOn(useLazyGetRecentlyTerminatedReportQuery, "useLazyGetRecentlyTerminatedReportQuery").mockReturnValue([
-      mockTriggerSearch,
-      {
-        data: undefined,
-        isLoading: false,
-        isSuccess: false,
-        isError: false,
-        error: null,
-        isFetching: false,
-        isUninitialized: true,
-        currentData: undefined,
-        requestId: undefined,
-        endpointName: "getRecentlyTerminatedReport",
-        startedTimeStamp: undefined,
-        fulfilledTimeStamp: undefined
-      },
-      { lastArg: undefined, requestStatus: "uninitialized" }
-    ] as unknown as ReturnType<typeof useLazyGetRecentlyTerminatedReportQuery.useLazyGetRecentlyTerminatedReportQuery>);
+    vi.spyOn(useLazyGetRecentlyTerminatedReportQuery, "useLazyGetRecentlyTerminatedReportQuery").mockReturnValue(
+      [
+        mockTriggerSearch,
+        {
+          data: undefined,
+          isLoading: false,
+          isSuccess: false,
+          isError: false,
+          error: null,
+          isFetching: false,
+          isUninitialized: true,
+          currentData: undefined,
+          requestId: undefined,
+          endpointName: "getRecentlyTerminatedReport",
+          startedTimeStamp: undefined,
+          fulfilledTimeStamp: undefined
+        },
+        { lastArg: undefined, requestStatus: "uninitialized" }
+      ] as unknown as ReturnType<typeof useLazyGetRecentlyTerminatedReportQuery>
+    );
   });
 
   describe("Initial State", () => {
@@ -200,15 +212,17 @@ describe("useRecentlyTerminated", () => {
       expect(result.current.searchParams).toEqual({ beginningDate, endingDate });
       expect(result.current.searchCompleted).toBe(true);
       expect(result.current.reportData).toBeDefined();
-      expect(result.current.reportData?.results).toHaveLength(2);
+      expect((result.current.reportData?.response as unknown as MockPaged<RecentlyTerminatedDetail>)?.items).toHaveLength(2);
     });
 
     it("should set isSearching to true during search", async () => {
       mockTriggerSearch.mockImplementation(() => {
-        const delayedPromise = new Promise<Paged<RecentlyTerminatedDetail>>((resolve) =>
+        const delayedPromise = new Promise<RecentlyTerminatedResponse>((resolve) =>
           setTimeout(() => resolve(createMockRecentlyTerminatedResponse()), 100)
-        ) as RTKQueryPromise<Paged<RecentlyTerminatedDetail>>;
-        delayedPromise.unwrap = () => delayedPromise;
+        ) as unknown as RTKQueryPromise<RecentlyTerminatedResponse>;
+        (delayedPromise as RTKQueryPromise<RecentlyTerminatedResponse>).unwrap = () => new Promise<RecentlyTerminatedResponse>((resolve) =>
+          setTimeout(() => resolve(createMockRecentlyTerminatedResponse()), 100)
+        );
         return delayedPromise;
       });
 
@@ -316,7 +330,7 @@ describe("useRecentlyTerminated", () => {
       });
 
       expect(result.current.reportData).toEqual(mockData);
-      expect(result.current.reportData?.items).toHaveLength(2);
+      expect((result.current.reportData?.response as unknown as MockPaged<RecentlyTerminatedDetail>)?.items).toHaveLength(2);
     });
   });
 
@@ -481,7 +495,7 @@ describe("useRecentlyTerminated", () => {
       const { result } = renderHook(() => useRecentlyTerminated());
 
       // First search succeeds
-      mockTriggerSearch.mockImplementationOnce(() => createMockRTKQueryPromise(createMockPagedData()));
+      mockTriggerSearch.mockImplementationOnce(() => createMockRTKQueryPromise(createMockRecentlyTerminatedResponse()));
 
       await act(async () => {
         await result.current.executeSearch("2024-01-01", "2024-12-31");
@@ -525,10 +539,7 @@ describe("useRecentlyTerminated", () => {
 
       // Try to paginate without having searched first
       await act(async () => {
-        await result.current.gridPagination.handlePaginationChange(0, 25, {
-          sortBy: "fullName, terminationDate",
-          isSortDescending: false
-        });
+        await result.current.gridPagination.handlePaginationChange(0, 25);
       });
 
       expect(mockTriggerSearch).not.toHaveBeenCalled();
@@ -568,7 +579,7 @@ describe("useRecentlyTerminated", () => {
       const { result } = renderHook(() => useRecentlyTerminated());
 
       // Initial successful search
-      mockTriggerSearch.mockImplementationOnce(() => createMockRTKQueryPromise(createMockPagedData()));
+      mockTriggerSearch.mockImplementationOnce(() => createMockRTKQueryPromise(createMockRecentlyTerminatedResponse()));
 
       await act(async () => {
         await result.current.executeSearch("2024-01-01", "2024-12-31");
@@ -579,10 +590,7 @@ describe("useRecentlyTerminated", () => {
       mockAddAlert.mockClear();
 
       await act(async () => {
-        await result.current.gridPagination.handlePaginationChange(1, 25, {
-          sortBy: "fullName, terminationDate",
-          isSortDescending: false
-        });
+        await result.current.gridPagination.handlePaginationChange(1, 25);
       });
 
       expect(mockAddAlert).toHaveBeenCalledWith(
@@ -738,8 +746,8 @@ describe("useRecentlyTerminated", () => {
         await result.current.executeSearch("2024-01-01", "2024-12-31");
       });
 
-      expect(result.current.reportData?.items).toHaveLength(3);
-      expect(result.current.reportData?.totalCount).toBe(3);
+      expect((result.current.reportData?.response as unknown as MockPaged<RecentlyTerminatedDetail>)?.items).toHaveLength(3);
+      expect((result.current.reportData?.response as unknown as MockPaged<RecentlyTerminatedDetail>)?.total).toBe(3);
     });
 
     it("should handle empty search results", async () => {
@@ -751,8 +759,8 @@ describe("useRecentlyTerminated", () => {
         await result.current.executeSearch("2024-01-01", "2024-12-31");
       });
 
-      expect(result.current.reportData?.results).toEqual([]);
-      expect(result.current.reportData?.total).toBe(0);
+      expect((result.current.reportData?.response as unknown as MockPaged<RecentlyTerminatedDetail>)?.items).toEqual([]);
+      expect((result.current.reportData?.response as unknown as MockPaged<RecentlyTerminatedDetail>)?.total).toBe(0);
       expect(result.current.searchCompleted).toBe(true);
     });
   });

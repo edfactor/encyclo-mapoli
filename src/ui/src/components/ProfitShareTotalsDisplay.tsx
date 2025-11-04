@@ -1,6 +1,6 @@
 import { Box, Table, TableBody, TableCell, TableContainer, TableRow } from "@mui/material";
-import { numberToCurrency } from "smart-ui-library";
 import { YearEndProfitSharingReportTotalsResponse } from "reduxstore/types";
+import { numberToCurrency } from "smart-ui-library";
 
 interface ProfitShareTotalsDisplayProps {
   totalsData: YearEndProfitSharingReportTotalsResponse | null | undefined;

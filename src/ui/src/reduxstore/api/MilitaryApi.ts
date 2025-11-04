@@ -24,7 +24,7 @@ export const MilitaryApi = createApi({
           take: request.pagination.take
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setMilitaryContributions(data));

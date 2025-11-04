@@ -7,8 +7,16 @@ describe("useExecutiveModal", () => {
   const mockExecutive = {
     badgeNumber: 12345,
     fullName: "John Doe",
+    storeNumber: 1,
+    socialSecurity: 123456789,
     hoursExecutive: 40,
-    incomeExecutive: 1000
+    incomeExecutive: 1000,
+    currentHoursYear: 35,
+    currentIncomeYear: 900,
+    payFrequencyId: 1,
+    payFrequencyName: "Monthly",
+    employmentStatusId: "1",
+    employmentStatusName: "Active"
   };
 
   const defaultProps = {

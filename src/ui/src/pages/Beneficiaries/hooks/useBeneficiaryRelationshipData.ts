@@ -2,8 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetBeneficiariesQuery } from "reduxstore/api/BeneficiariesApi";
 import { RootState } from "reduxstore/store";
-import { BeneficiaryDetail, BeneficiaryDetailAPIRequest, BeneficiaryDto, Paged } from "../../types";
+import { Paged } from "smart-ui-library";
 import { SortParams } from "../../../hooks/useGridPagination";
+import { BeneficiaryDetail, BeneficiaryDetailAPIRequest, BeneficiaryDto } from "../../../types";
 
 /**
  * Configuration for useBeneficiaryRelationshipData hook
@@ -19,7 +20,7 @@ interface UseBeneficiaryRelationshipDataConfig {
 /**
  * Return type for useBeneficiaryRelationshipData hook
  */
-interface UseBeneficiaryRelationshipDataReturn {
+export interface UseBeneficiaryRelationshipDataReturn {
   // Data
   beneficiaryList: Paged<BeneficiaryDto> | undefined;
   beneficiaryOfList: Paged<BeneficiaryDto> | undefined;

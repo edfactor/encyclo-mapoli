@@ -1,5 +1,5 @@
 import { ColDef } from "ag-grid-community";
-import { GRID_COLUMN_WIDTHS } from "../../../constants";
+import { GRID_COLUMN_WIDTHS } from "@/constants";
 import {
   createAgeColumn,
   createBadgeColumn,
@@ -12,7 +12,7 @@ import {
   createStatusColumn,
   createStoreColumn,
   createYesOrNoColumn
-} from "../../../utils/gridColumnFactory";
+} from "@/utils/gridColumnFactory";
 
 export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
