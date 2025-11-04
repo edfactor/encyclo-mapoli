@@ -36,7 +36,7 @@ const StatusReadOnlyInfo = ({ message }: StatusReadOnlyInfoProps) => {
       }
       return null;
     };
-    return navigationList?.navigation ? findNavigation(navigationList.navigation) : null;
+    return navigationList?.navigation ? findNavigation(navigationList.navigation as unknown as NavigationItem[]) : null;
   };
 
   const currentNavigation = getCurrentNavigation();

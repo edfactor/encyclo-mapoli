@@ -28,10 +28,10 @@ interface TestStoreState {
   };
 }
 
-const createMockStore = (initialState = {}) => {
+const createMockStore = (initialState: Record<string, unknown> = {}) => {
   return configureStore({
     reducer: {
-      general: generalReducer as never
+      general: generalReducer
     },
     preloadedState: {
       general: {
@@ -39,8 +39,8 @@ const createMockStore = (initialState = {}) => {
         activeSubmenu: null,
         ...initialState
       }
-    } as never
-  });
+    }
+  } as never);
 };
 
 const createWrapper = (store: ReturnType<typeof createMockStore>) => {

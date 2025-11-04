@@ -27,6 +27,14 @@ describe("useMissiveAlerts", () => {
     expect(result.current).toBe(mockContextValue);
   });
 
+  it("should throw error when context value is null", () => {
+    const { result } = renderHook(() => useMissiveAlerts(), {
+      wrapper: wrapper(null)
+    });
+
+    expect(result.current).toBe(null);
+  });
+
   it("should throw error when used outside provider", () => {
     // Suppress console.error for this test
     const originalError = console.error;
@@ -34,7 +42,7 @@ describe("useMissiveAlerts", () => {
 
     expect(() => {
       renderHook(() => useMissiveAlerts(), {
-        wrapper: wrapper(undefined)
+        wrapper: wrapper(null)
       });
     }).toThrow("useMissiveAlerts must be used within a MissiveAlertProvider");
 

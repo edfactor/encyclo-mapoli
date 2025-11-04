@@ -320,7 +320,7 @@ describe("useDuplicateNamesAndBirthdays", () => {
       },
       yearsEnd: {
         selectedProfitYearForDecemberActivities: null
-      } as Partial<YearsEndState>
+      } as unknown as Partial<YearsEndState>
     });
 
     expect(result.current.isSearching).toBe(false);
@@ -387,7 +387,7 @@ describe("useDuplicateNamesAndBirthdays", () => {
       },
       yearsEnd: {
         selectedProfitYearForDecemberActivities: null
-      } as Partial<YearsEndState>
+      } as unknown as Partial<YearsEndState>
     });
 
     expect(result.current.searchParams).toBeNull();
