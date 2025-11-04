@@ -29,6 +29,7 @@ const createMockRecentlyTerminatedRecord = (
   ssn: "123-45-6789",
   terminationDate: "2024-01-15",
   terminationCodeId: "1",
+  terminationCode: "RIF",
   address: "123 Main St",
   address2: "",
   city: "Springfield",
@@ -52,7 +53,15 @@ const createMockPagedData = (items: RecentlyTerminatedDetail[] = []): MockPaged<
 });
 
 // Create mock paged data response (this is what the API returns after unwrap)
-const createMockRecentlyTerminatedResponse = (items: RecentlyTerminatedDetail[] = []) => createMockPagedData(items);
+const createMockRecentlyTerminatedResponse = (items: RecentlyTerminatedDetail[] = []) => ({
+  reportName: "Recently Terminated Report",
+  reportDate: "2024-01-15",
+  startDate: "2024-01-01",
+  endDate: "2024-12-31",
+  dataSource: "Test Data",
+  response: createMockPagedData(items),
+  resultHash: "test-hash"
+});
 
 // Helper to create RTK Query-like promise with unwrap method
 interface RTKQueryPromise<T> extends Promise<{ data: T }> {
@@ -60,18 +69,18 @@ interface RTKQueryPromise<T> extends Promise<{ data: T }> {
 }
 
 const createMockRTKQueryPromise = (
-  data: Paged<RecentlyTerminatedDetail> | null = null,
+  data: RecentlyTerminatedResponse | null = null,
   error: unknown = null
-): RTKQueryPromise<Paged<RecentlyTerminatedDetail> | null> => {
+): RTKQueryPromise<RecentlyTerminatedResponse | null> => {
   const promise = error ? Promise.reject(error) : Promise.resolve({ data });
 
   if (error) {
-    (promise as RTKQueryPromise<Paged<RecentlyTerminatedDetail> | null>).unwrap = () => Promise.reject(error);
+    (promise as RTKQueryPromise<RecentlyTerminatedResponse | null>).unwrap = () => Promise.reject(error);
   } else {
-    (promise as RTKQueryPromise<Paged<RecentlyTerminatedDetail> | null>).unwrap = () => Promise.resolve(data);
+    (promise as RTKQueryPromise<RecentlyTerminatedResponse | null>).unwrap = () => Promise.resolve(data);
   }
 
-  return promise as RTKQueryPromise<Paged<RecentlyTerminatedDetail> | null>;
+  return promise as RTKQueryPromise<RecentlyTerminatedResponse | null>;
 };
 
 // Mock hooks
@@ -200,15 +209,15 @@ describe("useRecentlyTerminated", () => {
       expect(result.current.searchParams).toEqual({ beginningDate, endingDate });
       expect(result.current.searchCompleted).toBe(true);
       expect(result.current.reportData).toBeDefined();
-      expect(result.current.reportData?.results).toHaveLength(2);
+      expect(result.current.reportData?.response.items).toHaveLength(2);
     });
 
     it("should set isSearching to true during search", async () => {
       mockTriggerSearch.mockImplementation(() => {
-        const delayedPromise = new Promise<Paged<RecentlyTerminatedDetail>>((resolve) =>
+        const delayedPromise = new Promise<RecentlyTerminatedResponse>((resolve) =>
           setTimeout(() => resolve(createMockRecentlyTerminatedResponse()), 100)
-        ) as RTKQueryPromise<Paged<RecentlyTerminatedDetail>>;
-        delayedPromise.unwrap = () => delayedPromise;
+        ) as unknown as RTKQueryPromise<RecentlyTerminatedResponse>;
+        (delayedPromise as RTKQueryPromise<RecentlyTerminatedResponse>).unwrap = () => delayedPromise;
         return delayedPromise;
       });
 
@@ -316,7 +325,7 @@ describe("useRecentlyTerminated", () => {
       });
 
       expect(result.current.reportData).toEqual(mockData);
-      expect(result.current.reportData?.items).toHaveLength(2);
+      expect(result.current.reportData?.response.items).toHaveLength(2);
     });
   });
 
@@ -397,10 +406,7 @@ describe("useRecentlyTerminated", () => {
 
       // Simulate pagination change
       await act(async () => {
-        await result.current.gridPagination.handlePaginationChange(1, 25, {
-          sortBy: "fullName, terminationDate",
-          isSortDescending: false
-        });
+        await result.current.gridPagination.handlePaginationChange(1, 25);
       });
 
       expect(mockTriggerSearch).toHaveBeenCalledWith(
@@ -492,10 +498,7 @@ describe("useRecentlyTerminated", () => {
 
       // Simulate pagination that fails
       await act(async () => {
-        await result.current.gridPagination.handlePaginationChange(1, 25, {
-          sortBy: "fullName, terminationDate",
-          isSortDescending: false
-        });
+        await result.current.gridPagination.handlePaginationChange(1, 25);
       });
 
       expect(result.current.reportError).toBe(errorMsg);
@@ -630,10 +633,7 @@ describe("useRecentlyTerminated", () => {
       mockTriggerSearch.mockClear();
 
       await act(async () => {
-        await result.current.gridPagination.handlePaginationChange(1, 25, {
-          sortBy: "fullName, terminationDate",
-          isSortDescending: false
-        });
+        await result.current.gridPagination.handlePaginationChange(1, 25);
       });
 
       expect(mockTriggerSearch).toHaveBeenCalledTimes(1);
@@ -732,8 +732,8 @@ describe("useRecentlyTerminated", () => {
         await result.current.executeSearch("2024-01-01", "2024-12-31");
       });
 
-      expect(result.current.reportData?.items).toHaveLength(3);
-      expect(result.current.reportData?.totalCount).toBe(3);
+      expect(result.current.reportData?.response.items).toHaveLength(3);
+      expect(result.current.reportData?.response.total).toBe(3);
     });
 
     it("should handle empty search results", async () => {
@@ -745,8 +745,8 @@ describe("useRecentlyTerminated", () => {
         await result.current.executeSearch("2024-01-01", "2024-12-31");
       });
 
-      expect(result.current.reportData?.results).toEqual([]);
-      expect(result.current.reportData?.total).toBe(0);
+      expect(result.current.reportData?.response.items).toEqual([]);
+      expect(result.current.reportData?.response.total).toBe(0);
       expect(result.current.searchCompleted).toBe(true);
     });
   });

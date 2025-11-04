@@ -107,7 +107,18 @@ function createMockStore(preloadedState?: MockStoreState) {
 }
 
 function renderHookWithProvider<T>(hook: () => T, preloadedState?: MockStoreState) {
-  const store = createMockStore(preloadedState || { security: { token: "mock-token" }, inquiry: {} });
+  const defaultState = {
+    security: { token: "mock-token" },
+    inquiry: {
+      masterInquiryData: null,
+      masterInquiryMemberDetails: null,
+      masterInquiryMemberDetailsSecondary: null,
+      masterInquiryResults: null,
+      masterInquiryRequestParams: null,
+      masterInquiryGroupingData: null
+    }
+  } as unknown as MockStoreState;
+  const store = createMockStore(preloadedState || defaultState);
   return renderHook(() => hook(), {
     wrapper: ({ children }: { children: React.ReactNode }) => React.createElement(Provider, { store, children })
   });
@@ -127,7 +138,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: vi.fn(),
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments());
@@ -140,7 +154,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: vi.fn(),
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments());
@@ -152,7 +169,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: vi.fn(),
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments());
@@ -164,7 +184,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: vi.fn(),
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments());
@@ -188,7 +211,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: mockAddAlert,
-        clearAlerts: mockClearAlerts
+        addAlerts: vi.fn(),
+        clearAlerts: mockClearAlerts,
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments());
@@ -213,7 +239,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: mockAddAlert,
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments());
@@ -248,7 +277,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: vi.fn(),
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments());
@@ -277,7 +309,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: mockAddAlert,
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments());
@@ -305,7 +340,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: mockAddAlert,
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments());
@@ -329,7 +367,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: mockAddAlert,
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments());
@@ -348,8 +389,11 @@ describe("useAdjustments", () => {
 
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
-        addAlert: mockAddAlert,
-        clearAlerts: vi.fn()
+        addAlert: vi.fn(),
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments(), {
@@ -399,7 +443,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: mockAddAlert,
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments(), {
@@ -442,7 +489,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: vi.fn(),
-        clearAlerts: mockClearAlerts
+        addAlerts: vi.fn(),
+        clearAlerts: mockClearAlerts,
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments());
@@ -460,7 +510,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: vi.fn(),
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments());
@@ -472,7 +525,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: vi.fn(),
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments(), {

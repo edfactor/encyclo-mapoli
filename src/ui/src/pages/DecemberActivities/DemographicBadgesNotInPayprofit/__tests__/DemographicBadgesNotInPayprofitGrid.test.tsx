@@ -68,7 +68,8 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
     handlePaginationChange: vi.fn(),
     handleSortChange: vi.fn(),
     setPageNumber: vi.fn(),
-    setPageSize: vi.fn()
+    setPageSize: vi.fn(),
+    resetPagination: vi.fn()
   };
 
   const mockRef = { current: null };
@@ -305,8 +306,11 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
         response: {
           results: Array.from({ length: 25 }, (_, i) => ({
             badgeNumber: 10000 + i,
-            storeName: `Store ${i}`,
-            employeeName: `Employee ${i}`
+            ssn: 100000000 + i,
+            employeeName: `Employee ${i}`,
+            store: i + 1,
+            status: "Active",
+            statusName: "Active"
           })),
           total: 100000,
           totalPages: 4000,
@@ -333,7 +337,7 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
         endDate: "2024-12-31",
         dataSource: "Test Data",
         response: {
-          results: [{ badgeNumber: 1, storeName: "Store", employeeName: "Name" }],
+          results: [{ badgeNumber: 1, ssn: 100000000, employeeName: "Name", store: 1, status: "Active", statusName: "Active" }],
           total: 1,
           totalPages: 1,
           pageSize: 25,

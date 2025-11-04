@@ -5,13 +5,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { CalendarResponseDto } from "../types/common/api";
 import useFiscalCalendarYear, { useLazyGetAccountingRangeToCurrent } from "./useFiscalCalendarYear";
 
-// Type for RTK Query lazy hook return value (3-element tuple)
-type LazyQueryMockReturn = [
-  ReturnType<typeof vi.fn>,
-  { isLoading: boolean; data?: CalendarResponseDto[] },
-  Record<string, unknown>
-];
-
 // Mock the custom hooks
 vi.mock("./useDecemberFlowProfitYear", () => ({
   default: vi.fn()
@@ -50,7 +43,7 @@ describe("useFiscalCalendarYear", () => {
     mockStore = createMockStore(true, null);
 
     vi.mocked(useDecemberFlowProfitYear).mockReturnValue(2024);
-    vi.mocked(useLazyGetAccountingYearQuery).mockReturnValue([mockFetchAccountingYear, { isLoading: false }, {}] as LazyQueryMockReturn);
+    vi.mocked(useLazyGetAccountingYearQuery).mockReturnValue([mockFetchAccountingYear, { isLoading: false, reset: vi.fn() }, {}] as unknown as ReturnType<typeof useLazyGetAccountingYearQuery>);
 
     const { result } = renderHook(() => useFiscalCalendarYear(), { wrapper });
 
@@ -65,7 +58,7 @@ describe("useFiscalCalendarYear", () => {
     mockStore = createMockStore(true, mockData);
 
     vi.mocked(useDecemberFlowProfitYear).mockReturnValue(2024);
-    vi.mocked(useLazyGetAccountingYearQuery).mockReturnValue([mockFetchAccountingYear, { isLoading: false }, {}] as LazyQueryMockReturn);
+    vi.mocked(useLazyGetAccountingYearQuery).mockReturnValue([mockFetchAccountingYear, { isLoading: false, reset: vi.fn() }, {}] as unknown as ReturnType<typeof useLazyGetAccountingYearQuery>);
 
     const { result } = renderHook(() => useFiscalCalendarYear(), { wrapper });
 
@@ -77,7 +70,7 @@ describe("useFiscalCalendarYear", () => {
     const profitYear = 2024;
 
     vi.mocked(useDecemberFlowProfitYear).mockReturnValue(profitYear);
-    vi.mocked(useLazyGetAccountingYearQuery).mockReturnValue([mockFetchAccountingYear, { isLoading: false }, {}] as LazyQueryMockReturn);
+    vi.mocked(useLazyGetAccountingYearQuery).mockReturnValue([mockFetchAccountingYear, { isLoading: false, reset: vi.fn() }, {}] as unknown as ReturnType<typeof useLazyGetAccountingYearQuery>);
 
     renderHook(() => useFiscalCalendarYear(), { wrapper });
 
@@ -90,7 +83,7 @@ describe("useFiscalCalendarYear", () => {
     mockStore = createMockStore(false, null);
 
     vi.mocked(useDecemberFlowProfitYear).mockReturnValue(2024);
-    vi.mocked(useLazyGetAccountingYearQuery).mockReturnValue([mockFetchAccountingYear, { isLoading: false }, {}] as LazyQueryMockReturn);
+    vi.mocked(useLazyGetAccountingYearQuery).mockReturnValue([mockFetchAccountingYear, { isLoading: false, reset: vi.fn() }, {}] as unknown as ReturnType<typeof useLazyGetAccountingYearQuery>);
 
     renderHook(() => useFiscalCalendarYear(), { wrapper });
 
@@ -101,7 +94,7 @@ describe("useFiscalCalendarYear", () => {
     mockStore = createMockStore(true, null);
 
     vi.mocked(useDecemberFlowProfitYear).mockReturnValue(0);
-    vi.mocked(useLazyGetAccountingYearQuery).mockReturnValue([mockFetchAccountingYear, { isLoading: false }, {}] as LazyQueryMockReturn);
+    vi.mocked(useLazyGetAccountingYearQuery).mockReturnValue([mockFetchAccountingYear, { isLoading: false, reset: vi.fn() }, {}] as unknown as ReturnType<typeof useLazyGetAccountingYearQuery>);
 
     renderHook(() => useFiscalCalendarYear(), { wrapper });
 
@@ -112,7 +105,7 @@ describe("useFiscalCalendarYear", () => {
     mockStore = createMockStore(true, null);
 
     vi.mocked(useDecemberFlowProfitYear).mockReturnValue(2024);
-    vi.mocked(useLazyGetAccountingYearQuery).mockReturnValue([mockFetchAccountingYear, { isLoading: false }, {}] as LazyQueryMockReturn);
+    vi.mocked(useLazyGetAccountingYearQuery).mockReturnValue([mockFetchAccountingYear, { isLoading: false, reset: vi.fn() }, {}] as unknown as ReturnType<typeof useLazyGetAccountingYearQuery>);
 
     const { rerender } = renderHook(() => useFiscalCalendarYear(), { wrapper });
 
@@ -149,10 +142,10 @@ describe("useLazyGetAccountingRangeToCurrent", () => {
 
   it("should return trigger function and result", () => {
     mockStore = createMockStore(true);
-    const mockResult = { data: [], isLoading: false };
+    const mockResult = { data: [], isLoading: false, reset: vi.fn() };
 
     vi.mocked(useDecemberFlowProfitYear).mockReturnValue(2024);
-    vi.mocked(useLazyGetAccountingRangeQuery).mockReturnValue([mockTrigger, mockResult, {}] as LazyQueryMockReturn);
+    vi.mocked(useLazyGetAccountingRangeQuery).mockReturnValue([mockTrigger, mockResult, {}] as unknown as ReturnType<typeof useLazyGetAccountingRangeQuery>);
 
     const { result } = renderHook(() => useLazyGetAccountingRangeToCurrent(5), { wrapper });
 
@@ -167,7 +160,7 @@ describe("useLazyGetAccountingRangeToCurrent", () => {
     const yearsBack = 5;
 
     vi.mocked(useDecemberFlowProfitYear).mockReturnValue(currentYear);
-    vi.mocked(useLazyGetAccountingRangeQuery).mockReturnValue([mockTrigger, { data: [], isLoading: false }, {}] as LazyQueryMockReturn);
+    vi.mocked(useLazyGetAccountingRangeQuery).mockReturnValue([mockTrigger, { data: [], isLoading: false, reset: vi.fn() }, {}] as unknown as ReturnType<typeof useLazyGetAccountingRangeQuery>);
 
     const { result } = renderHook(() => useLazyGetAccountingRangeToCurrent(yearsBack), {
       wrapper
@@ -185,7 +178,7 @@ describe("useLazyGetAccountingRangeToCurrent", () => {
     mockStore = createMockStore(false);
 
     vi.mocked(useDecemberFlowProfitYear).mockReturnValue(2024);
-    vi.mocked(useLazyGetAccountingRangeQuery).mockReturnValue([mockTrigger, { data: [], isLoading: false }, {}] as LazyQueryMockReturn);
+    vi.mocked(useLazyGetAccountingRangeQuery).mockReturnValue([mockTrigger, { data: [], isLoading: false, reset: vi.fn() }, {}] as unknown as ReturnType<typeof useLazyGetAccountingRangeQuery>);
 
     const { result } = renderHook(() => useLazyGetAccountingRangeToCurrent(5), { wrapper });
 
@@ -209,7 +202,7 @@ describe("useLazyGetAccountingRangeToCurrent", () => {
 
     for (const { yearsBack, expectedBegin } of testCases) {
       mockTrigger.mockClear();
-      vi.mocked(useLazyGetAccountingRangeQuery).mockReturnValue([mockTrigger, { data: [], isLoading: false }, {}] as LazyQueryMockReturn);
+      vi.mocked(useLazyGetAccountingRangeQuery).mockReturnValue([mockTrigger, { data: [], isLoading: false, reset: vi.fn() }, {}] as unknown as ReturnType<typeof useLazyGetAccountingRangeQuery>);
 
       const { result } = renderHook(() => useLazyGetAccountingRangeToCurrent(yearsBack), {
         wrapper
@@ -228,7 +221,7 @@ describe("useLazyGetAccountingRangeToCurrent", () => {
     mockStore = createMockStore(true);
 
     vi.mocked(useDecemberFlowProfitYear).mockReturnValue(2024);
-    vi.mocked(useLazyGetAccountingRangeQuery).mockReturnValue([mockTrigger, { data: [], isLoading: false }, {}] as LazyQueryMockReturn);
+    vi.mocked(useLazyGetAccountingRangeQuery).mockReturnValue([mockTrigger, { data: [], isLoading: false, reset: vi.fn() }, {}] as unknown as ReturnType<typeof useLazyGetAccountingRangeQuery>);
 
     const { result, rerender } = renderHook(() => useLazyGetAccountingRangeToCurrent(5), {
       wrapper
@@ -245,7 +238,7 @@ describe("useLazyGetAccountingRangeToCurrent", () => {
     mockStore = createMockStore(true);
 
     vi.mocked(useDecemberFlowProfitYear).mockReturnValue(2024);
-    vi.mocked(useLazyGetAccountingRangeQuery).mockReturnValue([mockTrigger, { data: [], isLoading: false }, {}] as LazyQueryMockReturn);
+    vi.mocked(useLazyGetAccountingRangeQuery).mockReturnValue([mockTrigger, { data: [], isLoading: false, reset: vi.fn() }, {}] as unknown as ReturnType<typeof useLazyGetAccountingRangeQuery>);
 
     const { result, rerender } = renderHook(({ yearsBack }) => useLazyGetAccountingRangeToCurrent(yearsBack), {
       wrapper,

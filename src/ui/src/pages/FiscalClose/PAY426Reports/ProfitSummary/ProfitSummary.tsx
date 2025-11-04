@@ -23,7 +23,7 @@ const activeInactivePlaceholders: YearEndProfitSharingReportSummaryLineItem[] = 
   {
     subgroup: "ACTIVE AND INACTIVE",
     lineItemPrefix: "1",
-    lineItemTitle: "AGE 18-20 WITH >= 1000 PS HOURS",
+    lineItemTitle: "AGE 18-20 WITH >= 1000 PS HOUR",
     numberOfMembers: 0,
     totalWages: 0,
     totalBalance: 0,
@@ -235,9 +235,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
   }, [terminatedRowData]);
 
   return (
-    <Page
-      label={`SUMMARY`}
-      actionNode={renderActionNode()}>
+    <Page actionNode={renderActionNode()}>
       <Grid
         container
         rowSpacing="24px">
