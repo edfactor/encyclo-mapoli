@@ -544,7 +544,7 @@ export const YearsEndApi = createApi({
       transformResponse: (response: ContributionsByAge) => {
         return response;
       },
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           // Don't proceed with API call if validation failed
           if (arg.profitYear < 2020 || arg.profitYear > 2100) {
@@ -808,7 +808,7 @@ export const YearsEndApi = createApi({
           //isSortDescending: params.pagination.isSortDescending
         }
       }),
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setProfitSharingUpdate(data));
@@ -890,7 +890,7 @@ export const YearsEndApi = createApi({
           isSortDescending: params.pagination.isSortDescending
         }
       }),
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
 

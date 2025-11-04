@@ -54,7 +54,7 @@ describe("useBeneficiaryKinds", () => {
       unwrap: vi.fn().mockResolvedValue({ beneficiaryKindList: mockBeneficiaryKinds })
     });
 
-    const { result } = renderHookWithProvider(() => useBeneficiaryKinds(), { security: { token: null, user: null } });
+    const { result } = renderHookWithProvider(() => useBeneficiaryKinds(), { security: { token: null, appUser: null } });
 
     expect(result.current.isLoading).toBe(false);
     expect(result.current.beneficiaryKinds).toEqual([]);
@@ -167,7 +167,7 @@ describe("useBeneficiaryKinds", () => {
       unwrap: vi.fn().mockResolvedValue({ beneficiaryKindList: mockBeneficiaryKinds })
     });
 
-    const { result } = renderHookWithProvider(() => useBeneficiaryKinds(), { security: { token: null, user: null } });
+    const { result } = renderHookWithProvider(() => useBeneficiaryKinds(), { security: { token: null, appUser: null } });
 
     expect(result.current.beneficiaryKinds).toEqual([]);
     expect(result.current.error).toBeNull();

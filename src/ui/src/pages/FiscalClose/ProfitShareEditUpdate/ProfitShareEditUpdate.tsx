@@ -145,7 +145,7 @@ const ProfitShareEditUpdate = () => {
                   <Typography
                     fontWeight="bold"
                     variant="body2">
-                    {`Employees: ${profitSharingUpdate.profitShareUpdateTotals.totalEmployees} | Beneficiaries: ${profitSharingUpdate.profitShareUpdateTotals.totalBeneficiaries}`}
+                    {`Employees: ${profitSharingUpdate.profitShareUpdateTotals.totalEmployees} | Beneficiaries: ${profitSharingUpdate.profitShareUpdateTotals.totalBeneficaries}`}
                   </Typography>
                 </div>
 

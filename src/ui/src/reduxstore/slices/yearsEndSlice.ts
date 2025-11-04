@@ -405,7 +405,7 @@ export const yearsEndSlice = createSlice({
         state.yearEndProfitSharingReportQueryParams?.profitYear !== action.payload
       ) {
         state.yearEndProfitSharingReportQueryParams.profitYear = action.payload;
-        state.yearEndProfitSharingReport = null;
+        state.yearEndProfitSharingReportLive = null;
       }
 
       // Termination

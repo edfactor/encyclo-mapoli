@@ -42,12 +42,9 @@ function createMockStore(preloadedState?: MockStoreState) {
 
 function renderHookWithProvider<T>(hook: () => T, preloadedState?: MockStoreState) {
   const defaultState: MockStoreState = {
-    security: { token: "mock-token", user: null },
+    security: { token: "mock-token", appUser: null },
     yearsEnd: {
-      selectedProfitYearForDecemberActivities: 2024,
-      yearsEndData: null,
-      yearsEndError: null,
-      yearsEndIsLoading: false
+      selectedProfitYearForDecemberActivities: 2024
     }
   };
 
@@ -93,12 +90,9 @@ describe("useDuplicateNamesAndBirthdays", () => {
     mockUseGridPagination.mockReturnValue(mockPaginationObject);
 
     const { result } = renderHookWithProvider(() => useDuplicateNamesAndBirthdays(), {
-      security: { token: null, user: null },
+      security: { token: null, appUser: null },
       yearsEnd: {
-        selectedProfitYearForDecemberActivities: 2024,
-        yearsEndData: null,
-        yearsEndError: null,
-        yearsEndIsLoading: false
+        selectedProfitYearForDecemberActivities: 2024
       }
     });
 
@@ -110,7 +104,7 @@ describe("useDuplicateNamesAndBirthdays", () => {
     mockUseGridPagination.mockReturnValue(mockPaginationObject);
 
     const { result } = renderHookWithProvider(() => useDuplicateNamesAndBirthdays(), {
-      security: { token: "mock-token", user: null },
+      security: { token: "mock-token", appUser: null },
       yearsEnd: {
         selectedProfitYearForDecemberActivities: null,
         yearsEndData: null,
@@ -171,7 +165,7 @@ describe("useDuplicateNamesAndBirthdays", () => {
     mockUseGridPagination.mockReturnValue(mockPaginationObject);
 
     const { result } = renderHookWithProvider(() => useDuplicateNamesAndBirthdays(), {
-      security: { token: "mock-token", user: null },
+      security: { token: "mock-token", appUser: null },
       yearsEnd: {
         selectedProfitYearForDecemberActivities: null,
         yearsEndData: null,

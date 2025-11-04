@@ -5,12 +5,12 @@ import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 
 // Setup store with minimal required reducers
-const createMockStore = (preloadedState?: Partial<Record<string, unknown>>) => {
+const createMockStore = (preloadedState?: { security?: { token: string | null } }) => {
+  const defaultState = preloadedState?.security ?? { token: "mock-token" };
   return configureStore({
     reducer: {
-      security: (state = { token: "mock-token" }) => state
-    },
-    preloadedState
+      security: (state = defaultState) => state
+    }
   });
 };
 

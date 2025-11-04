@@ -498,7 +498,7 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
           pendingChanges: {
             profitYear: 2024,
             executiveHoursAndDollars: [
-              { badgeNumber: 12345, fullName: "Test", hoursExecutive: 40, incomeExecutive: 1000 }
+              { badgeNumber: 12345, executiveHours: 40, executiveDollars: 1000 }
             ]
           },
           additionalExecutives: [],
@@ -546,7 +546,7 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
             pendingChanges: {
               profitYear: 2024,
               executiveHoursAndDollars: [
-                { badgeNumber: 12345, fullName: "John", hoursExecutive: 40, incomeExecutive: 1000 }
+                { badgeNumber: 12345, executiveHours: 40, executiveDollars: 1000 }
               ]
             }
           }
@@ -569,7 +569,7 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
             pendingChanges: {
               profitYear: 2024,
               executiveHoursAndDollars: [
-                { badgeNumber: 12345, fullName: "John", hoursExecutive: 40, incomeExecutive: 1000 }
+                { badgeNumber: 12345, executiveHours: 40, executiveDollars: 1000 }
               ]
             }
           }

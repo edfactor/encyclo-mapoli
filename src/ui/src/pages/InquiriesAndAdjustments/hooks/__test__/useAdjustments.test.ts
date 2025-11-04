@@ -316,7 +316,7 @@ describe("useAdjustments", () => {
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments(), {
-        security: { token: "mock-token", user: null },
+        security: { token: "mock-token", appUser: null },
         inquiry: {
           masterInquiryMemberDetails: mockMember,
           masterInquiryMemberDetailsSecondary: mockMember
@@ -353,7 +353,7 @@ describe("useAdjustments", () => {
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments(), {
-        security: { token: "mock-token", user: null },
+        security: { token: "mock-token", appUser: null },
         inquiry: {
           masterInquiryMemberDetails: mockMember,
           masterInquiryMemberDetailsSecondary: mockMember
@@ -413,7 +413,7 @@ describe("useAdjustments", () => {
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments(), {
-        security: { token: "mock-token", user: null },
+        security: { token: "mock-token", appUser: null },
         inquiry: {
           masterInquiryMemberDetails: mockMember,
           masterInquiryMemberDetailsSecondary: mockMember

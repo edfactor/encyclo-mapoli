@@ -668,10 +668,23 @@ describe("usePayMasterUpdate", () => {
       // Setup mock to return data with searchCompleted flag
       const mockData = createMockUpdateSummaryResponse([
         {
-          id: 1,
           badgeNumber: 12345,
-          employeeName: "John Doe",
-          participationStatus: "Active"
+          storeNumber: 1,
+          psnSuffix: 0,
+          name: "John Doe",
+          isEmployee: true,
+          before: {
+            profitSharingAmount: 1000,
+            vestedProfitSharingAmount: 800,
+            yearsInPlan: 5,
+            enrollmentId: 1
+          },
+          after: {
+            profitSharingAmount: 1200,
+            vestedProfitSharingAmount: 1000,
+            yearsInPlan: 5,
+            enrollmentId: 1
+          }
         }
       ]);
 
@@ -713,10 +726,23 @@ describe("usePayMasterUpdate", () => {
       // Setup mock to return data
       const mockData = createMockUpdateSummaryResponse([
         {
-          id: 1,
           badgeNumber: 12345,
-          employeeName: "John Doe",
-          participationStatus: "Active"
+          storeNumber: 1,
+          psnSuffix: 0,
+          name: "John Doe",
+          isEmployee: true,
+          before: {
+            profitSharingAmount: 1000,
+            vestedProfitSharingAmount: 800,
+            yearsInPlan: 5,
+            enrollmentId: 1
+          },
+          after: {
+            profitSharingAmount: 1200,
+            vestedProfitSharingAmount: 1000,
+            yearsInPlan: 5,
+            enrollmentId: 1
+          }
         }
       ]);
 

@@ -235,7 +235,7 @@ describe("useMasterInquiryReducer", () => {
         ...initialState,
         selection: {
           ...initialState.selection,
-          memberDetails: { name: "John" },
+          memberDetails: { firstName: "John", lastName: "Doe" },
           isFetchingMemberDetails: true
         }
       };
@@ -321,7 +321,7 @@ describe("useMasterInquiryReducer", () => {
         },
         selection: {
           selectedMember: { memberType: 1, id: 1, ssn: 123, badgeNumber: 111, psnSuffix: 0 },
-          memberDetails: { name: "John" },
+          memberDetails: { firstName: "John", lastName: "Doe" },
           memberProfitData: { results: [], total: 0 },
           isFetchingMemberDetails: true,
           isFetchingProfitData: true

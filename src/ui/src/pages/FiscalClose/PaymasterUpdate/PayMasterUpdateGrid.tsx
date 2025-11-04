@@ -12,13 +12,15 @@ interface PayMasterUpdateGridProps {
   gridPagination: ReturnType<typeof useGridPagination>;
   pageNumberReset: boolean;
   setPageNumberReset: (reset: boolean) => void;
+  isLoading?: boolean;
 }
 
 const PayMasterUpdateGrid: React.FC<PayMasterUpdateGridProps> = ({
   summaryData,
   gridPagination,
   pageNumberReset,
-  setPageNumberReset
+  setPageNumberReset,
+  isLoading = false
 }) => {
   const { pageNumber, pageSize, handlePaginationChange, handleSortChange, resetPagination } = gridPagination;
 
@@ -84,6 +86,7 @@ const PayMasterUpdateGrid: React.FC<PayMasterUpdateGridProps> = ({
           <DSMGrid
             preferenceKey={"ELIGIBLE_EMPLOYEES"}
             handleSortChanged={handleSortChange}
+            isLoading={isLoading}
             providedOptions={{
               rowData: gridData,
               pinnedTopRowData: getSummaryRow(),

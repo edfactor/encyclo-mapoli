@@ -81,7 +81,7 @@ const DistributionInquiryContent = () => {
 
       const successMessage = {
         id: 911,
-        severity: (state.operationType === "delete-failed" ? "error" : "success") as const,
+        severity: state.operationType === "delete-failed" ? ("error" as const) : ("success" as const),
         message: message,
         description: description
       };
