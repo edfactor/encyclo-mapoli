@@ -7,6 +7,8 @@ import MilitaryContribution from "./MilitaryContribution";
 interface MissiveAlert {
   id: number;
   message: string;
+  description: string;
+  severity: string;
 }
 
 // Mock child components
@@ -375,7 +377,7 @@ describe("MilitaryContribution", () => {
     it("should display missive alerts when present", async () => {
       const { useMissiveAlerts } = await import("../../../hooks/useMissiveAlerts");
       vi.mocked(useMissiveAlerts).mockReturnValueOnce({
-        missiveAlerts: [{ id: 1, message: "Test Alert" }] as MissiveAlert[],
+        missiveAlerts: [{ id: 1, message: "Test Alert", description: "Test description", severity: "info" }] as MissiveAlert[],
         addAlert: vi.fn(),
         clearAlerts: vi.fn()
       });

@@ -124,7 +124,18 @@ describe("useBeneficiaryRelationshipData", () => {
           pageSize: 25,
           sortParams: { sortBy: "psnSuffix", isSortDescending: true }
         }),
-      { security: { token: null } }
+      {
+        security: {
+          token: null,
+          userGroups: [],
+          userRoles: [],
+          userPermissions: [],
+          username: "",
+          performLogout: false,
+          appUser: null,
+          impersonating: []
+        }
+      }
     );
 
     expect(result.current.isLoading).toBe(false);

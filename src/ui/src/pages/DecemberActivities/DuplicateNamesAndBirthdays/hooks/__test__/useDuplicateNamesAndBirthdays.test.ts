@@ -42,7 +42,16 @@ function createMockStore(preloadedState?: MockStoreState) {
 
 function renderHookWithProvider<T>(hook: () => T, preloadedState?: MockStoreState) {
   const defaultState: MockStoreState = {
-    security: { token: "mock-token", appUser: null },
+    security: {
+      token: "mock-token",
+      userGroups: [],
+      userRoles: [],
+      userPermissions: [],
+      username: "test-user",
+      performLogout: false,
+      appUser: null,
+      impersonating: []
+    },
     yearsEnd: {
       selectedProfitYearForDecemberActivities: 2024
     }
@@ -90,7 +99,16 @@ describe("useDuplicateNamesAndBirthdays", () => {
     mockUseGridPagination.mockReturnValue(mockPaginationObject);
 
     const { result } = renderHookWithProvider(() => useDuplicateNamesAndBirthdays(), {
-      security: { token: null, appUser: null },
+      security: {
+        token: null,
+        userGroups: [],
+        userRoles: [],
+        userPermissions: [],
+        username: "",
+        performLogout: false,
+        appUser: null,
+        impersonating: []
+      },
       yearsEnd: {
         selectedProfitYearForDecemberActivities: 2024
       }
@@ -104,13 +122,19 @@ describe("useDuplicateNamesAndBirthdays", () => {
     mockUseGridPagination.mockReturnValue(mockPaginationObject);
 
     const { result } = renderHookWithProvider(() => useDuplicateNamesAndBirthdays(), {
-      security: { token: "mock-token", appUser: null },
+      security: {
+        token: "mock-token",
+        userGroups: [],
+        userRoles: [],
+        userPermissions: [],
+        username: "test-user",
+        performLogout: false,
+        appUser: null,
+        impersonating: []
+      },
       yearsEnd: {
-        selectedProfitYearForDecemberActivities: null,
-        yearsEndData: null,
-        yearsEndError: null,
-        yearsEndIsLoading: false
-      }
+        selectedProfitYearForDecemberActivities: null
+      } as Partial<YearsEndState>
     });
 
     expect(result.current.isSearching).toBe(false);
@@ -165,13 +189,19 @@ describe("useDuplicateNamesAndBirthdays", () => {
     mockUseGridPagination.mockReturnValue(mockPaginationObject);
 
     const { result } = renderHookWithProvider(() => useDuplicateNamesAndBirthdays(), {
-      security: { token: "mock-token", appUser: null },
+      security: {
+        token: "mock-token",
+        userGroups: [],
+        userRoles: [],
+        userPermissions: [],
+        username: "test-user",
+        performLogout: false,
+        appUser: null,
+        impersonating: []
+      },
       yearsEnd: {
-        selectedProfitYearForDecemberActivities: null,
-        yearsEndData: null,
-        yearsEndError: null,
-        yearsEndIsLoading: false
-      }
+        selectedProfitYearForDecemberActivities: null
+      } as Partial<YearsEndState>
     });
 
     expect(result.current.searchParams).toBeNull();

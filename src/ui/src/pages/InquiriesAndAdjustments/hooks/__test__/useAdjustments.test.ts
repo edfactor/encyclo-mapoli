@@ -31,9 +31,46 @@ vi.mock("../../../../hooks/useMissiveAlerts", () => ({
 const mockMember = {
   id: 1,
   badgeNumber: 123456,
+  psnSuffix: 0,
+  payFrequencyId: 1,
   isEmployee: true,
   firstName: "John",
-  lastName: "Doe"
+  lastName: "Doe",
+  address: "123 Main St",
+  addressCity: "Boston",
+  addressState: "MA",
+  addressZipCode: "02101",
+  dateOfBirth: "1990-01-01",
+  ssn: "123-45-6789",
+  yearToDateProfitSharingHours: 2080,
+  yearsInPlan: 5,
+  percentageVested: 100,
+  contributionsLastYear: true,
+  enrollmentId: 1,
+  enrollment: "Active",
+  hireDate: "2018-01-01",
+  terminationDate: null,
+  reHireDate: null,
+  storeNumber: 1,
+  beginPSAmount: 10000,
+  currentPSAmount: 12000,
+  beginVestedAmount: 10000,
+  currentVestedAmount: 12000,
+  currentEtva: 0,
+  previousEtva: 0,
+  employmentStatus: "Active",
+  department: "IT",
+  payClassification: "Salaried",
+  gender: "M",
+  phoneNumber: "617-555-1234",
+  workLocation: "Boston HQ",
+  receivedContributionsLastYear: true,
+  fullTimeDate: "2018-01-01",
+  terminationReason: "",
+  missives: null,
+  allocationFromAmount: 0,
+  allocationToAmount: 0,
+  badgesOfDuplicateSsns: []
 };
 
 const mockProfitDetails = {
@@ -316,7 +353,16 @@ describe("useAdjustments", () => {
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments(), {
-        security: { token: "mock-token", appUser: null },
+        security: {
+          token: "mock-token",
+          userGroups: [],
+          userRoles: [],
+          userPermissions: [],
+          username: "test-user",
+          performLogout: false,
+          appUser: null,
+          impersonating: []
+        },
         inquiry: {
           masterInquiryMemberDetails: mockMember,
           masterInquiryMemberDetailsSecondary: mockMember
@@ -353,7 +399,16 @@ describe("useAdjustments", () => {
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments(), {
-        security: { token: "mock-token", appUser: null },
+        security: {
+          token: "mock-token",
+          userGroups: [],
+          userRoles: [],
+          userPermissions: [],
+          username: "test-user",
+          performLogout: false,
+          appUser: null,
+          impersonating: []
+        },
         inquiry: {
           masterInquiryMemberDetails: mockMember,
           masterInquiryMemberDetailsSecondary: mockMember
@@ -413,7 +468,16 @@ describe("useAdjustments", () => {
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments(), {
-        security: { token: "mock-token", appUser: null },
+        security: {
+          token: "mock-token",
+          userGroups: [],
+          userRoles: [],
+          userPermissions: [],
+          username: "test-user",
+          performLogout: false,
+          appUser: null,
+          impersonating: []
+        },
         inquiry: {
           masterInquiryMemberDetails: mockMember,
           masterInquiryMemberDetailsSecondary: mockMember

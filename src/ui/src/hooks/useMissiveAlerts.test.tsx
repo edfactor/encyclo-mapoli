@@ -43,7 +43,7 @@ describe("useMissiveAlerts", () => {
 
   it("should return the full context API", () => {
     const contextValue: MissiveAlertContextType = {
-      missiveAlerts: [{ id: 1, message: "Test alert", severity: "info" as const }],
+      missiveAlerts: [{ id: 1, message: "Test alert", description: "Test description", severity: "info" }],
       addAlert: () => {},
       addAlerts: () => {},
       removeAlert: () => {},

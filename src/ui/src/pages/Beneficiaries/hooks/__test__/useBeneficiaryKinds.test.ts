@@ -54,7 +54,18 @@ describe("useBeneficiaryKinds", () => {
       unwrap: vi.fn().mockResolvedValue({ beneficiaryKindList: mockBeneficiaryKinds })
     });
 
-    const { result } = renderHookWithProvider(() => useBeneficiaryKinds(), { security: { token: null, appUser: null } });
+    const { result } = renderHookWithProvider(() => useBeneficiaryKinds(), {
+      security: {
+        token: null,
+        userGroups: [],
+        userRoles: [],
+        userPermissions: [],
+        username: "",
+        performLogout: false,
+        appUser: null,
+        impersonating: []
+      }
+    });
 
     expect(result.current.isLoading).toBe(false);
     expect(result.current.beneficiaryKinds).toEqual([]);
@@ -167,7 +178,18 @@ describe("useBeneficiaryKinds", () => {
       unwrap: vi.fn().mockResolvedValue({ beneficiaryKindList: mockBeneficiaryKinds })
     });
 
-    const { result } = renderHookWithProvider(() => useBeneficiaryKinds(), { security: { token: null, appUser: null } });
+    const { result } = renderHookWithProvider(() => useBeneficiaryKinds(), {
+      security: {
+        token: null,
+        userGroups: [],
+        userRoles: [],
+        userPermissions: [],
+        username: "",
+        performLogout: false,
+        appUser: null,
+        impersonating: []
+      }
+    });
 
     expect(result.current.beneficiaryKinds).toEqual([]);
     expect(result.current.error).toBeNull();
