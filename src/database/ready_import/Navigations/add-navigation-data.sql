@@ -103,6 +103,7 @@ DECLARE
     EDIT_DISTRIBUTION_PAGE CONSTANT NUMBER := 159;
     DISTTRIBUTION_EDIT_RUN CONSTANT NUMBER := 160;
     DIVORCE_REPORT CONSTANT NUMBER := 161;
+    MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE CONSTANT NUMBER := 162;
 
 
     --- These are the role IDs from the ROLES table
@@ -276,15 +277,15 @@ BEGIN
     
 
 -- QPAY600 (Year End child)
-    
-    insert_navigation_item(GET_ELIGIBLE_EMPLOYEES, FISCAL_CLOSE, 'Get Eligible Employees', 'GET-ELIGIBLE-EMPS', 'eligible-employees', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(PROFIT_SHARE_FORFEIT, FISCAL_CLOSE, 'Profit Share Forfeit', 'PAY443', 'forfeit', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(MASTER_UPDATE, FISCAL_CLOSE, 'Master Update', 'PAY444|PAY447', 'profit-share-update', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE, FISCAL_CLOSE, 'Manage Executive Hours', 'PROF-DOLLAR-EXEC-EXTRACT, TPR008-09', 'manage-executive-hours-and-dollars', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(GET_ELIGIBLE_EMPLOYEES, FISCAL_CLOSE, 'Get Eligible Employees', 'GET-ELIGIBLE-EMPS', 'eligible-employees', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROFIT_SHARE_FORFEIT, FISCAL_CLOSE, 'Profit Share Forfeit', 'PAY443', 'forfeit', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(MASTER_UPDATE, FISCAL_CLOSE, 'Master Update', 'PAY444|PAY447', 'profit-share-update', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
     --insert_navigation_item(PROFIT_MASTER_UPDATE, FISCAL_CLOSE, 'Profit Master Update', 'PAY460, PROFTLD', 'profit-master-update', STATUS_NORMAL, ORDER_EIGHTH, '', DISABLED, IS_NAVIGABLE);
-    insert_navigation_item(PAYMASTER_UPDATE, FISCAL_CLOSE, 'Paymaster Update', 'PAY450', 'pay450-summary', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(PROF_CONTROL_SHEET, FISCAL_CLOSE, 'Prof Control Sheet', 'PROF-CNTRL-SHEET', 'prof-control-sheet', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(PROF_SHARE_REPORT_BY_AGE, FISCAL_CLOSE, 'Prof Share Report By Age', 'Prof130', '', STATUS_NORMAL, ORDER_EIGHTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(PROF_SHARE_GROSS_RPT, FISCAL_CLOSE, 'Prof Share Gross Rpt', 'QPAY501', 'profit-share-gross-report', STATUS_NORMAL, ORDER_NINTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PAYMASTER_UPDATE, FISCAL_CLOSE, 'Paymaster Update', 'PAY450', 'pay450-summary', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROF_CONTROL_SHEET, FISCAL_CLOSE, 'Prof Control Sheet', 'PROF-CNTRL-SHEET', 'prof-control-sheet', STATUS_NORMAL, ORDER_EIGHTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROF_SHARE_REPORT_BY_AGE, FISCAL_CLOSE, 'Prof Share Report By Age', 'Prof130', '', STATUS_NORMAL, ORDER_NINTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROF_SHARE_GROSS_RPT, FISCAL_CLOSE, 'Prof Share Gross Rpt', 'QPAY501', 'profit-share-gross-report', STATUS_NORMAL, ORDER_TENTH, '', ENABLED, IS_NAVIGABLE);
     
     
     --insert_navigation_item(SAVE_PROF_PAYMSTR, FISCAL_CLOSE, 'Save Prof Paymstr', '', 'save-prof-paymstr', STATUS_NORMAL, ORDER_SIXTEENTH, '', ENABLED, IS_NAVIGABLE);
@@ -332,6 +333,13 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     -- assign_navigation_role(PAY_BEN_REPORT, SYSTEM_ADMINISTRATOR); -- COMMENTED OUT - navigation item doesn't exist
     -- assign_navigation_role(PAY_BEN_REPORT, FINANCE_MANAGER); -- COMMENTED OUT - navigation item doesn't exist
     -- assign_navigation_role(PAY_BEN_REPORT, DISTRIBUTIONS_CLERK); -- COMMENTED OUT - navigation item doesn't exist
+
+
+
+ -- MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE 
+    assign_navigation_role(MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE, FINANCE_MANAGER);
+    assign_navigation_role(MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE, DISTRIBUTIONS_CLERK);
 
 -- Print PS Jobs
     assign_navigation_role(PRINT_PS_JOBS, SYSTEM_ADMINISTRATOR);

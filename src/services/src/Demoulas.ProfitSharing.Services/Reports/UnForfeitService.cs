@@ -34,7 +34,7 @@ public sealed class UnforfeitService : IUnforfeitService
         _totalService = totalService;
     }
 
-    public async Task<ReportResponseBase<UnforfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(StartAndEndDateRequest req,
+    public async Task<ReportResponseBase<UnforfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(FilterableStartAndEndDateRequest req,
         CancellationToken cancellationToken)
     {
         StartAndEndDateRequestValidator? validator = new();
@@ -47,8 +47,10 @@ public sealed class UnforfeitService : IUnforfeitService
         {
             rehiredEmployees = await _dataContextFactory.UseReadOnlyContext(async context =>
             {
-                IQueryable<ParticipantTotalYear>? yearsOfServiceQuery = _totalService.GetYearsOfService(context, req.ProfitYear, req.EndingDate);
-                IQueryable<ParticipantTotalVestingBalance>? vestingServiceQuery = _totalService.TotalVestingBalance(context, req.ProfitYear, req.EndingDate);
+                short profitYear = (short)req.EndingDate.Year;
+
+                IQueryable<ParticipantTotalYear>? yearsOfServiceQuery = _totalService.GetYearsOfService(context, profitYear, req.EndingDate);
+                IQueryable<ParticipantTotalVestingBalance>? vestingServiceQuery = _totalService.TotalVestingBalance(context, profitYear, req.EndingDate);
                 IQueryable<Demographic>? demo = await _demographicReaderService.BuildDemographicQuery(context);
 
                 // PERFORMANCE: Pre-filter demographics to reduce join volume
@@ -65,7 +67,7 @@ public sealed class UnforfeitService : IUnforfeitService
                     from pd in forfeitureTransactions
                     join d in activeDemographics on pd.Ssn equals d.Ssn
                     join ppYE in context.PayProfits
-                        on new { d.Id, req.ProfitYear } equals new { Id = ppYE.DemographicId, ppYE.ProfitYear }
+                        on new { d.Id, ProfitYear = profitYear } equals new { Id = ppYE.DemographicId, ProfitYear = ppYE.ProfitYear }
                     join enrollment in context.Enrollments
                         on ppYE.EnrollmentId equals enrollment.Id
                     join yos in yearsOfServiceQuery on d.Ssn equals yos.Ssn into yosTmp
@@ -93,7 +95,8 @@ public sealed class UnforfeitService : IUnforfeitService
                     };
 
                 // Apply pagination to main query
-                var sortBy = (req.SortBy ?? "badgenumber").ToLowerInvariant() switch {
+                var sortBy = (req.SortBy ?? "badgenumber").ToLowerInvariant() switch
+                {
                     "rehireddate" => "RehireDate",
                     "companycontributionyears" => "YearsOfService",
                     _ => (req.SortBy ?? "badgenumber")
@@ -103,7 +106,7 @@ public sealed class UnforfeitService : IUnforfeitService
                 {
                     sortBy += " DESC";
                 }
-                
+
 
                 var paginatedMain = await mainQuery
                     .Distinct() // Remove duplicates from multiple ProfitDetail rows

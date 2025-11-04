@@ -46,6 +46,13 @@ public sealed class ScenarioFactory
         .Select(f => new Department { Id = (byte)f.GetValue(null)!, Name = f.Name })
         .ToList();
 
+    // populate TerminationCodes from Constants
+    public List<TerminationCode> TerminationCodes { get; set; } = typeof(TerminationCode.Constants)
+        .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+        .Where(f => f.FieldType == typeof(char))
+        .Select(f => new TerminationCode { Id = (char)f.GetValue(null)!, Name = f.Name })
+        .ToList();
+
     // collects ctx.ProfitDetail.AddRange() rows for inspection by test
     public List<ProfitDetail> addedProfitDetails = [];
 
@@ -207,6 +214,11 @@ public sealed class ScenarioFactory
         Mock<DbSet<Demographic>> mockDemograhpics = Demographics.BuildMockDbSet();
         _sdb.ProfitSharingDbContext.Setup(m => m.Demographics).Returns(mockDemograhpics.Object);
         _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.Demographics).Returns(mockDemograhpics.Object);
+
+        // TerminationCodes
+        Mock<DbSet<TerminationCode>> mockTerminationCodes = TerminationCodes.BuildMockDbSet();
+        _sdb.ProfitSharingDbContext.Setup(m => m.TerminationCodes).Returns(mockTerminationCodes.Object);
+        _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.TerminationCodes).Returns(mockTerminationCodes.Object);
 
         // PayProfits
         Mock<DbSet<PayProfit>> mockPayProfits = PayProfits.BuildMockDbSet();

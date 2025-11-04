@@ -18,7 +18,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
 
-public sealed class TerminatedEmployeesNeedingFormLetterEndpoint : EndpointWithCsvBase<StartAndEndDateRequest, AdhocTerminatedEmployeeResponse, TerminatedEmployeesNeedingFormLetterEndpoint.EndpointMap>
+public sealed class TerminatedEmployeesNeedingFormLetterEndpoint : EndpointWithCsvBase<FilterableStartAndEndDateRequest, AdhocTerminatedEmployeeResponse, TerminatedEmployeesNeedingFormLetterEndpoint.EndpointMap>
 {
     private readonly IAdhocTerminatedEmployeesService _adhocTerminatedEmployeesService;
     private readonly ILogger<TerminatedEmployeesNeedingFormLetterEndpoint> _logger;
@@ -39,7 +39,6 @@ public sealed class TerminatedEmployeesNeedingFormLetterEndpoint : EndpointWithC
             s.Description = "Returns a report of terminated employees who have not yet been sent a form letter to accompany a set of forms to receive vested interest .";
             s.ExampleRequest = new StartAndEndDateRequest
             {
-                ProfitYear = 2023,
                 Skip = 0,
                 Take = 100,
                 SortBy = "TerminationDate",
@@ -68,6 +67,7 @@ public sealed class TerminatedEmployeesNeedingFormLetterEndpoint : EndpointWithC
                                     Ssn = "123-45-6789",
                                     TerminationDate = new DateOnly(2023, 5, 15),
                                     TerminationCodeId = 'A',
+                                    TerminationCode = "Active",
                                     Address = "123 Main St",
                                     State = "MA",
                                     City = "Andover",
@@ -84,7 +84,7 @@ public sealed class TerminatedEmployeesNeedingFormLetterEndpoint : EndpointWithC
         base.Configure();
     }
 
-    public override async Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetResponse(StartAndEndDateRequest req, CancellationToken ct)
+    public override async Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetResponse(FilterableStartAndEndDateRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 

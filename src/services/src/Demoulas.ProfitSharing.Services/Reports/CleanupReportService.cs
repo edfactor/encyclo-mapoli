@@ -1,5 +1,4 @@
-﻿using Demoulas.Common.Contracts.Contracts.Request;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts;
@@ -11,7 +10,6 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
-using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;

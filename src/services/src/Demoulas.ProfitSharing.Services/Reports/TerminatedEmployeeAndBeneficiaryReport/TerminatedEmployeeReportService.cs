@@ -43,7 +43,7 @@ public sealed class TerminatedEmployeeReportService
         _yearEndService = yearEndService;
     }
 
-    public Task<TerminatedEmployeeAndBeneficiaryResponse> CreateDataAsync(StartAndEndDateRequest req, CancellationToken cancellationToken)
+    public Task<TerminatedEmployeeAndBeneficiaryResponse> CreateDataAsync(FilterableStartAndEndDateRequest req, CancellationToken cancellationToken)
     {
         return _factory.UseReadOnlyContext(async ctx =>
         {
@@ -60,7 +60,7 @@ public sealed class TerminatedEmployeeReportService
     /// </summary>
     private async Task<TerminatedEmployeeAndBeneficiaryResponse> MergeAndCreateDataset(
         ProfitSharingReadOnlyDbContext ctx,
-        StartAndEndDateRequest req,
+        FilterableStartAndEndDateRequest req,
         List<MemberSlice> memberSliceUnion,
         CancellationToken cancellationToken)
     {
@@ -117,7 +117,7 @@ public sealed class TerminatedEmployeeReportService
             }, cancellationToken);
 
         // This report is always giving values about today for the members current status.
-        DateOnly today = DateOnly.FromDateTime(DateTime.Today); 
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
         // The "Begin" values always refer to the prior completed year.  "Begin" is the "end" of the last completed YE.
         short lastCompletedYearEnd = await _yearEndService.GetCompletedYearEnd(cancellationToken);
         CalendarResponseDto priorYearDateRange = await _calendarService.GetYearStartAndEndAccountingDatesAsync(lastCompletedYearEnd, cancellationToken);
@@ -221,7 +221,7 @@ public sealed class TerminatedEmployeeReportService
 
             var hasForfeited = enrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords ||
                                enrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
-            var suggestedForfeit = hasForfeited ? (decimal?) 0 : Math.Round(member.EndingBalance - vestedBalance, 2, MidpointRounding.AwayFromZero);
+            var suggestedForfeit = hasForfeited ? (decimal?)0 : Math.Round(member.EndingBalance - vestedBalance, 2, MidpointRounding.AwayFromZero);
             if (member.PsnSuffix > 0)
             {
                 // You can not forfeit a pure bene
@@ -268,7 +268,7 @@ public sealed class TerminatedEmployeeReportService
             .GroupBy(x => new { x.BadgeNumber, x.PsnSuffix, x.Name })
             .Select(g => new TerminatedEmployeeAndBeneficiaryDataResponseDto
             {
-                PSN = g.Key.PsnSuffix == 0 ? (long) g.Key.BadgeNumber : (long)g.Key.BadgeNumber * 10000 + g.Key.PsnSuffix,
+                PSN = g.Key.PsnSuffix == 0 ? (long)g.Key.BadgeNumber : (long)g.Key.BadgeNumber * 10000 + g.Key.PsnSuffix,
                 Name = g.Key.Name,
                 YearDetails = g.Select(x => x.YearDetail).OrderByDescending(y => y.ProfitYear).ToList()
             }).AsQueryable().ToPaginationResultsAsync(req, cancellationToken);
@@ -305,7 +305,7 @@ public sealed class TerminatedEmployeeReportService
         {
             return false;
         }
-        
+
         // Beginning balance (most important filter)
         if (member.BeginningAmount != 0)
         {
@@ -340,7 +340,7 @@ public sealed class TerminatedEmployeeReportService
     /// <summary>
     ///     Extracts the profit year range from the request date range.
     /// </summary>
-    private (short beginProfitYear, short endProfitYear) GetProfitYearRange(StartAndEndDateRequest request)
+    private (short beginProfitYear, short endProfitYear) GetProfitYearRange(FilterableStartAndEndDateRequest request)
     {
         return ((short)request.BeginningDate.Year, (short)request.EndingDate.Year);
     }
@@ -351,7 +351,7 @@ public sealed class TerminatedEmployeeReportService
     /// </summary>
     private async Task<List<MemberSlice>> RetrieveMemberSlices(
         IProfitSharingDbContext ctx,
-        StartAndEndDateRequest request,
+        FilterableStartAndEndDateRequest request,
         CancellationToken cancellationToken)
     {
         _logger.LogInformation(
@@ -370,7 +370,7 @@ public sealed class TerminatedEmployeeReportService
     /// </summary>
     private async Task<IQueryable<TerminatedEmployeeDto>> GetTerminatedEmployees(
         IProfitSharingDbContext ctx,
-        StartAndEndDateRequest request)
+        FilterableStartAndEndDateRequest request)
     {
         IQueryable<Demographic> demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
 
@@ -395,7 +395,7 @@ public sealed class TerminatedEmployeeReportService
     /// </summary>
     private IQueryable<MemberSlice> GetEmployeesAsMembers(
         IProfitSharingDbContext ctx,
-        StartAndEndDateRequest request,
+        FilterableStartAndEndDateRequest request,
         IQueryable<TerminatedEmployeeDto> terminatedEmployees,
         DateOnly asOfDate)
     {
@@ -407,39 +407,39 @@ public sealed class TerminatedEmployeeReportService
         short requestedYear = (short)request.EndingDate.Year;
 
         IQueryable<MemberSlice> query = from employee in terminatedEmployees
-            join payProfit in ctx.PayProfits.Where(pp => pp.ProfitYear == requestedYear)
-                on employee.Demographic.Id equals payProfit.DemographicId into payProfitTmp
-            from payProfit in payProfitTmp.DefaultIfEmpty()
-            join yipTbl in _totalService.GetYearsOfService(ctx, requestedYear, asOfDate)
-                on employee.Demographic.Ssn equals yipTbl.Ssn into yipTmp
-            from yip in yipTmp.DefaultIfEmpty()
-            select new MemberSlice
-            {
-                PsnSuffix = 0,
-                BadgeNumber = employee.Demographic.BadgeNumber,
-                Ssn = employee.Demographic.Ssn,
-                BirthDate = employee.Demographic.DateOfBirth,
-                HoursCurrentYear = payProfit != null ? payProfit.CurrentHoursYear : 0,
-                EmploymentStatusCode = employee.Demographic.EmploymentStatusId,
-                FullName = employee.Demographic.ContactInfo.FullName,
-                FirstName = employee.Demographic.ContactInfo.FirstName,
-                LastName = employee.Demographic.ContactInfo.LastName,
-                YearsInPs = yip != null ? yip.Years : (byte)0,
-                TerminationDate = employee.Demographic.TerminationDate,
-                IncomeRegAndExecCurrentYear = payProfit != null ? payProfit.CurrentIncomeYear + payProfit.IncomeExecutive : 0,
-                TerminationCode = employee.Demographic.TerminationCodeId,
-                ZeroCont = employee.Demographic.TerminationCodeId == TerminationCode.Constants.Deceased
-                    ? ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested
-                    : payProfit != null && payProfit.ZeroContributionReasonId != null
-                        ? payProfit.ZeroContributionReasonId
-                        : 0,
-                EnrollmentId = payProfit != null ? payProfit.EnrollmentId : (byte)0,
-                Etva = payProfit != null ? payProfit.Etva : 0,
-                ProfitYear = requestedYear,
-                IsOnlyBeneficiary = false,
-                IsBeneficiaryAndEmployee = false,
-                IsExecutive = employee.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly
-            };
+                                        join payProfit in ctx.PayProfits.Where(pp => pp.ProfitYear == requestedYear)
+                                            on employee.Demographic.Id equals payProfit.DemographicId into payProfitTmp
+                                        from payProfit in payProfitTmp.DefaultIfEmpty()
+                                        join yipTbl in _totalService.GetYearsOfService(ctx, requestedYear, asOfDate)
+                                            on employee.Demographic.Ssn equals yipTbl.Ssn into yipTmp
+                                        from yip in yipTmp.DefaultIfEmpty()
+                                        select new MemberSlice
+                                        {
+                                            PsnSuffix = 0,
+                                            BadgeNumber = employee.Demographic.BadgeNumber,
+                                            Ssn = employee.Demographic.Ssn,
+                                            BirthDate = employee.Demographic.DateOfBirth,
+                                            HoursCurrentYear = payProfit != null ? payProfit.CurrentHoursYear : 0,
+                                            EmploymentStatusCode = employee.Demographic.EmploymentStatusId,
+                                            FullName = employee.Demographic.ContactInfo.FullName,
+                                            FirstName = employee.Demographic.ContactInfo.FirstName,
+                                            LastName = employee.Demographic.ContactInfo.LastName,
+                                            YearsInPs = yip != null ? yip.Years : (byte)0,
+                                            TerminationDate = employee.Demographic.TerminationDate,
+                                            IncomeRegAndExecCurrentYear = payProfit != null ? payProfit.CurrentIncomeYear + payProfit.IncomeExecutive : 0,
+                                            TerminationCode = employee.Demographic.TerminationCodeId,
+                                            ZeroCont = employee.Demographic.TerminationCodeId == TerminationCode.Constants.Deceased
+                                                ? ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested
+                                                : payProfit != null && payProfit.ZeroContributionReasonId != null
+                                                    ? payProfit.ZeroContributionReasonId
+                                                    : 0,
+                                            EnrollmentId = payProfit != null ? payProfit.EnrollmentId : (byte)0,
+                                            Etva = payProfit != null ? payProfit.Etva : 0,
+                                            ProfitYear = requestedYear,
+                                            IsOnlyBeneficiary = false,
+                                            IsBeneficiaryAndEmployee = false,
+                                            IsExecutive = employee.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly
+                                        };
 
         return query;
     }
@@ -450,7 +450,7 @@ public sealed class TerminatedEmployeeReportService
     /// </summary>
     private async Task<IQueryable<MemberSlice>> GetBeneficiaries(
         IProfitSharingDbContext ctx,
-        StartAndEndDateRequest request)
+        FilterableStartAndEndDateRequest request)
     {
         _logger.LogInformation(
             "Loading beneficiaries for date range {BeginningDate} to {EndingDate}",

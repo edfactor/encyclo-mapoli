@@ -21,7 +21,7 @@ export const GetRecentlyTerminatedColumns = (): ColDef[] => {
     }),
     createStatusColumn({
       headerName: "Termination Code",
-      field: "terminationCodeId"
+      field: "terminationCode"
     })
   ];
 };

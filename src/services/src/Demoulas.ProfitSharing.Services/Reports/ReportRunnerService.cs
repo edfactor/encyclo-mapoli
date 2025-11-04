@@ -111,7 +111,7 @@ public class ReportRunnerService : IReportRunnerService
             {
                 ReportResponseBase<UnforfeituresResponse> result = await _unForfeitService
                     .FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(
-                        StartAndEndDateRequest.RequestExample(), ct);
+                        FilterableStartAndEndDateRequest.RequestExample(), ct);
                 return (result.Response.Total, result.Response.Results.Count());
             }),
             ["eligibleEmployees"] = async ct => await InvokeReport("eligibleEmployees", ct, async () =>

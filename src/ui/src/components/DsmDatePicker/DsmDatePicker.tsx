@@ -20,6 +20,7 @@ type MyProps = {
   disabled?: boolean;
   minDate?: Date;
   maxDate?: Date;
+  shouldDisableMonth?: (month: Date) => boolean;
 };
 
 const DsmDatePicker: FC<MyProps> = ({
@@ -36,7 +37,8 @@ const DsmDatePicker: FC<MyProps> = ({
   id,
   disabled,
   minDate = new Date(new Date().getFullYear() - 6, 0, 1),
-  maxDate
+  maxDate,
+  shouldDisableMonth
 }) => {
   const isInvalid = error ? error?.length > 0 : false;
   const isYearOnly = views?.length === 1 && views[0] === "year";
@@ -96,6 +98,7 @@ const DsmDatePicker: FC<MyProps> = ({
           disabled={disabled}
           minDate={minDate || undefined}
           maxDate={maxDate || undefined}
+          shouldDisableMonth={shouldDisableMonth}
         />
       </LocalizationProvider>
     </div>
