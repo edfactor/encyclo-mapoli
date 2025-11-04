@@ -1,7 +1,6 @@
 import { Grid } from "@mui/material";
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../../components/ReportSummary";
@@ -20,7 +19,7 @@ const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
   setInitialSearchLoaded
 }) => {
   const under21Breakdown = useSelector((state: RootState) => state.yearsEnd.under21BreakdownByStore);
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
   const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
     initialPageSize: 25,
@@ -33,12 +32,14 @@ const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
   });
 
   // Handle navigation for badge clicks
+  /*
   const handleNavigation = React.useCallback(
     (path: string) => {
       navigate(path);
     },
     [navigate]
   );
+  */
 
   const sortEventHandler = (update: ISortParams) => {
     if (update.sortBy === "") {

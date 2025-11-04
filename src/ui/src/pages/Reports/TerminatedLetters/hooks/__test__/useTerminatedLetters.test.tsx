@@ -430,7 +430,10 @@ describe("useTerminatedLetters", () => {
 
       // Simulate pagination change
       await act(async () => {
-        await result.current.gridPagination.handlePaginationChange(1, 50);
+        await result.current.gridPagination.handlePaginationChange(1, 50, {
+          sortBy: "fullName",
+          isSortDescending: false
+        });
       });
 
       expect(mockTriggerSearch).toHaveBeenCalledWith(
