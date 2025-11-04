@@ -26,9 +26,17 @@ vi.mock("../DuplicateSSNsOnDemographicsGridColumns", () => ({
 
 describe("DuplicateSSNsOnDemographicsGrid", () => {
   const mockData = {
+    reportName: "Duplicate SSNs on Demographics",
+    reportDate: "2024-01-15",
+    startDate: "2024-01-01",
+    endDate: "2024-12-31",
+    dataSource: "Test Data",
     response: {
       results: [{ ssn: "123-45-6789", badgeNumber: 12345, employeeName: "John Doe" }],
-      total: 1
+      total: 1,
+      totalPages: 1,
+      pageSize: 25,
+      currentPage: 0
     }
   };
 
@@ -37,7 +45,8 @@ describe("DuplicateSSNsOnDemographicsGrid", () => {
     pageSize: 25,
     sortParams: { sortBy: "ssn", isSortDescending: true },
     handlePaginationChange: vi.fn(),
-    handleSortChange: vi.fn()
+    handleSortChange: vi.fn(),
+    resetPagination: vi.fn()
   };
 
   const defaultProps = {

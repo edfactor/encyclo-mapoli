@@ -14,7 +14,8 @@ vi.mock("../../../../hooks/useGridPagination", () => ({
     pageSize: 25,
     sortParams: { sortBy: "ssn", isSortDescending: true },
     handlePaginationChange: vi.fn(),
-    handleSortChange: vi.fn()
+    handleSortChange: vi.fn(),
+    resetPagination: vi.fn()
   }))
 }));
 
@@ -22,16 +23,27 @@ vi.mock("react-redux", () => ({
   useSelector: vi.fn(() => true)
 }));
 
+const { mockTriggerSearch } = vi.hoisted(() => ({
+  mockTriggerSearch: vi.fn(async () => ({
+    reportName: "Duplicate SSNs",
+    reportDate: "2024-01-15",
+    startDate: "2024-01-01",
+    endDate: "2024-12-31",
+    dataSource: "Test",
+    response: {
+      results: [{ ssn: "123-45-6789", badgeNumber: 12345, employeeName: "John Doe" }],
+      total: 1,
+      totalPages: 1,
+      pageSize: 25,
+      currentPage: 0
+    }
+  }))
+}));
+
 vi.mock("../../../../reduxstore/api/YearsEndApi", () => ({
-  useLazyGetDuplicateSSNsQuery: vi.fn(() => [
-    vi.fn(async (_request) => ({
-      response: {
-        results: [{ ssn: "123-45-6789", badgeNumber: 12345, employeeName: "John Doe" }],
-        total: 1
-      }
-    })),
-    { isFetching: false }
-  ])
+  useLazyGetDuplicateSSNsQuery: vi.fn(() =>
+    [mockTriggerSearch, { isFetching: false }, {}] as unknown as ReturnType<typeof useLazyGetDuplicateSSNsQuery>
+  )
 }));
 
 describe("useDuplicateSSNsOnDemographics Hook", () => {
@@ -109,12 +121,13 @@ describe("useDuplicateSSNsOnDemographics Hook", () => {
 
   describe("Error handling", () => {
     it("should handle search errors gracefully", async () => {
-      vi.mocked(useLazyGetDuplicateSSNsQuery).mockReturnValueOnce([
-        vi.fn(async () => {
-          throw new Error("API Error");
-        }),
-        { isFetching: false }
-      ] as ReturnType<typeof useLazyGetDuplicateSSNsQuery>);
+      const mockErrorTrigger = vi.fn(async () => {
+        throw new Error("API Error");
+      });
+
+      vi.mocked(useLazyGetDuplicateSSNsQuery).mockReturnValueOnce(
+        [mockErrorTrigger, { isFetching: false }, {}] as unknown as ReturnType<typeof useLazyGetDuplicateSSNsQuery>
+      );
 
       const [triggerSearch] = useLazyGetDuplicateSSNsQuery();
       const request = {
@@ -132,12 +145,24 @@ describe("useDuplicateSSNsOnDemographics Hook", () => {
 
   describe("Edge cases", () => {
     it("should handle empty search results", async () => {
-      vi.mocked(useLazyGetDuplicateSSNsQuery).mockReturnValueOnce([
-        vi.fn(async () => ({
-          response: { results: [], total: 0 }
-        })),
-        { isFetching: false }
-      ] as ReturnType<typeof useLazyGetDuplicateSSNsQuery>);
+      const mockEmptyTrigger = vi.fn(async () => ({
+        reportName: "Duplicate SSNs",
+        reportDate: "2024-01-15",
+        startDate: "2024-01-01",
+        endDate: "2024-12-31",
+        dataSource: "Test",
+        response: {
+          results: [],
+          total: 0,
+          totalPages: 0,
+          pageSize: 25,
+          currentPage: 0
+        }
+      }));
+
+      vi.mocked(useLazyGetDuplicateSSNsQuery).mockReturnValueOnce(
+        [mockEmptyTrigger, { isFetching: false }, {}] as unknown as ReturnType<typeof useLazyGetDuplicateSSNsQuery>
+      );
 
       const [triggerSearch] = useLazyGetDuplicateSSNsQuery();
       const result = await triggerSearch({
