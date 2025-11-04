@@ -43,22 +43,17 @@ describe("MasterUpdateSummaryTable", { timeout: 16000 }, () => {
   };
 
   const mockValidationResponse = {
-    validationResults: {
-      TotalProfitSharingBalance: { isValid: true, currentValue: 1000000, expectedValue: 1000000 },
-      TotalContributions: { isValid: false, currentValue: 50000, expectedValue: 50100 },
-      TotalEarnings: { isValid: true, currentValue: 25000, expectedValue: 25000 },
-      TotalForfeitures: { isValid: true, currentValue: 10000, expectedValue: 10000 },
-      DistributionTotals: { isValid: false, currentValue: 15000, expectedValue: 15200 },
-      NetAllocTransfer: { isValid: true, currentValue: 0, expectedValue: 0 },
-      IncomingAllocations: { isValid: true, currentValue: 8000, expectedValue: 8000 },
-      OutgoingAllocations: { isValid: true, currentValue: -8000, expectedValue: -8000 }
-    }
+    isValid: true,
+    currentValue: 1000000,
+    expectedValue: 1000000,
+    variance: 0,
+    message: "Validation passed"
   };
 
   const mockGetFieldValidation = (fieldKey: string) => {
     const validations: Record<
       string,
-      { isValid: boolean; currentValue: number | null; expectedValue: number | null; message?: string | null }
+      { isValid: boolean; currentValue: number; expectedValue: number; variance?: number; message?: string }
     > = {
       TotalProfitSharingBalance: { isValid: true, currentValue: 1000000, expectedValue: 1000000 },
       TotalContributions: { isValid: false, currentValue: 50000, expectedValue: 50100 },
@@ -389,7 +384,7 @@ describe("MasterUpdateSummaryTable", { timeout: 16000 }, () => {
       render(
         <MasterUpdateSummaryTable
           {...defaultProps}
-          totals={totalsWithUndefined as typeof mockTotals}
+          totals={totalsWithUndefined as unknown as typeof mockTotals}
         />
       );
 
@@ -500,9 +495,9 @@ describe("MasterUpdateSummaryTable", { timeout: 16000 }, () => {
 
   describe("Null Safety in Popups", () => {
     it("handles null validation data gracefully in Beginning Balance popup", () => {
-      const mockGetFieldValidationWithNulls = (field: string) => {
+      const mockGetFieldValidationWithNulls = (field: string): { isValid: boolean; currentValue: number | null; expectedValue: number | null; variance?: number; message?: string } | null => {
         if (field === "TotalProfitSharingBalance") {
-          return { isValid: false, currentValue: null, expectedValue: null, message: null };
+          return { isValid: false, currentValue: null, expectedValue: null };
         }
         return null;
       };
@@ -522,7 +517,7 @@ describe("MasterUpdateSummaryTable", { timeout: 16000 }, () => {
     it("handles null validation data gracefully in Contributions popup", () => {
       const mockGetFieldValidationWithNulls = (field: string) => {
         if (field === "TotalContributions") {
-          return { isValid: false, currentValue: 50000, expectedValue: 45000, message: null };
+          return { isValid: false, currentValue: 50000, expectedValue: 45000 };
         }
         // PAY443.TotalContributions returns null - this is the critical test
         if (field === "PAY443.TotalContributions") {
@@ -547,7 +542,7 @@ describe("MasterUpdateSummaryTable", { timeout: 16000 }, () => {
     it("handles null validation data gracefully in Earnings popup", () => {
       const mockGetFieldValidationWithNulls = (field: string) => {
         if (field === "TotalEarnings") {
-          return { isValid: false, currentValue: 25000, expectedValue: 24000, message: null };
+          return { isValid: false, currentValue: 25000, expectedValue: 24000 };
         }
         // PAY443.TotalEarnings returns null
         if (field === "PAY443.TotalEarnings") {
@@ -569,7 +564,7 @@ describe("MasterUpdateSummaryTable", { timeout: 16000 }, () => {
     it("handles null validation data gracefully in Forfeitures popup", () => {
       const mockGetFieldValidationWithNulls = (field: string) => {
         if (field === "TotalForfeitures") {
-          return { isValid: false, currentValue: 10000, expectedValue: 9500, message: null };
+          return { isValid: false, currentValue: 10000, expectedValue: 9500 };
         }
         // PAY443.TotalForfeitures returns null
         if (field === "PAY443.TotalForfeitures") {
@@ -589,10 +584,10 @@ describe("MasterUpdateSummaryTable", { timeout: 16000 }, () => {
     });
 
     it("handles null validation data gracefully in Distributions popup", () => {
-      const mockGetFieldValidationWithNulls = (field: string) => {
+      const mockGetFieldValidationWithNulls = (field: string): { isValid: boolean; currentValue: number | null; expectedValue: number | null; variance?: number; message?: string } | null => {
         if (field === "DistributionTotals") {
           // Return null for currentValue and expectedValue to test null handling
-          return { isValid: false, currentValue: null, expectedValue: null, message: null };
+          return { isValid: false, currentValue: null, expectedValue: null };
         }
         return null;
       };
@@ -657,9 +652,8 @@ describe("MasterUpdateSummaryTable", { timeout: 16000 }, () => {
           return {
             isValid: false,
             currentValue: undefined,
-            expectedValue: undefined,
-            message: null
-          };
+            expectedValue: undefined
+          } as { isValid: boolean; currentValue: number | undefined; expectedValue: number | undefined; variance?: number; message?: string };
         }
         return null;
       };

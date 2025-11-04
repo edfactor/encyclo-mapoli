@@ -75,7 +75,7 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
 
   const defaultProps = {
     innerRef: mockRef,
-    data: mockData,
+    data: mockData as unknown as Parameters<typeof DemographicBadgesNotInPayprofitGrid>[0]["data"],
     isLoading: false,
     showData: true,
     hasResults: true,

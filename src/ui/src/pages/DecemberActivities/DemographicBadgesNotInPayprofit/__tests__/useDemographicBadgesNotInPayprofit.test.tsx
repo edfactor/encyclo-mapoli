@@ -47,6 +47,7 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
       handleSortChange: vi.fn()
     });
 
+    type LazyQueryReturn = ReturnType<typeof useLazyGetDemographicBadgesNotInPayprofitQuery>;
     vi.mocked(useLazyGetDemographicBadgesNotInPayprofitQuery).mockReturnValue([
       vi.fn().mockReturnValue({
         unwrap: vi.fn().mockResolvedValue({
@@ -56,7 +57,7 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
       }),
       { isFetching: false },
       {}
-    ] as any);
+    ] as LazyQueryReturn);
   });
 
   describe("Hook initialization", () => {
