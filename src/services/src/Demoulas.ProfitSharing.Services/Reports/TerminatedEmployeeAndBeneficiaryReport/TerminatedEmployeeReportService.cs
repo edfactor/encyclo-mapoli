@@ -171,9 +171,9 @@ public sealed class TerminatedEmployeeReportService
         var processingStart = DateTime.UtcNow;
         List<(int BadgeNumber, short PsnSuffix, string? Name, TerminatedEmployeeAndBeneficiaryYearDetailDto YearDetail)> yearDetailsList = new();
 
-        var memberSliceCollection = await memberSliceUnion.Where(m => !(m.YearsInPs <= 2 && m.HoursCurrentYear >= /*1000*/ ReferenceData.MinimumHoursForContribution()))
-            .ToListAsync(cancellationToken);
-        foreach (MemberSlice memberSlice in memberSliceCollection)
+        var memberSliceCollection = memberSliceUnion.Where(m => !(m.YearsInPs <= 2 && m.HoursCurrentYear >= /*1000*/ ReferenceData.MinimumHoursForContribution())).AsAsyncEnumerable();
+            
+        await foreach (MemberSlice memberSlice in memberSliceCollection)
         {
             // Get transactions for this member
             var key = new { memberSlice.Ssn, memberSlice.ProfitYear };
@@ -290,6 +290,11 @@ public sealed class TerminatedEmployeeReportService
             }
 
             yearDetailsList.Add((member.BadgeNumber, member.PsnSuffix, member.FullName, yearDetail));
+
+            if (yearDetailsList.Count >= req.Take)
+            {
+                break;
+            }
             
             // Accumulate totals
             totalVested += vestedBalance;
@@ -308,6 +313,7 @@ public sealed class TerminatedEmployeeReportService
                 Name = g.Key.Name,
                 YearDetails = g.Select(x => x.YearDetail).OrderByDescending(y => y.ProfitYear).ToList()
             }).ToPaginationResultsAsync(req, cancellationToken);
+        
         var groupingDuration = (DateTime.UtcNow - groupingStart).TotalMilliseconds;
         int groupCount = grouped.Results != null ? grouped.Results.Count() : 0;
         _logger.LogInformation("Grouping and pagination completed in {DurationMs:F2}ms, returned {GroupCount} groups", groupingDuration, groupCount);
