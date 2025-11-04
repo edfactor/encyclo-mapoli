@@ -52,12 +52,11 @@ public sealed class TerminatedEmployeeReportService
         {
             var retrieveStartTime = DateTime.UtcNow;
             IQueryable<MemberSlice> memberSliceQuery = await RetrieveMemberSlices(ctx, req);
-            List<MemberSlice> memberSliceUnion = await memberSliceQuery.ToListAsync(cancellationToken);
             var retrieveDuration = (DateTime.UtcNow - retrieveStartTime).TotalMilliseconds;
-            _logger.LogInformation("RetrieveMemberSlices completed in {DurationMs:F2}ms, returned {MemberCount} members", retrieveDuration, memberSliceUnion.Count);
+            
 
             var mergeStartTime = DateTime.UtcNow;
-            var result = await MergeAndCreateDataset(ctx, req, memberSliceUnion, cancellationToken);
+            var result = await MergeAndCreateDataset(ctx, req, memberSliceQuery, cancellationToken);
             var mergeDuration = (DateTime.UtcNow - mergeStartTime).TotalMilliseconds;
             int recordCount = result.Response?.Results != null ? result.Response.Results.Count() : 0;
             _logger.LogInformation("MergeAndCreateDataset completed in {DurationMs:F2}ms, processed {RecordCount} records", mergeDuration, recordCount);
@@ -78,11 +77,11 @@ public sealed class TerminatedEmployeeReportService
     private async Task<TerminatedEmployeeAndBeneficiaryResponse> MergeAndCreateDataset(
         ProfitSharingReadOnlyDbContext ctx,
         FilterableStartAndEndDateRequest req,
-        List<MemberSlice> memberSliceUnion,
+        IQueryable<MemberSlice> memberSliceUnion,
         CancellationToken cancellationToken)
     {
         var overallStart = DateTime.UtcNow;
-        _logger.LogInformation("MergeAndCreateDataset started with {MemberCount} members", memberSliceUnion.Count);
+        
         
         // Initialize report totals
         decimal totalVested = 0;
@@ -91,7 +90,7 @@ public sealed class TerminatedEmployeeReportService
         decimal totalBeneficiaryAllocation = 0;
 
         (short beginProfitYear, short endProfitYear) profitYearRange = GetProfitYearRange(req);
-        HashSet<int> ssns = memberSliceUnion.Select(ms => ms.Ssn).ToHashSet();
+        IQueryable<int> ssns = memberSliceUnion.Select(ms => ms.Ssn);
 
         // COBOL Transaction Year Boundary: Does NOT process transactions after the entered year
         // This is the YDATE in Cobol.  in December it is the current year, in January it is the previous year.
@@ -303,8 +302,6 @@ public sealed class TerminatedEmployeeReportService
             totalBeneficiaryAllocation += member.BeneficiaryAllocation;
         }
         var processingDuration = (DateTime.UtcNow - processingStart).TotalMilliseconds;
-        _logger.LogInformation("Member processing loop completed in {DurationMs:F2}ms: {ProcessedCount} included, {FilteredCount} filtered out of {TotalCount}", 
-            processingDuration, processedCount, filteredCount, memberSliceUnion.Count);
 
         var groupingStart = DateTime.UtcNow;
         PaginatedResponseDto<TerminatedEmployeeAndBeneficiaryDataResponseDto> grouped = await yearDetailsList
