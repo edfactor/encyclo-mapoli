@@ -2,6 +2,7 @@ import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useRef } from "react";
 import { Page } from "smart-ui-library";
+import { CAPTIONS } from "../../../constants";
 import EligibleEmployeesGrid from "./EligibleEmployeesGrid";
 import useEligibleEmployees from "./hooks/useEligibleEmployees";
 
@@ -13,11 +14,9 @@ const EligibleEmployees = () => {
     return <StatusDropdownActionNode />;
   };
 
-  const recordCount = searchResults?.response?.total || 0;
-
   return (
     <Page
-      label={`Get Eligible Employees (${recordCount} records)`}
+      label={`${CAPTIONS.ELIGIBLE_EMPLOYEES}`}
       actionNode={renderActionNode()}>
       <Grid
         container

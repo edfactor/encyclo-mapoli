@@ -1,11 +1,11 @@
 ﻿using System.Diagnostics;
 using System.Runtime;
-using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Data.Entities.Scheduling;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Clients;
@@ -13,6 +13,7 @@ using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Job = Demoulas.ProfitSharing.Data.Entities.Scheduling.Job;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
@@ -28,23 +29,32 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly Channel<MessageRequest<OracleEmployee[]>> _employeeChannel;
     private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly ILogger<EmployeeSyncService> _logger;
 
     public EmployeeSyncService(AtomFeedClient atomFeedClient,
         EmployeeFullSyncClient oracleEmployeeDataSyncClient,
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
         Channel<MessageRequest<OracleEmployee[]>> employeeChannel,
-        IServiceScopeFactory serviceScopeFactory)
+        IServiceScopeFactory serviceScopeFactory,
+        ILogger<EmployeeSyncService> logger)
     {
         _oracleEmployeeDataSyncClient = oracleEmployeeDataSyncClient;
         _atomFeedClient = atomFeedClient;
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
         _employeeChannel = employeeChannel;
         _serviceScopeFactory = serviceScopeFactory;
+        _logger = logger;
     }
 
     public async Task ExecuteFullSyncAsync(string requestedBy = Constants.SystemAccountName, CancellationToken cancellationToken = default)
     {
+        var stopwatch = Stopwatch.StartNew();
         using Activity? activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ExecuteFullSyncAsync), ActivityKind.Internal);
+
+        // Add telemetry tags
+        activity?.SetTag("sync.type", "full");
+        activity?.SetTag("requested.by", requestedBy);
+        activity?.SetTag("operation", "employee-full-sync");
 
         using var scope = _serviceScopeFactory.CreateScope();
         var demographicsService = scope.ServiceProvider.GetRequiredService<IDemographicsServiceInternal>();
@@ -65,21 +75,56 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         }, cancellationToken).ConfigureAwait(false);
 
         bool success = true;
+        int employeeBatchesProcessed = 0;
         try
         {
             await demographicsService.CleanAuditError(cancellationToken).ConfigureAwait(false);
             await foreach (OracleEmployee[] oracleHcmEmployees in _oracleEmployeeDataSyncClient.GetAllEmployees(cancellationToken).ConfigureAwait(false))
             {
                 await QueueEmployee(requestedBy, oracleHcmEmployees, cancellationToken).ConfigureAwait(false);
+                employeeBatchesProcessed++;
             }
+
+            // Record success metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "employee-full-sync"),
+                new("status", "success"),
+                new("service", nameof(EmployeeSyncService)));
+
+            activity?.SetTag("batches.processed", employeeBatchesProcessed);
+            activity?.SetTag("status", "success");
         }
         catch (Exception ex)
         {
             success = false;
             await demographicsService.AuditError(0, 0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken).ConfigureAwait(false);
+
+            // Record failure metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "employee-full-sync"),
+                new("status", "failed"),
+                new("service", nameof(EmployeeSyncService)));
+
+            EndpointTelemetry.EndpointErrorsTotal.Add(1,
+                new("error.type", ex.GetType().Name),
+                new("operation", "employee-full-sync"),
+                new("service", nameof(EmployeeSyncService)));
+
+            activity?.SetTag("error", true);
+            activity?.SetTag("error.type", ex.GetType().Name);
+            activity?.SetTag("error.message", ex.Message);
+
+            _logger.LogError(ex, "Employee full sync failed after processing {BatchCount} batches", employeeBatchesProcessed);
         }
         finally
         {
+            stopwatch.Stop();
+
+            // Record duration metrics
+            EndpointTelemetry.BusinessLogicDurationMs.Record(stopwatch.Elapsed.TotalMilliseconds,
+                new("operation", "employee-full-sync"),
+                new("service", nameof(EmployeeSyncService)));
+
             await _profitSharingDataContextFactory.UseWritableContext(db =>
             {
                 return db.Jobs.Where(j => j.Id == job.Id).ExecuteUpdateAsync(s => s
@@ -87,6 +132,9 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
                         .SetProperty(b => b.JobStatusId, b => success ? JobStatus.Constants.Completed : JobStatus.Constants.Failed),
                     cancellationToken: cancellationToken);
             }, cancellationToken).ConfigureAwait(false);
+
+            _logger.LogInformation("Employee full sync completed. Success: {Success}, Batches: {BatchCount}, Duration: {DurationMs}ms",
+                success, employeeBatchesProcessed, stopwatch.Elapsed.TotalMilliseconds);
 
 #pragma warning disable S1215
             GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
@@ -97,7 +145,14 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
 
     public async Task ExecuteDeltaSyncAsync(string requestedBy = Constants.SystemAccountName, CancellationToken cancellationToken = default)
     {
+        var stopwatch = Stopwatch.StartNew();
         using Activity? activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ExecuteDeltaSyncAsync), ActivityKind.Internal);
+
+        // Add telemetry tags
+        activity?.SetTag("sync.type", "delta");
+        activity?.SetTag("requested.by", requestedBy);
+        activity?.SetTag("operation", "employee-delta-sync");
+
         using var scope = _serviceScopeFactory.CreateScope();
         var demographicsService = scope.ServiceProvider.GetRequiredService<IDemographicsServiceInternal>();
 
@@ -116,35 +171,97 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
             return db.SaveChangesAsync(cancellationToken);
         }, cancellationToken).ConfigureAwait(false);
         bool success = true;
+        int totalChangedEmployees = 0;
         try
         {
             DateTimeOffset maxDate = DateTimeOffset.UtcNow;
             DateTimeOffset minDate = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
             {
-                return c.Demographics.MinAsync(d => (d.ModifiedAtUtc == null ? d.CreatedAtUtc : d.ModifiedAtUtc.Value) - TimeSpan.FromDays(7), cancellationToken: cancellationToken);
-            }).ConfigureAwait(false);
+                return c.Demographics
+                    .TagWith($"DeltaSync-GetMinModifiedDate")
+                    .MinAsync(d => (d.ModifiedAtUtc == null ? d.CreatedAtUtc : d.ModifiedAtUtc.Value) - TimeSpan.FromDays(7), cancellationToken: cancellationToken);
+            }, cancellationToken).ConfigureAwait(false);
 
-            IAsyncEnumerable<NewHireContext> newHires = _atomFeedClient.GetFeedDataAsync<NewHireContext>("newhire", minDate, maxDate, cancellationToken);
-            IAsyncEnumerable<AssignmentContext> assignments = _atomFeedClient.GetFeedDataAsync<AssignmentContext>("empassignment", minDate, maxDate, cancellationToken);
-            IAsyncEnumerable<EmployeeUpdateContext> updates = _atomFeedClient.GetFeedDataAsync<EmployeeUpdateContext>("empupdate", minDate, maxDate, cancellationToken);
-            IAsyncEnumerable<TerminationContext> terminations = _atomFeedClient.GetFeedDataAsync<TerminationContext>("termination", minDate, maxDate, cancellationToken);
+            // Fetch all feeds in parallel for better performance
+            var newHiresTask = MaterializeAsync(_atomFeedClient.GetFeedDataAsync<NewHireContext>("newhire", minDate, maxDate, cancellationToken), cancellationToken);
+            var assignmentsTask = MaterializeAsync(_atomFeedClient.GetFeedDataAsync<AssignmentContext>("empassignment", minDate, maxDate, cancellationToken), cancellationToken);
+            var updatesTask = MaterializeAsync(_atomFeedClient.GetFeedDataAsync<EmployeeUpdateContext>("empupdate", minDate, maxDate, cancellationToken), cancellationToken);
+            var terminationsTask = MaterializeAsync(_atomFeedClient.GetFeedDataAsync<TerminationContext>("termination", minDate, maxDate, cancellationToken), cancellationToken);
 
+            await Task.WhenAll(newHiresTask, assignmentsTask, updatesTask, terminationsTask).ConfigureAwait(false);
+
+            // Get results from completed tasks
+            var newHires = await newHiresTask.ConfigureAwait(false);
+            var assignments = await assignmentsTask.ConfigureAwait(false);
+            var updates = await updatesTask.ConfigureAwait(false);
+            var terminations = await terminationsTask.ConfigureAwait(false);
+
+            // Merge results and extract unique person IDs
             HashSet<long> people = new HashSet<long>();
-            await foreach (DeltaContextBase record in MergeAsyncEnumerables(newHires, updates, terminations, assignments, cancellationToken).ConfigureAwait(false))
+            foreach (var record in newHires.Cast<DeltaContextBase>()
+                .Concat(assignments)
+                .Concat(updates)
+                .Concat(terminations))
             {
                 people.Add(record.PersonId);
             }
 
+            totalChangedEmployees = people.Count;
+
+            // Record feed-specific metrics
+            activity?.SetTag("feed.newhires", newHires.Count);
+            activity?.SetTag("feed.assignments", assignments.Count);
+            activity?.SetTag("feed.updates", updates.Count);
+            activity?.SetTag("feed.terminations", terminations.Count);
+            activity?.SetTag("employees.changed", totalChangedEmployees);
+
+            EndpointTelemetry.RecordCountsProcessed.Record(totalChangedEmployees,
+                new("operation", "employee-delta-sync"),
+                new("record.type", "changed-employees"),
+                new("service", nameof(EmployeeSyncService)));
+
             await TrySyncEmployeeFromOracleHcm(requestedBy, people, cancellationToken).ConfigureAwait(false);
+
+            // Record success metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "employee-delta-sync"),
+                new("status", "success"),
+                new("service", nameof(EmployeeSyncService)));
+
+            activity?.SetTag("status", "success");
 
         }
         catch (Exception ex)
         {
             success = false;
             await demographicsService.AuditError(0, 0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken).ConfigureAwait(false);
+
+            // Record failure metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "employee-delta-sync"),
+                new("status", "failed"),
+                new("service", nameof(EmployeeSyncService)));
+
+            EndpointTelemetry.EndpointErrorsTotal.Add(1,
+                new("error.type", ex.GetType().Name),
+                new("operation", "employee-delta-sync"),
+                new("service", nameof(EmployeeSyncService)));
+
+            activity?.SetTag("error", true);
+            activity?.SetTag("error.type", ex.GetType().Name);
+            activity?.SetTag("error.message", ex.Message);
+
+            _logger.LogError(ex, "Employee delta sync failed. Changed employees: {EmployeeCount}", totalChangedEmployees);
         }
         finally
         {
+            stopwatch.Stop();
+
+            // Record duration metrics
+            EndpointTelemetry.BusinessLogicDurationMs.Record(stopwatch.Elapsed.TotalMilliseconds,
+                new("operation", "employee-delta-sync"),
+                new("service", nameof(EmployeeSyncService)));
+
             await _profitSharingDataContextFactory.UseWritableContext(db =>
             {
                 return db.Jobs.Where(j => j.Id == job.Id).ExecuteUpdateAsync(s => s
@@ -152,6 +269,9 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
                         .SetProperty(b => b.JobStatusId, b => success ? JobStatus.Constants.Completed : JobStatus.Constants.Failed),
                     cancellationToken: cancellationToken);
             }, cancellationToken).ConfigureAwait(false);
+
+            _logger.LogInformation("Employee delta sync completed. Success: {Success}, Changed Employees: {EmployeeCount}, Duration: {DurationMs}ms",
+                success, totalChangedEmployees, stopwatch.Elapsed.TotalMilliseconds);
         }
     }
 
@@ -186,42 +306,16 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         return _employeeChannel.Writer.WriteAsync(message, cancellationToken);
     }
 
-
     /// <summary>
-    /// Merges multiple asynchronous enumerables of <see cref="T"/> into a single asynchronous enumerable.
+    /// Materializes an IAsyncEnumerable into a List asynchronously.
     /// </summary>
-    /// <param name="first">The first asynchronous enumerable to merge.</param>
-    /// <param name="second">The second asynchronous enumerable to merge.</param>
-    /// <param name="third">The third asynchronous enumerable to merge.</param>
-    /// <param name="fourth">The fourth asynchronous enumerable to merge.</param>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>
-    /// An asynchronous enumerable that yields elements from all provided enumerables in sequence.
-    /// </returns>
-    private static async IAsyncEnumerable<DeltaContextBase> MergeAsyncEnumerables(IAsyncEnumerable<DeltaContextBase> first,
-        IAsyncEnumerable<DeltaContextBase> second,
-        IAsyncEnumerable<DeltaContextBase> third,
-        IAsyncEnumerable<DeltaContextBase> fourth,
-        [EnumeratorCancellation] CancellationToken cancellationToken)
+    private static async Task<List<T>> MaterializeAsync<T>(IAsyncEnumerable<T> source, CancellationToken cancellationToken)
     {
-        await foreach (DeltaContextBase item in first.WithCancellation(cancellationToken).ConfigureAwait(false))
+        var result = new List<T>();
+        await foreach (var item in source.WithCancellation(cancellationToken).ConfigureAwait(false))
         {
-            yield return item;
+            result.Add(item);
         }
-
-        await foreach (DeltaContextBase item in second.WithCancellation(cancellationToken).ConfigureAwait(false))
-        {
-            yield return item;
-        }
-
-        await foreach (DeltaContextBase item in third.WithCancellation(cancellationToken).ConfigureAwait(false))
-        {
-            yield return item;
-        }
-
-        await foreach (DeltaContextBase item in fourth.WithCancellation(cancellationToken).ConfigureAwait(false))
-        {
-            yield return item;
-        }
+        return result;
     }
 }

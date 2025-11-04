@@ -122,7 +122,7 @@ internal sealed class MissiveService : IMissiveService
                 }
 
                 return Task.FromResult(true);
-            });
+            }, cancellation);
             return result;
         }
     }
@@ -132,6 +132,6 @@ internal sealed class MissiveService : IMissiveService
         return _dataContextFactory.UseReadOnlyContext(ctx =>
         {
             return ctx.Missives.Select(x => new MissiveResponse() { Id = x.Id, Message = x.Message, Description = x.Description, Severity = x.Severity }).ToListAsync(token);
-        });
+        }, token);
     }
 }

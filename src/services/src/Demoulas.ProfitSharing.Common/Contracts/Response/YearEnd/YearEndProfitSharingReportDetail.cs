@@ -3,7 +3,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
-public sealed record YearEndProfitSharingReportDetail : IIsExecutive
+public sealed record YearEndProfitSharingReportDetail : IIsExecutive, IProfitYearRequest
 {
     public required int BadgeNumber { get; set; }
     public required short ProfitYear { get; set; }
@@ -18,6 +18,8 @@ public sealed record YearEndProfitSharingReportDetail : IIsExecutive
     public required decimal Wages { get; set; }
     public required decimal PriorBalance { get; set; }
     public required decimal Hours { get; set; }
+
+    [MaskSensitive]
     public short Points { get; set; }
     public required bool IsUnder21 { get; set; }
     public required bool IsNew { get; set; }

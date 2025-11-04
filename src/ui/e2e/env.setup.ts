@@ -38,7 +38,7 @@ export async function impersonateRole(page: Page, roleName: string) {
   ];
 
   // Try to find the combobox, retrying a few times and attempting to open the side drawer
-  let combo: any = null;
+  let combo: ReturnType<typeof page.getByRole> | null = null;
   const maxAttempts = 6; // increase attempts for slower or loaded environments
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     for (const loc of candidateLocators) {
@@ -47,7 +47,7 @@ export async function impersonateRole(page: Page, roleName: string) {
         await loc.waitFor({ state: "visible", timeout: 3000 });
         combo = loc;
         break;
-      } catch (e) {
+      } catch (_e) {
         // ignore and try next locator
       }
     }
@@ -72,7 +72,7 @@ export async function impersonateRole(page: Page, roleName: string) {
 
       // small backoff to allow DOM to update
       await page.waitForTimeout(700);
-    } catch (e) {
+    } catch (_e) {
       // swallow and continue attempts
     }
   }
@@ -80,7 +80,6 @@ export async function impersonateRole(page: Page, roleName: string) {
   if (!combo) {
     const message =
       "impersonateRole: roles combobox not found after retries. Ensure the page exposes a combobox with accessible name 'roles' or check the app state.";
-    // eslint-disable-next-line no-console
     console.error(message);
     throw new Error(message);
   }
@@ -101,7 +100,7 @@ export async function impersonateRole(page: Page, roleName: string) {
     await page.reload();
     await page.waitForLoadState("networkidle");
     return;
-  } catch (err) {
+  } catch (_err) {
     // Retry with force clicks but keep short timeouts to avoid global test timeout hangs
     try {
       await combo.click({ force: true, timeout: 3000 });
@@ -113,7 +112,7 @@ export async function impersonateRole(page: Page, roleName: string) {
           await opt.waitFor({ state: "visible", timeout: 1000 });
           optionFound = true;
           break;
-        } catch (e) {
+        } catch (_e) {
           // small wait and retry
           await page.waitForTimeout(300);
         }
@@ -127,11 +126,10 @@ export async function impersonateRole(page: Page, roleName: string) {
       await page.reload();
       await page.waitForLoadState("networkidle");
       return;
-    } catch (err2) {
+    } catch (_err2) {
       // Expose a helpful error for debugging flakiness in CI
-      // eslint-disable-next-line no-console
-      console.error("impersonateRole failed", err2);
-      throw err2;
+      console.error("impersonateRole failed", _err2);
+      throw _err2;
     }
   }
 }
@@ -240,7 +238,7 @@ export async function navigateToPage(
       try {
         await page.keyboard.press("Escape");
         await page.waitForTimeout(500);
-      } catch (e) {
+      } catch (_e) {
         // Ignore errors when pressing Escape
       }
     }

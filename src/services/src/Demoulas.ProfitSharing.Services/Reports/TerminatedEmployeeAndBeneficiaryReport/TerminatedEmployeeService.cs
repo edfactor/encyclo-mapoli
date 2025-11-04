@@ -9,28 +9,44 @@ namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficia
 
 public class TerminatedEmployeeService : ITerminatedEmployeeService
 {
+    private readonly ICalendarService _calendarService;
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
-    private readonly TotalService _totalService;
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly ILogger<TerminatedEmployeeReportService> _logger;
+    private readonly TotalService _totalService;
+    private readonly IYearEndService _yearEndService;
 
     public TerminatedEmployeeService(IProfitSharingDataContextFactory dataContextFactory,
         TotalService totalService,
         IDemographicReaderService demographicReaderService,
-        ILogger<TerminatedEmployeeReportService> logger)
+        ILogger<TerminatedEmployeeReportService> logger,
+        ICalendarService calendarService,
+        IYearEndService yearEndService)
     {
         _dataContextFactory = dataContextFactory;
         _totalService = totalService;
         _demographicReaderService = demographicReaderService;
         _logger = logger;
+        _calendarService = calendarService;
+        _yearEndService = yearEndService;
     }
 
 
     public Task<TerminatedEmployeeAndBeneficiaryResponse> GetReportAsync(StartAndEndDateRequest req, CancellationToken ct)
     {
-        TerminatedEmployeeReportService reportServiceGenerator = new(_dataContextFactory, _totalService, _demographicReaderService, _logger);
-        return reportServiceGenerator.CreateDataAsync(req, ct);
+        TerminatedEmployeeReportService reportServiceGenerator = new(_dataContextFactory, _totalService, _demographicReaderService, _logger, _calendarService, _yearEndService);
+
+        // Convert StartAndEndDateRequest to FilterableStartAndEndDateRequest
+        var filterableRequest = new FilterableStartAndEndDateRequest
+        {
+            BeginningDate = req.BeginningDate,
+            EndingDate = req.EndingDate,
+            Skip = req.Skip,
+            Take = req.Take,
+            SortBy = req.SortBy,
+            IsSortDescending = req.IsSortDescending
+        };
+
+        return reportServiceGenerator.CreateDataAsync(filterableRequest, ct);
     }
-
-
 }

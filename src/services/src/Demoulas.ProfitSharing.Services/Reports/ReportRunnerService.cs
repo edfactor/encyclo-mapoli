@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -8,30 +10,31 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
 public class ReportRunnerService : IReportRunnerService
 {
+    private readonly IAdhocBeneficiariesReport _adhocBeneficiariesReport;
+    private readonly IBreakdownService _breakdownService;
+    private readonly ICleanupReportService _cleanupReportService;
+    private readonly IDuplicateNamesAndBirthdaysService _duplicateNamesAndBirthdaysService;
+    private readonly IFrozenReportService _frozenReportService;
+    private readonly IGetEligibleEmployeesService _getEligibleEmployeesService;
+    private readonly IMasterInquiryService _masterInquiryService;
+    private readonly INegativeEtvaReportService _negativeEtvaReportService;
+    private readonly IPayrollDuplicateSsnReportService _payrollDuplicateSsnReportService;
     private readonly IProfitShareUpdateService _profitShareUpdateService;
     private readonly Dictionary<string, Func<CancellationToken, Task<Dictionary<string, object>>>> _reports;
     private readonly ITerminatedEmployeeService _terminatedEmployeeService;
     private readonly IUnforfeitService _unForfeitService;
-    private readonly ICleanupReportService _cleanupReportService;
-    private readonly IPayrollDuplicateSsnReportService _payrollDuplicateSsnReportService;
-    private readonly INegativeEtvaReportService _negativeEtvaReportService;
-    private readonly IGetEligibleEmployeesService _getEligibleEmployeesService;
-    private readonly IBreakdownService _breakdownService;
-    private readonly IFrozenReportService _frozenReportService;
-    private readonly IMasterInquiryService _masterInquiryService;
-    private readonly IAdhocBeneficiariesReport _adhocBeneficiariesReport;
 
 
     public ReportRunnerService(ITerminatedEmployeeService terminatedEmployeeService,
         IProfitShareUpdateService profitShareUpdateService,
         IUnforfeitService unForfeitService,
         ICleanupReportService cleanupReportService,
+        IDuplicateNamesAndBirthdaysService duplicateNamesAndBirthdaysService,
         IPayrollDuplicateSsnReportService payrollDuplicateSsnReportService,
         INegativeEtvaReportService negativeEtvaReportService,
         IGetEligibleEmployeesService getEligibleEmployeesService,
@@ -44,6 +47,7 @@ public class ReportRunnerService : IReportRunnerService
         _profitShareUpdateService = profitShareUpdateService;
         _unForfeitService = unForfeitService;
         _cleanupReportService = cleanupReportService;
+        _duplicateNamesAndBirthdaysService = duplicateNamesAndBirthdaysService;
         _payrollDuplicateSsnReportService = payrollDuplicateSsnReportService;
         _negativeEtvaReportService = negativeEtvaReportService;
         _getEligibleEmployeesService = getEligibleEmployeesService;
@@ -55,84 +59,85 @@ public class ReportRunnerService : IReportRunnerService
 
         _reports = new Dictionary<string, Func<CancellationToken, Task<Dictionary<string, object>>>>
         {
-            ["demographicBadgesNotInPayProfit"] = async ct => await Handle("demographicBadgesNotInPayProfit", ct, async () =>
+            ["demographicBadgesNotInPayProfit"] = async ct => await InvokeReport("demographicBadgesNotInPayProfit", ct, async () =>
             {
-                var r = await _cleanupReportService.GetDemographicBadgesNotInPayProfitAsync(new ProfitYearRequest { ProfitYear = wallClockYear }, ct);
+                ReportResponseBase<DemographicBadgesNotInPayProfitResponse> r =
+                    await _cleanupReportService.GetDemographicBadgesNotInPayProfitAsync(new ProfitYearRequest { ProfitYear = wallClockYear }, ct);
                 return (r.Response.Total, r.Response.Results.Count());
             }),
-            ["duplicateNamesAndBirthdays"] = async ct => await Handle("duplicateNamesAndBirthdays", ct, async () =>
+            ["duplicateNamesAndBirthdays"] = async ct => await InvokeReport("duplicateNamesAndBirthdays", ct, async () =>
             {
-                var r = await _cleanupReportService.GetDuplicateNamesAndBirthdaysAsync(new ProfitYearRequest { ProfitYear = wallClockYear }, ct);
+                ReportResponseBase<DuplicateNamesAndBirthdaysResponse> r =
+                    await _duplicateNamesAndBirthdaysService.GetDuplicateNamesAndBirthdaysAsync(new ProfitYearRequest { ProfitYear = wallClockYear }, ct);
                 return (r.Response.Total, r.Response.Results.Count());
             }),
-            ["negativeEtvaReportService"] = async ct => await Handle("negativeEtvaReportService", ct, async () =>
+            ["negativeEtvaReportService"] = async ct => await InvokeReport("negativeEtvaReportService", ct, async () =>
             {
-                var r = await _negativeEtvaReportService.GetNegativeETVAForSsNsOnPayProfitResponseAsync(new ProfitYearRequest { ProfitYear = wallClockYear }, ct);
+                ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse> r =
+                    await _negativeEtvaReportService.GetNegativeETVAForSsNsOnPayProfitResponseAsync(new ProfitYearRequest { ProfitYear = wallClockYear }, ct);
                 return (r.Response.Total, r.Response.Results.Count());
             }),
-            ["distributionsAndForfeiture"] = async ct => await Handle("distributionsAndForfeiture", ct, async () =>
+            ["distributionsAndForfeiture"] = async ct => await InvokeReport("distributionsAndForfeiture", ct, async () =>
             {
-                var result = await _cleanupReportService.GetDistributionsAndForfeitureAsync(new DistributionsAndForfeituresRequest
-                {
-                    StartDate = new DateOnly(wallClockYear, 1, 1),
-                    EndDate = new DateOnly(wallClockYear, 12, 31)
-                }, ct);
+                Result<DistributionsAndForfeitureTotalsResponse> result = await _cleanupReportService.GetDistributionsAndForfeitureAsync(
+                    new DistributionsAndForfeituresRequest { StartDate = new DateOnly(wallClockYear, 1, 1), EndDate = new DateOnly(wallClockYear, 12, 31) }, ct);
 
                 if (result.IsError)
                 {
                     return (0, 0); // Return empty counts when validation fails
                 }
 
-                var r = result.Value!;
+                DistributionsAndForfeitureTotalsResponse r = result.Value!;
                 return (r.Response.Total, r.Response.Results.Count());
             }),
-            ["duplicateSsns"] = async ct => await Handle("duplicateSsns", ct, async () =>
+            ["duplicateSsns"] = async ct => await InvokeReport("duplicateSsns", ct, async () =>
             {
-                var r = await _payrollDuplicateSsnReportService.GetDuplicateSsnAsync(new(), ct);
+                ReportResponseBase<PayrollDuplicateSsnResponseDto> r = await _payrollDuplicateSsnReportService.GetDuplicateSsnAsync(new SortedPaginationRequestDto(), ct);
                 return (r.Response.Total, r.Response.Results.Count());
             }),
-            ["terminations"] = async ct => await Handle("terminations", ct, async () =>
+            ["terminations"] = async ct => await InvokeReport("terminations", ct, async () =>
             {
                 TerminatedEmployeeAndBeneficiaryResponse result = await _terminatedEmployeeService
                     .GetReportAsync(StartAndEndDateRequest.RequestExample(), ct);
                 return (result.Response.Total, result.Response.Results.Count());
             }),
-            ["profitShareUpdate"] = async ct => await Handle("profitShareUpdate", ct, async () =>
+            ["profitShareUpdate"] = async ct => await InvokeReport("profitShareUpdate", ct, async () =>
             {
                 ProfitShareUpdateResponse result = await _profitShareUpdateService
                     .ProfitShareUpdate(ProfitShareUpdateRequest.RequestExample(), ct);
                 return (result.Response.Total, result.Response.Results.Count());
             }),
-            ["unforfeit"] = async ct => await Handle("unforfeit", ct, async () =>
+            ["unforfeit"] = async ct => await InvokeReport("unforfeit", ct, async () =>
             {
                 ReportResponseBase<UnforfeituresResponse> result = await _unForfeitService
                     .FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(
-                        StartAndEndDateRequest.RequestExample(), ct);
+                        FilterableStartAndEndDateRequest.RequestExample(), ct);
                 return (result.Response.Total, result.Response.Results.Count());
             }),
-            ["eligibleEmployees"] = async ct => await Handle("eligibleEmployees", ct, async () =>
+            ["eligibleEmployees"] = async ct => await InvokeReport("eligibleEmployees", ct, async () =>
             {
-                var r = await _getEligibleEmployeesService.GetEligibleEmployeesAsync(new ProfitYearRequest { ProfitYear = wallClockYear }, ct);
+                GetEligibleEmployeesResponse r = await _getEligibleEmployeesService.GetEligibleEmployeesAsync(new ProfitYearRequest { ProfitYear = wallClockYear }, ct);
                 return (r.Response.Total, r.Response.Results.Count());
             }),
-            ["breakdownByStore"] = async ct => await Handle("breakdownByStore", ct, async () =>
+            ["breakdownByStore"] = async ct => await InvokeReport("breakdownByStore", ct, async () =>
             {
-                var r = await _breakdownService.GetActiveMembersByStore(new BreakdownByStoreRequest { ProfitYear = wallClockYear }, ct);
+                ReportResponseBase<MemberYearSummaryDto> r = await _breakdownService.GetActiveMembersByStore(new BreakdownByStoreRequest { ProfitYear = wallClockYear }, ct);
                 return (r.Response.Total, r.Response.Results.Count());
             }),
-            ["balanceByAge"] = async ct => await Handle("balanceByAge", ct, async () =>
+            ["balanceByAge"] = async ct => await InvokeReport("balanceByAge", ct, async () =>
             {
-                var r = await _frozenReportService.GetBalanceByAgeYearAsync(new FrozenReportsByAgeRequest { ProfitYear = wallClockYear }, ct);
+                BalanceByAge r = await _frozenReportService.GetBalanceByAgeYearAsync(new FrozenReportsByAgeRequest { ProfitYear = wallClockYear }, ct);
                 return (r.Response.Total, r.Response.Results.Count());
             }),
-            ["masterInquirySearch"] = async ct => await Handle("masterInquirySearch", ct, async () =>
+            ["masterInquirySearch"] = async ct => await InvokeReport("masterInquirySearch", ct, async () =>
             {
-                var r = await _masterInquiryService.GetMembersAsync(new MasterInquiryRequest { ProfitYear = wallClockYear }, ct);
+                PaginatedResponseDto<MemberDetails> r = await _masterInquiryService.GetMembersAsync(new MasterInquiryRequest { ProfitYear = wallClockYear }, ct);
                 return (r.Total, r.Results.Count());
             }),
-            ["adhocBeneficiaries"] = async ct => await Handle("adhocBeneficiaries", ct, async () =>
+            ["adhocBeneficiaries"] = async ct => await InvokeReport("adhocBeneficiaries", ct, async () =>
             {
-                var r = await _adhocBeneficiariesReport.GetAdhocBeneficiariesReportAsync(new AdhocBeneficiariesReportRequest(true) { ProfitYear = wallClockYear }, ct);
+                AdhocBeneficiariesReportResponse r =
+                    await _adhocBeneficiariesReport.GetAdhocBeneficiariesReportAsync(new AdhocBeneficiariesReportRequest(true) { ProfitYear = wallClockYear }, ct);
                 return (r.Response.Total, r.Response.Results.Count());
             })
         };
@@ -162,10 +167,15 @@ public class ReportRunnerService : IReportRunnerService
             return await runner(cancellationToken);
         }
 
+        if (reportSelector == "report-list")
+        {
+            return new Dictionary<string, object> { ["report-list"] = _reports.Keys.ToList() };
+        }
+
         return new Dictionary<string, object> { ["error"] = "report not found" };
     }
 
-    private async Task<Dictionary<string, object>> Handle(
+    private async Task<Dictionary<string, object>> InvokeReport(
         string reportSelector,
         CancellationToken cancellationToken,
         Func<Task<(long Total, int)>> func)

@@ -87,7 +87,7 @@ public static class StockFactory
             PayFrequencyId = 0,
             PayFrequency = null,
             TerminationCodeId = null,
-            TerminationCode = null,
+            TerminationCode = new TerminationCode { Id = TerminationCode.Constants.AnotherJob, Name = "AnotherJob" },
             EmploymentStatusId = '\0',
             EmploymentStatus = null,
             PayProfits = [],

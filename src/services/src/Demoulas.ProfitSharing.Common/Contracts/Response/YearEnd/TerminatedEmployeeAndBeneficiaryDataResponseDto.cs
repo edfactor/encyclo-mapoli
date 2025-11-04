@@ -5,33 +5,18 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto : IIsExecutive
 {
-    public required int BadgeNumber { get; set; }
-    public required short PsnSuffix { get; set; }
+    public required long PSN { get; set; }
 
-    [MaskSensitive]
-    public required string? Name { get; set; }
-    public bool IsExecutive { get; set; }
-
-    public string BadgePSn
-    {
-        get
-        {
-            if (PsnSuffix == 0)
-            {
-                return BadgeNumber.ToString();
-            }
-            return $"{BadgeNumber}{PsnSuffix}";
-        }
-    }
+    [MaskSensitive] public required string? Name { get; set; }
 
     public List<TerminatedEmployeeAndBeneficiaryYearDetailDto> YearDetails { get; set; } = [];
+    public bool IsExecutive { get; set; }
 
     public static TerminatedEmployeeAndBeneficiaryDataResponseDto ResponseExample()
     {
         return new TerminatedEmployeeAndBeneficiaryDataResponseDto
         {
-            BadgeNumber = 777123,
-            PsnSuffix = 100,
+            PSN = 7771230100, // ie. Bene or Empl
             Name = "Example, Joe F",
             YearDetails =
             [
@@ -55,9 +40,8 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto : IIsExecut
     }
 }
 
-public sealed record TerminatedEmployeeAndBeneficiaryYearDetailDto : IIsExecutive
+public sealed record TerminatedEmployeeAndBeneficiaryYearDetailDto : IIsExecutive, IProfitYearRequest
 {
-    public short ProfitYear { get; set; }
     public decimal BeginningBalance { get; set; }
     public decimal BeneficiaryAllocation { get; set; }
     public decimal DistributionAmount { get; set; }
@@ -71,4 +55,6 @@ public sealed record TerminatedEmployeeAndBeneficiaryYearDetailDto : IIsExecutiv
     public bool HasForfeited { get; set; }
     public decimal? SuggestedForfeit { get; set; }
     public bool IsExecutive { get; set; }
+    public short ProfitYear { get; set; }
+    public byte EnrollmentId { get; set; }
 }

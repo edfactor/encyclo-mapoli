@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Demoulas.Security" />
+    <PackageReference Include="Demoulas.Util" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
   </ItemGroup>
 

@@ -1,0 +1,35 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
+public sealed record BeneficiaryDisbursementRequest
+{
+    public required int BadgeNumber { get; init; }
+    public short? PsnSuffix { get; init; }
+    public bool IsDeceased { get; init; }
+    public required List<RecipientBeneficiary> Beneficiaries { get; init; }
+
+    public static BeneficiaryDisbursementRequest SampleRequest()
+    {
+        return new BeneficiaryDisbursementRequest
+        {
+            BadgeNumber = 700024,
+            IsDeceased = true,
+            Beneficiaries = new List<RecipientBeneficiary>
+            {
+                new RecipientBeneficiary { PsnSuffix = 1, Percentage = 50.0m },
+                new RecipientBeneficiary { PsnSuffix = 2, Percentage = 50.0m }
+            }
+        };
+    }
+}
+
+public sealed record RecipientBeneficiary
+{
+    public short PsnSuffix { get; init; }
+    public decimal? Percentage { get; init; }
+    public decimal? Amount { get; init; }
+}

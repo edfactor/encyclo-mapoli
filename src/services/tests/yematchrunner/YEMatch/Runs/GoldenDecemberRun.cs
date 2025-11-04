@@ -20,7 +20,6 @@ public class GoldenDecemberRun : Runnable
         await Run(Specify(
             "R0", // import obfuscated
             nameof(DropBadBenesReady),
-            nameof(FixFrozenReady),
             "R1", // "PROFSHARE-SSN-CLEANUP-RPTS"
             "R2", // TERM-REHIRE
             "R3", // PROF-TERM

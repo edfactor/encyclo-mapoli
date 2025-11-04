@@ -3,9 +3,6 @@ import { MENU_LABELS } from "./constants";
 import { NavigationDto, NavigationResponseDto } from "./reduxstore/types";
 import { RouteCategory } from "./types/MenuTypes";
 
-// Navigation menu ID constants
-const YEAR_END_MENU_ID = 55;
-
 export const MenuData = (data: NavigationResponseDto | undefined): RouteCategory[] => {
   if (!data || !data.navigation) {
     return [];
@@ -36,108 +33,74 @@ export const MenuData = (data: NavigationResponseDto | undefined): RouteCategory
 
 // Helper function to create a RouteCategory from NavigationDto
 const createRouteCategory = (navigationItem: NavigationDto): RouteCategory => {
+  // Don't show popup menus for sections that use the drawer
+  // These sections should open the drawer when clicked, not show a popup
+  const drawerOnlySections = ["INQUIRIES", "YEAR END", "DISTRIBUTIONS", "IT DEVOPS"];
+  const shouldShowPopup = !drawerOnlySections.includes(navigationItem.title);
+
   return {
     menuLabel: navigationItem.title,
     parentRoute: navigationItem.url || navigationItem.title.toLowerCase(), // Use URL field for proper routing
     disabled: navigationItem.disabled,
     underlined: false,
     roles: navigationItem.requiredRoles,
-    items: navigationItem.items && navigationItem.items.length > 0 ? getRouteData(navigationItem.items) : undefined
+    items:
+      shouldShowPopup && navigationItem.items && navigationItem.items.length > 0
+        ? getRouteData(navigationItem.items)
+        : undefined
   };
 };
 
 const getRouteData = (data: NavigationDto[]): RouteData[] => {
-  return data
+  const routes: RouteData[] = [];
+
+  data
     .filter((v) => v.isNavigable ?? true)
-    .map((value) => ({
-      caption: value.title,
-      route: value.url,
-      disabled: false,
-      divider: false,
-      requiredPermission: ""
-    }));
+    .forEach((value) => {
+      // If the item has a URL, add it directly to the popup
+      if (value.url) {
+        routes.push({
+          caption: value.title,
+          route: value.url,
+          disabled: false,
+          divider: false,
+          requiredPermission: ""
+        });
+      } else if (value.items && value.items.length > 0) {
+        // If no URL but has children (it's a group), recursively get child routes
+        routes.push(...getRouteData(value.items));
+      }
+    });
+
+  return routes;
 };
-
-interface MenuLevel {
-  navigationId?: number;
-  mainTitle: string;
-  statusId?: number;
-  statusName?: string;
-  topPage: TopPage[];
-}
-
-interface TopPage {
-  navigationId?: number;
-  topTitle: string;
-  topRoute?: string;
-  statusId?: number;
-  statusName?: string;
-  disabled?: boolean;
-  subPages: SubPages[];
-}
-
-interface SubPages {
-  navigationId?: number;
-  subTitle?: string;
-  subRoute?: string;
-  statusId?: number;
-  statusName?: string;
-  disabled?: boolean;
-}
 
 export const drawerTitle = MENU_LABELS.YEAR_END;
 
-const addSubTitle = (subTitle?: string): string => {
-  return subTitle ? ` (${subTitle})` : "";
-};
-
-export const menuLevels = (data: NavigationResponseDto | undefined): MenuLevel[] => {
-  if (!data || !data.navigation) {
-    return [];
-  }
-
-  // Find the Year End navigation item
-  const yearEndList = data.navigation.find((m) => m.title === "YEAR END");
-  if (!yearEndList || !yearEndList.items) {
-    return [];
-  }
-
-  return yearEndList.items
-    .filter((v) => v.isNavigable ?? true)
-    .map((value) => ({
-      navigationId: value.id,
-      statusId: value.statusId,
-      statusName: value.statusName,
-      mainTitle: value.title + addSubTitle(value.subTitle),
-      topPage: value.items && value.items.length > 0 ? populateTopPage(value.items) : []
-    }));
-};
-
-const populateTopPage = (data: NavigationDto[]): TopPage[] => {
-  return data
-    .filter((v) => v.isNavigable ?? true)
-    .map((value) => ({
-      navigationId: value.id,
-      statusId: value.statusId,
-      statusName: value.statusName,
-      topTitle: value.title + addSubTitle(value.subTitle),
-      disabled: value.disabled,
-      topRoute: value.url,
-      subPages: value.items && value.items.length > 0 ? populateSubPages(value.items) : []
-    }));
-};
-
-const populateSubPages = (data: NavigationDto[]): SubPages[] => {
-  return data
-    .filter((v) => v.isNavigable ?? true)
-    .map((value) => ({
-      navigationId: value.id,
-      statusId: value.statusId,
-      statusName: value.statusName,
-      subTitle: value.title + addSubTitle(value.subTitle),
-      disabled: value.disabled,
-      subRoute: value.url
-    }));
-};
+// ============================================================================
+// REMOVED: menuLevels() and related functions
+// ============================================================================
+// The hardcoded menuLevels() function has been removed in favor of the new
+// 100% data-driven navigation system. The new PSDrawer component uses:
+//
+// - getL0NavigationByTitle(data, "YEAR END") - Dynamic lookup of L0 items
+// - getDrawerItemsForSection(data, "YEAR END") - Get drawer items for any section
+// - createDrawerConfig("YEAR END") - Dynamic configuration
+//
+// These functions are located in:
+// - src/ui/src/components/Drawer/utils/navigationStructureUtils.ts
+// - src/ui/src/components/Drawer/models/DrawerConfig.ts
+//
+// The old approach:
+// - ❌ Hardcoded "YEAR END" search by string literal
+// - ❌ Limited to 3-level depth (MenuLevel → TopPage → SubPages)
+// - ❌ Not reusable for other navigation sections
+//
+// The new approach:
+// - ✅ 100% data-driven from API (parentId === null for L0)
+// - ✅ Supports unlimited nesting depth via recursive rendering
+// - ✅ Works with ANY L0 navigation section
+// - ✅ No hardcoded navigation items or IDs
+// ============================================================================
 
 export default MenuData;

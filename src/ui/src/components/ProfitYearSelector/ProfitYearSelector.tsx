@@ -1,6 +1,6 @@
 import { FormControl, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import InputLabel from "@mui/material/InputLabel";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetProfitYearSelectorFrozenDataQuery } from "reduxstore/api/ItOperationsApi";
 import { useLazyGetAccountingYearQuery } from "reduxstore/api/LookupsApi";
@@ -45,17 +45,19 @@ const ProfitYearSelector = ({
   const hasFrozenData = profitYearSelectorData?.results && profitYearSelectorData.results.length > 0;
 
   // Build years to display
-  const yearsToDisplay: number[] = [];
-  if (!yearsToDisplay.includes(thisYear)) {
-    yearsToDisplay.push(thisYear);
-  }
-  if (hasFrozenData && activeFrozenState?.profitYear && !yearsToDisplay.includes(activeFrozenState.profitYear)) {
-    yearsToDisplay.push(activeFrozenState.profitYear);
-  }
-
-  if (!yearsToDisplay.includes(thisYear - 1)) {
-    yearsToDisplay.push(thisYear - 1);
-  }
+  const yearsToDisplay = useMemo<number[]>(() => {
+    const list: number[] = [];
+    if (!list.includes(thisYear)) {
+      list.push(thisYear);
+    }
+    if (hasFrozenData && activeFrozenState?.profitYear && !list.includes(activeFrozenState.profitYear)) {
+      list.push(activeFrozenState.profitYear);
+    }
+    if (!list.includes(thisYear - 1)) {
+      list.push(thisYear - 1);
+    }
+    return list;
+  }, [thisYear, hasFrozenData, activeFrozenState?.profitYear]);
 
   // Fetch accounting year data for each year
   const [accountingYearData, setAccountingYearData] = useState<Record<number, { startDate: string; endDate: string }>>(

@@ -1,18 +1,13 @@
 import { Box, Chip, Typography } from "@mui/material";
 import { formatNumberWithComma } from "smart-ui-library";
 import { PagedReportResponse } from "../reduxstore/types";
-import { mmDDYYFormat } from "../utils/dateUtils";
-import EnvironmentUtils from "../utils/environmentUtils";
+import { shouldShowDataSource, renderDateRangeLabel } from "./ReportSummaryUtils";
 
 interface ReportSummaryProps<T> {
   report: PagedReportResponse<T>;
 }
 
-export const shouldShowDataSource = (): boolean => {
-  return EnvironmentUtils.isDevelopmentOrQA;
-};
-
-export function ReportSummary<T>({ report }: ReportSummaryProps<T>) {
+function ReportSummary<T>({ report }: ReportSummaryProps<T>) {
   return (
     <Box
       className="flex flex-wrap items-center gap-2"
@@ -26,7 +21,7 @@ export function ReportSummary<T>({ report }: ReportSummaryProps<T>) {
       )}
       <Box className="flex flex-wrap gap-1">
         <Chip
-          label={`Report range: ${mmDDYYFormat(report.startDate)} to ${mmDDYYFormat(report.endDate)}`}
+          label={renderDateRangeLabel(report)}
           className="bg-dsm-grey-hover"
         />
         {shouldShowDataSource() && (

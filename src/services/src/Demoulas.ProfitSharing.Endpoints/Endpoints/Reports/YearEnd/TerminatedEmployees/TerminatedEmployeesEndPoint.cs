@@ -161,7 +161,7 @@ public class TerminatedEmployeesEndPoint
         {
             foreach (var yd in employee.YearDetails)
             {
-                csvWriter.WriteField(employee.BadgePSn);
+                csvWriter.WriteField(employee.PSN);
                 csvWriter.WriteField(employee.Name);
                 csvWriter.WriteField(yd.ProfitYear);
                 csvWriter.WriteField(yd.BeginningBalance);
@@ -185,7 +185,7 @@ public class TerminatedEmployeesEndPoint
         public TerminatedEmployeeCsvMap()
         {
             // This ClassMap is required by the base class but won't be used since we override GenerateCsvContent
-            Map(m => m.BadgePSn).Name("BADGE_PSN");
+            Map(m => m.PSN).Name("BADGE_PSN");
             Map(m => m.Name).Name("NAME");
         }
     }

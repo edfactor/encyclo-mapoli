@@ -2,12 +2,12 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 
 import { setBeneficiaryError } from "reduxstore/slices/beneficiarySlice";
 import {
+  BeneficiariesGetAPIResponse,
+  BeneficiaryDetail,
+  BeneficiaryDetailAPIRequest,
   BeneficiaryKindRequestDto,
   BeneficiaryKindResponseDto,
-  BeneficiaryRequestDto,
-  BeneficiaryResponse,
-  BeneficiarySearchFilterRequest,
-  BeneficiarySearchFilterResponse,
+  BeneficiarySearchAPIRequest,
   BeneficiaryTypesRequestDto,
   BeneficiaryTypesResponseDto,
   CreateBeneficiaryContactRequest,
@@ -26,9 +26,9 @@ export const BeneficiariesApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "beneficiariesApi",
   endpoints: (builder) => ({
-    getBeneficiaries: builder.query<BeneficiaryResponse, BeneficiaryRequestDto>({
+    getBeneficiaries: builder.query<BeneficiariesGetAPIResponse, BeneficiaryDetailAPIRequest>({
       query: (request) => ({
-        url: `/beneficiary`,
+        url: `/beneficiaries`,
         method: "GET",
         params: request
       }),
@@ -42,9 +42,9 @@ export const BeneficiariesApi = createApi({
         }
       }
     }),
-    beneficiarySearchFilter: builder.query<Paged<BeneficiarySearchFilterResponse>, BeneficiarySearchFilterRequest>({
+    beneficiarySearchFilter: builder.query<Paged<BeneficiaryDetail>, BeneficiarySearchAPIRequest>({
       query: (request) => ({
-        url: `/beneficiary/search`,
+        url: `/beneficiaries/search`,
         method: "GET",
         params: request
       }),
@@ -82,8 +82,8 @@ export const BeneficiariesApi = createApi({
         try {
           await queryFulfilled;
         } catch (err) {
-          console.error("Failed to fetch beneficiaries:", err);
-          dispatch(setBeneficiaryError("Failed to fetch beneficiaries"));
+          console.error("Failed to fetch kinds of beneficiaries:", err);
+          dispatch(setBeneficiaryError("Failed to fetch kinds of beneficiaries"));
         }
       }
     }),
@@ -132,10 +132,9 @@ export const BeneficiariesApi = createApi({
         }
       }
     }),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    getBeneficiaryDetail: builder.query<any, any>({
+    getBeneficiaryDetail: builder.query<BeneficiaryDetail, BeneficiaryDetailAPIRequest>({
       query: (request) => ({
-        url: `/beneficiary/detail`,
+        url: `/beneficiaries/detail`,
         method: "GET",
         params: request
       }),

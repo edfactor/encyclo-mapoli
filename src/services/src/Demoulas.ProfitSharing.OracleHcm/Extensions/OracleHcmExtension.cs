@@ -7,6 +7,10 @@ using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
+using Demoulas.ProfitSharing.Common.Telemetry;
+using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Data.Repositories;
 using Demoulas.ProfitSharing.OracleHcm.Clients;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Factories;
@@ -15,11 +19,13 @@ using Demoulas.ProfitSharing.OracleHcm.HostedServices;
 using Demoulas.ProfitSharing.OracleHcm.Jobs;
 using Demoulas.ProfitSharing.OracleHcm.Messaging;
 using Demoulas.ProfitSharing.OracleHcm.Services;
+using Demoulas.ProfitSharing.OracleHcm.Services.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.ItDevOps;
+using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.Util.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -55,7 +61,8 @@ public static class OracleHcmExtension
     /// <remarks>
     /// This method registers the Oracle HCM synchronization services and the hosted service
     /// responsible for managing Oracle HCM background processes. It ensures that the necessary
-    /// dependencies and configurations are added to the application.
+    /// dependencies and configurations are added to the application, including a null implementation
+    /// of INavigationService suitable for console/background service contexts.
     /// </remarks>
 #if DEBUG
     public static IHostApplicationBuilder AddEmployeeDeltaSyncService(this IHostApplicationBuilder builder, ISet<long>? debugOracleHcmIdSet = null)
@@ -69,6 +76,9 @@ public static class OracleHcmExtension
         // Process each delta employee one at a time.
         oracleHcmConfig.Limit = 1;
 
+        // Register null navigation service for console app context (navigation concepts don't apply)
+        builder.Services.AddScoped<INavigationService, NullNavigationService>();
+
         // Add Oracle HCM synchronization with the retrieved configuration.
         builder.AddOracleHcmSynchronization(oracleHcmConfig);
 
@@ -78,9 +88,7 @@ public static class OracleHcmExtension
 
         builder.Services.AddHostedService<EmployeeDeltaSyncService>();
 
-        builder.Services.AddScoped<ITotalService, TotalService>();
         builder.Services.AddSingleton<ICalendarService, CalendarService>();
-        builder.Services.AddScoped<ITotalService, TotalService>();
         builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
         builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
@@ -94,16 +102,18 @@ public static class OracleHcmExtension
         OracleHcmConfig oracleHcmConfig = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>()
                                           ?? new OracleHcmConfig { BaseAddress = string.Empty, DemographicUrl = string.Empty };
 
-        builder.Services.AddScoped<ITotalService, TotalService>();
+        // Register null navigation service for console app context (navigation concepts don't apply)
+        builder.Services.AddScoped<INavigationService, NullNavigationService>();
+
+        builder.AddOracleHcmSynchronization(oracleHcmConfig);
+        builder.Services.AddHostedService<EmployeeFullSyncService>();
+
         builder.Services.AddSingleton<ICalendarService, CalendarService>();
-        builder.Services.AddScoped<ITotalService, TotalService>();
         builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
         builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
         builder.Services.AddScoped<IFrozenService, FrozenService>();
 
-        builder.AddOracleHcmSynchronization(oracleHcmConfig);
-        builder.Services.AddHostedService<EmployeeFullSyncService>();
         return builder;
     }
 
@@ -112,12 +122,13 @@ public static class OracleHcmExtension
         OracleHcmConfig oracleHcmConfig = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>()
                                           ?? new OracleHcmConfig { BaseAddress = string.Empty, DemographicUrl = string.Empty };
 
+        // Register null navigation service for console app context (navigation concepts don't apply)
+        builder.Services.AddScoped<INavigationService, NullNavigationService>();
+
         builder.AddOracleHcmSynchronization(oracleHcmConfig);
         builder.Services.AddHostedService<EmployeePayrollSyncService>();
 
-        builder.Services.AddScoped<ITotalService, TotalService>();
         builder.Services.AddSingleton<ICalendarService, CalendarService>();
-        builder.Services.AddScoped<ITotalService, TotalService>();
         builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
         builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
@@ -135,6 +146,7 @@ public static class OracleHcmExtension
     /// <returns>The updated <see cref="IHostApplicationBuilder"/> instance.</returns>
     /// <remarks>
     /// This method performs the following actions:
+    /// - Initializes endpoint telemetry for business operations tracking
     /// - Retrieves and binds the Oracle HCM configuration.
     /// - Registers the Oracle HCM configuration as a singleton service.
     /// - Registers necessary Oracle HCM services.
@@ -146,6 +158,10 @@ public static class OracleHcmExtension
     public static IHostApplicationBuilder AddOracleHcmSynchronization(this IHostApplicationBuilder builder,
         OracleHcmConfig oracleHcmConfig)
     {
+        // Initialize endpoint telemetry for comprehensive business operations tracking
+        // Safe to call multiple times (idempotent)
+        EndpointTelemetry.Initialize();
+
         builder.Services.AddTransient((_) => oracleHcmConfig);
 
         RegisterOracleHcmServices(builder.Services);
@@ -153,7 +169,7 @@ public static class OracleHcmExtension
 
         builder.Services.AddHealthChecks().AddCheck<OracleHcmHealthCheck>("OracleHcm")
             .AddProcessAllocatedMemoryHealthCheck(maximumMegabytesAllocated: 1024);
-        builder.AddProjectCachingServices();
+        builder.AddMinimalCachingServices();
         builder.AddOracleHcmMessaging();
 
         builder.Services.AddOpenTelemetry().WithTracing(tracing =>
@@ -193,6 +209,13 @@ public static class OracleHcmExtension
         services.AddTransient<AddressMapper>();
         services.AddTransient<ContactInfoMapper>();
 
+        // Repositories
+        services.AddScoped<IDemographicsRepository, DemographicsRepository>();
+
+        // Domain services (business logic)
+        services.AddScoped<IDemographicMatchingService, DemographicMatchingService>();
+        services.AddScoped<IDemographicAuditService, DemographicAuditService>();
+        services.AddScoped<IDemographicHistoryService, DemographicHistoryService>();
 
         // Internal services
         services.AddTransient<IDemographicsServiceInternal, DemographicsService>();

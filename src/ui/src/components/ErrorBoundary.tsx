@@ -7,7 +7,7 @@ interface AppErrorBoundaryProps {
   children: React.ReactNode;
 }
 
-const ErrorFallback = ({ error, resetErrorBoundary }: FallbackProps) => {
+const ErrorFallback = ({ error }: FallbackProps) => {
   const handleReturn = () => {
     window.location.href = "/";
   };

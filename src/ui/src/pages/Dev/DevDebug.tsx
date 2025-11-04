@@ -1,22 +1,37 @@
-import { Page } from "smart-ui-library";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
-import { SecurityState } from "reduxstore/slices/securitySlice";
-import React, { useEffect } from "react";
-import { useLazyGetCurrentUserQuery, useLazyGetMetadataQuery } from "reduxstore/api/ItOperationsApi";
-import DSMCollapsedAccordion from "../../components/DSMCollapsedAccordion";
 import { useGetHealthQuery } from "reduxstore/api/AppSupportApi";
+import { useLazyGetCurrentUserQuery, useLazyGetMetadataQuery } from "reduxstore/api/ItOperationsApi";
+import { SecurityState } from "reduxstore/slices/securitySlice";
+import { RootState } from "reduxstore/store";
+import { Page } from "smart-ui-library";
 import { getHealthStatusDescription } from "utils/appSupportUtil";
+import DSMCollapsedAccordion from "../../components/DSMCollapsedAccordion";
+import { CAPTIONS } from "../../constants";
+
+interface ApiRequest {
+  time: string | number;
+  method: string;
+  url: string;
+  status: number;
+  duration: number;
+}
 
 const DevDebug = () => {
-  const securityState = useSelector<RootState, SecurityState>((state) => state.security);
-  const hasToken: boolean = !!useSelector((state: RootState) => securityState.token);
+  const securityState = useSelector<RootState, SecurityState>((_state) => _state.security);
+  const hasToken: boolean = !!useSelector((_state: RootState) => securityState.token);
   const { data: healthData, isLoading: healthLoading } = useGetHealthQuery();
-  const healthStatus = useSelector((state: RootState) => state.support.health);
+  //const healthStatus = useSelector((state: RootState) => state.support.health);
 
   // Initialize the lazy queries
   const [getCurrentUser, { data: currentUserData, isLoading: currentUserLoading }] = useLazyGetCurrentUserQuery();
   const [getMetadata, { data: metadataData, isLoading: metadataLoading }] = useLazyGetMetadataQuery();
+
+  // API History state - moved from callback to component level
+  const [apiHistory, setApiHistory] = useState<ApiRequest[]>(() => {
+    // Try to get history from session storage
+    return JSON.parse(sessionStorage.getItem("api_request_history") || "[]");
+  });
 
   // Trigger the API calls when the component mounts
   useEffect(() => {
@@ -26,8 +41,30 @@ const DevDebug = () => {
     }
   }, [getCurrentUser, getMetadata, hasToken]);
 
+  // Monitor session storage for API history changes - moved from callback to component level
+  useEffect(() => {
+    // Function to handle storage changes
+    const handleStorageChange = () => {
+      const storedHistory = sessionStorage.getItem("api_request_history");
+      if (storedHistory) {
+        setApiHistory(JSON.parse(storedHistory));
+      }
+    };
+
+    // Set up an interval to check session storage
+    const interval = setInterval(handleStorageChange, 2000);
+
+    // Initial load
+    handleStorageChange();
+
+    // Clean up
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <Page label="Dev Debug">
+    <Page
+      label={`${CAPTIONS.DEV_DEBUG}`}
+      actionNode={null}>
       <div style={{ padding: "24px" }}>
         {/* Health Status Section */}
         <div style={{ display: "flex", marginTop: "24px", gap: "24px" }}>
@@ -66,7 +103,7 @@ const DevDebug = () => {
         <div style={{ marginTop: "24px" }}>
           <DSMCollapsedAccordion
             title={`API Health Status: ${healthData?.status || "Unknown"}`}
-            initiallyExpanded={healthData?.status !== "Healthy"}>
+            isCollapsedOnRender={healthData?.status !== "Healthy"}>
             <div>
               {healthLoading ? (
                 <p>Loading health data...</p>
@@ -313,85 +350,53 @@ const DevDebug = () => {
                   This section shows the last 50 API calls made during the current session, even if made on other pages.
                 </p>
 
-                {(() => {
-                  // Define a React state to store the history
-                  const [apiHistory, setApiHistory] = React.useState(() => {
-                    // Try to get history from session storage using the utility function
-                    return JSON.parse(sessionStorage.getItem("api_request_history") || "[]");
-                  });
-
-                  // Check for updates in session storage
-                  React.useEffect(() => {
-                    // Function to handle storage changes
-                    const handleStorageChange = () => {
-                      const storedHistory = sessionStorage.getItem("api_request_history");
-                      if (storedHistory) {
-                        setApiHistory(JSON.parse(storedHistory));
-                      }
-                    };
-
-                    // Set up an interval to check session storage
-                    const interval = setInterval(handleStorageChange, 2000);
-
-                    // Initial load
-                    handleStorageChange();
-
-                    // Clean up
-                    return () => clearInterval(interval);
-                  }, []);
-
-                  // If no history, show message
-                  if (!apiHistory || apiHistory.length === 0) {
-                    return (
-                      <div style={{ padding: "16px", backgroundColor: "#f5f5f5", borderRadius: "4px" }}>
-                        <p>No API request history found. Make some API calls and return to this page.</p>
-                        <p>Note: API calls are limited to the last 50 requests for debugging purposes.</p>
-                      </div>
-                    );
-                  }
-
+                {/* If no history, show message */}
+                {!apiHistory || apiHistory.length === 0 ? (
+                  <div style={{ padding: "16px", backgroundColor: "#f5f5f5", borderRadius: "4px" }}>
+                    <p>No API request history found. Make some API calls and return to this page.</p>
+                    <p>Note: API calls are limited to the last 50 requests for debugging purposes.</p>
+                  </div>
+                ) : (
                   // Display the history
-                  return (
-                    <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                      <thead>
-                        <tr>
-                          <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Time</th>
-                          <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Method</th>
-                          <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>URL</th>
-                          <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Status</th>
-                          <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Duration</th>
+                  <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                    <thead>
+                      <tr>
+                        <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Time</th>
+                        <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Method</th>
+                        <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>URL</th>
+                        <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Status</th>
+                        <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Duration</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {apiHistory.map((request, index) => (
+                        <tr key={index}>
+                          <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                            {typeof request.time === "string"
+                              ? new Date(request.time).toLocaleTimeString()
+                              : new Date(request.time).toLocaleTimeString()}
+                          </td>
+                          <td style={{ border: "1px solid #ddd", padding: "8px" }}>{request.method}</td>
+                          <td style={{ border: "1px solid #ddd", padding: "8px" }}>{request.url}</td>
+                          <td
+                            style={{
+                              border: "1px solid #ddd",
+                              padding: "8px",
+                              color:
+                                request.status >= 400
+                                  ? "red"
+                                  : request.status >= 200 && request.status < 300
+                                    ? "green"
+                                    : "orange"
+                            }}>
+                            {request.status}
+                          </td>
+                          <td style={{ border: "1px solid #ddd", padding: "8px" }}>{request.duration}ms</td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {apiHistory.map((request, index) => (
-                          <tr key={index}>
-                            <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                              {typeof request.time === "string"
-                                ? new Date(request.time).toLocaleTimeString()
-                                : new Date(request.time).toLocaleTimeString()}
-                            </td>
-                            <td style={{ border: "1px solid #ddd", padding: "8px" }}>{request.method}</td>
-                            <td style={{ border: "1px solid #ddd", padding: "8px" }}>{request.url}</td>
-                            <td
-                              style={{
-                                border: "1px solid #ddd",
-                                padding: "8px",
-                                color:
-                                  request.status >= 400
-                                    ? "red"
-                                    : request.status >= 200 && request.status < 300
-                                      ? "green"
-                                      : "orange"
-                              }}>
-                              {request.status}
-                            </td>
-                            <td style={{ border: "1px solid #ddd", padding: "8px" }}>{request.duration}ms</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  );
-                })()}
+                      ))}
+                    </tbody>
+                  </table>
+                )}
 
                 {/* Add controls to manage history */}
                 <div style={{ marginTop: "16px", display: "flex", gap: "8px" }}>

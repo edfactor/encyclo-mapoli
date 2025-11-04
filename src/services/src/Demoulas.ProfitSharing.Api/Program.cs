@@ -4,7 +4,6 @@ using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.Common.Logging.Extensions;
 using Demoulas.ProfitSharing.Api;
-using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Metrics;
 using Demoulas.ProfitSharing.Common.Telemetry;
@@ -13,8 +12,6 @@ using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interceptors;
 using Demoulas.ProfitSharing.Endpoints.HealthCheck;
-using Demoulas.ProfitSharing.OracleHcm.Configuration;
-using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Security.Extensions;
 using Demoulas.ProfitSharing.Services.Extensions;
@@ -55,30 +52,19 @@ else
         .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 }
 
-ElasticSearchConfig smartConfig = new ElasticSearchConfig();
-builder.Configuration.Bind("Logging:Smart", smartConfig);
+// Configure logging - configuration read from SmartLogging section in appsettings
+LoggingConfig logConfig = new();
+builder.Configuration.Bind("SmartLogging", logConfig);
 
-FileSystemLogConfig fileSystemLog = new FileSystemLogConfig();
-builder.Configuration.Bind("Logging:FileSystem", fileSystemLog);
-
-smartConfig.MaskingOperators = [
+logConfig.MaskingOperators = [
     new UnformattedSocialSecurityNumberMaskingOperator(),
     new SensitiveValueMaskingOperator()
 ];
-builder.SetDefaultLoggerConfiguration(smartConfig, fileSystemLog);
+
+_ = builder.SetDefaultLoggerConfiguration(logConfig);
 
 _ = builder.AddSecurityServices();
 
-if (!builder.Environment.IsTestEnvironment() && Environment.GetEnvironmentVariable("YEMATCH_USE_TEST_CERTS") == null)
-{
-    builder.Services.AddOktaSecurity(builder.Configuration);
-}
-else
-{
-    builder.Services.AddTestingSecurity(builder.Configuration);
-}
-
-builder.ConfigureSecurityPolicies();
 
 string[] allowedOrigins = [
         "https://ps.qa.demoulas.net",
@@ -109,16 +95,15 @@ builder.Services.AddCors(options =>
     });
 });
 
-OracleHcmConfig oracleHcmConfig = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>()
-                                  ?? new OracleHcmConfig { BaseAddress = string.Empty, DemographicUrl = string.Empty };
-
-builder.AddOracleHcmSynchronization(oracleHcmConfig);
-
-// Register masking converter (must be first so it can wrap others)
+// Configure JSON serialization with source generation for better performance
 builder.Services.ConfigureHttpJsonOptions(o =>
 {
-    // Insert at index 0 to ensure highest precedence
+    // Insert masking converter at index 0 to ensure highest precedence
     o.SerializerOptions.Converters.Insert(0, new MaskingJsonConverterFactory());
+
+    // Add source-generated JSON serializer context for compile-time serialization
+    // This reduces reflection overhead and improves startup time
+    o.SerializerOptions.TypeInfoResolverChain.Insert(0, Demoulas.ProfitSharing.Api.Serialization.ProfitSharingJsonSerializerContext.Default);
 });
 
 builder.AddDatabaseServices((services, factoryRequests) =>
@@ -160,7 +145,7 @@ builder.Services.AddHealthChecks().AddCheck<EnvironmentHealthCheck>("Environment
 builder.Services.Configure<HealthCheckPublisherOptions>(options =>
 {
     options.Delay = TimeSpan.FromMinutes(1);       // Initial delay before the first run
-    options.Period = TimeSpan.FromMinutes(10);     // How often health checks are run
+    options.Period = TimeSpan.FromMinutes(15);     // How often health checks are run
     options.Predicate = _ => true;
 });
 

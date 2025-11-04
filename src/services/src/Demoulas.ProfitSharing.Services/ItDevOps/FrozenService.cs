@@ -224,7 +224,7 @@ public class FrozenService : IFrozenService
                 IsActive = f.IsActive,
                 CreatedDateTime = f.CreatedDateTime
             }).ToPaginationResultsAsync(request, cancellationToken);
-        });
+        }, cancellationToken);
     }
 
     public Task<FrozenStateResponse> GetActiveFrozenDemographic(CancellationToken cancellationToken = default)
@@ -250,7 +250,7 @@ public class FrozenService : IFrozenService
                 AsOfDateTime = DateTimeOffset.UtcNow,
                 IsActive = false
             };
-        });
+        }, cancellationToken);
     }
 
     /// <summary>

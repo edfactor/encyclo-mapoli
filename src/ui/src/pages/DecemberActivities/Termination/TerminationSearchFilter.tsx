@@ -1,5 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Button, FormHelperText, Grid } from "@mui/material";
+import { Button, Checkbox, FormControlLabel, FormHelperText, Grid } from "@mui/material";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,22 +12,20 @@ import { clearTermination } from "../../../reduxstore/slices/yearsEndSlice";
 import { RootState } from "../../../reduxstore/store";
 import { CalendarResponseDto } from "../../../reduxstore/types";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
-import { profitYearValidator } from "../../../utils/FormValidators";
+import {
+  dateStringValidator,
+  endDateStringAfterStartDateValidator,
+  profitYearValidator
+} from "../../../utils/FormValidators";
 import { TerminationSearchRequest } from "./Termination";
 
 const schema = yup.object().shape({
-  beginningDate: yup.string().required("Begin Date is required"),
-  endingDate: yup
-    .string()
-    .required("End Date is required")
-    .test("is-after-start", "End Date must be after Begin Date", function (value) {
-      const { beginningDate } = this.parent;
-      if (!beginningDate || !value) return true;
-      const startDate = tryddmmyyyyToDate(beginningDate);
-      const endDate = tryddmmyyyyToDate(value);
-      if (!startDate || !endDate) return true;
-      return endDate > startDate;
-    }),
+  beginningDate: dateStringValidator(2000, 2099, "Beginning Date").required("Beginning Date is required"),
+  endingDate: endDateStringAfterStartDateValidator(
+    "beginningDate",
+    tryddmmyyyyToDate,
+    "Ending date must be the same or after the beginning date"
+  ).required("Ending Date is required"),
   forfeitureStatus: yup.string().required("Forfeiture Status is required"),
   pagination: yup
     .object({
@@ -37,7 +35,8 @@ const schema = yup.object().shape({
       isSortDescending: yup.boolean().required()
     })
     .required(),
-  profitYear: profitYearValidator(2015, 2099)
+  profitYear: profitYearValidator(2015, 2099),
+  excludeZeroAndFullyVested: yup.boolean()
 });
 
 interface TerminationSearchFilterProps {
@@ -72,7 +71,8 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
       endingDate: termination?.endDate || (fiscalData ? mmDDYYFormat(fiscalData.fiscalEndDate) : "") || "",
       forfeitureStatus: "showAll",
       pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: false },
-      profitYear: selectedProfitYear
+      profitYear: selectedProfitYear,
+      excludeZeroAndFullyVested: false
     }
   });
 
@@ -104,7 +104,8 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
       endingDate: fiscalData ? mmDDYYFormat(fiscalData.fiscalEndDate) : "",
       forfeitureStatus: "showAll",
       pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: false },
-      profitYear: selectedProfitYear
+      profitYear: selectedProfitYear,
+      excludeZeroAndFullyVested: false
     });
     // Trigger validation after reset to ensure form validity is updated
     await trigger();
@@ -135,8 +136,10 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
       <Grid
         container
         paddingX="24px"
-        gap="24px">
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        columnSpacing={2}
+        rowSpacing={1}
+        alignItems="flex-end">
+        <Grid size={{ xs: 12, sm: 6, md: 2.5 }}>
           <Controller
             name="beginningDate"
             control={control}
@@ -144,8 +147,11 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
               <DsmDatePicker
                 id="beginningDate"
                 onChange={(value: Date | null) => {
-                  field.onChange(value || undefined);
-                  trigger("endingDate");
+                  field.onChange(value ? mmDDYYFormat(value) : undefined);
+                  trigger("beginningDate");
+                  if (value) {
+                    trigger("endingDate");
+                  }
                 }}
                 value={field.value ? tryddmmyyyyToDate(field.value) : null}
                 required={false}
@@ -159,7 +165,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
           />
           {errors.beginningDate && <FormHelperText error>{errors.beginningDate.message}</FormHelperText>}
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 2.5 }}>
           <Controller
             name="endingDate"
             control={control}
@@ -182,6 +188,23 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
           />
           {errors.endingDate && <FormHelperText error>{errors.endingDate.message}</FormHelperText>}
         </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+          <Controller
+            name="excludeZeroAndFullyVested"
+            control={control}
+            render={({ field }) => (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={field.value || false}
+                    onChange={(e) => field.onChange(e.target.checked)}
+                  />
+                }
+                label="Exclude members with; a $0 Ending Balance, 100% Vested, or Forfeited"
+              />
+            )}
+          />
+        </Grid>
       </Grid>
       <Grid
         width="100%"
@@ -192,7 +215,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
               handleReset={handleReset}
               handleSearch={validateAndSearch}
               isFetching={isFetching}
-              disabled={!isValid || !prerequisitesComplete}
+              disabled={!isValid || !prerequisitesComplete || isFetching}
             />
           )}
         </DuplicateSsnGuard>

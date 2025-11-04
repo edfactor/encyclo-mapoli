@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { apiLoggerMiddleware } from "../middleware/apiLoggerMiddleware";
 import { rtkQueryErrorToastMiddleware } from "../redux/rtkQueryErrorToastMiddleware";
 import EnvironmentUtils from "../utils/environmentUtils";
+import { AccountHistoryReportApi } from "./api/AccountHistoryReportApi";
 import { AdjustmentsApi } from "./api/AdjustmentsApi";
 import { AppSupportApi } from "./api/AppSupportApi";
 import { BeneficiariesApi } from "./api/BeneficiariesApi";
@@ -13,12 +14,15 @@ import { LookupsApi } from "./api/LookupsApi";
 import { MilitaryApi } from "./api/MilitaryApi";
 import { NavigationApi } from "./api/NavigationApi";
 import { NavigationStatusApi } from "./api/NavigationStatusApi";
+import { PayServicesApi } from "./api/PayServicesApi";
 import { SecurityApi } from "./api/SecurityApi";
+import { validationApi } from "./api/ValidationApi";
 import { YearsEndApi } from "./api/YearsEndApi";
 import navigationStatusSlice from "./slices/NavigationStatusSlice";
 import AppSupportSlice from "./slices/appSupportSlice";
 import beneficiarySlice from "./slices/beneficiarySlice";
 import commonSlice from "./slices/commonSlice";
+import distributionSlice from "./slices/distributionSlice";
 import forfeituresAdjustmentSlice from "./slices/forfeituresAdjustmentSlice";
 import frozenSlice from "./slices/frozenSlice";
 import generalSlice from "./slices/generalSlice";
@@ -48,6 +52,7 @@ export const store = configureStore({
     navigationStatus: navigationStatusSlice,
     forfeituresAdjustment: forfeituresAdjustmentSlice,
     beneficiaries: beneficiarySlice,
+    distribution: distributionSlice,
 
     [SecurityApi.reducerPath]: SecurityApi.reducer,
     [YearsEndApi.reducerPath]: YearsEndApi.reducer,
@@ -61,7 +66,10 @@ export const store = configureStore({
     [NavigationStatusApi.reducerPath]: NavigationStatusApi.reducer,
     [BeneficiariesApi.reducerPath]: BeneficiariesApi.reducer,
     [AdjustmentsApi.reducerPath]: AdjustmentsApi.reducer,
-    [DistributionApi.reducerPath]: DistributionApi.reducer
+    [DistributionApi.reducerPath]: DistributionApi.reducer,
+    [PayServicesApi.reducerPath]: PayServicesApi.reducer,
+    [AccountHistoryReportApi.reducerPath]: AccountHistoryReportApi.reducer,
+    [validationApi.reducerPath]: validationApi.reducer
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -82,6 +90,9 @@ export const store = configureStore({
       .concat(BeneficiariesApi.middleware)
       .concat(AdjustmentsApi.middleware)
       .concat(DistributionApi.middleware)
+      .concat(PayServicesApi.middleware)
+      .concat(AccountHistoryReportApi.middleware)
+      .concat(validationApi.middleware)
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

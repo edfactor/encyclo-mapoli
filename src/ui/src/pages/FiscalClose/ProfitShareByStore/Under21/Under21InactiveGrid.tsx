@@ -1,12 +1,10 @@
-import React, { useMemo } from "react";
-import { Typography } from "@mui/material";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { Grid } from "@mui/material";
+import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { under21InactiveColumnDefs } from "./GetUnder21BreakdownColumnDefs";
-import { useNavigate } from "react-router-dom";
+import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../../components/ReportSummary";
+import { under21InactiveColumnDefs } from "./GetUnder21BreakdownGridColumns";
 
 interface Under21InactiveGridProps {
   isLoading?: boolean;
@@ -22,22 +20,23 @@ interface Under21InactiveGridProps {
 
 const Under21InactiveGrid: React.FC<Under21InactiveGridProps> = ({
   isLoading = false,
-  initialSearchLoaded,
+
   setInitialSearchLoaded,
   pageNumber,
   setPageNumber,
   pageSize,
   setPageSize,
-  sortParams,
   setSortParams
 }) => {
   const under21Inactive = useSelector((state: RootState) => state.yearsEnd.under21Inactive);
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
   // Handle navigation for badge clicks
+  /*
   const handleNavigation = (path: string) => {
     navigate(path);
   };
+  */
 
   const sortEventHandler = (update: ISortParams) => {
     if (update.sortBy === "") {
@@ -49,14 +48,14 @@ const Under21InactiveGrid: React.FC<Under21InactiveGridProps> = ({
     setInitialSearchLoaded(true);
   };
 
-  const columnDefs = useMemo(() => under21InactiveColumnDefs(handleNavigation), [handleNavigation]);
+  const columnDefs = useMemo(() => under21InactiveColumnDefs(), []);
 
   return (
     <Grid
       container
       direction="column"
       width="100%">
-      <ReportSummary report={under21Inactive} />
+      {under21Inactive && <ReportSummary report={under21Inactive} />}
       <Grid width="100%">
         <DSMGrid
           preferenceKey="UNDER_21_INACTIVE_REPORT"

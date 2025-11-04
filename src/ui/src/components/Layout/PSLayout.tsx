@@ -1,6 +1,6 @@
 import { Grid } from "@mui/material";
 import React from "react";
-import EnvironmentBanner, { IEnvironmentBannerProps } from "../Layout/EnvironmentBanner";
+import { EnvironmentBanner, IEnvironmentBannerProps } from "smart-ui-library";
 import WelcomeDisplay, { WelcomeDisplayProps } from "../Layout/WelcomeDisplay";
 
 export interface DSMLayoutProps extends IEnvironmentBannerProps, WelcomeDisplayProps {

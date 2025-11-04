@@ -9,6 +9,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.Utilities;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -23,28 +24,31 @@ public class PostFrozenService : IPostFrozenService
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly ILogger _logger;
 
-    private readonly List<int> _earningsProfitCodes = new List<int>
-    {
+    // Static readonly arrays for profit code filtering - zero per-instance allocation
+    // EF Core translates array.Contains() to SQL IN clause
+    private static readonly int[] s_earningsProfitCodes =
+    [
         ProfitCode.Constants.IncomingContributions.Id,
         ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
         ProfitCode.Constants.OutgoingForfeitures.Id,
         ProfitCode.Constants.OutgoingDirectPayments.Id,
         ProfitCode.Constants.Incoming100PercentVestedEarnings.Id,
-    };
+    ];
 
-    private readonly List<int> _contributionProfitCodes = new List<int>
-    {
+    private static readonly int[] s_contributionProfitCodes =
+    [
         ProfitCode.Constants.IncomingContributions.Id,
         ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
         ProfitCode.Constants.OutgoingForfeitures.Id,
         ProfitCode.Constants.OutgoingDirectPayments.Id,
-    };
-    private readonly List<int> _distributionProfitCodes = new List<int>
-    {
+    ];
+
+    private static readonly int[] s_distributionProfitCodes =
+    [
         ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
         ProfitCode.Constants.OutgoingForfeitures.Id,
         ProfitCode.Constants.Outgoing100PercentVestedPayment.Id,
-    };
+    ];
 
     public PostFrozenService(
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
@@ -75,54 +79,58 @@ public class PostFrozenService : IPostFrozenService
 
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
 
-            var totalBaseQuery = await (from d in demographics.Where(x => x.DateOfBirth >= birthDate21)
-                                        join balTbl in _totalService.TotalVestingBalance(ctx, request.ProfitYear, request.ProfitYear, calInfo.FiscalEndDate) on d.Ssn equals balTbl.Ssn into balTmp
-                                        from bal in balTmp.DefaultIfEmpty()
-                                        join lyBalTbl in _totalService.TotalVestingBalance(ctx, lastProfitYear, lastProfitYear, calInfo.FiscalEndDate) on d.Ssn equals lyBalTbl.Ssn into lyBalTmp
-                                        from lyBal in lyBalTmp.DefaultIfEmpty()
-                                        select new Under21IntermediaryResult() { d = d, bal = bal ?? new ParticipantTotalVestingBalance(), lyBal = lyBal ?? new ParticipantTotalVestingBalance() }
-                ).ToListAsync(cancellationToken);
+            // Build base query - keep as IQueryable for database-level operations
+            var baseQuery = from d in demographics.Where(x => x.DateOfBirth >= birthDate21)
+                            join balTbl in _totalService.TotalVestingBalance(ctx, request.ProfitYear, request.ProfitYear, calInfo.FiscalEndDate) on d.Ssn equals balTbl.Ssn into balTmp
+                            from bal in balTmp.DefaultIfEmpty()
+                            join lyBalTbl in _totalService.TotalVestingBalance(ctx, lastProfitYear, lastProfitYear, calInfo.FiscalEndDate) on d.Ssn equals lyBalTbl.Ssn into lyBalTmp
+                            from lyBal in lyBalTmp.DefaultIfEmpty()
+                            select new Under21IntermediaryResult()
+                            {
+                                d = d,
+                                bal = bal ?? new ParticipantTotalVestingBalance(),
+                                lyBal = lyBal ?? new ParticipantTotalVestingBalance()
+                            };
 
-            //Get Active under 21 counts
-            var activeTotalVested = totalBaseQuery
-                .Where(x => x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate)
-                .Count(x => (x.bal.YearsInPlan > 6 || x.lyBal.VestedBalance > 0));
+            // Execute all counts at database level in parallel
+            var totalUnder21Task = baseQuery.CountAsync(cancellationToken);
 
-            var activePartiallyVested = totalBaseQuery
-                .Where(x => x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate)
-                .Count(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 2 && x.bal.YearsInPlan < 6));
+            // Active counts
+            var activeQuery = baseQuery.Where(x => x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate);
+            var activeTotalVestedTask = activeQuery.CountAsync(x => x.bal.YearsInPlan > 6 || x.lyBal.VestedBalance > 0, cancellationToken);
+            var activePartiallyVestedTask = activeQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 2 && x.bal.YearsInPlan < 6), cancellationToken);
+            var activePartiallyVestedButLessThanThreeYearsTask = activeQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 0 && x.bal.YearsInPlan < 3), cancellationToken);
 
-            var activePartiallyVestedButLessThanThreeYears = totalBaseQuery
-                .Where(x => x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate)
-                .Count(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 0 && x.bal.YearsInPlan < 3));
+            // Inactive counts
+            var inactiveQuery = baseQuery.Where(x => !(x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate) && x.d.EmploymentStatusId != EmploymentStatus.Constants.Terminated);
+            var inactiveTotalVestedTask = inactiveQuery.CountAsync(x => (x.bal != null && x.bal.YearsInPlan > 6) || (x.lyBal != null && x.lyBal.VestedBalance > 0), cancellationToken);
+            var inactivePartiallyVestedTask = inactiveQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 2 && x.bal.YearsInPlan < 6), cancellationToken);
+            var inactivePartiallyVestedButLessThanThreeYearsTask = inactiveQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 0 && x.bal.YearsInPlan < 3), cancellationToken);
 
-            //Get Not active, nor terminated (Inactive) under 21 counts
-            var inactiveTotalVested = totalBaseQuery
-                .Where(x => !(x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate) && x.d.EmploymentStatusId != EmploymentStatus.Constants.Terminated)
-                .Count(x => ((x.bal != null && x.bal.YearsInPlan > 6) || (x.lyBal != null && x.lyBal.VestedBalance > 0)));
+            // Terminated counts
+            var terminatedQuery = baseQuery.Where(x => !(x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate) && x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated);
+            var terminatedTotalVestedTask = terminatedQuery.CountAsync(x => (x.bal != null && x.bal.YearsInPlan > 6) || (x.lyBal != null && x.lyBal.VestedBalance > 0), cancellationToken);
+            var terminatedPartiallyVestedTask = terminatedQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 2 && x.bal.YearsInPlan < 6), cancellationToken);
+            var terminatedPartiallyVestedButLessThanThreeYearsTask = terminatedQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 0 && x.bal.YearsInPlan < 3), cancellationToken);
 
-            var inactivePartiallyVested = totalBaseQuery
-                .Where(x => !(x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate) && x.d.EmploymentStatusId != EmploymentStatus.Constants.Terminated)
-                .Count(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 2 && x.bal.YearsInPlan < 6));
+            // Await all counts in parallel
+            await Task.WhenAll(
+                totalUnder21Task,
+                activeTotalVestedTask, activePartiallyVestedTask, activePartiallyVestedButLessThanThreeYearsTask,
+                inactiveTotalVestedTask, inactivePartiallyVestedTask, inactivePartiallyVestedButLessThanThreeYearsTask,
+                terminatedTotalVestedTask, terminatedPartiallyVestedTask, terminatedPartiallyVestedButLessThanThreeYearsTask
+            );
 
-            var inactivePartiallyVestedButLessThanThreeYears = totalBaseQuery
-                .Where(x => !(x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate) && x.d.EmploymentStatusId != EmploymentStatus.Constants.Terminated)
-                .Count(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 0 && x.bal.YearsInPlan < 3));
-
-            //Get terminated under 21 counts.
-            var terminatedTotalVested = totalBaseQuery
-                .Where(x => !(x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate) && x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated)
-                .Count(x => ((x.bal != null && x.bal.YearsInPlan > 6) || (x.lyBal != null && x.lyBal.VestedBalance > 0)));
-
-            var terminatedPartiallyVested = totalBaseQuery
-                .Where(x => !(x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate) && x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated)
-                .Count(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 2 && x.bal.YearsInPlan < 6));
-
-            var terminatedPartiallyVestedButLessThanThreeYears = totalBaseQuery
-                .Where(x => !(x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate) && x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated)
-                .Count(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 0 && x.bal.YearsInPlan < 3));
-
-            var totalUnder21 = totalBaseQuery.Count;
+            var totalUnder21 = await totalUnder21Task;
+            var activeTotalVested = await activeTotalVestedTask;
+            var activePartiallyVested = await activePartiallyVestedTask;
+            var activePartiallyVestedButLessThanThreeYears = await activePartiallyVestedButLessThanThreeYearsTask;
+            var inactiveTotalVested = await inactiveTotalVestedTask;
+            var inactivePartiallyVested = await inactivePartiallyVestedTask;
+            var inactivePartiallyVestedButLessThanThreeYears = await inactivePartiallyVestedButLessThanThreeYearsTask;
+            var terminatedTotalVested = await terminatedTotalVestedTask;
+            var terminatedPartiallyVested = await terminatedPartiallyVestedTask;
+            var terminatedPartiallyVestedButLessThanThreeYears = await terminatedPartiallyVestedButLessThanThreeYearsTask;
 
             var pagedData = await (
                 from d in demographics.Where(x => x.DateOfBirth >= birthDate21)
@@ -168,7 +176,7 @@ public class PostFrozenService : IPostFrozenService
             };
 
             return response;
-        });
+        }, cancellationToken);
         return rslt;
     }
 
@@ -197,11 +205,11 @@ public class PostFrozenService : IPostFrozenService
                     select new
                     {
                         Ssn = pdGrp.Key,
-                        Earnings = pdGrp.Where(x => _earningsProfitCodes.Contains(x.ProfitCodeId)).Sum(x => x.Earnings),
-                        Contributions = pdGrp.Where(x => _contributionProfitCodes.Contains(x.ProfitCodeId)).Sum(x => x.Contribution),
+                        Earnings = pdGrp.Where(x => s_earningsProfitCodes.Contains(x.ProfitCodeId)).Sum(x => x.Earnings),
+                        Contributions = pdGrp.Where(x => s_contributionProfitCodes.Contains(x.ProfitCodeId)).Sum(x => x.Contribution),
                         Forfeitures = pdGrp.Where(x => x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id).Sum(x => x.Forfeiture) -
                                       pdGrp.Where(x => x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id).Sum(x => x.Forfeiture),
-                        Distributions = pdGrp.Where(x => _distributionProfitCodes.Contains(x.ProfitCodeId)).Sum(x => x.Forfeiture * -1)
+                        Distributions = pdGrp.Where(x => s_distributionProfitCodes.Contains(x.ProfitCodeId)).Sum(x => x.Forfeiture * -1)
                     }
                 ) on d.Ssn equals tyPdGrpTbl.Ssn into tyPdGrpTmp
                 from tyPdGrp in tyPdGrpTmp.DefaultIfEmpty()
@@ -233,7 +241,7 @@ public class PostFrozenService : IPostFrozenService
                 row.Age = (byte)row.DateOfBirth.Age(fiscalEndDateTime);
             }
             return pagedResults;
-        });
+        }, cancellation);
 
         return new ReportResponseBase<ProfitSharingUnder21BreakdownByStoreResponse>()
         {
@@ -283,7 +291,7 @@ public class PostFrozenService : IPostFrozenService
                     IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
                 }
             ).ToPaginationResultsAsync(request, cancellationToken);
-        });
+        }, cancellationToken);
 
         var fiscalEndDateTime = calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Local);
         foreach (var row in rslt.Results)
@@ -412,7 +420,7 @@ public class PostFrozenService : IPostFrozenService
             rslt.TotalEarnings = await (
                 from b in rootQuery
                 join pd in ctx.ProfitDetails on b.d.Ssn equals pd.Ssn
-                where _earningsProfitCodes.Contains(pd.ProfitCodeId)
+                where s_earningsProfitCodes.Contains(pd.ProfitCodeId)
                 group pd by true into grp
                 select grp.Sum(x => x.Earnings)
             ).FirstOrDefaultAsync(cancellationToken);
@@ -420,7 +428,7 @@ public class PostFrozenService : IPostFrozenService
             rslt.TotalContributions = await (
                 from b in rootQuery
                 join pd in ctx.ProfitDetails on b.d.Ssn equals pd.Ssn
-                where _contributionProfitCodes.Contains(pd.ProfitCodeId)
+                where s_contributionProfitCodes.Contains(pd.ProfitCodeId)
                 group pd by true into grp
                 select grp.Sum(x => x.Contribution)
             ).FirstOrDefaultAsync(cancellationToken);
@@ -444,7 +452,7 @@ public class PostFrozenService : IPostFrozenService
             rslt.TotalDisbursements = await (
                 from b in rootQuery
                 join pd in ctx.ProfitDetails on b.d.Ssn equals pd.Ssn
-                where _distributionProfitCodes.Contains(pd.ProfitCodeId)
+                where s_distributionProfitCodes.Contains(pd.ProfitCodeId)
                 group pd by true into grp
                 select grp.Sum(x => x.Forfeiture * -1)
             ).FirstOrDefaultAsync(cancellationToken);
@@ -467,7 +475,7 @@ public class PostFrozenService : IPostFrozenService
 
 
             return true;
-        });
+        }, cancellationToken);
 
         return rslt;
     }
@@ -475,13 +483,20 @@ public class PostFrozenService : IPostFrozenService
     public async Task<List<string>> GetNewProfitSharingLabelsForMailMerge(ProfitYearRequest request, CancellationToken ct)
     {
         var people = await GetNewProfitSharingLabels(request, ct);
-        var rslt = new List<string>();
-        foreach (var person in people.Results)
+        var resultsList = people.Results?.ToList() ?? [];
+        var rslt = new List<string>(resultsList.Count * 4); // Pre-allocate capacity
+
+        foreach (var person in resultsList)
         {
-            rslt.Add($"{person.StoreNumber.ToString("000")}-{person.DepartmentId.ToString("0")}-{person.PayClassificationId}-{person.BadgeNumber}");
+            // Use string.Create for better performance with formatting
+            rslt.Add(string.Create(
+                System.Globalization.CultureInfo.InvariantCulture,
+                $"{person.StoreNumber:000}-{person.DepartmentId:0}-{person.PayClassificationId}-{person.BadgeNumber}"));
             rslt.Add(person.EmployeeName);
             rslt.Add(person.Address1 ?? string.Empty);
-            rslt.Add($"{person.City ?? string.Empty}, {person.State ?? string.Empty}, {person.PostalCode ?? string.Empty}");
+            rslt.Add(string.Create(
+                System.Globalization.CultureInfo.InvariantCulture,
+                $"{person.City ?? string.Empty}, {person.State ?? string.Empty}, {person.PostalCode ?? string.Empty}"));
         }
 
         return rslt;
@@ -562,7 +577,7 @@ public class PostFrozenService : IPostFrozenService
                         }
                     )
                 };
-            }));
+            }, cancellationToken));
 
             return rslt;
         }
@@ -571,7 +586,23 @@ public class PostFrozenService : IPostFrozenService
     public async Task<List<string>> GetProfitSharingLabelsExport(ProfitYearRequest request, CancellationToken ct)
     {
         var rawData = await GetProfitSharingLabels(request, ct);
-        var rslt = rawData.Results.Select(x => $"{x.EmployeeName};{x.Address1};{x.City};{x.State};{x.PostalCode};{x.FirstName};{x.StoreNumber};{x.DepartmentId};{x.PayClassificationId};{x.BadgeNumber}").ToList();
+
+        // Use CsvStringHandler for better performance - eliminates intermediate allocations
+        var rslt = rawData.Results.Select(x =>
+        {
+            var csv = new CsvStringHandler(10);
+            csv.AppendField(x.EmployeeName);
+            csv.AppendField(x.Address1);
+            csv.AppendField(x.City);
+            csv.AppendField(x.State);
+            csv.AppendField(x.PostalCode);
+            csv.AppendField(x.FirstName);
+            csv.AppendField(x.StoreNumber, "000");
+            csv.AppendField(x.DepartmentId, "0");
+            csv.AppendField(x.PayClassificationId);
+            csv.AppendField(x.BadgeNumber);
+            return csv.ToString();
+        }).ToList();
 
         return rslt;
     }
@@ -654,7 +685,7 @@ public class PostFrozenService : IPostFrozenService
                         IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly
                     }
                 ).ToPaginationResultsAsync(request, ct);
-            }));
+            }, ct));
         }
     }
 

@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Common.Interfaces;
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 public sealed record DistributionSearchResponse : IIsExecutive
 {
+    public required long Id { get; set; }
+    public required int PaymentSequence { get; set; }
     public required string Ssn { get; set; }
     public int? BadgeNumber { get; set; }
     public required string FullName { get; set; }
     public bool IsExecutive { get; set; }
+    public bool IsEmployee { get; set; }
     public char FrequencyId { get; set; }
     public required string FrequencyName { get; set; }
     public char StatusId { get; set; }
@@ -22,15 +20,20 @@ public sealed record DistributionSearchResponse : IIsExecutive
     public decimal FederalTax { get; set; }
     public decimal StateTax { get; set; }
     public decimal CheckAmount { get; set; }
+    public int? DemographicId { get; set; }
+    public int? BeneficiaryId { get; set; }
 
     public static DistributionSearchResponse SampleResponse()
     {
         var response = new DistributionSearchResponse
         {
+            Id = 1001,
+            PaymentSequence = 1,
             Ssn = "XXX-XX-1234",
             BadgeNumber = 701001,
             FullName = "John Doe",
             IsExecutive = false,
+            IsEmployee = true,
             FrequencyId = 'W',
             FrequencyName = "Weekly",
             StatusId = 'P',
@@ -40,7 +43,9 @@ public sealed record DistributionSearchResponse : IIsExecutive
             GrossAmount = 1500.00M,
             FederalTax = 150.00M,
             StateTax = 75.00M,
-            CheckAmount = 1275.00M
+            CheckAmount = 1275.00M,
+            DemographicId = 5001,
+            BeneficiaryId = null
         };
 
         return response;

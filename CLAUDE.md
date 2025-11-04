@@ -7,6 +7,7 @@ AI Assistant Project Instructions for Claude Code (claude.ai/code) when working 
 - Monorepo with two primary roots:
   - `src/services/` (.NET 9) multi-project solution `Demoulas.ProfitSharing.slnx` (FastEndpoints, EF Core 9 + Oracle, Aspire, Serilog, Feature Flags, RabbitMQ, Mapperly, Shouldly)
   - `src/ui/` (Vite + React + TypeScript + Tailwind + Redux Toolkit + internal `smart-ui-library`)
+  - redux related files are in src/ui/src/reduxstore
 - Database: Oracle 19. EF Core migrations via `ProfitSharingDbContext`; CLI utility project `Demoulas.ProfitSharing.Data.Cli` performs schema ops & imports from legacy READY system
 - Cross-cutting: Central package mgmt (`Directory.Packages.props`), shared build config (`Directory.Build.props`), global SDK pin (`global.json`)
 
@@ -40,6 +41,77 @@ Patterns:
   ```
 - Avoid returning raw DTOs or nulls; always wrap service outcomes in `Result<T>` before translating to HTTP
 - Catch unexpected exceptions and map to `TypedResults.Problem(ex.Message)` (logging appropriately) unless a global handler already standardizes this
+
+## EF Core 9 Patterns & Best Practices (MANDATORY)
+
+We use **EF Core 9** with Oracle provider. All DB access MUST follow these patterns.
+
+**CRITICAL**: Use `context.UseReadOnlyContext()` for read-only ops—it auto-applies `.AsNoTracking()`. Do NOT add `.AsNoTracking()` when using `UseReadOnlyContext()`.
+
+### Query Tagging (Recommended)
+Tag queries for production traceability:
+- `TagWith()`: Add business context (year, user, operation, ticket) - **Required for complex operations**
+
+```csharp
+// Business context tagging (required for year-end, reports, etc.)
+var report = await _context.ProfitSharingRecords
+    .TagWith($"YearEnd-{year}-Calc")
+    .Where(r => r.ProfitYear == year)
+    .ToListAsync(ct);
+
+// Optional: Add call site for detailed tracing
+var data = await _context.Employees
+    .TagWith($"Report-{reportType}")
+    .Where(e => e.IsActive)
+    .ToListAsync(ct);
+```
+
+### Oracle-Specific Patterns
+- **NO `??` in queries**: Oracle provider fails—use `x != null ? x : "default"` instead
+- **String search**: Use `EF.Functions.Like(m.Name, "%search%")` for case-insensitive
+
+### Bulk Operations (ExecuteUpdate/ExecuteDelete)
+Use EF9 bulk ops—no entity loading, single SQL, efficient:
+```csharp
+await _context.Records
+    .TagWith($"BulkUpdate-Status-{year}")
+    .Where(r => r.Year == year)
+    .ExecuteUpdateAsync(s => s.SetProperty(r => r.Status, newStatus), ct);
+```
+
+### Performance Patterns
+**Read-only (preferred)**:
+```csharp
+await using var ctx = await _factory.CreateDbContextAsync(ct);
+ctx.UseReadOnlyContext(); // Auto AsNoTracking
+var data = await ctx.Members.TagWith("GetMembers").ToListAsync(ct);
+```
+
+**Projection**: Select only needed columns for DTOs
+**Lookups**: Pre-compute `ToDictionary`/`ToLookup` before loops
+**Degenerate guard**: Validate inputs (e.g., prevent all-zero badge numbers)
+
+### Critical Rules
+- Services only—NO DbContext in endpoints
+- Always async (`FirstOrDefaultAsync`, `ToListAsync`)
+- Explicit `Include()`/`ThenInclude()`—NO lazy loading
+- Validate inputs to prevent table scans
+
+### Example Service
+```csharp
+public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
+{
+    await using var ctx = await _factory.CreateDbContextAsync(ct);
+    ctx.UseReadOnlyContext();
+    
+    var member = await ctx.Members
+        .TagWith($"GetMember-{id}")
+        .FirstOrDefaultAsync(m => m.Id == id, ct);
+    
+    return member is null 
+        ? Result<MemberDto>.Failure(Error.MemberNotFound)
+        : Result<MemberDto>.Success(member.ToDto());
+}
 
 ## Telemetry & Observability Patterns (MANDATORY)
 
@@ -213,6 +285,31 @@ Complete implementation details and examples available in (read when needed):
   - When adding this rule to new code or code reviews, add a brief comment explaining why `??` was avoided (e.g., "avoid EF translation issues with Oracle provider").
   - XML doc comments for public & internal APIs
 
+## Do NOT
+- Bypass history tracking for mutable audited entities.
+- Introduce raw SQL without parameters.
+- Duplicate mapping logic already covered by Mapperly profiles.
+- Hardcode environment-specific connection strings or credentials.
+- Access `DbContext`, `IProfitSharingDataContextFactory`, or any EF Core DbSet directly inside endpoint classes. (If present, refactor: move data logic into a service and have the endpoint call that service returning `Result<T>`.)
+- Use null-coalescing operator `??` in EF Core query expressions (Oracle provider translation issue—use explicit conditionals instead).
+- Use lazy loading in EF Core (use explicit `Include()`/`ThenInclude()` instead).
+- Use synchronous EF Core methods (`FirstOrDefault`, `ToList`, etc.)—always use async variants (`FirstOrDefaultAsync`, `ToListAsync`, etc.).
+- Load entities into memory for bulk updates/deletes—use `ExecuteUpdateAsync`/`ExecuteDeleteAsync` for efficiency.
+- Skip input validation that could cause degenerate queries (e.g., allow all-zero badge numbers that would scan entire tables).
+- Manually add `.AsNoTracking()` to queries when using `UseReadOnlyContext()`—it's already applied automatically by `UseReadOnlyContext()`.
+- Create endpoints without comprehensive telemetry using `TelemetryExtensions` patterns.
+- Use legacy telemetry patterns instead of `ExecuteWithTelemetry` or manual `TelemetryExtensions` methods.
+- Access sensitive fields without declaring them in telemetry calls (security requirement).
+- Skip logger injection in endpoint constructors (required for telemetry correlation).
+- Use `IMemoryCache` for application caching—use `IDistributedCache` instead for Redis/distributed cache support.
+- Attempt pattern-based cache deletion with `IDistributedCache` (no `RemoveByPrefix` support)—use version-based invalidation instead.
+- Store cache version counters with expiration—version counters should persist indefinitely.
+- Include high-cardinality data in cache keys (e.g., individual user IDs)—use role combinations or other low-cardinality identifiers.
+- Fail operations when cache operations fail—degrade gracefully and log errors.
+
+---
+Provide reasoning in PR descriptions when deviating from these patterns.
+
 ## Validation & Boundary Checks (MANDATORY)
 
 All incoming data MUST be validated with explicit boundary checks at both the server and client boundaries. Validation is a security and correctness concern: never rely solely on client-side checks. The following are required by policy for every endpoint and page that accepts user input.
@@ -311,6 +408,8 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
 - **Telemetry Testing**: All endpoint tests should verify telemetry integration (activity creation, metrics recording, business operations tracking). See `TELEMETRY_GUIDE.md` for testing patterns
 - Frontend: Add Playwright or component tests colocated (if pattern emerges) but keep end-to-end in `e2e/`
 - Security warnings/analyzers treated as errors; keep build green
+
+For testing of front end react components, see this file: @ai-templates/front-end/fe-unit-tests.md
 
 ## Logging & Observability
 
@@ -535,4 +634,16 @@ dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
 - READ_ONLY_QUICK_REFERENCE.md (`src/ui/public/docs/`) - Developer cheat sheet with copy-paste code examples
 - PS-1623_READ_ONLY_SUMMARY.md - Executive summary of read-only role implementation
 
+**Writing unit tests for react hooks** (read when needed):
+- fe-write-unit-tests-for-hooks.md ('ai-templates/front-end/') Guide to writing tests for react hooks
+
 These documents contain essential patterns and examples for implementing telemetry, caching, and read-only functionality correctly across all components. Reference them when creating new endpoints or troubleshooting issues.
+
+## Changing Directories
+
+NEVER use cd commands to change directories during interactions. This is a STRICT rule with NO exceptions. Instead:
+Use relative or absolute paths directly in commands (e.g., ls ./subdirectory or grep pattern ./subdirectory/file.txt instead of cd ./subdirectory && ls or cd ./subdirectory && grep pattern file.txt)
+If you need to run multiple commands in a specific directory, use subshells: (cd /path/to/dir && command1 && command2) which contain the directory change
+When needing to reference multiple files in the same directory, use pattern matching: /path/to/dir/*.py instead of changing into that directory
+NEVER combine cd with command execution using && or ; outside of a subshell
+If a user explicitly requests you to use cd, explain this policy and suggest the alternatives above

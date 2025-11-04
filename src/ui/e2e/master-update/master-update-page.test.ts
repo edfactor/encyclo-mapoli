@@ -33,7 +33,7 @@ test.describe("Master Update page: ", () => {
         { timeout: 5000 }
       );
       await expect(response.status()).toBe(200);
-    } catch (e) {
+    } catch (_e) {
       return;
     }
   });
@@ -53,7 +53,7 @@ test.describe("Master Update page: ", () => {
         { timeout: 5000 }
       );
       await expect(response.status()).toBe(200);
-    } catch (e) {
+    } catch (_e) {
       return;
     }
   });
@@ -94,7 +94,7 @@ test.describe("Master Update page: ", () => {
         timeout: 5000
       });
       await expect(resp.status()).toBe(200);
-    } catch (e) {
+    } catch (_e) {
       return;
     }
 
@@ -113,7 +113,7 @@ test.describe("Master Update page: ", () => {
           timeout: 5000
         });
         await expect(response1.status()).toBe(200);
-      } catch (e) {
+      } catch (_e) {
         return;
       }
     }

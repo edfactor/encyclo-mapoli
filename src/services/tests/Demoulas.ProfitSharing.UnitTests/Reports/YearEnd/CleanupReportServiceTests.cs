@@ -1,10 +1,10 @@
 ﻿using System.ComponentModel;
 using System.Text;
 using System.Text.Json;
-using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Report;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -13,7 +13,6 @@ using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareRepo
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
-using Demoulas.ProfitSharing.UnitTests.Common.Helpers;
 using FastEndpoints;
 using IdGen;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +24,6 @@ namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
 public class CleanupReportServiceTests : ApiTestBase<Program>
 {
-    private readonly CleanupReportClient _cleanupReportClient;
     private readonly ITestOutputHelper _testOutputHelper;
     private readonly ProfitYearRequest _paginationRequest = new ProfitYearRequest { ProfitYear = 2023, Skip = 0, Take = byte.MaxValue };
     private readonly IdGenerator _generator;
@@ -34,7 +32,6 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     public CleanupReportServiceTests(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
-        _cleanupReportClient = new CleanupReportClient(ApiClient, DownloadClient);
         _generator = new IdGenerator(0);
     }
 
@@ -42,10 +39,10 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     [Fact(DisplayName = "PS-147: Check Duplicate SSNs (JSON)")]
     public async Task GetDuplicateSsNsTestJson()
     {
-        _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        var response = await _cleanupReportClient.GetDuplicateSsnAsync(_paginationRequest, CancellationToken.None);
-        response.ShouldNotBeNull();
-        response.Response.Results.Count().ShouldBe(0);
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        var response = await ApiClient.GETAsync<GetDuplicateSsNsEndpoint, ProfitYearRequest, ReportResponseBase<PayrollDuplicateSsnResponseDto>>(_paginationRequest);
+        response.Result.ShouldNotBeNull();
+        response.Result.Response.Results.Count().ShouldBe(0);
     }
 
     [Fact(DisplayName = "PS-147: Check Duplicate SSNs (CSV)")]
@@ -66,14 +63,14 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     [Fact(DisplayName = "PS-151: Demographic badges without payprofit (JSON)")]
     public Task GetDemographicBadgesWithoutPayProfitTests()
     {
-        _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         return MockDbContextFactory.UseWritableContext(async c =>
         {
-            var response = await _cleanupReportClient.GetDemographicBadgesNotInPayProfitAsync(_paginationRequest, CancellationToken.None);
-            response.ShouldNotBeNull();
-            response.Response.Results.Count().ShouldBe(0);
+            var response = await ApiClient.GETAsync<DemographicBadgesNotInPayProfitEndpoint, ProfitYearRequest, ReportResponseBase<DemographicBadgesNotInPayProfitResponse>>(_paginationRequest);
+            response.Result.ShouldNotBeNull();
+            response.Result.Response.Results.Count().ShouldBe(0);
 
-            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response.Result, new JsonSerializerOptions { WriteIndented = true }));
 
             byte mismatchedValues = 5;
 
@@ -85,25 +82,25 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
 
             await c.SaveChangesAsync(CancellationToken.None);
 
-            response = await _cleanupReportClient.GetDemographicBadgesNotInPayProfitAsync(_paginationRequest, CancellationToken.None);
-            response.ShouldNotBeNull();
-            response.Response.Results.Count().ShouldBe(mismatchedValues);
+            response = await ApiClient.GETAsync<DemographicBadgesNotInPayProfitEndpoint, ProfitYearRequest, ReportResponseBase<DemographicBadgesNotInPayProfitResponse>>(_paginationRequest);
+            response.Result.ShouldNotBeNull();
+            response.Result.Response.Results.Count().ShouldBe(mismatchedValues);
 
-            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response.Result, new JsonSerializerOptions { WriteIndented = true }));
 
             var oneRecord = new ProfitYearRequest { Skip = 0, Take = 1, ProfitYear = _paginationRequest.ProfitYear };
-            response = await _cleanupReportClient.GetDemographicBadgesNotInPayProfitAsync(oneRecord, CancellationToken.None);
-            response.ShouldNotBeNull();
-            response.Response.Results.Count().ShouldBe(1);
+            response = await ApiClient.GETAsync<DemographicBadgesNotInPayProfitEndpoint, ProfitYearRequest, ReportResponseBase<DemographicBadgesNotInPayProfitResponse>>(oneRecord);
+            response.Result.ShouldNotBeNull();
+            response.Result.Response.Results.Count().ShouldBe(1);
 
-            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response.Result, new JsonSerializerOptions { WriteIndented = true }));
         });
     }
 
     [Fact(DisplayName = "PS-151: Demographic badges without payprofit (CSV)")]
     public Task GetDemographicBadgesWithoutPayProfitTestsCsv()
     {
-        _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         return MockDbContextFactory.UseWritableContext(async c =>
         {
             byte mismatchedValues = 5;
@@ -118,7 +115,8 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
 
             await c.SaveChangesAsync(CancellationToken.None);
 
-            var stream = await _cleanupReportClient.DownloadDemographicBadgesNotInPayProfit(_paginationRequest.ProfitYear, CancellationToken.None);
+            var response = await DownloadClient.GETAsync<DemographicBadgesNotInPayProfitEndpoint, ProfitYearRequest, DemographicBadgesNotInPayProfitResponse>(_paginationRequest);
+            var stream = await response.Response.Content.ReadAsStreamAsync();
             stream.ShouldNotBeNull();
 
             using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
@@ -137,7 +135,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     [Fact(DisplayName = "PS-145 : Negative ETVA for SSNs on PayProfit (JSON)")]
     public Task GetNegativeEtvaReportJson()
     {
-        _cleanupReportClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR, Role.EXECUTIVEADMIN);
+        ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR, Role.EXECUTIVEADMIN);
         byte negativeValues = 5;
         return MockDbContextFactory.UseWritableContext(async c =>
         {
@@ -147,32 +145,31 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
                 pp.ProfitYear = _paginationRequest.ProfitYear;
             });
 
-
             await c.SaveChangesAsync(CancellationToken.None);
 
+            var response = await ApiClient.GETAsync<NegativeEtvaForSsNsOnPayProfitEndPoint, ProfitYearRequest, ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>>(_paginationRequest);
 
-            var response = await _cleanupReportClient.GetNegativeETVAForSSNsOnPayProfitResponseAsync(_paginationRequest, CancellationToken.None);
+            response.Result.ShouldNotBeNull();
+            response.Result.ReportName.ShouldBeEquivalentTo("Negative ETVA for SSNs on PayProfit");
+            response.Result.Response.Results.Count().ShouldBe(negativeValues);
 
-            response.ShouldNotBeNull();
-            response.ReportName.ShouldBeEquivalentTo("Negative ETVA for SSNs on PayProfit");
-            response.Response.Results.Count().ShouldBe(negativeValues);
-
-            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response.Result, new JsonSerializerOptions { WriteIndented = true }));
 
             var oneRecord = new ProfitYearRequest { ProfitYear = _paginationRequest.ProfitYear, Skip = 0, Take = 1 };
-            response = await _cleanupReportClient.GetNegativeETVAForSSNsOnPayProfitResponseAsync(oneRecord, CancellationToken.None);
-            response.ShouldNotBeNull();
-            response.Response.Results.Count().ShouldBe(1);
+            response = await ApiClient.GETAsync<NegativeEtvaForSsNsOnPayProfitEndPoint, ProfitYearRequest, ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>>(oneRecord);
+            response.Result.ShouldNotBeNull();
+            response.Result.Response.Results.Count().ShouldBe(1);
 
-            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response.Result, new JsonSerializerOptions { WriteIndented = true }));
         });
     }
 
     [Fact(DisplayName = "PS-145 : Negative ETVA for SSNs on PayProfit (CSV)")]
     public async Task GetNegativeEtvaReportCsv()
     {
-        _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        var stream = await _cleanupReportClient.DownloadNegativeETVAForSSNsOnPayProfitResponse(_paginationRequest.ProfitYear, CancellationToken.None);
+        DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        var response = await DownloadClient.GETAsync<NegativeEtvaForSsNsOnPayProfitEndPoint, ProfitYearRequest, NegativeEtvaForSsNsOnPayProfitResponse>(_paginationRequest);
+        var stream = await response.Response.Content.ReadAsStreamAsync();
         stream.ShouldNotBeNull();
 
         using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
@@ -187,7 +184,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     [Fact(DisplayName = "PS-61 : Year-end Profit Sharing Report (JSON)")]
     public async Task GetYearEndProfitSharingReport()
     {
-        _cleanupReportClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
+        ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var profitYear = (short)(2024);
         var req = new YearEndProfitSharingReportRequest()
         {
@@ -303,9 +300,15 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     [Fact(DisplayName = "PS-399 : Year-end Profit Sharing Report with filters (JSON")]
     public async Task GetYearEndProfitSharingReportWithFilters()
     {
-        _cleanupReportClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
+        ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var profitYear = (short)Math.Min(DateTime.Now.Year - 1, 2024);
-        var req = new YearEndProfitSharingReportRequest() { Skip = 0, Take = byte.MaxValue, ProfitYear = profitYear, ReportId = YearEndProfitSharingReportId.Age21OrOlderWith1000Hours };
+        var req = new YearEndProfitSharingReportRequest()
+        {
+            Skip = 0,
+            Take = byte.MaxValue,
+            ProfitYear = profitYear,
+            ReportId = YearEndProfitSharingReportId.Age21OrOlderWith1000Hours
+        };
         var testHours = 1001;
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
@@ -380,7 +383,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     {
         decimal sampleforfeiture = 5150m;
 
-        _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         var req = new DistributionsAndForfeituresRequest() { Skip = 0, Take = byte.MaxValue };
         TestResult<DistributionsAndForfeitureTotalsResponse> response;
 
@@ -427,7 +430,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             });
 
             response = await ApiClient
-                    .GETAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(req);
+                .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(req);
 
 
             response.Result.ShouldNotBeNull();
@@ -448,7 +451,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         });
 
         response = await ApiClient
-            .GETAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
                 DistributionsAndForfeitureTotalsResponse>(req);
 
         response.Result.ShouldNotBeNull();
@@ -467,7 +470,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         });
 
         response = await ApiClient
-            .GETAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
                 DistributionsAndForfeitureTotalsResponse>(req);
 
         response.ShouldNotBeNull();
@@ -485,7 +488,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         });
 
         response = await ApiClient
-            .GETAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
+            .POSTAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
                 DistributionsAndForfeitureTotalsResponse>(req);
 
         response.ShouldNotBeNull();

@@ -12,8 +12,10 @@ public sealed record DistributionSearchRequest : SortedPaginationRequestDto
     public string? Ssn { get; set; }
     public int? BadgeNumber { get; set; }
     public short? PsnSuffix { get; set; }
+    public byte? MemberType { get; set; } // 1 = employees, 2 = beneficiaries, null = all
     public char? DistributionFrequencyId { get; set; }
     public char? DistributionStatusId { get; set; }
+    public List<string>? DistributionStatusIds { get; set; }
     public char? TaxCodeId { get; set; }
     public decimal? MinGrossAmount { get; set; }
     public decimal? MaxGrossAmount { get; set; }

@@ -1,10 +1,8 @@
 import type { PagedReportResponse } from "../common/api";
 
 export interface TerminationDetail {
-  badgeNumber: number;
-  psnSuffix: number;
+  psn: number;
   name: string | null;
-  badgePSn: string;
   yearDetails: TerminationYearDetail[];
 }
 

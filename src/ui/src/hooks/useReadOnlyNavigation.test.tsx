@@ -27,7 +27,7 @@ describe("useReadOnlyNavigation", () => {
     items: []
   });
 
-  const createMockStore = (navigationData: any) => {
+  const createMockStore = (navigationData: { navigation: NavigationDto[] } | null) => {
     return configureStore({
       reducer: {
         navigation: () => ({

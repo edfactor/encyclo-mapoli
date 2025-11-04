@@ -63,6 +63,7 @@ export interface ProfitShareUpdateResponse extends PagedReportResponse<ProfitSha
   hasExceededMaximumContributions: true;
   adjustmentsSummary: ProfitShareAdjustmentSummary;
   profitShareUpdateTotals: ProfitShareUpdateTotals;
+  crossReferenceValidation?: MasterUpdateCrossReferenceValidationResponse;
 }
 
 export interface ProfitShareUpdateTotals {
@@ -248,4 +249,8 @@ export interface ProfitShareEditUpdateSearch {
 export interface GrossReportParams {
   profitYear: number;
   gross?: number;
+}
+
+export interface UpdateEnrollmentRequest {
+  profitYear: number;
 }

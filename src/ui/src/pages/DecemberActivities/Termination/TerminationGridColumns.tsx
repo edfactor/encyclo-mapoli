@@ -4,8 +4,9 @@ import { createBadgeColumn, createNameColumn } from "../../../utils/gridColumnFa
 export const GetTerminationColumns = (): ColDef[] => {
   return [
     createBadgeColumn({
-      headerName: "Badge",
-      psnSuffix: true
+      headerName: "PSN",
+      field: "psn",
+      psnSuffix: false // No suffix needed - PSN is already combined
     }),
     createNameColumn({
       field: "name"

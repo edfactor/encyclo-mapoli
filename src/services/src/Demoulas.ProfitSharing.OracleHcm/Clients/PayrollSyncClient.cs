@@ -186,7 +186,7 @@ internal class PayrollSyncClient
 
             // Find PersonIds that are in existsCollection but not in the database
             return existsCollection.Except(existingPersonIds).ToList();
-        }).ConfigureAwait(false);
+        }, cancellationToken).ConfigureAwait(false);
 
         foreach (long id in missingPersonIds)
         {
@@ -253,6 +253,14 @@ internal class PayrollSyncClient
     private async Task<HttpResponseMessage> GetOraclePayrollValue(string url, CancellationToken cancellationToken)
     {
         using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+
+        // Copy default headers from HttpClient to the request message
+        // (SendAsync does NOT automatically add Authorization and other default headers)
+        foreach (var header in _httpClient.DefaultRequestHeaders)
+        {
+            request.Headers.Add(header.Key, header.Value);
+        }
+
         HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode && Debugger.IsAttached)
         {

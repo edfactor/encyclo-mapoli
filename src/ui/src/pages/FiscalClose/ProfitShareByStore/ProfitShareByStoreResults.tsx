@@ -1,8 +1,7 @@
-import { Grid } from "@mui/material";
-import { Typography } from "@mui/material";
-import { InfoCard } from "../../FiscalFlow/ProfitShareReportEditRun/InfoCard";
+import { Grid, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { CAPTIONS, ROUTES } from "../../../constants";
+import { InfoCard } from "../InfoCard";
 
 interface StoreReportCategory {
   code: string;

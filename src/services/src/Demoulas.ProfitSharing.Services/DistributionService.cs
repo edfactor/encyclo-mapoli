@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
@@ -19,19 +21,22 @@ using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services;
+
 public sealed class DistributionService : IDistributionService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly IAppUser? _appUser;
     private readonly TotalService _totalService;
+    private readonly ICalendarService _calendarService;
 
-    public DistributionService(IProfitSharingDataContextFactory dataContextFactory, IDemographicReaderService demographicReaderService, IAppUser? appUser, TotalService totalService)
+    public DistributionService(IProfitSharingDataContextFactory dataContextFactory, IDemographicReaderService demographicReaderService, IAppUser? appUser, TotalService totalService, ICalendarService calendarService)
     {
         _dataContextFactory = dataContextFactory;
         _demographicReaderService = demographicReaderService;
         _appUser = appUser;
         _totalService = totalService;
+        _calendarService = calendarService;
     }
 
     public async Task<PaginatedResponseDto<DistributionSearchResponse>> SearchAsync(DistributionSearchRequest request, CancellationToken cancellationToken)
@@ -49,6 +54,8 @@ public sealed class DistributionService : IDistributionService
                         from ben in benGroup.DefaultIfEmpty()
                         select new
                         {
+                            dist.Id,
+                            dist.PaymentSequence,
                             dist.Ssn,
                             BadgeNumber = dem != null ? (int?)dem.BadgeNumber : null,
                             DemFullName = dem != null ? dem.ContactInfo.FullName : null,
@@ -63,12 +70,23 @@ public sealed class DistributionService : IDistributionService
                             dist.FederalTaxAmount,
                             dist.StateTaxAmount,
                             dist.CheckAmount,
-                            IsExecutive = dem != null && dem.PayFrequencyId == PayFrequency.Constants.Monthly
+                            IsExecutive = dem != null && dem.PayFrequencyId == PayFrequency.Constants.Monthly,
+                            DemographicId = dem != null ? (int?)dem.OracleHcmId : null,
+                            BeneficiaryId = ben != null ? (int?)ben.Id : null
                         };
 
             int searchSsn;
             if (!string.IsNullOrWhiteSpace(request.Ssn) && int.TryParse(request.Ssn, out searchSsn))
             {
+                // Validate that SSN exists in either demographics or beneficiaries
+                var ssnExists = await demographic.AnyAsync(d => d.Ssn == searchSsn, cancellationToken) ||
+                               await ctx.Beneficiaries.AnyAsync(b => b.Contact!.Ssn == searchSsn, cancellationToken);
+
+                if (!ssnExists)
+                {
+                    throw new InvalidOperationException("SSN not found.");
+                }
+
                 query = query.Where(d => d.Ssn == searchSsn);
             }
 
@@ -100,7 +118,22 @@ public sealed class DistributionService : IDistributionService
                 query = query.Where(d => d.FrequencyId == request.DistributionFrequencyId.Value);
             }
 
-            if (request.DistributionStatusId.HasValue)
+            // Support both single and multiple status IDs
+            // Prioritize DistributionStatusIds (array) if provided, otherwise use single DistributionStatusId
+            if (request.DistributionStatusIds != null && request.DistributionStatusIds.Count > 0)
+            {
+                // Convert string list to char list for comparison
+                var statusChars = request.DistributionStatusIds
+                    .Where(s => !string.IsNullOrEmpty(s) && s.Length == 1)
+                    .Select(s => s[0])
+                    .ToList();
+
+                if (statusChars.Count > 0)
+                {
+                    query = query.Where(d => statusChars.Contains(d.StatusId));
+                }
+            }
+            else if (request.DistributionStatusId.HasValue)
             {
                 query = query.Where(d => d.StatusId == request.DistributionStatusId.Value);
             }
@@ -130,14 +163,34 @@ public sealed class DistributionService : IDistributionService
                 query = query.Where(d => d.CheckAmount <= request.MaxCheckAmount.Value);
             }
 
+            // Filter by MemberType similar to MasterInquiry pattern
+            if (request.MemberType.HasValue)
+            {
+                if (request.MemberType.Value == 1) // Employees only
+                {
+                    query = query.Where(d => d.BadgeNumber != null);
+                }
+                else if (request.MemberType.Value == 2) // Beneficiaries only
+                {
+                    query = query.Where(d => d.BadgeNumber == null);
+                }
+                // If null or any other value, don't filter (show all)
+            }
+
+            // Add query tagging for production traceability
+            var searchContext = $"DistributionSearch-Badge{request.BadgeNumber}-SSN{(string.IsNullOrWhiteSpace(request.Ssn?.MaskSsn()) ? "None" : "Provided")}-{DateTime.UtcNow:yyyyMMddHHmm}";
+            query = query.TagWith(searchContext);
+
             return await query.ToPaginationResultsAsync(request, cancellationToken);
-        });
+        }, cancellationToken);
 
         var result = new PaginatedResponseDto<DistributionSearchResponse>(request)
         {
             Total = data.Total,
             Results = data.Results.Select(d => new DistributionSearchResponse
             {
+                Id = d.Id,
+                PaymentSequence = d.PaymentSequence,
                 Ssn = d.Ssn.MaskSsn(),
                 BadgeNumber = d.BadgeNumber,
                 FullName = d.DemFullName ?? d.BeneFullName,
@@ -151,7 +204,10 @@ public sealed class DistributionService : IDistributionService
                 FederalTax = d.FederalTaxAmount,
                 StateTax = d.StateTaxAmount,
                 CheckAmount = d.CheckAmount,
-                IsExecutive = d.IsExecutive
+                IsExecutive = d.IsExecutive,
+                IsEmployee = d.BadgeNumber.HasValue,
+                DemographicId = d.DemographicId,
+                BeneficiaryId = d.BeneficiaryId
             }).ToList()
         };
 
@@ -195,7 +251,7 @@ public sealed class DistributionService : IDistributionService
                 request.CheckAmount = request.GrossAmount;
             }
 
-            var maxSequence = await ctx.Distributions.Where(d => d.Ssn == dem.Ssn).MaxAsync(d => (byte?)d.PaymentSequence) ?? 0;
+            var maxSequence = await ctx.Distributions.Where(d => d.Ssn == dem.Ssn).MaxAsync(d => (byte?)d.PaymentSequence, cancellationToken: cancellationToken) ?? 0;
             var distribution = new Distribution
             {
                 Ssn = dem.Ssn,
@@ -460,6 +516,249 @@ public sealed class DistributionService : IDistributionService
         }, cancellationToken);
     }
 
+    public async Task<Result<DistributionRunReportSummaryResponse[]>> GetDistributionRunReportSummary(CancellationToken cancellationToken)
+    {
+        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var distributionQuery = GetDistributionExtract(ctx, cancellationToken, Array.Empty<char>());
+
+            var groupedResults = await distributionQuery
+                .TagWith($"DistributionSummaryReport-{DateTime.UtcNow:yyyyMMddHHmm}")
+                .GroupBy(d => d.FrequencyId)
+                .Select(g => new DistributionRunReportSummaryResponse
+                {
+                    DistributionFrequencyId = g.Key,
+                    DistributionTypeName = g.First().Frequency!.Name,
+                    TotalDistributions = g.Count(),
+                    TotalGrossAmount = g.Sum(d => d.GrossAmount),
+                    TotalFederalTaxAmount = g.Sum(d => d.FederalTaxAmount),
+                    TotalStateTaxAmount = g.Sum(d => d.StateTaxAmount),
+                    TotalCheckAmount = g.Sum(d => d.GrossAmount) - g.Sum(d => d.FederalTaxAmount) - g.Sum(d => d.StateTaxAmount)
+                })
+                .ToListAsync(cancellationToken);
+
+            var foundFrequencyIds = groupedResults.Select(gr => gr.DistributionFrequencyId).ToHashSet();
+            var missingFrequencies = (await ctx.DistributionFrequencies.ToListAsync(cancellationToken))
+                .Where(df => !foundFrequencyIds.Any(gr => gr == df.Id))
+                .Select(df => new DistributionRunReportSummaryResponse
+                {
+                    DistributionFrequencyId = df.Id,
+                    DistributionTypeName = df.Name,
+                    TotalDistributions = 0,
+                    TotalGrossAmount = 0,
+                    TotalFederalTaxAmount = 0,
+                    TotalStateTaxAmount = 0,
+                    TotalCheckAmount = 0
+                })
+                .ToList();
+
+            var manualAndOnHoldDistributions = await (
+                from d in ctx.Distributions.Include(x => x.Frequency)
+                where d.StatusId == DistributionStatus.Constants.RequestOnHold || d.StatusId == DistributionStatus.Constants.ManualCheck
+                group d by d.StatusId into g
+                select new DistributionRunReportSummaryResponse
+                {
+                    DistributionFrequencyId = null,
+                    DistributionTypeName = g.First().Status!.Name,
+                    TotalDistributions = g.Count(),
+                    TotalGrossAmount = g.Sum(d => d.GrossAmount),
+                    TotalFederalTaxAmount = g.Sum(d => d.FederalTaxAmount),
+                    TotalStateTaxAmount = g.Sum(d => d.StateTaxAmount),
+                    TotalCheckAmount = g.Sum(d => d.GrossAmount) - g.Sum(d => d.FederalTaxAmount) - g.Sum(d => d.StateTaxAmount)
+                })
+                .TagWith($"DistributionSummaryManualOnHold-{DateTime.UtcNow:yyyyMMddHHmm}")
+                .ToListAsync(cancellationToken);
+
+            var foundStatusNames = manualAndOnHoldDistributions.Select(gr => gr.DistributionTypeName).ToHashSet();
+            var missingStatuses = (await ctx.DistributionStatuses.Where(d => d.Id == DistributionStatus.Constants.RequestOnHold || d.Id == DistributionStatus.Constants.ManualCheck).ToListAsync(cancellationToken))
+                .Where(ds => !foundStatusNames.Any(gr => gr == ds.Name))
+                .Select(ds => new DistributionRunReportSummaryResponse
+                {
+                    DistributionFrequencyId = null,
+                    DistributionTypeName = ds.Name,
+                    TotalDistributions = 0,
+                    TotalGrossAmount = 0,
+                    TotalFederalTaxAmount = 0,
+                    TotalStateTaxAmount = 0,
+                    TotalCheckAmount = 0
+                })
+                .ToList();
+
+            groupedResults.AddRange(missingFrequencies);
+            groupedResults.AddRange(manualAndOnHoldDistributions);
+            groupedResults.AddRange(missingStatuses);
+
+            groupedResults.Sort((a, b) => a.DistributionTypeName.CompareTo(b.DistributionTypeName));
+
+            return Result<DistributionRunReportSummaryResponse[]>.Success(groupedResults.ToArray());
+        }, cancellationToken);
+    }
+
+    public async Task<Result<PaginatedResponseDto<DistributionsOnHoldResponse>>> GetDistributionsOnHold(SortedPaginationRequestDto request, CancellationToken cancellationToken)
+    {
+        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var query = from dist in ctx.Distributions.Include(x => x.Payee)
+                        where dist.StatusId == DistributionStatus.Constants.RequestOnHold
+                        select new
+                        {
+                            dist.Ssn,
+                            PayTo = dist.Payee!.Name,
+                            dist.CheckAmount,
+                        };
+
+            // Add query tagging for on-hold distributions
+            query = query.TagWith($"DistributionsOnHold-{DateTime.UtcNow:yyyyMMddHHmm}");
+
+            var paginatedResults = await query.ToPaginationResultsAsync(request, cancellationToken);
+
+            var maskedResults = new PaginatedResponseDto<DistributionsOnHoldResponse>(request)
+            {
+                Total = paginatedResults.Total,
+                Results = paginatedResults.Results.Select(d => new DistributionsOnHoldResponse
+                {
+                    Ssn = d.Ssn.MaskSsn(),
+                    PayTo = d.PayTo,
+                    CheckAmount = d.CheckAmount,
+                }).ToList()
+            };
+
+            return Result<PaginatedResponseDto<DistributionsOnHoldResponse>>.Success(maskedResults);
+        }, cancellationToken);
+    }
+
+    public async Task<Result<PaginatedResponseDto<ManualChecksWrittenResponse>>> GetManualCheckDistributions(SortedPaginationRequestDto request, CancellationToken cancellationToken)
+    {
+        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var query = from dist in ctx.Distributions.Include(x => x.Payee)
+                        where dist.StatusId == DistributionStatus.Constants.ManualCheck
+                        select new
+                        {
+                            dist.Ssn,
+                            PayTo = dist.Payee!.Name,
+                            dist.CheckAmount,
+                            dist.ManualCheckNumber,
+                            dist.GrossAmount,
+                            dist.FederalTaxAmount,
+                            dist.StateTaxAmount,
+                        };
+
+            // Add query tagging for manual check distributions
+            query = query.TagWith($"ManualCheckDistributions-{DateTime.UtcNow:yyyyMMddHHmm}");
+
+            var paginatedResults = await query.ToPaginationResultsAsync(request, cancellationToken);
+
+            var maskedResults = new PaginatedResponseDto<ManualChecksWrittenResponse>(request)
+            {
+                Total = paginatedResults.Total,
+                Results = paginatedResults.Results.Select(d => new ManualChecksWrittenResponse
+                {
+                    Ssn = d.Ssn.MaskSsn(),
+                    PayTo = d.PayTo,
+                    CheckAmount = d.CheckAmount,
+                    CheckNumber = d.ManualCheckNumber,
+                    GrossAmount = d.GrossAmount,
+                    FederalTaxAmount = d.FederalTaxAmount,
+                    StateTaxAmount = d.StateTaxAmount,
+                }).ToList()
+            };
+
+            return Result<PaginatedResponseDto<ManualChecksWrittenResponse>>.Success(maskedResults);
+        }, cancellationToken);
+    }
+
+    public async Task<Result<PaginatedResponseDto<DistributionRunReportDetail>>> GetDistributionRunReport(DistributionRunReportRequest request, CancellationToken cancellationToken)
+    {
+        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+            var distributionQuery = GetDistributionExtract(ctx, cancellationToken, request.DistributionFrequencies ?? Array.Empty<char>());
+            var query = from dist in distributionQuery
+                        join dem in demographicQuery.Include(x => x.PayClassification)
+                                                    .Include(x => x.Address)
+                                                    .Include(x => x.Department)
+                                                    .Include(x => x.EmploymentType)
+                                                    .Include(x => x.ContactInfo) on dist.Ssn equals dem.Ssn
+                        select new DistributionRunReportDetail
+                        {
+                            BadgeNumber = dem.BadgeNumber,
+                            DepartmentId = dem.DepartmentId,
+                            DepartmentName = dem.Department!.Name,
+                            PayClassificationId = dem.PayClassificationId,
+                            PayClassificationName = dem.PayClassification!.Name,
+                            StoreNumber = dem.StoreNumber,
+                            TaxCodeId = dist.TaxCodeId,
+                            TaxCodeName = dist.TaxCode!.Name,
+                            EmployeeName = dem.ContactInfo!.FullName ?? "",
+                            EmploymentTypeId = dem.EmploymentTypeId,
+                            EmploymentTypeName = dem.EmploymentType!.Name,
+                            HireDate = dem.HireDate,
+                            FullTimeDate = dem.FullTimeDate,
+                            DateOfBirth = dem.DateOfBirth,
+                            Age = dem.DateOfBirth.Age(),
+                            GrossAmount = dist.GrossAmount,
+                            StateTaxAmount = dist.StateTaxAmount,
+                            FederalTaxAmount = dist.FederalTaxAmount,
+                            CheckAmount = dist.CheckAmount,
+                            PayeeName = dist.Payee != null ? dist.Payee.Name : null,
+                            PayeeAddress = dist.Payee != null ? dist.Payee.Address!.Street : null,
+                            PayeeCity = dist.Payee != null ? dist.Payee.Address!.City : null,
+                            PayeeState = dist.Payee != null ? dist.Payee.Address!.State : null,
+                            PayeePostalCode = dist.Payee != null ? dist.Payee.Address!.PostalCode : null,
+                            ThirdPartyPayeeName = dist.ThirdPartyPayee != null ? dist.ThirdPartyPayee.Name : null,
+                            ThirdPartyPayeeAddress = dist.ThirdPartyPayee != null ? dist.ThirdPartyPayee.Address!.Street : null,
+                            ThirdPartyPayeeCity = dist.ThirdPartyPayee != null ? dist.ThirdPartyPayee.Address!.City : null,
+                            ThirdPartyPayeeState = dist.ThirdPartyPayee != null ? dist.ThirdPartyPayee.Address!.State : null,
+                            ThirdPartyPayeePostalCode = dist.ThirdPartyPayee != null ? dist.ThirdPartyPayee.Address!.PostalCode : null,
+                            IsDesceased = dist.IsDeceased,
+                            ForTheBenefitOfAccountType = dist.ForTheBenefitOfAccountType,
+                            ForTheBenefitOfPayee = dist.ForTheBenefitOfPayee,
+                            Tax1099ForEmployee = dist.Tax1099ForEmployee,
+                            Tax1099ForBeneficiary = dist.Tax1099ForBeneficiary
+                        };
+
+            // Add query tagging for distribution run report
+            var frequencies = request.DistributionFrequencies?.Length > 0 ? string.Join(",", request.DistributionFrequencies) : "All";
+            query = query.TagWith($"DistributionRunReport-Freq{frequencies}-{DateTime.UtcNow:yyyyMMddHHmm}");
+
+            var paginatedResults = await query.ToPaginationResultsAsync(request, cancellationToken);
+            return Result<PaginatedResponseDto<DistributionRunReportDetail>>.Success(paginatedResults);
+        }, cancellationToken);
+    }
+
+    public async Task<Result<PaginatedResponseDto<DisbursementReportDetailResponse>>> GetDisbursementReport(ProfitYearRequest request, CancellationToken cancellationToken)
+    {
+        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
+            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+            var distributionQuery = GetDistributionExtract(ctx, cancellationToken, new[] {DistributionFrequency.Constants.Annually, DistributionFrequency.Constants.Monthly, DistributionFrequency.Constants.Quarterly } );
+            var query = from dist in distributionQuery
+                        join dem in demographicQuery on dist.Ssn equals dem.Ssn into demJoin
+                        from dem in demJoin.DefaultIfEmpty()
+                        join bc in ctx.BeneficiaryContacts on dist.Ssn equals bc.Ssn into benJoin
+                        from ben in benJoin.DefaultIfEmpty()
+                        join vb in _totalService.TotalVestingBalance(ctx, request.ProfitYear, calInfo.FiscalEndDate) on dist.Ssn equals vb.Ssn into vbJoin
+                        from vest in vbJoin.DefaultIfEmpty()
+                        select new DisbursementReportDetailResponse
+                        {
+                            DistributionFrequencyId = dist.FrequencyId,
+                            DistributionFrequencyName = dist.Frequency!.Name,
+                            Ssn = dist.Ssn.MaskSsn(),
+                            BadgeNumber = dem != null ? dem.BadgeNumber : 0,
+                            EmployeeName = dem.ContactInfo!.FullName ?? ben.ContactInfo.FullName ?? "?",
+                            VestedBalance = vest != null ? vest.VestedBalance ?? 0 : 0,
+                            OriginalAmount = dist.GrossAmount,
+                            RemainingBalance = (vest != null ? vest.VestedBalance ?? 0 : 0) - dist.GrossAmount
+                        };
+            // Add query tagging for disbursement report
+            query = query.TagWith($"DisbursementReport-{DateTime.UtcNow:yyyyMMddHHmm}");
+            var paginatedResults = await query.ToPaginationResultsAsync(request, cancellationToken);
+            return Result<PaginatedResponseDto<DisbursementReportDetailResponse>>.Success(paginatedResults);
+        }, cancellationToken);
+    }
+
     private Result<bool> ValidateDistributionRequest(CreateDistributionRequest request)
     {
         var validationErrors = new Dictionary<string, string[]>();
@@ -488,5 +787,29 @@ public sealed class DistributionService : IDistributionService
         return validationErrors.Count > 0
             ? Result<bool>.ValidationFailure(validationErrors)
             : Result<bool>.Success(true);
+    }
+
+    private IQueryable<Distribution> GetDistributionExtract(IProfitSharingDbContext ctx, CancellationToken cancellationToken, char[] distributionFrequencies)
+    {
+        var distributionQuery = ctx.Distributions
+            .Include(d => d.Frequency)
+            .Include(d => d.Status)
+            .Include(d => d.TaxCode)
+            .Include(d => d.Payee)
+            .Include(d => d.ThirdPartyPayee)
+            .ThenInclude(tp => tp!.Address)
+            .Where(x => x.StatusId != DistributionStatus.Constants.RequestOnHold && x.StatusId != DistributionStatus.Constants.ManualCheck)
+            .Select(d => d);
+
+        if (distributionFrequencies.Any())
+        {
+            distributionQuery = distributionQuery.Where(d => distributionFrequencies.Contains(d.FrequencyId));
+        }
+
+        // Add query tagging for distribution extract operations
+        var frequencies = distributionFrequencies.Any() ? string.Join(",", distributionFrequencies) : "All";
+        distributionQuery = distributionQuery.TagWith($"DistributionExtract-Freq{frequencies}-{DateTime.UtcNow:yyyyMMddHHmm}");
+
+        return distributionQuery;
     }
 }

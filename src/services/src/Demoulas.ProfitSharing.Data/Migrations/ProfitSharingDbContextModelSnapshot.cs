@@ -18,7 +18,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("USING_NLS_COMP")
-                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("ProductVersion", "9.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -26186,6 +26186,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = (byte)25,
                             Name = "Forfeit Class Action"
+                        },
+                        new
+                        {
+                            Id = (byte)26,
+                            Name = "Forfeit Administrative"
                         });
                 });
 
@@ -28110,6 +28115,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<bool>("IsDeceased")
                         .HasColumnType("NUMBER(1)")
                         .HasColumnName("DECEASED");
+
+                    b.Property<string>("ManualCheckNumber")
+                        .HasMaxLength(16)
+                        .HasColumnType("NVARCHAR2(16)")
+                        .HasColumnName("MANUAL_CHECK_NUMBER");
 
                     b.Property<string>("Memo")
                         .HasMaxLength(128)
@@ -30312,6 +30322,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasIndex("ZeroContributionReasonId")
                         .HasDatabaseName("IX_PROFIT_DETAIL_ZEROCONTRIBUTIONREASONID");
 
+                    b.HasIndex(new[] { "ProfitYear", "Ssn" }, "IX_PROFITYEAR_SSN")
+                        .HasDatabaseName("IX_PROFIT_DETAIL_PROFITYEAR_SSN");
+
                     b.HasIndex(new[] { "ProfitYear", "MonthToDate" }, "IX_PROFIT_CODE_ID_MONTHTODATE")
                         .HasDatabaseName("IX_PROFIT_DETAIL_PROFITYEAR_MONTHTODATE");
 
@@ -30955,12 +30968,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Virtual.ParticipantTotalVestingBalance", b =>
                 {
+                    b.Property<int>("Id")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID");
+
                     b.Property<int>("Ssn")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("NUMBER(10)")
                         .HasColumnName("SSN");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Ssn"));
 
                     b.Property<decimal?>("AllocationsFromBeneficiary")
                         .HasPrecision(18, 2)
@@ -30977,10 +30991,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(18,2)")
                         .HasColumnName("CURRENTBALANCE");
 
-                    b.Property<int>("Id")
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("ID");
-
                     b.Property<decimal?>("VestedBalance")
                         .HasPrecision(18, 2)
                         .HasColumnType("DECIMAL(18,2)")
@@ -30995,7 +31005,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("YEARS");
 
-                    b.HasKey("Ssn")
+                    b.HasKey("Id", "Ssn")
                         .HasName("PK_PARTICIPANTTOTALVESTINGBALANCES");
 
                     b.ToTable("PARTICIPANTTOTALVESTINGBALANCES", null, t =>
@@ -31006,18 +31016,19 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Virtual.ParticipantTotalYear", b =>
                 {
+                    b.Property<int>("DemographicId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("DEMOGRAPHIC_ID");
+
                     b.Property<int>("Ssn")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("NUMBER(10)")
                         .HasColumnName("SSN");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Ssn"));
 
                     b.Property<byte>("Years")
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("YEARS");
 
-                    b.HasKey("Ssn")
+                    b.HasKey("DemographicId", "Ssn")
                         .HasName("PK_PARTICIPANTTOTALYEARS");
 
                     b.ToTable("PARTICIPANTTOTALYEARS", null, t =>

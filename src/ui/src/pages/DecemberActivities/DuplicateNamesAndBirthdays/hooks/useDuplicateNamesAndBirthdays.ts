@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { useSelector } from "react-redux";
+import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useLazyGetDuplicateNamesAndBirthdaysQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../../reduxstore/store";
-import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
-import { useGridPagination } from "../../../../hooks/useGridPagination";
 import {
-  initialState,
   duplicateNamesAndBirthdaysReducer,
-  selectShowData,
-  selectHasResults
+  initialState,
+  selectHasResults,
+  selectShowData
 } from "./useDuplicateNamesAndBirthdaysReducer";
 
 export interface DuplicateNamesAndBirthdaysSearchParams {
@@ -23,7 +23,7 @@ const useDuplicateNamesAndBirthdays = () => {
   const decemberFlowProfitYear = useDecemberFlowProfitYear();
 
   const handlePaginationChange = useCallback(
-    (pageNumber: number, pageSize: number, sortParams: any) => {
+    (pageNumber: number, pageSize: number, sortParams: SortParams) => {
       if (decemberFlowProfitYear && hasToken) {
         try {
           const request = {
@@ -63,7 +63,7 @@ const useDuplicateNamesAndBirthdays = () => {
   });
 
   const executeSearch = useCallback(
-    async (searchParams: DuplicateNamesAndBirthdaysSearchParams, source = "manual") => {
+    async (searchParams: DuplicateNamesAndBirthdaysSearchParams, _source = "manual") => {
       if (!hasToken) return;
 
       dispatch({ type: "SEARCH_START", payload: { profitYear: searchParams.profitYear } });
@@ -97,6 +97,7 @@ const useDuplicateNamesAndBirthdays = () => {
       hasInitiallySearched.current = true;
       executeSearch({ profitYear: decemberFlowProfitYear }, "auto-initial");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [decemberFlowProfitYear, state.data, hasToken, state.search.isLoading]);
 
   return {

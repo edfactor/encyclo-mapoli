@@ -1,11 +1,11 @@
 import { MissiveResponse } from "reduxstore/types";
 
 export const FORFEITURES_ADJUSTMENT_MESSAGES = {
-  EMPLOYEE_NOT_FOUND: {
+  MEMBER_NOT_FOUND: {
     id: 950,
     severity: "Error" as const,
-    message: "Employee Not Found",
-    description: "Employee not found."
+    message: "Member Not Found",
+    description: "Member not found."
   } as MissiveResponse
 };
 
@@ -44,4 +44,50 @@ export const MASTER_INQUIRY_MESSAGES = {
     message: "Military entry has affected vested percentage",
     description: `Vested percentage now at ${vestedPercentage * 100}%.`
   })
+};
+
+export const DISTRIBUTION_INQUIRY_MESSAGES = {
+  MEMBER_NOT_FOUND: {
+    id: 910,
+    severity: "Error" as const,
+    message: "Member Not Found",
+    description: "The member you are searching for does not exist in the system."
+  } as MissiveResponse,
+
+  DISTRIBUTION_SAVED_SUCCESS: {
+    id: 911,
+    severity: "success" as const,
+    message: "Distribution Saved Successfully",
+    description: "The distribution has been saved successfully."
+  } as MissiveResponse
+};
+
+export const EXECUTIVE_HOURS_AND_DOLLARS_MESSAGES = {
+  EXECUTIVE_HOURS_SAVED_SUCCESS: {
+    id: 970,
+    severity: "success" as const,
+    message: "Executive Hours and Dollars Saved",
+    description: "All executive hours and dollars have been saved successfully."
+  } as MissiveResponse,
+
+  EXECUTIVE_HOURS_SAVE_ERROR: {
+    id: 971,
+    severity: "Error" as const,
+    message: "Save Failed",
+    description: "Failed to save executive hours and dollars. Please try again."
+  } as MissiveResponse,
+
+  MEMBER_NOT_FOUND: {
+    id: 972,
+    severity: "Error" as const,
+    message: "Member Not Found",
+    description: "The member you are searching for does not exist in the system."
+  } as MissiveResponse,
+
+  NO_RESULTS_FOUND: {
+    id: 973,
+    severity: "Error" as const,
+    message: "No Results Found",
+    description: "The search did not return any results. Please try a different search criteria."
+  } as MissiveResponse
 };

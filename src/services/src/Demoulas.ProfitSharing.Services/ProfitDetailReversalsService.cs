@@ -12,14 +12,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services;
-public sealed class ProfitDetailReversalsService: IProfitDetailReversalsService
+
+public sealed class ProfitDetailReversalsService : IProfitDetailReversalsService
 {
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly ILogger<ProfitDetailReversalsService> _logger;
 
     public ProfitDetailReversalsService(
-        IProfitSharingDataContextFactory dbContextFactory, 
+        IProfitSharingDataContextFactory dbContextFactory,
         IDemographicReaderService demographicReaderService,
         ILogger<ProfitDetailReversalsService> logger)
     {
@@ -34,56 +35,113 @@ public sealed class ProfitDetailReversalsService: IProfitDetailReversalsService
         if (profitDetailIds == null || profitDetailIds.Length == 0)
         {
             _logger.LogWarning("Attempted to reverse profit details with null or empty ID array");
-            return Result<bool>.Failure(Error.Validation(new Dictionary<string, string[]>
+            return Result<bool>.ValidationFailure(new Dictionary<string, string[]>
             {
                 [nameof(profitDetailIds)] = ["Profit detail IDs cannot be null or empty"]
-            }));
+            });
         }
 
         // Guard against degenerate queries - limit batch size
         if (profitDetailIds.Length > 1000)
         {
             _logger.LogWarning("Attempted to reverse {Count} profit details, exceeding maximum batch size of 1000", profitDetailIds.Length);
-            return Result<bool>.Failure(Error.Validation(new Dictionary<string, string[]>
+            return Result<bool>.ValidationFailure(new Dictionary<string, string[]>
             {
                 [nameof(profitDetailIds)] = ["Cannot reverse more than 1000 profit details in a single operation"]
-            }));
+            });
         }
 
         try
         {
             var result = await _dbContextFactory.UseWritableContext(async (ctx) =>
             {
+                // Phase 1: Load all profit details and validate
                 var profitDetails = await ctx.ProfitDetails
                     .Where(pd => profitDetailIds.Contains(pd.Id))
                     .ToListAsync(cancellationToken);
 
-                // Validate that we found some profit details to reverse
-                if (profitDetails.Count == 0)
+                // Check if we found all requested profit details
+                var foundIds = profitDetails.Select(pd => pd.Id).ToHashSet();
+                var missingIds = profitDetailIds.Where(id => !foundIds.Contains(id)).ToArray();
+
+                if (missingIds.Length > 0)
                 {
-                    _logger.LogWarning("No profit details found for provided IDs: [{Ids}]", string.Join(", ", profitDetailIds));
-                    return Result<bool>.Failure(Error.EntityNotFound("Profit details"));
+                    _logger.LogWarning("Profit details not found for IDs: [{MissingIds}]", string.Join(", ", missingIds));
+                    return Result<bool>.ValidationFailure(new Dictionary<string, string[]>
+                    {
+                        ["profitDetailIds"] = [$"Profit details not found for IDs: {string.Join(", ", missingIds)}"]
+                    });
                 }
 
+                // Get frozen year for validation
+                var maxFrozenYear = await ctx.FrozenStates.MaxAsync(fy => (int?)fy.ProfitYear, cancellationToken) ?? 0;
+                var currentDate = DateTime.Now;
+
+                // Phase 2: Validate ALL records and collect issues
+                var validationErrors = new Dictionary<string, List<string>>();
+
+                foreach (var pd in profitDetails)
+                {
+                    var pdErrors = new List<string>();
+
+                    // Check for non-reversible profit codes
+                    if (pd.ProfitCodeId is 0 or 2 or 8)
+                    {
+                        pdErrors.Add($"Profit code {pd.ProfitCodeId} is not reversible");
+                    }
+
+                    // Check if profit year is frozen
+                    if (pd.ProfitYear <= maxFrozenYear)
+                    {
+                        pdErrors.Add($"Cannot reverse profit detail for frozen year {pd.ProfitYear}");
+                    }
+
+                    // Check January month restrictions
+                    if (currentDate.Month == 1 && pd.MonthToDate > 1 && pd.MonthToDate < 12)
+                    {
+                        pdErrors.Add($"In January, can only reverse months 1 or 12, not month {pd.MonthToDate}");
+                    }
+
+                    // Check if MonthToDate is too old
+                    if (pd.MonthToDate < currentDate.Month - 2)
+                    {
+                        pdErrors.Add($"Cannot reverse profit detail from month {pd.MonthToDate} as it is more than 2 months old");
+                    }
+
+                    if (pdErrors.Count > 0)
+                    {
+                        validationErrors[$"profitDetail_{pd.Id}"] = pdErrors;
+                    }
+                }
+
+                // If any validation errors, return them all without processing
+                if (validationErrors.Count > 0)
+                {
+                    var flattenedErrors = validationErrors.ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => kvp.Value.ToArray()
+                    );
+
+                    _logger.LogWarning("Validation failed for {ErrorCount} profit details out of {TotalCount} requested",
+                        validationErrors.Count, profitDetails.Count);
+
+                    return Result<bool>.ValidationFailure(flattenedErrors);
+                }
+
+                // Phase 3: All validations passed, now process all records
                 var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
                 var employeeSsns = await demographicQuery
                     .Where(d => profitDetails.Select(pd => pd.Ssn).Contains(d.Ssn))
                     .Select(d => d.Ssn)
                     .ToListAsync(cancellationToken);
-                
-                var currentDate = DateTime.Now;
+
                 var reversedCount = 0;
-                var skippedCount = 0;
-                
+
                 foreach (var pd in profitDetails)
                 {
-                    // Skip non-reversible profit codes (0, 2, 8)
-                    if (pd.ProfitCodeId is 0 or 2 or 8) {
-                        skippedCount++;
-                        continue;
-                    }
+                    var state = pd.Remark?.Length >= 17 ? pd.Remark.Substring(15, 2) : "";
 
-                    var reverseProfitDetail = new Data.Entities.ProfitDetail
+                    var reverseProfitDetail = new ProfitDetail
                     {
                         Ssn = pd.Ssn,
                         ProfitYear = pd.ProfitYear,
@@ -100,10 +158,10 @@ public sealed class ProfitDetailReversalsService: IProfitDetailReversalsService
                         YearsOfServiceCredit = (sbyte)-pd.YearsOfServiceCredit,
                         TaxCodeId = pd.TaxCodeId,
                         CommentTypeId = pd.Remark?.StartsWith("REV") == true ? CommentType.Constants.UndoReversal : CommentType.Constants.Reversal,
-                        Remark = pd.Remark?.StartsWith("REV") == true 
-                            ? $"UN-REV {currentDate:MM/yy}" 
-                            : $"REV {currentDate:MM/yy}",
-                        
+                        Remark = ((pd.Remark?.StartsWith("REV") == true
+                            ? $"UN-REV {currentDate:MM/yy}  "
+                            : $"REV    {currentDate:MM/yy}  ") + state).Trim(),
+
                         ZeroContributionReasonId = null
                     };
 
@@ -111,7 +169,7 @@ public sealed class ProfitDetailReversalsService: IProfitDetailReversalsService
                     reversedCount++;
 
                     // Handle ETVA updates for profit codes 6 and 9
-                    var employeeMember = employeeSsns.FirstOrDefault(x => x == pd.Ssn);  
+                    var employeeMember = employeeSsns.FirstOrDefault(x => x == pd.Ssn);
                     if (pd.ProfitCodeId is 6 or 9 && employeeMember != default)
                     {
                         var currentPayProfit = await ctx.PayProfits
@@ -124,10 +182,9 @@ public sealed class ProfitDetailReversalsService: IProfitDetailReversalsService
                 }
 
                 await ctx.SaveChangesAsync(cancellationToken);
-                
-                _logger.LogInformation("Successfully reversed {ReversedCount} profit details, skipped {SkippedCount} non-reversible entries", 
-                    reversedCount, skippedCount);
-                
+
+                _logger.LogInformation("Successfully reversed {ReversedCount} profit details", reversedCount);
+
                 return Result<bool>.Success(true);
             }, cancellationToken);
 

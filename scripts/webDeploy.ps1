@@ -37,8 +37,18 @@ $Deployments = @(
 )
 
 $Failed = $false
-try {
-    $Session = New-PSSession $envServerName
+$RetryCount = 0
+$MaxRetries = 1
+$RetryDelaySeconds = 15
+
+while ($RetryCount -le $MaxRetries) {
+    try {
+        if ($RetryCount -gt 0) {
+            Write-Host "Retrying deployment (attempt $($RetryCount + 1) of $($MaxRetries + 1))..." -ForegroundColor Yellow
+            Start-Sleep -Seconds $RetryDelaySeconds
+        }
+        
+        $Session = New-PSSession $envServerName
 
     foreach ($Deploy in $Deployments) {
         Invoke-Command -Session $Session -ScriptBlock {
@@ -87,12 +97,28 @@ try {
 
         if (!$?) { $Failed = $true; break }
     }
+    
+    # If we got here without failure, break out of retry loop
+    if (-not $Failed) {
+        Write-Host "Web deployment completed successfully" -ForegroundColor Green
+        break
+    }
 } catch {
     $Failed = $true
+    $RetryCount++
+    if ($RetryCount -gt $MaxRetries) {
+        Write-Host "Web deployment failed after $($MaxRetries + 1) attempts" -ForegroundColor Red
+    }
 } finally {
     if ($null -ne $Session) {
         Remove-PSSession -Session $Session
     }
+}
+
+# Exit retry loop if we've exceeded max retries
+if ($Failed -and $RetryCount -gt $MaxRetries) {
+    break
+}
 }
 
 if ($Failed) { exit 1 }

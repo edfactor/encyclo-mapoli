@@ -8,7 +8,6 @@ using Shouldly;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 
-
 /*
  * This integration test requires that READY's test/reference schema should be run to "Activity 18", for this test to pass.
  *      YEMatch Specify(["R0", "R18"])
@@ -32,7 +31,7 @@ public class YearEndServiceTests : PristineBaseTest
     public async Task TestPay426DataUpdates()
     {
         // ------- Arrange
-        const short profitYear = 2024;
+        const short profitYear = 2025;
         CancellationToken ct = CancellationToken.None;
 
         await DbFactory.UseWritableContext(async ctx =>

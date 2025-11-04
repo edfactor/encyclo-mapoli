@@ -1,19 +1,19 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormControlLabel, FormHelperText, Grid } from "@mui/material";
-import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { useEffect } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetUnForfeitsQuery } from "reduxstore/api/YearsEndApi";
+import { SearchAndReset } from "smart-ui-library";
+import * as yup from "yup";
+import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { useLazyGetUnForfeitsQuery } from "../../../reduxstore/api/YearsEndApi";
 import {
   clearUnForfeitsDetails,
   clearUnForfeitsQueryParams,
   setUnForfeitsQueryParams
-} from "reduxstore/slices/yearsEndSlice";
-import { RootState } from "reduxstore/store";
-import { SearchAndReset } from "smart-ui-library";
-import * as yup from "yup";
-import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
+} from "../../../reduxstore/slices/yearsEndSlice";
+import { RootState } from "../../../reduxstore/store";
 import { CalendarResponseDto, StartAndEndDateRequest } from "../../../reduxstore/types";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
 import {
@@ -28,19 +28,16 @@ const schema = yup.object().shape({
     "beginningDate",
     tryddmmyyyyToDate,
     "Ending date must be the same or after the beginning date"
-  )
-    .required("Ending Date is required")
-    .test("is-too-early", "Insuffient data for dates before 2024", function (value) {
-      return new Date(value) > new Date(2024, 1, 1);
-    }),
+  ).required("Ending Date is required"),
+  // Pagination is handled separately, not part of form validation
   pagination: yup
     .object({
-      skip: yup.number().required(),
-      take: yup.number().required(),
-      sortBy: yup.string().required(),
-      isSortDescending: yup.boolean().required()
+      skip: yup.number(),
+      take: yup.number(),
+      sortBy: yup.string(),
+      isSortDescending: yup.boolean()
     })
-    .required(),
+    .nullable(),
   // Hidden field: not shown in search filter, but required in data
   profitYear: profitYearValidator()
 });
@@ -217,15 +214,18 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
             name="excludeZeroBalance"
             control={control}
             render={({ field }) => (
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={field.value || false}
-                    onChange={(e) => field.onChange(e.target.checked)}
-                  />
-                }
-                label="Exclude employees with no current balance and no vested balance"
-              />
+              <>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={field.value || false}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                    />
+                  }
+                  label="Exclude employees with no current or vested balance"
+                />
+                <FormHelperText> </FormHelperText>
+              </>
             )}
           />
         </Grid>

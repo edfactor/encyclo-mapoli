@@ -189,8 +189,14 @@ const SummariesContent: React.FC = () => {
     }
   ];
 
+  interface RowStyleParams {
+    node: {
+      rowPinned?: boolean;
+    };
+  }
+
   const gridOptions = {
-    getRowStyle: (params: any) => {
+    getRowStyle: (params: RowStyleParams) => {
       if (params.node.rowPinned) {
         return { background: "#f0f0f0", fontWeight: "bold" };
       }

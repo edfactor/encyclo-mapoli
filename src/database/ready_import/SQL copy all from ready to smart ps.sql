@@ -1,7 +1,6 @@
 DECLARE
     this_year NUMBER := 2025; -- <-------- ORACLE HCM loads data in this year.
     last_year NUMBER := 2024; -- <-------- active year end year for the scramble.   Scramble is frozen in 2024. 
-    last_last_year NUMBER := 2023; -- <--- last year for the scramble data
     demographic_cutoff TIMESTAMP; -- <-- Timestamp to use if we import DEMO_PROFSHARE
 BEGIN
 
@@ -82,7 +81,7 @@ BEGIN
      TERMINATION_CODE_ID,
      EMPLOYMENT_STATUS_ID)
     SELECT
-                ROWNUM AS ORACLEHCMID,
+        ROWNUM AS ORACLEHCMID,
                 DEM_SSN,
                 DEM_BADGE,
                 PY_NAM,
@@ -326,14 +325,14 @@ BEGIN
         PY_PH AS CURRENT_HOURS_YEAR,
         PY_PD AS CURRENT_INCOME_YEAR,
         PY_WEEKS_WORK AS WEEKS_WORKED_YEAR,
-        null as PS_CERTIFICATE_ISSUED_DATE,
+        null as PS_CERTIFICATE_ISSUED_DATE, -- Presuming an import is happening in year without a completed YE, so we use null 
         PY_PS_ENROLLED AS ENROLLMENT_ID,
         PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
         PY_PROF_NEWEMP AS EMPLOYEE_TYPE_ID,
         PY_PROF_ZEROCONT AS ZERO_CONTRIBUTION_REASON_ID,
         NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE, 
         NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE,
-        0 as POINTS_EARNED,
+        0 as POINTS_EARNED,  -- Presuming an import is happening in year without a completed YE, so we use 0
         PY_PS_ETVA as ETVA
     FROM {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT
     where PAYPROF_BADGE in ( select BADGE_NUMBER from DEMOGRAPHIC  );
@@ -357,57 +356,26 @@ BEGIN
     SELECT
         (SELECT ID FROM DEMOGRAPHIC WHERE BADGE_NUMBER = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
         last_year AS PROFIT_YEAR,
-        PY_PH_LASTYR as CURRENT_HOURS_YEAR, -- The scramble has 2024 hours as "last year"
-        PY_PD_LASTYR AS CURRENT_INCOME_YEAR, -- The scramble has 2024 hours as "last year"
+        PY_PH_LASTYR as CURRENT_HOURS_YEAR, -- Pull the prior year hours as "last year"
+        PY_PD_LASTYR AS CURRENT_INCOME_YEAR, -- Pull the prior year income as "last year"
         PY_WEEKS_WORK_LAST AS WEEKS_WORKED_YEAR,
-        NULL AS PS_CERTIFICATE_ISSUED_DATE,
-        PY_PS_ENROLLED,
+        CASE -- pull in the cert as the prior year's cert.  We use a DATE in SMART, but READY only has a boolean so we fudge it here.
+            WHEN PY_PROF_CERT = 1 THEN TO_DATE('12/31/' || last_year, 'MM/DD/YYYY')
+            ELSE NULL
+        END as PS_CERTIFICATE_ISSUED_DATE,
+        -- We will recompute this in RebuildEnrollmentAndZeroContService for most employees when we first run.
+        -- We leave it as a default as RebuildEnrollmentAndZeroContService might not recompute every employee
+        PY_PS_ENROLLED, 
         PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
         PY_PROF_NEWEMP as EMPLOYEE_TYPE_ID,
-        PY_PROF_ZEROCONT,
+        -- We will re-compute this in RebuildEnrollmentAndZeroContService for most employees when we first run. We intensionally leave the old value
+        -- because there is special logic for when someone gets to 6 (retired) that they never go back to an earlier value
+        -- so 6 is sticky.
+        PY_PROF_ZEROCONT, 
         NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE,
         NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE,
-        0 AS POINTS_EARNED,
+        PY_PROF_POINTS AS POINTS_EARNED,
         PY_PRIOR_ETVA as ETVA 
-    FROM
-        {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT pp
-            LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.DEMOGRAPHICS d on d.DEM_BADGE = pp.PAYPROF_BADGE
-    WHERE
-        PAYPROF_BADGE IN (SELECT BADGE_NUMBER FROM DEMOGRAPHIC);
-
-    -- Insert the year before LAST YEARS data into the PAY_PROFIT table
-    INSERT INTO PAY_PROFIT
-    (DEMOGRAPHIC_ID,
-     PROFIT_YEAR,
-     CURRENT_HOURS_YEAR,
-     CURRENT_INCOME_YEAR,
-     WEEKS_WORKED_YEAR,
-     PS_CERTIFICATE_ISSUED_DATE,
-     ENROLLMENT_ID,
-     BENEFICIARY_TYPE_ID,
-     EMPLOYEE_TYPE_ID,
-     ZERO_CONTRIBUTION_REASON_ID,
-     HOURS_EXECUTIVE,
-     INCOME_EXECUTIVE,
-     POINTS_EARNED,
-     ETVA)
-    SELECT
-        (SELECT ID FROM DEMOGRAPHIC WHERE BADGE_NUMBER = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
-        last_last_year AS PROFIT_YEAR,
-        0 AS CURRENT_HOURS_YEAR,
-        0 AS CURRENT_INCOME_YEAR,
-        0 AS WEEKS_WORKED_YEAR,
-        CASE WHEN TRIM(PY_PROF_CERT) = '1' then
-                 TO_DATE(last_last_year || '-12-31', 'YYYY-MM-DD')
-            ELSE null END PS_CERTIFICATE_ISSUED_DATE,
-        0,
-        PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
-        0,
-        0,
-        NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE, -- from the scramble, these are correct exec hours for 2023
-        NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE, --  from the scramble, the income exec hours for 2023
-        PY_PROF_POINTS AS POINTS_EARNED, -- from the scramble, these are the correct points for 2023
-        0 as ETVA
     FROM
         {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT pp
             LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.DEMOGRAPHICS d on d.DEM_BADGE = pp.PAYPROF_BADGE
@@ -471,7 +439,8 @@ BEGIN
      QDRO,
      MEMO,
      ROTH_IRA,
-     THIRD_PARTY_PAYEE_ACCOUNT)
+     THIRD_PARTY_PAYEE_ACCOUNT,
+     MANUAL_CHECK_NUMBER)
     SELECT
         PROFDIST_SSN,
         PROFDIST_PAYSEQ,
@@ -522,7 +491,8 @@ BEGIN
             WHEN PROFDIST_ROTH_IRA = 'Y' THEN 1
             ELSE 0
             END as ecode,
-        PROFDIST_3RDACCT
+        CASE WHEN PROFDIST_PAYFLAG <> 'C' THEN '' ELSE PROFDIST_3RDACCT END,
+        CASE WHEN PROFDIST_PAYFLAG = 'C' THEN PROFDIST_3RDACCT ELSE '' END as MANUAL_CHECK_NUMBER
     FROM {SOURCE_PROFITSHARE_SCHEMA}.PROFDIST;
 
 --PROFIT DETAIL table
@@ -1429,35 +1399,23 @@ INSERT ALL
 -- get rid of any history of YE Updates, as all the data is wiped
 delete from ye_update_status;
 
-------------  These are users in the scramble, their ssn's do not in PROD
+------------  These are bad members (benes) in the scramble, their ssn's are not present UAT/PROD
     
+-- We remove benes who are "not complete", namely either
+--     1) their PAYBEN balance does not match their PROFIT_DETAIL rows
+--     2) they are a bene w/o no employee side - but have profit code = 0 transactions which means they were an employee
+--    
+--  | SSN       | Name           | Type             | PAYBEN Balance | Has Code 0?  | Details                                                    |
+--  |-----------|----------------|------------------|----------------|--------------|------------------------------------------------------------|
+--  | 700010556 | BEIL, AUTUMN   | BENEFICIARY ONLY | $96,719.52     | NO           | Legitimate QDRO (Code 6) beneficiary                       |
+--  | 700010521 | MILLS, KRYSTAL | BENEFICIARY ONLY | $0.00          | YES          | SCRAMBLED: 19 employee contributions (2004-2024, $29,655)  |
+--  | 700010561 | RHODES, CRUZ   | BENEFICIARY ONLY | $0.00          | YES          | SCRAMBLED: 28 employee contributions (1992-2024, $101,536) |
+
 --  Bad Beneficiaries, See https://demoulas.atlassian.net/browse/PS-1268
-delete from profit_detail where ssn IN ( 700010556, 700010596 );
-delete from BENEFICIARY where beneficiary_contact_id in (select id from BENEFICIARY_CONTACT where ssn in (700010556, 700010596));
-delete from BENEFICIARY_CONTACT where ssn in (700010556, 700010596 );
+delete from profit_detail where ssn IN ( 700010556, 700010521, 700010561 );
+delete from BENEFICIARY where beneficiary_contact_id in (select id from BENEFICIARY_CONTACT where ssn in (700010556, 700010521, 700010561));
+delete from BENEFICIARY_CONTACT where ssn in (700010556, 700010521, 700010561 );
 
--- 700007178 rehired   20250306
--- 700009305 rehired   20250204
-
--- first change the current history to have a start time, lets use their rehire date
-UPDATE DEMOGRAPHIC_HISTORY dh SET dh.VALID_FROM = DATE '2025-03-06' WHERE dh.demographic_id = (select id from demographic where ssn = 700007178);
-UPDATE DEMOGRAPHIC_HISTORY dh SET dh.VALID_FROM = DATE '2025-03-06' WHERE dh.demographic_id = (select id from demographic where ssn = 700009305);
-
--- now insert the history row from time 0 up to rehire date, in this time range the employee is term.
-INSERT INTO DEMOGRAPHIC_HISTORY (DEMOGRAPHIC_ID, VALID_FROM,            VALID_TO,      ORACLE_HCM_ID,     BADGE_NUMBER, STORE_NUMBER,    PAY_CLASSIFICATION_ID,    DATE_OF_BIRTH,    HIRE_DATE,    REHIRE_DATE, TERMINATION_DATE, DEPARTMENT,    EMPLOYMENT_TYPE_ID,    PAY_FREQUENCY_ID,    TERMINATION_CODE_ID, EMPLOYMENT_STATUS_ID, CREATED_DATETIME)
-SELECT                           d.ID          , DATE '1900-01-01', DATE '2025-03-06', dh.ORACLE_HCM_ID, d.badge_number,    dh.STORE_NUMBER, dh.PAY_CLASSIFICATION_ID, dh.DATE_OF_BIRTH, dh.HIRE_DATE, NULL,        DATE '2024-12-06',        dh.DEPARTMENT, dh.EMPLOYMENT_TYPE_ID, dh.PAY_FREQUENCY_ID, 'A'                , 't'                 , dh.CREATED_DATETIME
-FROM DEMOGRAPHIC_HISTORY dh JOIN DEMOGRAPHIC d ON dh.DEMOGRAPHIC_ID = d.ID
-WHERE d.ssn = 700007178;
-
--- now insert the history row from time 0 up to rehire date, in this time range the employee is term.
-INSERT INTO DEMOGRAPHIC_HISTORY (DEMOGRAPHIC_ID, VALID_FROM,            VALID_TO,      ORACLE_HCM_ID,     BADGE_NUMBER, STORE_NUMBER,    PAY_CLASSIFICATION_ID,    DATE_OF_BIRTH,    HIRE_DATE,    REHIRE_DATE, TERMINATION_DATE, DEPARTMENT,    EMPLOYMENT_TYPE_ID,    PAY_FREQUENCY_ID,    TERMINATION_CODE_ID, EMPLOYMENT_STATUS_ID, CREATED_DATETIME)
-SELECT                           d.ID          , DATE '1900-01-01', DATE '2025-02-04', dh.ORACLE_HCM_ID, d.badge_number,dh.STORE_NUMBER, dh.PAY_CLASSIFICATION_ID, dh.DATE_OF_BIRTH, dh.HIRE_DATE, NULL,        DATE '2024-12-06',        dh.DEPARTMENT, dh.EMPLOYMENT_TYPE_ID, dh.PAY_FREQUENCY_ID, 'A'                , 't'                 , dh.CREATED_DATETIME
-FROM DEMOGRAPHIC_HISTORY dh JOIN DEMOGRAPHIC d ON dh.DEMOGRAPHIC_ID = d.ID
-WHERE d.ssn = 700009305;
-
-
---Set Zero Contribution Reason to 2 - (Terminated Employee)
-UPDATE PAY_PROFIT SET ZERO_CONTRIBUTION_REASON_ID = 2 WHERE PROFIT_YEAR = 2024 and demographic_id in (select id from demographic where ssn in (700007178,700009305));
 
 END;
 COMMIT ;

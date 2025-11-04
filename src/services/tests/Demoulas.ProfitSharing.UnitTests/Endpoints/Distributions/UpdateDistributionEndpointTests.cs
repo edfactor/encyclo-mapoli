@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.Net;
+﻿using System.Net;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -84,7 +83,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
                 Ssn = demographic.Ssn, // Required field
                 PaymentSequence = 1, // Required field
                 EmployeeName = "Test Employee", // Required field
-                StatusId = 'A', // Active status
+                StatusId = 'Y', // OkayToPay status (valid distribution status)
                 FrequencyId = 'M', // Monthly frequency
                 FederalTaxAmount = 50.00m, // Lower initial amounts
                 StateTaxAmount = 25.00m,
@@ -118,7 +117,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         {
             Id = distributionId,
             BadgeNumber = validBadgeNumber,
-            StatusId = 'A',
+            StatusId = 'Y', // OkayToPay - valid status
             FrequencyId = 'Q', // Changed from 'M' to 'Q'
             FederalTaxPercentage = 15.0m, // Changed from 10.0m to 15.0m
             FederalTaxAmount = 150.00m, // Changed from 100.00m to 150.00m
@@ -172,7 +171,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         {
             Id = distributionId,
             BadgeNumber = validBadgeNumber,
-            StatusId = 'T', // Changed to 'T' (Terminated)
+            StatusId = 'P', // PaymentMade - valid status
             FrequencyId = 'L', // Changed to 'L' (Lump Sum)
             FederalTaxPercentage = 0.0m,
             FederalTaxAmount = 0.00m,
@@ -218,7 +217,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         {
             Id = distributionId,
             BadgeNumber = validBadgeNumber,
-            StatusId = 'A',
+            StatusId = 'Y', // OkayToPay - valid status
             FrequencyId = 'R', // Use 'R' for Rollover Direct to allow third party payee
             FederalTaxPercentage = 20.0m,
             FederalTaxAmount = 200.00m,
@@ -319,7 +318,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         {
             Id = distributionId,
             BadgeNumber = validBadgeNumber,
-            StatusId = 'A',
+            StatusId = 'Y', // OkayToPay - valid status
             FrequencyId = 'L',
             FederalTaxPercentage = 0.0m,
             FederalTaxAmount = 0.00m,
@@ -335,14 +334,15 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         // Act
         var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
 
+        // Assert
+        response.ShouldNotBeNull();
+
         // If we get a 400, log the error for debugging
         if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
         {
             var errorContent = await response.Response.Content.ReadAsStringAsync();
             throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
         }
-        // Assert
-        response.ShouldNotBeNull();
         response.Response.EnsureSuccessStatusCode();
         response.Result.ShouldNotBeNull();
         response.Result.Id.ShouldBe(request.Id);
@@ -353,9 +353,9 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Theory(DisplayName = "UpdateDistribution - Should accept valid status ID updates")]
-    [InlineData('A')]
-    [InlineData('D')]
-    [InlineData('T')]
+    [InlineData(DistributionStatus.Constants.ManualCheck)] // ManualCheck
+    [InlineData(DistributionStatus.Constants.PurgeRecord)] // PurgeRecord
+    [InlineData(DistributionStatus.Constants.RequestOnHold)] // RequestOnHold
     public async Task UpdateDistribution_WithValidStatusIdUpdates_ShouldReturnSuccess(char statusId)
     {
         // Arrange
@@ -368,14 +368,14 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
             Id = distributionId,
             BadgeNumber = validBadgeNumber,
             StatusId = statusId,
-            FrequencyId = 'M',
+            FrequencyId = DistributionFrequency.Constants.Monthly,
             FederalTaxPercentage = 15.0m,
             FederalTaxAmount = 150.00m,
             StateTaxPercentage = 5.0m,
             StateTaxAmount = 50.00m,
             GrossAmount = 1000.00m,
             CheckAmount = 800.00m,
-            TaxCodeId = '1'
+            TaxCodeId = TaxCode.Constants.EarlyDistributionNoException.Id
         };
 
         // Act
@@ -396,10 +396,10 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
     }
 
     [Theory(DisplayName = "UpdateDistribution - Should accept valid frequency ID updates")]
-    [InlineData('M')]
-    [InlineData('Q')]
-    [InlineData('H')]
-    [InlineData('R')]
+    [InlineData(DistributionFrequency.Constants.Monthly)]
+    [InlineData(DistributionFrequency.Constants.Quarterly)]
+    [InlineData(DistributionFrequency.Constants.Annually)]
+    [InlineData(DistributionFrequency.Constants.PayDirect)]
     public async Task UpdateDistribution_WithValidFrequencyIdUpdates_ShouldReturnSuccess(char frequencyId)
     {
         // Arrange
@@ -411,7 +411,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         {
             Id = distributionId,
             BadgeNumber = validBadgeNumber,
-            StatusId = 'A',
+            StatusId = 'Y', // OkayToPay - valid status
             FrequencyId = frequencyId,
             FederalTaxPercentage = 15.0m,
             FederalTaxAmount = 150.00m,
@@ -450,7 +450,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         {
             Id = 999999, // Non-existent ID
             BadgeNumber = validBadgeNumber,
-            StatusId = 'A',
+            StatusId = 'Y', // OkayToPay - valid status
             FrequencyId = 'M',
             FederalTaxPercentage = 15.0m,
             FederalTaxAmount = 150.00m,
@@ -488,7 +488,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         {
             Id = distributionId,
             BadgeNumber = -1, // Invalid badge number
-            StatusId = 'A',
+            StatusId = 'Y', // OkayToPay - valid status
             FrequencyId = 'M',
             FederalTaxPercentage = 15.0m,
             FederalTaxAmount = 150.00m,
@@ -518,7 +518,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         {
             Id = 1,
             BadgeNumber = 12345,
-            StatusId = 'A',
+            StatusId = 'Y', // OkayToPay - valid status
             FrequencyId = 'M',
             FederalTaxPercentage = 15.0m,
             FederalTaxAmount = 150.00m,
@@ -563,7 +563,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         {
             Id = distributionId,
             BadgeNumber = validBadgeNumber,
-            StatusId = 'A',
+            StatusId = 'Y', // OkayToPay - valid status
             FrequencyId = 'M',
             FederalTaxPercentage = 15.0m,
             FederalTaxAmount = 150.00m,
@@ -682,7 +682,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         {
             Id = distributionId1,
             BadgeNumber = validBadgeNumber,
-            StatusId = 'A',
+            StatusId = 'Y', // OkayToPay - valid status
             FrequencyId = 'M',
             FederalTaxPercentage = 15.0m,
             FederalTaxAmount = 150.00m,
@@ -698,7 +698,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         {
             Id = distributionId2,
             BadgeNumber = validBadgeNumber,
-            StatusId = 'A',
+            StatusId = 'Y', // OkayToPay - valid status
             FrequencyId = 'Q',
             FederalTaxPercentage = 20.0m,
             FederalTaxAmount = 200.00m,
@@ -754,7 +754,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         {
             Id = 0, // Zero ID (should be invalid)
             BadgeNumber = validBadgeNumber,
-            StatusId = 'A',
+            StatusId = 'Y', // OkayToPay - valid status
             FrequencyId = 'M',
             FederalTaxPercentage = 15.0m,
             FederalTaxAmount = 150.00m,

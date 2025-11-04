@@ -1,19 +1,19 @@
 import { RefObject, useMemo } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
-import { EligibleEmployeesResponse } from "../../../reduxstore/types";
+import { GridPaginationActions, GridPaginationState, SortParams } from "../../../hooks/useGridPagination";
+import { EligibleEmployeeResponseDto } from "../../../reduxstore/types";
 import { GetEligibleEmployeesColumns } from "./EligibleEmployeesGridColumns";
-import { GridPaginationState, GridPaginationActions } from "../../../hooks/useGridPagination";
 
 interface EligibleEmployeesGridProps {
   innerRef: RefObject<HTMLDivElement | null>;
-  data: EligibleEmployeesResponse | null;
+  data: EligibleEmployeeResponseDto | null;
   isLoading: boolean;
   showData: boolean;
   hasResults: boolean;
   pagination: GridPaginationState & GridPaginationActions;
   onPaginationChange: (pageNumber: number, pageSize: number) => void;
-  onSortChange: (sortParams: any) => void;
+  onSortChange: (sortParams: SortParams) => void;
 }
 
 const EligibleEmployeesGrid = ({
@@ -26,19 +26,27 @@ const EligibleEmployeesGrid = ({
   onPaginationChange,
   onSortChange
 }: EligibleEmployeesGridProps) => {
+  // I need to clone the data object, but alter the reportName. I need to keep the year from the end
+  // of the existing report name, but add "Eligible Employees " to the front.
+  const clonedData = data ? ({ ...data } as EligibleEmployeeResponseDto) : null;
+  const year = clonedData?.reportName?.match(/\d{4}$/)?.[0];
+  if (clonedData && year) {
+    clonedData.reportName = `Eligible Employees ${year}`;
+  }
+
   const columnDefs = useMemo(() => GetEligibleEmployeesColumns(), []);
 
   return (
     <>
-      {showData && data?.response && (
+      {showData && clonedData?.response && (
         <div ref={innerRef}>
-          <ReportSummary report={data} />
+          <ReportSummary report={clonedData} />
           <DSMGrid
             preferenceKey={"ELIGIBLE_EMPLOYEES"}
             isLoading={isLoading}
             handleSortChanged={onSortChange}
             providedOptions={{
-              rowData: data.response.results,
+              rowData: clonedData.response.results,
               columnDefs: columnDefs,
               suppressMultiSort: true
             }}

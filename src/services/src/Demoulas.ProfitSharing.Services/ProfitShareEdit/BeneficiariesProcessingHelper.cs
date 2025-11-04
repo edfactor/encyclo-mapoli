@@ -32,7 +32,7 @@ internal static class BeneficiariesProcessingHelper
                          }).ToListAsync(cancellationToken);
 
             return benes;
-        });
+        }, cancellationToken);
 
 
         Dictionary<int, ProfitDetailTotals> thisYearsTotalsBySSn =

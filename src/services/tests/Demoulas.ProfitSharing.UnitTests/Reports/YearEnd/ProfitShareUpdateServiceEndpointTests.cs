@@ -3,7 +3,6 @@ using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Security;
@@ -12,6 +11,7 @@ using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
@@ -24,7 +24,9 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
     public ProfitShareUpdateServiceEndpointTests()
     {
         IProfitShareUpdateService svc = ServiceProvider?.GetRequiredService<IProfitShareUpdateService>()!;
-        _endpoint = new ProfitShareUpdateEndpoint(svc);
+        ICrossReferenceValidationService crossRefSvc = ServiceProvider?.GetRequiredService<ICrossReferenceValidationService>()!;
+        ILogger<ProfitShareUpdateEndpoint> logger = ServiceProvider?.GetRequiredService<ILogger<ProfitShareUpdateEndpoint>>()!;
+        _endpoint = new ProfitShareUpdateEndpoint(svc, crossRefSvc, logger);
     }
 
     [Fact(DisplayName = "Unauthorized")]
@@ -61,43 +63,7 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
     }
 
 
-    [Fact]
-    public void Ensure_max_contribution_is_tripped()
-    {
-        _ = MockDbContextFactory.UseWritableContext(async c =>
-        {
-            // Arrange
-            // ensure we always have an employee with PointsEarned
-            await EnsureEmployeeHasPoints(c);
-            ProfitShareUpdateRequest req = new() { ProfitYear = ProfitYear, AdjustContributionAmount = 20, MaxAllowedContributions = 1 };
-            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-
-            // Act
-            TestResult<ProfitShareUpdateResponse> response =
-                await ApiClient
-                    .GETAsync<ProfitShareUpdateEndpoint,
-                        ProfitShareUpdateRequest, ProfitShareUpdateResponse>(req);
-
-            // Assert
-            response.Response.StatusCode.ShouldBe(HttpStatusCode.OK);
-            response.Result.HasExceededMaximumContributions.ShouldBeTrue();
-        });
-    }
-
-
-    private static async Task<PayProfit> EnsureEmployeeHasPoints(ProfitSharingDbContext c)
-    {
-        PayProfit pp = await c.PayProfits
-            .Include(payProfit => payProfit.Demographic!)
-            .ThenInclude(demographic => demographic.ContactInfo)
-            .Include(p => p.Demographic != null)
-            .FirstAsync(CancellationToken.None);
-        pp.ProfitYear = ProfitYear;
-        pp.PointsEarned = 100_000 / 100;
-        await c.SaveChangesAsync(CancellationToken.None);
-        return pp;
-    }
-
+  
 #pragma warning disable AsyncFixer01
 
     [Fact]

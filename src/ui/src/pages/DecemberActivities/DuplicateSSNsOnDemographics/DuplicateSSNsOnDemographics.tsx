@@ -2,6 +2,7 @@ import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useRef } from "react";
 import { Page } from "smart-ui-library";
+import { CAPTIONS } from "../../../constants";
 import DuplicateSSNsOnDemographicsGrid from "./DuplicateSSNsOnDemographicsGrid";
 import useDuplicateSSNsOnDemographics from "./hooks/useDuplicateSSNsOnDemographics";
 
@@ -17,7 +18,7 @@ const DuplicateSSNsOnDemographics = () => {
 
   return (
     <Page
-      label={`Duplicate SSNs on Demographics (${recordCount} records)`}
+      label={`${CAPTIONS.DUPLICATE_SSNS} (${recordCount} records)`}
       actionNode={renderActionNode()}>
       <Grid
         container

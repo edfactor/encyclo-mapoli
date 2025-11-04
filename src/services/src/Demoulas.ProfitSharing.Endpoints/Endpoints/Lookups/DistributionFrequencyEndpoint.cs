@@ -62,7 +62,7 @@ public sealed class DistributionFrequencyEndpoint : ProfitSharingResultResponseE
             var items = await _dataContextFactory.UseReadOnlyContext(c => c.DistributionFrequencies
                 .OrderBy(x => x.Name)
                 .Select(x => new DistributionFrequencyResponse { Id = x.Id, Name = x.Name })
-                .ToListAsync(ct));
+                .ToListAsync(ct), ct);
 
             // Record business metrics
             Demoulas.ProfitSharing.Common.Telemetry.EndpointTelemetry.BusinessOperationsTotal.Add(1,

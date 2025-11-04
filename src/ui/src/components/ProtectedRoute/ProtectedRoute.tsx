@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ImpersonationRoles } from "reduxstore/types";
 
@@ -12,17 +12,19 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRoles
   const navigate = useNavigate();
   const location = useLocation();
 
-  if (!requiredRoles) {
-    return <>{children}</>;
-  }
-
-  const rolesArray = Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles];
-
-  const hasRequiredRole = rolesArray.some((role) => localStorageImpersonating.includes(role));
+  const rolesArray = useMemo<ImpersonationRoles[]>(
+    () => (requiredRoles ? (Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles]) : []),
+    [requiredRoles]
+  );
+  const hasRequiredRole = rolesArray.length > 0 && rolesArray.some((role) => localStorageImpersonating.includes(role));
 
   console.log("ProtectedRoute - hasRequiredRole:", hasRequiredRole);
 
   useEffect(() => {
+    if (!requiredRoles) {
+      return;
+    }
+
     if (!hasRequiredRole) {
       const rolesList = rolesArray.join(", ");
       const searchParams = new URLSearchParams({
@@ -32,7 +34,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRoles
       });
       navigate(`/unauthorized?${searchParams.toString()}`, { replace: true });
     }
-  }, [hasRequiredRole, rolesArray, location.pathname, navigate]);
+  }, [hasRequiredRole, rolesArray, location.pathname, navigate, requiredRoles]);
+
+  if (!requiredRoles) {
+    return <>{children}</>;
+  }
 
   return hasRequiredRole ? <>{children}</> : null;
 };

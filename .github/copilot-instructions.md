@@ -7,7 +7,7 @@
   - `src/services/` - .NET 9 multi-project solution `Demoulas.ProfitSharing.slnx` (FastEndpoints, EF Core 9 + Oracle, Aspire, Serilog, RabbitMQ, Mapperly, Shouldly)
     - Hosted using **.NET Aspire** (`Demoulas.ProfitSharing.AppHost`) - do not create ad-hoc hosts
     - **Start app**: `aspire run` from project root
-    - [Aspire docs](https://github.com/dotnet/docs-aspire/blob/main/docs/cli/overview.md)
+  - Aspire docs: https://github.com/dotnet/docs-aspire/blob/main/docs/cli/overview.md
   - `src/ui/` - Vite + React + TypeScript + Tailwind + Redux Toolkit + `smart-ui-library`
 - **Database**: Oracle 19. EF Core migrations via `ProfitSharingDbContext`; CLI utility `Demoulas.ProfitSharing.Data.Cli` for schema ops
 - **Cross-cutting**: Central package mgmt (`Directory.Packages.props`), shared build config (`Directory.Build.props`), global SDK pin (`global.json`)
@@ -20,6 +20,7 @@
   - Bulk maintenance uses `ExecuteUpdate/ExecuteDelete` inside services
   - Dynamic filters build expressions in services (see `DemographicsService`)
   - Avoid raw SQL; if needed, encapsulate in service layer
+- **EF Core 9 Best Practices**: See detailed EF Core patterns in the section below
 - **Distributed Caching**: Use `IDistributedCache` (NOT `IMemoryCache`). See DISTRIBUTED_CACHING_PATTERNS.md (`.github/`) for complete patterns including version-based invalidation
 - **Auditing & History**: Close current record (`ValidTo = now`), insert new history row. NEVER overwrite historical rows.
 - **Identifiers**: `OracleHcmId` is authoritative; fall back to `(Ssn,BadgeNumber)` only when Oracle id missing
@@ -40,7 +41,77 @@ var result = await _svc.GetAsync(req.Id, ct);
 return result.ToHttpResult(Error.SomeEntityNotFound);
 ```
 
-## Telemetry & Observability (MANDATORY)
+## EF Core 9 Patterns & Best Practices (MANDATORY)
+
+We use **EF Core 9** with Oracle provider. All DB access MUST follow these patterns.
+
+**CRITICAL**: Use `context.UseReadOnlyContext()` for read-only ops—it auto-applies `.AsNoTracking()`. Do NOT add `.AsNoTracking()` when using `UseReadOnlyContext()`.
+
+### Query Tagging (Recommended)
+Tag queries for production traceability:
+- `TagWith()`: Add business context (year, user, operation, ticket) - **Required for complex operations**
+
+```csharp
+// Business context tagging (required for year-end, reports, etc.)
+var report = await _context.ProfitSharingRecords
+    .TagWith($"YearEnd-{year}-Calc")
+    .Where(r => r.ProfitYear == year)
+    .ToListAsync(ct);
+
+// Optional: Add call site for detailed tracing
+var data = await _context.Employees
+    .TagWith($"Report-{reportType}")
+    .Where(e => e.IsActive)
+    .ToListAsync(ct);
+```
+
+### Oracle-Specific Patterns
+- **NO `??` in queries**: Oracle provider fails—use `x != null ? x : "default"` instead
+- **String search**: Use `EF.Functions.Like(m.Name, "%search%")` for case-insensitive
+
+### Bulk Operations (ExecuteUpdate/ExecuteDelete)
+Use EF9 bulk ops—no entity loading, single SQL, efficient:
+```csharp
+await _context.Records
+    .TagWith($"BulkUpdate-Status-{year}")
+    .Where(r => r.Year == year)
+    .ExecuteUpdateAsync(s => s.SetProperty(r => r.Status, newStatus), ct);
+```
+
+### Performance Patterns
+**Read-only (preferred)**:
+**Read-only (preferred)**:
+```csharp
+await using var ctx = await _factory.CreateDbContextAsync(ct);
+ctx.UseReadOnlyContext(); // Auto AsNoTracking
+var data = await ctx.Members.TagWith("GetMembers").ToListAsync(ct);
+```
+
+**Projection**: Select only needed columns for DTOs
+**Lookups**: Pre-compute `ToDictionary`/`ToLookup` before loops
+**Degenerate guard**: Validate inputs (e.g., prevent all-zero badge numbers)
+
+### Critical Rules
+- Services only—NO DbContext in endpoints
+- Always async (`FirstOrDefaultAsync`, `ToListAsync`)
+- Explicit `Include()`/`ThenInclude()`—NO lazy loading
+- Validate inputs to prevent table scans
+
+### Example Service
+```csharp
+public async Task<Result<MemberDto>> GetByIdAsync(int id, CancellationToken ct)
+{
+    await using var ctx = await _factory.CreateDbContextAsync(ct);
+    ctx.UseReadOnlyContext();
+    
+    var member = await ctx.Members
+        .TagWith($"GetMember-{id}")
+        .FirstOrDefaultAsync(m => m.Id == id, ct);
+    
+    return member is null 
+        ? Result<MemberDto>.Failure(Error.MemberNotFound)
+        : Result<MemberDto>.Success(member.ToDto());
+}
 
 All FastEndpoints MUST implement comprehensive telemetry. **See [TELEMETRY_GUIDE.md](../src/ui/public/docs/TELEMETRY_GUIDE.md)** for complete reference.
 
@@ -104,6 +175,17 @@ public class SearchRequestValidator : AbstractValidator<SearchRequest>
 - Always brace control blocks; favor null propagation `?.` and coalescing `??`.
   - IMPORTANT: Avoid using the null-coalescing operator `??` inside expressions that will be translated by Entity Framework Core into SQL. The Oracle EF Core provider can fail with `??` in queries. Use explicit conditional projection instead.
 - XML doc comments for public & internal APIs.
+
+### Project-specific Conventions
+
+These conventions are important project-wide rules. Follow them in addition to the coding style above:
+
+- Public methods use PascalCase naming
+- Private fields start with underscore (_)
+- Use Task/Task<T> or ValueTask/ValueTask<T> for asynchronous operations
+- Dependencies are injected through constructor parameters (constructor injection)
+- Use Result<T> pattern for error handling instead of throwing exceptions directly
+- Use DTOs/ViewModels for data transfer between layers
 
 ## Database & CLI
 - Add a migration (run from repo root PowerShell):
@@ -201,8 +283,12 @@ See BRANCHING_AND_WORKFLOW.md (`.github/`) for complete Git, Jira, and PR conven
 
 **Quick Summary**:
 - Always branch from `develop` (not `main`)
-- Branch naming: `<type>/PS-####-short-description`
-- Commit messages: Start with `PS-####:`
+- Branching and commit message examples:
+
+```text
+Branch example: feature/PS-1720-add-reporting-view
+Commit example: PS-1720: Add reporting view
+```
 - PR title: Start with Jira key
 - Use Atlassian MCP for all Jira/Confluence interactions
 - AI assistants: Do NOT auto-create or auto-merge PRs (human review required)
@@ -237,6 +323,9 @@ For comprehensive implementation details, see these dedicated guides:
 - Distribution-Processing-Requirements.md (`src/ui/public/docs/`) - Distribution processing flows
 - Year-End-Testability-And-Acceptance-Criteria.md (`src/ui/public/docs/`) - Year-end processing tests
 
+### Front End Tests
+- fe-unit-tests.md ('ai-templates/front-end/') Guide to writing tests for react tests
+
 ## Quick Commands (PowerShell)
 ```pwsh
 # Start the entire application (API + UI) - RUN FROM PROJECT ROOT
@@ -253,6 +342,12 @@ dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitS
 - Duplicate mapping logic already covered by Mapperly profiles.
 - Hardcode environment-specific connection strings or credentials.
 - Access `DbContext`, `IProfitSharingDataContextFactory`, or any EF Core DbSet directly inside endpoint classes. (If present, refactor: move data logic into a service and have the endpoint call that service returning `Result<T>`.)
+- Use null-coalescing operator `??` in EF Core query expressions (Oracle provider translation issue—use explicit conditionals instead).
+- Use lazy loading in EF Core (use explicit `Include()`/`ThenInclude()` instead).
+- Use synchronous EF Core methods (`FirstOrDefault`, `ToList`, etc.)—always use async variants (`FirstOrDefaultAsync`, `ToListAsync`, etc.).
+- Load entities into memory for bulk updates/deletes—use `ExecuteUpdateAsync`/`ExecuteDeleteAsync` for efficiency.
+- Skip input validation that could cause degenerate queries (e.g., allow all-zero badge numbers that would scan entire tables).
+- Manually add `.AsNoTracking()` to queries when using `UseReadOnlyContext()`—it's already applied automatically by `UseReadOnlyContext()`.
 - Create endpoints without comprehensive telemetry using `TelemetryExtensions` patterns.
 - Use legacy telemetry patterns instead of `ExecuteWithTelemetry` or manual `TelemetryExtensions` methods.
 - Access sensitive fields without declaring them in telemetry calls (security requirement).

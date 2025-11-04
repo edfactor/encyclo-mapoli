@@ -55,14 +55,14 @@ test.describe.serial("Pay 443: ", () => {
   });
 
   test("changing status of YTD Wages Extract", async ({ page }) => {
-    const [response] = await Promise.all([
+    await Promise.all([
       page.waitForResponse((resp) => resp.url().includes("api/navigation")),
       (async () => {
         await page.getByRole("combobox").nth(1).click();
         await page.getByRole("option", { name: "Complete" }).click();
       })()
     ]);
-    const json = await response.json();
+    //const json = await response.json();
     return;
   });
 });

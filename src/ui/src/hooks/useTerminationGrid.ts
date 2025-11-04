@@ -8,11 +8,22 @@ import {
 } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { CalendarResponseDto, ForfeitureAdjustmentUpdateRequest, StartAndEndDateRequest } from "reduxstore/types";
-import { formatNumberWithComma, setMessage } from "smart-ui-library";
+import { setMessage } from "smart-ui-library";
+import { flattenMasterDetailData, generateRowKey } from "../utils/forfeitActivities/gridDataHelpers";
+import {
+  clearGridSelectionsForBadges,
+  formatApiError,
+  generateBulkSaveSuccessMessage,
+  generateSaveSuccessMessage,
+  getErrorMessage,
+  getRowKeysForRequests,
+  prepareBulkSaveRequests,
+  prepareSaveRequest
+} from "../utils/forfeitActivities/saveOperationHelpers";
 import { Messages } from "../utils/messageDictonary";
 import useDecemberFlowProfitYear from "./useDecemberFlowProfitYear";
 import { useEditState } from "./useEditState";
-import { useGridPagination } from "./useGridPagination";
+import { SortParams, useGridPagination } from "./useGridPagination";
 import { useRowSelection } from "./useRowSelection";
 
 interface TerminationSearchRequest {
@@ -41,6 +52,12 @@ interface TerminationGridConfig {
   onLoadingChange?: (isLoading: boolean) => void;
 }
 
+// Configuration for shared utilities
+const ACTIVITY_CONFIG = {
+  activityType: "termination" as const,
+  rowKeyConfig: { type: "termination" as const }
+};
+
 export const useTerminationGrid = ({
   initialSearchLoaded,
   setInitialSearchLoaded,
@@ -55,7 +72,6 @@ export const useTerminationGrid = ({
   onLoadingChange
 }: TerminationGridConfig) => {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
-  const [gridApi, setGridApi] = useState<GridApi | null>(null);
   const [pendingSuccessMessage, setPendingSuccessMessage] = useState<string | null>(null);
   const [isPendingBulkMessage, setIsPendingBulkMessage] = useState<boolean>(false);
   const [isBulkSaveInProgress, setIsBulkSaveInProgress] = useState<boolean>(false);
@@ -70,8 +86,16 @@ export const useTerminationGrid = ({
 
   const editState = useEditState();
   const selectionState = useRowSelection();
-  const gridRef = useRef<any>(null);
+  const gridRef = useRef<{ api: GridApi } | null>(null);
+  const prevTermination = useRef<typeof termination | null>(null);
   const lastRequestKeyRef = useRef<string | null>(null);
+
+  // Notify parent component of loading state changes
+  useEffect(() => {
+    if (onLoadingChange) {
+      onLoadingChange(isFetching);
+    }
+  }, [isFetching, onLoadingChange]);
 
   // Create a request object based on current parameters
   const createRequest = useCallback(
@@ -108,7 +132,7 @@ export const useTerminationGrid = ({
       initialSortBy: "name",
       initialSortDescending: false,
       onPaginationChange: useCallback(
-        async (pageNum: number, pageSz: number, sortPrms: any) => {
+        async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
           if (initialSearchLoaded && searchParams) {
             const params = createRequest(
               pageNum * pageSz,
@@ -126,8 +150,8 @@ export const useTerminationGrid = ({
       )
     });
 
-  const onGridReady = useCallback((params: { api: GridApi }) => {
-    setGridApi(params.api);
+  const onGridReady = useCallback((_params: { api: GridApi }) => {
+    // Grid is now ready - gridRef will be set by the component
   }, []);
 
   // Effect to show success message after grid finishes loading
@@ -150,25 +174,38 @@ export const useTerminationGrid = ({
     }
   }, [isFetching, pendingSuccessMessage, isPendingBulkMessage, dispatch]);
 
-  // Notify parent component about loading state changes
+  // Need a useEffect to reset the page number when total count changes (new search, not pagination)
+  // Don't reset during or immediately after bulk save operations to preserve grid position
   useEffect(() => {
-    onLoadingChange?.(isFetching);
-  }, [isFetching, onLoadingChange]);
+    const prevTotal = prevTermination.current?.response?.total;
+    const currentTotal = termination?.response?.total;
+
+    // Skip if this is the initial load (previous was undefined/null OR transitioning from 0 to non-zero)
+    const isInitialLoad =
+      !prevTermination.current || (prevTotal === 0 && currentTotal !== undefined && currentTotal > 0);
+
+    if (
+      !isBulkSaveInProgress &&
+      !isInitialLoad &&
+      termination !== prevTermination.current &&
+      currentTotal !== undefined &&
+      currentTotal !== prevTotal
+    ) {
+      resetPagination();
+    }
+    prevTermination.current = termination;
+  }, [termination, resetPagination, isBulkSaveInProgress]);
 
   // Initialize expandedRows when data is loaded
   useEffect(() => {
     if (termination?.response?.results && termination.response.results.length > 0) {
-      const badgeNumbers = termination.response.results.map((row: any) => row.badgeNumber).join(",");
-      const prevBadgeNumbers = Object.keys(expandedRows).join(",");
-      if (badgeNumbers !== prevBadgeNumbers) {
-        const initialExpandState: Record<string, boolean> = {};
-        termination.response.results.forEach((row: any) => {
-          if (row.yearDetails && row.yearDetails.length > 0) {
-            initialExpandState[row.badgeNumber] = true;
-          }
-        });
-        setExpandedRows(initialExpandState);
-      }
+      const initialExpandState: Record<string, boolean> = {};
+      termination.response.results.forEach((row) => {
+        if (row.yearDetails && row.yearDetails.length > 0) {
+          initialExpandState[String(row.psn)] = true;
+        }
+      });
+      setExpandedRows(initialExpandState);
     }
   }, [termination?.response?.results]);
 
@@ -192,9 +229,11 @@ export const useTerminationGrid = ({
       pageSz: number,
       beginningDate?: string,
       endingDate?: string,
-      archive?: boolean
+      archive?: boolean,
+      excludeZeroAndFullyVested?: boolean,
+      excludeAlreadyForfeited?: boolean
     ) =>
-      `${skip}|${pageSz}|${sortBy}|${isSortDescending}|${profitYear}|${beginningDate ?? ""}|${endingDate ?? ""}|${archive ? "1" : "0"}`,
+      `${skip}|${pageSz}|${sortBy}|${isSortDescending}|${profitYear}|${beginningDate ?? ""}|${endingDate ?? ""}|${archive ? "1" : "0"}|${excludeZeroAndFullyVested ? "1" : "0"}|${excludeAlreadyForfeited ? "1" : "0"}`,
     []
   );
 
@@ -218,19 +257,13 @@ export const useTerminationGrid = ({
           sortParams.isSortDescending,
           selectedProfitYear,
           pageSize,
-          (params as any).beginningDate,
-          (params as any).endingDate,
-          (params as any).archive
+          params.beginningDate,
+          params.endingDate,
+          (params as StartAndEndDateRequest & { archive?: boolean }).archive,
+          (params as StartAndEndDateRequest & { excludeZeroAndFullyVested?: boolean }).excludeZeroAndFullyVested
         );
 
-        // Prevent duplicate requests
-        if (lastRequestKeyRef.current === key) {
-          if (shouldArchive) {
-            onArchiveHandled?.();
-          }
-          return;
-        }
-
+        // Allow re-search with same parameters (consistent with all other search pages)
         lastRequestKeyRef.current = key;
         await triggerSearch(params, false);
 
@@ -265,25 +298,41 @@ export const useTerminationGrid = ({
   const handleSave = useCallback(
     async (request: ForfeitureAdjustmentUpdateRequest, name: string) => {
       const rowId = request.badgeNumber;
+
+      // Capture the CURRENT page number from the ref (not the stale closure value)
+      const actualCurrentPage = currentPageNumberRef.current;
+
       editState.addLoadingRow(rowId);
 
       try {
-        await updateForfeitureAdjustment(request);
-        const rowKey = `${request.badgeNumber}-${request.profitYear}`;
+        // Transform request using shared helper (no transformation for termination, but keeps consistent)
+        const transformedRequest = prepareSaveRequest(ACTIVITY_CONFIG, request);
+        await updateForfeitureAdjustment(transformedRequest);
+
+        // Generate row key using shared helper
+        const rowKey = generateRowKey(ACTIVITY_CONFIG.rowKeyConfig, {
+          badgeNumber: request.badgeNumber,
+          profitYear: request.profitYear
+        });
         editState.removeEditedValue(rowKey);
 
         // Check for remaining edits after removing this one
         const remainingEdits = Object.keys(editState.editedValues).filter((key) => key !== rowKey).length > 0;
         onUnsavedChanges(remainingEdits);
 
-        // Prepare success message
-        const employeeName = name || "the selected employee";
-        const successMessage = `The forfeiture adjustment of amount $${formatNumberWithComma(request.forfeitureAmount)} for ${employeeName} saved successfully`;
+        // Generate success message using shared helper
+        const successMessage = generateSaveSuccessMessage(
+          ACTIVITY_CONFIG.activityType,
+          name || "the selected employee",
+          request.forfeitureAmount
+        );
 
         // Refresh grid and show success message after data loads
         if (searchParams) {
+          // Use the captured page number to stay on the same page
+          const skip = actualCurrentPage * pageSize;
           const params = createRequest(
-            pageNumber * pageSize,
+            skip,
             sortParams.sortBy,
             sortParams.isSortDescending,
             selectedProfitYear,
@@ -291,6 +340,10 @@ export const useTerminationGrid = ({
           );
           if (params) {
             await triggerSearch(params, false);
+
+            // Restore the page number in pagination state
+            handlePaginationChange(actualCurrentPage, pageSize);
+
             setPendingSuccessMessage(successMessage);
           }
         } else {
@@ -307,11 +360,12 @@ export const useTerminationGrid = ({
       } catch (error) {
         console.error("Failed to save forfeiture adjustment:", error);
 
+        const errorMessage = formatApiError(error, getErrorMessage(ACTIVITY_CONFIG.activityType, "save"));
         dispatch(
           setMessage({
             key: "TerminationSave",
             message: {
-              message: `Failed to save adjustment for ${name || "employee"}.`,
+              message: errorMessage,
               type: "error"
             }
           })
@@ -329,12 +383,12 @@ export const useTerminationGrid = ({
       editState,
       onUnsavedChanges,
       searchParams,
-      pageNumber,
       pageSize,
       sortParams,
       selectedProfitYear,
       createRequest,
       triggerSearch,
+      handlePaginationChange,
       dispatch,
       onErrorOccurred
     ]
@@ -351,19 +405,29 @@ export const useTerminationGrid = ({
       setIsBulkSaveInProgress(true);
 
       try {
-        await updateForfeitureAdjustmentBulk(requests);
+        // Transform all requests using shared helper
+        const transformedRequests = prepareBulkSaveRequests(ACTIVITY_CONFIG, requests);
+        await updateForfeitureAdjustmentBulk(transformedRequests);
 
-        const rowKeys = requests.map((request) => `${request.badgeNumber}-${request.profitYear}`);
+        // Generate row keys using shared helper
+        const rowKeys = getRowKeysForRequests(ACTIVITY_CONFIG, requests);
         editState.clearEditedValues(rowKeys);
         selectionState.clearSelection();
+
+        // Clear selections in grid using shared helper
+        clearGridSelectionsForBadges(gridRef.current?.api, badgeNumbers);
 
         // Check for remaining edits
         const remainingEditKeys = Object.keys(editState.editedValues).filter((key) => !rowKeys.includes(key));
         onUnsavedChanges(remainingEditKeys.length > 0);
 
-        // Prepare bulk success message
+        // Generate bulk success message using shared helper
         const employeeNames = names.map((name) => name || "Unknown Employee");
-        const bulkSuccessMessage = `Members affected: ${employeeNames.join("; ")}`;
+        const bulkSuccessMessage = generateBulkSaveSuccessMessage(
+          ACTIVITY_CONFIG.activityType,
+          requests.length,
+          employeeNames
+        );
 
         if (searchParams) {
           // Use the captured page number to stay on the same page
@@ -388,11 +452,12 @@ export const useTerminationGrid = ({
       } catch (error) {
         console.error("Failed to save forfeiture adjustments:", error);
 
+        const errorMessage = formatApiError(error, getErrorMessage(ACTIVITY_CONFIG.activityType, "bulkSave"));
         dispatch(
           setMessage({
             key: "TerminationSave",
             message: {
-              message: `Failed to save bulk adjustments.`,
+              message: errorMessage,
               type: "error"
             }
           })
@@ -424,11 +489,18 @@ export const useTerminationGrid = ({
     ]
   );
 
-  // Reset page number to 0 when resetPageFlag changes
+  // Reset page number to 0 when resetPageFlag changes (from search button)
+  // Track the previous value to detect actual changes, not just re-renders
+  const prevResetPageFlag = useRef<boolean>(resetPageFlag);
   useEffect(() => {
-    if (!isBulkSaveInProgress) {
+    // Only reset if the flag actually toggled (changed value)
+    const flagChanged = prevResetPageFlag.current !== resetPageFlag;
+
+    if (flagChanged && !isBulkSaveInProgress) {
       resetPagination();
     }
+
+    prevResetPageFlag.current = resetPageFlag;
   }, [resetPageFlag, resetPagination, isBulkSaveInProgress]);
 
   // Track unsaved changes based on edit state only
@@ -437,7 +509,7 @@ export const useTerminationGrid = ({
   }, [editState.hasAnyEdits, onUnsavedChanges]);
 
   // Sort handler that immediately triggers a search with the new sort parameters
-  const sortEventHandler = (update: any) => {
+  const sortEventHandler = (update: SortParams) => {
     handleSortChange(update);
   };
 
@@ -449,36 +521,33 @@ export const useTerminationGrid = ({
     }));
   };
 
-  // Build grid data with expandable rows
+  // Build grid data with expandable rows using shared helper
   const gridData = useMemo(() => {
     if (!termination?.response?.results) return [];
-    const rows = [];
-    for (const row of termination.response.results) {
-      const hasDetails = row.yearDetails && row.yearDetails.length > 0;
 
-      // Add main row
-      rows.push({
-        ...row,
-        isExpandable: hasDetails,
-        isExpanded: hasDetails && Boolean(expandedRows[row.badgeNumber])
-      });
+    // Convert expandedRows Record<string, boolean> to Set<string>
+    const expandedRowsSet = new Set(
+      Object.entries(expandedRows)
+        .filter(([_, isExpanded]) => isExpanded)
+        .map(([key, _]) => key)
+    );
 
-      // Add detail rows if expanded
-      if (hasDetails && expandedRows[row.badgeNumber]) {
-        for (const detail of row.yearDetails) {
-          const detailRow = {
-            ...row,
-            ...detail,
-            isDetail: true,
-            parentId: row.badgeNumber
-          };
-
-          rows.push(detailRow);
-        }
-      }
-    }
-
-    return rows;
+    return flattenMasterDetailData(termination.response.results, expandedRowsSet, {
+      getKey: (row) => String(row.psn),
+      getDetails: (row) => {
+        // For termination, we need to merge parent data with detail data
+        // Extract badgeNumber from PSN (PSN = badgeNumber * 10000 + psnSuffix)
+        const badgeNumber = row.psn;
+        return (row.yearDetails || []).map((detail, index) => ({
+          ...row,
+          ...detail,
+          badgeNumber, // Add badgeNumber for row key generation and save operations
+          parentId: badgeNumber,
+          index
+        }));
+      },
+      hasDetails: (row) => Boolean(row.yearDetails && row.yearDetails.length > 0)
+    });
   }, [termination, expandedRows]);
 
   const paginationHandlers = {

@@ -15,7 +15,7 @@ public static class ReadyActivityFactory
         string? username = secretConfig["YEMatchHost:Username"];
         string? password = secretConfig["YEMatchHost:Password"];
         string host = "appt07d"; // was "tduapp01"
-        bool chatty = false; // set to true to enable debugging chatter
+        bool chatty = true; // set to true to enable debugging chatter
 
         if (username == null || password == null)
         {
@@ -36,8 +36,8 @@ public static class ReadyActivityFactory
 
         List<IActivity> activities =
         [
-            // We still default to the OLD SCRAMBLE - although GoldenDecember overrides this. 
-            new ReadyActivity(sshClient, SftpClient, chatty, "A0", "PROFSHARE-BUILD-READY", "PROFITSHARE2", dataDirectory),
+            // A0 creates new datbase by importing from PROFITSHARE schema
+            new ReadyActivity(sshClient, SftpClient, chatty, "A0", "PROFSHARE-BUILD-READY", "", dataDirectory),
 
             // Clean Up
             new ReadyActivity(sshClient, SftpClient, chatty, "A1", "PROFSHARE-SSN-CLEANUP-RPTS", "", dataDirectory),
@@ -57,7 +57,7 @@ public static class ReadyActivityFactory
             new ReadyActivity(sshClient, SftpClient, chatty, "A11", "PROF-DOLLAR-EXTRACT", "", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A12", "PROF-LOAD-YREND-DEMO-PROFSHARE", $"YEAR={YEAR}", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A13A", "PAYPROFIT-SHIFT", "MODE=U TYPE=P", dataDirectory),
-            new ReadyActivity(sshClient, SftpClient, chatty, "A13B", "PAYPROFIT-SHIFT", "MODE=U TYPE=W;EJR PAYPROFIT-SHIFT MODE=U TYPE=P", dataDirectory),
+            new ReadyActivity(sshClient, SftpClient, chatty, "A13B", "PAYPROFIT-SHIFT", "MODE=U TYPE=W", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A14", "ZERO-PY-PD-PAYPROFIT", "", dataDirectory),
 
             // Fiscal Close
@@ -66,6 +66,7 @@ public static class ReadyActivityFactory
             // sw[2]=1 <--- last years exec hours dollars   sw[3]=1 <--- do not update
             new ReadyActivity(sshClient, SftpClient, chatty, "A17", "PROF-SHARE", $"sw[2]=1 sw[3]=1 CDATE={lastSaturday} YEAREND=Y SUMREP=Y", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A18", "PROF-SHARE", $"sw[2]=1 CDATE={lastSaturday} YEAREND=Y", dataDirectory),
+            
             new ReadyActivity(sshClient, SftpClient, chatty, "A19", "GET-ELIGIBLE-EMPS", $" CDATE={firstSaturday}", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A20", "PROF-FORT", $"YEAR={YEAR}", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A21", "PROF-UPD1", $"YEAR={YEAR}.0", dataDirectory),

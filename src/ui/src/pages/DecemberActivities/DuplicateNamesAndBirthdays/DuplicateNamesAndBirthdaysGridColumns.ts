@@ -26,16 +26,15 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       field: "dateOfBirth"
     }),
     createAddressColumn({
-      field1: "street",
-      field2: "street2"
+      field1: "street"
     }),
     createCityColumn({
-      field: "address.city",
-      colId: "address.city"
+      field: "city",
+      colId: "city"
     }),
     createStateColumn({
       headerName: "State",
-      field: "address.state"
+      field: "state"
     }),
     createDateColumn({
       headerName: "Hire",
@@ -67,7 +66,7 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       headerName: "Employment Status",
       field: "employmentStatusName",
       valueFormatter: (params) => {
-        const id = params.data.status; // assuming 'status' is in the row data
+        //const id = params.data.status; // assuming 'status' is in the row data
         const name = params.data.employmentStatusName; // assuming 'statusName' is in the row data
         //see if one is undefined or null then show other
         return `${name}`;

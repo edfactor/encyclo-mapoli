@@ -1,14 +1,10 @@
 ﻿using System.Threading.Channels;
-using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
-using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -71,7 +67,7 @@ internal class EmployeeSyncChannelConsumer : BackgroundService
                 return c.Demographics.Where(d => oracleHcmIds.Contains(d.OracleHcmId))
                     .Select(d => new { d.OracleHcmId, d.Ssn })
                     .ToDictionaryAsync(d => d.OracleHcmId, d => d.Ssn, cancellationToken);
-            }).ConfigureAwait(false);
+            }, cancellationToken).ConfigureAwait(false);
 
             var missingIds = oracleHcmIds.Where(id => !empSsnDic.ContainsKey(id)).ToList();
             var newSsns = await _fakeSsnService.GenerateFakeSsnBatchAsync(missingIds.Count, cancellationToken).ConfigureAwait(false);

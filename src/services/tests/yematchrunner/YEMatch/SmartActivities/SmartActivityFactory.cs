@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -14,6 +15,7 @@ using HttpMethod = System.Net.Http.HttpMethod;
 
 namespace YEMatch.YEMatch.SmartActivities;
 
+[SuppressMessage("Minor Code Smell", "S1199:Nested code blocks should not be used")]
 public static class SmartActivityFactory
 {
     private static readonly short _profitYear = 2025;
@@ -65,10 +67,30 @@ public static class SmartActivityFactory
 
     private static async Task<Outcome> A0_Initialize_Database_with_Obfuscated_data(ApiClient apiClient, string aname, string name)
     {
-        // We now use the CLI ImportReadyToSmartDB to do the import, so it handles the 2023 rebuild 
-        throw new NotImplementedException();
+        try
+        {
+#if false
+   IF-FALSEblock used if we need to nuke, then do this
+            AspireToAspire("drop-recreate-db --connection-name ProfitSharing");
+            AspireToAspire(
+                "import-from-navigation --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"../../../../src/database/ready_import/Navigations/add-navigation-data.sql\"");
+            AspireToAspire(
+                "import-uat-navigation --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"../../../../src/database/ready_import/Navigations/add-uat-navigation-data.sql\"");
+#endif
+            AspireToAspire(
+                "import-from-ready --connection-name ProfitSharing --source-schema PROFITSHARE --sql-file \"../../../../src/database/ready_import/SQL copy all from ready to smart ps.sql\"");
+        }
+        catch (Exception ex)
+        {
+            return new Outcome(aname, name, "", OutcomeStatus.Error, "Problem setting up database " + ex.Message, null, true);
+        }
+
+        return new Outcome(aname, name, "", OutcomeStatus.Ok, "Database setup complete.\n", null, true);
+
 
 #if false
+   This check can be annoying when we are only working with ready.  It requires SMART be running in test mode.
+
         // Quick authentication sanity check
         AppVersionInfo? r = await apiClient.DemoulasCommonApiEndpointsAppVersionInfoEndpointAsync(null);
         // Might be nice to also include the database version. What database is used.  Wall clock time.
@@ -83,6 +105,17 @@ public static class SmartActivityFactory
 
         return new Outcome(aname, name, "", OutcomeStatus.Ok, "Database setup complete.\n", null, true);
 #endif
+    }
+
+    /** Invoke the CLI so we are not reinventing the wheel in this test framework **/
+    private static void AspireToAspire(string command)
+    {
+        int res = ScriptRunner.Run(true /*CHATTY*/, "/Users/robertherrmann/prj/smart-profit-sharing/src/services/src/Demoulas.ProfitSharing.Data.Cli",
+            "dotnet", "run " + command);
+        if (res != 0)
+        {
+            throw new Exception($" res={res} during command --> {command}");
+        }
     }
 
     private static async Task<Outcome> A1_Profit_Sharing_Clean_up_Reports(ApiClient apiClient, string aname, string name)

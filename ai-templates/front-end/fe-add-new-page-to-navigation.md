@@ -31,6 +31,8 @@ Then, make a call to the insert_navigation_item using the appopriate parent page
 
  insert_navigation_item(MANAGE_EXECUTIVE_HOURS_PAGE, FISCAL_CLOSE, 'Manage Executive Hours', 'PROF-DOLLAR-EXEC-EXTRACT, TPR008-09', 'manage-executive-hours-and-dollars', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
 
+Note: if the page is not navigable, the last constant value should be: NOT_NAVIGABLE. Also, a page that is not navigable does not need to have a menu parent for the second parameter, it can be TOP_LEVEL_MENU.
+
 Then, add permissions for whatever roles are desired with a call to assign_navigation_role. Here is an example:
 
 assign_navigation_role(MANAGE_EXECUTIVE_HOURS_PAGE, SYSTEM_ADMINISTRATOR);

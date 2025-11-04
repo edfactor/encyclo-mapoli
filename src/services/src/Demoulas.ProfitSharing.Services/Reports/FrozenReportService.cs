@@ -88,7 +88,7 @@ public class FrozenReportService : IFrozenReportService
             };
 
             return await query.ToListAsync(cancellationToken: cancellationToken);
-        });
+        }, cancellationToken);
 
         var details = queryResult.Select(x => new
         {
@@ -237,7 +237,7 @@ public class FrozenReportService : IFrozenReportService
 
 
             return await query.ToListAsync(cancellationToken: cancellationToken);
-        });
+        }, cancellationToken);
 
         var asOfDate = await GetAsOfDate(req, cancellationToken);
         var details = queryResult.Select(x => new { Age = x.DateOfBirth.Age(asOfDate), x.BadgeNumber, x.Amount })
@@ -316,7 +316,7 @@ public class FrozenReportService : IFrozenReportService
 
 
             return await query.ToListAsync(cancellationToken: cancellationToken);
-        });
+        }, cancellationToken);
 
         var asOfDate = await GetAsOfDate(req, cancellationToken);
         var details = queryResult.Select(x => new { Age = x.DateOfBirth.Age(asOfDate), x.BadgeNumber, x.Amount })
@@ -424,7 +424,7 @@ public class FrozenReportService : IFrozenReportService
             };
 
             return await joinedQuery.ToListAsync(cancellationToken);
-        });
+        }, cancellationToken);
 
         // Client-side processing for grouping and filtering
         var asOfDate = await GetAsOfDate(req, cancellationToken);
@@ -527,7 +527,7 @@ public class FrozenReportService : IFrozenReportService
             return await joinedQuery
                 .Where(detail => (detail.CurrentBalance > 0 || detail.VestedBalance > 0))
                 .ToListAsync(cancellationToken);
-        });
+        }, cancellationToken);
 
         // Client-side grouping and aggregation
         var asOfDate = await GetAsOfDate(req, cancellationToken);
@@ -674,7 +674,7 @@ public class FrozenReportService : IFrozenReportService
 
             return await joinedQuery.ToListAsync(cancellationToken);
 
-        });
+        }, cancellationToken);
 
         var details = detailList
             .Where(detail => (detail.CurrentBalance > 0 || detail.VestedBalance > 0))
@@ -871,7 +871,7 @@ public class FrozenReportService : IFrozenReportService
                 TotalNumberOfBeneficiaries = totals.TotalBeneficiaries,
                 TotalNumberOfEmployees = totals.TotalEmployees
             };
-        });
+        }, cancellationToken);
 
 
         return rawResult;
@@ -881,31 +881,30 @@ public class FrozenReportService : IFrozenReportService
     public async Task<GrossWagesReportResponse> GetGrossWagesReport(GrossWagesReportRequest req,
         CancellationToken cancellationToken = default)
     {
-        using (_logger.BeginScope("Request FORFEITURES AND POINTS FOR YEAR"))
+        using (_logger.BeginScope("REQUEST GROSS WAGES REPORT FOR YEAR: {ProfitYear}", req.ProfitYear))
         {
             var rslt = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                short lastProfitYear = (short)(req.ProfitYear - 1);
                 var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, true);
+
+                // Query for PayProfit data for the requested year
                 var baseQuery = (from d in demographics
-                                 join lyPP in ctx.PayProfits on new { d.Id, Year = lastProfitYear } equals new
-                                 {
-                                     Id = lyPP.DemographicId,
-                                     Year = lyPP.ProfitYear
-                                 }
                                  join pp in ctx.PayProfits on new { d.Id, Year = req.ProfitYear } equals new
                                  {
                                      Id = pp.DemographicId,
                                      Year = pp.ProfitYear
-                                 }
-                                 join psBal in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear) on d.Ssn equals psBal.Ssn
+                                 } into pp_tmp
+                                 from pp in pp_tmp.DefaultIfEmpty()
+                                 join psBal in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear) on d.Ssn equals psBal.Ssn into
+                                     psBal_tmp
+                                 from psBal in psBal_tmp.DefaultIfEmpty()
                                  join fBal in _totalService.GetForfeitures(ctx, req.ProfitYear) on d.Ssn equals fBal.Ssn into
                                      fBal_tmp
                                  from fBal_lj in fBal_tmp.DefaultIfEmpty()
                                  join lBal in _totalService.GetQuoteLoansUnQuote(ctx, req.ProfitYear) on d.Ssn equals lBal.Ssn into
                                      lBal_tmp
                                  from lBal_lj in lBal_tmp.DefaultIfEmpty()
-                                 where pp.CurrentIncomeYear + pp.IncomeExecutive > req.MinGrossAmount
+                                 where pp != null && (pp.CurrentIncomeYear + pp.IncomeExecutive) >= req.MinGrossAmount
                                  orderby d.ContactInfo.FullName
                                  select new
                                  {
@@ -913,11 +912,11 @@ public class FrozenReportService : IFrozenReportService
                                      EmployeeName = d.ContactInfo.FullName ?? "",
                                      d.DateOfBirth,
                                      d.Ssn,
-                                     Forfeitures = fBal_lj.TotalAmount,
-                                     Loans = lBal_lj.TotalAmount,
-                                     ProfitSharingAmount = psBal.TotalAmount,
-                                     GrossWages = pp.CurrentIncomeYear + pp.IncomeExecutive,
-                                     pp.EnrollmentId,
+                                     Forfeitures = fBal_lj != null ? fBal_lj.TotalAmount : (decimal?)null,
+                                     Loans = lBal_lj != null ? lBal_lj.TotalAmount : (decimal?)null,
+                                     ProfitSharingAmount = psBal != null ? psBal.TotalAmount : (decimal?)null,
+                                     GrossWages = pp != null ? pp.CurrentIncomeYear + pp.IncomeExecutive : 0m,
+                                     EnrollmentId = pp != null ? pp.EnrollmentId : (byte?)null,
                                      d.PayFrequencyId,
                                  });
 
@@ -941,13 +940,13 @@ public class FrozenReportService : IFrozenReportService
                         Loans = x.Loans ?? 0,
                         ProfitSharingAmount = x.ProfitSharingAmount ?? 0,
                         GrossWages = x.GrossWages,
-                        EnrollmentId = (byte)x.EnrollmentId,
+                        EnrollmentId = (byte)(x.EnrollmentId ?? 0),
                         IsExecutive = x.PayFrequencyId == PayFrequency.Constants.Monthly,
                     }).ToList(),
                     Total = pagedData.Total
                 };
                 return new { reportDemographics, totals };
-            });
+            }, cancellationToken);
 
             var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
             return new GrossWagesReportResponse()
@@ -1012,7 +1011,7 @@ public class FrozenReportService : IFrozenReportService
                     .Where(kvp => both.Contains(kvp.Key))
                     .Sum(kvp => kvp.Value);
                 return response;
-            });
+            }, cancellationToken);
         }
     }
 

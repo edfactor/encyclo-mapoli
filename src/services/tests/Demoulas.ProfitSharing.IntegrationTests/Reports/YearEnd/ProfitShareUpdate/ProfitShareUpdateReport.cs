@@ -1,5 +1,4 @@
-﻿using Demoulas.Common.Data.Contexts.Interfaces;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -7,11 +6,7 @@ using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
-using Demoulas.ProfitSharing.Services.ItDevOps;
 using Demoulas.ProfitSharing.Services.ProfitShareEdit;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.Memory;
-using Moq;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 
@@ -20,8 +15,9 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpd
 /// </summary>
 internal sealed class ProfitShareUpdateReport
 {
-    private readonly IProfitSharingDataContextFactory _dbFactory;
+    private const string prefix = "\n\nDJDE JDE=PAY426,JDL=PAYROL,END,;\n";
     private readonly CalendarService _calendarService;
+    private readonly IProfitSharingDataContextFactory _dbFactory;
     private short _profitYear;
 
     /// <summary>
@@ -38,9 +34,7 @@ internal sealed class ProfitShareUpdateReport
 
     public async Task ProfitSharingUpdatePaginated(ProfitShareUpdateRequest profitShareUpdateRequest, IDemographicReaderService demographicReaderService)
     {
-        var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
-        FrozenService frozenService = new FrozenService(_dbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, distributedCache);
-        TotalService totalService = new TotalService(_dbFactory, _calendarService, new EmbeddedSqlService(), demographicReaderService);
+        TotalService totalService = new(_dbFactory, _calendarService, new EmbeddedSqlService(), demographicReaderService);
         ProfitShareUpdateService psu = new(_dbFactory, totalService, _calendarService, demographicReaderService);
         _profitYear = profitShareUpdateRequest.ProfitYear;
 
@@ -166,13 +160,11 @@ internal sealed class ProfitShareUpdateReport
         }
     }
 
-    const string prefix = "\n\nDJDE JDE=PAY426,JDL=PAYROL,END,;\n";
-
     public void m830PrintHeader(ReportCounters reportCounters, Header1 header1)
     {
         reportCounters.PageCounter += 1;
         header1.HDR1_PAGE = reportCounters.PageCounter;
-        WRITE($"{((ReportLines.Count == 0) ? prefix : "")}\n{header1}");
+        WRITE($"{(ReportLines.Count == 0 ? prefix : "")}\n{header1}");
         WRITE("");
         WRITE(new Header2());
         WRITE(new Header3());
@@ -214,14 +206,14 @@ internal sealed class ProfitShareUpdateReport
         WRITE("");
         WRITE(client_tot);
 
-        client_tot = new();
+        client_tot = new ClientTot();
         client_tot.CONT_TOT = wsClientProfitShareUpdateTotals.Allocations;
         client_tot.MIL_TOT = wsClientProfitShareUpdateTotals.PaidAllocations;
         client_tot.END_BAL_TOT = wsClientProfitShareUpdateTotals.PaidAllocations + wsClientProfitShareUpdateTotals.Allocations;
         client_tot.TOT_FILLER = "ALLOC   ";
         WRITE(client_tot);
 
-        client_tot = new();
+        client_tot = new ClientTot();
         client_tot.CONT_TOT = wsClientProfitShareUpdateTotals.ContributionPoints;
         client_tot.EARN_TOT = wsClientProfitShareUpdateTotals.EarningPoints;
         client_tot.useRedefineFormatting = true;

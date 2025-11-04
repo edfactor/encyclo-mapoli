@@ -42,9 +42,7 @@ test.describe("Unforfeitures landing page: ", () => {
   });
 
   test("check Exclude employee with no current balance and click on search", async ({ page }) => {
-    await page
-      .getByRole("checkbox", { name: "Exclude employees with no current balance and no vested balance" })
-      .check();
+    await page.getByRole("checkbox", { name: "Exclude employees with no current or vested balance" }).check();
     await page.getByTestId("searchButton").click();
     const [response] = await Promise.all([
       page.waitForResponse((resp) => resp.url().includes("yearend/unforfeitures"))
@@ -60,7 +58,7 @@ test.describe("Unforfeitures landing page: ", () => {
         await page.getByRole("option", { name: "Complete" }).click();
       })()
     ]);
-    const json = await response.json();
+    //const json = await response.json();
     await expect(response.status()).toBe(200);
   });
 
@@ -72,7 +70,7 @@ test.describe("Unforfeitures landing page: ", () => {
     await expect(response.status()).toBe(200);
     const suggestedUnforfeit = await page.locator('[col-id="suggestedUnforfeit"]');
     const count = await suggestedUnforfeit.count();
-    for (var i = 0; i < count; i++) {
+    for (let i = 0; i < count; i++) {
       const innerText = await suggestedUnforfeit.nth(i).innerText();
       const numericValue = Number(innerText.replace(/[^0-9.]/g, ""));
       if (innerText.length > 0 && !isNaN(numericValue) && numericValue > 0) {
