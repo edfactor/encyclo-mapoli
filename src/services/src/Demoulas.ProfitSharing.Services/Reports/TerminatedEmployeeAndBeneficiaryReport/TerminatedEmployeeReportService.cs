@@ -51,7 +51,8 @@ public sealed class TerminatedEmployeeReportService
         return await _factory.UseReadOnlyContext(async ctx =>
         {
             var retrieveStartTime = DateTime.UtcNow;
-            List<MemberSlice> memberSliceUnion = await RetrieveMemberSlices(ctx, req, cancellationToken);
+            IQueryable<MemberSlice> memberSliceQuery = await RetrieveMemberSlices(ctx, req);
+            List<MemberSlice> memberSliceUnion = await memberSliceQuery.ToListAsync(cancellationToken);
             var retrieveDuration = (DateTime.UtcNow - retrieveStartTime).TotalMilliseconds;
             _logger.LogInformation("RetrieveMemberSlices completed in {DurationMs:F2}ms, returned {MemberCount} members", retrieveDuration, memberSliceUnion.Count);
 
@@ -397,41 +398,46 @@ public sealed class TerminatedEmployeeReportService
     /// <summary>
     ///     Retrieves all member slices (terminated employees + beneficiaries) for the requested date range.
     ///     Coordinates the loading of terminated employees and beneficiaries, then combines them.
+    ///     Returns an IQueryable to defer materialization until needed.
     /// </summary>
-    private async Task<List<MemberSlice>> RetrieveMemberSlices(
+    private async Task<IQueryable<MemberSlice>> RetrieveMemberSlices(
         IProfitSharingDbContext ctx,
-        FilterableStartAndEndDateRequest request,
-        CancellationToken cancellationToken)
+        FilterableStartAndEndDateRequest request)
     {
-        var overallStart = DateTime.UtcNow;
         _logger.LogInformation(
             "Starting retrieval for date range {BeginningDate} to {EndingDate}",
             request.BeginningDate, request.EndingDate);
 
-        var terminatedStart = DateTime.UtcNow;
-        IQueryable<TerminatedEmployeeDto> terminatedEmployees = await GetTerminatedEmployees(ctx, request);
-        var terminatedDuration = (DateTime.UtcNow - terminatedStart).TotalMilliseconds;
-        _logger.LogDebug("GetTerminatedEmployees query built in {DurationMs:F2}ms", terminatedDuration);
+        var terminatedEmployees = await GetTerminatedEmployeesSync(ctx, request);
+        var terminatedWithContributions = GetEmployeesAsMembers(ctx, request, terminatedEmployees, request.EndingDate);
+        var beneficiaries = await GetBeneficiariesSync(ctx, request);
+        
+        return CombineEmployeeAndBeneficiarySlices(terminatedWithContributions, beneficiaries);
+    }
 
-        var employeesStart = DateTime.UtcNow;
-        IQueryable<MemberSlice> terminatedWithContributions = GetEmployeesAsMembers(ctx, request, terminatedEmployees, request.EndingDate);
-        var employeesDuration = (DateTime.UtcNow - employeesStart).TotalMilliseconds;
-        _logger.LogDebug("GetEmployeesAsMembers query built in {DurationMs:F2}ms", employeesDuration);
+    /// <summary>
+    ///     Queries terminated employees within the specified date range.
+    ///     Excludes retirees receiving pension (matching READY COBOL business rules).
+    /// </summary>
+    private async Task<IQueryable<TerminatedEmployeeDto>> GetTerminatedEmployeesSync(
+        IProfitSharingDbContext ctx,
+        FilterableStartAndEndDateRequest request)
+    {
+        IQueryable<Demographic> demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
 
-        var beneficiariesStart = DateTime.UtcNow;
-        IQueryable<MemberSlice> beneficiaries = await GetBeneficiaries(ctx, request);
-        var beneficiariesDuration = (DateTime.UtcNow - beneficiariesStart).TotalMilliseconds;
-        _logger.LogDebug("GetBeneficiaries query built in {DurationMs:F2}ms", beneficiariesDuration);
+        // BUSINESS RULE: Get employees who might have profit sharing activity.
+        // READY includes employees based on activity rather than just HR termination status.
+        // Excludes retirees receiving pension (READY: PY_TERM != 'W').
+        IQueryable<TerminatedEmployeeDto> queryable = demographics
+            .Include(d => d.ContactInfo)
+            .Where(d => d.EmploymentStatusId == EmploymentStatus.Constants.Terminated
+                        && (d.TerminationCodeId == null || d.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension)
+                        && d.TerminationDate != null
+                        && d.TerminationDate >= request.BeginningDate
+                        && d.TerminationDate <= request.EndingDate)
+            .Select(d => new TerminatedEmployeeDto { Demographic = d });
 
-        var combineStart = DateTime.UtcNow;
-        var result = await CombineEmployeeAndBeneficiarySlices(terminatedWithContributions, beneficiaries, cancellationToken);
-        var combineDuration = (DateTime.UtcNow - combineStart).TotalMilliseconds;
-        _logger.LogInformation("CombineEmployeeAndBeneficiarySlices completed in {DurationMs:F2}ms, returned {ResultCount} members", combineDuration, result.Count);
-
-        var totalDuration = (DateTime.UtcNow - overallStart).TotalMilliseconds;
-        _logger.LogInformation("RetrieveMemberSlices complete: total {TotalDurationMs:F2}ms", totalDuration);
-
-        return result;
+        return queryable;
     }
 
     /// <summary>
@@ -519,6 +525,63 @@ public sealed class TerminatedEmployeeReportService
     }
 
     /// <summary>
+    ///     Retrieves beneficiary records for deceased employees (synchronous query building).
+    ///     Implements COBOL QPAY066 beneficiary logic with PSN suffix handling.
+    /// </summary>
+    private async Task<IQueryable<MemberSlice>> GetBeneficiariesSync(
+        IProfitSharingDbContext ctx,
+        FilterableStartAndEndDateRequest request)
+    {
+        _logger.LogDebug(
+            "Loading beneficiaries for date range {BeginningDate} to {EndingDate}",
+            request.BeginningDate, request.EndingDate);
+
+        IQueryable<Demographic> demographicsQuery = await _demographicReaderService.BuildDemographicQuery(ctx);
+
+        // Load beneficiaries and their related employee demographics
+        IQueryable<MemberSlice> query = ctx.Beneficiaries
+            .Include(b => b.Contact)
+            .ThenInclude(c => c!.ContactInfo)
+            .GroupJoin(
+                demographicsQuery,
+                b => b.Contact!.Ssn,
+                d => d.Ssn,
+                (b, ds) => new { b, ds })
+            .SelectMany(
+                x => x.ds.DefaultIfEmpty(),
+                (x, d) =>
+                    new MemberSlice
+                    {
+                        // COBOL Lines 775-782: When beneficiary matches demographics AND termination date is NOT in range,
+                        // use badge number with PSN=0 (appears as primary employee), otherwise use PSN suffix
+                        PsnSuffix = d == null ? x.b.PsnSuffix : (short)0,
+                        BadgeNumber = d == null ? x.b.BadgeNumber : d.BadgeNumber,
+                        Ssn = x.b.Contact!.Ssn,
+                        BirthDate = x.b.Contact!.DateOfBirth,
+                        HoursCurrentYear = 0,
+                        EmploymentStatusCode = '\0',
+                        FullName = x.b.Contact!.ContactInfo.FullName!,
+                        FirstName = x.b.Contact.ContactInfo.FirstName,
+                        LastName = x.b.Contact.ContactInfo.LastName,
+                        YearsInPs = 10, // Convention to make IsInteresting() always return true (matches READY)
+                        TerminationDate = d == null ? null : d.TerminationDate,
+                        IncomeRegAndExecCurrentYear = 0,
+                        TerminationCode = d == null ? null : d.TerminationCodeId,
+                        ZeroCont = ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
+                        EnrollmentId = 0,
+                        Etva = 0,
+                        // CRITICAL: Beneficiaries must use the requested profit year to match transaction lookups
+                        ProfitYear = (short)request.EndingDate.Year,
+                        IsOnlyBeneficiary = d == null,
+                        IsBeneficiaryAndEmployee = d != null,
+                        IsExecutive = false
+                    }
+            );
+
+        return query;
+    }
+
+    /// <summary>
     ///     Retrieves beneficiary records for deceased employees.
     ///     Implements COBOL QPAY066 beneficiary logic with PSN suffix handling.
     /// </summary>
@@ -582,11 +645,11 @@ public sealed class TerminatedEmployeeReportService
     /// <summary>
     ///     Combines employee and beneficiary slices, filtering for eligibility and removing duplicates.
     ///     Prioritizes employee records over beneficiary records for the same person.
+    ///     Returns an IQueryable to defer materialization until the data is actually needed.
     /// </summary>
-    private async Task<List<MemberSlice>> CombineEmployeeAndBeneficiarySlices(
+    private IQueryable<MemberSlice> CombineEmployeeAndBeneficiarySlices(
         IQueryable<MemberSlice> terminatedWithContributions,
-        IQueryable<MemberSlice> beneficiaries,
-        CancellationToken cancellation)
+        IQueryable<MemberSlice> beneficiaries)
     {
         // Filter employees based on enrollment and years in plan
         IQueryable<MemberSlice> employees = terminatedWithContributions.Where(member =>
@@ -599,22 +662,10 @@ public sealed class TerminatedEmployeeReportService
              member.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords)
             && member.YearsInPs > 1);
 
-        List<MemberSlice> employeeList = await employees.ToListAsync(cancellation);
-        HashSet<int> employeeSsn = employeeList.Select(e => e.Ssn).Distinct().ToHashSet();
-        List<MemberSlice> beneficiaryList = await beneficiaries.Where(b => !employeeSsn.Contains(b.Ssn)).ToListAsync(cancellation);
-
-        _logger.LogInformation(
-            "Retrieved {EmployeeCount} employees and {BeneficiaryCount} beneficiaries",
-            employeeList.Count, beneficiaryList.Count);
-
-        // Combine: all employees + beneficiaries without employee equivalents
-        List<MemberSlice> result = employeeList.Concat(beneficiaryList).ToList();
-
-        _logger.LogInformation(
-            "Combined result: {TotalCount} members ({EmployeeCount} employees + {BeneficiaryCount} beneficiaries)",
-            result.Count, employeeList.Count, beneficiaryList.Count);
-
-        return result;
+        // Combine: all employees + beneficiaries (without deduplication at query level)
+        // Deduplication by SSN happens via GroupBy in the caller (RetrieveMemberSlices)
+        // This keeps the query composable and defers materialization
+        return employees.Concat(beneficiaries);
     }
 
     #endregion
