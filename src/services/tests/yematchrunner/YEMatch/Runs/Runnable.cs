@@ -24,7 +24,7 @@ public abstract class Runnable
         if (activitiesToRun.Any(a => a is SmartActivity))
         {
             // Quick authentication sanity check
-            AppVersionInfo? r = await SmartActivityFactory.Client!.DemoulasCommonApiEndpointsAppVersionInfoEndpointAsync(null);
+            IAppVersionInfo? r = await SmartActivityFactory.Client!.DemoulasCommonApiEndpointsAppVersionInfoEndpointAsync(null);
             // Might be nice to also include the database version. What database is used.  Wall clock time.
             Console.WriteLine(" Connected to SMART build:" + r.BuildNumber + " git-hash:" + r.ShortGitHash);
         }
