@@ -3,15 +3,16 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import {
   useFinalizeReportMutation,
   useLazyGetYearEndProfitSharingSummaryReportQuery
 } from "reduxstore/api/YearsEndApi";
-import { FilterParams, YearEndProfitSharingReportSummaryLineItem } from "reduxstore/types";
+import { YearEndProfitSharingReportSummaryLineItem } from "reduxstore/types";
 import { DSMGrid, Page } from "smart-ui-library";
+import { ROUTES } from "../../../../constants";
 import { RootState } from "../../../../reduxstore/store";
 import CommitModal from "../../../DecemberActivities/ProfitShareReport/CommitModal.tsx";
-import presets from "../PAY426N/presets";
 import { GetProfitSummaryGridColumns } from "./ProfitSummaryGridColumns";
 
 /**
@@ -77,18 +78,17 @@ const activeInactivePlaceholders: YearEndProfitSharingReportSummaryLineItem[] = 
 ];
 
 interface ProfitSummaryProps {
-  onPresetParamsChange?: (params: FilterParams | null) => void;
   frozenData: boolean;
 }
 
-const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, frozenData }) => {
+const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
   const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingSummaryReportQuery();
-  const [selectedLineItem, setSelectedLineItem] = useState<string | null>(null);
   const [shouldArchive, setShouldArchive] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
+  const navigate = useNavigate();
   const [finalizeReport, { isLoading: isFinalizing }] = useFinalizeReportMutation();
 
   const handleCommit = async () => {
@@ -113,7 +113,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, fro
     }
   };
 
-  const getPresetForLineItem = (lineItemPrefix: string): FilterParams | null => {
+  const getPresetNumberForLineItem = (lineItemPrefix: string): string | null => {
     const presetMap: { [key: string]: string } = {
       "1": "1",
       "2": "2",
@@ -127,24 +127,17 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, fro
       N: "10"
     };
 
-    const presetId = presetMap[lineItemPrefix];
-    return presets.find((preset) => preset.id === presetId)?.params || null;
+    return presetMap[lineItemPrefix] || null;
   };
 
   const handleRowClick = (event: { data: YearEndProfitSharingReportSummaryLineItem }) => {
     const rowData = event.data;
     const clickedLineItem = rowData.lineItemPrefix;
+    const presetNumber = getPresetNumberForLineItem(clickedLineItem);
 
-    // Toggle selection
-    const newSelected = selectedLineItem === clickedLineItem ? null : clickedLineItem;
-    setSelectedLineItem(newSelected);
-
-    // Update parent component's preset params based on new selection
-    if (newSelected) {
-      const params = getPresetForLineItem(newSelected);
-      onPresetParamsChange?.(params);
-    } else {
-      onPresetParamsChange?.(null);
+    if (presetNumber) {
+      // Navigate to PAY426N with the preset number
+      navigate(`/${ROUTES.PAY426N_LIVE}/${presetNumber}`);
     }
   };
 
@@ -240,8 +233,6 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange, fro
       }
     ];
   }, [terminatedRowData]);
-
-  //const shouldShowDetailGrid = selectedLineItem && getPresetForLineItem(selectedLineItem);
 
   return (
     <Page
