@@ -51,8 +51,8 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
     dataSource: "Test Data",
     response: {
       results: [
-        { badgeNumber: 12345, storeName: "Store 1", employeeName: "John Doe" },
-        { badgeNumber: 12346, storeName: "Store 2", employeeName: "Jane Smith" }
+        { badgeNumber: 12345, ssn: 123456789, employeeName: "John Doe", store: 1, status: "Active", statusName: "Active" },
+        { badgeNumber: 12346, ssn: 123456790, employeeName: "Jane Smith", store: 2, status: "Active", statusName: "Active" }
       ],
       total: 2,
       totalPages: 1,

@@ -30,6 +30,8 @@ interface TerminationSearchRequest {
   beginningDate?: string;
   endingDate?: string;
   profitYear?: number;
+  excludeZeroBalance?: boolean;
+  excludeZeroAndFullyVested?: boolean;
   pagination?: {
     skip: number;
     take: number;

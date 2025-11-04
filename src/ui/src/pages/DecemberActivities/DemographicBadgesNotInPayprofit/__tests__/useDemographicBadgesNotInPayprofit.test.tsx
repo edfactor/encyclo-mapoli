@@ -54,8 +54,9 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
           total: 1
         })
       }),
-      { isFetching: false }
-    ] as unknown as ReturnType<typeof useLazyGetDemographicBadgesNotInPayprofitQuery>);
+      { isFetching: false },
+      {}
+    ] as any);
   });
 
   describe("Hook initialization", () => {

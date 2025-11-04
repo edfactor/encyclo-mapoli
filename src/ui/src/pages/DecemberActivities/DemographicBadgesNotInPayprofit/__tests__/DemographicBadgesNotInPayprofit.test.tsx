@@ -34,8 +34,11 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 interface MockResult {
   badgeNumber: number;
-  storeName: string;
+  ssn: number;
   employeeName: string;
+  store: number;
+  status: string;
+  statusName: string;
 }
 
 interface MockSearchResults {
@@ -103,7 +106,7 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
   describe("Rendering", () => {
     it("should render the page component", () => {
       vi.mocked(useDemographicBadgesNotInPayprofit).mockReturnValue({
-        searchResults: createMockSearchResults([{ badgeNumber: 12345, storeName: "Store 1", employeeName: "John Doe" }], 1),
+        searchResults: createMockSearchResults([{ badgeNumber: 12345, ssn: 123456789, employeeName: "John Doe", store: 1, status: "Active", statusName: "Active" }], 1),
         isSearching: false,
         pagination: {
           pageNumber: 0,
@@ -134,7 +137,7 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
 
     it("should render page with correct label including record count", () => {
       vi.mocked(useDemographicBadgesNotInPayprofit).mockReturnValue({
-        searchResults: createMockSearchResults([{ badgeNumber: 12345, storeName: "Store 1", employeeName: "John Doe" }], 1),
+        searchResults: createMockSearchResults([{ badgeNumber: 12345, ssn: 123456789, employeeName: "John Doe", store: 1, status: "Active", statusName: "Active" }], 1),
         isSearching: false,
         pagination: {
           pageNumber: 0,
@@ -230,7 +233,7 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
   describe("Data display", () => {
     it("should display record count from hook results", () => {
       vi.mocked(useDemographicBadgesNotInPayprofit).mockReturnValue({
-        searchResults: createMockSearchResults([{ badgeNumber: 1, storeName: "Store", employeeName: "Name" }], 1),
+        searchResults: createMockSearchResults([{ badgeNumber: 1, ssn: 111111111, employeeName: "Name", store: 1, status: "Active", statusName: "Active" }], 1),
         isSearching: false,
         pagination: {
           pageNumber: 0,
@@ -293,9 +296,9 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
     it("should display multiple records count", () => {
       vi.mocked(useDemographicBadgesNotInPayprofit).mockReturnValue({
         searchResults: createMockSearchResults([
-          { badgeNumber: 1, storeName: "Store 1", employeeName: "Jane Doe" },
-          { badgeNumber: 2, storeName: "Store 2", employeeName: "John Smith" },
-          { badgeNumber: 3, storeName: "Store 3", employeeName: "Bob Johnson" }
+          { badgeNumber: 1, ssn: 111111111, employeeName: "Jane Doe", store: 1, status: "Active", statusName: "Active" },
+          { badgeNumber: 2, ssn: 222222222, employeeName: "John Smith", store: 2, status: "Active", statusName: "Active" },
+          { badgeNumber: 3, ssn: 333333333, employeeName: "Bob Johnson", store: 3, status: "Active", statusName: "Active" }
         ], 3),
         isSearching: false,
         pagination: {
@@ -328,7 +331,7 @@ describe("DemographicBadgesNotInPayprofit Component", () => {
 
   describe("Grid props passing", () => {
     it("should pass data to grid", () => {
-      const mockResults = createMockSearchResults([{ badgeNumber: 123, storeName: "Store", employeeName: "Test" }], 1);
+      const mockResults = createMockSearchResults([{ badgeNumber: 123, ssn: 123000000, employeeName: "Test", store: 1, status: "Active", statusName: "Active" }], 1);
 
       const mockHandlePaginationChange = vi.fn();
       const mockHandleSortChange = vi.fn();
