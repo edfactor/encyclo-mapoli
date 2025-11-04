@@ -29,7 +29,7 @@ public class Pay443Tests : PristineBaseTest
 
         // Get a hot response from SMART
         ForfeituresAndPointsForYearResponseWithTotals actualResponse =
-            await _forfeituresAndPointsForYearService.GetForfeituresAndPointsForYearAsync(new FrozenProfitYearRequest { ProfitYear = 2024, Take = int.MaxValue });
+            await _forfeituresAndPointsForYearService.GetForfeituresAndPointsForYearAsync(new FrozenProfitYearRequest { ProfitYear = 2025, Take = int.MaxValue });
 
         // We do not test that the order is identical.
         HashSet<ForfeituresAndPointsForYearResponse> actualRows = actualResponse.Response.Results.ToHashSet();
