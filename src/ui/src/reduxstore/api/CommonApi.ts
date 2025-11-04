@@ -18,7 +18,7 @@ export const CommonApi = createApi({
       query: () => ({
         url: "/common/app-version-info"
       }),
-      async onQueryStarted(val: void, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_val: void, { dispatch, queryFulfilled }) {
         const { data } = await queryFulfilled;
         dispatch(setVersionInfo(data));
       }

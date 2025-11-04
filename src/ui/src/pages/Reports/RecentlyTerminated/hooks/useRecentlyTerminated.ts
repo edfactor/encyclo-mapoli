@@ -1,7 +1,6 @@
 import { useCallback, useReducer, useRef } from "react";
 import { useLazyGetRecentlyTerminatedReportQuery } from "reduxstore/api/YearsEndApi";
 import { RecentlyTerminatedResponse } from "reduxstore/types";
-import { Paged } from "smart-ui-library";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useMissiveAlerts } from "../../../../hooks/useMissiveAlerts";

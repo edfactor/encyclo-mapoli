@@ -385,7 +385,7 @@ export const YearsEndApi = createApi({
           isSortDescending: params.pagination.isSortDescending
         }
       }),
-      async onQueryStarted({ _dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
         } catch (err) {
@@ -495,7 +495,7 @@ export const YearsEndApi = createApi({
           isSortDescending: params.pagination.isSortDescending
         }
       }),
-      async onQueryStarted(params: EligibleEmployeesRequestDto, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_params: EligibleEmployeesRequestDto, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setEligibleEmployees(data));

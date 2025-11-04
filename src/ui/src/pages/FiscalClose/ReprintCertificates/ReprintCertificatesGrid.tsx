@@ -22,7 +22,7 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
     isSortDescending: false
   });
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
+  const [_selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
 
   // Use dynamic grid height utility hook
   const gridMaxHeight = useDynamicGridHeight();

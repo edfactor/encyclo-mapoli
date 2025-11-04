@@ -28,7 +28,7 @@ export const validationApi = createApi({
      */
     getMasterUpdateValidation: builder.query<MasterUpdateCrossReferenceValidationResponse, number>({
       query: (profitYear) => `checksum/master-update/${profitYear}`,
-      providesTags: (result, error, profitYear) => [{ type: "MasterUpdateValidation", id: profitYear }]
+      providesTags: (_result, _error, profitYear) => [{ type: "MasterUpdateValidation", id: profitYear }]
     })
   })
 });
