@@ -1,6 +1,6 @@
 import { ColDef } from "ag-grid-community";
 import { formatNumberWithComma, numberToCurrency } from "smart-ui-library";
-import { createCurrencyColumn, createPointsColumn } from "../../../../utils/gridColumnFactory";
+import { createCurrencyColumn, createHoursColumn, createPointsColumn } from "../../../../utils/gridColumnFactory";
 
 export const GetProfitSummaryGridColumns = (): ColDef[] => {
   return [
@@ -10,8 +10,10 @@ export const GetProfitSummaryGridColumns = (): ColDef[] => {
       colId: "lineItemTitle",
       minWidth: 400,
       headerClass: "left-align",
-      cellClass: "left-align",
+      cellClass:
+        "left-align h-5 normal-case underline decoration-blue-600 !outline-none !border-none focus:outline-none focus:border-none",
       resizable: true,
+      //suppressCellFocus: true,
       valueFormatter: (params) => {
         return params.data.lineItemPrefix ? `${params.data.lineItemPrefix}. ${params.value}` : params.value;
       }
@@ -42,6 +44,18 @@ export const GetProfitSummaryGridColumns = (): ColDef[] => {
         }
         return numberToCurrency(params.value);
       }
+    }),
+    createHoursColumn({
+      headerName: "Hours",
+      field: "totalHours",
+      minWidth: 80,
+      valueFormatter: (params) => formatNumberWithComma(params.value)
+    }),
+    createPointsColumn({
+      headerName: "Points",
+      field: "totalPoints",
+      minWidth: 100,
+      valueFormatter: (params) => formatNumberWithComma(params.value)
     })
   ];
 };

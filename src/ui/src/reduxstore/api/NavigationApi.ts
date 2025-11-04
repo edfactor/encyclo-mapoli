@@ -22,7 +22,7 @@ export const NavigationApi = createApi({
         url: `/navigation`,
         method: "GET"
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           // Normalize navigation items to ensure `isNavigable` is present (default true)

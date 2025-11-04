@@ -44,10 +44,16 @@ const mockResetSearch = vi.fn();
 // Create proper report data structure that ReportSummary expects
 const mockGridData = {
   reportName: "Executive Hours and Dollars",
+  reportDate: "2024-01-15",
+  startDate: "2024-01-01",
+  endDate: "2024-12-31",
   dataSource: "Test",
   response: {
     results: [],
-    total: 0
+    total: 0,
+    totalPages: 0,
+    pageSize: 25,
+    currentPage: 0
   }
 };
 
@@ -69,6 +75,7 @@ vi.mock("../hooks/useManageExecutiveHoursAndDollars", () => ({
     mainGridPagination: {
       pageSize: 25,
       pageNumber: 1,
+      sortParams: { sortBy: "badgeNumber", isSortDescending: false },
       handlePaginationChange: vi.fn(),
       handleSortChange: vi.fn(),
       resetPagination: vi.fn()
@@ -76,6 +83,7 @@ vi.mock("../hooks/useManageExecutiveHoursAndDollars", () => ({
     modalGridPagination: {
       pageSize: 25,
       pageNumber: 1,
+      sortParams: { sortBy: "badgeNumber", isSortDescending: false },
       handlePaginationChange: vi.fn(),
       handleSortChange: vi.fn(),
       resetPagination: vi.fn()
@@ -147,6 +155,7 @@ describe("ManageExecutiveHoursAndDollars", () => {
         mainGridPagination: {
           pageSize: 25,
           pageNumber: 1,
+          sortParams: { sortBy: "badgeNumber", isSortDescending: false },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
           resetPagination: vi.fn()
@@ -154,6 +163,7 @@ describe("ManageExecutiveHoursAndDollars", () => {
         modalGridPagination: {
           pageSize: 25,
           pageNumber: 1,
+          sortParams: { sortBy: "badgeNumber", isSortDescending: false },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
           resetPagination: vi.fn()
@@ -201,6 +211,7 @@ describe("ManageExecutiveHoursAndDollars", () => {
         mainGridPagination: {
           pageSize: 25,
           pageNumber: 1,
+          sortParams: { sortBy: "badgeNumber", isSortDescending: false },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
           resetPagination: vi.fn()
@@ -208,6 +219,7 @@ describe("ManageExecutiveHoursAndDollars", () => {
         modalGridPagination: {
           pageSize: 25,
           pageNumber: 1,
+          sortParams: { sortBy: "badgeNumber", isSortDescending: false },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
           resetPagination: vi.fn()

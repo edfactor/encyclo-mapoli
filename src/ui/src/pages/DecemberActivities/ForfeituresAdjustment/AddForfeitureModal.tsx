@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useUpdateForfeitureAdjustmentMutation } from "reduxstore/api/YearsEndApi";
 import { ForfeitureAdjustmentUpdateRequest, SuggestedForfeitResponse } from "reduxstore/types";
 import { SmartModal } from "smart-ui-library";
-import { ServiceErrorResponse } from "../../types/errors/errors";
+import { ServiceErrorResponse } from "@/types/errors/errors";
 
 interface AddForfeitureModalProps {
   open: boolean;

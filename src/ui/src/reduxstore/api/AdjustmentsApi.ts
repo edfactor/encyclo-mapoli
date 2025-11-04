@@ -1,5 +1,5 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { MergeProfitsDetailRequest } from "../types/adjustment/adjustment";
+import { MergeProfitsDetailRequest } from "@/types/adjustment/adjustment";
 import { createDataSourceAwareBaseQuery } from "./api";
 
 const baseQuery = createDataSourceAwareBaseQuery();
@@ -16,7 +16,7 @@ export const AdjustmentsApi = createApi({
         body: mergeRequest
       }),
       invalidatesTags: ["MergeOperation"],
-      async onQueryStarted(_mergeRequest, { queryFulfilled, _dispatch }) {
+      async onQueryStarted(_mergeRequest, { queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           console.log("Merge operation completed successfully:", data);

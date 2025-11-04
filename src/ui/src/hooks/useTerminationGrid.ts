@@ -30,6 +30,8 @@ interface TerminationSearchRequest {
   beginningDate?: string;
   endingDate?: string;
   profitYear?: number;
+  excludeZeroBalance?: boolean;
+  excludeZeroAndFullyVested?: boolean;
   pagination?: {
     skip: number;
     take: number;
@@ -108,9 +110,12 @@ export const useTerminationGrid = ({
     ): (StartAndEndDateRequest & { archive?: boolean }) | null => {
       const base: StartAndEndDateRequest = searchParams
         ? {
-            ...searchParams,
+            beginningDate: searchParams.beginningDate || "",
+            endingDate: searchParams.endingDate || "",
             profitYear,
-            pagination: { skip, take: pageSz, sortBy, isSortDescending }
+            pagination: { skip, take: pageSz, sortBy, isSortDescending },
+            excludeZeroBalance: searchParams.excludeZeroBalance,
+            excludeZeroAndFullyVested: searchParams.excludeZeroAndFullyVested
           }
         : {
             beginningDate: fiscalData?.fiscalBeginDate || "",

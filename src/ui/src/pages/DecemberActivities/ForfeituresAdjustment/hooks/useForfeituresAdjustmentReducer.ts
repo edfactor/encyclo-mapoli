@@ -1,5 +1,5 @@
 import { ISortParams } from "smart-ui-library";
-import { SuggestedForfeitResponse } from "../../../../types/years-end/years-end";
+import { SuggestedForfeitResponse } from "@/types/december-activities/forfeitures";
 
 export interface PaginationState {
   pageNumber: number;

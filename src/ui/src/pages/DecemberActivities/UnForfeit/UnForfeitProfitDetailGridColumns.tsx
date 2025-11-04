@@ -2,7 +2,7 @@ import { ColDef, EditableCallbackParams, ICellRendererParams } from "ag-grid-com
 import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "components/SuggestedForfeiture";
 import { numberToCurrency } from "smart-ui-library";
 import { createSaveButtonCellRenderer } from "../../../components/ForfeitActivities";
-import { ForfeitureAdjustmentUpdateRequest } from "types";
+import { ForfeitureAdjustmentUpdateRequest } from "@/types/december-activities/forfeitures";
 import {
   createCommentColumn,
   createCurrencyColumn,

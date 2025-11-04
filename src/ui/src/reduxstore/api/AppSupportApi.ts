@@ -15,7 +15,7 @@ export const AppSupportApi = createApi({
       query: () => ({
         url: "health"
       }),
-      async onQueryStarted(val: void, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_val: void, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setHealthInfo(data));

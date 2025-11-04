@@ -32,6 +32,7 @@ export const rtkQueryErrorToastMiddleware =
       const queryMeta = (action as any).meta?.arg?.meta;
 
       // Useful for debugging
+
       /*
       console.log("RTK Error Middleware Debug:", {
         endpointName: arg?.endpointName,
@@ -46,6 +47,7 @@ export const rtkQueryErrorToastMiddleware =
         queryMetaOnlyNetworkToastErrors: queryMeta?.onlyNetworkToastErrors
       });
       */
+
       if (arg?.suppressAllToastErrors || originalArg?.suppressAllToastErrors || queryMeta?.suppressAllToastErrors) {
         return next(action);
       }
@@ -59,11 +61,11 @@ export const rtkQueryErrorToastMiddleware =
 
       // If onlyNetworkToastErrors is set, skip showing validation-style errors
       if (!(arg?.onlyNetworkToastErrors || originalArg?.onlyNetworkToastErrors || queryMeta?.onlyNetworkToastErrors)) {
-        const statusCode = payloadData.status;
+        const statusCode = Number(payloadData.status);
+        console.log("RTK Error Middleware Status Code:", statusCode);
 
         if (statusCode && payloadData.errors) {
           if (statusCode == 400) {
-            console.log("Got a 400 with errors:", payloadData.errors);
             const validationErrors = createValidationErrorsMessage(payload);
             ToastServiceUtils.triggerError(validationErrors);
           } else if (statusCode === 401 || statusCode === 403) {
@@ -71,6 +73,22 @@ export const rtkQueryErrorToastMiddleware =
             const msgStr = `Authorization unsuccessful for "${arg?.endpointName?.toUpperCase()}" endpoint`;
             ToastServiceUtils.triggerError(msgStr);
           }
+        } else if (statusCode > 400) {
+          // Other client errors
+          const msgStr = `Authorization error for "${arg?.endpointName?.toUpperCase()}": • ${payloadData.detail}`;
+          ToastServiceUtils.triggerError(msgStr);
+        } else if (statusCode === 404) {
+          // Not found errors
+          const msgStr = `Resource not found for "${arg?.endpointName?.toUpperCase()}" endpoint`;
+          ToastServiceUtils.triggerError(msgStr);
+        } else if (statusCode == 400) {
+          // Other client errors
+          const msgStr = `Validation error for "${arg?.endpointName?.toUpperCase()}": • ${payloadData.detail}`;
+          ToastServiceUtils.triggerError(msgStr);
+        } else if (statusCode >= 500) {
+          // Server errors
+          const msgStr = `Server error for "${arg?.endpointName?.toUpperCase()}": • ${payloadData.detail}`;
+          ToastServiceUtils.triggerError(msgStr);
         } else {
           // Fallback for timeout or other issues
           const msgStr = `Service call unsuccessful for "${arg?.endpointName?.toUpperCase()}" endpoint`;

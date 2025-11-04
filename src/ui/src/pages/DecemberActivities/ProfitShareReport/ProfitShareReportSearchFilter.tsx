@@ -24,7 +24,7 @@ const schema = yup.object().shape({
 
 interface SearchParams {
   [key: string]: unknown;
-  reportId?: number;
+  reportId: number;
   badgeNumber?: number;
   profitYear?: number;
   pagination?: {

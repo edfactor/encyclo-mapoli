@@ -7,7 +7,7 @@ import { BeneficiaryKindDto } from "reduxstore/types";
 /**
  * Return type for useBeneficiaryKinds hook
  */
-interface UseBeneficiaryKindsReturn {
+export interface UseBeneficiaryKindsReturn {
   beneficiaryKinds: BeneficiaryKindDto[];
   isLoading: boolean;
   error: string | null;

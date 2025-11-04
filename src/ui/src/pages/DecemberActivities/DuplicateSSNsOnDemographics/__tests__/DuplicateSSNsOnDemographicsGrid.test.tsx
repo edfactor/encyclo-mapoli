@@ -107,9 +107,17 @@ describe("DuplicateSSNsOnDemographicsGrid", () => {
   describe("Data handling", () => {
     it("should handle empty results", () => {
       const emptyData = {
+        reportName: "Duplicate SSNs on Demographics",
+        reportDate: "2024-01-15",
+        startDate: "2024-01-01",
+        endDate: "2024-12-31",
+        dataSource: "Test Data",
         response: {
           results: [],
-          total: 0
+          total: 0,
+          totalPages: 0,
+          pageSize: 25,
+          currentPage: 0
         }
       };
       render(

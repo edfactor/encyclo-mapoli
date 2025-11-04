@@ -27,7 +27,7 @@ export const ItOperationsApi = createApi({
         method: "GET"
       }),
       providesTags: ["FrozenState"],
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setFrozenStateResponse(data));
@@ -49,7 +49,7 @@ export const ItOperationsApi = createApi({
         }
       }),
       providesTags: ["FrozenState"],
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setFrozenStateCollectionResponse(data));
@@ -70,7 +70,7 @@ export const ItOperationsApi = createApi({
           isSortDescending: params.isSortDescending
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setProfitYearSelectorData(data));

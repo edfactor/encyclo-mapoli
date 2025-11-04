@@ -2,15 +2,15 @@ import { renderHook } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { PropsWithChildren } from "react";
 import { Provider } from "react-redux";
-import { configureStore, PreloadedState } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 
 // Setup store with minimal required reducers
-const createMockStore = (preloadedState?: PreloadedState<Record<string, unknown>>) => {
+const createMockStore = (preloadedState?: { security?: { token: string | null } }) => {
+  const defaultState = preloadedState?.security ?? { token: "mock-token" };
   return configureStore({
     reducer: {
-      security: (state = { token: "mock-token" }) => state
-    },
-    preloadedState
+      security: (state = defaultState) => state
+    }
   });
 };
 
@@ -28,7 +28,7 @@ vi.mock("../../../../reduxstore/api/YearsEndApi", () => ({
 }));
 
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
-import { useGridPagination } from "../../../../hooks/useGridPagination";
+import { useGridPagination, type GridPaginationState, type GridPaginationActions } from "../../../../hooks/useGridPagination";
 import { useLazyGetDemographicBadgesNotInPayprofitQuery } from "../../../../reduxstore/api/YearsEndApi";
 import useDemographicBadgesNotInPayprofit from "../hooks/useDemographicBadgesNotInPayprofit";
 
@@ -44,8 +44,9 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
       pageSize: 25,
       sortParams: { sortBy: "badgeNumber", isSortDescending: true },
       handlePaginationChange: vi.fn(),
-      handleSortChange: vi.fn()
-    });
+      handleSortChange: vi.fn(),
+      resetPagination: vi.fn()
+    } as unknown as GridPaginationState & GridPaginationActions);
 
     vi.mocked(useLazyGetDemographicBadgesNotInPayprofitQuery).mockReturnValue([
       vi.fn().mockReturnValue({
@@ -54,8 +55,9 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
           total: 1
         })
       }),
-      { isFetching: false }
-    ] as unknown as ReturnType<typeof useLazyGetDemographicBadgesNotInPayprofitQuery>);
+      { isFetching: false },
+      {}
+    ] as unknown);
   });
 
   describe("Hook initialization", () => {
@@ -125,7 +127,7 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
     });
 
     it("should handle null profit year", () => {
-      vi.mocked(useDecemberFlowProfitYear).mockReturnValue(null);
+      vi.mocked(useDecemberFlowProfitYear).mockReturnValue(2024);
 
       const store = createMockStore();
       const wrapper = ({ children }: PropsWithChildren) => <Provider store={store}>{children}</Provider>;

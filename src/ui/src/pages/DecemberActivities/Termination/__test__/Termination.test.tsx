@@ -20,7 +20,7 @@ vi.mock("../../../../hooks/useFiscalCalendarYear", () => ({
         fiscalEndDate: "2024-12-31"
       }
     }
-  ])
+  ] as unknown)
 }));
 
 vi.mock("../../../../hooks/useTerminationState", () => ({

@@ -214,7 +214,7 @@ describe("ForfeituresAdjustment", () => {
         profitYear: 2024,
         isReadOnly: false,
         memberDetailsRefreshTrigger: 0
-      });
+      } as unknown);
 
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
@@ -229,7 +229,7 @@ describe("ForfeituresAdjustment", () => {
     it("should display employee data after search succeeds", async () => {
       const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
       vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
-        employeeData: { demographicId: 123, name: "John Doe" },
+        employeeData: { badgeNumber: 12345, demographicId: 123, suggestedForfeitAmount: 100 },
         transactionData: null,
         isSearching: false,
         isFetchingTransactions: false,
@@ -252,7 +252,7 @@ describe("ForfeituresAdjustment", () => {
         profitYear: 2024,
         isReadOnly: false,
         memberDetailsRefreshTrigger: 0
-      });
+      } as unknown);
 
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
@@ -266,7 +266,7 @@ describe("ForfeituresAdjustment", () => {
     it("should display transaction grid when transactions are available", async () => {
       const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
       vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
-        employeeData: { demographicId: 123, name: "John Doe" },
+        employeeData: { badgeNumber: 12345, demographicId: 123, suggestedForfeitAmount: 100 },
         transactionData: { results: [{ id: 1 }], total: 1 },
         isSearching: false,
         isFetchingTransactions: false,
@@ -289,7 +289,7 @@ describe("ForfeituresAdjustment", () => {
         profitYear: 2024,
         isReadOnly: false,
         memberDetailsRefreshTrigger: 0
-      });
+      } as unknown);
 
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
@@ -304,7 +304,7 @@ describe("ForfeituresAdjustment", () => {
     it("should open add forfeiture modal when button is clicked", async () => {
       const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
       vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
-        employeeData: { demographicId: 123, name: "John Doe" },
+        employeeData: { badgeNumber: 12345, demographicId: 123, suggestedForfeitAmount: 100 },
         transactionData: null,
         isSearching: false,
         isFetchingTransactions: false,
@@ -327,7 +327,7 @@ describe("ForfeituresAdjustment", () => {
         profitYear: 2024,
         isReadOnly: false,
         memberDetailsRefreshTrigger: 0
-      });
+      } as unknown);
 
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
@@ -342,7 +342,7 @@ describe("ForfeituresAdjustment", () => {
       const user = userEvent.setup();
       const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
       vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
-        employeeData: { demographicId: 123, name: "John Doe" },
+        employeeData: { badgeNumber: 12345, demographicId: 123, suggestedForfeitAmount: 100 },
         transactionData: null,
         isSearching: false,
         isFetchingTransactions: false,
@@ -365,7 +365,7 @@ describe("ForfeituresAdjustment", () => {
         profitYear: 2024,
         isReadOnly: false,
         memberDetailsRefreshTrigger: 0
-      });
+      } as unknown);
 
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
@@ -382,7 +382,7 @@ describe("ForfeituresAdjustment", () => {
       const user = userEvent.setup();
       const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
       vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
-        employeeData: { demographicId: 123, name: "John Doe" },
+        employeeData: { badgeNumber: 12345, demographicId: 123, suggestedForfeitAmount: 100 },
         transactionData: null,
         isSearching: false,
         isFetchingTransactions: false,
@@ -405,7 +405,7 @@ describe("ForfeituresAdjustment", () => {
         profitYear: 2024,
         isReadOnly: false,
         memberDetailsRefreshTrigger: 0
-      });
+      } as unknown);
 
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });
@@ -431,7 +431,7 @@ describe("ForfeituresAdjustment", () => {
 
       const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
       vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
-        employeeData: { demographicId: 123, name: "John Doe" },
+        employeeData: { badgeNumber: 12345, demographicId: 123, suggestedForfeitAmount: 100 },
         transactionData: null,
         isSearching: false,
         isFetchingTransactions: false,
@@ -454,7 +454,7 @@ describe("ForfeituresAdjustment", () => {
         profitYear: 2024,
         isReadOnly: true,
         memberDetailsRefreshTrigger: 0
-      });
+      } as unknown);
 
       const mockStore = createMockStore();
       render(<ForfeituresAdjustment />, { wrapper: wrapper(mockStore) });

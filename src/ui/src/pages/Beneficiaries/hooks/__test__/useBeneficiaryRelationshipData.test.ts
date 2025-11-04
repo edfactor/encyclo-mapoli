@@ -3,8 +3,9 @@ import { renderHook, act, waitFor } from "@testing-library/react";
 import React from "react";
 import { Provider } from "react-redux";
 import { useBeneficiaryRelationshipData } from "../useBeneficiaryRelationshipData";
-import { BeneficiaryDetail, Paged, BeneficiaryDto } from "../../../types";
-import { configureStore, type PreloadedState } from "@reduxjs/toolkit";
+import { BeneficiaryDetail, BeneficiaryDto } from "@/types/beneficiary/beneficiary";
+import { Paged } from "smart-ui-library";
+import { configureStore } from "@reduxjs/toolkit";
 import securityReducer, { type SecurityState } from "reduxstore/slices/securitySlice";
 
 // Create mock functions for triggers/actions
@@ -29,47 +30,67 @@ const mockBeneficiaryList: Paged<BeneficiaryDto> = {
   results: [
     {
       id: 1,
+      psnSuffix: 1,
+      badgeNumber: 123,
+      demographicId: 1,
+      psn: "1231",
+      ssn: "123-45-6789",
       firstName: "Jane",
       lastName: "Doe",
       percent: 50,
-      dateOfBirth: "1990-01-01",
-      kindId: "spouse",
+      dateOfBirth: new Date("1990-01-01"),
+      createdDate: new Date("2024-01-01"),
+      beneficiaryContactId: 1,
+      kindId: 1,
       relationship: "Spouse",
       street: "123 Main St",
       city: "Boston",
       state: "MA",
       postalCode: "02101",
       phone: "617-555-1234"
-    }
+    } as BeneficiaryDto
   ],
-  total: 1
+  total: 1,
+  totalPages: 1,
+  pageSize: 25,
+  currentPage: 0
 };
 
 const mockBeneficiaryOfList: Paged<BeneficiaryDto> = {
   results: [
     {
       id: 2,
+      psnSuffix: 2,
+      badgeNumber: 456,
+      demographicId: 2,
+      psn: "4562",
+      ssn: "987-65-4321",
       firstName: "Parent",
       lastName: "Doe",
       percent: 100,
-      dateOfBirth: "1960-01-01",
-      kindId: "parent",
+      dateOfBirth: new Date("1960-01-01"),
+      createdDate: new Date("2024-01-01"),
+      beneficiaryContactId: 2,
+      kindId: 2,
       relationship: "Parent",
       street: "456 Oak St",
       city: "Boston",
       state: "MA",
       postalCode: "02101",
       phone: "617-555-5678"
-    }
+    } as BeneficiaryDto
   ],
-  total: 1
+  total: 1,
+  totalPages: 1,
+  pageSize: 25,
+  currentPage: 0
 };
 
 type RootState = {
   security: SecurityState;
 };
 
-type MockStoreState = PreloadedState<RootState>;
+type MockStoreState = Partial<RootState>;
 
 function createMockStore(preloadedState?: MockStoreState) {
   return configureStore<RootState>({
@@ -81,7 +102,7 @@ function createMockStore(preloadedState?: MockStoreState) {
 }
 
 function renderHookWithProvider<T>(hook: () => T, preloadedState?: MockStoreState) {
-  const store = createMockStore(preloadedState || { security: { token: "mock-token", user: null } });
+  const store = createMockStore(preloadedState || { security: { token: "mock-token" } });
   return renderHook(() => hook(), {
     wrapper: ({ children }: { children: React.ReactNode }) => React.createElement(Provider, { store, children })
   });
@@ -103,7 +124,18 @@ describe("useBeneficiaryRelationshipData", () => {
           pageSize: 25,
           sortParams: { sortBy: "psnSuffix", isSortDescending: true }
         }),
-      { security: { token: null, user: null } }
+      {
+        security: {
+          token: null,
+          userGroups: [],
+          userRoles: [],
+          userPermissions: [],
+          username: "",
+          performLogout: false,
+          appUser: null,
+          impersonating: []
+        }
+      }
     );
 
     expect(result.current.isLoading).toBe(false);
