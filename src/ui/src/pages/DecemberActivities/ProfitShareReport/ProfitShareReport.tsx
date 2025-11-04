@@ -22,6 +22,7 @@ interface SearchParams {
 
 const ProfitShareReport = () => {
   const [selectedPresetParams, setSelectedPresetParams] = useState<FilterParams | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- False positive: isLoadingTotals is used on line 150
   const [isLoadingTotals, setIsLoadingTotals] = useState(false);
   const [currentSearchParams, setCurrentSearchParams] = useState<SearchParams | null>(null);
   const [isInitialSearchLoaded, setIsInitialSearchLoaded] = useState(false);

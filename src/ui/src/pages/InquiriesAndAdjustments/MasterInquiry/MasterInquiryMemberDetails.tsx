@@ -37,7 +37,6 @@ in the React memo stuff at the bottom and are important for edge cases like thes
   - The component could show stale data for wrong member
 */
 const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = memo(
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ({ memberType: _memberType, id: _id, profitYear, memberDetails, isLoading }) => {
     const { missiveAlerts } = useMissiveAlerts();
 

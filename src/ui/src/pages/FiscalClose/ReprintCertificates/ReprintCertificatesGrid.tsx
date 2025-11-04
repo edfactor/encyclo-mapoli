@@ -21,7 +21,6 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
     sortBy: "badgeNumber",
     isSortDescending: false
   });
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
 
   // Use dynamic grid height utility hook
