@@ -23,7 +23,7 @@ interface INestedGridRowProps<T extends Record<string, unknown> = Record<string,
   expandedBackgroundColor: string;
 }
 
-export const NestedGridRow = <T,>({
+export const NestedGridRow = <T extends Record<string, unknown>,>({
   row,
   columns,
   renderNestedContent,
@@ -56,7 +56,7 @@ export const NestedGridRow = <T,>({
               py: 1.5,
               width: column.width
             }}>
-            {column.render ? column.render(row[column.key], row) : row[column.key]}
+            {column.render ? column.render(row[column.key], row) : (row[column.key] as React.ReactNode)}
           </TableCell>
         ))}
 

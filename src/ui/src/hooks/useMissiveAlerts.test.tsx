@@ -14,7 +14,7 @@ describe("useMissiveAlerts", () => {
   };
 
   const wrapper =
-    (contextValue: MissiveAlertContextType | undefined) =>
+    (contextValue: MissiveAlertContextType | null) =>
     ({ children }: { children: React.ReactNode }) => (
       <MissiveAlertContext.Provider value={contextValue}>{children}</MissiveAlertContext.Provider>
     );
@@ -27,6 +27,20 @@ describe("useMissiveAlerts", () => {
     expect(result.current).toBe(mockContextValue);
   });
 
+  it("should throw error when context value is null", () => {
+    // Suppress console.error for this test
+    const originalError = console.error;
+    console.error = () => {};
+
+    expect(() => {
+      renderHook(() => useMissiveAlerts(), {
+        wrapper: wrapper(null)
+      });
+    }).toThrow("useMissiveAlerts must be used within a MissiveAlertProvider");
+
+    console.error = originalError;
+  });
+
   it("should throw error when used outside provider", () => {
     // Suppress console.error for this test
     const originalError = console.error;
@@ -34,7 +48,7 @@ describe("useMissiveAlerts", () => {
 
     expect(() => {
       renderHook(() => useMissiveAlerts(), {
-        wrapper: wrapper(undefined)
+        wrapper: wrapper(null)
       });
     }).toThrow("useMissiveAlerts must be used within a MissiveAlertProvider");
 

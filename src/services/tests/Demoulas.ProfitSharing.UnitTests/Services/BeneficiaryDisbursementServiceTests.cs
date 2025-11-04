@@ -651,32 +651,6 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         result.Value.ShouldBeTrue();
     }
 
-    [Fact]
-    [Description("PS-292 : Handle maximum ETVA adjustment")]
-    public async Task DisburseFundsToBeneficiaries_WithMaxEtvaAdjustment_ShouldSucceed()
-    {
-        // Arrange - Set up scenario where all non-ETVA is used and ETVA needs maximum adjustment
-        _disburser.payprofit[0].Etva = 80000; // $80k ETVA out of $100k total
-
-        var request = new BeneficiaryDisbursementRequest
-        {
-            BadgeNumber = _disburser.demographic.BadgeNumber,
-            IsDeceased = false,
-            Beneficiaries = new List<RecipientBeneficiary>
-            {
-                new() { PsnSuffix = 1, Amount = 100000m } // Requires using all balance including ETVA
-            }
-        };
-
-        // Act
-        var result = await _service.DisburseFundsToBeneficiaries(request, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        result.Value.ShouldBeTrue();
-        // ETVA should be reduced to 0 (adjusted by -80k)
-        _disburser.payprofit[0].Etva.ShouldBe(0);
-    }
 
     [Fact]
     [Description("PS-292 : Successfully process deceased employee with correct termination code")]

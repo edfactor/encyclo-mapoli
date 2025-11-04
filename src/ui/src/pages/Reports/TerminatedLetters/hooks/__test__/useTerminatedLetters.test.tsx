@@ -238,16 +238,12 @@ describe("useTerminatedLetters", () => {
       expect(result.current.searchParams).toEqual({ beginningDate, endingDate });
       expect(result.current.searchCompleted).toBe(true);
       expect(result.current.reportData).toBeDefined();
-      expect(result.current.reportData?.items).toHaveLength(2);
+      expect(result.current.reportData?.results).toHaveLength(2);
     });
 
     it("should set isSearching to true during search", async () => {
       mockTriggerSearch.mockImplementation(() => {
-        const delayedPromise = new Promise<Paged<TerminatedLettersDetail>>((resolve) =>
-          setTimeout(() => resolve(createMockTerminatedLettersResponse()), 100)
-        ) as RTKQueryPromise<Paged<TerminatedLettersDetail>>;
-        delayedPromise.unwrap = () => delayedPromise;
-        return delayedPromise;
+        return createMockRTKQueryPromise(createMockTerminatedLettersResponse());
       });
 
       const { result } = renderHook(() => useTerminatedLetters());

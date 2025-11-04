@@ -14,7 +14,7 @@ vi.mock("../DistributionsAndForfeituresSearchFilter", () => ({
         data-testid="search-btn">
         Search
       </button>
-      {isFetching && <div data-testid="fetching">Fetching...</div>}
+      {isFetching ? <div data-testid="fetching">Fetching...</div> : null}
     </div>
   ))
 }));

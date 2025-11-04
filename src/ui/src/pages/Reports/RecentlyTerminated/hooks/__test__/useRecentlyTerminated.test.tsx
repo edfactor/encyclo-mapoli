@@ -127,7 +127,7 @@ describe("useRecentlyTerminated", () => {
         handlePaginationChange: mockHandlePaginationChange,
         handleSortChange: vi.fn(),
         resetPagination: mockResetPagination
-      } as ReturnType<typeof useGridPagination.useGridPagination>;
+      } as unknown as ReturnType<typeof useGridPagination.useGridPagination>;
     });
 
     // Mock lazy query - default to returning data
@@ -140,24 +140,26 @@ describe("useRecentlyTerminated", () => {
       )
     );
 
-    vi.spyOn(useLazyGetRecentlyTerminatedReportQuery, "useLazyGetRecentlyTerminatedReportQuery").mockReturnValue([
-      mockTriggerSearch,
-      {
-        data: undefined,
-        isLoading: false,
-        isSuccess: false,
-        isError: false,
-        error: null,
-        isFetching: false,
-        isUninitialized: true,
-        currentData: undefined,
-        requestId: undefined,
-        endpointName: "getRecentlyTerminatedReport",
-        startedTimeStamp: undefined,
-        fulfilledTimeStamp: undefined
-      },
-      { lastArg: undefined, requestStatus: "uninitialized" }
-    ] as unknown);
+    vi.spyOn(useLazyGetRecentlyTerminatedReportQuery, "useLazyGetRecentlyTerminatedReportQuery").mockReturnValue(
+      [
+        mockTriggerSearch,
+        {
+          data: undefined,
+          isLoading: false,
+          isSuccess: false,
+          isError: false,
+          error: null,
+          isFetching: false,
+          isUninitialized: true,
+          currentData: undefined,
+          requestId: undefined,
+          endpointName: "getRecentlyTerminatedReport",
+          startedTimeStamp: undefined,
+          fulfilledTimeStamp: undefined
+        },
+        { lastArg: undefined, requestStatus: "uninitialized" }
+      ] as unknown as ReturnType<typeof useLazyGetRecentlyTerminatedReportQuery>
+    );
   });
 
   describe("Initial State", () => {

@@ -93,7 +93,7 @@ describe("MasterInquiryFunctions", () => {
     it("should return false for search with name and contribution", () => {
       const params: MasterInquirySearch = {
         name: "John Doe",
-        contribution: "1000",
+        contribution: 1000,
         socialSecurity: undefined,
         badgeNumber: undefined,
         endProfitYear: 2024,
@@ -114,7 +114,7 @@ describe("MasterInquiryFunctions", () => {
     it("should return false for search with name and startProfitMonth", () => {
       const params: MasterInquirySearch = {
         name: "John Doe",
-        startProfitMonth: "1",
+        startProfitMonth: 1,
         socialSecurity: undefined,
         badgeNumber: undefined,
         endProfitYear: 2024,
@@ -135,7 +135,7 @@ describe("MasterInquiryFunctions", () => {
     it("should return false for search with name and earnings", () => {
       const params: MasterInquirySearch = {
         name: "John Doe",
-        earnings: "5000",
+        earnings: 5000,
         socialSecurity: undefined,
         badgeNumber: undefined,
         endProfitYear: 2024,
@@ -156,7 +156,7 @@ describe("MasterInquiryFunctions", () => {
     it("should return false for search with name and forfeiture", () => {
       const params: MasterInquirySearch = {
         name: "John Doe",
-        forfeiture: "500",
+        forfeiture: 500,
         socialSecurity: undefined,
         badgeNumber: undefined,
         endProfitYear: 2024,
@@ -177,7 +177,7 @@ describe("MasterInquiryFunctions", () => {
     it("should return false for search with name and payment", () => {
       const params: MasterInquirySearch = {
         name: "John Doe",
-        payment: "2000",
+        payment: 2000,
         socialSecurity: undefined,
         badgeNumber: undefined,
         endProfitYear: 2024,
