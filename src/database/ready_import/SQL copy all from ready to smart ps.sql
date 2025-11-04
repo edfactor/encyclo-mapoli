@@ -359,7 +359,10 @@ BEGIN
         PY_PH_LASTYR as CURRENT_HOURS_YEAR, -- Pull the prior year hours as "last year"
         PY_PD_LASTYR AS CURRENT_INCOME_YEAR, -- Pull the prior year income as "last year"
         PY_WEEKS_WORK_LAST AS WEEKS_WORKED_YEAR,
-        NULL AS PS_CERTIFICATE_ISSUED_DATE,
+        CASE -- pull in the cert as the prior year's cert.  We use a DATE in SMART, but READY only has a boolean so we fudge it here.
+            WHEN PY_PROF_CERT = '1' THEN TO_DATE('12/31/' || last_year, 'MM/DD/YYYY')
+            ELSE NULL
+        END as PS_CERTIFICATE_ISSUED_DATE,
         -- We will recompute this in RebuildEnrollmentAndZeroContService for most employees when we first run.
         -- We leave it as a default as RebuildEnrollmentAndZeroContService might not recompute every employee
         PY_PS_ENROLLED, 
