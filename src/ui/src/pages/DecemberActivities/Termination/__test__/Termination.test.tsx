@@ -20,7 +20,7 @@ vi.mock("../../../../hooks/useFiscalCalendarYear", () => ({
         fiscalEndDate: "2024-12-31"
       }
     }
-  ] as any)
+  ] as unknown)
 }));
 
 vi.mock("../../../../hooks/useTerminationState", () => ({
@@ -223,7 +223,7 @@ describe("Termination", () => {
             fiscalEndDate: null
           }
         }
-      ] as any);
+      ] as unknown);
 
       render(<Termination />, { wrapper });
 
@@ -265,7 +265,7 @@ describe("Termination", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as any);
+      } as unknown);
 
       render(<Termination />, { wrapper });
 
@@ -304,7 +304,7 @@ describe("Termination", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as any);
+      } as unknown);
 
       render(<Termination />, { wrapper });
 
@@ -335,7 +335,7 @@ describe("Termination", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as any);
+      } as unknown);
 
       render(<Termination />, { wrapper });
 
@@ -370,7 +370,7 @@ describe("Termination", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as any);
+      } as unknown);
 
       render(<Termination />, { wrapper });
 
@@ -403,7 +403,7 @@ describe("Termination", () => {
           handleStatusChange: mockHandleStatusChange,
           handleArchiveHandled: vi.fn()
         }
-      } as any);
+      } as unknown);
 
       render(<Termination />, { wrapper });
 
@@ -513,7 +513,7 @@ describe("Termination", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as any);
+      } as unknown);
 
       render(<Termination />, { wrapper });
 
@@ -535,7 +535,7 @@ describe("Termination", () => {
 
       vi.mocked(useTerminationState).mockReturnValueOnce({
         state: {
-          searchParams: { archive: true } as any,
+          searchParams: { archive: true } as unknown,
           initialSearchLoaded: true,
           hasUnsavedChanges: false,
           resetPageFlag: false,
@@ -551,7 +551,7 @@ describe("Termination", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: mockHandleArchiveHandled
         }
-      } as any);
+      } as unknown);
 
       render(<Termination />, { wrapper });
 

@@ -389,7 +389,7 @@ describe("useAdjustments", () => {
 
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
-        addAlert: vi.fn(),
+        addAlert: mockAddAlert,
         addAlerts: vi.fn(),
         clearAlerts: vi.fn(),
         removeAlert: vi.fn(),

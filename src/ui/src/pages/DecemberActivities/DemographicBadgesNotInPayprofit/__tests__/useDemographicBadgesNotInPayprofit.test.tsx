@@ -28,7 +28,7 @@ vi.mock("../../../../reduxstore/api/YearsEndApi", () => ({
 }));
 
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
-import { useGridPagination } from "../../../../hooks/useGridPagination";
+import { useGridPagination, type GridPaginationState, type GridPaginationActions } from "../../../../hooks/useGridPagination";
 import { useLazyGetDemographicBadgesNotInPayprofitQuery } from "../../../../reduxstore/api/YearsEndApi";
 import useDemographicBadgesNotInPayprofit from "../hooks/useDemographicBadgesNotInPayprofit";
 
@@ -46,7 +46,7 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
       handlePaginationChange: vi.fn(),
       handleSortChange: vi.fn(),
       resetPagination: vi.fn()
-    } as any);
+    } as unknown as GridPaginationState & GridPaginationActions);
 
     vi.mocked(useLazyGetDemographicBadgesNotInPayprofitQuery).mockReturnValue([
       vi.fn().mockReturnValue({
@@ -57,7 +57,7 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
       }),
       { isFetching: false },
       {}
-    ] as any);
+    ] as unknown);
   });
 
   describe("Hook initialization", () => {
