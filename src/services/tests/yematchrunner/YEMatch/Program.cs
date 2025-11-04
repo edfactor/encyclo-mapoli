@@ -45,8 +45,10 @@ internal static class Program
             "goldendecemberexpress" => new GoldenDecemberRun() { DataDirectory = dataDirectory },
             "masterinquiry" => new MasterInquiryRun { DataDirectory = dataDirectory },
             "tinker" => new TinkerRun { DataDirectory = dataDirectory },
+            "terminations" => new TerminationsRun { DataDirectory = dataDirectory },
             "seven" => new SevenRun { DataDirectory = dataDirectory },
             "view" => new ViewRun { DataDirectory = dataDirectory },
+            "automatch" => new AutoMatchRun() { DataDirectory = dataDirectory },
             _ => throw new ArgumentException($"Unknown run type: {runType}")
         };
     }

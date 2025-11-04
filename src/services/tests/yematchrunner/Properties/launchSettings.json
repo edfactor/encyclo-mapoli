@@ -35,6 +35,14 @@
         "Tinker Run": {
             "commandName": "Project",
             "commandLineArgs": "--run tinker"
+        },
+        "Terminations Run": {
+            "commandName": "Project",
+            "commandLineArgs": "--run terminations"
+        },
+        "Auto Match Run": {
+            "commandName": "Project",
+            "commandLineArgs": "--run automatch"
         }
     }
 }
