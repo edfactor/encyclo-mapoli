@@ -291,11 +291,6 @@ public sealed class TerminatedEmployeeReportService
 
             yearDetailsList.Add((member.BadgeNumber, member.PsnSuffix, member.FullName, yearDetail));
 
-            if (yearDetailsList.Count >= req.Take)
-            {
-                break;
-            }
-            
             // Accumulate totals
             totalVested += vestedBalance;
             totalForfeit += member.ForfeitAmount;
