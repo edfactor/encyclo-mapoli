@@ -79,10 +79,4 @@ public class Pay443Tests : PristineBaseTest
         actualResponse.ShouldBeEquivalentTo(expectedResponse);
     }
 
-    public static string ReadEmbeddedResource(string resourceName)
-    {
-        using Stream? stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
-        using StreamReader reader = new(stream!);
-        return reader.ReadToEnd();
-    }
 }

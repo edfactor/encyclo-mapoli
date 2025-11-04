@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Data.Contexts.Interfaces;
+﻿using System.Reflection;
+using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
@@ -35,12 +36,20 @@ public abstract class PristineBaseTest
         DbFactory = new PristineDataContextFactory();
         DistributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
         CalendarService = new CalendarService(DbFactory, Aps, DistributedCache);
-        FrozenService = new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, DistributedCache, new Mock<INavigationService>().Object);
+        FrozenService = new FrozenService(DbFactory, new Mock<ICommitGuardOverride>().Object, new Mock<IServiceProvider>().Object, DistributedCache,
+            new Mock<INavigationService>().Object);
         EmbeddedSqlService = new EmbeddedSqlService();
         DemographicReaderService = new DemographicReaderService(FrozenService, HttpContextAccessor);
         TotalService = new TotalService(DbFactory, CalendarService, EmbeddedSqlService, DemographicReaderService);
         TestOutputHelper = testOutputHelper;
-        PayProfitUpdateService = new PayProfitUpdateService(DbFactory,  new Mock<ILoggerFactory>().Object, TotalService, CalendarService);
+        PayProfitUpdateService = new PayProfitUpdateService(DbFactory, new Mock<ILoggerFactory>().Object, TotalService, CalendarService);
         YearEndService = new YearEndService(DbFactory, CalendarService, PayProfitUpdateService, TotalService, DemographicReaderService);
+    }
+
+    public static string ReadEmbeddedResource(string resourceName)
+    {
+        using Stream? stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
+        using StreamReader reader = new(stream!);
+        return reader.ReadToEnd();
     }
 }
