@@ -43,12 +43,28 @@ public sealed class TerminatedEmployeeReportService
         _yearEndService = yearEndService;
     }
 
-    public Task<TerminatedEmployeeAndBeneficiaryResponse> CreateDataAsync(FilterableStartAndEndDateRequest req, CancellationToken cancellationToken)
+    public async Task<TerminatedEmployeeAndBeneficiaryResponse> CreateDataAsync(FilterableStartAndEndDateRequest req, CancellationToken cancellationToken)
     {
-        return _factory.UseReadOnlyContext(async ctx =>
+        var startTime = DateTime.UtcNow;
+        _logger.LogInformation("CreateDataAsync started for date range {BeginningDate} to {EndingDate}", req.BeginningDate, req.EndingDate);
+        
+        return await _factory.UseReadOnlyContext(async ctx =>
         {
+            var retrieveStartTime = DateTime.UtcNow;
             List<MemberSlice> memberSliceUnion = await RetrieveMemberSlices(ctx, req, cancellationToken);
-            return await MergeAndCreateDataset(ctx, req, memberSliceUnion, cancellationToken);
+            var retrieveDuration = (DateTime.UtcNow - retrieveStartTime).TotalMilliseconds;
+            _logger.LogInformation("RetrieveMemberSlices completed in {DurationMs:F2}ms, returned {MemberCount} members", retrieveDuration, memberSliceUnion.Count);
+
+            var mergeStartTime = DateTime.UtcNow;
+            var result = await MergeAndCreateDataset(ctx, req, memberSliceUnion, cancellationToken);
+            var mergeDuration = (DateTime.UtcNow - mergeStartTime).TotalMilliseconds;
+            int recordCount = result.Response?.Results != null ? result.Response.Results.Count() : 0;
+            _logger.LogInformation("MergeAndCreateDataset completed in {DurationMs:F2}ms, processed {RecordCount} records", mergeDuration, recordCount);
+            
+            var totalDuration = (DateTime.UtcNow - startTime).TotalMilliseconds;
+            _logger.LogInformation("CreateDataAsync completed in {DurationMs:F2}ms (retrieve: {RetrieveDurationMs:F2}ms, merge: {MergeDurationMs:F2}ms)", totalDuration, retrieveDuration, mergeDuration);
+            
+            return result;
         }, cancellationToken);
     }
 
@@ -64,6 +80,9 @@ public sealed class TerminatedEmployeeReportService
         List<MemberSlice> memberSliceUnion,
         CancellationToken cancellationToken)
     {
+        var overallStart = DateTime.UtcNow;
+        _logger.LogInformation("MergeAndCreateDataset started with {MemberCount} members", memberSliceUnion.Count);
+        
         // Initialize report totals
         decimal totalVested = 0;
         decimal totalForfeit = 0;
@@ -81,6 +100,7 @@ public sealed class TerminatedEmployeeReportService
         int transactionYearBoundary = yearEnd + 1;
 
         // Load profit detail transactions
+        var profitDetailsStart = DateTime.UtcNow;
         IQueryable<ProfitDetail> profitDetailsRaw = ctx.ProfitDetails
             .Where(pd => pd.ProfitYear >= profitYearRange.beginProfitYear
                          && pd.ProfitYear <= profitYearRange.endProfitYear
@@ -115,6 +135,8 @@ public sealed class TerminatedEmployeeReportService
                                            (x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0) -
                                            (x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0))
             }, cancellationToken);
+        var profitDetailsDuration = (DateTime.UtcNow - profitDetailsStart).TotalMilliseconds;
+        _logger.LogInformation("ProfitDetails dictionary loaded in {DurationMs:F2}ms with {RecordCount} entries", profitDetailsDuration, profitDetailsDict.Count);
 
         // This report is always giving values about today for the members current status.
         DateOnly today = DateOnly.FromDateTime(DateTime.Today);
@@ -122,22 +144,35 @@ public sealed class TerminatedEmployeeReportService
         short lastCompletedYearEnd = await _yearEndService.GetCompletedYearEnd(cancellationToken);
         CalendarResponseDto priorYearDateRange = await _calendarService.GetYearStartAndEndAccountingDatesAsync(lastCompletedYearEnd, cancellationToken);
 
+        var thisYearStart = DateTime.UtcNow;
         Dictionary<int, ParticipantTotalVestingBalance> thisYearBalancesDict = await _totalService
             .TotalVestingBalance(ctx, profitYearRange.beginProfitYear, profitYearRange.endProfitYear, today)
             .Where(x => ssns.Contains(x.Ssn))
             .ToDictionaryAsync(x => x.Ssn, x => x, cancellationToken);
+        var thisYearDuration = (DateTime.UtcNow - thisYearStart).TotalMilliseconds;
+        _logger.LogInformation("ThisYearBalances dictionary loaded in {DurationMs:F2}ms with {RecordCount} entries", thisYearDuration, thisYearBalancesDict.Count);
 
+        var lastYearStart = DateTime.UtcNow;
         Dictionary<int, ParticipantTotal> lastYearBalancesDict = await _totalService.GetTotalBalanceSet(ctx, lastCompletedYearEnd)
             .Where(x => ssns.Contains(x.Ssn))
             .ToDictionaryAsync(x => x.Ssn, x => x, cancellationToken);
+        var lastYearDuration = (DateTime.UtcNow - lastYearStart).TotalMilliseconds;
+        _logger.LogInformation("LastYearBalances dictionary loaded in {DurationMs:F2}ms with {RecordCount} entries", lastYearDuration, lastYearBalancesDict.Count);
 
+        var vestedStart = DateTime.UtcNow;
         Dictionary<int, ParticipantTotalVestingBalance> lastYearVestedBalancesDict = await _totalService
             .TotalVestingBalance(ctx, /*PayProfit Year*/lastCompletedYearEnd, /*Desired Year*/lastCompletedYearEnd, priorYearDateRange.FiscalEndDate)
             .Where(x => ssns.Contains(x.Ssn))
             .ToDictionaryAsync(x => x.Ssn, x => x, cancellationToken);
+        var vestedDuration = (DateTime.UtcNow - vestedStart).TotalMilliseconds;
+        _logger.LogInformation("LastYearVestedBalances dictionary loaded in {DurationMs:F2}ms with {RecordCount} entries", vestedDuration, lastYearVestedBalancesDict.Count);
 
         // Build year details list for each member
+        var processingStart = DateTime.UtcNow;
         List<(int BadgeNumber, short PsnSuffix, string? Name, TerminatedEmployeeAndBeneficiaryYearDetailDto YearDetail)> yearDetailsList = new();
+
+        int processedCount = 0;
+        int filteredCount = 0;
 
         foreach (MemberSlice memberSlice in memberSliceUnion)
         {
@@ -190,6 +225,7 @@ public sealed class TerminatedEmployeeReportService
             // Apply IsInteresting filter
             if (!IsInteresting(member))
             {
+                filteredCount++;
                 continue;
             }
 
@@ -252,10 +288,12 @@ public sealed class TerminatedEmployeeReportService
             // Exclude members with 0 balance OR 100% vested (no forfeiture opportunity)
             if (req.ExcludeZeroAndFullyVested && (member.EndingBalance == 0 || vestedRatio == 1.0m || hasForfeited))
             {
+                filteredCount++;
                 continue;
             }
 
             yearDetailsList.Add((member.BadgeNumber, member.PsnSuffix, member.FullName, yearDetail));
+            processedCount++;
 
             // Accumulate totals
             totalVested += vestedBalance;
@@ -263,7 +301,11 @@ public sealed class TerminatedEmployeeReportService
             totalEndingBalance += member.EndingBalance;
             totalBeneficiaryAllocation += member.BeneficiaryAllocation;
         }
+        var processingDuration = (DateTime.UtcNow - processingStart).TotalMilliseconds;
+        _logger.LogInformation("Member processing loop completed in {DurationMs:F2}ms: {ProcessedCount} included, {FilteredCount} filtered out of {TotalCount}", 
+            processingDuration, processedCount, filteredCount, memberSliceUnion.Count);
 
+        var groupingStart = DateTime.UtcNow;
         PaginatedResponseDto<TerminatedEmployeeAndBeneficiaryDataResponseDto> grouped = await yearDetailsList
             .GroupBy(x => new { x.BadgeNumber, x.PsnSuffix, x.Name })
             .Select(g => new TerminatedEmployeeAndBeneficiaryDataResponseDto
@@ -272,6 +314,13 @@ public sealed class TerminatedEmployeeReportService
                 Name = g.Key.Name,
                 YearDetails = g.Select(x => x.YearDetail).OrderByDescending(y => y.ProfitYear).ToList()
             }).AsQueryable().ToPaginationResultsAsync(req, cancellationToken);
+        var groupingDuration = (DateTime.UtcNow - groupingStart).TotalMilliseconds;
+        int groupCount = grouped.Results != null ? grouped.Results.Count() : 0;
+        _logger.LogInformation("Grouping and pagination completed in {DurationMs:F2}ms, returned {GroupCount} groups", groupingDuration, groupCount);
+
+        var totalProcessingDuration = (DateTime.UtcNow - overallStart).TotalMilliseconds;
+        _logger.LogInformation("MergeAndCreateDataset complete: total {TotalDurationMs:F2}ms (queries: {QueryDurationMs:F2}ms, processing: {ProcessingDurationMs:F2}ms, grouping: {GroupingDurationMs:F2}ms)",
+            totalProcessingDuration, profitDetailsDuration + thisYearDuration + lastYearDuration + vestedDuration, processingDuration, groupingDuration);
 
         return new TerminatedEmployeeAndBeneficiaryResponse
         {
@@ -354,14 +403,35 @@ public sealed class TerminatedEmployeeReportService
         FilterableStartAndEndDateRequest request,
         CancellationToken cancellationToken)
     {
+        var overallStart = DateTime.UtcNow;
         _logger.LogInformation(
             "Starting retrieval for date range {BeginningDate} to {EndingDate}",
             request.BeginningDate, request.EndingDate);
 
+        var terminatedStart = DateTime.UtcNow;
         IQueryable<TerminatedEmployeeDto> terminatedEmployees = await GetTerminatedEmployees(ctx, request);
+        var terminatedDuration = (DateTime.UtcNow - terminatedStart).TotalMilliseconds;
+        _logger.LogDebug("GetTerminatedEmployees query built in {DurationMs:F2}ms", terminatedDuration);
+
+        var employeesStart = DateTime.UtcNow;
         IQueryable<MemberSlice> terminatedWithContributions = GetEmployeesAsMembers(ctx, request, terminatedEmployees, request.EndingDate);
+        var employeesDuration = (DateTime.UtcNow - employeesStart).TotalMilliseconds;
+        _logger.LogDebug("GetEmployeesAsMembers query built in {DurationMs:F2}ms", employeesDuration);
+
+        var beneficiariesStart = DateTime.UtcNow;
         IQueryable<MemberSlice> beneficiaries = await GetBeneficiaries(ctx, request);
-        return await CombineEmployeeAndBeneficiarySlices(terminatedWithContributions, beneficiaries, cancellationToken);
+        var beneficiariesDuration = (DateTime.UtcNow - beneficiariesStart).TotalMilliseconds;
+        _logger.LogDebug("GetBeneficiaries query built in {DurationMs:F2}ms", beneficiariesDuration);
+
+        var combineStart = DateTime.UtcNow;
+        var result = await CombineEmployeeAndBeneficiarySlices(terminatedWithContributions, beneficiaries, cancellationToken);
+        var combineDuration = (DateTime.UtcNow - combineStart).TotalMilliseconds;
+        _logger.LogInformation("CombineEmployeeAndBeneficiarySlices completed in {DurationMs:F2}ms, returned {ResultCount} members", combineDuration, result.Count);
+
+        var totalDuration = (DateTime.UtcNow - overallStart).TotalMilliseconds;
+        _logger.LogInformation("RetrieveMemberSlices complete: total {TotalDurationMs:F2}ms", totalDuration);
+
+        return result;
     }
 
     /// <summary>
@@ -372,6 +442,7 @@ public sealed class TerminatedEmployeeReportService
         IProfitSharingDbContext ctx,
         FilterableStartAndEndDateRequest request)
     {
+        var start = DateTime.UtcNow;
         IQueryable<Demographic> demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
 
         // BUSINESS RULE: Get employees who might have profit sharing activity.
@@ -385,6 +456,9 @@ public sealed class TerminatedEmployeeReportService
                         && d.TerminationDate >= request.BeginningDate
                         && d.TerminationDate <= request.EndingDate)
             .Select(d => new TerminatedEmployeeDto { Demographic = d });
+
+        var duration = (DateTime.UtcNow - start).TotalMilliseconds;
+        _logger.LogDebug("GetTerminatedEmployees query building completed in {DurationMs:F2}ms", duration);
 
         return queryable;
     }
@@ -452,7 +526,8 @@ public sealed class TerminatedEmployeeReportService
         IProfitSharingDbContext ctx,
         FilterableStartAndEndDateRequest request)
     {
-        _logger.LogInformation(
+        var start = DateTime.UtcNow;
+        _logger.LogDebug(
             "Loading beneficiaries for date range {BeginningDate} to {EndingDate}",
             request.BeginningDate, request.EndingDate);
 
@@ -497,6 +572,9 @@ public sealed class TerminatedEmployeeReportService
                         IsExecutive = false
                     }
             );
+
+        var duration = (DateTime.UtcNow - start).TotalMilliseconds;
+        _logger.LogDebug("GetBeneficiaries query building completed in {DurationMs:F2}ms", duration);
 
         return query;
     }
