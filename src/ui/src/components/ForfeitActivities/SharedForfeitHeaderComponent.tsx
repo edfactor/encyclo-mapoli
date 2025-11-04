@@ -13,7 +13,7 @@ export interface RowData {
   isDetail: boolean;
   profitYear: number;
   badgeNumber: string;
-  psn: number;
+  psn?: number;
   enrollmentId?: string;
   suggestedForfeit?: number;
   suggestedUnforfeiture?: number;
@@ -96,7 +96,7 @@ export const SharedForfeitHeaderComponent: React.FC<HeaderComponentProps> = (par
     const transformedValue = transformForfeitureValue(activityType, currentValue || 0);
 
     const basePayload: ForfeitureAdjustmentUpdateRequest = {
-      badgeNumber: activityType === "unforfeit" ? Number(nodeData.badgeNumber) : nodeData.psn,
+      badgeNumber: activityType === "unforfeit" ? Number(nodeData.badgeNumber) : (nodeData.psn || 0),
       profitYear: selectedProfitYear,
       forfeitureAmount: transformedValue,
       classAction: false

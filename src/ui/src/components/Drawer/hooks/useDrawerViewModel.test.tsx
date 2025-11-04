@@ -31,7 +31,7 @@ interface TestStoreState {
 const createMockStore = (initialState = {}) => {
   return configureStore({
     reducer: {
-      general: generalReducer
+      general: generalReducer as never
     },
     preloadedState: {
       general: {
@@ -39,7 +39,7 @@ const createMockStore = (initialState = {}) => {
         activeSubmenu: null,
         ...initialState
       }
-    }
+    } as never
   });
 };
 
@@ -55,7 +55,7 @@ const mockNavigationData: NavigationResponseDto = {
   navigation: [
     {
       id: 1,
-      parentId: null,
+      parentId: null as unknown as number,
       title: "YEAR END",
       subTitle: "Year End",
       url: "",

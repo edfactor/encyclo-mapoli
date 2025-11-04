@@ -14,7 +14,7 @@ describe("useMissiveAlerts", () => {
   };
 
   const wrapper =
-    (contextValue: MissiveAlertContextType | undefined) =>
+    (contextValue: MissiveAlertContextType | null) =>
     ({ children }: { children: React.ReactNode }) => (
       <MissiveAlertContext.Provider value={contextValue}>{children}</MissiveAlertContext.Provider>
     );

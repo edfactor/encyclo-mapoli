@@ -38,7 +38,7 @@ function createMockStore(preloadedState?: MockStoreState) {
 }
 
 function renderHookWithProvider<T>(hook: () => T, preloadedState?: MockStoreState) {
-  const store = createMockStore(preloadedState || { security: { token: "mock-token" } });
+  const store = createMockStore((preloadedState || { security: { token: "mock-token" } }) as Partial<RootState>);
   return renderHook(() => hook(), {
     wrapper: ({ children }: { children: React.ReactNode }) => React.createElement(Provider, { store, children })
   });
