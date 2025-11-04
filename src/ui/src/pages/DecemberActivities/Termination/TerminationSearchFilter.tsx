@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Button, Checkbox, FormControlLabel, FormHelperText, Grid } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { SearchAndReset, SmartModal } from "smart-ui-library";
@@ -8,7 +8,6 @@ import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import DuplicateSsnGuard from "../../../components/DuplicateSsnGuard";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
-import { useLazyGetAccountingYearQuery } from "../../../reduxstore/api/LookupsApi";
 import { clearTermination } from "../../../reduxstore/slices/yearsEndSlice";
 import { RootState } from "../../../reduxstore/store";
 import { CalendarResponseDto } from "../../../reduxstore/types";
@@ -48,55 +47,6 @@ interface TerminationSearchFilterProps {
   isFetching?: boolean;
 }
 
-/*
- We use local storage for keeping the users filter parameters.  The idea being that the Terminations/Forfiet
- list is long enough that someone may have broken this work across multiple days.
-
- If the user has never enterd a date, we defer to what the BE tells us is the appropriate range.
- */
-const STORAGE_KEY = "terminationSearchDates";
-
-interface StoredSearchDates {
-  beginningDate: string;
-  endingDate: string;
-  excludeZeroAndFullyVested?: boolean;
-}
-
-const getSavedSearchDates = (): StoredSearchDates | null => {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      return JSON.parse(stored);
-    }
-  } catch (error) {
-    console.error("Error reading termination search dates from localStorage:", error);
-  }
-  return null;
-};
-
-const saveSearchDates = (beginningDate: string, endingDate: string, excludeZeroAndFullyVested?: boolean) => {
-  try {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({
-        beginningDate,
-        endingDate,
-        excludeZeroAndFullyVested
-      })
-    );
-  } catch (error) {
-    console.error("Error saving termination search dates to localStorage:", error);
-  }
-};
-
-const clearSavedSearchDates = () => {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch (error) {
-    console.error("Error clearing termination search dates from localStorage:", error);
-  }
-};
-
 const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   setInitialSearchLoaded,
   fiscalData,
@@ -108,41 +58,6 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   const dispatch = useDispatch();
   const selectedProfitYear = useDecemberFlowProfitYear();
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
-
-  // Fetch fiscal year data for profitYear - 1
-  const [fetchPreviousYearFiscalData, { data: previousYearFiscalData }] = useLazyGetAccountingYearQuery();
-
-  useEffect(() => {
-    if (selectedProfitYear) {
-      fetchPreviousYearFiscalData({ profitYear: selectedProfitYear - 1 });
-    }
-  }, [selectedProfitYear, fetchPreviousYearFiscalData]);
-
-  // Get saved dates from localStorage, falling back to previous year's fiscal dates
-  const savedDates = getSavedSearchDates();
-  const defaultBeginDate =
-    termination?.startDate ||
-    savedDates?.beginningDate ||
-    (previousYearFiscalData ? mmDDYYFormat(previousYearFiscalData.fiscalBeginDate) : `01/01/${selectedProfitYear - 1}`);
-
-  // Calculate end date: fiscal end date + 6 days
-  // NOTE: The backend returns the fiscal end date as the FIRST SATURDAY of the final fiscal week.
-  // We add 6 days to get the complete week sweep (Saturday + 6 days = Friday of that week).
-  // This ensures we capture all terminations through the end of the fiscal week.
-  const calculateDefaultEndDate = () => {
-    if (previousYearFiscalData?.fiscalEndDate) {
-      const fiscalEndDate = tryddmmyyyyToDate(previousYearFiscalData.fiscalEndDate);
-      if (fiscalEndDate) {
-        const endDatePlus6 = new Date(fiscalEndDate);
-        endDatePlus6.setDate(endDatePlus6.getDate() + 6);
-        return mmDDYYFormat(endDatePlus6);
-      }
-    }
-    return `01/01/${selectedProfitYear}`;
-  };
-
-  const defaultEndDate = termination?.endDate || savedDates?.endingDate || calculateDefaultEndDate();
-
   const {
     control,
     handleSubmit,
@@ -150,15 +65,14 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
     reset,
     trigger
   } = useForm<TerminationSearchRequest>({
-    mode: "onChange",
     resolver: yupResolver(schema),
     defaultValues: {
-      beginningDate: defaultBeginDate,
-      endingDate: defaultEndDate,
+      beginningDate: termination?.startDate || (fiscalData ? mmDDYYFormat(fiscalData.fiscalBeginDate) : "") || "",
+      endingDate: termination?.endDate || (fiscalData ? mmDDYYFormat(fiscalData.fiscalEndDate) : "") || "",
       forfeitureStatus: "showAll",
       pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: false },
       profitYear: selectedProfitYear,
-      excludeZeroAndFullyVested: savedDates?.excludeZeroAndFullyVested || false
+      excludeZeroAndFullyVested: false
     }
   });
 
@@ -176,10 +90,6 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
         : mmDDYYFormat(fiscalData?.fiscalBeginDate || ""),
       endingDate: data.endingDate ? mmDDYYFormat(data.endingDate) : mmDDYYFormat(fiscalData?.fiscalEndDate || "")
     };
-
-    // Save the user's selected dates and checkbox values to localStorage
-    saveSearchDates(params.beginningDate, params.endingDate, data.excludeZeroAndFullyVested);
-
     // Only update search params and initial loaded state; let the grid trigger the API
     onSearch(params);
     setInitialSearchLoaded(true);
@@ -188,15 +98,10 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   const validateAndSearch = handleSubmit(validateAndSubmit);
 
   const handleReset = async () => {
-    // Clear saved dates from localStorage
-    clearSavedSearchDates();
-
     setInitialSearchLoaded(false);
     reset({
-      beginningDate: previousYearFiscalData
-        ? mmDDYYFormat(previousYearFiscalData.fiscalBeginDate)
-        : `01/01/${selectedProfitYear - 1}`,
-      endingDate: calculateDefaultEndDate(),
+      beginningDate: fiscalData ? mmDDYYFormat(fiscalData.fiscalBeginDate) : "",
+      endingDate: fiscalData ? mmDDYYFormat(fiscalData.fiscalEndDate) : "",
       forfeitureStatus: "showAll",
       pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: false },
       profitYear: selectedProfitYear,
