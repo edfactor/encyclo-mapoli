@@ -47,23 +47,23 @@ public sealed class TerminatedEmployeeReportService
     {
         var startTime = DateTime.UtcNow;
         _logger.LogInformation("CreateDataAsync started for date range {BeginningDate} to {EndingDate}", req.BeginningDate, req.EndingDate);
-        
+
         return await _factory.UseReadOnlyContext(async ctx =>
         {
             var retrieveStartTime = DateTime.UtcNow;
             IQueryable<MemberSlice> memberSliceQuery = await RetrieveMemberSlices(ctx, req);
             var retrieveDuration = (DateTime.UtcNow - retrieveStartTime).TotalMilliseconds;
-            
+
 
             var mergeStartTime = DateTime.UtcNow;
             var result = await MergeAndCreateDataset(ctx, req, memberSliceQuery, cancellationToken);
             var mergeDuration = (DateTime.UtcNow - mergeStartTime).TotalMilliseconds;
             int recordCount = result.Response?.Results != null ? result.Response.Results.Count() : 0;
             _logger.LogInformation("MergeAndCreateDataset completed in {DurationMs:F2}ms, processed {RecordCount} records", mergeDuration, recordCount);
-            
+
             var totalDuration = (DateTime.UtcNow - startTime).TotalMilliseconds;
             _logger.LogInformation("CreateDataAsync completed in {DurationMs:F2}ms (retrieve: {RetrieveDurationMs:F2}ms, merge: {MergeDurationMs:F2}ms)", totalDuration, retrieveDuration, mergeDuration);
-            
+
             return result;
         }, cancellationToken);
     }
@@ -81,8 +81,8 @@ public sealed class TerminatedEmployeeReportService
         CancellationToken cancellationToken)
     {
         var overallStart = DateTime.UtcNow;
-        
-        
+
+
         // Initialize report totals
         decimal totalVested = 0;
         decimal totalForfeit = 0;
@@ -109,7 +109,7 @@ public sealed class TerminatedEmployeeReportService
 
         var profitDetailsDict = await profitDetailsRaw
             .GroupBy(pd => new { pd.Ssn, pd.ProfitYear })
-            .ToDictionaryAsync(g => g.Key, g => new InternalProfitDetailDto
+            .Select(g => new InternalProfitDetailDto
             {
                 Ssn = g.Key.Ssn,
                 ProfitYear = g.Key.ProfitYear,
@@ -134,7 +134,8 @@ public sealed class TerminatedEmployeeReportService
                 CurrentAmount = g.Sum(x => x.Contribution + x.Earnings +
                                            (x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0) -
                                            (x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0))
-            }, cancellationToken);
+            })
+            .ToDictionaryAsync(x => new { x.Ssn, x.ProfitYear }, cancellationToken);
         var profitDetailsDuration = (DateTime.UtcNow - profitDetailsStart).TotalMilliseconds;
         _logger.LogInformation("ProfitDetails dictionary loaded in {DurationMs:F2}ms with {RecordCount} entries", profitDetailsDuration, profitDetailsDict.Count);
 
@@ -172,7 +173,7 @@ public sealed class TerminatedEmployeeReportService
         List<(int BadgeNumber, short PsnSuffix, string? Name, TerminatedEmployeeAndBeneficiaryYearDetailDto YearDetail)> yearDetailsList = new();
 
         var memberSliceCollection = memberSliceUnion.Where(m => !(m.YearsInPs <= 2 && m.HoursCurrentYear >= /*1000*/ ReferenceData.MinimumHoursForContribution())).AsAsyncEnumerable();
-            
+
         await foreach (MemberSlice memberSlice in memberSliceCollection)
         {
             // Get transactions for this member
@@ -308,7 +309,7 @@ public sealed class TerminatedEmployeeReportService
                 Name = g.Key.Name,
                 YearDetails = g.Select(x => x.YearDetail).OrderByDescending(y => y.ProfitYear).ToList()
             }).ToPaginationResultsAsync(req, cancellationToken);
-        
+
         var groupingDuration = (DateTime.UtcNow - groupingStart).TotalMilliseconds;
         int groupCount = grouped.Results != null ? grouped.Results.Count() : 0;
         _logger.LogInformation("Grouping and pagination completed in {DurationMs:F2}ms, returned {GroupCount} groups", groupingDuration, groupCount);
@@ -405,7 +406,7 @@ public sealed class TerminatedEmployeeReportService
         var terminatedEmployees = await GetTerminatedEmployeesSync(ctx, request);
         var terminatedWithContributions = GetEmployeesAsMembers(ctx, request, terminatedEmployees, request.EndingDate);
         var beneficiaries = await GetBeneficiariesSync(ctx, request);
-        
+
         return CombineEmployeeAndBeneficiarySlices(terminatedWithContributions, beneficiaries);
     }
 
