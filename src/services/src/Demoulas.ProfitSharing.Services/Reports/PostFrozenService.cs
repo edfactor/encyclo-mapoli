@@ -88,51 +88,33 @@ public class PostFrozenService : IPostFrozenService
                             select new Under21IntermediaryResult()
                             {
                                 d = d,
-                                bal = bal ?? new ParticipantTotalVestingBalance(),
-                                lyBal = lyBal ?? new ParticipantTotalVestingBalance()
+                                bal = bal,
+                                lyBal = lyBal,
                             };
 
-            // Execute all counts at database level in parallel
-            var totalUnder21Task = baseQuery.CountAsync(cancellationToken);
+            // Execute all counts at database level sequentially
+            var totalUnder21 = await baseQuery.CountAsync(cancellationToken);
 
             // Active counts
             var activeQuery = baseQuery.Where(x => x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate);
-            var activeTotalVestedTask = activeQuery.CountAsync(x => x.bal.YearsInPlan > 6 || x.lyBal.VestedBalance > 0, cancellationToken);
-            var activePartiallyVestedTask = activeQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 2 && x.bal.YearsInPlan < 6), cancellationToken);
-            var activePartiallyVestedButLessThanThreeYearsTask = activeQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 0 && x.bal.YearsInPlan < 3), cancellationToken);
+            var activeTotalVested = await activeQuery.CountAsync(x => x.bal.YearsInPlan > 6 || x.lyBal.VestedBalance > 0, cancellationToken);
+            var activePartiallyVested = await activeQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 2 && x.bal.YearsInPlan < 6), cancellationToken);
+            var activePartiallyVestedButLessThanThreeYears = await activeQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 0 && x.bal.YearsInPlan < 3), cancellationToken);
 
             // Inactive counts
             var inactiveQuery = baseQuery.Where(x => !(x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate) && x.d.EmploymentStatusId != EmploymentStatus.Constants.Terminated);
-            var inactiveTotalVestedTask = inactiveQuery.CountAsync(x => (x.bal != null && x.bal.YearsInPlan > 6) || (x.lyBal != null && x.lyBal.VestedBalance > 0), cancellationToken);
-            var inactivePartiallyVestedTask = inactiveQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 2 && x.bal.YearsInPlan < 6), cancellationToken);
-            var inactivePartiallyVestedButLessThanThreeYearsTask = inactiveQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 0 && x.bal.YearsInPlan < 3), cancellationToken);
+            var inactiveTotalVested = await inactiveQuery.CountAsync(x => (x.bal != null && x.bal.YearsInPlan > 6) || (x.lyBal != null && x.lyBal.VestedBalance > 0), cancellationToken);
+            var inactivePartiallyVested = await inactiveQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 2 && x.bal.YearsInPlan < 6), cancellationToken);
+            var inactivePartiallyVestedButLessThanThreeYears = await inactiveQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 0 && x.bal.YearsInPlan < 3), cancellationToken);
 
             // Terminated counts
             var terminatedQuery = baseQuery.Where(x => !(x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate) && x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated);
-            var terminatedTotalVestedTask = terminatedQuery.CountAsync(x => (x.bal != null && x.bal.YearsInPlan > 6) || (x.lyBal != null && x.lyBal.VestedBalance > 0), cancellationToken);
-            var terminatedPartiallyVestedTask = terminatedQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 2 && x.bal.YearsInPlan < 6), cancellationToken);
-            var terminatedPartiallyVestedButLessThanThreeYearsTask = terminatedQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 0 && x.bal.YearsInPlan < 3), cancellationToken);
+            var terminatedTotalVested = await terminatedQuery.CountAsync(x => (x.bal != null && x.bal.YearsInPlan > 6) || (x.lyBal != null && x.lyBal.VestedBalance > 0), cancellationToken);
+            var terminatedPartiallyVested = await terminatedQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 2 && x.bal.YearsInPlan < 6), cancellationToken);
+            var terminatedPartiallyVestedButLessThanThreeYears = await terminatedQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 0 && x.bal.YearsInPlan < 3), cancellationToken);
 
-            // Await all counts in parallel
-            await Task.WhenAll(
-                totalUnder21Task,
-                activeTotalVestedTask, activePartiallyVestedTask, activePartiallyVestedButLessThanThreeYearsTask,
-                inactiveTotalVestedTask, inactivePartiallyVestedTask, inactivePartiallyVestedButLessThanThreeYearsTask,
-                terminatedTotalVestedTask, terminatedPartiallyVestedTask, terminatedPartiallyVestedButLessThanThreeYearsTask
-            );
-
-            var totalUnder21 = await totalUnder21Task;
-            var activeTotalVested = await activeTotalVestedTask;
-            var activePartiallyVested = await activePartiallyVestedTask;
-            var activePartiallyVestedButLessThanThreeYears = await activePartiallyVestedButLessThanThreeYearsTask;
-            var inactiveTotalVested = await inactiveTotalVestedTask;
-            var inactivePartiallyVested = await inactivePartiallyVestedTask;
-            var inactivePartiallyVestedButLessThanThreeYears = await inactivePartiallyVestedButLessThanThreeYearsTask;
-            var terminatedTotalVested = await terminatedTotalVestedTask;
-            var terminatedPartiallyVested = await terminatedPartiallyVestedTask;
-            var terminatedPartiallyVestedButLessThanThreeYears = await terminatedPartiallyVestedButLessThanThreeYearsTask;
-
-            var pagedData = await (
+            // First get anonymous type from database query (no Age() or MaskSsn() calls in query)
+            var rawPagedData = await (
                 from d in demographics.Where(x => x.DateOfBirth >= birthDate21)
                 join bal in _totalService.TotalVestingBalance(ctx, request.ProfitYear, request.ProfitYear, calInfo.FiscalEndDate) on d.Ssn equals bal.Ssn
                 join lyPpTbl in ctx.PayProfits.Where(x => x.ProfitYear == request.ProfitYear - 1) on d.Id equals lyPpTbl.DemographicId into lyPpTmp
@@ -141,26 +123,53 @@ public class PostFrozenService : IPostFrozenService
                 from tyPp in tyPpTmp.DefaultIfEmpty()
                 where bal.YearsInPlan > 0 || bal.VestedBalance > 0
                 orderby d.StoreNumber, d.ContactInfo.FullName
-                select new ProfitSharingUnder21ReportDetail(
+                select new
+                {
                     d.StoreNumber,
                     d.BadgeNumber,
                     d.ContactInfo.FirstName,
                     d.ContactInfo.LastName,
-                    d.Ssn.MaskSsn(),
-                    (bal.YearsInPlan ?? 0),
-                    d.EmploymentTypeId.ToString() == EmployeeType.Constants.NewLastYear.ToString(),
-                    tyPp != null ? tyPp.CurrentHoursYear : 0,
-                    lyPp != null ? lyPp.CurrentHoursYear : 0,
+                    d.Ssn, // Raw SSN - will be masked after query
+                    YearsInPlan = (bal.YearsInPlan ?? 0),
+                    IsNewLastYear = d.EmploymentTypeId.ToString() == EmployeeType.Constants.NewLastYear.ToString(),
+                    CurrentYearHours = tyPp != null ? tyPp.CurrentHoursYear : 0,
+                    LastYearHours = lyPp != null ? lyPp.CurrentHoursYear : 0,
                     d.HireDate,
                     d.FullTimeDate,
                     d.TerminationDate,
-                    d.DateOfBirth,
-                    d.DateOfBirth.Age(), //Current report uses today's date for calculating age
+                    d.DateOfBirth, // Raw birth date - age will be calculated after query
                     d.EmploymentStatusId,
-                    (bal.CurrentBalance ?? 0),
-                    tyPp != null ? tyPp.EnrollmentId : (byte)0
+                    CurrentBalance = (bal.CurrentBalance ?? 0),
+                    EnrollmentId = tyPp != null ? tyPp.EnrollmentId : (byte)0,
+                    IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly
+                }
+            ).ToPaginationResultsAsync(request, cancellationToken: cancellationToken);
+
+            // Then project to final type with post-query SSN masking and age calculation
+            var pagedData = new PaginatedResponseDto<ProfitSharingUnder21ReportDetail>(request)
+            {
+                Total = rawPagedData.Total,
+                Results = rawPagedData.Results.Select(x => new ProfitSharingUnder21ReportDetail(
+                    x.StoreNumber,
+                    x.BadgeNumber,
+                    x.FirstName,
+                    x.LastName,
+                    x.Ssn.MaskSsn(), // SSN masking after database query
+                    x.YearsInPlan,
+                    x.IsNewLastYear,
+                    x.CurrentYearHours,
+                    x.LastYearHours,
+                    x.HireDate,
+                    x.FullTimeDate,
+                    x.TerminationDate,
+                    x.DateOfBirth,
+                    x.DateOfBirth.Age(), // Age calculation after database query
+                    x.EmploymentStatusId,
+                    x.CurrentBalance,
+                    x.EnrollmentId
                 )
-                { IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly }).ToPaginationResultsAsync(request, cancellationToken: cancellationToken);
+                { IsExecutive = x.IsExecutive })
+            };
 
             var response = new ProfitSharingUnder21ReportResponse
             {

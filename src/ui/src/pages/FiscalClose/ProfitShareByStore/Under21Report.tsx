@@ -5,17 +5,14 @@ import { Page } from "smart-ui-library";
 import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
-import {
-  useLazyGetUnder21BreakdownByStoreQuery,
-  useLazyGetUnder21TotalsQuery
-} from "../../../reduxstore/api/YearsEndApi";
+import { useLazyGetPostFrozenUnder21Query, useLazyGetUnder21TotalsQuery } from "../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../reduxstore/store";
 import Under21BreakdownGrid from "./Under21/Under21BreakdownGrid";
 import Under21Summary from "./Under21/Under21Summary";
 
 const Under21Report = () => {
   const [fetchUnder21Totals, { isLoading: isTotalsLoading }] = useLazyGetUnder21TotalsQuery();
-  const [fetchUnder21Breakdown, { isLoading: isBreakdownLoading }] = useLazyGetUnder21BreakdownByStoreQuery();
+  const [fetchUnder21Breakdown, { isLoading: isBreakdownLoading }] = useLazyGetPostFrozenUnder21Query();
   const under21Totals = useSelector((state: RootState) => state.yearsEnd.under21Totals);
   const under21Breakdown = useSelector((state: RootState) => state.yearsEnd.under21BreakdownByStore);
   const [initialLoad, setInitialLoad] = useState(true);

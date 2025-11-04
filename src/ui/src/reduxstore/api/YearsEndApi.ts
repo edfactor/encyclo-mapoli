@@ -10,6 +10,7 @@ import {
   clearProfitMasterStatus,
   clearProfitSharingEdit,
   clearProfitSharingLabels,
+  clearProfitSharingUnder21Report,
   clearProfitSharingUpdate,
   clearUnder21BreakdownByStore,
   clearUnder21Inactive,
@@ -45,6 +46,7 @@ import {
   setProfitShareSummaryReport,
   setProfitSharingEdit,
   setProfitSharingLabels,
+  setProfitSharingUnder21Report,
   setProfitSharingUpdate,
   setProfitSharingUpdateAdjustmentSummary,
   setRecentlyTerminated,
@@ -112,6 +114,8 @@ import {
   ProfitSharingDistributionsByAge,
   ProfitSharingLabel,
   ProfitSharingLabelsRequest,
+  ProfitSharingUnder21ReportRequest,
+  ProfitSharingUnder21ReportResponse,
   ProfitYearRequest,
   QPAY066BTerminatedWithVestedBalanceRequest,
   QPAY066BTerminatedWithVestedBalanceResponse,
@@ -970,7 +974,29 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-
+    getPostFrozenUnder21: builder.query<ProfitSharingUnder21ReportResponse, ProfitSharingUnder21ReportRequest>({
+      query: (params) => ({
+        url: "yearend/post-frozen-under-21",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          dispatch(clearProfitSharingUnder21Report());
+          const { data } = await queryFulfilled;
+          dispatch(setProfitSharingUnder21Report(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearUnder21BreakdownByStore());
+        }
+      }
+    }),
     getUnder21Inactive: builder.query<Under21InactiveResponse, Under21InactiveRequest>({
       query: (params) => ({
         url: "yearend/post-frozen/under-21-inactive",
@@ -1443,6 +1469,7 @@ export const {
   useLazyGetUnder21InactiveQuery,
   useLazyGetUnder21TotalsQuery,
   useLazyGetVestingAmountByAgeQuery,
+  useLazyGetPostFrozenUnder21Query,
   useLazyGetYearEndProfitSharingReportLiveQuery,
   useLazyGetYearEndProfitSharingReportFrozenQuery,
   useLazyGetYearEndProfitSharingReportTotalsQuery,
