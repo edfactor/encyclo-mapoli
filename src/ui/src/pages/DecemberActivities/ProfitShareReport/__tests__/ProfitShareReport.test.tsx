@@ -64,10 +64,6 @@ vi.mock("smart-ui-library", () => ({
   TotalsGrid: vi.fn(() => <div data-testid="totalsgrid">TotalsGrid</div>)
 }));
 
-vi.mock("components/ProfitShareTotalsDisplay", () => ({
-  default: vi.fn(() => <div data-testid="totals-display">Totals Display</div>)
-}));
-
 vi.mock("../../../FiscalClose/PAY426Reports/ProfitSummary/ProfitSummary", () => ({
   default: vi.fn(({ onPresetParamsChange }: { onPresetParamsChange: (params: null) => void }) => (
     <div data-testid="profit-summary">
@@ -127,12 +123,6 @@ describe("ProfitShareReport", () => {
       expect(screen.getByText(/PROFIT SHARE REPORT/i)).toBeInTheDocument();
     });
 
-    it("should render totals display component", () => {
-      render(<ProfitShareReport />, { wrapper });
-
-      expect(screen.getByTestId("totals-display")).toBeInTheDocument();
-    });
-
     it("should render profit summary section", () => {
       render(<ProfitShareReport />, { wrapper });
 
@@ -146,12 +136,6 @@ describe("ProfitShareReport", () => {
 
       // Component should render without search filter initially
       expect(screen.queryByTestId("search-filter")).not.toBeInTheDocument();
-    });
-
-    it("should display totals display initially", () => {
-      render(<ProfitShareReport />, { wrapper });
-
-      expect(screen.getByTestId("totals-display")).toBeInTheDocument();
     });
   });
 
@@ -184,7 +168,6 @@ describe("ProfitShareReport", () => {
       render(<ProfitShareReport />, { wrapper });
 
       expect(screen.getByTestId("profit-summary")).toBeInTheDocument();
-      expect(screen.getByTestId("totals-display")).toBeInTheDocument();
     });
 
     it("should render profit summary", () => {

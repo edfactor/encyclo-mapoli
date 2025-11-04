@@ -22,8 +22,6 @@ interface SearchParams {
 
 const ProfitShareReport = () => {
   const [selectedPresetParams, setSelectedPresetParams] = useState<FilterParams | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- False positive: isLoadingTotals is used on line 150
-  const [isLoadingTotals, setIsLoadingTotals] = useState(false);
   const [currentSearchParams, setCurrentSearchParams] = useState<SearchParams | null>(null);
   const [isInitialSearchLoaded, setIsInitialSearchLoaded] = useState(false);
 
@@ -36,8 +34,6 @@ const ProfitShareReport = () => {
   // Load both tables when page loads - this is consistent with other pages which only display data and do not take input.
   useEffect(() => {
     if (hasToken && profitYear) {
-      setIsLoadingTotals(true);
-
       const totalsRequest = {
         profitYear: profitYear,
         useFrozenData: false,
@@ -46,13 +42,12 @@ const ProfitShareReport = () => {
 
       triggerSearch(totalsRequest, false)
         .then((result) => {
-          setIsLoadingTotals(false);
           if (result.data) {
             dispatch(setYearEndProfitSharingReportQueryParams(profitYear));
           }
         })
         .catch((_error) => {
-          setIsLoadingTotals(false);
+          // Error handled silently
         });
     }
   }, [hasToken, profitYear, triggerSearch, dispatch]);
@@ -71,8 +66,6 @@ const ProfitShareReport = () => {
   const handleStatusChange = (_newStatus: string, statusName?: string) => {
     // Check if the status is "Complete" and trigger search with archive=true
     if (statusName === "Complete" && profitYear) {
-      setIsLoadingTotals(true);
-
       const totalsRequest = {
         profitYear: profitYear,
         useFrozenData: false,
@@ -82,14 +75,12 @@ const ProfitShareReport = () => {
 
       triggerSearch(totalsRequest, false)
         .then((result) => {
-          setIsLoadingTotals(false);
           if (result.data) {
             dispatch(setYearEndProfitSharingReportQueryParams(profitYear));
           }
         })
         .catch((error) => {
           console.error("Archive search failed:", error);
-          setIsLoadingTotals(false);
         });
     }
   };
@@ -138,7 +129,7 @@ const ProfitShareReport = () => {
         </Grid>
         {/*}
         <Grid width="100%">
-         
+
           <Box sx={{ mb: 3 }}>
             <div style={{ padding: "0 24px 0 24px" }}>
               <Typography
@@ -158,7 +149,7 @@ const ProfitShareReport = () => {
               </Box>
             )}
           </Box>
-          
+
         </Grid>
         */}
         <Grid width="100%">
