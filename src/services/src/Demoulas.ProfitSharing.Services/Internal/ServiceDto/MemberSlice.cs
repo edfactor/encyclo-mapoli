@@ -9,6 +9,7 @@ namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 /// </summary>
 internal sealed record MemberSlice
 {
+    internal required int Id { get; set; }
     internal short PsnSuffix { get; init; }
     internal required int BadgeNumber { get; init; }
     internal int Ssn { get; init; }
