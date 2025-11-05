@@ -21,8 +21,8 @@ const Under21TA = () => {
   const [initialLoad, setInitialLoad] = useState(true);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [pageNumber, setPageNumber] = useState<number>(0);
-  const [pageSize, setPageSize] = useState<number>(25);
-  const [sortParams, setSortParams] = useState({
+  const [pageSize] = useState<number>(25);
+  const [sortParams] = useState({
     sortBy: "badgeNumber",
     isSortDescending: false
   });
