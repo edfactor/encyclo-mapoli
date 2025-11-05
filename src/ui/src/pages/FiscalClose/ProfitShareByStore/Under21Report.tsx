@@ -36,7 +36,7 @@ const Under21Report = () => {
   useEffect(() => {
     const fetchData = async () => {
       setManualLoading(true);
-      
+
       const queryParams = {
         profitYear: profitYear,
         isSortDescending: gridPagination.sortParams.isSortDescending,
@@ -70,7 +70,7 @@ const Under21Report = () => {
   useEffect(() => {
     if (initialSearchLoaded) {
       setManualLoading(true);
-      
+
       const queryParams = {
         profitYear: profitYear,
         isSortDescending: gridPagination.sortParams.isSortDescending,
@@ -82,10 +82,7 @@ const Under21Report = () => {
         }
       };
 
-      Promise.all([
-        fetchUnder21Totals(queryParams),
-        fetchProfitSharingUnder21Report(queryParams)
-      ]).finally(() => {
+      Promise.all([fetchUnder21Totals(queryParams), fetchProfitSharingUnder21Report(queryParams)]).finally(() => {
         setManualLoading(false);
       });
     }
