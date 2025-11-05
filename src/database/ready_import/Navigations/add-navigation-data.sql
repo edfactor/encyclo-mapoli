@@ -103,6 +103,10 @@ DECLARE
     DISTTRIBUTION_EDIT_RUN CONSTANT NUMBER := 160;
     DIVORCE_REPORT CONSTANT NUMBER := 161;
     MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE CONSTANT NUMBER := 162;
+    NEWPSLABELS_REPORT CONSTANT NUMBER := 163;
+    LABELS CONSTANT NUMBER := 164;
+    LABELS_NEW CONSTANT NUMBER := 165;
+
 
 
     --- These are the role IDs from the ROLES table
@@ -310,10 +314,11 @@ BEGIN
     --insert_navigation_item(UNDER_21_REPORT, PROF_SHARE_BY_STORE, 'Under-21 Report', '', 'under-21-report', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
     
     insert_navigation_item(QPAY066TA_UNDR21, PROF_SHARE_BY_STORE, 'QPAY066TA-UNDR21', '', 'qpay066ta-under21', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
-
--- QPAY066B (child of Prof Share by Store)
     insert_navigation_item(QPAY066B, PROF_SHARE_BY_STORE, 'QPAY066B', '', 'qpay066b', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(QPAY066TA, PROF_SHARE_BY_STORE, 'Breakdown Report', 'QPAY066TA', 'qpay066ta', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(NEWPSLABELS_REPORT, PROF_SHARE_BY_STORE, 'NEWPSLABELS Report', '', '', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(LABELS, PROF_SHARE_BY_STORE, 'LABELS', '', '', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(LABELS_NEW, PROF_SHARE_BY_STORE, 'LABELSNEW', '', '', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
    
 
 -- Print PS Jobs
@@ -335,6 +340,20 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     -- assign_navigation_role(PAY_BEN_REPORT, DISTRIBUTIONS_CLERK); -- COMMENTED OUT - navigation item doesn't exist
 
 
+ -- LABELS NEW REPORT
+    assign_navigation_role(LABELS_NEW, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(LABELS_NEW, FINANCE_MANAGER);
+    assign_navigation_role(LABELS_NEW, DISTRIBUTIONS_CLERK);
+
+ -- LABELS REPORT
+    assign_navigation_role(LABELS, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(LABELS, FINANCE_MANAGER);
+    assign_navigation_role(LABELS, DISTRIBUTIONS_CLERK);
+ 
+ -- NEWPSLABLE REPORT
+    assign_navigation_role(NEWPSLABELS_REPORT, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(NEWPSLABELS_REPORT, FINANCE_MANAGER);
+    assign_navigation_role(NEWPSLABELS_REPORT, DISTRIBUTIONS_CLERK);
 
  -- MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE 
     assign_navigation_role(MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE, SYSTEM_ADMINISTRATOR);

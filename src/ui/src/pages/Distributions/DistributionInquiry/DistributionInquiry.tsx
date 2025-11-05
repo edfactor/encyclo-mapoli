@@ -35,7 +35,7 @@ interface LocationState {
   showSuccessMessage?: boolean;
   memberName?: string;
   amount?: number;
-  operationType?: "added" | "deleted";
+  operationType?: "added" | "deleted" | "delete-failed";
 }
 
 const DistributionInquiryContent = () => {

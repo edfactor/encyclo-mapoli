@@ -119,7 +119,7 @@ export const GetDetailColumns = (
           false
         );
       },
-      valueFormatter: (params) => (params.value !== null ? numberToCurrency(params.value) : null),
+      valueFormatter: (params) => (params.value !== null ? numberToCurrency(params.value) : ""),
       valueGetter: (params) => {
         if (!params.data.isDetail) return null;
         const rowKey = String(params.data.psn);

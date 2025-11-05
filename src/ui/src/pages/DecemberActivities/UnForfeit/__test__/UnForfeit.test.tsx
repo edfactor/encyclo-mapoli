@@ -7,18 +7,15 @@ import UnForfeit from "../UnForfeit";
 
 // Mock the hook dependencies
 vi.mock("../../../../hooks/useFiscalCalendarYear", () => ({
-  useLazyGetAccountingRangeToCurrent: vi.fn(
-    () =>
-      [
-        vi.fn(),
-        {
-          data: {
-            fiscalBeginDate: "2024-01-01",
-            fiscalEndDate: "2024-12-31"
-          }
-        }
-      ] as unknown
-  )
+  useLazyGetAccountingRangeToCurrent: vi.fn(() => [
+    vi.fn(),
+    {
+      data: {
+        fiscalBeginDate: "2024-01-01",
+        fiscalEndDate: "2024-12-31"
+      }
+    }
+  ])
 }));
 
 vi.mock("../../../../hooks/useDecemberFlowProfitYear", () => ({
@@ -155,12 +152,15 @@ describe("UnForfeit", () => {
       vi.mocked(useLazyGetAccountingRangeToCurrent).mockReturnValueOnce([
         vi.fn(),
         {
-          data: {
-            fiscalBeginDate: null,
-            fiscalEndDate: null
-          }
+          data: undefined,
+          isFetching: false,
+          isSuccess: false,
+          isLoading: false,
+          isError: false,
+          isUninitialized: true,
+          status: "uninitialized" as const
         }
-      ] as unknown);
+      ] as unknown as ReturnType<typeof useLazyGetAccountingRangeToCurrent>);
 
       render(<UnForfeit />, { wrapper });
 
@@ -222,7 +222,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      });
 
       render(<UnForfeit />, { wrapper });
 
@@ -260,7 +260,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      });
 
       render(<UnForfeit />, { wrapper });
 
@@ -299,7 +299,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      });
 
       render(<UnForfeit />, { wrapper });
 
@@ -331,7 +331,7 @@ describe("UnForfeit", () => {
           handleStatusChange: mockHandleStatusChange,
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      });
 
       render(<UnForfeit />, { wrapper });
 
@@ -363,7 +363,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      });
 
       render(<UnForfeit />, { wrapper });
 
@@ -393,7 +393,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      });
 
       render(<UnForfeit />, { wrapper });
 
@@ -423,7 +423,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      });
 
       render(<UnForfeit />, { wrapper });
 
@@ -457,7 +457,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      });
 
       render(<UnForfeit />, { wrapper });
 
@@ -493,9 +493,15 @@ describe("UnForfeit", () => {
           data: {
             fiscalBeginDate: "2024-01-01",
             fiscalEndDate: "2024-12-31"
-          }
+          },
+          isFetching: false,
+          isSuccess: true,
+          isLoading: false,
+          isError: false,
+          isUninitialized: false,
+          status: "fulfilled" as const
         }
-      ] as unknown);
+      ] as unknown as ReturnType<typeof useLazyGetAccountingRangeToCurrent>);
 
       render(<UnForfeit />, { wrapper });
 

@@ -26,6 +26,7 @@ const ProfitShareTotals426 = () => {
       setHasInitialSearchRun(true);
 
       const request = {
+        reportId: 0,
         isYearEnd: false,
         minimumAgeInclusive: 18,
         maximumAgeInclusive: 98,

@@ -291,7 +291,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
           recordCount={currentData?.response.total ?? 0}
         />
       )}
-      {!isModal && (
+      {!isModal && modalGridPagination && (
         <SmartModal
           open={isModalOpen}
           onClose={closeModal}>

@@ -47,23 +47,23 @@ public sealed class TerminatedEmployeeReportService
     {
         var startTime = DateTime.UtcNow;
         _logger.LogInformation("CreateDataAsync started for date range {BeginningDate} to {EndingDate}", req.BeginningDate, req.EndingDate);
-        
+
         return await _factory.UseReadOnlyContext(async ctx =>
         {
             var retrieveStartTime = DateTime.UtcNow;
             IQueryable<MemberSlice> memberSliceQuery = await RetrieveMemberSlices(ctx, req);
             var retrieveDuration = (DateTime.UtcNow - retrieveStartTime).TotalMilliseconds;
-            
+
 
             var mergeStartTime = DateTime.UtcNow;
             var result = await MergeAndCreateDataset(ctx, req, memberSliceQuery, cancellationToken);
             var mergeDuration = (DateTime.UtcNow - mergeStartTime).TotalMilliseconds;
             int recordCount = result.Response?.Results != null ? result.Response.Results.Count() : 0;
             _logger.LogInformation("MergeAndCreateDataset completed in {DurationMs:F2}ms, processed {RecordCount} records", mergeDuration, recordCount);
-            
+
             var totalDuration = (DateTime.UtcNow - startTime).TotalMilliseconds;
             _logger.LogInformation("CreateDataAsync completed in {DurationMs:F2}ms (retrieve: {RetrieveDurationMs:F2}ms, merge: {MergeDurationMs:F2}ms)", totalDuration, retrieveDuration, mergeDuration);
-            
+
             return result;
         }, cancellationToken);
     }
@@ -81,8 +81,8 @@ public sealed class TerminatedEmployeeReportService
         CancellationToken cancellationToken)
     {
         var overallStart = DateTime.UtcNow;
-        
-        
+
+
         // Initialize report totals
         decimal totalVested = 0;
         decimal totalForfeit = 0;
@@ -109,7 +109,7 @@ public sealed class TerminatedEmployeeReportService
 
         var profitDetailsDict = await profitDetailsRaw
             .GroupBy(pd => new { pd.Ssn, pd.ProfitYear })
-            .ToDictionaryAsync(g => g.Key, g => new InternalProfitDetailDto
+            .Select(g => new InternalProfitDetailDto
             {
                 Ssn = g.Key.Ssn,
                 ProfitYear = g.Key.ProfitYear,
@@ -134,7 +134,8 @@ public sealed class TerminatedEmployeeReportService
                 CurrentAmount = g.Sum(x => x.Contribution + x.Earnings +
                                            (x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0) -
                                            (x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0))
-            }, cancellationToken);
+            })
+            .ToDictionaryAsync(x => new { x.Ssn, x.ProfitYear }, cancellationToken);
         var profitDetailsDuration = (DateTime.UtcNow - profitDetailsStart).TotalMilliseconds;
         _logger.LogInformation("ProfitDetails dictionary loaded in {DurationMs:F2}ms with {RecordCount} entries", profitDetailsDuration, profitDetailsDict.Count);
 
@@ -145,10 +146,10 @@ public sealed class TerminatedEmployeeReportService
         CalendarResponseDto priorYearDateRange = await _calendarService.GetYearStartAndEndAccountingDatesAsync(lastCompletedYearEnd, cancellationToken);
 
         var thisYearStart = DateTime.UtcNow;
-        Dictionary<int, ParticipantTotalVestingBalance> thisYearBalancesDict = await _totalService
+        Dictionary<(int Ssn, int Id), ParticipantTotalVestingBalance> thisYearBalancesDict = await _totalService
             .TotalVestingBalance(ctx, profitYearRange.beginProfitYear, profitYearRange.endProfitYear, today)
             .Where(x => ssns.Contains(x.Ssn))
-            .ToDictionaryAsync(x => x.Ssn, x => x, cancellationToken);
+            .ToDictionaryAsync(x => (x.Ssn, x.Id), x => x, cancellationToken);
         var thisYearDuration = (DateTime.UtcNow - thisYearStart).TotalMilliseconds;
         _logger.LogInformation("ThisYearBalances dictionary loaded in {DurationMs:F2}ms with {RecordCount} entries", thisYearDuration, thisYearBalancesDict.Count);
 
@@ -160,10 +161,10 @@ public sealed class TerminatedEmployeeReportService
         _logger.LogInformation("LastYearBalances dictionary loaded in {DurationMs:F2}ms with {RecordCount} entries", lastYearDuration, lastYearBalancesDict.Count);
 
         var vestedStart = DateTime.UtcNow;
-        Dictionary<int, ParticipantTotalVestingBalance> lastYearVestedBalancesDict = await _totalService
+        Dictionary<(int Ssn, int Id), ParticipantTotalVestingBalance> lastYearVestedBalancesDict = await _totalService
             .TotalVestingBalance(ctx, /*PayProfit Year*/lastCompletedYearEnd, /*Desired Year*/lastCompletedYearEnd, priorYearDateRange.FiscalEndDate)
             .Where(x => ssns.Contains(x.Ssn))
-            .ToDictionaryAsync(x => x.Ssn, x => x, cancellationToken);
+            .ToDictionaryAsync(x => (x.Ssn, x.Id), x => x, cancellationToken);
         var vestedDuration = (DateTime.UtcNow - vestedStart).TotalMilliseconds;
         _logger.LogInformation("LastYearVestedBalances dictionary loaded in {DurationMs:F2}ms with {RecordCount} entries", vestedDuration, lastYearVestedBalancesDict.Count);
 
@@ -171,10 +172,24 @@ public sealed class TerminatedEmployeeReportService
         var processingStart = DateTime.UtcNow;
         List<(int BadgeNumber, short PsnSuffix, string? Name, TerminatedEmployeeAndBeneficiaryYearDetailDto YearDetail)> yearDetailsList = new();
 
-        var memberSliceCollection = memberSliceUnion.Where(m => !(m.YearsInPs <= 2 && m.HoursCurrentYear >= /*1000*/ ReferenceData.MinimumHoursForContribution())).AsAsyncEnumerable();
-            
+        // Deduplication: Process employees first, then beneficiaries; skip beneficiaries if employee already processed
+        // This prevents duplicates when a person appears as both terminated employee and beneficiary
+        var seenMembers = new HashSet<(int BadgeNumber, short PsnSuffix)>();
+
+        var memberSliceCollection = memberSliceUnion
+            .Where(m => !(m.YearsInPs <= 2 && m.HoursCurrentYear >= ReferenceData.MinimumHoursForContribution()))
+            .AsAsyncEnumerable();
+
         await foreach (MemberSlice memberSlice in memberSliceCollection)
         {
+            // Skip duplicate: If same (BadgeNumber, PsnSuffix) already processed, skip this record
+            // Since union is employees.Concat(beneficiaries), employees are processed first,
+            // so beneficiary records for the same person are automatically skipped
+            if (!seenMembers.Add((memberSlice.BadgeNumber, memberSlice.PsnSuffix)))
+            {
+                continue; // Duplicate - already processed as employee
+            }
+
             // Get transactions for this member
             var key = new { memberSlice.Ssn, memberSlice.ProfitYear };
             if (!profitDetailsDict.TryGetValue(key, out InternalProfitDetailDto? transactionsThisYear))
@@ -188,15 +203,31 @@ public sealed class TerminatedEmployeeReportService
                 : 0m;
 
             // Get vesting balance and percentage from this year
-            ParticipantTotalVestingBalance? thisYearVestedBalance = thisYearBalancesDict.GetValueOrDefault(memberSlice.Ssn);
+            // Use compound key (Ssn, Id) to look up the correct record
+            ParticipantTotalVestingBalance? thisYearVestedBalance = thisYearBalancesDict.GetValueOrDefault((memberSlice.Ssn, memberSlice.Id));
+
+            // Fallback for pure beneficiaries: if compound key fails and this is a pure beneficiary, search by SSN only
+            if (thisYearVestedBalance == null && memberSlice.IsOnlyBeneficiary)
+            {
+                thisYearVestedBalance = thisYearBalancesDict.Values.FirstOrDefault(v => v.Ssn == memberSlice.Ssn);
+            }
+
             decimal vestedBalance = thisYearVestedBalance?.VestedBalance ?? 0m;
 
-            ParticipantTotalVestingBalance? lastYearVestedBalance = lastYearVestedBalancesDict.GetValueOrDefault(memberSlice.Ssn);
+            ParticipantTotalVestingBalance? lastYearVestedBalance = lastYearVestedBalancesDict.GetValueOrDefault((memberSlice.Ssn, memberSlice.Id));
+
+            // Fallback for pure beneficiaries: if compound key fails and this is a pure beneficiary, search by SSN only
+            if (lastYearVestedBalance == null && memberSlice.IsOnlyBeneficiary)
+            {
+                lastYearVestedBalance = lastYearVestedBalancesDict.Values.FirstOrDefault(v => v.Ssn == memberSlice.Ssn);
+            }
+
             decimal vestedRatio = lastYearVestedBalance?.VestingPercent ?? 0;
 
             // Create member record with all values
             Member member = new()
             {
+                Id = memberSlice.Id,
                 BadgeNumber = memberSlice.BadgeNumber,
                 ProfitYear = memberSlice.ProfitYear,
                 PsnSuffix = memberSlice.PsnSuffix,
@@ -308,7 +339,7 @@ public sealed class TerminatedEmployeeReportService
                 Name = g.Key.Name,
                 YearDetails = g.Select(x => x.YearDetail).OrderByDescending(y => y.ProfitYear).ToList()
             }).ToPaginationResultsAsync(req, cancellationToken);
-        
+
         var groupingDuration = (DateTime.UtcNow - groupingStart).TotalMilliseconds;
         int groupCount = grouped.Results != null ? grouped.Results.Count() : 0;
         _logger.LogInformation("Grouping and pagination completed in {DurationMs:F2}ms, returned {GroupCount} groups", groupingDuration, groupCount);
@@ -405,7 +436,7 @@ public sealed class TerminatedEmployeeReportService
         var terminatedEmployees = await GetTerminatedEmployeesSync(ctx, request);
         var terminatedWithContributions = GetEmployeesAsMembers(ctx, request, terminatedEmployees, request.EndingDate);
         var beneficiaries = await GetBeneficiariesSync(ctx, request);
-        
+
         return CombineEmployeeAndBeneficiarySlices(terminatedWithContributions, beneficiaries);
     }
 
@@ -489,6 +520,7 @@ public sealed class TerminatedEmployeeReportService
                                         from yip in yipTmp.DefaultIfEmpty()
                                         select new MemberSlice
                                         {
+                                            Id = employee.Demographic.Id,
                                             PsnSuffix = 0,
                                             BadgeNumber = employee.Demographic.BadgeNumber,
                                             Ssn = employee.Demographic.Ssn,
@@ -548,6 +580,7 @@ public sealed class TerminatedEmployeeReportService
                     {
                         // COBOL Lines 775-782: When beneficiary matches demographics AND termination date is NOT in range,
                         // use badge number with PSN=0 (appears as primary employee), otherwise use PSN suffix
+                        Id = d == null ? x.b.Id : d.Id,
                         PsnSuffix = d == null ? x.b.PsnSuffix : (short)0,
                         BadgeNumber = d == null ? x.b.BadgeNumber : d.BadgeNumber,
                         Ssn = x.b.Contact!.Ssn,
@@ -606,6 +639,7 @@ public sealed class TerminatedEmployeeReportService
                     {
                         // COBOL Lines 775-782: When beneficiary matches demographics AND termination date is NOT in range,
                         // use badge number with PSN=0 (appears as primary employee), otherwise use PSN suffix
+                        Id = d == null ? x.b.Id : d.Id,
                         PsnSuffix = d == null ? x.b.PsnSuffix : (short)0,
                         BadgeNumber = d == null ? x.b.BadgeNumber : d.BadgeNumber,
                         Ssn = x.b.Contact!.Ssn,

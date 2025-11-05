@@ -72,7 +72,7 @@ const ProfitShareReportSearchFilter: React.FC<ProfitShareReportSearchFilterProps
   const validateAndSearch = handleSubmit((data) => {
     const request = {
       ...presetParams,
-      badgeNumber: data.badgeNumber,
+      badgeNumber: data.badgeNumber ?? undefined,
       profitYear: profitYear,
       pagination: {
         skip: 0,

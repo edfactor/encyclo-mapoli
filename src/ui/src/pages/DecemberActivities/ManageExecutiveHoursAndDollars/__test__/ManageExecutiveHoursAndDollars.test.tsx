@@ -60,6 +60,8 @@ const mockGridData = {
 vi.mock("../hooks/useManageExecutiveHoursAndDollars", () => ({
   default: vi.fn(() => ({
     profitYear: 2024,
+    searchParams: null,
+    searchResults: null,
     executeSearch: mockExecuteSearch,
     resetSearch: mockResetSearch,
     isSearching: false,
@@ -93,7 +95,12 @@ vi.mock("../hooks/useManageExecutiveHoursAndDollars", () => ({
     addExecutivesToMainGrid: vi.fn(),
     isModalSearching: false,
     hasPendingChanges: false,
-    saveChanges: mockSaveChanges
+    saveChanges: mockSaveChanges,
+    saveExecutiveHoursAndDollars: vi.fn(),
+    initialSearchLoaded: false,
+    setInitialSearchLoaded: vi.fn(),
+    pageNumberReset: false,
+    setPageNumberReset: vi.fn()
   }))
 }));
 
@@ -104,13 +111,13 @@ describe("ManageExecutiveHoursAndDollars", () => {
     vi.clearAllMocks();
     const mockState = {
       security: { token: "mock-token" },
-      navigation: { navigationData: null },
+      navigation: { navigationData: undefined, error: undefined, currentNavigationId: null },
       yearsEnd: {
         selectedProfitYearForFiscalClose: 2024,
-        executiveHoursAndDollarsGrid: []
+        executiveHoursAndDollarsGrid: { executiveHoursAndDollars: [], profitYear: null }
       }
     };
-    const { wrapper } = createMockStoreAndWrapper(mockState);
+    const { wrapper } = createMockStoreAndWrapper(mockState as Parameters<typeof createMockStoreAndWrapper>[0]);
     customWrapper = ({ children }: { children: React.ReactNode }) => (
       <MissiveAlertProvider>{wrapper({ children })}</MissiveAlertProvider>
     );
@@ -140,6 +147,8 @@ describe("ManageExecutiveHoursAndDollars", () => {
       const useManageExecutiveHoursAndDollars = await import("../hooks/useManageExecutiveHoursAndDollars");
       vi.mocked(useManageExecutiveHoursAndDollars.default).mockReturnValueOnce({
         profitYear: 2024,
+        searchParams: null,
+        searchResults: null,
         executeSearch: mockExecuteSearch,
         resetSearch: mockResetSearch,
         isSearching: false,
@@ -173,7 +182,12 @@ describe("ManageExecutiveHoursAndDollars", () => {
         addExecutivesToMainGrid: vi.fn(),
         isModalSearching: false,
         hasPendingChanges: true, // Has pending changes
-        saveChanges: mockSaveChanges
+        saveChanges: mockSaveChanges,
+        saveExecutiveHoursAndDollars: vi.fn(),
+        initialSearchLoaded: false,
+        setInitialSearchLoaded: vi.fn(),
+        pageNumberReset: false,
+        setPageNumberReset: vi.fn()
       });
 
       render(<ManageExecutiveHoursAndDollars />, { wrapper: customWrapper });
@@ -196,6 +210,8 @@ describe("ManageExecutiveHoursAndDollars", () => {
       const useManageExecutiveHoursAndDollars = await import("../hooks/useManageExecutiveHoursAndDollars");
       vi.mocked(useManageExecutiveHoursAndDollars.default).mockReturnValueOnce({
         profitYear: 2024,
+        searchParams: null,
+        searchResults: null,
         executeSearch: mockExecuteSearch,
         resetSearch: mockResetSearch,
         isSearching: false,
@@ -229,7 +245,12 @@ describe("ManageExecutiveHoursAndDollars", () => {
         addExecutivesToMainGrid: vi.fn(),
         isModalSearching: false,
         hasPendingChanges: true,
-        saveChanges: mockSaveChanges
+        saveChanges: mockSaveChanges,
+        saveExecutiveHoursAndDollars: vi.fn(),
+        initialSearchLoaded: false,
+        setInitialSearchLoaded: vi.fn(),
+        pageNumberReset: false,
+        setPageNumberReset: vi.fn()
       });
 
       render(<ManageExecutiveHoursAndDollars />, { wrapper: customWrapper });
@@ -260,6 +281,8 @@ describe("ManageExecutiveHoursAndDollars", () => {
       const useManageExecutiveHoursAndDollars = await import("../hooks/useManageExecutiveHoursAndDollars");
       vi.mocked(useManageExecutiveHoursAndDollars.default).mockReturnValueOnce({
         profitYear: 2024,
+        searchParams: null,
+        searchResults: null,
         executeSearch: mockExecuteSearch,
         resetSearch: mockResetSearch,
         isSearching: false,
@@ -275,6 +298,7 @@ describe("ManageExecutiveHoursAndDollars", () => {
         mainGridPagination: {
           pageSize: 25,
           pageNumber: 1,
+          sortParams: { sortBy: "badgeNumber", isSortDescending: false },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
           resetPagination: vi.fn()
@@ -282,6 +306,7 @@ describe("ManageExecutiveHoursAndDollars", () => {
         modalGridPagination: {
           pageSize: 25,
           pageNumber: 1,
+          sortParams: { sortBy: "badgeNumber", isSortDescending: false },
           handlePaginationChange: vi.fn(),
           handleSortChange: vi.fn(),
           resetPagination: vi.fn()
@@ -291,7 +316,12 @@ describe("ManageExecutiveHoursAndDollars", () => {
         addExecutivesToMainGrid: vi.fn(),
         isModalSearching: false,
         hasPendingChanges: true, // Has pending changes but read-only
-        saveChanges: mockSaveChanges
+        saveChanges: mockSaveChanges,
+        saveExecutiveHoursAndDollars: vi.fn(),
+        initialSearchLoaded: false,
+        setInitialSearchLoaded: vi.fn(),
+        pageNumberReset: false,
+        setPageNumberReset: vi.fn()
       });
 
       render(<ManageExecutiveHoursAndDollars />, { wrapper: customWrapper });

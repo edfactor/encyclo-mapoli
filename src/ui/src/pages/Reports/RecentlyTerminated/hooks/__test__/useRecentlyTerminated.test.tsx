@@ -1,4 +1,4 @@
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import * as useLazyGetRecentlyTerminatedReportQuery from "reduxstore/api/YearsEndApi";
 import { RecentlyTerminatedDetail } from "reduxstore/types";
 import type { RecentlyTerminatedResponse } from "../../../../../types/reports/recent-termination";
@@ -112,22 +112,26 @@ describe("useRecentlyTerminated", () => {
 
     // Mock useGridPagination - capture the callback
     const mockHandlePaginationChange = vi.fn();
+    const mockSortParams = {
+      sortBy: "fullName, terminationDate",
+      isSortDescending: false
+    };
     vi.spyOn(useGridPagination, "useGridPagination").mockImplementation((config) => {
-      // When the hook calls useGridPagination with a callback, capture it
+      // When the hook calls useGridPagination with a callback, capture it and wrap it
       if (config?.onPaginationChange) {
-        mockHandlePaginationChange.mockImplementation(config.onPaginationChange);
+        mockHandlePaginationChange.mockImplementation((pageNumber: number, pageSize: number) => {
+          // Simulate real useGridPagination behavior: call callback with sortParams
+          return config.onPaginationChange!(pageNumber, pageSize, mockSortParams);
+        });
       }
       return {
         pageNumber: 0,
         pageSize: 25,
-        sortParams: {
-          sortBy: "fullName, terminationDate",
-          isSortDescending: false
-        },
+        sortParams: mockSortParams,
         handlePaginationChange: mockHandlePaginationChange,
         handleSortChange: vi.fn(),
         resetPagination: mockResetPagination
-      } as ReturnType<typeof useGridPagination.useGridPagination>;
+      } as unknown as ReturnType<typeof useGridPagination.useGridPagination>;
     });
 
     // Mock lazy query - default to returning data
@@ -140,24 +144,26 @@ describe("useRecentlyTerminated", () => {
       )
     );
 
-    vi.spyOn(useLazyGetRecentlyTerminatedReportQuery, "useLazyGetRecentlyTerminatedReportQuery").mockReturnValue([
-      mockTriggerSearch,
-      {
-        data: undefined,
-        isLoading: false,
-        isSuccess: false,
-        isError: false,
-        error: null,
-        isFetching: false,
-        isUninitialized: true,
-        currentData: undefined,
-        requestId: undefined,
-        endpointName: "getRecentlyTerminatedReport",
-        startedTimeStamp: undefined,
-        fulfilledTimeStamp: undefined
-      },
-      { lastArg: undefined, requestStatus: "uninitialized" }
-    ] as unknown);
+    vi.spyOn(useLazyGetRecentlyTerminatedReportQuery, "useLazyGetRecentlyTerminatedReportQuery").mockReturnValue(
+      [
+        mockTriggerSearch,
+        {
+          data: undefined,
+          isLoading: false,
+          isSuccess: false,
+          isError: false,
+          error: null,
+          isFetching: false,
+          isUninitialized: true,
+          currentData: undefined,
+          requestId: undefined,
+          endpointName: "getRecentlyTerminatedReport",
+          startedTimeStamp: undefined,
+          fulfilledTimeStamp: undefined
+        },
+        { lastArg: undefined, requestStatus: "uninitialized" }
+      ] as unknown as ReturnType<typeof useLazyGetRecentlyTerminatedReportQuery.useLazyGetRecentlyTerminatedReportQuery>
+    );
   });
 
   describe("Initial State", () => {
@@ -409,20 +415,20 @@ describe("useRecentlyTerminated", () => {
 
       // Simulate pagination change
       await act(async () => {
-        await result.current.gridPagination.handlePaginationChange(1, 25, {
-          sortBy: "fullName, terminationDate",
-          isSortDescending: false
-        });
+        await result.current.gridPagination.handlePaginationChange(1, 25);
       });
 
-      expect(mockTriggerSearch).toHaveBeenCalledWith(
-        expect.objectContaining({
-          pagination: expect.objectContaining({
-            skip: 25,
-            take: 25
+      // Wait for the deferred callback to execute (setTimeout in useGridPagination)
+      await waitFor(() => {
+        expect(mockTriggerSearch).toHaveBeenCalledWith(
+          expect.objectContaining({
+            pagination: expect.objectContaining({
+              skip: 25,
+              take: 25
+            })
           })
-        })
-      );
+        );
+      });
     });
 
     it("should not paginate if no search params exist", async () => {
@@ -504,13 +510,13 @@ describe("useRecentlyTerminated", () => {
 
       // Simulate pagination that fails
       await act(async () => {
-        await result.current.gridPagination.handlePaginationChange(1, 25, {
-          sortBy: "fullName, terminationDate",
-          isSortDescending: false
-        });
+        await result.current.gridPagination.handlePaginationChange(1, 25);
       });
 
-      expect(result.current.reportError).toBe(errorMsg);
+      // Wait for the deferred callback and error handling to complete
+      await waitFor(() => {
+        expect(result.current.reportError).toBe(errorMsg);
+      });
     });
   });
 
@@ -642,13 +648,13 @@ describe("useRecentlyTerminated", () => {
       mockTriggerSearch.mockClear();
 
       await act(async () => {
-        await result.current.gridPagination.handlePaginationChange(1, 25, {
-          sortBy: "fullName, terminationDate",
-          isSortDescending: false
-        });
+        await result.current.gridPagination.handlePaginationChange(1, 25);
       });
 
-      expect(mockTriggerSearch).toHaveBeenCalledTimes(1);
+      // Wait for the deferred callback to execute
+      await waitFor(() => {
+        expect(mockTriggerSearch).toHaveBeenCalledTimes(1);
+      });
 
       // Reset
       act(() => {

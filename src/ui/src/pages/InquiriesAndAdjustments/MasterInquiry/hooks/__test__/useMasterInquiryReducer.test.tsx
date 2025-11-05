@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { type EmployeeDetails } from "reduxstore/types";
 import {
   initialState,
   masterInquiryReducer,
@@ -70,7 +71,7 @@ describe("useMasterInquiryReducer", () => {
             psnSuffix: "0",
             isEmployee: true
           }
-        ],
+        ] as unknown as EmployeeDetails[],
         total: 1
       };
 
@@ -94,7 +95,7 @@ describe("useMasterInquiryReducer", () => {
         results: [
           { id: "1", ssn: "111", badgeNumber: "11111", psnSuffix: "0", isEmployee: true },
           { id: "2", ssn: "222", badgeNumber: "22222", psnSuffix: "0", isEmployee: false }
-        ],
+        ] as unknown as EmployeeDetails[],
         total: 2
       };
 
@@ -118,7 +119,7 @@ describe("useMasterInquiryReducer", () => {
 
     it("should differentiate between employee and beneficiary", () => {
       const results = {
-        results: [{ id: "1", ssn: "123", badgeNumber: "111", psnSuffix: "0", isEmployee: false }],
+        results: [{ id: "1", ssn: "123", badgeNumber: "111", psnSuffix: "0", isEmployee: false }] as unknown as EmployeeDetails[],
         total: 1
       };
 
@@ -222,7 +223,7 @@ describe("useMasterInquiryReducer", () => {
     });
 
     it("should set details on success", () => {
-      const details = { name: "John Doe", ssn: "123456789" };
+      const details = { name: "John Doe", ssn: "123456789" } as unknown as EmployeeDetails;
       const action = { type: "MEMBER_DETAILS_FETCH_SUCCESS" as const, payload: { details } };
       const newState = masterInquiryReducer(initialState, action);
 

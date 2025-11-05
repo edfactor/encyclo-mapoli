@@ -11,7 +11,7 @@ import {
 } from "utils/gridColumnFactory";
 import { HeaderComponent } from "./UnForfeitHeaderComponent";
 
-function isTransactionEditable(params, isReadOnly: boolean = false): boolean {
+function isTransactionEditable(params: EditableCallbackParams, isReadOnly: boolean = false): boolean {
   return params.data.suggestedUnforfeiture != null && !isReadOnly;
 }
 

@@ -5,6 +5,7 @@
 /// </summary>
 internal sealed record Member
 {
+    public required int Id { get; init; }
     public required int BadgeNumber { get; init; }
     public required short PsnSuffix { get; init; }
     internal int Ssn { get; init; }

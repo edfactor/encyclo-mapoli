@@ -1,7 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Button, Checkbox, FormControlLabel, FormHelperText, Grid } from "@mui/material";
 import React, { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { SearchAndReset, SmartModal } from "smart-ui-library";
 import * as yup from "yup";
@@ -65,7 +65,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
     reset,
     trigger
   } = useForm<TerminationSearchRequest>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as Resolver<TerminationSearchRequest>,
     defaultValues: {
       beginningDate: termination?.startDate || (fiscalData ? mmDDYYFormat(fiscalData.fiscalBeginDate) : "") || "",
       endingDate: termination?.endDate || (fiscalData ? mmDDYYFormat(fiscalData.fiscalEndDate) : "") || "",
@@ -95,7 +95,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
     setInitialSearchLoaded(true);
   };
 
-  const validateAndSearch = handleSubmit(validateAndSubmit);
+  const validateAndSearch = handleSubmit(validateAndSubmit as (data: TerminationSearchRequest) => Promise<void>);
 
   const handleReset = async () => {
     setInitialSearchLoaded(false);

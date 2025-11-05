@@ -1,7 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormControlLabel, FormHelperText, Grid } from "@mui/material";
 import { useEffect } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
@@ -95,7 +95,7 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
     trigger,
     clearErrors
   } = useForm<StartAndEndDateRequest>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as Resolver<StartAndEndDateRequest>,
     defaultValues: {
       beginningDate:
         unForfeitsQueryParams?.beginningDate ||
@@ -119,7 +119,7 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
   }, [fiscalData.fiscalBeginDate, fiscalData.fiscalEndDate, trigger]);
 
   // Effect to fetch fiscal data when profit year changes
-  const validateAndSearch = handleSubmit(validateAndSubmit);
+  const validateAndSearch = handleSubmit(validateAndSubmit as (data: StartAndEndDateRequest) => void);
 
   const handleReset = () => {
     setHasUnsavedChanges(false);

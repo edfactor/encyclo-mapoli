@@ -1,7 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormControlLabel, FormLabel, Grid, MenuItem, TextField, Typography } from "@mui/material";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, Resolver, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { DistributionSearchResponse, EditDistributionRequest } from "../../../types";
 
@@ -92,7 +92,7 @@ const EditDistributionForm = forwardRef<EditDistributionFormRef, EditDistributio
       watch,
       formState: { errors, isValid }
     } = useForm<EditDistributionFormData>({
-      resolver: yupResolver(schema),
+      resolver: yupResolver(schema) as unknown as Resolver<EditDistributionFormData>,
       mode: "onChange",
       defaultValues: {
         paymentFlag: distribution.statusId || "",

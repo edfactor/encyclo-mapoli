@@ -48,16 +48,23 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
       resetPagination: vi.fn()
     } as unknown as GridPaginationState & GridPaginationActions);
 
-    vi.mocked(useLazyGetDemographicBadgesNotInPayprofitQuery).mockReturnValue([
-      vi.fn().mockReturnValue({
-        unwrap: vi.fn().mockResolvedValue({
-          results: [{ badgeNumber: 12345, storeName: "Store 1", employeeName: "John Doe" }],
-          total: 1
-        })
-      }),
-      { isFetching: false },
-      {}
-    ] as unknown);
+    const mockTrigger = vi.fn().mockReturnValue({
+      unwrap: vi.fn().mockResolvedValue({
+        results: [{
+          badgeNumber: 12345,
+          ssn: 123456789,
+          employeeName: "John Doe",
+          store: 1,
+          status: "A",
+          statusName: "Active"
+        }],
+        total: 1
+      })
+    });
+
+    vi.mocked(useLazyGetDemographicBadgesNotInPayprofitQuery).mockReturnValue(
+      [mockTrigger, { isFetching: false }, {}] as unknown as ReturnType<typeof useLazyGetDemographicBadgesNotInPayprofitQuery>
+    );
   });
 
   describe("Hook initialization", () => {

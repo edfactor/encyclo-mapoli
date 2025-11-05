@@ -85,6 +85,7 @@ export interface MasterInquiryMemberRequest {
 }
 
 export interface MasterInquiryResponseDto {
+  [key: string]: unknown;
   isEmployee: boolean;
   id: number;
   ssn: string;

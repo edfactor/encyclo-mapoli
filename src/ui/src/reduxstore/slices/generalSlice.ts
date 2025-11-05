@@ -110,7 +110,7 @@ export const generalSlice = createSlice({
         }
         return;
       }
-      if (payload.error || payload === "") {
+      if (payload.error) {
         state.error = String(payload.error || "");
         return;
       }

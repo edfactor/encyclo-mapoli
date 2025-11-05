@@ -34,7 +34,8 @@ public class YearEndServiceTests : PristineBaseTest
         const short profitYear = 2025;
         CancellationToken ct = CancellationToken.None;
 
-        await DbFactory.UseWritableContext(async ctx =>
+        // Get SMART results within transaction (will rollback to avoid modifying database)
+        Dictionary<int, YearEndChange> smartRowsBySsn = await DbFactory.UseWritableContext(async ctx =>
         {
             PayProfitUpdateService ppus = new(DbFactory, _loggerFactory, TotalService, CalendarService);
             YearEndService yearEndService = new(DbFactory, CalendarService, ppus, TotalService, DemographicReaderService);
@@ -44,16 +45,20 @@ public class YearEndServiceTests : PristineBaseTest
             // ------- Act
             DbTransaction transaction = await c.BeginTransactionAsync(ct);
             await yearEndService.RunFinalYearEndUpdates(profitYear, false, ct);
-            await transaction.CommitAsync(ct);
 
-            return 7;
+            // Read results BEFORE rollback (so changes are visible but not committed)
+            // IMPORTANT: Use the same connection/transaction to see uncommitted changes
+            var smartResults = await GetSmartRowsBySsn(profitYear, c);
+
+            // Rollback transaction (don't modify database - allows multiple test runs)
+            await transaction.RollbackAsync(ct);
+
+            return smartResults;
         }, ct);
 
         //  ----- Assert
         // Get Ready's rows (expected) for PayProfit
         Dictionary<int, YearEndChange> readyRowsBySsn = await GetReadyPayProfit();
-        // Get the results by reading all the pay_profit rows
-        Dictionary<int, YearEndChange> smartRowsBySsn = await GetSmartRowsBySsn(profitYear);
 
         // ensure number of rows match 
         readyRowsBySsn.Count.ShouldBe(smartRowsBySsn.Count);
@@ -75,11 +80,8 @@ public class YearEndServiceTests : PristineBaseTest
     }
 
 
-    private async Task<Dictionary<int, YearEndChange>> GetSmartRowsBySsn(short profitYear)
+    private async Task<Dictionary<int, YearEndChange>> GetSmartRowsBySsn(short profitYear, OracleConnection connection)
     {
-        OracleConnection connection = new(DbFactory.ConnectionString);
-        await connection.OpenAsync();
-
         string query = $"""
                         SELECT
                             Ssn,
