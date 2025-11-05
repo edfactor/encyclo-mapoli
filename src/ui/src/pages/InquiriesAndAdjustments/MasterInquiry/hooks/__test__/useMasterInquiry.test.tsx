@@ -25,7 +25,7 @@ describe("useMasterInquiry - Performance Optimizations", () => {
         search: {
           ...initialState.search,
           params: searchParams1,
-          results: { results: [{ id: 1 }] as any, total: 100 }
+          results: { results: [{ id: 1 }] as unknown as EmployeeDetails[], total: 100 }
         },
         view: { mode: "multipleMembers" as const }
       };
@@ -59,7 +59,7 @@ describe("useMasterInquiry - Performance Optimizations", () => {
         search: {
           ...initialState.search,
           params: searchParams1,
-          results: { results: [{ id: 1 }] as any, total: 100 }
+          results: { results: [{ id: 1 }] as unknown as EmployeeDetails[], total: 100 }
         },
         view: { mode: "multipleMembers" as const }
       };
@@ -92,7 +92,7 @@ describe("useMasterInquiry - Performance Optimizations", () => {
         search: {
           ...initialState.search,
           params: searchParams1,
-          results: { results: [{ id: 1 }] as any, total: 100 }
+          results: { results: [{ id: 1 }] as unknown as EmployeeDetails[], total: 100 }
         }
       };
 

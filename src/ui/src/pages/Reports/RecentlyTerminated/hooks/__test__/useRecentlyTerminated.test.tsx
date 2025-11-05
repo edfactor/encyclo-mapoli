@@ -158,7 +158,7 @@ describe("useRecentlyTerminated", () => {
           fulfilledTimeStamp: undefined
         },
         { lastArg: undefined, requestStatus: "uninitialized" }
-      ] as any
+      ] as unknown as ReturnType<typeof useLazyGetRecentlyTerminatedReportQuery>
     );
   });
 

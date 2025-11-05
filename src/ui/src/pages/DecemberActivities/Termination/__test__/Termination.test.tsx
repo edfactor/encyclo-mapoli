@@ -233,7 +233,7 @@ describe("Termination", () => {
           isUninitialized: true,
           status: "uninitialized" as const
         }
-      ] as any);
+      ] as unknown as ReturnType<typeof useLazyGetAccountingRangeToCurrent>);
 
       render(<Termination />, { wrapper });
 

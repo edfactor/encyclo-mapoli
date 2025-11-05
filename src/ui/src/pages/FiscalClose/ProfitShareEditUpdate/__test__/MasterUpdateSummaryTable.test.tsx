@@ -505,10 +505,10 @@ describe("MasterUpdateSummaryTable", { timeout: 16000 }, () => {
       const propsWithNullData = {
         ...defaultProps,
         getFieldValidation: mockGetFieldValidationWithNulls,
-        openValidationField: "TotalProfitSharingBalance"
+        openValidationField: "TotalProfitSharingBalance" as string | null
       };
 
-      render(<MasterUpdateSummaryTable {...(propsWithNullData as any)} />);
+      render(<MasterUpdateSummaryTable {...propsWithNullData} />);
 
       // Should render $0.00 when values are null
       expect(screen.getAllByText("$0.00").length).toBeGreaterThan(0);
@@ -595,10 +595,10 @@ describe("MasterUpdateSummaryTable", { timeout: 16000 }, () => {
       const propsWithNullData = {
         ...defaultProps,
         getFieldValidation: mockGetFieldValidationWithNulls,
-        openValidationField: "DistributionTotals"
+        openValidationField: "DistributionTotals" as string | null
       };
 
-      expect(() => render(<MasterUpdateSummaryTable {...(propsWithNullData as any)} />)).not.toThrow();
+      expect(() => render(<MasterUpdateSummaryTable {...propsWithNullData} />)).not.toThrow();
       expect(screen.getAllByText("$0.00").length).toBeGreaterThan(0);
     });
 
@@ -661,10 +661,10 @@ describe("MasterUpdateSummaryTable", { timeout: 16000 }, () => {
       const propsWithUndefinedValues = {
         ...defaultProps,
         getFieldValidation: mockGetFieldValidationWithUndefined,
-        openValidationField: "TotalProfitSharingBalance"
+        openValidationField: "TotalProfitSharingBalance" as string | null
       };
 
-      render(<MasterUpdateSummaryTable {...(propsWithUndefinedValues as any)} />);
+      render(<MasterUpdateSummaryTable {...propsWithUndefinedValues} />);
 
       // Should render $0.00 when values are undefined
       expect(screen.getAllByText("$0.00").length).toBeGreaterThan(0);

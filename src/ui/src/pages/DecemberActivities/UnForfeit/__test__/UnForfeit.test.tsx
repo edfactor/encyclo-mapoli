@@ -160,7 +160,7 @@ describe("UnForfeit", () => {
           isUninitialized: true,
           status: "uninitialized" as const
         }
-      ] as any);
+      ] as unknown as ReturnType<typeof useLazyGetAccountingRangeToCurrent>);
 
       render(<UnForfeit />, { wrapper });
 
@@ -501,7 +501,7 @@ describe("UnForfeit", () => {
           isUninitialized: false,
           status: "fulfilled" as const
         }
-      ] as any);
+      ] as unknown as ReturnType<typeof useLazyGetAccountingRangeToCurrent>);
 
       render(<UnForfeit />, { wrapper });
 

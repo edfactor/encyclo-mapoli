@@ -152,8 +152,8 @@ const ProfitShareEditUpdate = () => {
                 {/* Unified Summary Table (PAY444) */}
                 <MasterUpdateSummaryTable
                   totals={profitSharingUpdate.profitShareUpdateTotals}
-                  validationResponse={validationResponse as any}
-                  getFieldValidation={getFieldValidation as any}
+                  validationResponse={validationResponse}
+                  getFieldValidation={getFieldValidation}
                   openValidationField={openValidationField}
                   onValidationToggle={handleValidationToggle}
                 />
