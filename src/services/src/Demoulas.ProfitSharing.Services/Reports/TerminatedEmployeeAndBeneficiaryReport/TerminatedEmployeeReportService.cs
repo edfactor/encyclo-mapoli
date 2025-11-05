@@ -156,8 +156,6 @@ public sealed class TerminatedEmployeeReportService
         var lastYearStart = DateTime.UtcNow;
         Dictionary<int, ParticipantTotal> lastYearBalancesDict = await _totalService.GetTotalBalanceSet(ctx, lastCompletedYearEnd)
             .Where(x => ssns.Contains(x.Ssn))
-            .GroupBy(x => x.Ssn)
-            .Select(g => g.First())
             .ToDictionaryAsync(x => x.Ssn, x => x, cancellationToken);
         var lastYearDuration = (DateTime.UtcNow - lastYearStart).TotalMilliseconds;
         _logger.LogInformation("LastYearBalances dictionary loaded in {DurationMs:F2}ms with {RecordCount} entries", lastYearDuration, lastYearBalancesDict.Count);
