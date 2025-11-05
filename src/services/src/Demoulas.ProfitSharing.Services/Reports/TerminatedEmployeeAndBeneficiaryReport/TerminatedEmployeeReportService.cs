@@ -203,21 +203,18 @@ public sealed class TerminatedEmployeeReportService
                 : 0m;
 
             // Get vesting balance and percentage from this year
-            ParticipantTotalVestingBalance? thisYearVestedBalance = thisYearBalancesDict
-                .Where(kvp => kvp.Key.Ssn == memberSlice.Ssn)
-                .FirstOrDefault()
-                .Value;
+            // Use compound key (Ssn, Id) to look up the correct record
+            ParticipantTotalVestingBalance? thisYearVestedBalance = thisYearBalancesDict.GetValueOrDefault((memberSlice.Ssn, memberSlice.Id));
             decimal vestedBalance = thisYearVestedBalance?.VestedBalance ?? 0m;
 
-            ParticipantTotalVestingBalance? lastYearVestedBalance = lastYearVestedBalancesDict
-                .Where(kvp => kvp.Key.Ssn == memberSlice.Ssn)
-                .FirstOrDefault()
-                .Value;
+            ParticipantTotalVestingBalance? lastYearVestedBalance = lastYearVestedBalancesDict.GetValueOrDefault((memberSlice.Ssn, memberSlice.Id));
+
             decimal vestedRatio = lastYearVestedBalance?.VestingPercent ?? 0;
 
             // Create member record with all values
             Member member = new()
             {
+                Id = memberSlice.Id,
                 BadgeNumber = memberSlice.BadgeNumber,
                 ProfitYear = memberSlice.ProfitYear,
                 PsnSuffix = memberSlice.PsnSuffix,
@@ -510,6 +507,7 @@ public sealed class TerminatedEmployeeReportService
                                         from yip in yipTmp.DefaultIfEmpty()
                                         select new MemberSlice
                                         {
+                                            Id = employee.Demographic.Id,
                                             PsnSuffix = 0,
                                             BadgeNumber = employee.Demographic.BadgeNumber,
                                             Ssn = employee.Demographic.Ssn,
@@ -569,6 +567,7 @@ public sealed class TerminatedEmployeeReportService
                     {
                         // COBOL Lines 775-782: When beneficiary matches demographics AND termination date is NOT in range,
                         // use badge number with PSN=0 (appears as primary employee), otherwise use PSN suffix
+                        Id = d == null ? x.b.Id : d.Id,
                         PsnSuffix = d == null ? x.b.PsnSuffix : (short)0,
                         BadgeNumber = d == null ? x.b.BadgeNumber : d.BadgeNumber,
                         Ssn = x.b.Contact!.Ssn,
@@ -627,6 +626,7 @@ public sealed class TerminatedEmployeeReportService
                     {
                         // COBOL Lines 775-782: When beneficiary matches demographics AND termination date is NOT in range,
                         // use badge number with PSN=0 (appears as primary employee), otherwise use PSN suffix
+                        Id = d == null ? x.b.Id : d.Id,
                         PsnSuffix = d == null ? x.b.PsnSuffix : (short)0,
                         BadgeNumber = d == null ? x.b.BadgeNumber : d.BadgeNumber,
                         Ssn = x.b.Contact!.Ssn,
