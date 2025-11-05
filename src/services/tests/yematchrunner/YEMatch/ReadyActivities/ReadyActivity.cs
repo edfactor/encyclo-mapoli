@@ -31,6 +31,7 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
         }
 
         Console.WriteLine($"    $ EJR {ksh} {Args}");
+        Console.WriteLine($"    $ EJR YE-{ksh} {Args}");
 
         Stopwatch stopwatch = Stopwatch.StartNew();
         SshCommand? result = null;
@@ -83,7 +84,7 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
             IfChatty($"Log file copied to: file:///{localPath}");
 
             // #######  LP WAS CALLED WITH ARGS :-d plaser5 /dsmdev/data/PAYROLL/SYS/PVTSYSOUT/PAY444A-25103 
-            MatchCollection matches = Regex.Matches(result.Result, @"#######  LP WAS CALLED WITH ARGS :-d \w+ (/.+?-\d+)");
+            MatchCollection matches = Regex.Matches(result.Result, @"#######  LP WAS CALLED WITH ARGS :-d \w+ (/.+?-\d{4,})");
             foreach (Match lpMatch in matches)
             {
                 string reportName = lpMatch.Groups[1].Value;

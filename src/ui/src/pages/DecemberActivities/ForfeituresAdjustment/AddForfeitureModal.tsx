@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useUpdateForfeitureAdjustmentMutation } from "reduxstore/api/YearsEndApi";
 import { ForfeitureAdjustmentUpdateRequest, SuggestedForfeitResponse } from "reduxstore/types";
 import { SmartModal } from "smart-ui-library";
-import { ServiceErrorResponse } from "../../types/errors/errors";
+import { ServiceErrorResponse } from "@/types/errors/errors";
 
 interface AddForfeitureModalProps {
   open: boolean;
@@ -34,7 +34,12 @@ const handleResponseError = (error: ServiceErrorResponse) => {
 };
 
 const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, onSave, suggestedForfeitResponse }) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    badgeNumber: number;
+    forfeitureAmount: number;
+    suggestedForfeitAmount: number | null;
+    classAction: boolean;
+  }>({
     badgeNumber: 0,
     forfeitureAmount: 0,
     suggestedForfeitAmount: null,
@@ -45,7 +50,7 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
 
   useEffect(() => {
     if (!open) {
-      setFormData({ badgeNumber: 0, forfeitureAmount: 0, classAction: false });
+      setFormData({ badgeNumber: 0, forfeitureAmount: 0, suggestedForfeitAmount: null, classAction: false });
       return;
     }
 
@@ -54,7 +59,7 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
         ...prev,
         badgeNumber: suggestedForfeitResponse.badgeNumber,
         suggestedForfeitAmount: suggestedForfeitResponse.suggestedForfeitAmount,
-        forfeitureAmount: suggestedForfeitResponse.suggestedForfeitAmount
+        forfeitureAmount: suggestedForfeitResponse.suggestedForfeitAmount ?? 0
       }));
     }
   }, [suggestedForfeitResponse, open]);

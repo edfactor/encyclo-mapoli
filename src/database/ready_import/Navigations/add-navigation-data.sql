@@ -78,7 +78,7 @@ DECLARE
     ADHOC_BENEFICIARIES_REPORT CONSTANT NUMBER := 135;
     TERMINATED_LETTERS CONSTANT NUMBER := 136;
     QPAY600 CONSTANT NUMBER := 137;
-    PAY426N_LIVE CONSTANT NUMBER := 138;
+    PAY426N_DECEMBER CONSTANT NUMBER := 138;
     PROFIT_SUMMARY CONSTANT NUMBER := 139;
     PAY426_2 CONSTANT NUMBER := 140;
     PAY426_3 CONSTANT NUMBER := 141;
@@ -89,12 +89,11 @@ DECLARE
     DUPLICATE_NAMES_BIRTHDAYS CONSTANT NUMBER := 146;
     MILITARY_CONTRIBUTIONS CONSTANT NUMBER := 147;
     UNFORFEIT CONSTANT NUMBER := 148;
-
     PROFIT_SHARE_REPORT_FINAL_RUN CONSTANT NUMBER := 149;
     PRINT_PROFIT_CERTS CONSTANT NUMBER := 150;
     PROFIT_SHARE_REPORT_EDIT_RUN CONSTANT NUMBER := 151;
     PAY_BEN_REPORT CONSTANT NUMBER := 152;
-    PAY426N_FROZEN CONSTANT NUMBER := 153;
+    PAY426N_FISCAL_CLOSE CONSTANT NUMBER := 153;
     PROFIT_DETAILS_REVERSAL CONSTANT NUMBER := 154;
     PRINT_PS_JOBS CONSTANT NUMBER :=155;
     VIEW_DISTRIBUTION_PAGE CONSTANT NUMBER := 156;
@@ -103,6 +102,11 @@ DECLARE
     EDIT_DISTRIBUTION_PAGE CONSTANT NUMBER := 159;
     DISTTRIBUTION_EDIT_RUN CONSTANT NUMBER := 160;
     DIVORCE_REPORT CONSTANT NUMBER := 161;
+    MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE CONSTANT NUMBER := 162;
+    NEWPSLABELS_REPORT CONSTANT NUMBER := 163;
+    LABELS CONSTANT NUMBER := 164;
+    LABELS_NEW CONSTANT NUMBER := 165;
+
 
 
     --- These are the role IDs from the ROLES table
@@ -247,7 +251,8 @@ BEGIN
     insert_navigation_item(FORFEITURES, DECEMBER_ACTIVITIES, 'Forfeitures', '008-12', 'forfeitures-adjustment', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(DISTRIBUTIONS_AND_FORFEITURES, DECEMBER_ACTIVITIES, 'Distributions and Forfeitures', 'QPAY129', 'distributions-and-forfeitures', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(MANAGE_EXECUTIVE_HOURS_PAGE, DECEMBER_ACTIVITIES, 'Manage Executive Hours', 'PROF-DOLLAR-EXEC-EXTRACT, TPR008-09', 'manage-executive-hours-and-dollars', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(PROFIT_SHARE_REPORT, DECEMBER_ACTIVITIES, 'Profit Share Report', 'PAY426', 'profit-share-report', STATUS_NORMAL, ORDER_NINTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROFIT_SHARE_REPORT, DECEMBER_ACTIVITIES, 'Profit Sharing Summmary', 'PAY426', 'profit-share-report', STATUS_NORMAL, ORDER_EIGHTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PAY426N_DECEMBER, DECEMBER_ACTIVITIES, 'Profit Sharing Report', 'PAY426N', 'pay426n', STATUS_NORMAL, ORDER_NINTH, '', ENABLED, IS_NAVIGABLE);
                           
 -- Profit Share Totals (Year End)
     insert_navigation_item(FISCAL_CLOSE, YEAR_END_MENU, 'Fiscal Close', '', 'fiscal-close', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);    
@@ -263,7 +268,7 @@ BEGIN
 
 -- Profit Summary (PAY426 summary)
     insert_navigation_item(PROFIT_SUMMARY, FISCAL_CLOSE, 'Profit Summary (PAY426 summary)', '', 'pay426-9', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
-    --insert_navigation_item(PAY426N_FROZEN, FISCAL_CLOSE, 'Profit Sharing Report', 'PAY426N', 'pay426n_frozen', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PAY426N_FISCAL_CLOSE, FISCAL_CLOSE, 'Profit Sharing Report', 'PAY426N', 'pay426n', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
 
     
     
@@ -276,15 +281,15 @@ BEGIN
     
 
 -- QPAY600 (Year End child)
-    
-    insert_navigation_item(GET_ELIGIBLE_EMPLOYEES, FISCAL_CLOSE, 'Get Eligible Employees', 'GET-ELIGIBLE-EMPS', 'eligible-employees', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(PROFIT_SHARE_FORFEIT, FISCAL_CLOSE, 'Profit Share Forfeit', 'PAY443', 'forfeit', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(MASTER_UPDATE, FISCAL_CLOSE, 'Master Update', 'PAY444|PAY447', 'profit-share-update', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE, FISCAL_CLOSE, 'Manage Executive Hours', 'PROF-DOLLAR-EXEC-EXTRACT, TPR008-09', 'manage-executive-hours-and-dollars', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(GET_ELIGIBLE_EMPLOYEES, FISCAL_CLOSE, 'Get Eligible Employees', 'GET-ELIGIBLE-EMPS', 'eligible-employees', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROFIT_SHARE_FORFEIT, FISCAL_CLOSE, 'Profit Share Forfeit', 'PAY443', 'forfeit', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(MASTER_UPDATE, FISCAL_CLOSE, 'Master Update', 'PAY444|PAY447', 'profit-share-update', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
     --insert_navigation_item(PROFIT_MASTER_UPDATE, FISCAL_CLOSE, 'Profit Master Update', 'PAY460, PROFTLD', 'profit-master-update', STATUS_NORMAL, ORDER_EIGHTH, '', DISABLED, IS_NAVIGABLE);
-    insert_navigation_item(PAYMASTER_UPDATE, FISCAL_CLOSE, 'Paymaster Update', 'PAY450', 'pay450-summary', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(PROF_CONTROL_SHEET, FISCAL_CLOSE, 'Prof Control Sheet', 'PROF-CNTRL-SHEET', 'prof-control-sheet', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(PROF_SHARE_REPORT_BY_AGE, FISCAL_CLOSE, 'Prof Share Report By Age', 'Prof130', '', STATUS_NORMAL, ORDER_EIGHTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(PROF_SHARE_GROSS_RPT, FISCAL_CLOSE, 'Prof Share Gross Rpt', 'QPAY501', 'profit-share-gross-report', STATUS_NORMAL, ORDER_NINTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PAYMASTER_UPDATE, FISCAL_CLOSE, 'Paymaster Update', 'PAY450', 'pay450-summary', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROF_CONTROL_SHEET, FISCAL_CLOSE, 'Prof Control Sheet', 'PROF-CNTRL-SHEET', 'prof-control-sheet', STATUS_NORMAL, ORDER_EIGHTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROF_SHARE_REPORT_BY_AGE, FISCAL_CLOSE, 'Prof Share Report By Age', 'Prof130', '', STATUS_NORMAL, ORDER_NINTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROF_SHARE_GROSS_RPT, FISCAL_CLOSE, 'Prof Share Gross Rpt', 'QPAY501', 'profit-share-gross-report', STATUS_NORMAL, ORDER_TENTH, '', ENABLED, IS_NAVIGABLE);
     
     
     --insert_navigation_item(SAVE_PROF_PAYMSTR, FISCAL_CLOSE, 'Save Prof Paymstr', '', 'save-prof-paymstr', STATUS_NORMAL, ORDER_SIXTEENTH, '', ENABLED, IS_NAVIGABLE);
@@ -309,10 +314,11 @@ BEGIN
     --insert_navigation_item(UNDER_21_REPORT, PROF_SHARE_BY_STORE, 'Under-21 Report', '', 'under-21-report', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
     
     insert_navigation_item(QPAY066TA_UNDR21, PROF_SHARE_BY_STORE, 'QPAY066TA-UNDR21', '', 'qpay066ta-under21', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
-
--- QPAY066B (child of Prof Share by Store)
     insert_navigation_item(QPAY066B, PROF_SHARE_BY_STORE, 'QPAY066B', '', 'qpay066b', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(QPAY066TA, PROF_SHARE_BY_STORE, 'Breakdown Report', 'QPAY066TA', 'qpay066ta', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(NEWPSLABELS_REPORT, PROF_SHARE_BY_STORE, 'NEWPSLABELS Report', '', '', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(LABELS, PROF_SHARE_BY_STORE, 'LABELS', '', '', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(LABELS_NEW, PROF_SHARE_BY_STORE, 'LABELSNEW', '', '', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
    
 
 -- Print PS Jobs
@@ -332,6 +338,27 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     -- assign_navigation_role(PAY_BEN_REPORT, SYSTEM_ADMINISTRATOR); -- COMMENTED OUT - navigation item doesn't exist
     -- assign_navigation_role(PAY_BEN_REPORT, FINANCE_MANAGER); -- COMMENTED OUT - navigation item doesn't exist
     -- assign_navigation_role(PAY_BEN_REPORT, DISTRIBUTIONS_CLERK); -- COMMENTED OUT - navigation item doesn't exist
+
+
+ -- LABELS NEW REPORT
+    assign_navigation_role(LABELS_NEW, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(LABELS_NEW, FINANCE_MANAGER);
+    assign_navigation_role(LABELS_NEW, DISTRIBUTIONS_CLERK);
+
+ -- LABELS REPORT
+    assign_navigation_role(LABELS, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(LABELS, FINANCE_MANAGER);
+    assign_navigation_role(LABELS, DISTRIBUTIONS_CLERK);
+ 
+ -- NEWPSLABLE REPORT
+    assign_navigation_role(NEWPSLABELS_REPORT, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(NEWPSLABELS_REPORT, FINANCE_MANAGER);
+    assign_navigation_role(NEWPSLABELS_REPORT, DISTRIBUTIONS_CLERK);
+
+ -- MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE 
+    assign_navigation_role(MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE, FINANCE_MANAGER);
+    assign_navigation_role(MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE, DISTRIBUTIONS_CLERK);
 
 -- Print PS Jobs
     assign_navigation_role(PRINT_PS_JOBS, SYSTEM_ADMINISTRATOR);
@@ -530,8 +557,10 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(DIVORCE_REPORT, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(DIVORCE_REPORT, FINANCE_MANAGER);
     assign_navigation_role(DIVORCE_REPORT, DISTRIBUTIONS_CLERK);
-    -- assign_navigation_role(PAY426N_FROZEN, SYSTEM_ADMINISTRATOR); -- COMMENTED OUT - navigation item doesn't exist
-    -- assign_navigation_role(PAY426N_FROZEN, FINANCE_MANAGER); -- COMMENTED OUT - navigation item doesn't exist
+    assign_navigation_role(PAY426N_DECEMBER, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(PAY426N_DECEMBER, FINANCE_MANAGER);
+    assign_navigation_role(PAY426N_FISCAL_CLOSE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(PAY426N_FISCAL_CLOSE, FINANCE_MANAGER);
     assign_navigation_role(PAY426_2, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(PAY426_2, FINANCE_MANAGER);
     assign_navigation_role(PAY426_3, SYSTEM_ADMINISTRATOR);
@@ -550,6 +579,8 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(DISTRIBUTIONS_MENU, IT_DEVOPS);
     assign_navigation_role(DISTRIBUTION_INQUIRY_PAGE, IT_DEVOPS);
     assign_navigation_role(VIEW_DISTRIBUTION_PAGE, IT_DEVOPS);
+    assign_navigation_role(PAY426N_DECEMBER, IT_DEVOPS);
+    assign_navigation_role(PAY426N_FISCAL_CLOSE, IT_DEVOPS);
 
     
 

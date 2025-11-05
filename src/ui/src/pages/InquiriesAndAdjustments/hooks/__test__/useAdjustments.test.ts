@@ -1,4 +1,4 @@
-import { configureStore, type PreloadedState } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import React from "react";
 import { Provider } from "react-redux";
@@ -31,9 +31,46 @@ vi.mock("../../../../hooks/useMissiveAlerts", () => ({
 const mockMember = {
   id: 1,
   badgeNumber: 123456,
+  psnSuffix: 0,
+  payFrequencyId: 1,
   isEmployee: true,
   firstName: "John",
-  lastName: "Doe"
+  lastName: "Doe",
+  address: "123 Main St",
+  addressCity: "Boston",
+  addressState: "MA",
+  addressZipCode: "02101",
+  dateOfBirth: "1990-01-01",
+  ssn: "123-45-6789",
+  yearToDateProfitSharingHours: 2080,
+  yearsInPlan: 5,
+  percentageVested: 100,
+  contributionsLastYear: true,
+  enrollmentId: 1,
+  enrollment: "Active",
+  hireDate: "2018-01-01",
+  terminationDate: null,
+  reHireDate: null,
+  storeNumber: 1,
+  beginPSAmount: 10000,
+  currentPSAmount: 12000,
+  beginVestedAmount: 10000,
+  currentVestedAmount: 12000,
+  currentEtva: 0,
+  previousEtva: 0,
+  employmentStatus: "Active",
+  department: "IT",
+  payClassification: "Salaried",
+  gender: "M",
+  phoneNumber: "617-555-1234",
+  workLocation: "Boston HQ",
+  receivedContributionsLastYear: true,
+  fullTimeDate: "2018-01-01",
+  terminationReason: "",
+  missives: null,
+  allocationFromAmount: 0,
+  allocationToAmount: 0,
+  badgesOfDuplicateSsns: []
 };
 
 const mockProfitDetails = {
@@ -57,7 +94,7 @@ type RootState = {
   inquiry: InquiryState;
 };
 
-type MockStoreState = PreloadedState<RootState>;
+type MockStoreState = Partial<RootState>;
 
 function createMockStore(preloadedState?: MockStoreState) {
   return configureStore<RootState>({
@@ -70,7 +107,18 @@ function createMockStore(preloadedState?: MockStoreState) {
 }
 
 function renderHookWithProvider<T>(hook: () => T, preloadedState?: MockStoreState) {
-  const store = createMockStore(preloadedState || { security: { token: "mock-token", user: null }, inquiry: {} });
+  const defaultState = {
+    security: { token: "mock-token" },
+    inquiry: {
+      masterInquiryData: null,
+      masterInquiryMemberDetails: null,
+      masterInquiryMemberDetailsSecondary: null,
+      masterInquiryResults: null,
+      masterInquiryRequestParams: null,
+      masterInquiryGroupingData: null
+    }
+  } as unknown as MockStoreState;
+  const store = createMockStore(preloadedState || defaultState);
   return renderHook(() => hook(), {
     wrapper: ({ children }: { children: React.ReactNode }) => React.createElement(Provider, { store, children })
   });
@@ -90,7 +138,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: vi.fn(),
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments());
@@ -103,7 +154,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: vi.fn(),
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments());
@@ -115,7 +169,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: vi.fn(),
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments());
@@ -127,7 +184,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: vi.fn(),
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments());
@@ -151,7 +211,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: mockAddAlert,
-        clearAlerts: mockClearAlerts
+        addAlerts: vi.fn(),
+        clearAlerts: mockClearAlerts,
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments());
@@ -176,7 +239,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: mockAddAlert,
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments());
@@ -211,7 +277,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: vi.fn(),
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments());
@@ -240,7 +309,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: mockAddAlert,
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments());
@@ -268,7 +340,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: mockAddAlert,
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments());
@@ -292,7 +367,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: mockAddAlert,
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments());
@@ -312,14 +390,30 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: mockAddAlert,
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments(), {
-        security: { token: "mock-token", user: null },
+        security: {
+          token: "mock-token",
+          userGroups: [],
+          userRoles: [],
+          userPermissions: [],
+          username: "test-user",
+          performLogout: false,
+          appUser: null,
+          impersonating: []
+        },
         inquiry: {
+          masterInquiryData: null,
           masterInquiryMemberDetails: mockMember,
-          masterInquiryMemberDetailsSecondary: mockMember
+          masterInquiryMemberDetailsSecondary: mockMember,
+          masterInquiryResults: null,
+          masterInquiryRequestParams: null,
+          masterInquiryGroupingData: null
         }
       });
 
@@ -349,14 +443,30 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: mockAddAlert,
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments(), {
-        security: { token: "mock-token", user: null },
+        security: {
+          token: "mock-token",
+          userGroups: [],
+          userRoles: [],
+          userPermissions: [],
+          username: "test-user",
+          performLogout: false,
+          appUser: null,
+          impersonating: []
+        },
         inquiry: {
+          masterInquiryData: null,
           masterInquiryMemberDetails: mockMember,
-          masterInquiryMemberDetailsSecondary: mockMember
+          masterInquiryMemberDetailsSecondary: mockMember,
+          masterInquiryResults: null,
+          masterInquiryRequestParams: null,
+          masterInquiryGroupingData: null
         }
       });
 
@@ -379,7 +489,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: vi.fn(),
-        clearAlerts: mockClearAlerts
+        addAlerts: vi.fn(),
+        clearAlerts: mockClearAlerts,
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments());
@@ -397,7 +510,10 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: vi.fn(),
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments());
@@ -409,14 +525,30 @@ describe("useAdjustments", () => {
       getMissiveAlertsMock().mockReturnValue({
         missiveAlerts: [],
         addAlert: vi.fn(),
-        clearAlerts: vi.fn()
+        addAlerts: vi.fn(),
+        clearAlerts: vi.fn(),
+        removeAlert: vi.fn(),
+        hasAlert: vi.fn()
       });
 
       const { result } = renderHookWithProvider(() => useAdjustments(), {
-        security: { token: "mock-token", user: null },
+        security: {
+          token: "mock-token",
+          userGroups: [],
+          userRoles: [],
+          userPermissions: [],
+          username: "test-user",
+          performLogout: false,
+          appUser: null,
+          impersonating: []
+        },
         inquiry: {
+          masterInquiryData: null,
           masterInquiryMemberDetails: mockMember,
-          masterInquiryMemberDetailsSecondary: mockMember
+          masterInquiryMemberDetailsSecondary: mockMember,
+          masterInquiryResults: null,
+          masterInquiryRequestParams: null,
+          masterInquiryGroupingData: null
         }
       });
 

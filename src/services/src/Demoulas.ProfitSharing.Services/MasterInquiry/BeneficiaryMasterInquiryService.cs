@@ -47,10 +47,19 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
         MasterInquiryRequest? req = null,
         CancellationToken cancellationToken = default)
     {
-        // ReadOnlyDbContext automatically handles AsSplitQuery and AsNoTracking
+        // CRITICAL FIX (PS-1998): Start from Beneficiaries and LEFT JOIN to ProfitDetails
+        // to include beneficiaries even if they have no ProfitDetails records.
+        // Previously, the query started from ProfitDetails with INNER JOIN,
+        // which excluded beneficiaries that never had distributions.
+
+        IQueryable<Beneficiary> beneficiariesQuery = ctx.Beneficiaries
+            .Include(b => b.Contact)
+            .ThenInclude(bc => bc!.ContactInfo)
+            .TagWith("MasterInquiry: Get beneficiary");
+
+        // Build the profit details filter if needed
         IQueryable<ProfitDetail> profitDetailsQuery = ctx.ProfitDetails;
 
-        // OPTIMIZATION: Pre-filter ProfitDetails before expensive join if we have selective criteria
         if (req?.EndProfitYear.HasValue == true)
         {
             profitDetailsQuery = profitDetailsQuery.Where(pd => pd.ProfitYear <= req.EndProfitYear.Value);
@@ -58,7 +67,6 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
 
         if (req?.PaymentType.HasValue == true)
         {
-            // Apply payment type filter early for massive performance gain
             var commentTypeIds = req.PaymentType switch
             {
                 1 => new byte?[] { CommentType.Constants.Hardship.Id, CommentType.Constants.Distribution.Id },
@@ -73,33 +81,40 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
             }
         }
 
-        var query = profitDetailsQuery
+        profitDetailsQuery = profitDetailsQuery
             .Include(pd => pd.ProfitCode)
             .Include(pd => pd.ZeroContributionReason)
             .Include(pd => pd.TaxCode)
             .Include(pd => pd.CommentType)
-            .TagWith("MasterInquiry: Get beneficiary with profit details")
-            .Join(ctx.Beneficiaries.Join(ctx.BeneficiaryContacts, b => b.BeneficiaryContactId, bc => bc.Id, (b, bc) => new { b, bc }),
-                pd => pd.Ssn,  // Join only on SSN - CommentRelatedPsnSuffix is just data, not a join key
-                bene => bene.bc.Ssn,
-                (pd, d) => new MasterInquiryItem
+            .TagWith("MasterInquiry: Get profit details for join");
+
+        // LEFT JOIN: Beneficiaries to ProfitDetails
+        var query = beneficiariesQuery
+            .GroupJoin(
+                profitDetailsQuery,
+                b => b.Contact!.Ssn,
+                pd => pd.Ssn,
+                (b, profitDetails) => new { b, profitDetails })
+            .SelectMany(x =>
+                x.profitDetails.DefaultIfEmpty(),
+                (x, pd) => new MasterInquiryItem
                 {
                     ProfitDetail = pd,
-                    ProfitCode = pd.ProfitCode,
-                    ZeroContributionReason = pd.ZeroContributionReason,
-                    TaxCode = pd.TaxCode,
-                    CommentType = pd.CommentType,
-                    TransactionDate = pd.CreatedAtUtc,
+                    ProfitCode = pd != null ? pd.ProfitCode : null,
+                    ZeroContributionReason = pd != null ? pd.ZeroContributionReason : null,
+                    TaxCode = pd != null ? pd.TaxCode : null,
+                    CommentType = pd != null ? pd.CommentType : null,
+                    TransactionDate = pd != null ? pd.CreatedAtUtc : DateTimeOffset.MinValue,
                     Member = new InquiryDemographics
                     {
-                        Id = d.b.Id,  // Use Beneficiary.Id, not BeneficiaryContact.Id
-                        BadgeNumber = d.b.BadgeNumber,
-                        FullName = d.bc.ContactInfo.FullName != null ? d.bc.ContactInfo.FullName : d.bc.ContactInfo.LastName,
-                        FirstName = d.bc.ContactInfo.FirstName,
-                        LastName = d.bc.ContactInfo.LastName,
+                        Id = x.b.Id,
+                        BadgeNumber = x.b.BadgeNumber,
+                        FullName = x.b.Contact!.ContactInfo!.FullName != null ? x.b.Contact.ContactInfo.FullName : x.b.Contact.ContactInfo.LastName,
+                        FirstName = x.b.Contact.ContactInfo.FirstName,
+                        LastName = x.b.Contact.ContactInfo.LastName,
                         PayFrequencyId = 0,
-                        Ssn = d.bc.Ssn,
-                        PsnSuffix = d.b.PsnSuffix,
+                        Ssn = x.b.Contact.Ssn,
+                        PsnSuffix = x.b.PsnSuffix,
                         CurrentIncomeYear = 0,
                         CurrentHoursYear = 0,
                         IsExecutive = false,

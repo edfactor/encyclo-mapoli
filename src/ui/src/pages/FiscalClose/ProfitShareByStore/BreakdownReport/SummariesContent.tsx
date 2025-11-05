@@ -1,5 +1,6 @@
 import { Typography, CircularProgress } from "@mui/material";
 import { Grid } from "@mui/material";
+import { RowClassParams } from "ag-grid-community";
 import { DSMGrid, numberToCurrency } from "smart-ui-library";
 import { useEffect, useState } from "react";
 import { useLazyGetBreakdownGrandTotalsQuery } from "reduxstore/api/YearsEndApi";
@@ -22,27 +23,27 @@ const SummariesContent: React.FC = () => {
   // Define the type for row data
   interface RowData {
     category: string;
-    ste1: string;
-    "700": string;
-    "701": string;
-    "800": string;
-    "801": string;
-    "802": string;
-    "900": string;
-    total: string;
+    ste1: number;
+    "700": number;
+    "701": number;
+    "800": number;
+    "801": number;
+    "802": number;
+    "900": number;
+    total: number;
   }
 
   const [rowData, setRowData] = useState<RowData[]>([]);
   const [grandTotal, setGrandTotal] = useState<RowData>({
     category: "",
-    ste1: "",
-    "700": "",
-    "701": "",
-    "800": "",
-    "801": "",
-    "802": "",
-    "900": "",
-    total: ""
+    ste1: 0,
+    "700": 0,
+    "701": 0,
+    "800": 0,
+    "801": 0,
+    "802": 0,
+    "900": 0,
+    total: 0
   });
 
   // Load data when component mounts
@@ -102,7 +103,7 @@ const SummariesContent: React.FC = () => {
         "801": partiallyVestedRow ? partiallyVestedRow.store801 : 0,
         "802": partiallyVestedRow ? partiallyVestedRow.store802 : 0,
         "900": partiallyVestedRow ? partiallyVestedRow.store900 : 0,
-        total: partiallyVestedRow ? partiallyVestedRow.rowTotal.toString() : "0"
+        total: partiallyVestedRow ? partiallyVestedRow.rowTotal : 0
       },
       {
         category: "Not Vested",
@@ -113,7 +114,7 @@ const SummariesContent: React.FC = () => {
         "801": notVestedRow ? notVestedRow.store801 : 0,
         "802": notVestedRow ? notVestedRow.store802 : 0,
         "900": notVestedRow ? notVestedRow.store900 : 0,
-        total: notVestedRow ? notVestedRow.rowTotal.toString() : "0"
+        total: notVestedRow ? notVestedRow.rowTotal : 0
       }
     ];
 
@@ -189,14 +190,8 @@ const SummariesContent: React.FC = () => {
     }
   ];
 
-  interface RowStyleParams {
-    node: {
-      rowPinned?: boolean;
-    };
-  }
-
   const gridOptions = {
-    getRowStyle: (params: RowStyleParams) => {
+    getRowStyle: (params: RowClassParams) => {
       if (params.node.rowPinned) {
         return { background: "#f0f0f0", fontWeight: "bold" };
       }

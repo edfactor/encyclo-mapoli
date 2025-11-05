@@ -281,18 +281,17 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
           setPageNumber={(value: number) =>
             currentPagination.handlePaginationChange(
               value - 1,
-              currentPagination.pageSize,
-              currentPagination.sortParams
+              currentPagination.pageSize
             )
           }
           pageSize={currentPagination.pageSize}
           setPageSize={(value: number) =>
-            currentPagination.handlePaginationChange(0, value, currentPagination.sortParams)
+            currentPagination.handlePaginationChange(0, value)
           }
           recordCount={currentData?.response.total ?? 0}
         />
       )}
-      {!isModal && (
+      {!isModal && modalGridPagination && (
         <SmartModal
           open={isModalOpen}
           onClose={closeModal}>

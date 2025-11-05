@@ -91,6 +91,34 @@ var data = await ctx.Members.TagWith("GetMembers").ToListAsync(ct);
 **Lookups**: Pre-compute `ToDictionary`/`ToLookup` before loops
 **Degenerate guard**: Validate inputs (e.g., prevent all-zero badge numbers)
 
+### Dictionary Keys with Demographic (CRITICAL)
+**SSN is NOT unique** in the `Demographic` entity. When building dictionaries/lookups from Demographics:
+- **WRONG**: `demographics.ToDictionary(d => d.Ssn)` — will throw duplicate key exception
+- **CORRECT**: Use a composite key combining SSN with a unique identifier:
+  - `(d.Ssn, d.OracleHcmId)` — **preferred** (most reliable across systems)
+  - `(d.Ssn, d.BadgeNumber)` — when OracleHcmId unavailable
+  - `(d.Ssn, d.Id)` — when badge/HCM unavailable (database ID)
+
+**Examples**:
+```csharp
+// Best: Use OracleHcmId
+var demographicsByKey = demographics
+    .ToDictionary(d => (d.Ssn, d.OracleHcmId), d => d);
+
+// Fallback: Use badge when HCM ID missing
+var demographicsByKey = demographics
+    .Where(d => d.OracleHcmId != 0) // Guard against missing identifiers
+    .ToDictionary(d => (d.Ssn, d.OracleHcmId), d => d);
+
+// For lookups (one-to-many): Use ToLookup to avoid duplicates entirely
+var demographicsByKey = demographics
+    .ToLookup(d => (d.Ssn, d.OracleHcmId));
+    
+// Access: var matches = demographicsByKey[(ssn, hcmId)];
+```
+
+**Why**: Historical data, data feeds, and migrations can create SSN duplicates (same employee with multiple records). Always pair SSN with a unique identifier when creating dictionaries.
+
 ### Critical Rules
 - Services only—NO DbContext in endpoints
 - Always async (`FirstOrDefaultAsync`, `ToListAsync`)

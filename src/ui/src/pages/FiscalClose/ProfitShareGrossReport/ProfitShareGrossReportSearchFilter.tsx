@@ -1,7 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useLazyGetGrossWagesReportQuery } from "reduxstore/api/YearsEndApi";
 import { setGrossWagesReportQueryParams } from "reduxstore/slices/yearsEndSlice";
@@ -34,7 +34,7 @@ const ProfitShareGrossReportSearchFilter: React.FC<ProfitShareGrossReportSearchF
     formState: { errors, isValid },
     reset
   } = useForm<GrossReportParams>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as Resolver<GrossReportParams>,
     defaultValues: {
       profitYear: fiscalCloseProfitYear,
       gross: 50000
@@ -48,7 +48,7 @@ const ProfitShareGrossReportSearchFilter: React.FC<ProfitShareGrossReportSearchF
         {
           profitYear: data.profitYear,
           minGrossAmount: data.gross,
-          pagination: { skip: 0, take: 25 }
+          pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false }
         },
         false
       ).unwrap();

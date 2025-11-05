@@ -58,7 +58,34 @@ public sealed class YearEndService : IYearEndService
         _totalService = totalService;
         _demographicReaderService = demographicReaderService;
     }
+    
+    /// <summary>
+    /// Returns the minimum birth date for an employee to be age 18+ on the fiscal end date.
+    /// Age 18+ means DOB <= (fiscalEndDate - 18 years).
+    /// COBOL PAY426.cbl line 936: IF W-AGE > 17
+    /// </summary>
+    private static DateOnly GetMinimumBirthDateForAge18(DateOnly fiscalEndDate)
+    {
+        return fiscalEndDate.AddYears(-ReferenceData.MinimumAgeForVesting());
+    }
 
+    /// <summary>
+    /// Returns the minimum birth date for an employee to be age 64+ on the fiscal end date.
+    /// Age 64+ means DOB <= (fiscalEndDate - 64 years).
+    /// COBOL PAY426.cbl line 937: IF W-AGE NOT < 64 (age >= 64)
+    /// </summary>
+    private static DateOnly GetMinimumBirthDateForAge64(DateOnly fiscalEndDate)
+    {
+        // To include age 64+, we need DOB <= (fiscalEndDate - 64 years)
+        // ReferenceData.RetirementAge() = 65, so -65 + 1 = -64
+        return fiscalEndDate.AddYears(-ReferenceData.RetirementAge() + 1);
+    }
+
+    private static short CalculateAge(DateOnly dateOfBirth, DateOnly fiscalEndDate)
+    {
+        return dateOfBirth.Age(fiscalEndDate.ToDateTime(TimeOnly.MinValue));
+    }
+    
     /*
         The RunFinalYearEndUpdates's "ComputeChange" method (see below) very closely follows the logic of https://bitbucket.org/demoulas/hpux/src/master/prg-source/PAY426.cbl
 
@@ -68,8 +95,8 @@ public sealed class YearEndService : IYearEndService
           ZeroContributionReason      - How was your contribution handled?  Normal, Under21, Terminated (Vest Only), Retired, Soon to be Retired
           EmployeeType                - Is this a "new employee  in the plan" - aka this is your first year >21 and >1000 hours - employee may already have V-ONLY records
           PsCertificateIssuedDate     - indicates that this employee should get a physically printed certificate.   It is really a proxy for Earn Points > 0.
-          
-          The "rebuild" argument is for rebuilding a prior year.   It rebuilds a year, but does not push the year values forward to the next year.  "rebuild" should only 
+
+          The "rebuild" argument is for rebuilding a prior year.   It rebuilds a year, but does not push the year values forward to the next year.  "rebuild" should only
           be used after importing scramble/uat/prod data to rebuild the prior Year End values.
     */
     public async Task RunFinalYearEndUpdates(short profitYear, bool rebuild, CancellationToken ct)
@@ -77,70 +104,21 @@ public sealed class YearEndService : IYearEndService
         CalendarResponseDto calendarInfo = await _calendar.GetYearStartAndEndAccountingDatesAsync(profitYear, ct);
         await _profitSharingDataContextFactory.UseWritableContext(async ctx =>
         {
-            DateOnly fiscalEndDate /*Fiscal End Date*/ = calendarInfo.FiscalEndDate;
-            DateOnly vestingOver18 = fiscalEndDate.AddYears(-ReferenceData.MinimumAgeForVesting());
-            DateOnly almostRetired64 = fiscalEndDate.AddYears(-ReferenceData.RetirementAge() - 1);
+            DateOnly fiscalEndDate = calendarInfo.FiscalEndDate;
+            DateOnly minAge18BirthDate = GetMinimumBirthDateForAge18(fiscalEndDate);
+            DateOnly minAge64BirthDate = GetMinimumBirthDateForAge64(fiscalEndDate);
 
             var frozenDemographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, true);
 
             IQueryable<PayProfitDto> query;
 
-            if (rebuild) // rebuild is used after importing data - to rebuild the ZeroContribution 
+            if (rebuild) // rebuild is used after importing data - to rebuild the ZeroContribution
             {
-                query = ctx.PayProfits
-                    .Join(frozenDemographicQuery,
-                        pp => pp.DemographicId,
-                        d => d.Id,
-                        (pp, d) => new { pp, d })
-                    .AsNoTracking()
-                    .Where(x => x.pp.ProfitYear == profitYear)
-                    .Select(x => new PayProfitDto
-                    {
-                        ProfitYear = x.pp.ProfitYear,
-                        CurrentHoursYear = x.pp.CurrentHoursYear,
-                        HoursExecutive = x.pp.HoursExecutive,
-                        Demographic = x.d,
-                        EmployeeTypeId = x.pp.EmployeeTypeId,
-                        ZeroContributionReasonId = x.pp.ZeroContributionReasonId,
-                        PointsEarned = x.pp.PointsEarned,
-                        PsCertificateIssuedDate = x.pp.PsCertificateIssuedDate,
-                        IncomeExecutive = x.pp.IncomeExecutive,
-                        CurrentIncomeYear = x.pp.CurrentIncomeYear,
-                    });
+                query = BuildQueryForRebuild(ctx, frozenDemographicQuery, profitYear);
             }
             else
             {
-                query = ctx.PayProfits
-                    .Join(frozenDemographicQuery,
-                        pp => pp.DemographicId,
-                        d => d.Id,
-                        (pp, d) => new { pp, d })
-                    .AsNoTracking()
-                    .Where(x =>
-                        x.pp.ProfitYear == profitYear &&
-                        (
-                            (x.d.DateOfBirth <= vestingOver18 &&
-                             (x.pp.CurrentHoursYear + x.pp.HoursExecutive) >= 1000)
-                            || x.d.DateOfBirth < almostRetired64
-                        ) &&
-                        x.d.HireDate < fiscalEndDate &&
-                        !(
-                            x.d.DateOfBirth <= almostRetired64 &&
-                            (x.pp.CurrentHoursYear + x.pp.HoursExecutive) < 1000
-                        ))
-                    .Select(x => new PayProfitDto
-                    {
-                        ProfitYear = x.pp.ProfitYear,
-                        CurrentHoursYear = x.pp.CurrentHoursYear,
-                        HoursExecutive = x.pp.HoursExecutive,
-                        Demographic = x.d,
-                        EmployeeTypeId = x.pp.EmployeeTypeId,
-                        ZeroContributionReasonId = x.pp.ZeroContributionReasonId,
-                        PointsEarned = x.pp.PointsEarned,
-                        PsCertificateIssuedDate = x.pp.PsCertificateIssuedDate,
-                        IncomeExecutive = x.pp.IncomeExecutive,
-                        CurrentIncomeYear = x.pp.CurrentIncomeYear,
-                    });
+                query = BuildQueryForEligibleEmployees(ctx, frozenDemographicQuery, profitYear, fiscalEndDate, minAge18BirthDate, minAge64BirthDate);
             }
 
             List<PayProfitDto> employees = await query.ToListAsync(ct);
@@ -165,11 +143,11 @@ public sealed class YearEndService : IYearEndService
             foreach (PayProfitDto employee in employees)
             {
                 int ssn = employee.Demographic!.Ssn;
-                short age = employee.Demographic!.DateOfBirth.Age(fiscalEndDate.ToDateTime(TimeOnly.MinValue));
+                short age = CalculateAge(employee.Demographic!.DateOfBirth, fiscalEndDate);
                 short? firstYearContribution = firstContributionYearBySsn.TryGetValue(ssn, out short value) ? value : null;
                 decimal lastYearBalance = lastYearBalanceBySsn.TryGetValue(ssn, out decimal? value1) ? value1 ?? 0m : 0m;
 
-                YearEndChange change = ComputeChange(profitYear, firstYearContribution, age, lastYearBalance, employee, fiscalEndDate);
+                YearEndChange change = YearEndChangeCalculator.ComputeChange(profitYear, firstYearContribution, age, lastYearBalance, employee, fiscalEndDate);
                 if (change.IsChanged(employee))
                 {
                     changes.Add(employee.Demographic.Id, change);
@@ -179,7 +157,189 @@ public sealed class YearEndService : IYearEndService
             OracleConnection oracleConnection = (ctx.Database.GetDbConnection() as OracleConnection)!;
             await EnsureTempPayProfitChangesTableExistsAsync(oracleConnection, ct);
             await UpdatePayProfitChanges(oracleConnection, profitYear, changes, rebuild, ct);
+
+            // Reset IsNew field for employees who are no longer new (had first contribution in prior year)
+            // This handles employees who don't meet the WHERE clause (< 1000 hours) but still need IsNew reset
+            await ResetIsNewForPriorYearEmployeesAsync(ctx, profitYear, ct);
+
+            // Reset ZeroCont/Points for ineligible employees (those excluded by WHERE clause)
+            // COBOL PAY426 resets these to 0, but C# WHERE clause excludes them from processing
+            await ResetIneligibleEmployeesAsync(ctx, profitYear, fiscalEndDate, ct);
         }, ct);
+    }
+
+    private static IQueryable<PayProfitDto> BuildQueryForRebuild(
+        IProfitSharingDbContext ctx,
+        IQueryable<Demographic> demographicQuery,
+        short profitYear)
+    {
+        return ctx.PayProfits
+            .Join(demographicQuery,
+                pp => pp.DemographicId,
+                d => d.Id,
+                (pp, d) => new { pp, d })
+            .AsNoTracking()
+            .Where(x => x.pp.ProfitYear == profitYear)
+            .Select(x => new PayProfitDto
+            {
+                ProfitYear = x.pp.ProfitYear,
+                CurrentHoursYear = x.pp.CurrentHoursYear,
+                HoursExecutive = x.pp.HoursExecutive,
+                Demographic = x.d,
+                EmployeeTypeId = x.pp.EmployeeTypeId,
+                ZeroContributionReasonId = x.pp.ZeroContributionReasonId,
+                PointsEarned = x.pp.PointsEarned,
+                PsCertificateIssuedDate = x.pp.PsCertificateIssuedDate,
+                IncomeExecutive = x.pp.IncomeExecutive,
+                CurrentIncomeYear = x.pp.CurrentIncomeYear,
+            });
+    }
+
+    private static IQueryable<PayProfitDto> BuildQueryForEligibleEmployees(
+        IProfitSharingDbContext ctx,
+        IQueryable<Demographic> demographicQuery,
+        short profitYear,
+        DateOnly fiscalEndDate,
+        DateOnly minAge18BirthDate,
+        DateOnly minAge64BirthDate)
+    {
+        // COBOL PAY426.cbl lines 936-944: Eligibility is (Age > 17 AND hours >= 1000) OR (Age > 63)
+        return ctx.PayProfits
+            .Join(demographicQuery,
+                pp => pp.DemographicId,
+                d => d.Id,
+                (pp, d) => new { pp, d })
+            .AsNoTracking()
+            .Where(x =>
+                x.pp.ProfitYear == profitYear &&
+                (
+                    (x.d.DateOfBirth <= minAge18BirthDate &&
+                     (x.pp.CurrentHoursYear + x.pp.HoursExecutive) >= 1000)
+                    || x.d.DateOfBirth <= minAge64BirthDate
+                ) &&
+                x.d.HireDate < fiscalEndDate)
+            .Select(x => new PayProfitDto
+            {
+                ProfitYear = x.pp.ProfitYear,
+                CurrentHoursYear = x.pp.CurrentHoursYear,
+                HoursExecutive = x.pp.HoursExecutive,
+                Demographic = x.d,
+                EmployeeTypeId = x.pp.EmployeeTypeId,
+                ZeroContributionReasonId = x.pp.ZeroContributionReasonId,
+                PointsEarned = x.pp.PointsEarned,
+                PsCertificateIssuedDate = x.pp.PsCertificateIssuedDate,
+                IncomeExecutive = x.pp.IncomeExecutive,
+                CurrentIncomeYear = x.pp.CurrentIncomeYear,
+            });
+    }
+
+    /// <summary>
+    /// Resets employee_type_id to 0 (NotNewLastYear) for employees who had their first contribution
+    /// in a prior year but currently have employee_type_id = 1 (NewLastYear).
+    /// This ensures employees who don't meet the hours requirement still get their IsNew field updated.
+    /// Matches COBOL PAY426 behavior which processes ALL employees regardless of hours.
+    /// </summary>
+    private async Task ResetIsNewForPriorYearEmployeesAsync(
+        IProfitSharingDbContext ctx,
+        short profitYear,
+        CancellationToken ct)
+    {
+        // Get all first contribution years (SSN -> FirstYear mapping)
+        var firstContributionYears = await ctx.ProfitDetails
+            .Where(pd => pd.ProfitCodeId == 0 &&
+                        pd.Contribution > 0 &&
+                        pd.ProfitYearIteration == 0)
+            .GroupBy(pd => pd.Ssn)
+            .Select(g => new
+            {
+                Ssn = g.Key,
+                FirstYear = g.Min(pd => pd.ProfitYear)
+            })
+            .ToListAsync(ct);
+
+        // Filter to SSNs where the first contribution was before this year
+        var ssnsThatAreNoLongerNew = firstContributionYears
+            .Where(x => x.FirstYear < profitYear)
+            .Select(x => x.Ssn)
+            .ToHashSet();
+
+        if (ssnsThatAreNoLongerNew.Count == 0)
+        {
+            return; // Nothing to update
+        }
+
+        // Get demographic IDs for these SSNs
+        var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, useFrozenData: false);
+        var demographicIdsThatAreNoLongerNew = await demographicQuery
+            .Where(d => ssnsThatAreNoLongerNew.Contains(d.Ssn))
+            .Select(d => d.Id)
+            .ToListAsync(ct);
+
+        // Update employee_type_id to 0 for these employees (only if currently 1)
+        await ctx.PayProfits
+            .Where(pp => pp.ProfitYear == profitYear &&
+                        pp.EmployeeTypeId == EmployeeType.Constants.NewLastYear &&
+                        demographicIdsThatAreNoLongerNew.Contains(pp.DemographicId))
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(
+                    pp => pp.EmployeeTypeId,
+                    EmployeeType.Constants.NotNewLastYear),
+                ct);
+    }
+
+    /// <summary>
+    /// Resets zero_contribution_reason_id and points_earned to 0 for employees who don't meet
+    /// the eligibility criteria (excluded by WHERE clause).
+    /// COBOL PAY426 lines 1199-1203 resets employees to 0 if:
+    /// 1. Hire date >= fiscal end date (future hires)
+    /// 2. OR don't meet eligibility: (Age > 17 AND hours >= 1000) OR (Age > 63)
+    /// </summary>
+    private async Task ResetIneligibleEmployeesAsync(
+        IProfitSharingDbContext ctx,
+        short profitYear,
+        DateOnly fiscalEndDate,
+        CancellationToken ct)
+    {
+        DateOnly minAge18BirthDate = GetMinimumBirthDateForAge18(fiscalEndDate);
+        DateOnly minAge64BirthDate = GetMinimumBirthDateForAge64(fiscalEndDate);
+
+        var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, useFrozenData: true);
+
+        // COBOL PAY426 lines 1199-1203: Reset if (hire date >= fiscal end) OR (not eligible)
+        // Step 1: Get DemographicIds to reset (Oracle doesn't allow ExecuteUpdate on JOINs)
+        // Note: Eligibility logic inlined here because EF Core can't translate custom methods to SQL
+        // Eligibility is: (Age > 17 AND hours >= 1000) OR (Age > 63)
+        var demographicIdsToReset = await ctx.PayProfits
+            .Join(demographicQuery,
+                pp => pp.DemographicId,
+                d => d.Id,
+                (pp, d) => new { pp, d })
+            .Where(x =>
+                x.pp.ProfitYear == profitYear &&
+                (
+                    // Future hires: hired on or after fiscal end date
+                    x.d.HireDate >= fiscalEndDate ||
+                    // OR ineligible: NOT eligible (inlined logic from IsEligibleForProcessing)
+                    !(
+                        (x.d.DateOfBirth <= minAge18BirthDate && (x.pp.CurrentHoursYear + x.pp.HoursExecutive) >= 1000)
+                        || x.d.DateOfBirth <= minAge64BirthDate
+                    )
+                ))
+            .Select(x => x.pp.DemographicId)
+            .ToListAsync(ct);
+
+        // Step 2: Update by composite key (DemographicId + ProfitYear) - avoids Oracle ORA-01779 error
+        if (demographicIdsToReset.Any())
+        {
+            await ctx.PayProfits
+                .Where(pp => pp.ProfitYear == profitYear && demographicIdsToReset.Contains(pp.DemographicId))
+                .ExecuteUpdateAsync(
+                    setters => setters
+                        .SetProperty(pp => pp.ZeroContributionReasonId, (byte)0)
+                        .SetProperty(pp => pp.PointsEarned, 0m)
+                        .SetProperty(pp => pp.PsCertificateIssuedDate, (DateOnly?)null),
+                    ct);
+        }
     }
 
     public Task UpdateEnrollmentId(short profitYear, CancellationToken ct)
@@ -196,94 +356,9 @@ public sealed class YearEndService : IYearEndService
                     .Where(st => st.IsYearEndCompleted == true)
                     .Select(st => (short?)st.ProfitYear)  // Make it nullable
                     .MaxAsync(ct);
-            
+
                 return maxYear ?? (short)(ReferenceData.SmartTransitionYear - 1);
             }, ct);
-    }
-    
-    // Calculates the Year End Change for a single employee.
-    //  Very closely follows PAY456.cbl, 405-calculate-points
-    private YearEndChange ComputeChange(short profitYear, short? firstContributionYear, short age, decimal currentBalance, PayProfitDto employee, DateOnly fiscalEnd)
-    {
-        int newEmpl = 0;
-        decimal points = 0;
-        DateOnly? certificationDate = null;
-        DateOnly today = DateOnly.FromDateTime(DateTime.Now);
-
-        byte? zeroContributionReason = null;
-        if (firstContributionYear == null && age >= ReferenceData.MinimumAgeForContribution())
-        {
-            newEmpl = /*1*/ EmployeeType.Constants.NewLastYear;
-        }
-
-        if (zeroContributionReason == null || zeroContributionReason < /*6*/ ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested)
-        {
-            zeroContributionReason = /*0*/ ZeroContributionReason.Constants.Normal;
-        }
-
-        if (age < /*21*/ ReferenceData.MinimumAgeForContribution())
-        {
-            zeroContributionReason = /*1*/ ZeroContributionReason.Constants.Under21WithOver1Khours;
-            return new YearEndChange { IsNew = newEmpl, ZeroCont = (byte)zeroContributionReason, EarnPoints = 0, PsCertificateIssuedDate = certificationDate };
-        }
-
-        if (employee.Demographic!.EmploymentStatusId == EmploymentStatus.Constants.Terminated && employee.Demographic.TerminationDate < fiscalEnd) // assuming Frozen access here.
-        {
-            zeroContributionReason = /*2*/ ZeroContributionReason.Constants.TerminatedEmployeeOver1000HoursWorkedGetsYearVested;
-        }
-        else
-        {
-            points = Math.Round((employee.IncomeExecutive + employee.CurrentIncomeYear) / 100.0m, MidpointRounding.AwayFromZero);
-            if (points > 0)
-            {
-                certificationDate = today;
-            }
-        }
-
-        if (age < /*64*/ (ReferenceData.RetirementAge() - 1))
-        {
-            if (employee.Demographic!.EmploymentStatusId == EmploymentStatus.Constants.Terminated && employee.Demographic.TerminationDate < fiscalEnd)
-            {
-                newEmpl = /*0*/ EmployeeType.Constants.NotNewLastYear;
-            }
-
-            return new YearEndChange { IsNew = newEmpl, ZeroCont = (byte)zeroContributionReason, EarnPoints = points, PsCertificateIssuedDate = certificationDate };
-        }
-
-        if (employee.ZeroContributionReasonId > /*2*/ ZeroContributionReason.Constants.TerminatedEmployeeOver1000HoursWorkedGetsYearVested
-            && employee.ZeroContributionReasonId != /*6*/ ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested)
-        {
-            zeroContributionReason = /*0*/ ZeroContributionReason.Constants.Normal;
-        }
-
-        int yearsSinceFirstContribution = profitYear - (firstContributionYear ?? profitYear);
-        // bump up years 1 if an employee had money last year.   See PY-PS-AMT at PAY426.cbl#lines-1273
-        if (currentBalance > 0)
-        {
-            yearsSinceFirstContribution++;
-        }
-
-        if (yearsSinceFirstContribution >= ReferenceData.VestingYears() && age >= ReferenceData.RetirementAge())
-        {
-            zeroContributionReason = /*6*/ ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested;
-        }
-
-        if (yearsSinceFirstContribution == (ReferenceData.VestingYears() - 1) && age >= ReferenceData.RetirementAge())
-        {
-            zeroContributionReason = /*7*/ ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay;
-        }
-
-        if (yearsSinceFirstContribution >= (ReferenceData.VestingYears() - 1) && age == (ReferenceData.RetirementAge() - 1))
-        {
-            zeroContributionReason = /*7*/ ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay;
-        }
-
-        if (employee.Demographic!.EmploymentStatusId == EmploymentStatus.Constants.Terminated && employee.Demographic.TerminationDate < fiscalEnd)
-        {
-            newEmpl = EmployeeType.Constants.NotNewLastYear;
-        }
-
-        return new YearEndChange { IsNew = newEmpl, ZeroCont = (byte)zeroContributionReason, EarnPoints = points, PsCertificateIssuedDate = certificationDate };
     }
 
     /*
@@ -337,7 +412,7 @@ public sealed class YearEndService : IYearEndService
 
         if (!rebuild)
         {
-            // Copy the current ZeroContributionReason to the Now Year.    This might seem odd, but the YE process looks at ZeroContribution for 
+            // Copy the current ZeroContributionReason to the Now Year.    This might seem odd, but the YE process looks at ZeroContribution for
             // last year, and handles someone differently if they had a ZercontributionReason=6  last year.
             cmd.CommandText = $@"
             MERGE INTO pay_profit pp
@@ -363,7 +438,7 @@ public sealed class YearEndService : IYearEndService
     private static async Task EnsureTempPayProfitChangesTableExistsAsync(OracleConnection conn, CancellationToken cancellation)
     {
         const string checkSql = @"
-            SELECT COUNT(*) FROM all_tables 
+            SELECT COUNT(*) FROM all_tables
             WHERE table_name = 'TEMP_PAY_PROFIT_CHANGES' AND owner = USER";
 
         await using OracleCommand checkCmd = new(checkSql, conn);

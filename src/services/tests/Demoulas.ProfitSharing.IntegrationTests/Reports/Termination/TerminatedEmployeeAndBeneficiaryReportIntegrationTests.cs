@@ -24,7 +24,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         short profitSharingYear = 2025;
         DateOnly startDate = new(2025, 01, 4);
         DateOnly endDate = new(2025, 12, 27);
-        DateOnly effectiveDateOfTestData = new(2025, 10, 24);
+        DateOnly effectiveDateOfTestData = new(2025, 11, 04);
 
         ILoggerFactory _loggerFactory = LoggerFactory.Create(builder =>
         {
@@ -120,11 +120,6 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
     [Fact]
     public async Task EnsureSmartReportMatchesReadyReport()
     {
-        // Fetch Master Inquiry Data
-        string content = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.MasterInquiry.22Oct2025.outfl");
-        List<OutFL> outties = OutFLParser.ParseStringIntoRecords(content);
-        Dictionary<long, OutFL> outtieBySsn = outties.ToDictionary(o => long.Parse(o.OUT_SSN), o => o);
-
         Stopwatch stopwatch = Stopwatch.StartNew();
         string actualText = await CreateTextReport();
         TestOutputHelper.WriteLine($"Took: {stopwatch.ElapsedMilliseconds} To create SMART QPAY066 report");
@@ -153,14 +148,6 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         // Query READY pscalcview2 for authoritative vested balance and percent
         Dictionary<int, (decimal VestedBalance, decimal VestedPercent)> readyVestingData =
             await GetReadyVestedBalancesByBadge(employeeBadges, DbFactory.ConnectionString);
-
-#if false
-        // Alternative: Use MasterInquiry OutFL data (currently commented out - suspected data issues)
-        Dictionary<int, int> badgeToSsn = await DbFactory.UseReadOnlyContext(async ctx =>
-            await ctx.Demographics
-                .Where(d => employeeBadges.Contains(d.BadgeNumber))
-                .ToDictionaryAsync(d => d.BadgeNumber, d => d.Ssn));
-#endif
 
         // Compare the values for each matching key
         List<string> differences = new();
@@ -297,14 +284,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
                     : (long)qp.BadgeNumber * 10_000 + qp.PsnSuffix,
                 qp => qp);
     }
-
-    public static string ReadEmbeddedResource(string resourceName)
-    {
-        using Stream? stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
-        using StreamReader reader = new(stream!);
-        return reader.ReadToEnd();
-    }
-
+    
     /// <summary>
     ///     Queries the READY schema's pscalcview2 view to get vested balances and vested percent for a set of badge numbers.
     /// </summary>

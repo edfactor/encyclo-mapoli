@@ -56,7 +56,7 @@ const useDuplicateSSNsOnDemographics = () => {
 
   const pagination = useGridPagination({
     initialPageSize: 25,
-    initialSortBy: "badgeNumber",
+    initialSortBy: "name",
     initialSortDescending: false,
     onPaginationChange: handlePaginationChange
   });

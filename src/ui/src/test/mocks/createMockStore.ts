@@ -16,7 +16,7 @@
  *   });
  */
 
-import { configureStore, PreloadedState } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import React, { PropsWithChildren, ReactNode } from "react";
 import { Provider } from "react-redux";
 import { AccountHistoryReportApi } from "../../reduxstore/api/AccountHistoryReportApi";
@@ -111,7 +111,7 @@ interface MockRootState {
  *   yearsEnd: { selectedProfitYear: 2024 }
  * });
  */
-export const createMockStore = (preloadedState?: PreloadedState<MockRootState>) => {
+export const createMockStore = (preloadedState?: Partial<MockRootState>) => {
   // Default state for each slice
   const defaultState: MockRootState = {
     security: {
@@ -166,7 +166,7 @@ export const createMockStore = (preloadedState?: PreloadedState<MockRootState>) 
       ...defaultState.navigation,
       ...preloadedState?.navigation,
       profitYearSelectorData: {
-        ...defaultState.navigation.profitYearSelectorData,
+        ...(defaultState.navigation?.profitYearSelectorData ?? {}),
         ...preloadedState?.navigation?.profitYearSelectorData
       }
     },
@@ -189,25 +189,25 @@ export const createMockStore = (preloadedState?: PreloadedState<MockRootState>) 
 
   // Add RTK Query API reducers that tests commonly mock
   // When tests mock these APIs with vi.mock(), these fallback reducers prevent errors
-  const reducers: { [key: string]: unknown } = baseReducers;
-
-  // Add RTK Query API reducers - must match real store configuration
-  reducers[SecurityApi.reducerPath] = SecurityApi.reducer;
-  reducers[YearsEndApi.reducerPath] = YearsEndApi.reducer;
-  reducers[ItOperationsApi.reducerPath] = ItOperationsApi.reducer;
-  reducers[MilitaryApi.reducerPath] = MilitaryApi.reducer;
-  reducers[InquiryApi.reducerPath] = InquiryApi.reducer;
-  reducers[LookupsApi.reducerPath] = LookupsApi.reducer;
-  reducers[CommonApi.reducerPath] = CommonApi.reducer;
-  reducers[NavigationApi.reducerPath] = NavigationApi.reducer;
-  reducers[AppSupportApi.reducerPath] = AppSupportApi.reducer;
-  reducers[NavigationStatusApi.reducerPath] = NavigationStatusApi.reducer;
-  reducers[BeneficiariesApi.reducerPath] = BeneficiariesApi.reducer;
-  reducers[AdjustmentsApi.reducerPath] = AdjustmentsApi.reducer;
-  reducers[DistributionApi.reducerPath] = DistributionApi.reducer;
-  reducers[PayServicesApi.reducerPath] = PayServicesApi.reducer;
-  reducers[AccountHistoryReportApi.reducerPath] = AccountHistoryReportApi.reducer;
-  reducers[validationApi.reducerPath] = validationApi.reducer;
+  const reducers = {
+    ...baseReducers,
+    [SecurityApi.reducerPath]: SecurityApi.reducer,
+    [YearsEndApi.reducerPath]: YearsEndApi.reducer,
+    [ItOperationsApi.reducerPath]: ItOperationsApi.reducer,
+    [MilitaryApi.reducerPath]: MilitaryApi.reducer,
+    [InquiryApi.reducerPath]: InquiryApi.reducer,
+    [LookupsApi.reducerPath]: LookupsApi.reducer,
+    [CommonApi.reducerPath]: CommonApi.reducer,
+    [NavigationApi.reducerPath]: NavigationApi.reducer,
+    [AppSupportApi.reducerPath]: AppSupportApi.reducer,
+    [NavigationStatusApi.reducerPath]: NavigationStatusApi.reducer,
+    [BeneficiariesApi.reducerPath]: BeneficiariesApi.reducer,
+    [AdjustmentsApi.reducerPath]: AdjustmentsApi.reducer,
+    [DistributionApi.reducerPath]: DistributionApi.reducer,
+    [PayServicesApi.reducerPath]: PayServicesApi.reducer,
+    [AccountHistoryReportApi.reducerPath]: AccountHistoryReportApi.reducer,
+    [validationApi.reducerPath]: validationApi.reducer
+  } as const;
 
   return configureStore({
     reducer: reducers,
@@ -250,7 +250,7 @@ type ProviderProps = PropsWithChildren<Record<string, unknown>>;
 
 export const createProviderWrapper = (store: MockStore) => {
   const Wrapper = ({ children }: ProviderProps) => {
-    return React.createElement(Provider, { store }, children);
+    return React.createElement(Provider, { store, children });
   };
   return Wrapper;
 };
@@ -267,7 +267,7 @@ export const createProviderWrapper = (store: MockStore) => {
  * });
  * render(<Component />, { wrapper });
  */
-export const createMockStoreAndWrapper = (preloadedState?: PreloadedState<MockRootState>) => {
+export const createMockStoreAndWrapper = (preloadedState?: Partial<MockRootState>) => {
   const store = createMockStore(preloadedState);
   const wrapper = createProviderWrapper(store);
 
@@ -291,12 +291,12 @@ export const createTestWrapper = (
   additionalProviders?: Array<(props: { children: ReactNode }) => ReactNode>
 ) => {
   return ({ children }: ProviderProps) => {
-    let content: ReactNode = React.createElement(Provider, { store }, children);
+    let content: ReactNode = React.createElement(Provider, { store, children });
 
     // Wrap with additional providers in order
     if (additionalProviders) {
       for (const ProviderComponent of additionalProviders) {
-        content = React.createElement(ProviderComponent, undefined, content);
+        content = React.createElement(ProviderComponent, { children: content });
       }
     }
 

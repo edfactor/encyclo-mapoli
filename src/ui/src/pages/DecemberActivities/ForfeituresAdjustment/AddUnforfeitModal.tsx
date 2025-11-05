@@ -39,7 +39,12 @@ const handleResponseError = (error: ErrorResponse) => {
 };
 
 const AddUnforfeitModal: React.FC<AddUnforfeitModalProps> = ({ open, onClose, onSave, suggestedForfeitResponse }) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    badgeNumber: number;
+    forfeitureAmount: number;
+    suggestedForfeitAmount: number | null;
+    classAction: boolean;
+  }>({
     badgeNumber: 0,
     forfeitureAmount: 0,
     suggestedForfeitAmount: null,
@@ -50,7 +55,7 @@ const AddUnforfeitModal: React.FC<AddUnforfeitModalProps> = ({ open, onClose, on
 
   useEffect(() => {
     if (!open) {
-      setFormData({ badgeNumber: 0, forfeitureAmount: 0, classAction: false });
+      setFormData({ badgeNumber: 0, forfeitureAmount: 0, suggestedForfeitAmount: null, classAction: false });
       return;
     }
 
@@ -59,7 +64,7 @@ const AddUnforfeitModal: React.FC<AddUnforfeitModalProps> = ({ open, onClose, on
         ...prev,
         badgeNumber: suggestedForfeitResponse.badgeNumber,
         suggestedForfeitAmount: suggestedForfeitResponse.suggestedForfeitAmount,
-        forfeitureAmount: Math.abs(suggestedForfeitResponse.suggestedForfeitAmount) // Use absolute value for unforfeit
+        forfeitureAmount: Math.abs(suggestedForfeitResponse.suggestedForfeitAmount ?? 0) // Use absolute value for unforfeit
       }));
     }
   }, [suggestedForfeitResponse, open]);
@@ -102,7 +107,7 @@ const AddUnforfeitModal: React.FC<AddUnforfeitModalProps> = ({ open, onClose, on
       const result = await updateForfeiture(request);
 
       if (result.error) {
-        handleResponseError(result.error);
+        handleResponseError(result.error as unknown as ErrorResponse);
         return;
       }
 
@@ -113,7 +118,7 @@ const AddUnforfeitModal: React.FC<AddUnforfeitModalProps> = ({ open, onClose, on
 
       onClose();
     } catch (error) {
-      handleResponseError(error);
+      handleResponseError(error as unknown as ErrorResponse);
     }
   };
 

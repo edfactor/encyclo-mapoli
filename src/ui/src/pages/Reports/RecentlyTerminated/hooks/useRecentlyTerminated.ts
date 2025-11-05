@@ -1,7 +1,6 @@
 import { useCallback, useReducer, useRef } from "react";
 import { useLazyGetRecentlyTerminatedReportQuery } from "reduxstore/api/YearsEndApi";
-import { RecentlyTerminatedRecord } from "reduxstore/types";
-import { Paged } from "smart-ui-library";
+import { RecentlyTerminatedResponse } from "reduxstore/types";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useMissiveAlerts } from "../../../../hooks/useMissiveAlerts";
@@ -20,7 +19,7 @@ interface RecentlyTerminatedState {
     error: string | null;
   };
   report: {
-    data: Paged<RecentlyTerminatedRecord> | null;
+    data: RecentlyTerminatedResponse | null;
     isLoading: boolean;
     error: string | null;
   };
@@ -28,11 +27,11 @@ interface RecentlyTerminatedState {
 
 type RecentlyTerminatedAction =
   | { type: "SEARCH_START"; payload: { params: SearchParams } }
-  | { type: "SEARCH_SUCCESS"; payload: { data: Paged<RecentlyTerminatedRecord> } }
+  | { type: "SEARCH_SUCCESS"; payload: { data: RecentlyTerminatedResponse } }
   | { type: "SEARCH_FAILURE"; payload: { error: string } }
   | { type: "SEARCH_RESET" }
   | { type: "REPORT_FETCH_START" }
-  | { type: "REPORT_FETCH_SUCCESS"; payload: { data: Paged<RecentlyTerminatedRecord> } }
+  | { type: "REPORT_FETCH_SUCCESS"; payload: { data: RecentlyTerminatedResponse } }
   | { type: "REPORT_FETCH_FAILURE"; payload: { error: string } };
 
 const initialState: RecentlyTerminatedState = {

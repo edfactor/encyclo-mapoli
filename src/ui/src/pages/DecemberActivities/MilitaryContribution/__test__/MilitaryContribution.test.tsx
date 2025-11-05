@@ -263,7 +263,11 @@ describe("MilitaryContribution", () => {
 
       const noMemberState = {
         security: { token: "mock-token" },
-        navigation: { navigationData: null },
+        navigation: {
+          navigationData: undefined,
+          error: undefined,
+          currentNavigationId: null
+        },
         inquiry: {
           masterInquiryMemberDetails: null // No member selected
         },

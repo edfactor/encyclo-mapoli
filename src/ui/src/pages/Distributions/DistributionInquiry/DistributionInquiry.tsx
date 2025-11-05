@@ -35,7 +35,7 @@ interface LocationState {
   showSuccessMessage?: boolean;
   memberName?: string;
   amount?: number;
-  operationType?: "added" | "deleted";
+  operationType?: "added" | "deleted" | "delete-failed";
 }
 
 const DistributionInquiryContent = () => {
@@ -81,7 +81,7 @@ const DistributionInquiryContent = () => {
 
       const successMessage = {
         id: 911,
-        severity: (state.operationType === "delete-failed" ? "error" : "success") as const,
+        severity: state.operationType === "delete-failed" ? ("error" as const) : ("success" as const),
         message: message,
         description: description
       };

@@ -66,9 +66,23 @@ describe("useEligibleEmployeesReducer", () => {
         endDate: "2024-12-31",
         dataSource: "test",
         response: {
-          results: [{ badgeNumber: 12345, fullName: "John Doe" }],
-          total: 1
-        }
+          results: [{
+            badgeNumber: 12345,
+            fullName: "John Doe",
+            oracleHcmId: 12345,
+            departmentId: 1,
+            department: "Test Dept",
+            storeNumber: 1,
+            isExecutive: false
+          }],
+          total: 1,
+          totalPages: 1,
+          pageSize: 25,
+          currentPage: 0
+        },
+        numberReadOnFrozen: 0,
+        numberNotSelected: 0,
+        numberWritten: 1
       };
 
       const action = { type: "SEARCH_SUCCESS" as const, payload: mockData };
@@ -98,8 +112,14 @@ describe("useEligibleEmployeesReducer", () => {
         dataSource: "test",
         response: {
           results: [],
-          total: 0
-        }
+          total: 0,
+          totalPages: 0,
+          pageSize: 25,
+          currentPage: 0
+        },
+        numberReadOnFrozen: 0,
+        numberNotSelected: 0,
+        numberWritten: 0
       };
 
       const action = { type: "SEARCH_SUCCESS" as const, payload: mockData };
@@ -138,7 +158,10 @@ describe("useEligibleEmployeesReducer", () => {
           startDate: "2024-01-01",
           endDate: "2024-12-31",
           dataSource: "test",
-          response: { results: [], total: 0 }
+          response: { results: [], total: 0, totalPages: 0, pageSize: 25, currentPage: 0 },
+          numberReadOnFrozen: 0,
+          numberNotSelected: 0,
+          numberWritten: 0
         },
         search: {
           isLoading: true,
@@ -237,7 +260,10 @@ describe("useEligibleEmployeesReducer", () => {
           startDate: "2024-01-01",
           endDate: "2024-12-31",
           dataSource: "test",
-          response: { results: [], total: 0 }
+          response: { results: [], total: 0, totalPages: 0, pageSize: 25, currentPage: 0 },
+          numberReadOnFrozen: 0,
+          numberNotSelected: 0,
+          numberWritten: 0
         },
         search: {
           isLoading: false,
@@ -269,9 +295,23 @@ describe("useEligibleEmployeesReducer", () => {
           endDate: "2024-12-31",
           dataSource: "test",
           response: {
-            results: [{ badgeNumber: 12345, fullName: "John Doe" }],
-            total: 1
-          }
+            results: [{
+              badgeNumber: 12345,
+              fullName: "John Doe",
+              oracleHcmId: 12345,
+              departmentId: 1,
+              department: "Test Dept",
+              storeNumber: 1,
+              isExecutive: false
+            }],
+            total: 1,
+            totalPages: 1,
+            pageSize: 25,
+            currentPage: 0
+          },
+          numberReadOnFrozen: 0,
+          numberNotSelected: 0,
+          numberWritten: 1
         },
         pagination: {
           pageNumber: 5,
@@ -303,7 +343,10 @@ describe("useEligibleEmployeesReducer", () => {
             startDate: "2024-01-01",
             endDate: "2024-12-31",
             dataSource: "test",
-            response: { results: [], total: 0 }
+            response: { results: [], total: 0, totalPages: 0, pageSize: 25, currentPage: 0 },
+            numberReadOnFrozen: 0,
+            numberNotSelected: 0,
+            numberWritten: 0
           },
           search: { ...initialState.search, hasSearched: true }
         };
@@ -329,7 +372,10 @@ describe("useEligibleEmployeesReducer", () => {
             startDate: "2024-01-01",
             endDate: "2024-12-31",
             dataSource: "test",
-            response: { results: [], total: 0 }
+            response: { results: [], total: 0, totalPages: 0, pageSize: 25, currentPage: 0 },
+            numberReadOnFrozen: 0,
+            numberNotSelected: 0,
+            numberWritten: 0
           }
         };
 
@@ -348,9 +394,23 @@ describe("useEligibleEmployeesReducer", () => {
             endDate: "2024-12-31",
             dataSource: "test",
             response: {
-              results: [{ badgeNumber: 12345, fullName: "John Doe" }],
-              total: 1
-            }
+              results: [{
+                badgeNumber: 12345,
+                fullName: "John Doe",
+                oracleHcmId: 12345,
+                departmentId: 1,
+                department: "Test Dept",
+                storeNumber: 1,
+                isExecutive: false
+              }],
+              total: 1,
+              totalPages: 1,
+              pageSize: 25,
+              currentPage: 0
+            },
+            numberReadOnFrozen: 0,
+            numberNotSelected: 0,
+            numberWritten: 1
           }
         };
 
@@ -368,8 +428,14 @@ describe("useEligibleEmployeesReducer", () => {
             dataSource: "test",
             response: {
               results: [],
-              total: 0
-            }
+              total: 0,
+              totalPages: 0,
+              pageSize: 25,
+              currentPage: 0
+            },
+            numberReadOnFrozen: 0,
+            numberNotSelected: 0,
+            numberWritten: 0
           }
         };
 

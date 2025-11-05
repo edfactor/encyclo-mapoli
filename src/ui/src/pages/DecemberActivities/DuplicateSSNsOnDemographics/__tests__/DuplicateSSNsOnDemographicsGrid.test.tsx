@@ -26,9 +26,39 @@ vi.mock("../DuplicateSSNsOnDemographicsGridColumns", () => ({
 
 describe("DuplicateSSNsOnDemographicsGrid", () => {
   const mockData = {
+    reportName: "Duplicate SSNs on Demographics",
+    reportDate: "2024-01-15",
+    startDate: "2024-01-01",
+    endDate: "2024-12-31",
+    dataSource: "Test Data",
     response: {
-      results: [{ ssn: "123-45-6789", badgeNumber: 12345, employeeName: "John Doe" }],
-      total: 1
+      results: [{
+        ssn: "123-45-6789",
+        badgeNumber: 12345,
+        name: "John Doe",
+        address: {
+          street: "123 Main St",
+          street2: null,
+          city: "Boston",
+          state: "MA",
+          postalCode: "02101",
+          countryIso: "US"
+        },
+        hireDate: "2020-01-01",
+        terminationDate: null,
+        rehireDate: null,
+        status: "A",
+        employmentStatusName: "Active",
+        storeNumber: 100,
+        profitSharingRecords: 5,
+        hoursCurrentYear: 2080,
+        hoursLastYear: 2080,
+        incomeCurrentYear: 50000
+      }],
+      total: 1,
+      totalPages: 1,
+      pageSize: 25,
+      currentPage: 0
     }
   };
 
@@ -37,7 +67,8 @@ describe("DuplicateSSNsOnDemographicsGrid", () => {
     pageSize: 25,
     sortParams: { sortBy: "ssn", isSortDescending: true },
     handlePaginationChange: vi.fn(),
-    handleSortChange: vi.fn()
+    handleSortChange: vi.fn(),
+    resetPagination: vi.fn()
   };
 
   const defaultProps = {
@@ -107,9 +138,17 @@ describe("DuplicateSSNsOnDemographicsGrid", () => {
   describe("Data handling", () => {
     it("should handle empty results", () => {
       const emptyData = {
+        reportName: "Duplicate SSNs on Demographics",
+        reportDate: "2024-01-15",
+        startDate: "2024-01-01",
+        endDate: "2024-12-31",
+        dataSource: "Test Data",
         response: {
           results: [],
-          total: 0
+          total: 0,
+          totalPages: 0,
+          pageSize: 25,
+          currentPage: 0
         }
       };
       render(

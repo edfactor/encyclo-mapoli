@@ -38,7 +38,8 @@ public sealed class Program
             new Option<string>("--connection-name") { Description = "The name of the configuration property that holds the connection string" },
             new Option<string>("--sql-file") { Description = "The path to the custom SQL file" },
             new Option<string>("--source-schema") { Description = "Name of the schema that is being used as the source database" },
-            new Option<string>("--output-file") { Description = "The path to save the file (if applicable)" }
+            new Option<string>("--output-file") { Description = "The path to save the file (if applicable)" },
+            new Option<string>("--environment") { Description = "The environment name (e.g., UAT, QA, Production)" }
         };
 
             var upgradeDbCommand = new Command("upgrade-db", "Apply migrations to upgrade the database");
@@ -99,6 +100,7 @@ public sealed class Program
             var sourceSchemaOption = new Option<string?>("--source-schema");
             var outputFileOption = new Option<string?>("--output-file");
             var currentYearOption = new Option<string?>("--current-year");
+            var environmentOption = new Option<string?>("--environment");
 
             var cmds = new[] { upgradeDbCommand, dropRecreateDbCommand, runSqlCommand, runSqlCommandForNavigation, runSqlCommandForUatNavigation, generateDgmlCommand, generateMarkdownCommand, validateImportCommand, generateUpgradeScriptCmd };
 
@@ -110,6 +112,7 @@ public sealed class Program
                 options.Add(sourceSchemaOption);
                 options.Add(outputFileOption);
                 options.Add(currentYearOption);
+                options.Add(environmentOption);
             });
 
             // Determine which command was invoked. Prefer the first non-option token from args as the command name.
@@ -121,6 +124,7 @@ public sealed class Program
             string? sourceSchema = configuration["source-schema"];
             string? outputFile = configuration["output-file"];
             string? currentYear = configuration["current-year"];
+            string? environment = configuration["environment"];
 
             // Populate environment variables that the existing Execute* methods may read from IConfiguration or Env if required
             if (!string.IsNullOrEmpty(connectionName)) { Environment.SetEnvironmentVariable("connection-name", connectionName); }
@@ -128,6 +132,7 @@ public sealed class Program
             if (!string.IsNullOrEmpty(sourceSchema)) { Environment.SetEnvironmentVariable("source-schema", sourceSchema); }
             if (!string.IsNullOrEmpty(outputFile)) { Environment.SetEnvironmentVariable("output-file", outputFile); }
             if (!string.IsNullOrEmpty(currentYear)) { Environment.SetEnvironmentVariable("current-year", currentYear); }
+            if (!string.IsNullOrEmpty(environment)) { Environment.SetEnvironmentVariable("environment", environment); }
 
             // Dispatch to the appropriate implementation
             switch (invokedCommand)
@@ -179,7 +184,11 @@ public sealed class Program
                 context.AccountingPeriods.AddRange(newRecords);
                 await context.SaveChangesAsync();
             }
+
             await GatherSchemaStatistics(context);
+
+            string? environment = configuration["environment"] ?? Environment.GetEnvironmentVariable("environment");
+            await GrantSelectPermissionsIfUat(context, environment);
         });
         return 0;
     }
@@ -212,6 +221,9 @@ public sealed class Program
             }, sourceSchema);
 
             await GatherSchemaStatistics(context);
+
+            string? environment = configuration["environment"] ?? Environment.GetEnvironmentVariable("environment");
+            await GrantSelectPermissionsIfUat(context, environment);
 
             var rebuildService = sp.GetRequiredService<RebuildEnrollmentAndZeroContService>();
             await rebuildService.ExecuteAsync(CancellationToken.None);
@@ -402,6 +414,50 @@ public sealed class Program
         if (profitDetailsCount == 0)
         {
             throw new InvalidOperationException("ProfitDetails table is empty. Import validation failed.");
+        }
+    }
+
+    private static async Task GrantSelectPermissionsIfUat(ProfitSharingDbContext context, string? environment)
+    {
+        // Only grant permissions in UAT environment
+        if (environment?.Equals(Constants.UAT, StringComparison.OrdinalIgnoreCase) != true)
+        {
+            return;
+        }
+
+        // Get all entity types from the DbContext model
+        var entityTypes = context.Model.GetEntityTypes();
+        if (!entityTypes.Any())
+        {
+            Console.WriteLine("No entity types found in DbContext model.");
+            return;
+        }
+
+        Console.WriteLine($"Granting SELECT permissions on {entityTypes.Count()} tables to SELECT_PROFITSHARE_ROLE...");
+
+        try
+        {
+            foreach (var entityType in entityTypes)
+            {
+                // Get the table name for this entity
+                var tableName = entityType.GetTableName();
+                if (string.IsNullOrWhiteSpace(tableName))
+                {
+                    continue;
+                }
+
+                // Execute GRANT SELECT statement
+                string grantSql = $"GRANT SELECT ON PROFITSHARE.{tableName} TO SELECT_PROFITSHARE_ROLE";
+                await context.Database.ExecuteSqlRawAsync(grantSql);
+                Console.WriteLine($"  ✓ Granted SELECT on PROFITSHARE.{tableName}");
+            }
+
+            Console.WriteLine($"Successfully granted SELECT permissions on all {entityTypes.Count()} tables to SELECT_PROFITSHARE_ROLE");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error granting SELECT permissions: {ex.Message}");
+            throw;
         }
     }
 

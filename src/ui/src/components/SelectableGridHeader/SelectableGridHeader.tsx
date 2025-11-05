@@ -1,7 +1,7 @@
 import { SaveOutlined } from "@mui/icons-material";
 import { Checkbox, CircularProgress, IconButton, Tooltip } from "@mui/material";
 import { IHeaderParams, IRowNode } from "ag-grid-community";
-import { ForfeitureAdjustmentUpdateRequest } from "types";
+import { ForfeitureAdjustmentUpdateRequest } from "../../types";
 
 interface SelectableGridHeaderProps extends IHeaderParams {
   addRowToSelectedRows: (id: number) => void;
@@ -11,8 +11,11 @@ interface SelectableGridHeaderProps extends IHeaderParams {
       isDetail: boolean;
       profitYear: number;
       badgeNumber: string;
+      psn?: number;
       enrollmentId?: string;
       suggestedForfeit?: number;
+      suggestedUnforfeiture?: number;
+      profitDetailId?: number;
       remark?: string;
     },
     context: {
@@ -24,8 +27,11 @@ interface SelectableGridHeaderProps extends IHeaderParams {
       isDetail: boolean;
       profitYear: number;
       badgeNumber: string;
+      psn?: number;
       enrollmentId?: string;
       suggestedForfeit?: number;
+      suggestedUnforfeiture?: number;
+      profitDetailId?: number;
       remark?: string;
     },
     context: {

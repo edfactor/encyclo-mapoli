@@ -1,7 +1,7 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import React from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockStoreAndWrapper } from "../../../../test";
 import UnForfeit from "../UnForfeit";
 
@@ -52,49 +52,60 @@ vi.mock("../../../../hooks/useUnsavedChangesGuard", () => ({
 }));
 
 vi.mock("../../../../components/FrozenYearWarning", () => ({
-  default: vi.fn(() => React.createElement('section', { 'aria-label': 'frozen year warning' }, 'Frozen Year Warning'))
+  default: vi.fn(() => React.createElement("section", { "aria-label": "frozen year warning" }, "Frozen Year Warning"))
 }));
 
 vi.mock("../../../../components/StatusDropdownActionNode", () => ({
-  default: vi.fn(() => React.createElement('section', { 'aria-label': 'status dropdown', role: 'status' }, 'Status Dropdown'))
+  default: vi.fn(() =>
+    React.createElement("section", { "aria-label": "status dropdown", role: "status" }, "Status Dropdown")
+  )
 }));
 
 vi.mock("../UnForfeitSearchFilter", () => ({
   default: vi.fn(({ onSearch, hasUnsavedChanges }) =>
-    React.createElement('section', { 'aria-label': 'search filter' },
-      React.createElement('button', {
-        'aria-label': 'search button',
-        onClick: () => onSearch(),
-        disabled: hasUnsavedChanges
-      }, 'Search')
+    React.createElement(
+      "section",
+      { "aria-label": "search filter" },
+      React.createElement(
+        "button",
+        {
+          "aria-label": "search button",
+          onClick: () => onSearch(),
+          disabled: hasUnsavedChanges
+        },
+        "Search"
+      )
     )
   )
 }));
 
 vi.mock("../UnForfeitGrid", () => ({
-  default: vi.fn(() => React.createElement('section', { 'aria-label': 'unforfeit grid' }, 'UnForfeit Grid'))
+  default: vi.fn(() => React.createElement("section", { "aria-label": "unforfeit grid" }, "UnForfeit Grid"))
 }));
 
 vi.mock("smart-ui-library", () => ({
-  ApiMessageAlert: vi.fn(() => React.createElement('section', { 'aria-label': 'api message alert', role: 'alert' }, 'Message Alert')),
+  ApiMessageAlert: vi.fn(() =>
+    React.createElement("section", { "aria-label": "api message alert", role: "alert" }, "Message Alert")
+  ),
   DSMAccordion: vi.fn(({ title, children }) =>
-    React.createElement('section', { 'aria-label': 'accordion' },
-      React.createElement('div', null, title),
-      children
-    )
+    React.createElement("section", { "aria-label": "accordion" }, React.createElement("div", null, title), children)
   ),
   Page: vi.fn(({ label, actionNode, children }) =>
-    React.createElement('section', { 'aria-label': 'page' },
-      React.createElement('div', null, label),
+    React.createElement(
+      "section",
+      { "aria-label": "page" },
+      React.createElement("div", null, label),
       actionNode,
       children
     )
   ),
   SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) =>
-    React.createElement('div', { role: 'group', 'aria-label': 'search and reset' },
-      React.createElement('button', { onClick: handleSearch, disabled: disabled || isFetching }, 'Search'),
-      React.createElement('button', { onClick: handleReset }, 'Reset'),
-      isFetching && React.createElement('span', { role: 'status' }, 'Loading...')
+    React.createElement(
+      "div",
+      { role: "group", "aria-label": "search and reset" },
+      React.createElement("button", { onClick: handleSearch, disabled: disabled || isFetching }, "Search"),
+      React.createElement("button", { onClick: handleReset }, "Reset"),
+      isFetching && React.createElement("span", { role: "status" }, "Loading...")
     )
   )
 }));
@@ -141,12 +152,15 @@ describe("UnForfeit", () => {
       vi.mocked(useLazyGetAccountingRangeToCurrent).mockReturnValueOnce([
         vi.fn(),
         {
-          data: {
-            fiscalBeginDate: null,
-            fiscalEndDate: null
-          }
+          data: undefined,
+          isFetching: false,
+          isSuccess: false,
+          isLoading: false,
+          isError: false,
+          isUninitialized: true,
+          status: "uninitialized" as const
         }
-      ] as unknown);
+      ] as unknown as ReturnType<typeof useLazyGetAccountingRangeToCurrent>);
 
       render(<UnForfeit />, { wrapper });
 
@@ -208,7 +222,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      });
 
       render(<UnForfeit />, { wrapper });
 
@@ -246,7 +260,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      });
 
       render(<UnForfeit />, { wrapper });
 
@@ -285,7 +299,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      });
 
       render(<UnForfeit />, { wrapper });
 
@@ -317,7 +331,7 @@ describe("UnForfeit", () => {
           handleStatusChange: mockHandleStatusChange,
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      });
 
       render(<UnForfeit />, { wrapper });
 
@@ -349,7 +363,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      });
 
       render(<UnForfeit />, { wrapper });
 
@@ -379,7 +393,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      });
 
       render(<UnForfeit />, { wrapper });
 
@@ -409,7 +423,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      });
 
       render(<UnForfeit />, { wrapper });
 
@@ -443,7 +457,7 @@ describe("UnForfeit", () => {
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      });
 
       render(<UnForfeit />, { wrapper });
 
@@ -479,9 +493,15 @@ describe("UnForfeit", () => {
           data: {
             fiscalBeginDate: "2024-01-01",
             fiscalEndDate: "2024-12-31"
-          }
+          },
+          isFetching: false,
+          isSuccess: true,
+          isLoading: false,
+          isError: false,
+          isUninitialized: false,
+          status: "fulfilled" as const
         }
-      ] as unknown);
+      ] as unknown as ReturnType<typeof useLazyGetAccountingRangeToCurrent>);
 
       render(<UnForfeit />, { wrapper });
 

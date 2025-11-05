@@ -1,7 +1,6 @@
 import { CircularProgress, Divider, Grid } from "@mui/material";
 import { memo } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
-import MissiveAlerts from "../../../components/MissiveAlerts/MissiveAlerts";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import { CAPTIONS } from "../../../constants";
 import useMasterInquiry from "./hooks/useMasterInquiry";
@@ -40,9 +39,7 @@ const MasterInquiryContent = memo(() => {
       </Grid>
       <Grid
         size={{ xs: 12 }}
-        width={"100%"}>
-        <MissiveAlerts />
-      </Grid>
+        width={"100%"}></Grid>
       <Grid
         size={{ xs: 12 }}
         width={"100%"}>

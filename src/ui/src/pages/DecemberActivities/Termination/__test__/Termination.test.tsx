@@ -4,9 +4,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockStoreAndWrapper } from "../../../../test";
 import Termination from "../Termination";
 type MockSearchParams = {
-  beginningDate?: string;
-  endingDate?: string;
-  forfeitureStatus?: string;
+  beginningDate: string;
+  endingDate: string;
+  forfeitureStatus: string;
+  profitYear: number;  // Required to match StartAndEndDateRequest
+  pagination: {         // Required to match StartAndEndDateRequest
+    skip: number;
+    take: number;
+    sortBy: string;
+    isSortDescending: boolean;
+  };
   archive?: boolean;
 };
 
@@ -218,12 +225,15 @@ describe("Termination", () => {
       vi.mocked(useLazyGetAccountingRangeToCurrent).mockReturnValueOnce([
         vi.fn(),
         {
-          data: {
-            fiscalBeginDate: null,
-            fiscalEndDate: null
-          }
+          data: undefined,
+          isFetching: false,
+          isSuccess: false,
+          isLoading: false,
+          isError: false,
+          isUninitialized: true,
+          status: "uninitialized" as const
         }
-      ] as unknown);
+      ] as unknown as ReturnType<typeof useLazyGetAccountingRangeToCurrent>);
 
       render(<Termination />, { wrapper });
 
@@ -259,13 +269,12 @@ describe("Termination", () => {
         },
         actions: {
           handleSearch: mockHandleSearch,
-          handleReset: vi.fn(),
           setInitialSearchLoaded: vi.fn(),
           handleUnsavedChanges: vi.fn(),
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      });
 
       render(<Termination />, { wrapper });
 
@@ -298,13 +307,12 @@ describe("Termination", () => {
         },
         actions: {
           handleSearch: vi.fn(),
-          handleReset: vi.fn(),
           setInitialSearchLoaded: vi.fn(),
           handleUnsavedChanges: vi.fn(),
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      });
 
       render(<Termination />, { wrapper });
 
@@ -329,13 +337,12 @@ describe("Termination", () => {
         },
         actions: {
           handleSearch: vi.fn(),
-          handleReset: vi.fn(),
           setInitialSearchLoaded: vi.fn(),
           handleUnsavedChanges: vi.fn(),
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      });
 
       render(<Termination />, { wrapper });
 
@@ -364,13 +371,12 @@ describe("Termination", () => {
         },
         actions: {
           handleSearch: vi.fn(),
-          handleReset: vi.fn(),
           setInitialSearchLoaded: vi.fn(),
           handleUnsavedChanges: vi.fn(),
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      });
 
       render(<Termination />, { wrapper });
 
@@ -397,13 +403,12 @@ describe("Termination", () => {
         },
         actions: {
           handleSearch: vi.fn(),
-          handleReset: vi.fn(),
           setInitialSearchLoaded: vi.fn(),
           handleUnsavedChanges: vi.fn(),
           handleStatusChange: mockHandleStatusChange,
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      });
 
       render(<Termination />, { wrapper });
 
@@ -492,7 +497,14 @@ describe("Termination", () => {
       const mockSearchParams: MockSearchParams = {
         beginningDate: "01/01/2024",
         endingDate: "12/31/2024",
-        forfeitureStatus: "showAll"
+        forfeitureStatus: "showAll",
+        profitYear: 2024,
+        pagination: {
+          skip: 0,
+          take: 25,
+          sortBy: "badgeNumber",
+          isSortDescending: false
+        }
       };
 
       vi.mocked(useTerminationState).mockReturnValueOnce({
@@ -507,13 +519,12 @@ describe("Termination", () => {
         },
         actions: {
           handleSearch: vi.fn(),
-          handleReset: vi.fn(),
           setInitialSearchLoaded: vi.fn(),
           handleUnsavedChanges: vi.fn(),
           handleStatusChange: vi.fn(),
           handleArchiveHandled: vi.fn()
         }
-      } as unknown);
+      });
 
       render(<Termination />, { wrapper });
 
@@ -535,7 +546,19 @@ describe("Termination", () => {
 
       vi.mocked(useTerminationState).mockReturnValueOnce({
         state: {
-          searchParams: { archive: true } as unknown,
+          searchParams: {
+            beginningDate: "01/01/2024",
+            endingDate: "12/31/2024",
+            forfeitureStatus: "showAll",
+            profitYear: 2024,
+            archive: true,
+            pagination: {
+              skip: 0,
+              take: 25,
+              sortBy: "badgeNumber",
+              isSortDescending: false
+            }
+          },
           initialSearchLoaded: true,
           hasUnsavedChanges: false,
           resetPageFlag: false,
@@ -545,13 +568,12 @@ describe("Termination", () => {
         },
         actions: {
           handleSearch: vi.fn(),
-          handleReset: vi.fn(),
           setInitialSearchLoaded: vi.fn(),
           handleUnsavedChanges: vi.fn(),
           handleStatusChange: vi.fn(),
           handleArchiveHandled: mockHandleArchiveHandled
         }
-      } as unknown);
+      });
 
       render(<Termination />, { wrapper });
 

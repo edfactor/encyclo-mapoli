@@ -154,7 +154,7 @@ describe("badgeUtils", () => {
     });
 
     it("should return false when badgeNumber is null", () => {
-      expect(isValidBadgeIdentifiers(null, 1)).toBe(false);
+      expect(isValidBadgeIdentifiers(null as unknown as number, 1)).toBe(false);
     });
 
     it("should return false when badgeNumber is undefined", () => {
@@ -166,19 +166,19 @@ describe("badgeUtils", () => {
     });
 
     it("should return false when psnSuffix is null", () => {
-      expect(isValidBadgeIdentifiers(1234567, null)).toBe(false);
+      expect(isValidBadgeIdentifiers(1234567, null as unknown as number)).toBe(false);
     });
 
     it("should return false when psnSuffix is undefined", () => {
-      expect(isValidBadgeIdentifiers(1234567, undefined)).toBe(false);
+      expect(isValidBadgeIdentifiers(1234567, undefined as unknown as number)).toBe(false);
     });
 
     it("should return false when both are missing", () => {
-      expect(isValidBadgeIdentifiers(undefined, undefined)).toBe(false);
+      expect(isValidBadgeIdentifiers(undefined as unknown as number, undefined as unknown as number)).toBe(false);
     });
 
     it("should return false when both are null", () => {
-      expect(isValidBadgeIdentifiers(null, null)).toBe(false);
+      expect(isValidBadgeIdentifiers(null as unknown as number, null as unknown as number)).toBe(false);
     });
 
     it("should return true for large badge numbers", () => {

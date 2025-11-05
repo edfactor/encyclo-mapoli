@@ -1,5 +1,5 @@
 import { ISortParams } from "smart-ui-library";
-import { SuggestedForfeitResponse } from "../../../../types/years-end/years-end";
+import { SuggestedForfeitResponse } from "@/types/december-activities/forfeitures";
 
 export interface PaginationState {
   pageNumber: number;
@@ -54,7 +54,7 @@ export interface ForfeituresAdjustmentState {
 export type ForfeituresAdjustmentAction =
   // Search actions
   | { type: "SEARCH_START"; payload: { params: ForfeitureAdjustmentSearchParams } }
-  | { type: "SEARCH_SUCCESS"; payload: { employeeData: SuggestedForfeitResponse } }
+  | { type: "SEARCH_SUCCESS"; payload: { employeeData: SuggestedForfeitResponse | null } }
   | { type: "SEARCH_FAILURE"; payload: { error: string } }
   // Member details actions
   | { type: "MEMBER_DETAILS_FETCH_START" }

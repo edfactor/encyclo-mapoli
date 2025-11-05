@@ -2,7 +2,7 @@ import { ColDef, EditableCallbackParams, ICellRendererParams } from "ag-grid-com
 import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "components/SuggestedForfeiture";
 import { numberToCurrency } from "smart-ui-library";
 import { createSaveButtonCellRenderer } from "../../../components/ForfeitActivities";
-import { ForfeitureAdjustmentUpdateRequest } from "types";
+import { ForfeitureAdjustmentUpdateRequest } from "@/types/december-activities/forfeitures";
 import {
   createCommentColumn,
   createCurrencyColumn,
@@ -11,7 +11,7 @@ import {
 } from "utils/gridColumnFactory";
 import { HeaderComponent } from "./UnForfeitHeaderComponent";
 
-function isTransactionEditable(params, isReadOnly: boolean = false): boolean {
+function isTransactionEditable(params: EditableCallbackParams, isReadOnly: boolean = false): boolean {
   return params.data.suggestedUnforfeiture != null && !isReadOnly;
 }
 

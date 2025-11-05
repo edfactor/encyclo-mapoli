@@ -26,7 +26,6 @@ internal static class TestActivityFactory
             new OverwriteBadges(),
             new SetDateOfBirthTo19YearsAgo(),
             new UpdateNavigation(),
-            new SmartPay456(),
             new ReadyActivity(ReadyActivityFactory.sshClient!, ReadyActivityFactory.SftpClient!, true, "MasterInquiryDumper", "THA-8-10", "", dataDirectory),
 
         ];

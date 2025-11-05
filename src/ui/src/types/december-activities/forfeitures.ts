@@ -9,6 +9,7 @@ export interface ForfeitureDetail extends ProfitYearRequest {
   enrollmentId: number;
   enrollmentName: string;
   profitDetailId: number;
+  [key: string]: unknown;
 }
 
 export interface UnForfeit {
@@ -24,6 +25,7 @@ export interface UnForfeit {
   terminationDate: string;
   storeNumber: number;
   details: ForfeitureDetail[];
+  [key: string]: unknown;
 }
 
 export interface SuggestForfeitureAdjustmentRequest extends SortedPaginationRequestDto {

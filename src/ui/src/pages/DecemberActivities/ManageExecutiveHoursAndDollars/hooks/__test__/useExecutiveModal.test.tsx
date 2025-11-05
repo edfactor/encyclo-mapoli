@@ -7,8 +7,16 @@ describe("useExecutiveModal", () => {
   const mockExecutive = {
     badgeNumber: 12345,
     fullName: "John Doe",
+    storeNumber: 1,
+    socialSecurity: 123456789,
     hoursExecutive: 40,
-    incomeExecutive: 1000
+    incomeExecutive: 1000,
+    currentHoursYear: 35,
+    currentIncomeYear: 900,
+    payFrequencyId: 1,
+    payFrequencyName: "Monthly",
+    employmentStatusId: "1",
+    employmentStatusName: "Active"
   };
 
   const defaultProps = {
@@ -251,12 +259,12 @@ describe("useExecutiveModal", () => {
   describe("prop updates", () => {
     it("should update when selectedExecutives changes", () => {
       const { result, rerender } = renderHook(
-        ({ executives }) =>
+        ({ executives }: { executives: (typeof mockExecutive)[] }) =>
           useExecutiveModal({
             ...defaultProps,
             selectedExecutives: executives
           }),
-        { initialProps: { executives: [] } }
+        { initialProps: { executives: [] as (typeof mockExecutive)[] } }
       );
 
       expect(result.current.selectedExecutives).toEqual([]);
@@ -342,7 +350,7 @@ describe("useExecutiveModal", () => {
             onAddExecutives,
             selectedExecutives: executives
           }),
-        { initialProps: { executives: [] } }
+        { initialProps: { executives: [] as (typeof mockExecutive)[] } }
       );
 
       const firstHandler = result.current.handleAddToMainGrid;

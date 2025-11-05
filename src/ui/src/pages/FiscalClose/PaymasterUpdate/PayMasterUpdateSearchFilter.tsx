@@ -19,9 +19,10 @@ interface ProfitYearSearchFilterProps {
   onSearch: (data: ProfitYearSearch) => void;
   onReset: () => void;
   setPageReset: (reset: boolean) => void;
+  isFetching?: boolean;
 }
 
-const PayMasterUpdateSearchFilters: React.FC<ProfitYearSearchFilterProps> = ({ onSearch, onReset, setPageReset }) => {
+const PayMasterUpdateSearchFilters: React.FC<ProfitYearSearchFilterProps> = ({ onSearch, onReset, setPageReset, isFetching = false }) => {
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
 
   const {
@@ -87,6 +88,7 @@ const PayMasterUpdateSearchFilters: React.FC<ProfitYearSearchFilterProps> = ({ o
           handleReset={handleReset}
           handleSearch={validateAndSubmit}
           disabled={!isValid}
+          isFetching={isFetching}
         />
       </Grid>
     </form>
