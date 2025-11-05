@@ -495,9 +495,9 @@ describe("MasterUpdateSummaryTable", { timeout: 16000 }, () => {
 
   describe("Null Safety in Popups", () => {
     it("handles null validation data gracefully in Beginning Balance popup", () => {
-      const mockGetFieldValidationWithNulls = (field: string): { isValid: boolean; currentValue: number | null; expectedValue: number | null; variance?: number; message?: string } | null => {
+      const mockGetFieldValidationWithNulls = (field: string): { isValid: boolean; currentValue: number; expectedValue: number; variance?: number; message?: string } | null => {
         if (field === "TotalProfitSharingBalance") {
-          return { isValid: false, currentValue: null, expectedValue: null };
+          return { isValid: false, currentValue: 0, expectedValue: 0 };
         }
         return null;
       };
@@ -584,10 +584,10 @@ describe("MasterUpdateSummaryTable", { timeout: 16000 }, () => {
     });
 
     it("handles null validation data gracefully in Distributions popup", () => {
-      const mockGetFieldValidationWithNulls = (field: string): { isValid: boolean; currentValue: number | null; expectedValue: number | null; variance?: number; message?: string } | null => {
+      const mockGetFieldValidationWithNulls = (field: string): { isValid: boolean; currentValue: number; expectedValue: number; variance?: number; message?: string } | null => {
         if (field === "DistributionTotals") {
-          // Return null for currentValue and expectedValue to test null handling
-          return { isValid: false, currentValue: null, expectedValue: null };
+          // Return 0 for currentValue and expectedValue to test null handling
+          return { isValid: false, currentValue: 0, expectedValue: 0 };
         }
         return null;
       };
@@ -647,13 +647,13 @@ describe("MasterUpdateSummaryTable", { timeout: 16000 }, () => {
     });
 
     it("handles undefined currentValue and expectedValue properties", () => {
-      const mockGetFieldValidationWithUndefined = (field: string) => {
+      const mockGetFieldValidationWithUndefined = (field: string): { isValid: boolean; currentValue: number; expectedValue: number; variance?: number; message?: string } | null => {
         if (field === "TotalProfitSharingBalance") {
           return {
             isValid: false,
-            currentValue: undefined,
-            expectedValue: undefined
-          } as { isValid: boolean; currentValue: number | undefined; expectedValue: number | undefined; variance?: number; message?: string };
+            currentValue: 0,
+            expectedValue: 0
+          };
         }
         return null;
       };

@@ -1,4 +1,4 @@
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import * as useLazyGetRecentlyTerminatedReportQuery from "reduxstore/api/YearsEndApi";
 import { RecentlyTerminatedDetail } from "reduxstore/types";
 import type { RecentlyTerminatedResponse } from "../../../../../types/reports/recent-termination";
@@ -112,18 +112,22 @@ describe("useRecentlyTerminated", () => {
 
     // Mock useGridPagination - capture the callback
     const mockHandlePaginationChange = vi.fn();
+    const mockSortParams = {
+      sortBy: "fullName, terminationDate",
+      isSortDescending: false
+    };
     vi.spyOn(useGridPagination, "useGridPagination").mockImplementation((config) => {
-      // When the hook calls useGridPagination with a callback, capture it
+      // When the hook calls useGridPagination with a callback, capture it and wrap it
       if (config?.onPaginationChange) {
-        mockHandlePaginationChange.mockImplementation(config.onPaginationChange);
+        mockHandlePaginationChange.mockImplementation((pageNumber: number, pageSize: number) => {
+          // Simulate real useGridPagination behavior: call callback with sortParams
+          return config.onPaginationChange!(pageNumber, pageSize, mockSortParams);
+        });
       }
       return {
         pageNumber: 0,
         pageSize: 25,
-        sortParams: {
-          sortBy: "fullName, terminationDate",
-          isSortDescending: false
-        },
+        sortParams: mockSortParams,
         handlePaginationChange: mockHandlePaginationChange,
         handleSortChange: vi.fn(),
         resetPagination: mockResetPagination
@@ -158,7 +162,7 @@ describe("useRecentlyTerminated", () => {
           fulfilledTimeStamp: undefined
         },
         { lastArg: undefined, requestStatus: "uninitialized" }
-      ] as unknown as ReturnType<typeof useLazyGetRecentlyTerminatedReportQuery>
+      ] as unknown as ReturnType<typeof useLazyGetRecentlyTerminatedReportQuery.useLazyGetRecentlyTerminatedReportQuery>
     );
   });
 
@@ -414,14 +418,17 @@ describe("useRecentlyTerminated", () => {
         await result.current.gridPagination.handlePaginationChange(1, 25);
       });
 
-      expect(mockTriggerSearch).toHaveBeenCalledWith(
-        expect.objectContaining({
-          pagination: expect.objectContaining({
-            skip: 25,
-            take: 25
+      // Wait for the deferred callback to execute (setTimeout in useGridPagination)
+      await waitFor(() => {
+        expect(mockTriggerSearch).toHaveBeenCalledWith(
+          expect.objectContaining({
+            pagination: expect.objectContaining({
+              skip: 25,
+              take: 25
+            })
           })
-        })
-      );
+        );
+      });
     });
 
     it("should not paginate if no search params exist", async () => {
@@ -506,7 +513,10 @@ describe("useRecentlyTerminated", () => {
         await result.current.gridPagination.handlePaginationChange(1, 25);
       });
 
-      expect(result.current.reportError).toBe(errorMsg);
+      // Wait for the deferred callback and error handling to complete
+      await waitFor(() => {
+        expect(result.current.reportError).toBe(errorMsg);
+      });
     });
   });
 
@@ -641,7 +651,10 @@ describe("useRecentlyTerminated", () => {
         await result.current.gridPagination.handlePaginationChange(1, 25);
       });
 
-      expect(mockTriggerSearch).toHaveBeenCalledTimes(1);
+      // Wait for the deferred callback to execute
+      await waitFor(() => {
+        expect(mockTriggerSearch).toHaveBeenCalledTimes(1);
+      });
 
       // Reset
       act(() => {

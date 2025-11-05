@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { EmployeeDetails } from "reduxstore/types";
 import { initialState, masterInquiryReducer, MasterInquiryState } from "../useMasterInquiryReducer";
 
 /**

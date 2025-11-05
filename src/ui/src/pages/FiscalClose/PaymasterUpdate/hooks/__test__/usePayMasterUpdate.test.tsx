@@ -474,7 +474,7 @@ describe("usePayMasterUpdate", () => {
       });
 
       expect(mockUpdateEnrollment).toHaveBeenCalledWith({
-        ProfitYearRequest: 2024
+        profitYear: 2024
       });
       expect(result.current.isModalOpen).toBe(false);
     });
