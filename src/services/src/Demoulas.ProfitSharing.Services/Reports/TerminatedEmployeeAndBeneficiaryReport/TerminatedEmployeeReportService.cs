@@ -146,25 +146,27 @@ public sealed class TerminatedEmployeeReportService
         CalendarResponseDto priorYearDateRange = await _calendarService.GetYearStartAndEndAccountingDatesAsync(lastCompletedYearEnd, cancellationToken);
 
         var thisYearStart = DateTime.UtcNow;
-        Dictionary<int, ParticipantTotalVestingBalance> thisYearBalancesDict = await _totalService
+        Dictionary<(int Ssn, int Id), ParticipantTotalVestingBalance> thisYearBalancesDict = await _totalService
             .TotalVestingBalance(ctx, profitYearRange.beginProfitYear, profitYearRange.endProfitYear, today)
             .Where(x => ssns.Contains(x.Ssn))
-            .ToDictionaryAsync(x => x.Ssn, x => x, cancellationToken);
+            .ToDictionaryAsync(x => (x.Ssn, x.Id), x => x, cancellationToken);
         var thisYearDuration = (DateTime.UtcNow - thisYearStart).TotalMilliseconds;
         _logger.LogInformation("ThisYearBalances dictionary loaded in {DurationMs:F2}ms with {RecordCount} entries", thisYearDuration, thisYearBalancesDict.Count);
 
         var lastYearStart = DateTime.UtcNow;
         Dictionary<int, ParticipantTotal> lastYearBalancesDict = await _totalService.GetTotalBalanceSet(ctx, lastCompletedYearEnd)
             .Where(x => ssns.Contains(x.Ssn))
+            .GroupBy(x => x.Ssn)
+            .Select(g => g.First())
             .ToDictionaryAsync(x => x.Ssn, x => x, cancellationToken);
         var lastYearDuration = (DateTime.UtcNow - lastYearStart).TotalMilliseconds;
         _logger.LogInformation("LastYearBalances dictionary loaded in {DurationMs:F2}ms with {RecordCount} entries", lastYearDuration, lastYearBalancesDict.Count);
 
         var vestedStart = DateTime.UtcNow;
-        Dictionary<int, ParticipantTotalVestingBalance> lastYearVestedBalancesDict = await _totalService
+        Dictionary<(int Ssn, int Id), ParticipantTotalVestingBalance> lastYearVestedBalancesDict = await _totalService
             .TotalVestingBalance(ctx, /*PayProfit Year*/lastCompletedYearEnd, /*Desired Year*/lastCompletedYearEnd, priorYearDateRange.FiscalEndDate)
             .Where(x => ssns.Contains(x.Ssn))
-            .ToDictionaryAsync(x => x.Ssn, x => x, cancellationToken);
+            .ToDictionaryAsync(x => (x.Ssn, x.Id), x => x, cancellationToken);
         var vestedDuration = (DateTime.UtcNow - vestedStart).TotalMilliseconds;
         _logger.LogInformation("LastYearVestedBalances dictionary loaded in {DurationMs:F2}ms with {RecordCount} entries", vestedDuration, lastYearVestedBalancesDict.Count);
 
@@ -189,10 +191,16 @@ public sealed class TerminatedEmployeeReportService
                 : 0m;
 
             // Get vesting balance and percentage from this year
-            ParticipantTotalVestingBalance? thisYearVestedBalance = thisYearBalancesDict.GetValueOrDefault(memberSlice.Ssn);
+            ParticipantTotalVestingBalance? thisYearVestedBalance = thisYearBalancesDict
+                .Where(kvp => kvp.Key.Ssn == memberSlice.Ssn)
+                .FirstOrDefault()
+                .Value;
             decimal vestedBalance = thisYearVestedBalance?.VestedBalance ?? 0m;
 
-            ParticipantTotalVestingBalance? lastYearVestedBalance = lastYearVestedBalancesDict.GetValueOrDefault(memberSlice.Ssn);
+            ParticipantTotalVestingBalance? lastYearVestedBalance = lastYearVestedBalancesDict
+                .Where(kvp => kvp.Key.Ssn == memberSlice.Ssn)
+                .FirstOrDefault()
+                .Value;
             decimal vestedRatio = lastYearVestedBalance?.VestingPercent ?? 0;
 
             // Create member record with all values
