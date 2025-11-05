@@ -4,7 +4,6 @@ import {
   createCityColumn,
   createDateColumn,
   createNameColumn,
-  createPSNColumn,
   createSSNColumn,
   createStateColumn,
   createZipColumn
@@ -14,14 +13,7 @@ export const GetBeneficiariesListGridColumns = (
   percentageFieldRenderer: (percentage: number, id: number) => React.JSX.Element
 ): ColDef[] => {
   return [
-    createBadgeColumn({}),
-    createPSNColumn({
-      headerName: "Psn",
-      field: "psnSuffix",
-      maxWidth: 80,
-      enableLinking: true,
-      linkingStyle: "simple"
-    }),
+    createBadgeColumn({ headerName: 'Badge/Psn', psnSuffix: true }),
     createNameColumn({
       field: "fullName",
 
