@@ -172,10 +172,24 @@ public sealed class TerminatedEmployeeReportService
         var processingStart = DateTime.UtcNow;
         List<(int BadgeNumber, short PsnSuffix, string? Name, TerminatedEmployeeAndBeneficiaryYearDetailDto YearDetail)> yearDetailsList = new();
 
-        var memberSliceCollection = memberSliceUnion.Where(m => !(m.YearsInPs <= 2 && m.HoursCurrentYear >= /*1000*/ ReferenceData.MinimumHoursForContribution())).AsAsyncEnumerable();
+        // Deduplication: Process employees first, then beneficiaries; skip beneficiaries if employee already processed
+        // This prevents duplicates when a person appears as both terminated employee and beneficiary
+        var seenMembers = new HashSet<(int BadgeNumber, short PsnSuffix)>();
+
+        var memberSliceCollection = memberSliceUnion
+            .Where(m => !(m.YearsInPs <= 2 && m.HoursCurrentYear >= ReferenceData.MinimumHoursForContribution()))
+            .AsAsyncEnumerable();
 
         await foreach (MemberSlice memberSlice in memberSliceCollection)
         {
+            // Skip duplicate: If same (BadgeNumber, PsnSuffix) already processed, skip this record
+            // Since union is employees.Concat(beneficiaries), employees are processed first,
+            // so beneficiary records for the same person are automatically skipped
+            if (!seenMembers.Add((memberSlice.BadgeNumber, memberSlice.PsnSuffix)))
+            {
+                continue; // Duplicate - already processed as employee
+            }
+
             // Get transactions for this member
             var key = new { memberSlice.Ssn, memberSlice.ProfitYear };
             if (!profitDetailsDict.TryGetValue(key, out InternalProfitDetailDto? transactionsThisYear))
