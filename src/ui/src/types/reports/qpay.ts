@@ -38,3 +38,46 @@ export interface QPAY066BTerminatedWithVestedBalanceResponse {
   endDate: string;
   response: PagedReportResponse<QPAY066BTerminatedEmployee>;
 }
+
+export interface ProfitSharingUnder21ReportRequest {
+  profitYear: number;
+  pagination: SortedPaginationRequestDto;
+}
+
+export interface ProfitSharingUnder21ReportDetail {
+  storeNumber: number;
+  badgeNumber: number;
+  firstName: string;
+  lastName: string;
+  ssn: string;
+  profitSharingYears: number;
+  isNew: boolean;
+  thisYearHours: number;
+  lastYearHours: number;
+  hireDate: string;
+  fullTimeDate: string | null;
+  terminationDate: string | null;
+  dateOfBirth: string;
+  age: number;
+  employmentStatusId: string;
+  currentBalance: number;
+  enrollmentId: number;
+  isExecutive: boolean;
+}
+
+export interface ProfitSharingUnder21TotalForStatus {
+  totalVested: number;
+  partiallyVested: number;
+  partiallyVestedButLessThanThreeYears: number;
+}
+
+export interface ProfitSharingUnder21ReportResponse extends PagedReportResponse<ProfitSharingUnder21ReportDetail> {
+  reportName: string;
+  reportDate: string;
+  startDate: string;
+  endDate: string;
+  activeTotals: ProfitSharingUnder21TotalForStatus;
+  inactiveTotals: ProfitSharingUnder21TotalForStatus;
+  terminatedTotals: ProfitSharingUnder21TotalForStatus;
+  totalUnder21: number;
+}

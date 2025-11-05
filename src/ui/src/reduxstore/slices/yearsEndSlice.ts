@@ -38,6 +38,7 @@ import {
   ProfitShareUpdateResponse,
   ProfitSharingDistributionsByAge,
   ProfitSharingLabel,
+  ProfitSharingUnder21ReportResponse,
   ProfitYearRequest,
   RecentlyTerminatedResponse,
   ReportsByAgeParams,
@@ -126,6 +127,7 @@ export interface YearsEndState {
   profitSharingMaster: ProfitShareMasterResponse | null;
   profitSharingRevert: ProfitShareMasterResponse | null;
   profitSharingUpdateAdjustmentSummary: ProfitShareAdjustmentSummary | null;
+  profitSharingUnder21Report: ProfitSharingUnder21ReportResponse | null;
   termination: TerminationResponse | null;
   recentlyTerminated: RecentlyTerminatedResponse | null;
   recentlyTerminatedQueryParams: StartAndEndDateRequest | null;
@@ -229,6 +231,7 @@ const initialState: YearsEndState = {
   profitSharingMaster: null,
   profitSharingRevert: null,
   profitSharingUpdateAdjustmentSummary: null,
+  profitSharingUnder21Report: null,
   profitEditUpdateChangesAvailable: false,
   profitEditUpdateRevertChangesAvailable: false,
   termination: null,
@@ -291,6 +294,12 @@ export const yearsEndSlice = createSlice({
     },
     setProfitSharingUpdateAdjustmentSummary: (state, action: PayloadAction<ProfitShareAdjustmentSummary>) => {
       state.profitSharingUpdateAdjustmentSummary = action.payload;
+    },
+    clearProfitSharingUnder21Report: (state) => {
+      state.profitSharingUnder21Report = null;
+    },
+    setProfitSharingUnder21Report: (state, action: PayloadAction<ProfitSharingUnder21ReportResponse>) => {
+      state.profitSharingUnder21Report = action.payload;
     },
     addBadgeNumberToUpdateAdjustmentSummary: (state, action: PayloadAction<number>) => {
       if (state.profitSharingUpdateAdjustmentSummary) {
@@ -1148,6 +1157,8 @@ export const {
   clearProfitSharingEditQueryParams,
   updateProfitSharingEditQueryParam,
   setProfitSharingUpdateAdjustmentSummary,
+  clearProfitSharingUnder21Report,
+  setProfitSharingUnder21Report,
   addBadgeNumberToUpdateAdjustmentSummary,
   clearExecutiveHoursAndDollarsAddQueryParams,
   setExecutiveHoursAndDollarsAddQueryParams,
