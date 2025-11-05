@@ -46,8 +46,8 @@ import EnvironmentUtils from "../../utils/environmentUtils";
 import { createUnauthorizedParams, isPathAllowedInNavigation } from "../../utils/navigationAccessUtils";
 import { validateImpersonationRoles, validateRoleRemoval } from "../../utils/roleUtils";
 
-import PayMasterUpdateSummary from "@/pages/FiscalClose/PayMasterUpdate/PayMasterUpdateSummary";
-import ProfitSharingControlSheet from "@/pages/FiscalClose/PayMasterUpdate/ProfitSharingControlSheet";
+import PayMasterUpdateSummary from "@/pages/FiscalClose/PaymasterUpdate/PayMasterUpdateSummary";
+import ProfitSharingControlSheet from "@/pages/FiscalClose/PaymasterUpdate/ProfitSharingControlSheet";
 import { ImpersonationMultiSelect } from "../../components/MenuBar/ImpersonationMultiSelect";
 import { MenuBar } from "../../components/MenuBar/MenuBar";
 import DistributionInquiry from "../../pages//Distributions/DistributionInquiry/DistributionInquiry";
