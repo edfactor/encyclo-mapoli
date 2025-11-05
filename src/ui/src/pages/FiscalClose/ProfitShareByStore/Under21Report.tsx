@@ -6,16 +6,14 @@ import StatusDropdownActionNode from "../../../components/StatusDropdownActionNo
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useGridPagination } from "../../../hooks/useGridPagination";
-import { useLazyGetPostFrozenUnder21Query, useLazyGetUnder21TotalsQuery } from "../../../reduxstore/api/YearsEndApi";
+import { useLazyGetPostFrozenUnder21Query } from "../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../reduxstore/store";
 import PostFrozenUnder21ReportGrid from "./PostFrozenUnder21ReportGrid";
-import Under21Summary from "./Under21/Under21Summary";
+import Under21ReportTotals from "./Under21ReportTotals";
 
 const Under21Report = () => {
-  const [fetchUnder21Totals, { isLoading: isTotalsLoading }] = useLazyGetUnder21TotalsQuery();
   const [fetchProfitSharingUnder21Report, { isLoading: isBreakdownLoading }] = useLazyGetPostFrozenUnder21Query();
-  const under21Totals = useSelector((state: RootState) => state.yearsEnd.under21Totals);
-  const under21Breakdown = useSelector((state: RootState) => state.yearsEnd.profitSharingUnder21Report);
+  const profitSharingUnder21Data = useSelector((state: RootState) => state.yearsEnd.profitSharingUnder21Report);
   const [initialLoad, setInitialLoad] = useState(true);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [manualLoading, setManualLoading] = useState(false);
@@ -27,8 +25,8 @@ const Under21Report = () => {
   });
 
   const profitYear = useDecemberFlowProfitYear();
-  const isLoading = isTotalsLoading || isBreakdownLoading || manualLoading;
-  const hasData = !!under21Totals && !!under21Breakdown;
+  const isLoading = isBreakdownLoading || manualLoading;
+  const hasData = !!profitSharingUnder21Data;
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
   };
@@ -49,7 +47,7 @@ const Under21Report = () => {
       };
 
       try {
-        await Promise.all([fetchUnder21Totals(queryParams), fetchProfitSharingUnder21Report(queryParams)]);
+        await fetchProfitSharingUnder21Report(queryParams);
       } finally {
         setManualLoading(false);
         setInitialLoad(false);
@@ -58,7 +56,6 @@ const Under21Report = () => {
 
     fetchData();
   }, [
-    fetchUnder21Totals,
     fetchProfitSharingUnder21Report,
     gridPagination.pageNumber,
     gridPagination.pageSize,
@@ -82,7 +79,7 @@ const Under21Report = () => {
         }
       };
 
-      Promise.all([fetchUnder21Totals(queryParams), fetchProfitSharingUnder21Report(queryParams)]).finally(() => {
+      fetchProfitSharingUnder21Report(queryParams).finally(() => {
         setManualLoading(false);
       });
     }
@@ -92,7 +89,6 @@ const Under21Report = () => {
     gridPagination.pageSize,
     gridPagination.sortParams.sortBy,
     gridPagination.sortParams.isSortDescending,
-    fetchUnder21Totals,
     fetchProfitSharingUnder21Report,
     profitYear
   ]);
@@ -105,25 +101,6 @@ const Under21Report = () => {
       prevProfitYear.current = profitYear;
     }
   }, [profitYear, gridPagination]);
-
-  /*
-  const handleSearch = (profitYear: number, isSortDescending: boolean) => {
-    const queryParams = {
-      profitYear,
-      isSortDescending,
-      pagination: {
-        take: pageSize,
-        skip: pageNumber * pageSize,
-        sortBy: sortParams.sortBy,
-        isSortDescending
-      }
-    };
-
-    fetchUnder21Totals(queryParams);
-    fetchUnder21Breakdown(queryParams);
-  };
-
-  */
 
   return (
     <Page
@@ -152,9 +129,9 @@ const Under21Report = () => {
               <Grid
                 width="100%"
                 paddingX="24px">
-                <Under21Summary
-                  totals={under21Totals}
-                  isLoading={isTotalsLoading}
+                <Under21ReportTotals
+                  totals={profitSharingUnder21Data}
+                  isLoading={isLoading}
                   title="UNDER 21 REPORT (QPAY066-UNDR21)"
                 />
               </Grid>
