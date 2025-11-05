@@ -420,7 +420,7 @@ public sealed class Program
     private static async Task GrantSelectPermissionsIfUat(ProfitSharingDbContext context, string? environment)
     {
         // Only grant permissions in UAT environment
-        if (environment?.Equals("UAT", StringComparison.OrdinalIgnoreCase) != true)
+        if (environment?.Equals(Constants.UAT, StringComparison.OrdinalIgnoreCase) != true)
         {
             return;
         }
