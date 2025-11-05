@@ -5,101 +5,102 @@ import { Page } from "smart-ui-library";
 import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
-import {
-  useLazyGetUnder21BreakdownByStoreQuery,
-  useLazyGetUnder21TotalsQuery
-} from "../../../reduxstore/api/YearsEndApi";
+import { useGridPagination } from "../../../hooks/useGridPagination";
+import { useLazyGetPostFrozenUnder21Query } from "../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../reduxstore/store";
-import Under21BreakdownGrid from "./Under21/Under21BreakdownGrid";
-import Under21Summary from "./Under21/Under21Summary";
+import PostFrozenUnder21ReportGrid from "./PostFrozenUnder21ReportGrid";
+import Under21ReportTotals from "./Under21ReportTotals";
 
 const Under21Report = () => {
-  const [fetchUnder21Totals, { isLoading: isTotalsLoading }] = useLazyGetUnder21TotalsQuery();
-  const [fetchUnder21Breakdown, { isLoading: isBreakdownLoading }] = useLazyGetUnder21BreakdownByStoreQuery();
-  const under21Totals = useSelector((state: RootState) => state.yearsEnd.under21Totals);
-  const under21Breakdown = useSelector((state: RootState) => state.yearsEnd.under21BreakdownByStore);
+  const [fetchProfitSharingUnder21Report, { isLoading: isBreakdownLoading }] = useLazyGetPostFrozenUnder21Query();
+  const profitSharingUnder21Data = useSelector((state: RootState) => state.yearsEnd.profitSharingUnder21Report);
   const [initialLoad, setInitialLoad] = useState(true);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
-  const [pageNumber, setPageNumber] = useState<number>(0);
-  const [pageSize, _setPageSize] = useState<number>(25);
-  const [sortParams, _setSortParams] = useState({
-    sortBy: "badgeNumber",
-    isSortDescending: false
+  const [manualLoading, setManualLoading] = useState(false);
+
+  const gridPagination = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "badgeNumber",
+    initialSortDescending: false
   });
 
   const profitYear = useDecemberFlowProfitYear();
-  const isLoading = isTotalsLoading || isBreakdownLoading;
-  const hasData = !!under21Totals && !!under21Breakdown;
+  const isLoading = isBreakdownLoading || manualLoading;
+  const hasData = !!profitSharingUnder21Data;
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
   };
 
   useEffect(() => {
     const fetchData = async () => {
+      setManualLoading(true);
+
       const queryParams = {
         profitYear: profitYear,
-        isSortDescending: sortParams.isSortDescending,
+        isSortDescending: gridPagination.sortParams.isSortDescending,
         pagination: {
-          take: pageSize,
-          skip: pageNumber * pageSize,
-          sortBy: sortParams.sortBy,
-          isSortDescending: sortParams.isSortDescending
+          take: gridPagination.pageSize,
+          skip: gridPagination.pageNumber * gridPagination.pageSize,
+          sortBy: gridPagination.sortParams.sortBy,
+          isSortDescending: gridPagination.sortParams.isSortDescending
         }
       };
 
-      await Promise.all([fetchUnder21Totals(queryParams), fetchUnder21Breakdown(queryParams)]);
-
-      setInitialLoad(false);
-    };
-
-    fetchData();
-  }, [fetchUnder21Totals, fetchUnder21Breakdown, pageNumber, pageSize, sortParams, profitYear]);
-
-  useEffect(() => {
-    if (initialSearchLoaded) {
-      const queryParams = {
-        profitYear: profitYear,
-        isSortDescending: sortParams.isSortDescending,
-        pagination: {
-          take: pageSize,
-          skip: pageNumber * pageSize,
-          sortBy: sortParams.sortBy,
-          isSortDescending: sortParams.isSortDescending
-        }
-      };
-
-      fetchUnder21Totals(queryParams);
-      fetchUnder21Breakdown(queryParams);
-    }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, fetchUnder21Totals, fetchUnder21Breakdown, profitYear]);
-
-  // Need a useEffect to reset the page number when under21Totals changes
-  const prevUnder21Totals = useRef<typeof under21Totals>(null);
-  useEffect(() => {
-    if (under21Totals?.numberOfEmployees !== prevUnder21Totals.current?.numberOfEmployees) {
-      setPageNumber(0);
-    }
-    prevUnder21Totals.current = under21Totals;
-  }, [under21Totals]);
-
-  /*
-  const handleSearch = (profitYear: number, isSortDescending: boolean) => {
-    const queryParams = {
-      profitYear,
-      isSortDescending,
-      pagination: {
-        take: pageSize,
-        skip: pageNumber * pageSize,
-        sortBy: sortParams.sortBy,
-        isSortDescending
+      try {
+        await fetchProfitSharingUnder21Report(queryParams);
+      } finally {
+        setManualLoading(false);
+        setInitialLoad(false);
       }
     };
 
-    fetchUnder21Totals(queryParams);
-    fetchUnder21Breakdown(queryParams);
-  };
+    fetchData();
+  }, [
+    fetchProfitSharingUnder21Report,
+    gridPagination.pageNumber,
+    gridPagination.pageSize,
+    gridPagination.sortParams.sortBy,
+    gridPagination.sortParams.isSortDescending,
+    profitYear
+  ]);
 
-  */
+  useEffect(() => {
+    if (initialSearchLoaded) {
+      setManualLoading(true);
+
+      const queryParams = {
+        profitYear: profitYear,
+        isSortDescending: gridPagination.sortParams.isSortDescending,
+        pagination: {
+          take: gridPagination.pageSize,
+          skip: gridPagination.pageNumber * gridPagination.pageSize,
+          sortBy: gridPagination.sortParams.sortBy,
+          isSortDescending: gridPagination.sortParams.isSortDescending
+        }
+      };
+
+      fetchProfitSharingUnder21Report(queryParams).finally(() => {
+        setManualLoading(false);
+      });
+    }
+  }, [
+    initialSearchLoaded,
+    gridPagination.pageNumber,
+    gridPagination.pageSize,
+    gridPagination.sortParams.sortBy,
+    gridPagination.sortParams.isSortDescending,
+    fetchProfitSharingUnder21Report,
+    profitYear
+  ]);
+
+  // Reset page number when profit year changes (not when data updates during pagination)
+  const prevProfitYear = useRef<number>(profitYear);
+  useEffect(() => {
+    if (profitYear !== prevProfitYear.current) {
+      gridPagination.handlePaginationChange(0, gridPagination.pageSize);
+      prevProfitYear.current = profitYear;
+    }
+  }, [profitYear, gridPagination]);
 
   return (
     <Page
@@ -128,18 +129,19 @@ const Under21Report = () => {
               <Grid
                 width="100%"
                 paddingX="24px">
-                <Under21Summary
-                  totals={under21Totals}
-                  isLoading={isTotalsLoading}
+                <Under21ReportTotals
+                  totals={profitSharingUnder21Data}
+                  isLoading={isLoading}
                   title="UNDER 21 REPORT (QPAY066-UNDR21)"
                 />
               </Grid>
             )}
 
             <Grid width="100%">
-              <Under21BreakdownGrid
-                isLoading={isBreakdownLoading}
+              <PostFrozenUnder21ReportGrid
+                isLoading={isLoading}
                 setInitialSearchLoaded={setInitialSearchLoaded}
+                gridPagination={gridPagination}
               />
             </Grid>
           </>

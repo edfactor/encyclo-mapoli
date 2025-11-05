@@ -4,10 +4,12 @@ import {
   createCurrencyColumn,
   createDateColumn,
   createNameColumn,
-  createPercentageColumn
+  createPercentageColumn,
+  createStoreColumn
 } from "utils/gridColumnFactory";
 
 export const GetUnder21BreakdownColumnDefs = () => [
+  createStoreColumn({}),
   createBadgeColumn({
     renderAsLink: true
   }),
