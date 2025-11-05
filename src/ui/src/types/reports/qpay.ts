@@ -71,7 +71,7 @@ export interface ProfitSharingUnder21TotalForStatus {
   partiallyVestedButLessThanThreeYears: number;
 }
 
-export interface ProfitSharingUnder21ReportResponse {
+export interface ProfitSharingUnder21ReportResponse extends PagedReportResponse<ProfitSharingUnder21ReportDetail> {
   reportName: string;
   reportDate: string;
   startDate: string;
@@ -80,5 +80,4 @@ export interface ProfitSharingUnder21ReportResponse {
   inactiveTotals: ProfitSharingUnder21TotalForStatus;
   terminatedTotals: ProfitSharingUnder21TotalForStatus;
   totalUnder21: number;
-  response: PagedReportResponse<ProfitSharingUnder21ReportDetail>;
 }
