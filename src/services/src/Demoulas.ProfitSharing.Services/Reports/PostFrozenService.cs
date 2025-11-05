@@ -201,6 +201,17 @@ public class PostFrozenService : IPostFrozenService
             return await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var sortRequest = request with 
+                { 
+                    SortBy = request.SortBy switch 
+                    { 
+                        "profitSharingYears" => "YearsInPlan",
+                        "isNew" => "IsNewLastYear",
+                        "thisYearHours" => "CurrentYearHours",
+                        "age" => "DateOfBirth",
+                        _ => request.SortBy,
+                    }
+                };
 
                 // First get anonymous type from database query (no Age() or MaskSsn() calls in query)
                 var rawPagedData = await (
@@ -232,7 +243,7 @@ public class PostFrozenService : IPostFrozenService
                         EnrollmentId = tyPp != null ? tyPp.EnrollmentId : (byte)0,
                         IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly
                     }
-                ).ToPaginationResultsAsync(request, cancellationToken: cancellationToken);
+                ).ToPaginationResultsAsync(sortRequest, cancellationToken: cancellationToken);
 
                 // Then project to final type with post-query SSN masking and age calculation
                 return new PaginatedResponseDto<ProfitSharingUnder21ReportDetail>(request)
