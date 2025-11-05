@@ -73,7 +73,7 @@ describe("MasterInquiryFunctions", () => {
       const params: MasterInquirySearch = {
         name: undefined,
         socialSecurity: undefined,
-        badgeNumber: "12345",
+        badgeNumber: 12345,
         endProfitYear: 2024,
         startProfitMonth: undefined,
         endProfitMonth: undefined,

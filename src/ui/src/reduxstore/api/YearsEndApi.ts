@@ -170,7 +170,7 @@ export const YearsEndApi = createApi({
       // after we do the update. Yet the working copy in the grid is
       // the correct data, a refresh is not needed.
     }),
-    updateEnrollment: builder.mutation<void, { ProfitYearRequest }>({
+    updateEnrollment: builder.mutation<void, ProfitYearRequest>({
       query: (params) => ({
         url: `yearend/update-enrollment`,
         method: "POST",
@@ -674,8 +674,8 @@ export const YearsEndApi = createApi({
     getTerminationReport: builder.query<TerminationResponse, TerminationRequestWithArchive>({
       query: (params) => {
         const body: {
-          beginningDate: Date;
-          endingDate: Date;
+          beginningDate: string;
+          endingDate: string;
           skip: number;
           take: number;
           sortBy?: string;

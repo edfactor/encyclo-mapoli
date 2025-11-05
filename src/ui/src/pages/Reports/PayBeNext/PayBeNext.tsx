@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, Divider, FormLabel, Grid, MenuItem, Select, Typography } from "@mui/material";
-import { ICellRendererParams } from "ag-grid-community";
+import { CellClickedEvent, ICellRendererParams } from "ag-grid-community";
 import { useMemo, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { DSMAccordion, DSMGrid, ISortParams, Page, Pagination, SearchAndReset } from "smart-ui-library";
@@ -112,7 +112,7 @@ const PayBeNext = () => {
         }
         return "";
       },
-      onCellClicked: (event: ICellRendererParams) => {
+      onCellClicked: (event: CellClickedEvent) => {
         if (event.data && !event.data.isDetail && event.data.isExpandable) {
           handleRowExpansion(event.data.badgeNumber.toString() + event.data.beneficiaryId.toString());
         }

@@ -18,11 +18,6 @@ interface SearchFormData {
   badgeNumber?: string;
 }
 
-interface ExecuteSearchData {
-  socialSecurity?: string;
-  badgeNumber?: number;
-}
-
 // Define schema with proper typing for our form
 const validationSchema = yup
   .object({
@@ -64,12 +59,8 @@ const MilitaryContributionSearchFilter: React.FC = () => {
   }, [socialSecurity, badgeNumber]);
 
   const onSubmit = async (data: SearchFormData) => {
-    // Convert badgeNumber string to number for API if it exists
-    const searchData: ExecuteSearchData = {
-      socialSecurity: data.socialSecurity,
-      badgeNumber: data.badgeNumber ? Number(data.badgeNumber) : undefined
-    };
-    await executeSearch(searchData, defaultProfitYear);
+    // executeSearch will handle the conversion internally
+    await executeSearch(data, defaultProfitYear);
   };
 
   const handleReset = () => {

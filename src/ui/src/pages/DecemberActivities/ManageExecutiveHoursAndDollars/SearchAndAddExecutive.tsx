@@ -9,6 +9,7 @@ import ManageExecutiveHoursAndDollarsSearchFilter from "./ManageExecutiveHoursAn
 // PS-1623: Secure-by-default, all add actions are read-only unless explicitly overridden. QA: Verify add button is disabled unless isReadOnly is false.
 
 interface ExecutiveSearchForm {
+  [key: string]: unknown;
   profitYear?: number;
   badgeNumber?: number;
   name?: string;

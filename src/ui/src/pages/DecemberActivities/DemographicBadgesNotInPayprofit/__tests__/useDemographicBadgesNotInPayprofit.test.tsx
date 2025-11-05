@@ -50,7 +50,14 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
 
     const mockTrigger = vi.fn().mockReturnValue({
       unwrap: vi.fn().mockResolvedValue({
-        results: [{ badgeNumber: 12345, storeName: "Store 1", employeeName: "John Doe" }],
+        results: [{
+          badgeNumber: 12345,
+          ssn: 123456789,
+          employeeName: "John Doe",
+          store: 1,
+          status: "A",
+          statusName: "Active"
+        }],
         total: 1
       })
     });

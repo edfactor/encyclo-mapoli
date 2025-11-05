@@ -71,7 +71,7 @@ const EditDistributionContent = () => {
 
         // Step 1: Search for member using badge number
         const searchResponse = await triggerSearchMember({
-          badgeNumber: currentDistribution.badgeNumber,
+          badgeNumber: currentDistribution.badgeNumber ?? undefined,
           memberType: memberTypeNum,
           endProfitYear: profitYear,
           pagination: {
@@ -331,7 +331,7 @@ const EditDistributionContent = () => {
 
           {/* Pending Disbursements List Section */}
           <PendingDisbursementsList
-            badgeNumber={currentDistribution.badgeNumber}
+            badgeNumber={currentDistribution.badgeNumber!}
             memberType={currentDistribution.demographicId ? 1 : 2}
           />
         </>

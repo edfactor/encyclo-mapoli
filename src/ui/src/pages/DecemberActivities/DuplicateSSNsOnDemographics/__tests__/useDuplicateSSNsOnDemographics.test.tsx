@@ -24,19 +24,21 @@ vi.mock("react-redux", () => ({
 }));
 
 const { mockTriggerSearch } = vi.hoisted(() => ({
-  mockTriggerSearch: vi.fn(async () => ({
-    reportName: "Duplicate SSNs",
-    reportDate: "2024-01-15",
-    startDate: "2024-01-01",
-    endDate: "2024-12-31",
-    dataSource: "Test",
-    response: {
-      results: [{ ssn: "123-45-6789", badgeNumber: 12345, employeeName: "John Doe" }],
-      total: 1,
-      totalPages: 1,
-      pageSize: 25,
-      currentPage: 0
-    }
+  mockTriggerSearch: vi.fn(() => ({
+    unwrap: vi.fn().mockResolvedValue({
+      reportName: "Duplicate SSNs",
+      reportDate: "2024-01-15",
+      startDate: "2024-01-01",
+      endDate: "2024-12-31",
+      dataSource: "Test",
+      response: {
+        results: [{ ssn: "123-45-6789", badgeNumber: 12345, employeeName: "John Doe" }],
+        total: 1,
+        totalPages: 1,
+        pageSize: 25,
+        currentPage: 0
+      }
+    })
   }))
 }));
 
@@ -75,7 +77,7 @@ describe("useDuplicateSSNsOnDemographics Hook", () => {
         profitYear: 2024
       };
 
-      const result = await triggerSearch(request);
+      const result = await triggerSearch(request).unwrap();
       expect(result).toBeDefined();
       expect(result.response.results).toHaveLength(1);
     });
@@ -145,19 +147,21 @@ describe("useDuplicateSSNsOnDemographics Hook", () => {
 
   describe("Edge cases", () => {
     it("should handle empty search results", async () => {
-      const mockEmptyTrigger = vi.fn(async () => ({
-        reportName: "Duplicate SSNs",
-        reportDate: "2024-01-15",
-        startDate: "2024-01-01",
-        endDate: "2024-12-31",
-        dataSource: "Test",
-        response: {
-          results: [],
-          total: 0,
-          totalPages: 0,
-          pageSize: 25,
-          currentPage: 0
-        }
+      const mockEmptyTrigger = vi.fn(() => ({
+        unwrap: vi.fn().mockResolvedValue({
+          reportName: "Duplicate SSNs",
+          reportDate: "2024-01-15",
+          startDate: "2024-01-01",
+          endDate: "2024-12-31",
+          dataSource: "Test",
+          response: {
+            results: [],
+            total: 0,
+            totalPages: 0,
+            pageSize: 25,
+            currentPage: 0
+          }
+        })
       }));
 
       vi.mocked(useLazyGetDuplicateSSNsQuery).mockReturnValueOnce(
@@ -168,7 +172,7 @@ describe("useDuplicateSSNsOnDemographics Hook", () => {
       const result = await triggerSearch({
         pagination: { skip: 0, take: 25, sortBy: "ssn", isSortDescending: true },
         profitYear: 2024
-      });
+      }).unwrap();
 
       expect(result.response.results).toHaveLength(0);
     });

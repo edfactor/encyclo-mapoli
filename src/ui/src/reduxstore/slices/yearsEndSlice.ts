@@ -348,11 +348,9 @@ export const yearsEndSlice = createSlice({
       // on another year
 
       // Distributions And Forfeitures
-      if (
-        state.distributionsAndForfeituresQueryParams?.profitYear &&
-        state.distributionsAndForfeituresQueryParams?.profitYear !== action.payload
-      ) {
-        state.distributionsAndForfeituresQueryParams.profitYear = action.payload;
+      // DistributionsAndForfeituresQueryParams uses date ranges, not profitYear
+      // Clear the data when the year changes
+      if (state.distributionsAndForfeituresQueryParams) {
         state.distributionsAndForfeitures = null;
       }
 
@@ -394,9 +392,9 @@ export const yearsEndSlice = createSlice({
       }
 
       // Military and Rehire Profit Summary
-      // StartAndEndDateRequest does not have profitYear, so just clear the data if the year changes
+      // StartAndEndDateRequest does not have profitYear, so just clear the query params if the year changes
       if (state.rehireProfitSummaryQueryParams) {
-        state.rehire = null;
+        state.rehireProfitSummaryQueryParams = null;
       }
 
       // Year End Profit Sharing Report

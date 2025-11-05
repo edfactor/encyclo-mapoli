@@ -1,7 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormControlLabel, FormLabel, Grid, MenuItem, Select, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import {
   clearBreakdownByStore,
@@ -73,7 +73,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
     reset,
     setValue
   } = useForm<BreakdownSearchParams>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as Resolver<BreakdownSearchParams>,
     defaultValues: {
       store: null,
       employeeStatus: "",
@@ -109,8 +109,8 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
     dispatch(
       setBreakdownByStoreQueryParams({
         profitYear: profitYear,
-        storeNumber: data.store,
-        badgeNumber: data.badgeId,
+        storeNumber: data.store ?? undefined,
+        badgeNumber: data.badgeId ?? undefined,
         employeeName: data.employeeName,
         pagination: {
           take: 25,

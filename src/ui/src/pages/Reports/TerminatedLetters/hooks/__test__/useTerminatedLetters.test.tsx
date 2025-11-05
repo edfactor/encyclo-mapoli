@@ -1,7 +1,7 @@
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import * as useLazyGetTerminatedLettersDownloadQuery from "reduxstore/api/YearsEndApi";
 import * as useLazyGetTerminatedLettersReportQuery from "reduxstore/api/YearsEndApi";
-import { TerminatedLettersDetail } from "reduxstore/types";
+import { TerminatedLettersDetail, TerminatedLettersResponse } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as useDecemberFlowProfitYear from "../../../../../hooks/useDecemberFlowProfitYear";
@@ -52,14 +52,21 @@ const createMockPagedData = (items: TerminatedLettersDetail[] = []): MockPaged<T
 });
 
 // Create mock paged data response (this is what the API returns after unwrap)
-const createMockTerminatedLettersResponse = (items: TerminatedLettersDetail[] = []) => createMockPagedData(items);
+const createMockTerminatedLettersResponse = (items: TerminatedLettersDetail[] = []) => ({
+  reportName: "Terminated Letters",
+  reportDate: "2024-01-01",
+  startDate: "2024-01-01",
+  endDate: "2024-12-31",
+  dataSource: "Test",
+  response: createMockPagedData(items)
+});
 
 // Helper to create RTK Query-like promise with unwrap method
 interface RTKQueryPromise<T> extends Promise<{ data: T }> {
   unwrap: () => Promise<T>;
 }
 
-type TerminatedLettersData = Paged<TerminatedLettersDetail> | Blob | null;
+type TerminatedLettersData = TerminatedLettersResponse | Blob | null;
 
 const createMockRTKQueryPromise = (
   data: TerminatedLettersData = null,
@@ -122,7 +129,14 @@ describe("useTerminatedLetters", () => {
     vi.spyOn(useGridPagination, "useGridPagination").mockImplementation((config) => {
       // When the hook calls useGridPagination with a callback, capture it
       if (config?.onPaginationChange) {
-        mockHandlePaginationChange.mockImplementation(config.onPaginationChange);
+        mockHandlePaginationChange.mockImplementation((pageNumber: number, pageSize: number) => {
+          // Simulate real useGridPagination behavior: call callback with sortParams
+          const mockSortParams = {
+            sortBy: "fullName",
+            isSortDescending: false
+          };
+          return config.onPaginationChange!(pageNumber, pageSize, mockSortParams);
+        });
       }
       return {
         pageNumber: 0,
@@ -238,7 +252,7 @@ describe("useTerminatedLetters", () => {
       expect(result.current.searchParams).toEqual({ beginningDate, endingDate });
       expect(result.current.searchCompleted).toBe(true);
       expect(result.current.reportData).toBeDefined();
-      expect(result.current.reportData?.results).toHaveLength(2);
+      expect(result.current.reportData?.response?.results).toHaveLength(2);
     });
 
     it("should set isSearching to true during search", async () => {
@@ -426,20 +440,20 @@ describe("useTerminatedLetters", () => {
 
       // Simulate pagination change
       await act(async () => {
-        await result.current.gridPagination.handlePaginationChange(1, 50, {
-          sortBy: "fullName",
-          isSortDescending: false
-        });
+        await result.current.gridPagination.handlePaginationChange(1, 50);
       });
 
-      expect(mockTriggerSearch).toHaveBeenCalledWith(
-        expect.objectContaining({
-          pagination: expect.objectContaining({
-            skip: 50,
-            take: 50
+      // Wait for the deferred callback to execute (setTimeout in useGridPagination)
+      await waitFor(() => {
+        expect(mockTriggerSearch).toHaveBeenCalledWith(
+          expect.objectContaining({
+            pagination: expect.objectContaining({
+              skip: 50,
+              take: 50
+            })
           })
-        })
-      );
+        );
+      });
     });
 
     it("should not paginate if no search params exist", async () => {
