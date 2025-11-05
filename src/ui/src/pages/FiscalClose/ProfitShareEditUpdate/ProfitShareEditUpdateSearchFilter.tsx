@@ -3,7 +3,7 @@ import { FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetProfitShareEditQuery, useLazyGetProfitShareUpdateQuery } from "reduxstore/api/YearsEndApi";
 import {
@@ -98,7 +98,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
     formState: { errors, isValid },
     reset
   } = useForm<ProfitShareEditUpdateSearch>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as Resolver<ProfitShareEditUpdateSearch>,
     defaultValues: {
       profitYear: fiscalCloseProfitYearAsDate,
       contributionPercent: 15.0,

@@ -158,7 +158,7 @@ describe("useRecentlyTerminated", () => {
           fulfilledTimeStamp: undefined
         },
         { lastArg: undefined, requestStatus: "uninitialized" }
-      ] as unknown as ReturnType<typeof useLazyGetRecentlyTerminatedReportQuery>
+      ] as any
     );
   });
 
@@ -411,10 +411,7 @@ describe("useRecentlyTerminated", () => {
 
       // Simulate pagination change
       await act(async () => {
-        await result.current.gridPagination.handlePaginationChange(1, 25, {
-          sortBy: "fullName, terminationDate",
-          isSortDescending: false
-        });
+        await result.current.gridPagination.handlePaginationChange(1, 25);
       });
 
       expect(mockTriggerSearch).toHaveBeenCalledWith(
@@ -506,10 +503,7 @@ describe("useRecentlyTerminated", () => {
 
       // Simulate pagination that fails
       await act(async () => {
-        await result.current.gridPagination.handlePaginationChange(1, 25, {
-          sortBy: "fullName, terminationDate",
-          isSortDescending: false
-        });
+        await result.current.gridPagination.handlePaginationChange(1, 25);
       });
 
       expect(result.current.reportError).toBe(errorMsg);
@@ -644,10 +638,7 @@ describe("useRecentlyTerminated", () => {
       mockTriggerSearch.mockClear();
 
       await act(async () => {
-        await result.current.gridPagination.handlePaginationChange(1, 25, {
-          sortBy: "fullName, terminationDate",
-          isSortDescending: false
-        });
+        await result.current.gridPagination.handlePaginationChange(1, 25);
       });
 
       expect(mockTriggerSearch).toHaveBeenCalledTimes(1);

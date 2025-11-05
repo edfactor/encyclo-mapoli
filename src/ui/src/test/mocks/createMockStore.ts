@@ -210,7 +210,7 @@ export const createMockStore = (preloadedState?: Partial<MockRootState>) => {
   } as const;
 
   return configureStore({
-    reducer: reducers as unknown as Record<string, unknown>,
+    reducer: reducers,
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({ serializableCheck: false })
         // Add all RTK Query API middleware - critical to prevent warnings

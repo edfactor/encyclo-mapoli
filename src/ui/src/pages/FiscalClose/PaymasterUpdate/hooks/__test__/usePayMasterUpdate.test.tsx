@@ -101,7 +101,7 @@ const createWrapper = (initialState?: Partial<MockRootState>) => {
       navigation: navigationReducer,
       message: messageSlice
     },
-    preloadedState: initialState as Partial<MockRootState>
+    preloadedState: initialState as MockRootState
   });
 
   return ({ children }: { children: ReactNode }) => <Provider store={store}>{children}</Provider>;
@@ -137,7 +137,7 @@ describe("usePayMasterUpdate", () => {
     const mockMutationPromise = Promise.resolve({
       data: { success: true }
     });
-    (mockMutationPromise as Record<string, unknown>).unwrap = () => Promise.resolve({ success: true });
+    (mockMutationPromise as any).unwrap = () => Promise.resolve({ success: true });
     mockUpdateEnrollment.mockReturnValue(
       mockMutationPromise as unknown as ReturnType<typeof useUpdateEnrollmentMutation.useUpdateEnrollmentMutation>[0]
     );
@@ -499,7 +499,7 @@ describe("usePayMasterUpdate", () => {
 
     it("should handle update errors", async () => {
       const mockErrorPromise = Promise.reject(new Error("Update failed"));
-      (mockErrorPromise as Record<string, unknown>).unwrap = () => Promise.reject(new Error("Update failed"));
+      (mockErrorPromise as any).unwrap = () => Promise.reject(new Error("Update failed"));
       mockUpdateEnrollment.mockReturnValue(mockErrorPromise as unknown as ReturnType<typeof useUpdateEnrollmentMutation.useUpdateEnrollmentMutation>[0]);
 
       const { result } = renderHook(() => usePayMasterUpdate(), {
@@ -801,7 +801,7 @@ describe("usePayMasterUpdate", () => {
 
     it("should handle enrollment update with unknown error", async () => {
       const mockErrorPromise = Promise.reject("Unknown error");
-      (mockErrorPromise as Record<string, unknown>).unwrap = () => Promise.reject("Unknown error");
+      (mockErrorPromise as any).unwrap = () => Promise.reject("Unknown error");
       mockUpdateEnrollment.mockReturnValue(mockErrorPromise as unknown as ReturnType<typeof useUpdateEnrollmentMutation.useUpdateEnrollmentMutation>[0]);
 
       const { result } = renderHook(() => usePayMasterUpdate(), {

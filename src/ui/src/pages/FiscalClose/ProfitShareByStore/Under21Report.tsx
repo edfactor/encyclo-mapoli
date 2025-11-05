@@ -21,8 +21,8 @@ const Under21Report = () => {
   const [initialLoad, setInitialLoad] = useState(true);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [pageNumber, setPageNumber] = useState<number>(0);
-  const [pageSize, setPageSize] = useState<number>(25);
-  const [sortParams, setSortParams] = useState({
+  const [pageSize, _setPageSize] = useState<number>(25);
+  const [sortParams, _setSortParams] = useState({
     sortBy: "badgeNumber",
     isSortDescending: false
   });
@@ -140,12 +140,6 @@ const Under21Report = () => {
               <Under21BreakdownGrid
                 isLoading={isBreakdownLoading}
                 setInitialSearchLoaded={setInitialSearchLoaded}
-                pageNumber={pageNumber}
-                setPageNumber={setPageNumber}
-                pageSize={pageSize}
-                setPageSize={setPageSize}
-                sortParams={sortParams}
-                setSortParams={setSortParams}
               />
             </Grid>
           </>

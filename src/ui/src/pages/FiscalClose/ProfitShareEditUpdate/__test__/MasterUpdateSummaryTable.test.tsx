@@ -508,7 +508,7 @@ describe("MasterUpdateSummaryTable", { timeout: 16000 }, () => {
         openValidationField: "TotalProfitSharingBalance"
       };
 
-      render(<MasterUpdateSummaryTable {...propsWithNullData} />);
+      render(<MasterUpdateSummaryTable {...(propsWithNullData as any)} />);
 
       // Should render $0.00 when values are null
       expect(screen.getAllByText("$0.00").length).toBeGreaterThan(0);
@@ -598,7 +598,7 @@ describe("MasterUpdateSummaryTable", { timeout: 16000 }, () => {
         openValidationField: "DistributionTotals"
       };
 
-      expect(() => render(<MasterUpdateSummaryTable {...propsWithNullData} />)).not.toThrow();
+      expect(() => render(<MasterUpdateSummaryTable {...(propsWithNullData as any)} />)).not.toThrow();
       expect(screen.getAllByText("$0.00").length).toBeGreaterThan(0);
     });
 
@@ -664,7 +664,7 @@ describe("MasterUpdateSummaryTable", { timeout: 16000 }, () => {
         openValidationField: "TotalProfitSharingBalance"
       };
 
-      render(<MasterUpdateSummaryTable {...propsWithUndefinedValues} />);
+      render(<MasterUpdateSummaryTable {...(propsWithUndefinedValues as any)} />);
 
       // Should render $0.00 when values are undefined
       expect(screen.getAllByText("$0.00").length).toBeGreaterThan(0);

@@ -96,8 +96,8 @@ describe("useProfitShareEditUpdate", () => {
   const createStore = (preloadedState?: Partial<MockedRootState>) => {
     return configureStore({
       reducer: {
-        yearsEnd: yearsEndReducer,
-        security: securityReducer,
+        yearsEnd: yearsEndReducer as any,
+        security: securityReducer as any,
         yearsEndApi: () => ({ queries: {}, mutations: {}, provided: [], arg: [] })
       },
       preloadedState: preloadedState as Partial<MockedRootState>
@@ -771,7 +771,7 @@ describe("useProfitShareEditUpdate", () => {
       mockUseChecksumValidation.mockReturnValue({
         validationData: { field1: { hasError: false } },
         getFieldValidation: mockGetFieldValidation
-      } as ChecksumValidationResult);
+      } as any);
 
       const { result } = renderHookWithProvider(() => useProfitShareEditUpdate());
 

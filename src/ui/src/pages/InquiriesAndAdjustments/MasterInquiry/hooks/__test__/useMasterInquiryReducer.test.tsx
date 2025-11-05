@@ -71,7 +71,7 @@ describe("useMasterInquiryReducer", () => {
             psnSuffix: "0",
             isEmployee: true
           }
-        ],
+        ] as unknown as EmployeeDetails[],
         total: 1
       };
 

@@ -47,6 +47,7 @@ const validationSchema = yup
   );
 
 interface SearchData {
+  [key: string]: unknown;
   profitYear: number;
   badgeNumber?: number;
   socialSecurity?: string | undefined;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { initialState, masterInquiryReducer } from "../useMasterInquiryReducer";
+import { initialState, masterInquiryReducer, MasterInquiryState } from "../useMasterInquiryReducer";
 
 /**
  * Performance Fix Tests - PS-XXXX
@@ -20,14 +20,14 @@ describe("useMasterInquiry - Performance Optimizations", () => {
         pagination: { skip: 25, take: 25, sortBy: "badgeNumber", isSortDescending: false }
       };
 
-      const stateWithResults = {
+      const stateWithResults: MasterInquiryState = {
         ...initialState,
         search: {
           ...initialState.search,
           params: searchParams1,
-          results: { results: [{ id: "1" }], total: 100 }
+          results: { results: [{ id: 1 }] as any, total: 100 }
         },
-        view: { mode: "memberGrid" as const }
+        view: { mode: "multipleMembers" as const }
       };
 
       const action = {
@@ -39,8 +39,8 @@ describe("useMasterInquiry - Performance Optimizations", () => {
 
       // Should NOT clear results when only pagination changes
       expect(newState.search.results).not.toBeNull();
-      expect(newState.search.results?.results).toEqual([{ id: "1" }]);
-      expect(newState.view.mode).toBe("memberGrid");
+      expect(newState.search.results?.results).toEqual([{ id: 1 }]);
+      expect(newState.view.mode).toBe("multipleMembers");
     });
 
     it("should clear state when search parameters change (not just pagination)", () => {
@@ -54,14 +54,14 @@ describe("useMasterInquiry - Performance Optimizations", () => {
         pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false }
       };
 
-      const stateWithResults = {
+      const stateWithResults: MasterInquiryState = {
         ...initialState,
         search: {
           ...initialState.search,
           params: searchParams1,
-          results: { results: [{ id: "1" }], total: 100 }
+          results: { results: [{ id: 1 }] as any, total: 100 }
         },
-        view: { mode: "memberGrid" as const }
+        view: { mode: "multipleMembers" as const }
       };
 
       const action = {
@@ -87,12 +87,12 @@ describe("useMasterInquiry - Performance Optimizations", () => {
         pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: true }
       };
 
-      const stateWithResults = {
+      const stateWithResults: MasterInquiryState = {
         ...initialState,
         search: {
           ...initialState.search,
           params: searchParams1,
-          results: { results: [{ id: "1" }], total: 100 }
+          results: { results: [{ id: 1 }] as any, total: 100 }
         }
       };
 
@@ -150,9 +150,9 @@ describe("useMasterInquiry - Performance Optimizations", () => {
     });
 
     it("should not transition mode during pagination-only changes", () => {
-      const stateInGridMode = {
+      const stateInGridMode: MasterInquiryState = {
         ...initialState,
-        view: { mode: "memberGrid" as const }
+        view: { mode: "multipleMembers" as const }
       };
 
       const params = {
@@ -166,8 +166,8 @@ describe("useMasterInquiry - Performance Optimizations", () => {
       };
 
       const newState = masterInquiryReducer(stateInGridMode, action);
-      // Should stay in memberGrid mode for pagination
-      expect(newState.view.mode).toBe("memberGrid");
+      // Should stay in multipleMembers mode for pagination
+      expect(newState.view.mode).toBe("multipleMembers");
     });
   });
 });

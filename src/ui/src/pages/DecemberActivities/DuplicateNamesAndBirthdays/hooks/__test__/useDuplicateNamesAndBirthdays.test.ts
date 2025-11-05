@@ -178,20 +178,8 @@ const mockDuplicateData = {
   total: 1
 };
 
-describe("useDuplicateNamesAndBirthdays", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    // Reset RTK Query hook to return default state
-    mockTriggerSearch.mockReturnValue({
-      unwrap: vi.fn()
-    });
-  });
-
-  it("should not fetch when token is missing", () => {
-    // Setup mocks
-    mockUseGridPagination.mockReturnValue(mockPaginationObject);
-
-    const defaultYearsEndState: YearsEndState = {
+// Define defaultYearsEndState at module scope so it can be used by all tests
+const defaultYearsEndState: YearsEndState = {
       selectedProfitYearForDecemberActivities: 2024,
       selectedProfitYearForFiscalClose: 2024,
       invalidProfitShareEditYear: false,
@@ -286,7 +274,20 @@ describe("useDuplicateNamesAndBirthdays", () => {
       controlSheet: null,
       breakdownGrandTotals: null,
       certificates: null
-    };
+};
+
+describe("useDuplicateNamesAndBirthdays", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Reset RTK Query hook to return default state
+    mockTriggerSearch.mockReturnValue({
+      unwrap: vi.fn()
+    });
+  });
+
+  it("should not fetch when token is missing", () => {
+    // Setup mocks
+    mockUseGridPagination.mockReturnValue(mockPaginationObject);
 
     const { result } = renderHookWithProvider(() => useDuplicateNamesAndBirthdays(), {
       security: {
@@ -324,8 +325,9 @@ describe("useDuplicateNamesAndBirthdays", () => {
         impersonating: []
       },
       yearsEnd: {
-        selectedProfitYearForDecemberActivities: null
-      } as unknown as Partial<YearsEndState>
+        ...defaultYearsEndState,
+        selectedProfitYearForDecemberActivities: 0
+      }
     });
 
     expect(result.current.isSearching).toBe(false);
@@ -489,7 +491,7 @@ describe("useDuplicateNamesAndBirthdays", () => {
       },
       yearsEnd: {
         ...defaultYearsEndState,
-        selectedProfitYearForDecemberActivities: null
+        selectedProfitYearForDecemberActivities: 0
       }
     });
 

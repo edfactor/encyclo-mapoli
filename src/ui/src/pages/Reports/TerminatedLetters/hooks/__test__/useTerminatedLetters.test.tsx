@@ -238,7 +238,7 @@ describe("useTerminatedLetters", () => {
       expect(result.current.searchParams).toEqual({ beginningDate, endingDate });
       expect(result.current.searchCompleted).toBe(true);
       expect(result.current.reportData).toBeDefined();
-      expect(result.current.reportData?.results).toHaveLength(2);
+      expect(result.current.reportData?.response?.results).toHaveLength(2);
     });
 
     it("should set isSearching to true during search", async () => {
@@ -426,10 +426,7 @@ describe("useTerminatedLetters", () => {
 
       // Simulate pagination change
       await act(async () => {
-        await result.current.gridPagination.handlePaginationChange(1, 50, {
-          sortBy: "fullName",
-          isSortDescending: false
-        });
+        await result.current.gridPagination.handlePaginationChange(1, 50);
       });
 
       expect(mockTriggerSearch).toHaveBeenCalledWith(
