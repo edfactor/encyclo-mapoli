@@ -4,7 +4,6 @@ import {
   createCityColumn,
   createDateColumn,
   createNameColumn,
-  createPSNColumn,
   createSSNColumn,
   createStateColumn,
   createZipColumn

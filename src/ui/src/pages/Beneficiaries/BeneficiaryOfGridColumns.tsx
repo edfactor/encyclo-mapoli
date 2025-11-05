@@ -4,7 +4,6 @@ import {
   createCurrencyColumn,
   createDateColumn,
   createNameColumn,
-  createPSNColumn,
   createSSNColumn,
   createStateColumn,
   createZipColumn
