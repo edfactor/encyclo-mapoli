@@ -205,9 +205,22 @@ public sealed class TerminatedEmployeeReportService
             // Get vesting balance and percentage from this year
             // Use compound key (Ssn, Id) to look up the correct record
             ParticipantTotalVestingBalance? thisYearVestedBalance = thisYearBalancesDict.GetValueOrDefault((memberSlice.Ssn, memberSlice.Id));
+
+            // Fallback for pure beneficiaries: if compound key fails and this is a pure beneficiary, search by SSN only
+            if (thisYearVestedBalance == null && memberSlice.IsOnlyBeneficiary)
+            {
+                thisYearVestedBalance = thisYearBalancesDict.Values.FirstOrDefault(v => v.Ssn == memberSlice.Ssn);
+            }
+
             decimal vestedBalance = thisYearVestedBalance?.VestedBalance ?? 0m;
 
             ParticipantTotalVestingBalance? lastYearVestedBalance = lastYearVestedBalancesDict.GetValueOrDefault((memberSlice.Ssn, memberSlice.Id));
+
+            // Fallback for pure beneficiaries: if compound key fails and this is a pure beneficiary, search by SSN only
+            if (lastYearVestedBalance == null && memberSlice.IsOnlyBeneficiary)
+            {
+                lastYearVestedBalance = lastYearVestedBalancesDict.Values.FirstOrDefault(v => v.Ssn == memberSlice.Ssn);
+            }
 
             decimal vestedRatio = lastYearVestedBalance?.VestingPercent ?? 0;
 
