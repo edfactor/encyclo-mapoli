@@ -146,10 +146,10 @@ public sealed class TerminatedEmployeeReportService
         CalendarResponseDto priorYearDateRange = await _calendarService.GetYearStartAndEndAccountingDatesAsync(lastCompletedYearEnd, cancellationToken);
 
         var thisYearStart = DateTime.UtcNow;
-        Dictionary<int, ParticipantTotalVestingBalance> thisYearBalancesDict = await _totalService
+        Dictionary<(int Ssn, int Id), ParticipantTotalVestingBalance> thisYearBalancesDict = await _totalService
             .TotalVestingBalance(ctx, profitYearRange.beginProfitYear, profitYearRange.endProfitYear, today)
             .Where(x => ssns.Contains(x.Ssn))
-            .ToDictionaryAsync(x => x.Ssn, x => x, cancellationToken);
+            .ToDictionaryAsync(x => (x.Ssn, x.Id), x => x, cancellationToken);
         var thisYearDuration = (DateTime.UtcNow - thisYearStart).TotalMilliseconds;
         _logger.LogInformation("ThisYearBalances dictionary loaded in {DurationMs:F2}ms with {RecordCount} entries", thisYearDuration, thisYearBalancesDict.Count);
 
@@ -161,10 +161,10 @@ public sealed class TerminatedEmployeeReportService
         _logger.LogInformation("LastYearBalances dictionary loaded in {DurationMs:F2}ms with {RecordCount} entries", lastYearDuration, lastYearBalancesDict.Count);
 
         var vestedStart = DateTime.UtcNow;
-        Dictionary<int, ParticipantTotalVestingBalance> lastYearVestedBalancesDict = await _totalService
+        Dictionary<(int Ssn, int Id), ParticipantTotalVestingBalance> lastYearVestedBalancesDict = await _totalService
             .TotalVestingBalance(ctx, /*PayProfit Year*/lastCompletedYearEnd, /*Desired Year*/lastCompletedYearEnd, priorYearDateRange.FiscalEndDate)
             .Where(x => ssns.Contains(x.Ssn))
-            .ToDictionaryAsync(x => x.Ssn, x => x, cancellationToken);
+            .ToDictionaryAsync(x => (x.Ssn, x.Id), x => x, cancellationToken);
         var vestedDuration = (DateTime.UtcNow - vestedStart).TotalMilliseconds;
         _logger.LogInformation("LastYearVestedBalances dictionary loaded in {DurationMs:F2}ms with {RecordCount} entries", vestedDuration, lastYearVestedBalancesDict.Count);
 
@@ -203,15 +203,18 @@ public sealed class TerminatedEmployeeReportService
                 : 0m;
 
             // Get vesting balance and percentage from this year
-            ParticipantTotalVestingBalance? thisYearVestedBalance = thisYearBalancesDict.GetValueOrDefault(memberSlice.Ssn);
+            // Use compound key (Ssn, Id) to look up the correct record
+            ParticipantTotalVestingBalance? thisYearVestedBalance = thisYearBalancesDict.GetValueOrDefault((memberSlice.Ssn, memberSlice.Id));
             decimal vestedBalance = thisYearVestedBalance?.VestedBalance ?? 0m;
 
-            ParticipantTotalVestingBalance? lastYearVestedBalance = lastYearVestedBalancesDict.GetValueOrDefault(memberSlice.Ssn);
+            ParticipantTotalVestingBalance? lastYearVestedBalance = lastYearVestedBalancesDict.GetValueOrDefault((memberSlice.Ssn, memberSlice.Id));
+
             decimal vestedRatio = lastYearVestedBalance?.VestingPercent ?? 0;
 
             // Create member record with all values
             Member member = new()
             {
+                Id = memberSlice.Id,
                 BadgeNumber = memberSlice.BadgeNumber,
                 ProfitYear = memberSlice.ProfitYear,
                 PsnSuffix = memberSlice.PsnSuffix,
@@ -504,6 +507,7 @@ public sealed class TerminatedEmployeeReportService
                                         from yip in yipTmp.DefaultIfEmpty()
                                         select new MemberSlice
                                         {
+                                            Id = employee.Demographic.Id,
                                             PsnSuffix = 0,
                                             BadgeNumber = employee.Demographic.BadgeNumber,
                                             Ssn = employee.Demographic.Ssn,
@@ -563,6 +567,7 @@ public sealed class TerminatedEmployeeReportService
                     {
                         // COBOL Lines 775-782: When beneficiary matches demographics AND termination date is NOT in range,
                         // use badge number with PSN=0 (appears as primary employee), otherwise use PSN suffix
+                        Id = d == null ? x.b.Id : d.Id,
                         PsnSuffix = d == null ? x.b.PsnSuffix : (short)0,
                         BadgeNumber = d == null ? x.b.BadgeNumber : d.BadgeNumber,
                         Ssn = x.b.Contact!.Ssn,
@@ -621,6 +626,7 @@ public sealed class TerminatedEmployeeReportService
                     {
                         // COBOL Lines 775-782: When beneficiary matches demographics AND termination date is NOT in range,
                         // use badge number with PSN=0 (appears as primary employee), otherwise use PSN suffix
+                        Id = d == null ? x.b.Id : d.Id,
                         PsnSuffix = d == null ? x.b.PsnSuffix : (short)0,
                         BadgeNumber = d == null ? x.b.BadgeNumber : d.BadgeNumber,
                         Ssn = x.b.Contact!.Ssn,
