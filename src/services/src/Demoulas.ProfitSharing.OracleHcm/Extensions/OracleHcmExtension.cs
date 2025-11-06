@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Net.Http.Headers;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Channels;
 using Demoulas.Common.Data.Services.Interfaces;
@@ -193,7 +194,7 @@ public static class OracleHcmExtension
     /// </param>
     /// <remarks>
     /// This method configures general services, mappers, and internal services required for Oracle HCM functionality.
-    /// It ensures that dependencies such as validators, jobs, and mappers are properly registered.
+    /// It ensures that dependencies such as validators, jobs, mappers, and certificate management are properly registered.
     /// </remarks>
     private static void RegisterOracleHcmServices(IServiceCollection services)
     {
@@ -217,6 +218,9 @@ public static class OracleHcmExtension
         services.AddScoped<IDemographicAuditService, DemographicAuditService>();
         services.AddScoped<IDemographicHistoryService, DemographicHistoryService>();
 
+        // Certificate management for Oracle HCM authentication
+        services.AddSingleton<IOracleHcmCertificateService, OracleHcmCertificateService>();
+
         // Internal services
         services.AddTransient<IDemographicsServiceInternal, DemographicsService>();
         services.AddTransient<IEmployeeSyncService, EmployeeSyncService>();
@@ -229,6 +233,7 @@ public static class OracleHcmExtension
 
     /// <summary>
     /// Configures HTTP clients used for Oracle HCM integration by registering them with resilience strategies.
+    /// Supports both certificate-based and basic authentication configurations.
     /// </summary>
     /// <param name="services">
     /// The <see cref="IServiceCollection"/> to which the HTTP clients will be added.
@@ -237,6 +242,9 @@ public static class OracleHcmExtension
     /// This method sets up HTTP clients for various Oracle HCM services, such as Atom feed synchronization,
     /// employee synchronization, and payroll synchronization. It applies standard resilience strategies,
     /// including circuit breakers and timeout configurations, to ensure robust communication with the Oracle HCM API.
+    /// 
+    /// For certificate-based authentication, the HttpClientHandler is configured with the certificate
+    /// from the OracleHcmConfig before the resilience handlers are applied.
     /// </remarks>
     private static void ConfigureHttpClients(IServiceCollection services)
     {
@@ -359,6 +367,10 @@ public static class OracleHcmExtension
 
     /// <summary>
     /// Configures the provided <see cref="HttpClient"/> instance for Oracle HCM authentication.
+    /// Supports two authentication methods:
+    /// 1. Certificate-Based (Recommended): Uses mutual TLS with a PFX certificate
+    /// 2. Basic Authentication (Legacy): Uses username and password encoded in Authorization header
+    /// 
     /// Sets the base address, authorization headers, and default request headers required for communication with the Oracle HCM API.
     /// </summary>
     /// <param name="services">
@@ -367,19 +379,35 @@ public static class OracleHcmExtension
     /// <param name="client">
     /// The <see cref="HttpClient"/> instance to be configured for Oracle HCM API communication.
     /// </param>
+    /// <remarks>
+    /// When using certificate-based authentication:
+    /// - The PFX certificate must be properly configured in OracleHcmConfig.PfxFilePath
+    /// - The certificate password must be set in OracleHcmConfig.PfxPassword
+    /// - The HttpClientHandler must support certificate attachment for mutual TLS
+    /// 
+    /// When using basic authentication (fallback):
+    /// - Username and Password must be set in OracleHcmConfig
+    /// - This method is deprecated for production use
+    /// </remarks>
     private static void BuildOracleHcmAuthClient(IServiceProvider services, HttpClient client)
     {
         OracleHcmConfig config = services.GetRequiredService<OracleHcmConfig>();
-        if (config.Username == null)
-        {
-            return;
-        }
-        string authToken = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{config.Username}:{config.Password}"));
 
         client.BaseAddress = new Uri(config.BaseAddress, UriKind.Absolute);
         client.DefaultRequestHeaders.Add(FrameworkVersionHeader, config.RestFrameworkVersion);
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authToken);
+        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json")); // Specify JSON format
+        if (config.UseCertificateAuthentication)
+        {
+            // Certificate-based authentication (recommended for production)
+            // No additional headers needed; certificate is handled by HttpClientHandler
+            // See ConfigureHttpClients method for HttpClientHandler configuration
+        }
+        else if (config.Username is not null)
+        {
+            // Basic authentication (fallback for development/compatibility)
+            string authToken = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{config.Username}:{config.Password}"));
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authToken);
+        }
     }
 }
