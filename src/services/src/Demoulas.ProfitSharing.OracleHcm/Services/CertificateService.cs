@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Demoulas.ProfitSharing.OracleHcm.Services.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -43,7 +43,7 @@ public sealed class OracleHcmCertificateService : IOracleHcmCertificateService, 
     /// <inheritdoc />
     public X509Certificate2 GetCertificate(string pfxFilePath, string? password)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(pfxFilePath, nameof(pfxFilePath));
+        ArgumentException.ThrowIfNullOrWhiteSpace(pfxFilePath);
 
         // Normalize the path (convert to absolute if relative)
         string absolutePath = Path.IsPathRooted(pfxFilePath)
@@ -205,7 +205,7 @@ public sealed class OracleHcmCertificateService : IOracleHcmCertificateService, 
     /// <inheritdoc />
     public bool ClearCacheEntry(string sourceIdentifier)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(sourceIdentifier, nameof(sourceIdentifier));
+        ArgumentException.ThrowIfNullOrWhiteSpace(sourceIdentifier);
 
         _cacheLock.EnterWriteLock();
         try
@@ -250,7 +250,7 @@ public sealed class OracleHcmCertificateService : IOracleHcmCertificateService, 
     {
         try
         {
-            ArgumentException.ThrowIfNullOrWhiteSpace(pfxFilePath, nameof(pfxFilePath));
+            ArgumentException.ThrowIfNullOrWhiteSpace(pfxFilePath);
 
             string absolutePath = Path.IsPathRooted(pfxFilePath)
                 ? pfxFilePath
@@ -289,6 +289,7 @@ public sealed class OracleHcmCertificateService : IOracleHcmCertificateService, 
     /// <exception cref="InvalidOperationException">If the certificate cannot be loaded.</exception>
     private X509Certificate2 LoadCertificateFromFile(string absolutePath, string? password)
     {
+#pragma warning disable S2139 // Exceptions should be either logged or rethrown but not both
         try
         {
             if (!File.Exists(absolutePath))
@@ -314,12 +315,10 @@ public sealed class OracleHcmCertificateService : IOracleHcmCertificateService, 
         }
         catch (Exception ex)
         {
-            var invalidOpEx = new InvalidOperationException(
-                $"Failed to load certificate from {MaskPath(absolutePath)}. This may indicate the file is corrupted, the password is incorrect, or the file is not a valid PFX certificate.",
-                ex);
-            _logger.LogCritical(invalidOpEx, "Certificate load failure at {CertificatePath}. Oracle HCM authentication will fail. Verify the file format, password, and file permissions.", MaskPath(absolutePath));
-            throw invalidOpEx;
+            _logger.LogCritical(ex, "Certificate load failure at {CertificatePath}. Oracle HCM authentication will fail. Verify the file format, password, and file permissions.", MaskPath(absolutePath));
+            throw;
         }
+#pragma warning restore S2139 // Exceptions should be either logged or rethrown but not both
     }
 
     /// <summary>
@@ -358,7 +357,9 @@ public sealed class OracleHcmCertificateService : IOracleHcmCertificateService, 
             var invalidOpEx = new InvalidOperationException(
                 $"Failed to load certificate from stream ({sourceIdentifier ?? "no identifier"}). This may indicate the data is corrupted, the password is incorrect, or the data is not a valid PFX certificate.",
                 ex);
+#pragma warning disable S6667
             _logger.LogCritical(invalidOpEx, "Certificate load failure from stream {SourceIdentifier}. Oracle HCM authentication will fail. Verify the data format and password.", sourceIdentifier ?? "unknown");
+#pragma warning restore S6667
             throw invalidOpEx;
         }
     }
@@ -389,7 +390,9 @@ public sealed class OracleHcmCertificateService : IOracleHcmCertificateService, 
             var invalidOpEx = new InvalidOperationException(
                 $"Failed to load certificate from byte array ({sourceIdentifier ?? "no identifier"}). This may indicate the data is corrupted, the password is incorrect, or the data is not a valid PFX certificate.",
                 ex);
+#pragma warning disable S6667
             _logger.LogCritical(invalidOpEx, "Certificate load failure from bytes {SourceIdentifier}. Oracle HCM authentication will fail. Verify the data format and password.", sourceIdentifier ?? "unknown");
+#pragma warning restore S6667
             throw invalidOpEx;
         }
     }
