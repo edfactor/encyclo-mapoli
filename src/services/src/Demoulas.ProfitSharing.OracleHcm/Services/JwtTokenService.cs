@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
@@ -19,11 +20,13 @@ namespace Demoulas.ProfitSharing.OracleHcm.Services;
 public sealed class JwtTokenService : IJwtTokenService
 {
     private readonly OracleHcmConfig _config;
+    private readonly ILogger<JwtTokenService> _logger;
     private const string TokenType = "JWT";
 
-    public JwtTokenService(OracleHcmConfig config)
+    public JwtTokenService(OracleHcmConfig config, ILogger<JwtTokenService> logger)
     {
         _config = config;
+        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -75,6 +78,14 @@ public sealed class JwtTokenService : IJwtTokenService
         string headerEncoded = Base64UrlEncode(headerJson);
         string payloadEncoded = Base64UrlEncode(payloadJson);
 
+        // Log JWT components for debugging
+        _logger.LogDebug("JWT Token Generation - Header: {HeaderJson}", headerJson);
+        _logger.LogDebug("JWT Token Generation - Payload: {PayloadJson}", payloadJson);
+        _logger.LogDebug("JWT Token Generation - Algorithm: {Algorithm}, Issuer: {Issuer}, Principal: {Principal}, Expiration (Unix): {Expiration}", 
+            _config.JwtSigningAlgorithm, issuer, principal, expUnix);
+        _logger.LogInformation("JWT Token Generated - Certificate Subject: {Subject}, Thumbprint: {Thumbprint}", 
+            certificate.Subject, certificate.Thumbprint);
+
         // Create signature
         string signatureInput = $"{headerEncoded}.{payloadEncoded}";
         byte[] signatureInputBytes = Encoding.UTF8.GetBytes(signatureInput);
@@ -83,7 +94,10 @@ public sealed class JwtTokenService : IJwtTokenService
         string signatureEncoded = Base64UrlEncode(signatureBytes);
 
         // Combine to create JWT
-        return $"{signatureInput}.{signatureEncoded}";
+        string jwtToken = $"{signatureInput}.{signatureEncoded}";
+        _logger.LogDebug("JWT Token (first 100 chars): {JwtToken}...", jwtToken.Substring(0, Math.Min(100, jwtToken.Length)));
+        
+        return jwtToken;
     }
 
     /// <inheritdoc />
@@ -140,7 +154,7 @@ public sealed class JwtTokenService : IJwtTokenService
     /// Extracts the issuer identifier from the certificate subject.
     /// Attempts to extract CN (Common Name) first, then L (Locality), then uses the full subject as fallback.
     /// </summary>
-    private static string ExtractIssuerFromCertificate(X509Certificate2 certificate)
+    private string ExtractIssuerFromCertificate(X509Certificate2 certificate)
     {
         string subject = certificate.Subject;
 
@@ -148,17 +162,22 @@ public sealed class JwtTokenService : IJwtTokenService
         var cnMatch = System.Text.RegularExpressions.Regex.Match(subject, @"CN\s*=\s*([^,]+)");
         if (cnMatch.Success)
         {
-            return cnMatch.Groups[1].Value.Trim();
+            string extracted = cnMatch.Groups[1].Value.Trim();
+            _logger.LogDebug("Extracted CN from certificate subject: {ExtractedCn}", extracted);
+            return extracted;
         }
 
         // Fallback to L (Locality) - e.g., "L = Demoulas Supermarkets Inc."
         var lMatch = System.Text.RegularExpressions.Regex.Match(subject, @"L\s*=\s*([^,]+)");
         if (lMatch.Success)
         {
-            return lMatch.Groups[1].Value.Trim();
+            string extracted = lMatch.Groups[1].Value.Trim();
+            _logger.LogDebug("Extracted L (Locality) from certificate subject: {ExtractedLocality}", extracted);
+            return extracted;
         }
 
         // Last resort: use the full subject
+        _logger.LogWarning("Could not extract CN or L from certificate subject. Using full subject: {Subject}", subject);
         return subject;
     }
 }
