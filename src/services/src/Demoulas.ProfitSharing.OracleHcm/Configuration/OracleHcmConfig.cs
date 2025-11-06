@@ -67,8 +67,10 @@ public sealed record OracleHcmConfig
     // JWT Token Configuration
     /// <summary>
     /// Gets or sets the principal (username) claim for JWT tokens.
-    /// Used by Oracle HCM to identify the authenticated service.
-    /// Default: "fusion"
+    /// IMPORTANT: This must be an actual Oracle HCM user account that has the "Fusion Applications Integration" privilege.
+    /// This value is NOT found in the certificate - you must ask your Oracle HCM administrator for the correct username.
+    /// The example "fusion" is a common default, but your environment may use a different user.
+    /// Default: "fusion" (VERIFY THIS WITH YOUR ORACLE HCM ADMIN BEFORE USING IN PRODUCTION)
     /// </summary>
     public string JwtPrincipal { get; set; } = "fusion";
 

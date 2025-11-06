@@ -113,17 +113,24 @@ date +%s
 2. Extract `prn` value (should match Oracle HCM user)
 3. Verify user has required Oracle HCM privileges
 
+**IMPORTANT**: The `prn` value is **NOT** found in your certificate. You must ask your Oracle HCM administrator:
+- "Which user should we use for JWT authentication?"
+- "Which user has the 'Fusion Applications Integration' privilege?"
+
 **Solution**:
-- Default principal is "fusion", configured via `JwtPrincipal`:
+- The `JwtPrincipal` value must be configured with the actual Oracle HCM username your admin provides
+- The example "fusion" is just a common default - your environment may use a different user
+- Configure via `JwtPrincipal` in `appsettings.json`:
 ```json
 {
   "OracleHcm": {
-    "JwtPrincipal": "fusion"
+    "JwtPrincipal": "your-actual-oracle-hcm-username"
   }
 }
 ```
 - Verify user exists in Oracle HCM with required privileges
 - Check Oracle HCM security console for user role assignments
+- **Before production**: Confirm with Oracle HCM admin that this is the correct user
 
 ### 5. Certificate Not Found or Expired
 **Symptoms**: CRITICAL log entries, certificate file issues

@@ -322,7 +322,7 @@ public static class OracleHcmExtension
             .AddStandardResilienceHandler(options => ConfigureWith401RetryAndBulkhead(options, commonHttpOptions));
 
         services.AddHttpClient<OracleHcmHealthCheck>("OracleHcmHealthCheck", BuildOracleHcmAuthClient)
-            .ConfigurePrimaryHttpMessageHandler(services => CreateHttpClientHandlerWithCertificate(services))
+            .ConfigurePrimaryHttpMessageHandler(CreateHttpClientHandlerWithCertificate)
             .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
     }
 

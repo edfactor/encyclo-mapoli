@@ -81,9 +81,9 @@ public sealed class JwtTokenService : IJwtTokenService
         // Log JWT components for debugging
         _logger.LogDebug("JWT Token Generation - Header: {HeaderJson}", headerJson);
         _logger.LogDebug("JWT Token Generation - Payload: {PayloadJson}", payloadJson);
-        _logger.LogDebug("JWT Token Generation - Algorithm: {Algorithm}, Issuer: {Issuer}, Principal: {Principal}, Expiration (Unix): {Expiration}", 
+        _logger.LogDebug("JWT Token Generation - Algorithm: {Algorithm}, Issuer: {Issuer}, Principal: {Principal}, Expiration (Unix): {Expiration}",
             _config.JwtSigningAlgorithm, issuer, principal, expUnix);
-        _logger.LogInformation("JWT Token Generated - Certificate Subject: {Subject}, Thumbprint: {Thumbprint}", 
+        _logger.LogInformation("JWT Token Generated - Certificate Subject: {Subject}, Thumbprint: {Thumbprint}",
             certificate.Subject, certificate.Thumbprint);
 
         // Create signature
@@ -96,7 +96,7 @@ public sealed class JwtTokenService : IJwtTokenService
         // Combine to create JWT
         string jwtToken = $"{signatureInput}.{signatureEncoded}";
         _logger.LogDebug("JWT Token (first 100 chars): {JwtToken}...", jwtToken.Substring(0, Math.Min(100, jwtToken.Length)));
-        
+
         return jwtToken;
     }
 
