@@ -164,7 +164,6 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                   return month > endOfNextMonth;
                 }}
                 error={errors.startDate?.message}
-                views={["year", "month", "day"]}
               />
             )}
           />
@@ -191,7 +190,6 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                   return month > endOfNextMonth;
                 }}
                 error={errors.endDate?.message}
-                views={["year", "month", "day"]}
               />
             )}
           />
