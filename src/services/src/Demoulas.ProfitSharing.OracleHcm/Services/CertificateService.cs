@@ -41,7 +41,7 @@ public sealed class OracleHcmCertificateService : IOracleHcmCertificateService, 
     }
 
     /// <inheritdoc />
-    public async Task<X509Certificate2> GetCertificateAsync(string pfxFilePath, string? password, CancellationToken ct = default)
+    public X509Certificate2 GetCertificate(string pfxFilePath, string? password)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(pfxFilePath, nameof(pfxFilePath));
 
@@ -89,7 +89,7 @@ public sealed class OracleHcmCertificateService : IOracleHcmCertificateService, 
     }
 
     /// <inheritdoc />
-    public async Task<X509Certificate2> GetCertificateFromStreamAsync(Stream pfxStream, string? password, string? sourceIdentifier = null, CancellationToken ct = default)
+    public X509Certificate2 GetCertificateFromStream(Stream pfxStream, string? password, string? sourceIdentifier = null)
     {
         ArgumentNullException.ThrowIfNull(pfxStream);
 
@@ -144,7 +144,7 @@ public sealed class OracleHcmCertificateService : IOracleHcmCertificateService, 
     }
 
     /// <inheritdoc />
-    public async Task<X509Certificate2> GetCertificateFromBytesAsync(byte[] pfxData, string? password, string? sourceIdentifier = null, CancellationToken ct = default)
+    public X509Certificate2 GetCertificateFromBytes(byte[] pfxData, string? password, string? sourceIdentifier = null)
     {
         ArgumentNullException.ThrowIfNull(pfxData);
         if (pfxData.Length == 0)
