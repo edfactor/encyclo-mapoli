@@ -124,7 +124,7 @@ public sealed class OracleHcmCertificateService : IOracleHcmCertificateService
                 if (!File.Exists(absolutePath))
                 {
                     var ex = new FileNotFoundException($"Certificate file not found: {absolutePath}", absolutePath);
-                    _logger.LogError(ex, "Certificate file not found: {CertificatePath}", MaskPath(absolutePath));
+                    _logger.LogCritical(ex, "Certificate file not found at {CertificatePath}. Oracle HCM authentication cannot proceed.", MaskPath(absolutePath));
                     throw ex;
                 }
 
@@ -156,7 +156,7 @@ public sealed class OracleHcmCertificateService : IOracleHcmCertificateService
             }
             catch (FileNotFoundException ex)
             {
-                _logger.LogError(ex, "Certificate file not found");
+                _logger.LogCritical(ex, "Certificate file not found at {CertificatePath}. Oracle HCM authentication will fail. Ensure the certificate file exists at the configured path.", MaskPath(absolutePath));
                 throw;
             }
             catch (Exception ex)
@@ -164,7 +164,7 @@ public sealed class OracleHcmCertificateService : IOracleHcmCertificateService
                 var invalidOpEx = new InvalidOperationException(
                     $"Failed to load certificate from {MaskPath(absolutePath)}. This may indicate the file is corrupted, the password is incorrect, or the file is not a valid PFX certificate.",
                     ex);
-                _logger.LogError(invalidOpEx, "Failed to load certificate from {CertificatePath}", MaskPath(absolutePath));
+                _logger.LogCritical(invalidOpEx, "Certificate load failure at {CertificatePath}. Oracle HCM authentication will fail. Verify the file format, password, and file permissions.", MaskPath(absolutePath));
                 throw invalidOpEx;
             }
         }, ct);
