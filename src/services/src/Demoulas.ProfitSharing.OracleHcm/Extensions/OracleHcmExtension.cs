@@ -233,7 +233,7 @@ public static class OracleHcmExtension
 
     /// <summary>
     /// Configures HTTP clients used for Oracle HCM integration by registering them with resilience strategies.
-    /// Supports both certificate-based and basic authentication configurations.
+    /// Supports certificate-based authentication using mutual TLS (mTLS).
     /// </summary>
     /// <param name="services">
     /// The <see cref="IServiceCollection"/> to which the HTTP clients will be added.
@@ -243,8 +243,8 @@ public static class OracleHcmExtension
     /// employee synchronization, and payroll synchronization. It applies standard resilience strategies,
     /// including circuit breakers and timeout configurations, to ensure robust communication with the Oracle HCM API.
     /// 
-    /// For certificate-based authentication, the HttpClientHandler is configured with the certificate
-    /// from the OracleHcmConfig before the resilience handlers are applied.
+    /// Certificate-based authentication is wired through the HttpClientHandler, which attaches the X509Certificate2
+    /// to enable mutual TLS authentication with the Oracle HCM API.
     /// </remarks>
     private static void ConfigureHttpClients(IServiceCollection services)
     {
@@ -305,18 +305,23 @@ public static class OracleHcmExtension
         }
 
         services.AddHttpClient<AtomFeedClient>("AtomFeedSync", BuildOracleHcmAuthClient)
+            .ConfigurePrimaryHttpMessageHandler(services => CreateHttpClientHandlerWithCertificate(services))
             .AddStandardResilienceHandler(options => ConfigureWith401RetryAndBulkhead(options, commonHttpOptions));
 
         services.AddHttpClient<EmployeeFullSyncClient>("EmployeeSync", BuildOracleHcmAuthClient)
+            .ConfigurePrimaryHttpMessageHandler(services => CreateHttpClientHandlerWithCertificate(services))
             .AddStandardResilienceHandler(options => ConfigureWith401RetryAndBulkhead(options, commonHttpOptions));
 
         services.AddHttpClient<PayrollSyncClient>("PayrollSyncClient", BuildOracleHcmAuthClient)
+            .ConfigurePrimaryHttpMessageHandler(services => CreateHttpClientHandlerWithCertificate(services))
             .AddStandardResilienceHandler(options => ConfigureWith401RetryAndBulkhead(options, commonHttpOptions));
 
         services.AddHttpClient<PayrollSyncService>("PayrollSyncService", BuildOracleHcmAuthClient)
+            .ConfigurePrimaryHttpMessageHandler(services => CreateHttpClientHandlerWithCertificate(services))
             .AddStandardResilienceHandler(options => ConfigureWith401RetryAndBulkhead(options, commonHttpOptions));
 
         services.AddHttpClient<OracleHcmHealthCheck>("OracleHcmHealthCheck", BuildOracleHcmAuthClient)
+            .ConfigurePrimaryHttpMessageHandler(services => CreateHttpClientHandlerWithCertificate(services))
             .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
     }
 
@@ -366,12 +371,36 @@ public static class OracleHcmExtension
     }
 
     /// <summary>
-    /// Configures the provided <see cref="HttpClient"/> instance for Oracle HCM authentication.
-    /// Supports two authentication methods:
-    /// 1. Certificate-Based (Recommended): Uses mutual TLS with a PFX certificate
-    /// 2. Basic Authentication (Legacy): Uses username and password encoded in Authorization header
-    /// 
-    /// Sets the base address, authorization headers, and default request headers required for communication with the Oracle HCM API.
+    /// Creates an HttpClientHandler configured for certificate-based authentication.
+    /// Attaches the X509Certificate2 to the handler's client certificates collection for mutual TLS.
+    /// </summary>
+    /// <param name="services">The service provider for dependency injection.</param>
+    /// <returns>A configured HttpClientHandler with the certificate attached, or a default handler if certificate authentication is not configured.</returns>
+    /// <remarks>
+    /// This method retrieves the certificate from the IOracleHcmCertificateService and adds it
+    /// to the HttpClientHandler's ClientCertificates collection, enabling mutual TLS (mTLS) 
+    /// authentication with the Oracle HCM API.
+    /// </remarks>
+    private static HttpClientHandler CreateHttpClientHandlerWithCertificate(IServiceProvider services)
+    {
+        var handler = new HttpClientHandler();
+        OracleHcmConfig config = services.GetRequiredService<OracleHcmConfig>();
+
+        if (config.UseCertificateAuthentication && !string.IsNullOrWhiteSpace(config.PfxFilePath))
+        {
+            IOracleHcmCertificateService certificateService = services.GetRequiredService<IOracleHcmCertificateService>();
+            X509Certificate2 certificate = certificateService.GetCertificate(config.PfxFilePath, config.PfxPassword);
+            
+            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
+            handler.ClientCertificates.Add(certificate);
+        }
+
+        return handler;
+    }
+
+    /// <summary>
+    /// Configures the provided <see cref="HttpClient"/> instance for Oracle HCM API communication.
+    /// Sets the base address, framework version header, and content type headers.
     /// </summary>
     /// <param name="services">
     /// The <see cref="IServiceProvider"/> instance used to resolve dependencies, including the <see cref="OracleHcmConfig"/>.
@@ -380,14 +409,8 @@ public static class OracleHcmExtension
     /// The <see cref="HttpClient"/> instance to be configured for Oracle HCM API communication.
     /// </param>
     /// <remarks>
-    /// When using certificate-based authentication:
-    /// - The PFX certificate must be properly configured in OracleHcmConfig.PfxFilePath
-    /// - The certificate password must be set in OracleHcmConfig.PfxPassword
-    /// - The HttpClientHandler must support certificate attachment for mutual TLS
-    /// 
-    /// When using basic authentication (fallback):
-    /// - Username and Password must be set in OracleHcmConfig
-    /// - This method is deprecated for production use
+    /// Certificate-based authentication is wired separately via ConfigureHttpClientHandlerForCertificate.
+    /// This method only configures HTTP headers and the base address.
     /// </remarks>
     private static void BuildOracleHcmAuthClient(IServiceProvider services, HttpClient client)
     {
@@ -396,18 +419,5 @@ public static class OracleHcmExtension
         client.BaseAddress = new Uri(config.BaseAddress, UriKind.Absolute);
         client.DefaultRequestHeaders.Add(FrameworkVersionHeader, config.RestFrameworkVersion);
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-        if (config.UseCertificateAuthentication)
-        {
-            // Certificate-based authentication (recommended for production)
-            // No additional headers needed; certificate is handled by HttpClientHandler
-            // See ConfigureHttpClients method for HttpClientHandler configuration
-        }
-        else if (config.Username is not null)
-        {
-            // Basic authentication (fallback for development/compatibility)
-            string authToken = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{config.Username}:{config.Password}"));
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authToken);
-        }
     }
 }
