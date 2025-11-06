@@ -946,7 +946,7 @@ export const createCityColumn = (options: CityColumnOptions = {}): ColDef => {
     minWidth = 120,
     maxWidth,
     alignment = "left",
-    sortable = false,
+    sortable = true,
     resizable = true,
     nestedPath,
     valueGetter,
