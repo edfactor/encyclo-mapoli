@@ -29,7 +29,7 @@ namespace Demoulas.ProfitSharing.OracleHcm.Services;
 /// - Expiring within 90 days: Logged as WARNING - plan renewal soon
 /// - Not yet valid: Logged as CRITICAL - authentication will fail immediately
 /// </remarks>
-public sealed class OracleHcmCertificateService : IOracleHcmCertificateService
+public sealed class OracleHcmCertificateService : IOracleHcmCertificateService, IDisposable
 {
     private readonly ILogger<OracleHcmCertificateService> _logger;
     private readonly Dictionary<string, X509Certificate2> _certificateCache = new();
@@ -65,7 +65,7 @@ public sealed class OracleHcmCertificateService : IOracleHcmCertificateService
         }
 
         // Certificate not in cache, load it
-        X509Certificate2 certificate = await LoadCertificateFromFileAsync(absolutePath, password, ct);
+        X509Certificate2 certificate = LoadCertificateFromFile(absolutePath, password);
 
         _cacheLock.EnterWriteLock();
         try
@@ -114,7 +114,7 @@ public sealed class OracleHcmCertificateService : IOracleHcmCertificateService
         }
 
         // Certificate not in cache (or no caching requested), load it
-        X509Certificate2 certificate = await LoadCertificateFromStreamAsync(pfxStream, password, sourceIdentifier, ct);
+        X509Certificate2 certificate = LoadCertificateFromStream(pfxStream, password, sourceIdentifier);
 
         // Only cache if sourceIdentifier is provided
         if (!string.IsNullOrEmpty(cacheKey))
@@ -173,7 +173,7 @@ public sealed class OracleHcmCertificateService : IOracleHcmCertificateService
         }
 
         // Certificate not in cache (or no caching requested), load it
-        X509Certificate2 certificate = await LoadCertificateFromBytesAsync(pfxData, password, sourceIdentifier, ct);
+        X509Certificate2 certificate = LoadCertificateFromBytes(pfxData, password, sourceIdentifier);
 
         // Only cache if sourceIdentifier is provided
         if (!string.IsNullOrEmpty(cacheKey))
@@ -284,46 +284,42 @@ public sealed class OracleHcmCertificateService : IOracleHcmCertificateService
     /// </summary>
     /// <param name="absolutePath">The absolute file path to the PFX file.</param>
     /// <param name="password">The certificate password (optional).</param>
-    /// <param name="ct">Cancellation token.</param>
     /// <returns>The loaded X509Certificate2.</returns>
     /// <exception cref="FileNotFoundException">If the file is not found.</exception>
     /// <exception cref="InvalidOperationException">If the certificate cannot be loaded.</exception>
-    private async Task<X509Certificate2> LoadCertificateFromFileAsync(string absolutePath, string? password, CancellationToken ct)
+    private X509Certificate2 LoadCertificateFromFile(string absolutePath, string? password)
     {
-        return await Task.Run(() =>
+        try
         {
-            try
+            if (!File.Exists(absolutePath))
             {
-                if (!File.Exists(absolutePath))
-                {
-                    var ex = new FileNotFoundException($"Certificate file not found: {absolutePath}", absolutePath);
-                    _logger.LogCritical(ex, "Certificate file not found at {CertificatePath}. Oracle HCM authentication cannot proceed.", MaskPath(absolutePath));
-                    throw ex;
-                }
+                var ex = new FileNotFoundException($"Certificate file not found: {absolutePath}", absolutePath);
+                _logger.LogCritical(ex, "Certificate file not found at {CertificatePath}. Oracle HCM authentication cannot proceed.", MaskPath(absolutePath));
+                throw ex;
+            }
 
-                // Load certificate using modern API (X509CertificateLoader)
-                X509Certificate2 certificate = X509CertificateLoader.LoadPkcs12FromFile(
-                    absolutePath,
-                    password,
-                    X509KeyStorageFlags.EphemeralKeySet);
+            // Load certificate using modern API (X509CertificateLoader)
+            X509Certificate2 certificate = X509CertificateLoader.LoadPkcs12FromFile(
+                absolutePath,
+                password,
+                X509KeyStorageFlags.EphemeralKeySet);
 
-                ValidateAndLogCertificate(certificate);
-                return certificate;
-            }
-            catch (FileNotFoundException ex)
-            {
-                _logger.LogCritical(ex, "Certificate file not found at {CertificatePath}. Oracle HCM authentication will fail. Ensure the certificate file exists at the configured path.", MaskPath(absolutePath));
-                throw;
-            }
-            catch (Exception ex)
-            {
-                var invalidOpEx = new InvalidOperationException(
-                    $"Failed to load certificate from {MaskPath(absolutePath)}. This may indicate the file is corrupted, the password is incorrect, or the file is not a valid PFX certificate.",
-                    ex);
-                _logger.LogCritical(invalidOpEx, "Certificate load failure at {CertificatePath}. Oracle HCM authentication will fail. Verify the file format, password, and file permissions.", MaskPath(absolutePath));
-                throw invalidOpEx;
-            }
-        }, ct);
+            ValidateAndLogCertificate(certificate);
+            return certificate;
+        }
+        catch (FileNotFoundException ex)
+        {
+            _logger.LogCritical(ex, "Certificate file not found at {CertificatePath}. Oracle HCM authentication will fail. Ensure the certificate file exists at the configured path.", MaskPath(absolutePath));
+            throw;
+        }
+        catch (Exception ex)
+        {
+            var invalidOpEx = new InvalidOperationException(
+                $"Failed to load certificate from {MaskPath(absolutePath)}. This may indicate the file is corrupted, the password is incorrect, or the file is not a valid PFX certificate.",
+                ex);
+            _logger.LogCritical(invalidOpEx, "Certificate load failure at {CertificatePath}. Oracle HCM authentication will fail. Verify the file format, password, and file permissions.", MaskPath(absolutePath));
+            throw invalidOpEx;
+        }
     }
 
     /// <summary>
@@ -332,43 +328,39 @@ public sealed class OracleHcmCertificateService : IOracleHcmCertificateService
     /// <param name="pfxStream">Stream containing PFX data.</param>
     /// <param name="password">The certificate password (optional).</param>
     /// <param name="sourceIdentifier">Optional identifier for logging (e.g., "database:cert-1").</param>
-    /// <param name="ct">Cancellation token.</param>
     /// <returns>The loaded X509Certificate2.</returns>
     /// <exception cref="InvalidOperationException">If the certificate cannot be loaded.</exception>
-    private async Task<X509Certificate2> LoadCertificateFromStreamAsync(Stream pfxStream, string? password, string? sourceIdentifier, CancellationToken ct)
+    private X509Certificate2 LoadCertificateFromStream(Stream pfxStream, string? password, string? sourceIdentifier)
     {
-        return await Task.Run(() =>
+        try
         {
-            try
+            // Read all bytes from stream (required for X509CertificateLoader)
+            using var memoryStream = new MemoryStream();
+            pfxStream.CopyTo(memoryStream);
+            byte[] pfxData = memoryStream.ToArray();
+
+            if (pfxData.Length == 0)
             {
-                // Read all bytes from stream (required for X509CertificateLoader)
-                using var memoryStream = new MemoryStream();
-                pfxStream.CopyTo(memoryStream);
-                byte[] pfxData = memoryStream.ToArray();
-
-                if (pfxData.Length == 0)
-                {
-                    throw new InvalidOperationException("Stream contains no data.");
-                }
-
-                // Load certificate using modern API
-                X509Certificate2 certificate = X509CertificateLoader.LoadPkcs12(
-                    pfxData,
-                    password,
-                    X509KeyStorageFlags.EphemeralKeySet);
-
-                ValidateAndLogCertificate(certificate, sourceIdentifier);
-                return certificate;
+                throw new InvalidOperationException("Stream contains no data.");
             }
-            catch (Exception ex)
-            {
-                var invalidOpEx = new InvalidOperationException(
-                    $"Failed to load certificate from stream ({sourceIdentifier ?? "no identifier"}). This may indicate the data is corrupted, the password is incorrect, or the data is not a valid PFX certificate.",
-                    ex);
-                _logger.LogCritical(invalidOpEx, "Certificate load failure from stream {SourceIdentifier}. Oracle HCM authentication will fail. Verify the data format and password.", sourceIdentifier ?? "unknown");
-                throw invalidOpEx;
-            }
-        }, ct);
+
+            // Load certificate using modern API
+            X509Certificate2 certificate = X509CertificateLoader.LoadPkcs12(
+                pfxData,
+                password,
+                X509KeyStorageFlags.EphemeralKeySet);
+
+            ValidateAndLogCertificate(certificate, sourceIdentifier);
+            return certificate;
+        }
+        catch (Exception ex)
+        {
+            var invalidOpEx = new InvalidOperationException(
+                $"Failed to load certificate from stream ({sourceIdentifier ?? "no identifier"}). This may indicate the data is corrupted, the password is incorrect, or the data is not a valid PFX certificate.",
+                ex);
+            _logger.LogCritical(invalidOpEx, "Certificate load failure from stream {SourceIdentifier}. Oracle HCM authentication will fail. Verify the data format and password.", sourceIdentifier ?? "unknown");
+            throw invalidOpEx;
+        }
     }
 
     /// <summary>
@@ -377,33 +369,29 @@ public sealed class OracleHcmCertificateService : IOracleHcmCertificateService
     /// <param name="pfxData">Byte array containing PFX data.</param>
     /// <param name="password">The certificate password (optional).</param>
     /// <param name="sourceIdentifier">Optional identifier for logging (e.g., "env:CERT_VAR").</param>
-    /// <param name="ct">Cancellation token.</param>
     /// <returns>The loaded X509Certificate2.</returns>
     /// <exception cref="InvalidOperationException">If the certificate cannot be loaded.</exception>
-    private async Task<X509Certificate2> LoadCertificateFromBytesAsync(byte[] pfxData, string? password, string? sourceIdentifier, CancellationToken ct)
+    private X509Certificate2 LoadCertificateFromBytes(byte[] pfxData, string? password, string? sourceIdentifier)
     {
-        return await Task.Run(() =>
+        try
         {
-            try
-            {
-                // Load certificate using modern API
-                X509Certificate2 certificate = X509CertificateLoader.LoadPkcs12(
-                    pfxData,
-                    password,
-                    X509KeyStorageFlags.EphemeralKeySet);
+            // Load certificate using modern API
+            X509Certificate2 certificate = X509CertificateLoader.LoadPkcs12(
+                pfxData,
+                password,
+                X509KeyStorageFlags.EphemeralKeySet);
 
-                ValidateAndLogCertificate(certificate, sourceIdentifier);
-                return certificate;
-            }
-            catch (Exception ex)
-            {
-                var invalidOpEx = new InvalidOperationException(
-                    $"Failed to load certificate from byte array ({sourceIdentifier ?? "no identifier"}). This may indicate the data is corrupted, the password is incorrect, or the data is not a valid PFX certificate.",
-                    ex);
-                _logger.LogCritical(invalidOpEx, "Certificate load failure from bytes {SourceIdentifier}. Oracle HCM authentication will fail. Verify the data format and password.", sourceIdentifier ?? "unknown");
-                throw invalidOpEx;
-            }
-        }, ct);
+            ValidateAndLogCertificate(certificate, sourceIdentifier);
+            return certificate;
+        }
+        catch (Exception ex)
+        {
+            var invalidOpEx = new InvalidOperationException(
+                $"Failed to load certificate from byte array ({sourceIdentifier ?? "no identifier"}). This may indicate the data is corrupted, the password is incorrect, or the data is not a valid PFX certificate.",
+                ex);
+            _logger.LogCritical(invalidOpEx, "Certificate load failure from bytes {SourceIdentifier}. Oracle HCM authentication will fail. Verify the data format and password.", sourceIdentifier ?? "unknown");
+            throw invalidOpEx;
+        }
     }
 
     /// <summary>
@@ -453,8 +441,8 @@ public sealed class OracleHcmCertificateService : IOracleHcmCertificateService
     private static string MaskPath(string path) => Path.GetFileName(path);
 
     /// <summary>
-    /// Disposes all cached certificates.
-    /// Should be called during application shutdown.
+    /// Disposes all cached certificates and releases the cache lock.
+    /// Should be called during application shutdown or when the service is no longer needed.
     /// </summary>
     public void Dispose()
     {
