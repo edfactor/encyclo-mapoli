@@ -36,15 +36,16 @@ public interface IJwtTokenService
     string GenerateToken(X509Certificate2 certificate, string issuer, string principal, int expirationMinutes = 10);
 
     /// <summary>
-    /// Generates a JWT token with default Oracle HCM-compatible values.
+    /// Generates a JWT token with the certificate issuer as the claim issuer.
     /// </summary>
     /// <param name="certificate">The X509 certificate containing the private key for signing.</param>
     /// <param name="expirationMinutes">Token expiration time in minutes from now. Default: 10 minutes.</param>
     /// <returns>A signed JWT token string ready for use in the Authorization header.</returns>
     /// <remarks>
-    /// Uses default Oracle HCM values:
-    /// - Issuer: "www.demoulas.com"
-    /// - Principal: "fusion"
+    /// Uses the certificate subject's CN (Common Name) or L (Locality) as the issuer claim.
+    /// Default Oracle HCM principal: "fusion"
+    /// Example: For certificate with "CN = Demoulas Cloud Issuing CA 2", 
+    /// the token issuer claim will be "Demoulas Cloud Issuing CA 2"
     /// </remarks>
     string GenerateTokenWithDefaults(X509Certificate2 certificate, int expirationMinutes = 10);
 }

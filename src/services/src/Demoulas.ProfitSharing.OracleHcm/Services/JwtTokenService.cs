@@ -1,7 +1,8 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
+using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Services.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 
@@ -13,20 +14,24 @@ namespace Demoulas.ProfitSharing.OracleHcm.Services;
 /// <remarks>
 /// JWT tokens are required by Oracle HCM in addition to mutual TLS (mTLS).
 /// This service creates RS256-signed tokens with the required claims and certificate thumbprint.
+/// Configuration is loaded from OracleHcmConfig for principal, algorithm, and expiration.
 /// </remarks>
 public sealed class JwtTokenService : IJwtTokenService
 {
-    private const string DefaultIssuer = "www.demoulas.com";
-    private const string DefaultPrincipal = "fusion";
-    private const string SigningAlgorithm = "RS256";
+    private readonly OracleHcmConfig _config;
     private const string TokenType = "JWT";
+
+    public JwtTokenService(OracleHcmConfig config)
+    {
+        _config = config;
+    }
 
     /// <inheritdoc />
     public string GenerateToken(X509Certificate2 certificate, string issuer, string principal, int expirationMinutes = 10)
     {
         ArgumentNullException.ThrowIfNull(certificate);
-        ArgumentException.ThrowIfNullOrWhiteSpace(issuer, nameof(issuer));
-        ArgumentException.ThrowIfNullOrWhiteSpace(principal, nameof(principal));
+        ArgumentException.ThrowIfNullOrWhiteSpace(issuer);
+        ArgumentException.ThrowIfNullOrWhiteSpace(principal);
 
         if (!certificate.HasPrivateKey)
         {
@@ -46,7 +51,7 @@ public sealed class JwtTokenService : IJwtTokenService
         // Create header
         var header = new
         {
-            alg = SigningAlgorithm,
+            alg = _config.JwtSigningAlgorithm,
             typ = TokenType,
             x5t = x5t
         };
@@ -84,7 +89,12 @@ public sealed class JwtTokenService : IJwtTokenService
     /// <inheritdoc />
     public string GenerateTokenWithDefaults(X509Certificate2 certificate, int expirationMinutes = 10)
     {
-        return GenerateToken(certificate, DefaultIssuer, DefaultPrincipal, expirationMinutes);
+        // Extract issuer from certificate subject
+        string issuer = ExtractIssuerFromCertificate(certificate);
+
+        // Use configured principal and expiration (or provided override)
+        int tokenExpiration = expirationMinutes == 10 ? _config.JwtExpirationMinutes : expirationMinutes;
+        return GenerateToken(certificate, issuer, _config.JwtPrincipal, tokenExpiration);
     }
 
     /// <summary>
@@ -124,5 +134,31 @@ public sealed class JwtTokenService : IJwtTokenService
         string base64 = Convert.ToBase64String(input);
         // Convert to base64url: replace +/= with -_
         return base64.TrimEnd('=').Replace('+', '-').Replace('/', '_');
+    }
+
+    /// <summary>
+    /// Extracts the issuer identifier from the certificate subject.
+    /// Attempts to extract CN (Common Name) first, then L (Locality), then uses the full subject as fallback.
+    /// </summary>
+    private static string ExtractIssuerFromCertificate(X509Certificate2 certificate)
+    {
+        string subject = certificate.Subject;
+
+        // Try to extract CN (Common Name) - e.g., "CN = Demoulas Cloud Issuing CA 2"
+        var cnMatch = System.Text.RegularExpressions.Regex.Match(subject, @"CN\s*=\s*([^,]+)");
+        if (cnMatch.Success)
+        {
+            return cnMatch.Groups[1].Value.Trim();
+        }
+
+        // Fallback to L (Locality) - e.g., "L = Demoulas Supermarkets Inc."
+        var lMatch = System.Text.RegularExpressions.Regex.Match(subject, @"L\s*=\s*([^,]+)");
+        if (lMatch.Success)
+        {
+            return lMatch.Groups[1].Value.Trim();
+        }
+
+        // Last resort: use the full subject
+        return subject;
     }
 }

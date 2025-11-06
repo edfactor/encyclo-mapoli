@@ -63,4 +63,25 @@ public sealed record OracleHcmConfig
     /// Returns true if PfxFilePath is set and not empty, false otherwise.
     /// </summary>
     public bool UseCertificateAuthentication => !string.IsNullOrWhiteSpace(PfxFilePath);
+
+    // JWT Token Configuration
+    /// <summary>
+    /// Gets or sets the principal (username) claim for JWT tokens.
+    /// Used by Oracle HCM to identify the authenticated service.
+    /// Default: "fusion"
+    /// </summary>
+    public string JwtPrincipal { get; set; } = "fusion";
+
+    /// <summary>
+    /// Gets or sets the signing algorithm for JWT tokens.
+    /// Should be "RS256" (RSA SHA-256) for Oracle HCM compatibility.
+    /// Default: "RS256"
+    /// </summary>
+    public string JwtSigningAlgorithm { get; set; } = "RS256";
+
+    /// <summary>
+    /// Gets or sets the JWT token expiration time in minutes.
+    /// Default: 10 minutes
+    /// </summary>
+    public int JwtExpirationMinutes { get; set; } = 10;
 }
