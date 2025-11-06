@@ -41,11 +41,19 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
                          {
                              BadgeNumber = d.BadgeNumber,
                              FullName = d.ContactInfo.FullName != null ? d.ContactInfo.FullName : string.Empty,
+                             FirstName = d.ContactInfo.FirstName,
+                             LastName = d.ContactInfo.LastName,
+                             MiddleInitial = !string.IsNullOrEmpty(d.ContactInfo.MiddleName) ? d.ContactInfo.MiddleName[0].ToString() : string.Empty,
                              Ssn = d.Ssn.MaskSsn(),
                              TerminationDate = d.TerminationDate!.Value,
                              TerminationCodeId = d.TerminationCodeId,
                              TerminationCode = d.TerminationCode != null ? d.TerminationCode.Name : string.Empty,
-                             IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly
+                             IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
+                             Address = d.Address.Street,
+                             Address2 = !string.IsNullOrEmpty(d.Address.Street2) ? d.Address.Street2 : string.Empty,
+                             City = !string.IsNullOrEmpty(d.Address.City) ? d.Address.City : string.Empty,
+                             State = !string.IsNullOrEmpty(d.Address.State) ? d.Address.State : string.Empty,
+                             PostalCode = !string.IsNullOrEmpty(d.Address.PostalCode) ? d.Address.PostalCode : string.Empty
                          }).ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
 
             return await query;
