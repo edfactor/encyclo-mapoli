@@ -219,7 +219,7 @@ public sealed class DistributionService : IDistributionService
         var validationResult = ValidateDistributionRequest(request);
         if (!validationResult.IsSuccess)
         {
-            throw new InvalidOperationException(string.Join("; ", validationResult.Errors?.SelectMany(e => e.Value) ?? Array.Empty<string>()));
+            throw new InvalidOperationException(string.Join("; ", validationResult.Error?.ValidationErrors.SelectMany(e => e.Value) ?? []));
         }
 
         return await _dataContextFactory.UseWritableContext(async ctx =>
