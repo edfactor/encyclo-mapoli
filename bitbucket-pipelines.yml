@@ -82,9 +82,9 @@ definitions:
           # Navigate to UI directory
           Set-Location src/ui
           
-          # Update npm to latest version
-          Write-Host "Updating npm..." -ForegroundColor Cyan
-          npm install -g npm@latest
+          # Show current npm version (use existing npm, skip global update due to certificate issues)
+          Write-Host "Current npm version:" -ForegroundColor Cyan
+          npm --version
           
           # Create .npmrc for JFrog access (uses pipeline variable)
           Write-Host "Creating .npmrc for JFrog authentication..." -ForegroundColor Cyan
