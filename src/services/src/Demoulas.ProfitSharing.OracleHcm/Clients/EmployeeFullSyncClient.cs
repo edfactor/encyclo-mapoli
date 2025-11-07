@@ -175,7 +175,7 @@ internal sealed class EmployeeFullSyncClient
             _logger.LogWarning("Oracle HCM API request failed: {ErrorResponse} / {ReasonPhrase}", errorResponse, response.ReasonPhrase);
 
             // Generate and display cURL command for manual testing
-            string curlCommand = HttpRequestMessageExtension.GenerateCurlCommand(request, url);
+            string curlCommand = request.GenerateCurlCommand(url);
 
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine();

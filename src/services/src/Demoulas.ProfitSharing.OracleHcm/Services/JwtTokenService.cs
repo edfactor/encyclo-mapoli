@@ -123,7 +123,7 @@ public sealed class JwtTokenService : IJwtTokenService
     private string ExtractSigningAlgorithmFromCertificate(X509Certificate2 certificate)
     {
         string? certAlgorithm = certificate.SignatureAlgorithm.FriendlyName;
-        
+
         if (string.IsNullOrEmpty(certAlgorithm))
         {
             throw new InvalidOperationException(
