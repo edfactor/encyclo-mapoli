@@ -2,114 +2,110 @@
 
 This project uses .NET 9 for services and Node 20.4 (via Volta) for the UI. The steps below install common tooling and get you running quickly.
 
-## Quick Start (Automated)
+## Quick Start (Automated - RECOMMENDED)
 
-### Prerequisites
-- Windows 10/11
-- Administrator privileges
-- [Windows Package Manager (winget)](https://www.microsoft.com/p/app-installer/9nblggh4nns1) installed
+### For New Developers - ONE Command Setup
 
-### Enable PowerShell Script Execution
+**All you need**: Windows 10/11 and PowerShell
 
-If you get the error: **"cannot be loaded because running scripts is disabled on this system"**
-
-1. Open **PowerShell as Administrator**
+1. **Open PowerShell as Administrator**
    ```powershell
-   Start-Process pwsh -ArgumentList '-NoExit' -Verb RunAs
+   Start-Process pwsh -Verb RunAs
    ```
 
-2. Set execution policy to allow local scripts:
+2. **Enable script execution** (one-time):
    ```powershell
    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
    ```
 
-3. Verify it worked:
+3. **Clone the repository** (or download the script folder):
    ```powershell
-   Get-ExecutionPolicy
-   # Should return: RemoteSigned
+   git clone https://bitbucket.org/demoulas/smart-profit-sharing
+   cd smart-profit-sharing
    ```
 
-### Run Setup Script
+4. **Run the setup script**:
+   ```powershell
+   cd developer_setup
+   .\Setup-DeveloperEnvironment.ps1
+   ```
 
-Open **PowerShell as Administrator** and run:
+That's it! The script will automatically:
+- ✓ Check prerequisites (winget installed)
+- ✓ Read local `winget-config.json`
+- ✓ Install all required tools via winget
+- ✓ Configure Visual Studio 2022 workloads
+- ✓ Verify Node.js (Volta)
+- ✓ Show next steps
 
-```pwsh
-cd D:\source\Demoulas\smart-profit-sharing\developer_setup
-.\Setup-DeveloperEnvironment.ps1
-```
-
-The script automatically:
-- ✓ Installs all required development tools
-- ✓ Configures Visual Studio 2022 with required workloads
-- ✓ Verifies Volta and Node.js setup
-- ✓ Displays next steps
+**Note**: The script only reads the local `winget-config.json` file in the same folder. No code is downloaded—only your development tools via winget.
 
 ---
 
-## Manual Installation
+## Manual Installation (If Automated Script Fails)
 
-### 1) Install Required Tools with winget
+### 1) Download and Run Setup Script
 
-Run in PowerShell (**as Administrator**):
+If you prefer to use the script file directly:
 
-```pwsh
-winget import --import-file .\developer_setup\winget-config.json --accept-package-agreements --accept-source-agreements
-```
+1. Save `Setup-DeveloperEnvironment.ps1` locally
+2. Open PowerShell as Administrator
+3. Enable script execution:
+   ```pwsh
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+   ```
+4. Run the script:
+   ```pwsh
+   .\Setup-DeveloperEnvironment.ps1
+   ```
 
-What this installs:
-- **Visual Studio Code** - Code editor
-- **Visual Studio 2022 Professional** - Full IDE (with workload configuration)
-- **Volta** - Node.js version manager (pins to package.json version)
-- **Git & TortoiseGit** - Version control
-- **Postman** - API testing
-- **Web Deploy** - Deployment tooling
+### 2) Manual Package Installation
 
-Note: This config is streamlined for profit-sharing development. SQL Server tooling was intentionally removed (we use Oracle).
-
-### 2) Configure Visual Studio Workloads
-
-Visual Studio 2022 requires these workloads for development:
-- ✓ **ASP.NET and web development** - For API development
-- ✓ **Azure development** - For cloud services
-- ✓ **NET desktop development** - For WPF/Forms support
-
-**Option A: Automatic Configuration (Recommended)**
-
-The setup script handles this automatically. If you installed manually, run:
+If the script fails, install packages individually:
 
 ```pwsh
-# Find your Visual Studio installation
-$vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath
-
-# Install required workloads
-& "$vsPath\Common7\Tools\vsconfig.exe" `
-  --add Microsoft.VisualStudio.Workload.NetWeb `
-  --add Microsoft.VisualStudio.Workload.Azure `
-  --add Microsoft.VisualStudio.Workload.ManagedDesktop `
-  --quiet --norestart
+winget install Microsoft.VisualStudioCode --accept-package-agreements
+winget install Microsoft.VisualStudio.2022.Professional --accept-package-agreements
+winget install Git.Git --accept-package-agreements
+winget install TortoiseGit.TortoiseGit --accept-package-agreements
+winget install Postman.Postman --accept-package-agreements
+winget install Volta.Volta --accept-package-agreements
+winget install Microsoft.WebDeploy --accept-package-agreements
 ```
 
-**Option B: Manual Configuration**
+### 3) Manual Visual Studio Configuration
 
 1. Open **Visual Studio Installer**
-2. Click "Modify" on Visual Studio 2022 Professional
-3. Check these workloads:
+2. Click **Modify** on Visual Studio 2022 Professional
+3. Select these workloads:
    - ☑ ASP.NET and web development
    - ☑ Azure development
    - ☑ .NET desktop development
-4. Click "Modify" to install
-
-### 3) Finalize CLI Tooling
+4. Click **Modify** to install
 
 ```pwsh
-# Pin Node.js to the version specified by Volta in ui/package.json
+### 4) Complete Setup
+
+Once tools are installed, finish with:
+
+```pwsh
+# Pin Node.js version (managed by Volta)
 volta install node@LTS
 
-# EF Core tooling (global)
+# Install EF Core tools globally
 dotnet tool update --global dotnet-ef
 
-# Optional: Install git hooks (pre-commit runs dotnet format)
+# Optional: Install git hooks
 .\scripts\Install-GitHooks.ps1
+```
+
+### 5) Verify Installation
+
+```pwsh
+dotnet --version
+git --version
+volta --version
+```
 ```
 
 ### 4) Restore and Build

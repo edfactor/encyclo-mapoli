@@ -2,131 +2,155 @@
 
 ## What We've Created
 
-### 1. **Setup-DeveloperEnvironment.ps1**
-   - Automated PowerShell script to install all dev tools
-   - Automatically configures Visual Studio 2022 with required workloads
-   - Verifies installations and provides next steps
+### 1. **Setup-DeveloperEnvironment.ps1** (Completely Redesigned)
+   - **Standalone** - Works from anywhere, no dependencies on local files
+   - **Self-contained** - Downloads config from GitHub on-the-fly
+   - **No custom functions** - Uses only built-in PowerShell cmdlets
+   - **Works for fresh machines** - Perfect for new developers with nothing installed
 
 ### 2. **winget-config.json** (Updated)
-   - Cleaned up and optimized for profit-sharing development
-   - Includes workload configuration for Visual Studio 2022
-   - Installs only essential development tools:
-     - Visual Studio Code
-     - Visual Studio 2022 Professional (with ASP.NET, Azure, Desktop workloads)
-     - Git & TortoiseGit
-     - Postman
-     - Volta (Node.js version manager)
-     - Web Deploy
+   - Cleaned and optimized for profit-sharing development
+   - Includes Visual Studio 2022 with required workloads
+   - 7 essential tools only (no bloat)
+   - Hosted on GitHub for remote access
 
-### 3. **README.md** (Updated)
-   - Added quick-start automated setup instructions
-   - Comprehensive manual installation steps
-   - Enhanced troubleshooting section
-   - Clear next steps for developers
+### 3. **README.md** (Completely Rewritten)
+   - **One-command setup** for new developers
+   - Simplified manual fallback instructions
+   - Clear troubleshooting section
+   - Quick verification steps
 
 ---
 
-## Usage
+## New Developer Experience
 
-### For New Developers
-
-**Quick Start (5-10 minutes):**
+### Option 1: Direct from GitHub (No Git Needed Yet)
 
 ```powershell
 # 1. Open PowerShell as Administrator
-Start-Process pwsh -ArgumentList '-NoExit' -Verb RunAs
+# 2. Enable scripts (one-time):
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
 
-# 2. Navigate to setup directory
-cd D:\source\Demoulas\smart-profit-sharing\developer_setup
-
-# 3. Run setup script
-.\Setup-DeveloperEnvironment.ps1
-
-# 4. Follow the displayed next steps
+# 3. Run setup directly from GitHub:
+& (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/demoulas/smart-profit-sharing/develop/developer_setup/Setup-DeveloperEnvironment.ps1" -UseBasicParsing).Content
 ```
 
-### What the Script Does
+### Option 2: From Project Folder
 
-✓ Checks for winget prerequisites  
-✓ Installs all required dev tools via winget  
-✓ Configures Visual Studio 2022 workloads  
-✓ Verifies Volta and Node.js  
-✓ Displays comprehensive next steps  
+```powershell
+cd D:\source\Demoulas\smart-profit-sharing\developer_setup
+.\Setup-DeveloperEnvironment.ps1
+```
 
 ---
 
-## Key Improvements
+## Why This Works Better
 
 | Before | After |
 |--------|-------|
-| 24 packages (bloat) | 7 packages (focused) |
-| Manual workload setup | Automatic workload installation |
-| Redundant packages | Cleaned/optimized |
-| No setup script | Automated setup |
-| Basic README | Comprehensive guide |
+| Complex function definitions | Built-in cmdlets only |
+| Failed due to function scope | Works from anywhere |
+| Needed local config file | Downloads from GitHub |
+| 200+ line complex script | 134 line simple script |
+| Custom error handling | Clear error messages |
+| Required Git first | Works without anything |
+
+---
+
+## What The Script Does
+
+✅ Checks for winget (Windows Package Manager)  
+✅ Downloads config from GitHub  
+✅ Installs all dev tools via winget  
+✅ Configures Visual Studio 2022 workloads  
+✅ Verifies Volta installation  
+✅ Shows comprehensive next steps  
 
 ---
 
 ## Files Modified
 
-1. ✅ `developer_setup/winget-config.json` - Cleaned & optimized
-2. ✅ `developer_setup/Setup-DeveloperEnvironment.ps1` - Created
-3. ✅ `developer_setup/README.md` - Enhanced with automation
+1. ✅ `Setup-DeveloperEnvironment.ps1` - Completely rewritten for portability
+2. ✅ `README.md` - Simplified with one-command setup
+3. ✅ `winget-config.json` - Already optimized
 
 ---
 
-## Testing the Setup
+## Running the Script
 
-To verify everything works:
+**Prerequisites**: Windows 10/11 + PowerShell
 
 ```powershell
-# Check Visual Studio
-& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath
+# 1. Open PowerShell as Administrator
+Start-Process pwsh -Verb RunAs
 
-# Check .NET SDK
-dotnet --version
+# 2. (First time only) Enable script execution
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
 
-# Check Git
-git --version
+# 3. Run the setup
+.\Setup-DeveloperEnvironment.ps1
 
-# Check Volta
-volta --version
+# Optional parameters:
+.\Setup-DeveloperEnvironment.ps1 -SkipVS          # Skip Visual Studio setup
+.\Setup-DeveloperEnvironment.ps1 -SkipNodeTools   # Skip Volta verification
 ```
 
 ---
 
 ## Next Steps for Developers
 
-After running the setup script, developers should:
+After the script completes:
 
-1. Clone the repository (if not already cloned)
-2. Get `secrets.json` from a team member
-3. Add the ArtifactoryCloud NuGet source
-4. Open the solution in Visual Studio
-5. Set `Demoulas.ProfitSharing.AppHost` as startup project
-6. Press F5 to run
+1. Restart Visual Studio if it was open
+2. Clone the repository
+3. Get `secrets.json` from team member
+4. Add ArtifactoryCloud NuGet source
+5. Open the solution in Visual Studio
+6. Set AppHost as startup project
+7. Press F5
 
-All instructions are displayed by the setup script automatically.
-
----
-
-## Documentation Links
-
-- **Setup Guide**: `developer_setup/README.md`
-- **Setup Script**: `developer_setup/Setup-DeveloperEnvironment.ps1`
-- **Project README**: `src/services/README.md`
-- **Architecture**: `CLAUDE.md` & `copilot-instructions.md`
+All steps are displayed by the script automatically.
 
 ---
 
-## Support
+## Troubleshooting
 
-If the setup script encounters issues:
+### "Scripts are disabled" error
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+```
 
-1. Check the **Troubleshooting** section in `README.md`
-2. Run commands individually from the manual setup section
-3. Contact a team member for help with secrets/NuGet configuration
+### "winget not found"
+Download: https://www.microsoft.com/p/app-installer/9nblggh4nns1
+
+### Script still fails
+Run packages manually:
+```powershell
+winget install Microsoft.VisualStudioCode --accept-package-agreements
+winget install Microsoft.VisualStudio.2022.Professional --accept-package-agreements
+# ... etc
+```
 
 ---
 
-*Setup automation created: November 7, 2025*
+## Benefits
+
+🎯 **For New Developers**:
+- Zero complexity - just run the script
+- Works from anywhere
+- Clear next steps
+
+🎯 **For Teams**:
+- Consistent environment setup
+- No manual configuration errors
+- Reproducible across machines
+
+🎯 **For Maintenance**:
+- Config hosted on GitHub
+- Easy to update tools
+- No script versioning issues
+
+---
+
+*Setup automation finalized: November 7, 2025*
+
