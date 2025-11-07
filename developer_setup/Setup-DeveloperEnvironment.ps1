@@ -35,7 +35,7 @@ function Write-Success {
     Write-Host "✓ $Message" -ForegroundColor Green
 }
 
-function Write-Info {
+function Write-InfoMsg {
     param([string]$Message)
     Write-Host "ℹ $Message" -ForegroundColor Yellow
 }
@@ -56,7 +56,7 @@ Write-Header "Checking Prerequisites"
 
 if (-not (Test-CommandExists winget)) {
     Write-ErrorMsg "winget not found. Please install Windows Package Manager first."
-    Write-Info "Download from: https://www.microsoft.com/p/app-installer/9nblggh4nns1"
+    Write-InfoMsg "Download from: https://www.microsoft.com/p/app-installer/9nblggh4nns1"
     exit 1
 }
 Write-Success "winget is installed"
@@ -65,7 +65,7 @@ Write-Success "winget is installed"
 Write-Header "Installing Development Tools via winget"
 
 if (Test-Path $configPath) {
-    Write-Info "Using configuration from: $configPath"
+    Write-InfoMsg "Using configuration from: $configPath"
     try {
         winget import -i $configPath --accept-package-agreements --accept-source-agreements
         Write-Success "Winget packages installed successfully"
@@ -88,16 +88,16 @@ if (-not $SkipVS) {
     $vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products "*" -requires Microsoft.VisualStudio.Product.Professional -property installationPath 2>$null
     
     if (-not $vsPath) {
-        Write-Info "Visual Studio 2022 Professional not found. It may still be installing..."
-        Write-Info "Once installation completes, run this command manually:"
-        Write-Info "  vsconfig.exe --add Microsoft.VisualStudio.Workload.NetWeb --add Microsoft.VisualStudio.Workload.Azure --add Microsoft.VisualStudio.Workload.ManagedDesktop --quiet"
+        Write-InfoMsg "Visual Studio 2022 Professional not found. It may still be installing..."
+        Write-InfoMsg "Once installation completes, run this command manually:"
+        Write-InfoMsg "  vsconfig.exe --add Microsoft.VisualStudio.Workload.NetWeb --add Microsoft.VisualStudio.Workload.Azure --add Microsoft.VisualStudio.Workload.ManagedDesktop --quiet"
     }
     else {
-        Write-Info "Found Visual Studio at: $vsPath"
+        Write-InfoMsg "Found Visual Studio at: $vsPath"
         $vsConfigPath = Join-Path $vsPath "Common7\Tools\vsconfig.exe"
         
         if (Test-Path $vsConfigPath) {
-            Write-Info "Installing required workloads..."
+            Write-InfoMsg "Installing required workloads..."
             $workloads = @(
                 "Microsoft.VisualStudio.Workload.NetWeb",      # ASP.NET and web development
                 "Microsoft.VisualStudio.Workload.Azure",       # Azure development
@@ -113,7 +113,7 @@ if (-not $SkipVS) {
             }
             catch {
                 Write-ErrorMsg "Failed to install VS workloads: $_"
-                Write-Info "You may need to install them manually through Visual Studio Installer"
+                Write-InfoMsg "You may need to install them manually through Visual Studio Installer"
             }
         }
         else {
@@ -132,8 +132,8 @@ if (-not $SkipNodeTools) {
         # Check if Node.js is pinned in volta
         $package = Join-Path (Split-Path $PSScriptRoot -Parent) "ui\package.json"
         if (Test-Path $package) {
-            Write-Info "Volta configuration found in: $package"
-            Write-Info "Node.js version will be managed automatically by Volta"
+            Write-InfoMsg "Volta configuration found in: $package"
+            Write-InfoMsg "Node.js version will be managed automatically by Volta"
         }
     }
     else {
