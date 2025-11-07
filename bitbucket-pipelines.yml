@@ -175,6 +175,18 @@ definitions:
           //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
           EOF
         
+        # Update package.json version from .buildinfo.json
+        - |
+          if [ -f ../../.buildinfo.json ]; then
+            BUILD_NUMBER=$(grep -o '"buildNumber":"[^"]*"' ../../.buildinfo.json | cut -d'"' -f4)
+            BUILD_ID=$(grep -o '"buildId":[0-9]*' ../../.buildinfo.json | cut -d':' -f2)
+            if [ -n "$BUILD_NUMBER" ] && [ -n "$BUILD_ID" ]; then
+              VERSION="${BUILD_NUMBER}.${BUILD_ID}"
+              npm version "$VERSION" --no-git-tag-version
+              echo "✓ Updated package.json version to $VERSION"
+            fi
+          fi
+        
         # Copy buildinfo.json from artifact to public directory
         - echo "Copying .buildinfo.json from artifact..."
         - cp ../../.buildinfo.json ./public/.buildinfo.json
@@ -220,6 +232,18 @@ definitions:
           registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
           //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
           EOF
+        
+        # Update package.json version from .buildinfo.json
+        - |
+          if [ -f ../../.buildinfo.json ]; then
+            BUILD_NUMBER=$(grep -o '"buildNumber":"[^"]*"' ../../.buildinfo.json | cut -d'"' -f4)
+            BUILD_ID=$(grep -o '"buildId":[0-9]*' ../../.buildinfo.json | cut -d':' -f2)
+            if [ -n "$BUILD_NUMBER" ] && [ -n "$BUILD_ID" ]; then
+              VERSION="${BUILD_NUMBER}.${BUILD_ID}"
+              npm version "$VERSION" --no-git-tag-version
+              echo "✓ Updated package.json version to $VERSION"
+            fi
+          fi
         
         # Copy buildinfo.json from artifact to public directory
         - echo "Copying .buildinfo.json from artifact..."

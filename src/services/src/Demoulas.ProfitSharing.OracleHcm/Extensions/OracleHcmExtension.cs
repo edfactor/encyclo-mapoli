@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Net.Http.Headers;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Channels;
 using Demoulas.Common.Data.Services.Interfaces;
@@ -193,7 +194,7 @@ public static class OracleHcmExtension
     /// </param>
     /// <remarks>
     /// This method configures general services, mappers, and internal services required for Oracle HCM functionality.
-    /// It ensures that dependencies such as validators, jobs, and mappers are properly registered.
+    /// It ensures that dependencies such as validators, jobs, mappers, and certificate management are properly registered.
     /// </remarks>
     private static void RegisterOracleHcmServices(IServiceCollection services)
     {
@@ -217,6 +218,10 @@ public static class OracleHcmExtension
         services.AddScoped<IDemographicAuditService, DemographicAuditService>();
         services.AddScoped<IDemographicHistoryService, DemographicHistoryService>();
 
+        // Certificate management for Oracle HCM authentication
+        services.AddSingleton<IOracleHcmCertificateService, OracleHcmCertificateService>();
+        services.AddSingleton<IJwtTokenService, JwtTokenService>();
+
         // Internal services
         services.AddTransient<IDemographicsServiceInternal, DemographicsService>();
         services.AddTransient<IEmployeeSyncService, EmployeeSyncService>();
@@ -229,6 +234,7 @@ public static class OracleHcmExtension
 
     /// <summary>
     /// Configures HTTP clients used for Oracle HCM integration by registering them with resilience strategies.
+    /// Supports certificate-based authentication using mutual TLS (mTLS).
     /// </summary>
     /// <param name="services">
     /// The <see cref="IServiceCollection"/> to which the HTTP clients will be added.
@@ -237,6 +243,9 @@ public static class OracleHcmExtension
     /// This method sets up HTTP clients for various Oracle HCM services, such as Atom feed synchronization,
     /// employee synchronization, and payroll synchronization. It applies standard resilience strategies,
     /// including circuit breakers and timeout configurations, to ensure robust communication with the Oracle HCM API.
+    /// 
+    /// Certificate-based authentication is wired through the HttpClientHandler, which attaches the X509Certificate2
+    /// to enable mutual TLS authentication with the Oracle HCM API.
     /// </remarks>
     private static void ConfigureHttpClients(IServiceCollection services)
     {
@@ -297,18 +306,23 @@ public static class OracleHcmExtension
         }
 
         services.AddHttpClient<AtomFeedClient>("AtomFeedSync", BuildOracleHcmAuthClient)
+            .ConfigurePrimaryHttpMessageHandler(CreateHttpClientHandlerWithCertificate)
             .AddStandardResilienceHandler(options => ConfigureWith401RetryAndBulkhead(options, commonHttpOptions));
 
         services.AddHttpClient<EmployeeFullSyncClient>("EmployeeSync", BuildOracleHcmAuthClient)
+            .ConfigurePrimaryHttpMessageHandler(CreateHttpClientHandlerWithCertificate)
             .AddStandardResilienceHandler(options => ConfigureWith401RetryAndBulkhead(options, commonHttpOptions));
 
         services.AddHttpClient<PayrollSyncClient>("PayrollSyncClient", BuildOracleHcmAuthClient)
+            .ConfigurePrimaryHttpMessageHandler(CreateHttpClientHandlerWithCertificate)
             .AddStandardResilienceHandler(options => ConfigureWith401RetryAndBulkhead(options, commonHttpOptions));
 
         services.AddHttpClient<PayrollSyncService>("PayrollSyncService", BuildOracleHcmAuthClient)
+            .ConfigurePrimaryHttpMessageHandler(CreateHttpClientHandlerWithCertificate)
             .AddStandardResilienceHandler(options => ConfigureWith401RetryAndBulkhead(options, commonHttpOptions));
 
         services.AddHttpClient<OracleHcmHealthCheck>("OracleHcmHealthCheck", BuildOracleHcmAuthClient)
+            .ConfigurePrimaryHttpMessageHandler(CreateHttpClientHandlerWithCertificate)
             .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
     }
 
@@ -358,8 +372,36 @@ public static class OracleHcmExtension
     }
 
     /// <summary>
-    /// Configures the provided <see cref="HttpClient"/> instance for Oracle HCM authentication.
-    /// Sets the base address, authorization headers, and default request headers required for communication with the Oracle HCM API.
+    /// Creates an HttpClientHandler configured for certificate-based authentication.
+    /// Attaches the X509Certificate2 to the handler's client certificates collection for mutual TLS.
+    /// </summary>
+    /// <param name="services">The service provider for dependency injection.</param>
+    /// <returns>A configured HttpClientHandler with the certificate attached, or a default handler if certificate authentication is not configured.</returns>
+    /// <remarks>
+    /// This method retrieves the certificate from the IOracleHcmCertificateService and adds it
+    /// to the HttpClientHandler's ClientCertificates collection, enabling mutual TLS (mTLS) 
+    /// authentication with the Oracle HCM API.
+    /// </remarks>
+    private static HttpClientHandler CreateHttpClientHandlerWithCertificate(IServiceProvider services)
+    {
+        var handler = new HttpClientHandler();
+        OracleHcmConfig config = services.GetRequiredService<OracleHcmConfig>();
+
+        if (config.UseCertificateAuthentication && !string.IsNullOrWhiteSpace(config.PfxFilePath))
+        {
+            IOracleHcmCertificateService certificateService = services.GetRequiredService<IOracleHcmCertificateService>();
+            X509Certificate2 certificate = certificateService.GetCertificate(config.PfxFilePath, config.PfxPassword);
+
+            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
+            handler.ClientCertificates.Add(certificate);
+        }
+
+        return handler;
+    }
+
+    /// <summary>
+    /// Configures the provided <see cref="HttpClient"/> instance for Oracle HCM API communication.
+    /// Attaches the JWT token in the Authorization header for request authentication.
     /// </summary>
     /// <param name="services">
     /// The <see cref="IServiceProvider"/> instance used to resolve dependencies, including the <see cref="OracleHcmConfig"/>.
@@ -367,19 +409,33 @@ public static class OracleHcmExtension
     /// <param name="client">
     /// The <see cref="HttpClient"/> instance to be configured for Oracle HCM API communication.
     /// </param>
+    /// <remarks>
+    /// This method:
+    /// 1. Sets the base address and REST framework version header
+    /// 2. Loads the certificate from OracleHcmConfig
+    /// 3. Generates a JWT token signed with the certificate's private key
+    /// 4. Attaches the JWT token in the Authorization header as a Bearer token
+    /// 
+    /// Certificate-based mutual TLS (mTLS) is wired separately via CreateHttpClientHandlerWithCertificate.
+    /// </remarks>
     private static void BuildOracleHcmAuthClient(IServiceProvider services, HttpClient client)
     {
         OracleHcmConfig config = services.GetRequiredService<OracleHcmConfig>();
-        if (config.Username == null)
-        {
-            return;
-        }
-        string authToken = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{config.Username}:{config.Password}"));
 
         client.BaseAddress = new Uri(config.BaseAddress, UriKind.Absolute);
         client.DefaultRequestHeaders.Add(FrameworkVersionHeader, config.RestFrameworkVersion);
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authToken);
+        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json")); // Specify JSON format
+        // Generate and inject JWT token for Oracle HCM REST API authentication
+        if (config.UseCertificateAuthentication && !string.IsNullOrWhiteSpace(config.PfxFilePath))
+        {
+            IOracleHcmCertificateService certificateService = services.GetRequiredService<IOracleHcmCertificateService>();
+            IJwtTokenService jwtService = services.GetRequiredService<IJwtTokenService>();
+
+            X509Certificate2 certificate = certificateService.GetCertificate(config.PfxFilePath, config.PfxPassword);
+            string jwtToken = jwtService.GenerateTokenWithDefaults(certificate);
+
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+        }
     }
 }

@@ -9,7 +9,7 @@
     <PackageVersion Include="Aspire.Oracle.EntityFrameworkCore" Version="9.5.2" />
     <PackageVersion Include="AspNetCore.HealthChecks.System" Version="9.0.0" />
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.NodeJS.Extensions" Version="9.9.0" />
-    <PackageVersion Include="Demoulas.Common.Logging" Version="2.0.2-alpha.2" />
+    <PackageVersion Include="Demoulas.Common.Logging" Version="2.0.2-alpha.3" />
     <PackageVersion Include="ErikEJ.EntityFrameworkCore.DgmlBuilder" Version="6.0.0" />
     <PackageVersion Include="FastEndpoints.AspVersioning" Version="7.1.0" />
     <PackageVersion Include="FastEndpoints.Swagger" Version="7.1.0" />
@@ -18,7 +18,7 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.10" />
-    <PackageVersion Include="Demoulas.Util" Version="2.6.4" />
+    <PackageVersion Include="Demoulas.Util" Version="2.6.5-alpha.2" />
     <PackageVersion Include="FastEndpoints.Testing" Version="7.0.1" />
     <PackageVersion Include="IdGen" Version="3.0.7" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.10" />
@@ -27,7 +27,7 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="8.2.0" />
     <PackageVersion Include="CsvHelper" Version="33.1.0" />
-    <PackageVersion Include="Demoulas.Common.Api" Version="3.0.6-alpha.1" />
+    <PackageVersion Include="Demoulas.Common.Api" Version="3.0.6-alpha.2" />
     <PackageVersion Include="Demoulas.Common.Data.Contexts" Version="2.11.1-alpha.3" />
     <PackageVersion Include="Demoulas.Common.Data.Services" Version="3.6.1" />
     <PackageVersion Include="Demoulas.Common.Contracts" Version="2.9.1-alpha.2" />
