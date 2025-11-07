@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
+import { Path, useNavigate } from "react-router";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { CAPTIONS } from "../../../constants";
@@ -14,7 +15,19 @@ interface ForfeitGridProps {
 }
 
 const ForfeitGrid: React.FC<ForfeitGridProps> = ({ searchResults, pagination, isSearching }) => {
-  const columnDefs = useMemo(() => GetProfitShareForfeitColumns(), []);
+  const navigate = useNavigate();
+
+  const handleNavigationForButton = useCallback(
+    (destination: string | Partial<Path>) => {
+      navigate(destination);
+    },
+    [navigate]
+  );
+
+  const columnDefs = useMemo(
+    () => GetProfitShareForfeitColumns(handleNavigationForButton),
+    [handleNavigationForButton]
+  );
 
   // Use dynamic grid height utility hook
   const gridMaxHeight = useDynamicGridHeight();
