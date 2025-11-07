@@ -61,14 +61,14 @@ public class DuplicateNamesAndBirthdaysService : IDuplicateNamesAndBirthdaysServ
                 // Fallback for mocked (in-memory) db context which does not support raw SQL
                 if (_host.IsTestEnvironment())
                 {
-                    _logger.Log(LogLevel.Debug, "Inside the test environment");
+                    _logger.LogWarning(1, "Inside the test environment");
                     dupNameSlashDateOfBirth = demographics
                         .Include(d => d.ContactInfo)
                         .Select(d => new DemographicMatchDto { FullName = d.ContactInfo.FullName!, MatchedId = d.Id });
                 }
                 else
                 {
-                    _logger.Log(LogLevel.Debug, "Outside the test environment");
+                    _logger.LogWarning(2, "Outside the test environment");
                     string dupQuery =
                         @"WITH FILTERED_DEMOGRAPHIC AS (SELECT /*+ MATERIALIZE */ ID, FULL_NAME, DATE_OF_BIRTH, BADGE_NUMBER
                               FROM DEMOGRAPHIC
@@ -95,7 +95,7 @@ FROM FILTERED_DEMOGRAPHIC p1
 
                     dupNameSlashDateOfBirth = ctx.Database
                         .SqlQueryRaw<DemographicMatchDto>(dupQuery);
-                    _logger.Log(LogLevel.Debug, "Got value in dupNmaeSlashDateOfBirth");
+                    _logger.LogWarning(3, "Got value in dupNmaeSlashDateOfBirth");
                 }
 
                 dupInfo = await dupNameSlashDateOfBirth
@@ -104,7 +104,7 @@ FROM FILTERED_DEMOGRAPHIC p1
 
                 var names = dupInfo.Select(x => x.FullName).ToHashSet();
                 var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
-                _logger.Log(LogLevel.Debug, "Running the linq query to get from demographics");
+                _logger.LogWarning(4, "Running the linq query to get from demographics");
                 var query = from dem in demographics.Include(d => d.EmploymentStatus)
                             join ppLj in ctx.PayProfits on new { DemographicId = dem.Id, req.ProfitYear } equals new
                             {
@@ -139,7 +139,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                                 Years = yos != null ? yos.Years : (byte)0,
                                 dem.PayFrequencyId,
                             };
-                _logger.Log(LogLevel.Debug, "Calling ToPaginationResultsAsync");
+                _logger.LogWarning(5, "Calling ToPaginationResultsAsync");
                 return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             }, cancellationToken);
             var projectedResults = results.Results.Select(r => new DuplicateNamesAndBirthdaysResponse
@@ -172,7 +172,7 @@ FROM FILTERED_DEMOGRAPHIC p1
             {
                 r.Count = dupInfo.Count(x => x.MatchedId == r.BadgeNumber);
             }
-            _logger.Log(LogLevel.Debug, "Calling GetYearStartAndEndAccountingDatesAsync funnction");
+            _logger.LogWarning(6, "Calling GetYearStartAndEndAccountingDatesAsync function");
             var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
             _logger.Log(LogLevel.Debug, "Final return statement");
             return new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>()
