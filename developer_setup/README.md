@@ -153,47 +153,6 @@ npm run dev
 
 ## Troubleshooting
 
-### Script Execution Issues
-
-**Error: "cannot be loaded because running scripts is disabled on this system"**
-
-This happens because PowerShell's execution policy prevents running unsigned scripts. Fix it:
-
-```powershell
-# Open PowerShell as Administrator
-Start-Process pwsh -ArgumentList '-NoExit' -Verb RunAs
-
-# Allow scripts for current user (recommended)
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
-
-# Verify it worked
-Get-ExecutionPolicy
-# Should return: RemoteSigned
-
-# Now try running the setup script again
-cd D:\source\Demoulas\smart-profit-sharing\developer_setup
-.\Setup-DeveloperEnvironment.ps1
-```
-
-**Why this works:**
-- `RemoteSigned` allows locally-created scripts to run
-- `-Scope CurrentUser` applies only to your user account (doesn't affect system)
-- This is the safest and most developer-friendly setting
-
-**Alternative (System-wide, requires admin):**
-```powershell
-# Only do this if RemoteSigned doesn't work and you're on a corporate machine
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine -Force
-```
-
-**Other execution policy errors:**
-
-If you get "not digitally signed" even after RemoteSigned:
-```powershell
-# Temporarily bypass for this script only
-powershell -ExecutionPolicy Bypass -File .\Setup-DeveloperEnvironment.ps1
-```
-
 ### Setup Script Issues
 
 **winget import fails:**

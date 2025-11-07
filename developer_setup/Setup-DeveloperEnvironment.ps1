@@ -22,6 +22,7 @@ param(
 $ErrorActionPreference = "Stop"
 $configPath = Join-Path $PSScriptRoot "winget-config.json"
 
+# Define functions first (before they're called)
 function Write-Header {
     param([string]$Message)
     Write-Host "`n================================================" -ForegroundColor Cyan
@@ -39,7 +40,7 @@ function Write-Info {
     Write-Host "ℹ $Message" -ForegroundColor Yellow
 }
 
-function Write-Error {
+function Write-ErrorMsg {
     param([string]$Message)
     Write-Host "✗ $Message" -ForegroundColor Red
 }
@@ -54,7 +55,7 @@ function Test-CommandExists {
 Write-Header "Checking Prerequisites"
 
 if (-not (Test-CommandExists winget)) {
-    Write-Error "winget not found. Please install Windows Package Manager first."
+    Write-ErrorMsg "winget not found. Please install Windows Package Manager first."
     Write-Info "Download from: https://www.microsoft.com/p/app-installer/9nblggh4nns1"
     exit 1
 }
@@ -70,12 +71,12 @@ if (Test-Path $configPath) {
         Write-Success "Winget packages installed successfully"
     }
     catch {
-        Write-Error "Failed to install winget packages: $_"
+        Write-ErrorMsg "Failed to install winget packages: $_"
         exit 1
     }
 }
 else {
-    Write-Error "Configuration file not found: $configPath"
+    Write-ErrorMsg "Configuration file not found: $configPath"
     exit 1
 }
 
@@ -111,12 +112,12 @@ if (-not $SkipVS) {
                 Write-Success "Visual Studio workloads installed successfully"
             }
             catch {
-                Write-Error "Failed to install VS workloads: $_"
+                Write-ErrorMsg "Failed to install VS workloads: $_"
                 Write-Info "You may need to install them manually through Visual Studio Installer"
             }
         }
         else {
-            Write-Error "vsconfig.exe not found at expected location"
+            Write-ErrorMsg "vsconfig.exe not found at expected location"
         }
     }
 }
@@ -136,7 +137,7 @@ if (-not $SkipNodeTools) {
         }
     }
     else {
-        Write-Error "Volta not found, but should have been installed by winget"
+        Write-ErrorMsg "Volta not found, but should have been installed by winget"
     }
 }
 
