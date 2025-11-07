@@ -50,15 +50,38 @@ if (-not $SkipVS) {
     }
     else {
         Write-Host "OK Found Visual Studio at: $vsPath" -ForegroundColor Green
-        Write-Host "`nI To configure workloads, open Visual Studio Installer and:" -ForegroundColor Yellow
-        Write-Host "  1. Click 'Modify' on Visual Studio 2022 Professional" -ForegroundColor Yellow
-        Write-Host "  2. Select these workloads:" -ForegroundColor Yellow
-        Write-Host "     - ASP.NET and web development" -ForegroundColor Yellow
-        Write-Host "     - Azure development" -ForegroundColor Yellow
-        Write-Host "     - .NET desktop development" -ForegroundColor Yellow
-        Write-Host "  3. Click 'Modify' to install" -ForegroundColor Yellow
+        
+        $vsProfessionalPath = Join-Path $vsPath "vs_professional.exe"
+        
+        if (Test-Path $vsProfessionalPath) {
+            Write-Host "I Installing required workloads..." -ForegroundColor Yellow
+            try {
+                & $vsProfessionalPath --installPath $vsPath `
+                    --add Microsoft.VisualStudio.Workload.NetWeb `
+                    --add Microsoft.VisualStudio.Workload.Azure `
+                    --add Microsoft.VisualStudio.Workload.ManagedDesktop `
+                    --includeRecommended --includeOptional `
+                    --passive --wait
+                Write-Host "OK Visual Studio workloads installed successfully" -ForegroundColor Green
+            }
+            catch {
+                Write-Host "X Failed to install VS workloads: $_" -ForegroundColor Red
+                Write-Host "I Manual installation:" -ForegroundColor Yellow
+                Write-Host "  1. Open Visual Studio Installer" -ForegroundColor Yellow
+                Write-Host "  2. Click 'Modify' on Visual Studio 2022 Professional" -ForegroundColor Yellow
+                Write-Host "  3. Select workloads: ASP.NET, Azure, .NET desktop" -ForegroundColor Yellow
+            }
+        }
+        else {
+            Write-Host "I To configure workloads, open Visual Studio Installer and:" -ForegroundColor Yellow
+            Write-Host "  1. Click 'Modify' on Visual Studio 2022 Professional" -ForegroundColor Yellow
+            Write-Host "  2. Select these workloads:" -ForegroundColor Yellow
+            Write-Host "     - ASP.NET and web development" -ForegroundColor Yellow
+            Write-Host "     - Azure development" -ForegroundColor Yellow
+            Write-Host "     - .NET desktop development" -ForegroundColor Yellow
+            Write-Host "  3. Click 'Modify' to install" -ForegroundColor Yellow
+        }
     }
-}
 
 if (-not $SkipNodeTools) {
     Write-Host "`nVerifying Node.js Setup..." -ForegroundColor Cyan
