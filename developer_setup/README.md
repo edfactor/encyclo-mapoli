@@ -83,14 +83,23 @@ winget install Microsoft.WebDeploy --accept-package-agreements
    - ☑ .NET desktop development
 4. Click **Modify** to install
 
-```pwsh
-### 4) Complete Setup
+### 4) Manual Volta Installation
+
+If Volta didn't install via winget:
+
+1. Visit: https://docs.volta.sh/guide/getting-started
+2. Download the installer for Windows
+3. Run the installer and restart PowerShell
+4. Verify: `volta --version`
+
+### 5) Complete Setup
 
 Once tools are installed, finish with:
 
 ```pwsh
-# Pin Node.js version (managed by Volta)
-volta install node@LTS
+# Verify Node.js is available
+node --version
+npm --version
 
 # Install EF Core tools globally
 dotnet tool update --global dotnet-ef

@@ -6,7 +6,7 @@ param([switch]$SkipVS, [switch]$SkipNodeTools)
 $ErrorActionPreference = "Stop"
 
 Write-Host "`n================================================" -ForegroundColor Cyan
-Write-Host "Demoulas Profit Sharing - Developer Setup" -ForegroundColor Cyan
+Write-Host "Developer Setup" -ForegroundColor Cyan
 Write-Host "================================================" -ForegroundColor Cyan
 
 Write-Host "`nChecking Prerequisites..." -ForegroundColor Cyan
@@ -47,35 +47,16 @@ if (-not $SkipVS) {
     
     if (-not $vsPath) {
         Write-Host "I Visual Studio 2022 Professional not found (may still be installing)" -ForegroundColor Yellow
-        Write-Host "I Once installed, run this command:" -ForegroundColor Yellow
-        Write-Host "  vsconfig.exe --add Microsoft.VisualStudio.Workload.NetWeb --add Microsoft.VisualStudio.Workload.Azure --add Microsoft.VisualStudio.Workload.ManagedDesktop --quiet" -ForegroundColor Yellow
     }
     else {
-        Write-Host "I Found Visual Studio at: $vsPath" -ForegroundColor Yellow
-        $vsConfigPath = Join-Path $vsPath "Common7\Tools\vsconfig.exe"
-        
-        if (Test-Path $vsConfigPath) {
-            Write-Host "I Installing required workloads..." -ForegroundColor Yellow
-            $workloads = @(
-                "Microsoft.VisualStudio.Workload.NetWeb",
-                "Microsoft.VisualStudio.Workload.Azure",
-                "Microsoft.VisualStudio.Workload.ManagedDesktop"
-            )
-            
-            $workloadArgs = ($workloads | ForEach-Object { "--add $_" }) -join " "
-            
-            try {
-                & $vsConfigPath $workloadArgs --quiet --norestart
-                Write-Host "OK Visual Studio workloads installed successfully" -ForegroundColor Green
-            }
-            catch {
-                Write-Host "X Failed to install VS workloads: $_" -ForegroundColor Red
-                Write-Host "I Install them manually through Visual Studio Installer" -ForegroundColor Yellow
-            }
-        }
-        else {
-            Write-Host "X vsconfig.exe not found" -ForegroundColor Red
-        }
+        Write-Host "OK Found Visual Studio at: $vsPath" -ForegroundColor Green
+        Write-Host "`nI To configure workloads, open Visual Studio Installer and:" -ForegroundColor Yellow
+        Write-Host "  1. Click 'Modify' on Visual Studio 2022 Professional" -ForegroundColor Yellow
+        Write-Host "  2. Select these workloads:" -ForegroundColor Yellow
+        Write-Host "     - ASP.NET and web development" -ForegroundColor Yellow
+        Write-Host "     - Azure development" -ForegroundColor Yellow
+        Write-Host "     - .NET desktop development" -ForegroundColor Yellow
+        Write-Host "  3. Click 'Modify' to install" -ForegroundColor Yellow
     }
 }
 
@@ -89,7 +70,9 @@ if (-not $SkipNodeTools) {
         Write-Host "I Node.js version will be managed automatically by Volta" -ForegroundColor Yellow
     }
     else {
-        Write-Host "X Volta not found (should have been installed by winget)" -ForegroundColor Red
+        Write-Host "X Volta not found" -ForegroundColor Red
+        Write-Host "I Install manually: https://docs.volta.sh/guide/getting-started" -ForegroundColor Yellow
+        Write-Host "I Or run: winget install Volta.Volta --accept-package-agreements" -ForegroundColor Yellow
     }
 }
 
@@ -99,12 +82,10 @@ Write-Host "================================================" -ForegroundColor C
 
 Write-Host "`nNext Steps:" -ForegroundColor Green
 Write-Host "1. Restart Visual Studio if it was open"
-Write-Host "2. Clone: git clone https://bitbucket.org/demoulas/smart-profit-sharing"
+Write-Host "2. Clone: git clone https://github.com/dotnet/aspire-samples.git"
 Write-Host "3. Get secrets.json from team member"
 Write-Host "4. Place secrets.json in: src/services/configuration/"
 Write-Host "5. Add ArtifactoryCloud NuGet source (see README.md)"
-Write-Host "6. Open src/services/Demoulas.ProfitSharing.slnx"
-Write-Host "7. Set Demoulas.ProfitSharing.AppHost as startup project"
 Write-Host "8. Press F5 to run"
 Write-Host ""
 
