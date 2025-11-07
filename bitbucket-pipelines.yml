@@ -100,7 +100,9 @@ definitions:
           if ($LASTEXITCODE -ne 0) { Write-Error "npm ci failed"; exit 1 }
           
           Write-Host "Running tests..." -ForegroundColor Cyan
-          npm run test
+          # Use --run flag to exit after completion, --reporter=verbose for better output
+          # Limit workers to avoid "too many open files" error on Windows
+          npx vitest --run --reporter=verbose --coverage --workers=2
           if ($LASTEXITCODE -ne 0) { Write-Error "Frontend tests failed"; exit 1 }
    
     generate-buildinfo: &generate-buildinfo
