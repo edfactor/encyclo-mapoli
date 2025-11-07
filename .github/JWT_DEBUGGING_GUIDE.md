@@ -41,18 +41,19 @@ Add to `appsettings.json` or `appsettings.Development.json`:
 ### 1. Invalid JWT Issuer (iss claim)
 **Symptoms**: 401 Unauthorized from Oracle HCM
 **Check**:
-1. Look for `"Extracted CN from certificate subject"` log message
+1. Look for `"Extracted CN from certificate issuer"` log message
 2. Verify the extracted value matches what Oracle HCM expects
 3. Compare with what's configured in Oracle HCM security console
 
 **Debug Example**:
 ```
-Extracted CN from certificate subject: "Demoulas Cloud Issuing CA 2"
+Extracted CN from certificate issuer: "Demoulas Cloud Issuing CA 2"
 ```
 
 **Solution**:
-- If extraction is wrong, manually check certificate: `openssl x509 -in cert.pem -text -noout`
-- If CN/L don't match Oracle HCM config, update Oracle HCM's trusted issuer
+- The issuer is extracted from the certificate's **Issuer field** (the Certificate Authority that signed it)
+- If extraction is wrong, manually check certificate issuer: `openssl x509 -in cert.pem -text -noout | grep -A5 "Issuer:"`
+- If issuer doesn't match Oracle HCM config, update Oracle HCM's trusted issuer or use a different certificate
 
 ### 2. Invalid JWT Signature
 **Symptoms**: 401 Unauthorized, OAuth2 signature verification failed
@@ -200,7 +201,7 @@ openssl pkcs12 -in cert.pfx -text -noout -passin pass:YOUR_PASSWORD
 
 ### Successful Certificate Extraction
 ```
-[DBG] Extracted CN from certificate subject: "Demoulas Cloud Issuing CA 2"
+[DBG] Extracted CN from certificate issuer: "Demoulas Cloud Issuing CA 2"
 ```
 
 ### Certificate Expiration Warning
