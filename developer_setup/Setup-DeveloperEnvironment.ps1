@@ -40,6 +40,15 @@ catch {
     exit 1
 }
 
+# Explicitly install Podman to ensure it gets installed (winget import may skip it)
+Write-Host "I Ensuring Podman is installed..." -ForegroundColor Yellow
+$podmanInstallResult = & winget install RedHat.Podman --accept-package-agreements --accept-source-agreements 2>&1
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "OK Podman installation completed" -ForegroundColor Green
+} else {
+    Write-Host "X Podman installation may have failed. Check error above." -ForegroundColor Yellow
+}
+
 if (-not $SkipVS) {
     Write-Host "`nConfiguring Visual Studio 2022..." -ForegroundColor Cyan
     
@@ -100,6 +109,34 @@ if (-not $SkipNodeTools) {
         Write-Host "I Install manually: https://docs.volta.sh/guide/getting-started" -ForegroundColor Yellow
         Write-Host "I Or run: winget install Volta.Volta --accept-package-agreements" -ForegroundColor Yellow
     }
+}
+
+Write-Host "`nConfiguring Aspire Container Runtime..." -ForegroundColor Cyan
+
+# Check for Podman in PATH
+$podmanInPath = $null -ne (Get-Command podman -ErrorAction SilentlyContinue)
+
+# Also check the default Podman installation location
+$podmanExePath = "$env:ProgramFiles\RedHat\Podman\podman.exe"
+$podmanExists = $podmanInPath -or (Test-Path $podmanExePath)
+
+if ($podmanExists) {
+    Write-Host "OK Podman is installed" -ForegroundColor Green
+    Write-Host "I Setting ASPIRE_CONTAINER_RUNTIME to podman..." -ForegroundColor Yellow
+    [System.Environment]::SetEnvironmentVariable("ASPIRE_CONTAINER_RUNTIME", "podman", "User")
+    Write-Host "OK Environment variable set for current user" -ForegroundColor Green
+    
+    if (-not $podmanInPath) {
+        Write-Host "I Note: Podman was installed but not in current PATH." -ForegroundColor Yellow
+        Write-Host "I       Restart your terminal for Podman to be available in command line." -ForegroundColor Yellow
+    }
+}
+else {
+    Write-Host "X Podman not found" -ForegroundColor Red
+    Write-Host "I Podman should have been installed by winget above." -ForegroundColor Yellow
+    Write-Host "I If not installed, run: winget install RedHat.Podman --accept-package-agreements" -ForegroundColor Yellow
+    Write-Host "I After installation, restart your terminal and set the environment variable:" -ForegroundColor Yellow
+    Write-Host "  [System.Environment]::SetEnvironmentVariable('ASPIRE_CONTAINER_RUNTIME', 'podman', 'User')" -ForegroundColor Yellow
 }
 
 Write-Host "`n================================================" -ForegroundColor Cyan

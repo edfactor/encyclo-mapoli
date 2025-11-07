@@ -68,41 +68,29 @@ definitions:
     
     test-frontend: &test-frontend
       name: Build and Test Frontend UI
-      runs-on:
-        - windows
-        - self.hosted
-        - volta
+      # Run on Bitbucket Cloud to free on-premises resources
+      image: node:22-alpine
+      max-time: 10
       artifacts:
         - src/ui/coverage/**
         - src/ui/FE_Tests/**
       script:
+        - cd src/ui
+        - echo "Running frontend tests on cloud runner..."
+        
+        # Update npm to latest version
+        - npm install -g npm@latest
+        
+        # Create .npmrc for JFrog access (uses pipeline variable)
         - |
-          Write-Host "Running frontend tests on self-hosted runner..." -ForegroundColor Cyan
-          
-          # Navigate to UI directory
-          Set-Location src/ui
-          
-          # Show current npm version (use existing npm, skip global update due to certificate issues)
-          Write-Host "Current npm version:" -ForegroundColor Cyan
-          npm --version
-          
-          # Create .npmrc for JFrog access (uses pipeline variable)
-          Write-Host "Creating .npmrc for JFrog authentication..." -ForegroundColor Cyan
-          $npmrc = @"
+          cat > .npmrc << EOF
           registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
-          //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
-          "@
-          Set-Content -Path .npmrc -Value $npmrc
-          
-          # Install dependencies and run tests
-          Write-Host "Installing dependencies..." -ForegroundColor Cyan
-          npm ci
-          if ($LASTEXITCODE -ne 0) { Write-Error "npm ci failed"; exit 1 }
-          
-          Write-Host "Running tests..." -ForegroundColor Cyan
-          # Run tests with vitest - workers configured in vitest.config.ts
-          npm run test
-          if ($LASTEXITCODE -ne 0) { Write-Error "Frontend tests failed"; exit 1 }
+          //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=${JFROG_WORKSPACE_VARIABLE}
+          EOF
+        
+        # Install dependencies and run tests
+        - npm ci
+        - npm run test
    
     generate-buildinfo: &generate-buildinfo
       name: Generate Build Information

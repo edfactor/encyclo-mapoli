@@ -34,6 +34,9 @@
         },
         {
           "PackageIdentifier": "Volta.Volta"
+        },
+        {
+          "PackageIdentifier": "RedHat.Podman"
         }
       ],
       "SourceDetails": {
