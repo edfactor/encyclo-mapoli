@@ -310,7 +310,7 @@ public class MilitaryContributionRequestValidatorTests
         var req = ValidRequest() with
         {
             BadgeNumber = 1234567,
-            ContributionDate = new DateTime(2024, 6, 15),
+            ContributionDate = new DateTime(2024, 6, 15, 0, 0, 0, DateTimeKind.Utc),
             ProfitYear = 2024,
             IsSupplementalContribution = false  // Regular contribution
         };
@@ -352,7 +352,7 @@ public class MilitaryContributionRequestValidatorTests
         var req = ValidRequest() with
         {
             BadgeNumber = 1234567,
-            ContributionDate = new DateTime(2024, 6, 15),
+            ContributionDate = new DateTime(2024, 6, 15, 0, 0, 0, DateTimeKind.Utc),
             ProfitYear = 2024,
             IsSupplementalContribution = true  // Supplemental contribution
         };
