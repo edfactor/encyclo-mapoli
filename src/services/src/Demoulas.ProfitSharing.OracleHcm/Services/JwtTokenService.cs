@@ -151,33 +151,34 @@ public sealed class JwtTokenService : IJwtTokenService
     }
 
     /// <summary>
-    /// Extracts the issuer identifier from the certificate subject.
-    /// Attempts to extract CN (Common Name) first, then L (Locality), then uses the full subject as fallback.
+    /// Extracts the issuer identifier from the certificate issuer field (not subject).
+    /// The issuer is the Certificate Authority that signed this certificate.
+    /// Attempts to extract CN (Common Name) first, then L (Locality), then uses the full issuer as fallback.
     /// </summary>
     private string ExtractIssuerFromCertificate(X509Certificate2 certificate)
     {
-        string subject = certificate.Subject;
+        string issuer = certificate.Issuer;
 
         // Try to extract CN (Common Name) - e.g., "CN = Demoulas Cloud Issuing CA 2"
-        var cnMatch = System.Text.RegularExpressions.Regex.Match(subject, @"CN\s*=\s*([^,]+)");
+        var cnMatch = System.Text.RegularExpressions.Regex.Match(issuer, @"CN\s*=\s*([^,]+)");
         if (cnMatch.Success)
         {
             string extracted = cnMatch.Groups[1].Value.Trim();
-            _logger.LogDebug("Extracted CN from certificate subject: {ExtractedCn}", extracted);
+            _logger.LogDebug("Extracted CN from certificate issuer: {ExtractedCn}", extracted);
             return extracted;
         }
 
         // Fallback to L (Locality) - e.g., "L = Demoulas Supermarkets Inc."
-        var lMatch = System.Text.RegularExpressions.Regex.Match(subject, @"L\s*=\s*([^,]+)");
+        var lMatch = System.Text.RegularExpressions.Regex.Match(issuer, @"L\s*=\s*([^,]+)");
         if (lMatch.Success)
         {
             string extracted = lMatch.Groups[1].Value.Trim();
-            _logger.LogDebug("Extracted L (Locality) from certificate subject: {ExtractedLocality}", extracted);
+            _logger.LogDebug("Extracted L (Locality) from certificate issuer: {ExtractedLocality}", extracted);
             return extracted;
         }
 
-        // Last resort: use the full subject
-        _logger.LogWarning("Could not extract CN or L from certificate subject. Using full subject: {Subject}", subject);
-        return subject;
+        // Last resort: use the full issuer
+        _logger.LogWarning("Could not extract CN or L from certificate issuer. Using full issuer: {Issuer}", issuer);
+        return issuer;
     }
 }
