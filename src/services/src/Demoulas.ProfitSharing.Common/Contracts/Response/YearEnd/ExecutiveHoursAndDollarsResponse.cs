@@ -9,6 +9,8 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public sealed record ExecutiveHoursAndDollarsResponse : IFullNameProperty, IIsExecutive
 {
     public required int BadgeNumber { get; set; }
+
+    [MaskSensitive]
     public required string? FullName { get; set; }
     public required short StoreNumber { get; set; }
     public required string Ssn { get; set; }

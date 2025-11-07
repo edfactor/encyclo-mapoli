@@ -2,16 +2,50 @@
 
 /// <summary>
 /// Represents the configuration settings for the Oracle HCM integration.
+/// Supports two authentication methods:
+/// 1. Basic Authentication: Using Username and Password properties
+/// 2. Certificate-Based Authentication: Using PFX certificate with optional password
+/// 
 /// Provides properties for enabling sync operations, API endpoints, credentials, and sync parameters.
 /// </summary>
+/// <remarks>
+/// For certificate-based authentication (recommended for production):
+/// - Set PfxFilePath to the path of the certificate file
+/// - Set PfxPassword to the certificate password (optional if not password-protected)
+/// - Leave Username and Password empty (or they will be ignored)
+/// 
+/// For basic authentication (development only):
+/// - Set Username and Password
+/// - Leave PfxFilePath empty
+/// 
+/// Authentication method is determined automatically based on configuration presence.
+/// </remarks>
 public sealed record OracleHcmConfig
 {
     public bool EnableSync { get; set; } = true;
     public required string BaseAddress { get; set; }
     public required string DemographicUrl { get; set; }
     public string? PayrollUrl { get; set; }
+
+    // Basic Authentication (Legacy - for development only)
     public string? Username { get; set; }
     public string? Password { get; set; }
+
+    // Certificate-Based Authentication (Recommended for production)
+    /// <summary>
+    /// Gets or sets the file path to the PFX (PKCS#12) certificate file.
+    /// When set, certificate-based authentication will be used instead of basic auth.
+    /// Supports both absolute paths and environment-relative paths.
+    /// </summary>
+    public string? PfxFilePath { get; set; }
+
+    /// <summary>
+    /// Gets or sets the password for the PFX certificate file.
+    /// Only required if the certificate is password-protected.
+    /// Must be stored securely (e.g., .NET User Secrets or Azure Key Vault in production).
+    /// </summary>
+    public string? PfxPassword { get; set; }
+
     public string RestFrameworkVersion { get; set; } = "9";
     public byte Limit { get; set; } = 75;
     public short IntervalInHours { get; set; } = byte.MaxValue;
@@ -23,4 +57,26 @@ public sealed record OracleHcmConfig
     /// within the Oracle HCM integration.
     /// </summary>
     public byte DeltaIntervalInMinutes { get; set; } = 15;
+
+    /// <summary>
+    /// Determines whether certificate-based authentication should be used.
+    /// Returns true if PfxFilePath is set and not empty, false otherwise.
+    /// </summary>
+    public bool UseCertificateAuthentication => !string.IsNullOrWhiteSpace(PfxFilePath);
+
+    // JWT Token Configuration
+    /// <summary>
+    /// Gets or sets the principal (username) claim for JWT tokens.
+    /// IMPORTANT: This must be an actual Oracle HCM user account that has the "Fusion Applications Integration" privilege.
+    /// This value is NOT found in the certificate - you must ask your Oracle HCM administrator for the correct username.
+    /// The example "fusion" is a common default, but your environment may use a different user.
+    /// Default: "fusion" (VERIFY THIS WITH YOUR ORACLE HCM ADMIN BEFORE USING IN PRODUCTION)
+    /// </summary>
+    public string JwtPrincipal { get; set; } = "fusion";
+
+    /// <summary>
+    /// Gets or sets the JWT token expiration time in minutes.
+    /// Default: 10 minutes
+    /// </summary>
+    public int JwtExpirationMinutes { get; set; } = 10;
 }

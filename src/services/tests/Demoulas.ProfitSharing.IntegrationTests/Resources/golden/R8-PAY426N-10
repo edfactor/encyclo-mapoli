@@ -1,4 +1,4 @@
-DJDE JDE=PAY426,JDL=PAYROL,END,;PAY426N-10                           DEMOULAS SUPERMARKETS INC      PROFIT SHARING FOR   2024               09/29/25    15:26  PAGE
+DJDE JDE=PAY426,JDL=PAYROL,END,;PAY426N-10                           DEMOULAS SUPERMARKETS INC      PROFIT SHARING FOR   2025               11/06/25    13:16  PAGE
 
 -ALL NON-EMPLOYEE BENEFICIARIES
 
@@ -18,6 +18,7 @@
         0 BARTLETT, DREW              0 0 11/12/86 (99) 000-00-0675            .00      .00     0 (   )                        .00    7
         0 BEIL, AARON                 0 0 10/16/70 (99) 000-00-0510            .00      .00     0 (   )                        .00    7
         0 BEIL, COLTON                0 0 12/13/76 (99) 000-00-0646            .00      .00     0 (   )                        .00    7
+        0 BEIL, DAVID                 0 0 03/02/71 (99) 000-00-0596            .00      .00     0 (   )                        .00    7
         0 BENDER, ABIGAIL             0 0 06/08/60 (99) 000-00-0690            .00      .00     0 (   )                        .00    7
         0 BERNAL, BROOKLYN            0 0 11/13/71 (99) 000-00-0705            .00      .00     0 (   )                        .00    7
         0 BERNAL, LIAM                0 0 09/10/65 (99) 000-00-0559            .00      .00     0 (   )                        .00    7
@@ -53,14 +54,14 @@
         0 DELAROSA, OLIVIA            0 0 03/07/83 (99) 000-00-0622            .00      .00     0 (   )                        .00    7
         0 DUFFY, BENJAMIN             0 0 11/16/75 (99) 000-00-0658            .00      .00     0 (   )                  90,677.38    7
         0 DUNLAP, PEETA               0 0 09/11/48 (99) 000-00-0659            .00      .00     0 (   )                        .00    7
-        0 EVERETT, CHARLIE            0 0 09/14/72 (99) 000-00-0608            .00      .00     0 (   )                        .00    7
-        0 FARLEY, CARTER              0 0 02/06/50 (99) 000-00-0527            .00      .00     0 (   )                        .00    7PAY426N-10                           DEMOULAS SUPERMARKETS INC      PROFIT SHARING FOR   2024               09/29/25    15:26  PAGE
+        0 EVERETT, CHARLIE            0 0 09/14/72 (99) 000-00-0608            .00      .00     0 (   )                        .00    7PAY426N-10                           DEMOULAS SUPERMARKETS INC      PROFIT SHARING FOR   2025               11/06/25    13:16  PAGE
 
 -ALL NON-EMPLOYEE BENEFICIARIES
 
     BADGE NAME                      STR T BIRTHDTE AGE  SOC.SEC. #           WAGES    HOURS  POINT NEW  TERM DTE      CURR.BALANCE  SVC
 
 
+        0 FARLEY, CARTER              0 0 02/06/50 (99) 000-00-0527            .00      .00     0 (   )                        .00    7
         0 FARLEY, SANDRA              0 0 09/10/56 (99) 000-00-0657            .00      .00     0 (   )                        .00    7
         0 FELIX, EZEKIEL              0 0 09/08/63 (99) 000-00-0538            .00      .00     0 (   )                        .00    7
         0 FIELDS, EVA                 0 0 03/04/79 (99) 000-00-0557            .00      .00     0 (   )                        .00    7
@@ -109,17 +110,16 @@
         0 LUNA, LYLA                  0 0 10/16/87 (99) 000-00-0611            .00      .00     0 (   )                        .00    7
         0 MACDONALD, AUTUMN           0 0 02/03/54 (99) 000-00-0673            .00      .00     0 (   )               1,014,600.06    7
         0 MARQUEZ, ADAM               0 0 07/09/69 (99) 000-00-0602            .00      .00     0 (   )                        .00    7
-        0 MAY, ANNA                   0 0 03/03/60 (99) 000-00-0618            .00      .00     0 (   )                        .00    7
-        0 MAY, ELLIANA                0 0 06/08/95 (99) 000-00-0524            .00      .00     0 (   )                        .00    7PAY426N-10                           DEMOULAS SUPERMARKETS INC      PROFIT SHARING FOR   2024               09/29/25    15:26  PAGE
+        0 MAY, ANNA                   0 0 03/03/60 (99) 000-00-0618            .00      .00     0 (   )                        .00    7PAY426N-10                           DEMOULAS SUPERMARKETS INC      PROFIT SHARING FOR   2025               11/06/25    13:16  PAGE
 
 -ALL NON-EMPLOYEE BENEFICIARIES
 
     BADGE NAME                      STR T BIRTHDTE AGE  SOC.SEC. #           WAGES    HOURS  POINT NEW  TERM DTE      CURR.BALANCE  SVC
 
 
+        0 MAY, ELLIANA                0 0 06/08/95 (99) 000-00-0524            .00      .00     0 (   )                        .00    7
         0 MAY, MAYA                   0 0 09/10/78 (99) 000-00-0645            .00      .00     0 (   )                        .00    7
         0 MEDRANO, LUKA               0 0 02/04/85 (99) 000-00-0565            .00      .00     0 (   )                        .00    7
-        0 MILLS, KRYSTAL              0 0 11/11/86 (99) 000-00-0521            .00      .00     0 (   )                        .00    7
         0 MITCHELL, HERALDO           0 0 10/13/65 (99) 000-00-0536            .00      .00     0 (   )                        .00    7
         0 MORTON, JENNIFER            0 0 07/08/49 (99) 000-00-0623            .00      .00     0 (   )                        .00    7
         0 MURPHY, BRENDAN             0 0 02/03/60 (99) 000-00-0688            .00      .00     0 (   )                        .00    7
@@ -154,7 +154,6 @@
         0 POWERS, BRIANNA             0 0 02/04/67 (99) 000-00-0531            .00      .00     0 (   )                        .00    7
         0 POWERS, PAMELA              0 0 02/03/72 (99) 000-00-0555            .00      .00     0 (   )                        .00    7
         0 PUGH, SANTIAGO              0 0 09/16/80 (99) 000-00-0504            .00      .00     0 (   )                        .00    7
-        0 RHODES, CRUZ                0 0 02/02/71 (99) 000-00-0561            .00      .00     0 (   )                        .00    7
         0 RIVERA, ATHENA              0 0 02/05/67 (99) 000-00-0563            .00      .00     0 (   )                        .00    7
         0 RIVERA, JEM                 0 0 09/08/74 (99) 000-00-0634            .00      .00     0 (   )                        .00    7
         0 RIVERA, RYAN                0 0 10/13/65 (99) 000-00-0702            .00      .00     0 (   )                        .00    7
@@ -166,14 +165,14 @@
         0 SANCHEZ, CALEB              0 0 09/10/75 (99) 000-00-0677            .00      .00     0 (   )                        .00    7
         0 SANCHEZ, MICAH              0 0 00/00/00 (99) 000-00-0530            .00      .00     0 (   )                        .00    7
         0 SCHNEIDER, WILLIAM          0 0 10/12/85 (99) 000-00-0503            .00      .00     0 (   )                        .00    7
-        0 SCHNEIDER, ZOE              0 0 10/10/63 (99) 000-00-0589            .00      .00     0 (   )                        .00    7PAY426N-10                           DEMOULAS SUPERMARKETS INC      PROFIT SHARING FOR   2024               09/29/25    15:26  PAGE
+        0 SCHNEIDER, ZOE              0 0 10/10/63 (99) 000-00-0589            .00      .00     0 (   )                        .00    7
+        0 SCHULTZ, AALIYAH            0 0 11/17/55 (99) 000-00-0615            .00      .00     0 (   )                        .00    7PAY426N-10                           DEMOULAS SUPERMARKETS INC      PROFIT SHARING FOR   2025               11/06/25    13:16  PAGE
 
 -ALL NON-EMPLOYEE BENEFICIARIES
 
     BADGE NAME                      STR T BIRTHDTE AGE  SOC.SEC. #           WAGES    HOURS  POINT NEW  TERM DTE      CURR.BALANCE  SVC
 
 
-        0 SCHULTZ, AALIYAH            0 0 11/17/55 (99) 000-00-0615            .00      .00     0 (   )                        .00    7
         0 SHAFFER, JOHN               0 0 08/10/73 (99) 000-00-0560            .00      .00     0 (   )                        .00    7
         0 SHELTON, EDEN               0 0 08/11/93 (99) 000-00-0633            .00      .00     0 (   )                        .00    7
         0 SHEPHERD, SCOTT             0 0 03/06/70 (99) 000-00-0575            .00      .00     0 (   )                        .00    7
@@ -194,4 +193,4 @@
         0 WILSON, AALIYAH             0 0 03/05/60 (99) 000-00-0616            .00      .00     0 (   )                 130,996.04    7
         0 YOUNG, SEAN                 0 0 11/15/74 (99) 000-00-0635            .00      .00     0 (   )                        .00    7
 
-TOTAL NON-EMP BENEFICIAIRIES:     170                                          .00                                    2,564,290.61
+TOTAL NON-EMP BENEFICIAIRIES:     169                                          .00                                    2,564,290.61
