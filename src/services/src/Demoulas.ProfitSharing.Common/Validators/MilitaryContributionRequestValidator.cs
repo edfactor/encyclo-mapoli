@@ -84,6 +84,9 @@ public class MilitaryContributionRequestValidator : Validator<CreateMilitaryCont
             .WithMessage(request => $"Contribution year {request.ContributionDate.Year} is before the employee's earliest known hire year.")
             .MustAsync((request, _, ct) => ValidateAtLeast21OnContribution(request, ct))
             .WithMessage(request => $"Employee must be at least 21 years old on the contribution date {request.ContributionDate:yyyy-MM-dd}.")
+            .MustAsync((request, _, ct) => ValidateEmploymentStatus(request, ct))
+            .WithMessage(request => $"Employee is not active as of the contribution date {request.ContributionDate:yyyy-MM-dd}. " +
+                                     $"Regular contributions require active employee status. Mark as Supplemental to allow contributions for inactive/separated employees.")
             .MustAsync((request, _, ct) => ValidateContributionDate(request, ct))
             .WithMessage(request => $"Regular Contribution already recorded for year {request.ContributionDate.Year}. Duplicates are not allowed.");
 
@@ -148,6 +151,28 @@ public class MilitaryContributionRequestValidator : Validator<CreateMilitaryCont
         }
 
         return dob.Value.Age(req.ContributionDate) >= 21 || TrackFailure("AgeUnder21");
+    }
+
+    private async Task<bool> ValidateEmploymentStatus(CreateMilitaryContributionRequest req, CancellationToken token)
+    {
+        // COBOL Rule: Regular contributions require active employee status (PS-1824)
+        // Supplemental contributions bypass this check to allow contributions for separated employees
+        if (req.IsSupplementalContribution)
+        {
+            return true; // Supplemental contributions bypass employment status check
+        }
+
+        // Regular contributions: check if employee is active as-of the contribution date
+        var isActive = await _employeeLookup.IsActiveAsOfAsync(req.BadgeNumber,
+            DateOnly.FromDateTime(req.ContributionDate), token);
+
+        if (!isActive.HasValue)
+        {
+            // If employment status cannot be determined, fail validation so the issue can be surfaced.
+            return TrackFailure("EmploymentStatusUnknown");
+        }
+
+        return isActive.Value || TrackFailure("EmployeeNotActiveOnContributionDate");
     }
 
     private static bool TrackFailure(string rule)
