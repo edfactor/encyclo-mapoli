@@ -216,8 +216,11 @@ public sealed class DistributionService : IDistributionService
 
     public async Task<CreateOrUpdateDistributionResponse> CreateDistribution(CreateDistributionRequest request, CancellationToken cancellationToken)
     {
-
-        ValidateDistributionRequest(request);
+        var validationResult = ValidateDistributionRequest(request);
+        if (!validationResult.IsSuccess)
+        {
+            throw new InvalidOperationException(string.Join("; ", validationResult.Errors?.SelectMany(e => e.Value) ?? Array.Empty<string>()));
+        }
 
         return await _dataContextFactory.UseWritableContext(async ctx =>
         {
@@ -733,7 +736,7 @@ public sealed class DistributionService : IDistributionService
         {
             var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
-            var distributionQuery = GetDistributionExtract(ctx, cancellationToken, new[] {DistributionFrequency.Constants.Annually, DistributionFrequency.Constants.Monthly, DistributionFrequency.Constants.Quarterly } );
+            var distributionQuery = GetDistributionExtract(ctx, cancellationToken, new[] { DistributionFrequency.Constants.Annually, DistributionFrequency.Constants.Monthly, DistributionFrequency.Constants.Quarterly });
             var query = from dist in distributionQuery
                         join dem in demographicQuery on dist.Ssn equals dem.Ssn into demJoin
                         from dem in demJoin.DefaultIfEmpty()
