@@ -36,10 +36,16 @@
           "PackageIdentifier": "Volta.Volta"
         },
         {
-          "PackageIdentifier": "Microsoft.WSL"
+          "PackageIdentifier": "Microsoft.WSL",
+          "InstallationOptions": {
+            "Scope": "Machine"
+          }
         },
         {
-          "PackageIdentifier": "RedHat.Podman"
+          "PackageIdentifier": "RedHat.Podman",
+          "InstallationOptions": {
+            "Scope": "Machine"
+          }
         }
       ],
       "SourceDetails": {

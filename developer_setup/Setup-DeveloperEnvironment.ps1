@@ -40,6 +40,38 @@ catch {
     exit 1
 }
 
+# Initialize WSL 2 after installation
+Write-Host "`nInitializing WSL 2..." -ForegroundColor Cyan
+try {
+    Write-Host "I Setting up WSL 2 with default Ubuntu distribution..." -ForegroundColor Yellow
+    # Use --no-distribution flag first to initialize WSL, then install Ubuntu separately
+    & wsl --install --no-launch --no-distribution 2>&1 | Out-Null
+    
+    # Wait a moment for WSL to register
+    Start-Sleep -Seconds 2
+    
+    # Now install Ubuntu distribution
+    Write-Host "I Installing Ubuntu distribution..." -ForegroundColor Yellow
+    & wsl --install --distribution Ubuntu --no-launch 2>&1 | Out-Null
+    
+    Write-Host "OK WSL 2 initialized with Ubuntu" -ForegroundColor Green
+}
+catch {
+    Write-Host "X WSL 2 initialization encountered an issue: $_" -ForegroundColor Yellow
+}
+
+# Verify WSL is working
+try {
+    $wslCheck = & wsl --list -v 2>&1
+    if ($wslCheck -match "VERSION") {
+        Write-Host "OK WSL 2 is operational" -ForegroundColor Green
+    } else {
+        Write-Host "I WSL 2 may require a system restart to fully initialize" -ForegroundColor Yellow
+    }
+}
+catch {
+    Write-Host "I WSL may need to be restarted or reconfigured: $_" -ForegroundColor Yellow
+}
 
 if (-not $SkipVS) {
     Write-Host "`nConfiguring Visual Studio 2022..." -ForegroundColor Cyan
@@ -114,6 +146,24 @@ $podmanExists = $podmanInPath -or (Test-Path $podmanExePath)
 
 if ($podmanExists) {
     Write-Host "OK Podman is installed" -ForegroundColor Green
+    
+    # Initialize Podman machine if needed
+    Write-Host "I Initializing Podman machine..." -ForegroundColor Yellow
+    try {
+        # Check if default machine exists
+        $machineList = & podman machine list 2>&1
+        if ($machineList -notmatch "podman-machine-default") {
+            Write-Host "I Creating default Podman machine..." -ForegroundColor Yellow
+            & podman machine init --now 2>&1 | Out-Null
+            Write-Host "OK Podman machine initialized" -ForegroundColor Green
+        } else {
+            Write-Host "OK Podman machine already exists" -ForegroundColor Green
+        }
+    }
+    catch {
+        Write-Host "X Podman machine initialization failed: $_" -ForegroundColor Yellow
+    }
+    
     Write-Host "I Setting ASPIRE_CONTAINER_RUNTIME to podman..." -ForegroundColor Yellow
     [System.Environment]::SetEnvironmentVariable("ASPIRE_CONTAINER_RUNTIME", "podman", "User")
     Write-Host "OK Environment variable set for current user" -ForegroundColor Green
@@ -126,9 +176,8 @@ if ($podmanExists) {
 else {
     Write-Host "X Podman not found" -ForegroundColor Red
     Write-Host "I Podman should have been installed by winget above." -ForegroundColor Yellow
-    Write-Host "I If not installed, run: winget install RedHat.Podman --accept-package-agreements" -ForegroundColor Yellow
-    Write-Host "I After installation, restart your terminal and set the environment variable:" -ForegroundColor Yellow
-    Write-Host "  [System.Environment]::SetEnvironmentVariable('ASPIRE_CONTAINER_RUNTIME', 'podman', 'User')" -ForegroundColor Yellow
+    Write-Host "I Ensure WSL 2 is installed and restart this script." -ForegroundColor Yellow
+    Write-Host "I If needed, manually run: winget install RedHat.Podman --accept-package-agreements" -ForegroundColor Yellow
 }
 
 Write-Host "`n================================================" -ForegroundColor Cyan
