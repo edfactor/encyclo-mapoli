@@ -36,6 +36,9 @@
           "PackageIdentifier": "Volta.Volta"
         },
         {
+          "PackageIdentifier": "Microsoft.WSL"
+        },
+        {
           "PackageIdentifier": "RedHat.Podman"
         }
       ],

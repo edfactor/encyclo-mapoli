@@ -40,14 +40,6 @@ catch {
     exit 1
 }
 
-# Explicitly install Podman to ensure it gets installed (winget import may skip it)
-Write-Host "I Ensuring Podman is installed..." -ForegroundColor Yellow
-$podmanInstallResult = & winget install RedHat.Podman --accept-package-agreements --accept-source-agreements 2>&1
-if ($LASTEXITCODE -eq 0) {
-    Write-Host "OK Podman installation completed" -ForegroundColor Green
-} else {
-    Write-Host "X Podman installation may have failed. Check error above." -ForegroundColor Yellow
-}
 
 if (-not $SkipVS) {
     Write-Host "`nConfiguring Visual Studio 2022..." -ForegroundColor Cyan

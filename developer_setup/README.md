@@ -92,14 +92,68 @@ If Volta didn't install via winget:
 3. Run the installer and restart PowerShell
 4. Verify: `volta --version`
 
-### 5) Complete Setup
+### 5) Manual Podman Installation & Setup
+
+Podman requires **WSL 2** (Windows Subsystem for Linux) to run containers on Windows.
+
+**Prerequisites:**
+- Windows 10 Build 19041 or later (or Windows 11)
+- WSL 2 must be installed and initialized
+
+**Installation:**
+
+```pwsh
+# 1) Install WSL 2 if not already installed
+winget install Microsoft.WSL --accept-package-agreements
+
+# 2) Install Ubuntu distribution for WSL
+wsl --install -d Ubuntu
+
+# 3) Install Podman via winget
+winget install RedHat.Podman --accept-package-agreements
+
+# 4) Restart PowerShell to refresh PATH
+exit
+# Reopen PowerShell as Administrator
+```
+
+Then initialize and configure the Podman machine:
+
+```pwsh
+# 5) Create and start the default Podman VM
+podman machine init --now
+
+# (optional) give it more resources if needed
+# podman machine init --cpus 4 --memory 4096 --disk-size 60 --now
+
+# 6) Verify it's running
+podman machine list
+podman info
+
+# 7) Make sure your CLI is pointing at the default machine
+podman system connection default podman-machine-default
+
+# 8) Smoke test - verify Podman is working
+podman ps
+```
+
+Verify the Aspire environment variable is set:
+```pwsh
+[System.Environment]::GetEnvironmentVariable("ASPIRE_CONTAINER_RUNTIME", "User")
+# Should return: podman
+```
+
+### 6) Complete Setup
 
 Once tools are installed, finish with:
 
 ```pwsh
-# Verify Node.js is available
-node --version
-npm --version
+# Verify core tools
+dotnet --version
+git --version
+volta --version
+podman --version
+podman info
 
 # Install EF Core tools globally
 dotnet tool update --global dotnet-ef
@@ -108,7 +162,7 @@ dotnet tool update --global dotnet-ef
 .\scripts\Install-GitHooks.ps1
 ```
 
-### 5) Verify Installation
+### 7) Verify Installation
 
 ```pwsh
 dotnet --version
@@ -181,6 +235,34 @@ winget install Microsoft.WebDeploy --accept-package-agreements
 **Volta not found after installation:**
 - Close and restart PowerShell (it may need to reload PATH)
 - Verify: `volta --version`
+
+**Podman not found after installation:**
+- Close and restart PowerShell completely (PATH needs to be refreshed)
+- Verify: `podman --version`
+- **Ensure WSL 2 is installed and initialized**:
+  ```pwsh
+  wsl --list -v
+  # Should show Ubuntu (or other distro) with VERSION 2
+  
+  # If WSL not installed:
+  winget install Microsoft.WSL --accept-package-agreements
+  wsl --install -d Ubuntu
+  ```
+- If still not working, manually initialize Podman:
+  ```pwsh
+  podman machine init --now
+  podman info
+  podman ps
+  ```
+- Set the environment variable:
+  ```pwsh
+  [System.Environment]::SetEnvironmentVariable("ASPIRE_CONTAINER_RUNTIME", "podman", "User")
+  ```
+- Restart PowerShell and verify:
+  ```pwsh
+  $env:ASPIRE_CONTAINER_RUNTIME
+  # Should return: podman
+  ```
 
 ### Development Issues
 
