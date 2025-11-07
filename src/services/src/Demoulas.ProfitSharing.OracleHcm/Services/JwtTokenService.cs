@@ -48,13 +48,16 @@ public sealed class JwtTokenService : IJwtTokenService
             throw new InvalidOperationException("Failed to extract RSA private key from certificate.");
         }
 
+        // Extract the signing algorithm from the certificate
+        string signingAlgorithm = ExtractSigningAlgorithmFromCertificate(certificate);
+
         // Calculate x5t (SHA-1 thumbprint in base64) - Oracle HCM requirement
         string x5t = CalculateThumbprint(certificate);
 
         // Create header
         var header = new
         {
-            alg = _config.JwtSigningAlgorithm,
+            alg = signingAlgorithm,
             typ = TokenType,
             x5t = x5t
         };
@@ -82,7 +85,7 @@ public sealed class JwtTokenService : IJwtTokenService
         _logger.LogDebug("JWT Token Generation - Header: {HeaderJson}", headerJson);
         _logger.LogDebug("JWT Token Generation - Payload: {PayloadJson}", payloadJson);
         _logger.LogDebug("JWT Token Generation - Algorithm: {Algorithm}, Issuer: {Issuer}, Principal: {Principal}, Expiration (Unix): {Expiration}",
-            _config.JwtSigningAlgorithm, issuer, principal, expUnix);
+            signingAlgorithm, issuer, principal, expUnix);
         _logger.LogInformation("JWT Token Generated - Certificate Subject: {Subject}, Thumbprint: {Thumbprint}",
             certificate.Subject, certificate.Thumbprint);
 
@@ -109,6 +112,47 @@ public sealed class JwtTokenService : IJwtTokenService
         // Use configured principal and expiration (or provided override)
         int tokenExpiration = expirationMinutes == 10 ? _config.JwtExpirationMinutes : expirationMinutes;
         return GenerateToken(certificate, issuer, _config.JwtPrincipal, tokenExpiration);
+    }
+
+    /// <summary>
+    /// Extracts and maps the signing algorithm from the certificate to JWT algorithm format.
+    /// The certificate's signature algorithm is converted to the corresponding JWT algorithm identifier.
+    /// </summary>
+    /// <returns>JWT algorithm identifier (e.g., "RS256", "RS384", "RS512")</returns>
+    /// <throws>InvalidOperationException if the certificate uses an unsupported algorithm</throws>
+    private string ExtractSigningAlgorithmFromCertificate(X509Certificate2 certificate)
+    {
+        string? certAlgorithm = certificate.SignatureAlgorithm.FriendlyName;
+        
+        if (string.IsNullOrEmpty(certAlgorithm))
+        {
+            throw new InvalidOperationException(
+                "Unable to determine certificate signature algorithm. The certificate's algorithm information is missing or invalid.");
+        }
+
+        _logger.LogDebug("Certificate signature algorithm detected: {CertificateAlgorithm}", certAlgorithm);
+
+        // Map certificate algorithm to JWT algorithm
+        string jwtAlgorithm = certAlgorithm switch
+        {
+            "sha1RSA" => "RS256",  // Fallback, but log warning since SHA-1 is weak
+            "sha256RSA" => "RS256",
+            "sha384RSA" => "RS384",
+            "sha512RSA" => "RS512",
+            _ => throw new InvalidOperationException(
+                $"Certificate uses unsupported signing algorithm '{certAlgorithm}'. " +
+                $"Supported algorithms are: sha256RSA, sha384RSA, sha512RSA")
+        };
+
+        if (certAlgorithm == "sha1RSA")
+        {
+            _logger.LogWarning("Certificate uses SHA-1 (sha1RSA). While this still works, consider upgrading to SHA-256 or higher for better security.");
+        }
+
+        _logger.LogInformation("Using JWT algorithm: {JwtAlgorithm} (from certificate algorithm: {CertificateAlgorithm})",
+            jwtAlgorithm, certAlgorithm);
+
+        return jwtAlgorithm;
     }
 
     /// <summary>
