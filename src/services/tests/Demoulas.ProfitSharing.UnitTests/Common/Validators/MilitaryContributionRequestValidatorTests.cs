@@ -21,6 +21,9 @@ public class MilitaryContributionRequestValidatorTests
         employeeLookupMock
             .Setup(x => x.GetDateOfBirthAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new DateOnly((short)DateTime.Today.Year - 30, 1, 1));
+        employeeLookupMock
+            .Setup(x => x.IsActiveAsOfAsync(It.IsAny<int>(), It.IsAny<DateOnly>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);  // Default: employee is active
 
         var militaryServiceMock = new Mock<IMilitaryService>(MockBehavior.Strict);
         // Default: return success with empty results for GetMilitaryServiceRecordAsync

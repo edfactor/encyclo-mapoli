@@ -3,7 +3,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using FluentValidation.TestHelper;
 using System.ComponentModel;
 
-namespace Demoulas.ProfitSharing.UnitTests.Validation;
+namespace Demoulas.ProfitSharing.UnitTests.Common.Validators;
 
 /// <summary>
 /// Unit tests for IdsRequestValidator to ensure proper boundary validation
