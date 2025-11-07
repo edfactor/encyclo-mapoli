@@ -51,17 +51,18 @@ if (-not $SkipVS) {
     else {
         Write-Host "OK Found Visual Studio at: $vsPath" -ForegroundColor Green
         
-        $vsProfessionalPath = Join-Path $vsPath "vs_professional.exe"
+        $vsSetupPath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\setup.exe"
+        Write-Host "I Checking for installer at: $vsSetupPath" -ForegroundColor Yellow
         
-        if (Test-Path $vsProfessionalPath) {
+        if (Test-Path $vsSetupPath) {
             Write-Host "I Installing required workloads..." -ForegroundColor Yellow
             try {
-                & $vsProfessionalPath --installPath $vsPath `
+                & $vsSetupPath modify --installPath $vsPath `
                     --add Microsoft.VisualStudio.Workload.NetWeb `
                     --add Microsoft.VisualStudio.Workload.Azure `
                     --add Microsoft.VisualStudio.Workload.ManagedDesktop `
-                    --includeRecommended --includeOptional `
-                    --passive --wait
+                    --includeRecommended `
+                    --passive --norestart
                 Write-Host "OK Visual Studio workloads installed successfully" -ForegroundColor Green
             }
             catch {
@@ -73,6 +74,7 @@ if (-not $SkipVS) {
             }
         }
         else {
+            Write-Host "X setup.exe not found at: $vsSetupPath" -ForegroundColor Red
             Write-Host "I To configure workloads, open Visual Studio Installer and:" -ForegroundColor Yellow
             Write-Host "  1. Click 'Modify' on Visual Studio 2022 Professional" -ForegroundColor Yellow
             Write-Host "  2. Select these workloads:" -ForegroundColor Yellow
@@ -82,6 +84,7 @@ if (-not $SkipVS) {
             Write-Host "  3. Click 'Modify' to install" -ForegroundColor Yellow
         }
     }
+}
 
 if (-not $SkipNodeTools) {
     Write-Host "`nVerifying Node.js Setup..." -ForegroundColor Cyan
