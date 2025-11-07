@@ -76,8 +76,12 @@ public sealed record OracleHcmConfig
 
     /// <summary>
     /// Gets or sets the signing algorithm for JWT tokens.
-    /// Should be "RS256" (RSA SHA-256) for Oracle HCM compatibility.
-    /// Default: "RS256"
+    /// NOTE: This value is now DEPRECATED and no longer used.
+    /// The JWT signing algorithm is now automatically extracted from the certificate's signature algorithm:
+    /// - sha256RSA (certificate) → RS256 (JWT)
+    /// - sha384RSA (certificate) → RS384 (JWT)
+    /// - sha512RSA (certificate) → RS512 (JWT)
+    /// This property is kept for backward compatibility only.
     /// </summary>
     public string JwtSigningAlgorithm { get; set; } = "RS256";
 
