@@ -167,7 +167,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           handleSearch={handleSubmit(handleFilter)}
           isFetching={isLoading}
           disabled={!currentPreset || isLoading || !isValid}
-          searchButtonText="Filter"
+          searchButtonText="Search"
         />
       </Grid>
     </form>
