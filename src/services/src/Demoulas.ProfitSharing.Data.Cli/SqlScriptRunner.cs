@@ -56,6 +56,10 @@ internal sealed class SqlScriptRunner
             sql = sql.Replace(key, value ?? string.Empty, StringComparison.Ordinal);
         }
 
+        // Escape curly braces for ExecuteSqlRawAsync (which uses String.Format internally)
+        // This prevents Oracle PL/SQL syntax errors where braces are used for language constructs
+        sql = sql.Replace("{", "{{", StringComparison.Ordinal).Replace("}", "}}", StringComparison.Ordinal);
+
         await _db.Database.ExecuteSqlRawAsync(sql, ct);
 
         if (!string.IsNullOrWhiteSpace(sourceSchema))
