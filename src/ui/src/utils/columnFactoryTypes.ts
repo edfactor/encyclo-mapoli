@@ -66,6 +66,7 @@ export interface DateColumnOptions extends LimitedAlignmentColumnOptions {
 
 export interface YesOrNoColumnOptions extends FormattableColumnOptions {
   useWords?: boolean;
+  cellRenderer?: (params: ValueFormatterParams) => string;
 }
 
 export interface NameColumnOptions extends LimitedAlignmentColumnOptions {

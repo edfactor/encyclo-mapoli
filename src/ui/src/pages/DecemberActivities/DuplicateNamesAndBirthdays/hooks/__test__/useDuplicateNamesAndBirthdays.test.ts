@@ -146,7 +146,8 @@ function renderHookWithProvider<T>(hook: () => T, preloadedState?: MockStoreStat
       profitSharingLabels: null,
       controlSheet: null,
       breakdownGrandTotals: null,
-      certificates: null
+      certificates: null,
+      profitSharingUnder21Report: null
     }
   };
 
@@ -273,7 +274,8 @@ const defaultYearsEndState: YearsEndState = {
       profitSharingLabels: null,
       controlSheet: null,
       breakdownGrandTotals: null,
-      certificates: null
+      certificates: null,
+      profitSharingUnder21Report: null
 };
 
 describe("useDuplicateNamesAndBirthdays", () => {
@@ -475,7 +477,8 @@ describe("useDuplicateNamesAndBirthdays", () => {
       profitSharingLabels: null,
       controlSheet: null,
       breakdownGrandTotals: null,
-      certificates: null
+      certificates: null,
+      profitSharingUnder21Report: null
     };
 
     const { result } = renderHookWithProvider(() => useDuplicateNamesAndBirthdays(), {
