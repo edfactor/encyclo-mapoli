@@ -1,42 +1,177 @@
-# Developer setup
+# Developer Setup
 
 This project uses .NET 9 for services and Node 20.4 (via Volta) for the UI. The steps below install common tooling and get you running quickly.
 
-## 1) Install required tools with winget
+## Quick Start (Automated - RECOMMENDED)
 
-Run in PowerShell:
+### For New Developers - ONE Command Setup
+
+**All you need**: Windows 10/11 and PowerShell
+
+1. **Open PowerShell as Administrator**
+   ```powershell
+   Start-Process pwsh -Verb RunAs
+   ```
+
+2. **Enable script execution** (one-time):
+   ```powershell
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+   ```
+
+3. **Clone the repository** (or download the script folder):
+   ```powershell
+   git clone https://bitbucket.org/demoulas/smart-profit-sharing
+   cd smart-profit-sharing
+   ```
+
+4. **Run the setup script**:
+   ```powershell
+   cd developer_setup
+   .\Setup-DeveloperEnvironment.ps1
+   ```
+
+That's it! The script will automatically:
+- ✓ Check prerequisites (winget installed)
+- ✓ Read local `winget-config.json`
+- ✓ Install all required tools via winget
+- ✓ Configure Visual Studio 2022 workloads
+- ✓ Verify Node.js (Volta)
+- ✓ Show next steps
+
+**Note**: The script only reads the local `winget-config.json` file in the same folder. No code is downloaded—only your development tools via winget.
+
+---
+
+## Manual Installation (If Automated Script Fails)
+
+### 1) Download and Run Setup Script
+
+If you prefer to use the script file directly:
+
+1. Save `Setup-DeveloperEnvironment.ps1` locally
+2. Open PowerShell as Administrator
+3. Enable script execution:
+   ```pwsh
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+   ```
+4. Run the script:
+   ```pwsh
+   .\Setup-DeveloperEnvironment.ps1
+   ```
+
+### 2) Manual Package Installation
+
+If the script fails, install packages individually:
 
 ```pwsh
-winget import --import-file .\developer_setup\winget-config.json --disable-interactivity
+winget install Microsoft.VisualStudioCode --accept-package-agreements
+winget install Microsoft.VisualStudio.2022.Professional --accept-package-agreements
+winget install Git.Git --accept-package-agreements
+winget install TortoiseGit.TortoiseGit --accept-package-agreements
+winget install Postman.Postman --accept-package-agreements
+winget install Volta.Volta --accept-package-agreements
+winget install Microsoft.WebDeploy --accept-package-agreements
 ```
 
-What this installs (highlights):
-- .NET 9 SDK, Visual Studio Code
-- Visual Studio 2022 Professional (with workloads, on first launch)
-- Volta (Node tool manager) to pin Node 20.4.0
-- Git, Git LFS, PowerShell, Windows Terminal
-- Browsers, Postman
-- DBeaver (DB client)
+### 3) Manual Visual Studio Configuration
 
-Note: SQL Server tooling was intentionally removed. We use Oracle.
+1. Open **Visual Studio Installer**
+2. Click **Modify** on Visual Studio 2022 Professional
+3. Select these workloads:
+   - ☑ ASP.NET and web development
+   - ☑ Azure development
+   - ☑ .NET desktop development
+4. Click **Modify** to install
 
-## 2) Finalize CLI tooling
+### 4) Manual Volta Installation
+
+If Volta didn't install via winget:
+
+1. Visit: https://docs.volta.sh/guide/getting-started
+2. Download the installer for Windows
+3. Run the installer and restart PowerShell
+4. Verify: `volta --version`
+
+### 5) Manual Podman Installation & Setup
+
+Podman requires **WSL 2** (Windows Subsystem for Linux) to run containers on Windows.
+
+**Prerequisites:**
+- Windows 10 Build 19041 or later (or Windows 11)
+- WSL 2 must be installed and initialized
+
+**Installation:**
 
 ```pwsh
-# Pin Node.js to the version specified by Volta in ui/package.json
-volta install node@LTS
+# 1) Install WSL 2 if not already installed
+winget install Microsoft.WSL --accept-package-agreements
 
-# Optional but recommended: enable Git LFS in your repo
-git lfs install
+# 2) Install Ubuntu distribution for WSL
+wsl --install -d Ubuntu
 
-# EF Core tooling (global)
+# 3) Install Podman via winget
+winget install RedHat.Podman --accept-package-agreements
+
+# 4) Restart PowerShell to refresh PATH
+exit
+# Reopen PowerShell as Administrator
+```
+
+Then initialize and configure the Podman machine:
+
+```pwsh
+# 5) Create and start the default Podman VM
+podman machine init --now
+
+# (optional) give it more resources if needed
+# podman machine init --cpus 4 --memory 4096 --disk-size 60 --now
+
+# 6) Verify it's running
+podman machine list
+podman info
+
+# 7) Make sure your CLI is pointing at the default machine
+podman system connection default podman-machine-default
+
+# 8) Smoke test - verify Podman is working
+podman ps
+```
+
+Verify the Aspire environment variable is set:
+```pwsh
+[System.Environment]::GetEnvironmentVariable("ASPIRE_CONTAINER_RUNTIME", "User")
+# Should return: podman
+```
+
+### 6) Complete Setup
+
+Once tools are installed, finish with:
+
+```pwsh
+# Verify core tools
+dotnet --version
+git --version
+volta --version
+podman --version
+podman info
+
+# Install EF Core tools globally
 dotnet tool update --global dotnet-ef
 
-# Install git hooks (pre-commit hook runs dotnet format on staged C# files)
+# Optional: Install git hooks
 .\scripts\Install-GitHooks.ps1
 ```
 
-## 3) Restore and build
+### 7) Verify Installation
+
+```pwsh
+dotnet --version
+git --version
+volta --version
+```
+```
+
+### 4) Restore and Build
 
 Services (.NET):
 ```pwsh
@@ -77,12 +212,124 @@ npm run dev
 
 ## Troubleshooting
 
-- dotnet SDK mismatch: check `src/services/global.json` (9.0.300). Install .NET 9 via winget import above.
-- Node version mismatch: run `volta install node@LTS` and restart the terminal.
-- EF tools not found: run `dotnet tool update --global dotnet-ef`.
-- Oracle connectivity errors (ORA-12541/12514): confirm firewall/VPN, correct host/port/service name, and credentials.
-- SSL/TLS issues to internal feeds: ensure corporate root certs are installed and NuGet source is configured.
+### Setup Script Issues
 
-## Optional
+**winget import fails:**
+```pwsh
+# Install packages individually
+winget install Microsoft.VisualStudioCode --accept-package-agreements
+winget install Microsoft.VisualStudio.2022.Professional --accept-package-agreements
+winget install Git.Git --accept-package-agreements
+winget install TortoiseGit.TortoiseGit --accept-package-agreements
+winget install Postman.Postman --accept-package-agreements
+winget install Volta.Volta --accept-package-agreements
+winget install Microsoft.WebDeploy --accept-package-agreements
+```
 
-- Visual Studio workloads: install ASP.NET and web development, Azure, and .NET desktop development (VS will prompt as needed)
+**Visual Studio workloads don't install:**
+1. Open **Visual Studio Installer**
+2. Click "Modify" on Visual Studio 2022 Professional
+3. Select the required workloads manually
+4. Click "Modify"
+
+**Volta not found after installation:**
+- Close and restart PowerShell (it may need to reload PATH)
+- Verify: `volta --version`
+
+**Podman not found after installation:**
+- Close and restart PowerShell completely (PATH needs to be refreshed)
+- Verify: `podman --version`
+- **Ensure WSL 2 is installed and initialized**:
+  ```pwsh
+  wsl --list -v
+  # Should show Ubuntu (or other distro) with VERSION 2
+  
+  # If WSL not installed:
+  winget install Microsoft.WSL --accept-package-agreements
+  wsl --install -d Ubuntu
+  ```
+- If still not working, manually initialize Podman:
+  ```pwsh
+  podman machine init --now
+  podman info
+  podman ps
+  ```
+- Set the environment variable:
+  ```pwsh
+  [System.Environment]::SetEnvironmentVariable("ASPIRE_CONTAINER_RUNTIME", "podman", "User")
+  ```
+- Restart PowerShell and verify:
+  ```pwsh
+  $env:ASPIRE_CONTAINER_RUNTIME
+  # Should return: podman
+  ```
+
+### Development Issues
+
+- **dotnet SDK mismatch**: Check `src/services/global.json` (requires 9.0.300+). Run `winget install Microsoft.DotNet.SDK.9`
+- **Node version mismatch**: Run `volta install node@LTS` and restart terminal
+- **EF tools not found**: Run `dotnet tool update --global dotnet-ef`
+- **Oracle connectivity errors** (ORA-12541/12514): Verify firewall/VPN, correct host/port/service name, and credentials
+- **SSL/TLS issues to internal feeds**: Ensure corporate root certs installed and NuGet source configured
+
+## Next Steps
+
+After setup completes:
+
+1. **Clone repository** (if not done):
+   ```pwsh
+   git clone https://bitbucket.org/demoulas/smart-profit-sharing
+   cd smart-profit-sharing
+   ```
+
+2. **Get secrets**:
+   - Ask a teammate for `secrets.json`
+   - Place in: `src/services/configuration/secrets.json`
+   - See: https://learn.microsoft.com/aspnet/core/security/app-secrets
+
+3. **Configure NuGet source**:
+   ```pwsh
+   dotnet nuget list source
+   ```
+   - If "ArtifactoryCloud" is missing, add it following your internal guide
+
+4. **Build and run**:
+   - Open `src/services/Demoulas.ProfitSharing.slnx` in Visual Studio
+   - Set `Demoulas.ProfitSharing.AppHost` as startup project
+   - Press `F5` to run
+
+5. **UI Development**:
+   ```pwsh
+   cd src/ui
+   npm install
+   npm run dev
+   ```
+
+## Oracle 19 Notes
+
+- The services use **Oracle.ManagedDataAccess.Core** (managed ODP.NET), so a local Oracle Instant Client is not required
+- Optional GUI tools:
+  - **DBeaver** - Installed via winget (recommended)
+  - **Oracle SQL Developer / SQLcl** - Install manually from Oracle if preferred
+- Connection verification:
+  - Confirm network/VPN access to Oracle host and port
+  - Use EZConnect format: `host:port/service_name`
+  - If using TNS aliases, ensure `tnsnames.ora` exists in the expected location
+
+## Optional Enhancements
+
+- **Visual Studio Extensions**:
+  - Productivity Power Tools 2022
+  - Visual Studio Spell Checker (VS2022 and Later)
+  - Install from Extensions → Manage Extensions in VS
+
+- **Git LFS** (for large files):
+  ```pwsh
+  git lfs install
+  ```
+
+- **Pre-commit Hooks**:
+  ```pwsh
+  .\scripts\Install-GitHooks.ps1
+  ```
+  Automatically runs `dotnet format` on staged C# files

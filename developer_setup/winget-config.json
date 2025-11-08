@@ -5,88 +5,47 @@
     {
       "Packages": [
         {
-          "PackageIdentifier": "CoreyButler.NVMforWindows"
+          "PackageIdentifier": "Microsoft.VisualStudioCode"
         },
         {
-          "PackageIdentifier": "Git.Git"
-        },
-        {
-          "PackageIdentifier": "Microsoft.OneDrive"
-        },
-        {
-          "PackageIdentifier": "TortoiseGit.TortoiseGit"
+          "PackageIdentifier": "Microsoft.VisualStudio.2022.Professional",
+          "InstallationOptions": {
+            "InstallationType": "Full",
+            "Scope": "Machine"
+          },
+          "Components": [
+            "Microsoft.VisualStudio.Workload.CoreEditor",
+            "Microsoft.VisualStudio.Workload.NetWeb",
+            "Microsoft.VisualStudio.Workload.Azure",
+            "Microsoft.VisualStudio.Workload.ManagedDesktop"
+          ]
         },
         {
           "PackageIdentifier": "Microsoft.WebDeploy"
         },
         {
-          "PackageIdentifier": "Microsoft.PowerShell"
+          "PackageIdentifier": "Git.Git"
         },
         {
-          "PackageIdentifier": "Dropbox.Dropbox"
-        },
-        {
-          "PackageIdentifier": "Google.Chrome.EXE"
-        },
-        {
-          "PackageIdentifier": "Microsoft.Edge"
-        },
-        {
-          "PackageIdentifier": "Microsoft.VisualStudio.2022.Professional"
-        },
-        {
-          "PackageIdentifier": "Microsoft.VCRedist.2015+.x86"
-        },
-        {
-          "PackageIdentifier": "Microsoft.VCRedist.2015+.x64"
+          "PackageIdentifier": "TortoiseGit.TortoiseGit"
         },
         {
           "PackageIdentifier": "Postman.Postman"
         },
         {
-          "PackageIdentifier": "Zoom.Zoom.EXE"
-        },
-        {
-          "PackageIdentifier": "Microsoft.Teams"
-        },
-        {
-          "PackageIdentifier": "Microsoft.AppInstaller"
-        },
-        {
-          "PackageIdentifier": "Microsoft.UI.Xaml.2.7"
-        },
-        {
-          "PackageIdentifier": "Microsoft.UI.Xaml.2.8"
-        },
-        {
-          "PackageIdentifier": "Microsoft.VCLibs.Desktop.14"
-        },
-        {
-          "PackageIdentifier": "Microsoft.WindowsTerminal"
-        },
-        {
-          "PackageIdentifier": "Microsoft.DotNet.SDK.9"
-        },
-        {
-          "PackageIdentifier": "Microsoft.VisualStudioCode"
-        },
-        {
           "PackageIdentifier": "Volta.Volta"
         },
         {
-          "PackageIdentifier": "Microsoft.AzureCLI"
+          "PackageIdentifier": "Microsoft.WSL",
+          "InstallationOptions": {
+            "Scope": "Machine"
+          }
         },
         {
-          "PackageIdentifier": "Microsoft.EdgeWebView2Runtime"
-        },
-        {
-          "PackageIdentifier": "NuGet.NuGet"
-        },
-        {
-          "PackageIdentifier": "GitHub.GitLFS"
-        },
-        {
-          "PackageIdentifier": "DBeaver.DBeaver"
+          "PackageIdentifier": "RedHat.Podman",
+          "InstallationOptions": {
+            "Scope": "Machine"
+          }
         }
       ],
       "SourceDetails": {
@@ -94,25 +53,6 @@
         "Identifier": "Microsoft.Winget.Source_8wekyb3d8bbwe",
         "Name": "winget",
         "Type": "Microsoft.PreIndexed.Package"
-      }
-    },
-    {
-      "Packages": [
-        {
-          "PackageIdentifier": "XP8BT8DW290MPQ"
-        },
-        {
-          "PackageIdentifier": "XPFPPN5PLH3BFV"
-        },
-        {
-          "PackageIdentifier": "XP9KHM4BK9FZ7Q"
-        }
-      ],
-      "SourceDetails": {
-        "Argument": "https://storeedgefd.dsx.mp.microsoft.com/v9.0",
-        "Identifier": "StoreEdgeFD",
-        "Name": "msstore",
-        "Type": "Microsoft.Rest"
       }
     }
   ],
