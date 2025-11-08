@@ -986,7 +986,7 @@ export const YearsEndApi = createApi({
           isSortDescending: params.pagination.isSortDescending
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           dispatch(clearProfitSharingUnder21Report());
           const { data } = await queryFulfilled;

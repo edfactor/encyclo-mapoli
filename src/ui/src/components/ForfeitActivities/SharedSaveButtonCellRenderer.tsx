@@ -36,7 +36,8 @@ function generateRowKey(activityType: ActivityType, data: RowData): string {
   if (activityType === "unforfeit") {
     return data.profitDetailId?.toString() || "";
   }
-  return String(data.psn);
+  // For termination: use composite key (badgeNumber-profitYear)
+  return `${data.badgeNumber || data.psn}-${data.profitYear}`;
 }
 
 /**
@@ -75,8 +76,8 @@ function isTransactionEditable(
   }
 
   if (activityType === "termination") {
-    // Termination: if backend gives us a value, then we allow it
-    return params.data.suggestedForfeit != null;
+    // Termination: only show if backend gives us a non-null, non-zero value
+    return params.data.suggestedForfeit != null && params.data.suggestedForfeit !== 0;
   } else {
     // UnForfeit: all rows with non-null suggestedUnforfeiture are editable
     return params.data.suggestedUnforfeiture != null;

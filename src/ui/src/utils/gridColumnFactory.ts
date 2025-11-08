@@ -147,7 +147,7 @@ export const createYesOrNoColumn = (options: YesOrNoColumnOptions): ColDef => {
     sortable = true,
     resizable = true,
     useWords = false,
-    valueFormatter
+    cellRenderer
   } = options;
 
   const alignmentClass = alignment === "center" ? "center-align" : "left-align";
@@ -161,14 +161,14 @@ export const createYesOrNoColumn = (options: YesOrNoColumnOptions): ColDef => {
     cellClass: alignmentClass,
     resizable,
     sortable,
-    valueFormatter
+    cellRenderer
   };
 
-  if (!valueFormatter) {
+  if (!cellRenderer) {
     if (useWords) {
-      column.valueFormatter = (params) => (params.value ? "Yes" : "No");
+      column.cellRenderer = (params: ICellRendererParams) => (params.value ? "Yes" : "No");
     } else {
-      column.valueFormatter = (params) => (params.value ? "Y" : "N");
+      column.cellRenderer = (params: ICellRendererParams) => (params.value ? "Y" : "N");
     }
   }
 

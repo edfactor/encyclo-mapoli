@@ -1,4 +1,3 @@
-import { CellClickedEvent, ColDef, ICellRendererParams } from "ag-grid-community";
 import { useMemo } from "react";
 import { DSMGrid, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
@@ -55,7 +54,6 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     selectionState,
     handleSave,
     handleBulkSave,
-    handleRowExpansion,
     sortEventHandler,
     onGridReady,
     paginationHandlers,
@@ -75,7 +73,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     onLoadingChange
   });
 
-  // Get main and detail columns
+  // Get main and detail columns and combine them into a single list
   const mainColumns = useMemo(() => GetTerminationColumns(), []);
   const detailColumns = useMemo(
     () =>
@@ -97,89 +95,10 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     ]
   );
 
-  // Compose columns: show main columns for parent, detail columns for detail
+  // Combine main and detail columns into a single flat list
   const columnDefs = useMemo(() => {
-    // Add an expansion column as the first column
-    const expansionColumn = {
-      headerName: "",
-      field: "isExpandable",
-      width: 50,
-      cellRenderer: (params: ICellRendererParams) => {
-        if (params.data && !params.data.isDetail && params.data.isExpandable) {
-          return params.data.isExpanded ? "▼" : "►";
-        }
-        return "";
-      },
-      onCellClicked: (event: CellClickedEvent) => {
-        if (event.data && !event.data.isDetail && event.data.isExpandable) {
-          handleRowExpansion(String(event.data.psn));
-        }
-      },
-      suppressSizeToFit: true,
-      suppressAutoSize: true,
-      lockVisible: true,
-      lockPosition: true,
-      pinned: "left" as const
-    } as ColDef;
-
-    // Determine which columns to display based on whether it's a detail row
-    const visibleColumns = mainColumns.map((column) => {
-      return {
-        ...column,
-        cellRenderer: (params: ICellRendererParams) => {
-          // For detail rows, either hide the column or show a specific value
-          if (params.data?.isDetail) {
-            // Check if this main column should be hidden in detail rows
-            const hideInDetails = !detailColumns.some((detailCol) => detailCol.field === (column as ColDef).field);
-
-            if (hideInDetails) {
-              return ""; // Hide this column's content for detail rows
-            }
-          }
-
-          // Use the default renderer for this column if available
-          if ((column as ColDef).cellRenderer) {
-            return (column as ColDef).cellRenderer(params);
-          }
-
-          // Otherwise just return the field value
-          return params.valueFormatted ? params.valueFormatted : params.value;
-        }
-      } as ColDef;
-    });
-
-    // Add detail-specific columns that only appear for detail rows
-    const detailOnlyColumns = detailColumns
-      .filter((detailCol) => !mainColumns.some((mainCol) => mainCol.field === (detailCol as ColDef).field))
-      .map(
-        (column) =>
-          ({
-            ...column,
-            cellRenderer: (params: ICellRendererParams) => {
-              // Only show content for detail rows
-              if (!params.data?.isDetail) {
-                return "";
-              }
-
-              // Use the default renderer for this column if available
-              if ((column as ColDef).cellRenderer) {
-                return (column as ColDef).cellRenderer(params);
-              }
-
-              // Otherwise just return the field value
-              return params.valueFormatted ? params.valueFormatted : params.value;
-            }
-          }) as ColDef
-      );
-
-    // Combine all columns
-    return [expansionColumn, ...visibleColumns, ...detailOnlyColumns];
-  }, [mainColumns, detailColumns, handleRowExpansion]);
-
-  // Row class for detail rows using Tailwind
-  const getRowClass = (params: { data: { isDetail: boolean } }) => {
-    return params.data.isDetail ? "bg-gray-100" : "";
-  };
+    return [...mainColumns, ...detailColumns];
+  }, [mainColumns, detailColumns]);
 
   return (
     <div className="relative">
@@ -218,7 +137,6 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
               },
               rowData: gridData,
               columnDefs: columnDefs,
-              getRowClass: getRowClass,
               rowSelection: {
                 mode: "multiRow",
                 checkboxes: false,
