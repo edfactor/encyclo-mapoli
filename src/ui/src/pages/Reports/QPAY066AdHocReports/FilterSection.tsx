@@ -121,6 +121,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                   <FormLabel required>Store Number</FormLabel>
                   <TextField
                     {...field}
+                    value={field.value ?? ""}
                     fullWidth
                     size="small"
                     required
