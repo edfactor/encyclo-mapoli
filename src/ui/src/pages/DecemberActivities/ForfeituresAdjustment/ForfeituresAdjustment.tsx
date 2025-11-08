@@ -4,7 +4,6 @@ import StandaloneMemberDetails from "pages/InquiriesAndAdjustments/MasterInquiry
 import { memo } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
-import MissiveAlerts from "../../../components/MissiveAlerts/MissiveAlerts";
 import { CAPTIONS } from "../../../constants";
 import AddForfeitureModal from "./AddForfeitureModal";
 import ForfeituresAdjustmentPanel from "./ForfeituresAdjustmentPanel";
@@ -38,10 +37,6 @@ const ForfeituresAdjustmentContent = memo(() => {
       rowSpacing="24px">
       <Grid width={"100%"}>
         <Divider />
-      </Grid>
-
-      <Grid width={"100%"}>
-        <MissiveAlerts />
       </Grid>
 
       <Grid width={"100%"}>

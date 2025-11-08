@@ -1,4 +1,4 @@
-import { ValueFormatterParams, ValueGetterParams, ITooltipParams } from "ag-grid-community";
+import { ITooltipParams, ValueFormatterParams, ValueGetterParams } from "ag-grid-community";
 
 // Base interface with common properties
 export interface BaseColumnOptions {
@@ -107,4 +107,9 @@ export interface PSNColumnOptions extends FormattableColumnOptions {
   enableLinking?: boolean;
   navigateFunction?: (badgeNumber: string, psnSuffix?: string) => void;
   linkingStyle?: "simple" | "badge-psn"; // Different PSN linking patterns
+}
+
+export interface BadgeOrPSNOptions extends PSNColumnOptions {
+  badgeField: string;
+  psnField: string;
 }

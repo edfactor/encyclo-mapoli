@@ -4,7 +4,6 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import { CAPTIONS } from "../../../constants";
-import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
 import useRecentlyTerminated from "./hooks/useRecentlyTerminated";
 import RecentlyTerminatedGrid from "./RecentlyTerminatedGrid";
 import RecentlyTerminatedSearchFilter from "./RecentlyTerminatedSearchFilter";
@@ -12,7 +11,6 @@ import RecentlyTerminatedSearchFilter from "./RecentlyTerminatedSearchFilter";
 const RecentlyTerminatedContent = () => {
   const { reportData, isLoadingReport, searchCompleted, executeSearch, resetSearch, gridPagination } =
     useRecentlyTerminated();
-  const { missiveAlerts } = useMissiveAlerts();
 
   return (
     <Grid
@@ -22,7 +20,7 @@ const RecentlyTerminatedContent = () => {
         <Divider />
       </Grid>
 
-      {missiveAlerts.length > 0 && <MissiveAlerts />}
+      <MissiveAlerts />
 
       <Grid width="100%">
         <DSMAccordion title="Filter">
