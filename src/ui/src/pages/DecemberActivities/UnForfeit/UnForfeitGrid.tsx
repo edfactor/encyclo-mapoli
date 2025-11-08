@@ -1,6 +1,6 @@
 import { Grid } from "@mui/material";
 import { CellClickedEvent, ColDef, ICellRendererParams } from "ag-grid-community";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
@@ -66,8 +66,19 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
     shouldArchive,
     onArchiveHandled,
     setHasUnsavedChanges,
-    fiscalCalendarYear
+    fiscalCalendarYear,
+    isReadOnly
   });
+
+  // Refresh grid cells when read-only status changes
+  // This forces cell renderers to re-read isReadOnly from context
+  useEffect(() => {
+    if (gridRef.current?.api) {
+      gridRef.current.api.refreshCells({ force: true });
+    }
+    // gridRef is a ref and doesn't need to be in the dependency array
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isReadOnly]);
 
   // Get the main and detail columns
   const mainColumns = useMemo(() => UnForfeitGridColumns(), []);
