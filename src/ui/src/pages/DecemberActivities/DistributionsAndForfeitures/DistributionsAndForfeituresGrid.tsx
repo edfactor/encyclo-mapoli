@@ -33,8 +33,10 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
 }) => {
   const [showStateTaxTooltip, setShowStateTaxTooltip] = useState(false);
   const [showForfeitureTooltip, setShowForfeitureTooltip] = useState(false);
+  const [showUnattributedTooltip, setShowUnattributedTooltip] = useState(false);
   const [stateTaxTimeout, setStateTaxTimeout] = useState<NodeJS.Timeout | null>(null);
   const [forfeitureTimeout, setForfeitureTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [unattributedTimeout, setUnattributedTimeout] = useState<NodeJS.Timeout | null>(null);
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { distributionsAndForfeitures, distributionsAndForfeituresQueryParams } = useSelector(
     (state: RootState) => state.yearsEnd
@@ -123,6 +125,21 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
       setShowForfeitureTooltip(false);
     }, 100);
     setForfeitureTimeout(timeout);
+  };
+
+  const handleUnattributedPopoverOpen = () => {
+    if (unattributedTimeout) {
+      clearTimeout(unattributedTimeout);
+      setUnattributedTimeout(null);
+    }
+    setShowUnattributedTooltip(true);
+  };
+
+  const handleUnattributedPopoverClose = () => {
+    const timeout = setTimeout(() => {
+      setShowUnattributedTooltip(false);
+    }, 100);
+    setUnattributedTimeout(timeout);
   };
 
   const onSearch = useCallback(async () => {
@@ -361,6 +378,92 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                 </div>
               )}
             </div>
+            {distributionsAndForfeitures.hasUnattributedRecords && distributionsAndForfeitures.unattributedTotals && (
+              <div className="relative flex-1">
+                <TotalsGrid
+                  displayData={[[numberToCurrency(distributionsAndForfeitures.unattributedTotals.stateTax || 0)]]}
+                  leftColumnHeaders={["Unattributed State Taxes"]}
+                  topRowHeaders={[]}
+                  breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
+                  sx={{
+                    backgroundColor: "#fff3cd",
+                    border: "1px solid #ffc107",
+                    borderRadius: "0.375rem"
+                  }}
+                />
+                <div
+                  className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
+                  onMouseEnter={handleUnattributedPopoverOpen}
+                  onMouseLeave={handleUnattributedPopoverClose}>
+                  <InfoOutlinedIcon
+                    className="cursor-pointer text-yellow-600"
+                    fontSize="small"
+                  />
+                  <div
+                    className={`absolute right-0 top-full z-[1000] mt-1 max-h-[300px] max-w-[480px] overflow-auto rounded border border-yellow-300 bg-yellow-50 shadow-lg ${!showUnattributedTooltip ? "hidden" : ""}`}>
+                    <div className="p-3 px-4 pb-4">
+                      <Typography
+                        variant="subtitle2"
+                        sx={{ p: 1, pb: 0.5, color: "#856404" }}>
+                        Unattributed State Taxes
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ p: 1, pb: 1, color: "#856404" }}>
+                        These records have state taxes but could not be attributed to a specific state. This indicates a
+                        data quality issue in state extraction.
+                      </Typography>
+                      <table className="w-full border-collapse text-[0.9rem]">
+                        <thead>
+                          <tr>
+                            <th className="border-b border-yellow-300 px-2 py-1 text-left font-semibold text-yellow-900">
+                              Metric
+                            </th>
+                            <th className="whitespace-nowrap border-b border-yellow-300 px-2 py-1 text-right font-semibold text-yellow-900">
+                              Amount
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td className="whitespace-nowrap border-b border-yellow-200 px-2 py-2 text-left text-yellow-900">
+                              Records Count
+                            </td>
+                            <td className="whitespace-nowrap border-b border-yellow-200 px-2 py-2 text-right text-yellow-900">
+                              {distributionsAndForfeitures.unattributedTotals.count}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="whitespace-nowrap border-b border-yellow-200 px-2 py-2 text-left text-yellow-900">
+                              State Tax (Unattributed)
+                            </td>
+                            <td className="whitespace-nowrap border-b border-yellow-200 px-2 py-2 text-right text-yellow-900">
+                              {numberToCurrency(distributionsAndForfeitures.unattributedTotals.stateTax)}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="whitespace-nowrap border-b border-yellow-200 px-2 py-2 text-left text-yellow-900">
+                              Federal Tax (Unattributed)
+                            </td>
+                            <td className="whitespace-nowrap border-b border-yellow-200 px-2 py-2 text-right text-yellow-900">
+                              {numberToCurrency(distributionsAndForfeitures.unattributedTotals.federalTax)}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="whitespace-nowrap px-2 py-2 text-left text-yellow-900">
+                              Net Proceeds (Unattributed)
+                            </td>
+                            <td className="whitespace-nowrap px-2 py-2 text-right text-yellow-900">
+                              {numberToCurrency(distributionsAndForfeitures.unattributedTotals.netProceeds)}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {!isFetching && <ReportSummary report={distributionsAndForfeitures} />}
