@@ -1,3 +1,4 @@
+import { MAX_EMPLOYEE_BADGE_LENGTH } from "@/constants";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { numberToCurrency } from "smart-ui-library";
 import { createSaveButtonCellRenderer } from "../../../components/ForfeitActivities";
@@ -107,7 +108,8 @@ export const GetDetailColumns = (
       flex: 1,
       cellEditor: SuggestedForfeitEditor,
       cellRenderer: (params: ICellRendererParams) => {
-        if (params.data.suggestedForfeit === null) {
+        // If the psn is longer than 7 chars, it is a beneficiary and should not have a suggested forfeit
+        if (params.data.suggestedForfeit === null || params.data.psn.length > MAX_EMPLOYEE_BADGE_LENGTH) {
           return null;
         }
         return SuggestedForfeitCellRenderer(

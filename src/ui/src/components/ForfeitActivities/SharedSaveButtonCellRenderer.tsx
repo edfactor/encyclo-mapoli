@@ -1,3 +1,4 @@
+import { MAX_EMPLOYEE_BADGE_LENGTH } from "@/constants";
 import { SaveOutlined } from "@mui/icons-material";
 import { Checkbox, CircularProgress, IconButton, Tooltip } from "@mui/material";
 import { ICellRendererParams } from "ag-grid-community";
@@ -92,7 +93,11 @@ export function createSaveButtonCellRenderer(config: SaveButtonConfig) {
   return (params: SaveButtonCellParams) => {
     const { activityType, selectedProfitYear, isReadOnly } = config;
 
-    if (!isTransactionEditable(activityType, params, selectedProfitYear, isReadOnly)) {
+    // If psn is too long (beneficiary) or not editable, return empty
+    if (
+      !isTransactionEditable(activityType, params, selectedProfitYear, isReadOnly) ||
+      params.data.psn.length > MAX_EMPLOYEE_BADGE_LENGTH
+    ) {
       return "";
     }
 
