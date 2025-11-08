@@ -4,7 +4,6 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import { CAPTIONS } from "../../../constants";
-import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
 import useTerminatedLetters from "./hooks/useTerminatedLetters";
 import TerminatedLettersGrid from "./TerminatedLettersGrid";
 import TerminatedLettersSearchFilter from "./TerminatedLettersSearchFilter";
@@ -26,7 +25,6 @@ const TerminatedLettersContent = () => {
     printContent,
     printTerminatedLetters
   } = useTerminatedLetters();
-  const { missiveAlerts } = useMissiveAlerts();
 
   return (
     <Grid
@@ -36,7 +34,7 @@ const TerminatedLettersContent = () => {
         <Divider />
       </Grid>
 
-      {missiveAlerts.length > 0 && <MissiveAlerts />}
+      <MissiveAlerts />
 
       <Grid width="100%">
         <DSMAccordion title="Filter">
