@@ -88,18 +88,34 @@ if (-not $SkipVS) {
         Write-Host "I Checking for installer at: $vsSetupPath" -ForegroundColor Yellow
         
         if (Test-Path $vsSetupPath) {
-            Write-Host "I Installing required workloads..." -ForegroundColor Yellow
-            try {
-                & $vsSetupPath modify --installPath $vsPath `
-                    --add Microsoft.VisualStudio.Workload.NetWeb `
-                    --add Microsoft.VisualStudio.Workload.Azure `
-                    --add Microsoft.VisualStudio.Workload.ManagedDesktop `
-                    --includeRecommended `
-                    --passive --norestart
-                Write-Host "OK Visual Studio workloads installed successfully" -ForegroundColor Green
+            Write-Host "`nVisual Studio workloads needed:" -ForegroundColor Cyan
+            Write-Host "  - ASP.NET and web development" -ForegroundColor Yellow
+            Write-Host "  - Azure development" -ForegroundColor Yellow
+            Write-Host "  - .NET desktop development" -ForegroundColor Yellow
+            Write-Host "" -ForegroundColor Yellow
+            $response = Read-Host "Install Visual Studio workloads now? (y/n)"
+            
+            if ($response -eq "y" -or $response -eq "yes") {
+                Write-Host "I Installing required workloads..." -ForegroundColor Yellow
+                try {
+                    & $vsSetupPath modify --installPath $vsPath `
+                        --add Microsoft.VisualStudio.Workload.NetWeb `
+                        --add Microsoft.VisualStudio.Workload.Azure `
+                        --add Microsoft.VisualStudio.Workload.ManagedDesktop `
+                        --includeRecommended `
+                        --passive --norestart
+                    Write-Host "OK Visual Studio workloads installed successfully" -ForegroundColor Green
+                }
+                catch {
+                    Write-Host "X Failed to install VS workloads: $_" -ForegroundColor Red
+                    Write-Host "I Manual installation:" -ForegroundColor Yellow
+                    Write-Host "  1. Open Visual Studio Installer" -ForegroundColor Yellow
+                    Write-Host "  2. Click 'Modify' on Visual Studio 2022 Professional" -ForegroundColor Yellow
+                    Write-Host "  3. Select workloads: ASP.NET, Azure, .NET desktop" -ForegroundColor Yellow
+                }
             }
-            catch {
-                Write-Host "X Failed to install VS workloads: $_" -ForegroundColor Red
+            else {
+                Write-Host "I Skipping Visual Studio workload installation" -ForegroundColor Yellow
                 Write-Host "I Manual installation:" -ForegroundColor Yellow
                 Write-Host "  1. Open Visual Studio Installer" -ForegroundColor Yellow
                 Write-Host "  2. Click 'Modify' on Visual Studio 2022 Professional" -ForegroundColor Yellow
@@ -126,7 +142,16 @@ if (-not $SkipNodeTools) {
     
     if ($voltaExists) {
         Write-Host "OK Volta is installed" -ForegroundColor Green
-        Write-Host "I Node.js version will be managed automatically by Volta" -ForegroundColor Yellow
+        Write-Host "I Installing Node.js via Volta..." -ForegroundColor Yellow
+        try {
+            & volta install node 2>&1 | Out-Null
+            Write-Host "OK Node.js installed via Volta" -ForegroundColor Green
+            Write-Host "I Node.js version will be managed automatically by Volta" -ForegroundColor Yellow
+        }
+        catch {
+            Write-Host "X Failed to install Node.js via Volta: $_" -ForegroundColor Yellow
+            Write-Host "I You can manually run: volta install node" -ForegroundColor Yellow
+        }
     }
     else {
         Write-Host "X Volta not found" -ForegroundColor Red
@@ -188,8 +213,7 @@ Write-Host "`nNext Steps:" -ForegroundColor Green
 Write-Host "1. Restart Visual Studio if it was open"
 Write-Host "2. Clone: git clone https://github.com/dotnet/aspire-samples.git"
 Write-Host "3. Get secrets.json from team member"
-Write-Host "4. Place secrets.json in: src/services/configuration/"
-Write-Host "5. Add ArtifactoryCloud NuGet source (see README.md)"
+Write-Host "5. Add Custom NuGet source (see README.md)"
 Write-Host "8. Press F5 to run"
 Write-Host ""
 

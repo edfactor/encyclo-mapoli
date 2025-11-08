@@ -33,7 +33,13 @@
           "PackageIdentifier": "Postman.Postman"
         },
         {
-          "PackageIdentifier": "Volta.Volta"
+          "PackageIdentifier": "Volta.Volta",
+          "InstallationOptions": {
+            "Scope": "Machine"
+          }
+        },
+        {
+          "PackageIdentifier": "OpenJS.NodeJS.LTS"
         },
         {
           "PackageIdentifier": "Microsoft.WSL",

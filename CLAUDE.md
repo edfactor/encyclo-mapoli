@@ -432,6 +432,7 @@ this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => { ... });
 ### Documentation References
 
 Complete implementation details and examples available in (read when needed):
+- RESTFUL_API_GUIDELINES.INSTRUCTIONS.md (`.github/instructions/`) - Zalando RESTful API guidelines, endpoint design, HTTP semantics, URL patterns, pagination, security, OpenAPI spec requirements
 - TELEMETRY_GUIDE.md (`src/ui/public/docs/`) - Comprehensive reference for developers, QA, and DevOps
 - TELEMETRY_QUICK_REFERENCE.md (`src/ui/public/docs/`) - Developer cheat sheet with copy-paste examples  
 - TELEMETRY_DEVOPS_GUIDE.md (`src/ui/public/docs/`) - Production monitoring and operations guide
@@ -660,6 +661,7 @@ When creating new documentation:
 ## When Extending
 
 - Add new endpoints through FastEndpoints with consistent foldering; register dependencies via DI in existing composition root
+- **NEW ENDPOINT CHECKLIST**: Use the [RESTful API Guidelines Instructions](../.github/instructions/restful-api-guidelines.instructions.md#new-endpoint-checklist) to verify design, implementation, documentation, and security before submitting PR
 - ALL new endpoints MUST implement telemetry using `TelemetryExtensions` patterns (see Telemetry & Observability section)
 - Include appropriate business metrics for the endpoint's domain (year-end, reports, lookups, etc.)
 - Declare all sensitive fields accessed in telemetry calls for security auditing

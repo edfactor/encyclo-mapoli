@@ -379,6 +379,7 @@ When creating new documentation:
 
 ## When Extending
 - Add new endpoints through FastEndpoints with consistent foldering; register dependencies via DI in existing composition root.
+- **NEW ENDPOINT CHECKLIST**: Use the [RESTful API Guidelines Instructions](instructions/restful-api-guidelines.instructions.md#new-endpoint-checklist) to verify design, implementation, documentation, and security before submitting PR
 - ALL new endpoints MUST implement telemetry using `TelemetryExtensions` patterns (see Telemetry & Observability section).
 - Include appropriate business metrics for the endpoint's domain (year-end, reports, lookups, etc.).
 - Declare all sensitive fields accessed in telemetry calls for security auditing.
@@ -415,6 +416,7 @@ git push -u origin feature/PS-1720-add-reporting-view
 For comprehensive implementation details, see these dedicated guides:
 
 ### Core Patterns (read when needed)
+- RESTFUL_API_GUIDELINES.INSTRUCTIONS.md (`.github/instructions/`) - Zalando RESTful API guidelines, endpoint design, HTTP semantics, URL patterns, pagination
 - DISTRIBUTED_CACHING_PATTERNS.md (`.github/`) - IDistributedCache patterns, version-based invalidation, unit testing
 - VALIDATION_PATTERNS.md (`.github/`) - Server & client validation, FluentValidation examples, boundary checks
 - BRANCHING_AND_WORKFLOW.md (`.github/`) - Git branching, Jira workflow, PR guidelines, deny list
