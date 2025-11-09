@@ -76,6 +76,9 @@ function terminationReducer(state: TerminationState, action: TerminationAction):
         };
       } else {
         const shouldResetArchive = !isCompleteLike;
+        // Only toggle resetPageFlag if we're actually leaving archive mode
+        const wasInArchiveMode = state.archiveMode;
+        const isLeavingArchiveMode = wasInArchiveMode && shouldResetArchive;
         let updatedSearchParams = state.searchParams;
 
         if (shouldResetArchive && state.searchParams) {
@@ -90,7 +93,8 @@ function terminationReducer(state: TerminationState, action: TerminationAction):
           currentStatus: statusName || null,
           archiveMode: shouldResetArchive ? false : state.archiveMode,
           searchParams: shouldResetArchive ? updatedSearchParams : state.searchParams,
-          resetPageFlag: shouldResetArchive ? !state.resetPageFlag : state.resetPageFlag
+          // Only reset page when actually leaving archive mode, not on regular status changes
+          resetPageFlag: isLeavingArchiveMode ? !state.resetPageFlag : state.resetPageFlag
         };
       }
     }

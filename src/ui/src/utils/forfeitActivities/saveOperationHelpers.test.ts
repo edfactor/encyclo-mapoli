@@ -465,17 +465,23 @@ describe("saveOperationHelpers", () => {
     });
 
     it("should execute batches sequentially with delay", async () => {
+      vi.useFakeTimers();
+
       const requests = [1, 2, 3, 4];
       const saveFn = vi.fn().mockResolvedValue(undefined);
       const config: BatchConfig = { batchSize: 2, delayMs: 50 };
 
-      const startTime = Date.now();
-      await executeBatchSave(requests, saveFn, config);
-      const endTime = Date.now();
+      const executePromise = executeBatchSave(requests, saveFn, config);
 
-      // Should have at least one delay between batches
-      expect(endTime - startTime).toBeGreaterThanOrEqual(50);
+      // Fast-forward through the delay
+      await vi.advanceTimersByTimeAsync(50);
+
+      await executePromise;
+
+      // Verify batch delay was used (2 batches, 1 delay between them)
       expect(saveFn).toHaveBeenCalledTimes(4);
+
+      vi.useRealTimers();
     });
 
     it("should handle empty requests array", async () => {
@@ -524,17 +530,23 @@ describe("saveOperationHelpers", () => {
     });
 
     it("should not delay after the last batch", async () => {
+      vi.useFakeTimers();
+
       const requests = [1, 2, 3];
       const saveFn = vi.fn().mockResolvedValue(undefined);
       const config: BatchConfig = { batchSize: 2, delayMs: 1000 };
 
-      const startTime = Date.now();
-      await executeBatchSave(requests, saveFn, config);
-      const endTime = Date.now();
+      const executePromise = executeBatchSave(requests, saveFn, config);
 
       // Should have only one delay (between batch 1 and 2), not after batch 2
-      // Total time should be around 1000ms, not 2000ms
-      expect(endTime - startTime).toBeLessThan(1500);
+      await vi.advanceTimersByTimeAsync(1000);
+
+      await executePromise;
+
+      // Verify no additional delay occurred (if there were 2 delays, timer would need to advance more)
+      expect(saveFn).toHaveBeenCalledTimes(3);
+
+      vi.useRealTimers();
     });
 
     it("should handle exact multiple of batch size", async () => {

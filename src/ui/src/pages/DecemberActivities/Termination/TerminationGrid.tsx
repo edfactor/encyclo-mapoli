@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { DSMGrid, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
@@ -70,8 +70,19 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     shouldArchive,
     onArchiveHandled,
     onErrorOccurred,
-    onLoadingChange
+    onLoadingChange,
+    isReadOnly
   });
+
+  // Refresh grid cells when read-only status changes
+  // This forces cell renderers to re-read isReadOnly from context
+  useEffect(() => {
+    if (gridRef.current?.api) {
+      gridRef.current.api.refreshCells({ force: true });
+    }
+    // gridRef is a ref and doesn't need to be in the dependency array
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isReadOnly]);
 
   // Get main and detail columns and combine them into a single list
   const mainColumns = useMemo(() => GetTerminationColumns(), []);

@@ -52,6 +52,7 @@ interface TerminationGridConfig {
   onArchiveHandled?: () => void;
   onErrorOccurred?: () => void;
   onLoadingChange?: (isLoading: boolean) => void;
+  isReadOnly: boolean;
 }
 
 // Configuration for shared utilities
@@ -71,7 +72,8 @@ export const useTerminationGrid = ({
   shouldArchive,
   onArchiveHandled,
   onErrorOccurred,
-  onLoadingChange
+  onLoadingChange,
+  isReadOnly
 }: TerminationGridConfig) => {
   const [pendingSuccessMessage, setPendingSuccessMessage] = useState<string | null>(null);
   const [isPendingBulkMessage, setIsPendingBulkMessage] = useState<boolean>(false);
@@ -590,7 +592,8 @@ export const useTerminationGrid = ({
     gridContext: {
       editedValues: editState.editedValues,
       updateEditedValue: editState.updateEditedValue,
-      loadingRowIds: editState.loadingRowIds
+      loadingRowIds: editState.loadingRowIds,
+      isReadOnly
     }
   };
 };
