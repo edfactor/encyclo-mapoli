@@ -1,3 +1,4 @@
+import { MAX_EMPLOYEE_BADGE_LENGTH } from "@/constants";
 import { SaveOutlined } from "@mui/icons-material";
 import { Checkbox, CircularProgress, IconButton, Tooltip } from "@mui/material";
 import { ICellRendererParams } from "ag-grid-community";
@@ -36,7 +37,8 @@ function generateRowKey(activityType: ActivityType, data: RowData): string {
   if (activityType === "unforfeit") {
     return data.profitDetailId?.toString() || "";
   }
-  return String(data.psn);
+  // For termination: use composite key (badgeNumber-profitYear)
+  return `${data.badgeNumber || data.psn}-${data.profitYear}`;
 }
 
 /**
@@ -75,8 +77,8 @@ function isTransactionEditable(
   }
 
   if (activityType === "termination") {
-    // Termination: if backend gives us a value, then we allow it
-    return params.data.suggestedForfeit != null;
+    // Termination: only show if backend gives us a non-null, non-zero value
+    return params.data.suggestedForfeit != null && params.data.suggestedForfeit !== 0;
   } else {
     // UnForfeit: all rows with non-null suggestedUnforfeiture are editable
     return params.data.suggestedUnforfeiture != null;
@@ -91,7 +93,11 @@ export function createSaveButtonCellRenderer(config: SaveButtonConfig) {
   return (params: SaveButtonCellParams) => {
     const { activityType, selectedProfitYear, isReadOnly } = config;
 
-    if (!isTransactionEditable(activityType, params, selectedProfitYear, isReadOnly)) {
+    // If psn is too long (beneficiary) or not editable, return empty
+    if (
+      !isTransactionEditable(activityType, params, selectedProfitYear, isReadOnly) ||
+      params.data.psn.length > MAX_EMPLOYEE_BADGE_LENGTH
+    ) {
       return "";
     }
 

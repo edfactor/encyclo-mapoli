@@ -93,6 +93,12 @@ const MilitaryContributionForm = ({
                 );
               } else if (error.reason.includes("profit year differs from contribution year")) {
                 errorMessages.push("- When profit year differs from contribution year, it must be supplemental.");
+              } else if (error.reason.includes("not active") || error.reason.includes("Employee is not active")) {
+                errorMessages.push(
+                  "- Employee is no longer active as of the contribution date. " +
+                    "Regular contributions require active employee status. " +
+                    "Please check the 'Supplemental' box to add this contribution for an inactive or separated employee."
+                );
               } else {
                 console.warn("Backend error message:", error.reason);
                 errorMessages.push(`- ${error.reason}`);

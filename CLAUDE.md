@@ -23,6 +23,142 @@ AI Assistant Project Instructions for Claude Code (claude.ai/code) when working 
 - Entity updates: Keep helper methods like `UpdateEntityValues` cohesive; prefer adding fields there instead of scattering manual per-field assignments
 - Validation errors & audits: Use `DemographicSyncAudit` pattern—batch add + save once. When adding new audit types, follow existing property naming
 
+## Security Requirements (MANDATORY - OWASP Top 10 2021 Aligned)
+
+**ALL NEW CODE must follow these security patterns. Security review required for deviations (document in PR with risk/mitigation).**
+
+### Authentication & Authorization (A01/A07 Broken Access Control)
+- **Server-side validation ALWAYS**: Never trust client-provided roles or impersonation headers. Re-validate every request:
+  ```csharp
+  // WRONG: Trust header from client
+  var roles = req.Headers["x-impersonating-roles"];
+  _context.Items["roles"] = roles; // NO!
+  
+  // RIGHT: Always re-validate against authenticated user's permissions
+  if (req.Headers.TryGetValue("x-impersonating-roles", out var rolesHeader))
+  {
+      var requestedRoles = JsonSerializer.Deserialize<List<string>>(rolesHeader);
+      var allowedRoles = GetUserAllowedImpersonationRoles(userId, logger);
+      
+      if (!requestedRoles.All(r => allowedRoles.Contains(r)))
+          throw new UnauthorizedAccessException("Role impersonation not permitted");
+      
+      // Log for audit trail
+      logger.LogWarning("User {UserId} impersonating roles {Roles}", 
+          GetMaskedUserId(userId), string.Join(",", requestedRoles));
+  }
+  ```
+- **No client-side storage for auth elevation**: `localStorage` is vulnerable to XSS. Never use it to store/read roles that determine access control
+- **Centralized policies**: Authorization decisions via `PolicyRoleMap.cs` (single source of truth); all `[Authorize(Policy="...")]` attributes reference this map
+- **Least privilege**: Users assigned minimum required roles; audit role assignments quarterly; remove stale accounts
+- **Service account secrets**: Rotate Oracle connection string / Okta client secrets annually
+
+### Input Validation & SQL Injection (A03 Injection / A09 SSRF)
+- **Server-side validation mandatory**: Client-side checks (React form validation) are UX only; never security
+- **Parameterized queries always**: EF Core does this automatically for `Where()` / `Include()`. NEVER string-concatenate SQL
+- **Boundary checks**: All numeric inputs (page size, year, counts) must be validated
+  ```csharp
+  // In endpoint request validator:
+  RuleFor(x => x.PageSize)
+      .InclusiveBetween(1, 1000)
+      .WithMessage("PageSize must be 1-1000");
+  ```
+- **Degenerate query guards**: Prevent queries scanning entire tables (e.g., BadgeNumber == 0 is invalid)
+- **Collection size limits**: Prevent large payloads (e.g., bulk import max 10,000 records per call)
+- See `VALIDATION_PATTERNS.md` (`.github/`) for comprehensive patterns with FluentValidation examples
+
+### Sensitive Data Protection (A01 Broken Access Control / A09 Data Exposure)
+- **PII masking in logs**: SSN, email, phone, bank accounts MUST be masked in all logs/metrics
+  ```csharp
+  // Use TelemetryMiddleware.GetMaskedUserId() pattern
+  var maskedUserId = GetMaskedUserId(userId); // Returns "***a1b2c3"
+  logger.LogInformation("Request from {UserId}", maskedUserId);
+  
+  // Declare sensitive fields in telemetry calls
+  await this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => 
+  {
+      // ...
+  }, "Ssn", "Email", "BankAccount"); // List fields accessed
+  ```
+- **Minimize Okta claims extracted**: Only use 'sub' (subject) claim; avoid storing unmasked email/user ID in context
+- **Read-only database contexts**: Use `context.UseReadOnlyContext()` for queries to enforce least privilege EF operations
+- **Composite keys for Demographics**: Never use `ToDictionary(d => d.Ssn)` alone; use `(d.Ssn, d.OracleHcmId)` because SSN is not unique
+
+### Transport Security (A02 Cryptographic Failures / A05 Broken Access Control)
+- **HTTPS enforcement**: All prod endpoints require HTTPS. Dev can use HTTP locally only
+  - Add `UseHttpsRedirection()` middleware in non-dev environments
+  - Enable `UseHsts()` to send `Strict-Transport-Security` header (1-year HSTS)
+- **Security headers**: All endpoints MUST return these headers (via `NetEscapades.AspNetCore.SecurityHeaders`):
+  - `X-Frame-Options: DENY` (prevent clickjacking attacks)
+  - `X-Content-Type-Options: nosniff` (prevent MIME sniffing)
+  - `Content-Security-Policy: default-src 'self'` (XSS prevention; allow TailwindCSS only)
+  - `Strict-Transport-Security: max-age=31536000; includeSubDomains` (HSTS)
+  - `Referrer-Policy: strict-origin-when-cross-origin` (leak prevention)
+- **CORS restrictions**: Explicitly restrict to known origins (never `AllowAnyOrigin()` in production or dev)
+  ```csharp
+  // Dev: localhost only
+  .WithOrigins("http://localhost:3100", "http://127.0.0.1:3100")
+  
+  // Prod: specific domain
+  .WithOrigins("https://profit-sharing.example.com")
+  ```
+
+### Error Handling (A01/A10 Security Logging)
+- **No sensitive data in HTTP responses**: Never expose stack traces, SQL queries, file paths, or PII in error messages
+- **Use domain errors**: Return error codes (e.g., `Error.CalendarYearNotFound`) instead of raw exception messages
+- **Consistent HTTP responses**: All endpoints return `ProblemHttpResult` with standard structure: status, title, detail (never internal details)
+- **Log exceptions with correlation IDs**: 
+  ```csharp
+  _logger.LogError(ex, "Unexpected error in {Endpoint}; CorrelationId: {CorrelationId}",
+      nameof(MyEndpoint), HttpContext.TraceIdentifier);
+  ```
+
+### Telemetry & Observability (A10 Security Logging)
+- **Telemetry required on ALL endpoints**: Use `ExecuteWithTelemetry()` wrapper or manual telemetry patterns
+- **Declare sensitive fields accessed**: 
+  ```csharp
+  await this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => {
+      // ...
+  }, "Ssn", "Email"); // Security team audits these
+  ```
+- **Business metrics for anomalies**: Record operation counts (e.g., year-end runs, large exports) to detect unusual activity
+- **Correlation IDs**: Generated by `TelemetryMiddleware`; tie all logs/metrics to single request for incident investigation
+- **Endpoint categorization**: Routes categorized (year-end, reports, beneficiaries) for security monitoring dashboards
+
+### Credential & Session Management
+- **No hardcoded secrets**: Database passwords, API keys → Azure Key Vault or environment variables only
+- **Okta JWT tokens**: Auto-expire per Okta config (typically 1 hour); refresh tokens handled by Okta SDK
+- **No long-lived tokens**: Avoid custom JWT generation; rely on Okta OIDC flow
+- **Re-authentication for sensitive operations**: Year-end processing, member terminations should prompt re-auth confirmation (challenge-response)
+
+### Dependency & Supply Chain Security
+- **Monthly patch reviews**: Run `dotnet list package --outdated`; patch all non-major updates
+- **CVE response**: Critical vulnerabilities (CVSS >= 7.0) patched within 48 hours; document in PR
+- **No dev-only packages in production**: Test packages (xUnit, Shouldly, Moq) excluded from release builds
+- **Analyze new packages**: GitHub stars, maintenance status, known vulnerabilities before adding to `Directory.Packages.props`
+
+### Code Review Checklist for Security
+
+Before approving PRs, verify:
+- [ ] **No client-side role elevation** (localStorage, URL params determining access)
+- [ ] **Server-side auth re-validation** present if handling impersonation
+- [ ] **Input validation** on all user-facing endpoints (parameterized queries, boundary checks)
+- [ ] **No PII in logs** (SSN, email, phone all masked or omitted)
+- [ ] **Security headers** returned from API responses
+- [ ] **HTTPS/HSTS** enabled in non-dev (see PS-2024 ticket)
+- [ ] **Telemetry present** with sensitive fields declared
+- [ ] **Error messages** don't expose internal details
+- [ ] **New packages** documented and reviewed for vulnerabilities
+- [ ] **Related security tickets** (PS-2021 through PS-2026) addressed
+
+### Related Security Tickets
+- **PS-2021**: Remove localStorage impersonation fallback (CWE-639 privilege escalation)
+- **PS-2022**: Add server-side impersonation role validation (CWE-639 defense-in-depth)
+- **PS-2023**: Implement security headers middleware (CWE-693 XSS/clickjacking)
+- **PS-2024**: Add HTTPS redirect and HSTS enforcement (CWE-295 transport security)
+- **PS-2025**: Restrict dev CORS to localhost origins (CWE-942 MITM prevention)
+- **PS-2026**: Audit and refine telemetry PII masking (CWE-532 data exposure)
+
 ## Endpoint Results Pattern (MANDATORY)
 
 All FastEndpoints MUST return typed minimal API union results AND internally use the domain `Result<T>` record (`Demoulas.ProfitSharing.Common.Contracts.Result<T>`) for service-layer outcomes.
@@ -314,6 +450,21 @@ Complete implementation details and examples available in (read when needed):
   - XML doc comments for public & internal APIs
 
 ## Do NOT
+
+### Security - CRITICAL
+- **Trust client-provided roles/headers for authorization**: Always re-validate server-side. Remove `localStorage` role elevation code (PS-2021). Never bypass `PolicyRoleMap.cs` validation.
+- **Store secrets in code**: Use Azure Key Vault or environment variables. Never hardcode connection strings, API keys, or credentials.
+- **Expose PII in logs/responses**: SSN, email, phone, bank accounts must be masked. Use `GetMaskedUserId()` pattern. Never log unmasked identity claims.
+- **Skip input validation**: All user inputs must be validated server-side (ranges, lengths, enum values, degenerate cases). Client validation is UX only.
+- **Build SQL strings by concatenation**: Always use EF Core parameterized queries. NEVER string-concatenate SQL.
+- **Return sensitive data in error messages**: Never expose stack traces, SQL queries, file paths, or PII in HTTP error responses.
+- **Implement authentication client-side only**: Use Okta OIDC server-side flow. Never rely on localStorage for auth state.
+- **Deploy without security headers**: All endpoints must return HSTS, CSP, X-Frame-Options, etc. (See PS-2023, PS-2024 tickets).
+- **Use `AllowAnyOrigin()` in production CORS**: Restrict to specific domains. In dev, allow only `localhost:3100` (See PS-2025).
+- **Skip telemetry on sensitive operations**: Year-end processing, member termination, report generation MUST have telemetry with sensitive fields declared (See PS-2026).
+- **Skip re-validation when handling impersonation**: Always re-check that authenticated user is allowed to assume requested roles (PS-2022).
+
+### Architecture & Data Access
 - Bypass history tracking for mutable audited entities.
 - Introduce raw SQL without parameters.
 - Duplicate mapping logic already covered by Mapperly profiles.
@@ -325,6 +476,8 @@ Complete implementation details and examples available in (read when needed):
 - Load entities into memory for bulk updates/deletes—use `ExecuteUpdateAsync`/`ExecuteDeleteAsync` for efficiency.
 - Skip input validation that could cause degenerate queries (e.g., allow all-zero badge numbers that would scan entire tables).
 - Manually add `.AsNoTracking()` to queries when using `UseReadOnlyContext()`—it's already applied automatically by `UseReadOnlyContext()`.
+
+### Observability & Quality
 - Create endpoints without comprehensive telemetry using `TelemetryExtensions` patterns.
 - Use legacy telemetry patterns instead of `ExecuteWithTelemetry` or manual `TelemetryExtensions` methods.
 - Access sensitive fields without declaring them in telemetry calls (security requirement).
@@ -334,6 +487,10 @@ Complete implementation details and examples available in (read when needed):
 - Store cache version counters with expiration—version counters should persist indefinitely.
 - Include high-cardinality data in cache keys (e.g., individual user IDs)—use role combinations or other low-cardinality identifiers.
 - Fail operations when cache operations fail—degrade gracefully and log errors.
+- Deploy features without security review: All new endpoints, API changes, or data access patterns must be reviewed against the security checklist before merging.
+- Create new authentication or authorization flows: All auth changes must go through the centralized `PolicyRoleMap.cs` and `ImpersonationValidator` patterns.
+- Add external dependencies without security audit: Check GitHub stars, maintenance status, known CVEs (use `dotnet list package --vulnerable`).
+- Skip test coverage for security fixes: All PS-2021 through PS-2026 implementations must include unit tests and integration tests with telemetry validation.
 
 ---
 Provide reasoning in PR descriptions when deviating from these patterns.
