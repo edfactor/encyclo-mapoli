@@ -36,6 +36,7 @@ interface UnForfeitGridConfig {
   onArchiveHandled?: () => void;
   setHasUnsavedChanges: (hasChanges: boolean) => void;
   fiscalCalendarYear: CalendarResponseDto | null;
+  isReadOnly: boolean;
 }
 
 // Configuration for shared utilities
@@ -53,7 +54,8 @@ export const useUnForfeitGrid = ({
   shouldArchive,
   onArchiveHandled,
   setHasUnsavedChanges,
-  fiscalCalendarYear
+  fiscalCalendarYear,
+  isReadOnly
 }: UnForfeitGridConfig) => {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
@@ -509,7 +511,8 @@ export const useUnForfeitGrid = ({
     gridContext: {
       editedValues: editState.editedValues,
       updateEditedValue: editState.updateEditedValue,
-      loadingRowIds: editState.loadingRowIds
+      loadingRowIds: editState.loadingRowIds,
+      isReadOnly
     }
   };
 };
