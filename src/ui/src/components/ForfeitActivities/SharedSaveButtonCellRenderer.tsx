@@ -1,3 +1,4 @@
+import { MAX_EMPLOYEE_BADGE_LENGTH } from "@/constants";
 import { SaveOutlined } from "@mui/icons-material";
 import { Checkbox, CircularProgress, IconButton, Tooltip } from "@mui/material";
 import { ICellRendererParams } from "ag-grid-community";
@@ -36,7 +37,8 @@ function generateRowKey(activityType: ActivityType, data: RowData): string {
   if (activityType === "unforfeit") {
     return data.profitDetailId?.toString() || "";
   }
-  return String(data.psn);
+  // For termination: use composite key (badgeNumber-profitYear)
+  return `${data.badgeNumber || data.psn}-${data.profitYear}`;
 }
 
 /**
@@ -70,8 +72,8 @@ function shouldShowControls(activityType: ActivityType, params: SaveButtonCellPa
   }
 
   if (activityType === "termination") {
-    // Termination: if backend gives us a value, then we show controls
-    return params.data.suggestedForfeit != null;
+    // Termination: only show if backend gives us a non-null, non-zero value
+    return params.data.suggestedForfeit != null && params.data.suggestedForfeit !== 0;
   } else {
     // UnForfeit: all rows with non-null suggestedUnforfeiture get controls
     return params.data.suggestedUnforfeiture != null;
@@ -88,8 +90,11 @@ export function createSaveButtonCellRenderer(config: SaveButtonConfig) {
     // Read isReadOnly from context for reactivity when status changes
     const isReadOnly = params.context?.isReadOnly ?? config.isReadOnly;
 
-    // Don't show controls if row isn't eligible (not a detail row, no values, etc.)
-    if (!shouldShowControls(activityType, params)) {
+    // If psn is too long (beneficiary) or not editable, return empty
+    if (
+      !isTransactionEditable(activityType, params, selectedProfitYear, isReadOnly) ||
+      params.data.psn.length > MAX_EMPLOYEE_BADGE_LENGTH
+    ) {
       return "";
     }
 

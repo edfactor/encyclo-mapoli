@@ -9,7 +9,7 @@ import {
 import { RootState } from "reduxstore/store";
 import { CalendarResponseDto, ForfeitureAdjustmentUpdateRequest, StartAndEndDateRequest } from "reduxstore/types";
 import { setMessage } from "smart-ui-library";
-import { flattenMasterDetailData, generateRowKey } from "../utils/forfeitActivities/gridDataHelpers";
+import { generateRowKey } from "../utils/forfeitActivities/gridDataHelpers";
 import {
   clearGridSelectionsForBadges,
   formatApiError,
@@ -75,7 +75,6 @@ export const useTerminationGrid = ({
   onLoadingChange,
   isReadOnly
 }: TerminationGridConfig) => {
-  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [pendingSuccessMessage, setPendingSuccessMessage] = useState<string | null>(null);
   const [isPendingBulkMessage, setIsPendingBulkMessage] = useState<boolean>(false);
   const [isBulkSaveInProgress, setIsBulkSaveInProgress] = useState<boolean>(false);
@@ -202,19 +201,6 @@ export const useTerminationGrid = ({
     }
     prevTermination.current = termination;
   }, [termination, resetPagination, isBulkSaveInProgress]);
-
-  // Initialize expandedRows when data is loaded
-  useEffect(() => {
-    if (termination?.response?.results && termination.response.results.length > 0) {
-      const initialExpandState: Record<string, boolean> = {};
-      termination.response.results.forEach((row) => {
-        if (row.yearDetails && row.yearDetails.length > 0) {
-          initialExpandState[String(row.psn)] = true;
-        }
-      });
-      setExpandedRows(initialExpandState);
-    }
-  }, [termination?.response?.results]);
 
   // Refresh the grid when loading state changes
   useEffect(() => {
@@ -520,42 +506,42 @@ export const useTerminationGrid = ({
     handleSortChange(update);
   };
 
-  // Handle row expansion toggle
-  const handleRowExpansion = (badgeNumber: string) => {
-    setExpandedRows((prev) => ({
-      ...prev,
-      [badgeNumber]: !prev[badgeNumber]
-    }));
-  };
-
-  // Build grid data with expandable rows using shared helper
+  // Build grid data with flat combined rows (one row per employee using yearDetail matching selectedProfitYear)
   const gridData = useMemo(() => {
     if (!termination?.response?.results) return [];
 
-    // Convert expandedRows Record<string, boolean> to Set<string>
-    const expandedRowsSet = new Set(
-      Object.entries(expandedRows)
-        .filter(([_, isExpanded]) => isExpanded)
-        .map(([key, _]) => key)
-    );
+    // Flatten: create one row per employee combining master data with yearDetail for current profit year
+    return termination.response.results
+      .map((masterRow) => {
+        const badgeNumber = masterRow.psn;
 
-    return flattenMasterDetailData(termination.response.results, expandedRowsSet, {
-      getKey: (row) => String(row.psn),
-      getDetails: (row) => {
-        // For termination, we need to merge parent data with detail data
-        // Extract badgeNumber from PSN (PSN = badgeNumber * 10000 + psnSuffix)
-        const badgeNumber = row.psn;
-        return (row.yearDetails || []).map((detail, index) => ({
-          ...row,
-          ...detail,
-          badgeNumber, // Add badgeNumber for row key generation and save operations
+        // Find the yearDetail that matches the selected profit year
+        const matchingDetail = masterRow.yearDetails?.find(
+          (detail) => detail.profitYear === selectedProfitYear
+        );
+
+        // Skip this employee if no matching year detail found
+        if (!matchingDetail) {
+          return null;
+        }
+
+        return {
+          // Master row fields
+          psn: masterRow.psn,
+          name: masterRow.name,
+          badgeNumber, // For row key generation and save operations
+
+          // Current year detail fields
+          ...matchingDetail,
+
+          // Metadata (mark as detail row for shared components)
+          isDetail: true,
           parentId: badgeNumber,
-          index
-        }));
-      },
-      hasDetails: (row) => Boolean(row.yearDetails && row.yearDetails.length > 0)
-    });
-  }, [termination, expandedRows]);
+          index: 0
+        };
+      })
+      .filter((row) => row !== null); // Remove null entries
+  }, [termination, selectedProfitYear]);
 
   const paginationHandlers = {
     setPageNumber: (value: number) => {
@@ -581,7 +567,6 @@ export const useTerminationGrid = ({
     pageNumber,
     pageSize,
     sortParams,
-    expandedRows,
     gridData,
     isFetching,
     termination,
@@ -594,7 +579,6 @@ export const useTerminationGrid = ({
     // Handlers
     handleSave,
     handleBulkSave,
-    handleRowExpansion,
     sortEventHandler,
     onGridReady,
 

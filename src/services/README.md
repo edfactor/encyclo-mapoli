@@ -7,7 +7,7 @@
 ### Getting Started
 Install 3rd Party Libraries:
 
-1. Visual Studio Professional 2022 (17.14.13) or higher installed - https://visualstudio.microsoft.com/downloads/
+1. Visual Studio Professional 2022 (17.14.19) or higher installed - https://visualstudio.microsoft.com/downloads/
 
     ![Workload](./setup_images/workload.PNG)
     - Install the "ASP.net and web development", "Azure" workload, and ".NET desktop development" workloads

@@ -121,6 +121,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                   <FormLabel required>Store Number</FormLabel>
                   <TextField
                     {...field}
+                    value={field.value ?? ""}
                     fullWidth
                     size="small"
                     required
@@ -167,7 +168,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           handleSearch={handleSubmit(handleFilter)}
           isFetching={isLoading}
           disabled={!currentPreset || isLoading || !isValid}
-          searchButtonText="Filter"
+          searchButtonText="Search"
         />
       </Grid>
     </form>

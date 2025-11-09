@@ -46,7 +46,8 @@ function generateRowKey(activityType: ActivityType, nodeData: RowData): string {
   if (activityType === "unforfeit") {
     return nodeData.profitDetailId?.toString() || "";
   }
-  return String(nodeData.psn);
+  // For termination: use composite key (badgeNumber-profitYear)
+  return `${nodeData.badgeNumber || nodeData.psn}-${nodeData.profitYear}`;
 }
 
 /**
@@ -83,9 +84,16 @@ export const SharedForfeitHeaderComponent: React.FC<HeaderComponentProps> = (par
   const activityType = params.config.activityType;
 
   const isNodeEligible = (nodeData: RowData, context: GridContext): boolean => {
-    // For termination: only current year detail rows
-    // For unforfeit: all detail rows
+    // For termination: only current year detail rows with non-null, non-zero values
+    // For unforfeit: all detail rows with non-zero values
     if (!nodeData.isDetail) return false;
+
+    if (activityType === "termination") {
+      // Check if original suggested forfeit value is non-null and non-zero
+      if (nodeData.suggestedForfeit == null || nodeData.suggestedForfeit === 0) {
+        return false;
+      }
+    }
 
     const currentValue = getCurrentValue(activityType, nodeData, context);
     return (currentValue || 0) !== 0;

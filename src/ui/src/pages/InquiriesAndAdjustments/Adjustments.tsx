@@ -4,24 +4,21 @@ import { useSelector } from "react-redux";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
 import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
-import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
 import { RootState } from "../../reduxstore/store";
 import MasterInquiryDetailsGrid from "./MasterInquiry/MasterInquiryDetailsGrid";
 import StandaloneMemberDetails from "./MasterInquiry/StandaloneMemberDetails";
 import { useAdjustments } from "./hooks/useAdjustments";
 
 const Adjustments = memo(() => {
-  const { missiveAlerts } = useMissiveAlerts();
   const [sourceSSN, setSourceSSN] = useState("");
   const [destinationSSN, setDestinationSSN] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
   // Get member details from Redux
-  const {
-    masterInquiryMemberDetails,
-    masterInquiryMemberDetailsSecondary
-  } = useSelector((state: RootState) => state.inquiry);
+  const { masterInquiryMemberDetails, masterInquiryMemberDetailsSecondary } = useSelector(
+    (state: RootState) => state.inquiry
+  );
 
   const {
     isSearching,
@@ -114,7 +111,7 @@ const Adjustments = memo(() => {
         width={"100%"}>
         <Divider />
       </Grid>
-      {missiveAlerts.length > 0 && <MissiveAlerts />}
+      <MissiveAlerts />
       <Grid
         size={{ xs: 12 }}
         width={"100%"}>

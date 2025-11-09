@@ -50,7 +50,7 @@ const DistributionInquiryContent = () => {
   const [triggerSearch, { data, isFetching }] = useLazySearchDistributionsQuery();
   const [deleteDistribution, { isLoading: isDeleting }] = useDeleteDistributionMutation();
   const isReadOnly = useReadOnlyNavigation();
-  const { missiveAlerts, addAlert, clearAlerts } = useMissiveAlerts();
+  const { addAlert, clearAlerts } = useMissiveAlerts();
 
   // Clear all distribution slice data when component mounts
   useEffect(() => {
@@ -267,7 +267,7 @@ const DistributionInquiryContent = () => {
         <Divider />
       </Grid>
 
-      {missiveAlerts.length > 0 && <MissiveAlerts />}
+      <MissiveAlerts />
 
       <Grid
         width="100%"
