@@ -45,6 +45,9 @@ interface SelectableGridHeaderProps extends IHeaderParams {
 }
 
 export const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props) => {
+  // Read isReadOnly from context for reactivity when status changes
+  const isReadOnly = props.context?.isReadOnly ?? props.isReadOnly ?? false;
+
   const getSelectionState = () => {
     let totalEligible = 0;
     let totalSelected = 0;
@@ -106,22 +109,22 @@ export const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props)
   const { totalEligible, totalSelected } = getSelectionState();
   const allSelected = totalSelected === totalEligible && totalEligible > 0;
   const someSelected = totalSelected > 0 && totalSelected < totalEligible;
-  const isSaveDisabled = (props.isBulkSaving ? props.isBulkSaving() : false) || totalSelected === 0 || props.isReadOnly;
+  const isSaveDisabled = (props.isBulkSaving ? props.isBulkSaving() : false) || totalSelected === 0 || isReadOnly;
   const readOnlyTooltip = "You are in read-only mode and cannot perform bulk operations.";
 
   const checkboxElement = (
     <Checkbox
-      onClick={props.isReadOnly ? undefined : handleSelectAll}
+      onClick={isReadOnly ? undefined : handleSelectAll}
       checked={allSelected}
       indeterminate={someSelected}
-      onChange={props.isReadOnly ? undefined : handleSelectAll}
-      disabled={props.isReadOnly}
+      onChange={isReadOnly ? undefined : handleSelectAll}
+      disabled={isReadOnly}
     />
   );
 
   const saveButtonElement = (
     <IconButton
-      onClick={props.isReadOnly ? undefined : handleSave}
+      onClick={isReadOnly ? undefined : handleSave}
       disabled={isSaveDisabled}>
       {props.isBulkSaving && props.isBulkSaving() ? <CircularProgress size={20} /> : <SaveOutlined />}
     </IconButton>
@@ -129,14 +132,14 @@ export const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props)
 
   return (
     <div>
-      {props.isReadOnly ? (
+      {isReadOnly ? (
         <Tooltip title={readOnlyTooltip}>
           <span>{checkboxElement}</span>
         </Tooltip>
       ) : (
         checkboxElement
       )}
-      {props.isReadOnly ? (
+      {isReadOnly ? (
         <Tooltip title={readOnlyTooltip}>
           <span>{saveButtonElement}</span>
         </Tooltip>

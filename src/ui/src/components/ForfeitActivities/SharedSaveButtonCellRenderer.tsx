@@ -64,15 +64,10 @@ function transformForfeitureValue(activityType: ActivityType, value: number): nu
 }
 
 /**
- * Check if transaction is editable based on activity type
+ * Check if we should show controls for this row (regardless of read-only status)
  */
-function isTransactionEditable(
-  activityType: ActivityType,
-  params: SaveButtonCellParams,
-  _selectedProfitYear: number,
-  isReadOnly: boolean
-): boolean {
-  if (!params.data.isDetail || isReadOnly) {
+function shouldShowControls(activityType: ActivityType, params: SaveButtonCellParams): boolean {
+  if (!params.data.isDetail) {
     return false;
   }
 
@@ -80,7 +75,7 @@ function isTransactionEditable(
     // Termination: only show if backend gives us a non-null, non-zero value
     return params.data.suggestedForfeit != null && params.data.suggestedForfeit !== 0;
   } else {
-    // UnForfeit: all rows with non-null suggestedUnforfeiture are editable
+    // UnForfeit: all rows with non-null suggestedUnforfeiture get controls
     return params.data.suggestedUnforfeiture != null;
   }
 }
@@ -91,7 +86,9 @@ function isTransactionEditable(
  */
 export function createSaveButtonCellRenderer(config: SaveButtonConfig) {
   return (params: SaveButtonCellParams) => {
-    const { activityType, selectedProfitYear, isReadOnly } = config;
+    const { activityType, selectedProfitYear } = config;
+    // Read isReadOnly from context for reactivity when status changes
+    const isReadOnly = params.context?.isReadOnly ?? config.isReadOnly;
 
     // If psn is too long (beneficiary) or not editable, return empty
     if (
