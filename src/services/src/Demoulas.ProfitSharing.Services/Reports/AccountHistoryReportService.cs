@@ -4,6 +4,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,22 +13,19 @@ namespace Demoulas.ProfitSharing.Services.Reports;
 /// <summary>
 /// Service for generating account history reports with member account activity by profit year.
 /// Supports pagination and sorting of results.
-/// Uses TotalService for consistent profit code filtering and calculation logic.
+/// Uses ProfitDetails with proper ProfitCodeId-based field interpretation for accurate aggregation.
 /// </summary>
 public class AccountHistoryReportService : IAccountHistoryReportService
 {
     private readonly IProfitSharingDataContextFactory _contextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
-    private readonly TotalService _totalService;
 
     public AccountHistoryReportService(
         IProfitSharingDataContextFactory contextFactory,
-        IDemographicReaderService demographicReaderService,
-        TotalService totalService)
+        IDemographicReaderService demographicReaderService)
     {
         _contextFactory = contextFactory;
         _demographicReaderService = demographicReaderService;
-        _totalService = totalService;
     }
 
     public async Task<ReportResponseBase<AccountHistoryReportResponse>> GetAccountHistoryReportAsync(
@@ -48,51 +46,73 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 return new List<AccountHistoryReportResponse>();
             }
 
-            // Get all profit years for this member
-            var profitYears = await ctx.ProfitDetails
-                .TagWith($"AccountHistoryReport-ProfitYears-{demographic.BadgeNumber}")
-                .Where(pd => pd.Ssn == demographic.Ssn)
-                .Select(pd => pd.ProfitYear)
-                .Distinct()
-                .OrderBy(py => py)
+            // Get all profit transactions for this member from ProfitDetails
+            // ProfitDetails contains raw transaction data with ProfitCodeId which maps to transaction type
+            var startYear = request.StartDate?.Year ?? 2007;
+            var endYear = request.EndDate?.Year ?? DateTime.Today.Year;
+
+            var allTransactions = await ctx.ProfitDetails
+                .TagWith($"AccountHistoryReport-Transactions-{demographic.BadgeNumber}")
+                .Where(pd => pd.Ssn == demographic.Ssn &&
+                            pd.ProfitYear >= startYear &&
+                            pd.ProfitYear <= endYear)
                 .ToListAsync(cancellationToken);
 
-            if (!profitYears.Any())
+            if (!allTransactions.Any())
             {
                 return new List<AccountHistoryReportResponse>();
             }
 
             var reportData = new List<AccountHistoryReportResponse>();
 
-            // Process each year using TotalService calculations
-            foreach (var year in profitYears.Where(y => y >= (request.StartDate?.Year ?? 2007) && y <= (request.EndDate?.Year ?? DateTime.Today.Year)))
+            // Group transactions by profit year and aggregate by profit code
+            var transactionsByYear = allTransactions
+                .GroupBy(t => t.ProfitYear)
+                .OrderBy(g => g.Key);
+
+            foreach (var yearGroup in transactionsByYear)
             {
-                // Get transactions for this year from TotalService
-                var yearTransactions = await _totalService
-                    .GetTransactionsBySsnForProfitYearForOracle(ctx, year)
-                    .Where(t => t.Ssn == demographic.Ssn)
-                    .FirstOrDefaultAsync(cancellationToken);
+                var year = yearGroup.Key;
+                var yearTransactions = yearGroup.ToList();
 
-                if (yearTransactions is null)
-                {
-                    continue;
-                }
+                // Get payment profit codes (1,2,3,5,9) where Forfeiture field stores payment/payout amounts
+                var paymentProfitCodes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
 
-                // Map to simplified response showing only essential fields
-                // Note: DistributionsTotal includes partial withdrawals (profitCodeId=1), direct payments (3), and 100% vested payments (9)
-                // ForfeitsTotal is forfeiture amounts (profitCodeId=2)
-                // CurrentBalance is the ending balance for this year
+                var totalContributions = yearTransactions
+                    .Sum(t => t.Contribution);
+
+                var totalEarnings = yearTransactions
+                    .Sum(t => t.Earnings);
+
+                // Forfeitures: Only for profit codes NOT in payment codes (i.e., profitCodeId=0,2)
+                // For profitCodeId=2, Forfeiture field contains the actual forfeiture amount
+                var totalForfeitures = yearTransactions
+                    .Where(t => !paymentProfitCodes.Contains(t.ProfitCodeId))
+                    .Sum(t => t.Forfeiture);
+
+                // Withdrawals: For payment profit codes (1,3,9), the Forfeiture field contains payment amounts
+                // profitCodeId=1: Partial withdrawal
+                // profitCodeId=3: Direct payment
+                // profitCodeId=9: 100% vested payment
+                // NOTE: profitCodeId=5 (QDRO to beneficiaries) is in paymentProfitCodes but NOT counted as employee withdrawal
+                var totalWithdrawals = yearTransactions
+                    .Where(t => t.ProfitCodeId is 1 or 3 or 9)  // Employee payouts only, exclude QDRO (5)
+                    .Sum(t => t.Forfeiture);  // For these codes, Forfeiture field = payment amount
+
+                // Ending balance: Net of all transactions for this year
+                var endingBalance = totalContributions + totalEarnings - totalForfeitures - totalWithdrawals;
+
                 reportData.Add(new AccountHistoryReportResponse
                 {
                     BadgeNumber = demographic.BadgeNumber,
                     FullName = demographic.ContactInfo.FullName ?? string.Empty,
                     Ssn = demographic.Ssn.MaskSsn(),
                     ProfitYear = year,
-                    Contributions = yearTransactions.TotalContributions,
-                    Earnings = yearTransactions.TotalEarnings,
-                    Forfeitures = yearTransactions.ForfeitsTotal,
-                    Withdrawals = yearTransactions.DistributionsTotal,
-                    EndingBalance = yearTransactions.CurrentBalance
+                    Contributions = totalContributions,
+                    Earnings = totalEarnings,
+                    Forfeitures = totalForfeitures,
+                    Withdrawals = totalWithdrawals,
+                    EndingBalance = endingBalance
                 });
             }
 
