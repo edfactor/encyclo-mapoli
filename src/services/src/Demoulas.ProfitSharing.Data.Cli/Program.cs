@@ -447,7 +447,8 @@ public sealed class Program
                 }
 
                 // Execute GRANT SELECT statement
-                string grantSql = $"GRANT SELECT ON PROFITSHARE.{tableName} TO SELECT_PROFITSHARE_ROLE";
+                // Quote table name for Oracle identifiers (required for names starting with underscores)
+                string grantSql = $"GRANT SELECT ON PROFITSHARE.\"{tableName}\" TO SELECT_PROFITSHARE_ROLE";
                 await context.Database.ExecuteSqlRawAsync(grantSql);
                 Console.WriteLine($"  ✓ Granted SELECT on PROFITSHARE.{tableName}");
             }
