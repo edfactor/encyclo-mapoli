@@ -8,6 +8,9 @@ export const AdjustmentsApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "adjustmentsApi",
   tagTypes: ["MergeOperation"],
+  // Disable caching to prevent sensitive data from persisting in browser
+  keepUnusedDataFor: 0,
+  refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
     mergeProfitsDetail: builder.mutation<void, MergeProfitsDetailRequest>({
       query: (mergeRequest) => ({

@@ -163,6 +163,9 @@ const baseQuery = createDataSourceAwareBaseQuery(120000); // 2 minutes in millis
 export const YearsEndApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "yearsEndApi",
+  // Disable caching to prevent sensitive data from persisting in browser
+  keepUnusedDataFor: 0, // Remove data immediately when no longer in use
+  refetchOnMountOrArgChange: true, // Always fetch fresh data
   endpoints: (builder) => ({
     updateExecutiveHoursAndDollars: builder.mutation({
       query: ({ ...rest }) => ({

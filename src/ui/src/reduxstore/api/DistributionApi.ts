@@ -13,6 +13,9 @@ const baseQuery = createDataSourceAwareBaseQuery();
 export const DistributionApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "distributionApi",
+  // Disable caching to prevent sensitive data from persisting in browser
+  keepUnusedDataFor: 0,
+  refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
     searchDistributions: builder.query<DistributionSearchResultDto, DistributionSearchRequest>({
       query: (request) => ({

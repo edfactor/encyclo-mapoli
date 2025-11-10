@@ -163,6 +163,20 @@ GlobalMeter.RegisterObservableGauges();
 GlobalMeter.RecordDeploymentStartup();
 
 app.UseCors();
+
+// Add no-cache headers to all responses to prevent browser caching of sensitive data
+app.Use(async (context, next) =>
+{
+    context.Response.OnStarting(() =>
+    {
+        context.Response.Headers.CacheControl = "no-store, no-cache, must-revalidate, max-age=0";
+        context.Response.Headers.Pragma = "no-cache";
+        context.Response.Headers.Expires = "0";
+        return Task.CompletedTask;
+    });
+    await next();
+});
+
 app.UseDemographicHeaders();
 
 app.UseSensitiveValueMasking();

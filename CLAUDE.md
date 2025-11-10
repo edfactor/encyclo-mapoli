@@ -2,14 +2,6 @@
 
 AI Assistant Project Instructions for Claude Code (claude.ai/code) when working with this repository. Focus on THESE patterns; avoid generic advice.
 
-## Architecture Overview
-
-- Monorepo with two primary roots:
-  - `src/services/` (.NET 9) multi-project solution `Demoulas.ProfitSharing.slnx` (FastEndpoints, EF Core 9 + Oracle, Aspire, Serilog, Feature Flags, RabbitMQ, Mapperly, Shouldly)
-  - `src/ui/` (Vite + React + TypeScript + Tailwind + Redux Toolkit + internal `smart-ui-library`)
-  - redux related files are in src/ui/src/reduxstore
-- Database: Oracle 19. EF Core migrations via `ProfitSharingDbContext`; CLI utility project `Demoulas.ProfitSharing.Data.Cli` performs schema ops & imports from legacy READY system
-- Cross-cutting: Central package mgmt (`Directory.Packages.props`), shared build config (`Directory.Build.props`), global SDK pin (`global.json`)
 
 ## Key Backend Conventions
 
@@ -151,13 +143,6 @@ Before approving PRs, verify:
 - [ ] **New packages** documented and reviewed for vulnerabilities
 - [ ] **Related security tickets** (PS-2021 through PS-2026) addressed
 
-### Related Security Tickets
-- **PS-2021**: Remove localStorage impersonation fallback (CWE-639 privilege escalation)
-- **PS-2022**: Add server-side impersonation role validation (CWE-639 defense-in-depth)
-- **PS-2023**: Implement security headers middleware (CWE-693 XSS/clickjacking)
-- **PS-2024**: Add HTTPS redirect and HSTS enforcement (CWE-295 transport security)
-- **PS-2025**: Restrict dev CORS to localhost origins (CWE-942 MITM prevention)
-- **PS-2026**: Audit and refine telemetry PII masking (CWE-532 data exposure)
 
 ## Endpoint Results Pattern (MANDATORY)
 
@@ -420,22 +405,6 @@ this.RecordRequestMetrics(HttpContext, _logger, req, "Ssn", "OracleHcmId", "Sala
 this.ExecuteWithTelemetry(HttpContext, _logger, req, async () => { ... });
 ```
 
-### Migration from Legacy Patterns
-
-**Updating Existing Endpoints**:
-- Replace ad-hoc OpenTelemetry activity creation with `StartEndpointActivity`
-- Replace manual metrics with `TelemetryExtensions` methods
-- Consolidate scattered telemetry logic using `ExecuteWithTelemetry` wrapper
-- Add missing logger injection where absent
-- Ensure sensitive field declarations are complete
-
-### Documentation References
-
-Complete implementation details and examples available in (read when needed):
-- RESTFUL_API_GUIDELINES.INSTRUCTIONS.md (`.github/instructions/`) - Zalando RESTful API guidelines, endpoint design, HTTP semantics, URL patterns, pagination, security, OpenAPI spec requirements
-- TELEMETRY_GUIDE.md (`src/ui/public/docs/`) - Comprehensive reference for developers, QA, and DevOps
-- TELEMETRY_QUICK_REFERENCE.md (`src/ui/public/docs/`) - Developer cheat sheet with copy-paste examples  
-- TELEMETRY_DEVOPS_GUIDE.md (`src/ui/public/docs/`) - Production monitoring and operations guide
 
 ## Backend Coding Style
 
@@ -642,21 +611,6 @@ When creating new documentation:
      description: "Brief description of what this documentation covers"
    }
    ```
-5. **Update instruction files** (`copilot-instructions.md` and `CLAUDE.md`) if introducing new patterns
-
-### Documentation Structure Standards
-- **Overview section** with clear objectives and scope
-- **Architecture/Implementation sections** with code examples
-- **Testing/Quality guidelines** with specific checklists
-- **Troubleshooting section** with common issues and solutions
-- **References section** linking to related documentation
-
-### Content Guidelines
-- Include copy-paste code examples for common patterns
-- Provide checklists for implementation and testing
-- Document both "what to do" and "what NOT to do"
-- Include specific file paths and command examples
-- Add cross-references to related documentation files
 
 ## When Extending
 
@@ -668,33 +622,7 @@ When creating new documentation:
 - Share logic via interfaces in `Common` or specialized service projects; avoid cross-project circular refs
 - Update `COPILOT_INSTRUCTIONS.md` and this file if introducing a pervasive new pattern
 
-## Branching & Jira workflow (team conventions)
 
-  - `fix/PS-1645-military-pre-hire-validation`
-  - `feature/PS-1720-add-reporting-view`
-  ```pwsh
-  # ensure latest develop
-  git checkout develop
-  git pull origin develop
-
-  # create branch from develop
-  git checkout -b fix/PS-1645-military-pre-hire-validation
-
-  # make edits, stage, commit
-  git add <files>
-  git commit -m "PS-1645: Short description of the change"
-
-  # push and set upstream
-  git push -u origin fix/PS-1645-military-pre-hire-validation
-  ```
-  - When opening a PR for a Jira ticket, add a comment to the ticket with the PR link and a brief summary so reviewers and stakeholders are notified.
-  - If the Jira ticket does not have story points set, assign story points using the Fibonacci-like sequence commonly used by the team: `1, 2, 3, 5, 8, 13`.
-
-## Atlassian MCP & Confluence alignment
-
-Use the Atlassian MCP for any Jira or Confluence interactions. When creating or updating Jira issues, adding comments, or creating/updating Confluence pages, use the organization's MCP integration so actions are auditable and follow access controls. Align the workflow guidance with the Confluence page "Agile Jira Workflow Development Best Practices":
-
-https://demoulas.atlassian.net/wiki/spaces/PM/pages/339476525/Agile+Jira+Workflow+Development+Best+Practices
 
 ## Copilot deny list (sensitive UI files)
 
@@ -791,46 +719,3 @@ dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
 - Use existing patterns and libraries rather than introducing new ones
 - Provide reasoning in PR descriptions when deviating from these patterns
 
-## AI Assistant Operational Rules (Repository-specific)
-
-- Do NOT create or open Pull Requests automatically. AI assistants may prepare branch names, commit messages, and a suggested PR title/body, and provide the exact `git` commands to push the branch, but must stop short of actually creating or opening the PR in the remote hosting service. PR creation is a manual step for a human reviewer to perform.
-
-- When adding new unit tests, include a `Description` attribute on the test method with the Jira ticket number and a terse description in the following format:
-
-  ```csharp
-  [Description("PS-1721 : Duplicate detection by contribution year")]
-  public async Task MyNewTest() { ... }
-  ```
-
-  This attribute helps link tests to tickets and provides a terse description for test explorers and reviewers.
-
-## Documentation References
-
-**Core Telemetry Documentation** (read when needed):
-- TELEMETRY_GUIDE.md (`src/ui/public/docs/`) - Comprehensive 75+ page reference covering developers, QA, and DevOps
-- TELEMETRY_QUICK_REFERENCE.md (`src/ui/public/docs/`) - Developer cheat sheet with 3-step implementation process
-- TELEMETRY_DEVOPS_GUIDE.md (`src/ui/public/docs/`) - Production operations guide
-
-**Distributed Caching Documentation** (read when needed):
-- DISTRIBUTED_CACHE_MIGRATION_SUMMARY.md - Complete guide to IDistributedCache migration
-- UNIT_TESTS_IDISTRIBUTEDCACHE_COMPLETE.md - Unit test patterns for distributed cache
-- NAVIGATION_CACHING_COMPLETE.md - Detailed example of version-based cache invalidation
-
-**Read-Only Functionality Documentation** (read when needed):
-- READ_ONLY_FUNCTIONALITY.md (`src/ui/public/docs/`) - Complete guide to read-only role implementation
-- READ_ONLY_QUICK_REFERENCE.md (`src/ui/public/docs/`) - Developer cheat sheet with copy-paste code examples
-- PS-1623_READ_ONLY_SUMMARY.md - Executive summary of read-only role implementation
-
-**Writing unit tests for react hooks** (read when needed):
-- fe-write-unit-tests-for-hooks.md ('ai-templates/front-end/') Guide to writing tests for react hooks
-
-These documents contain essential patterns and examples for implementing telemetry, caching, and read-only functionality correctly across all components. Reference them when creating new endpoints or troubleshooting issues.
-
-## Changing Directories
-
-NEVER use cd commands to change directories during interactions. This is a STRICT rule with NO exceptions. Instead:
-Use relative or absolute paths directly in commands (e.g., ls ./subdirectory or grep pattern ./subdirectory/file.txt instead of cd ./subdirectory && ls or cd ./subdirectory && grep pattern file.txt)
-If you need to run multiple commands in a specific directory, use subshells: (cd /path/to/dir && command1 && command2) which contain the directory change
-When needing to reference multiple files in the same directory, use pattern matching: /path/to/dir/*.py instead of changing into that directory
-NEVER combine cd with command execution using && or ; outside of a subshell
-If a user explicitly requests you to use cd, explain this policy and suggest the alternatives above

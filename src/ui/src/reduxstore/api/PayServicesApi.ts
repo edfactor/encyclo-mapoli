@@ -14,10 +14,11 @@ export const PayServicesApi = createApi({
     "PayServicesFullTimeEightHolidays",
     "PayServicesFullTimeAccruedHolidays"
   ],
-  keepUnusedDataFor: 0, // Don't cache unused data
-  refetchOnMountOrArgChange: true, // Always refetch on mount or arg change
-  refetchOnFocus: false, // Don't refetch when window regains focus
-  refetchOnReconnect: false, // Don't refetch on network reconnect
+  // Disable caching to prevent sensitive data from persisting in browser
+  keepUnusedDataFor: 0,
+  refetchOnMountOrArgChange: true,
+  refetchOnFocus: false,
+  refetchOnReconnect: false,
   endpoints: (builder) => ({
     /**
      * Get pay services for part-time employees

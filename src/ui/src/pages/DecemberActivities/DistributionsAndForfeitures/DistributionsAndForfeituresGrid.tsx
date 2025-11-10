@@ -380,17 +380,19 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
             </div>
             {distributionsAndForfeitures.hasUnattributedRecords && distributionsAndForfeitures.unattributedTotals && (
               <div className="relative flex-1">
-                <TotalsGrid
-                  displayData={[[numberToCurrency(distributionsAndForfeitures.unattributedTotals.stateTax || 0)]]}
-                  leftColumnHeaders={["Unattributed State Taxes"]}
-                  topRowHeaders={[]}
-                  breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
-                  sx={{
+                <div
+                  className="rounded"
+                  style={{
                     backgroundColor: "#fff3cd",
-                    border: "1px solid #ffc107",
-                    borderRadius: "0.375rem"
-                  }}
-                />
+                    border: "1px solid #ffc107"
+                  }}>
+                  <TotalsGrid
+                    displayData={[[numberToCurrency(distributionsAndForfeitures.unattributedTotals.stateTax || 0)]]}
+                    leftColumnHeaders={["Unattributed State Taxes"]}
+                    topRowHeaders={[]}
+                    breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
+                  />
+                </div>
                 <div
                   className="absolute right-2 top-1/2 -mt-0.5 -translate-y-1/2"
                   onMouseEnter={handleUnattributedPopoverOpen}

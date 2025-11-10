@@ -15,6 +15,9 @@ const baseQuery = createDataSourceAwareBaseQuery();
 export const NavigationStatusApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "navigationStatusApi",
+  // Disable caching to prevent sensitive data from persisting in browser
+  keepUnusedDataFor: 0,
+  refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
     getNavigationStatus: builder.query<GetNavigationStatusResponseDto, GetNavigationStatusRequestDto>({
       query: (_request) => ({
