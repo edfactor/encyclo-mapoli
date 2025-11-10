@@ -28,11 +28,20 @@ Write-Host ""
 
 # Load IIS Gzip Configuration functions from IISGzipConfiguration.ps1
 $IISGzipConfigPath = Join-Path (Split-Path -Parent $PSCommandPath) 'IISGzipConfiguration.ps1'
+Write-Host "Looking for IISGzipConfiguration.ps1 at: $IISGzipConfigPath" -ForegroundColor Gray
 if (Test-Path $IISGzipConfigPath) {
-    . $IISGzipConfigPath
-    Write-Host "Loaded IIS Gzip Configuration functions." -ForegroundColor Gray
+    Write-Host "Found IISGzipConfiguration.ps1, loading..." -ForegroundColor Gray
+    try {
+        . $IISGzipConfigPath
+        Write-Host "✓ Loaded IIS Gzip Configuration functions successfully." -ForegroundColor Green
+    }
+    catch {
+        Write-Error "Failed to load IISGzipConfiguration.ps1: $_"
+        exit 1
+    }
 } else {
-    Write-Warning "IISGzipConfiguration.ps1 not found at $IISGzipConfigPath - gzip configuration functions unavailable"
+    Write-Error "IISGzipConfiguration.ps1 not found at $IISGzipConfigPath"
+    exit 1
 }
 
 function Get-ConfigEnvironment($envTargetVar) {
@@ -85,9 +94,21 @@ while ($RetryCount -le $MaxRetries) {
         Write-Host "Target: $envServerName" -ForegroundColor Gray
         Write-Host ""
         
+        # Verify that the gzip function is available before trying to invoke it
+        if (-not (Get-Command Test-IISGzipModules -ErrorAction SilentlyContinue)) {
+            Write-Error "Test-IISGzipModules function not available - IISGzipConfiguration.ps1 may not have loaded correctly"
+            exit 1
+        }
+        
         $GzipSetupResult = Invoke-Command -Session $Session -ScriptBlock {
             # Pass the Test-IISGzipModules function to remote session
             ${function:Test-IISGzipModules} = $args[0]
+            
+            # Verify function was passed correctly
+            if (-not (Get-Command Test-IISGzipModules -ErrorAction SilentlyContinue)) {
+                Write-Host "✗ Test-IISGzipModules function not available in remote session" -ForegroundColor Red
+                return $false
+            }
             
             try {
                 $result = Test-IISGzipModules
@@ -153,6 +174,13 @@ while ($RetryCount -le $MaxRetries) {
 
             # Configure compression and caching for this site
             ${function:Set-SiteCompressionAndCaching} = $args[0]
+            
+            # Verify function was passed correctly
+            if (-not (Get-Command Set-SiteCompressionAndCaching -ErrorAction SilentlyContinue)) {
+                Write-Host "✗ Set-SiteCompressionAndCaching function not available in remote session" -ForegroundColor Red
+                exit 1
+            }
+            
             $isApi = $Using:Deploy.SiteName -eq 'API'
             Set-SiteCompressionAndCaching -SiteName $Using:Deploy.SiteName -IsApiSite $isApi
 
