@@ -113,6 +113,13 @@ export interface Distribution {
   isRothIra: boolean;
 }
 
+export interface UnattributedTotals {
+  count: number;
+  federalTax: number;
+  stateTax: number;
+  netProceeds: number;
+}
+
 export interface DistributionsAndForfeitureTotalsResponse extends PagedReportResponse<DistributionsAndForfeitures> {
   distributionTotal: number;
   stateTaxTotal: number;
@@ -122,6 +129,8 @@ export interface DistributionsAndForfeitureTotalsResponse extends PagedReportRes
   forfeitureAdministrativeTotal: number;
   forfeitureClassActionTotal: number;
   stateTaxTotals: Record<string, number>;
+  unattributedTotals?: UnattributedTotals | null;
+  hasUnattributedRecords?: boolean;
 }
 
 export interface DistributionsAndForfeitures {

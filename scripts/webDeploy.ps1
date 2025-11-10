@@ -1,9 +1,39 @@
+$ErrorActionPreference = 'Stop'
+$VerbosePreference = 'Continue'
+
+# ==========================================
+# Deployment Configuration
+# ==========================================
 $StopAppTimeout = 10
 $envTarget = $args[0]
 $envServerName = $args[1]
 $apiArtifactName = $args[2]
 $uiArtifactName = $args[3]
 $configTarget = ''
+
+# Pipeline-aware logging
+$PipelineLogging = @{
+    Build = $env:BITBUCKET_BUILD_NUMBER
+    Branch = $env:BITBUCKET_BRANCH
+    Commit = $env:BITBUCKET_COMMIT
+}
+
+Write-Host "=====================================================================" -ForegroundColor Cyan
+Write-Host "Web Deployment Script - PS-2067 IIS Gzip Configuration Integrated" -ForegroundColor Cyan
+Write-Host "=====================================================================" -ForegroundColor Cyan
+if ($PipelineLogging.Build) {
+    Write-Host "Pipeline Build: $($PipelineLogging.Build) | Branch: $($PipelineLogging.Branch)" -ForegroundColor Gray
+}
+Write-Host ""
+
+# Load IIS Gzip Configuration functions from IISGzipConfiguration.ps1
+$IISGzipConfigPath = Join-Path (Split-Path -Parent $PSCommandPath) 'IISGzipConfiguration.ps1'
+if (Test-Path $IISGzipConfigPath) {
+    . $IISGzipConfigPath
+    Write-Host "Loaded IIS Gzip Configuration functions." -ForegroundColor Gray
+} else {
+    Write-Warning "IISGzipConfiguration.ps1 not found at $IISGzipConfigPath - gzip configuration functions unavailable"
+}
 
 function Get-ConfigEnvironment($envTargetVar) {
     Write-Host "The value for envTargetVar is $($envTargetVar)"
@@ -50,6 +80,37 @@ while ($RetryCount -le $MaxRetries) {
         
         $Session = New-PSSession $envServerName
 
+        # Ensure IIS gzip modules are installed and configured (run on remote server)
+        Write-Host "Setting up IIS gzip compression modules (PS-2067)..." -ForegroundColor Magenta
+        Write-Host "Target: $envServerName" -ForegroundColor Gray
+        Write-Host ""
+        
+        $GzipSetupResult = Invoke-Command -Session $Session -ScriptBlock {
+            # Pass the Test-IISGzipModules function to remote session
+            ${function:Test-IISGzipModules} = $args[0]
+            
+            try {
+                $result = Test-IISGzipModules
+                if ($result -eq $true) {
+                    Write-Host "✓ Gzip setup completed successfully" -ForegroundColor Green
+                    return $true
+                } else {
+                    Write-Host "⚠ Gzip setup completed with warnings" -ForegroundColor Yellow
+                    return $false
+                }
+            }
+            catch {
+                Write-Host "✗ Gzip setup failed: $_" -ForegroundColor Red
+                return $false
+            }
+        } -ArgumentList ${function:Test-IISGzipModules}
+
+        if ($GzipSetupResult -eq $false) {
+            Write-Warning "IIS gzip module setup encountered issues. Continuing with deployment (non-blocking)."
+        }
+        
+        Write-Host ""
+
     foreach ($Deploy in $Deployments) {
         Invoke-Command -Session $Session -ScriptBlock {
             # Stop IIS site and App Pool
@@ -90,10 +151,15 @@ while ($RetryCount -le $MaxRetries) {
                 Get-Content -path "$($Using:Deploy.TargetPath)\web.config" -Raw
             }
 
+            # Configure compression and caching for this site
+            ${function:Set-SiteCompressionAndCaching} = $args[0]
+            $isApi = $Using:Deploy.SiteName -eq 'API'
+            Set-SiteCompressionAndCaching -SiteName $Using:Deploy.SiteName -IsApiSite $isApi
+
             # Start App Pool and IIS site
             $AppPool | Start-WebAppPool
             $Site | Start-IISSite
-        }
+        } -ArgumentList ${function:Set-SiteCompressionAndCaching}
 
         if (!$?) { $Failed = $true; break }
     }
@@ -121,4 +187,26 @@ if ($Failed -and $RetryCount -gt $MaxRetries) {
 }
 }
 
-if ($Failed) { exit 1 }
+# ==========================================
+# Deployment Summary & Pipeline Exit Code
+# ==========================================
+Write-Host ""
+Write-Host "=====================================================================" -ForegroundColor Cyan
+Write-Host "Deployment Summary" -ForegroundColor Cyan
+Write-Host "=====================================================================" -ForegroundColor Cyan
+
+if ($Failed) {
+    Write-Host "Status: ❌ FAILED" -ForegroundColor Red
+    Write-Host "  - Web deployment failed after $($RetryCount) attempt(s)"
+    Write-Host "  - Pipeline will report deployment as failed"
+    Write-Host "  - Review logs above for detailed error information"
+    Write-Host ""
+    exit 1
+} else {
+    Write-Host "Status: ✅ SUCCESS" -ForegroundColor Green
+    Write-Host "  - All deployments completed successfully"
+    Write-Host "  - IIS gzip compression configured (PS-2067)"
+    Write-Host "  - Applications running and accessible"
+    Write-Host ""
+    exit 0
+}
