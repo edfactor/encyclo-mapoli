@@ -82,11 +82,6 @@ const Under21TA = () => {
     profitYear
   ]);
 
-  // Need a useEffect to reset the page number when under21Totals or under21Inactive changes
-  useEffect(() => {
-    setPageNumber(0);
-  }, [under21Totals, under21BreakdownByStore]);
-
   /*
   const handleSearch = (profitYear: number, isSortDescending: boolean) => {
     const queryParams = {
@@ -143,6 +138,9 @@ const Under21TA = () => {
               <Under21BreakdownGrid
                 isLoading={isInactiveLoading}
                 setInitialSearchLoaded={setInitialSearchLoaded}
+                pageNumber={pageNumber}
+                pageSize={pageSize}
+                onPageChange={setPageNumber}
               />
             </Grid>
           </>

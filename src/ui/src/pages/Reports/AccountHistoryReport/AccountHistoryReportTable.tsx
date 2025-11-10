@@ -3,11 +3,11 @@ import { useMemo } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { GridPaginationActions, GridPaginationState } from "../../../hooks/useGridPagination";
-import { AccountHistoryReportResponse, ReportResponseBase } from "../../../types/reports/AccountHistoryReportTypes";
+import { AccountHistoryReportPaginatedResponse } from "../../../types/reports/AccountHistoryReportTypes";
 import { GetAccountHistoryReportColumns } from "./AccountHistoryReportGridColumns";
 
 interface AccountHistoryReportTableProps {
-  data: ReportResponseBase<AccountHistoryReportResponse> | undefined;
+  data: AccountHistoryReportPaginatedResponse | undefined;
   isLoading: boolean;
   error: unknown;
   showData: boolean;

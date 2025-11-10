@@ -18,9 +18,10 @@ interface ReportGridProps {
   params: FilterParams;
   onLoadingChange?: (isLoading: boolean) => void;
   isFrozen: boolean;
+  searchTrigger: number;
 }
 
-const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFrozen }) => {
+const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFrozen, searchTrigger }) => {
   const navigate = useNavigate();
   const [triggerLive, { isFetching: isFetchingLive }] = useLazyGetYearEndProfitSharingReportLiveQuery();
   const [triggerFrozen, { isFetching: isFetchingFrozen }] = useLazyGetYearEndProfitSharingReportFrozenQuery();
@@ -94,7 +95,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange, isFroz
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trigger, hasToken, profitYear, params]);
+  }, [trigger, hasToken, profitYear, params, searchTrigger]);
 
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {

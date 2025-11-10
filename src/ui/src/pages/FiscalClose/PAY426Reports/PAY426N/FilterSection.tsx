@@ -8,6 +8,7 @@ interface FilterSectionProps {
   currentPreset: ReportPreset | null;
   onPresetChange: (preset: ReportPreset | null) => void;
   onReset: () => void;
+  onSearch: () => void;
   isLoading?: boolean;
 }
 
@@ -16,6 +17,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   currentPreset,
   onPresetChange,
   onReset,
+  onSearch,
   isLoading = false
 }) => {
   const handlePresetChange = (event: SelectChangeEvent<string>) => {
@@ -25,7 +27,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   };
 
   const handleApply = () => {
-    // No-op as the actual data fetching is handled by the parent component
+    // Trigger search in parent component
+    onSearch();
   };
 
   const handleReset = () => {

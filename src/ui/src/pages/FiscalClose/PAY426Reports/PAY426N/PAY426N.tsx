@@ -24,6 +24,7 @@ const PAY426N: React.FC<{ isFrozen: boolean }> = () => {
   const [currentPreset, setCurrentPreset] = useState<ReportPreset | null>(null);
   const [showSummaryReport, setShowSummaryReport] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchTrigger, setSearchTrigger] = useState(0);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const profitYear = useDecemberFlowProfitYear();
@@ -84,6 +85,11 @@ const PAY426N: React.FC<{ isFrozen: boolean }> = () => {
     setIsLoading(loading);
   };
 
+  const handleSearch = () => {
+    // Toggle searchTrigger to force re-search
+    setSearchTrigger((prev) => prev + 1);
+  };
+
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
   };
@@ -107,6 +113,7 @@ const PAY426N: React.FC<{ isFrozen: boolean }> = () => {
               currentPreset={currentPreset}
               onPresetChange={handlePresetChange}
               onReset={handleReset}
+              onSearch={handleSearch}
               isLoading={isLoading}
             />
           </DSMAccordion>
@@ -118,6 +125,7 @@ const PAY426N: React.FC<{ isFrozen: boolean }> = () => {
               params={currentPreset.params}
               onLoadingChange={handleLoadingChange}
               isFrozen={isFrozen}
+              searchTrigger={searchTrigger}
             />
           )}
 
