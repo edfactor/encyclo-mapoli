@@ -91,7 +91,7 @@ export function createSaveButtonCellRenderer(config: SaveButtonConfig) {
     const isReadOnly = params.context?.isReadOnly ?? config.isReadOnly;
 
     // If psn is too long (beneficiary) or not editable, return empty
-    if (!shouldShowControls(activityType, params) || params.data.psn.length > MAX_EMPLOYEE_BADGE_LENGTH) {
+    if (!shouldShowControls(activityType, params) || params?.data?.psn?.length > MAX_EMPLOYEE_BADGE_LENGTH) {
       return "";
     }
 

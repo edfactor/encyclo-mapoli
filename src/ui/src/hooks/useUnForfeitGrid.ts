@@ -81,13 +81,14 @@ export const useUnForfeitGrid = ({
     (
       skip: number,
       sortBy: string,
-      isSortDescending: boolean
+      isSortDescending: boolean,
+      take: number
     ): (StartAndEndDateRequest & { archive?: boolean }) | null => {
       const baseRequest: StartAndEndDateRequest = {
         beginningDate: unForfeitsQueryParams?.beginningDate || fiscalCalendarYear?.fiscalBeginDate || "",
         endingDate: unForfeitsQueryParams?.endingDate || fiscalCalendarYear?.fiscalEndDate || "",
         profitYear: selectedProfitYear,
-        pagination: { skip, take: 25, sortBy, isSortDescending } // Use fixed pageSize for now, will be updated dynamically
+        pagination: { skip, take, sortBy, isSortDescending }
       };
 
       if (!baseRequest.beginningDate || !baseRequest.endingDate) return null;
@@ -107,21 +108,16 @@ export const useUnForfeitGrid = ({
   const { pageNumber, pageSize, sortParams, handlePaginationChange, resetPagination } = useGridPagination({
     initialPageSize: 25,
     initialSortBy: "fullName",
-    initialSortDescending: false,
-    onPaginationChange: useCallback(
-      async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
-        if (initialSearchLoaded) {
-          const request = createRequest(pageNum * pageSz, sortPrms.sortBy, sortPrms.isSortDescending);
-          if (request && request.pagination) {
-            // Update the pageSize in the request
-            request.pagination.take = pageSz;
-            await triggerSearch(request, false);
-          }
-        }
-      },
-      [initialSearchLoaded, createRequest, triggerSearch]
-    )
+    initialSortDescending: false
   });
+
+  const isPaginationChangeRef = useRef<boolean>(false);
+  const currentPageSizeRef = useRef<number>(pageSize);
+
+  // Update the ref whenever pageSize changes
+  useEffect(() => {
+    currentPageSizeRef.current = pageSize;
+  }, [pageSize]);
 
   const onGridReady = useCallback((params: { api: GridApi }) => {
     setGridApi(params.api);
@@ -158,6 +154,7 @@ export const useUnForfeitGrid = ({
     if (
       !isBulkSaveInProgress &&
       !isInitialLoad &&
+      !isPaginationChangeRef.current &&
       unForfeits !== prevUnForfeits.current &&
       currentTotal !== undefined &&
       currentTotal !== prevTotal
@@ -168,8 +165,8 @@ export const useUnForfeitGrid = ({
   }, [unForfeits, resetPagination, isBulkSaveInProgress]);
 
   const performSearch = useCallback(
-    async (skip: number, sortBy: string, isSortDescending: boolean) => {
-      const request = createRequest(skip, sortBy, isSortDescending);
+    async (skip: number, sortBy: string, isSortDescending: boolean, take: number = 25) => {
+      const request = createRequest(skip, sortBy, isSortDescending, take);
       if (request) {
         await triggerSearch(request, false);
       }
@@ -224,7 +221,7 @@ export const useUnForfeitGrid = ({
           if (unForfeitsQueryParams) {
             // Use the captured page number to stay on the same page
             const skip = actualCurrentPage * pageSize;
-            const searchRequest = createRequest(skip, sortParams.sortBy, sortParams.isSortDescending);
+            const searchRequest = createRequest(skip, sortParams.sortBy, sortParams.isSortDescending, pageSize);
             if (searchRequest) {
               await triggerSearch(searchRequest, false);
 
@@ -303,7 +300,7 @@ export const useUnForfeitGrid = ({
           // Use the captured page number, not the current one (which may have been reset)
           const savedPageNumber = pageNumberAtBulkSaveRef.current ?? 0;
           const skip = savedPageNumber * pageSize;
-          const request = createRequest(skip, sortParams.sortBy, sortParams.isSortDescending);
+          const request = createRequest(skip, sortParams.sortBy, sortParams.isSortDescending, pageSize);
           if (request) {
             await triggerSearch(request, false);
 
@@ -341,10 +338,10 @@ export const useUnForfeitGrid = ({
 
   // Effect to handle initial load and pagination changes
   useEffect(() => {
-    if (initialSearchLoaded) {
-      performSearch(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);
+    if (initialSearchLoaded && !isPaginationChangeRef.current) {
+      performSearch(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending, pageSize);
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, performSearch]);
+  }, [initialSearchLoaded, pageNumber, sortParams, performSearch]);
 
   // Effect to handle archive mode search
   useEffect(() => {
@@ -352,7 +349,7 @@ export const useUnForfeitGrid = ({
 
     let cancelled = false;
     const run = async () => {
-      await performSearch(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);
+      await performSearch(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending, pageSize);
       if (!cancelled) {
         onArchiveHandled?.();
       }
@@ -423,7 +420,7 @@ export const useUnForfeitGrid = ({
   const sortEventHandler = (update: SortParams) => {
     // Reset to page 0 and perform search with new sort parameters
     handlePaginationChange(0, pageSize);
-    performSearch(0, update.sortBy, update.isSortDescending);
+    performSearch(0, update.sortBy, update.isSortDescending, pageSize);
   };
 
   // Handle row expansion toggle
@@ -460,24 +457,69 @@ export const useUnForfeitGrid = ({
     });
   }, [unForfeits, expandedRows]);
 
-  const paginationHandlers = {
-    setPageNumber: (value: number) => {
-      if (hasUnsavedChanges) {
-        alert("Please save your changes.");
-        return;
+  const paginationHandlers = useMemo(
+    () => ({
+      setPageNumber: async (value: number) => {
+        if (hasUnsavedChanges) {
+          alert("Please save your changes.");
+          return;
+        }
+
+        // If we're in the middle of a pagination change (like page size change),
+        // just update the state without triggering a search
+        if (isPaginationChangeRef.current) {
+          const newPageNumber = value - 1;
+          const currentPageSizeValue = currentPageSizeRef.current;
+          handlePaginationChange(newPageNumber, currentPageSizeValue);
+          return;
+        }
+
+        // Normal page number change - trigger search
+        const newPageNumber = value - 1;
+        const currentPageSizeValue = currentPageSizeRef.current;
+        handlePaginationChange(newPageNumber, currentPageSizeValue);
+        try {
+          await performSearch(
+            newPageNumber * currentPageSizeValue,
+            sortParams.sortBy,
+            sortParams.isSortDescending,
+            currentPageSizeValue
+          );
+        } finally {
+          // Don't set isPaginationChangeRef here since we're not the one who set it
+        }
+        setInitialSearchLoaded(true);
+      },
+      setPageSize: async (value: number) => {
+        if (hasUnsavedChanges) {
+          alert("Please save your changes.");
+          return;
+        }
+        isPaginationChangeRef.current = true;
+        currentPageSizeRef.current = value; // Update the ref immediately
+        handlePaginationChange(0, value);
+        try {
+          await performSearch(0, sortParams.sortBy, sortParams.isSortDescending, value);
+        } finally {
+          // Use requestAnimationFrame to clear flag after all synchronous updates
+          requestAnimationFrame(() => {
+            setTimeout(() => {
+              isPaginationChangeRef.current = false;
+            }, 10);
+          });
+        }
+        setInitialSearchLoaded(true);
       }
-      handlePaginationChange(value - 1, pageSize);
-      setInitialSearchLoaded(true);
-    },
-    setPageSize: (value: number) => {
-      if (hasUnsavedChanges) {
-        alert("Please save your changes.");
-        return;
-      }
-      handlePaginationChange(0, value);
-      setInitialSearchLoaded(true);
-    }
-  };
+    }),
+    [
+      hasUnsavedChanges,
+      handlePaginationChange,
+      performSearch,
+      sortParams.sortBy,
+      sortParams.isSortDescending,
+      setInitialSearchLoaded
+    ]
+  );
 
   return {
     // State
