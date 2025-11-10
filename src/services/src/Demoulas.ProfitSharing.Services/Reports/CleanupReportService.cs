@@ -220,7 +220,7 @@ public class CleanupReportService : ICleanupReportService
                     .Select(g => new
                     {
                         DistributionTotal = g.Sum(x => x.DistributionAmount),
-                        StateTaxTotal = g.Sum(x => x.StateTax),
+                        StateTaxTotal = g.Where(x => !string.IsNullOrEmpty(x.State)).Sum(x => x.StateTax),
                         FederalTaxTotal = g.Sum(x => x.FederalTax),
                         ForfeitureTotal = g.Sum(x => x.ForfeitAmount),
                         // MAIN-2170: Breakdown forfeitures by type
@@ -277,7 +277,6 @@ public class CleanupReportService : ICleanupReportService
                     .ToDictionary(g => g.Key, g => g.Sum(x => x.StateTax));
 
                 //// Check if sorting by Age - if so, we need to handle pagination manually since Age can't be calculated in SQL
-                PaginatedResponseDto<DistributionsAndForfeitureResponse> paginatedResponse;
 
 
                 var sortReq = req;
@@ -318,13 +317,13 @@ public class CleanupReportService : ICleanupReportService
                     IsExecutive = pd.PayFrequencyId == PayFrequency.Constants.Monthly
                 });
 
-                paginatedResponse = new PaginatedResponseDto<DistributionsAndForfeitureResponse>(req)
+                PaginatedResponseDto<DistributionsAndForfeitureResponse> paginatedResponse = new(req)
                 {
                     Results = apiResponse.ToList(),
                     Total = paginated.Total
                 };
-                //}
 
+                //}
                 var response = new DistributionsAndForfeitureTotalsResponse()
                 {
                     ReportName = "Distributions and Forfeitures",
