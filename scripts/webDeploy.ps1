@@ -132,87 +132,97 @@ while ($RetryCount -le $MaxRetries) {
         
         Write-Host ""
 
-    foreach ($Deploy in $Deployments) {
-        Invoke-Command -Session $Session -ScriptBlock {
-            # Stop IIS site and App Pool
-            $Site = Get-IISSite -Name $Using:Deploy.SiteName
-            $Site | Stop-IISSite -Confirm:$false
+        foreach ($Deploy in $Deployments) {
+            Write-Host "Deploying $($Deploy.SiteName)..." -ForegroundColor Cyan
+            
+            Invoke-Command -Session $Session -ScriptBlock {
+                # Stop IIS site and App Pool
+                $Site = Get-IISSite -Name $Using:Deploy.SiteName
+                $Site | Stop-IISSite -Confirm:$false
 
-            $AppPool = Get-IISAppPool -Name $Using:Deploy.AppPoolName
-            if ($AppPool.State -ne 'Stopped') {
-                $AppPool | Stop-WebAppPool
-                for ($i = 0; $i -lt $Using:StopAppTimeout; $i++) {
-                    if ($AppPool.State -eq 'Stopped') { break }
-                    Start-Sleep -Seconds 1
-                }
+                $AppPool = Get-IISAppPool -Name $Using:Deploy.AppPoolName
                 if ($AppPool.State -ne 'Stopped') {
-                    Write-Error -Message "Failed to stop App Pool '$($AppPool.Name)'"
+                    $AppPool | Stop-WebAppPool
+                    for ($i = 0; $i -lt $Using:StopAppTimeout; $i++) {
+                        if ($AppPool.State -eq 'Stopped') { break }
+                        Start-Sleep -Seconds 1
+                    }
+                    if ($AppPool.State -ne 'Stopped') {
+                        Write-Error -Message "Failed to stop App Pool '$($AppPool.Name)'"
+                        exit 1
+                    }
+                }
+
+                # Remove old files, excluding ignored ones
+                Get-ChildItem -Path $Using:Deploy.TargetPath -Exclude $Using:Deploy.IgnoreFiles | Remove-Item -Force -Recurse
+            }
+
+            if (!$?) { $Failed = $true; break }
+
+            # Deploy new artifact
+            Write-Host "  Copying artifact to server..." -ForegroundColor Gray
+            Copy-Item -ToSession $Session -Path .\dist\$($Deploy.Artifact) -Destination $Deploy.TargetPath
+            if (!$?) { $Failed = $true; break }
+
+            # Extract and configure new deployment
+            Write-Host "  Extracting and configuring deployment..." -ForegroundColor Gray
+            Invoke-Command -Session $Session -ScriptBlock {
+                Expand-Archive -Force -Path "$($Using:Deploy.TargetPath)\$($Using:Deploy.Artifact)" -DestinationPath $Using:Deploy.TargetPath
+                Remove-Item -Force -Path "$($Using:Deploy.TargetPath)\$($Using:Deploy.Artifact)"
+
+                if (Test-Path -Path "$($Using:Deploy.TargetPath)\web.config" -PathType Leaf) {
+                    Write-Output "$($Using:Deploy.TargetPath)\web.config"
+                    (Get-Content -path "$($Using:Deploy.TargetPath)\web.config" -Raw) -replace 'Development', $Using:Deploy.ConfigEnvironment | Set-Content -Path "$($Using:Deploy.TargetPath)\web.config"
+                    Get-Content -path "$($Using:Deploy.TargetPath)\web.config" -Raw
+                }
+
+                # Configure compression and caching for this site
+                ${function:Set-SiteCompressionAndCaching} = $args[0]
+                
+                # Verify function was passed correctly
+                if (-not (Get-Command Set-SiteCompressionAndCaching -ErrorAction SilentlyContinue)) {
+                    Write-Host "✗ Set-SiteCompressionAndCaching function not available in remote session" -ForegroundColor Red
                     exit 1
                 }
-            }
+                
+                $isApi = $Using:Deploy.SiteName -eq 'API'
+                Set-SiteCompressionAndCaching -SiteName $Using:Deploy.SiteName -IsApiSite $isApi
 
-            # Remove old files, excluding ignored ones
-            Get-ChildItem -Path $Using:Deploy.TargetPath -Exclude $Using:Deploy.IgnoreFiles | Remove-Item -Force -Recurse
+                # Start App Pool and IIS site
+                $AppPool | Start-WebAppPool
+                $Site | Start-IISSite
+            } -ArgumentList ${function:Set-SiteCompressionAndCaching}
+
+            if (!$?) { $Failed = $true; break }
+            
+            Write-Host "  ✓ $($Deploy.SiteName) deployment completed" -ForegroundColor Green
         }
-
-        if (!$?) { $Failed = $true; break }
-
-        # Deploy new artifact
-        Copy-Item -ToSession $Session -Path .\dist\$($Deploy.Artifact) -Destination $Deploy.TargetPath
-        if (!$?) { $Failed = $true; break }
-
-        # Extract and configure new deployment
-        Invoke-Command -Session $Session -ScriptBlock {
-            Expand-Archive -Force -Path "$($Using:Deploy.TargetPath)\$($Using:Deploy.Artifact)" -DestinationPath $Using:Deploy.TargetPath
-            Remove-Item -Force -Path "$($Using:Deploy.TargetPath)\$($Using:Deploy.Artifact)"
-
-            if (Test-Path -Path "$($Using:Deploy.TargetPath)\web.config" -PathType Leaf) {
-                Write-Output "$($Using:Deploy.TargetPath)\web.config"
-                (Get-Content -path "$($Using:Deploy.TargetPath)\web.config" -Raw) -replace 'Development', $Using:Deploy.ConfigEnvironment | Set-Content -Path "$($Using:Deploy.TargetPath)\web.config"
-                Get-Content -path "$($Using:Deploy.TargetPath)\web.config" -Raw
-            }
-
-            # Configure compression and caching for this site
-            ${function:Set-SiteCompressionAndCaching} = $args[0]
-            
-            # Verify function was passed correctly
-            if (-not (Get-Command Set-SiteCompressionAndCaching -ErrorAction SilentlyContinue)) {
-                Write-Host "✗ Set-SiteCompressionAndCaching function not available in remote session" -ForegroundColor Red
-                exit 1
-            }
-            
-            $isApi = $Using:Deploy.SiteName -eq 'API'
-            Set-SiteCompressionAndCaching -SiteName $Using:Deploy.SiteName -IsApiSite $isApi
-
-            # Start App Pool and IIS site
-            $AppPool | Start-WebAppPool
-            $Site | Start-IISSite
-        } -ArgumentList ${function:Set-SiteCompressionAndCaching}
-
-        if (!$?) { $Failed = $true; break }
+        
+        # If we got here without failure, break out of retry loop
+        if (-not $Failed) {
+            Write-Host ""
+            Write-Host "Web deployment completed successfully" -ForegroundColor Green
+            break
+        }
     }
-    
-    # If we got here without failure, break out of retry loop
-    if (-not $Failed) {
-        Write-Host "Web deployment completed successfully" -ForegroundColor Green
+    catch {
+        Write-Error "Deployment error: $_"
+        $Failed = $true
+        $RetryCount++
+        if ($RetryCount -le $MaxRetries) {
+            Write-Host "Retrying in $RetryDelaySeconds seconds..." -ForegroundColor Yellow
+        }
+    }
+    finally {
+        if ($null -ne $Session) {
+            Remove-PSSession -Session $Session
+        }
+    }
+
+    # Exit retry loop if we've exceeded max retries
+    if ($Failed -and $RetryCount -gt $MaxRetries) {
         break
     }
-} catch {
-    $Failed = $true
-    $RetryCount++
-    if ($RetryCount -gt $MaxRetries) {
-        Write-Host "Web deployment failed after $($MaxRetries + 1) attempts" -ForegroundColor Red
-    }
-} finally {
-    if ($null -ne $Session) {
-        Remove-PSSession -Session $Session
-    }
-}
-
-# Exit retry loop if we've exceeded max retries
-if ($Failed -and $RetryCount -gt $MaxRetries) {
-    break
-}
 }
 
 # ==========================================
