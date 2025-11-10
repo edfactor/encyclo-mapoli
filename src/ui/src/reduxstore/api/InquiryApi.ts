@@ -18,6 +18,9 @@ export const InquiryApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "inquiryApi",
   tagTypes: ["MemberDetails", "ProfitDetails"],
+  // Disable caching to prevent sensitive data from persisting in browser
+  keepUnusedDataFor: 0,
+  refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
     // Master Inquiry API endpoints
     searchProfitMasterInquiry: builder.query<Paged<EmployeeDetails>, MasterInquiryRequest>({

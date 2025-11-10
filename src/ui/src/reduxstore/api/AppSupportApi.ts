@@ -10,6 +10,9 @@ export const AppSupportApi = createApi({
     prepareHeaders
   }),
   reducerPath: "appSupportApi",
+  // Disable caching to prevent sensitive data from persisting in browser
+  keepUnusedDataFor: 0,
+  refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
     getHealth: builder.query<Health, void>({
       query: () => ({

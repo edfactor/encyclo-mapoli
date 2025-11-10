@@ -25,6 +25,9 @@ const baseQuery = createDataSourceAwareBaseQuery();
 export const BeneficiariesApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "beneficiariesApi",
+  // Disable caching to prevent sensitive data from persisting in browser
+  keepUnusedDataFor: 0,
+  refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
     getBeneficiaries: builder.query<BeneficiariesGetAPIResponse, BeneficiaryDetailAPIRequest>({
       query: (request) => ({
