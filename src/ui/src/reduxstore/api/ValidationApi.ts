@@ -13,6 +13,9 @@ export const validationApi = createApi({
     prepareHeaders
   }),
   tagTypes: ["MasterUpdateValidation"],
+  // Disable caching to prevent sensitive data from persisting in browser
+  keepUnusedDataFor: 0,
+  refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
     /**
      * Get Master Update cross-reference validation data for a specific profit year.

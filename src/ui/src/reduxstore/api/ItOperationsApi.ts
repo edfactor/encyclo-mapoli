@@ -20,6 +20,9 @@ export const ItOperationsApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "itOperationsApi",
   tagTypes: ["FrozenState"],
+  // Disable caching to prevent sensitive data from persisting in browser
+  keepUnusedDataFor: 0,
+  refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
     getFrozenStateResponse: builder.query<FrozenStateResponse, void>({
       query: () => ({

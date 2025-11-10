@@ -9,6 +9,9 @@ export const SecurityApi = createApi({
     prepareHeaders
   }),
   reducerPath: "securityApi",
+  // Disable caching to prevent sensitive data from persisting in browser
+  keepUnusedDataFor: 0, // Remove data immediately when no longer in use
+  refetchOnMountOrArgChange: true, // Always fetch fresh data
   endpoints: (builder) => ({
     getUserRoles: builder.query({
       query: () => ({

@@ -16,6 +16,9 @@ const baseQuery = createDataSourceAwareBaseQuery();
 export const LookupsApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "lookupsApi",
+  // Disable caching to prevent sensitive data from persisting in browser
+  keepUnusedDataFor: 0,
+  refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
     getAccountingYear: builder.query<CalendarResponseDto, ProfitYearRequest>({
       query: (params) => ({
