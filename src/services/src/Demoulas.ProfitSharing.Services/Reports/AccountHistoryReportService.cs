@@ -67,7 +67,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
             // Process each year using TotalService calculations
             foreach (var year in profitYears.Where(y => y >= (request.StartDate?.Year ?? 2007) && y <= (request.EndDate?.Year ?? DateTime.Today.Year)))
             {
-                // Get transactions for this year using TotalService's Oracle query which has all profit code filtering built in
+                // Get transactions for this year from TotalService
                 var yearTransactions = await _totalService
                     .GetTransactionsBySsnForProfitYearForOracle(ctx, year)
                     .Where(t => t.Ssn == demographic.Ssn)
@@ -79,6 +79,9 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 }
 
                 // Map to simplified response showing only essential fields
+                // Note: DistributionsTotal includes partial withdrawals (profitCodeId=1), direct payments (3), and 100% vested payments (9)
+                // ForfeitsTotal is forfeiture amounts (profitCodeId=2)
+                // CurrentBalance is the ending balance for this year
                 reportData.Add(new AccountHistoryReportResponse
                 {
                     BadgeNumber = demographic.BadgeNumber,
@@ -88,7 +91,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                     Contributions = yearTransactions.TotalContributions,
                     Earnings = yearTransactions.TotalEarnings,
                     Forfeitures = yearTransactions.ForfeitsTotal,
-                    Withdrawals = yearTransactions.AllocationsTotal,
+                    Withdrawals = yearTransactions.DistributionsTotal,
                     EndingBalance = yearTransactions.CurrentBalance
                 });
             }
