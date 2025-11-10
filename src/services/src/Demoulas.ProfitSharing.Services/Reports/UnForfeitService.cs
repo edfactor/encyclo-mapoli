@@ -99,6 +99,7 @@ public sealed class UnforfeitService : IUnforfeitService
                 {
                     "rehireddate" => "RehireDate",
                     "companycontributionyears" => "YearsOfService",
+                    "" => "badgenumber",
                     _ => (req.SortBy ?? "badgenumber")
                 };
 
