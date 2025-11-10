@@ -40,6 +40,10 @@ export interface AccountHistoryReportTotals {
 }
 
 export interface AccountHistoryReportPaginatedResponse extends PaginatedResponseDto<AccountHistoryReportResponse> {
+  reportName: string;
+  reportDate: string;
+  startDate: string;
+  endDate: string;
   cumulativeTotals?: AccountHistoryReportTotals;
 }
 

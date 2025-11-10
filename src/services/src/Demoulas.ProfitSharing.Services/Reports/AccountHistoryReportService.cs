@@ -28,7 +28,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         _demographicReaderService = demographicReaderService;
     }
 
-    public async Task<ReportResponseBase<AccountHistoryReportResponse>> GetAccountHistoryReportAsync(
+    public async Task<AccountHistoryReportPaginatedResponse> GetAccountHistoryReportAsync(
         int memberId,
         AccountHistoryReportRequest request,
         CancellationToken cancellationToken)
@@ -148,10 +148,17 @@ public class AccountHistoryReportService : IAccountHistoryReportService
             ? (startDate, endDate)
             : (endDate, startDate);
 
-        var paginatedResponse = new AccountHistoryReportPaginatedResponse
+        var paginatedResponse = new AccountHistoryReportPaginatedResponse()
         {
-            Results = paginatedResult,
-            Total = totalCount,
+            ReportName = "Account History Report",
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = dateRange.Item1,
+            EndDate = dateRange.Item2,
+            Response = new PaginatedResponseDto<AccountHistoryReportResponse>
+            {
+                Results = paginatedResult,
+                Total = totalCount
+            },
             CumulativeTotals = new AccountHistoryReportTotals
             {
                 TotalContributions = totalContributions,
@@ -162,21 +169,10 @@ public class AccountHistoryReportService : IAccountHistoryReportService
             }
         };
 
-        // Use System.Text.Json to add cumulative totals to the response during serialization
-        // Store totals as extension data on the response object
-        var reportResponse = new ReportResponseBase<AccountHistoryReportResponse>
-        {
-            ReportName = "Account History Report",
-            ReportDate = DateTimeOffset.UtcNow,
-            StartDate = dateRange.Item1,
-            EndDate = dateRange.Item2,
-            Response = paginatedResponse
-        };
-
         // Note: Cumulative totals (total contributions, earnings, forfeitures, withdrawals, balance)
         // are calculated from all sorted results before pagination. The UI reads these values
-        // from the response serialization layer
-        return reportResponse;
+        // from the AccountHistoryReportPaginatedResponse.CumulativeTotals property
+        return paginatedResponse;
     }
 
     /// <summary>

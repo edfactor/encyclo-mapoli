@@ -17,7 +17,7 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
 /// Endpoint for generating account history reports showing member account activity by profit year.
 /// Allows users to set start and end dates for export and condense data into one line per plan year.
 /// </summary>
-public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<AccountHistoryReportRequest, Results<Ok<ReportResponseBase<AccountHistoryReportResponse>>, ProblemHttpResult>>
+public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<AccountHistoryReportRequest, Results<Ok<AccountHistoryReportPaginatedResponse>, ProblemHttpResult>>
 {
     private readonly IAccountHistoryReportService _accountHistoryReportService;
     private readonly ILogger<AccountHistoryReportEndpoint> _logger;
@@ -47,13 +47,13 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
             {
                 {
                     200,
-                    new ReportResponseBase<AccountHistoryReportResponse>
+                    new AccountHistoryReportPaginatedResponse
                     {
                         ReportName = "Account History Report",
                         ReportDate = DateTimeOffset.Now,
                         StartDate = new DateOnly(2007, 1, 1),
                         EndDate = new DateOnly(2024, 12, 31),
-                        Response = new AccountHistoryReportPaginatedResponse
+                        Response = new PaginatedResponseDto<AccountHistoryReportResponse>
                         {
                             Results = new List<AccountHistoryReportResponse>
                             {
@@ -83,6 +83,14 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
                                 }
                             },
                             Total = 2
+                        },
+                        CumulativeTotals = new AccountHistoryReportTotals
+                        {
+                            TotalContributions = 105000,
+                            TotalEarnings = 11000,
+                            TotalForfeitures = 0,
+                            TotalWithdrawals = 0,
+                            CumulativeBalance = 116000
                         }
                     }
                 }
@@ -93,7 +101,7 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
         });
     }
 
-    public override async Task<Results<Ok<ReportResponseBase<AccountHistoryReportResponse>>, ProblemHttpResult>> ExecuteAsync(AccountHistoryReportRequest req, CancellationToken ct)
+    public override async Task<Results<Ok<AccountHistoryReportPaginatedResponse>, ProblemHttpResult>> ExecuteAsync(AccountHistoryReportRequest req, CancellationToken ct)
     {
         using var activity = this.StartEndpointActivity(HttpContext);
 
@@ -107,22 +115,23 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
                 _logger.LogWarning("Account history report requested without valid badge number (correlation: {CorrelationId})",
                     HttpContext.TraceIdentifier);
 
-                var emptyResult = new ReportResponseBase<AccountHistoryReportResponse>
+                var emptyResult = new AccountHistoryReportPaginatedResponse
                 {
                     ReportName = "Account History Report",
                     StartDate = req.StartDate ?? new DateOnly(2007, 1, 1),
                     EndDate = req.EndDate ?? DateOnly.FromDateTime(DateTime.Today),
-                    Response = new AccountHistoryReportPaginatedResponse
+                    Response = new PaginatedResponseDto<AccountHistoryReportResponse>
                     {
                         Results = [],
-                        CumulativeTotals = new AccountHistoryReportTotals
-                        {
-                            TotalContributions = 0,
-                            TotalEarnings = 0,
-                            TotalForfeitures = 0,
-                            TotalWithdrawals = 0,
-                            CumulativeBalance = 0
-                        }
+                        Total = 0
+                    },
+                    CumulativeTotals = new AccountHistoryReportTotals
+                    {
+                        TotalContributions = 0,
+                        TotalEarnings = 0,
+                        TotalForfeitures = 0,
+                        TotalWithdrawals = 0,
+                        CumulativeBalance = 0
                     }
                 };
 
@@ -154,22 +163,23 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
                 return TypedResults.Ok(result);
             }
 
-            var emptyReportResult = new ReportResponseBase<AccountHistoryReportResponse>
+            var emptyReportResult = new AccountHistoryReportPaginatedResponse
             {
                 ReportName = "Account History Report",
                 StartDate = req.StartDate ?? new DateOnly(2007, 1, 1),
                 EndDate = req.EndDate ?? DateOnly.FromDateTime(DateTime.Today),
-                Response = new AccountHistoryReportPaginatedResponse
+                Response = new PaginatedResponseDto<AccountHistoryReportResponse>
                 {
                     Results = [],
-                    CumulativeTotals = new AccountHistoryReportTotals
-                    {
-                        TotalContributions = 0,
-                        TotalEarnings = 0,
-                        TotalForfeitures = 0,
-                        TotalWithdrawals = 0,
-                        CumulativeBalance = 0
-                    }
+                    Total = 0
+                },
+                CumulativeTotals = new AccountHistoryReportTotals
+                {
+                    TotalContributions = 0,
+                    TotalEarnings = 0,
+                    TotalForfeitures = 0,
+                    TotalWithdrawals = 0,
+                    CumulativeBalance = 0
                 }
             };
 
