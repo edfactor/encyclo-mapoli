@@ -124,6 +124,13 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         var isSortDescending = request.IsSortDescending ?? true;
         var sortedResult = ApplySorting(result, sortBy, isSortDescending).ToList();
 
+        // Calculate cumulative totals across all results
+        var totalContributions = sortedResult.Sum(r => r.Contributions);
+        var totalEarnings = sortedResult.Sum(r => r.Earnings);
+        var totalForfeitures = sortedResult.Sum(r => r.Forfeitures);
+        var totalWithdrawals = sortedResult.Sum(r => r.Withdrawals);
+        var cumulativeBalance = sortedResult.LastOrDefault()?.EndingBalance ?? 0m;
+
         // Calculate total count before pagination
         var totalCount = sortedResult.Count;
 
@@ -141,20 +148,35 @@ public class AccountHistoryReportService : IAccountHistoryReportService
             ? (startDate, endDate)
             : (endDate, startDate);
 
-        return new ReportResponseBase<AccountHistoryReportResponse>
+        var paginatedResponse = new AccountHistoryReportPaginatedResponse
+        {
+            Results = paginatedResult,
+            Total = totalCount,
+            CumulativeTotals = new AccountHistoryReportTotals
+            {
+                TotalContributions = totalContributions,
+                TotalEarnings = totalEarnings,
+                TotalForfeitures = totalForfeitures,
+                TotalWithdrawals = totalWithdrawals,
+                CumulativeBalance = cumulativeBalance
+            }
+        };
+
+        // Use System.Text.Json to add cumulative totals to the response during serialization
+        // Store totals as extension data on the response object
+        var reportResponse = new ReportResponseBase<AccountHistoryReportResponse>
         {
             ReportName = "Account History Report",
             ReportDate = DateTimeOffset.UtcNow,
             StartDate = dateRange.Item1,
             EndDate = dateRange.Item2,
-            Response = new PaginatedResponseDto<AccountHistoryReportResponse>(request)
-            {
-                Results = paginatedResult,
-                Total = totalCount
-            }
+            Response = paginatedResponse
         };
-        // Note: PageSize, CurrentPage, and TotalPages are computed properties on PaginatedResponseDto
-        // and are automatically calculated based on Results and Total during serialization
+
+        // Note: Cumulative totals (total contributions, earnings, forfeitures, withdrawals, balance)
+        // are calculated from all sorted results before pagination. The UI reads these values
+        // from the response serialization layer
+        return reportResponse;
     }
 
     /// <summary>

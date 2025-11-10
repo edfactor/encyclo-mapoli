@@ -53,7 +53,7 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
                         ReportDate = DateTimeOffset.Now,
                         StartDate = new DateOnly(2007, 1, 1),
                         EndDate = new DateOnly(2024, 12, 31),
-                        Response = new PaginatedResponseDto<AccountHistoryReportResponse>
+                        Response = new AccountHistoryReportPaginatedResponse
                         {
                             Results = new List<AccountHistoryReportResponse>
                             {
@@ -112,7 +112,18 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
                     ReportName = "Account History Report",
                     StartDate = req.StartDate ?? new DateOnly(2007, 1, 1),
                     EndDate = req.EndDate ?? DateOnly.FromDateTime(DateTime.Today),
-                    Response = new PaginatedResponseDto<AccountHistoryReportResponse> { Results = [] }
+                    Response = new AccountHistoryReportPaginatedResponse
+                    {
+                        Results = [],
+                        CumulativeTotals = new AccountHistoryReportTotals
+                        {
+                            TotalContributions = 0,
+                            TotalEarnings = 0,
+                            TotalForfeitures = 0,
+                            TotalWithdrawals = 0,
+                            CumulativeBalance = 0
+                        }
+                    }
                 };
 
                 this.RecordResponseMetrics(HttpContext, _logger, emptyResult);
@@ -148,7 +159,18 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
                 ReportName = "Account History Report",
                 StartDate = req.StartDate ?? new DateOnly(2007, 1, 1),
                 EndDate = req.EndDate ?? DateOnly.FromDateTime(DateTime.Today),
-                Response = new PaginatedResponseDto<AccountHistoryReportResponse> { Results = [] }
+                Response = new AccountHistoryReportPaginatedResponse
+                {
+                    Results = [],
+                    CumulativeTotals = new AccountHistoryReportTotals
+                    {
+                        TotalContributions = 0,
+                        TotalEarnings = 0,
+                        TotalForfeitures = 0,
+                        TotalWithdrawals = 0,
+                        CumulativeBalance = 0
+                    }
+                }
             };
 
             this.RecordResponseMetrics(HttpContext, _logger, emptyReportResult);

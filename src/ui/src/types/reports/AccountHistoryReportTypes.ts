@@ -31,6 +31,18 @@ export interface PaginatedResponseDto<T> {
   results: T[];
 }
 
+export interface AccountHistoryReportTotals {
+  totalContributions: number;
+  totalEarnings: number;
+  totalForfeitures: number;
+  totalWithdrawals: number;
+  cumulativeBalance: number;
+}
+
+export interface AccountHistoryReportPaginatedResponse extends PaginatedResponseDto<AccountHistoryReportResponse> {
+  cumulativeTotals?: AccountHistoryReportTotals;
+}
+
 export interface ReportResponseBase<T> {
   reportName: string;
   reportDate: string;

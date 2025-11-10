@@ -1,6 +1,6 @@
 import { Divider, Grid } from "@mui/material";
 import React, { useCallback, useRef, useState } from "react";
-import { DSMAccordion, Page } from "smart-ui-library";
+import { DSMAccordion, numberToCurrency, Page, TotalsGrid } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { AccountHistoryReportApi } from "../../../reduxstore/api/AccountHistoryReportApi";
@@ -99,16 +99,66 @@ const AccountHistoryReport: React.FC = () => {
           </DSMAccordion>
         </Grid>
 
-        {filterParams && (
-          <Grid width="100%">
-            <AccountHistoryReportTable
-              data={data}
-              isLoading={isFetching}
-              error={undefined}
-              showData={!!filterParams}
-              gridPagination={gridPagination}
-            />
-          </Grid>
+        {filterParams && data?.response && (
+          <>
+            <Grid width="100%">
+              <div className="sticky top-0 z-10 flex items-start gap-2 bg-white py-2">
+                {data.response.cumulativeTotals && (
+                  <>
+                    <div className="flex-1">
+                      <TotalsGrid
+                        displayData={[[numberToCurrency(data.response.cumulativeTotals.totalContributions)]]}
+                        leftColumnHeaders={["Contributions"]}
+                        topRowHeaders={[]}
+                        breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <TotalsGrid
+                        displayData={[[numberToCurrency(data.response.cumulativeTotals.totalEarnings)]]}
+                        leftColumnHeaders={["Earnings"]}
+                        topRowHeaders={[]}
+                        breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <TotalsGrid
+                        displayData={[[numberToCurrency(data.response.cumulativeTotals.totalForfeitures)]]}
+                        leftColumnHeaders={["Forfeitures"]}
+                        topRowHeaders={[]}
+                        breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <TotalsGrid
+                        displayData={[[numberToCurrency(data.response.cumulativeTotals.totalWithdrawals)]]}
+                        leftColumnHeaders={["Withdrawals"]}
+                        topRowHeaders={[]}
+                        breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <TotalsGrid
+                        displayData={[[numberToCurrency(data.response.cumulativeTotals.cumulativeBalance)]]}
+                        leftColumnHeaders={["Cumulative Balance"]}
+                        topRowHeaders={[]}
+                        breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+            </Grid>
+            <Grid width="100%">
+              <AccountHistoryReportTable
+                data={data}
+                isLoading={isFetching}
+                error={undefined}
+                showData={!!filterParams}
+                gridPagination={gridPagination}
+              />
+            </Grid>
+          </>
         )}
       </Grid>
     </Page>
