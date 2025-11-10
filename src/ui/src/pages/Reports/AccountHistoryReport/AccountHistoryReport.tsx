@@ -103,11 +103,11 @@ const AccountHistoryReport: React.FC = () => {
           <>
             <Grid width="100%">
               <div className="sticky top-0 z-10 flex items-start gap-2 bg-white py-2">
-                {data.response.cumulativeTotals && (
+                {data.cumulativeTotals && (
                   <>
                     <div className="flex-1">
                       <TotalsGrid
-                        displayData={[[numberToCurrency(data.response.cumulativeTotals.totalContributions)]]}
+                        displayData={[[numberToCurrency(data.cumulativeTotals.totalContributions)]]}
                         leftColumnHeaders={["Contributions"]}
                         topRowHeaders={[]}
                         breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
@@ -115,7 +115,7 @@ const AccountHistoryReport: React.FC = () => {
                     </div>
                     <div className="flex-1">
                       <TotalsGrid
-                        displayData={[[numberToCurrency(data.response.cumulativeTotals.totalEarnings)]]}
+                        displayData={[[numberToCurrency(data.cumulativeTotals.totalEarnings)]]}
                         leftColumnHeaders={["Earnings"]}
                         topRowHeaders={[]}
                         breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
@@ -123,7 +123,7 @@ const AccountHistoryReport: React.FC = () => {
                     </div>
                     <div className="flex-1">
                       <TotalsGrid
-                        displayData={[[numberToCurrency(data.response.cumulativeTotals.totalForfeitures)]]}
+                        displayData={[[numberToCurrency(data.cumulativeTotals.totalForfeitures)]]}
                         leftColumnHeaders={["Forfeitures"]}
                         topRowHeaders={[]}
                         breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
@@ -131,7 +131,7 @@ const AccountHistoryReport: React.FC = () => {
                     </div>
                     <div className="flex-1">
                       <TotalsGrid
-                        displayData={[[numberToCurrency(data.response.cumulativeTotals.totalWithdrawals)]]}
+                        displayData={[[numberToCurrency(data.cumulativeTotals.totalWithdrawals)]]}
                         leftColumnHeaders={["Withdrawals"]}
                         topRowHeaders={[]}
                         breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
@@ -139,7 +139,7 @@ const AccountHistoryReport: React.FC = () => {
                     </div>
                     <div className="flex-1">
                       <TotalsGrid
-                        displayData={[[numberToCurrency(data.response.cumulativeTotals.cumulativeBalance)]]}
+                        displayData={[[numberToCurrency(data.cumulativeTotals.cumulativeBalance)]]}
                         leftColumnHeaders={["Cumulative Balance"]}
                         topRowHeaders={[]}
                         breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}

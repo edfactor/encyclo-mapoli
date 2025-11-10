@@ -39,11 +39,12 @@ export interface AccountHistoryReportTotals {
   cumulativeBalance: number;
 }
 
-export interface AccountHistoryReportPaginatedResponse extends PaginatedResponseDto<AccountHistoryReportResponse> {
+export interface AccountHistoryReportPaginatedResponse {
   reportName: string;
   reportDate: string;
   startDate: string;
   endDate: string;
+  response: PaginatedResponseDto<AccountHistoryReportResponse>;
   cumulativeTotals?: AccountHistoryReportTotals;
 }
 
