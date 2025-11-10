@@ -9,19 +9,23 @@ import { GetUnder21BreakdownColumnDefs } from "./GetUnder21BreakdownGridColumns"
 
 interface Under21BreakdownGridProps {
   isLoading?: boolean;
-
   setInitialSearchLoaded: (loaded: boolean) => void;
+  pageNumber: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
 }
 
 const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
   isLoading = false,
-
-  setInitialSearchLoaded
+  setInitialSearchLoaded,
+  pageNumber,
+  pageSize,
+  onPageChange
 }) => {
   const under21Breakdown = useSelector((state: RootState) => state.yearsEnd.under21BreakdownByStore);
   //const navigate = useNavigate();
 
-  const { pageNumber, pageSize, handlePaginationChange, handleSortChange } = useGridPagination({
+  const { handleSortChange } = useGridPagination({
     initialPageSize: 25,
     initialSortBy: "badgeNumber",
     initialSortDescending: false,
@@ -72,12 +76,12 @@ const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
           <Pagination
             pageNumber={pageNumber}
             setPageNumber={(value: number) => {
-              handlePaginationChange(value - 1, pageSize);
+              onPageChange(value - 1);
               setInitialSearchLoaded(true);
             }}
             pageSize={pageSize}
-            setPageSize={(value: number) => {
-              handlePaginationChange(0, value);
+            setPageSize={(_value: number) => {
+              onPageChange(0);
               setInitialSearchLoaded(true);
             }}
             recordCount={under21Breakdown.response.total || 0}
