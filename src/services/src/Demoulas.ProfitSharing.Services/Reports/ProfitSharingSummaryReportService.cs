@@ -150,7 +150,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 // If totalsFilter provided, override NumberOfMembers
                 if (totalsFilter != null)
                 {
-                    lineItem.NumberOfMembers = summaryData.Where(totalsFilter).Count();
+                    lineItem.NumberOfMembers = summaryData.Count(totalsFilter);
                 }
 
                 return lineItem;

@@ -191,7 +191,7 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
                     else if (pm.IsPrimitiveOrString)
                     {
                         // Write primitive directly for performance where possible
-                        WritePrimitive(writer, propVal, pm);
+                        WritePrimitive(writer, propVal);
                     }
                     else if (pm.IsDictionaryWithDecimalValues)
                     {
@@ -232,7 +232,7 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
             return false;
         }
 
-        private static void WritePrimitive(Utf8JsonWriter writer, object value, PropertyMetadata pm)
+        private static void WritePrimitive(Utf8JsonWriter writer, object value)
         {
             switch (value)
             {

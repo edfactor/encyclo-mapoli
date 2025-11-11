@@ -13,6 +13,7 @@ using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.BeneficiaryInquiry;
+
 public class BeneficiaryInquiryService : IBeneficiaryInquiryService
 {
     // Magic number constants
@@ -34,7 +35,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         _masterInquiryService = masterInquiryService;
     }
 
-    private async Task<IQueryable<BeneficiarySearchFilterResponse>> GetEmployeeQuery(BeneficiarySearchFilterRequest request, ProfitSharingReadOnlyDbContext context)
+    private async Task<IQueryable<BeneficiarySearchFilterResponse>> GetEmployeeQuery(BeneficiarySearchFilterRequest request)
     {
         var member = await _masterInquiryService.GetMembersAsync(new Common.Contracts.Request.MasterInquiry.MasterInquiryRequest()
         {

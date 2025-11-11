@@ -513,11 +513,11 @@ public sealed class DistributionService : IDistributionService
         }, cancellationToken);
     }
 
-    public async Task<Result<DistributionRunReportSummaryResponse[]>> GetDistributionRunReportSummary(CancellationToken cancellationToken)
+    public Task<Result<DistributionRunReportSummaryResponse[]>> GetDistributionRunReportSummary(CancellationToken cancellationToken)
     {
-        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var distributionQuery = GetDistributionExtract(ctx, cancellationToken, Array.Empty<char>());
+            var distributionQuery = GetDistributionExtract(ctx, Array.Empty<char>());
 
             var groupedResults = await distributionQuery
                 .TagWith($"DistributionSummaryReport-{DateTime.UtcNow:yyyyMMddHHmm}")
@@ -591,9 +591,9 @@ public sealed class DistributionService : IDistributionService
         }, cancellationToken);
     }
 
-    public async Task<Result<PaginatedResponseDto<DistributionsOnHoldResponse>>> GetDistributionsOnHold(SortedPaginationRequestDto request, CancellationToken cancellationToken)
+    public Task<Result<PaginatedResponseDto<DistributionsOnHoldResponse>>> GetDistributionsOnHold(SortedPaginationRequestDto request, CancellationToken cancellationToken)
     {
-        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var query = from dist in ctx.Distributions.Include(x => x.Payee)
                         where dist.StatusId == DistributionStatus.Constants.RequestOnHold
@@ -624,9 +624,9 @@ public sealed class DistributionService : IDistributionService
         }, cancellationToken);
     }
 
-    public async Task<Result<PaginatedResponseDto<ManualChecksWrittenResponse>>> GetManualCheckDistributions(SortedPaginationRequestDto request, CancellationToken cancellationToken)
+    public Task<Result<PaginatedResponseDto<ManualChecksWrittenResponse>>> GetManualCheckDistributions(SortedPaginationRequestDto request, CancellationToken cancellationToken)
     {
-        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var query = from dist in ctx.Distributions.Include(x => x.Payee)
                         where dist.StatusId == DistributionStatus.Constants.ManualCheck
@@ -665,12 +665,12 @@ public sealed class DistributionService : IDistributionService
         }, cancellationToken);
     }
 
-    public async Task<Result<PaginatedResponseDto<DistributionRunReportDetail>>> GetDistributionRunReport(DistributionRunReportRequest request, CancellationToken cancellationToken)
+    public Task<Result<PaginatedResponseDto<DistributionRunReportDetail>>> GetDistributionRunReport(DistributionRunReportRequest request, CancellationToken cancellationToken)
     {
-        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
-            var distributionQuery = GetDistributionExtract(ctx, cancellationToken, request.DistributionFrequencies ?? Array.Empty<char>());
+            var distributionQuery = GetDistributionExtract(ctx, request.DistributionFrequencies ?? Array.Empty<char>());
             var query = from dist in distributionQuery
                         join dem in demographicQuery.Include(x => x.PayClassification)
                                                     .Include(x => x.Address)
@@ -724,13 +724,13 @@ public sealed class DistributionService : IDistributionService
         }, cancellationToken);
     }
 
-    public async Task<Result<PaginatedResponseDto<DisbursementReportDetailResponse>>> GetDisbursementReport(ProfitYearRequest request, CancellationToken cancellationToken)
+    public Task<Result<PaginatedResponseDto<DisbursementReportDetailResponse>>> GetDisbursementReport(ProfitYearRequest request, CancellationToken cancellationToken)
     {
-        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
-            var distributionQuery = GetDistributionExtract(ctx, cancellationToken, new[] { DistributionFrequency.Constants.Annually, DistributionFrequency.Constants.Monthly, DistributionFrequency.Constants.Quarterly });
+            var distributionQuery = GetDistributionExtract(ctx, new[] { DistributionFrequency.Constants.Annually, DistributionFrequency.Constants.Monthly, DistributionFrequency.Constants.Quarterly });
             var query = from dist in distributionQuery
                         join dem in demographicQuery on dist.Ssn equals dem.Ssn into demJoin
                         from dem in demJoin.DefaultIfEmpty()
@@ -756,7 +756,7 @@ public sealed class DistributionService : IDistributionService
         }, cancellationToken);
     }
 
-    private Result<bool> ValidateDistributionRequest(CreateDistributionRequest request)
+    private static Result<bool> ValidateDistributionRequest(CreateDistributionRequest request)
     {
         var validationErrors = new Dictionary<string, string[]>();
 
@@ -786,7 +786,7 @@ public sealed class DistributionService : IDistributionService
             : Result<bool>.Success(true);
     }
 
-    private IQueryable<Distribution> GetDistributionExtract(IProfitSharingDbContext ctx, CancellationToken cancellationToken, char[] distributionFrequencies)
+    private static IQueryable<Distribution> GetDistributionExtract(IProfitSharingDbContext ctx, char[] distributionFrequencies)
     {
         var distributionQuery = ctx.Distributions
             .Include(d => d.Frequency)

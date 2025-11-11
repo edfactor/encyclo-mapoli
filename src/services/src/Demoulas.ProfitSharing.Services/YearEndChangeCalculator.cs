@@ -31,7 +31,7 @@ internal static class YearEndChangeCalculator
         // Handle terminated employees
         if (IsTerminatedBeforeFiscalEnd(employee, fiscalEnd))
         {
-            return ComputeChangeForTerminated(employee, age, profitYear, firstContributionYear, currentBalance, fiscalEnd);
+            return ComputeChangeForTerminated(employee, age, profitYear, firstContributionYear, currentBalance);
         }
 
         // Handle age 64+ employees
@@ -63,8 +63,7 @@ internal static class YearEndChangeCalculator
         short age,
         short profitYear,
         short? firstContributionYear,
-        decimal currentBalance,
-        DateOnly fiscalEnd)
+        decimal currentBalance)
     {
         byte zeroCont = HasMinimumHours(employee)
             ? ZeroContributionReason.Constants.TerminatedEmployeeOver1000HoursWorkedGetsYearVested

@@ -175,7 +175,7 @@ public class ReportRunnerService : IReportRunnerService
         return new Dictionary<string, object> { ["error"] = "report not found" };
     }
 
-    private async Task<Dictionary<string, object>> InvokeReport(
+    private static async Task<Dictionary<string, object>> InvokeReport(
         string reportSelector,
                 Func<Task<(long Total, int)>> func)
     {

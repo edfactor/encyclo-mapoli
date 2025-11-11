@@ -73,7 +73,6 @@ public sealed class BreakdownReportService : IBreakdownService
         public decimal Earnings { get; internal set; }
         public decimal Contributions { get; internal set; }
         public decimal Forfeitures { get; internal set; }
-        public decimal? BeneficiaryAllocation2 => BeneficiaryAllocation; // preserve binary layout if any mapping expects this (no-op)
         public decimal Distributions { get; internal set; }
 
     }
@@ -83,11 +82,6 @@ public sealed class BreakdownReportService : IBreakdownService
         decimal BeginningBalance,
         ProfitDetailRollup Txn,
         decimal VestingRatio);
-
-    private sealed record CombinedTotals(
-        short StoreNumber,
-        decimal VestingRatio,
-        decimal EndBalance);
 
     private enum StatusFilterEnum
     {

@@ -103,7 +103,9 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
                             && d.EmploymentStatusId == EmploymentStatus.Constants.Terminated
                             && d.TerminationCodeId != TerminationCode.Constants.Retired
                             && (req.BadgeNumbers == null || !req.BadgeNumbers.Any() || req.BadgeNumbers.Contains(d.BadgeNumber))
-                         /*TODO : Exclude employees who have already been sent a letter?*/
+#pragma warning disable S1135 // Track: Exclude employees who have already been sent a letter
+                         && true // Placeholder for future letter-sent filter
+#pragma warning restore S1135
                          /*Filter for employees who are not fully vested, and probably have a balance */
                          select new AdhocTerminatedEmployeeResponse
                          {

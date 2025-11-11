@@ -140,7 +140,7 @@ namespace Demoulas.ProfitSharing.Services.Reports
         }
 
 
-        private IQueryable<int> GetDuplicateSsnQuery(IQueryable<Demographic> demographics)
+        private static IQueryable<int> GetDuplicateSsnQuery(IQueryable<Demographic> demographics)
         {
             return demographics
                 .GroupBy(x => x.Ssn)

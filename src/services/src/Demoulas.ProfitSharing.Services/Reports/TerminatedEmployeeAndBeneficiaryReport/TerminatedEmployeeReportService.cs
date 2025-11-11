@@ -415,7 +415,7 @@ public sealed class TerminatedEmployeeReportService
     /// <summary>
     ///     Extracts the profit year range from the request date range.
     /// </summary>
-    private (short beginProfitYear, short endProfitYear) GetProfitYearRange(FilterableStartAndEndDateRequest request)
+    private static (short beginProfitYear, short endProfitYear) GetProfitYearRange(FilterableStartAndEndDateRequest request)
     {
         return ((short)request.BeginningDate.Year, (short)request.EndingDate.Year);
     }
@@ -675,7 +675,7 @@ public sealed class TerminatedEmployeeReportService
     ///     Prioritizes employee records over beneficiary records for the same person.
     ///     Returns an IQueryable to defer materialization until the data is actually needed.
     /// </summary>
-    private IQueryable<MemberSlice> CombineEmployeeAndBeneficiarySlices(
+    private static IQueryable<MemberSlice> CombineEmployeeAndBeneficiarySlices(
         IQueryable<MemberSlice> terminatedWithContributions,
         IQueryable<MemberSlice> beneficiaries)
     {
