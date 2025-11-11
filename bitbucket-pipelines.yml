@@ -21,30 +21,30 @@ definitions:
         # Ensure the REPORTS_PATH directory exists
         - mkdir -Force -Path $env:REPORTS_PATH
 
-        # Check if .NET 9 SDK is installed
+        # Check if .NET 10 SDK is installed
         - echo "Checking installed .NET SDK versions..."
-        - $dotnetSdkInstalled = dotnet --list-sdks | Select-String "^9\.(\d+)\.(\d+)"
+        - $dotnetSdkInstalled = dotnet --list-sdks | Select-String "^10\.(\d+)\.(\d+)"
         - if ($dotnetSdkInstalled) {
               $isSdkValid = $false;
               foreach ($sdk in $dotnetSdkInstalled) {
-                if ($sdk -match "^9\.(\d+)\.(\d+)") {
+                if ($sdk -match "^10\.(\d+)\.(\d+)") {
                   $minor = [int]$matches[1];
                   $patch = [int]$matches[2];
-                  if ($minor -gt 0 -or $patch -ge 306) {
+                  if ($minor -gt 0 -or $patch -ge 100) {
                     $isSdkValid = $true;
                     break;
                   }
                 }
               }
               if ($isSdkValid) {
-                Write-Output ".NET SDK 9.0.306 or higher is installed.";
+                Write-Output ".NET SDK 10.0.100 or higher is installed.";
               } else {
-                Write-Output ".NET SDK 9.0.306 or higher is NOT installed.";
-                Invoke-WebRequest -Uri "https://builds.dotnet.microsoft.com/dotnet/Sdk/9.0.306/dotnet-sdk-9.0.306-win-x64.exe" -OutFile "$env:TEMP\dotnet-sdk-9.0.306-win-x64.exe";
-                Start-Process -FilePath "$env:TEMP\dotnet-sdk-9.0.306-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait;
+                Write-Output ".NET SDK 10.0.100 or higher is NOT installed.";
+                Invoke-WebRequest -Uri "https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.100/dotnet-sdk-10.0.100-win-x64.exe" -OutFile "$env:TEMP\dotnet-sdk-10.0.100-win-x64.exe";
+                Start-Process -FilePath "$env:TEMP\dotnet-sdk-10.0.100-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait;
               }
             } else {
-              Write-Output "No .NET 9.x SDK installed.";
+              Write-Output "No .NET 10.x SDK installed.";
             }
 
         # Clean any previous build artifacts to ensure deterministic builds
