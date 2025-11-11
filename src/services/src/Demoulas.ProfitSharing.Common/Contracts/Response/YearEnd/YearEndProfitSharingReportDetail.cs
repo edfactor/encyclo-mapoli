@@ -4,7 +4,6 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
-[SuppressMessage("Major Code Smell", "S125:Sections of code should not be commented out")]
 public sealed record YearEndProfitSharingReportDetail : IIsExecutive, IProfitYearRequest
 {
     public required int BadgeNumber { get; set; }

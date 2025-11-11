@@ -45,7 +45,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         public byte? Years { get; init; }
         public short? FirstContributionYear { get; init; }
         public bool IsExecutive { get; init; }
-        public byte EnrollmentId { get; init; } // PY-PS-ENROLLED from READY
+        public byte EnrollmentId { get; init; }
     }
 
     private sealed record EmployeeWithBalance
