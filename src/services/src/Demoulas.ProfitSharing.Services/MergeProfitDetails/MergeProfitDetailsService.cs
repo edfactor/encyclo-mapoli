@@ -19,28 +19,28 @@ public class MergeProfitDetailsService : IMergeProfitDetailsService
         _demographicReaderService = demographicReaderService;
     }
 
-    public async Task<Result<bool>> MergeProfitDetailsToDemographic(int sourceSsn, int destinationSsn, CancellationToken cancellationToken = default)
+    public async Task<Result<bool>> MergeProfitDetailsToDemographic(int sourceDemographic, int targetDemographic, CancellationToken cancellationToken = default)
     {
         // Early validation: prevent merging with same SSN
-        if (sourceSsn == destinationSsn)
+        if (sourceDemographic == targetDemographic)
         {
             return Result<bool>.Failure(Error.SameDemographicMerge);
         }
 
         try
         {
-            return await _dataContextFactory.UseWritableContext(async ctx =>
+            return await _dataContextFactory.UseWritableContext((Func<Data.Contexts.ProfitSharingDbContext, Task<Result<bool>>>)(async ctx =>
             {
                 var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
-                HashSet<int> ssns = new() { sourceSsn, destinationSsn };
+                HashSet<int> ssns = new() { sourceDemographic, targetDemographic };
 
                 List<Demographic> source = await demographicQuery
                      .Where(d => ssns.Contains(d.Ssn))
                      .ToListAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
                 // Confirm we have both source and destination
-                Demographic? sourceDemographic = source.FirstOrDefault(d => d.Ssn == sourceSsn);
-                Demographic? destinationDemographic = source.FirstOrDefault(e => e.Ssn == destinationSsn);
+                Demographic? sourceDemographic = source.FirstOrDefault((Func<Demographic, bool>)(d => d.Ssn == sourceDemographic));
+                Demographic? destinationDemographic = source.FirstOrDefault(e => e.Ssn == targetDemographic);
 
                 // Validate demographics existence with specific error messages
                 if (sourceDemographic == null && destinationDemographic == null)
@@ -58,13 +58,13 @@ public class MergeProfitDetailsService : IMergeProfitDetailsService
 
                 // Perform the merge operation
                 var rowsAffected = await ctx.ProfitDetails
-                    .Where(p => p.Ssn == sourceSsn)
+                    .Where((System.Linq.Expressions.Expression<Func<ProfitDetail, bool>>)(p => p.Ssn == sourceDemographic))
                     .ExecuteUpdateAsync(
-                        s => s.SetProperty(p => p.Ssn, destinationSsn),
+                        s => s.SetProperty(p => p.Ssn, targetDemographic),
                         cancellationToken);
 
                 return Result<bool>.Success(true);
-            }, cancellationToken);
+            }), cancellationToken);
         }
         catch (Exception ex)
         {

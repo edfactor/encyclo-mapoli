@@ -59,8 +59,6 @@ public class BeneficiaryService : IBeneficiaryService
                 throw new InvalidOperationException("Invalid percentage");
             }
 
-            //await ValidatePercentages(ctx, req.EmployeeBadgeNumber, req.Percentage, cancellationToken);
-
             var psnSuffix = await FindPsn(req, ctx, cancellationToken);
             var beneficiary = new Beneficiary
             {
@@ -495,41 +493,10 @@ public class BeneficiaryService : IBeneficiaryService
         return true;
     }
 
-    private async Task<bool> CanIDeleteThisBeneficiaryContact(int beneficiaryId, BeneficiaryContact contact, ProfitSharingDbContext ctx, CancellationToken token)
+    private static async Task<bool> CanIDeleteThisBeneficiaryContact(int beneficiaryId, BeneficiaryContact contact, ProfitSharingDbContext ctx, CancellationToken token)
     {
         return !(await ctx.Beneficiaries.AnyAsync(b => b.BeneficiaryContactId == contact.Id && b.Id != beneficiaryId, token));
     }
-    private async Task ValidatePercentages(ProfitSharingDbContext ctx, int badgeNumber, byte proposedPctOfNewBeneficiary, CancellationToken token)
-    {
-        var beneficiaries = await ctx.Beneficiaries.Where(x => x.DemographicId == badgeNumber).OrderBy(x => x.Psn).ToListAsync(token);
-        var rootBeneficiaries = new List<Beneficiary>();
-
-        foreach (var beneficiary in beneficiaries)
-        {
-            int childMask = 10;
-            if (beneficiary.PsnSuffix % 100 == 0 && beneficiary.PsnSuffix % 1000 != 0)
-            {
-                childMask = 100;
-            }
-            else if (beneficiary.PsnSuffix % 1000 == 0)
-            {
-                childMask = 1000;
-            }
-            if (!beneficiaries.Any(x => x.PsnSuffix > beneficiary.PsnSuffix && x.PsnSuffix < beneficiary.PsnSuffix + childMask))
-            {
-                rootBeneficiaries.Add(beneficiary);
-            }
-        }
-
-        if (rootBeneficiaries.Sum(x => x.Percent) + proposedPctOfNewBeneficiary > 100)
-        {
-            throw new InvalidOperationException("Total percentage for employee would be more than 100%");
-        }
-
-
-
-    }
-
     private static async Task<short> FindPsn(CreateBeneficiaryRequest req, ProfitSharingDbContext ctx, CancellationToken token)
     {
         int minPsn = 0;

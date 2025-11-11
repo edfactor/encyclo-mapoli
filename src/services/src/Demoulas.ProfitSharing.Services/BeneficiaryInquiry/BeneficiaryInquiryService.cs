@@ -128,7 +128,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         return result;
     }
 
-    private int StepBackNumber(int num)
+    private static int StepBackNumber(int num)
     {
         if (num <= PsnSuffixRoot)
         {
@@ -160,7 +160,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         }
     }
 
-    private async Task<PaginatedResponseDto<BeneficiaryDto>> GetPreviousBeneficiaries(BeneficiaryRequestDto request, IQueryable<Beneficiary> query, CancellationToken cancellationToken)
+    private Task<PaginatedResponseDto<BeneficiaryDto>> GetPreviousBeneficiaries(BeneficiaryRequestDto request, IQueryable<Beneficiary> query, CancellationToken cancellationToken)
     {
         List<BeneficiaryDto> res = new();
         int psnSuffix = request.PsnSuffix ?? 0;
@@ -215,7 +215,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 Relationship = x.Relationship
             });
             
-            return await result.ToPaginationResultsAsync(request, cancellationToken);
+            return result.ToPaginationResultsAsync(request, cancellationToken);
         }
         else
         {
@@ -254,7 +254,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 IsExecutive = x.Demographic != null && x.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly,
             });
             
-            return await result.ToPaginationResultsAsync(request, cancellationToken);
+            return result.ToPaginationResultsAsync(request, cancellationToken);
         }
     }
     

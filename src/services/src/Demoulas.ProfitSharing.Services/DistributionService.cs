@@ -232,12 +232,9 @@ public sealed class DistributionService : IDistributionService
             }
 
             var balance = await _totalService.GetVestingBalanceForSingleMemberAsync(Common.Contracts.Request.SearchBy.Ssn, dem.Ssn, (short)DateTime.Today.Year, cancellationToken);
-            if (request.TaxCodeId == TaxCode.Constants.NormalDistribution.Id && dem.DateOfBirth.Age() > 64)
+            if (request.TaxCodeId == TaxCode.Constants.NormalDistribution.Id && dem.DateOfBirth.Age() > 64 && balance != default && balance.VestedBalance != request.GrossAmount && string.IsNullOrEmpty(request.Memo))
             {
-                if (balance != default && balance.VestedBalance != request.GrossAmount && string.IsNullOrEmpty(request.Memo))
-                {
-                    request.Memo = "AGE>64 - OVERRIDE";
-                }
+                request.Memo = "AGE>64 - OVERRIDE";
             }
 
             if (request.GrossAmount > (balance?.VestedBalance ?? 0))
@@ -377,12 +374,9 @@ public sealed class DistributionService : IDistributionService
                 return Result<CreateOrUpdateDistributionResponse>.Failure(Error.BadgeNumberNotFound);
             }
             var balance = await _totalService.GetVestingBalanceForSingleMemberAsync(Common.Contracts.Request.SearchBy.Ssn, dem.Ssn, (short)DateTime.Today.Year, cancellationToken);
-            if (request.TaxCodeId == TaxCode.Constants.NormalDistribution.Id && dem.DateOfBirth.Age() > 64)
+            if (request.TaxCodeId == TaxCode.Constants.NormalDistribution.Id && dem.DateOfBirth.Age() > 64 && balance != default && balance.VestedBalance != request.GrossAmount && string.IsNullOrEmpty(request.Memo))
             {
-                if (balance != default && balance.VestedBalance != request.GrossAmount && string.IsNullOrEmpty(request.Memo))
-                {
-                    request.Memo = "AGE>64 - OVERRIDE";
-                }
+                request.Memo = "AGE>64 - OVERRIDE";
             }
             var originalGrossAmount = distribution.GrossAmount;
             if (request.GrossAmount > (balance != default ? balance.VestedBalance - originalGrossAmount : originalGrossAmount))

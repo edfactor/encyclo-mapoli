@@ -43,10 +43,10 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
         return meta.HasMaskableProperties;
     }
 
-    public override JsonConverter CreateConverter(Type type, JsonSerializerOptions options)
+    public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
     {
-        TypeMetadata meta = _typeMetadataCache.GetOrAdd(type, BuildMetadata);
-        Type concrete = typeof(MaskingConverter<>).MakeGenericType(type);
+        TypeMetadata meta = _typeMetadataCache.GetOrAdd(typeToConvert, BuildMetadata);
+        Type concrete = typeof(MaskingConverter<>).MakeGenericType(typeToConvert);
         return (JsonConverter)Activator.CreateInstance(concrete, meta, options)!;
     }
 

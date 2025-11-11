@@ -36,12 +36,12 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
     }
 
 
-    public async Task<ForfeituresAndPointsForYearResponseWithTotals> GetForfeituresAndPointsForYearAsync(FrozenProfitYearRequest request,
+    public async Task<ForfeituresAndPointsForYearResponseWithTotals> GetForfeituresAndPointsForYearAsync(FrozenProfitYearRequest req,
         CancellationToken cancellationToken = default)
     {
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            short currentYear = request.ProfitYear;
+            short currentYear = req.ProfitYear;
             short lastYear = (short)(currentYear - 1);
 
             // Validate no duplicate SSNs exist
@@ -175,7 +175,7 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
 
             // Apply pagination
             PaginatedResponseDto<ForfeituresAndPointsForYearResponse> paginatedData =
-                await members.AsQueryable().ToPaginationResultsAsync(request, cancellationToken);
+                await members.AsQueryable().ToPaginationResultsAsync(req, cancellationToken);
 
             return new ForfeituresAndPointsForYearResponseWithTotals
             {

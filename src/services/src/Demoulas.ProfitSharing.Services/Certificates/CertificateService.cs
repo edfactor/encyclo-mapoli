@@ -250,7 +250,7 @@ public sealed class CertificateService : ICertificateService
         };
     }
 
-    private async Task<ReportResponseBase<MemberYearSummaryDto>> GetCertificateData(CerficatePrintRequest request, CancellationToken token)
+    private Task<ReportResponseBase<MemberYearSummaryDto>> GetCertificateData(CerficatePrintRequest request, CancellationToken token)
     {
         var breakdownRequest = new BreakdownByStoreRequest
         {
@@ -260,15 +260,16 @@ public sealed class CertificateService : ICertificateService
             SortBy = ReferenceData.CertificateSort,
         };
 
-        return await _breakdownService.GetMembersWithBalanceActivityByStore(breakdownRequest, request.Ssns, request.BadgeNumbers ?? Array.Empty<int>(), token);
+        return _breakdownService.GetMembersWithBalanceActivityByStore(breakdownRequest, request.Ssns, request.BadgeNumbers ?? Array.Empty<int>(), token);
     }
 
-    private async Task<Dictionary<byte, AnnuityRate>> GetAnnuityRatesByAge(CerficatePrintRequest request, CancellationToken token)
+    private Task<Dictionary<byte, AnnuityRate>> GetAnnuityRatesByAge(CerficatePrintRequest request, CancellationToken token)
     {
-        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        return _dataContextFactory.UseReadOnlyContext(ctx =>
         {
-            return await ctx.AnnuityRates
-                .Where(x => x.Year == request.ProfitYear).ToDictionaryAsync(x => x.Age, x => x, token);
+            return ctx.AnnuityRates
+                .Where(x => x.Year == request.ProfitYear)
+                .ToDictionaryAsync(x => x.Age, x => x, token);
         }, token);
     }
 }
