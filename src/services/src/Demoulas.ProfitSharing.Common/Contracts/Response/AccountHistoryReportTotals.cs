@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
 /// <summary>
 /// Cumulative totals for Account History Report
@@ -9,5 +9,4 @@ public record AccountHistoryReportTotals
     public decimal TotalEarnings { get; set; }
     public decimal TotalForfeitures { get; set; }
     public decimal TotalWithdrawals { get; set; }
-    public decimal CumulativeBalance { get; set; }
 }

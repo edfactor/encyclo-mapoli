@@ -341,7 +341,7 @@ export const useUnForfeitGrid = ({
     if (initialSearchLoaded && !isPaginationChangeRef.current) {
       performSearch(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending, pageSize);
     }
-  }, [initialSearchLoaded, pageNumber, sortParams, performSearch]);
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, performSearch]);
 
   // Effect to handle archive mode search
   useEffect(() => {

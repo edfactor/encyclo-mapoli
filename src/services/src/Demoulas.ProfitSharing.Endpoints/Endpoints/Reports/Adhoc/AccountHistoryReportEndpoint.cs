@@ -89,8 +89,7 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
                             TotalContributions = 105000,
                             TotalEarnings = 11000,
                             TotalForfeitures = 0,
-                            TotalWithdrawals = 0,
-                            CumulativeBalance = 116000
+                            TotalWithdrawals = 0
                         }
                     }
                 }
@@ -130,8 +129,7 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
                         TotalContributions = 0,
                         TotalEarnings = 0,
                         TotalForfeitures = 0,
-                        TotalWithdrawals = 0,
-                        CumulativeBalance = 0
+                        TotalWithdrawals = 0
                     }
                 };
 
@@ -178,8 +176,7 @@ public sealed class AccountHistoryReportEndpoint : ProfitSharingEndpoint<Account
                     TotalContributions = 0,
                     TotalEarnings = 0,
                     TotalForfeitures = 0,
-                    TotalWithdrawals = 0,
-                    CumulativeBalance = 0
+                    TotalWithdrawals = 0
                 }
             };
 

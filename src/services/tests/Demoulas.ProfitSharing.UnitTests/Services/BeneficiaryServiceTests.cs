@@ -8,6 +8,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services;
+
+[Collection("SharedGlobalState")]
 public sealed class BeneficiaryServiceTests : ApiTestBase<Program>
 {
     private readonly (Demographic demographic, List<PayProfit> payprofit) _demographic;

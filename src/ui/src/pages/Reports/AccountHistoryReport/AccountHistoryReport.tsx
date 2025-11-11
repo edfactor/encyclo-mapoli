@@ -137,14 +137,6 @@ const AccountHistoryReport: React.FC = () => {
                         breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
                       />
                     </div>
-                    <div className="flex-1">
-                      <TotalsGrid
-                        displayData={[[numberToCurrency(data.cumulativeTotals.cumulativeBalance)]]}
-                        leftColumnHeaders={["Cumulative Balance"]}
-                        topRowHeaders={[]}
-                        breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
-                      />
-                    </div>
                   </>
                 )}
               </div>
