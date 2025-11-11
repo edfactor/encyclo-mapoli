@@ -363,44 +363,57 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
     [Description("PS-292 : Properly adjust ETVA when disbursement exceeds non-ETVA balance")]
     public async Task DisburseFundsToBeneficiaries_WithEtvaAdjustment_ShouldAdjustCorrectly()
     {
-        // Arrange - Use global test data but modify ETVA amount
-        _disburser.payprofit[0].Etva = 30000; // Set $30k ETVA for testing
+        // Store original state to restore after test (prevents test isolation issues)
+        var originalMock = Constants.FakeParticipantTotals;
+        var originalEtva = _disburser.payprofit[0].Etva;
 
-        // Set up specific balance scenario for this test
-        var originalBalance = 40000m; // $40k total balance (will be 30k ETVA + 10k non-ETVA after ETVA adjustment)
-        var mockParticipantTotalsForTest = new List<ParticipantTotal>
+        try
         {
-            new() { Ssn = _disburser.demographic.Ssn, TotalAmount = originalBalance }
-        };
+            // Arrange - Use global test data but modify ETVA amount
+            _disburser.payprofit[0].Etva = 30000; // Set $30k ETVA for testing
 
-        // Override the global mock with test-specific data AFTER building mocks
-        var mockParticipantTotalsDbSetForTest = mockParticipantTotalsForTest.BuildMockDbSet();
-        Constants.FakeParticipantTotals = mockParticipantTotalsDbSetForTest;
-
-        var request = new BeneficiaryDisbursementRequest
-        {
-            BadgeNumber = _disburser.demographic.BadgeNumber,
-            IsDeceased = false,
-            Beneficiaries = new List<RecipientBeneficiary>
+            // Set up specific balance scenario for this test
+            var originalBalance = 40000m; // $40k total balance (will be 30k ETVA + 10k non-ETVA after ETVA adjustment)
+            var mockParticipantTotalsForTest = new List<ParticipantTotal>
             {
-                new() { PsnSuffix = 1, Amount = 25000m } // Exceeds non-ETVA (10k) by 15k, should trigger ETVA adjustment
+                new() { Ssn = _disburser.demographic.Ssn, TotalAmount = originalBalance }
+            };
+
+            // Override the global mock with test-specific data AFTER building mocks
+            var mockParticipantTotalsDbSetForTest = mockParticipantTotalsForTest.BuildMockDbSet();
+            Constants.FakeParticipantTotals = mockParticipantTotalsDbSetForTest;
+
+            var request = new BeneficiaryDisbursementRequest
+            {
+                BadgeNumber = _disburser.demographic.BadgeNumber,
+                IsDeceased = false,
+                Beneficiaries = new List<RecipientBeneficiary>
+                {
+                    new() { PsnSuffix = 1, Amount = 25000m } // Exceeds non-ETVA (10k) by 15k, should trigger ETVA adjustment
+                }
+            };
+
+            // Act
+            var result = await _service.DisburseFundsToBeneficiaries(request, CancellationToken.None);
+
+            // Assert - First check what the actual error is
+            if (!result.IsSuccess)
+            {
+                var errorCode = result.Error?.Code;
+                var errorDescription = result.Error?.Description;
+                throw new Exception($"Test failed with error code: {errorCode}, description: {errorDescription}");
             }
-        };
+            result.IsSuccess.ShouldBeTrue();
 
-        // Act
-        var result = await _service.DisburseFundsToBeneficiaries(request, CancellationToken.None);
-
-        // Assert - First check what the actual error is
-        if (!result.IsSuccess)
-        {
-            var errorCode = result.Error?.Code;
-            var errorDescription = result.Error?.Description;
-            throw new Exception($"Test failed with error code: {errorCode}, description: {errorDescription}");
+            // Verify ETVA was reduced by 15k (from 30k to 15k)
+            _disburser.payprofit[0].Etva.ShouldBe(15000);
         }
-        result.IsSuccess.ShouldBeTrue();
-
-        // Verify ETVA was reduced by 15k (from 30k to 15k)
-        _disburser.payprofit[0].Etva.ShouldBe(15000);
+        finally
+        {
+            // Restore original state to prevent affecting other tests
+            Constants.FakeParticipantTotals = originalMock;
+            _disburser.payprofit[0].Etva = originalEtva;
+        }
     }
 
     [Fact]
