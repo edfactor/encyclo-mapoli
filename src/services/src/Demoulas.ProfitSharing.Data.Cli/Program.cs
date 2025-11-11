@@ -437,6 +437,9 @@ public sealed class Program
 
         try
         {
+            int successCount = 0;
+            int skipCount = 0;
+
             foreach (var entityType in entityTypes)
             {
                 // Get the table name for this entity
@@ -446,14 +449,24 @@ public sealed class Program
                     continue;
                 }
 
-                // Execute GRANT SELECT statement
-                // Quote table name for Oracle identifiers (required for names starting with underscores)
-                string grantSql = $"GRANT SELECT ON PROFITSHARE.\"{tableName}\" TO SELECT_PROFITSHARE_ROLE";
-                await context.Database.ExecuteSqlRawAsync(grantSql);
-                Console.WriteLine($"  ✓ Granted SELECT on PROFITSHARE.{tableName}");
+                try
+                {
+                    // Execute GRANT SELECT statement
+                    // Quote table name for Oracle identifiers (required for names starting with underscores)
+                    string grantSql = $"GRANT SELECT ON PROFITSHARE.\"{tableName}\" TO SELECT_PROFITSHARE_ROLE";
+                    await context.Database.ExecuteSqlRawAsync(grantSql);
+                    Console.WriteLine($"  ✓ Granted SELECT on PROFITSHARE.{tableName}");
+                    successCount++;
+                }
+                catch (Exception ex) when (ex.Message.Contains("ORA-00942"))
+                {
+                    // Table or view does not exist - skip it
+                    Console.WriteLine($"  ⊘ Skipped PROFITSHARE.{tableName} (table does not exist)");
+                    skipCount++;
+                }
             }
 
-            Console.WriteLine($"Successfully granted SELECT permissions on all {entityTypes.Count()} tables to SELECT_PROFITSHARE_ROLE");
+            Console.WriteLine($"Successfully granted SELECT permissions on {successCount} tables to SELECT_PROFITSHARE_ROLE (skipped {skipCount} non-existent tables)");
         }
         catch (Exception ex)
         {
