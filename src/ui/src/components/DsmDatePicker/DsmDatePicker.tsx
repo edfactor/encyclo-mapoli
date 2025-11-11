@@ -5,7 +5,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { parseISO } from "date-fns";
 import { FC, KeyboardEvent } from "react";
 
-type MyProps = {
+type DsmDatePickerProps = {
   id: string;
   onChange: (value: Date | null) => void;
   value: Date | null;
@@ -23,13 +23,12 @@ type MyProps = {
   shouldDisableMonth?: (month: Date) => boolean;
 };
 
-const DsmDatePicker: FC<MyProps> = ({
+const DsmDatePicker: FC<DsmDatePickerProps> = ({
   error,
   views,
   onChange,
   value,
   disableFuture,
-
   required,
   label,
   onKeyDown,
