@@ -1,3 +1,4 @@
+import { AccountHistoryReportTotals } from "@/types/reports/AccountHistoryReportTypes";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
@@ -10,6 +11,7 @@ export interface AccountHistoryReportFilterParams {
   badgeNumber: string;
   startDate: Date | null;
   endDate: Date | null;
+  cumulativeTotals?: AccountHistoryReportTotals;
 }
 
 const schema = yup.object().shape({

@@ -12,6 +12,7 @@ using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Beneficiaries;
 
+[Collection("SharedGlobalState")]
 public class BeneficiaryDisbursementEndpointTests : ApiTestBase<Program>
 {
     public BeneficiaryDisbursementEndpointTests(ITestOutputHelper testOutputHelper) : base()
@@ -34,10 +35,10 @@ public class BeneficiaryDisbursementEndpointTests : ApiTestBase<Program>
     }
 
     [Theory(DisplayName = "BeneficiaryDisbursement - Should require appropriate role")]
-    [InlineData(Role.FINANCEMANAGER)]
     [InlineData(Role.ITOPERATIONS)]
     [InlineData(Role.AUDITOR)]
     [InlineData(Role.ITDEVOPS)]
+    [InlineData(Role.EXECUTIVEADMIN)]
     [Description("PS-292 : Should return forbidden when user lacks CAN_MANAGE_BENEFICIARIES policy")]
     public async Task BeneficiaryDisbursement_WithInappropriateRole_ShouldReturnForbidden(string role)
     {

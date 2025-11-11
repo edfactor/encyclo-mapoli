@@ -129,7 +129,6 @@ public class AccountHistoryReportService : IAccountHistoryReportService
         var totalEarnings = sortedResult.Sum(r => r.Earnings);
         var totalForfeitures = sortedResult.Sum(r => r.Forfeitures);
         var totalWithdrawals = sortedResult.Sum(r => r.Withdrawals);
-        var cumulativeBalance = sortedResult.LastOrDefault()?.EndingBalance ?? 0m;
 
         // Calculate total count before pagination
         var totalCount = sortedResult.Count;
@@ -164,8 +163,7 @@ public class AccountHistoryReportService : IAccountHistoryReportService
                 TotalContributions = totalContributions,
                 TotalEarnings = totalEarnings,
                 TotalForfeitures = totalForfeitures,
-                TotalWithdrawals = totalWithdrawals,
-                CumulativeBalance = cumulativeBalance
+                TotalWithdrawals = totalWithdrawals
             }
         };
 

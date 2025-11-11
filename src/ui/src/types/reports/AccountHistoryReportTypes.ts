@@ -36,7 +36,6 @@ export interface AccountHistoryReportTotals {
   totalEarnings: number;
   totalForfeitures: number;
   totalWithdrawals: number;
-  cumulativeBalance: number;
 }
 
 export interface AccountHistoryReportPaginatedResponse {

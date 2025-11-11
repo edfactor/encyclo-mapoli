@@ -1,10 +1,13 @@
 import { Divider, Grid } from "@mui/material";
 import React, { useCallback, useRef, useState } from "react";
 import { DSMAccordion, numberToCurrency, Page, TotalsGrid } from "smart-ui-library";
+import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import { CAPTIONS } from "../../../constants";
 import { SortParams, useGridPagination } from "../../../hooks/useGridPagination";
 import { AccountHistoryReportApi } from "../../../reduxstore/api/AccountHistoryReportApi";
+import { InquiryApi } from "../../../reduxstore/api/InquiryApi";
 import { AccountHistoryReportRequest } from "../../../types/reports/AccountHistoryReportTypes";
+import MasterInquiryMemberDetails from "../../InquiriesAndAdjustments/MasterInquiry/MasterInquiryMemberDetails";
 import AccountHistoryReportFilterSection, {
   AccountHistoryReportFilterParams
 } from "./AccountHistoryReportFilterSection";
@@ -13,6 +16,16 @@ import AccountHistoryReportTable from "./AccountHistoryReportTable";
 const AccountHistoryReport: React.FC = () => {
   const [filterParams, setFilterParams] = useState<AccountHistoryReportFilterParams | null>(null);
   const [triggerSearch, { data, isFetching }] = AccountHistoryReportApi.useLazyGetAccountHistoryReportQuery();
+  const [selectedBadgeNumber, setSelectedBadgeNumber] = useState<string | null>(null);
+
+  // Fetch member details when badge number changes
+  const profitYear = filterParams?.endDate ? filterParams.endDate.getFullYear() : new Date().getFullYear();
+  const { data: memberDetails, isFetching: isFetchingMemberDetails } = InquiryApi.useGetProfitMasterInquiryMemberQuery(
+    selectedBadgeNumber
+      ? { memberType: 1, id: parseInt(selectedBadgeNumber, 10), profitYear }
+      : { memberType: 1, id: 0, profitYear },
+    { skip: !selectedBadgeNumber }
+  );
 
   // Pagination state
   const filterParamsRef = useRef(filterParams);
@@ -56,6 +69,7 @@ const AccountHistoryReport: React.FC = () => {
 
   const handleFilterChange = (params: AccountHistoryReportFilterParams) => {
     setFilterParams(params);
+    setSelectedBadgeNumber(params.badgeNumber);
 
     // Trigger the query immediately with the search params
     const queryParams: AccountHistoryReportRequest = {
@@ -102,7 +116,18 @@ const AccountHistoryReport: React.FC = () => {
         {filterParams && data?.response && (
           <>
             <Grid width="100%">
-              <div className="sticky top-0 z-10 flex items-start gap-2 bg-white py-2">
+              <MissiveAlertProvider>
+                <MasterInquiryMemberDetails
+                  memberType={1}
+                  id={selectedBadgeNumber || ""}
+                  profitYear={profitYear}
+                  memberDetails={memberDetails || undefined}
+                  isLoading={isFetchingMemberDetails}
+                />
+              </MissiveAlertProvider>
+            </Grid>
+            <Grid width="100%">
+              <div className="sticky top-0 z-10 flex items-start gap-2 bg-white py-2 [&_*]:!text-left">
                 {data.cumulativeTotals && (
                   <>
                     <div className="flex-1">
@@ -133,14 +158,6 @@ const AccountHistoryReport: React.FC = () => {
                       <TotalsGrid
                         displayData={[[numberToCurrency(data.cumulativeTotals.totalWithdrawals)]]}
                         leftColumnHeaders={["Withdrawals"]}
-                        topRowHeaders={[]}
-                        breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <TotalsGrid
-                        displayData={[[numberToCurrency(data.cumulativeTotals.cumulativeBalance)]]}
-                        leftColumnHeaders={["Cumulative Balance"]}
                         topRowHeaders={[]}
                         breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
                       />

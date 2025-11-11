@@ -10,6 +10,7 @@ using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services.ProfitShareEdit;
 
+[Collection("SharedGlobalState")]
 public class BeneficiaryTests : ApiTestBase<Program>
 {
     private readonly Beneficiary _beneficiary;

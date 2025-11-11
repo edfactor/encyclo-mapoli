@@ -24,6 +24,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 /// Bug fix: October 2025 optimization incorrectly used IsTerminatedInFiscalYear instead of IsTerminatedBeforeFiscalEnd.
 /// </summary>
 [Description("PS-1262: Profit Sharing Summary Report COBOL Logic")]
+[Collection("SharedGlobalState")]
 public class ProfitSharingSummaryReportRegressionTests
 {
     private readonly ITestOutputHelper _testOutputHelper;
