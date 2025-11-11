@@ -54,14 +54,24 @@ export const GetProfitSummaryGridColumns = (): ColDef[] => {
       field: "totalHours",
       minWidth: 80,
       sortable: false,
-      valueFormatter: (params) => formatNumberWithComma(params.value)
+      valueFormatter: (params) => {
+        if (params.value === null || params.value === undefined) {
+          return "";
+        }
+        return formatNumberWithComma(params.value);
+      }
     }),
     createPointsColumn({
       headerName: "Points",
       field: "totalPoints",
       minWidth: 100,
-      sortable: false,
-      valueFormatter: (params) => formatNumberWithComma(params.value)
+      sortable: false, 
+      valueFormatter: (params) => {
+        if (params.value === null || params.value === undefined) {
+            return "";
+        }
+        return formatNumberWithComma(params.value);
+      }
     })
   ];
 };

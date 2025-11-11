@@ -117,7 +117,6 @@ public class MaskingJsonConverterTests
             BadgeNumber = 12345,
             ProfitYear = 2024,
             YearsInPlan = 3,
-            PriorProfitYear = 2023,
             EmployeeName = "Test Employee",
             StoreNumber = 1,
             EmployeeTypeCode = 'P',
@@ -126,7 +125,6 @@ public class MaskingJsonConverterTests
             Age = 34,
             Ssn = "123-45-6789",
             Wages = 50000m,
-            PriorBalance = 10000m,
             Hours = 2000,
             Points = 100,  // This should be masked as a string when IT-DevOps
             IsUnder21 = false,

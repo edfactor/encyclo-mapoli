@@ -45,6 +45,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         public byte? Years { get; init; }
         public short? FirstContributionYear { get; init; }
         public bool IsExecutive { get; init; }
+        public byte EnrollmentId { get; init; }
     }
 
     private sealed record EmployeeWithBalance
@@ -52,9 +53,6 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         public required EmployeeProjection Employee { get; init; } = null!;
         public required short ProfitYear { get; init; }
         public required decimal Balance { get; init; }
-
-        public required short PriorProfitYear { get; init; }
-        public required decimal PriorBalance { get; init; }
     }
 
     /// <summary>
@@ -130,7 +128,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 string prefix,
                 string title,
                 Func<dynamic, bool> mainFilter,
-                Func<dynamic, bool>? totalsFilter = null)
+                Func<dynamic, bool>? totalsFilter = null,
+                bool includeHoursAndPoints = false)
             {
                 var mainGroup = summaryData.Where(mainFilter).ToList();
 
@@ -141,8 +140,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     LineItemTitle = title,
                     NumberOfMembers = mainGroup.Count,
                     TotalWages = mainGroup.Sum(x => (decimal)x.Wages),
-                    TotalHours = mainGroup.Sum(x => (decimal)x.Hours),
-                    TotalPoints = mainGroup.Sum(x => (int)x.Points),
+                    TotalHours = includeHoursAndPoints ? mainGroup.Sum(x => (decimal)x.Hours) : null,
+                    TotalPoints = includeHoursAndPoints ? mainGroup.Sum(x => (int)x.Points) : null,
                     TotalBalance = mainGroup.Sum(x => (decimal)x.Balance),
                     TotalPriorBalance = mainGroup.Sum(x => (decimal)x.PriorBalance)
                 };
@@ -156,7 +155,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 return lineItem;
             }
 
-            // Helper predicates matching GetReportFilter logic
+            // Helper predicates matching GetReportDetail logic
             bool IsActiveOrInactive(dynamic x) =>
                 x.EmploymentStatus == EmploymentStatus.Constants.Active ||
                 x.EmploymentStatus == EmploymentStatus.Constants.Inactive;
@@ -181,16 +180,20 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     x => (IsActiveOrInactive(x) || IsTerminatedAfterFiscalEnd(x)) &&
                          x.Hours >= _hoursThreshold &&
                          x.DateOfBirth <= birthday18 &&
-                         x.DateOfBirth > birthday21),
+                         x.DateOfBirth > birthday21 &&
+                         x.Wages > 0),
 
-                // Line 2: Age 21+ with 1000+ hours
+                // Line 2: Age 21+ with 1000+ hours (ONLY line with hours/points populated)
                 CreateLineFromData(
                     "Active and Inactive",
                     ((int)YearEndProfitSharingReportId.Age21OrOlderWith1000Hours).ToString(),
                     GetEnumDescription(YearEndProfitSharingReportId.Age21OrOlderWith1000Hours),
                     x => (IsActiveOrInactive(x) || IsTerminatedAfterFiscalEnd(x)) &&
                          x.Hours >= _hoursThreshold &&
-                         x.DateOfBirth <= birthday21),
+                         x.DateOfBirth <= birthday21 &&
+                         x.Wages > 0,
+                    totalsFilter: null,
+                    includeHoursAndPoints: true),
 
                 // Line 3: Under 18
                 CreateLineFromData(
@@ -198,7 +201,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     ((int)YearEndProfitSharingReportId.Under18).ToString(),
                     GetEnumDescription(YearEndProfitSharingReportId.Under18),
                     x => (IsActiveOrInactive(x) || IsTerminatedAfterFiscalEnd(x)) &&
-                         x.DateOfBirth > birthday18),
+                         x.DateOfBirth > birthday18 &&
+                         x.Wages > 0),
 
                 // Line 4: Age 18+ with <1000 hours and prior balance
                 CreateLineFromData(
@@ -208,7 +212,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     x => (IsActiveOrInactive(x) || IsTerminatedAfterFiscalEnd(x)) &&
                          x.Hours < _hoursThreshold &&
                          x.DateOfBirth <= birthday18 &&
-                         x.PriorBalance > 0),
+                         x.Balance > 0),
 
                 // Line 5: Age 18+ with <1000 hours and no prior balance
                 CreateLineFromData(
@@ -218,7 +222,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     x => (IsActiveOrInactive(x) || IsTerminatedAfterFiscalEnd(x)) &&
                          x.Hours < _hoursThreshold &&
                          x.DateOfBirth <= birthday18 &&
-                         x.PriorBalance == 0),
+                         x.Balance == 0 &&
+                         x.Wages > 0),
 
                 // Line 6: Terminated age 18+ with 1000+ hours
                 CreateLineFromData(
@@ -227,7 +232,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     GetEnumDescription(YearEndProfitSharingReportId.TerminatedAge18OrOlderWith1000Hours),
                     x => IsTerminatedBeforeFiscalEnd(x) &&
                          x.Hours >= _hoursThreshold &&
-                         x.DateOfBirth <= birthday18),
+                         x.DateOfBirth <= birthday18 &&
+                         x.Wages > 0),
 
                 // Line 7: Terminated age 18+ with <1000 hours and no prior balance
                 // COBOL Logic: Counts ALL terminated employees classified as Report 7, not just those terminated in fiscal year
@@ -240,7 +246,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                          x.TerminationDate < fiscalEndDate &&
                          x.Hours < _hoursThreshold &&
                          x.DateOfBirth <= birthday18 &&
-                         x.PriorBalance == 0),
+                         x.Balance == 0 &&
+                         x.Wages > 0),
 
                 // Line 8: Terminated age 18+ with <1000 hours and prior balance
                 // COBOL Logic: Counts ALL terminated employees classified as Report 8, not just those terminated in fiscal year
@@ -253,7 +260,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                          x.TerminationDate < fiscalEndDate &&
                          x.Hours < _hoursThreshold &&
                          x.DateOfBirth <= birthday18 &&
-                         x.PriorBalance > 0)
+                         x.Balance > 0)
             };
 
             // Line N: Non-employee beneficiaries (from BeneficiaryContacts, NOT in Demographics)
@@ -264,7 +271,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 join d in demographicQueryForBeneficiaries on bc.Ssn equals d.Ssn into demoJoin
                 from d in demoJoin.DefaultIfEmpty()
                 where d == null
-                join tot in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear) on bc.Ssn equals tot.Ssn
+                join tot in _totalService.GetTotalBalanceSet(ctx, beginningBalanceYear) on bc.Ssn equals tot.Ssn into totJoin
+                from tot in totJoin.DefaultIfEmpty()
                 select new { bc, tot }
             ).ToListAsync(cancellationToken);
 
@@ -277,9 +285,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     LineItemTitle = "NON-EMPLOYEE BENEFICIARIES",
                     NumberOfMembers = beneData.Count,
                     TotalWages = 0,
-                    TotalHours = 0,
-                    TotalPoints = 0,
-                    TotalBalance = beneData.Sum(x => x.tot.TotalAmount ?? 0),
+                    TotalHours = null,  // Null - beneficiaries don't have hours
+                    TotalPoints = null, // Null - beneficiaries don't get contributions/points
+                    TotalBalance = beneData.Sum(x => x.tot?.TotalAmount ?? 0),
                     TotalPriorBalance = 0
                 };
                 lineItems.Add(beneficiaryLineItem);
@@ -324,8 +332,19 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 var birthday18 = calInfo.FiscalEndDate.AddYears(-18);
                 var birthday21 = calInfo.FiscalEndDate.AddYears(-21);
 
-                var filter = GetReportFilter(reportIdInt, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21);
+                var filter = GetReportDetailFilterExpression(reportIdInt, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21);
                 filteredDetails = allDetails.Where(filter);
+            }
+
+            // READY excludes employees with zero wages (COBOL behavior) - BUT NOT for reports that track prior amounts
+            // Reports 4 and 8 specifically include employees with prior balances regardless of current-year wages
+            // Report 10 (NonEmployeeBeneficiaries) has zero wages by design - they're non-employees with inherited balances
+            // Match this behavior to ensure SMART reports match READY reports
+            if (req.ReportId != YearEndProfitSharingReportId.Age18OrOlderWithLessThan1000HoursAndPriorAmount &&
+                req.ReportId != YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndPriorAmount &&
+                req.ReportId != YearEndProfitSharingReportId.NonEmployeeBeneficiaries)
+            {
+                filteredDetails = filteredDetails.Where(d => d.Wages > 0);
             }
 
             var sortReq = req;
@@ -341,6 +360,25 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             }
 
             var details = await filteredDetails.ToPaginationResultsAsync(sortReq, cancellationToken);
+
+            // Post-materialization processing
+            foreach (var detail in details.Results)
+            {
+                // Convert database status (lowercase) to uppercase
+                // Database: 'a'/'i'/'t' → Report format: 'A'/'I'/'T'
+                if (detail.EmployeeStatus.HasValue)
+                {
+                    detail.EmployeeStatus = char.ToUpper(detail.EmployeeStatus.Value);
+                }
+
+                // For terminated employee reports (6, 7, 8), zero out Points per READY PAY426N COBOL logic
+                if (req.ReportId == YearEndProfitSharingReportId.TerminatedAge18OrOlderWith1000Hours ||
+                    req.ReportId == YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndNoPriorAmount ||
+                    req.ReportId == YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndPriorAmount)
+                {
+                    detail.Points = 0;
+                }
+            }
 
             // Totals calculation - handle in-memory queryables (Report 10) vs EF queryables (Reports 1-8)
             ProfitShareTotal totals;
@@ -461,7 +499,12 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 !(x.DateOfBirth <= birthday64 && x.Hours < _hoursThreshold)).ToList();
 
             var wagesTotal = eligibleForTotals.Sum(x => x.Wages);
-            var hoursTotal = eligibleForTotals.Sum(x => x.Hours);
+            // Truncate individual hours BEFORE summing to match READY PAY426.cbl behavior
+            // READY: ADD S-HRS (truncated int) TO WS-SECT-HOURS (no decimals)
+            var hoursTotal = eligibleForTotals.Sum(x => Math.Truncate(x.Hours));
+            // Calculate points per employee BEFORE summing to match READY PAY426.cbl behavior
+            // READY: Rounds each employee's wages/100, then sums rounded points
+            var pointsTotal = eligibleForTotals.Sum(x => Math.Round(x.Wages / 100, MidpointRounding.AwayFromZero));
 
             return new YearEndProfitSharingReportTotals
             {
@@ -469,8 +512,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 NumberOfNewEmployees = numberOfNewEmployees,
                 NumberOfEmployeesUnder21 = numberOfEmployeesUnder21,
                 WagesTotal = wagesTotal,
-                HoursTotal = Math.Truncate(hoursTotal),
-                PointsTotal = Math.Round(wagesTotal / 100, MidpointRounding.AwayFromZero),
+                HoursTotal = hoursTotal,
+                PointsTotal = pointsTotal,
             };
         }, cancellationToken);
     }
@@ -490,7 +533,6 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             .ThenInclude(d => d!.ContactInfo);
 
         var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, req.UseFrozenData);
-        // No IsYearEnd check, always join
         basePayProfits = basePayProfits
             .Join(demographicQuery, p => p.DemographicId, d => d.Id, (p, _) => p);
 
@@ -505,7 +547,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             select new EmployeeProjection
             {
                 BadgeNumber = pp.Demographic!.BadgeNumber,
-                Hours = pp.CurrentHoursYear + pp.HoursExecutive,
+                // Truncate hours to match READY PAY426.cbl behavior (uses S-HRS integer part only)
+                Hours = Math.Truncate(pp.CurrentHoursYear + pp.HoursExecutive),
                 Wages = pp.CurrentIncomeYear + pp.IncomeExecutive,
                 DateOfBirth = pp.Demographic!.DateOfBirth,
                 EmploymentStatusId = pp.Demographic!.EmploymentStatusId,
@@ -513,12 +556,13 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 Ssn = pp.Demographic!.Ssn,
                 FullName = pp.Demographic!.ContactInfo.FullName,
                 StoreNumber = pp.Demographic!.StoreNumber,
-                EmploymentTypeId = pp.Demographic!.EmploymentTypeId,
+                EmploymentTypeId = (char)pp.EmployeeTypeId,
                 EmploymentTypeName = et.Name,
                 PointsEarned = pp.PointsEarned,
                 Years = yip.Years,
                 FirstContributionYear = fc.FirstContributionYear,
-                IsExecutive = pp.Demographic!.PayFrequencyId == PayFrequency.Constants.Monthly
+                IsExecutive = pp.Demographic!.PayFrequencyId == PayFrequency.Constants.Monthly,
+                EnrollmentId = pp.EnrollmentId
             };
 
 
@@ -529,20 +573,15 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
         var beginningBalanceYear = (short)(req.ProfitYear - 1);
         var balances = _totalService.GetTotalBalanceSet(ctx, beginningBalanceYear);
-        var priorBalances = _totalService.GetTotalBalanceSet(ctx, (short)(beginningBalanceYear - 1));
         var employeeWithBalanceQry =
             from e in employeeQry
             join bal in balances on e.Ssn equals bal.Ssn into balTmp
             from bal in balTmp.DefaultIfEmpty()
-            join priorBal in priorBalances on e.Ssn equals priorBal.Ssn into priorBalTmp
-            from priorBal in priorBalTmp.DefaultIfEmpty()
             select new EmployeeWithBalance
             {
                 Employee = e,
                 ProfitYear = req.ProfitYear,
                 Balance = (decimal)(bal != null && bal.TotalAmount != null ? bal.TotalAmount : 0),
-                PriorProfitYear = beginningBalanceYear,
-                PriorBalance = (decimal)(priorBal != null && priorBal.TotalAmount != null ? priorBal.TotalAmount : 0)
             };
         return employeeWithBalanceQry;
     }
@@ -557,7 +596,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         CancellationToken cancellationToken = default)
     {
         // Get beneficiaries who are NOT in Demographics (non-employees)
-        // Use a database-side anti-join instead of materializing all Demographics SSNs
+        // Matches COBOL PAY426N Report 10: reads PAYBEN, checks if SSN exists in PAYPROFIT
         var beginningBalanceYear = (short)(profitYear - 1);
         var balances = _totalService.GetTotalBalanceSet(ctx, beginningBalanceYear);
 
@@ -570,8 +609,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             from bc in ctx.BeneficiaryContacts
             join d in demographicQueryForAntiJoin on bc.Ssn equals d.Ssn into demoJoin
             from d in demoJoin.DefaultIfEmpty()
-            where d == null  // Anti-join: only beneficiaries NOT in Demographics
-            join bal in balances on bc.Ssn equals bal.Ssn
+            where d == null  // Anti-join: only beneficiaries NOT in Demographics (COBOL PAYPROFIT equivalent)
+            join bal in balances on bc.Ssn equals bal.Ssn into balJoin
+            from bal in balJoin.DefaultIfEmpty()  // LEFT JOIN: include beneficiaries even if they have no balance
             select new { Beneficiary = bc, Balance = bal }
         ).ToListAsync(cancellationToken);
 
@@ -579,13 +619,12 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         {
             BadgeNumber = 0,  // Non-employees have badge 0
             ProfitYear = profitYear,
-            PriorProfitYear = beginningBalanceYear,
             EmployeeName = x.Beneficiary.ContactInfo.FullName ?? string.Empty,
             StoreNumber = 0,
-            EmployeeTypeCode = '\0',
-            EmployeeTypeName = "Non-Employee",
+            EmployeeTypeCode = '0',  // READY reports beneficiaries with type code '0' (non-employee indicator)
+            EmployeeTypeName = "Hourly",  // Will be normalized to "Hourly" for comparison
             DateOfBirth = x.Beneficiary.DateOfBirth,
-            Age = (byte)x.Beneficiary.DateOfBirth.Age(),  // Cast short to byte
+            Age = 99,  // READY COBOL sets WS-AGE = 99 for all beneficiaries (PAY426N.cbl line 1610)
             // Use the MaskSsn extension in-memory (bc.Ssn is an int)
             Ssn = x.Beneficiary.Ssn.MaskSsn(),
             Wages = 0,  // Non-employees have no wages
@@ -593,9 +632,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             Points = 0,  // No points earned
             IsNew = false,
             IsUnder21 = false,
-            EmployeeStatus = EmploymentStatus.Constants.Terminated,  // Treated as terminated per COBOL
-            Balance = (decimal)(x.Balance.TotalAmount ?? 0),
-            PriorBalance = 0,
+            EmployeeStatus = EmploymentStatus.Constants.Active,  // READY marks beneficiaries as Active (space in report)
+            Balance = (decimal)(x.Balance?.TotalAmount ?? 0),  // Balance may be null if no prior year balance exists
             YearsInPlan = 0,  // Fixed value per COBOL (WS-PYRS = 99)
             TerminationDate = null,
             FirstContributionYear = null,
@@ -621,29 +659,46 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     {
         var employees = await BuildFilteredEmployeeSetAsync(ctx, req, badgeNumber, ageAsOfDate);
 
+        // Calculate age once to avoid multiple EF translations
+        var ageCalcDate = ageAsOfDate.ToDateTime(TimeOnly.MaxValue);
 
+        // Calculate age cutoff for 21 years old (anyone born on or before this date is >= 21)
+        var age21CutoffDate = ageAsOfDate.AddYears(-21);
 
         // Always fetch all details for the year
         IQueryable<YearEndProfitSharingReportDetail> allDetails = employees.Select(x => new YearEndProfitSharingReportDetail
         {
             BadgeNumber = x.Employee.BadgeNumber,
             ProfitYear = x.ProfitYear,
-            PriorProfitYear = x.PriorProfitYear,
             EmployeeName = x.Employee.FullName!,
             StoreNumber = x.Employee.StoreNumber,
             EmployeeTypeCode = x.Employee.EmploymentTypeId,
             EmployeeTypeName = x.Employee.EmploymentTypeName,
             DateOfBirth = x.Employee.DateOfBirth,
-            Age = (byte)x.Employee.DateOfBirth.Age(ageAsOfDate.ToDateTime(TimeOnly.MaxValue)),
+            Age = (byte)x.Employee.DateOfBirth.Age(ageCalcDate),
             Ssn = x.Employee.Ssn.MaskSsn(),
             Wages = x.Employee.Wages,
             Hours = x.Employee.Hours,
-            Points = Convert.ToInt16(x.Employee.PointsEarned),
-            IsNew = x.Balance == 0 && x.Employee.Hours > ReferenceData.MinimumHoursForContribution() && (x.Employee.Years == null || x.Employee.Years == 0),
-            IsUnder21 = (DateTime.UtcNow.Year - x.Employee.DateOfBirth.Year - (DateTime.UtcNow.DayOfYear < x.Employee.DateOfBirth.DayOfYear ? 1 : 0)) < 21,
+            // Calculate points per READY PAY426N formula (COBOL lines 2620-2633):
+            // - Age >= 21 AND Hours >= 1000: DIVIDE wages BY 100, round up if remainder >= 50
+            // - Otherwise: points = 0
+            // Note: Points will be zeroed for terminated employee reports (6, 7, 8) after materialization
+            Points = x.Employee.DateOfBirth <= age21CutoffDate && x.Employee.Hours >= 1000
+                ? (short)(Math.Truncate(x.Employee.Wages / 100) + (x.Employee.Wages % 100 >= 50 ? 1 : 0))
+                : (short)0,
+            // Calculate IsNew dynamically like READY report does
+            // READY PAY426N displays "NEW" only when ALL conditions met:
+            // 1. Never enrolled (PY-PS-ENROLLED = 0 / EnrollmentId = 0)
+            // 2. No prior contributions (NO-PROFIT-SHARE / FirstContributionYear == null)
+            // 3. Meets minimum hours (Hours >= 1000)
+            // 4. At least 18 years old (Report 3 shows "<21>" for all under-18, never "NEW")
+            IsNew = x.Employee.EnrollmentId == 0
+                && x.Employee.FirstContributionYear == null
+                && x.Employee.Hours >= ReferenceData.MinimumHoursForContribution()
+                && x.Employee.DateOfBirth.Age(ageCalcDate) >= 18,
+            IsUnder21 = x.Employee.DateOfBirth.Age(ageCalcDate) < 21,
             EmployeeStatus = x.Employee.EmploymentStatusId,
             Balance = x.Balance,
-            PriorBalance = x.PriorBalance,
             YearsInPlan = x.Employee.Years ?? 0,
             TerminationDate = x.Employee.TerminationDate,
             FirstContributionYear = x.Employee.FirstContributionYear,
@@ -654,15 +709,15 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     }
 
     /// <summary>
-    /// Returns the filter expression for a given report ID or line number.
+    /// Returns a filter expression for individual employee detail records based on PAY426N report ID.
     /// </summary>
     /// <param name="reportId">The report ID or line number.</param>
     /// <param name="fiscalBeginDate">Fiscal year begin date.</param>
     /// <param name="fiscalEndDate">Fiscal year end date.</param>
     /// <param name="birthday18">Date representing 18 years before fiscal end.</param>
     /// <param name="birthday21">Date representing 21 years before fiscal end.</param>
-    /// <returns>Filter expression for the report line.</returns>
-    private static Expression<Func<YearEndProfitSharingReportDetail, bool>> GetReportFilter(
+    /// <returns>Filter expression for the report detail records.</returns>
+    private static Expression<Func<YearEndProfitSharingReportDetail, bool>> GetReportDetailFilterExpression(
         int reportId,
         DateOnly fiscalBeginDate,
         DateOnly fiscalEndDate,
@@ -672,8 +727,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         return reportId switch
         {
             1 => x =>
-                ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) ||
-                 (x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate > fiscalEndDate)) &&
+                ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > fiscalEndDate)) &&
                 x.Hours >= _hoursThreshold && x.DateOfBirth <= birthday18 && x.DateOfBirth > birthday21,
             2 => x =>
                 ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > fiscalEndDate)) &&
@@ -683,19 +737,19 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 x.DateOfBirth > birthday18,
             4 => x =>
                 ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > fiscalEndDate)) &&
-                x.Hours < _hoursThreshold && x.DateOfBirth <= birthday18 && x.PriorBalance > 0,
+                x.Hours < _hoursThreshold && x.DateOfBirth <= birthday18 && x.Balance > 0,
             5 => x =>
                 ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > fiscalEndDate)) &&
-                x.Hours < _hoursThreshold && x.DateOfBirth <= birthday18 && x.PriorBalance == 0,
+                x.Hours < _hoursThreshold && x.DateOfBirth <= birthday18 && x.Balance == 0,
             6 => x =>
                 x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate < fiscalEndDate &&
                 x.Hours >= _hoursThreshold && x.DateOfBirth <= birthday18,
             7 => x =>
-                x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate <= fiscalEndDate && x.TerminationDate >= fiscalBeginDate &&
-                x.Hours < _hoursThreshold && x.DateOfBirth <= birthday18 && x.PriorBalance == 0,
+                x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate != null && x.TerminationDate < fiscalEndDate &&
+                x.Hours < _hoursThreshold && x.DateOfBirth <= birthday18 && x.Balance == 0,
             8 => x =>
-                x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate <= fiscalEndDate && x.TerminationDate >= fiscalBeginDate &&
-                x.Hours < _hoursThreshold && x.DateOfBirth <= birthday18 && x.PriorBalance > 0,
+                x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate != null && x.TerminationDate < fiscalEndDate &&
+                x.Hours < _hoursThreshold && x.DateOfBirth <= birthday18 && x.Balance > 0,
             10 => x =>
                 x.BadgeNumber == 0, // Non-employee beneficiaries (not in Demographics/PayProfit)
             11 => x => x.BadgeNumber == 0,
