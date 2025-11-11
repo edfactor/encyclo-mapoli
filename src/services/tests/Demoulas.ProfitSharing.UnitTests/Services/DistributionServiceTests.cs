@@ -17,6 +17,7 @@ using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services;
 
+[Collection("SharedGlobalState")]
 [Description("PS-1230 : Unit tests for DistributionService - distribution reporting and query methods")]
 public sealed class DistributionServiceTests : ApiTestBase<Api.Program>
 {

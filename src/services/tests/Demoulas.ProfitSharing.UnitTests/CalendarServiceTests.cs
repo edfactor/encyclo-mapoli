@@ -23,6 +23,7 @@ using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests;
 
+[Collection("SharedGlobalState")]
 public class CalendarServiceTests : ApiTestBase<Program>
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;

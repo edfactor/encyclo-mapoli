@@ -17,6 +17,7 @@ using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Distributions;
 
+[Collection("SharedGlobalState")]
 public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 {
     public UpdateDistributionEndpointTests(ITestOutputHelper testOutputHelper)

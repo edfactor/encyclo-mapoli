@@ -22,6 +22,7 @@ using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
+[Collection("SharedGlobalState")]
 public class CleanupReportServiceTests : ApiTestBase<Program>
 {
     private readonly ITestOutputHelper _testOutputHelper;

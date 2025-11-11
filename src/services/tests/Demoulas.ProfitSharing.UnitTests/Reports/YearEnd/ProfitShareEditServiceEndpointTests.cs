@@ -12,6 +12,7 @@ using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
+[Collection("SharedGlobalState")]
 public sealed class ProfitShareEditServiceEndpointTests : ApiTestBase<Program>
 {
     private readonly short _profitYear = 2024;
