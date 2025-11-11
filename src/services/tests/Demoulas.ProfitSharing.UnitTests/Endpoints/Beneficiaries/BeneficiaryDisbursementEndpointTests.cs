@@ -277,8 +277,8 @@ public class BeneficiaryDisbursementEndpointTests : ApiTestBase<Program>
         ApiClient.CreateAndAssignTokenForClient(Role.BENEFICIARY_ADMINISTRATOR);
         var request = BeneficiaryDisbursementRequest.SampleRequest();
         // Use a unique request to distinguish this test from others
-        request = request with 
-        { 
+        request = request with
+        {
             BadgeNumber = 888888,
             Beneficiaries = new List<RecipientBeneficiary>
             {

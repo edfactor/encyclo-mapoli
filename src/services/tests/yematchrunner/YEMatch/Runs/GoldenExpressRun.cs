@@ -22,7 +22,7 @@ public class GoldenExpressRun : Runnable
             "P0", // init both dbs
             nameof(DropBadBenesReady), // in READY, get rid of the two Bene/Employees w/o Demographics rows
             nameof(SanityCheckEmployeeAndBenes),
-            
+
             // QPAY129 <-- should add this to validations
             "R13A", // PAYPROFIT-SHIFT
             "R13B", // PAYPROFIT-SHIFT
@@ -33,11 +33,11 @@ public class GoldenExpressRun : Runnable
                      // PAY426
             "R18",   // "PROF-SHARE sw[2]=1 CDATE=251227 YEAREND=Y" on READY    
                      // will set Earnpoints, fiddle with zerocont, clear new employee, clear certdate
-            
+
             // build some
             // nameof(SmartPay456), // update payprofit[2025] PS_CERTIFICATE_ISSUED_DATE = null, EMPLOYEE_TYPE_ID = 0,  points_earned=0, zero_contribution_reason_id = 6?? 
             "S18" // Run YearEndService on SMART and
-            
+
             
             // Should match
    //         nameof(TestPayProfitSelectedColumns) // VERIFY: Test PayProfit Updates; EarnPoints, ZeroCont, New Employee, CertDate

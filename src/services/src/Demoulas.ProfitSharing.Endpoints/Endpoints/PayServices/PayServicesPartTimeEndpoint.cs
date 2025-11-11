@@ -37,7 +37,7 @@ public sealed class PayServicesPartTimeEndpoint: ProfitSharingEndpoint<PayServic
     {
         Get("parttime/{ProfitYear}");
         Group<PayServicesGroup>();
-        
+
         Validator<PayServicesRequestValidator>();
         Summary(s =>
         {

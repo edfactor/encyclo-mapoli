@@ -201,10 +201,10 @@ public class PostFrozenService : IPostFrozenService
             return await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
-                var sortRequest = request with 
-                { 
-                    SortBy = request.SortBy switch 
-                    { 
+                var sortRequest = request with
+                {
+                    SortBy = request.SortBy switch
+                    {
                         "profitSharingYears" => "YearsInPlan",
                         "isNew" => "IsNewLastYear",
                         "thisYearHours" => "CurrentYearHours",

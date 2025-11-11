@@ -84,7 +84,7 @@ public static class SmartActivityFactory
 
             AspireToAspire(
                     "import-from-ready --connection-name ProfitSharing --source-schema PROFITSHARE --sql-file \"../../../../src/database/ready_import/SQL copy all from ready to smart ps.sql\"");
-            
+
         }
         catch (Exception ex)
         {
@@ -127,7 +127,7 @@ public static class SmartActivityFactory
     private static async Task<Outcome> A1_Profit_Sharing_Clean_up_Reports(ApiClient apiClient, string aname, string name)
     {
         StringBuilder sb = new();
-        
+
     // ReportsYearEndCleanupNegativeEtvaForSsNsOnPayProfitEndPointAsync(int profitYear, string sortBy, bool? isSortDescending, int? skip, int? take, int? queryTimeoutSeconds, Impersonation52? impersonation)
 
         ReportResponseBaseOfNegativeEtvaForSsNsOnPayProfitResponse? r6 =

@@ -21,7 +21,7 @@ public class TinkerRun : Runnable
             nameof(SanityCheckEmployeeAndBenes),
             #endif
             // Should -> RUN/Verify QPAY129 ?
-            
+
             // Handle SHIFT Hours/Dollars
             "R13A", // PAYPROFIT-SHIFT
             "R13B", // PAYPROFIT-SHIFT

@@ -18,11 +18,11 @@ namespace Demoulas.ProfitSharing.Services.Validation;
 /// <remarks>
 /// PS-1721: Refactored to focus solely on checksum validation.
 /// This service now has a single, focused responsibility: validating report fields via SHA256 checksums.
-/// 
+///
 /// Related Services:
 /// - <see cref="ICrossReferenceValidationService"/>: Orchestrates cross-reference validation across multiple reports
 /// - <see cref="IArchivedValueService"/>: Retrieves archived report values from stored checksums
-/// 
+///
 /// Responsibilities:
 /// 1. SHA256 checksum calculation and comparison
 /// 2. Per-field validation against archived checksums

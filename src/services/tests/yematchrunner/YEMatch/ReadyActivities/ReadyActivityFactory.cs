@@ -66,7 +66,7 @@ public static class ReadyActivityFactory
             // sw[2]=1 <--- last years exec hours dollars   sw[3]=1 <--- do not update
             new ReadyActivity(sshClient, SftpClient, chatty, "A17", "PROF-SHARE", $"sw[2]=1 sw[3]=1 CDATE={lastSaturday} YEAREND=Y SUMREP=Y", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A18", "PROF-SHARE", $"sw[2]=1 CDATE={lastSaturday} YEAREND=Y", dataDirectory),
-            
+
             new ReadyActivity(sshClient, SftpClient, chatty, "A19", "GET-ELIGIBLE-EMPS", $" CDATE={firstSaturday}", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A20", "PROF-FORT", $"YEAR={YEAR}", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A21", "PROF-UPD1", $"YEAR={YEAR}.0", dataDirectory),

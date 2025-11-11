@@ -48,7 +48,7 @@ public class FrozenReportService : IFrozenReportService
     /// A token to monitor for cancellation requests.
     /// </param>
     /// <returns>
-    /// A task that represents the asynchronous operation. The task result contains the 
+    /// A task that represents the asynchronous operation. The task result contains the
     /// <see cref="DistributionsByAge"/> object, which includes the report details and aggregated data.
     /// </returns>
     public async Task<DistributionsByAge> GetDistributionsByAgeYearAsync(FrozenReportsByAgeRequest req,
@@ -189,15 +189,15 @@ public class FrozenReportService : IFrozenReportService
     /// Retrieves the contributions grouped by age for a specific profit year, based on the provided request.
     /// </summary>
     /// <param name="req">
-    /// The request containing the parameters for generating the contributions report, 
+    /// The request containing the parameters for generating the contributions report,
     /// including the profit year and report type (e.g., FullTime, PartTime, or Total).
     /// </param>
     /// <param name="cancellationToken">
     /// A token to monitor for cancellation requests.
     /// </param>
     /// <returns>
-    /// A task that represents the asynchronous operation. The task result contains a <see cref="ContributionsByAge"/> object, 
-    /// which includes details such as the report name, report date, total employees, distribution total amount, 
+    /// A task that represents the asynchronous operation. The task result contains a <see cref="ContributionsByAge"/> object,
+    /// which includes details such as the report name, report date, total employees, distribution total amount,
     /// and a paginated response of contributions grouped by age.
     /// </returns>
     /// <exception cref="ArgumentNullException">
@@ -374,7 +374,7 @@ public class FrozenReportService : IFrozenReportService
     /// A token to monitor for cancellation requests.
     /// </param>
     /// <returns>
-    /// A <see cref="BalanceByAge"/> object containing the balance details grouped by age, 
+    /// A <see cref="BalanceByAge"/> object containing the balance details grouped by age,
     /// including totals and other relevant metrics.
     /// </returns>
     /// <remarks>

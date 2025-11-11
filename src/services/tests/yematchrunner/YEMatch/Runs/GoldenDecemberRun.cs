@@ -36,6 +36,6 @@ public class GoldenDecemberRun : Runnable
             // "R13B", // PAYPROFIT-SHIFT
             // "R14" // ZERO-PY-PD-PAYPROFIT
         ));
-        
+
     }
 }

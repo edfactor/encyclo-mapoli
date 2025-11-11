@@ -47,8 +47,8 @@ public sealed class PayService : IPayService
     /// <param name="cancellationToken">Cancellation token for async operation</param>
     /// <returns>Result containing paginated pay services data aggregated by years since hire</returns>
     public async Task<Result<PayServicesResponse>> GetPayServices(
-        PayServicesRequest request, 
-        char employmentType, 
+        PayServicesRequest request,
+        char employmentType,
         CancellationToken cancellationToken = default)
     {
         return await _dataContextFactory.UseReadOnlyContext<Result<PayServicesResponse>>(async ctx =>
@@ -57,7 +57,7 @@ public sealed class PayService : IPayService
             {
                 // Get fiscal year end date for years calculation
                 var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(
-                    request.ProfitYear, 
+                    request.ProfitYear,
                     cancellationToken);
 
                 // Build demographics query with frozen/live data selection
@@ -72,7 +72,7 @@ public sealed class PayService : IPayService
                     from d in demographics
                     where d.EmploymentStatusId == EmploymentStatus.Constants.Active
                         && d.EmploymentTypeId == employmentType
-                    join pp in ctx.PayProfits.Where(p => p.ProfitYear == request.ProfitYear) 
+                    join pp in ctx.PayProfits.Where(p => p.ProfitYear == request.ProfitYear)
                         on d.Id equals pp.DemographicId into payProfitGroup
                     from payProfit in payProfitGroup.DefaultIfEmpty()
                     select new
@@ -103,7 +103,7 @@ public sealed class PayService : IPayService
                 var payServicesDtos = aggregatedData.Select(s => new PayServicesDto
                 {
                     Employees = s.Employees,
-                    YearsOfServiceLabel = s.YearsSinceHire != -1 && s.YearsSinceHire != -2 ? $"{s.YearsSinceHire}" : 
+                    YearsOfServiceLabel = s.YearsSinceHire != -1 && s.YearsSinceHire != -2 ? $"{s.YearsSinceHire}" :
                         (s.YearsSinceHire == -1 ? "> 6 mos" : "< 6 mos"),
                     YearsOfService = s.YearsSinceHire,
                     YearsWages = s.TotalWages
@@ -139,8 +139,8 @@ public sealed class PayService : IPayService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, 
-                    "Error retrieving pay services for EmploymentType: {EmploymentType}, ProfitYear: {ProfitYear}", 
+                _logger.LogError(ex,
+                    "Error retrieving pay services for EmploymentType: {EmploymentType}, ProfitYear: {ProfitYear}",
                     employmentType, request.ProfitYear);
                 return Result<PayServicesResponse>.Failure(
                     Error.Unexpected($"Failed to retrieve pay services: {ex.Message}"));

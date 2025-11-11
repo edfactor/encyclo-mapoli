@@ -54,19 +54,19 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
             // Execute queries sequentially (DbContext is not thread-safe)
             // Query 1: Last year total balance - aggregate in database
             decimal? lastYearTotal = await _totalService.TotalVestingBalance(ctx, lastYear, DateOnly.MaxValue)
-                
+
                 .TagWith($"ForfeituresReport-LastYearTotal-{lastYear}")
                 .SumAsync(ptvb => ptvb.CurrentBalance, cancellationToken);
 
             // Query 2: Current year transactions (reused for totals and member details)
             var transactionsInCurrentYear = await _totalService.GetTransactionsBySsnForProfitYearForOracle(ctx, currentYear)
-                
+
                 .TagWith($"ForfeituresReport-Transactions-{currentYear}")
                 .ToListAsync(cancellationToken);
 
             // Query 3: Current year balances with projection (only load needed fields)
             var currentBalances = await _totalService.TotalVestingBalance(ctx, currentYear, DateOnly.MaxValue)
-                
+
                 .TagWith($"ForfeituresReport-CurrentBalances-{currentYear}")
                 .Select(b => new { b.Ssn, b.Id, b.CurrentBalance })
                 .ToListAsync(cancellationToken);

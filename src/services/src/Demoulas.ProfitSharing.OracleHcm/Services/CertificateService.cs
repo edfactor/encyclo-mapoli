@@ -14,15 +14,15 @@ namespace Demoulas.ProfitSharing.OracleHcm.Services;
 /// This service caches loaded certificates to avoid repeated file I/O and parsing overhead.
 /// Certificates are stored in-memory for the lifetime of the application.
 /// For highly sensitive scenarios, consider implementing additional key protection mechanisms.
-/// 
+///
 /// Loading sources:
 /// - File paths: Cached by normalized absolute path
 /// - Streams: Cached by SHA256 hash of content (requires sourceIdentifier)
 /// - Byte arrays: Cached by SHA256 hash of content (requires sourceIdentifier)
-/// 
+///
 /// Oracle HCM Certificate Authentication Reference:
 /// https://www.oracle.com/webfolder/technetwork/tutorials/obe/fusionapps/HCM/JWT_API_Authentication_OBE/html/index.html
-/// 
+///
 /// Certificate Lifecycle:
 /// - Expired: Logged as CRITICAL - authentication will fail immediately
 /// - Expiring within 30 days: Logged as ERROR - renewal required

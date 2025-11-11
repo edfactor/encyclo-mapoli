@@ -16,7 +16,7 @@ public sealed class BeneficiaryDisbursementEndpoint : ProfitSharingEndpoint<Bene
     private readonly IBeneficiaryDisbursementService _beneficiaryDisbursementService;
     private readonly ILogger<BeneficiaryDisbursementEndpoint> _logger;
 
-    public BeneficiaryDisbursementEndpoint(IBeneficiaryDisbursementService beneficiaryDisbursementService, ILogger<BeneficiaryDisbursementEndpoint> logger) : base(Navigation.Constants.Beneficiaries) 
+    public BeneficiaryDisbursementEndpoint(IBeneficiaryDisbursementService beneficiaryDisbursementService, ILogger<BeneficiaryDisbursementEndpoint> logger) : base(Navigation.Constants.Beneficiaries)
     {
         _beneficiaryDisbursementService = beneficiaryDisbursementService;
         _logger = logger;

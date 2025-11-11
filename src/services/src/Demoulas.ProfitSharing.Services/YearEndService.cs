@@ -58,7 +58,7 @@ public sealed class YearEndService : IYearEndService
         _totalService = totalService;
         _demographicReaderService = demographicReaderService;
     }
-    
+
     /// <summary>
     /// Returns the minimum birth date for an employee to be age 18+ on the fiscal end date.
     /// Age 18+ means DOB <= (fiscalEndDate - 18 years).
@@ -85,7 +85,7 @@ public sealed class YearEndService : IYearEndService
     {
         return dateOfBirth.Age(fiscalEndDate.ToDateTime(TimeOnly.MinValue));
     }
-    
+
     /*
         The RunFinalYearEndUpdates's "ComputeChange" method (see below) very closely follows the logic of https://bitbucket.org/demoulas/hpux/src/master/prg-source/PAY426.cbl
 

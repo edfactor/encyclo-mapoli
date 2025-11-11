@@ -63,7 +63,6 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
     }
 
 
-  
 #pragma warning disable AsyncFixer01
 
     [Fact]

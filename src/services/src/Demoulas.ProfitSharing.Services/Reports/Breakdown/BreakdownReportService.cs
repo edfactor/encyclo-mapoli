@@ -604,8 +604,8 @@ public sealed class BreakdownReportService : IBreakdownService
 
     /// <summary>
     /// Base query for "active‐members" with ONE round-trip to Oracle.
-    /// – Joins year-end Profit-Sharing balances  *and*  ETVA balances  
-    /// – Re-creates the legacy COBOL store-bucket logic (700, 701, 800, 801, 802, 900) **inside the SQL**  
+    /// – Joins year-end Profit-Sharing balances  *and*  ETVA balances
+    /// – Re-creates the legacy COBOL store-bucket logic (700, 701, 800, 801, 802, 900) **inside the SQL**
     /// – Returns the sequence already filtered to the store requested by the UI
     /// </summary>
     private async Task<IQueryable<ActiveMemberDto>> BuildEmployeesBaseQuery(

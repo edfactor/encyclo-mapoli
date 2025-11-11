@@ -181,7 +181,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 stepBack = StepBackNumber(stepBack);
             }
             query = query.Where(x => psns.Contains(x.PsnSuffix)).OrderByDescending(x => x.PsnSuffix);
-            
+
             var result = query.Select(x => new BeneficiaryDto()
             {
                 Id = x.Id,
@@ -214,13 +214,13 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 },
                 Relationship = x.Relationship
             });
-            
+
             return result.ToPaginationResultsAsync(request, cancellationToken);
         }
         else
         {
             query = query.Where(x => x.PsnSuffix == psnSuffix);
-            
+
             var result = query.Select(x => new BeneficiaryDto()
             {
                 Id = x.Id,
@@ -253,11 +253,11 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 Relationship = x.Relationship,
                 IsExecutive = x.Demographic != null && x.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly,
             });
-            
+
             return result.ToPaginationResultsAsync(request, cancellationToken);
         }
     }
-    
+
     /// <summary>
     /// Retrieves beneficiary information with hierarchical structure and balance information.
     /// </summary>
@@ -352,7 +352,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 },
                 Relationship = x.Relationship
             });
-            
+
             PaginatedResponseDto<BeneficiaryDto> final = await result.ToPaginationResultsAsync(request, cancellationToken);
             return new BeneficiaryResponse() { Beneficiaries = final, BeneficiaryOf = prevBeneficiaries };
         }
@@ -363,7 +363,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             ISet<int> ssnList = new HashSet<int>(beneficiary.Beneficiaries.Results.Select(x => Convert.ToInt32(x.Ssn)).ToList());
             var balanceList = await _totalService.GetVestingBalanceForMembersAsync(SearchBy.Ssn, ssnList, yearEnd, cancellationToken);
             var balanceLookup = balanceList.ToDictionary(x => x.Id.ToString());
-            
+
             foreach (var item in beneficiary.Beneficiaries.Results)
             {
                 item.CurrentBalance = balanceLookup.TryGetValue(item.Ssn, out var balance)
@@ -379,7 +379,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             ISet<int> ssnListBO = new HashSet<int>(beneficiary.BeneficiaryOf.Results.Select(x => Convert.ToInt32(x.Ssn)).ToList());
             var balanceListBO = await _totalService.GetVestingBalanceForMembersAsync(SearchBy.Ssn, ssnListBO, yearEnd, cancellationToken);
             var balanceLookupBO = balanceListBO.ToDictionary(x => x.Id.ToString());
-            
+
             foreach (var item in beneficiary.BeneficiaryOf.Results)
             {
                 item.CurrentBalance = balanceLookupBO.TryGetValue(item.Ssn, out var balance)
@@ -402,9 +402,9 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
     {
         var frozenStateResponse = await _frozenService.GetActiveFrozenDemographic(cancellationToken);
         short yearEnd = frozenStateResponse.ProfitYear;
-        
+
         List<BeneficiaryDetailResponse> result;
-        
+
         if (request.PsnSuffix.HasValue && request.PsnSuffix > 0)
         {
             // Query from database - use async
@@ -438,7 +438,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 ProfitYear = (short)DateTime.Now.Year,
                 MemberType = EmployeeMemberType
             }, cancellationToken);
-            
+
             result = memberDetail.Results.Select(x => new BeneficiaryDetailResponse
             {
                 Name = x.FullName,

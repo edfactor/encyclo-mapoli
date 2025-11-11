@@ -243,7 +243,7 @@ public static class OracleHcmExtension
     /// This method sets up HTTP clients for various Oracle HCM services, such as Atom feed synchronization,
     /// employee synchronization, and payroll synchronization. It applies standard resilience strategies,
     /// including circuit breakers and timeout configurations, to ensure robust communication with the Oracle HCM API.
-    /// 
+    ///
     /// Certificate-based authentication is wired through the HttpClientHandler, which attaches the X509Certificate2
     /// to enable mutual TLS authentication with the Oracle HCM API.
     /// </remarks>
@@ -331,12 +331,12 @@ public static class OracleHcmExtension
     /// </summary>
     /// <param name="options">The <see cref="HttpStandardResilienceOptions"/> to configure.</param>
     /// <param name="commonOptions">
-    /// The common resilience options containing configurations for circuit breaker, 
+    /// The common resilience options containing configurations for circuit breaker,
     /// attempt timeout, and total request timeout strategies.
     /// </param>
     /// <remarks>
-    /// This method applies the specified resilience strategies to the provided HTTP options, 
-    /// ensuring consistent handling of circuit breaker, attempt timeout, and total request timeout 
+    /// This method applies the specified resilience strategies to the provided HTTP options,
+    /// ensuring consistent handling of circuit breaker, attempt timeout, and total request timeout
     /// across HTTP clients.
     /// </remarks>
     private static void ApplyResilienceOptions(HttpStandardResilienceOptions options, HttpResilienceOptions commonOptions)
@@ -379,7 +379,7 @@ public static class OracleHcmExtension
     /// <returns>A configured HttpClientHandler with the certificate attached, or a default handler if certificate authentication is not configured.</returns>
     /// <remarks>
     /// This method retrieves the certificate from the IOracleHcmCertificateService and adds it
-    /// to the HttpClientHandler's ClientCertificates collection, enabling mutual TLS (mTLS) 
+    /// to the HttpClientHandler's ClientCertificates collection, enabling mutual TLS (mTLS)
     /// authentication with the Oracle HCM API.
     /// </remarks>
     private static HttpClientHandler CreateHttpClientHandlerWithCertificate(IServiceProvider services)
@@ -415,7 +415,7 @@ public static class OracleHcmExtension
     /// 2. Loads the certificate from OracleHcmConfig
     /// 3. Generates a JWT token signed with the certificate's private key
     /// 4. Attaches the JWT token in the Authorization header as a Bearer token
-    /// 
+    ///
     /// Certificate-based mutual TLS (mTLS) is wired separately via CreateHttpClientHandlerWithCertificate.
     /// </remarks>
     private static void BuildOracleHcmAuthClient(IServiceProvider services, HttpClient client)

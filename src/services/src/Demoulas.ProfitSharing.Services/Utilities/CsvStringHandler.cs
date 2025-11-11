@@ -13,7 +13,7 @@ namespace Demoulas.ProfitSharing.Services.Utilities;
 /// - Null values should be replaced with empty strings
 /// - Numeric values use InvariantCulture formatting
 /// - Memory allocations are minimized
-/// 
+///
 /// Usage:
 /// <code>
 /// var csv = new CsvStringHandler(5); // 5 fields

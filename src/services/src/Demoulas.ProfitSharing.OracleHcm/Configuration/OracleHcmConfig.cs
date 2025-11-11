@@ -5,7 +5,7 @@
 /// Supports two authentication methods:
 /// 1. Basic Authentication: Using Username and Password properties
 /// 2. Certificate-Based Authentication: Using PFX certificate with optional password
-/// 
+///
 /// Provides properties for enabling sync operations, API endpoints, credentials, and sync parameters.
 /// </summary>
 /// <remarks>
@@ -13,11 +13,11 @@
 /// - Set PfxFilePath to the path of the certificate file
 /// - Set PfxPassword to the certificate password (optional if not password-protected)
 /// - Leave Username and Password empty (or they will be ignored)
-/// 
+///
 /// For basic authentication (development only):
 /// - Set Username and Password
 /// - Leave PfxFilePath empty
-/// 
+///
 /// Authentication method is determined automatically based on configuration presence.
 /// </remarks>
 public sealed record OracleHcmConfig

@@ -304,7 +304,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             IQueryable<YearEndProfitSharingReportDetail> allDetails;
-            
+
             // Special handling for Report 10: Non-Employee Beneficiaries
             if (req.ReportId == YearEndProfitSharingReportId.NonEmployeeBeneficiaries)
             {
@@ -344,7 +344,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
             // Totals calculation - handle in-memory queryables (Report 10) vs EF queryables (Reports 1-8)
             ProfitShareTotal totals;
-            
+
             if (req.ReportId == YearEndProfitSharingReportId.NonEmployeeBeneficiaries)
             {
                 // Report 10: filteredDetails is in-memory, use synchronous LINQ
