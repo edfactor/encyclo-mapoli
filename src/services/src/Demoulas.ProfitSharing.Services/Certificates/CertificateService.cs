@@ -190,7 +190,7 @@ public sealed class CertificateService : ICertificateService
             var age = (byte)cert.DateOfBirth.Age(calInfo.FiscalEndDate.ToDateTime(TimeOnly.MaxValue));
             if (age < 67)
             {
-                age = (byte)67;
+                age = 67;
             }
 
             annuityRates.TryGetValue(age, out var annuityRate);

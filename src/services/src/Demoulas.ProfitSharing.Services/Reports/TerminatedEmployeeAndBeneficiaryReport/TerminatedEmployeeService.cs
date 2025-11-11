@@ -12,14 +12,14 @@ public class TerminatedEmployeeService : ITerminatedEmployeeService
     private readonly ICalendarService _calendarService;
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
-    private readonly ILogger<TerminatedEmployeeReportService> _logger;
+    private readonly ILogger<TerminatedEmployeeService> _logger;
     private readonly TotalService _totalService;
     private readonly IYearEndService _yearEndService;
 
     public TerminatedEmployeeService(IProfitSharingDataContextFactory dataContextFactory,
         TotalService totalService,
         IDemographicReaderService demographicReaderService,
-        ILogger<TerminatedEmployeeReportService> logger,
+        ILogger<TerminatedEmployeeService> logger,
         ICalendarService calendarService,
         IYearEndService yearEndService)
     {

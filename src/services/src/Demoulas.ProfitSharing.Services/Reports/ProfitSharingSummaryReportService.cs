@@ -594,7 +594,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             IsNew = false,
             IsUnder21 = false,
             EmployeeStatus = EmploymentStatus.Constants.Terminated,  // Treated as terminated per COBOL
-            Balance = (decimal)(x.Balance.TotalAmount ?? 0),
+            Balance = x.Balance.TotalAmount ?? 0,
             PriorBalance = 0,
             YearsInPlan = 0,  // Fixed value per COBOL (WS-PYRS = 99)
             TerminationDate = null,

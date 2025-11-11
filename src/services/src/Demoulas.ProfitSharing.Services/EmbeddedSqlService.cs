@@ -251,7 +251,7 @@ SELECT
     {
         var initialContributionFiveYearsAgo = asOfDate.AddYears(-5).Year;
         var birthDate65 = asOfDate.AddYears(-65);
-        var yearsOfCreditQuery = GetYearsOfServiceQuery((short)profitYear, asOfDate);
+        var yearsOfCreditQuery = GetYearsOfServiceQuery(profitYear, asOfDate);
         var initialContributionYearQuery = GetInitialContributionYearQuery();
 
         var query = @$"

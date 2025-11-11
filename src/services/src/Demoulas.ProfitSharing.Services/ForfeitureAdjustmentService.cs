@@ -152,7 +152,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             var vestingBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
                 SearchBy.Ssn,
                 employeeData.Ssn,
-                (short)req.ProfitYear,
+                req.ProfitYear,
                 cancellationToken);
 
             // If no vesting balance found, return failure
@@ -175,7 +175,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             var profitDetail = new ProfitDetail
             {
                 Ssn = employeeData.Ssn,
-                ProfitYear = (short)req.ProfitYear,
+                ProfitYear = req.ProfitYear,
                 ProfitYearIteration = 0,
                 ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id, // Code 2 for forfeitures
                 Remark = remarkText,
@@ -195,7 +195,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             if (payProfit != null)
             {
                 // Get Calculated ETVA amount
-                var profitCodeTotals = await _totalService.GetTotalComputedEtva(context, (short)req.ProfitYear).Where(x => x.Ssn == payProfit.Demographic!.Ssn)
+                var profitCodeTotals = await _totalService.GetTotalComputedEtva(context, req.ProfitYear).Where(x => x.Ssn == payProfit.Demographic!.Ssn)
                     .FirstOrDefaultAsync(cancellationToken);
 
                 // Default to zero if no totals found

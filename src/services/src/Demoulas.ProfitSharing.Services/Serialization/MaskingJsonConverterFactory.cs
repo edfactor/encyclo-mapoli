@@ -181,7 +181,7 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
                 writer.WritePropertyName(propName);
                 object? propVal = pm.Property.GetValue(value);
 
-                bool shouldMask = ShouldMask(pm, propVal, isExecutiveRow, ctx);
+                bool shouldMask = ShouldMask(pm, isExecutiveRow, ctx);
                 if (!shouldMask)
                 {
                     if (propVal is null)
@@ -341,7 +341,7 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
             }
         }
 
-        private static bool ShouldMask(PropertyMetadata pm, object? value, bool isExecutiveRow, RoleContextSnapshot? ctx)
+        private static bool ShouldMask(PropertyMetadata pm, bool isExecutiveRow, RoleContextSnapshot? ctx)
         {
             // 1. Unmask attribute (no roles) => always unmasked
             if (pm.UnmaskAllRoles)

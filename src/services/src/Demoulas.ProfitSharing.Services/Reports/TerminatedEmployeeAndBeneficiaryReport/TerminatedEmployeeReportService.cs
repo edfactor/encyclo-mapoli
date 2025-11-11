@@ -335,7 +335,7 @@ public sealed class TerminatedEmployeeReportService
             .GroupBy(x => new { x.BadgeNumber, x.PsnSuffix, x.Name })
             .Select(g => new TerminatedEmployeeAndBeneficiaryDataResponseDto
             {
-                PSN = g.Key.PsnSuffix == 0 ? (long)g.Key.BadgeNumber : (long)g.Key.BadgeNumber * 10000 + g.Key.PsnSuffix,
+                PSN = g.Key.PsnSuffix == 0 ? g.Key.BadgeNumber : (long)g.Key.BadgeNumber * 10000 + g.Key.PsnSuffix,
                 Name = g.Key.Name,
                 YearDetails = g.Select(x => x.YearDetail).OrderByDescending(y => y.ProfitYear).ToList()
             }).ToPaginationResultsAsync(req, cancellationToken);

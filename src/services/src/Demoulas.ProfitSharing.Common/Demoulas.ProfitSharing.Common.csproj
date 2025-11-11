@@ -1,11 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <Configurations>Debug;Release;Russ</Configurations>
-  </PropertyGroup>
-
   <ItemGroup>
     <Compile Remove="Contracts\InternalDto\**" />
     <EmbeddedResource Remove="Contracts\InternalDto\**" />

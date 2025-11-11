@@ -162,7 +162,7 @@ public sealed class UnforfeitService : IUnforfeitService
                 var responses = paginatedMain.Select(main =>
                 {
                     detailsBySsn.TryGetValue(main.Ssn, out var details);
-                    var maxProfitDetailId = (details?.Any() ?? false) ? details.Max(d => (int)d.Id) : 0;
+                    var maxProfitDetailId = (details?.Any() ?? false) ? details.Max(d => d.Id) : 0;
 
                     return new UnforfeituresResponse
                     {

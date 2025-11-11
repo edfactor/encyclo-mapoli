@@ -1,7 +1,9 @@
 <!-- [SolutionRoot]/Demoulas.ProfitSharing.Services/Directory.Build.props -->
 <Project>
+  <!-- Import parent Directory.Build.props to inherit common properties -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+  
   <PropertyGroup>
-    
     <!-- ONLY this one change -->
     <NoWarn>DSM001;CA2227;CA1715;CA1000;IDE0062;IDE1006;IDE0090;VSSpell001;NU1507;NU1900;S1481;IDE0161;VSTHRD200;S3358;S1699</NoWarn>
   </PropertyGroup>
