@@ -20,6 +20,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Services;
 /// and data aggregation scenarios to ensure 80%+ code coverage.
 /// PS-868: PayService comprehensive service layer tests
 /// </summary>
+[Collection("SharedGlobalState")]
 [Description("PS-868 : PayService unit tests")]
 public sealed class PayServiceTests : ApiTestBase<Api.Program>
 {
