@@ -1,26 +1,33 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using YEMatch.YEMatch.ArrangeActivites;
-using YEMatch.YEMatch.AssertActivities;
+using Microsoft.Extensions.Logging;
+using YEMatch.Activities;
+using YEMatch.ReadyActivities;
+using YEMatch.SmartActivities;
+using static YEMatch.Activities.ActivityName;
 
-namespace YEMatch.YEMatch.Runs;
+namespace YEMatch.Runs;
 
 [SuppressMessage("AsyncUsage", "AsyncFixer01:Unnecessary async/await usage")]
 public class MasterInquiryRun : Runnable
 {
+    public MasterInquiryRun(
+        IActivityFactory activityFactory,
+        IReadySshClientFactory readySshClientFactory,
+        ISmartApiClientFactory smartApiClientFactory,
+        ILogger<MasterInquiryRun> logger)
+        : base(activityFactory, readySshClientFactory, smartApiClientFactory, logger)
+    {
+    }
+
     public override async Task Exec()
     {
         await Run(Specify(
 #if false
-            "R0", // import obfuscated/scramble
-            nameof(DropBadBenesReady),
-            nameof(FixFrozenReady),
-            "ImportReadyDbToSmartDb", // Import SMART Schema directly from READY Schema (with dropped Bad Bene)
-            "Give2023Hours",
-            "S18_Rebuild2023ZeroCont",
-            "S24_Rebuild2023Enrollment", // We use S24 as a tool to rebuild 2023
-            
+            R00_BuildDatabase, // import obfuscated/scramble
+            DropBadBenesReady,
+            ImportReadyDbToSmartDb, // Import SMART Schema directly from READY Schema (with dropped Bad Bene)
 #endif
-            nameof(TestMasterInquiry)
+            TestMasterInquiry
         ));
     }
 }

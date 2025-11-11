@@ -1,6 +1,6 @@
-﻿using YEMatch.YEMatch.Activities;
+﻿using YEMatch.Activities;
 
-namespace YEMatch.YEMatch.AssertActivities;
+namespace YEMatch.AssertActivities;
 
 // The base class for activities which directly interact with the database
 public abstract class BaseActivity : IActivity

@@ -1,23 +1,24 @@
-﻿using YEMatch.YEMatch.Activities;
+﻿using YEMatch.Activities;
 
-namespace YEMatch.YEMatch.ArrangeActivites;
+namespace YEMatch.ArrangeActivites;
 
 // This task takes the READY database and imports it directly to SMART.  Handy for isolating smart activities.
 internal sealed class ImportReadyDbToSmartDb : IActivity
 {
-    public string Name()
-    {
-        return "ImportReadyDbToSmartDb";
-    }
-
-    private static readonly string _homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
     private const string ProjectDirectory = "prj/smart-profit-sharing";
     public const string CliProject = "src/services/src/Demoulas.ProfitSharing.Data.Cli";
 
     private const string Args =
         "run -- import-from-ready --connection-name ProfitSharing --source-schema \"tbherrmann\" --sql-file \"../../../../src/database/ready_import/SQL copy all from ready to smart ps.sql\"";
 
+    private static readonly string _homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
     private readonly string _workingDir = Path.Combine(_homeDirectory, ProjectDirectory, CliProject);
+
+    public string Name()
+    {
+        return "ImportReadyDbToSmartDb";
+    }
 
     public Task<Outcome> Execute()
     {

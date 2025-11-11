@@ -1,4 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Entities.Navigations;
+
 public static class Navigation
 {
     public static class Constants
@@ -72,6 +73,4 @@ public static class Navigation
         public const short QNEWPROFLBL = 47;
         public const short PROFNEW = 48;
     }
-
-
 }

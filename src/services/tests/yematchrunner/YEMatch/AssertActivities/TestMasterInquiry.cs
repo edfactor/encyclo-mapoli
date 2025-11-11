@@ -2,11 +2,10 @@
 using System.Net.Http.Headers;
 using System.Text;
 using Newtonsoft.Json;
-using YEMatch.YEMatch.AssertActivities.MasterInquiry;
-using YEMatch.YEMatch.SmartActivities;
+using YEMatch.AssertActivities.MasterInquiry;
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-namespace YEMatch.YEMatch.AssertActivities;
+namespace YEMatch.AssertActivities;
 
 public sealed class TeeWriter(TextWriter one, TextWriter two) : TextWriter
 {
@@ -36,6 +35,7 @@ public sealed class TeeWriter(TextWriter one, TextWriter two) : TextWriter
 public class TestMasterInquiry : BaseSqlActivity
 {
     private readonly HttpClient httpClient = new() { Timeout = TimeSpan.FromHours(2) };
+    public required ApiClient ApiClient { get; init; }
 
     public override async Task<Outcome> Execute()
     {
@@ -46,7 +46,7 @@ public class TestMasterInquiry : BaseSqlActivity
         string content = await File.ReadAllTextAsync(path);
         List<OutFL> outties = OutFLParser.ParseStringIntoRecords(content);
 
-        await using var writer = new StreamWriter("compare.md") { AutoFlush = true };
+        await using StreamWriter writer = new("compare.md") { AutoFlush = true };
         Console.SetOut(new TeeWriter(Console.Out, writer));
 
         int profitYear = 2025;
@@ -118,7 +118,7 @@ public class TestMasterInquiry : BaseSqlActivity
         decimal outEtva = employeeDetails.CurrentEtva;
         string outErrMesg = string.Join(",", employeeDetails.Missives);
 
-        return new()
+        return new OutFL
         {
             OUT_SSN = outSsn,
             OUT_HRS = outHrs,
@@ -144,7 +144,7 @@ public class TestMasterInquiry : BaseSqlActivity
         Console.WriteLine("| Field Name | Differences |");
         Console.WriteLine("|------------|------------ |");
 
-        foreach (var (field, count) in diffsByFieldName)
+        foreach ((string field, int count) in diffsByFieldName)
         {
             Console.WriteLine($"| {field} | {count} |");
         }
@@ -165,7 +165,7 @@ public class TestMasterInquiry : BaseSqlActivity
 
     private async Task<MemberProfitPlanDetails?> GetEmployeeDetails(int profitYear, string ssn)
     {
-        ApiClient apiClient = SmartActivityFactory.Client!;
+        ApiClient apiClient = ApiClient;
 
 
         HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/master/master-inquiry/search")
@@ -217,7 +217,7 @@ public class TestMasterInquiry : BaseSqlActivity
                 "take": 255
             }'
             */
-        int demographicsId = 77;// memberDetails.id
+        int demographicsId = 77; // memberDetails.id
         if (demographicsId == 77)
         {
             throw new Exception("Not implemented");

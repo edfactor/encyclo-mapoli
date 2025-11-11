@@ -1,4 +1,4 @@
-﻿namespace YEMatch.YEMatch.AssertActivities.MasterInquiry;
+﻿namespace YEMatch.AssertActivities.MasterInquiry;
 
 /* Parses a line from the cobol output file "OUTFL".  It contains a dump of values which match Master Inqiery Scrrens. */
 public static class OutFLParser
@@ -58,7 +58,7 @@ public static class OutFLParser
     {
         string digits = data.Substring(index, 12).Trim();
         string sign = data.Length == index + 12 ? "" : data.Substring(index + 12, 1).Trim();
-        if ((digits + sign) == "")
+        if (digits + sign == "")
         {
             return 0;
         }
