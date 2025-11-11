@@ -14,7 +14,7 @@ using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services;
 
-[Collection("BeneficiaryDisbursementServiceTests")]
+[Collection("SharedGlobalState")]
 public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
 {
     private readonly (Demographic demographic, List<PayProfit> payprofit) _disburser;
