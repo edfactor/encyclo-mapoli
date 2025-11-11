@@ -1,10 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
-using System.Text.RegularExpressions;
 using Renci.SshNet;
-using YEMatch.YEMatch.ReadyActivities;
+using YEMatch.ReadyActivities;
 
-namespace YEMatch.YEMatch;
+namespace YEMatch;
 
 // Tries to parse the outcome.json and get all the remote files.    Used for creating the Golden Master
 [SuppressMessage("Minor Code Smell", "S3267:Loops should be simplified with \"LINQ\" expressions")]
@@ -36,6 +34,5 @@ public static class GetGold
         {
             sftpClient.DownloadFile(readyFile, fileStream);
         }
-
     }
 }

@@ -4,22 +4,52 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-YEMatch is an integration testing framework for comparing READY (legacy) and SMART (new) profit sharing systems during year-end processing. It executes parallel operations against both systems and validates that they produce identical results.
+YEMatch is an integration testing framework for comparing READY (legacy) and SMART (new) profit sharing systems during
+year-end processing. It executes parallel operations against both systems and validates that they produce identical
+results.
 
-**Confluence Documentation:** https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/272007173/READY+SMART+Year+End+Exact+Match+Testing+YE+Match
+**Confluence Documentation:
+** https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/272007173/READY+SMART+Year+End+Exact+Match+Testing+YE+Match
 
 ## Architecture
 
 ### Core Concepts
 
-- **Runs**: End-to-end test scenarios (e.g., `GoldenYearEndRun`, `BaselineRun`, `TerminationsRun`) that orchestrate sequences of activities
+- **Runs**: End-to-end test scenarios (e.g., `GoldenYearEndRun`, `BaselineRun`, `TerminationsRun`) that orchestrate
+  sequences of activities
 - **Activities**: Individual test steps implementing the `IActivity` interface, categorized as:
-  - `ReadyActivity`: SSH commands executed against READY system (via Renci.SshNet)
-  - `SmartActivity`: API calls to SMART system (via NSwag-generated `ApiClient`)
-  - Assert Activities: SQL-based validation queries comparing READY and SMART databases
-  - Arrange Activities: Setup and teardown operations
-- **Outcomes**: Activity execution results with status (`Ok`, `Error`, `NoOperation`, `ToBeDone`), timing, and output capture
+    - `ReadyActivity`: SSH commands executed against READY system (via Renci.SshNet)
+    - `SmartActivity`: API calls to SMART system (via NSwag-generated `ApiClient`)
+    - Assert Activities: SQL-based validation queries comparing READY and SMART databases
+    - Arrange Activities: Setup and teardown operations
+- **Outcomes**: Activity execution results with status (`Ok`, `Error`, `NoOperation`, `ToBeDone`), timing, and output
+  capture
 - **Parallel Execution**: Activities can run in parallel using `ParallelActivity` wrapper; outcomes are merged
+
+### Dependency Injection Architecture
+
+YEMatch uses **.NET Dependency Injection** with the following lifetime scopes:
+
+- **Singleton Factories**: `IReadySshClientFactory`, `ISmartApiClientFactory`, `IActivityFactory`
+    - Maintain single SSH/HTTP connections throughout application lifetime
+    - Create and register all available activities
+    - Implement `IDisposable` for proper cleanup
+
+- **Transient Runs**: All Run classes (BaselineRun, TinkerRun, etc.)
+    - New instance created per execution
+    - Dependencies injected via constructor
+
+- **Configuration**: `IOptions<YeMatchOptions>` pattern
+    - Strongly-typed configuration from `appsettings.json` and user secrets
+    - Hierarchical structure: `YeMatch:ReadyHost:*`, `YeMatch:SmartApi:*`, etc.
+
+**DI Container Setup** (Program.cs):
+
+- Host.CreateDefaultBuilder with Serilog
+- User secrets loaded from ProgramMarker type
+- IHttpClientFactory for SMART API client lifecycle
+- Factories registered as singletons
+- All Run types registered as transient
 
 ### Directory Structure
 
@@ -38,12 +68,14 @@ YEMatch/
 │   ├── AutoMatchRun.cs          # Automated matching scenarios
 │   └── [Other run types]
 ├── ReadyActivities/
-│   ├── ReadyActivity.cs         # SSH-based READY command execution
-│   └── ReadyActivityFactory.cs  # READY activity creation
+│   ├── ReadyActivity.cs          # SSH-based READY command execution
+│   ├── ReadySshClientFactory.cs  # DI-based SSH client and activity factory
+│   └── IReadySshClientFactory.cs # Factory interface
 ├── SmartActivities/
-│   ├── SmartActivity.cs         # SMART API call execution
-│   ├── SmartActivityFactory.cs  # SMART activity creation with Okta auth
-│   ├── ApiClient.cs             # NSwag-generated API client (regenerated via gen.bat)
+│   ├── SmartActivity.cs          # SMART API call execution
+│   ├── SmartApiClientFactory.cs  # DI-based API client and activity factory
+│   ├── ISmartApiClientFactory.cs # Factory interface
+│   ├── ApiClient.cs              # NSwag-generated API client (regenerated via gen.bat)
 │   └── [Specific test implementations]
 ├── AssertActivities/
 │   ├── BaseActivity.cs          # Base SQL assertion logic
@@ -62,8 +94,8 @@ Run from the project directory (`src/services/tests/yematchrunner`):
 
 ```bash
 # READY SSH credentials
-dotnet user-secrets set "YEMatchHost:Username" "your_ready_username"
-dotnet user-secrets set "YEMatchHost:Password" "your_ready_password"
+dotnet user-secrets set "YeMatch:ReadyHost:Username" "your_ready_username"
+dotnet user-secrets set "YeMatch:ReadyHost:Password" "your_ready_password"
 
 # Database connection strings
 dotnet user-secrets set SmartConnectionString "Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=your_host)(PORT=1521)))(CONNECT_DATA=(SERVICE_NAME=your_service)(SERVER=DEDICATED)));User Id=smart_user;Password=smart_pass"
@@ -73,15 +105,33 @@ dotnet user-secrets set ReadyConnectionString "Data Source=(DESCRIPTION=(ADDRESS
 
 ### Optional Configuration
 
-Create `appsettings.json` to override default log directory:
+Create `appsettings.json` to override defaults:
 
 ```json
 {
-  "BaseDataDirectory": "/custom/path/for/logs"
+  "YeMatch": {
+    "BaseDataDirectory": "/custom/path/for/logs",
+    "ReadyHost": {
+      "Host": "appt07d",
+      "ConnectionTimeoutSeconds": 30,
+      "Chatty": true
+    },
+    "SmartApi": {
+      "BaseUrl": "https://localhost:7141",
+      "TimeoutHours": 2
+    },
+    "YearEndDates": {
+      "ProfitYear": 2025,
+      "FirstSaturday": "250104",
+      "LastSaturday": "251227",
+      "CutOffSaturday": "260103",
+      "MoreThanFiveYears": "181231"
+    }
+  }
 }
 ```
 
-Default: `/tmp/ye/<dd-MMM-HH-mm>`
+Default data directory: `/tmp/ye/<dd-MMM-HH-mm>`
 
 ## Running Tests
 
@@ -133,51 +183,94 @@ dotnet run -- --run tinker
 ### Adding a New Run
 
 1. Create a class in `YEMatch/Runs/` extending `Runnable`
-2. Override `Exec()` method and build activity list
-3. Call `await Run(activitiesToRun)`
-4. Register in `Program.cs` `GetRunner` switch statement
+2. Add constructor with DI dependencies (IActivityFactory, IReadySshClientFactory, ISmartApiClientFactory, ILogger)
+3. Override `Exec()` method and use `Specify()` to select activities by name
+4. Register in `Program.cs` DI container as `AddTransient<YourNewRun>()`
+5. Add to `GetRunner()` switch statement
 
 Example:
+
 ```csharp
+using Microsoft.Extensions.Logging;
+using YEMatch.Activities;
+using YEMatch.ReadyActivities;
+using YEMatch.SmartActivities;
+
+namespace YEMatch.Runs;
+
 public class MyNewRun : Runnable
 {
+    public MyNewRun(
+        IActivityFactory activityFactory,
+        IReadySshClientFactory readySshClientFactory,
+        ISmartApiClientFactory smartApiClientFactory,
+        ILogger<MyNewRun> logger)
+        : base(activityFactory, readySshClientFactory, smartApiClientFactory, logger)
+    {
+    }
+
     public override async Task Exec()
     {
-        List<IActivity> activities = [
-            Factory.ReadyActivity("A01", "SCRIPT_NAME", "args"),
-            Factory.SmartActivity("A02", SmartActivityFactory.SomeOperation),
-            Factory.AssertActivity("A03", "ValidationQuery")
-        ];
-        await Run(activities);
+        // Use Specify() to select activities by their registered names
+        await Run(Specify(
+            "R0",    // READY activity to build database
+            "S0",    // SMART activity to import from READY
+            "TestPayProfitSelectedColumns"  // Assertion activity
+        ));
     }
 }
 ```
 
+Then register in Program.cs:
+
+```csharp
+// In ConfigureServices:
+services.AddTransient<MyNewRun>();
+
+// In GetRunner switch:
+"mynewrun" => services.GetRequiredService<MyNewRun>(),
+```
+
 ### Adding a New Activity
 
+Activities are created by factories and registered in the ActivityFactory's activities dictionary. Use the `Specify()`
+method in Run classes to select activities by name.
+
 **READY Activity:**
+Add to `ReadySshClientFactory.CreateActivities()`:
+
 ```csharp
-// In ReadyActivityFactory
-public static ReadyActivity NewOperation(string args) =>
-    new ReadyActivity(client, sftpClient, chatty, "A##", "KSH_SCRIPT", args, dataDirectory);
+new ReadyActivity(ssh, sftp, _chatty, "A30", "MY-NEW-SCRIPT", $"ARG1={value}", dataDirectory)
 ```
 
 **SMART Activity:**
+Add to `SmartApiClientFactory.CreateActivities()`:
+
 ```csharp
-// In SmartActivityFactory
-public static SmartActivity NewOperation(string args) =>
-    new SmartActivity(async (client, name, command) =>
-    {
-        var result = await client.SomeEndpointAsync(command, null);
-        return new Outcome(name, "Operation Name", command, OutcomeStatus.Ok, "", null, true);
-    }, Client!, "A##", args);
+new SmartActivity(async (client, name, command) =>
+{
+    var result = await client.MyNewEndpointAsync(command, null);
+    return new Outcome(name, "My Operation Description", command,
+        OutcomeStatus.Ok, "", null, true);
+}, Client!, "A30", "optional-args")
 ```
 
-**Assert Activity:**
+**Assert/Test Activity:**
+Add to `TestActivityFactory.CreateActivities()`:
+
 ```csharp
-// In TestActivityFactory
-public static BaseSqlActivity ValidateData(string args) =>
-    new BaseSqlActivity(dataDirectory, "A##", "SELECT ... FROM ... WHERE ...");
+new MyCustomTestActivity()  // Implements IActivity
+```
+
+**Using Activities in Runs:**
+
+```csharp
+// In your Run's Exec() method:
+await Run(Specify(
+    "R30",  // References the READY activity with name "A30"
+    "S30",  // References the SMART activity with name "A30"
+    "MyCustomTestActivity"  // References by activity name
+));
 ```
 
 ### Regenerating API Client
@@ -202,19 +295,29 @@ nswag openapi2csclient /classname:ApiClient /namespace:YEMatch /input:https://lo
 
 ### Parallel Execution
 
+Activities prefixed with "P" run READY and SMART operations in parallel. The `ActivityFactory` automatically creates
+parallel wrappers for matching activity numbers.
+
 ```csharp
-// Execute two activities concurrently
-List<IActivity> activities = [
-    new ParallelActivity(
-        Factory.ReadyActivity("A01", "SCRIPT1", ""),
-        Factory.SmartActivity("A01", SmartActivityFactory.Operation1)
-    )
-];
+// In your Run's Exec() method:
+await Run(Specify(
+    "P0"   // Runs R0 (READY) and S0 (SMART) concurrently
+));
+
+// The ParallelActivity merges outcomes from both activities
+// Displays timing for the longer of the two operations
 ```
+
+Parallel activities are created automatically in `ActivityFactory`:
+
+- "P0" wraps "R0" + "S0"
+- "P1" wraps "R1" + "S1"
+- etc.
 
 ### READY SSH Command Pattern
 
 ReadyActivity translates production paths to development paths:
+
 ```bash
 . ~/setyematch;
 sed -e's|/production/|/dsmdev/data/PAYROLL/tmp-yematch/|g' jcl/{ksh}.ksh > jcl/YE-{ksh}.ksh;
@@ -234,15 +337,24 @@ EJR YE-{ksh} {args}
 ### Debug a Specific Activity
 
 Use `TinkerRun.cs` as a scratch pad:
+
 ```csharp
 public override async Task Exec()
 {
-    List<IActivity> activities = [
-        Factory.ReadyActivity("A01", "MY_SCRIPT", "args_to_test")
-    ];
-    await Run(activities);
+    // Use Specify() to select activities by name
+    await Run(Specify(
+        "R17",  // Run specific READY activity
+        "S12",  // Run specific SMART activity
+        "TestPayProfitSelectedColumns"  // Run specific test
+    ));
 }
 ```
+
+To see all available activity names, check:
+
+- `ReadySshClientFactory.CreateActivities()` for READY activities (R0-R29)
+- `SmartApiClientFactory.CreateActivities()` for SMART activities (S0-S29)
+- `TestActivityFactory.CreateActivities()` for test/assertion activities
 
 ### Compare Database Results
 
@@ -252,17 +364,22 @@ public override async Task Exec()
 
 ### Capture READY Output Files
 
-ReadyActivity automatically downloads files matching patterns from `/dsmdev/data/PAYROLL/tmp-yematch/` to local data directory.
+ReadyActivity automatically downloads files matching patterns from `/dsmdev/data/PAYROLL/tmp-yematch/` to local data
+directory.
 
 ## Technology Stack
 
 - **.NET 9** with C# 12
-- **Renci.SshNet** for READY SSH/SFTP access
-- **NSwag** for SMART API client generation
-- **Okta.AspNetCore** for SMART API authentication
-- **Oracle.ManagedDataAccess.Core** for database validation
-- **Shouldly** for assertions
-- **Microsoft.Extensions.Configuration** for secrets management
+- **Microsoft.Extensions.DependencyInjection** - Dependency injection container
+- **Microsoft.Extensions.Hosting** - Application host builder
+- **Microsoft.Extensions.Configuration** - Configuration and user secrets management
+- **IHttpClientFactory** - Proper HttpClient lifecycle management
+- **Serilog** - Structured logging
+- **Renci.SshNet** - READY SSH/SFTP access
+- **NSwag** - SMART API client generation
+- **Okta.AspNetCore** - SMART API authentication (test tokens)
+- **Oracle.ManagedDataAccess.Core** - Database validation queries
+- **Shouldly** - Assertion library
 
 ## Important Notes
 
@@ -271,7 +388,9 @@ ReadyActivity automatically downloads files matching patterns from `/dsmdev/data
 - Log directories can grow large during year-end runs; clean `/tmp/ye` periodically
 - API client is generated code; do not hand-edit
 - Parallel activities merge outcomes; the longest duration is reported
-- READY activities include hardcoded path: `/Users/robertherrmann/prj/smart-profit-sharing/src/services/tests/Demoulas.ProfitSharing.IntegrationTests/Resources/` for optional local resource base (may need adjustment per developer)
+- READY activities include hardcoded path:
+  `/Users/robertherrmann/prj/smart-profit-sharing/src/services/tests/Demoulas.ProfitSharing.IntegrationTests/Resources/`
+  for optional local resource base (may need adjustment per developer)
 
 ## Troubleshooting
 
@@ -286,5 +405,6 @@ ReadyActivity automatically downloads files matching patterns from `/dsmdev/data
 ## Related Projects
 
 This testing framework is part of the larger Demoulas Profit Sharing monorepo:
+
 - **SMART application**: `/Users/robertherrmann/prj/smart-profit-sharing/` (main .NET 9 API)
 - **Parent repository**: `/Users/robertherrmann/prj/yerunner/` (contains broader test infrastructure)

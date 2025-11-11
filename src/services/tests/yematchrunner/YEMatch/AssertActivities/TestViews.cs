@@ -1,23 +1,23 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Oracle.ManagedDataAccess.Client;
 
-namespace YEMatch.YEMatch.AssertActivities;
+namespace YEMatch.AssertActivities;
 
 [SuppressMessage("Major Code Smell", "S125:Sections of code should not be commented out")]
 [SuppressMessage("AsyncUsage", "AsyncFixer01:Unnecessary async/await usage")]
 [SuppressMessage("Major Code Smell", "S1144:Unused private types or members should be removed")]
 public class TestViews : BaseSqlActivity
 {
+    private const string ViewDirectory = "/Users/robertherrmann/prj/smart-profit-sharing/src/database/SQL calculations view/";
     private OracleConnection? _readyConnection;
     private OracleConnection? _smartConnection;
-    private const string ViewDirectory = "/Users/robertherrmann/prj/smart-profit-sharing/src/database/SQL calculations view/";
 
 
     public override async Task<Outcome> Execute()
     {
-        _readyConnection = new(ReadyConnString);
+        _readyConnection = new OracleConnection(ReadyConnString);
         await _readyConnection.OpenAsync();
-        _smartConnection = new(SmartConnString);
+        _smartConnection = new OracleConnection(SmartConnString);
         await _smartConnection.OpenAsync();
 
         await LoadViews();
@@ -51,7 +51,6 @@ public class TestViews : BaseSqlActivity
             string sql = QueryDiffRows("ready", "smart", queryA, queryB, "ssn");
             Console.WriteLine($"This query can dig into why.\n{sql}");
         }
-
     }
 
     private async Task LoadViews()
@@ -67,7 +66,7 @@ public class TestViews : BaseSqlActivity
 
     private async Task LoadViews(bool smart, string viewName)
     {
-        var viewFileName = $"{(smart ? "SMART" : "READY")} {viewName} view.sql";
+        string viewFileName = $"{(smart ? "SMART" : "READY")} {viewName} view.sql";
         Console.WriteLine($"Loading view {viewFileName} ");
         string viewText = await File.ReadAllTextAsync($"{ViewDirectory}{viewFileName}");
 
@@ -88,6 +87,4 @@ public class TestViews : BaseSqlActivity
             Console.WriteLine();
         }
     }
-
-
 }
