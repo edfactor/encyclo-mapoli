@@ -130,9 +130,9 @@ public sealed class PayService : IPayService
 
                 return Result<PayServicesResponse>.Success(response);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException ex)
             {
-                _logger.LogWarning(
+                _logger.LogWarning(ex,
                     "GetPayServices operation cancelled for EmploymentType: {EmploymentType}, ProfitYear: {ProfitYear}",
                     employmentType, request.ProfitYear);
                 return Result<PayServicesResponse>.Failure(Error.Unexpected($"Operation cancelled."));

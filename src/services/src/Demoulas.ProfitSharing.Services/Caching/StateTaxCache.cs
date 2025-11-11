@@ -15,7 +15,7 @@ public sealed class StateTaxCache : LookupCache<string, decimal?, StateTax>
     public StateTaxCache(
         IDistributedCache cache,
         IProfitSharingDataContextFactory contextFactory,
-        ILogger<LookupCache<string, decimal?, StateTax>> logger)
+        ILogger<StateTaxCache> logger)
         : base(
             cache,
             contextFactory,

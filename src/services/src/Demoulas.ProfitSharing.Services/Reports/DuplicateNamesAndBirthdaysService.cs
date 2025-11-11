@@ -158,9 +158,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                 TerminationDate = r.TerminationDate,
                 Status = r.EmploymentStatusId,
                 StoreNumber = r.StoreNumber,
-                Count = dict.ContainsKey(r.BadgeNumber)
-                            ? ++dict[r.BadgeNumber]
-                            : dict[r.BadgeNumber] = 1,
+                Count = GetDictValue(dict, r.BadgeNumber),
                 NetBalance = r.NetBalance ?? 0,
                 HoursCurrentYear = r.HoursCurrentYear,
                 IncomeCurrentYear = r.IncomeCurrentYear,
@@ -276,4 +274,16 @@ FROM FILTERED_DEMOGRAPHIC p1
             throw;
         }
     }
+
+    private static int GetDictValue(Dictionary<int, int> dict, int key)
+    {
+        if (dict.ContainsKey(key))
+        {
+            return ++dict[key];
+        }
+
+        dict[key] = 1;
+        return 1;
+    }
 }
+

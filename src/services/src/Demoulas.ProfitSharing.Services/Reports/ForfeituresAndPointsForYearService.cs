@@ -143,24 +143,21 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
             }
 
             // Add beneficiaries (excluding employees)
-            foreach (var bene in beneficiaries)
+            foreach (var bene in beneficiaries.Where(b => !employeeSsns.Contains(b.ContactSsn)))
             {
-                if (!employeeSsns.Contains(bene.ContactSsn))
+                var balance = balancesByKey.GetValueOrDefault((bene.ContactSsn, bene.ContactId));
+
+                var member = ToBeneficiaryMemberDetails(
+                    bene.ContactFullName!,
+                    bene.ContactSsn,
+                    bene.BadgeNumber,
+                    bene.PsnSuffix,
+                    balance?.CurrentBalance);
+
+                // Filter immediately
+                if (member.EarningPoints != 0)
                 {
-                    var balance = balancesByKey.GetValueOrDefault((bene.ContactSsn, bene.ContactId));
-
-                    var member = ToBeneficiaryMemberDetails(
-                        bene.ContactFullName!,
-                        bene.ContactSsn,
-                        bene.BadgeNumber,
-                        bene.PsnSuffix,
-                        balance?.CurrentBalance);
-
-                    // Filter immediately
-                    if (member.EarningPoints != 0)
-                    {
-                        members.Add(member);
-                    }
+                    members.Add(member);
                 }
             }
 

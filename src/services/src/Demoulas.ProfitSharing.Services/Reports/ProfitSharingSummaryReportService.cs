@@ -26,7 +26,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     private readonly ICalendarService _calendarService;
     private readonly TotalService _totalService;
     private readonly IDemographicReaderService _demographicReaderService;
-    private static readonly short _hoursThreshold;
+    private static readonly short _hoursThreshold = ReferenceData.MinimumHoursForContribution();
 
     private sealed record EmployeeProjection
     {
@@ -69,12 +69,6 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         _calendarService = calendarService;
         _totalService = totalService;
         _demographicReaderService = demographicReaderService;
-    }
-
-    static ProfitSharingSummaryReportService()
-    {
-        // Set the hours threshold for profit sharing eligibility
-        _hoursThreshold = ReferenceData.MinimumHoursForContribution();
     }
 
     /// <summary>

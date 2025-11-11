@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -83,7 +83,7 @@ public sealed class BreakdownReportService : IBreakdownService
         ProfitDetailRollup Txn,
         decimal VestingRatio);
 
-    private enum StatusFilterEnum
+    private enum StatusFilter
     {
         All = 0,
         Active,
@@ -92,7 +92,7 @@ public sealed class BreakdownReportService : IBreakdownService
         Retired,
     }
 
-    private enum BalanceEnum
+    private enum Balance
     {
         BalanceOrNoBalance = 0,
         HasVestedBalance,
@@ -307,69 +307,69 @@ public sealed class BreakdownReportService : IBreakdownService
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Active, BalanceEnum.BalanceOrNoBalance, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilter.Active, Balance.BalanceOrNoBalance, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetMembersWithBalanceActivityByStore(BreakdownByStoreRequest request, int[]? Ssns, int[] BadgeNumbers, CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.All, BalanceEnum.HasBalanceActivity, withBeneficiaryAllocation: false, Ssns, BadgeNumbers, cancellationToken);
+        return GetMembersByStore(request, StatusFilter.All, Balance.HasBalanceActivity, withBeneficiaryAllocation: false, Ssns, BadgeNumbers, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetInactiveMembersByStore(
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Inactive, BalanceEnum.BalanceOrNoBalance, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilter.Inactive, Balance.BalanceOrNoBalance, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetInactiveMembersWithVestedBalanceByStore(
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Inactive, BalanceEnum.HasVestedBalance, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilter.Inactive, Balance.HasVestedBalance, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetRetiredEmployessWithBalanceActivity(
        TerminatedEmployeesWithBalanceBreakdownRequest request,
        CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Retired, BalanceEnum.HasBalanceActivity, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilter.Retired, Balance.HasBalanceActivity, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithVestedBalanceByStore(
        BreakdownByStoreRequest request,
        CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.HasVestedBalance, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilter.Terminated, Balance.HasVestedBalance, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithBalanceActivityByStore(
        BreakdownByStoreRequest request,
        CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.HasBalanceActivity, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilter.Terminated, Balance.HasBalanceActivity, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithCurrentBalanceNotVestedByStore(
        BreakdownByStoreRequest request,
        CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.HasCurrentBalanceNotVested, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilter.Terminated, Balance.HasCurrentBalanceNotVested, withBeneficiaryAllocation: false, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithBeneficiaryByStore(
        TerminatedEmployeesWithBalanceBreakdownRequest request,
        CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.BalanceOrNoBalance, withBeneficiaryAllocation: true, ssns: null, badgeNumbers: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilter.Terminated, Balance.BalanceOrNoBalance, withBeneficiaryAllocation: true, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
     #region ── Private: common building blocks ───────────────────────────────────────────
 
     private Task<ReportResponseBase<MemberYearSummaryDto>> GetMembersByStore(
         BreakdownByStoreRequest request,
-        StatusFilterEnum employeeStatusFilter,
-        BalanceEnum balanceFilter,
+        StatusFilter employeeStatusFilter,
+        Balance balanceFilter,
         bool withBeneficiaryAllocation,
         int[]? ssns,
         int[]? badgeNumbers,
@@ -396,19 +396,19 @@ public sealed class BreakdownReportService : IBreakdownService
             var startEndDateRequest = request as IStartEndDateRequest;
 
             // Apply status filter BEFORE materialization - PERFORMANCE OPTIMIZATION
-            if (employeeStatusFilter == StatusFilterEnum.Active)
+            if (employeeStatusFilter == StatusFilter.Active)
             {
                 employeesBase = employeesBase.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Active);
             }
-            else if (employeeStatusFilter == StatusFilterEnum.Inactive)
+            else if (employeeStatusFilter == StatusFilter.Inactive)
             {
                 employeesBase = employeesBase.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Inactive && e.TerminationCodeId != TerminationCode.Constants.Transferred);
             }
 
-            if (employeeStatusFilter == StatusFilterEnum.Terminated || employeeStatusFilter == StatusFilterEnum.Retired)
+            if (employeeStatusFilter == StatusFilter.Terminated || employeeStatusFilter == StatusFilter.Retired)
             {
                 employeesBase = employeesBase.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Terminated);
-                if (employeeStatusFilter == StatusFilterEnum.Terminated)
+                if (employeeStatusFilter == StatusFilter.Terminated)
                 {
                     employeesBase = employeesBase.Where(e => e.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension);
                 }
@@ -443,16 +443,16 @@ public sealed class BreakdownReportService : IBreakdownService
 
             employeesBase = balanceFilter switch
             {
-                BalanceEnum.BalanceOrNoBalance => employeesBase,
-                BalanceEnum.HasVestedBalance => employeesBase.Where(e => e.VestedBalance.HasValue && e.VestedBalance.Value > 0),
-                BalanceEnum.HasBalanceActivity => employeesBase.Where(e =>
+                Balance.BalanceOrNoBalance => employeesBase,
+                Balance.HasVestedBalance => employeesBase.Where(e => e.VestedBalance.HasValue && e.VestedBalance.Value > 0),
+                Balance.HasBalanceActivity => employeesBase.Where(e =>
                     (e.VestedBalance.HasValue && e.VestedBalance.Value > 0)
                     || (e.CurrentBalance.HasValue && e.CurrentBalance.Value > 0)
                     || (e.Earnings != 0)
                     || (e.Distributions != 0)
                     || (e.Forfeitures != 0)
                     || (e.Contributions != 0)),
-                BalanceEnum.HasCurrentBalanceNotVested => employeesBase.Where(e => e.CurrentBalance.HasValue && e.CurrentBalance.Value > 0 && (e.VestedBalance == null || e.VestedBalance.Value == 0)),
+                Balance.HasCurrentBalanceNotVested => employeesBase.Where(e => e.CurrentBalance.HasValue && e.CurrentBalance.Value > 0 && (e.VestedBalance == null || e.VestedBalance.Value == 0)),
                 _ => employeesBase
             };
 
@@ -484,7 +484,7 @@ public sealed class BreakdownReportService : IBreakdownService
             }
 
 
-            if (balanceFilter == BalanceEnum.HasVestedBalance && employeeStatusFilter == StatusFilterEnum.Inactive)
+            if (balanceFilter == Balance.HasVestedBalance && employeeStatusFilter == StatusFilter.Inactive)
             {
                 employeesBase = employeesBase
                     .Where(e => !ctx.ExcludedIds.Any(x => e.BadgeNumber == x.ExcludedIdValue));
@@ -545,7 +545,7 @@ public sealed class BreakdownReportService : IBreakdownService
     private static async Task<PaginatedResponseDto<ActiveMemberDto>> GetPaginatedResults(
         BreakdownByStoreRequest request,
         IQueryable<ActiveMemberDto> employeesBase,
-        StatusFilterEnum employeeStatusFilter,
+        StatusFilter employeeStatusFilter,
         CancellationToken cancellationToken)
     {
         // Apply sorting BEFORE pagination (in SQL) - PERFORMANCE OPTIMIZATION
@@ -562,7 +562,7 @@ public sealed class BreakdownReportService : IBreakdownService
         {
             orderedQuery = employeesBase
                 .OrderBy(e => e.StoreNumber)
-                .ThenBy(e => employeeStatusFilter == StatusFilterEnum.All ? e.CertificateSort : 0)
+                .ThenBy(e => employeeStatusFilter == StatusFilter.All ? e.CertificateSort : 0)
                 .ThenBy(e => e.FullName);
         }
 
