@@ -10,21 +10,22 @@ internal enum VestingStateType
     FullyVested
 }
 
-/*
- * Essentially, the Enrollment flag (enrollment_id / py_ps_enrolled) is a summarizer of profit detail rows.   It tells you "at a glance" if an employee
- * is new, or is returning, or has forfeited and/or left the plan.
- *
- * This logic is extracted from PAY450.cbl
- *
- * So by scanning the profit_detail transactions we can figure out if an employee is in one of 5 states;
- *
- *  0 - Not enrolled
- *  1 - Old vesting plan has Contributions (7 years to full vesting)
- *  2 - New vesting plan has Contributions (6 years to full vesting)
- *  3 - Old vesting plan has Forfeiture records
- *  4 - New vesting plan has Forfeiture records
- *
- */
+/// <summary>
+/// Summarizes enrollment status by analyzing profit detail transaction history.
+/// The enrollment flag (enrollment_id / py_ps_enrolled) indicates at a glance if an employee
+/// is new, returning, or has forfeited and/or left the plan.
+/// </summary>
+/// <remarks>
+/// This logic is extracted from PAY450.cbl.
+/// By scanning profit_detail transactions, we determine one of 5 enrollment states:
+/// <list type="bullet">
+/// <item><description>0 - Not enrolled</description></item>
+/// <item><description>1 - Old vesting plan has Contributions (7 years to full vesting)</description></item>
+/// <item><description>2 - New vesting plan has Contributions (6 years to full vesting)</description></item>
+/// <item><description>3 - Old vesting plan has Forfeiture records</description></item>
+/// <item><description>4 - New vesting plan has Forfeiture records</description></item>
+/// </list>
+/// </remarks>
 internal class EnrollmentSummarizer
 {
     // Used to ensure we only process each year once.  For some years there are multiple contributions in a single year, but we only care about a single contribution instance per year

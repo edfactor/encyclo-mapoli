@@ -126,14 +126,14 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                         EmploymentStatusId = d.EmploymentStatusId,
                         // Use correlated subqueries for PayProfits data
                         // These will be optimized by Oracle when IX_PayProfits_Demographic_Year index exists
-                        CurrentIncomeYear = await ctx.PayProfits
+                        CurrentIncomeYear = ctx.PayProfits
                             .Where(pp => pp.DemographicId == d.Id && pp.ProfitYear == pd.ProfitYear)
                             .Select(pp => pp.CurrentIncomeYear)
-                            .FirstOrDefaultAsync(),
-                        CurrentHoursYear = await ctx.PayProfits
+                            .FirstOrDefault(),
+                        CurrentHoursYear = ctx.PayProfits
                             .Where(pp => pp.DemographicId == d.Id && pp.ProfitYear == pd.ProfitYear)
                             .Select(pp => pp.CurrentHoursYear)
-                            .FirstOrDefaultAsync()
+                            .FirstOrDefault()
                     }
                 });
 

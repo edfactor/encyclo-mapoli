@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.MergeProfitDetails;
+
 public class MergeProfitDetailsService : IMergeProfitDetailsService
 {
 
@@ -19,10 +20,10 @@ public class MergeProfitDetailsService : IMergeProfitDetailsService
         _demographicReaderService = demographicReaderService;
     }
 
-    public async Task<Result<bool>> MergeProfitDetailsToDemographic(int sourceDemographic, int targetDemographic, CancellationToken cancellationToken = default)
+    public async Task<Result<bool>> MergeProfitDetailsToDemographic(int sourceSsn, int destinationSsn, CancellationToken cancellationToken = default)
     {
         // Early validation: prevent merging with same SSN
-        if (sourceDemographic == targetDemographic)
+        if (sourceSsn == destinationSsn)
         {
             return Result<bool>.Failure(Error.SameDemographicMerge);
         }
@@ -32,15 +33,15 @@ public class MergeProfitDetailsService : IMergeProfitDetailsService
             return await _dataContextFactory.UseWritableContext((Func<Data.Contexts.ProfitSharingDbContext, Task<Result<bool>>>)(async ctx =>
             {
                 var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
-                HashSet<int> ssns = new() { sourceDemographic, targetDemographic };
+                HashSet<int> ssns = new() { sourceSsn, destinationSsn };
 
                 List<Demographic> source = await demographicQuery
                      .Where(d => ssns.Contains(d.Ssn))
                      .ToListAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
                 // Confirm we have both source and destination
-                Demographic? sourceDemographic = source.FirstOrDefault((Func<Demographic, bool>)(d => d.Ssn == sourceDemographic));
-                Demographic? destinationDemographic = source.FirstOrDefault(e => e.Ssn == targetDemographic);
+                Demographic? sourceDemographic = source.FirstOrDefault(d => d.Ssn == sourceSsn);
+                Demographic? destinationDemographic = source.FirstOrDefault(e => e.Ssn == destinationSsn);
 
                 // Validate demographics existence with specific error messages
                 if (sourceDemographic == null && destinationDemographic == null)
@@ -58,9 +59,9 @@ public class MergeProfitDetailsService : IMergeProfitDetailsService
 
                 // Perform the merge operation
                 var rowsAffected = await ctx.ProfitDetails
-                    .Where((System.Linq.Expressions.Expression<Func<ProfitDetail, bool>>)(p => p.Ssn == sourceDemographic))
+                    .Where(p => p.Ssn == sourceSsn)
                     .ExecuteUpdateAsync(
-                        s => s.SetProperty(p => p.Ssn, targetDemographic),
+                        s => s.SetProperty(p => p.Ssn, destinationSsn),
                         cancellationToken);
 
                 return Result<bool>.Success(true);

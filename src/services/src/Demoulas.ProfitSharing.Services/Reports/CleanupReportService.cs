@@ -323,7 +323,6 @@ public class CleanupReportService : ICleanupReportService
                     Total = paginated.Total
                 };
 
-                //}
                 var response = new DistributionsAndForfeitureTotalsResponse()
                 {
                     ReportName = "Distributions and Forfeitures",
