@@ -293,7 +293,6 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
             // Use reflection to access dictionary entries
             Type valueType = value.GetType();
             PropertyInfo? keysProperty = valueType.GetProperty("Keys");
-            PropertyInfo? valuesProperty = valueType.GetProperty("Values");
             PropertyInfo? itemProperty = valueType.GetProperty("Item");
 
             if (keysProperty == null || itemProperty == null)

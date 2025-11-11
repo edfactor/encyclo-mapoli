@@ -46,12 +46,12 @@ public sealed class PayService : IPayService
     /// <param name="employmentType">Employment type (P=Part-time, H/G/F=Full-time variants)</param>
     /// <param name="cancellationToken">Cancellation token for async operation</param>
     /// <returns>Result containing paginated pay services data aggregated by years since hire</returns>
-    public async Task<Result<PayServicesResponse>> GetPayServices(
+    public Task<Result<PayServicesResponse>> GetPayServices(
         PayServicesRequest request,
         char employmentType,
         CancellationToken cancellationToken = default)
     {
-        return await _dataContextFactory.UseReadOnlyContext<Result<PayServicesResponse>>(async ctx =>
+        return _dataContextFactory.UseReadOnlyContext<Result<PayServicesResponse>>(async ctx =>
         {
             try
             {
@@ -86,18 +86,18 @@ public sealed class PayService : IPayService
                 .TagWith($"PayServices-RawData-{request.ProfitYear}-EmpType-{employmentType}")
                 .ToListAsync(cancellationToken);
 
-            // STEP 2: Calculate years since hire and perform grouping/aggregation in memory
-            // Oracle EF provider cannot translate the GROUP BY calculation, so we do this client-side
-            var aggregatedData = rawData
-                .GroupBy(x => ((fiscalEndYear - x.HireYear != 0 ? fiscalEndYear - x.HireYear : x.HireMonth < 7 ? -2 : -1)) )
-                    .Select(g => new
-                    {
-                        YearsSinceHire = g.Key,
-                        Employees = g.Select(x => x.DemographicId).Distinct().Count(),
-                        TotalWages = g.Sum(x => x.Wages)
-                    })
-                    .OrderBy(x => x.YearsSinceHire)
-                    .ToList();
+                // STEP 2: Calculate years since hire and perform grouping/aggregation in memory
+                // Oracle EF provider cannot translate the GROUP BY calculation, so we do this client-side
+                var aggregatedData = rawData
+                    .GroupBy(x => fiscalEndYear - x.HireYear != 0 ? fiscalEndYear - x.HireYear : x.HireMonth < 7 ? -2 : -1)
+                        .Select(g => new
+                        {
+                            YearsSinceHire = g.Key,
+                            Employees = g.Select(x => x.DemographicId).Distinct().Count(),
+                            TotalWages = g.Sum(x => x.Wages)
+                        })
+                        .OrderBy(x => x.YearsSinceHire)
+                        .ToList();
 
                 // Map to DTOs with weekly pay calculation
                 var payServicesDtos = aggregatedData.Select(s => new PayServicesDto

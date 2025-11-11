@@ -29,11 +29,11 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
     /// <summary>
     /// Builds the query for beneficiary inquiry with optional filtering.
     /// </summary>
-    public async Task<IQueryable<MasterInquiryItem>> GetBeneficiaryInquiryQueryAsync(
+    public Task<IQueryable<MasterInquiryItem>> GetBeneficiaryInquiryQueryAsync(
         MasterInquiryRequest? req = null,
         CancellationToken cancellationToken = default)
     {
-        return await _factory.UseReadOnlyContext(async ctx =>
+        return _factory.UseReadOnlyContext(async ctx =>
         {
             return await GetBeneficiaryInquiryQueryAsync(ctx, req, cancellationToken);
         }, cancellationToken);
@@ -42,7 +42,7 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
     /// <summary>
     /// Builds the query for beneficiary inquiry with optional filtering using an existing context.
     /// </summary>
-    public async Task<IQueryable<MasterInquiryItem>> GetBeneficiaryInquiryQueryAsync(
+    public Task<IQueryable<MasterInquiryItem>> GetBeneficiaryInquiryQueryAsync(
         ProfitSharingReadOnlyDbContext ctx,
         MasterInquiryRequest? req = null,
         CancellationToken cancellationToken = default)
@@ -122,7 +122,7 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
                     }
                 });
 
-        return await Task.FromResult(query);
+        return Task.FromResult(query);
     }
 
     /// <summary>
@@ -307,12 +307,12 @@ public sealed class BeneficiaryMasterInquiryService : IBeneficiaryMasterInquiryS
     /// <summary>
     /// Find beneficiary SSN by badge number and PSN suffix.
     /// </summary>
-    public async Task<int> FindBeneficiarySsnByBadgeAsync(
+    public Task<int> FindBeneficiarySsnByBadgeAsync(
         int badgeNumber,
         short psnSuffix,
         CancellationToken cancellationToken = default)
     {
-        return await _factory.UseReadOnlyContext(async ctx =>
+        return _factory.UseReadOnlyContext(async ctx =>
         {
             // ReadOnlyDbContext automatically handles AsNoTracking
             int ssnBene = await ctx.Beneficiaries
