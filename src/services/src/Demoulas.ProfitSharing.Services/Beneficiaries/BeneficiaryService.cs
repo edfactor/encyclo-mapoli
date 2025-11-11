@@ -173,9 +173,9 @@ public class BeneficiaryService : IBeneficiaryService
         return response;
     }
 
-    public async Task<UpdateBeneficiaryResponse> UpdateBeneficiary(UpdateBeneficiaryRequest req, CancellationToken cancellationToken)
+    public Task<UpdateBeneficiaryResponse> UpdateBeneficiary(UpdateBeneficiaryRequest req, CancellationToken cancellationToken)
     {
-        var resp = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
+       return _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
         {
             var beneficiary = await ctx.Beneficiaries.SingleAsync(x => x.Id == req.Id, cancellationToken);
 
@@ -222,10 +222,8 @@ public class BeneficiaryService : IBeneficiaryService
                 await transaction.CommitAsync(cancellationToken);
             }
 
-            return Task.FromResult(response);
+            return response;
         }, cancellationToken);
-
-        return await resp;
     }
 
 
@@ -446,12 +444,17 @@ public class BeneficiaryService : IBeneficiaryService
     {
         _ = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
         {
-            var contactToDelete = await ctx.BeneficiaryContacts.Include(x => x.Beneficiaries).SingleAsync(x => x.Id == id, cancellation);
+            var contactToDelete = await ctx.BeneficiaryContacts
+                .Include(x => x.Beneficiaries)
+                .Include(beneficiaryContact => beneficiaryContact.Address)
+                .Include(beneficiaryContact => beneficiaryContact.ContactInfo)
+                .SingleAsync(x => x.Id == id, cancellation);
+
             var deleteContact = true;
             Beneficiary? beneficiaryToDelete = null;
             if (contactToDelete.Beneficiaries?.Count == 1) //If contact is only associated with one beneficiary, check to see if we can delete it.
             {
-                var firstBeneficiary = contactToDelete.Beneficiaries.First();
+                var firstBeneficiary = contactToDelete.Beneficiaries[0];
                 deleteContact = await CanIDeleteThisBeneficiary(firstBeneficiary, ctx, cancellation);
                 beneficiaryToDelete = firstBeneficiary;
             }

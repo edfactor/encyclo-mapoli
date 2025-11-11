@@ -240,10 +240,10 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 return detailsList;
             }, timeoutToken);
         }
-        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        catch (OperationCanceledException oce) when (!cancellationToken.IsCancellationRequested)
         {
             // Timeout occurred (not user cancellation)
-            _logger.LogWarning("Master inquiry search timed out after 30 seconds for profit year {ProfitYear}", req.ProfitYear);
+            _logger.LogWarning(oce, "Master inquiry search timed out after 30 seconds for profit year {ProfitYear}", req.ProfitYear);
 
             // Return empty result with message indicating timeout
             // Note: Add IsPartialResult and Message properties to PaginatedResponseDto if not present
