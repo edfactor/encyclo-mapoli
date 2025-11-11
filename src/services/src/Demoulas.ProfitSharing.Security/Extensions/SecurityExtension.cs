@@ -37,7 +37,7 @@ public static class SecurityExtension
         // This eliminates the need to restart when switching between UI testing and integration tests
         if (builder.Environment.IsDevelopment())
         {
-            _ = builder.Services.AddTestCertificateSupport();
+            _ = builder.Services.AddTestCertificateSupport(builder.Configuration);
         }
 
         _ = builder.ConfigureSecurityPolicies();
@@ -46,17 +46,25 @@ public static class SecurityExtension
     }
 
     /// <summary>
-    /// Adds test certificate support to the existing Okta authentication.
-    /// This allows integration tests (using test certs) to work alongside UI (using Okta)
+    /// Adds test certificate support to the existing Okta authentication using dotnet user-jwts.
+    /// This allows integration tests (using test JWTs) to work alongside UI (using Okta)
     /// without needing to restart the backend.
     /// </summary>
-    private static IServiceCollection AddTestCertificateSupport(this IServiceCollection services)
+    private static IServiceCollection AddTestCertificateSupport(this IServiceCollection services, IConfiguration configuration)
     {
-        // Post-configure the existing JWT Bearer authentication to add test cert fallback
+        // Post-configure the existing JWT Bearer authentication to add test JWT fallback
         services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
         {
-            // Test certificate security key
-            var testCertKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("abcdefghijklmnopqrstuvwxyz123456"));
+            // Read signing key from dotnet user-jwts configuration (stored in user secrets)
+            var signingKeyValue = configuration["Authentication:Schemes:Bearer:SigningKeys:0:Value"];
+
+            if (string.IsNullOrEmpty(signingKeyValue))
+            {
+                throw new InvalidOperationException(
+                    "No signing key found in user secrets. Run: dotnet user-jwts create --audience https://localhost:7141");
+            }
+
+            var testCertKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKeyValue));
 
             // Store original events
             var originalEvents = options.Events ?? new JwtBearerEvents();
@@ -81,12 +89,17 @@ public static class SecurityExtension
                         try
                         {
                             var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+
+                            // Read issuer and audience from configuration
+                            var validIssuer = configuration["Authentication:Schemes:Bearer:ValidIssuer"] ?? "dotnet-user-jwts";
+                            var validAudience = configuration["Authentication:Schemes:Bearer:ValidAudiences:0"] ?? "https://localhost:7141";
+
                             var validationParameters = new TokenValidationParameters
                             {
                                 ValidateIssuer = true,
-                                ValidIssuer = "Unit Test Issuer",
+                                ValidIssuer = validIssuer,
                                 ValidateAudience = true,
-                                ValidAudience = "Unit Test Audience",
+                                ValidAudience = validAudience,
                                 ValidateLifetime = true,
                                 ValidateIssuerSigningKey = true,
                                 IssuerSigningKey = testCertKey,
@@ -111,7 +124,9 @@ public static class SecurityExtension
 
                     // Call original handler if it exists
                     if (originalEvents.OnAuthenticationFailed != null)
+                    {
                         await originalEvents.OnAuthenticationFailed(context);
+                    }
                 }
             };
 
