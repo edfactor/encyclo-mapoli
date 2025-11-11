@@ -348,7 +348,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             if (req.ReportId == YearEndProfitSharingReportId.NonEmployeeBeneficiaries)
             {
                 // Report 10: filteredDetails is in-memory, use synchronous LINQ
-                var filteredList = filteredDetails.ToList();
+                var filteredList = await filteredDetails.ToListAsync();
                 totals = new ProfitShareTotal
                 {
                     WagesTotal = filteredList.Sum(x => x.Wages),

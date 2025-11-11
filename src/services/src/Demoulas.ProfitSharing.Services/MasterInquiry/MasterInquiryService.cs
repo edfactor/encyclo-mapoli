@@ -224,7 +224,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                             .ToList();
 
                     // Apply sorting based on request
-                    var sortedResults = ApplySorting(allResults.AsQueryable(), req).ToList();
+                    var sortedResults = await ApplySorting(allResults.AsQueryable(), req).ToListAsync();
 
                     // Apply pagination to the final deduplicated result set
                     int skip = req.Skip ?? 0;

@@ -78,7 +78,7 @@ public class PostFrozenService : IPostFrozenService
         // Helper function to build the base query for counts - each task will use its own context
         Func<IProfitSharingDbContext, IQueryable<Under21IntermediaryResult>> buildBaseQuery = (ctx) =>
         {
-            var demographics = _demographicReaderService.BuildDemographicQuery(ctx).Result;
+            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
             return from d in demographics.Where(x => x.DateOfBirth >= birthDate21)
                    join balTbl in _totalService.TotalVestingBalance(ctx, request.ProfitYear, request.ProfitYear, calInfo.FiscalEndDate) on d.Ssn equals balTbl.Ssn into balTmp
                    from bal in balTmp.DefaultIfEmpty()
