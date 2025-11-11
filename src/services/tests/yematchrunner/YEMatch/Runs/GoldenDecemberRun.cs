@@ -14,24 +14,26 @@ public class GoldenDecemberRun : Runnable
     {
         ActivityFactory.SetNewScramble();
 
-        GetGold.Purge();
+        // GetGold.Purge()
 
         // Generate the Golden files.  Run READY through december flow
         await Run(Specify(
             "R0", // import obfuscated
             nameof(DropBadBenesReady),
+            
             "R1", // "PROFSHARE-SSN-CLEANUP-RPTS"
             "R2", // TERM-REHIRE
             "R3", // PROF-TERM
             "R4", // QRY-PSLOAN
-            "R5", // PROF-DOLLAR-EXEC-EXTRACT
-            // "R6", // PAYPROFIT-CLEAR-EXEC
+            "R5", // PROF-DOLLAR-EXEC-EXTRACT,
+            // "R6", // PAYPROFIT-CLEAR-EXEC -- We dont clear them, as of 06-Nov-2025, in the "SQL copy..." scrips 
             "R7", // !Ready-Screen-008-09
-            "R8", // PROF-SHARE
-            "R9", // !YE-Oracle-Payroll-Processing
-            "R10", // Load-Oracle-PAYPROFIT(weekly job)
-            "R11", // PROF-DOLLAR-EXTRACT 
-            "R12" //  PROF-LOAD-YREND-DEMO-PROFSHARE
+            "R8" // PROF-SHARE
+
+            // "R9", // !YE-Oracle-Payroll-Processing
+            // "R10", // Load-Oracle-PAYPROFIT(weekly job)
+            // R11", // PROF-DOLLAR-EXTRACT 
+            // "R12" //  PROF-LOAD-YREND-DEMO-PROFSHARE
             // "R13A", // PAYPROFIT-SHIFT
             // "R13B", // PAYPROFIT-SHIFT
             // "R14" // ZERO-PY-PD-PAYPROFIT

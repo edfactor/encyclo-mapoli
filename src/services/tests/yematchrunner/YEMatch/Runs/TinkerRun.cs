@@ -15,11 +15,26 @@ public class TinkerRun : Runnable
     public override async Task Exec()
     {
         await Run(Specify(
-            #if false
+            "P0",
+            nameof(DropBadBenesReady),
+            "R8",
+
+        nameof(IntPay426),
+        nameof(IntPay426N),
+        nameof(IntPay426N9)
+
+            //
+            //      nameof(IntPay426),
+        // nameof(IntPay426N)
+            
+                  //   "P0",
+           // "R8"
+        // nameof(IntTestQPay129)
+
+#if false
             "P0", // init both dbs
             nameof(DropBadBenesReady), // in READY, get rid of the three Bene/Employees w/o Demographics rows
             nameof(SanityCheckEmployeeAndBenes),
-            #endif
             // Should -> RUN/Verify QPAY129 ?
             
             // Handle SHIFT Hours/Dollars
@@ -31,7 +46,6 @@ public class TinkerRun : Runnable
 
             "S12" // Freeze on Smart
 
-        #if false
                      // runs PAY456.cbl and PAY426.cbl 
             "R18",   // "PROF-SHARE sw[2]=1 CDATE=251227 YEAREND=Y" on READY    
                      // will set Earnpoints, fiddle with zerocont, clear new employee, clear certdate
