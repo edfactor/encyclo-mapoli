@@ -1,13 +1,14 @@
-﻿using Demoulas.ProfitSharing.Common.Attributes;
+﻿using System.Diagnostics.CodeAnalysis;
+using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
+[SuppressMessage("Major Code Smell", "S125:Sections of code should not be commented out")]
 public sealed record YearEndProfitSharingReportDetail : IIsExecutive, IProfitYearRequest
 {
     public required int BadgeNumber { get; set; }
     public required short ProfitYear { get; set; }
-    public required short PriorProfitYear { get; set; }
     [MaskSensitive] public required string EmployeeName { get; set; }
     public required short StoreNumber { get; set; }
     public required char EmployeeTypeCode { get; set; }
@@ -16,7 +17,6 @@ public sealed record YearEndProfitSharingReportDetail : IIsExecutive, IProfitYea
     public required byte Age { get; set; }
     public required string Ssn { get; set; }
     public required decimal Wages { get; set; }
-    public required decimal PriorBalance { get; set; }
     public required decimal Hours { get; set; }
 
     [MaskSensitive]
@@ -35,7 +35,6 @@ public sealed record YearEndProfitSharingReportDetail : IIsExecutive, IProfitYea
         return new YearEndProfitSharingReportDetail()
         {
             BadgeNumber = 135,
-            PriorProfitYear = 2023,
             ProfitYear = 2024,
             EmployeeName = "John Doe",
             StoreNumber = 23,
@@ -45,7 +44,6 @@ public sealed record YearEndProfitSharingReportDetail : IIsExecutive, IProfitYea
             Age = 28,
             Ssn = "XXX-XX-1234",
             Wages = 26527,
-            PriorBalance = 12345,
             Hours = 1475,
             Points = 2653,
             IsUnder21 = false,

@@ -332,7 +332,7 @@ BEGIN
         PY_PROF_ZEROCONT AS ZERO_CONTRIBUTION_REASON_ID,
         NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE, 
         NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE,
-        0 as POINTS_EARNED,  -- Presuming an import is happening in year without a completed YE, so we use 0
+        PY_PROF_POINTS AS POINTS_EARNED, -- Leaving the points here helps the PAY426 reports match identically.
         PY_PS_ETVA as ETVA
     FROM {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT
     where PAYPROF_BADGE in ( select BADGE_NUMBER from DEMOGRAPHIC  );

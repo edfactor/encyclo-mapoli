@@ -207,14 +207,22 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
   const getActiveAndInactiveTotals = useMemo(() => {
     if (!activeAndInactiveRowData) return [];
 
+    // Helper to sum nullable values - returns null if all values are null, otherwise sums them
+    const sumNullable = (field: keyof YearEndProfitSharingReportSummaryLineItem) => {
+      const values = activeAndInactiveRowData.map((row) => row[field]);
+      const hasAnyValue = values.some((v) => v !== null && v !== undefined);
+      if (!hasAnyValue) return null;
+      return values.reduce((acc, curr) => acc + (curr || 0), 0);
+    };
+
     return [
       {
         lineItemTitle: "TOTAL",
         numberOfMembers: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0),
         totalWages: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.totalWages, 0),
         totalBalance: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.totalBalance, 0),
-        totalHours: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.totalHours, 0),
-        totalPoints: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.totalPoints, 0)
+        totalHours: sumNullable("totalHours"),
+        totalPoints: sumNullable("totalPoints")
       }
     ];
   }, [activeAndInactiveRowData]);
@@ -222,14 +230,22 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
   const getTerminatedTotals = useMemo(() => {
     if (!terminatedRowData) return [];
 
+    // Helper to sum nullable values - returns null if all values are null, otherwise sums them
+    const sumNullable = (field: keyof YearEndProfitSharingReportSummaryLineItem) => {
+      const values = terminatedRowData.map((row) => row[field]);
+      const hasAnyValue = values.some((v) => v !== null && v !== undefined);
+      if (!hasAnyValue) return null;
+      return values.reduce((acc, curr) => acc + (curr || 0), 0);
+    };
+
     return [
       {
         lineItemTitle: "TOTAL",
         numberOfMembers: terminatedRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0),
         totalWages: terminatedRowData.reduce((acc, curr) => acc + curr.totalWages, 0),
         totalBalance: terminatedRowData.reduce((acc, curr) => acc + curr.totalBalance, 0),
-        totalHours: terminatedRowData.reduce((acc, curr) => acc + curr.totalHours, 0),
-        totalPoints: terminatedRowData.reduce((acc, curr) => acc + curr.totalPoints, 0)
+        totalHours: sumNullable("totalHours"),
+        totalPoints: sumNullable("totalPoints")
       }
     ];
   }, [terminatedRowData]);
