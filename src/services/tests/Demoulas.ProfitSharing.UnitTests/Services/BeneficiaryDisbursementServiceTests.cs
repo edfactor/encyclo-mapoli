@@ -52,7 +52,17 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         _beneficiary2.PsnSuffix = 2;
         _beneficiary2.Contact!.Ssn = 111222333; // Not an employee
 
-        // Set up mock balance data for the TotalService via MockEmbeddedSqlService
+        _scenarioFactory = new ScenarioFactory
+        {
+            Demographics = [_disburser.demographic, _beneficiaryEmployee.demographic],
+            PayProfits = [.. _disburser.payprofit, .. _beneficiaryEmployee.payprofit],
+            Beneficiaries = [_beneficiary1, _beneficiary2]
+        };
+        MockDbContextFactory = _scenarioFactory.BuildMocks();
+
+        // IMPORTANT: Set up mock balance data AFTER BuildMocks() to prevent it from being overwritten
+        // BuildMocks() internally sets Constants.FakeParticipantTotals with random faker data
+        // We need our specific test data ($100k balance) to be the final value
         var mockParticipantTotals = new List<ParticipantTotal>
         {
             new() { Ssn = _disburser.demographic.Ssn, TotalAmount = 100000m } // $100,000 total balance
@@ -61,14 +71,6 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         // Use MockQueryable.Moq to create a proper mock DbSet
         var mockParticipantTotalsDbSet = mockParticipantTotals.BuildMockDbSet();
         Constants.FakeParticipantTotals = mockParticipantTotalsDbSet;
-
-        _scenarioFactory = new ScenarioFactory
-        {
-            Demographics = [_disburser.demographic, _beneficiaryEmployee.demographic],
-            PayProfits = [.. _disburser.payprofit, .. _beneficiaryEmployee.payprofit],
-            Beneficiaries = [_beneficiary1, _beneficiary2]
-        };
-        MockDbContextFactory = _scenarioFactory.BuildMocks();
 
         _service = ServiceProvider?.GetRequiredService<IBeneficiaryDisbursementService>()!;
     }
