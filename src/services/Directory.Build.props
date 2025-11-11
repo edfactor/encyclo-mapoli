@@ -4,7 +4,7 @@
     <Authors>NGDS Core Team | $(Company)</Authors>
     <Copyright>Copyright © $(Company) $([System.DateTime]::Now.Year)</Copyright>
 
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
@@ -32,7 +32,7 @@
     <!-- Keep AssemblyVersion stable to avoid binding issues; vary FileVersion/InformationalVersion per build -->
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
 
-    <!-- .NET 10 Performance Optimizations -->
+    <!-- .NET 9 Performance Optimizations -->
     <!-- Server GC is optimized for throughput in multi-core server environments -->
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
