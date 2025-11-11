@@ -4,7 +4,7 @@
     <Authors>NGDS Core Team | $(Company)</Authors>
     <Copyright>Copyright © $(Company) $([System.DateTime]::Now.Year)</Copyright>
 
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
@@ -15,8 +15,8 @@
     <!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
 
-  <!-- Use portable PDBs for best SourceLink compatibility -->
-  <DebugType>portable</DebugType>
+    <!-- Use portable PDBs for best SourceLink compatibility -->
+    <DebugType>portable</DebugType>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -29,10 +29,10 @@
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <EnforceFIPSPolicy>false</EnforceFIPSPolicy>
     <Deterministic>true</Deterministic>
-  <!-- Keep AssemblyVersion stable to avoid binding issues; vary FileVersion/InformationalVersion per build -->
-  <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <!-- Keep AssemblyVersion stable to avoid binding issues; vary FileVersion/InformationalVersion per build -->
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
 
-    <!-- .NET 9 Performance Optimizations -->
+    <!-- .NET 10 Performance Optimizations -->
     <!-- Server GC is optimized for throughput in multi-core server environments -->
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
