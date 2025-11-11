@@ -650,4 +650,33 @@ public sealed class BeneficiaryDisbursementServiceTests : ApiTestBase<Program>
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldBeTrue();
     }
+
+
+    [Fact]
+    [Description("PS-292 : Successfully process deceased employee with correct termination code")]
+    public async Task DisburseFundsToBeneficiaries_WithDeceasedEmployee_ShouldSucceed()
+    {
+        // Arrange - Set employee as deceased
+        _disburser.demographic.TerminationCodeId = TerminationCode.Constants.Deceased;
+
+        var request = new BeneficiaryDisbursementRequest
+        {
+            BadgeNumber = _disburser.demographic.BadgeNumber,
+            IsDeceased = true,
+            Beneficiaries = new List<RecipientBeneficiary>
+            {
+                new() { PsnSuffix = 1, Amount = 100000m } // Full balance for deceased
+            }
+        };
+
+        // Act
+        var result = await _service.DisburseFundsToBeneficiaries(request, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBeTrue();
+
+        // Reset for other tests
+        _disburser.demographic.TerminationCodeId = null;
+    }
 }
