@@ -33,6 +33,7 @@ public static class ReadyActivityFactory
         var lastSaturday = "251227"; // 241228
         var cutOffSaturday = "260103";
         var YEAR = "2025"; // {YEAR}
+        var moreThanFiveYears = "181231";
 
         List<IActivity> activities =
         [
@@ -44,7 +45,7 @@ public static class ReadyActivityFactory
             // 241228 <-- Saturday of "last week" for 2024.   Week # 52 some year, some years Week 53
             // 251227 <-- Saturday 
             new ReadyActivity(sshClient, SftpClient, chatty, "A2", "TERM-REHIRE", $"BDATE={firstSaturday} EDATE={lastSaturday}", dataDirectory),
-            new ReadyActivity(sshClient, SftpClient, chatty, "A3", "PROF-TERM", $"SDATE={firstSaturday} EDATE={lastSaturday} YDATE={YEAR}", dataDirectory),
+            new ReadyActivity(sshClient, SftpClient, chatty, "A3", "PROF-TERM", $"SDATE={moreThanFiveYears} EDATE={lastSaturday} YDATE={YEAR}", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A4", "QRY-PSLOAN", $"YR={YEAR}", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A5", "PROF-DOLLAR-EXEC-EXTRACT", $"YEAR={YEAR}", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A6", "PAYPROFIT-CLEAR-EXEC", "", dataDirectory),

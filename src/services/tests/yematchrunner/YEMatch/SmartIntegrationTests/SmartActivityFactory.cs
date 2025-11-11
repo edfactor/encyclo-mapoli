@@ -10,7 +10,12 @@ public static class IntegrationTestFactory
         [
             // Test
             new IntPay443(),
-            new IntTerminatedEmployee()
+            new IntTerminatedEmployee(),
+            new IntTestPay426DataUpdates(),
+            new IntTestQPay129(),
+            new IntPay426N9(),
+            new IntPay426N(),
+            new IntPay426()
         ];
     }
 }
