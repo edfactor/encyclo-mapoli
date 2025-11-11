@@ -304,6 +304,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
                   required={false}
                   label=""
                   disableFuture
+                  minDate={new Date(1900, 0, 1)}
                   error={errors.dateOfBirth?.message}
                 />
               )}
