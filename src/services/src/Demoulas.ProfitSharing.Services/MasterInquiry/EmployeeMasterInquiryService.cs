@@ -160,7 +160,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                 .Include(d => d.TerminationCode)
                 .Include(d => d.PayClassification)
                 .Include(d => d.Gender)
-                .Where(d => d.Id == id)
+                .Where(d => (d.Id == id || d.BadgeNumber == id))
                 .Select(d => new
                 {
                     d.Id,
