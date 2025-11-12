@@ -1,16 +1,19 @@
 import { TextField, Typography } from "@mui/material";
 import { FocusEvent, useCallback, useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { useLazyDeleteBeneficiaryQuery } from "reduxstore/api/BeneficiariesApi";
+import { setDistributionHome } from "reduxstore/slices/distributionSlice";
 import { DSMGrid, Pagination } from "smart-ui-library";
-import { CAPTIONS } from "../../constants";
+import { CAPTIONS, ROUTES } from "../../constants";
 import { SortParams, useGridPagination } from "../../hooks/useGridPagination";
 import { BeneficiaryDetail, BeneficiaryDto } from "../../types";
-import { createBeneficiaryActionsCellRenderer } from "./BeneficiaryActions";
 import { GetBeneficiariesListGridColumns } from "./BeneficiariesListGridColumns";
+import { BeneficiaryActionHandlers } from "./BeneficiaryActions";
 import { GetBeneficiaryOfGridColumns } from "./BeneficiaryOfGridColumns";
 import DeleteBeneficiaryDialog from "./DeleteBeneficiaryDialog";
-import { useBeneficiaryRelationshipData } from "./hooks/useBeneficiaryRelationshipData";
 import { useBeneficiaryPercentageUpdate } from "./hooks/useBeneficiaryPercentageUpdate";
+import { useBeneficiaryRelationshipData } from "./hooks/useBeneficiaryRelationshipData";
 
 interface BeneficiaryRelationshipsProps {
   selectedMember: BeneficiaryDetail | null;
@@ -23,6 +26,8 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
   count,
   onEditBeneficiary
 }) => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [openDeleteConfirmationDialog, setOpenDeleteConfirmationDialog] = useState(false);
   const [deleteBeneficiaryId, setDeleteBeneficiaryId] = useState<number>(0);
   const [deleteInProgress, setDeleteInProgress] = useState<boolean>(false);
@@ -87,10 +92,19 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
   };
 
   // Handler functions for Action column
-  const handleNewBeneficiaryDistribution = useCallback((beneficiary: BeneficiaryDto) => {
-    console.log("New Beneficiary Distribution", beneficiary);
-    // TODO: Implement distribution creation logic
-  }, []);
+  const handleNewBeneficiaryDistribution = useCallback(
+    (beneficiary: BeneficiaryDto) => {
+      const psnNumber = String(beneficiary.badgeNumber) + String(beneficiary.psnSuffix);
+      const memberType = 2; // Hardcoded memberType for beneficiaries
+
+      // Set distribution home to beneficiary inquiry page
+      dispatch(setDistributionHome(ROUTES.BENEFICIARY_INQUIRY));
+
+      // Navigate to add distribution page
+      navigate(`/${ROUTES.ADD_DISTRIBUTION}/${psnNumber}/${memberType}`);
+    },
+    [dispatch, navigate]
+  );
 
   const handleEditBeneficiary = useCallback(
     (beneficiary: BeneficiaryDto) => {
@@ -140,20 +154,19 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
 
   const beneficiaryOfColumnDefs = useMemo(() => GetBeneficiaryOfGridColumns(), []);
 
-  const actionsCellRenderer = useMemo(
-    () =>
-      createBeneficiaryActionsCellRenderer({
-        onNewDistribution: handleNewBeneficiaryDistribution,
-        onEdit: handleEditBeneficiary,
-        onDelete: handleDeleteBeneficiary
-      }),
+  const actionHandlers: BeneficiaryActionHandlers = useMemo(
+    () => ({
+      onNewDistribution: handleNewBeneficiaryDistribution,
+      onEdit: handleEditBeneficiary,
+      onDelete: handleDeleteBeneficiary
+    }),
     [handleNewBeneficiaryDistribution, handleEditBeneficiary, handleDeleteBeneficiary]
   );
 
   const columnDefs = useMemo(() => {
-    const columns = GetBeneficiariesListGridColumns(percentageFieldRenderer, actionsCellRenderer);
+    const columns = GetBeneficiariesListGridColumns(percentageFieldRenderer, actionHandlers);
     return [...columns];
-  }, [percentageFieldRenderer, actionsCellRenderer]);
+  }, [percentageFieldRenderer, actionHandlers]);
 
   return (
     <>
