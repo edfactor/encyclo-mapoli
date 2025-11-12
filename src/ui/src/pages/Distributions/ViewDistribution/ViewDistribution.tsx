@@ -29,7 +29,9 @@ const ViewDistributionContent = () => {
   const profitYear = useDecemberFlowProfitYear();
   const isReadOnly = useReadOnlyNavigation();
 
-  const { currentMember, currentDistribution } = useSelector((state: RootState) => state.distribution);
+  const { currentMember, currentDistribution, distributionHome } = useSelector(
+    (state: RootState) => state.distribution
+  );
 
   const { isLoading, fetchMember, clearMemberData } = useViewDistribution();
 
@@ -63,8 +65,10 @@ const ViewDistributionContent = () => {
     }
   };
 
-  const handleCancel = () => {
-    navigate(`/${ROUTES.DISTRIBUTIONS_INQUIRY}`);
+  const handleClose = () => {
+    // Navigate to the stored distribution home route, fallback to distributions inquiry
+    const homeRoute = distributionHome || ROUTES.DISTRIBUTIONS_INQUIRY;
+    navigate(`/${homeRoute}`);
   };
 
   const handleDelete = () => {
@@ -148,9 +152,9 @@ const ViewDistributionContent = () => {
         </Button>
         <Button
           variant="outlined"
-          onClick={handleCancel}
+          onClick={handleClose}
           startIcon={<CloseIcon />}>
-          CANCEL
+          CLOSE
         </Button>
       </Grid>
 

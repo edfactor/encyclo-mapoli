@@ -1,10 +1,12 @@
 import { Divider, Grid } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useLazyBeneficiarySearchFilterQuery, useLazyGetBeneficiaryDetailQuery } from "reduxstore/api/BeneficiariesApi";
 
 import { DSMAccordion, Page, Paged } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
-import { CAPTIONS } from "../../constants";
+import { CAPTIONS, ROUTES } from "../../constants";
+import { setDistributionHome } from "../../reduxstore/slices/distributionSlice";
 import BeneficiaryInquirySearchFilter from "./BeneficiaryInquirySearchFilter";
 import IndividualBeneficiaryView from "./IndividualBeneficiaryView";
 import MemberResultsGrid from "./MemberResultsGrid";
@@ -13,6 +15,7 @@ import { useBeneficiarySearch } from "./hooks/useBeneficiarySearch";
 import { BeneficiaryDetail, BeneficiaryDetailAPIRequest, BeneficiarySearchAPIRequest } from "@/types";
 
 const BeneficiaryInquiry = () => {
+  const dispatch = useDispatch();
   const [triggerBeneficiaryDetail, { isSuccess }] = useLazyGetBeneficiaryDetailQuery();
   const [selectedMember, setSelectedMember] = useState<BeneficiaryDetail | null>();
   const [beneficiarySearchFilterResponse, setBeneficiarySearchFilterResponse] = useState<Paged<BeneficiaryDetail>>();
@@ -24,6 +27,11 @@ const BeneficiaryInquiry = () => {
 
   // Use custom hook for pagination and sort state
   const search = useBeneficiarySearch({ defaultPageSize: 10, defaultSortBy: "name" });
+
+  // Set distribution home when component mounts
+  useEffect(() => {
+    dispatch(setDistributionHome(ROUTES.BENEFICIARY_INQUIRY));
+  }, [dispatch]);
 
   const onBadgeClick = useCallback(
     (data: BeneficiaryDetail) => {
