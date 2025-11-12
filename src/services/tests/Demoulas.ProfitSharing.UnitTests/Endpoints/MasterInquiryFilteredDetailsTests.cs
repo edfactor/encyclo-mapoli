@@ -11,7 +11,16 @@ using Xunit;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints;
 
+/// <summary>
+/// Collection definition for MasterInquiryFilteredDetails tests - disables parallelization
+/// </summary>
 [CollectionDefinition("MasterInquiryFilteredDetails", DisableParallelization = true)]
+public class MasterInquiryFilteredDetailsCollection
+{
+    // This class defines the test collection but contains no tests
+}
+
+[Collection("MasterInquiryFilteredDetails")]
 public class MasterInquiryFilteredDetailsTests : ApiTestBase<Api.Program>
 {
     public MasterInquiryFilteredDetailsTests()
