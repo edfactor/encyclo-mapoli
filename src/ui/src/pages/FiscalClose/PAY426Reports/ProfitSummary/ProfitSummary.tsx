@@ -1,4 +1,5 @@
 import { Button, Divider, Grid, Typography } from "@mui/material";
+import { RowClickedEvent } from "ag-grid-community";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useMemo, useState } from "react";
@@ -130,8 +131,9 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
     return presetMap[lineItemPrefix] || null;
   };
 
-  const handleRowClick = (event: { data: YearEndProfitSharingReportSummaryLineItem }) => {
+  const handleRowClick = (event: RowClickedEvent<YearEndProfitSharingReportSummaryLineItem>) => {
     const rowData = event.data;
+    if (!rowData) return;
     const clickedLineItem = rowData.lineItemPrefix;
     const presetNumber = getPresetNumberForLineItem(clickedLineItem);
 
@@ -212,7 +214,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
       const values = activeAndInactiveRowData.map((row) => row[field]);
       const hasAnyValue = values.some((v) => v !== null && v !== undefined);
       if (!hasAnyValue) return null;
-      return values.reduce((acc, curr) => acc + (curr || 0), 0);
+      return values.reduce((acc, curr) => Number(acc) + Number(curr || 0), 0);
     };
 
     return [
@@ -235,7 +237,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
       const values = terminatedRowData.map((row) => row[field]);
       const hasAnyValue = values.some((v) => v !== null && v !== undefined);
       if (!hasAnyValue) return null;
-      return values.reduce((acc, curr) => acc + (curr || 0), 0);
+      return values.reduce((acc, curr) => Number(acc) + Number(curr || 0), 0);
     };
 
     return [
@@ -273,7 +275,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
               rowData: activeAndInactiveRowData,
               pinnedTopRowData: getActiveAndInactiveTotals,
               columnDefs: columnDefs,
-              onRowClicked: handleRowClick
+              onRowClicked: handleRowClick as (event: unknown) => void
             }}
           />
         </Grid>
@@ -292,7 +294,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
               rowData: terminatedRowData,
               pinnedTopRowData: getTerminatedTotals,
               columnDefs: columnDefs,
-              onRowClicked: handleRowClick
+              onRowClicked: handleRowClick as (event: unknown) => void
             }}
           />
         </Grid>
