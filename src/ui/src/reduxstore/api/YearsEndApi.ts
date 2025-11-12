@@ -148,7 +148,11 @@ import { createDataSourceAwareBaseQuery } from "./api";
 type UpdateSummaryRequestWithArchive = UpdateSummaryRequest & { archive?: boolean };
 
 // Create intersection type for getTerminationReport with optional archive
-type TerminationRequestWithArchive = StartAndEndDateRequest & { archive?: boolean };
+type TerminationRequestWithArchive = StartAndEndDateRequest & {
+  archive?: boolean;
+  vestedBalanceValue?: number | null;
+  vestedBalanceOperator?: number | null;
+};
 
 import {
   clearForfeitureAdjustmentData,
@@ -689,6 +693,8 @@ export const YearsEndApi = createApi({
           isSortDescending?: boolean;
           profitYear?: number;
           excludeZeroAndFullyVested?: boolean;
+          vestedBalanceValue?: number | null;
+          vestedBalanceOperator?: number | null;
         } = {
           beginningDate: params.beginningDate,
           endingDate: params.endingDate,
@@ -704,6 +710,14 @@ export const YearsEndApi = createApi({
 
         if (params.excludeZeroAndFullyVested !== undefined) {
           body.excludeZeroAndFullyVested = params.excludeZeroAndFullyVested;
+        }
+
+        if (params.vestedBalanceValue !== null && params.vestedBalanceValue !== undefined) {
+          body.vestedBalanceValue = params.vestedBalanceValue;
+        }
+
+        if (params.vestedBalanceOperator !== null && params.vestedBalanceOperator !== undefined) {
+          body.vestedBalanceOperator = params.vestedBalanceOperator;
         }
 
         return {

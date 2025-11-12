@@ -147,14 +147,20 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
     });
 
     it("should replace previous data with new search results", () => {
-      const previousData = createMockPagedResponse([{ badgeNumber: 1, storeName: "Old Store", employeeName: "Old Name" }], 1);
+      const previousData = createMockPagedResponse(
+        [{ badgeNumber: 1, storeName: "Old Store", employeeName: "Old Name" }],
+        1
+      );
 
       const stateWithData = {
         search: { isLoading: false },
         data: previousData
       } as ReducerState;
 
-      const newData = createMockPagedResponse([{ badgeNumber: 2, storeName: "New Store", employeeName: "New Name" }], 1);
+      const newData = createMockPagedResponse(
+        [{ badgeNumber: 2, storeName: "New Store", employeeName: "New Name" }],
+        1
+      );
 
       const action = { type: "SEARCH_SUCCESS", payload: newData };
 
@@ -176,11 +182,14 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
     });
 
     it("should handle large result sets", () => {
-      const largeData = createMockPagedResponse(Array.from({ length: 100 }, (_, i) => ({
-        badgeNumber: 10000 + i,
-        storeName: `Store ${i}`,
-        employeeName: `Employee ${i}`
-      })), 100);
+      const largeData = createMockPagedResponse(
+        Array.from({ length: 100 }, (_, i) => ({
+          badgeNumber: 10000 + i,
+          storeName: `Store ${i}`,
+          employeeName: `Employee ${i}`
+        })),
+        100
+      );
 
       const action = { type: "SEARCH_SUCCESS", payload: largeData };
 
@@ -323,11 +332,14 @@ describe("useDemographicBadgesNotInPayprofitReducer", () => {
     it("should handle multiple results", () => {
       const stateWithMultipleResults = {
         search: { isLoading: false },
-        data: createMockPagedResponse([
-          { badgeNumber: 1, storeName: "Store 1", employeeName: "Name 1" },
-          { badgeNumber: 2, storeName: "Store 2", employeeName: "Name 2" },
-          { badgeNumber: 3, storeName: "Store 3", employeeName: "Name 3" }
-        ], 3)
+        data: createMockPagedResponse(
+          [
+            { badgeNumber: 1, storeName: "Store 1", employeeName: "Name 1" },
+            { badgeNumber: 2, storeName: "Store 2", employeeName: "Name 2" },
+            { badgeNumber: 3, storeName: "Store 3", employeeName: "Name 3" }
+          ],
+          3
+        )
       } as ReducerState;
 
       const result = selectHasResults(stateWithMultipleResults);

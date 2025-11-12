@@ -7,8 +7,9 @@ type MockSearchParams = {
   beginningDate: string;
   endingDate: string;
   forfeitureStatus: string;
-  profitYear: number;  // Required to match StartAndEndDateRequest
-  pagination: {         // Required to match StartAndEndDateRequest
+  profitYear: number; // Required to match StartAndEndDateRequest
+  pagination: {
+    // Required to match StartAndEndDateRequest
     skip: number;
     take: number;
     sortBy: string;
@@ -151,21 +152,10 @@ vi.mock("../TerminationGrid", () => ({
 vi.mock("smart-ui-library", () => ({
   ApiMessageAlert: vi.fn(() => React.createElement("div", { "data-testid": "api-message-alert" }, "Message Alert")),
   DSMAccordion: vi.fn(({ title, children }) =>
-    React.createElement(
-      "div",
-      { "data-testid": "accordion" },
-      React.createElement("div", null, title),
-      children
-    )
+    React.createElement("div", { "data-testid": "accordion" }, React.createElement("div", null, title), children)
   ),
   Page: vi.fn(({ label, actionNode, children }) =>
-    React.createElement(
-      "div",
-      { "data-testid": "page" },
-      React.createElement("div", null, label),
-      actionNode,
-      children
-    )
+    React.createElement("div", { "data-testid": "page" }, React.createElement("div", null, label), actionNode, children)
   ),
   SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) =>
     React.createElement(

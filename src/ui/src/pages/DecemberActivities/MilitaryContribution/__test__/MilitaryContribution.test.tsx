@@ -33,10 +33,7 @@ vi.mock("../../../../reduxstore/api/MilitaryApi", () => ({
     reducer: (state = {}) => state,
     middleware: []
   },
-  useLazyGetMilitaryContributionsQuery: vi.fn(() => [
-    mockTriggerGetMilitaryContributions,
-    { isFetching: false }
-  ])
+  useLazyGetMilitaryContributionsQuery: vi.fn(() => [mockTriggerGetMilitaryContributions, { isFetching: false }])
 }));
 
 vi.mock("../../../../reduxstore/api/InquiryApi", () => ({
@@ -48,10 +45,7 @@ vi.mock("../../../../reduxstore/api/InquiryApi", () => ({
       invalidateTags: vi.fn(() => ({ type: "inquiryApi/invalidateTags", payload: [] }))
     }
   },
-  useLazySearchProfitMasterInquiryQuery: vi.fn(() => [
-    mockTriggerSearchMasterInquiry,
-    { isFetching: false }
-  ]),
+  useLazySearchProfitMasterInquiryQuery: vi.fn(() => [mockTriggerSearchMasterInquiry, { isFetching: false }]),
   useLazyGetProfitMasterInquiryMemberQuery: vi.fn(() => [
     mockTriggerGetProfitMasterInquiryMember,
     { isFetching: false }
@@ -85,44 +79,57 @@ interface MissiveAlert {
 
 // Mock child components
 vi.mock("../../../../components/FrozenYearWarning", () => ({
-  default: vi.fn(() => React.createElement('div', { role: 'alert', 'aria-label': 'frozen year warning' }, 'Frozen Year Warning'))
+  default: vi.fn(() =>
+    React.createElement("div", { role: "alert", "aria-label": "frozen year warning" }, "Frozen Year Warning")
+  )
 }));
 
 vi.mock("../../../../components/StatusReadOnlyInfo", () => ({
-  default: vi.fn(() => React.createElement('div', { role: 'status', 'aria-label': 'read only info' }, 'Read Only Info'))
+  default: vi.fn(() => React.createElement("div", { role: "status", "aria-label": "read only info" }, "Read Only Info"))
 }));
 
 vi.mock("../../../../components/StatusDropdownActionNode", () => ({
-  default: vi.fn(() => React.createElement('div', { role: 'status', 'aria-label': 'status dropdown' }, 'Status Dropdown'))
+  default: vi.fn(() =>
+    React.createElement("div", { role: "status", "aria-label": "status dropdown" }, "Status Dropdown")
+  )
 }));
 
 vi.mock("../../../../components/MissiveAlerts/MissiveAlerts", () => ({
-  default: vi.fn(() => React.createElement('div', { role: 'alert', 'aria-label': 'missive alerts' }, 'Missive Alerts'))
+  default: vi.fn(() => React.createElement("div", { role: "alert", "aria-label": "missive alerts" }, "Missive Alerts"))
 }));
 
 vi.mock("../MilitaryContributionSearchFilter", () => ({
-  default: vi.fn(() => React.createElement('section', { 'aria-label': 'search filter' }, 'Search Filter'))
+  default: vi.fn(() => React.createElement("section", { "aria-label": "search filter" }, "Search Filter"))
 }));
 
 vi.mock("../MilitaryContributionFormGrid", () => ({
   default: vi.fn(({ onAddContribution, isReadOnly }) =>
-    React.createElement('section', { 'aria-label': 'military contribution grid' },
-      React.createElement('button', { onClick: onAddContribution, disabled: isReadOnly }, 'Add Contribution')
+    React.createElement(
+      "section",
+      { "aria-label": "military contribution grid" },
+      React.createElement("button", { onClick: onAddContribution, disabled: isReadOnly }, "Add Contribution")
     )
   )
 }));
 
 vi.mock("../MilitaryContributionForm", () => ({
   default: vi.fn(({ onSubmit, onCancel }) =>
-    React.createElement('form', { 'aria-label': 'military contribution form' },
-      React.createElement('button', {
-        onClick: () => onSubmit({
-          contributionAmount: 5000,
-          contributionYear: 2024,
-          isSupplementalContribution: false
-        })
-      }, 'Submit'),
-      React.createElement('button', { onClick: onCancel }, 'Cancel')
+    React.createElement(
+      "form",
+      { "aria-label": "military contribution form" },
+      React.createElement(
+        "button",
+        {
+          onClick: () =>
+            onSubmit({
+              contributionAmount: 5000,
+              contributionYear: 2024,
+              isSupplementalContribution: false
+            })
+        },
+        "Submit"
+      ),
+      React.createElement("button", { onClick: onCancel }, "Cancel")
     )
   )
 }));
@@ -147,26 +154,21 @@ vi.mock("../hooks/useMilitaryContribution", () => ({
 }));
 
 vi.mock("smart-ui-library", () => ({
-  ApiMessageAlert: vi.fn(() => React.createElement('div', { role: 'alert' }, 'Message Alert')),
+  ApiMessageAlert: vi.fn(() => React.createElement("div", { role: "alert" }, "Message Alert")),
   DSMAccordion: vi.fn(({ title, children }) =>
-    React.createElement('section', { 'aria-label': title },
-      React.createElement('h2', null, title),
-      children
-    )
+    React.createElement("section", { "aria-label": title }, React.createElement("h2", null, title), children)
   ),
-  DSMGrid: vi.fn(() => React.createElement('div', { role: 'grid' }, 'Grid')),
+  DSMGrid: vi.fn(() => React.createElement("div", { role: "grid" }, "Grid")),
   Page: vi.fn(({ label, actionNode, children }) =>
-    React.createElement('main', null,
-      React.createElement('h1', null, label),
-      actionNode,
-      children
-    )
+    React.createElement("main", null, React.createElement("h1", null, label), actionNode, children)
   ),
   SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) =>
-    React.createElement('div', { role: 'group', 'aria-label': 'search and reset controls' },
-      React.createElement('button', { onClick: handleSearch, disabled: disabled || isFetching }, 'Search'),
-      React.createElement('button', { onClick: handleReset }, 'Reset'),
-      isFetching && React.createElement('span', { role: 'status' }, 'Loading...')
+    React.createElement(
+      "div",
+      { role: "group", "aria-label": "search and reset controls" },
+      React.createElement("button", { onClick: handleSearch, disabled: disabled || isFetching }, "Search"),
+      React.createElement("button", { onClick: handleReset }, "Reset"),
+      isFetching && React.createElement("span", { role: "status" }, "Loading...")
     )
   ),
   formatNumberWithComma: vi.fn((num) => num.toString()),

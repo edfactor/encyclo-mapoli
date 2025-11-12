@@ -297,7 +297,9 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
       );
 
       const inputs = screen.getAllByRole("textbox");
-      const ssnInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("SSN")) as HTMLInputElement;
+      const ssnInput = inputs.find((input) =>
+        (input as HTMLInputElement).placeholder?.includes("SSN")
+      ) as HTMLInputElement;
 
       if (ssnInput) {
         // Type value

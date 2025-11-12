@@ -32,6 +32,8 @@ interface TerminationSearchRequest {
   profitYear?: number;
   excludeZeroBalance?: boolean;
   excludeZeroAndFullyVested?: boolean;
+  vestedBalanceValue?: number | null;
+  vestedBalanceOperator?: number | null;
   pagination?: {
     skip: number;
     take: number;
@@ -116,7 +118,9 @@ export const useTerminationGrid = ({
             profitYear,
             pagination: { skip, take: pageSz, sortBy, isSortDescending },
             excludeZeroBalance: searchParams.excludeZeroBalance,
-            excludeZeroAndFullyVested: searchParams.excludeZeroAndFullyVested
+            excludeZeroAndFullyVested: searchParams.excludeZeroAndFullyVested,
+            vestedBalanceValue: searchParams.vestedBalanceValue,
+            vestedBalanceOperator: searchParams.vestedBalanceOperator
           }
         : {
             beginningDate: fiscalData?.fiscalBeginDate || "",
@@ -224,9 +228,11 @@ export const useTerminationGrid = ({
       endingDate?: string,
       archive?: boolean,
       excludeZeroAndFullyVested?: boolean,
-      excludeAlreadyForfeited?: boolean
+      excludeAlreadyForfeited?: boolean,
+      vestedBalanceValue?: number | null,
+      vestedBalanceOperator?: number | null
     ) =>
-      `${skip}|${pageSz}|${sortBy}|${isSortDescending}|${profitYear}|${beginningDate ?? ""}|${endingDate ?? ""}|${archive ? "1" : "0"}|${excludeZeroAndFullyVested ? "1" : "0"}|${excludeAlreadyForfeited ? "1" : "0"}`,
+      `${skip}|${pageSz}|${sortBy}|${isSortDescending}|${profitYear}|${beginningDate ?? ""}|${endingDate ?? ""}|${archive ? "1" : "0"}|${excludeZeroAndFullyVested ? "1" : "0"}|${excludeAlreadyForfeited ? "1" : "0"}|${vestedBalanceValue ?? ""}|${vestedBalanceOperator ?? ""}`,
     []
   );
 
@@ -253,7 +259,10 @@ export const useTerminationGrid = ({
           params.beginningDate,
           params.endingDate,
           (params as StartAndEndDateRequest & { archive?: boolean }).archive,
-          (params as StartAndEndDateRequest & { excludeZeroAndFullyVested?: boolean }).excludeZeroAndFullyVested
+          (params as StartAndEndDateRequest & { excludeZeroAndFullyVested?: boolean }).excludeZeroAndFullyVested,
+          undefined,
+          (params as StartAndEndDateRequest & { vestedBalanceValue?: number | null }).vestedBalanceValue,
+          (params as StartAndEndDateRequest & { vestedBalanceOperator?: number | null }).vestedBalanceOperator
         );
 
         // Allow re-search with same parameters (consistent with all other search pages)
@@ -516,9 +525,7 @@ export const useTerminationGrid = ({
         const badgeNumber = masterRow.psn;
 
         // Find the yearDetail that matches the selected profit year
-        const matchingDetail = masterRow.yearDetails?.find(
-          (detail) => detail.profitYear === selectedProfitYear
-        );
+        const matchingDetail = masterRow.yearDetails?.find((detail) => detail.profitYear === selectedProfitYear);
 
         // Skip this employee if no matching year detail found
         if (!matchingDetail) {

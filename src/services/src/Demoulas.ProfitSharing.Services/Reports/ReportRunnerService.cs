@@ -98,7 +98,7 @@ public class ReportRunnerService : IReportRunnerService
             ["terminations"] = async ct => await InvokeReport("terminations", async () =>
             {
                 TerminatedEmployeeAndBeneficiaryResponse result = await _terminatedEmployeeService
-                    .GetReportAsync(StartAndEndDateRequest.RequestExample(), ct);
+                    .GetReportAsync(FilterableStartAndEndDateRequest.RequestExample(), ct);
                 return (result.Response.Total, result.Response.Results.Count());
             }),
             ["profitShareUpdate"] = async ct => await InvokeReport("profitShareUpdate", async () =>

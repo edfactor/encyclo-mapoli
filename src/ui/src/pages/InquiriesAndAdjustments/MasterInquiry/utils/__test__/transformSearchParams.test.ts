@@ -141,7 +141,7 @@ describe("transformSearchParams", () => {
   });
 
   it("should use default pagination values when not provided", () => {
-    const data = { ...baseSearchData, pagination: undefined as unknown as  MasterInquirySearch["pagination"] };
+    const data = { ...baseSearchData, pagination: undefined as unknown as MasterInquirySearch["pagination"] };
     const result = transformSearchParams(data, 2024);
 
     expect(result.pagination).toEqual({

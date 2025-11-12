@@ -37,7 +37,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
             new(DbFactory, TotalService, DemographicReaderService, _loggerFactory, CalendarService, YearEndService);
 
         TerminatedEmployeeAndBeneficiaryResponse data = await mockService.GetReportAsync(
-            new StartAndEndDateRequest { SortBy = "Name", BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue },
+            new FilterableStartAndEndDateRequest { SortBy = "Name", BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue },
             CancellationToken.None);
 
         // READY sorts with "Mc" coming after "MC"

@@ -32,22 +32,11 @@ public class TerminatedEmployeeService : ITerminatedEmployeeService
     }
 
 
-    public Task<TerminatedEmployeeAndBeneficiaryResponse> GetReportAsync(StartAndEndDateRequest req, CancellationToken ct)
+    public Task<TerminatedEmployeeAndBeneficiaryResponse> GetReportAsync(FilterableStartAndEndDateRequest req, CancellationToken ct)
     {
         var logger = _loggerFactory.CreateLogger<TerminatedEmployeeReportService>();
         TerminatedEmployeeReportService reportServiceGenerator = new(_dataContextFactory, _totalService, _demographicReaderService, logger, _calendarService, _yearEndService);
 
-        // Convert StartAndEndDateRequest to FilterableStartAndEndDateRequest
-        var filterableRequest = new FilterableStartAndEndDateRequest
-        {
-            BeginningDate = req.BeginningDate,
-            EndingDate = req.EndingDate,
-            Skip = req.Skip,
-            Take = req.Take,
-            SortBy = req.SortBy,
-            IsSortDescending = req.IsSortDescending
-        };
-
-        return reportServiceGenerator.CreateDataAsync(filterableRequest, ct);
+        return reportServiceGenerator.CreateDataAsync(req, ct);
     }
 }

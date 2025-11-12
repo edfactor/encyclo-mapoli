@@ -43,8 +43,8 @@ const { mockTriggerSearch } = vi.hoisted(() => ({
 }));
 
 vi.mock("../../../../reduxstore/api/YearsEndApi", () => ({
-  useLazyGetDuplicateSSNsQuery: vi.fn(() =>
-    [mockTriggerSearch, { isFetching: false }, {}] as unknown as ReturnType<typeof useLazyGetDuplicateSSNsQuery>
+  useLazyGetDuplicateSSNsQuery: vi.fn(
+    () => [mockTriggerSearch, { isFetching: false }, {}] as unknown as ReturnType<typeof useLazyGetDuplicateSSNsQuery>
   )
 }));
 
@@ -127,9 +127,11 @@ describe("useDuplicateSSNsOnDemographics Hook", () => {
         throw new Error("API Error");
       });
 
-      vi.mocked(useLazyGetDuplicateSSNsQuery).mockReturnValueOnce(
-        [mockErrorTrigger, { isFetching: false }, {}] as unknown as ReturnType<typeof useLazyGetDuplicateSSNsQuery>
-      );
+      vi.mocked(useLazyGetDuplicateSSNsQuery).mockReturnValueOnce([
+        mockErrorTrigger,
+        { isFetching: false },
+        {}
+      ] as unknown as ReturnType<typeof useLazyGetDuplicateSSNsQuery>);
 
       const [triggerSearch] = useLazyGetDuplicateSSNsQuery();
       const request = {
@@ -164,9 +166,11 @@ describe("useDuplicateSSNsOnDemographics Hook", () => {
         })
       }));
 
-      vi.mocked(useLazyGetDuplicateSSNsQuery).mockReturnValueOnce(
-        [mockEmptyTrigger, { isFetching: false }, {}] as unknown as ReturnType<typeof useLazyGetDuplicateSSNsQuery>
-      );
+      vi.mocked(useLazyGetDuplicateSSNsQuery).mockReturnValueOnce([
+        mockEmptyTrigger,
+        { isFetching: false },
+        {}
+      ] as unknown as ReturnType<typeof useLazyGetDuplicateSSNsQuery>);
 
       const [triggerSearch] = useLazyGetDuplicateSSNsQuery();
       const result = await triggerSearch({
