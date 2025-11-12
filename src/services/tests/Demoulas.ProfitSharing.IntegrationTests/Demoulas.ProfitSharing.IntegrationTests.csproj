@@ -14,32 +14,30 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\**"/>
+    <None Remove="Resources\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\**"/>
+    <EmbeddedResource Include="Resources\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Bogus"/>
+    <PackageReference Include="Bogus" />
     <PackageReference Include="coverlet.collector">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="IdGen"/>
-    <PackageReference Include="JetBrains.Annotations"/>
-    <PackageReference Include="JunitXml.TestLogger"/>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing"/>
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets"/>
-    <PackageReference Include="Microsoft.NET.Test.Sdk"/>
-    <PackageReference Include="MockQueryable.Moq"/>
-    <PackageReference Include="OpenTelemetry.Api"/>
-    <PackageReference Include="Shouldly"/>
-    <PackageReference Include="System.Net.Http"/>
-    <PackageReference Include="System.Text.RegularExpressions"/>
-    <PackageReference Include="xunit"/>
-    <PackageReference Include="xunit.abstractions"/>
+    <PackageReference Include="IdGen" />
+    <PackageReference Include="JetBrains.Annotations" />
+    <PackageReference Include="JunitXml.TestLogger" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="MockQueryable.Moq" />
+    <PackageReference Include="OpenTelemetry.Api" />
+    <PackageReference Include="Shouldly" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.abstractions" />
     <PackageReference Include="xunit.runner.visualstudio">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -47,14 +45,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Demoulas.ProfitSharing.Api\Demoulas.ProfitSharing.Api.csproj"/>
-    <ProjectReference Include="..\..\src\Demoulas.ProfitSharing.Security\Demoulas.ProfitSharing.Security.csproj"/>
-    <ProjectReference Include="..\Demoulas.ProfitSharing.UnitTests.Common\Demoulas.ProfitSharing.UnitTests.Common.csproj"/>
+    <ProjectReference Include="..\..\src\Demoulas.ProfitSharing.Api\Demoulas.ProfitSharing.Api.csproj" />
+    <ProjectReference Include="..\..\src\Demoulas.ProfitSharing.Security\Demoulas.ProfitSharing.Security.csproj" />
+    <ProjectReference Include="..\Demoulas.ProfitSharing.UnitTests.Common\Demoulas.ProfitSharing.UnitTests.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="Xunit"/>
-    <Using Include="Xunit.Abstractions"/>
+    <Using Include="Xunit" />
+    <Using Include="Xunit.Abstractions" />
   </ItemGroup>
 
   <ItemGroup>
@@ -89,9 +87,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Resources\golden\"/>
-    <Folder Include="Resources\MasterInquiry\"/>
-    <Folder Include="Resources\qpay066ta\"/>
+    <Folder Include="Resources\golden\" />
+    <Folder Include="Resources\MasterInquiry\" />
+    <Folder Include="Resources\qpay066ta\" />
   </ItemGroup>
 
 </Project>
