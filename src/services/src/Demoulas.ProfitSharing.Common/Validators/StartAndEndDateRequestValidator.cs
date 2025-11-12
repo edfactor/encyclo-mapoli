@@ -25,7 +25,7 @@ public class StartAndEndDateRequestValidator : PaginationValidatorBase<StartAndE
         RuleFor(x => x.Take)
             .GreaterThanOrEqualTo(1)
             .WithMessage("Take must be greater than or equal to 1.")
-            .LessThanOrEqualTo(10000)
-            .WithMessage("Take must be less than or equal to 10000.");
+            .Must(take => take <= 10000 || take == int.MaxValue)
+            .WithMessage("Take must be less than or equal to 10000 (or int.MaxValue for CSV exports).");
     }
 }

@@ -151,7 +151,7 @@ public sealed class StartAndEndDateRequestValidatorTests
     }
 
     [Fact]
-    [Description("PS-2009 : Validator should reject take value greater than maximum")]
+    [Description("PS-2009 : Validator should reject take value greater than maximum (but not int.MaxValue)")]
     public void Should_Reject_Take_Value_Greater_Than_Maximum()
     {
         var request = new StartAndEndDateRequest
@@ -164,6 +164,22 @@ public sealed class StartAndEndDateRequestValidatorTests
 
         var result = _validator.TestValidate(request);
         result.ShouldHaveValidationErrorFor(x => x.Take);
+    }
+
+    [Fact]
+    [Description("PS-2009 : Validator should accept int.MaxValue for CSV exports")]
+    public void Should_Accept_IntMaxValue_For_CSV_Exports()
+    {
+        var request = new StartAndEndDateRequest
+        {
+            BeginningDate = new DateOnly(2024, 1, 1),
+            EndingDate = new DateOnly(2024, 12, 31),
+            Skip = 0,
+            Take = int.MaxValue // Special case for CSV exports
+        };
+
+        var result = _validator.TestValidate(request);
+        result.ShouldNotHaveAnyValidationErrors();
     }
 
     #endregion
