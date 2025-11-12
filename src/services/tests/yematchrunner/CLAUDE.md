@@ -101,6 +101,24 @@ dotnet user-secrets set "YeMatch:ReadyHost:Password" "your_ready_password"
 dotnet user-secrets set SmartConnectionString "Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=your_host)(PORT=1521)))(CONNECT_DATA=(SERVICE_NAME=your_service)(SERVER=DEDICATED)));User Id=smart_user;Password=smart_pass"
 
 dotnet user-secrets set ReadyConnectionString "Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=your_host)(PORT=1521)))(CONNECT_DATA=(SERVICE_NAME=your_service)(SERVER=DEDICATED)));User Id=ready_user;Password=ready_pass"
+
+# JWT Signing Key (REQUIRED - must match the SMART API server's signing key)
+# This key is used to generate authentication tokens for the SMART API.
+# The key must be at least 32 characters (256 bits) for HS256 algorithm.
+#
+# IMPORTANT: This key MUST match the signing key used by the SMART API server.
+# If the server uses 'dotnet user-jwts', find the key by running this command
+# in the SMART API project directory:
+#   dotnet user-secrets list
+# Look for "Authentication:Schemes:Bearer:SigningKeys" and copy the Value field.
+#
+# Example (use a secure random key of at least 32 characters):
+dotnet user-secrets set "YeMatch:Jwt:SigningKey" "your-jwt-signing-key-must-be-at-least-32-bytes-long"
+
+# Optional JWT configuration (override defaults if needed)
+# dotnet user-secrets set "YeMatch:Jwt:Issuer" "dotnet-user-jwts"
+# dotnet user-secrets set "YeMatch:Jwt:Audience" "https://localhost:7141"
+# dotnet user-secrets set "YeMatch:Jwt:ExpirationSeconds" "3600"
 ```
 
 ### Optional Configuration
@@ -120,6 +138,11 @@ Create `appsettings.json` to override defaults:
       "BaseUrl": "https://localhost:7141",
       "TimeoutHours": 2
     },
+    "Jwt": {
+      "Issuer": "dotnet-user-jwts",
+      "Audience": "https://localhost:7141",
+      "ExpirationSeconds": 3600
+    },
     "YearEndDates": {
       "ProfitYear": 2025,
       "FirstSaturday": "250104",
@@ -131,14 +154,19 @@ Create `appsettings.json` to override defaults:
 }
 ```
 
+**Note**: The JWT `SigningKey` should NEVER be in `appsettings.json`. It must be stored in user secrets only.
+
 Default data directory: `/tmp/ye/<dd-MMM-HH-mm>`
 
 ## Running Tests
 
 ### Prerequisites
 
-1. Start the local SMART API with test credentials using the "API YE Match (Test Certs)" launch configuration
-2. Ensure READY environment is accessible via SSH with `setyematch` script configured
+1. **Configure JWT signing key** in user secrets (see Configuration section above)
+   - The key must match the SMART API server's signing key
+   - If the server uses `dotnet user-jwts`, copy the signing key from the server's user secrets
+2. Start the local SMART API with the JWT authentication enabled
+3. Ensure READY environment is accessible via SSH with `setyematch` script configured
 
 ### Execute a Run
 
@@ -383,7 +411,8 @@ directory.
 
 ## Important Notes
 
-- All database credentials must be in user secrets (never commit)
+- **JWT signing key MUST match the SMART API server**: This is the most common authentication issue. Copy the exact key from the server's user secrets
+- All database credentials and secrets must be in user secrets (never commit)
 - READY system requires `setyematch` script configured on target host
 - Log directories can grow large during year-end runs; clean `/tmp/ye` periodically
 - API client is generated code; do not hand-edit
@@ -394,7 +423,16 @@ directory.
 
 ## Troubleshooting
 
-**"No SMART authentication"**: Ensure local SMART API is running with "API YE Match (Test Certs)" configuration
+**JWT authentication errors (401 Unauthorized)**:
+- Verify the JWT signing key in YEMatch user secrets matches the SMART API server's signing key
+- Check the server's user secrets with: `dotnet user-secrets list` (in the SMART API project directory)
+- Look for `Authentication:Schemes:Bearer:SigningKeys` and ensure the `Value` field matches `YeMatch:Jwt:SigningKey`
+- Ensure the signing key is at least 32 characters long
+- Verify the issuer and audience match the server's JWT configuration
+
+**"No SMART authentication" or legacy authentication errors**:
+- The old hardcoded test credentials no longer work
+- You MUST configure the JWT signing key in user secrets (see Configuration section)
 
 **SSH connection failures**: Verify READY credentials in user secrets and network access to READY host
 

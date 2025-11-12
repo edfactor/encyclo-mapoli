@@ -39,7 +39,7 @@ public class TestMasterInquiry : BaseSqlActivity
 
     public override async Task<Outcome> Execute()
     {
-        TestToken.CreateAndAssignTokenForClient(httpClient, "Finance-Manager");
+        // TestToken.CreateAndAssignTokenForClient(httpClient, "Finance-Manager");
 
         string path; //  = Path.Combine(AppContext.BaseDirectory, "OUTFL");
         path = "/Users/robertherrmann/prj/yerunner/src/services/tests/yematchrunner/YEMatch/Resources/MTPR.OUTFL";
