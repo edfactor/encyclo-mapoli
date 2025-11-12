@@ -17,6 +17,8 @@ export interface TerminationSearchRequest extends StartAndEndDateRequest {
   archive?: boolean;
   excludeZeroBalance?: boolean;
   excludeZeroAndFullyVested?: boolean;
+  vestedBalanceValue?: number | null;
+  vestedBalanceOperator?: number | null;
 }
 
 const Termination = () => {

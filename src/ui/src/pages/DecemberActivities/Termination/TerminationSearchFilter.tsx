@@ -1,5 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Button, Checkbox, FormControlLabel, FormHelperText, Grid } from "@mui/material";
+import { Button, Checkbox, FormControlLabel, FormHelperText, Grid, MenuItem, TextField } from "@mui/material";
 import React, { useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
@@ -36,7 +36,20 @@ const schema = yup.object().shape({
     })
     .required(),
   profitYear: profitYearValidator(2015, 2099),
-  excludeZeroAndFullyVested: yup.boolean()
+  excludeZeroAndFullyVested: yup.boolean(),
+  vestedBalanceValue: yup
+    .number()
+    .nullable()
+    .min(0, "Vested Balance must be 0 or greater")
+    .transform((value, originalValue) => (originalValue === "" ? null : value)),
+  vestedBalanceOperator: yup
+    .number()
+    .nullable()
+    .when("vestedBalanceValue", {
+      is: (val: number | null | undefined) => val !== null && val !== undefined,
+      then: (schema) => schema.required("Operator is required when Vested Balance is provided"),
+      otherwise: (schema) => schema.nullable()
+    })
 });
 
 interface TerminationSearchFilterProps {
@@ -72,7 +85,9 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
       forfeitureStatus: "showAll",
       pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: false },
       profitYear: selectedProfitYear,
-      excludeZeroAndFullyVested: false
+      excludeZeroAndFullyVested: false,
+      vestedBalanceValue: null,
+      vestedBalanceOperator: 0
     }
   });
 
@@ -90,6 +105,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
         : mmDDYYFormat(fiscalData?.fiscalBeginDate || ""),
       endingDate: data.endingDate ? mmDDYYFormat(data.endingDate) : mmDDYYFormat(fiscalData?.fiscalEndDate || "")
     };
+
     // Only update search params and initial loaded state; let the grid trigger the API
     onSearch(params);
     setInitialSearchLoaded(true);
@@ -105,7 +121,9 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
       forfeitureStatus: "showAll",
       pagination: { skip: 0, take: 25, sortBy: "name", isSortDescending: false },
       profitYear: selectedProfitYear,
-      excludeZeroAndFullyVested: false
+      excludeZeroAndFullyVested: false,
+      vestedBalanceValue: null,
+      vestedBalanceOperator: 0
     });
     // Trigger validation after reset to ensure form validity is updated
     await trigger();
@@ -187,6 +205,57 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
             )}
           />
           {errors.endingDate && <FormHelperText error>{errors.endingDate.message}</FormHelperText>}
+        </Grid>
+        <Grid size={{ xs: 12, sm: 3, md: 1.25 }}>
+          <Controller
+            name="vestedBalanceOperator"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                select
+                fullWidth
+                label="Operator"
+                value={field.value ?? 0}
+                onChange={(e) => field.onChange(Number(e.target.value))}
+                onBlur={field.onBlur}
+                name={field.name}
+                inputRef={field.ref}>
+                <MenuItem value={0}>=</MenuItem>
+                <MenuItem value={1}>&lt;</MenuItem>
+                <MenuItem value={2}>&lt;=</MenuItem>
+                <MenuItem value={3}>&gt;</MenuItem>
+                <MenuItem value={4}>&gt;=</MenuItem>
+              </TextField>
+            )}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 3, md: 1.25 }}>
+          <Controller
+            name="vestedBalanceValue"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                fullWidth
+                type="number"
+                label="Vested Balance"
+                placeholder="Enter amount"
+                value={field.value ?? ""}
+                onChange={(e) => {
+                  const value = e.target.value === "" ? null : Number(e.target.value);
+                  field.onChange(value);
+                }}
+                onBlur={field.onBlur}
+                name={field.name}
+                inputRef={field.ref}
+                inputProps={{
+                  min: 0,
+                  step: 1
+                }}
+                error={!!errors.vestedBalanceValue}
+                helperText={errors.vestedBalanceValue?.message}
+              />
+            )}
+          />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 6 }}>
           <Controller

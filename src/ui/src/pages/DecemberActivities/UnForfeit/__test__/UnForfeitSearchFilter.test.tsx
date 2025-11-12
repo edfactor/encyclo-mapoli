@@ -90,7 +90,13 @@ vi.mock("smart-ui-library", () => ({
         onClick={handleReset}>
         Reset
       </button>
-      {isFetching && <span role="status" aria-label="loading">Loading...</span>}
+      {isFetching && (
+        <span
+          role="status"
+          aria-label="loading">
+          Loading...
+        </span>
+      )}
     </section>
   ))
 }));
@@ -252,7 +258,7 @@ describe("UnForfeitSearchFilter", () => {
       expect(inputs.length).toBeGreaterThanOrEqual(2);
 
       // Verify inputs are not disabled
-      inputs.forEach(input => {
+      inputs.forEach((input) => {
         expect(input).not.toBeDisabled();
       });
     });

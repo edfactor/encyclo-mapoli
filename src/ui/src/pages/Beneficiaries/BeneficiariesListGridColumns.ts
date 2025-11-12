@@ -13,7 +13,7 @@ export const GetBeneficiariesListGridColumns = (
   percentageFieldRenderer: (percentage: number, id: number) => React.JSX.Element
 ): ColDef[] => {
   return [
-    createBadgeColumn({ headerName: 'Badge/Psn', psnSuffix: true }),
+    createBadgeColumn({ headerName: "Badge/Psn", psnSuffix: true }),
     createNameColumn({
       field: "fullName",
 
