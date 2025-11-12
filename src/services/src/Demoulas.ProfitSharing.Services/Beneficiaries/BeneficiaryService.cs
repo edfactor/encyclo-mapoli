@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.Util.Extensions;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Beneficiaries;
@@ -57,6 +58,19 @@ public class BeneficiaryService : IBeneficiaryService
             if (req.Percentage < 0 || req.Percentage > 100)
             {
                 throw new InvalidOperationException("Invalid percentage");
+            }
+
+            // Check if trying to create a primary beneficiary when one already exists
+            if (req.KindId == BeneficiaryKind.Constants.Primary)
+            {
+                var existingPrimaryBeneficiary = await ctx.Beneficiaries
+                    .Where(b => b.DemographicId == demographic.Id && b.KindId == BeneficiaryKind.Constants.Primary)
+                    .FirstOrDefaultAsync(cancellationToken);
+                
+                if (existingPrimaryBeneficiary != null)
+                {
+                    throw new ValidationException("Employee already has a primary beneficiary. Only one primary beneficiary is allowed per employee.");
+                }
             }
 
             //await ValidatePercentages(ctx, req.EmployeeBadgeNumber, req.Percentage, cancellationToken);
