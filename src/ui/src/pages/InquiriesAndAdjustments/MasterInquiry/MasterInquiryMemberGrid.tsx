@@ -1,4 +1,5 @@
 import { Box, Typography } from "@mui/material";
+import { RowClickedEvent } from "ag-grid-community";
 import React, { memo, useMemo } from "react";
 import { DSMGrid, formatNumberWithComma, Pagination, ISortParams } from "smart-ui-library";
 import { EmployeeDetails } from "../../../reduxstore/types";
@@ -91,11 +92,11 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
             rowData: searchResults.results,
             columnDefs: columns,
             context: { onBadgeClick: handleMemberClick },
-            onRowClicked: (event) => {
+            onRowClicked: ((event: RowClickedEvent<EmployeeDetails>) => {
               if (event.data) {
                 handleMemberClick(event.data);
               }
-            }
+            }) as (event: unknown) => void
           }}
         />
         <Pagination

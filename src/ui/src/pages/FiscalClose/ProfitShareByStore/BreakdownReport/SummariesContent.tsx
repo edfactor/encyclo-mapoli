@@ -1,6 +1,6 @@
 import { Typography, CircularProgress } from "@mui/material";
 import { Grid } from "@mui/material";
-import { RowClassParams } from "ag-grid-community";
+import { ColDef, RowClassParams } from "ag-grid-community";
 import { DSMGrid, numberToCurrency } from "smart-ui-library";
 import { useEffect, useState } from "react";
 import { useLazyGetBreakdownGrandTotalsQuery } from "reduxstore/api/YearsEndApi";
@@ -134,7 +134,7 @@ const SummariesContent: React.FC = () => {
     setGrandTotal(total);
   };
 
-  const allEmployeesColumnDefs = [
+  const allEmployeesColumnDefs: ColDef[] = [
     {
       headerName: "Category",
       field: "category",

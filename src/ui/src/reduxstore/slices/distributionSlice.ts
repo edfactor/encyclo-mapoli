@@ -7,13 +7,15 @@ export interface DistributionState {
   currentDistribution: DistributionSearchResponse | null;
   pendingDisbursements: DistributionSearchResponse[];
   historicalDisbursements: DistributionSearchResponse[];
+  distributionHome: string | null;
 }
 
 const initialState: DistributionState = {
   currentMember: null,
   currentDistribution: null,
   pendingDisbursements: [],
-  historicalDisbursements: []
+  historicalDisbursements: [],
+  distributionHome: null
 };
 
 const distributionSlice = createSlice({
@@ -43,6 +45,12 @@ const distributionSlice = createSlice({
     },
     clearHistoricalDisbursements: (state) => {
       state.historicalDisbursements = [];
+    },
+    setDistributionHome: (state, action: PayloadAction<string>) => {
+      state.distributionHome = action.payload;
+    },
+    clearDistributionHome: (state) => {
+      state.distributionHome = null;
     }
   }
 });
@@ -55,7 +63,9 @@ export const {
   setPendingDisbursements,
   clearPendingDisbursements,
   setHistoricalDisbursements,
-  clearHistoricalDisbursements
+  clearHistoricalDisbursements,
+  setDistributionHome,
+  clearDistributionHome
 } = distributionSlice.actions;
 
 export default distributionSlice.reducer;
