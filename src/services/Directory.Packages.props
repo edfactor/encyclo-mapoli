@@ -22,8 +22,8 @@
     <PackageVersion Include="IdGen" Version="3.0.7" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Systemd" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="8.2.0" />
     <PackageVersion Include="CsvHelper" Version="33.1.0" />
     <PackageVersion Include="Demoulas.Common.Api" Version="3.0.6-alpha.2" />
@@ -36,7 +36,7 @@
     <PackageVersion Include="FastEndpoints.Security" Version="5.31.0" />
     <PackageVersion Include="Microsoft.Extensions.Compliance.Redaction" Version="8.7.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.10.0" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.0.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
     <PackageVersion Include="FastEndpoints" Version="7.1.0" />
@@ -50,10 +50,10 @@
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.2" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
     <PackageVersion Include="NetEscapades.AspNetCore.SecurityHeaders" Version="1.2.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
@@ -72,7 +72,7 @@
     <PackageVersion Include="Quartz" Version="3.15.1" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.15.1" />
     <PackageVersion Include="Riok.Mapperly" Version="4.3.0" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.10.1" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.10.3" />
     <PackageVersion Include="Serilog.AspNetCore" Version="8.0.2" />
     <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageVersion Include="Serilog.Enrichers.Memory" Version="1.0.4" />
@@ -90,7 +90,7 @@
     <PackageVersion Include="MockQueryable.Moq" Version="9.0.0" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Include="SSH.NET" Version="2025.1.0" />
-    <PackageVersion Include="System.CommandLine" Version="2.0.0-rc.1.25451.107" />
+    <PackageVersion Include="System.CommandLine" Version="2.0.0" />
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="10.0.0" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.6.0" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
