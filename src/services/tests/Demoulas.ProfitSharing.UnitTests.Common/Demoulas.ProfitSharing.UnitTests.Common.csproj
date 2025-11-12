@@ -1,12 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <ExcludeFromCodeCoverage>true</ExcludeFromCodeCoverage>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Bogus" />
     <PackageReference Include="coverlet.collector">
