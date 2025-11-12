@@ -77,6 +77,21 @@ vi.mock("../../../utils/FormValidators", async () => {
 });
 
 vi.mock("smart-ui-library", () => ({
+  DSMDatePicker: vi.fn(({ label, onChange, value, disabled, required }) => (
+    <div>
+      <label>{label}</label>
+      <input
+        data-testid={`date-picker-${label}`}
+        aria-label={label}
+        onChange={(e) => onChange(e.target.value ? new Date(e.target.value) : null)}
+        value={value ? new Date(value).toISOString().split("T")[0] : ""}
+        placeholder={label}
+        type="date"
+        disabled={disabled}
+        required={required}
+      />
+    </div>
+  )),
   SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) => (
     <section aria-label="search and reset">
       <button

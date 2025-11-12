@@ -1,6 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
@@ -21,7 +20,7 @@ import {
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { ProfitShareUpdateRequest } from "reduxstore/types";
-import { SearchAndReset } from "smart-ui-library";
+import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { badgeNumberValidator, positiveNumberValidator, profitYearDateValidator } from "../../../utils/FormValidators";
 
@@ -321,7 +320,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
               name="profitYear"
               control={control}
               render={({ field }) => (
-                <DsmDatePicker
+                <DSMDatePicker
                   id="Beginning Year"
                   onChange={(value: Date | null) => field.onChange(value)}
                   value={field.value ?? null}
