@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Reflection;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
@@ -251,6 +251,15 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         {
             demographics.Find(d => d.Id == payProfit.DemographicId)?.PayProfits.Add(payProfit);
         }
+
+        List<ParticipantTotal> participantTotals = new ParticipantTotalFaker(demographics, beneficiaries).Generate(demographics.Count + beneficiaries.Count);
+        Constants.FakeParticipantTotals = participantTotals.BuildMockDbSet();
+
+        List<ParticipantTotalVestingBalance> participantTotalVestingBalances = new ParticipantTotalVestingBalanceFaker(demographics, beneficiaries).Generate(demographics.Count + beneficiaries.Count);
+        Constants.FakeParticipantTotalVestingBalances = participantTotalVestingBalances.BuildMockDbSet();
+
+        List<ParticipantTotal> etvaBalances = new ParticipantEtvaTotalFaker(profitDetails).Generate(profitDetails.Count);
+        Constants.FakeEtvaTotals = etvaBalances.BuildMockDbSet();
 
         var profitShareTotal = new ProfitShareTotalFaker().Generate();
         Constants.ProfitShareTotals = (new List<ProfitShareTotal>() { profitShareTotal }).BuildMockDbSet();
