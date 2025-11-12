@@ -271,7 +271,7 @@ FROM FILTERED_DEMOGRAPHIC p1
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to force refresh duplicate names and birthdays cache");
-            throw;
+            throw new InvalidOperationException("Cache force refresh failed for duplicate names and birthdays", ex);
         }
     }
 

@@ -34,7 +34,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         });
 
         TerminatedEmployeeService mockService =
-            new(DbFactory, TotalService, DemographicReaderService, _loggerFactory.CreateLogger<TerminatedEmployeeReportService>(), CalendarService, YearEndService);
+            new(DbFactory, TotalService, DemographicReaderService, _loggerFactory, CalendarService, YearEndService);
 
         TerminatedEmployeeAndBeneficiaryResponse data = await mockService.GetReportAsync(
             new StartAndEndDateRequest { SortBy = "Name", BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue },
