@@ -305,10 +305,12 @@ public sealed class YearEndService : IYearEndService
 
         var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, useFrozenData: true);
 
-        // COBOL PAY426 lines 1199-1203: Reset if (hire date >= fiscal end) OR (not eligible)
-        // Step 1: Get DemographicIds to reset (Oracle doesn't allow ExecuteUpdate on JOINs)
-        // Note: Eligibility logic inlined here because EF Core can't translate custom methods to SQL
-        // Eligibility is: (Age > 17 AND hours >= 1000) OR (Age > 63)
+
+#pragma warning disable S125 // Sections of code should not be commented out
+                            // COBOL PAY426 lines 1199-1203: Reset if (hire date >= fiscal end) OR (not eligible)
+                            // Step 1: Get DemographicIds to reset (Oracle doesn't allow ExecuteUpdate on JOINs)
+                            // Note: Eligibility logic inlined here because EF Core can't translate custom methods to SQL
+                            // Eligibility is: (Age > 17 AND hours >= 1000) OR (Age > 63)
         var demographicIdsToReset = await ctx.PayProfits
             .Join(demographicQuery,
                 pp => pp.DemographicId,
@@ -327,6 +329,7 @@ public sealed class YearEndService : IYearEndService
                 ))
             .Select(x => x.pp.DemographicId)
             .ToListAsync(ct);
+#pragma warning restore S125 // Sections of code should not be commented out
 
         // Step 2: Update by composite key (DemographicId + ProfitYear) - avoids Oracle ORA-01779 error
         if (demographicIdsToReset.Any())

@@ -101,7 +101,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             switch (request.MemberType)
             {
                 case EmployeeMemberType:
-                    query = await GetEmployeeQuery(request, context);
+                    query = await GetEmployeeQuery(request);
                     break;
                 case BeneficiaryMemberType:
                     query = GetBeneficiaryQuery(request, context);

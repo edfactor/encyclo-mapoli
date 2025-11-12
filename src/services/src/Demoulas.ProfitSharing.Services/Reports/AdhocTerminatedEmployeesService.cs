@@ -69,7 +69,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
         };
     }
 
-    public async Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetTerminatedEmployeesNeedingFormLetter(FilterableStartAndEndDateRequest req, CancellationToken cancellationToken)
+    public Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetTerminatedEmployeesNeedingFormLetter(FilterableStartAndEndDateRequest req, CancellationToken cancellationToken)
     {
         // Convert to TerminatedLettersRequest and delegate to the more flexible overload
         var terminatedLettersRequest = new TerminatedLettersRequest
@@ -84,7 +84,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             BadgeNumbers = null // No badge filtering for the original method
         };
 
-        return await GetTerminatedEmployeesNeedingFormLetter(terminatedLettersRequest, cancellationToken);
+        return GetTerminatedEmployeesNeedingFormLetter(terminatedLettersRequest, cancellationToken);
     }
 
     public async Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetTerminatedEmployeesNeedingFormLetter(TerminatedLettersRequest req, CancellationToken cancellationToken)

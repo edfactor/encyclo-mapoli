@@ -214,7 +214,7 @@ public sealed class DistributionService : IDistributionService
         return result;
     }
 
-    public async Task<CreateOrUpdateDistributionResponse> CreateDistribution(CreateDistributionRequest request, CancellationToken cancellationToken)
+    public Task<CreateOrUpdateDistributionResponse> CreateDistribution(CreateDistributionRequest request, CancellationToken cancellationToken)
     {
         var validationResult = ValidateDistributionRequest(request);
         if (!validationResult.IsSuccess)
@@ -222,7 +222,7 @@ public sealed class DistributionService : IDistributionService
             throw new InvalidOperationException(string.Join("; ", validationResult.Error?.ValidationErrors.SelectMany(e => e.Value) ?? []));
         }
 
-        return await _dataContextFactory.UseWritableContext(async ctx =>
+        return _dataContextFactory.UseWritableContext(async ctx =>
         {
             var demographic = await _demographicReaderService.BuildDemographicQuery(ctx, false);
             var dem = await demographic.Where(d => d.BadgeNumber == request.BadgeNumber).FirstOrDefaultAsync(cancellationToken);

@@ -766,7 +766,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         return detailsList;
     }
 
-    private Task<PaginatedResponseDto<MemberDetails>> GetDemographicDetailsForSsns(SortedPaginationRequestDto req, ISet<int> ssns, short currentYear, short previousYear, ISet<int> duplicateSsns, CancellationToken cancellationToken = default)
+    private Task<PaginatedResponseDto<MemberDetails>> GetDemographicDetailsForSsns(MasterInquiryRequest req, ISet<int> ssns, short currentYear, short previousYear, ISet<int> duplicateSsns, CancellationToken cancellationToken = default)
     {
         return _employeeInquiryService.GetEmployeeDetailsForSsnsAsync(req, ssns, currentYear, previousYear, duplicateSsns, cancellationToken);
     }

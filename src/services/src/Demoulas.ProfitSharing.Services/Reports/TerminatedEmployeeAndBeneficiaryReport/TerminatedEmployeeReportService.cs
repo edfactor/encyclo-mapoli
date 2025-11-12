@@ -43,12 +43,12 @@ public sealed class TerminatedEmployeeReportService
         _yearEndService = yearEndService;
     }
 
-    public async Task<TerminatedEmployeeAndBeneficiaryResponse> CreateDataAsync(FilterableStartAndEndDateRequest req, CancellationToken cancellationToken)
+    public Task<TerminatedEmployeeAndBeneficiaryResponse> CreateDataAsync(FilterableStartAndEndDateRequest req, CancellationToken cancellationToken)
     {
         var startTime = DateTime.UtcNow;
         _logger.LogInformation("CreateDataAsync started for date range {BeginningDate} to {EndingDate}", req.BeginningDate, req.EndingDate);
 
-        return await _factory.UseReadOnlyContext(async ctx =>
+        return _factory.UseReadOnlyContext(async ctx =>
         {
             var retrieveStartTime = DateTime.UtcNow;
             IQueryable<MemberSlice> memberSliceQuery = await RetrieveMemberSlices(ctx, req);

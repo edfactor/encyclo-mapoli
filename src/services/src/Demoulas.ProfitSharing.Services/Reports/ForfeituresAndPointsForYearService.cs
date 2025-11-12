@@ -36,10 +36,10 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
     }
 
 
-    public async Task<ForfeituresAndPointsForYearResponseWithTotals> GetForfeituresAndPointsForYearAsync(FrozenProfitYearRequest req,
+    public Task<ForfeituresAndPointsForYearResponseWithTotals> GetForfeituresAndPointsForYearAsync(FrozenProfitYearRequest req,
         CancellationToken cancellationToken = default)
     {
-        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             short currentYear = req.ProfitYear;
             short lastYear = (short)(currentYear - 1);

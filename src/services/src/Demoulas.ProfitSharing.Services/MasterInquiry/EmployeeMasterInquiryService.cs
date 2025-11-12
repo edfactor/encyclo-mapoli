@@ -95,6 +95,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         }
 
         _logger.LogInformation("TRACE: About to build query with Include");
+#pragma warning disable AsyncFixer02 // Long-running or blocking operations inside an async method
         var query = profitDetailsQuery
             .Include(pd => pd.ProfitCode)
             .Include(pd => pd.ZeroContributionReason)
@@ -136,6 +137,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
                             .FirstOrDefault()
                     }
                 });
+#pragma warning restore AsyncFixer02 // Long-running or blocking operations inside an async method
 
         _logger.LogInformation("TRACE: Query built, returning");
         return query;
@@ -293,7 +295,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         }, cancellationToken);
     }
 
-    public async Task<PaginatedResponseDto<MemberDetails>> GetEmployeeDetailsForSsnsAsync(
+    public Task<PaginatedResponseDto<MemberDetails>> GetEmployeeDetailsForSsnsAsync(
         MasterInquiryRequest req,
         ISet<int> ssns,
         short currentYear,
@@ -304,7 +306,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         _logger.LogDebug("Getting paginated employee details for {SsnCount} SSNs. BadgeNumber: {BadgeNumber}, CurrentYear: {CurrentYear}",
             ssns.Count, req.BadgeNumber, currentYear);
 
-        return await _factory.UseReadOnlyContext(async ctx =>
+        return _factory.UseReadOnlyContext(async ctx =>
         {
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
 
@@ -454,7 +456,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         }, cancellationToken);
     }
 
-    public async Task<List<MemberDetails>> GetAllEmployeeDetailsForSsnsAsync(
+    public Task<List<MemberDetails>> GetAllEmployeeDetailsForSsnsAsync(
         ISet<int> ssns,
         short currentYear,
         short previousYear,
@@ -464,7 +466,7 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         _logger.LogDebug("Getting all employee details for {SsnCount} SSNs (non-paginated). CurrentYear: {CurrentYear}",
             ssns.Count, currentYear);
 
-        return await _factory.UseReadOnlyContext(async ctx =>
+        return _factory.UseReadOnlyContext(async ctx =>
         {
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
 
