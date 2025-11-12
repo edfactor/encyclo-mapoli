@@ -105,7 +105,13 @@ vi.mock("smart-ui-library", () => ({
         onClick={handleReset}>
         Reset
       </button>
-      {isFetching && <span role="status" aria-label="loading">Loading...</span>}
+      {isFetching && (
+        <span
+          role="status"
+          aria-label="loading">
+          Loading...
+        </span>
+      )}
     </section>
   ))
 }));
@@ -267,8 +273,9 @@ describe("UnForfeitSearchFilter", () => {
       const endDateInput = screen.getByLabelText("Rehire Ending Date");
 
       // Verify inputs are not disabled
-      expect(beginDateInput).not.toBeDisabled();
-      expect(endDateInput).not.toBeDisabled();
+      inputs.forEach((input) => {
+        expect(input).not.toBeDisabled();
+      });
     });
   });
 

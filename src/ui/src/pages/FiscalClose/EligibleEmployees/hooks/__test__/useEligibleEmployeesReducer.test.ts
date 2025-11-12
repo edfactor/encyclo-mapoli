@@ -66,15 +66,17 @@ describe("useEligibleEmployeesReducer", () => {
         endDate: "2024-12-31",
         dataSource: "test",
         response: {
-          results: [{
-            badgeNumber: 12345,
-            fullName: "John Doe",
-            oracleHcmId: 12345,
-            departmentId: 1,
-            department: "Test Dept",
-            storeNumber: 1,
-            isExecutive: false
-          }],
+          results: [
+            {
+              badgeNumber: 12345,
+              fullName: "John Doe",
+              oracleHcmId: 12345,
+              departmentId: 1,
+              department: "Test Dept",
+              storeNumber: 1,
+              isExecutive: false
+            }
+          ],
           total: 1,
           totalPages: 1,
           pageSize: 25,
@@ -295,15 +297,17 @@ describe("useEligibleEmployeesReducer", () => {
           endDate: "2024-12-31",
           dataSource: "test",
           response: {
-            results: [{
-              badgeNumber: 12345,
-              fullName: "John Doe",
-              oracleHcmId: 12345,
-              departmentId: 1,
-              department: "Test Dept",
-              storeNumber: 1,
-              isExecutive: false
-            }],
+            results: [
+              {
+                badgeNumber: 12345,
+                fullName: "John Doe",
+                oracleHcmId: 12345,
+                departmentId: 1,
+                department: "Test Dept",
+                storeNumber: 1,
+                isExecutive: false
+              }
+            ],
             total: 1,
             totalPages: 1,
             pageSize: 25,
@@ -394,15 +398,17 @@ describe("useEligibleEmployeesReducer", () => {
             endDate: "2024-12-31",
             dataSource: "test",
             response: {
-              results: [{
-                badgeNumber: 12345,
-                fullName: "John Doe",
-                oracleHcmId: 12345,
-                departmentId: 1,
-                department: "Test Dept",
-                storeNumber: 1,
-                isExecutive: false
-              }],
+              results: [
+                {
+                  badgeNumber: 12345,
+                  fullName: "John Doe",
+                  oracleHcmId: 12345,
+                  departmentId: 1,
+                  department: "Test Dept",
+                  storeNumber: 1,
+                  isExecutive: false
+                }
+              ],
               total: 1,
               totalPages: 1,
               pageSize: 25,

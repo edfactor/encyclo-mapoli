@@ -11,7 +11,7 @@ import {
 
 export const GetBeneficiaryOfGridColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({headerName:'Badge/Psn', psnSuffix:true}),
+    createBadgeColumn({ headerName: "Badge/Psn", psnSuffix: true }),
     createNameColumn({
       field: "fullName",
       valueFormatter: (params) => {

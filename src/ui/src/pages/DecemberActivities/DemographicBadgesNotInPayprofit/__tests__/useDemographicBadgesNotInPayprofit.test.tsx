@@ -28,7 +28,11 @@ vi.mock("../../../../reduxstore/api/YearsEndApi", () => ({
 }));
 
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
-import { useGridPagination, type GridPaginationState, type GridPaginationActions } from "../../../../hooks/useGridPagination";
+import {
+  useGridPagination,
+  type GridPaginationState,
+  type GridPaginationActions
+} from "../../../../hooks/useGridPagination";
 import { useLazyGetDemographicBadgesNotInPayprofitQuery } from "../../../../reduxstore/api/YearsEndApi";
 import useDemographicBadgesNotInPayprofit from "../hooks/useDemographicBadgesNotInPayprofit";
 
@@ -50,21 +54,25 @@ describe("useDemographicBadgesNotInPayprofit Hook", () => {
 
     const mockTrigger = vi.fn().mockReturnValue({
       unwrap: vi.fn().mockResolvedValue({
-        results: [{
-          badgeNumber: 12345,
-          ssn: 123456789,
-          employeeName: "John Doe",
-          store: 1,
-          status: "A",
-          statusName: "Active"
-        }],
+        results: [
+          {
+            badgeNumber: 12345,
+            ssn: 123456789,
+            employeeName: "John Doe",
+            store: 1,
+            status: "A",
+            statusName: "Active"
+          }
+        ],
         total: 1
       })
     });
 
-    vi.mocked(useLazyGetDemographicBadgesNotInPayprofitQuery).mockReturnValue(
-      [mockTrigger, { isFetching: false }, {}] as unknown as ReturnType<typeof useLazyGetDemographicBadgesNotInPayprofitQuery>
-    );
+    vi.mocked(useLazyGetDemographicBadgesNotInPayprofitQuery).mockReturnValue([
+      mockTrigger,
+      { isFetching: false },
+      {}
+    ] as unknown as ReturnType<typeof useLazyGetDemographicBadgesNotInPayprofitQuery>);
   });
 
   describe("Hook initialization", () => {

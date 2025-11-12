@@ -214,6 +214,26 @@ public sealed class TerminatedEmployeeReportService
 
             decimal vestedBalance = thisYearVestedBalance?.VestedBalance ?? 0m;
 
+            // Apply optional vested balance filter
+            if (req.VestedBalanceValue.HasValue && req.VestedBalanceOperator.HasValue)
+            {
+                var filterValue = req.VestedBalanceValue.Value;
+                bool passesFilter = req.VestedBalanceOperator.Value switch
+                {
+                    Common.Enums.ComparisonOperator.Equals => vestedBalance == filterValue,
+                    Common.Enums.ComparisonOperator.LessThan => vestedBalance < filterValue,
+                    Common.Enums.ComparisonOperator.LessThanOrEqual => vestedBalance <= filterValue,
+                    Common.Enums.ComparisonOperator.GreaterThan => vestedBalance > filterValue,
+                    Common.Enums.ComparisonOperator.GreaterThanOrEqual => vestedBalance >= filterValue,
+                    _ => true // Unknown operator - include record
+                };
+
+                if (!passesFilter)
+                {
+                    continue; // Skip this member - doesn't match vested balance criteria
+                }
+            }
+
             ParticipantTotalVestingBalance? lastYearVestedBalance = lastYearVestedBalancesDict.GetValueOrDefault((memberSlice.Ssn, memberSlice.Id));
 
             // Fallback for pure beneficiaries: if compound key fails and this is a pure beneficiary, search by SSN only

@@ -48,11 +48,23 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
   describe("SEARCH_SUCCESS", () => {
     it("should set results and grid data", () => {
       const mockPagedResponse = {
-        results: [{ badgeNumber: 12345, fullName: "John Doe", hoursExecutive: 40, incomeExecutive: 1000 } as unknown as ExecutiveHoursAndDollars],
+        results: [
+          {
+            badgeNumber: 12345,
+            fullName: "John Doe",
+            hoursExecutive: 40,
+            incomeExecutive: 1000
+          } as unknown as ExecutiveHoursAndDollars
+        ],
         total: 1
       };
 
-      const action = { type: "SEARCH_SUCCESS" as const, payload: { results: { response: mockPagedResponse } as unknown as PagedReportResponse<ExecutiveHoursAndDollars> } };
+      const action = {
+        type: "SEARCH_SUCCESS" as const,
+        payload: {
+          results: { response: mockPagedResponse } as unknown as PagedReportResponse<ExecutiveHoursAndDollars>
+        }
+      };
       const newState = manageExecutiveHoursAndDollarsReducer(initialState, action);
 
       expect(newState.search.results).toEqual(mockPagedResponse);
@@ -67,7 +79,12 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
         total: 0
       };
 
-      const action = { type: "SEARCH_SUCCESS" as const, payload: { results: { response: mockPagedResponse } as unknown as PagedReportResponse<ExecutiveHoursAndDollars> } };
+      const action = {
+        type: "SEARCH_SUCCESS" as const,
+        payload: {
+          results: { response: mockPagedResponse } as unknown as PagedReportResponse<ExecutiveHoursAndDollars>
+        }
+      };
       const newState = manageExecutiveHoursAndDollarsReducer(initialState, action);
 
       expect(newState.search.results).toEqual(mockPagedResponse);
@@ -279,7 +296,14 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
 
   describe("additional executives", () => {
     it("should add additional executives", () => {
-      const executives = [{ badgeNumber: 12345, fullName: "John Doe", hoursExecutive: 40, incomeExecutive: 1000 } as unknown as ExecutiveHoursAndDollars];
+      const executives = [
+        {
+          badgeNumber: 12345,
+          fullName: "John Doe",
+          hoursExecutive: 40,
+          incomeExecutive: 1000
+        } as unknown as ExecutiveHoursAndDollars
+      ];
 
       const action = { type: "ADD_ADDITIONAL_EXECUTIVES" as const, payload: { executives } };
       const newState = manageExecutiveHoursAndDollarsReducer(initialState, action);
@@ -288,7 +312,14 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
     });
 
     it("should append to existing additional executives", () => {
-      const existing = [{ badgeNumber: 11111, fullName: "Jane Smith", hoursExecutive: 35, incomeExecutive: 900 } as unknown as ExecutiveHoursAndDollars];
+      const existing = [
+        {
+          badgeNumber: 11111,
+          fullName: "Jane Smith",
+          hoursExecutive: 35,
+          incomeExecutive: 900
+        } as unknown as ExecutiveHoursAndDollars
+      ];
 
       const stateWithExecutives: ManageExecutiveHoursAndDollarsState = {
         ...initialState,
@@ -296,7 +327,12 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
       };
 
       const newExecutives = [
-        { badgeNumber: 22222, fullName: "Bob Johnson", hoursExecutive: 45, incomeExecutive: 1100 } as unknown as ExecutiveHoursAndDollars
+        {
+          badgeNumber: 22222,
+          fullName: "Bob Johnson",
+          hoursExecutive: 45,
+          incomeExecutive: 1100
+        } as unknown as ExecutiveHoursAndDollars
       ];
 
       const action = { type: "ADD_ADDITIONAL_EXECUTIVES" as const, payload: { executives: newExecutives } };
@@ -311,7 +347,12 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
         grid: {
           ...initialState.grid,
           additionalExecutives: [
-            { badgeNumber: 12345, fullName: "John Doe", hoursExecutive: 40, incomeExecutive: 1000 } as unknown as ExecutiveHoursAndDollars
+            {
+              badgeNumber: 12345,
+              fullName: "John Doe",
+              hoursExecutive: 40,
+              incomeExecutive: 1000
+            } as unknown as ExecutiveHoursAndDollars
           ]
         }
       };
@@ -344,7 +385,22 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
             dataSource: "test",
             response: { results: [], total: 0, totalPages: 0, pageSize: 25, currentPage: 0 }
           },
-          selectedExecutives: [{ badgeNumber: 12345, fullName: "Test", storeNumber: 1, socialSecurity: 123456789, hoursExecutive: 40, incomeExecutive: 1000, currentHoursYear: 35, currentIncomeYear: 900, payFrequencyId: 1, payFrequencyName: "Monthly", employmentStatusId: "1", employmentStatusName: "Active" }],
+          selectedExecutives: [
+            {
+              badgeNumber: 12345,
+              fullName: "Test",
+              storeNumber: 1,
+              socialSecurity: 123456789,
+              hoursExecutive: 40,
+              incomeExecutive: 1000,
+              currentHoursYear: 35,
+              currentIncomeYear: 900,
+              payFrequencyId: 1,
+              payFrequencyName: "Monthly",
+              employmentStatusId: "1",
+              employmentStatusName: "Active"
+            }
+          ],
           isSearching: false,
           searchParams: {
             profitYear: 2024,
@@ -383,7 +439,12 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
         total: 0
       };
 
-      const action = { type: "MODAL_SEARCH_SUCCESS" as const, payload: { results: { response: mockPagedResponse } as unknown as PagedReportResponse<ExecutiveHoursAndDollars> } };
+      const action = {
+        type: "MODAL_SEARCH_SUCCESS" as const,
+        payload: {
+          results: { response: mockPagedResponse } as unknown as PagedReportResponse<ExecutiveHoursAndDollars>
+        }
+      };
       const newState = manageExecutiveHoursAndDollarsReducer(initialState, action);
 
       expect(newState.modal.results).toEqual({ response: mockPagedResponse });
@@ -403,7 +464,14 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
     });
 
     it("should select executives in modal", () => {
-      const executives = [{ badgeNumber: 12345, fullName: "John Doe", hoursExecutive: 40, incomeExecutive: 1000 } as unknown as ExecutiveHoursAndDollars];
+      const executives = [
+        {
+          badgeNumber: 12345,
+          fullName: "John Doe",
+          hoursExecutive: 40,
+          incomeExecutive: 1000
+        } as unknown as ExecutiveHoursAndDollars
+      ];
 
       const action = { type: "MODAL_SELECT_EXECUTIVES" as const, payload: { executives } };
       const newState = manageExecutiveHoursAndDollarsReducer(initialState, action);
@@ -416,7 +484,14 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
         ...initialState,
         modal: {
           ...initialState.modal,
-          selectedExecutives: [{ badgeNumber: 12345, fullName: "Test", hoursExecutive: 40, incomeExecutive: 1000 } as unknown as ExecutiveHoursAndDollars]
+          selectedExecutives: [
+            {
+              badgeNumber: 12345,
+              fullName: "Test",
+              hoursExecutive: 40,
+              incomeExecutive: 1000
+            } as unknown as ExecutiveHoursAndDollars
+          ]
         }
       };
 
@@ -480,9 +555,7 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
           },
           pendingChanges: {
             profitYear: 2024,
-            executiveHoursAndDollars: [
-              { badgeNumber: 12345, executiveHours: 40, executiveDollars: 1000 }
-            ]
+            executiveHoursAndDollars: [{ badgeNumber: 12345, executiveHours: 40, executiveDollars: 1000 }]
           },
           additionalExecutives: [],
           selectedRows: []
@@ -528,9 +601,7 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
             ...initialState.grid,
             pendingChanges: {
               profitYear: 2024,
-              executiveHoursAndDollars: [
-                { badgeNumber: 12345, executiveHours: 40, executiveDollars: 1000 }
-              ]
+              executiveHoursAndDollars: [{ badgeNumber: 12345, executiveHours: 40, executiveDollars: 1000 }]
             }
           }
         };
@@ -551,9 +622,7 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
             ...initialState.grid,
             pendingChanges: {
               profitYear: 2024,
-              executiveHoursAndDollars: [
-                { badgeNumber: 12345, executiveHours: 40, executiveDollars: 1000 }
-              ]
+              executiveHoursAndDollars: [{ badgeNumber: 12345, executiveHours: 40, executiveDollars: 1000 }]
             }
           }
         };
@@ -575,7 +644,22 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
           search: {
             ...initialState.search,
             results: {
-              results: [{ badgeNumber: 12345, fullName: "Test", storeNumber: 1, socialSecurity: 123456789, hoursExecutive: 40, incomeExecutive: 1000, currentHoursYear: 35, currentIncomeYear: 900, payFrequencyId: 1, payFrequencyName: "Monthly", employmentStatusId: "1", employmentStatusName: "Active" }],
+              results: [
+                {
+                  badgeNumber: 12345,
+                  fullName: "Test",
+                  storeNumber: 1,
+                  socialSecurity: 123456789,
+                  hoursExecutive: 40,
+                  incomeExecutive: 1000,
+                  currentHoursYear: 35,
+                  currentIncomeYear: 900,
+                  payFrequencyId: 1,
+                  payFrequencyName: "Monthly",
+                  employmentStatusId: "1",
+                  employmentStatusName: "Active"
+                }
+              ],
               total: 1
             }
           },
@@ -614,7 +698,14 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
           endDate: "2024-12-31",
           dataSource: "test",
           response: {
-            results: [{ badgeNumber: 12345, fullName: "John", hoursExecutive: 40, incomeExecutive: 1000 } as unknown as ExecutiveHoursAndDollars],
+            results: [
+              {
+                badgeNumber: 12345,
+                fullName: "John",
+                hoursExecutive: 40,
+                incomeExecutive: 1000
+              } as unknown as ExecutiveHoursAndDollars
+            ],
             total: 1,
             totalPages: 1,
             pageSize: 25,
@@ -639,7 +730,14 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
           endDate: "2024-12-31",
           dataSource: "test",
           response: {
-            results: [{ badgeNumber: 12345, fullName: "John", hoursExecutive: 40, incomeExecutive: 1000 } as unknown as ExecutiveHoursAndDollars],
+            results: [
+              {
+                badgeNumber: 12345,
+                fullName: "John",
+                hoursExecutive: 40,
+                incomeExecutive: 1000
+              } as unknown as ExecutiveHoursAndDollars
+            ],
             total: 1,
             totalPages: 1,
             pageSize: 25,
@@ -647,7 +745,14 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
           }
         } as unknown as PagedReportResponse<ExecutiveHoursAndDollars>;
 
-        const additional = [{ badgeNumber: 22222, fullName: "Jane", hoursExecutive: 35, incomeExecutive: 900 } as unknown as ExecutiveHoursAndDollars];
+        const additional = [
+          {
+            badgeNumber: 22222,
+            fullName: "Jane",
+            hoursExecutive: 35,
+            incomeExecutive: 900
+          } as unknown as ExecutiveHoursAndDollars
+        ];
 
         const state: ManageExecutiveHoursAndDollarsState = {
           ...initialState,
@@ -666,7 +771,14 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
           endDate: "2024-12-31",
           dataSource: "test",
           response: {
-            results: [{ badgeNumber: 12345, fullName: "John", hoursExecutive: 40, incomeExecutive: 1000 } as unknown as ExecutiveHoursAndDollars],
+            results: [
+              {
+                badgeNumber: 12345,
+                fullName: "John",
+                hoursExecutive: 40,
+                incomeExecutive: 1000
+              } as unknown as ExecutiveHoursAndDollars
+            ],
             total: 1,
             totalPages: 1,
             pageSize: 25,
@@ -675,7 +787,12 @@ describe("useManageExecutiveHoursAndDollarsReducer", () => {
         } as unknown as PagedReportResponse<ExecutiveHoursAndDollars>;
 
         const additional = [
-          { badgeNumber: 12345, fullName: "John Updated", hoursExecutive: 45, incomeExecutive: 1100 } as unknown as ExecutiveHoursAndDollars
+          {
+            badgeNumber: 12345,
+            fullName: "John Updated",
+            hoursExecutive: 45,
+            incomeExecutive: 1100
+          } as unknown as ExecutiveHoursAndDollars
         ];
 
         const state: ManageExecutiveHoursAndDollarsState = {

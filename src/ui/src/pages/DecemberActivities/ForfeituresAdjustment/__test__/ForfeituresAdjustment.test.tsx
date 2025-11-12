@@ -10,56 +10,79 @@ import ForfeituresAdjustment from "../ForfeituresAdjustment";
 // Mock child components
 vi.mock("../ForfeituresAdjustmentSearchFilter", () => ({
   default: vi.fn(({ onSearch, onReset, isSearching }) =>
-    React.createElement('section', { 'aria-label': 'search filter' },
-      React.createElement('button', {
-        onClick: () => onSearch({
-          ssn: "123-45-6789",
-          badge: "",
-          profitYear: 2024,
-          skip: 0,
-          take: 255,
-          sortBy: "badgeNumber",
-          isSortDescending: false
-        })
-      }, 'Search'),
-      React.createElement('button', { onClick: onReset }, 'Reset'),
-      isSearching && React.createElement('span', { role: 'status' }, 'Searching...')
+    React.createElement(
+      "section",
+      { "aria-label": "search filter" },
+      React.createElement(
+        "button",
+        {
+          onClick: () =>
+            onSearch({
+              ssn: "123-45-6789",
+              badge: "",
+              profitYear: 2024,
+              skip: 0,
+              take: 255,
+              sortBy: "badgeNumber",
+              isSortDescending: false
+            })
+        },
+        "Search"
+      ),
+      React.createElement("button", { onClick: onReset }, "Reset"),
+      isSearching && React.createElement("span", { role: "status" }, "Searching...")
     )
   )
 }));
 
 vi.mock("../ForfeituresAdjustmentPanel", () => ({
   default: vi.fn(({ onAddForfeiture, isReadOnly }) =>
-    React.createElement('section', { 'aria-label': 'forfeiture panel' },
-      React.createElement('button', {
-        onClick: onAddForfeiture,
-        disabled: isReadOnly
-      }, 'Add Forfeiture')
+    React.createElement(
+      "section",
+      { "aria-label": "forfeiture panel" },
+      React.createElement(
+        "button",
+        {
+          onClick: onAddForfeiture,
+          disabled: isReadOnly
+        },
+        "Add Forfeiture"
+      )
     )
   )
 }));
 
 vi.mock("../ForfeituresTransactionGrid", () => ({
-  default: vi.fn(() => React.createElement('section', { 'aria-label': 'transaction grid' }, 'Transaction Grid'))
+  default: vi.fn(() => React.createElement("section", { "aria-label": "transaction grid" }, "Transaction Grid"))
 }));
 
 vi.mock("../AddForfeitureModal", () => ({
-  default: vi.fn(({ open, onClose, onSave }) =>
-    open && React.createElement('section', { 'aria-label': 'add forfeiture modal' },
-      React.createElement('button', { onClick: onClose }, 'Close'),
-      React.createElement('button', {
-        onClick: () => onSave({ forfeitureAmount: 1000, classAction: false })
-      }, 'Save')
-    )
+  default: vi.fn(
+    ({ open, onClose, onSave }) =>
+      open &&
+      React.createElement(
+        "section",
+        { "aria-label": "add forfeiture modal" },
+        React.createElement("button", { onClick: onClose }, "Close"),
+        React.createElement(
+          "button",
+          {
+            onClick: () => onSave({ forfeitureAmount: 1000, classAction: false })
+          },
+          "Save"
+        )
+      )
   )
 }));
 
 vi.mock("../../../InquiriesAndAdjustments/MasterInquiry/StandaloneMemberDetails", () => ({
-  default: vi.fn(() => React.createElement('section', { 'aria-label': 'member details' }, 'Member Details'))
+  default: vi.fn(() => React.createElement("section", { "aria-label": "member details" }, "Member Details"))
 }));
 
 vi.mock("../../../../components/StatusDropdownActionNode", () => ({
-  default: vi.fn(() => React.createElement('div', { role: 'status', 'aria-label': 'status dropdown' }, 'Status Dropdown'))
+  default: vi.fn(() =>
+    React.createElement("div", { role: "status", "aria-label": "status dropdown" }, "Status Dropdown")
+  )
 }));
 
 vi.mock("../../../../hooks/useReadOnlyNavigation", () => ({
@@ -233,7 +256,15 @@ describe("ForfeituresAdjustment", () => {
     it("should display employee data after search succeeds", async () => {
       const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
       vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
-        searchParams: { ssn: "123-45-6789", badge: "", profitYear: 2024, skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false },
+        searchParams: {
+          ssn: "123-45-6789",
+          badge: "",
+          profitYear: 2024,
+          skip: 0,
+          take: 25,
+          sortBy: "badgeNumber",
+          isSortDescending: false
+        },
         employeeData: { badgeNumber: 12345, demographicId: 123, suggestedForfeitAmount: 100 },
         memberDetails: null,
         transactionData: null,
@@ -274,7 +305,15 @@ describe("ForfeituresAdjustment", () => {
     it("should display transaction grid when transactions are available", async () => {
       const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
       vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
-        searchParams: { ssn: "123-45-6789", badge: "", profitYear: 2024, skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false },
+        searchParams: {
+          ssn: "123-45-6789",
+          badge: "",
+          profitYear: 2024,
+          skip: 0,
+          take: 25,
+          sortBy: "badgeNumber",
+          isSortDescending: false
+        },
         employeeData: { badgeNumber: 12345, demographicId: 123, suggestedForfeitAmount: 100 },
         memberDetails: null,
         transactionData: { results: [{ id: 1 }], total: 1 },
@@ -316,7 +355,15 @@ describe("ForfeituresAdjustment", () => {
     it("should open add forfeiture modal when button is clicked", async () => {
       const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
       vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
-        searchParams: { ssn: "123-45-6789", badge: "", profitYear: 2024, skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false },
+        searchParams: {
+          ssn: "123-45-6789",
+          badge: "",
+          profitYear: 2024,
+          skip: 0,
+          take: 25,
+          sortBy: "badgeNumber",
+          isSortDescending: false
+        },
         employeeData: { badgeNumber: 12345, demographicId: 123, suggestedForfeitAmount: 100 },
         memberDetails: null,
         transactionData: null,
@@ -358,7 +405,15 @@ describe("ForfeituresAdjustment", () => {
       const user = userEvent.setup();
       const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
       vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
-        searchParams: { ssn: "123-45-6789", badge: "", profitYear: 2024, skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false },
+        searchParams: {
+          ssn: "123-45-6789",
+          badge: "",
+          profitYear: 2024,
+          skip: 0,
+          take: 25,
+          sortBy: "badgeNumber",
+          isSortDescending: false
+        },
         employeeData: { badgeNumber: 12345, demographicId: 123, suggestedForfeitAmount: 100 },
         memberDetails: null,
         transactionData: null,
@@ -402,7 +457,15 @@ describe("ForfeituresAdjustment", () => {
       const user = userEvent.setup();
       const useForfeituresAdjustment = await import("../hooks/useForfeituresAdjustment");
       vi.mocked(useForfeituresAdjustment.default).mockReturnValueOnce({
-        searchParams: { ssn: "123-45-6789", badge: "", profitYear: 2024, skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false },
+        searchParams: {
+          ssn: "123-45-6789",
+          badge: "",
+          profitYear: 2024,
+          skip: 0,
+          take: 25,
+          sortBy: "badgeNumber",
+          isSortDescending: false
+        },
         employeeData: { badgeNumber: 12345, demographicId: 123, suggestedForfeitAmount: 100 },
         memberDetails: null,
         transactionData: null,

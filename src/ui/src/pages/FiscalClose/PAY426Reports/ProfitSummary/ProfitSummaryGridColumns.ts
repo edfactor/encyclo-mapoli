@@ -65,10 +65,10 @@ export const GetProfitSummaryGridColumns = (): ColDef[] => {
       headerName: "Points",
       field: "totalPoints",
       minWidth: 100,
-      sortable: false, 
+      sortable: false,
       valueFormatter: (params) => {
         if (params.value === null || params.value === undefined) {
-            return "";
+          return "";
         }
         return formatNumberWithComma(params.value);
       }

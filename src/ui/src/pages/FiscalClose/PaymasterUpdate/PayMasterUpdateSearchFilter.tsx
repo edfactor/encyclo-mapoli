@@ -21,7 +21,12 @@ interface ProfitYearSearchFilterProps {
   isFetching?: boolean;
 }
 
-const PayMasterUpdateSearchFilters: React.FC<ProfitYearSearchFilterProps> = ({ onSearch, onReset, setPageReset, isFetching = false }) => {
+const PayMasterUpdateSearchFilters: React.FC<ProfitYearSearchFilterProps> = ({
+  onSearch,
+  onReset,
+  setPageReset,
+  isFetching = false
+}) => {
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
 
   const {
