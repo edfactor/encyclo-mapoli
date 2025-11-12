@@ -1,5 +1,6 @@
 ﻿using Demoulas.Common.Contracts.Configuration;
 using Demoulas.Security.Extensions;
+using Demoulas.Util.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -7,7 +8,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 namespace Demoulas.ProfitSharing.Security.Extensions;
 
@@ -64,7 +64,8 @@ public static class SecurityExtension
                     "No signing key found in user secrets. Run: dotnet user-jwts create --audience https://localhost:7141");
             }
 
-            var testCertKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKeyValue));
+            // The signing key from dotnet user-jwts is Base64-encoded
+            var testCertKey = new SymmetricSecurityKey(Convert.FromBase64String(signingKeyValue));
 
             // Store original events
             var originalEvents = options.Events ?? new JwtBearerEvents();
@@ -92,14 +93,17 @@ public static class SecurityExtension
 
                             // Read issuer and audience from configuration
                             var validIssuer = configuration["Authentication:Schemes:Bearer:ValidIssuer"] ?? "dotnet-user-jwts";
-                            var validAudience = configuration["Authentication:Schemes:Bearer:ValidAudiences:0"] ?? "https://localhost:7141";
+
+                            // Read all valid audiences from configuration
+                            var validAudiences = configuration.GetSection("Authentication:Schemes:Bearer:ValidAudiences")
+                                .Get<string[]>() ?? new[] { "https://localhost:7141" };
 
                             var validationParameters = new TokenValidationParameters
                             {
                                 ValidateIssuer = true,
                                 ValidIssuer = validIssuer,
                                 ValidateAudience = true,
-                                ValidAudience = validAudience,
+                                ValidAudiences = validAudiences,
                                 ValidateLifetime = true,
                                 ValidateIssuerSigningKey = true,
                                 IssuerSigningKey = testCertKey,
