@@ -81,12 +81,12 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
                 {
                     // Demographic fields
                     DemographicId = demo.Id,
-                    Ssn = demo.Ssn,
-                    BadgeNumber = demo.BadgeNumber,
-                    FullName = demo.ContactInfo.FullName,
-                    PayFrequencyId = demo.PayFrequencyId,
+                    demo.Ssn,
+                    demo.BadgeNumber,
+                    demo.ContactInfo.FullName,
+                    demo.PayFrequencyId,
                     // PayProfit fields
-                    PointsEarned = pp.PointsEarned
+                    pp.PointsEarned
                 })
                 .TagWith($"ForfeituresReport-EmployeeData-{currentYear}")
                 .ToListAsync(cancellationToken);
@@ -100,8 +100,8 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
                     ContactSsn = b.Contact!.Ssn,
                     ContactId = b.Contact!.Id,
                     ContactFullName = b.Contact.ContactInfo.FullName,
-                    BadgeNumber = b.BadgeNumber,
-                    PsnSuffix = b.PsnSuffix
+                    b.BadgeNumber,
+                    b.PsnSuffix
                 })
                 .ToListAsync(cancellationToken);
 

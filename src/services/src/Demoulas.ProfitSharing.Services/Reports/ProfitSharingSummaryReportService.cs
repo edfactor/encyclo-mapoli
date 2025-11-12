@@ -108,9 +108,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     Hours = pp.CurrentHoursYear + pp.HoursExecutive,
                     Wages = pp.CurrentIncomeYear + pp.IncomeExecutive,
                     Points = (int)Math.Round((pp.CurrentIncomeYear + pp.IncomeExecutive) / 100, MidpointRounding.AwayFromZero),
-                    DateOfBirth = d.DateOfBirth,
+                    d.DateOfBirth,
                     EmploymentStatus = d.EmploymentStatusId,
-                    TerminationDate = d.TerminationDate,
+                    d.TerminationDate,
                     Balance = (decimal)(bal != null && bal.TotalAmount != null ? bal.TotalAmount : 0),
                     PriorBalance = (decimal)(priorBal != null && priorBal.TotalAmount != null ? priorBal.TotalAmount : 0)
                 })
@@ -326,7 +326,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 var birthday18 = calInfo.FiscalEndDate.AddYears(-18);
                 var birthday21 = calInfo.FiscalEndDate.AddYears(-21);
 
-                var filter = GetReportDetailFilterExpression(reportIdInt, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21);
+                var filter = GetReportDetailFilterExpression(reportIdInt, calInfo.FiscalEndDate, birthday18, birthday21);
                 filteredDetails = allDetails.Where(filter);
             }
 
@@ -476,9 +476,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 {
                     Hours = pp.CurrentHoursYear + pp.HoursExecutive,
                     Wages = pp.CurrentIncomeYear + pp.IncomeExecutive,
-                    DateOfBirth = d.DateOfBirth,
+                    d.DateOfBirth,
                     FirstContributionYear = fc != null ? fc.FirstContributionYear : (short?)null,
-                    Ssn = d.Ssn
+                    d.Ssn
                 })
                 .ToListAsync(cancellationToken);
 
@@ -627,7 +627,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             IsNew = false,
             IsUnder21 = false,
             EmployeeStatus = EmploymentStatus.Constants.Active,  // READY marks beneficiaries as Active (space in report)
-            Balance = (decimal)(x.Balance?.TotalAmount ?? 0),  // Balance may be null if no prior year balance exists
+            Balance = (x.Balance?.TotalAmount ?? 0),  // Balance may be null if no prior year balance exists
             YearsInPlan = 0,  // Fixed value per COBOL (WS-PYRS = 99)
             TerminationDate = null,
             FirstContributionYear = null,
@@ -706,14 +706,12 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     /// Returns a filter expression for individual employee detail records based on PAY426N report ID.
     /// </summary>
     /// <param name="reportId">The report ID or line number.</param>
-    /// <param name="fiscalBeginDate">Fiscal year begin date.</param>
-    /// <param name="fiscalEndDate">Fiscal year end date.</param>
+    /// <param name="fiscalEndDate">Fiscal year-end date.</param>
     /// <param name="birthday18">Date representing 18 years before fiscal end.</param>
     /// <param name="birthday21">Date representing 21 years before fiscal end.</param>
     /// <returns>Filter expression for the report detail records.</returns>
     private static Expression<Func<YearEndProfitSharingReportDetail, bool>> GetReportDetailFilterExpression(
         int reportId,
-        DateOnly fiscalBeginDate,
         DateOnly fiscalEndDate,
         DateOnly birthday18,
         DateOnly birthday21)

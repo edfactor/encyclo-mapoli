@@ -75,7 +75,7 @@ public class FrozenReportService : IFrozenReportService
                          {
                              d.DateOfBirth,
                              EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT,
-                             BadgeNumber = d.BadgeNumber,
+                             d.BadgeNumber,
                              Amount = pd.Forfeiture,
                              pd.CommentTypeId
                          });
@@ -224,7 +224,7 @@ public class FrozenReportService : IFrozenReportService
                          {
                              d.DateOfBirth,
                              EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT,
-                             BadgeNumber = d.BadgeNumber,
+                             d.BadgeNumber,
                              Amount = pd.Contribution
                          });
 
@@ -303,7 +303,7 @@ public class FrozenReportService : IFrozenReportService
                          {
                              d.DateOfBirth,
                              EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT,
-                             BadgeNumber = d.BadgeNumber,
+                             d.BadgeNumber,
                              Amount = pd.Forfeiture
                          });
 

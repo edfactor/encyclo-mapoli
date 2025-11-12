@@ -67,7 +67,7 @@ public sealed class UnforfeitService : IUnforfeitService
                     from pd in forfeitureTransactions
                     join d in activeDemographics on pd.Ssn equals d.Ssn
                     join ppYE in context.PayProfits
-                        on new { d.Id, ProfitYear = profitYear } equals new { Id = ppYE.DemographicId, ProfitYear = ppYE.ProfitYear }
+                        on new { d.Id, ProfitYear = profitYear } equals new { Id = ppYE.DemographicId, ppYE.ProfitYear }
                     join enrollment in context.Enrollments
                         on ppYE.EnrollmentId equals enrollment.Id
                     join yos in yearsOfServiceQuery on d.Ssn equals yos.Ssn into yosTmp

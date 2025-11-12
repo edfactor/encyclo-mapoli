@@ -1,4 +1,4 @@
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -122,7 +122,7 @@ public sealed class BreakdownReportService : IBreakdownService
             var aggregatedData = await baseQuery
                 .Select(m => new
                 {
-                    StoreNumber = m.StoreNumber,
+                    m.StoreNumber,
                     VestingRatio = (m.VestedPercent ?? 0m),
                     EndBalance = (m.BeginningBalance ?? 0m)
                                 + m.Earnings
@@ -130,7 +130,7 @@ public sealed class BreakdownReportService : IBreakdownService
                                 + m.Forfeitures
                                 + m.Distributions
                                 + (m.BeneficiaryAllocation ?? 0m),
-                    Ssn = m.Ssn,
+                    m.Ssn,
                     // Compute bucket in SQL to enable single-query aggregation
                     VestingBucket = m.VestedPercent == 1m ? "100% Vested"
                                   : (m.VestedPercent > 0m && m.VestedPercent < 1m) ? "Partially Vested"

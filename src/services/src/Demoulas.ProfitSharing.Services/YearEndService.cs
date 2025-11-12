@@ -357,7 +357,7 @@ public sealed class YearEndService : IYearEndService
     /// Based on the Year_end_update_status table, independent of wall clock time.
     /// This function focuses on completed year-end status and does not check for active freeze state.
     /// </remarks>
-    public async Task<short> GetCompletedYearEnd(CancellationToken ct)
+    public Task<short> GetCompletedYearEnd(CancellationToken ct)
     {
         return _profitSharingDataContextFactory.UseReadOnlyContext(
             async ctx =>
