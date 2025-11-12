@@ -272,10 +272,12 @@ describe("UnForfeitSearchFilter", () => {
       const beginDateInput = screen.getByLabelText("Rehire Begin Date");
       const endDateInput = screen.getByLabelText("Rehire Ending Date");
 
+      expect(beginDateInput).toBeInTheDocument();
+      expect(endDateInput).toBeInTheDocument();
+
       // Verify inputs are not disabled
-      inputs.forEach((input) => {
-        expect(input).not.toBeDisabled();
-      });
+      expect(beginDateInput).not.toBeDisabled();
+      expect(endDateInput).not.toBeDisabled();
     });
   });
 

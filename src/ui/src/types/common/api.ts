@@ -41,6 +41,15 @@ export interface StartAndEndDateRequest extends ProfitYearRequest {
   excludeZeroAndFullyVested?: boolean;
 }
 
+/**
+ * Extends StartAndEndDateRequest with vested balance filtering capabilities.
+ * Mirrors the backend FilterableStartAndEndDateRequest type.
+ */
+export interface FilterableStartAndEndDateRequest extends StartAndEndDateRequest {
+  vestedBalanceValue?: number | null;
+  vestedBalanceOperator?: number | null;
+}
+
 export interface FilterParams {
   reportId: number;
   badgeNumber?: number | null;

@@ -161,7 +161,7 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
                 render={({ field }) => (
                   <DSMDatePicker
                     id="asOfDate"
-                    onChange={(date) => field.onChange(date)}
+                    onChange={(date: Date | null) => field.onChange(date)}
                     value={field.value}
                     required={true}
                     label="As of Date"
