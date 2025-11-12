@@ -10,7 +10,7 @@ import {
 } from "reduxstore/api/YearsEndApi";
 import { YearEndProfitSharingReportSummaryLineItem } from "reduxstore/types";
 import { DSMGrid, Page } from "smart-ui-library";
-import { ROUTES } from "../../../../constants";
+import { CAPTIONS, ROUTES } from "../../../../constants";
 import { RootState } from "../../../../reduxstore/store";
 import CommitModal from "../../../DecemberActivities/ProfitShareReport/CommitModal.tsx";
 import { GetProfitSummaryGridColumns } from "./ProfitSummaryGridColumns";
@@ -251,7 +251,10 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ frozenData }) => {
   }, [terminatedRowData]);
 
   return (
-    <Page actionNode={renderActionNode()}>
+    // Do not remove the label, as that also removes the buttons
+    <Page
+      label={CAPTIONS.PAY426_SUMMARY}
+      actionNode={renderActionNode()}>
       <Grid
         container
         rowSpacing="24px">
