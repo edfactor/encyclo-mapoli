@@ -95,48 +95,54 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         }
 
         _logger.LogInformation("TRACE: About to build query with Include");
-#pragma warning disable AsyncFixer02 // Long-running or blocking operations inside an async method
-        var query = profitDetailsQuery
-            .Include(pd => pd.ProfitCode)
-            .Include(pd => pd.ZeroContributionReason)
-            .Include(pd => pd.TaxCode)
-            .Include(pd => pd.CommentType)
-            .TagWith("EmployeeMasterInquiry: Get demographics with profit details")
+        
+        // PERFORMANCE OPTIMIZATION: Pre-join Demographics to get DemographicId, then join PayProfits
+        // to avoid N+1 correlated subqueries. In test environments with MockQueryable, correlated 
+        // subqueries execute individually per row causing massive performance degradation 
+        // (~200 rows × 2 subqueries = 400 query evaluations). This approach creates a single join operation.
+        
+        // Step 1: Join ProfitDetails with Demographics to get DemographicId
+        var profitDetailsWithDemo = profitDetailsQuery
             .Join(demographics,
                 pd => pd.Ssn,
                 d => d.Ssn,
-                (pd, d) => new MasterInquiryItem
+                (pd, d) => new { ProfitDetail = pd, Demographic = d });
+        
+        // Step 2: Left join with PayProfits using DemographicId and ProfitYear
+        var profitDetailsWithPayProfits = profitDetailsWithDemo
+            .GroupJoin(
+                ctx.PayProfits,
+                x => new { DemographicId = x.Demographic.Id, ProfitYear = x.ProfitDetail.ProfitYear },
+                pp => new { DemographicId = pp.DemographicId, ProfitYear = pp.ProfitYear },
+                (x, payProfits) => new { x.ProfitDetail, x.Demographic, PayProfit = payProfits.FirstOrDefault() });
+
+#pragma warning disable AsyncFixer02 // Long-running or blocking operations inside an async method
+        var query = profitDetailsWithPayProfits
+            .Select(x => new MasterInquiryItem
+            {
+                ProfitDetail = x.ProfitDetail,
+                ProfitCode = x.ProfitDetail.ProfitCode,
+                ZeroContributionReason = x.ProfitDetail.ZeroContributionReason,
+                TaxCode = x.ProfitDetail.TaxCode,
+                CommentType = x.ProfitDetail.CommentType,
+                TransactionDate = x.ProfitDetail.CreatedAtUtc,
+                Member = new InquiryDemographics
                 {
-                    ProfitDetail = pd,
-                    ProfitCode = pd.ProfitCode,
-                    ZeroContributionReason = pd.ZeroContributionReason,
-                    TaxCode = pd.TaxCode,
-                    CommentType = pd.CommentType,
-                    TransactionDate = pd.CreatedAtUtc,
-                    Member = new InquiryDemographics
-                    {
-                        Id = d.Id,
-                        BadgeNumber = d.BadgeNumber,
-                        FullName = d.ContactInfo.FullName != null ? d.ContactInfo.FullName : d.ContactInfo.LastName,
-                        FirstName = d.ContactInfo.FirstName,
-                        LastName = d.ContactInfo.LastName,
-                        PayFrequencyId = d.PayFrequencyId,
-                        Ssn = d.Ssn,
-                        PsnSuffix = 0,
-                        IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
-                        EmploymentStatusId = d.EmploymentStatusId,
-                        // Use correlated subqueries for PayProfits data
-                        // These will be optimized by Oracle when IX_PayProfits_Demographic_Year index exists
-                        CurrentIncomeYear = ctx.PayProfits
-                            .Where(pp => pp.DemographicId == d.Id && pp.ProfitYear == pd.ProfitYear)
-                            .Select(pp => pp.CurrentIncomeYear)
-                            .FirstOrDefault(),
-                        CurrentHoursYear = ctx.PayProfits
-                            .Where(pp => pp.DemographicId == d.Id && pp.ProfitYear == pd.ProfitYear)
-                            .Select(pp => pp.CurrentHoursYear)
-                            .FirstOrDefault()
-                    }
-                });
+                    Id = x.Demographic.Id,
+                    BadgeNumber = x.Demographic.BadgeNumber,
+                    FullName = x.Demographic.ContactInfo.FullName != null ? x.Demographic.ContactInfo.FullName : x.Demographic.ContactInfo.LastName,
+                    FirstName = x.Demographic.ContactInfo.FirstName,
+                    LastName = x.Demographic.ContactInfo.LastName,
+                    PayFrequencyId = x.Demographic.PayFrequencyId,
+                    Ssn = x.Demographic.Ssn,
+                    PsnSuffix = 0,
+                    IsExecutive = x.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly,
+                    EmploymentStatusId = x.Demographic.EmploymentStatusId,
+                    // Use pre-joined PayProfit data to avoid N+1 correlated subqueries
+                    CurrentIncomeYear = x.PayProfit != null ? x.PayProfit.CurrentIncomeYear : 0m,
+                    CurrentHoursYear = x.PayProfit != null ? x.PayProfit.CurrentHoursYear : 0m
+                }
+            });
 #pragma warning restore AsyncFixer02 // Long-running or blocking operations inside an async method
 
         _logger.LogInformation("TRACE: Query built, returning");
