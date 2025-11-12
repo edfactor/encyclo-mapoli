@@ -1,6 +1,6 @@
-﻿using YEMatch.YEMatch.AssertActivities;
+﻿using YEMatch.AssertActivities;
 
-namespace YEMatch.YEMatch.ArrangeActivites;
+namespace YEMatch.ArrangeActivites;
 
 /*
  * The profitshare dataset (aka the scramble data) does not have hours for 2023, yet our vesting algorithm (which uses the database) expects the hours to be available for the current year.
@@ -12,7 +12,7 @@ public class Give2023Hours
 {
     public override async Task<Outcome> Execute()
     {
-        var cnt = await SmtSql(
+        int cnt = await SmtSql(
             "update pay_profit set current_hours_year = 1000 where profit_year = 2023 and demographic_id in (select d.id from demographic d join profit_detail pd on pd.ssn = d.ssn where profit_year = 2023 and YEARS_OF_SERVICE_CREDIT = 1 )");
 
         if (cnt == 5)
@@ -20,6 +20,6 @@ public class Give2023Hours
             throw new InvalidOperationException("Mismatch in number of rows updated");
         }
 
-        return new Outcome(Name(), Name(), $"", OutcomeStatus.Ok, "updated hours", null, false);
+        return new Outcome(Name(), Name(), "", OutcomeStatus.Ok, "updated hours", null, false);
     }
 }

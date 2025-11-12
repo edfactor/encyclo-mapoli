@@ -1,4 +1,4 @@
-﻿namespace YEMatch.YEMatch;
+﻿namespace YEMatch;
 
 public static class ActivityToReports
 {
@@ -93,10 +93,11 @@ public static class ActivityToReports
     {
         if (!_processIdByActivity.ContainsKey(activityName))
         {
-            return new();
+            return new List<(string, string)>();
         }
 
         string referenceProcessId = _processIdByActivity[activityName];
-        return _referenceLogfiles.Where(r => r.Contains(referenceProcessId)).Select(r => (r.Replace(referenceProcessId, processId), r.Replace("-" + referenceProcessId, ""))).ToList();
+        return _referenceLogfiles.Where(r => r.Contains(referenceProcessId)).Select(r => (r.Replace(referenceProcessId, processId), r.Replace("-" + referenceProcessId, "")))
+            .ToList();
     }
 }

@@ -1,53 +1,40 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using YEMatch.YEMatch.ArrangeActivites;
-using YEMatch.YEMatch.AssertActivities;
-using YEMatch.YEMatch.SmartIntegrationTests;
+using Microsoft.Extensions.Logging;
+using YEMatch.Activities;
+using YEMatch.ReadyActivities;
+using YEMatch.SmartActivities;
+using static YEMatch.Activities.ActivityName;
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
-namespace YEMatch.YEMatch.Runs;
+namespace YEMatch.Runs;
 
 /* A scratch pad for running different Activities on demand */
 
 [SuppressMessage("AsyncUsage", "AsyncFixer01:Unnecessary async/await usage")]
 public class TinkerRun : Runnable
 {
+    public TinkerRun(
+        IActivityFactory activityFactory,
+        IReadySshClientFactory readySshClientFactory,
+        ISmartApiClientFactory smartApiClientFactory,
+        ILogger<TinkerRun> logger)
+        : base(activityFactory, readySshClientFactory, smartApiClientFactory, logger)
+    {
+    }
+
     public override async Task Exec()
     {
         await Run(Specify(
-            #if false
-            "P0", // init both dbs
-            nameof(DropBadBenesReady), // in READY, get rid of the three Bene/Employees w/o Demographics rows
-            nameof(SanityCheckEmployeeAndBenes),
-            #endif
-            // Should -> RUN/Verify QPAY129 ?
+//             IntTerminatedEmployee
+//            P00_BuildDatabase,
+//            DropBadBenesReady,
+//            R08_ProfitShareReport,
+//            IntPay426,
+//            IntPay426N,
+//            IntPay426N9
 
-            // Handle SHIFT Hours/Dollars
-            "R13A", // PAYPROFIT-SHIFT
-            "R13B", // PAYPROFIT-SHIFT
-            "R14", // ZERO-PY-PD-PAYPROFIT
-
-            "R17", // create PAY426 report on READY
-
-            "S12" // Freeze on Smart
-
-        #if false
-                     // runs PAY456.cbl and PAY426.cbl 
-            "R18",   // "PROF-SHARE sw[2]=1 CDATE=251227 YEAREND=Y" on READY    
-                     // will set Earnpoints, fiddle with zerocont, clear new employee, clear certdate
-            
-
-            // build some
-            "S18"  // Run YearEndService on SMART <-- Set EarnPoints, ZeroCont, New Employee, CertDate
-                      "R20", // 443
-
-        nameof(IntPay443),
-        "S20", // 443
-        nameof(IntPay443)
-
-            // Should match
-            nameof(TestPayProfitSelectedColumns) // VERIFY: Test PayProfit Updates; EarnPoints, ZeroCont, New Employee, CertDate
-#endif
-            ));
+IntPay443
+        ));
     }
 }

@@ -22,9 +22,9 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         // These are arguments to the program/rest endpoint
         // Plan admin may choose a range of dates (ie. Q2 ?)
         short profitSharingYear = 2025;
-        DateOnly startDate = new(2025, 01, 4);
+        DateOnly startDate = new(2018, 12, 31);
         DateOnly endDate = new(2025, 12, 27);
-        DateOnly effectiveDateOfTestData = new(2025, 11, 04);
+        DateOnly effectiveDateOfTestData = new(2025, 11, 11);
 
         ILoggerFactory _loggerFactory = LoggerFactory.Create(builder =>
         {
@@ -302,23 +302,32 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         await using OracleConnection connection = new(connectionString);
         await connection.OpenAsync();
 
-        string query = @"
-            SELECT d.DEM_BADGE, v.VESTED_BALANCE, v.VESTED_PERCENT
-            FROM tbherrmann.pscalcview2 v
-            INNER JOIN tbherrmann.DEMOGRAPHICS d ON v.SSN = d.DEM_SSN
-            WHERE d.DEM_BADGE IN (" + string.Join(",", badges) + ")";
-
         Dictionary<int, (decimal, decimal)> result = new();
 
-        await using OracleCommand command = new(query, connection);
-        await using OracleDataReader? reader = await command.ExecuteReaderAsync();
+        // Oracle has a limit of 1000 items in an IN clause, so batch the queries
+        const int batchSize = 1000;
+        var badgeList = badges.ToList();
 
-        while (await reader.ReadAsync())
+        for (int i = 0; i < badgeList.Count; i += batchSize)
         {
-            int badge = reader.GetInt32(0);
-            decimal vestedBalance = reader.GetDecimal(1);
-            decimal vestedPercent = reader.GetDecimal(2);
-            result[badge] = (vestedBalance, vestedPercent);
+            var batch = badgeList.Skip(i).Take(batchSize);
+
+            string query = @"
+                SELECT d.DEM_BADGE, v.VESTED_BALANCE, v.VESTED_PERCENT
+                FROM tbherrmann.pscalcview2 v
+                INNER JOIN tbherrmann.DEMOGRAPHICS d ON v.SSN = d.DEM_SSN
+                WHERE d.DEM_BADGE IN (" + string.Join(",", batch) + ")";
+
+            await using OracleCommand command = new(query, connection);
+            await using OracleDataReader? reader = await command.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
+            {
+                int badge = reader.GetInt32(0);
+                decimal vestedBalance = reader.GetDecimal(1);
+                decimal vestedPercent = reader.GetDecimal(2);
+                result[badge] = (vestedBalance, vestedPercent);
+            }
         }
 
         return result;

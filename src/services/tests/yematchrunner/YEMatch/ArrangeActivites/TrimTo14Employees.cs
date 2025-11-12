@@ -1,6 +1,6 @@
-﻿using YEMatch.YEMatch.AssertActivities;
+﻿using YEMatch.AssertActivities;
 
-namespace YEMatch.YEMatch.ArrangeActivites;
+namespace YEMatch.ArrangeActivites;
 
 public class TrimTo14Employees : BaseSqlActivity
 {

@@ -350,7 +350,14 @@ public sealed class YearEndService : IYearEndService
         return _payProfitUpdateService.SetEnrollmentId(profitYear, ct);
     }
 
-    public Task<short> GetCompletedYearEnd(CancellationToken ct)
+    /// <summary>
+    /// Returns the last completed year-end processing cycle.
+    /// </summary>
+    /// <remarks>
+    /// Based on the Year_end_update_status table, independent of wall clock time.
+    /// This function focuses on completed year-end status and does not check for active freeze state.
+    /// </remarks>
+    public async Task<short> GetCompletedYearEnd(CancellationToken ct)
     {
         return _profitSharingDataContextFactory.UseReadOnlyContext(
             async ctx =>
@@ -364,11 +371,10 @@ public sealed class YearEndService : IYearEndService
             }, ct);
     }
 
-    /*
-     * To update oracle quickly:
-     * 1) we bulk insert our changes into temp table
-     * 2) merge in changes
-     */
+    /// <summary>
+    /// Updates PayProfit table efficiently using bulk operations.
+    /// Bulk inserts changes into a temp table, then merges into PayProfit.
+    /// </summary>
     private static async Task UpdatePayProfitChanges(OracleConnection connection,
         int profitYear,
         Dictionary<int, YearEndChange> changes, bool rebuild, CancellationToken cancellation)
@@ -432,12 +438,14 @@ public sealed class YearEndService : IYearEndService
         }
     }
 
-    /*
-     * We create a table on demand here.  This table is not part of the EF Frameworks migration
-     * because it is used outside EF. Note that its contents are automatically deleted on commit.
-     * The table is created on demand at first use.  If the schema of the table is to be altered, this
-     * method would need to handle that.   This table's use is isolated to this service.
-     */
+    /// <summary>
+    /// Ensures the temporary table for PayProfit changes exists, creating it if necessary.
+    /// </summary>
+    /// <remarks>
+    /// This global temporary table is not part of EF Core migrations and is managed outside the framework.
+    /// Contents are automatically deleted on commit (ON COMMIT DELETE ROWS).
+    /// Schema changes require updates to this method. Table usage is isolated to this service.
+    /// </remarks>
     private static async Task EnsureTempPayProfitChangesTableExistsAsync(OracleConnection conn, CancellationToken cancellation)
     {
         const string checkSql = @"

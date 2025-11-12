@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace YEMatch.YEMatch.AssertActivities;
+namespace YEMatch.AssertActivities;
 
 public record Row(IReadOnlyDictionary<string, object?> Values);
 
@@ -13,25 +13,26 @@ public record Table(IReadOnlyList<Row> Rows)
             return "(empty table)";
         }
 
-        var columnNames = Rows[0].Values.Keys.ToList();
+        List<string> columnNames = Rows[0].Values.Keys.ToList();
 
         // compute max width per column
-        var widths = new Dictionary<string, int>();
-        foreach (var col in columnNames)
+        Dictionary<string, int> widths = new();
+        foreach (string col in columnNames)
         {
             int max = col.Length;
-            foreach (var row in Rows)
+            foreach (Row row in Rows)
             {
-                var text = row.Values[col]?.ToString() ?? "NULL";
+                string text = row.Values[col]?.ToString() ?? "NULL";
                 max = Math.Max(max, text.Length);
             }
+
             widths[col] = max;
         }
 
-        var sb = new StringBuilder();
+        StringBuilder sb = new();
 
         // header
-        foreach (var col in columnNames)
+        foreach (string col in columnNames)
         {
             sb.Append("| ").Append(col.PadRight(widths[col])).Append(' ');
         }
@@ -39,7 +40,7 @@ public record Table(IReadOnlyList<Row> Rows)
         sb.AppendLine("|");
 
         // separator
-        foreach (var col in columnNames)
+        foreach (string col in columnNames)
         {
             sb.Append("| ").Append(new string('-', widths[col])).Append(' ');
         }
@@ -47,13 +48,14 @@ public record Table(IReadOnlyList<Row> Rows)
         sb.AppendLine("|");
 
         // rows
-        foreach (var row in Rows)
+        foreach (Row row in Rows)
         {
-            foreach (var col in columnNames)
+            foreach (string col in columnNames)
             {
-                var text = row.Values[col]?.ToString() ?? "NULL";
+                string text = row.Values[col]?.ToString() ?? "NULL";
                 sb.Append("| ").Append(text.PadRight(widths[col])).Append(' ');
             }
+
             sb.AppendLine("|");
         }
 
