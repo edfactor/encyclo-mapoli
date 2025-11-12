@@ -23,7 +23,7 @@ interface INestedGridRowProps<T extends Record<string, unknown> = Record<string,
   expandedBackgroundColor: string;
 }
 
-export const NestedGridRow = <T extends Record<string, unknown>,>({
+export const NestedGridRow = <T extends Record<string, unknown>>({
   row,
   columns,
   renderNestedContent,

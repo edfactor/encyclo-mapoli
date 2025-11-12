@@ -104,7 +104,7 @@ export const SharedForfeitHeaderComponent: React.FC<HeaderComponentProps> = (par
     const transformedValue = transformForfeitureValue(activityType, currentValue || 0);
 
     const basePayload: ForfeitureAdjustmentUpdateRequest = {
-      badgeNumber: activityType === "unforfeit" ? Number(nodeData.badgeNumber) : (nodeData.psn || 0),
+      badgeNumber: activityType === "unforfeit" ? Number(nodeData.badgeNumber) : nodeData.psn || 0,
       profitYear: selectedProfitYear,
       forfeitureAmount: transformedValue,
       classAction: false

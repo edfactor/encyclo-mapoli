@@ -32,29 +32,31 @@ describe("DuplicateSSNsOnDemographicsGrid", () => {
     endDate: "2024-12-31",
     dataSource: "Test Data",
     response: {
-      results: [{
-        ssn: "123-45-6789",
-        badgeNumber: 12345,
-        name: "John Doe",
-        address: {
-          street: "123 Main St",
-          street2: null,
-          city: "Boston",
-          state: "MA",
-          postalCode: "02101",
-          countryIso: "US"
-        },
-        hireDate: "2020-01-01",
-        terminationDate: null,
-        rehireDate: null,
-        status: "A",
-        employmentStatusName: "Active",
-        storeNumber: 100,
-        profitSharingRecords: 5,
-        hoursCurrentYear: 2080,
-        hoursLastYear: 2080,
-        incomeCurrentYear: 50000
-      }],
+      results: [
+        {
+          ssn: "123-45-6789",
+          badgeNumber: 12345,
+          name: "John Doe",
+          address: {
+            street: "123 Main St",
+            street2: null,
+            city: "Boston",
+            state: "MA",
+            postalCode: "02101",
+            countryIso: "US"
+          },
+          hireDate: "2020-01-01",
+          terminationDate: null,
+          rehireDate: null,
+          status: "A",
+          employmentStatusName: "Active",
+          storeNumber: 100,
+          profitSharingRecords: 5,
+          hoursCurrentYear: 2080,
+          hoursLastYear: 2080,
+          incomeCurrentYear: 50000
+        }
+      ],
       total: 1,
       totalPages: 1,
       pageSize: 25,

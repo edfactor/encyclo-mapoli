@@ -8,20 +8,24 @@ import ManageExecutiveHoursAndDollars from "../ManageExecutiveHoursAndDollars";
 
 // Mock the child components
 vi.mock("../ManageExecutiveHoursAndDollarsGrid", () => ({
-  default: vi.fn(() => React.createElement('section', { 'aria-label': 'executive grid' }, 'Grid Content'))
+  default: vi.fn(() => React.createElement("section", { "aria-label": "executive grid" }, "Grid Content"))
 }));
 
 vi.mock("../ManageExecutiveHoursAndDollarsSearchFilter", () => ({
   default: vi.fn(({ onSearch, onReset }) =>
-    React.createElement('section', { 'aria-label': 'search filter' },
-      React.createElement('button', { onClick: () => onSearch({ badgeNumber: 12345 }) }, 'Search'),
-      React.createElement('button', { onClick: onReset }, 'Reset')
+    React.createElement(
+      "section",
+      { "aria-label": "search filter" },
+      React.createElement("button", { onClick: () => onSearch({ badgeNumber: 12345 }) }, "Search"),
+      React.createElement("button", { onClick: onReset }, "Reset")
     )
   )
 }));
 
 vi.mock("../../../../components/StatusDropdownActionNode", () => ({
-  default: vi.fn(() => React.createElement('div', { role: 'status', 'aria-label': 'status dropdown' }, 'Status Dropdown'))
+  default: vi.fn(() =>
+    React.createElement("div", { role: "status", "aria-label": "status dropdown" }, "Status Dropdown")
+  )
 }));
 
 vi.mock("../../../../hooks/useReadOnlyNavigation", () => ({
@@ -343,7 +347,7 @@ describe("ManageExecutiveHoursAndDollars", () => {
 
       // Button should be wrapped in a span (Tooltip requires wrapping disabled buttons)
       const span = saveButton.parentElement;
-      expect(span?.tagName).toBe('SPAN');
+      expect(span?.tagName).toBe("SPAN");
     });
   });
 
@@ -358,7 +362,7 @@ describe("ManageExecutiveHoursAndDollars", () => {
 
       // Button should be wrapped in a span (Tooltip requires wrapping disabled buttons)
       const span = saveButton.parentElement;
-      expect(span?.tagName).toBe('SPAN');
+      expect(span?.tagName).toBe("SPAN");
     });
   });
 });

@@ -279,15 +279,10 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
         <Pagination
           pageNumber={currentPagination.pageNumber}
           setPageNumber={(value: number) =>
-            currentPagination.handlePaginationChange(
-              value - 1,
-              currentPagination.pageSize
-            )
+            currentPagination.handlePaginationChange(value - 1, currentPagination.pageSize)
           }
           pageSize={currentPagination.pageSize}
-          setPageSize={(value: number) =>
-            currentPagination.handlePaginationChange(0, value)
-          }
+          setPageSize={(value: number) => currentPagination.handlePaginationChange(0, value)}
           recordCount={currentData?.response.total ?? 0}
         />
       )}
