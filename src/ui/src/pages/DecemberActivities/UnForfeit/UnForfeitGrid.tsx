@@ -204,7 +204,7 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
             providedOptions={{
               rowData: gridData,
               columnDefs: columnDefs,
-              getRowClass: (params: { data: { isDetail: boolean } }) => (params.data.isDetail ? "detail-row" : ""),
+              getRowClass: (params) => ((params.data as { isDetail?: boolean })?.isDetail ? "detail-row" : ""),
               rowSelection: {
                 mode: "multiRow",
                 checkboxes: false,

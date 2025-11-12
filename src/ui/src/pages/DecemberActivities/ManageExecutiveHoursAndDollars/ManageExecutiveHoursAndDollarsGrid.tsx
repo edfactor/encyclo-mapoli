@@ -266,7 +266,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
             onCellValueChanged: processEditedRow,
             getRowStyle: (params) => {
               // Rows with unsaved changes will have yellow color
-              if (!isModal && isRowStagedToSave(params.node.data.badgeNumber)) {
+              if (!isModal && params.node.data && isRowStagedToSave((params.node.data as ExecutiveHoursAndDollars).badgeNumber)) {
                 return { background: "lemonchiffon" };
               } else {
                 return { background: "white" };

@@ -10,7 +10,7 @@ import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveA
 import MissiveAlerts from "../../../components/MissiveAlerts/MissiveAlerts";
 import { DISTRIBUTION_INQUIRY_MESSAGES } from "../../../components/MissiveAlerts/MissiveMessages";
 import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
-import { CAPTIONS } from "../../../constants";
+import { CAPTIONS, ROUTES } from "../../../constants";
 import { SortParams } from "../../../hooks/useGridPagination";
 import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
@@ -22,7 +22,8 @@ import {
   clearCurrentDistribution,
   clearCurrentMember,
   clearHistoricalDisbursements,
-  clearPendingDisbursements
+  clearPendingDisbursements,
+  setDistributionHome
 } from "../../../reduxstore/slices/distributionSlice";
 import { DistributionSearchFormData, DistributionSearchRequest, DistributionSearchResponse } from "../../../types";
 import { ServiceErrorResponse } from "../../../types/errors/errors";
@@ -52,12 +53,13 @@ const DistributionInquiryContent = () => {
   const isReadOnly = useReadOnlyNavigation();
   const { addAlert, clearAlerts } = useMissiveAlerts();
 
-  // Clear all distribution slice data when component mounts
+  // Clear all distribution slice data and set distribution home when component mounts
   useEffect(() => {
     dispatch(clearCurrentMember());
     dispatch(clearCurrentDistribution());
     dispatch(clearPendingDisbursements());
     dispatch(clearHistoricalDisbursements());
+    dispatch(setDistributionHome(ROUTES.DISTRIBUTIONS_INQUIRY));
   }, [dispatch]);
 
   // Display success/error message if returning from AddDistribution or after deletion
@@ -108,11 +110,14 @@ const DistributionInquiryContent = () => {
     try {
       clearAlerts();
 
-      const request: DistributionSearchRequest = {
+      const request: DistributionSearchRequest & {
+        onlyNetworkToastErrors?: boolean;
+      } = {
         skip: 0,
         take: 25,
         sortBy: "badgeNumber",
-        isSortDescending: false
+        isSortDescending: false,
+        onlyNetworkToastErrors: true // Suppress validation errors, only show network errors
       };
 
       // Map SSN directly

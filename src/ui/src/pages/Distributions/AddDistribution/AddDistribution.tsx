@@ -3,12 +3,14 @@ import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import SaveIcon from "@mui/icons-material/Save";
 import { Alert, Button, CircularProgress, Divider, Grid, Tooltip } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import { CAPTIONS, ROUTES } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
+import { RootState } from "../../../reduxstore/store";
 import { CreateDistributionRequest } from "../../../types";
 import MasterInquiryMemberDetails from "../../InquiriesAndAdjustments/MasterInquiry/MasterInquiryMemberDetails";
 import PendingDisbursementsList from "../ViewDistribution/PendingDisbursementsList";
@@ -24,6 +26,8 @@ const AddDistributionContent = () => {
   const [submittedAmount, setSubmittedAmount] = useState<number | null>(null);
 
   const profitYear = useDecemberFlowProfitYear();
+
+  const { distributionHome } = useSelector((state: RootState) => state.distribution);
 
   // Use the custom hook
   const {
@@ -94,7 +98,9 @@ const AddDistributionContent = () => {
 
   // Handle cancel
   const handleCancel = () => {
-    navigate(`/${ROUTES.DISTRIBUTIONS_INQUIRY}`);
+    // Navigate to the stored distribution home route, fallback to distributions inquiry
+    const homeRoute = distributionHome || ROUTES.DISTRIBUTIONS_INQUIRY;
+    navigate(`/${homeRoute}`);
   };
 
   // Handle save button click

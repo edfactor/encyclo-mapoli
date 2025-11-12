@@ -22,6 +22,12 @@ export default defineConfig({
       reportsDirectory: "./coverage",
       cleanOnRerun: true,
       exclude: ["node_modules/", "src/test/", "e2e/", "**/*.d.ts", "**/*.config.*", "**/mockData", "**/types"]
+    },
+    // Handle server-side dependencies that need special resolution
+    server: {
+      deps: {
+        inline: ["smart-ui-library"]
+      }
     }
   },
   resolve: {
@@ -34,7 +40,12 @@ export default defineConfig({
       pages: path.resolve(__dirname, "./src/pages"),
       schemas: path.resolve(__dirname, "./src/schemas"),
       hooks: path.resolve(__dirname, "./src/hooks"),
-      styles: path.resolve(__dirname, "./src/styles")
-    }
+      styles: path.resolve(__dirname, "./src/styles"),
+      // Fix for ES module directory import issue with MUI date pickers
+      "@mui/x-date-pickers/AdapterDateFnsV3": "@mui/x-date-pickers/AdapterDateFnsV3/index.js",
+      "@mui/x-date-pickers/AdapterDayjs": "@mui/x-date-pickers/AdapterDayjs/index.js"
+    },
+    // Add conditions to help with ES module resolution
+    conditions: ["node", "import", "module", "browser", "default"]
   }
 });
