@@ -110,11 +110,14 @@ const DistributionInquiryContent = () => {
     try {
       clearAlerts();
 
-      const request: DistributionSearchRequest = {
+      const request: DistributionSearchRequest & {
+        onlyNetworkToastErrors?: boolean;
+      } = {
         skip: 0,
         take: 25,
         sortBy: "badgeNumber",
-        isSortDescending: false
+        isSortDescending: false,
+        onlyNetworkToastErrors: true // Suppress validation errors, only show network errors
       };
 
       // Map SSN directly
