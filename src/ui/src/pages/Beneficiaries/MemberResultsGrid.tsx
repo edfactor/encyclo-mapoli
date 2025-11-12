@@ -1,4 +1,5 @@
 import { BeneficiaryDetail } from "@/types";
+import { RowClickedEvent } from "ag-grid-community";
 import { useMemo } from "react";
 import { DSMGrid, Paged, Pagination } from "smart-ui-library";
 import { GetMemberResultsGridColumns } from "./MemberResultsGridColumns";
@@ -37,11 +38,11 @@ const MemberResultsGrid: React.FC<MemberResultsGridProps> = ({
           columnDefs: columnDefs,
           suppressMultiSort: true,
 
-          onRowClicked: (event) => {
+          onRowClicked: ((event: RowClickedEvent<BeneficiaryDetail>) => {
             if (event.data) {
               onRowClick(event.data);
             }
-          }
+          }) as (event: unknown) => void
         }}
       />
 

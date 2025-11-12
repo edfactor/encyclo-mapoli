@@ -312,17 +312,27 @@ export const useAddDistribution = () => {
       try {
         dispatch({ type: "MEMBER_FETCH_START" });
 
-        const identifierNum = parseInt(identifier, 10);
+        let identifierNum = parseInt(identifier, 10);
         const isSSN = identifier.length === 9 && /^\d{9}$/.test(identifier);
 
         let searchResponse;
         let memberId: number;
         let badgeNum = identifierNum;
 
+        // If memberType is 2, we need to create a new variable for psnSuffix that is the last four digits and then use the numbers before that as the badge number
+        let psnSuffix = 0;
+        if (memberType === 2) {
+          const identifierStr = identifier.toString();
+          psnSuffix = parseInt(identifierStr.slice(-4), 10);
+          identifierNum = parseInt(identifierStr.slice(0, -4), 10);
+        }
+
         // Step 1: Try to search for member using identifier (could be badge number or SSN)
         try {
           searchResponse = await triggerSearchMember({
             badgeNumber: identifierNum,
+            // Only use the psnSuffix parameter if it is not 0
+            psnSuffix: psnSuffix !== 0 ? psnSuffix : undefined,
             memberType,
             endProfitYear: profitYear,
             pagination: {
