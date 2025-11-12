@@ -31,6 +31,11 @@ public class YeMatchOptions
     ///     Path configurations
     /// </summary>
     public PathOptions Paths { get; set; } = new();
+
+    /// <summary>
+    ///     JWT authentication configuration
+    /// </summary>
+    public JwtOptions Jwt { get; set; } = new();
 }
 
 /// <summary>
@@ -151,4 +156,32 @@ public class PathOptions
 
         return Path.Combine(SmartProjectRoot, IntegrationTestResourcesPath);
     }
+}
+
+/// <summary>
+///     JWT authentication configuration for SMART API
+/// </summary>
+public class JwtOptions
+{
+    /// <summary>
+    ///     JWT signing key (stored in user secrets).
+    ///     This should match the key used by the SMART API server (typically managed via 'dotnet user-jwts').
+    ///     Minimum length: 32 bytes (256 bits) for HS256 algorithm.
+    /// </summary>
+    public string? SigningKey { get; set; }
+
+    /// <summary>
+    ///     JWT issuer. Defaults to "dotnet-user-jwts" to match the standard tool.
+    /// </summary>
+    public string Issuer { get; set; } = "dotnet-user-jwts";
+
+    /// <summary>
+    ///     JWT audience. Should match the application identifier.
+    /// </summary>
+    public string Audience { get; set; } = "https://localhost:7141";
+
+    /// <summary>
+    ///     Token expiration time in seconds. Defaults to 3600 (1 hour).
+    /// </summary>
+    public int ExpirationSeconds { get; set; } = 3600;
 }

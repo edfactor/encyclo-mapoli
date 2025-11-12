@@ -22,6 +22,7 @@ public sealed class SmartApiClientFactory : ISmartApiClientFactory
     private readonly bool _nuke = false;
     private readonly YeMatchOptions _options;
     private readonly short _profitYear;
+    private readonly JwtOptions _jwtOptions;
     private ApiClient? _client;
 
     public SmartApiClientFactory(IHttpClientFactory httpClientFactory, IOptions<YeMatchOptions> options)
@@ -32,6 +33,7 @@ public sealed class SmartApiClientFactory : ISmartApiClientFactory
         _httpClientFactory = httpClientFactory;
         _options = options.Value;
         _profitYear = _options.YearEndDates.ProfitYear;
+        _jwtOptions = _options.Jwt;
     }
 
     public ApiClient CreateClient()
@@ -42,7 +44,7 @@ public sealed class SmartApiClientFactory : ISmartApiClientFactory
         }
 
         HttpClient httpClient = _httpClientFactory.CreateClient("SmartApi");
-        TestToken.CreateAndAssignTokenForClient(httpClient, "System-Administrator", "Executive-Administrator");
+        TestToken.CreateAndAssignTokenForClient(httpClient, _jwtOptions, "System-Administrator", "Executive-Administrator");
 
         _client = new ApiClient(httpClient);
         return _client;
@@ -239,7 +241,7 @@ public sealed class SmartApiClientFactory : ISmartApiClientFactory
     private async Task<Outcome> A12_PROF_LOAD_YREND_DEMO_PROFITSHARE(ApiClient apiClient, string aname, string name)
     {
         HttpClient httpClient = _httpClientFactory.CreateClient("SmartApi");
-        TestToken.CreateAndAssignTokenForClient(httpClient, "IT-DevOps");
+        TestToken.CreateAndAssignTokenForClient(httpClient, _jwtOptions, "IT-DevOps");
 
         HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/itdevops/freeze")
         {
@@ -299,7 +301,7 @@ public sealed class SmartApiClientFactory : ISmartApiClientFactory
             string postBody = JsonSerializer.Serialize(criteria);
 
             HttpClient httpClient = _httpClientFactory.CreateClient("SmartApi");
-            TestToken.CreateAndAssignTokenForClient(httpClient, "Executive-Administrator");
+            TestToken.CreateAndAssignTokenForClient(httpClient, _jwtOptions, "Executive-Administrator");
 
             HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/yearend/yearend-profit-sharing-report")
             {
@@ -324,7 +326,7 @@ public sealed class SmartApiClientFactory : ISmartApiClientFactory
     private async Task<Outcome> A18_Profit_Share_Report_final_run(ApiClient apiClient, string aname, string name)
     {
         HttpClient httpClient = _httpClientFactory.CreateClient("SmartApi");
-        TestToken.CreateAndAssignTokenForClient(httpClient, "Finance-Manager");
+        TestToken.CreateAndAssignTokenForClient(httpClient, _jwtOptions, "Finance-Manager");
 
         HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/yearend/final")
         {
@@ -411,7 +413,7 @@ public sealed class SmartApiClientFactory : ISmartApiClientFactory
         string postBody = JsonSerializer.Serialize(req);
 
         HttpClient httpClient = _httpClientFactory.CreateClient("SmartApi");
-        TestToken.CreateAndAssignTokenForClient(httpClient, "System-Administrator");
+        TestToken.CreateAndAssignTokenForClient(httpClient, _jwtOptions, "System-Administrator");
 
         HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/yearend/profit-master-update")
         {
@@ -436,7 +438,7 @@ public sealed class SmartApiClientFactory : ISmartApiClientFactory
     private async Task<Outcome> A24_PROF_PAYMASTER_UPD(ApiClient apiClient, string aname, string name)
     {
         HttpClient httpClient = _httpClientFactory.CreateClient("SmartApi");
-        TestToken.CreateAndAssignTokenForClient(httpClient, "Finance-Manager");
+        TestToken.CreateAndAssignTokenForClient(httpClient, _jwtOptions, "Finance-Manager");
 
         HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/yearend/update-enrollment")
         {

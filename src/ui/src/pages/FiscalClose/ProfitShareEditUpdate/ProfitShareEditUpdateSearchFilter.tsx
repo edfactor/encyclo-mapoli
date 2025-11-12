@@ -1,5 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
+import { FormHelperText, FormLabel, Grid, TextField, Tooltip } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
@@ -20,7 +20,7 @@ import {
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { ProfitShareUpdateRequest } from "reduxstore/types";
-import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
+import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { badgeNumberValidator, positiveNumberValidator, profitYearDateValidator } from "../../../utils/FormValidators";
 
@@ -315,27 +315,6 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
           container
           spacing={3}
           width="100%">
-          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-            <Controller
-              name="profitYear"
-              control={control}
-              render={({ field }) => (
-                <DSMDatePicker
-                  id="Beginning Year"
-                  onChange={(value: Date | null) => field.onChange(value)}
-                  value={field.value ?? null}
-                  required={true}
-                  label="Profit Year"
-                  disableFuture
-                  views={["year"]}
-                  error={errors.profitYear?.message}
-                  disabled={true}
-                />
-              )}
-            />
-            {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
-          </Grid>
-
           <Grid size={{ xs: 12, sm: 4, md: 2 }}>
             <FormLabel>Contribution %</FormLabel>
             <Controller
@@ -411,25 +390,48 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Secondary Earnings %</FormLabel>
-            <Controller
-              name="secondaryEarningsPercent"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  value={field.value ?? ""}
-                  error={!!errors.secondaryEarningsPercent}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    processFieldsEntered("secondaryEarningsPercent", e.target.value !== "");
-                    dispatch(updateProfitSharingEditQueryParam({ secondaryEarningsPercent: Number(e.target.value) }));
-                  }}
+            <Tooltip
+              title={
+                <a
+                  href="https://demoulas.atlassian.net/browse/PS-1419"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "white", textDecoration: "underline" }}>
+                  PS-1419
+                </a>
+              }
+              arrow>
+              <span>
+                <Controller
+                  name="secondaryEarningsPercent"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      value={field.value ?? ""}
+                      error={!!errors.secondaryEarningsPercent}
+                      disabled={true}
+                      sx={{
+                        "& .MuiInputBase-root": {
+                          backgroundColor: "#e0e0e0",
+                          cursor: "not-allowed"
+                        }
+                      }}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        processFieldsEntered("secondaryEarningsPercent", e.target.value !== "");
+                        dispatch(
+                          updateProfitSharingEditQueryParam({ secondaryEarningsPercent: Number(e.target.value) })
+                        );
+                      }}
+                    />
+                  )}
                 />
-              )}
-            />
+              </span>
+            </Tooltip>
             {errors.secondaryEarningsPercent && (
               <FormHelperText error>{errors.secondaryEarningsPercent.message}</FormHelperText>
             )}
@@ -460,6 +462,9 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
               <FormHelperText error>{errors.maxAllowedContributions.message}</FormHelperText>
             )}
           </Grid>
+
+          {/* Spacer to push row 2 to a new line */}
+          <Grid size={{ xs: 12, sm: 6, md: 2 }} />
 
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Adjustment Badge</FormLabel>
@@ -564,53 +569,99 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
             )}
           </Grid>
 
+          {/* Spacer fields to ensure row 3 starts on a new line */}
+          <Grid size={{ xs: 12, sm: 6, md: 2 }} />
+          <Grid size={{ xs: 12, sm: 6, md: 2 }} />
+
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Adjust Secondary Badge</FormLabel>
-            <Controller
-              name="badgeToAdjust2"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  value={field.value ?? ""}
-                  error={!!errors.badgeToAdjust2}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    processFieldsEntered("badgeToAdjust2", e.target.value !== "");
-                    dispatch(updateProfitSharingEditQueryParam({ badgeToAdjust2: Number(e.target.value) }));
-                  }}
+            <Tooltip
+              title={
+                <a
+                  href="https://demoulas.atlassian.net/browse/PS-1419"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "white", textDecoration: "underline" }}>
+                  PS-1419
+                </a>
+              }
+              arrow>
+              <span>
+                <Controller
+                  name="badgeToAdjust2"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      value={field.value ?? ""}
+                      error={!!errors.badgeToAdjust2}
+                      disabled={true}
+                      sx={{
+                        "& .MuiInputBase-root": {
+                          backgroundColor: "#e0e0e0",
+                          cursor: "not-allowed"
+                        }
+                      }}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        processFieldsEntered("badgeToAdjust2", e.target.value !== "");
+                        dispatch(updateProfitSharingEditQueryParam({ badgeToAdjust2: Number(e.target.value) }));
+                      }}
+                    />
+                  )}
                 />
-              )}
-            />
+              </span>
+            </Tooltip>
             {errors.badgeToAdjust2 && <FormHelperText error>{errors.badgeToAdjust2.message}</FormHelperText>}
           </Grid>
 
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <FormLabel>Adjust Secondary Earnings Amount</FormLabel>
-            <Controller
-              name="adjustEarningsSecondaryAmount"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  value={field.value ?? ""}
-                  error={!!errors.adjustEarningsSecondaryAmount}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    processFieldsEntered("adjustEarningsSecondaryAmount", e.target.value !== "");
-                    dispatch(
-                      updateProfitSharingEditQueryParam({ adjustEarningsSecondaryAmount: Number(e.target.value) })
-                    );
-                  }}
+            <Tooltip
+              title={
+                <a
+                  href="https://demoulas.atlassian.net/browse/PS-1419"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "white", textDecoration: "underline" }}>
+                  PS-1419
+                </a>
+              }
+              arrow>
+              <span>
+                <Controller
+                  name="adjustEarningsSecondaryAmount"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      value={field.value ?? ""}
+                      error={!!errors.adjustEarningsSecondaryAmount}
+                      disabled={true}
+                      sx={{
+                        "& .MuiInputBase-root": {
+                          backgroundColor: "#e0e0e0",
+                          cursor: "not-allowed"
+                        }
+                      }}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        processFieldsEntered("adjustEarningsSecondaryAmount", e.target.value !== "");
+                        dispatch(
+                          updateProfitSharingEditQueryParam({ adjustEarningsSecondaryAmount: Number(e.target.value) })
+                        );
+                      }}
+                    />
+                  )}
                 />
-              )}
-            />
+              </span>
+            </Tooltip>
             {errors.adjustEarningsSecondaryAmount && (
               <FormHelperText error>{errors.adjustEarningsSecondaryAmount.message}</FormHelperText>
             )}

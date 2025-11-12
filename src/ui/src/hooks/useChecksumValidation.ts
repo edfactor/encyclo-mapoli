@@ -168,14 +168,16 @@ export const useChecksumValidation = (config: ChecksumValidationConfig) => {
     if (validationData && onValidationLoaded) {
       onValidationLoaded(validationData);
     }
-  }, [validationData, onValidationLoaded]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [validationData]);
 
   // Call onError when an error occurs
   useEffect(() => {
     if (error && onError) {
       onError(error);
     }
-  }, [error, onError]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
 
   /**
    * Helper function to find a specific field validation by field name.
