@@ -70,10 +70,10 @@ public class ApiTestBase<TStartup> where TStartup : class
         // Default HttpClient timeout is 100 seconds, which is insufficient for endpoints
         // that return thousands of records (e.g., MasterInquiry, PostFrozen reports)
         // Real-world integration tests can take 2-5 minutes for large data queries
-        ApiClient.Timeout = TimeSpan.FromMinutes(10);
+        ApiClient.Timeout = TimeSpan.FromMinutes(5);
 
         DownloadClient = builder.CreateClient();
-        DownloadClient.Timeout = TimeSpan.FromMinutes(10);
+        DownloadClient.Timeout = TimeSpan.FromMinutes(5);
         DownloadClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("text/csv"));
     }
 
