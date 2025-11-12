@@ -137,6 +137,8 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
         private readonly JsonSerializerOptions _originalOptions;
         private readonly JsonSerializerOptions _unmaskedOptions;
 
+        // Constructor is used via reflection in CreateConverter (Activator.CreateInstance)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Used via reflection in CreateConverter")]
         public MaskingConverter(TypeMetadata meta, JsonSerializerOptions original)
         {
             _meta = meta;

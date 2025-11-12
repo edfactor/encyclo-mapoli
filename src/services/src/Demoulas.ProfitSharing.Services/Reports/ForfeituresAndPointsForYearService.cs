@@ -218,41 +218,6 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
         };
     }
 
-    private static ForfeituresAndPointsForYearResponse ToMemberDetails(Demographic d, ParticipantTotalVestingBalance? ptvb, PayProfit pp,
-        ProfitDetailRollup? singleYearNumbers
-    )
-    {
-        decimal balanceConsideredForEarnings = (ptvb?.CurrentBalance ?? 0) - (singleYearNumbers?.MilitaryTotal ?? 0) - (singleYearNumbers?.ClassActionFundTotal ?? 0);
-        int earningsPoints = (int)Math.Round(balanceConsideredForEarnings / 100, MidpointRounding.AwayFromZero);
-        decimal forfeitures = singleYearNumbers == null ? 0.00m : -1 * singleYearNumbers.TotalForfeitures;
-
-        return new ForfeituresAndPointsForYearResponse
-        {
-            EmployeeName = d.ContactInfo.FullName!,
-            BadgeNumber = d.BadgeNumber,
-            Ssn = d.Ssn.MaskSsn(),
-            Forfeitures = forfeitures,
-            ContForfeitPoints = (short)(pp.PointsEarned ?? 0), // Yea, PointsEarned is not EarningPoints
-            EarningPoints = earningsPoints,
-            IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
-        };
-    }
-
-    private static ForfeituresAndPointsForYearResponse ToMemberDetails(Beneficiary b, ParticipantTotalVestingBalance? ptvb)
-    {
-        short earningsPoints = ptvb != null ? (short)Math.Round((ptvb.CurrentBalance ?? 0) / 100, MidpointRounding.AwayFromZero) : (short)0;
-        return new ForfeituresAndPointsForYearResponse
-        {
-            EmployeeName = b.Contact!.ContactInfo.FullName!,
-            BadgeNumber = 0,
-            Ssn = b.Contact!.Ssn.MaskSsn(),
-            Forfeitures = 0.00m,
-            ContForfeitPoints = 0,
-            EarningPoints = earningsPoints,
-            BeneficiaryPsn = "0" + b.Psn,
-            IsExecutive = false,
-        };
-    }
 
     // Optimized helper for beneficiaries when using projection
     private static ForfeituresAndPointsForYearResponse ToBeneficiaryMemberDetails(string fullName, int ssn, int badgeNumber, short psnSuffix, decimal? currentBalance)

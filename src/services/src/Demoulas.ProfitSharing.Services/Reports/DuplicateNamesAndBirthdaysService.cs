@@ -275,11 +275,12 @@ FROM FILTERED_DEMOGRAPHIC p1
         }
     }
 
-    private static int GetDictValue(Dictionary<int, int> dict, int key)
+    private static int GetDictValue(Dictionary<int, byte> dict, int key)
     {
         if (dict.ContainsKey(key))
         {
-            return ++dict[key];
+            dict[key]++;
+            return dict[key];
         }
 
         dict[key] = 1;

@@ -101,12 +101,9 @@ internal class EnrollmentSummarizer
     // COBOL: 310-Get-Balance
     public byte GetEnrolled(short years)
     {
-        if (IsNewVestingRules)
+        if (IsNewVestingRules && EnrollmentId == /*1*/ Enrollment.Constants.OldVestingPlanHasContributions)
         {
-            if (EnrollmentId == /*1*/ Enrollment.Constants.OldVestingPlanHasContributions)
-            {
-                EnrollmentId = /*2*/ Enrollment.Constants.NewVestingPlanHasContributions;
-            }
+            EnrollmentId = /*2*/ Enrollment.Constants.NewVestingPlanHasContributions;
         }
 
         if (VestedState != VestingStateType.NotVested)

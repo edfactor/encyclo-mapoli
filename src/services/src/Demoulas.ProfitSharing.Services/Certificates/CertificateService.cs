@@ -11,6 +11,7 @@ using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Certificates;
+
 public sealed class CertificateService : ICertificateService
 {
     private readonly IBreakdownService _breakdownService;
@@ -87,7 +88,7 @@ public sealed class CertificateService : ICertificateService
             sb.AppendFormat(member.EndingBalance.ToString("$#,###,###.00 ;$#,###,###.00-").PadLeft(14));
             sb.Append(spaces_3);
             sb.AppendFormat(member.VestedAmount.ToString("$#,###,###.00 ;$#,###,###.00-").PadLeft(14).TrimEnd());
-            sb.AppendFormat("\r\n");
+            sb.Append("\r\n");
             #endregion
 
             #region Spacing
