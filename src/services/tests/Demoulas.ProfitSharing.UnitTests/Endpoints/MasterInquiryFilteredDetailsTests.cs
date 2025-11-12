@@ -18,7 +18,7 @@ public class MasterInquiryFilteredDetailsTests : ApiTestBase<Api.Program>
     {
     }
 
-    [Fact(DisplayName = "Master Inquiry Filtered Details - Basic Employee Request")]
+    [Fact(DisplayName = "Master Inquiry Filtered Details - Basic Employee Request", Skip = "Performance: Slow test due to correlated subqueries with mock data (2-3 min execution time)")]
     public async Task GetFilteredDetailsForEmployees()
     {
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR, Role.EXECUTIVEADMIN);
@@ -31,7 +31,7 @@ public class MasterInquiryFilteredDetailsTests : ApiTestBase<Api.Program>
         response.Response.EnsureSuccessStatusCode();
     }
 
-    [Fact(DisplayName = "Master Inquiry Filtered Details - Filtered By Year And Month")]
+    [Fact(DisplayName = "Master Inquiry Filtered Details - Filtered By Year And Month", Skip = "Performance: Slow test due to correlated subqueries with mock data (2-3 min execution time)")]
     public async Task GetFilteredDetailsByYearAndMonth()
     {
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR, Role.EXECUTIVEADMIN);

@@ -277,10 +277,8 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.BeneficiaryContacts).Returns(mockBeneficiaryContacts.Object);
 
-        List<Beneficiary>? beneficiaryList = new BeneficiaryListFaker().GetDummyBeneficiary();
-        Mock<DbSet<Beneficiary>> mockBeneficiaryList = beneficiaryList.BuildMockDbSet();
-        _profitSharingDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaryList.Object);
-        _profitSharingReadOnlyDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaryList.Object);
+        // Note: Removed duplicate BeneficiaryListFaker setup that was creating a conflicting Setup call
+        // The primary beneficiaries list above is used for all beneficiary queries
 
         Mock<DbSet<PayProfit>> mockProfits = BuildMockDbSetWithBackingList(profits);
         _profitSharingDbContext.Setup(m => m.PayProfits).Returns(mockProfits.Object);
