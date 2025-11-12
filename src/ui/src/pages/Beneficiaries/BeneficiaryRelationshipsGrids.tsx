@@ -1,11 +1,11 @@
-import { Delete, Edit } from "@mui/icons-material";
-import { Button, TextField, Typography } from "@mui/material";
-import { FocusEvent, JSX, useCallback, useMemo, useState } from "react";
+import { TextField, Typography } from "@mui/material";
+import { FocusEvent, useCallback, useMemo, useState } from "react";
 import { useLazyDeleteBeneficiaryQuery } from "reduxstore/api/BeneficiariesApi";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import { SortParams, useGridPagination } from "../../hooks/useGridPagination";
 import { BeneficiaryDetail, BeneficiaryDto } from "../../types";
+import { createBeneficiaryActionsCellRenderer } from "./BeneficiaryActions";
 import { GetBeneficiariesListGridColumns } from "./BeneficiariesListGridColumns";
 import { GetBeneficiaryOfGridColumns } from "./BeneficiaryOfGridColumns";
 import DeleteBeneficiaryDialog from "./DeleteBeneficiaryDialog";
@@ -54,10 +54,11 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
     }
     handleSortChange(update);
   };
-  const deleteBeneficiary = (id: number) => {
+
+  const deleteBeneficiary = useCallback((id: number) => {
     setDeleteBeneficiaryId(id);
     setOpenDeleteConfirmationDialog(true);
-  };
+  }, []);
 
   const handleDeleteConfirmationDialog = (del: boolean) => {
     if (del) {
@@ -85,26 +86,25 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
     }
   };
 
-  const actionButtons = (data: BeneficiaryDto): JSX.Element => {
-    return (
-      <>
-        <Button
-          onClick={() => {
-            onEditBeneficiary(data);
-          }}
-          size="small"
-          color="primary">
-          <Edit fontSize="small" />
-        </Button>
-        <Button
-          onClick={() => deleteBeneficiary(data.id)}
-          size="small"
-          color="error">
-          <Delete fontSize="small" />
-        </Button>
-      </>
-    );
-  };
+  // Handler functions for Action column
+  const handleNewBeneficiaryDistribution = useCallback((beneficiary: BeneficiaryDto) => {
+    console.log("New Beneficiary Distribution", beneficiary);
+    // TODO: Implement distribution creation logic
+  }, []);
+
+  const handleEditBeneficiary = useCallback(
+    (beneficiary: BeneficiaryDto) => {
+      onEditBeneficiary(beneficiary);
+    },
+    [onEditBeneficiary]
+  );
+
+  const handleDeleteBeneficiary = useCallback(
+    (beneficiary: BeneficiaryDto) => {
+      deleteBeneficiary(beneficiary.id);
+    },
+    [deleteBeneficiary]
+  );
 
   const validatePercentageOfBeneficiaries = useCallback(
     async (e: FocusEvent<HTMLInputElement | HTMLTextAreaElement>, id: number) => {
@@ -124,24 +124,36 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
     [relationships.beneficiaryList, percentageUpdate]
   );
 
-  const percentageFieldRenderer = (percentage: number, id: number) => {
-    return (
-      <>
-        <TextField
-          type="number"
-          defaultValue={percentage}
-          onBlur={(e) => validatePercentageOfBeneficiaries(e, id)}></TextField>
-      </>
-    );
-  };
+  const percentageFieldRenderer = useCallback(
+    (percentage: number, id: number) => {
+      return (
+        <>
+          <TextField
+            type="number"
+            defaultValue={percentage}
+            onBlur={(e) => validatePercentageOfBeneficiaries(e, id)}></TextField>
+        </>
+      );
+    },
+    [validatePercentageOfBeneficiaries]
+  );
 
   const beneficiaryOfColumnDefs = useMemo(() => GetBeneficiaryOfGridColumns(), []);
 
+  const actionsCellRenderer = useMemo(
+    () =>
+      createBeneficiaryActionsCellRenderer({
+        onNewDistribution: handleNewBeneficiaryDistribution,
+        onEdit: handleEditBeneficiary,
+        onDelete: handleDeleteBeneficiary
+      }),
+    [handleNewBeneficiaryDistribution, handleEditBeneficiary, handleDeleteBeneficiary]
+  );
+
   const columnDefs = useMemo(() => {
-    const columns = GetBeneficiariesListGridColumns(percentageFieldRenderer);
+    const columns = GetBeneficiariesListGridColumns(percentageFieldRenderer, actionsCellRenderer);
     return [...columns];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionButtons]);
+  }, [percentageFieldRenderer, actionsCellRenderer]);
 
   return (
     <>
