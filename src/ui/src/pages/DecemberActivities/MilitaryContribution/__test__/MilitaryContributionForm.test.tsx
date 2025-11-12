@@ -23,6 +23,22 @@ vi.mock("../../../hooks/useDecemberFlowProfitYear", () => ({
   default: vi.fn(() => 2024)
 }));
 
+vi.mock("smart-ui-library", () => ({
+  DSMDatePicker: vi.fn(({ label, onChange, value }) => (
+    <div>
+      <label>{label}</label>
+      <input
+        aria-label={label}
+        data-testid={`date-picker-${label}`}
+        onChange={(e) => onChange(e.target.value ? new Date(e.target.value) : null)}
+        value={value ? new Date(value).toISOString().split("T")[0] : ""}
+        placeholder={label}
+        type="date"
+      />
+    </div>
+  ))
+}));
+
 describe("MilitaryContributionForm", { timeout: 55000 }, () => {
   const mockOnSubmit = vi.fn();
   const mockOnCancel = vi.fn();
@@ -170,15 +186,15 @@ describe("MilitaryContributionForm", { timeout: 55000 }, () => {
         { wrapper }
       );
 
-      const inputs = screen.getAllByRole("textbox");
-      if (inputs.length > 0) {
-        await user.type(inputs[0], "5000");
-        expect((inputs[0] as HTMLInputElement).value).not.toBe("");
-      }
+      // Type some value into the form
+      const amountInput = screen.getByRole("spinbutton");
+      await user.type(amountInput, "5000");
 
+      // Click cancel button
       const cancelButton = screen.getByRole("button", { name: /cancel/i });
       await user.click(cancelButton);
 
+      // Verify cancel callback was called
       await waitFor(() => {
         expect(mockOnCancel).toHaveBeenCalled();
       });
@@ -213,14 +229,13 @@ describe("MilitaryContributionForm", { timeout: 55000 }, () => {
         { wrapper }
       );
 
-      const inputs = screen.getAllByRole("textbox");
-      if (inputs.length > 0) {
-        // Try to enter negative amount
-        await user.type(inputs[0], "-100");
+      const amountInput = screen.getByRole("spinbutton");
 
-        // Form should validate this
-        expect(inputs[0]).toBeInTheDocument();
-      }
+      // Try to enter negative amount
+      await user.type(amountInput, "-100");
+
+      // Form should validate this
+      expect(amountInput).toBeInTheDocument();
     });
 
     it("should validate contribution year", () => {
@@ -339,10 +354,8 @@ describe("MilitaryContributionForm", { timeout: 55000 }, () => {
       );
 
       // Fill in form with test data
-      const inputs = screen.getAllByRole("textbox");
-      if (inputs.length > 0) {
-        await user.type(inputs[0], "1000");
-      }
+      const amountInput = screen.getByRole("spinbutton");
+      await user.type(amountInput, "1000");
 
       const submitButton = screen.getByRole("button", { name: /submit|save/i });
       fireEvent.click(submitButton);

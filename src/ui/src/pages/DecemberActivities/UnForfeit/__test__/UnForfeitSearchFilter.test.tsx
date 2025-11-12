@@ -239,9 +239,9 @@ describe("UnForfeitSearchFilter", () => {
         expect(screen.getByText("Rehire Ending Date")).toBeInTheDocument();
       });
 
-      // Verify that date inputs exist (even if not yet populated)
-      const inputs = screen.getAllByRole("textbox");
-      expect(inputs.length).toBeGreaterThanOrEqual(2);
+      // Verify that date inputs exist using accessible labels
+      expect(screen.getByLabelText("Rehire Begin Date")).toBeInTheDocument();
+      expect(screen.getByLabelText("Rehire Ending Date")).toBeInTheDocument();
     });
 
     it("should support date input interaction", async () => {
@@ -263,13 +263,12 @@ describe("UnForfeitSearchFilter", () => {
       });
 
       // Date inputs should be present and interactive
-      const inputs = screen.getAllByRole("textbox");
-      expect(inputs.length).toBeGreaterThanOrEqual(2);
+      const beginDateInput = screen.getByLabelText("Rehire Begin Date");
+      const endDateInput = screen.getByLabelText("Rehire Ending Date");
 
       // Verify inputs are not disabled
-      inputs.forEach(input => {
-        expect(input).not.toBeDisabled();
-      });
+      expect(beginDateInput).not.toBeDisabled();
+      expect(endDateInput).not.toBeDisabled();
     });
   });
 
