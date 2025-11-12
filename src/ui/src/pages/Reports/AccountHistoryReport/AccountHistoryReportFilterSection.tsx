@@ -1,10 +1,9 @@
 import { AccountHistoryReportTotals } from "@/types/reports/AccountHistoryReportTypes";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import React from "react";
 import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
-import { SearchAndReset } from "smart-ui-library";
+import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
 export interface AccountHistoryReportFilterParams {
@@ -115,7 +114,7 @@ const AccountHistoryReportFilterSection: React.FC<AccountHistoryReportFilterSect
             name="startDate"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="startDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value);
@@ -137,7 +136,7 @@ const AccountHistoryReportFilterSection: React.FC<AccountHistoryReportFilterSect
             name="endDate"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="endDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value);

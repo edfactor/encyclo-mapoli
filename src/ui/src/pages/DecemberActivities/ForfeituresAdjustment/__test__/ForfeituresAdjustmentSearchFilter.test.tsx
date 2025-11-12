@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockStoreAndWrapper } from "../../../../test";
 import ForfeituresAdjustmentSearchFilter from "../ForfeituresAdjustmentSearchFilter";
 
@@ -143,17 +143,14 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
         { wrapper }
       );
 
-      const inputs = screen.getAllByRole("textbox");
-      const ssnInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("SSN"));
-      const badgeInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("Badge"));
+      const ssnInput = screen.getByPlaceholderText("SSN");
+      const badgeInput = screen.getByPlaceholderText("Badge");
 
-      if (ssnInput && badgeInput) {
-        await user.type(ssnInput, "123456789");
+      await user.type(ssnInput, "123456789");
 
-        await waitFor(() => {
-          expect((badgeInput as HTMLInputElement).disabled).toBe(true);
-        });
-      }
+      await waitFor(() => {
+        expect(badgeInput).toBeDisabled();
+      });
     });
 
     it("should disable SSN field when Badge is entered", async () => {
@@ -167,17 +164,14 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
         { wrapper }
       );
 
-      const inputs = screen.getAllByRole("textbox");
-      const ssnInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("SSN"));
-      const badgeInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("Badge"));
+      const ssnInput = screen.getByPlaceholderText("SSN");
+      const badgeInput = screen.getByPlaceholderText("Badge");
 
-      if (ssnInput && badgeInput) {
-        await user.type(badgeInput, "12345");
+      await user.type(badgeInput, "12345");
 
-        await waitFor(() => {
-          expect((ssnInput as HTMLInputElement).disabled).toBe(true);
-        });
-      }
+      await waitFor(() => {
+        expect(ssnInput).toBeDisabled();
+      });
     });
 
     it("should enable both fields when one is cleared", async () => {
@@ -191,27 +185,24 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
         { wrapper }
       );
 
-      const inputs = screen.getAllByRole("textbox");
-      const ssnInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("SSN"));
-      const badgeInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("Badge"));
+      const ssnInput = screen.getByPlaceholderText("SSN");
+      const badgeInput = screen.getByPlaceholderText("Badge");
 
-      if (ssnInput && badgeInput) {
-        // Type in SSN
-        await user.type(ssnInput, "123456789");
-        await waitFor(() => {
-          expect((badgeInput as HTMLInputElement).disabled).toBe(true);
-        });
+      // Type in SSN
+      await user.type(ssnInput, "123456789");
+      await waitFor(() => {
+        expect(badgeInput).toBeDisabled();
+      });
 
-        // Click reset button to clear form
-        const resetButton = screen.getByTestId("reset-btn");
-        await user.click(resetButton);
+      // Click reset button to clear form
+      const resetButton = screen.getByTestId("reset-btn");
+      await user.click(resetButton);
 
-        // Both should be enabled after reset
-        await waitFor(() => {
-          expect((ssnInput as HTMLInputElement).disabled).toBe(false);
-          expect((badgeInput as HTMLInputElement).disabled).toBe(false);
-        });
-      }
+      // Both should be enabled after reset
+      await waitFor(() => {
+        expect(ssnInput).not.toBeDisabled();
+        expect(badgeInput).not.toBeDisabled();
+      });
     });
   });
 
@@ -258,16 +249,13 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
         { wrapper }
       );
 
-      const inputs = screen.getAllByRole("textbox");
-      const ssnInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("SSN"));
+      const ssnInput = screen.getByPlaceholderText("SSN");
 
-      if (ssnInput) {
-        // Verify we can interact with inputs
-        await user.type(ssnInput, "1");
+      // Verify we can interact with inputs
+      await user.type(ssnInput, "1");
 
-        // Form structure should exist
-        expect(screen.getByTestId("search-and-reset")).toBeInTheDocument();
-      }
+      // Form structure should exist
+      expect(screen.getByTestId("search-and-reset")).toBeInTheDocument();
     });
 
     it("should show loading state when isSearching is true", () => {
@@ -301,17 +289,15 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
         (input as HTMLInputElement).placeholder?.includes("SSN")
       ) as HTMLInputElement;
 
-      if (ssnInput) {
-        // Type value
-        await user.type(ssnInput, "1");
+      // Type value
+      await user.type(ssnInput, "1");
 
-        // Click reset
-        const resetButton = screen.getByTestId("reset-btn");
-        await user.click(resetButton);
+      // Click reset
+      const resetButton = screen.getByTestId("reset-btn");
+      await user.click(resetButton);
 
-        // Reset should be called
-        expect(mockOnReset).toHaveBeenCalled();
-      }
+      // Reset should be called
+      expect(mockOnReset).toHaveBeenCalled();
     });
 
     it("should call onReset callback", async () => {
@@ -325,17 +311,14 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
         { wrapper }
       );
 
-      const inputs = screen.getAllByRole("textbox");
-      const ssnInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("SSN"));
+      const ssnInput = screen.getByPlaceholderText("SSN");
 
-      if (ssnInput) {
-        await user.type(ssnInput, "123456789");
+      await user.type(ssnInput, "123456789");
 
-        const resetButton = screen.getByTestId("reset-btn");
-        await user.click(resetButton);
+      const resetButton = screen.getByTestId("reset-btn");
+      await user.click(resetButton);
 
-        expect(mockOnReset).toHaveBeenCalled();
-      }
+      expect(mockOnReset).toHaveBeenCalled();
     });
 
     it("should have reset button available", () => {
@@ -366,19 +349,16 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
         { wrapper }
       );
 
-      const inputs = screen.getAllByRole("textbox");
-      const ssnInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("SSN"));
+      const ssnInput = screen.getByPlaceholderText("SSN");
 
-      if (ssnInput) {
-        // Enter invalid SSN
-        await user.type(ssnInput, "invalid");
+      // Enter invalid SSN
+      await user.type(ssnInput, "invalid");
 
-        const searchButton = screen.getByTestId("search-btn");
+      const searchButton = screen.getByTestId("search-btn");
 
-        // Should still be disabled if validation fails
-        // This test ensures the validator is working
-        expect(searchButton).toBeInTheDocument();
-      }
+      // Should still be disabled if validation fails
+      // This test ensures the validator is working
+      expect(searchButton).toBeInTheDocument();
     });
 
     it("should validate that at least one field is required", () => {
@@ -409,16 +389,13 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
         { wrapper }
       );
 
-      const inputs = screen.getAllByRole("textbox");
-      const badgeInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("Badge"));
+      const badgeInput = screen.getByPlaceholderText("Badge");
 
-      if (badgeInput) {
-        // Verify we can interact with badge input
-        await user.type(badgeInput, "1");
+      // Verify we can interact with badge input
+      await user.type(badgeInput, "1");
 
-        // Form should exist
-        expect(screen.getByTestId("search-and-reset")).toBeInTheDocument();
-      }
+      // Form should exist
+      expect(screen.getByTestId("search-and-reset")).toBeInTheDocument();
     });
 
     it("should render form element", () => {

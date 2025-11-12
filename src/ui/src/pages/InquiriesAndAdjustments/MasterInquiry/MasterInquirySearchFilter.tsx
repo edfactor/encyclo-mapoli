@@ -222,7 +222,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
           name="endProfitYear"
           control={control}
           render={({ field }) => (
-            <DsmDatePicker
+            <DSMDatePicker
               id="Profit Year"
               onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
               value={field.value ? new Date(field.value, 0) : null}

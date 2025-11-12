@@ -1,9 +1,8 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormControl, FormHelperText, FormLabel, Grid, MenuItem, Select } from "@mui/material";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import React from "react";
 import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
-import { SearchAndReset } from "smart-ui-library";
+import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
 export interface QPAY600FilterParams {
@@ -74,7 +73,7 @@ const QPAY600FilterSection: React.FC<QPAY600FilterSectionProps> = ({ onFilterCha
               name="profitYear"
               control={control}
               render={({ field }) => (
-                <DsmDatePicker
+                <DSMDatePicker
                   id="profitYear"
                   onChange={(value: Date | null) => {
                     field.onChange(value);

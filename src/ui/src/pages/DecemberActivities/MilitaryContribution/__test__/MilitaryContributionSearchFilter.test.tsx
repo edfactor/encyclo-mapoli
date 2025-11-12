@@ -122,61 +122,52 @@ describe("MilitaryContributionSearchFilter", () => {
       const user = userEvent.setup();
       render(<MilitaryContributionSearchFilter />, { wrapper });
 
-      const inputs = screen.getAllByRole("textbox");
-      const ssnInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("SSN"));
-      const badgeInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("Badge"));
+      const ssnInput = screen.getByPlaceholderText("Enter SSN");
+      const badgeInput = screen.getByPlaceholderText("Enter Badge Number");
 
-      if (ssnInput && badgeInput) {
-        await user.type(ssnInput, "123456789");
+      await user.type(ssnInput, "123456789");
 
-        await waitFor(() => {
-          expect((badgeInput as HTMLInputElement).disabled).toBe(true);
-        });
-      }
+      await waitFor(() => {
+        expect(badgeInput).toBeDisabled();
+      });
     });
 
     it("should disable SSN field when Badge is entered", async () => {
       const user = userEvent.setup();
       render(<MilitaryContributionSearchFilter />, { wrapper });
 
-      const inputs = screen.getAllByRole("textbox");
-      const ssnInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("SSN"));
-      const badgeInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("Badge"));
+      const ssnInput = screen.getByPlaceholderText("Enter SSN");
+      const badgeInput = screen.getByPlaceholderText("Enter Badge Number");
 
-      if (ssnInput && badgeInput) {
-        await user.type(badgeInput, "12345");
+      await user.type(badgeInput, "12345");
 
-        await waitFor(() => {
-          expect((ssnInput as HTMLInputElement).disabled).toBe(true);
-        });
-      }
+      await waitFor(() => {
+        expect(ssnInput).toBeDisabled();
+      });
     });
 
     it("should enable both fields when one is cleared via reset", async () => {
       const user = userEvent.setup();
       render(<MilitaryContributionSearchFilter />, { wrapper });
 
-      const inputs = screen.getAllByRole("textbox");
-      const ssnInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("SSN"));
-      const badgeInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("Badge"));
+      const ssnInput = screen.getByPlaceholderText("Enter SSN");
+      const badgeInput = screen.getByPlaceholderText("Enter Badge Number");
 
-      if (ssnInput && badgeInput) {
-        // Type in SSN
-        await user.type(ssnInput, "123456789");
-        await waitFor(() => {
-          expect((badgeInput as HTMLInputElement).disabled).toBe(true);
-        });
+      // Type in SSN
+      await user.type(ssnInput, "123456789");
+      await waitFor(() => {
+        expect(badgeInput).toBeDisabled();
+      });
 
-        // Click reset button to clear form
-        const resetButton = screen.getByTestId("reset-btn");
-        await user.click(resetButton);
+      // Click reset button to clear form
+      const resetButton = screen.getByTestId("reset-btn");
+      await user.click(resetButton);
 
-        // Both should be enabled after reset
-        await waitFor(() => {
-          expect((ssnInput as HTMLInputElement).disabled).toBe(false);
-          expect((badgeInput as HTMLInputElement).disabled).toBe(false);
-        });
-      }
+      // Both should be enabled after reset
+      await waitFor(() => {
+        expect(ssnInput).not.toBeDisabled();
+        expect(badgeInput).not.toBeDisabled();
+      });
     });
   });
 
@@ -221,15 +212,12 @@ describe("MilitaryContributionSearchFilter", () => {
       const user = userEvent.setup();
       render(<MilitaryContributionSearchFilter />, { wrapper });
 
-      const inputs = screen.getAllByRole("textbox");
-      const ssnInput = inputs.find((input) => (input as HTMLInputElement).placeholder?.includes("SSN"));
+      const ssnInput = screen.getByPlaceholderText("Enter SSN");
 
-      if (ssnInput) {
-        await user.type(ssnInput, "invalid");
+      await user.type(ssnInput, "invalid");
 
-        const searchButton = screen.getByTestId("search-btn");
-        expect(searchButton).toBeInTheDocument();
-      }
+      const searchButton = screen.getByTestId("search-btn");
+      expect(searchButton).toBeInTheDocument();
     });
   });
 

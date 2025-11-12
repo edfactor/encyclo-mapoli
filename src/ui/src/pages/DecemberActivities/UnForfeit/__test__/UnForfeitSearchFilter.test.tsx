@@ -77,6 +77,21 @@ vi.mock("../../../utils/FormValidators", async () => {
 });
 
 vi.mock("smart-ui-library", () => ({
+  DSMDatePicker: vi.fn(({ label, onChange, value, disabled, required }) => (
+    <div>
+      <label>{label}</label>
+      <input
+        data-testid={`date-picker-${label}`}
+        aria-label={label}
+        onChange={(e) => onChange(e.target.value ? new Date(e.target.value) : null)}
+        value={value ? new Date(value).toISOString().split("T")[0] : ""}
+        placeholder={label}
+        type="date"
+        disabled={disabled}
+        required={required}
+      />
+    </div>
+  )),
   SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) => (
     <section aria-label="search and reset">
       <button
@@ -230,9 +245,9 @@ describe("UnForfeitSearchFilter", () => {
         expect(screen.getByText("Rehire Ending Date")).toBeInTheDocument();
       });
 
-      // Verify that date inputs exist (even if not yet populated)
-      const inputs = screen.getAllByRole("textbox");
-      expect(inputs.length).toBeGreaterThanOrEqual(2);
+      // Verify that date inputs exist using accessible labels
+      expect(screen.getByLabelText("Rehire Begin Date")).toBeInTheDocument();
+      expect(screen.getByLabelText("Rehire Ending Date")).toBeInTheDocument();
     });
 
     it("should support date input interaction", async () => {
@@ -254,13 +269,15 @@ describe("UnForfeitSearchFilter", () => {
       });
 
       // Date inputs should be present and interactive
-      const inputs = screen.getAllByRole("textbox");
-      expect(inputs.length).toBeGreaterThanOrEqual(2);
+      const beginDateInput = screen.getByLabelText("Rehire Begin Date");
+      const endDateInput = screen.getByLabelText("Rehire Ending Date");
+
+      expect(beginDateInput).toBeInTheDocument();
+      expect(endDateInput).toBeInTheDocument();
 
       // Verify inputs are not disabled
-      inputs.forEach((input) => {
-        expect(input).not.toBeDisabled();
-      });
+      expect(beginDateInput).not.toBeDisabled();
+      expect(endDateInput).not.toBeDisabled();
     });
   });
 
