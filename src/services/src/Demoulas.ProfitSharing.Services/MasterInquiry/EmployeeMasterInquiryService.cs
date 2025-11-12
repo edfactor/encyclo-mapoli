@@ -95,19 +95,19 @@ public sealed class EmployeeMasterInquiryService : IEmployeeMasterInquiryService
         }
 
         _logger.LogInformation("TRACE: About to build query with Include");
-        
+
         // PERFORMANCE OPTIMIZATION: Pre-join Demographics to get DemographicId, then join PayProfits
         // to avoid N+1 correlated subqueries. In test environments with MockQueryable, correlated 
         // subqueries execute individually per row causing massive performance degradation 
         // (~200 rows × 2 subqueries = 400 query evaluations). This approach creates a single join operation.
-        
+
         // Step 1: Join ProfitDetails with Demographics to get DemographicId
         var profitDetailsWithDemo = profitDetailsQuery
             .Join(demographics,
                 pd => pd.Ssn,
                 d => d.Ssn,
                 (pd, d) => new { ProfitDetail = pd, Demographic = d });
-        
+
         // Step 2: Left join with PayProfits using DemographicId and ProfitYear
         var profitDetailsWithPayProfits = profitDetailsWithDemo
             .GroupJoin(
