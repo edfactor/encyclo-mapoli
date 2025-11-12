@@ -163,26 +163,6 @@ export const useProfitShareEditUpdate = () => {
       : undefined
   });
 
-  // Year validation effect
-  useEffect(() => {
-    const currentYear = new Date().getFullYear();
-    if (profitYear !== currentYear - 1) {
-      reduxDispatch(setInvalidProfitShareEditYear(true));
-      reduxDispatch(
-        setMessage({
-          key: MessageKeys.ProfitShareEditUpdate,
-          message: {
-            type: "warning",
-            title: "Invalid Year Selected",
-            message: `Please select a ${currentYear - 1} date in the drawer menu to proceed.`
-          }
-        })
-      );
-    } else {
-      reduxDispatch(setInvalidProfitShareEditYear(false));
-    }
-  }, [profitYear, reduxDispatch]);
-
   // Save action
   const saveAction = useCallback(async (): Promise<void> => {
     const params: ProfitShareMasterApplyRequest = {
@@ -317,7 +297,8 @@ export const useProfitShareEditUpdate = () => {
   // Update validation when params change
   useEffect(() => {
     validateForm();
-  }, [validateForm]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profitSharingEditQueryParams]);
 
   // Fetch profit master status
   const onStatusSearch = useCallback(async () => {
@@ -350,7 +331,8 @@ export const useProfitShareEditUpdate = () => {
       hasInitializedRef.current = true;
       onStatusSearch();
     }
-  }, [hasToken, onStatusSearch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasToken]);
 
   // Modal handlers
   const handleOpenSaveModal = useCallback(() => {
