@@ -20,8 +20,9 @@ import { BeneficiaryDetail, BeneficiaryDetailAPIRequest, BeneficiarySearchAPIReq
 
 const BeneficiaryInquiryContent = () => {
   const dispatch = useDispatch();
-  const [triggerBeneficiaryDetail, { isSuccess }] = useLazyGetBeneficiaryDetailQuery();
+  const [triggerBeneficiaryDetail] = useLazyGetBeneficiaryDetailQuery();
   const [selectedMember, setSelectedMember] = useState<BeneficiaryDetail | null>();
+  const [hasSelectedMember, setHasSelectedMember] = useState(false);
   const [beneficiarySearchFilterResponse, setBeneficiarySearchFilterResponse] = useState<Paged<BeneficiaryDetail>>();
   const [memberType, setMemberType] = useState<number | undefined>(undefined);
   const [beneficiarySearchFilterRequest, setBeneficiarySearchFilterRequest] = useState<
@@ -53,6 +54,7 @@ const BeneficiaryInquiryContent = () => {
           .unwrap()
           .then((res) => {
             setSelectedMember(res);
+            setHasSelectedMember(true);
           });
       }
     },
@@ -110,8 +112,10 @@ const BeneficiaryInquiryContent = () => {
   ]);
 
   const handleReset = useCallback(() => {
+    setBeneficiarySearchFilterRequest(undefined);
     setBeneficiarySearchFilterResponse(undefined);
     setSelectedMember(null);
+    setHasSelectedMember(false);
     setMemberType(undefined);
     clearAlerts();
     search.reset();
@@ -163,7 +167,7 @@ const BeneficiaryInquiryContent = () => {
           />
         )}
 
-        {isSuccess && selectedMember && (
+        {hasSelectedMember && selectedMember && (
           <IndividualBeneficiaryView
             selectedMember={selectedMember}
             memberType={memberType}
