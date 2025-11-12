@@ -1,12 +1,12 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { createDataSourceAwareBaseQuery } from "./api";
 import {
+  CreateDistributionRequest,
+  CreateOrUpdateDistributionResponse,
   DistributionSearchRequest,
   DistributionSearchResultDto,
-  CreateDistributionRequest,
-  EditDistributionRequest,
-  CreateOrUpdateDistributionResponse
+  EditDistributionRequest
 } from "../../types";
+import { createDataSourceAwareBaseQuery } from "./api";
 
 const baseQuery = createDataSourceAwareBaseQuery();
 
@@ -17,12 +17,21 @@ export const DistributionApi = createApi({
   keepUnusedDataFor: 0,
   refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
-    searchDistributions: builder.query<DistributionSearchResultDto, DistributionSearchRequest>({
-      query: (request) => ({
-        url: "/distribution/search",
-        method: "POST",
-        body: request
-      })
+    searchDistributions: builder.query<
+      DistributionSearchResultDto,
+      DistributionSearchRequest & { suppressAllToastErrors?: boolean; onlyNetworkToastErrors?: boolean }
+    >({
+      query: (params) => {
+        console.log("DistributionApi.searchDistributions called with params:", params);
+        const { suppressAllToastErrors, onlyNetworkToastErrors, ...requestData } = params;
+        return {
+          url: "/distribution/search",
+          method: "POST",
+          body: requestData,
+          // Pass params through meta so middleware can access it
+          meta: { suppressAllToastErrors, onlyNetworkToastErrors }
+        };
+      }
     }),
     createDistribution: builder.mutation<CreateOrUpdateDistributionResponse, CreateDistributionRequest>({
       query: (request) => ({
