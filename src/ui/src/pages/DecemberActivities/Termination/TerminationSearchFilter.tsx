@@ -3,9 +3,8 @@ import { Button, Checkbox, FormControlLabel, FormHelperText, Grid, MenuItem, Tex
 import React, { useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { SearchAndReset, SmartModal } from "smart-ui-library";
+import { DSMDatePicker, SearchAndReset, SmartModal } from "smart-ui-library";
 import * as yup from "yup";
-import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import DuplicateSsnGuard from "../../../components/DuplicateSsnGuard";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { clearTermination } from "../../../reduxstore/slices/yearsEndSlice";
@@ -162,7 +161,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
             name="beginningDate"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="beginningDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value ? mmDDYYFormat(value) : undefined);
@@ -188,7 +187,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
             name="endingDate"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="endingDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value || undefined);

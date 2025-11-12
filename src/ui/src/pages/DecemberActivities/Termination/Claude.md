@@ -362,7 +362,7 @@ interface HeaderComponentProps extends IHeaderParams {
 
 **Test Setup**:
 
-- Mocks `DsmDatePicker` component
+- Mocks `DSMDatePicker` component
 - Mocks `DuplicateSsnGuard` component
 - Mocks form validators (`FormValidators`)
 - Mocks date utility functions
@@ -500,7 +500,7 @@ context: {
 ### Shared Components
 
 - `StatusDropdownActionNode` - Page status dropdown
-- `DsmDatePicker` - Date picker with fiscal year constraints
+- `DSMDatePicker` - Date picker with fiscal year constraints
 - `DuplicateSsnGuard` - Data quality validation guard
 - `SuggestedForfeitEditor` / `SuggestedForfeitCellRenderer` - Custom cell editor/renderer
 - `SharedForfeitHeaderComponent` - Reusable bulk save header

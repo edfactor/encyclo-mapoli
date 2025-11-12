@@ -7,7 +7,7 @@ import {
   useUpdateForfeitureAdjustmentMutation
 } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { CalendarResponseDto, ForfeitureAdjustmentUpdateRequest, StartAndEndDateRequest } from "reduxstore/types";
+import { CalendarResponseDto, ForfeitureAdjustmentUpdateRequest, FilterableStartAndEndDateRequest } from "reduxstore/types";
 import { setMessage } from "smart-ui-library";
 import { generateRowKey } from "../utils/forfeitActivities/gridDataHelpers";
 import {
@@ -110,8 +110,8 @@ export const useTerminationGrid = ({
       isSortDescending: boolean,
       profitYear: number,
       pageSz: number
-    ): (StartAndEndDateRequest & { archive?: boolean }) | null => {
-      const base: StartAndEndDateRequest = searchParams
+    ): (FilterableStartAndEndDateRequest & { archive?: boolean }) | null => {
+      const base: FilterableStartAndEndDateRequest = searchParams
         ? {
             beginningDate: searchParams.beginningDate || "",
             endingDate: searchParams.endingDate || "",
@@ -258,11 +258,11 @@ export const useTerminationGrid = ({
           pageSize,
           params.beginningDate,
           params.endingDate,
-          (params as StartAndEndDateRequest & { archive?: boolean }).archive,
-          (params as StartAndEndDateRequest & { excludeZeroAndFullyVested?: boolean }).excludeZeroAndFullyVested,
+          (params as FilterableStartAndEndDateRequest & { archive?: boolean }).archive,
+          params.excludeZeroAndFullyVested,
           undefined,
-          (params as StartAndEndDateRequest & { vestedBalanceValue?: number | null }).vestedBalanceValue,
-          (params as StartAndEndDateRequest & { vestedBalanceOperator?: number | null }).vestedBalanceOperator
+          params.vestedBalanceValue,
+          params.vestedBalanceOperator
         );
 
         // Allow re-search with same parameters (consistent with all other search pages)

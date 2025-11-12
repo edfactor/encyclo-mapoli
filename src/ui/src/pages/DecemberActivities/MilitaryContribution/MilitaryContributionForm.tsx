@@ -1,9 +1,9 @@
 import { Button, Checkbox, FormControl, FormControlLabel, FormLabel, Grid, TextField, Typography } from "@mui/material";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useCreateMilitaryContributionMutation } from "reduxstore/api/MilitaryApi";
 import { CreateMilitaryContributionRequest, MilitaryContribution } from "reduxstore/types";
+import { DSMDatePicker } from "smart-ui-library";
 import { ServiceErrorResponse } from "../../../types/errors/errors";
 
 interface FormData {
@@ -134,7 +134,7 @@ const MilitaryContributionForm = ({
             control={control}
             rules={{ required: "Date is required" }}
             render={({ field, fieldState: { error } }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="contributionDate"
                 label="Contribution Year"
                 onChange={(value: Date | null) => field.onChange(value)}

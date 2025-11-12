@@ -29,18 +29,6 @@ vi.mock("../../../../reduxstore/api/LookupsApi", () => ({
   ])
 }));
 
-vi.mock("../../../../components/DsmDatePicker/DsmDatePicker", () => ({
-  default: vi.fn(({ label, onChange, disabled }) =>
-    React.createElement("input", {
-      "aria-label": label,
-      onChange: (e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value),
-      disabled: disabled,
-      placeholder: label,
-      type: "text"
-    })
-  )
-}));
-
 vi.mock("../../../../components/DuplicateSsnGuard", () => ({
   default: vi.fn(({ children }) => children({ prerequisitesComplete: true }))
 }));
@@ -68,6 +56,20 @@ vi.mock("../../../../hooks/useDecemberFlowProfitYear", () => ({
 }));
 
 vi.mock("smart-ui-library", () => ({
+  DSMDatePicker: vi.fn(({ label, onChange, disabled, value }) =>
+    React.createElement("div", {},
+      React.createElement("label", {}, label),
+      React.createElement("input", {
+        "aria-label": label,
+        "data-testid": `date-picker-${label}`,
+        onChange: (e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value ? new Date(e.target.value) : null),
+        disabled: disabled,
+        placeholder: label,
+        type: "date",
+        value: value ? new Date(value).toISOString().split("T")[0] : ""
+      })
+    )
+  ),
   SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) =>
     React.createElement(
       "section",

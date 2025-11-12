@@ -1,10 +1,9 @@
 import { FormHelperText } from "@mui/material";
 import { Grid } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
-import { SearchAndReset } from "smart-ui-library";
+import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 
 interface StoreSearchParams {
   yDate: Date;
@@ -60,7 +59,7 @@ const ProfitShareByStoreParameters = () => {
             name="yDate"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="yDate"
                 onChange={(value: Date | null) => field.onChange(value)}
                 value={field.value ?? null}
@@ -79,7 +78,7 @@ const ProfitShareByStoreParameters = () => {
             name="lastDate"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="lastDate"
                 onChange={(value: Date | null) => field.onChange(value)}
                 value={field.value ?? null}
@@ -98,7 +97,7 @@ const ProfitShareByStoreParameters = () => {
             name="firstDate"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="firstDate"
                 onChange={(value: Date | null) => field.onChange(value)}
                 value={field.value ?? null}

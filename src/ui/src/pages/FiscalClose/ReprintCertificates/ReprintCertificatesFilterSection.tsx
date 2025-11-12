@@ -1,11 +1,10 @@
 import { FormControl, FormLabel, Grid, TextField } from "@mui/material";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useLazyGetCertificatesReportQuery } from "reduxstore/api/YearsEndApi";
 import { CertificatePrintRequest } from "reduxstore/types";
-import { SearchAndReset } from "smart-ui-library";
+import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 
 export interface ReprintCertificatesFilterParams {
   profitYear: number;
@@ -93,7 +92,7 @@ const ReprintCertificatesFilterSection: React.FC<ReprintCertificatesFilterSectio
                 required: "Profit Year is required"
               }}
               render={({ field }) => (
-                <DsmDatePicker
+                <DSMDatePicker
                   id="profitYear"
                   label="Profit Year *"
                   views={["year"]}
