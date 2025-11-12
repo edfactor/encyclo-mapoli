@@ -5,55 +5,58 @@ import { IconButton, Tooltip } from "@mui/material";
 import { ICellRendererParams } from "ag-grid-community";
 import type { BeneficiaryDto } from "../../types";
 
-interface BeneficiaryActionHandlers {
+export interface BeneficiaryActionHandlers {
   onNewDistribution: (beneficiary: BeneficiaryDto) => void;
   onEdit: (beneficiary: BeneficiaryDto) => void;
   onDelete: (beneficiary: BeneficiaryDto) => void;
 }
 
-export const createBeneficiaryActionsCellRenderer = (handlers: BeneficiaryActionHandlers) => {
-  return (props: ICellRendererParams) => {
-    const beneficiary = props.data as BeneficiaryDto;
+export interface BeneficiaryActionsCellRendererParams extends ICellRendererParams {
+  handlers: BeneficiaryActionHandlers;
+}
 
-    const handleNewDistribution = () => {
-      handlers.onNewDistribution(beneficiary);
-    };
+export const BeneficiaryActionsCellRenderer = (props: BeneficiaryActionsCellRendererParams) => {
+  const beneficiary = props.data as BeneficiaryDto;
+  const { handlers } = props;
 
-    const handleEdit = () => {
-      handlers.onEdit(beneficiary);
-    };
-
-    const handleDelete = () => {
-      handlers.onDelete(beneficiary);
-    };
-
-    return (
-      <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
-        <Tooltip title="New Beneficiary Distribution">
-          <IconButton
-            size="small"
-            onClick={handleNewDistribution}
-            style={{ color: "#033059" }}>
-            <LocalAtm fontSize="small" />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Edit">
-          <IconButton
-            size="small"
-            onClick={handleEdit}
-            style={{ color: "#033059" }}>
-            <EditIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Delete">
-          <IconButton
-            size="small"
-            onClick={handleDelete}
-            style={{ color: "#033059" }}>
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      </div>
-    );
+  const handleNewDistribution = () => {
+    handlers.onNewDistribution(beneficiary);
   };
+
+  const handleEdit = () => {
+    handlers.onEdit(beneficiary);
+  };
+
+  const handleDelete = () => {
+    handlers.onDelete(beneficiary);
+  };
+
+  return (
+    <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+      <Tooltip title="New Beneficiary Distribution">
+        <IconButton
+          size="small"
+          onClick={handleNewDistribution}
+          style={{ color: "#033059" }}>
+          <LocalAtm fontSize="small" />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Edit">
+        <IconButton
+          size="small"
+          onClick={handleEdit}
+          style={{ color: "#033059" }}>
+          <EditIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Delete">
+        <IconButton
+          size="small"
+          onClick={handleDelete}
+          style={{ color: "#033059" }}>
+          <DeleteIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    </div>
+  );
 };
