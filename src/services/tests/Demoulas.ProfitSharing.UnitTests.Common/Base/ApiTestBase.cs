@@ -46,9 +46,7 @@ public class ApiTestBase<TStartup> where TStartup : class
     /// </remarks>
     public ApiTestBase()
     {
-        var mockInitTimer = Stopwatch.StartNew();
         MockDbContextFactory = MockDataContextFactory.InitializeForTesting();
-        mockInitTimer.Stop();
 
         WebApplicationFactory<TStartup> webApplicationFactory = new WebApplicationFactory<TStartup>();
 

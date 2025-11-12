@@ -27,52 +27,26 @@ public class MasterInquiryFilteredDetailsTests : ApiTestBase<Api.Program>
     [Fact(DisplayName = "Master Inquiry Filtered Details - Basic Employee Request")]
     public async Task GetFilteredDetailsForEmployees()
     {
-        var overallTimer = Stopwatch.StartNew();
-        _output.WriteLine("==== TEST START (GetFilteredDetailsForEmployees) ====");
-
-        var tokenTimer = Stopwatch.StartNew();
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR, Role.EXECUTIVEADMIN);
-        tokenTimer.Stop();
-        _output.WriteLine($"[TOKEN] Created token: {tokenTimer.ElapsedMilliseconds}ms");
 
         var request = new MasterInquiryMemberDetailsRequest { MemberType = 1, Skip = 0, Take = 25 };
 
-        var queryTimer = Stopwatch.StartNew();
         var response = await ApiClient.POSTAsync<MasterInquiryFilteredDetailsEndpoint, MasterInquiryMemberDetailsRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
-        queryTimer.Stop();
-        _output.WriteLine($"[QUERY] POST request: {queryTimer.ElapsedMilliseconds}ms");
 
         response.ShouldNotBeNull();
         response.Response.EnsureSuccessStatusCode();
-
-        overallTimer.Stop();
-        _output.WriteLine($"[TOTAL] Test duration: {overallTimer.ElapsedMilliseconds}ms ({overallTimer.Elapsed.TotalMinutes:F2} minutes)");
-        _output.WriteLine("==== TEST END ====");
     }
 
     [Fact(DisplayName = "Master Inquiry Filtered Details - Filtered By Year And Month")]
     public async Task GetFilteredDetailsByYearAndMonth()
     {
-        var overallTimer = Stopwatch.StartNew();
-        _output.WriteLine("==== TEST START (GetFilteredDetailsByYearAndMonth) ====");
-
-        var tokenTimer = Stopwatch.StartNew();
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR, Role.EXECUTIVEADMIN);
-        tokenTimer.Stop();
-        _output.WriteLine($"[TOKEN] Created token: {tokenTimer.ElapsedMilliseconds}ms");
 
         var request = new MasterInquiryMemberDetailsRequest { MemberType = 1, ProfitYear = 2024, MonthToDate = 3, Skip = 0, Take = 25 };
 
-        var queryTimer = Stopwatch.StartNew();
         var response = await ApiClient.POSTAsync<MasterInquiryFilteredDetailsEndpoint, MasterInquiryMemberDetailsRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
-        queryTimer.Stop();
-        _output.WriteLine($"[QUERY] POST request: {queryTimer.ElapsedMilliseconds}ms");
 
         response.ShouldNotBeNull();
         response.Response.EnsureSuccessStatusCode();
-
-        overallTimer.Stop();
-        _output.WriteLine($"[TOTAL] Test duration: {overallTimer.ElapsedMilliseconds}ms ({overallTimer.Elapsed.TotalMinutes:F2} minutes)");
-        _output.WriteLine("==== TEST END ====");
     }
 }
