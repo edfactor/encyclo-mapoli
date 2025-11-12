@@ -21,35 +21,91 @@ definitions:
         # Ensure the REPORTS_PATH directory exists
         - mkdir -Force -Path $env:REPORTS_PATH
 
-        # Check if .NET 10 SDK is installed
+        # Check if .NET 10 SDK is installed and install if needed
         - echo "Checking installed .NET SDK versions..."
-        - $dotnetSdkInstalled = dotnet --list-sdks | Select-String "^10\.(\d+)\.(\d+)"
-        - if ($dotnetSdkInstalled) {
-              $isSdkValid = $false;
+        - |
+          $dotnetSdkList = dotnet --list-sdks;
+          Write-Output "Currently installed .NET SDKs:";
+          Write-Output $dotnetSdkList;
+          
+          $dotnetSdkInstalled = $dotnetSdkList | Select-String "^10\.";
+          $isSdkValid = $false;
+          
+          if ($dotnetSdkInstalled) {
               foreach ($sdk in $dotnetSdkInstalled) {
                 if ($sdk -match "^10\.(\d+)\.(\d+)") {
                   $minor = [int]$matches[1];
                   $patch = [int]$matches[2];
                   if ($minor -gt 0 -or $patch -ge 100) {
                     $isSdkValid = $true;
+                    Write-Output ".NET SDK 10.0.100+ is already installed: $sdk";
                     break;
                   }
                 }
               }
-              if ($isSdkValid) {
-                Write-Output ".NET SDK 10.0.100 or higher is installed.";
-              } else {
-                Write-Output ".NET SDK 10.0.100 or higher is NOT installed.";
-                Invoke-WebRequest -Uri "https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.100/dotnet-sdk-10.0.100-win-x64.exe" -OutFile "$env:TEMP\dotnet-sdk-10.0.100-win-x64.exe";
-                Start-Process -FilePath "$env:TEMP\dotnet-sdk-10.0.100-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait;
+          }
+          
+          if (-not $isSdkValid) {
+              Write-Output "No valid .NET 10 SDK found. Attempting to install .NET 10.0.100...";
+              
+              $installerPath = "$env:TEMP\dotnet-sdk-10.0.100-win-x64.exe";
+              $installerUrl = "https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.100/dotnet-sdk-10.0.100-win-x64.exe";
+              
+              try {
+                  Write-Output "Downloading .NET 10 SDK from: $installerUrl";
+                  Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath -ErrorAction Stop;
+                  
+                  if (-not (Test-Path $installerPath)) {
+                      throw "Installer download failed - file not found at $installerPath";
+                  }
+                  
+                  Write-Output "Downloaded installer size: $((Get-Item $installerPath).Length) bytes";
+                  Write-Output "Running .NET 10 SDK installer...";
+                  
+                  $process = Start-Process -FilePath $installerPath -ArgumentList "/quiet", "/norestart" -PassThru -Wait;
+                  $exitCode = $process.ExitCode;
+                  
+                  if ($exitCode -ne 0) {
+                      throw ".NET SDK installer exited with code $exitCode";
+                  }
+                  
+                  Write-Output "Installer completed with exit code $exitCode";
+                  Start-Sleep -Seconds 3;
+                  
+                  Write-Output "Verifying .NET 10 SDK installation...";
+                  $verificationList = dotnet --list-sdks;
+                  Write-Output "Installed SDKs after installation:";
+                  Write-Output $verificationList;
+                  
+                  $verified = $verificationList | Select-String "^10\.";
+                  if ($verified) {
+                      Write-Output "SUCCESS: .NET 10 SDK has been installed.";
+                  } else {
+                      throw "Verification failed: .NET 10 SDK not found after installation";
+                  }
+              } catch {
+                  Write-Error "Failed to install .NET 10 SDK: $_";
+                  exit 1;
               }
-            } else {
-              Write-Output "No .NET 10.x SDK installed.";
-            }
+          }
 
         # Clean any previous build artifacts to ensure deterministic builds
         - echo "Cleaning previous build artifacts..."
         - dotnet clean src/services/Demoulas.ProfitSharing.slnx --configuration Release
+
+        # Final verification: Ensure .NET 10 SDK is available before build
+        - |
+          $finalCheck = dotnet --list-sdks | Select-String "^10\.";
+          if (-not $finalCheck) {
+              Write-Error "CRITICAL: .NET 10 SDK is still not available after installation attempt!";
+              Write-Error "This may indicate:";
+              Write-Error "  1. Installer download failed or was incomplete";
+              Write-Error "  2. Installer execution failed silently";
+              Write-Error "  3. Insufficient permissions to install";
+              Write-Error "Please verify the build agent has .NET 10 SDK pre-installed or sufficient permissions.";
+              exit 1;
+          }
+          Write-Output "VERIFIED: .NET 10 SDK is available. Proceeding with build...";
 
         # Restore packages explicitly
         - echo "Restoring NuGet packages..."
