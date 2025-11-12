@@ -1,10 +1,16 @@
 import { Divider, Grid } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useLazyBeneficiarySearchFilterQuery, useLazyGetBeneficiaryDetailQuery } from "reduxstore/api/BeneficiariesApi";
 
 import { DSMAccordion, Page, Paged } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
-import { CAPTIONS } from "../../constants";
+import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
+import { BENEFICIARY_INQUIRY_MESSAGES } from "../../components/MissiveAlerts/MissiveMessages";
+import { CAPTIONS, ROUTES } from "../../constants";
+import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
+import { setDistributionHome } from "../../reduxstore/slices/distributionSlice";
+import { ServiceErrorResponse } from "../../types/errors/errors";
 import BeneficiaryInquirySearchFilter from "./BeneficiaryInquirySearchFilter";
 import IndividualBeneficiaryView from "./IndividualBeneficiaryView";
 import MemberResultsGrid from "./MemberResultsGrid";
@@ -12,18 +18,26 @@ import { useBeneficiarySearch } from "./hooks/useBeneficiarySearch";
 
 import { BeneficiaryDetail, BeneficiaryDetailAPIRequest, BeneficiarySearchAPIRequest } from "@/types";
 
-const BeneficiaryInquiry = () => {
-  const [triggerBeneficiaryDetail, { isSuccess }] = useLazyGetBeneficiaryDetailQuery();
+const BeneficiaryInquiryContent = () => {
+  const dispatch = useDispatch();
+  const [triggerBeneficiaryDetail] = useLazyGetBeneficiaryDetailQuery();
   const [selectedMember, setSelectedMember] = useState<BeneficiaryDetail | null>();
+  const [hasSelectedMember, setHasSelectedMember] = useState(false);
   const [beneficiarySearchFilterResponse, setBeneficiarySearchFilterResponse] = useState<Paged<BeneficiaryDetail>>();
   const [memberType, setMemberType] = useState<number | undefined>(undefined);
   const [beneficiarySearchFilterRequest, setBeneficiarySearchFilterRequest] = useState<
     BeneficiarySearchAPIRequest | undefined
   >();
   const [triggerSearch, { isFetching }] = useLazyBeneficiarySearchFilterQuery();
+  const { addAlert, clearAlerts, missiveAlerts } = useMissiveAlerts();
 
   // Use custom hook for pagination and sort state
   const search = useBeneficiarySearch({ defaultPageSize: 10, defaultSortBy: "name" });
+
+  // Set distribution home when component mounts
+  useEffect(() => {
+    dispatch(setDistributionHome(ROUTES.BENEFICIARY_INQUIRY));
+  }, [dispatch]);
 
   const onBadgeClick = useCallback(
     (data: BeneficiaryDetail) => {
@@ -40,6 +54,7 @@ const BeneficiaryInquiry = () => {
           .unwrap()
           .then((res) => {
             setSelectedMember(res);
+            setHasSelectedMember(true);
           });
       }
     },
@@ -49,16 +64,19 @@ const BeneficiaryInquiry = () => {
   const onSearch = useCallback(
     (res: Paged<BeneficiaryDetail> | undefined) => {
       setBeneficiarySearchFilterResponse(res);
-      if (res?.total == 1) {
+      if (res?.total === 0) {
+        addAlert(BENEFICIARY_INQUIRY_MESSAGES.MEMBER_NOT_FOUND);
+      } else if (res?.total === 1) {
         // Only 1 record - auto-select
         onBadgeClick(res.results[0]);
       }
     },
-    [onBadgeClick]
+    [onBadgeClick, addAlert]
   );
 
   useEffect(() => {
     if (beneficiarySearchFilterRequest) {
+      clearAlerts();
       const updatedRequest = {
         ...beneficiarySearchFilterRequest,
         isSortDescending: search.sortParams.isSortDescending,
@@ -71,6 +89,16 @@ const BeneficiaryInquiry = () => {
         .unwrap()
         .then((res) => {
           onSearch(res);
+        })
+        .catch((error) => {
+          const serviceError = error as ServiceErrorResponse;
+          // Check if it's a 500 error with "Badge number not found" or "SSN not found" title
+          if (
+            serviceError?.data?.status === 500 &&
+            (serviceError?.data?.title === "Badge number not found." || serviceError?.data?.title === "SSN not found.")
+          ) {
+            addAlert(BENEFICIARY_INQUIRY_MESSAGES.MEMBER_NOT_FOUND);
+          }
         });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -84,67 +112,79 @@ const BeneficiaryInquiry = () => {
   ]);
 
   const handleReset = useCallback(() => {
+    setBeneficiarySearchFilterRequest(undefined);
     setBeneficiarySearchFilterResponse(undefined);
     setSelectedMember(null);
+    setHasSelectedMember(false);
     setMemberType(undefined);
+    clearAlerts();
     search.reset();
-  }, [search]);
+  }, [search, clearAlerts]);
 
   return (
-    <MissiveAlertProvider>
-      <Page label={CAPTIONS.BENEFICIARY_INQUIRY}>
-        <Grid
-          container
-          rowSpacing="24px">
-          <Grid
-            size={{ xs: 12 }}
-            width={"100%"}>
-            <Divider />
-          </Grid>
-          <Grid
-            size={{ xs: 12 }}
-            width={"100%"}>
-            <DSMAccordion title="Filter">
-              <BeneficiaryInquirySearchFilter
-                onSearch={(req) => {
-                  setBeneficiarySearchFilterRequest(req);
-                  setSelectedMember(null);
-                  search.reset();
-                }}
-                onMemberTypeChange={(type) => {
-                  setMemberType(type);
-                }}
-                onReset={handleReset}
-                isSearching={isFetching}
-              />
-            </DSMAccordion>
-          </Grid>
+    <Grid
+      container
+      rowSpacing="24px">
+      <Grid
+        size={{ xs: 12 }}
+        width={"100%"}>
+        <Divider />
+      </Grid>
 
-          <Grid
-            size={{ xs: 12 }}
-            width="100%">
-            {beneficiarySearchFilterResponse && beneficiarySearchFilterResponse?.total > 1 && (
-              <MemberResultsGrid
-                searchResults={beneficiarySearchFilterResponse}
-                isLoading={isFetching}
-                pageNumber={search.pageNumber}
-                pageSize={search.pageSize}
-                onRowClick={onBadgeClick}
-                onPageNumberChange={(page) => search.handlePaginationChange(page, search.pageSize)}
-                onPageSizeChange={(size) => search.handlePaginationChange(0, size)}
-              />
-            )}
+      {missiveAlerts.length > 0 && <MissiveAlerts />}
 
-            {isSuccess && selectedMember && (
-              <IndividualBeneficiaryView
-                selectedMember={selectedMember}
-                memberType={memberType}
-              />
-            )}
-          </Grid>
-        </Grid>
-      </Page>
-    </MissiveAlertProvider>
+      <Grid
+        size={{ xs: 12 }}
+        width={"100%"}>
+        <DSMAccordion title="Filter">
+          <BeneficiaryInquirySearchFilter
+            onSearch={(req) => {
+              setBeneficiarySearchFilterRequest(req);
+              setSelectedMember(null);
+              search.reset();
+            }}
+            onMemberTypeChange={(type) => {
+              setMemberType(type);
+            }}
+            onReset={handleReset}
+            isSearching={isFetching}
+          />
+        </DSMAccordion>
+      </Grid>
+
+      <Grid
+        size={{ xs: 12 }}
+        width="100%">
+        {beneficiarySearchFilterResponse && beneficiarySearchFilterResponse?.total > 1 && (
+          <MemberResultsGrid
+            searchResults={beneficiarySearchFilterResponse}
+            isLoading={isFetching}
+            pageNumber={search.pageNumber}
+            pageSize={search.pageSize}
+            onRowClick={onBadgeClick}
+            onPageNumberChange={(page) => search.handlePaginationChange(page, search.pageSize)}
+            onPageSizeChange={(size) => search.handlePaginationChange(0, size)}
+          />
+        )}
+
+        {hasSelectedMember && selectedMember && (
+          <IndividualBeneficiaryView
+            selectedMember={selectedMember}
+            memberType={memberType}
+          />
+        )}
+      </Grid>
+    </Grid>
+  );
+};
+
+const BeneficiaryInquiry = () => {
+  return (
+    <Page label={CAPTIONS.BENEFICIARY_INQUIRY}>
+      <MissiveAlertProvider>
+        <BeneficiaryInquiryContent />
+      </MissiveAlertProvider>
+    </Page>
   );
 };
 

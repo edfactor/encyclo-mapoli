@@ -1,3 +1,4 @@
+import { ServiceErrorResponse } from "@/types/errors/errors";
 import { Grid } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { SortParams } from "../../../hooks/useGridPagination";
@@ -21,14 +22,34 @@ const PendingDisbursementsList: React.FC<PendingDisbursementsListProps> = ({ bad
   useEffect(() => {
     const fetchPendingDisbursements = async () => {
       try {
+        // If memberType is 2, we need to create a new variable for psnSuffix that is the last four digits and then use the numbers before that as the badge number
+        let psnSuffix = 0;
+        let effectiveBadgeNumber = badgeNumber;
+        if (memberType === 2) {
+          const identifierStr = badgeNumber.toString();
+          psnSuffix = parseInt(identifierStr.slice(-4), 10);
+          effectiveBadgeNumber = parseInt(identifierStr.slice(0, -4), 10);
+          console.log("Parsed badgeNumber:", effectiveBadgeNumber, "psnSuffix:", psnSuffix);
+        }
+
         await triggerSearch({
-          badgeNumber,
+          badgeNumber: effectiveBadgeNumber,
+          psnSuffix: psnSuffix !== 0 ? psnSuffix : undefined,
           memberType,
           distributionStatusIds: ["H", "Y", "C"],
           ...searchParams
         }).unwrap();
       } catch (error) {
-        console.error("Failed to fetch pending disbursements:", error);
+        const serviceError = error as ServiceErrorResponse;
+
+        // Check if it's a 500 error where it couldn't find the badge number and PSN suffix combination
+        // Because this is expected if there are no pending disbursements, we won't log it
+        if (
+          serviceError?.data.status === 500 &&
+          serviceError?.data?.title !== "Badge number and PSN suffix combination not found."
+        ) {
+          console.error("Pending Disbursements search failed:", error);
+        }
       }
     };
 

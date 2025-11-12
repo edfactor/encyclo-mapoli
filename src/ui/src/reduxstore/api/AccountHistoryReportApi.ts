@@ -1,8 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import {
   AccountHistoryReportRequest,
-  AccountHistoryReportResponse,
-  ReportResponseBase
+  AccountHistoryReportPaginatedResponse
 } from "../../types/reports/AccountHistoryReportTypes";
 import { createDataSourceAwareBaseQuery } from "./api";
 
@@ -16,7 +15,7 @@ export const AccountHistoryReportApi = createApi({
   refetchOnMountOrArgChange: true,
   endpoints: (builder) => ({
     getAccountHistoryReport: builder.query<
-      ReportResponseBase<AccountHistoryReportResponse>,
+      AccountHistoryReportPaginatedResponse,
       AccountHistoryReportRequest
     >({
       query: (params) => {

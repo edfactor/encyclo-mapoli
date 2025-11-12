@@ -1,4 +1,5 @@
 import { Typography } from "@mui/material";
+import { SelectionChangedEvent } from "ag-grid-community";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
@@ -103,9 +104,9 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
   );
 
   const onSelectionChanged = useCallback(
-    (event: { api: { getSelectedNodes: () => Array<{ data: { badge: number } }> } }) => {
+    (event: SelectionChangedEvent<ReprintCertificateEmployee>) => {
       const selectedNodes = event.api.getSelectedNodes();
-      const selectedIds = selectedNodes.map((node) => node.data.badge);
+      const selectedIds = selectedNodes.map((node) => node.data?.badge).filter((badge): badge is number => badge !== undefined);
       setSelectedRowIds(selectedIds);
       onSelectionChange?.(selectedIds);
     },
@@ -138,7 +139,7 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
             headerCheckbox: true,
             enableClickSelection: false
           },
-          onSelectionChanged: onSelectionChanged
+          onSelectionChanged: onSelectionChanged as (event: unknown) => void
         }}
       />
       {(gridData.length > 0 || totalCount > 0) && (
