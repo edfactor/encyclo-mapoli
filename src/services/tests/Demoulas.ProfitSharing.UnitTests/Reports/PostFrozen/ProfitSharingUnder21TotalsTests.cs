@@ -23,7 +23,7 @@ public sealed class ProfitSharingUnder21TotalsTests : ApiTestBase<Program>
     ///   This endpoint is computationally expensive with large mock datasets.
     ///   Increase timeout to allow for legitimate slowness in business logic.
     /// </summary>
-    protected override TimeSpan? GetHttpClientTimeout() => TimeSpan.FromMinutes(5);
+    protected override TimeSpan? GetHttpClientTimeout() => TimeSpan.FromMinutes(2);
 
     [Fact(DisplayName = "PS-759 - Profit Sharing under 21 ProfitShareUpdateTotals")]
     public async Task CheckUnder21Totals()

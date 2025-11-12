@@ -18,12 +18,6 @@ public class MasterInquiryFilteredDetailsTests : ApiTestBase<Api.Program>
     {
     }
 
-    /// <summary>
-    ///   This endpoint is computationally expensive with large mock datasets.
-    ///   Increase timeout to allow for legitimate slowness.
-    /// </summary>
-    protected override TimeSpan? GetHttpClientTimeout() => TimeSpan.FromMinutes(5);
-
     [Fact(DisplayName = "Master Inquiry Filtered Details - Basic Employee Request")]
     public async Task GetFilteredDetailsForEmployees()
     {
