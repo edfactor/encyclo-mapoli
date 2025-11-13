@@ -940,7 +940,7 @@ public class FrozenReportService : IFrozenReportService
                         Loans = x.Loans ?? 0,
                         ProfitSharingAmount = x.ProfitSharingAmount ?? 0,
                         GrossWages = x.GrossWages,
-                        EnrollmentId = (byte)(x.EnrollmentId ?? 0),
+                        EnrollmentId = (x.EnrollmentId ?? 0),
                         IsExecutive = x.PayFrequencyId == PayFrequency.Constants.Monthly,
                     }).ToList(),
                     Total = pagedData.Total
