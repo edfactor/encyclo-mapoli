@@ -122,7 +122,9 @@ public class ProfitSharingSummaryReportRegressionTests
                 HoursExecutive = 0,
                 IncomeExecutive = 0,
                 PointsEarned = 400,
-                Etva = 0
+                Etva = 0,
+                TotalIncome = 40000,
+                TotalHours = 800
             },
             new PayProfit
             {
@@ -133,6 +135,8 @@ public class ProfitSharingSummaryReportRegressionTests
                 HoursExecutive = 0,
                 IncomeExecutive = 0,
                 PointsEarned = 450,
+                TotalHours = 900,
+                TotalIncome = 45000,
                 Etva = 0
             }
         ];

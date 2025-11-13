@@ -13,6 +13,7 @@ internal sealed class DemographicHistoryMap : IEntityTypeConfiguration<Demograph
         _ = builder.HasKey(x => x.Id);
 
         _ = builder.HasIndex(x => x.DemographicId, "IX_DEMOGRAPHIC");
+        _ = builder.HasIndex(x => new { x.ValidFrom, x.ValidTo, x.DemographicId }, "IX_VALID_FROM_TO_DEMOGRAPHIC_ID");
 
         _ = builder.Property(x => x.Id)
             .HasPrecision(18)

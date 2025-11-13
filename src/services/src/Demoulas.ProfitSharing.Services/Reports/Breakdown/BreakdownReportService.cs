@@ -767,7 +767,7 @@ public sealed class BreakdownReportService : IBreakdownService
                 HireDate = d.HireDate,
                 TerminationDate = d.TerminationDate,
                 EnrollmentId = pp.EnrollmentId,
-                ProfitShareHours = pp.CurrentHoursYear + pp.HoursExecutive,
+                ProfitShareHours = pp.TotalHours,
                 Street1 = d.Address.Street,
                 City = d.Address.City,
                 State = d.Address.State,

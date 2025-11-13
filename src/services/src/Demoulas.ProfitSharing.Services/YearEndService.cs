@@ -214,7 +214,7 @@ public sealed class YearEndService : IYearEndService
                 x.pp.ProfitYear == profitYear &&
                 (
                     (x.d.DateOfBirth <= minAge18BirthDate &&
-                     (x.pp.CurrentHoursYear + x.pp.HoursExecutive) >= 1000)
+                     (x.pp.TotalHours) >= 1000)
                     || x.d.DateOfBirth <= minAge64BirthDate
                 ) &&
                 x.d.HireDate < fiscalEndDate)
@@ -321,7 +321,7 @@ public sealed class YearEndService : IYearEndService
                     x.d.HireDate >= fiscalEndDate ||
                     // OR ineligible: NOT eligible (inlined logic from IsEligibleForProcessing)
                     !(
-                        (x.d.DateOfBirth <= minAge18BirthDate && (x.pp.CurrentHoursYear + x.pp.HoursExecutive) >= 1000)
+                        (x.d.DateOfBirth <= minAge18BirthDate && (x.pp.TotalHours) >= 1000)
                         || x.d.DateOfBirth <= minAge64BirthDate
                     )
                 ))
