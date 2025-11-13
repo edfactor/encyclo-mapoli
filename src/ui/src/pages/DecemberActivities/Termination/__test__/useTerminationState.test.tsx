@@ -1,7 +1,7 @@
 import { renderHook } from "@testing-library/react";
 import { act } from "react";
 import { describe, expect, it } from "vitest";
-import { useTerminationState } from "./useTerminationState";
+import { useTerminationState } from "../hooks/useTerminationState";
 
 describe("useTerminationState", () => {
   it("should initialize with default state", () => {

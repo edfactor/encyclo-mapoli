@@ -48,7 +48,7 @@ public class FrozenReportService : IFrozenReportService
     /// A token to monitor for cancellation requests.
     /// </param>
     /// <returns>
-    /// A task that represents the asynchronous operation. The task result contains the
+    /// A task that represents the asynchronous operation. The task result contains the 
     /// <see cref="DistributionsByAge"/> object, which includes the report details and aggregated data.
     /// </returns>
     public async Task<DistributionsByAge> GetDistributionsByAgeYearAsync(FrozenReportsByAgeRequest req,
@@ -75,7 +75,7 @@ public class FrozenReportService : IFrozenReportService
                          {
                              d.DateOfBirth,
                              EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT,
-                             d.BadgeNumber,
+                             BadgeNumber = d.BadgeNumber,
                              Amount = pd.Forfeiture,
                              pd.CommentTypeId
                          });
@@ -189,15 +189,15 @@ public class FrozenReportService : IFrozenReportService
     /// Retrieves the contributions grouped by age for a specific profit year, based on the provided request.
     /// </summary>
     /// <param name="req">
-    /// The request containing the parameters for generating the contributions report,
+    /// The request containing the parameters for generating the contributions report, 
     /// including the profit year and report type (e.g., FullTime, PartTime, or Total).
     /// </param>
     /// <param name="cancellationToken">
     /// A token to monitor for cancellation requests.
     /// </param>
     /// <returns>
-    /// A task that represents the asynchronous operation. The task result contains a <see cref="ContributionsByAge"/> object,
-    /// which includes details such as the report name, report date, total employees, distribution total amount,
+    /// A task that represents the asynchronous operation. The task result contains a <see cref="ContributionsByAge"/> object, 
+    /// which includes details such as the report name, report date, total employees, distribution total amount, 
     /// and a paginated response of contributions grouped by age.
     /// </returns>
     /// <exception cref="ArgumentNullException">
@@ -224,7 +224,7 @@ public class FrozenReportService : IFrozenReportService
                          {
                              d.DateOfBirth,
                              EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT,
-                             d.BadgeNumber,
+                             BadgeNumber = d.BadgeNumber,
                              Amount = pd.Contribution
                          });
 
@@ -303,7 +303,7 @@ public class FrozenReportService : IFrozenReportService
                          {
                              d.DateOfBirth,
                              EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT,
-                             d.BadgeNumber,
+                             BadgeNumber = d.BadgeNumber,
                              Amount = pd.Forfeiture
                          });
 
@@ -374,7 +374,7 @@ public class FrozenReportService : IFrozenReportService
     /// A token to monitor for cancellation requests.
     /// </param>
     /// <returns>
-    /// A <see cref="BalanceByAge"/> object containing the balance details grouped by age,
+    /// A <see cref="BalanceByAge"/> object containing the balance details grouped by age, 
     /// including totals and other relevant metrics.
     /// </returns>
     /// <remarks>
@@ -809,7 +809,7 @@ public class FrozenReportService : IFrozenReportService
                     BeforeEnrollmentId = lyPp != null ? lyPp.EnrollmentId : 0,
                     BeforeProfitSharingAmount = lyBal != null ? lyBal.CurrentBalance : 0,
                     BeforeVestedProfitSharingAmount = lyBal != null ? lyBal.VestedBalance : 0,
-                    BeforeYearsInPlan = lyBal != null ? lyBal.YearsInPlan : 0,
+                    BeforeYearsInPlan = lyBal != null ? lyBal.YearsInPlan : (byte)0,
 
                     AfterEnrollmentId = pp != null ? pp.EnrollmentId : 0,
                     AfterProfitSharingAmount = bal.CurrentBalance,
@@ -904,7 +904,7 @@ public class FrozenReportService : IFrozenReportService
                                  join lBal in _totalService.GetQuoteLoansUnQuote(ctx, req.ProfitYear) on d.Ssn equals lBal.Ssn into
                                      lBal_tmp
                                  from lBal_lj in lBal_tmp.DefaultIfEmpty()
-                                 where pp != null && (pp.CurrentIncomeYear + pp.IncomeExecutive) >= req.MinGrossAmount
+                                 where pp != null && (pp.TotalIncome) >= req.MinGrossAmount
                                  orderby d.ContactInfo.FullName
                                  select new
                                  {
@@ -912,10 +912,10 @@ public class FrozenReportService : IFrozenReportService
                                      EmployeeName = d.ContactInfo.FullName ?? "",
                                      d.DateOfBirth,
                                      d.Ssn,
-                                     Forfeitures = fBal_lj != null ? fBal_lj.TotalAmount : null,
-                                     Loans = lBal_lj != null ? lBal_lj.TotalAmount : null,
-                                     ProfitSharingAmount = psBal != null ? psBal.TotalAmount : null,
-                                     GrossWages = pp != null ? pp.CurrentIncomeYear + pp.IncomeExecutive : 0m,
+                                     Forfeitures = fBal_lj != null ? fBal_lj.TotalAmount : (decimal?)null,
+                                     Loans = lBal_lj != null ? lBal_lj.TotalAmount : (decimal?)null,
+                                     ProfitSharingAmount = psBal != null ? psBal.TotalAmount : (decimal?)null,
+                                     GrossWages = pp != null ? pp.TotalIncome : 0m,
                                      EnrollmentId = pp != null ? pp.EnrollmentId : (byte?)null,
                                      d.PayFrequencyId,
                                  });
@@ -940,7 +940,7 @@ public class FrozenReportService : IFrozenReportService
                         Loans = x.Loans ?? 0,
                         ProfitSharingAmount = x.ProfitSharingAmount ?? 0,
                         GrossWages = x.GrossWages,
-                        EnrollmentId = x.EnrollmentId ?? 0,
+                        EnrollmentId = (byte)(x.EnrollmentId ?? 0),
                         IsExecutive = x.PayFrequencyId == PayFrequency.Constants.Monthly,
                     }).ToList(),
                     Total = pagedData.Total

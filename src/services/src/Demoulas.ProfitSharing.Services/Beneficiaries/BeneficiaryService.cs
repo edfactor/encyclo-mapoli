@@ -383,6 +383,9 @@ public class BeneficiaryService : IBeneficiaryService
             }
         }
 
+        //Update the ModifiedAtUtc timestamp
+        contact.ModifiedAtUtc = DateTimeOffset.UtcNow;
+
         response.Id = contact.Id;
         response.Ssn = contact.Ssn.MaskSsn();
         response.DateOfBirth = contact.DateOfBirth;
@@ -401,6 +404,7 @@ public class BeneficiaryService : IBeneficiaryService
         response.PhoneNumber = contact.ContactInfo.PhoneNumber;
         response.MobileNumber = contact.ContactInfo.MobileNumber;
         response.EmailAddress = contact.ContactInfo.EmailAddress;
+        response.ModifiedAtUtc = contact.ModifiedAtUtc;
 
         return contact;
     }

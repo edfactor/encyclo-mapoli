@@ -1,5 +1,5 @@
 import { useCallback, useReducer } from "react";
-import { TerminationSearchRequest } from "../pages/DecemberActivities/Termination/Termination";
+import { TerminationSearchRequest } from "../Termination";
 
 interface TerminationState {
   searchParams: TerminationSearchRequest | null;

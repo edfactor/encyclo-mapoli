@@ -206,6 +206,8 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         payProfit.HoursExecutive = 0;
         payProfit.CurrentIncomeYear = 12345.67m;
         payProfit.IncomeExecutive = 0;
+        payProfit.TotalIncome = payProfit.CurrentIncomeYear + payProfit.IncomeExecutive;
+        payProfit.TotalHours = payProfit.CurrentHoursYear + payProfit.HoursExecutive;
         payProfit.ProfitYear = profitYear;
 
         var details = await c.ProfitDetails.Where(pd => pd.Ssn == demo.Ssn).ToListAsync(CancellationToken.None);

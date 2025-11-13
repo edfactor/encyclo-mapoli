@@ -90,8 +90,8 @@ public sealed class UnforfeitService : IUnforfeitService
                         d.PayFrequencyId,
                         ppYE.EnrollmentId,
                         EnrollmentName = enrollment.Name,
-                        HoursProfitYear = ppYE.HoursExecutive + ppYE.CurrentHoursYear,
-                        WagesProfitYear = ppYE.IncomeExecutive + ppYE.CurrentIncomeYear
+                        HoursProfitYear = ppYE.TotalHours,
+                        WagesProfitYear = ppYE.TotalIncome
                     };
 
                 // Apply pagination to main query
@@ -148,7 +148,7 @@ public sealed class UnforfeitService : IUnforfeitService
                         pd.ProfitCodeId,
                         pd.CommentType,
                         HoursTransactionYear = pp != null ? (decimal?)pp.CurrentHoursYear : null,
-                        WagesTransactionYear = pp != null ? (decimal?)(pp.CurrentIncomeYear + pp.IncomeExecutive) : null
+                        WagesTransactionYear = pp != null ? (decimal?)(pp.TotalIncome) : null
                     };
 
                 var allDetails = await detailsQuery.ToListAsync(cancellationToken);

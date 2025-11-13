@@ -7,10 +7,10 @@ import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useLazyGetAccountingRangeToCurrent } from "../../../hooks/useFiscalCalendarYear";
 import { useIsProfitYearFrozen } from "../../../hooks/useIsProfitYearFrozen";
-import { useUnForfeitState } from "../../../hooks/useUnForfeitState";
 import { useUnsavedChangesGuard } from "../../../hooks/useUnsavedChangesGuard";
 import UnForfeitGrid from "./UnForfeitGrid";
 import UnForfeitSearchFilter from "./UnForfeitSearchFilter";
+import { useUnForfeitState } from "./useUnForfeitState";
 
 const UnForfeit = () => {
   const { state, actions } = useUnForfeitState();
