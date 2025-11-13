@@ -13,7 +13,11 @@ import {
   ForfeitureAdjustmentUpdateRequest
 } from "reduxstore/types";
 import { setMessage } from "smart-ui-library";
-import { generateRowKey } from "../utils/forfeitActivities/gridDataHelpers";
+import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { useEditState } from "../../../../hooks/useEditState";
+import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
+import { useRowSelection } from "../../../../hooks/useRowSelection";
+import { generateRowKey } from "../../../../utils/forfeitActivities/gridDataHelpers";
 import {
   clearGridSelectionsForBadges,
   formatApiError,
@@ -23,12 +27,8 @@ import {
   getRowKeysForRequests,
   prepareBulkSaveRequests,
   prepareSaveRequest
-} from "../utils/forfeitActivities/saveOperationHelpers";
-import { Messages } from "../utils/messageDictonary";
-import useDecemberFlowProfitYear from "./useDecemberFlowProfitYear";
-import { useEditState } from "./useEditState";
-import { SortParams, useGridPagination } from "./useGridPagination";
-import { useRowSelection } from "./useRowSelection";
+} from "../../../../utils/forfeitActivities/saveOperationHelpers";
+import { Messages } from "../../../../utils/messageDictonary";
 
 interface TerminationSearchRequest {
   beginningDate?: string;
@@ -271,7 +271,12 @@ export const useTerminationGrid = ({
 
         // Allow re-search with same parameters (consistent with all other search pages)
         lastRequestKeyRef.current = key;
-        await triggerSearch(params, false);
+
+        try {
+          await triggerSearch(params, false);
+        } catch (error) {
+          console.error("Error fetching termination report:", error);
+        }
 
         // Clear archive flag after successful search
         if (shouldArchive) {

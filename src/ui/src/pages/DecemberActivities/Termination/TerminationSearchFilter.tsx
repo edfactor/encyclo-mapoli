@@ -1,5 +1,15 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Button, Checkbox, FormControlLabel, FormHelperText, Grid, MenuItem, TextField } from "@mui/material";
+import {
+  Box,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  FormHelperText,
+  Grid,
+  InputLabel,
+  MenuItem,
+  TextField
+} from "@mui/material";
 import React, { useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
@@ -105,6 +115,12 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
       endingDate: data.endingDate ? mmDDYYFormat(data.endingDate) : mmDDYYFormat(fiscalData?.fiscalEndDate || "")
     };
 
+    // Only include vested balance fields if both are provided
+    if (data.vestedBalanceValue === null || data.vestedBalanceOperator === null) {
+      delete params.vestedBalanceValue;
+      delete params.vestedBalanceOperator;
+    }
+
     // Only update search params and initial loaded state; let the grid trigger the API
     onSearch(params);
     setInitialSearchLoaded(true);
@@ -205,56 +221,59 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
           />
           {errors.endingDate && <FormHelperText error>{errors.endingDate.message}</FormHelperText>}
         </Grid>
-        <Grid size={{ xs: 12, sm: 3, md: 1.25 }}>
-          <Controller
-            name="vestedBalanceOperator"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                select
-                fullWidth
-                label="Operator"
-                value={field.value ?? 0}
-                onChange={(e) => field.onChange(Number(e.target.value))}
-                onBlur={field.onBlur}
-                name={field.name}
-                inputRef={field.ref}>
-                <MenuItem value={0}>=</MenuItem>
-                <MenuItem value={1}>&lt;</MenuItem>
-                <MenuItem value={2}>&lt;=</MenuItem>
-                <MenuItem value={3}>&gt;</MenuItem>
-                <MenuItem value={4}>&gt;=</MenuItem>
-              </TextField>
-            )}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 3, md: 1.25 }}>
-          <Controller
-            name="vestedBalanceValue"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                fullWidth
-                type="number"
-                label="Vested Balance"
-                placeholder="Enter amount"
-                value={field.value ?? ""}
-                onChange={(e) => {
-                  const value = e.target.value === "" ? null : Number(e.target.value);
-                  field.onChange(value);
-                }}
-                onBlur={field.onBlur}
-                name={field.name}
-                inputRef={field.ref}
-                inputProps={{
-                  min: 0,
-                  step: 1
-                }}
-                error={!!errors.vestedBalanceValue}
-                helperText={errors.vestedBalanceValue?.message}
-              />
-            )}
-          />
+        <Grid size={{ xs: 12, sm: 6, md: 2.5 }}>
+          <InputLabel sx={{ mb: 1 }}>Vested Balance</InputLabel>
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Controller
+              name="vestedBalanceOperator"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  select
+                  fullWidth
+                  value={field.value ?? ""}
+                  onChange={(e) => {
+                    const value = e.target.value === "" ? null : Number(e.target.value);
+                    field.onChange(value);
+                  }}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  inputRef={field.ref}>
+                  <MenuItem value=""></MenuItem>
+                  <MenuItem value={0}>=</MenuItem>
+                  <MenuItem value={1}>&lt;</MenuItem>
+                  <MenuItem value={2}>&lt;=</MenuItem>
+                  <MenuItem value={3}>&gt;</MenuItem>
+                  <MenuItem value={4}>&gt;=</MenuItem>
+                </TextField>
+              )}
+            />
+            <Controller
+              name="vestedBalanceValue"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  fullWidth
+                  type="number"
+                  placeholder="Amount"
+                  value={field.value ?? ""}
+                  onChange={(e) => {
+                    const value = e.target.value === "" ? null : Number(e.target.value);
+                    field.onChange(value);
+                  }}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  inputRef={field.ref}
+                  inputProps={{
+                    min: 0,
+                    step: 1
+                  }}
+                  error={!!errors.vestedBalanceValue}
+                  helperText={errors.vestedBalanceValue?.message}
+                />
+              )}
+            />
+          </Box>
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 6 }}>
           <Controller
@@ -268,7 +287,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
                     onChange={(e) => field.onChange(e.target.checked)}
                   />
                 }
-                label="Exclude members with; a $0 Ending Balance, 100% Vested, or Forfeited"
+                label="Exclude members with: $0 Ending Balance, 100% Vested, or Forfeited"
               />
             )}
           />

@@ -26,6 +26,7 @@ npm run build:uat   # UAT environment
 # Code quality
 npm run lint        # ESLint with max 0 warnings
 npm run prettier    # Format code
+npx tsc -b --noEmit # Tyescript compiler check
 
 # Testing
 npm run test        # Run Vitest with coverage
