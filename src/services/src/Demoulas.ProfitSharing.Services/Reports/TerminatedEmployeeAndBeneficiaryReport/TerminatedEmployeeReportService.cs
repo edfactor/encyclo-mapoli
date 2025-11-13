@@ -18,6 +18,12 @@ namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficia
 
 /// <summary>
 ///     Generates reports for terminated employees and their beneficiaries.
+///  
+///  The user provides a termination date range, which selects a subset of employees for the report.
+///  
+///  The report generates a 1 year look at how an employee's profit sharing account has changed.
+///  The report always starts with the amounts at the beginning of the prior completed profit year
+///  and includes all transactions up to today.  
 /// </summary>
 public sealed class TerminatedEmployeeReportService
 {
@@ -81,8 +87,7 @@ public sealed class TerminatedEmployeeReportService
         CancellationToken cancellationToken)
     {
         var overallStart = DateTime.UtcNow;
-
-
+         
         // Initialize report totals
         decimal totalVested = 0;
         decimal totalForfeit = 0;
@@ -94,19 +99,19 @@ public sealed class TerminatedEmployeeReportService
 
         // COBOL Transaction Year Boundary: Does NOT process transactions after the entered year
         // This is the YDATE in Cobol.  in December it is the current year, in January it is the previous year.
-        var yearEnd = await _yearEndService.GetCompletedYearEnd(cancellationToken);
-        // We presume we are here working on the not yet complted year end.   Which is the next year end
+        var lastCompletedYearEnd = await _yearEndService.GetCompletedYearEnd(cancellationToken);
+        
+        // We presume we are here working on the not yet completed year end.   Which is the next year end
         // after the last completed one.    So we add 1 year to the completed year end.
-        int transactionYearBoundary = yearEnd + 1;
+        int openProfitYear = lastCompletedYearEnd + 1;
 
-        // Load profit detail transactions
+        // Load profit detail transactions for YDATE 
         var profitDetailsStart = DateTime.UtcNow;
         IQueryable<ProfitDetail> profitDetailsRaw = ctx.ProfitDetails
-            .Where(pd => pd.ProfitYear >= profitYearRange.beginProfitYear
-                         && pd.ProfitYear <= profitYearRange.endProfitYear
-                         && pd.ProfitYear <= transactionYearBoundary
+            .Where(pd => pd.ProfitYear == openProfitYear
                          && ssns.Contains(pd.Ssn));
 
+        // This grabs all transactions for the current year
         var profitDetailsDict = await profitDetailsRaw
             .GroupBy(pd => new { pd.Ssn, pd.ProfitYear })
             .Select(g => new InternalProfitDetailDto
@@ -142,12 +147,11 @@ public sealed class TerminatedEmployeeReportService
         // This report is always giving values about today for the members current status.
         DateOnly today = DateOnly.FromDateTime(DateTime.Today);
         // The "Begin" values always refer to the prior completed year.  "Begin" is the "end" of the last completed YE.
-        short lastCompletedYearEnd = await _yearEndService.GetCompletedYearEnd(cancellationToken);
         CalendarResponseDto priorYearDateRange = await _calendarService.GetYearStartAndEndAccountingDatesAsync(lastCompletedYearEnd, cancellationToken);
 
         var thisYearStart = DateTime.UtcNow;
         Dictionary<(int Ssn, int Id), ParticipantTotalVestingBalance> thisYearBalancesDict = await _totalService
-            .TotalVestingBalance(ctx, profitYearRange.beginProfitYear, profitYearRange.endProfitYear, today)
+            .TotalVestingBalance(ctx, (short)today.Year, today)
             .Where(x => ssns.Contains(x.Ssn))
             .ToDictionaryAsync(x => (x.Ssn, x.Id), x => x, cancellationToken);
         var thisYearDuration = (DateTime.UtcNow - thisYearStart).TotalMilliseconds;
