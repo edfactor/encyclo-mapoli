@@ -259,7 +259,8 @@ BEGIN
     insert_navigation_item(PROF_SHARE_BY_STORE, YEAR_END_MENU, 'Prof Share by Store', 'QPAY066TA', '', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
 
 -- Fiscal Close menu items updated according to ticket requirements
-    insert_navigation_item(YTD_WAGES_EXTRACT, FISCAL_CLOSE, 'YTD Wages Extract', 'PROF-DOLLAR-EXTRACT', 'ytd-wages-extract', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE, FISCAL_CLOSE, 'Manage Executive Hours', 'PROF-DOLLAR-EXEC-EXTRACT, TPR008-09', 'manage-executive-hours-and-dollars', STATUS_NORMAL, ORDER_FIRST, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(YTD_WAGES_EXTRACT, FISCAL_CLOSE, 'YTD Wages Extract', 'PROF-DOLLAR-EXTRACT', 'ytd-wages-extract', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
 
 
 -- Dev-only: PAY426N entries (not assigned to roles in SQL)
@@ -267,27 +268,26 @@ BEGIN
     insert_navigation_item(PAY426_3, FISCAL_CLOSE, 'PAY426-3', '', 'pay426-3', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, NOT_NAVIGABLE);
 
 -- Profit Summary (PAY426 summary)
-    insert_navigation_item(PROFIT_SUMMARY, FISCAL_CLOSE, 'Profit Summary (PAY426 summary)', '', 'pay426-9', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(PAY426N_FISCAL_CLOSE, FISCAL_CLOSE, 'Profit Sharing Report', 'PAY426N', 'pay426n', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROFIT_SUMMARY, FISCAL_CLOSE, 'Profit Summary (PAY426 summary)', '', 'pay426-9', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PAY426N_FISCAL_CLOSE, FISCAL_CLOSE, 'Profit Sharing Report', 'PAY426N', 'pay426n', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
 
-    
-    
-    
+
+
+
 
 -- Pay Beneficiary Report (Year End / Fiscal Close)
-    
+
 
 -- Adhoc Beneficiaries Report (Pay Be Next) (Year End / Fiscal Close)
-    
+
 
 -- QPAY600 (Year End child)
-    insert_navigation_item(MANAGE_EXECUTIVE_HOURS_FISCAL_CLOSE, FISCAL_CLOSE, 'Manage Executive Hours', 'PROF-DOLLAR-EXEC-EXTRACT, TPR008-09', 'manage-executive-hours-and-dollars', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(GET_ELIGIBLE_EMPLOYEES, FISCAL_CLOSE, 'Get Eligible Employees', 'GET-ELIGIBLE-EMPS', 'eligible-employees', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(PROFIT_SHARE_FORFEIT, FISCAL_CLOSE, 'Profit Share Forfeit', 'PAY443', 'forfeit', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(MASTER_UPDATE, FISCAL_CLOSE, 'Master Update', 'PAY444|PAY447', 'profit-share-update', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(GET_ELIGIBLE_EMPLOYEES, FISCAL_CLOSE, 'Get Eligible Employees', 'GET-ELIGIBLE-EMPS', 'eligible-employees', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PROFIT_SHARE_FORFEIT, FISCAL_CLOSE, 'Profit Share Forfeit', 'PAY443', 'forfeit', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(MASTER_UPDATE, FISCAL_CLOSE, 'Master Update', 'PAY444|PAY447', 'profit-share-update', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
     --insert_navigation_item(PROFIT_MASTER_UPDATE, FISCAL_CLOSE, 'Profit Master Update', 'PAY460, PROFTLD', 'profit-master-update', STATUS_NORMAL, ORDER_EIGHTH, '', DISABLED, IS_NAVIGABLE);
-    insert_navigation_item(PAYMASTER_UPDATE, FISCAL_CLOSE, 'Paymaster Update', 'PAY450', 'pay450-summary', STATUS_NORMAL, ORDER_SEVENTH, '', ENABLED, IS_NAVIGABLE);
-    insert_navigation_item(PROF_CONTROL_SHEET, FISCAL_CLOSE, 'Prof Control Sheet', 'PROF-CNTRL-SHEET', 'prof-control-sheet', STATUS_NORMAL, ORDER_EIGHTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(PAYMASTER_UPDATE, FISCAL_CLOSE, 'Paymaster Update', 'PAY450', 'pay450-summary', STATUS_NORMAL, ORDER_EIGHTH, '', ENABLED, IS_NAVIGABLE);
+    -- insert_navigation_item(PROF_CONTROL_SHEET, FISCAL_CLOSE, 'Prof Control Sheet', 'PROF-CNTRL-SHEET', 'prof-control-sheet', STATUS_NORMAL, ORDER_EIGHTH, '', ENABLED, IS_NAVIGABLE); -- REMOVED in PS-2107
     insert_navigation_item(PROF_SHARE_REPORT_BY_AGE, FISCAL_CLOSE, 'Prof Share Report By Age', 'Prof130', '', STATUS_NORMAL, ORDER_NINTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(PROF_SHARE_GROSS_RPT, FISCAL_CLOSE, 'Prof Share Gross Rpt', 'QPAY501', 'profit-share-gross-report', STATUS_NORMAL, ORDER_TENTH, '', ENABLED, IS_NAVIGABLE);
     
@@ -538,8 +538,8 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     -- assign_navigation_role(PROFIT_MASTER_UPDATE, FINANCE_MANAGER); -- COMMENTED OUT - navigation item doesn't exist
     -- assign_navigation_role(SAVE_PROF_PAYMSTR, SYSTEM_ADMINISTRATOR); -- COMMENTED OUT - navigation item doesn't exist
     -- assign_navigation_role(SAVE_PROF_PAYMSTR, FINANCE_MANAGER); -- COMMENTED OUT - navigation item doesn't exist
-    assign_navigation_role(PROF_CONTROL_SHEET, SYSTEM_ADMINISTRATOR);
-    assign_navigation_role(PROF_CONTROL_SHEET, FINANCE_MANAGER);
+    -- assign_navigation_role(PROF_CONTROL_SHEET, SYSTEM_ADMINISTRATOR); -- REMOVED in PS-2107
+    -- assign_navigation_role(PROF_CONTROL_SHEET, FINANCE_MANAGER); -- REMOVED in PS-2107
     assign_navigation_role(QPAY066_AD_HOC_REPORTS, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(QPAY066_AD_HOC_REPORTS, FINANCE_MANAGER);
     assign_navigation_role(RECENTLY_TERMINATED, SYSTEM_ADMINISTRATOR);
@@ -607,7 +607,7 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(PROFIT_SHARE_FORFEIT, IT_DEVOPS);
     assign_navigation_role(MASTER_UPDATE, IT_DEVOPS);
     -- assign_navigation_role(PROFIT_MASTER_UPDATE, IT_DEVOPS); -- COMMENTED OUT - navigation item doesn't exist
-    assign_navigation_role(PROF_CONTROL_SHEET, IT_DEVOPS);
+    -- assign_navigation_role(PROF_CONTROL_SHEET, IT_DEVOPS); -- REMOVED in PS-2107
     assign_navigation_role(PROF_SHARE_REPORT_BY_AGE, IT_DEVOPS);
     assign_navigation_role(PROF_SHARE_GROSS_RPT, IT_DEVOPS);
 
