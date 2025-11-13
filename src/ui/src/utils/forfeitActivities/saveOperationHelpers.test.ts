@@ -23,11 +23,11 @@ describe("saveOperationHelpers", () => {
         rowKeyConfig: { type: "unforfeit" }
       };
 
-      it("should negate forfeitureAmount for unforfeit", () => {
+      it("should preserve forfeitureAmount for unforfeit (FE already negated)", () => {
         const request: ForfeitureAdjustmentUpdateRequest = {
           badgeNumber: 123456,
           profitYear: 2025,
-          forfeitureAmount: 1500,
+          forfeitureAmount: -1500, // FE already negated this
           classAction: false
         };
         const result = prepareSaveRequest(config, request);
@@ -35,16 +35,16 @@ describe("saveOperationHelpers", () => {
         expect(result).toEqual({
           badgeNumber: 123456,
           profitYear: 2025,
-          forfeitureAmount: -1500,
+          forfeitureAmount: -1500, // Should remain negated
           classAction: false
         });
       });
 
-      it("should negate negative forfeitureAmount for unforfeit", () => {
+      it("should preserve positive forfeitureAmount for unforfeit", () => {
         const request: ForfeitureAdjustmentUpdateRequest = {
           badgeNumber: 123456,
           profitYear: 2025,
-          forfeitureAmount: -1500,
+          forfeitureAmount: 1500,
           classAction: false
         };
         const result = prepareSaveRequest(config, request);
@@ -56,7 +56,7 @@ describe("saveOperationHelpers", () => {
         const request: ForfeitureAdjustmentUpdateRequest = {
           badgeNumber: 123456,
           profitYear: 2025,
-          forfeitureAmount: 1500,
+          forfeitureAmount: -1500, // FE already negated this
           classAction: true,
           offsettingProfitDetailId: 789
         };
@@ -65,7 +65,7 @@ describe("saveOperationHelpers", () => {
         expect(result).toEqual({
           badgeNumber: 123456,
           profitYear: 2025,
-          forfeitureAmount: -1500,
+          forfeitureAmount: -1500, // Should remain negated
           classAction: true,
           offsettingProfitDetailId: 789
         });
@@ -115,10 +115,10 @@ describe("saveOperationHelpers", () => {
       rowKeyConfig: { type: "unforfeit" }
     };
 
-    it("should transform all requests in the array", () => {
+    it("should preserve all requests in the array (FE already negated)", () => {
       const requests: ForfeitureAdjustmentUpdateRequest[] = [
-        { badgeNumber: 123456, profitYear: 2025, forfeitureAmount: 1500, classAction: false },
-        { badgeNumber: 789012, profitYear: 2025, forfeitureAmount: 2000, classAction: false }
+        { badgeNumber: 123456, profitYear: 2025, forfeitureAmount: -1500, classAction: false }, // FE already negated
+        { badgeNumber: 789012, profitYear: 2025, forfeitureAmount: -2000, classAction: false } // FE already negated
       ];
 
       const result = prepareBulkSaveRequests(config, requests);
@@ -135,7 +135,7 @@ describe("saveOperationHelpers", () => {
 
     it("should handle single request", () => {
       const requests: ForfeitureAdjustmentUpdateRequest[] = [
-        { badgeNumber: 123456, profitYear: 2025, forfeitureAmount: 1500, classAction: false }
+        { badgeNumber: 123456, profitYear: 2025, forfeitureAmount: -1500, classAction: false } // FE already negated
       ];
 
       const result = prepareBulkSaveRequests(config, requests);

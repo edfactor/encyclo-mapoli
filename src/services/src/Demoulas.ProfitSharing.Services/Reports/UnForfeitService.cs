@@ -15,6 +15,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Linq.Dynamic.Core;
+using Demoulas.Util.Extensions;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
@@ -47,10 +48,15 @@ public sealed class UnforfeitService : IUnforfeitService
         {
             rehiredEmployees = await _dataContextFactory.UseReadOnlyContext(async context =>
             {
-                short profitYear = (short)req.EndingDate.Year;
+                // Unforfeit is always for the current year.  Ths page is used in December flow - so we should be using member financials (pay_profit row)
+                // from the wall clock year.
+                // If someone is using this service in Jan/Feb/March - then we may have trouble in the Suggested Forfeit, because those transactions will be in the current year
+                // and not the "openProfitYear" (aka wall clock year - 1)
+                var today = DateTime.Today.ToDateOnly();
+                short profitYear = (short) today.Year;
 
-                IQueryable<ParticipantTotalYear>? yearsOfServiceQuery = _totalService.GetYearsOfService(context, profitYear, req.EndingDate);
-                IQueryable<ParticipantTotalVestingBalance>? vestingServiceQuery = _totalService.TotalVestingBalance(context, profitYear, req.EndingDate);
+                IQueryable<ParticipantTotalYear>? yearsOfServiceQuery = _totalService.GetYearsOfService(context, profitYear, today);
+                IQueryable<ParticipantTotalVestingBalance>? vestingServiceQuery = _totalService.TotalVestingBalance(context, profitYear, today);
                 IQueryable<Demographic>? demo = await _demographicReaderService.BuildDemographicQuery(context);
 
                 // PERFORMANCE: Pre-filter demographics to reduce join volume
