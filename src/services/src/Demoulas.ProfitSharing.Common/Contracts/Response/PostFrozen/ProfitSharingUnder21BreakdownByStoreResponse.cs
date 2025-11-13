@@ -26,7 +26,7 @@ public sealed record ProfitSharingUnder21BreakdownByStoreResponse : IIsExecutive
     {
         return new ProfitSharingUnder21BreakdownByStoreResponse()
         {
-            StoreNumber = (short)42,
+            StoreNumber = 42,
             BadgeNumber = 704234,
             FullName = "Johnson, Martha",
             BeginningBalance = 20014,

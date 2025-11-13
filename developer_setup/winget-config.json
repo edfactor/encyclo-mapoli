@@ -28,10 +28,7 @@
         },
         {
           "PackageIdentifier": "Git.Git"
-        },
-        {
-          "PackageIdentifier": "Google.Chrome.EXE"
-        },
+        },       
         {
           "PackageIdentifier": "TortoiseGit.TortoiseGit"
         },

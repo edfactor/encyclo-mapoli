@@ -1,4 +1,4 @@
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -93,7 +93,6 @@ public sealed class TerminatedEmployeeReportService
         decimal totalEndingBalance = 0;
         decimal totalBeneficiaryAllocation = 0;
 
-        (short beginProfitYear, short endProfitYear) profitYearRange = GetProfitYearRange(req);
         IQueryable<int> ssns = memberSliceUnion.Select(ms => ms.Ssn);
 
         // COBOL Transaction Year Boundary: Does NOT process transactions after the entered year
@@ -363,7 +362,7 @@ public sealed class TerminatedEmployeeReportService
                 .GroupBy(x => new { x.BadgeNumber, x.PsnSuffix, x.Name })
                 .Select(g => new TerminatedEmployeeAndBeneficiaryDataResponseDto
                 {
-                    PSN = g.Key.PsnSuffix == 0 ? (long)g.Key.BadgeNumber : (long)g.Key.BadgeNumber * 10000 + g.Key.PsnSuffix,
+                    PSN = g.Key.PsnSuffix == 0 ? g.Key.BadgeNumber : (long)g.Key.BadgeNumber * 10000 + g.Key.PsnSuffix,
                     Name = g.Key.Name,
                     YearDetails = g.Select(x => x.YearDetail).OrderByDescending(y => y.ProfitYear).ToList()
                 }).ToPaginationResultsAsync(req, cancellationToken));
@@ -441,7 +440,7 @@ public sealed class TerminatedEmployeeReportService
     /// <summary>
     ///     Extracts the profit year range from the request date range.
     /// </summary>
-    private (short beginProfitYear, short endProfitYear) GetProfitYearRange(FilterableStartAndEndDateRequest request)
+    private static (short beginProfitYear, short endProfitYear) GetProfitYearRange(FilterableStartAndEndDateRequest request)
     {
         return ((short)request.BeginningDate.Year, (short)request.EndingDate.Year);
     }
@@ -487,35 +486,6 @@ public sealed class TerminatedEmployeeReportService
                         && d.TerminationDate >= request.BeginningDate
                         && d.TerminationDate <= request.EndingDate)
             .Select(d => new TerminatedEmployeeDto { Demographic = d });
-
-        return queryable;
-    }
-
-    /// <summary>
-    ///     Queries terminated employees within the specified date range.
-    ///     Excludes retirees receiving pension (matching READY COBOL business rules).
-    /// </summary>
-    private async Task<IQueryable<TerminatedEmployeeDto>> GetTerminatedEmployees(
-        IProfitSharingDbContext ctx,
-        FilterableStartAndEndDateRequest request)
-    {
-        var start = DateTime.UtcNow;
-        IQueryable<Demographic> demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
-
-        // BUSINESS RULE: Get employees who might have profit sharing activity.
-        // READY includes employees based on activity rather than just HR termination status.
-        // Excludes retirees receiving pension (READY: PY_TERM != 'W').
-        IQueryable<TerminatedEmployeeDto> queryable = demographics
-            .Include(d => d.ContactInfo)
-            .Where(d => d.EmploymentStatusId == EmploymentStatus.Constants.Terminated
-                        && (d.TerminationCodeId == null || d.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension)
-                        && d.TerminationDate != null
-                        && d.TerminationDate >= request.BeginningDate
-                        && d.TerminationDate <= request.EndingDate)
-            .Select(d => new TerminatedEmployeeDto { Demographic = d });
-
-        var duration = (DateTime.UtcNow - start).TotalMilliseconds;
-        _logger.LogDebug("GetTerminatedEmployees query building completed in {DurationMs:F2}ms", duration);
 
         return queryable;
     }
@@ -630,73 +600,11 @@ public sealed class TerminatedEmployeeReportService
     }
 
     /// <summary>
-    ///     Retrieves beneficiary records for deceased employees.
-    ///     Implements COBOL QPAY066 beneficiary logic with PSN suffix handling.
-    /// </summary>
-    private async Task<IQueryable<MemberSlice>> GetBeneficiaries(
-        IProfitSharingDbContext ctx,
-        FilterableStartAndEndDateRequest request)
-    {
-        var start = DateTime.UtcNow;
-        _logger.LogDebug(
-            "Loading beneficiaries for date range {BeginningDate} to {EndingDate}",
-            request.BeginningDate, request.EndingDate);
-
-        IQueryable<Demographic> demographicsQuery = await _demographicReaderService.BuildDemographicQuery(ctx);
-
-        // Load beneficiaries and their related employee demographics
-        IQueryable<MemberSlice> query = ctx.Beneficiaries
-            .Include(b => b.Contact)
-            .ThenInclude(c => c!.ContactInfo)
-            .GroupJoin(
-                demographicsQuery,
-                b => b.Contact!.Ssn,
-                d => d.Ssn,
-                (b, ds) => new { b, ds })
-            .SelectMany(
-                x => x.ds.DefaultIfEmpty(),
-                (x, d) =>
-                    new MemberSlice
-                    {
-                        // COBOL Lines 775-782: When beneficiary matches demographics AND termination date is NOT in range,
-                        // use badge number with PSN=0 (appears as primary employee), otherwise use PSN suffix
-                        Id = d == null ? x.b.Id : d.Id,
-                        PsnSuffix = d == null ? x.b.PsnSuffix : (short)0,
-                        BadgeNumber = d == null ? x.b.BadgeNumber : d.BadgeNumber,
-                        Ssn = x.b.Contact!.Ssn,
-                        BirthDate = x.b.Contact!.DateOfBirth,
-                        HoursCurrentYear = 0,
-                        EmploymentStatusCode = '\0',
-                        FullName = x.b.Contact!.ContactInfo.FullName!,
-                        FirstName = x.b.Contact.ContactInfo.FirstName,
-                        LastName = x.b.Contact.ContactInfo.LastName,
-                        YearsInPs = 10, // Convention to make IsInteresting() always return true (matches READY)
-                        TerminationDate = d == null ? null : d.TerminationDate,
-                        IncomeRegAndExecCurrentYear = 0,
-                        TerminationCode = d == null ? null : d.TerminationCodeId,
-                        ZeroCont = ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
-                        EnrollmentId = 0,
-                        Etva = 0,
-                        // CRITICAL: Beneficiaries must use the requested profit year to match transaction lookups
-                        ProfitYear = (short)request.EndingDate.Year,
-                        IsOnlyBeneficiary = d == null,
-                        IsBeneficiaryAndEmployee = d != null,
-                        IsExecutive = false
-                    }
-            );
-
-        var duration = (DateTime.UtcNow - start).TotalMilliseconds;
-        _logger.LogDebug("GetBeneficiaries query building completed in {DurationMs:F2}ms", duration);
-
-        return query;
-    }
-
-    /// <summary>
     ///     Combines employee and beneficiary slices, filtering for eligibility and removing duplicates.
     ///     Prioritizes employee records over beneficiary records for the same person.
     ///     Returns an IQueryable to defer materialization until the data is actually needed.
     /// </summary>
-    private IQueryable<MemberSlice> CombineEmployeeAndBeneficiarySlices(
+    private static IQueryable<MemberSlice> CombineEmployeeAndBeneficiarySlices(
         IQueryable<MemberSlice> terminatedWithContributions,
         IQueryable<MemberSlice> beneficiaries)
     {
