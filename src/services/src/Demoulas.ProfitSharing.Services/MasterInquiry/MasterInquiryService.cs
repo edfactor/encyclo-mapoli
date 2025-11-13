@@ -504,6 +504,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
+            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, false);
             // Use context-based overloads to avoid nested context disposal
             IQueryable<MasterInquiryItem> query;
 
@@ -632,7 +633,72 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 CurrentHoursYear = x.CurrentHoursYear,
                 IsExecutive = x.IsExecutive,
                 EmploymentStatusId = x.EmploymentStatusId ?? '\0',
-            });
+            }).ToList();
+
+            // Collect all partner references (both employees and beneficiaries)
+            var employeePartnerIds = formattedResults
+                .Where(x => x.CommentRelatedOracleHcmId.HasValue && (x.CommentRelatedPsnSuffix == null || x.CommentRelatedPsnSuffix == 0))
+                .Select(x => x.CommentRelatedOracleHcmId!.Value)
+                .Distinct()
+                .ToList();
+
+            var beneficiaryPartnerKeys = formattedResults
+                .Where(x => x.CommentRelatedOracleHcmId.HasValue && x.CommentRelatedPsnSuffix.HasValue && x.CommentRelatedPsnSuffix > 0)
+                .Select(x => (OracleHcmId: x.CommentRelatedOracleHcmId!.Value, PsnSuffix: x.CommentRelatedPsnSuffix!.Value))
+                .Distinct()
+                .ToList();
+
+            if (employeePartnerIds.Any() || beneficiaryPartnerKeys.Any())
+            {
+                // Single query to get both employees and beneficiaries
+                var badgeNumbers = employeePartnerIds.Concat(beneficiaryPartnerKeys.Select(k => k.OracleHcmId)).Distinct().ToList();
+                
+                var allPartnerInfo = await (
+                    from d in demographics
+                    where badgeNumbers.Contains(d.OracleHcmId)
+                    select new
+                    {
+                        d.OracleHcmId,
+                        d.BadgeNumber,
+                        d.ContactInfo!.FullName,
+                        // Left join to beneficiaries - will be null for employees
+                        Beneficiaries = (from b in ctx.Beneficiaries
+                                       join bc in ctx.BeneficiaryContacts on b.BeneficiaryContactId equals bc.Id
+                                       where b.DemographicId == d.Id
+                                       select new { b.PsnSuffix, bc.ContactInfo.FullName }).ToList()
+                    }
+                ).ToListAsync(cancellationToken);
+
+                // Build lookup dictionaries for fast access
+                var employeeLookup = allPartnerInfo.ToDictionary(p => p.OracleHcmId, p => (p.BadgeNumber, p.FullName));
+                var beneficiaryLookup = allPartnerInfo
+                    .SelectMany(p => p.Beneficiaries.Select(b => (Key: (p.OracleHcmId, b.PsnSuffix), p.BadgeNumber, b.FullName)))
+                    .ToDictionary(x => x.Key, x => (x.BadgeNumber, x.FullName));
+
+                // Enrich results in a single loop
+                foreach (var result in formattedResults.Where(x => x.CommentRelatedOracleHcmId.HasValue))
+                {
+                    if (result.CommentRelatedPsnSuffix is null or 0)
+                    {
+                        // Employee lookup
+                        if (employeeLookup.TryGetValue(result.CommentRelatedOracleHcmId!.Value, out var employee))
+                        {
+                            result.XFerQdroId = employee.BadgeNumber;
+                            result.XFerQdroName = employee.FullName;
+                        }
+                    }
+                    else
+                    {
+                        // Beneficiary lookup
+                        var key = (result.CommentRelatedOracleHcmId!.Value, result.CommentRelatedPsnSuffix!.Value);
+                        if (beneficiaryLookup.TryGetValue(key, out var beneficiary))
+                        {
+                            result.XFerQdroId = (((long)beneficiary.BadgeNumber) * 10000) + result.CommentRelatedPsnSuffix!.Value;
+                            result.XFerQdroName = beneficiary.FullName;
+                        }
+                    }
+                }
+            }
 
             return new PaginatedResponseDto<MasterInquiryResponseDto>(req) { Results = formattedResults, Total = rawQuery.Total };
         }, cancellationToken);
