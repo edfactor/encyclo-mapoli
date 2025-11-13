@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setMessage } from "smart-ui-library";
-import { useChecksumValidation } from "../../../../hooks/useChecksumValidation";
 import useFiscalCloseProfitYear from "../../../../hooks/useFiscalCloseProfitYear";
 import {
   useGetMasterApplyMutation,
@@ -21,6 +20,7 @@ import {
 import { RootState } from "../../../../reduxstore/store";
 import { ProfitShareMasterApplyRequest, ProfitYearRequest } from "../../../../reduxstore/types";
 import { Messages } from "../../../../utils/messageDictonary";
+import { useChecksumValidation } from "./useChecksumValidation";
 
 // State interface
 interface ProfitShareEditUpdateState {

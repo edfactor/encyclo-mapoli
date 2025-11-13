@@ -5,10 +5,10 @@ import { DSMGrid, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
-import { useUnForfeitGrid } from "../../../hooks/useUnForfeitGrid";
 import { CalendarResponseDto } from "../../../reduxstore/types";
 import { UnForfeitGridColumns } from "./UnForfeitGridColumns";
 import { GetProfitDetailColumns } from "./UnForfeitProfitDetailGridColumns";
+import { useUnForfeitGrid } from "./useUnForfeitGrid";
 
 interface UnForfeitGridSearchProps {
   initialSearchLoaded: boolean;

@@ -1,11 +1,11 @@
 import { renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { MasterUpdateCrossReferenceValidationResponse } from "../types/validation/cross-reference-validation";
-import { useChecksumValidation } from "./useChecksumValidation";
+import type { MasterUpdateCrossReferenceValidationResponse } from "../../../../../types/validation/cross-reference-validation";
+import { useChecksumValidation } from "../useChecksumValidation";
 
 // Mock RTK Query hook
 const mockUseGetMasterUpdateValidationQuery = vi.fn();
-vi.mock("../reduxstore/api/ValidationApi", () => ({
+vi.mock("../../../../../reduxstore/api/ValidationApi", () => ({
   useGetMasterUpdateValidationQuery: (...args: unknown[]) => mockUseGetMasterUpdateValidationQuery(...args)
 }));
 

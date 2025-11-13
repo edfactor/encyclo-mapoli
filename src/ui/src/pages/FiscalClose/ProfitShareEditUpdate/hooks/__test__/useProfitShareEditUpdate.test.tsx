@@ -44,7 +44,7 @@ vi.mock("../../../../../hooks/useFiscalCloseProfitYear", () => ({
   default: mockUseFiscalCloseProfitYear
 }));
 
-vi.mock("../../../../../hooks/useChecksumValidation", () => ({
+vi.mock("../useChecksumValidation", () => ({
   useChecksumValidation: mockUseChecksumValidation
 }));
 

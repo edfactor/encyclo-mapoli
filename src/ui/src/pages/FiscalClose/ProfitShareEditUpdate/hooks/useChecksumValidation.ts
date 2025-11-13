@@ -1,9 +1,9 @@
 import { useEffect, useMemo } from "react";
-import { useGetMasterUpdateValidationQuery } from "../reduxstore/api/ValidationApi";
+import { useGetMasterUpdateValidationQuery } from "../../../../reduxstore/api/ValidationApi";
 import {
   CrossReferenceValidation,
   MasterUpdateCrossReferenceValidationResponse
-} from "../types/validation/cross-reference-validation";
+} from "../../../../types/validation/cross-reference-validation";
 
 export interface ChecksumValidationConfig {
   /** The profit year to validate */
