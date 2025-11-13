@@ -239,7 +239,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
                   onBlur={field.onBlur}
                   name={field.name}
                   inputRef={field.ref}>
-                  <MenuItem value="">-</MenuItem>
+                  <MenuItem value=""></MenuItem>
                   <MenuItem value={0}>=</MenuItem>
                   <MenuItem value={1}>&lt;</MenuItem>
                   <MenuItem value={2}>&lt;=</MenuItem>
