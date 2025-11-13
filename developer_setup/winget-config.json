@@ -8,7 +8,10 @@
           "PackageIdentifier": "Microsoft.VisualStudioCode"
         },
         {
-          "PackageIdentifier": "Microsoft.VisualStudio.2022.Professional",
+          "PackageIdentifier": "CoreyButler.NVMforWindows"
+        },
+        {
+          "PackageIdentifier": "Microsoft.VisualStudio.Professional",
           "InstallationOptions": {
             "InstallationType": "Full",
             "Scope": "Machine"
@@ -27,6 +30,9 @@
           "PackageIdentifier": "Git.Git"
         },
         {
+          "PackageIdentifier": "Google.Chrome.EXE"
+        },
+        {
           "PackageIdentifier": "TortoiseGit.TortoiseGit"
         },
         {
@@ -39,6 +45,12 @@
           }
         },
         {
+          "PackageIdentifier": "Microsoft.Teams"
+        },
+        {
+          "PackageIdentifier": "Postman.Postman"
+        },
+        {
           "PackageIdentifier": "OpenJS.NodeJS.LTS"
         },
         {
@@ -46,6 +58,9 @@
           "InstallationOptions": {
             "Scope": "Machine"
           }
+        },
+        {
+          "PackageIdentifier": "Notepad++.Notepad++"
         },
         {
           "PackageIdentifier": "RedHat.Podman",
