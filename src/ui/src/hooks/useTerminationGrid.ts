@@ -9,8 +9,8 @@ import {
 import { RootState } from "reduxstore/store";
 import {
   CalendarResponseDto,
-  ForfeitureAdjustmentUpdateRequest,
-  FilterableStartAndEndDateRequest
+  FilterableStartAndEndDateRequest,
+  ForfeitureAdjustmentUpdateRequest
 } from "reduxstore/types";
 import { setMessage } from "smart-ui-library";
 import { generateRowKey } from "../utils/forfeitActivities/gridDataHelpers";
@@ -547,7 +547,7 @@ export const useTerminationGrid = ({
         };
       })
       .filter((row) => row !== null); // Remove null entries
-  }, [termination, selectedProfitYear]);
+  }, [termination]);
 
   const paginationHandlers = {
     setPageNumber: (value: number) => {
