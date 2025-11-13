@@ -15,16 +15,6 @@ namespace Demoulas.ProfitSharing.UnitTests.Reports.PostFrozen;
 [CollectionDefinition("PS-759-Under21Totals", DisableParallelization = true)]
 public sealed class ProfitSharingUnder21TotalsTests : ApiTestBase<Program>
 {
-    public ProfitSharingUnder21TotalsTests()
-    {
-    }
-
-    /// <summary>
-    ///   This endpoint is computationally expensive with large mock datasets.
-    ///   Increase timeout to allow for legitimate slowness in business logic.
-    /// </summary>
-    protected override TimeSpan? GetHttpClientTimeout() => TimeSpan.FromMinutes(2);
-
     [Fact(DisplayName = "PS-759 - Profit Sharing under 21 ProfitShareUpdateTotals", Skip = "Computationally expensive with large mock datasets")]
     public async Task CheckUnder21Totals()
     {
