@@ -6,9 +6,9 @@ import { CircularProgress, Divider, Grid } from "@mui/material";
 
 import { CAPTIONS } from "../../../constants";
 import { useLazyGetAccountingRangeToCurrent } from "../../../hooks/useFiscalCalendarYear";
-import { useTerminationState } from "../../../hooks/useTerminationState";
 import { useUnsavedChangesGuard } from "../../../hooks/useUnsavedChangesGuard";
 import { StartAndEndDateRequest } from "../../../reduxstore/types";
+import { useTerminationState } from "./hooks/useTerminationState";
 import TerminationGrid from "./TerminationGrid";
 import TerminationSearchFilter from "./TerminationSearchFilter";
 
@@ -17,6 +17,8 @@ export interface TerminationSearchRequest extends StartAndEndDateRequest {
   archive?: boolean;
   excludeZeroBalance?: boolean;
   excludeZeroAndFullyVested?: boolean;
+  vestedBalanceValue?: number | null;
+  vestedBalanceOperator?: number | null;
 }
 
 const Termination = () => {

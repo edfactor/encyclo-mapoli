@@ -1,5 +1,5 @@
 import { useCallback, useReducer } from "react";
-import { StartAndEndDateRequest } from "../reduxstore/types";
+import { StartAndEndDateRequest } from "../../../reduxstore/types";
 
 export interface UnForfeitSearchRequest extends StartAndEndDateRequest {
   archive?: boolean;

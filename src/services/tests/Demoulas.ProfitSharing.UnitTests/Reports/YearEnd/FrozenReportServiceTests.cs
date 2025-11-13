@@ -92,9 +92,11 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
             ppArray[0].ProfitYear = testYear;
             ppArray[0].IncomeExecutive = 25;
             ppArray[0].CurrentIncomeYear = 49995;
+            ppArray[0].TotalIncome = ppArray[0].IncomeExecutive + ppArray[0].CurrentIncomeYear;
             ppArray[1].ProfitYear = (short)(testYear - 1);
             ppArray[1].IncomeExecutive = 0;
             ppArray[1].CurrentIncomeYear = 0;
+            ppArray[1].TotalIncome = 0;
 
             await ctx.SaveChangesAsync(CancellationToken.None);
         });

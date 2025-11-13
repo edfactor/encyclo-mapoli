@@ -26,7 +26,7 @@ vi.mock("../../../../hooks/useIsProfitYearFrozen", () => ({
   useIsProfitYearFrozen: vi.fn(() => false)
 }));
 
-vi.mock("../../../../hooks/useUnForfeitState", () => ({
+vi.mock("../useUnForfeitState", () => ({
   useUnForfeitState: vi.fn(() => ({
     state: {
       initialSearchLoaded: false,
@@ -201,7 +201,7 @@ describe("UnForfeit", () => {
 
   describe("Search functionality", () => {
     it("should call handleSearch when search button is clicked", async () => {
-      const { useUnForfeitState } = await import("../../../../hooks/useUnForfeitState");
+      const { useUnForfeitState } = await import("../useUnForfeitState");
       const mockHandleSearch = vi.fn();
       const user = userEvent.setup();
 
@@ -241,7 +241,7 @@ describe("UnForfeit", () => {
     });
 
     it("should disable search button when unsaved changes exist", async () => {
-      const { useUnForfeitState } = await import("../../../../hooks/useUnForfeitState");
+      const { useUnForfeitState } = await import("../useUnForfeitState");
 
       vi.mocked(useUnForfeitState).mockReturnValueOnce({
         state: {
@@ -280,7 +280,7 @@ describe("UnForfeit", () => {
   describe("Unsaved changes guard", () => {
     it("should invoke useUnsavedChangesGuard with hasUnsavedChanges state", async () => {
       const { useUnsavedChangesGuard } = await import("../../../../hooks/useUnsavedChangesGuard");
-      const { useUnForfeitState } = await import("../../../../hooks/useUnForfeitState");
+      const { useUnForfeitState } = await import("../useUnForfeitState");
 
       vi.mocked(useUnForfeitState).mockReturnValueOnce({
         state: {
@@ -311,7 +311,7 @@ describe("UnForfeit", () => {
 
   describe("Status change handling", () => {
     it("should pass handleStatusChange to StatusDropdownActionNode", async () => {
-      const { useUnForfeitState } = await import("../../../../hooks/useUnForfeitState");
+      const { useUnForfeitState } = await import("../useUnForfeitState");
       const mockHandleStatusChange = vi.fn();
 
       vi.mocked(useUnForfeitState).mockReturnValueOnce({
@@ -343,7 +343,7 @@ describe("UnForfeit", () => {
 
   describe("Auto-archive on status change", () => {
     it("should auto-trigger search when shouldArchive is true", async () => {
-      const { useUnForfeitState } = await import("../../../../hooks/useUnForfeitState");
+      const { useUnForfeitState } = await import("../useUnForfeitState");
       const mockHandleSearch = vi.fn();
 
       vi.mocked(useUnForfeitState).mockReturnValueOnce({
@@ -373,7 +373,7 @@ describe("UnForfeit", () => {
     });
 
     it("should not auto-trigger search when shouldArchive is false", async () => {
-      const { useUnForfeitState } = await import("../../../../hooks/useUnForfeitState");
+      const { useUnForfeitState } = await import("../useUnForfeitState");
       const mockHandleSearch = vi.fn();
 
       vi.mocked(useUnForfeitState).mockReturnValueOnce({
@@ -404,7 +404,7 @@ describe("UnForfeit", () => {
 
   describe("Grid and Filter integration", () => {
     it("should pass initialSearchLoaded to UnForfeitGrid", async () => {
-      const { useUnForfeitState } = await import("../../../../hooks/useUnForfeitState");
+      const { useUnForfeitState } = await import("../useUnForfeitState");
 
       vi.mocked(useUnForfeitState).mockReturnValueOnce({
         state: {
@@ -438,7 +438,7 @@ describe("UnForfeit", () => {
     });
 
     it("should pass hasUnsavedChanges to grid and filter", async () => {
-      const { useUnForfeitState } = await import("../../../../hooks/useUnForfeitState");
+      const { useUnForfeitState } = await import("../useUnForfeitState");
 
       vi.mocked(useUnForfeitState).mockReturnValueOnce({
         state: {

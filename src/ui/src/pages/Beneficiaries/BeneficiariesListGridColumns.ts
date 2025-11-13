@@ -8,12 +8,14 @@ import {
   createStateColumn,
   createZipColumn
 } from "../../utils/gridColumnFactory";
+import { BeneficiaryActionHandlers, BeneficiaryActionsCellRenderer } from "./BeneficiaryActions";
 
 export const GetBeneficiariesListGridColumns = (
-  percentageFieldRenderer: (percentage: number, id: number) => React.JSX.Element
+  percentageFieldRenderer: (percentage: number, id: number) => React.JSX.Element,
+  actionHandlers?: BeneficiaryActionHandlers
 ): ColDef[] => {
-  return [
-    createBadgeColumn({ headerName: 'Badge/Psn', psnSuffix: true }),
+  const columns: ColDef[] = [
+    createBadgeColumn({ headerName: "Badge/Psn", psnSuffix: true }),
     createNameColumn({
       field: "fullName",
 
@@ -110,4 +112,24 @@ export const GetBeneficiariesListGridColumns = (
       }
     }
   ];
+
+  // Add Action column if handlers are provided
+  if (actionHandlers) {
+    columns.push({
+      headerName: "Action",
+      field: "actions",
+      sortable: false,
+      resizable: false,
+      headerClass: "center-align",
+      cellClass: "center-align",
+      cellRenderer: BeneficiaryActionsCellRenderer,
+      cellRendererParams: {
+        handlers: actionHandlers
+      },
+      minWidth: 200,
+      maxWidth: 250
+    });
+  }
+
+  return columns;
 };

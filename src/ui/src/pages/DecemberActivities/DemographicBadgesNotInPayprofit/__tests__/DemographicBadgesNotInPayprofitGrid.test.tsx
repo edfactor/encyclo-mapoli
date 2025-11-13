@@ -51,8 +51,22 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
     dataSource: "Test Data",
     response: {
       results: [
-        { badgeNumber: 12345, ssn: 123456789, employeeName: "John Doe", store: 1, status: "Active", statusName: "Active" },
-        { badgeNumber: 12346, ssn: 123456790, employeeName: "Jane Smith", store: 2, status: "Active", statusName: "Active" }
+        {
+          badgeNumber: 12345,
+          ssn: 123456789,
+          employeeName: "John Doe",
+          store: 1,
+          status: "Active",
+          statusName: "Active"
+        },
+        {
+          badgeNumber: 12346,
+          ssn: 123456790,
+          employeeName: "Jane Smith",
+          store: 2,
+          status: "Active",
+          statusName: "Active"
+        }
       ],
       total: 2,
       totalPages: 1,
@@ -337,7 +351,9 @@ describe("DemographicBadgesNotInPayprofitGrid", () => {
         endDate: "2024-12-31",
         dataSource: "Test Data",
         response: {
-          results: [{ badgeNumber: 1, ssn: 100000000, employeeName: "Name", store: 1, status: "Active", statusName: "Active" }],
+          results: [
+            { badgeNumber: 1, ssn: 100000000, employeeName: "Name", store: 1, status: "Active", statusName: "Active" }
+          ],
           total: 1,
           totalPages: 1,
           pageSize: 25,

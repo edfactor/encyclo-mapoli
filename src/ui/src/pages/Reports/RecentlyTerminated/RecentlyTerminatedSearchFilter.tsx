@@ -1,11 +1,10 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, Grid } from "@mui/material";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { useLazyGetAccountingRangeToCurrent } from "hooks/useFiscalCalendarYear";
 import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
-import { SearchAndReset } from "smart-ui-library";
+import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "utils/dateUtils";
 import * as yup from "yup";
 import {
@@ -102,7 +101,7 @@ const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterPro
             name="profitYear"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="profitYear"
                 onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
                 value={field.value ? new Date(field.value, 0) : null}
@@ -122,7 +121,7 @@ const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterPro
             name="beginningDate"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="beginningDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value ? mmDDYYFormat(value) : undefined);
@@ -145,7 +144,7 @@ const RecentlyTerminatedSearchFilter: React.FC<RecentlyTerminatedSearchFilterPro
             name="endingDate"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
+              <DSMDatePicker
                 id="endingDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value ? mmDDYYFormat(value) : undefined);

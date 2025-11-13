@@ -38,37 +38,59 @@ vi.mock("../hooks/useForfeit", () => ({
 // Mock the child components
 vi.mock("../ForfeitGrid", () => ({
   default: vi.fn(({ searchResults, pagination, isSearching }) =>
-    React.createElement('section', { 'aria-label': 'forfeit grid' },
-      React.createElement('div', { 'aria-live': 'polite' }, searchResults ? "true" : "false"),
-      React.createElement('div', null, isSearching.toString()),
-      React.createElement('div', null, pagination?.pageSize)
+    React.createElement(
+      "section",
+      { "aria-label": "forfeit grid" },
+      React.createElement("div", { "aria-live": "polite" }, searchResults ? "true" : "false"),
+      React.createElement("div", null, isSearching.toString()),
+      React.createElement("div", null, pagination?.pageSize)
     )
   )
 }));
 
 vi.mock("../ForfeitSearchFilter", () => ({
   default: vi.fn(({ onSearch, onReset, isSearching }) =>
-    React.createElement('section', { 'aria-label': 'forfeit search filter' },
-      React.createElement('button', {
-        onClick: () => onSearch({ profitYear: 2024 })
-      }, 'Search'),
-      React.createElement('button', {
-        onClick: onReset
-      }, 'Reset'),
-      React.createElement('div', { 'aria-live': 'polite' }, isSearching.toString())
+    React.createElement(
+      "section",
+      { "aria-label": "forfeit search filter" },
+      React.createElement(
+        "button",
+        {
+          onClick: () => onSearch({ profitYear: 2024 })
+        },
+        "Search"
+      ),
+      React.createElement(
+        "button",
+        {
+          onClick: onReset
+        },
+        "Reset"
+      ),
+      React.createElement("div", { "aria-live": "polite" }, isSearching.toString())
     )
   )
 }));
 
 vi.mock("../../../../components/StatusDropdownActionNode", () => ({
   default: vi.fn(({ onStatusChange }) =>
-    React.createElement('section', { 'aria-label': 'status dropdown' },
-      React.createElement('button', {
-        onClick: () => onStatusChange?.("4", "Complete")
-      }, 'Change to Complete'),
-      React.createElement('button', {
-        onClick: () => onStatusChange?.("2", "In Progress")
-      }, 'Change to In Progress')
+    React.createElement(
+      "section",
+      { "aria-label": "status dropdown" },
+      React.createElement(
+        "button",
+        {
+          onClick: () => onStatusChange?.("4", "Complete")
+        },
+        "Change to Complete"
+      ),
+      React.createElement(
+        "button",
+        {
+          onClick: () => onStatusChange?.("2", "In Progress")
+        },
+        "Change to In Progress"
+      )
     )
   )
 }));

@@ -65,9 +65,7 @@ const QPAY066B: React.FC = () => {
 
         {hasSearched && (
           <Grid width="100%">
-            <QPAY066BGrid
-              onLoadingChange={handleLoadingChange}
-            />
+            <QPAY066BGrid onLoadingChange={handleLoadingChange} />
           </Grid>
         )}
       </Grid>

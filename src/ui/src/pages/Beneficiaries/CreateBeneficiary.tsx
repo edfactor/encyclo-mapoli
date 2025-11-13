@@ -4,7 +4,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import Checkbox from "@mui/material/Checkbox";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import {
   useLazyCreateBeneficiariesQuery,
@@ -20,7 +19,7 @@ import {
   UpdateBeneficiaryRequest,
   UpdateBeneficiaryResponse
 } from "reduxstore/types";
-import { SearchAndReset } from "smart-ui-library";
+import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import { tryddmmyyyyToDate } from "utils/dateUtils";
 import { ssnValidator } from "utils/FormValidators";
 import * as yup from "yup";
@@ -295,7 +294,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
               name="dateOfBirth"
               control={control}
               render={({ field }) => (
-                <DsmDatePicker
+                <DSMDatePicker
                   id="dateOfBirth"
                   onChange={(value: Date | null) => {
                     field.onChange(value || undefined);

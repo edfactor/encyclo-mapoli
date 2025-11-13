@@ -111,9 +111,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 from priorBal in priorBalTmp.DefaultIfEmpty()
                 select new
                 {
-                    Hours = pp.CurrentHoursYear + pp.HoursExecutive,
-                    Wages = pp.CurrentIncomeYear + pp.IncomeExecutive,
-                    Points = (int)Math.Round((pp.CurrentIncomeYear + pp.IncomeExecutive) / 100, MidpointRounding.AwayFromZero),
+                    Hours = pp.TotalHours,
+                    Wages = pp.TotalIncome,
+                    Points = (int)Math.Round(pp.TotalIncome / 100, MidpointRounding.AwayFromZero),
                     DateOfBirth = d.DateOfBirth,
                     EmploymentStatus = d.EmploymentStatusId,
                     TerminationDate = d.TerminationDate,
@@ -476,12 +476,12 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 where ((d.EmploymentStatusId == EmploymentStatus.Constants.Active ||
                         d.EmploymentStatusId == EmploymentStatus.Constants.Inactive) ||
                        (d.TerminationDate.HasValue && d.TerminationDate.Value > fiscalEndDate)) &&
-                      (((pp.CurrentHoursYear + pp.HoursExecutive) >= _hoursThreshold && d.DateOfBirth <= birthday18) ||
+                      ((pp.TotalHours >= _hoursThreshold && d.DateOfBirth <= birthday18) ||
                        (d.DateOfBirth <= birthday64))
                 select new
                 {
-                    Hours = pp.CurrentHoursYear + pp.HoursExecutive,
-                    Wages = pp.CurrentIncomeYear + pp.IncomeExecutive,
+                    Hours = pp.TotalHours,
+                    Wages = pp.TotalIncome,
                     DateOfBirth = d.DateOfBirth,
                     FirstContributionYear = fc != null ? fc.FirstContributionYear : (short?)null,
                     Ssn = d.Ssn
@@ -548,8 +548,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             {
                 BadgeNumber = pp.Demographic!.BadgeNumber,
                 // Truncate hours to match READY PAY426.cbl behavior (uses S-HRS integer part only)
-                Hours = Math.Truncate(pp.CurrentHoursYear + pp.HoursExecutive),
-                Wages = pp.CurrentIncomeYear + pp.IncomeExecutive,
+                Hours = Math.Truncate(pp.TotalHours),
+                Wages = pp.TotalIncome,
                 DateOfBirth = pp.Demographic!.DateOfBirth,
                 EmploymentStatusId = pp.Demographic!.EmploymentStatusId,
                 TerminationDate = pp.Demographic!.TerminationDate,

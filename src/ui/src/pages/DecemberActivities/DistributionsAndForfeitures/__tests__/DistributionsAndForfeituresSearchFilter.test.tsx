@@ -2,18 +2,6 @@ import { render as _render, screen as _screen } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 // Mock dependencies
-vi.mock("components/DsmDatePicker/DsmDatePicker", () => ({
-  default: vi.fn(({ label, onChange, value }) => (
-    <input
-      data-testid={`date-picker-${label}`}
-      onChange={(e) => onChange(e.target.value)}
-      value={value ? new Date(value).toISOString().split("T")[0] : ""}
-      placeholder={label}
-      type="date"
-    />
-  ))
-}));
-
 vi.mock("reduxstore/api/LookupsApi", () => ({
   useGetStatesQuery: () => ({
     data: [
@@ -51,6 +39,20 @@ vi.mock("../../../hooks/useDecemberFlowProfitYear", () => ({
 }));
 
 vi.mock("smart-ui-library", () => ({
+  DSMDatePicker: vi.fn(({ label, onChange, value, disabled }) => (
+    <div>
+      <label>{label}</label>
+      <input
+        data-testid={`date-picker-${label}`}
+        aria-label={label}
+        onChange={(e) => onChange(e.target.value ? new Date(e.target.value) : null)}
+        value={value ? new Date(value).toISOString().split("T")[0] : ""}
+        placeholder={label}
+        type="date"
+        disabled={disabled}
+      />
+    </div>
+  )),
   SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) => (
     <div data-testid="search-and-reset">
       <button

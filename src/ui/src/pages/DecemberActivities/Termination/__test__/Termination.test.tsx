@@ -1,5 +1,5 @@
-import React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockStoreAndWrapper } from "../../../../test";
 import Termination from "../Termination";
@@ -7,8 +7,9 @@ type MockSearchParams = {
   beginningDate: string;
   endingDate: string;
   forfeitureStatus: string;
-  profitYear: number;  // Required to match StartAndEndDateRequest
-  pagination: {         // Required to match StartAndEndDateRequest
+  profitYear: number; // Required to match StartAndEndDateRequest
+  pagination: {
+    // Required to match StartAndEndDateRequest
     skip: number;
     take: number;
     sortBy: string;
@@ -30,7 +31,7 @@ vi.mock("../../../../hooks/useFiscalCalendarYear", () => ({
   ])
 }));
 
-vi.mock("../../../../hooks/useTerminationState", () => ({
+vi.mock("../hooks/useTerminationState", () => ({
   useTerminationState: vi.fn(() => ({
     state: {
       searchParams: null,
@@ -151,21 +152,10 @@ vi.mock("../TerminationGrid", () => ({
 vi.mock("smart-ui-library", () => ({
   ApiMessageAlert: vi.fn(() => React.createElement("div", { "data-testid": "api-message-alert" }, "Message Alert")),
   DSMAccordion: vi.fn(({ title, children }) =>
-    React.createElement(
-      "div",
-      { "data-testid": "accordion" },
-      React.createElement("div", null, title),
-      children
-    )
+    React.createElement("div", { "data-testid": "accordion" }, React.createElement("div", null, title), children)
   ),
   Page: vi.fn(({ label, actionNode, children }) =>
-    React.createElement(
-      "div",
-      { "data-testid": "page" },
-      React.createElement("div", null, label),
-      actionNode,
-      children
-    )
+    React.createElement("div", { "data-testid": "page" }, React.createElement("div", null, label), actionNode, children)
   ),
   SearchAndReset: vi.fn(({ handleSearch, handleReset, disabled, isFetching }) =>
     React.createElement(
@@ -254,7 +244,7 @@ describe("Termination", () => {
 
   describe("Search functionality", () => {
     it("should call handleSearch when search button is clicked", async () => {
-      const { useTerminationState } = await import("../../../../hooks/useTerminationState");
+      const { useTerminationState } = await import("../hooks/useTerminationState");
       const mockHandleSearch = vi.fn();
 
       vi.mocked(useTerminationState).mockReturnValueOnce({
@@ -293,7 +283,7 @@ describe("Termination", () => {
     });
 
     it("should disable search button during search", async () => {
-      const { useTerminationState } = await import("../../../../hooks/useTerminationState");
+      const { useTerminationState } = await import("../hooks/useTerminationState");
 
       vi.mocked(useTerminationState).mockReturnValueOnce({
         state: {
@@ -323,7 +313,7 @@ describe("Termination", () => {
     });
 
     it("should disable search button when unsaved changes exist", async () => {
-      const { useTerminationState } = await import("../../../../hooks/useTerminationState");
+      const { useTerminationState } = await import("../hooks/useTerminationState");
 
       vi.mocked(useTerminationState).mockReturnValueOnce({
         state: {
@@ -357,7 +347,7 @@ describe("Termination", () => {
   describe("Unsaved changes guard", () => {
     it("should invoke useUnsavedChangesGuard with hasUnsavedChanges state", async () => {
       const { useUnsavedChangesGuard } = await import("../../../../hooks/useUnsavedChangesGuard");
-      const { useTerminationState } = await import("../../../../hooks/useTerminationState");
+      const { useTerminationState } = await import("../hooks/useTerminationState");
 
       vi.mocked(useTerminationState).mockReturnValueOnce({
         state: {
@@ -388,7 +378,7 @@ describe("Termination", () => {
 
   describe("Status change handling", () => {
     it("should pass handleStatusChange to StatusDropdownActionNode", async () => {
-      const { useTerminationState } = await import("../../../../hooks/useTerminationState");
+      const { useTerminationState } = await import("../hooks/useTerminationState");
       const mockHandleStatusChange = vi.fn();
 
       vi.mocked(useTerminationState).mockReturnValueOnce({
@@ -493,7 +483,7 @@ describe("Termination", () => {
 
   describe("Grid and Filter integration", () => {
     it("should pass searchParams to TerminationGrid", async () => {
-      const { useTerminationState } = await import("../../../../hooks/useTerminationState");
+      const { useTerminationState } = await import("../hooks/useTerminationState");
       const mockSearchParams: MockSearchParams = {
         beginningDate: "01/01/2024",
         endingDate: "12/31/2024",
@@ -541,7 +531,7 @@ describe("Termination", () => {
 
   describe("Archive mode", () => {
     it("should handle archive flag when shouldArchive is true", async () => {
-      const { useTerminationState } = await import("../../../../hooks/useTerminationState");
+      const { useTerminationState } = await import("../hooks/useTerminationState");
       const mockHandleArchiveHandled = vi.fn();
 
       vi.mocked(useTerminationState).mockReturnValueOnce({

@@ -7,9 +7,17 @@ import {
   useUpdateForfeitureAdjustmentMutation
 } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { CalendarResponseDto, ForfeitureAdjustmentUpdateRequest, StartAndEndDateRequest } from "reduxstore/types";
+import {
+  CalendarResponseDto,
+  FilterableStartAndEndDateRequest,
+  ForfeitureAdjustmentUpdateRequest
+} from "reduxstore/types";
 import { setMessage } from "smart-ui-library";
-import { generateRowKey } from "../utils/forfeitActivities/gridDataHelpers";
+import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { useEditState } from "../../../../hooks/useEditState";
+import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
+import { useRowSelection } from "../../../../hooks/useRowSelection";
+import { generateRowKey } from "../../../../utils/forfeitActivities/gridDataHelpers";
 import {
   clearGridSelectionsForBadges,
   formatApiError,
@@ -19,12 +27,8 @@ import {
   getRowKeysForRequests,
   prepareBulkSaveRequests,
   prepareSaveRequest
-} from "../utils/forfeitActivities/saveOperationHelpers";
-import { Messages } from "../utils/messageDictonary";
-import useDecemberFlowProfitYear from "./useDecemberFlowProfitYear";
-import { useEditState } from "./useEditState";
-import { SortParams, useGridPagination } from "./useGridPagination";
-import { useRowSelection } from "./useRowSelection";
+} from "../../../../utils/forfeitActivities/saveOperationHelpers";
+import { Messages } from "../../../../utils/messageDictonary";
 
 interface TerminationSearchRequest {
   beginningDate?: string;
@@ -32,6 +36,8 @@ interface TerminationSearchRequest {
   profitYear?: number;
   excludeZeroBalance?: boolean;
   excludeZeroAndFullyVested?: boolean;
+  vestedBalanceValue?: number | null;
+  vestedBalanceOperator?: number | null;
   pagination?: {
     skip: number;
     take: number;
@@ -108,15 +114,17 @@ export const useTerminationGrid = ({
       isSortDescending: boolean,
       profitYear: number,
       pageSz: number
-    ): (StartAndEndDateRequest & { archive?: boolean }) | null => {
-      const base: StartAndEndDateRequest = searchParams
+    ): (FilterableStartAndEndDateRequest & { archive?: boolean }) | null => {
+      const base: FilterableStartAndEndDateRequest = searchParams
         ? {
             beginningDate: searchParams.beginningDate || "",
             endingDate: searchParams.endingDate || "",
             profitYear,
             pagination: { skip, take: pageSz, sortBy, isSortDescending },
             excludeZeroBalance: searchParams.excludeZeroBalance,
-            excludeZeroAndFullyVested: searchParams.excludeZeroAndFullyVested
+            excludeZeroAndFullyVested: searchParams.excludeZeroAndFullyVested,
+            vestedBalanceValue: searchParams.vestedBalanceValue,
+            vestedBalanceOperator: searchParams.vestedBalanceOperator
           }
         : {
             beginningDate: fiscalData?.fiscalBeginDate || "",
@@ -224,9 +232,11 @@ export const useTerminationGrid = ({
       endingDate?: string,
       archive?: boolean,
       excludeZeroAndFullyVested?: boolean,
-      excludeAlreadyForfeited?: boolean
+      excludeAlreadyForfeited?: boolean,
+      vestedBalanceValue?: number | null,
+      vestedBalanceOperator?: number | null
     ) =>
-      `${skip}|${pageSz}|${sortBy}|${isSortDescending}|${profitYear}|${beginningDate ?? ""}|${endingDate ?? ""}|${archive ? "1" : "0"}|${excludeZeroAndFullyVested ? "1" : "0"}|${excludeAlreadyForfeited ? "1" : "0"}`,
+      `${skip}|${pageSz}|${sortBy}|${isSortDescending}|${profitYear}|${beginningDate ?? ""}|${endingDate ?? ""}|${archive ? "1" : "0"}|${excludeZeroAndFullyVested ? "1" : "0"}|${excludeAlreadyForfeited ? "1" : "0"}|${vestedBalanceValue ?? ""}|${vestedBalanceOperator ?? ""}`,
     []
   );
 
@@ -252,13 +262,21 @@ export const useTerminationGrid = ({
           pageSize,
           params.beginningDate,
           params.endingDate,
-          (params as StartAndEndDateRequest & { archive?: boolean }).archive,
-          (params as StartAndEndDateRequest & { excludeZeroAndFullyVested?: boolean }).excludeZeroAndFullyVested
+          (params as FilterableStartAndEndDateRequest & { archive?: boolean }).archive,
+          params.excludeZeroAndFullyVested,
+          undefined,
+          params.vestedBalanceValue,
+          params.vestedBalanceOperator
         );
 
         // Allow re-search with same parameters (consistent with all other search pages)
         lastRequestKeyRef.current = key;
-        await triggerSearch(params, false);
+
+        try {
+          await triggerSearch(params, false);
+        } catch (error) {
+          console.error("Error fetching termination report:", error);
+        }
 
         // Clear archive flag after successful search
         if (shouldArchive) {
@@ -515,15 +533,8 @@ export const useTerminationGrid = ({
       .map((masterRow) => {
         const badgeNumber = masterRow.psn;
 
-        // Find the yearDetail that matches the selected profit year
-        const matchingDetail = masterRow.yearDetails?.find(
-          (detail) => detail.profitYear === selectedProfitYear
-        );
-
-        // Skip this employee if no matching year detail found
-        if (!matchingDetail) {
-          return null;
-        }
+        // We return 1 year for each person.
+        const matchingDetail = masterRow.yearDetails[0];
 
         return {
           // Master row fields
@@ -541,7 +552,7 @@ export const useTerminationGrid = ({
         };
       })
       .filter((row) => row !== null); // Remove null entries
-  }, [termination, selectedProfitYear]);
+  }, [termination]);
 
   const paginationHandlers = {
     setPageNumber: (value: number) => {

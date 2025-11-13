@@ -87,5 +87,17 @@ public sealed class PayProfit : ModifiedBase
     /// </summary>
     public decimal? PointsEarned { get; set; }
 
+    /// <summary>
+    /// Total hours including both executive and current year hours.
+    /// Computed as: HoursExecutive + CurrentHoursYear
+    /// </summary>
+    public decimal TotalHours { get; set; }
+
+    /// <summary>
+    /// Total income including both executive and current year income.
+    /// Computed as: IncomeExecutive + CurrentIncomeYear
+    /// </summary>
+    public decimal TotalIncome { get; set; }
+
     public Demographic? Demographic { get; set; }
 }

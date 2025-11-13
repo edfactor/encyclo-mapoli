@@ -32,7 +32,9 @@ export const NavigationApi = createApi({
             })) as NavigationDto[];
           };
 
-          const normalized: NavigationResponseDto | undefined = data ? { ...data, navigation: normalize(data.navigation) ?? [] } : data;
+          const normalized: NavigationResponseDto | undefined = data
+            ? { ...data, navigation: normalize(data.navigation) ?? [] }
+            : data;
           dispatch(setNavigation(normalized ?? null));
         } catch (err) {
           console.error("Failed to fetch navigation:", err);

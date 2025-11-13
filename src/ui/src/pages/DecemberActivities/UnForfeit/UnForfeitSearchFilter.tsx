@@ -3,9 +3,8 @@ import { Checkbox, FormControlLabel, FormHelperText, Grid } from "@mui/material"
 import { useEffect } from "react";
 import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { SearchAndReset } from "smart-ui-library";
+import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useLazyGetUnForfeitsQuery } from "../../../reduxstore/api/YearsEndApi";
 import {
@@ -151,7 +150,7 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
             control={control}
             render={({ field }) => (
               <>
-                <DsmDatePicker
+                <DSMDatePicker
                   id="beginningDate"
                   onChange={(value: Date | null) => {
                     field.onChange(value ? mmDDYYFormat(value) : undefined);
@@ -189,7 +188,7 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
 
               return (
                 <>
-                  <DsmDatePicker
+                  <DSMDatePicker
                     id="endingDate"
                     onChange={(value: Date | null) => {
                       field.onChange(value ? mmDDYYFormat(value) : undefined);

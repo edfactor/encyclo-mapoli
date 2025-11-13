@@ -27896,6 +27896,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasIndex(new[] { "DemographicId" }, "IX_DEMOGRAPHIC")
                         .HasDatabaseName("IX_DEMOGRAPHIC_HISTORY_DEMOGRAPHICID");
 
+                    b.HasIndex(new[] { "ValidFrom", "ValidTo", "DemographicId" }, "IX_VALID_FROM_TO_DEMOGRAPHIC_ID")
+                        .HasDatabaseName("IX_DEMOGRAPHIC_HISTORY_VALIDFROM_VALIDTO_DEMOGRAPHICID");
+
                     b.ToTable("DEMOGRAPHIC_HISTORY", (string)null);
                 });
 
@@ -30063,6 +30066,20 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DATE")
                         .HasColumnName("PS_CERTIFICATE_ISSUED_DATE");
 
+                    b.Property<decimal>("TotalHours")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasPrecision(6, 2)
+                        .HasColumnType("DECIMAL(6,2)")
+                        .HasColumnName("TOTAL_HOURS")
+                        .HasComputedColumnSql("HOURS_EXECUTIVE + CURRENT_HOURS_YEAR", true);
+
+                    b.Property<decimal>("TotalIncome")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasPrecision(9, 2)
+                        .HasColumnType("DECIMAL(9,2)")
+                        .HasColumnName("TOTAL_INCOME")
+                        .HasComputedColumnSql("INCOME_EXECUTIVE + CURRENT_INCOME_YEAR", true);
+
                     b.Property<string>("UserName")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(96)
@@ -30099,6 +30116,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasIndex(new[] { "ProfitYear", "DemographicId" }, "IX_ProfitYear_DemographicId")
                         .HasDatabaseName("IX_PAY_PROFIT_PROFITYEAR_DEMOGRAPHICID");
+
+                    b.HasIndex(new[] { "ProfitYear", "TotalHours" }, "IX_ProfitYear_TotalHours")
+                        .HasDatabaseName("IX_PAY_PROFIT_PROFITYEAR_TOTALHOURS");
 
                     b.ToTable("PAY_PROFIT", (string)null);
                 });
@@ -31756,7 +31776,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .WithMany("Demographics")
                         .HasForeignKey("TerminationCodeId")
                         .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_DEMOGRAPHIC_TERMINATIONCODE_TERMINATIONCODEID");
+                        .HasConstraintName("FK_DEMOGRAPHIC_TERMINATIONCODES_TERMINATIONCODEID");
 
                     b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.Address", "Address", b1 =>
                         {

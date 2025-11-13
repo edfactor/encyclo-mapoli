@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, Divider, FormLabel, Grid, MenuItem, Select, Typography } from "@mui/material";
-import { CellClickedEvent, ICellRendererParams } from "ag-grid-community";
+import { CellClickedEvent, ColDef, ICellRendererParams } from "ag-grid-community";
 import { useMemo, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { DSMAccordion, DSMGrid, ISortParams, Page, Pagination, SearchAndReset } from "smart-ui-library";
@@ -100,9 +100,9 @@ const PayBeNext = () => {
   };
 
   // Create column definitions with expand/collapse functionality
-  const columnDefs = useMemo(() => {
+  const columnDefs = useMemo((): ColDef[] => {
     // Add an expansion column
-    const expansionColumn = {
+    const expansionColumn: ColDef = {
       headerName: "",
       field: "isExpandable",
       width: 50,
