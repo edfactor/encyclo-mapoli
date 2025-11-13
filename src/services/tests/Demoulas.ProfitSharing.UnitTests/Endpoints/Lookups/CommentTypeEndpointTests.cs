@@ -10,6 +10,7 @@ using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Lookups;
 
+[Collection("Lookup Tests")]
 public class CommentTypeEndpointTests : ApiTestBase<Api.Program>
 {
     [Fact(DisplayName = "CommentType - Should return success with ADMINISTRATOR role")]

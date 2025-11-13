@@ -10,6 +10,7 @@ using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Lookups;
 
+[Collection("Lookup Tests")]
 public class DistributionFrequencyEndpointTests : ApiTestBase<Api.Program>
 {
     [Fact(DisplayName = "DistributionFrequency - Should return success with ADMINISTRATOR role")]

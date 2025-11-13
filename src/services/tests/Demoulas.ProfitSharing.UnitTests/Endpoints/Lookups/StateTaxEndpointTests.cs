@@ -11,6 +11,7 @@ using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Lookups;
 
+[Collection("Lookup Tests")]
 public class StateTaxEndpointTests : ApiTestBase<Api.Program>
 {
 

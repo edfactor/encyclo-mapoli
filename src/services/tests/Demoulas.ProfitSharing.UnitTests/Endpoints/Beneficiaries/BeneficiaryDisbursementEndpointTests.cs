@@ -12,7 +12,7 @@ using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Beneficiaries;
 
-[Collection("SharedGlobalState")]
+[Collection("Beneficiary Tests")]
 public class BeneficiaryDisbursementEndpointTests : ApiTestBase<Program>
 {
     public BeneficiaryDisbursementEndpointTests(ITestOutputHelper testOutputHelper) : base()
