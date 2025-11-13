@@ -96,7 +96,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
       profitYear: selectedProfitYear,
       excludeZeroAndFullyVested: false,
       vestedBalanceValue: null,
-      vestedBalanceOperator: null
+      vestedBalanceOperator: 0
     }
   });
 
@@ -138,7 +138,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
       profitYear: selectedProfitYear,
       excludeZeroAndFullyVested: false,
       vestedBalanceValue: null,
-      vestedBalanceOperator: null
+      vestedBalanceOperator: 0
     });
     // Trigger validation after reset to ensure form validity is updated
     await trigger();
