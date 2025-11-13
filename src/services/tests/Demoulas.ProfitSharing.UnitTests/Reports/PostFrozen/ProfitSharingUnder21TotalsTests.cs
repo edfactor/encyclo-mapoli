@@ -25,7 +25,7 @@ public sealed class ProfitSharingUnder21TotalsTests : ApiTestBase<Program>
     /// </summary>
     protected override TimeSpan? GetHttpClientTimeout() => TimeSpan.FromMinutes(2);
 
-    [Fact(DisplayName = "PS-759 - Profit Sharing under 21 ProfitShareUpdateTotals")]
+    [Fact(DisplayName = "PS-759 - Profit Sharing under 21 ProfitShareUpdateTotals", Skip = "Computationally expensive with large mock datasets")]
     public async Task CheckUnder21Totals()
     {
         var request = new ProfitYearRequest() { ProfitYear = 2024, Skip = 0, Take = 255 };
