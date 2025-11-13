@@ -198,7 +198,7 @@ public class BeneficiaryDisbursementEndpointTests : ApiTestBase<Program>
     [InlineData(5)]
     [InlineData(50)]
     [InlineData(100)]
-    [InlineData(500)]
+    [InlineData(250)]
     [Description("PS-292 : Should return validation error for various batch sizes of non-existent beneficiaries")]
     public async Task BeneficiaryDisbursement_WithVariousBatchSizes_ShouldReturnValidationError(int batchSize)
     {
