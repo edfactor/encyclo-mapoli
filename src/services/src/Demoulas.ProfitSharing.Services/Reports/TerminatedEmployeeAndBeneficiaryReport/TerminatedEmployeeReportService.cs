@@ -438,14 +438,6 @@ public sealed class TerminatedEmployeeReportService
     #region Member Data Retrieval
 
     /// <summary>
-    ///     Extracts the profit year range from the request date range.
-    /// </summary>
-    private static (short beginProfitYear, short endProfitYear) GetProfitYearRange(FilterableStartAndEndDateRequest request)
-    {
-        return ((short)request.BeginningDate.Year, (short)request.EndingDate.Year);
-    }
-
-    /// <summary>
     ///     Retrieves all member slices (terminated employees + beneficiaries) for the requested date range.
     ///     Coordinates the loading of terminated employees and beneficiaries, then combines them.
     ///     Returns an IQueryable to defer materialization until needed.
