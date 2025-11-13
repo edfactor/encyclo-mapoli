@@ -15,6 +15,7 @@ interface CreateBeneficiaryDialogProps {
   badgeNumber: number;
   psnSuffix: number;
   onSaveSuccess: () => void;
+  existingBeneficiaries?: BeneficiaryDto[];
 }
 
 const CreateBeneficiaryDialog: React.FC<CreateBeneficiaryDialogProps> = ({
@@ -25,7 +26,8 @@ const CreateBeneficiaryDialog: React.FC<CreateBeneficiaryDialogProps> = ({
   selectedMember,
   badgeNumber,
   psnSuffix,
-  onSaveSuccess
+  onSaveSuccess,
+  existingBeneficiaries
 }) => {
   return (
     <Dialog
@@ -50,6 +52,7 @@ const CreateBeneficiaryDialog: React.FC<CreateBeneficiaryDialogProps> = ({
           badgeNumber={badgeNumber}
           psnSuffix={psnSuffix}
           onSaveSuccess={onSaveSuccess}
+          existingBeneficiaries={existingBeneficiaries}
         />
       </DialogContent>
     </Dialog>

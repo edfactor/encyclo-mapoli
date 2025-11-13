@@ -1,5 +1,5 @@
 import { TextField, Typography } from "@mui/material";
-import { FocusEvent, useCallback, useMemo, useState } from "react";
+import { FocusEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useLazyDeleteBeneficiaryQuery } from "reduxstore/api/BeneficiariesApi";
@@ -19,12 +19,14 @@ interface BeneficiaryRelationshipsProps {
   selectedMember: BeneficiaryDetail | null;
   count: number;
   onEditBeneficiary: (selectedMember: BeneficiaryDto | undefined) => void;
+  onBeneficiariesChange?: (beneficiaries: BeneficiaryDto[]) => void;
 }
 
 const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = ({
   selectedMember,
   count,
-  onEditBeneficiary
+  onEditBeneficiary,
+  onBeneficiariesChange
 }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -51,6 +53,13 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
   const percentageUpdate = useBeneficiaryPercentageUpdate(() => {
     relationships.refresh();
   });
+
+  // Notify parent component when beneficiaries change
+  useEffect(() => {
+    if (onBeneficiariesChange && relationships.beneficiaryList?.results) {
+      onBeneficiariesChange(relationships.beneficiaryList.results);
+    }
+  }, [relationships.beneficiaryList?.results, onBeneficiariesChange]);
 
   const sortEventHandler = (update: SortParams) => {
     if (update.sortBy === "") {
