@@ -3,8 +3,8 @@ import { DSMGrid, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-libr
 import ReportSummary from "../../../components/ReportSummary";
 import { useDynamicGridHeight } from "../../../hooks/useDynamicGridHeight";
 import { useReadOnlyNavigation } from "../../../hooks/useReadOnlyNavigation";
-import { useTerminationGrid } from "../../../hooks/useTerminationGrid";
 import { CalendarResponseDto } from "../../../reduxstore/types";
+import { useTerminationGrid } from "./hooks/useTerminationGrid";
 import { TerminationSearchRequest } from "./Termination";
 import { GetDetailColumns } from "./TerminationDetailsGridColumns";
 import { GetTerminationColumns } from "./TerminationGridColumns";
