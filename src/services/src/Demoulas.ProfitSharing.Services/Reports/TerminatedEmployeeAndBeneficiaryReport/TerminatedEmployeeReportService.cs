@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -51,27 +51,28 @@ public sealed class TerminatedEmployeeReportService
 
     public async Task<TerminatedEmployeeAndBeneficiaryResponse> CreateDataAsync(FilterableStartAndEndDateRequest req, CancellationToken cancellationToken)
     {
-        var startTime = DateTime.UtcNow;
-        _logger.LogInformation("CreateDataAsync started for date range {BeginningDate} to {EndingDate}", req.BeginningDate, req.EndingDate);
+        _logger.LogInformation("CreateDataAsync started for termination date range {BeginningDate} to {EndingDate}", req.BeginningDate, req.EndingDate);
 
-        return await _factory.UseReadOnlyContext(async ctx =>
+        var (result, totalDuration) = await TimingHelper.TimeAsync(async () =>
         {
-            var retrieveStartTime = DateTime.UtcNow;
-            IQueryable<MemberSlice> memberSliceQuery = await RetrieveMemberSlices(ctx, req);
-            var retrieveDuration = (DateTime.UtcNow - retrieveStartTime).TotalMilliseconds;
+            return await _factory.UseReadOnlyContext(async ctx =>
+            {
+                var (memberSliceQuery, retrieveDuration) = await TimingHelper.TimeAsync(async () => 
+                    await RetrieveMemberSlices(ctx, req));
+                
+                var (result, mergeDuration) = await TimingHelper.TimeAsync(async () => 
+                    await MergeAndCreateDataset(ctx, req, memberSliceQuery, cancellationToken));
+                
+                int recordCount = result.Response?.Results != null ? result.Response.Results.Count() : 0;
+                _logger.LogInformation("MergeAndCreateDataset completed in {DurationMs:F2}ms, processed {RecordCount} records", mergeDuration, recordCount);
+                _logger.LogInformation("CreateDataAsync completed in retrieve: {RetrieveDurationMs:F2}ms, merge: {MergeDurationMs:F2}ms", retrieveDuration, mergeDuration);
 
+                return result;
+            }, cancellationToken);
+        });
 
-            var mergeStartTime = DateTime.UtcNow;
-            var result = await MergeAndCreateDataset(ctx, req, memberSliceQuery, cancellationToken);
-            var mergeDuration = (DateTime.UtcNow - mergeStartTime).TotalMilliseconds;
-            int recordCount = result.Response?.Results != null ? result.Response.Results.Count() : 0;
-            _logger.LogInformation("MergeAndCreateDataset completed in {DurationMs:F2}ms, processed {RecordCount} records", mergeDuration, recordCount);
-
-            var totalDuration = (DateTime.UtcNow - startTime).TotalMilliseconds;
-            _logger.LogInformation("CreateDataAsync completed in {DurationMs:F2}ms (retrieve: {RetrieveDurationMs:F2}ms, merge: {MergeDurationMs:F2}ms)", totalDuration, retrieveDuration, mergeDuration);
-
-            return result;
-        }, cancellationToken);
+        _logger.LogInformation("CreateDataAsync total duration: {DurationMs:F2}ms", totalDuration);
+        return result;
     }
 
     #region Report Dataset Creation
@@ -86,8 +87,6 @@ public sealed class TerminatedEmployeeReportService
         IQueryable<MemberSlice> memberSliceUnion,
         CancellationToken cancellationToken)
     {
-        var overallStart = DateTime.UtcNow;
-         
         // Initialize report totals
         decimal totalVested = 0;
         decimal totalForfeit = 0;
@@ -106,271 +105,274 @@ public sealed class TerminatedEmployeeReportService
         int openProfitYear = lastCompletedYearEnd + 1;
 
         // Load profit detail transactions for YDATE 
-        var profitDetailsStart = DateTime.UtcNow;
-        IQueryable<ProfitDetail> profitDetailsRaw = ctx.ProfitDetails
-            .Where(pd => pd.ProfitYear == openProfitYear
-                         && ssns.Contains(pd.Ssn));
-
-        // This grabs all transactions for the current year
-        var profitDetailsDict = await profitDetailsRaw
-            .GroupBy(pd => new { pd.Ssn, pd.ProfitYear })
-            .Select(g => new InternalProfitDetailDto
+        var (profitDetailsDict, profitDetailsDuration) = await _logger.TimeAndLogAsync(
+            "ProfitDetails dictionary load",
+            async () =>
             {
-                Ssn = g.Key.Ssn,
-                ProfitYear = g.Key.ProfitYear,
-                TotalContributions = g.Sum(x => x.Contribution),
-                TotalEarnings = g.Sum(x => x.Earnings),
-                TotalForfeitures = g.Sum(x => x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
-                    ? x.Forfeiture
-                    : x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id
-                        ? -x.Forfeiture
-                        : 0),
-                TotalPayments = g.Sum(x => x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0),
-                Distribution = g.Sum(x => x.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id ||
-                                          x.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments.Id ||
-                                          x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
-                    ? -x.Forfeiture
-                    : 0),
-                BeneficiaryAllocation = g.Sum(x => x.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary.Id
-                    ? -x.Forfeiture
-                    : x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary.Id
-                        ? x.Contribution
-                        : 0),
-                CurrentAmount = g.Sum(x => x.Contribution + x.Earnings +
-                                           (x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0) -
-                                           (x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0))
-            })
-            .ToDictionaryAsync(x => new { x.Ssn, x.ProfitYear }, cancellationToken);
-        var profitDetailsDuration = (DateTime.UtcNow - profitDetailsStart).TotalMilliseconds;
-        _logger.LogInformation("ProfitDetails dictionary loaded in {DurationMs:F2}ms with {RecordCount} entries", profitDetailsDuration, profitDetailsDict.Count);
+                IQueryable<ProfitDetail> profitDetailsRaw = ctx.ProfitDetails
+                    .Where(pd => pd.ProfitYear == openProfitYear
+                                 && ssns.Contains(pd.Ssn));
+
+                // This grabs all transactions for the current year
+                return await profitDetailsRaw
+                    .GroupBy(pd => new { pd.Ssn, pd.ProfitYear })
+                    .Select(g => new InternalProfitDetailDto
+                    {
+                        Ssn = g.Key.Ssn,
+                        ProfitYear = g.Key.ProfitYear,
+                        TotalContributions = g.Sum(x => x.Contribution),
+                        TotalEarnings = g.Sum(x => x.Earnings),
+                        TotalForfeitures = g.Sum(x => x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
+                            ? x.Forfeiture
+                            : x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id
+                                ? -x.Forfeiture
+                                : 0),
+                        TotalPayments = g.Sum(x => x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0),
+                        Distribution = g.Sum(x => x.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id ||
+                                                  x.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments.Id ||
+                                                  x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
+                            ? -x.Forfeiture
+                            : 0),
+                        BeneficiaryAllocation = g.Sum(x => x.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary.Id
+                            ? -x.Forfeiture
+                            : x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary.Id
+                                ? x.Contribution
+                                : 0),
+                        CurrentAmount = g.Sum(x => x.Contribution + x.Earnings +
+                                                   (x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0) -
+                                                   (x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0))
+                    })
+                    .ToDictionaryAsync(x => new { x.Ssn, x.ProfitYear }, cancellationToken);
+            },
+            dict => dict.Count);
 
         // This report is always giving values about today for the members current status.
         DateOnly today = DateOnly.FromDateTime(DateTime.Today);
         // The "Begin" values always refer to the prior completed year.  "Begin" is the "end" of the last completed YE.
         CalendarResponseDto priorYearDateRange = await _calendarService.GetYearStartAndEndAccountingDatesAsync(lastCompletedYearEnd, cancellationToken);
 
-        var thisYearStart = DateTime.UtcNow;
-        Dictionary<(int Ssn, int Id), ParticipantTotalVestingBalance> thisYearBalancesDict = await _totalService
-            .TotalVestingBalance(ctx, (short)today.Year, today)
-            .Where(x => ssns.Contains(x.Ssn))
-            .ToDictionaryAsync(x => (x.Ssn, x.Id), x => x, cancellationToken);
-        var thisYearDuration = (DateTime.UtcNow - thisYearStart).TotalMilliseconds;
-        _logger.LogInformation("ThisYearBalances dictionary loaded in {DurationMs:F2}ms with {RecordCount} entries", thisYearDuration, thisYearBalancesDict.Count);
+        var (thisYearBalancesDict, thisYearDuration) = await _logger.TimeAndLogAsync(
+            "ThisYearBalances dictionary load",
+            async () => await _totalService
+                .TotalVestingBalance(ctx, (short)today.Year, today)
+                .Where(x => ssns.Contains(x.Ssn))
+                .ToDictionaryAsync(x => (x.Ssn, x.Id), x => x, cancellationToken),
+            dict => dict.Count);
 
-        var lastYearStart = DateTime.UtcNow;
-        Dictionary<int, ParticipantTotal> lastYearBalancesDict = await _totalService.GetTotalBalanceSet(ctx, lastCompletedYearEnd)
-            .Where(x => ssns.Contains(x.Ssn))
-            .ToDictionaryAsync(x => x.Ssn, x => x, cancellationToken);
-        var lastYearDuration = (DateTime.UtcNow - lastYearStart).TotalMilliseconds;
-        _logger.LogInformation("LastYearBalances dictionary loaded in {DurationMs:F2}ms with {RecordCount} entries", lastYearDuration, lastYearBalancesDict.Count);
+        var (lastYearBalancesDict, lastYearDuration) = await _logger.TimeAndLogAsync(
+            "LastYearBalances dictionary load",
+            async () => await _totalService.GetTotalBalanceSet(ctx, lastCompletedYearEnd)
+                .Where(x => ssns.Contains(x.Ssn))
+                .ToDictionaryAsync(x => x.Ssn, x => x, cancellationToken),
+            dict => dict.Count);
 
-        var vestedStart = DateTime.UtcNow;
-        Dictionary<(int Ssn, int Id), ParticipantTotalVestingBalance> lastYearVestedBalancesDict = await _totalService
-            .TotalVestingBalance(ctx, /*PayProfit Year*/lastCompletedYearEnd, /*Desired Year*/lastCompletedYearEnd, priorYearDateRange.FiscalEndDate)
-            .Where(x => ssns.Contains(x.Ssn))
-            .ToDictionaryAsync(x => (x.Ssn, x.Id), x => x, cancellationToken);
-        var vestedDuration = (DateTime.UtcNow - vestedStart).TotalMilliseconds;
-        _logger.LogInformation("LastYearVestedBalances dictionary loaded in {DurationMs:F2}ms with {RecordCount} entries", vestedDuration, lastYearVestedBalancesDict.Count);
+        var (lastYearVestedBalancesDict, vestedDuration) = await _logger.TimeAndLogAsync(
+            "LastYearVestedBalances dictionary load",
+            async () => await _totalService
+                .TotalVestingBalance(ctx, /*PayProfit Year*/lastCompletedYearEnd, /*Desired Year*/lastCompletedYearEnd, priorYearDateRange.FiscalEndDate)
+                .Where(x => ssns.Contains(x.Ssn))
+                .ToDictionaryAsync(x => (x.Ssn, x.Id), x => x, cancellationToken),
+            dict => dict.Count);
 
         // Build year details list for each member
-        var processingStart = DateTime.UtcNow;
-        List<(int BadgeNumber, short PsnSuffix, string? Name, TerminatedEmployeeAndBeneficiaryYearDetailDto YearDetail)> yearDetailsList = new();
-
-        // Deduplication: Process employees first, then beneficiaries; skip beneficiaries if employee already processed
-        // This prevents duplicates when a person appears as both terminated employee and beneficiary
-        var seenMembers = new HashSet<(int BadgeNumber, short PsnSuffix)>();
-
-        var memberSliceCollection = memberSliceUnion
-            .Where(m => !(m.YearsInPs <= 2 && m.HoursCurrentYear >= ReferenceData.MinimumHoursForContribution()))
-            .AsAsyncEnumerable();
-
-        await foreach (MemberSlice memberSlice in memberSliceCollection)
+        var (yearDetailsList, processingDuration) = await TimingHelper.TimeAsync(async () =>
         {
-            // Skip duplicate: If same (BadgeNumber, PsnSuffix) already processed, skip this record
-            // Since union is employees.Concat(beneficiaries), employees are processed first,
-            // so beneficiary records for the same person are automatically skipped
-            if (!seenMembers.Add((memberSlice.BadgeNumber, memberSlice.PsnSuffix)))
+            var yearDetailsList = new List<(int BadgeNumber, short PsnSuffix, string? Name, TerminatedEmployeeAndBeneficiaryYearDetailDto YearDetail)>();
+
+            // Deduplication: Process employees first, then beneficiaries; skip beneficiaries if employee already processed
+            // This prevents duplicates when a person appears as both terminated employee and beneficiary
+            var seenMembers = new HashSet<(int BadgeNumber, short PsnSuffix)>();
+
+            var memberSliceCollection = memberSliceUnion
+                .Where(m => !(m.YearsInPs <= 2 && m.HoursCurrentYear >= ReferenceData.MinimumHoursForContribution()))
+                .AsAsyncEnumerable();
+
+            await foreach (MemberSlice memberSlice in memberSliceCollection)
             {
-                continue; // Duplicate - already processed as employee
-            }
-
-            // Get transactions for this member
-            var key = new { memberSlice.Ssn, memberSlice.ProfitYear };
-            if (!profitDetailsDict.TryGetValue(key, out InternalProfitDetailDto? transactionsThisYear))
-            {
-                transactionsThisYear = new InternalProfitDetailDto();
-            }
-
-            // Get beginning balance from last year
-            decimal? beginningAmount = lastYearBalancesDict.TryGetValue(memberSlice.Ssn, out ParticipantTotal? lastYearBalance)
-                ? lastYearBalance.TotalAmount
-                : 0m;
-
-            // Get vesting balance and percentage from this year
-            // Use compound key (Ssn, Id) to look up the correct record
-            ParticipantTotalVestingBalance? thisYearVestedBalance = thisYearBalancesDict.GetValueOrDefault((memberSlice.Ssn, memberSlice.Id));
-
-            // Fallback for pure beneficiaries: if compound key fails and this is a pure beneficiary, search by SSN only
-            if (thisYearVestedBalance == null && memberSlice.IsOnlyBeneficiary)
-            {
-                thisYearVestedBalance = thisYearBalancesDict.Values.FirstOrDefault(v => v.Ssn == memberSlice.Ssn);
-            }
-
-            decimal vestedBalance = thisYearVestedBalance?.VestedBalance ?? 0m;
-
-            // Apply optional vested balance filter
-            if (req.VestedBalanceValue.HasValue && req.VestedBalanceOperator.HasValue)
-            {
-                var filterValue = req.VestedBalanceValue.Value;
-                bool passesFilter = req.VestedBalanceOperator.Value switch
+                // Skip duplicate: If same (BadgeNumber, PsnSuffix) already processed, skip this record
+                // Since union is employees.Concat(beneficiaries), employees are processed first,
+                // so beneficiary records for the same person are automatically skipped
+                if (!seenMembers.Add((memberSlice.BadgeNumber, memberSlice.PsnSuffix)))
                 {
-                    Common.Enums.ComparisonOperator.Equals => vestedBalance == filterValue,
-                    Common.Enums.ComparisonOperator.LessThan => vestedBalance < filterValue,
-                    Common.Enums.ComparisonOperator.LessThanOrEqual => vestedBalance <= filterValue,
-                    Common.Enums.ComparisonOperator.GreaterThan => vestedBalance > filterValue,
-                    Common.Enums.ComparisonOperator.GreaterThanOrEqual => vestedBalance >= filterValue,
-                    _ => true // Unknown operator - include record
+                    continue; // Duplicate - already processed as employee
+                }
+
+                // Get transactions for this member
+                var key = new { memberSlice.Ssn, memberSlice.ProfitYear };
+                if (!profitDetailsDict.TryGetValue(key, out InternalProfitDetailDto? transactionsThisYear))
+                {
+                    transactionsThisYear = new InternalProfitDetailDto();
+                }
+
+                // Get beginning balance from last year
+                decimal? beginningAmount = lastYearBalancesDict.TryGetValue(memberSlice.Ssn, out ParticipantTotal? lastYearBalance)
+                    ? lastYearBalance.TotalAmount
+                    : 0m;
+
+                // Get vesting balance and percentage from this year
+                // Use compound key (Ssn, Id) to look up the correct record
+                ParticipantTotalVestingBalance? thisYearVestedBalance = thisYearBalancesDict.GetValueOrDefault((memberSlice.Ssn, memberSlice.Id));
+
+                // Fallback for pure beneficiaries: if compound key fails and this is a pure beneficiary, search by SSN only
+                if (thisYearVestedBalance == null && memberSlice.IsOnlyBeneficiary)
+                {
+                    thisYearVestedBalance = thisYearBalancesDict.Values.FirstOrDefault(v => v.Ssn == memberSlice.Ssn);
+                }
+
+                decimal vestedBalance = thisYearVestedBalance?.VestedBalance ?? 0m;
+
+                // Apply optional vested balance filter
+                if (req.VestedBalanceValue.HasValue && req.VestedBalanceOperator.HasValue)
+                {
+                    var filterValue = req.VestedBalanceValue.Value;
+                    bool passesFilter = req.VestedBalanceOperator.Value switch
+                    {
+                        Common.Enums.ComparisonOperator.Equals => vestedBalance == filterValue,
+                        Common.Enums.ComparisonOperator.LessThan => vestedBalance < filterValue,
+                        Common.Enums.ComparisonOperator.LessThanOrEqual => vestedBalance <= filterValue,
+                        Common.Enums.ComparisonOperator.GreaterThan => vestedBalance > filterValue,
+                        Common.Enums.ComparisonOperator.GreaterThanOrEqual => vestedBalance >= filterValue,
+                        _ => true // Unknown operator - include record
+                    };
+
+                    if (!passesFilter)
+                    {
+                        continue; // Skip this member - doesn't match vested balance criteria
+                    }
+                }
+
+                ParticipantTotalVestingBalance? lastYearVestedBalance = lastYearVestedBalancesDict.GetValueOrDefault((memberSlice.Ssn, memberSlice.Id));
+
+                // Fallback for pure beneficiaries: if compound key fails and this is a pure beneficiary, search by SSN only
+                if (lastYearVestedBalance == null && memberSlice.IsOnlyBeneficiary)
+                {
+                    lastYearVestedBalance = lastYearVestedBalancesDict.Values.FirstOrDefault(v => v.Ssn == memberSlice.Ssn);
+                }
+
+                decimal vestedRatio = lastYearVestedBalance?.VestingPercent ?? 0;
+
+                // Create member record with all values
+                Member member = new()
+                {
+                    Id = memberSlice.Id,
+                    BadgeNumber = memberSlice.BadgeNumber,
+                    ProfitYear = memberSlice.ProfitYear,
+                    PsnSuffix = memberSlice.PsnSuffix,
+                    FullName = memberSlice.FullName,
+                    FirstName = memberSlice.FirstName,
+                    LastName = memberSlice.LastName,
+                    Birthday = memberSlice.BirthDate,
+                    HoursCurrentYear = memberSlice.HoursCurrentYear,
+                    EarningsCurrentYear = memberSlice.IncomeRegAndExecCurrentYear,
+                    Ssn = memberSlice.Ssn,
+                    TerminationDate = memberSlice.TerminationDate,
+                    TerminationCode = memberSlice.TerminationCode,
+                    BeginningAmount = beginningAmount ?? 0,
+                    YearsInPlan = memberSlice.YearsInPs,
+                    ZeroCont = memberSlice.ZeroCont,
+                    EnrollmentId = memberSlice.EnrollmentId,
+                    IsExecutive = memberSlice.IsExecutive,
+                    Evta = memberSlice.Etva,
+                    BeneficiaryAllocation = transactionsThisYear.BeneficiaryAllocation,
+                    DistributionAmount = transactionsThisYear.Distribution,
+                    ForfeitAmount = transactionsThisYear.TotalForfeitures,
+                    EndingBalance = (beginningAmount ?? 0) + transactionsThisYear.TotalForfeitures + transactionsThisYear.Distribution + transactionsThisYear.BeneficiaryAllocation
                 };
 
-                if (!passesFilter)
+                // Apply IsInteresting filter
+                if (!IsInteresting(member))
                 {
-                    continue; // Skip this member - doesn't match vested balance criteria
+                    continue;
                 }
+
+                // Apply vesting rules and adjustments
+                byte enrollmentId = member.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions
+                    ? Enrollment.Constants.NotEnrolled
+                    : member.EnrollmentId;
+
+                // If retired, then they get it all.
+                if (member.ZeroCont == ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested)
+                {
+                    vestedRatio = 1;
+                }
+
+                // If bene, they get it all
+                if (memberSlice.IsOnlyBeneficiary)
+                {
+                    vestedRatio = 1;
+                }
+
+                // If there is no money, then the ratio is meaningless - follow how READY reports it as 0
+                if (member.EndingBalance == 0)
+                {
+                    vestedRatio = 0;
+                }
+
+                // Calculate age if birthdate available
+                int? age = member.Birthday?.Age();
+
+                var hasForfeited = enrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords ||
+                                   enrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
+                var suggestedForfeit = hasForfeited ? (decimal?)0 : Math.Round(member.EndingBalance - vestedBalance, 2, MidpointRounding.AwayFromZero);
+                if (member.PsnSuffix > 0)
+                {
+                    // You can not forfeit a pure bene
+                    suggestedForfeit = null;
+                }
+
+                // Create year detail record
+                TerminatedEmployeeAndBeneficiaryYearDetailDto yearDetail = new()
+                {
+                    ProfitYear = member.ProfitYear,
+                    BeginningBalance = member.BeginningAmount,
+                    BeneficiaryAllocation = member.BeneficiaryAllocation,
+                    DistributionAmount = member.DistributionAmount,
+                    Forfeit = member.ForfeitAmount,
+                    EndingBalance = member.EndingBalance,
+                    VestedBalance = vestedBalance,
+                    DateTerm = member.TerminationDate,
+                    YtdPsHours = member.HoursCurrentYear,
+                    IsExecutive = member.IsExecutive,
+                    VestedPercent = vestedRatio * 100,
+                    Age = age,
+                    HasForfeited = hasForfeited,
+                    SuggestedForfeit = suggestedForfeit,
+                    EnrollmentId = member.EnrollmentId
+                };
+
+                // Apply user-requested exclusion filters
+                // Exclude members with 0 balance OR 100% vested (no forfeiture opportunity)
+                if (req.ExcludeZeroAndFullyVested && (member.EndingBalance == 0 || vestedRatio == 1.0m || hasForfeited))
+                {
+                    continue;
+                }
+
+                yearDetailsList.Add((member.BadgeNumber, member.PsnSuffix, member.FullName, yearDetail));
+
+                // Accumulate totals
+                totalVested += vestedBalance;
+                totalForfeit += member.ForfeitAmount;
+                totalEndingBalance += member.EndingBalance;
+                totalBeneficiaryAllocation += member.BeneficiaryAllocation;
             }
+            return yearDetailsList;
+        });
 
-            ParticipantTotalVestingBalance? lastYearVestedBalance = lastYearVestedBalancesDict.GetValueOrDefault((memberSlice.Ssn, memberSlice.Id));
+        var (grouped, groupingDuration) = await TimingHelper.TimeAsync(async () =>
+            await yearDetailsList
+                .GroupBy(x => new { x.BadgeNumber, x.PsnSuffix, x.Name })
+                .Select(g => new TerminatedEmployeeAndBeneficiaryDataResponseDto
+                {
+                    PSN = g.Key.PsnSuffix == 0 ? (long)g.Key.BadgeNumber : (long)g.Key.BadgeNumber * 10000 + g.Key.PsnSuffix,
+                    Name = g.Key.Name,
+                    YearDetails = g.Select(x => x.YearDetail).OrderByDescending(y => y.ProfitYear).ToList()
+                }).ToPaginationResultsAsync(req, cancellationToken));
 
-            // Fallback for pure beneficiaries: if compound key fails and this is a pure beneficiary, search by SSN only
-            if (lastYearVestedBalance == null && memberSlice.IsOnlyBeneficiary)
-            {
-                lastYearVestedBalance = lastYearVestedBalancesDict.Values.FirstOrDefault(v => v.Ssn == memberSlice.Ssn);
-            }
-
-            decimal vestedRatio = lastYearVestedBalance?.VestingPercent ?? 0;
-
-            // Create member record with all values
-            Member member = new()
-            {
-                Id = memberSlice.Id,
-                BadgeNumber = memberSlice.BadgeNumber,
-                ProfitYear = memberSlice.ProfitYear,
-                PsnSuffix = memberSlice.PsnSuffix,
-                FullName = memberSlice.FullName,
-                FirstName = memberSlice.FirstName,
-                LastName = memberSlice.LastName,
-                Birthday = memberSlice.BirthDate,
-                HoursCurrentYear = memberSlice.HoursCurrentYear,
-                EarningsCurrentYear = memberSlice.IncomeRegAndExecCurrentYear,
-                Ssn = memberSlice.Ssn,
-                TerminationDate = memberSlice.TerminationDate,
-                TerminationCode = memberSlice.TerminationCode,
-                BeginningAmount = beginningAmount ?? 0,
-                YearsInPlan = memberSlice.YearsInPs,
-                ZeroCont = memberSlice.ZeroCont,
-                EnrollmentId = memberSlice.EnrollmentId,
-                IsExecutive = memberSlice.IsExecutive,
-                Evta = memberSlice.Etva,
-                BeneficiaryAllocation = transactionsThisYear.BeneficiaryAllocation,
-                DistributionAmount = transactionsThisYear.Distribution,
-                ForfeitAmount = transactionsThisYear.TotalForfeitures,
-                EndingBalance = (beginningAmount ?? 0) + transactionsThisYear.TotalForfeitures + transactionsThisYear.Distribution + transactionsThisYear.BeneficiaryAllocation
-            };
-
-            // Apply IsInteresting filter
-            if (!IsInteresting(member))
-            {
-                continue;
-            }
-
-            // Apply vesting rules and adjustments
-            byte enrollmentId = member.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions
-                ? Enrollment.Constants.NotEnrolled
-                : member.EnrollmentId;
-
-            // If retired, then they get it all.
-            if (member.ZeroCont == ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested)
-            {
-                vestedRatio = 1;
-            }
-
-            // If bene, they get it all
-            if (memberSlice.IsOnlyBeneficiary)
-            {
-                vestedRatio = 1;
-            }
-
-            // If there is no money, then the ratio is meaningless - follow how READY reports it as 0
-            if (member.EndingBalance == 0)
-            {
-                vestedRatio = 0;
-            }
-
-            // Calculate age if birthdate available
-            int? age = member.Birthday?.Age();
-
-            var hasForfeited = enrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords ||
-                               enrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
-            var suggestedForfeit = hasForfeited ? (decimal?)0 : Math.Round(member.EndingBalance - vestedBalance, 2, MidpointRounding.AwayFromZero);
-            if (member.PsnSuffix > 0)
-            {
-                // You can not forfeit a pure bene
-                suggestedForfeit = null;
-            }
-
-            // Create year detail record
-            TerminatedEmployeeAndBeneficiaryYearDetailDto yearDetail = new()
-            {
-                ProfitYear = member.ProfitYear,
-                BeginningBalance = member.BeginningAmount,
-                BeneficiaryAllocation = member.BeneficiaryAllocation,
-                DistributionAmount = member.DistributionAmount,
-                Forfeit = member.ForfeitAmount,
-                EndingBalance = member.EndingBalance,
-                VestedBalance = vestedBalance,
-                DateTerm = member.TerminationDate,
-                YtdPsHours = member.HoursCurrentYear,
-                IsExecutive = member.IsExecutive,
-                VestedPercent = vestedRatio * 100,
-                Age = age,
-                HasForfeited = hasForfeited,
-                SuggestedForfeit = suggestedForfeit,
-                EnrollmentId = member.EnrollmentId
-            };
-
-            // Apply user-requested exclusion filters
-            // Exclude members with 0 balance OR 100% vested (no forfeiture opportunity)
-            if (req.ExcludeZeroAndFullyVested && (member.EndingBalance == 0 || vestedRatio == 1.0m || hasForfeited))
-            {
-                continue;
-            }
-
-            yearDetailsList.Add((member.BadgeNumber, member.PsnSuffix, member.FullName, yearDetail));
-
-            // Accumulate totals
-            totalVested += vestedBalance;
-            totalForfeit += member.ForfeitAmount;
-            totalEndingBalance += member.EndingBalance;
-            totalBeneficiaryAllocation += member.BeneficiaryAllocation;
-        }
-        var processingDuration = (DateTime.UtcNow - processingStart).TotalMilliseconds;
-
-        var groupingStart = DateTime.UtcNow;
-        PaginatedResponseDto<TerminatedEmployeeAndBeneficiaryDataResponseDto> grouped = await yearDetailsList
-            .GroupBy(x => new { x.BadgeNumber, x.PsnSuffix, x.Name })
-            .Select(g => new TerminatedEmployeeAndBeneficiaryDataResponseDto
-            {
-                PSN = g.Key.PsnSuffix == 0 ? (long)g.Key.BadgeNumber : (long)g.Key.BadgeNumber * 10000 + g.Key.PsnSuffix,
-                Name = g.Key.Name,
-                YearDetails = g.Select(x => x.YearDetail).OrderByDescending(y => y.ProfitYear).ToList()
-            }).ToPaginationResultsAsync(req, cancellationToken);
-
-        var groupingDuration = (DateTime.UtcNow - groupingStart).TotalMilliseconds;
         int groupCount = grouped.Results != null ? grouped.Results.Count() : 0;
         _logger.LogInformation("Grouping and pagination completed in {DurationMs:F2}ms, returned {GroupCount} groups", groupingDuration, groupCount);
 
-        var totalProcessingDuration = (DateTime.UtcNow - overallStart).TotalMilliseconds;
-        _logger.LogInformation("MergeAndCreateDataset complete: total {TotalDurationMs:F2}ms (queries: {QueryDurationMs:F2}ms, processing: {ProcessingDurationMs:F2}ms, grouping: {GroupingDurationMs:F2}ms)",
-            totalProcessingDuration, profitDetailsDuration + thisYearDuration + lastYearDuration + vestedDuration, processingDuration, groupingDuration);
+        _logger.LogInformation("MergeAndCreateDataset queries: {QueryDurationMs:F2}ms, processing: {ProcessingDurationMs:F2}ms, grouping: {GroupingDurationMs:F2}ms",
+            profitDetailsDuration + thisYearDuration + lastYearDuration + vestedDuration, processingDuration, groupingDuration);
 
         return new TerminatedEmployeeAndBeneficiaryResponse
         {
@@ -458,7 +460,7 @@ public sealed class TerminatedEmployeeReportService
             request.BeginningDate, request.EndingDate);
 
         var terminatedEmployees = await GetTerminatedEmployeesSync(ctx, request);
-        var terminatedWithContributions = GetEmployeesAsMembers(ctx, request, terminatedEmployees, request.EndingDate);
+        var terminatedWithContributions = GetEmployeesAsMembers(ctx, terminatedEmployees);
         var beneficiaries = await GetBeneficiariesSync(ctx, request);
 
         return CombineEmployeeAndBeneficiarySlices(terminatedWithContributions, beneficiaries);
@@ -524,22 +526,17 @@ public sealed class TerminatedEmployeeReportService
     /// </summary>
     private IQueryable<MemberSlice> GetEmployeesAsMembers(
         IProfitSharingDbContext ctx,
-        FilterableStartAndEndDateRequest request,
-        IQueryable<TerminatedEmployeeDto> terminatedEmployees,
-        DateOnly asOfDate)
+        IQueryable<TerminatedEmployeeDto> terminatedEmployees)
     {
-        // CRITICAL: COBOL BUSINESS LOGIC ALIGNMENT (QPAY066 lines 604-634)
-        // COBOL queries PAYPROFIT WITHOUT year filter: "WHERE PAYPROF_BADGE = :H-DEM-BADGE"
-        // In READY's snapshot model, PayProfit has ONE record per employee.
-        // In SMART's temporal model, PayProfit has MULTIPLE records (one per year).
-        // Must get PayProfit for REQUESTED YEAR ONLY to match COBOL's "current year" behavior.
-        short requestedYear = (short)request.EndingDate.Year;
+        // Terminations is always showing "Live" current information about employees/benes
+        var ageAsOfDate = DateTime.Now.ToDateOnly();
+        short currentYear = (short)ageAsOfDate.Year;
 
         IQueryable<MemberSlice> query = from employee in terminatedEmployees
-                                        join payProfit in ctx.PayProfits.Where(pp => pp.ProfitYear == requestedYear)
+                                        join payProfit in ctx.PayProfits.Where(pp => pp.ProfitYear == currentYear)
                                             on employee.Demographic.Id equals payProfit.DemographicId into payProfitTmp
                                         from payProfit in payProfitTmp.DefaultIfEmpty()
-                                        join yipTbl in _totalService.GetYearsOfService(ctx, requestedYear, asOfDate)
+                                        join yipTbl in _totalService.GetYearsOfService(ctx, currentYear, ageAsOfDate)
                                             on employee.Demographic.Ssn equals yipTbl.Ssn into yipTmp
                                         from yip in yipTmp.DefaultIfEmpty()
                                         select new MemberSlice
@@ -565,7 +562,7 @@ public sealed class TerminatedEmployeeReportService
                                                     : 0,
                                             EnrollmentId = payProfit != null ? payProfit.EnrollmentId : (byte)0,
                                             Etva = payProfit != null ? payProfit.Etva : 0,
-                                            ProfitYear = requestedYear,
+                                            ProfitYear = currentYear,
                                             IsOnlyBeneficiary = false,
                                             IsBeneficiaryAndEmployee = false,
                                             IsExecutive = employee.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly

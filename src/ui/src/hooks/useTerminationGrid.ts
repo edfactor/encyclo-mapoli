@@ -7,7 +7,11 @@ import {
   useUpdateForfeitureAdjustmentMutation
 } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { CalendarResponseDto, ForfeitureAdjustmentUpdateRequest, FilterableStartAndEndDateRequest } from "reduxstore/types";
+import {
+  CalendarResponseDto,
+  ForfeitureAdjustmentUpdateRequest,
+  FilterableStartAndEndDateRequest
+} from "reduxstore/types";
 import { setMessage } from "smart-ui-library";
 import { generateRowKey } from "../utils/forfeitActivities/gridDataHelpers";
 import {
@@ -524,13 +528,8 @@ export const useTerminationGrid = ({
       .map((masterRow) => {
         const badgeNumber = masterRow.psn;
 
-        // Find the yearDetail that matches the selected profit year
-        const matchingDetail = masterRow.yearDetails?.find((detail) => detail.profitYear === selectedProfitYear);
-
-        // Skip this employee if no matching year detail found
-        if (!matchingDetail) {
-          return null;
-        }
+        // We return 1 year for each person.
+        const matchingDetail = masterRow.yearDetails[0];
 
         return {
           // Master row fields
