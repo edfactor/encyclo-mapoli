@@ -553,7 +553,7 @@ public sealed class TerminatedEmployeeReportService
                                             LastName = employee.Demographic.ContactInfo.LastName,
                                             YearsInPs = yip != null ? yip.Years : (byte)0,
                                             TerminationDate = employee.Demographic.TerminationDate,
-                                            IncomeRegAndExecCurrentYear = payProfit != null ? payProfit.CurrentIncomeYear + payProfit.IncomeExecutive : 0,
+                                            IncomeRegAndExecCurrentYear = payProfit != null ? payProfit.TotalIncome : 0,
                                             TerminationCode = employee.Demographic.TerminationCodeId,
                                             ZeroCont = employee.Demographic.TerminationCodeId == TerminationCode.Constants.Deceased
                                                 ? ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested

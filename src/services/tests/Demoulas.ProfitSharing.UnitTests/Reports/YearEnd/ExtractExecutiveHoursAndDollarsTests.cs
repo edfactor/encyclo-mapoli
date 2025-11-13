@@ -308,6 +308,8 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         pp.HoursExecutive = 0;
         pp.CurrentIncomeYear = _example.CurrentIncomeYear;
         pp.CurrentHoursYear = _example.CurrentHoursYear;
+        pp.TotalHours = _example.CurrentHoursYear + _example.HoursExecutive;
+        pp.TotalIncome = _example.CurrentIncomeYear + _example.IncomeExecutive;
         demo.PayFrequencyId = _example.PayFrequencyId;
         demo.PayFrequency = new PayFrequency { Id = _example.PayFrequencyId, Name = _example.PayFrequencyName };
         demo.EmploymentStatusId = _example.EmploymentStatusId;
