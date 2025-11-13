@@ -33,9 +33,9 @@ public static class SecurityExtension
         // All environments use Okta as the primary authentication
         _ = builder.Services.AddOktaSecurity(builder.Configuration);
 
-        // In Development mode, ALSO support Test Certs for integration tests
+        // In Development or Test mode, ALSO support Test Certs for integration tests
         // This eliminates the need to restart when switching between UI testing and integration tests
-        if (builder.Environment.IsDevelopment())
+        if (builder.Environment.IsDevelopment() || builder.Environment.IsTestEnvironment())
         {
             _ = builder.Services.AddTestCertificateSupport(builder.Configuration);
         }
@@ -58,14 +58,20 @@ public static class SecurityExtension
             // Read signing key from dotnet user-jwts configuration (stored in user secrets)
             var signingKeyValue = configuration["Authentication:Schemes:Bearer:SigningKeys:0:Value"];
 
+            SymmetricSecurityKey testCertKey;
+
             if (string.IsNullOrEmpty(signingKeyValue))
             {
-                throw new InvalidOperationException(
-                    "No signing key found in user secrets. Run: dotnet user-jwts create --audience https://localhost:7141");
+                // Fall back to hardcoded test key for unit tests (same key used in test JWT generation)
+#pragma warning disable S6781 // JWT secret keys should not be disclosed
+                testCertKey = new SymmetricSecurityKey("abcdefghijklmnopqrstuvwxyz123456"u8.ToArray());
+#pragma warning restore S6781 // JWT secret keys should not be disclosed
             }
-
-            // The signing key from dotnet user-jwts is Base64-encoded
-            var testCertKey = new SymmetricSecurityKey(Convert.FromBase64String(signingKeyValue));
+            else
+            {
+                // The signing key from dotnet user-jwts is Base64-encoded
+                testCertKey = new SymmetricSecurityKey(Convert.FromBase64String(signingKeyValue));
+            }
 
             // Store original events
             var originalEvents = options.Events ?? new JwtBearerEvents();
@@ -91,12 +97,21 @@ public static class SecurityExtension
                         {
                             var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
 
-                            // Read issuer and audience from configuration
-                            var validIssuer = configuration["Authentication:Schemes:Bearer:ValidIssuer"] ?? "dotnet-user-jwts";
+                            // Read issuer and audience from configuration, with fallbacks for unit tests
+                            var validIssuer = configuration["Authentication:Schemes:Bearer:ValidIssuer"];
+                            if (string.IsNullOrEmpty(validIssuer))
+                            {
+                                validIssuer = string.IsNullOrEmpty(signingKeyValue) ? "Unit Test Issuer" : "dotnet-user-jwts";
+                            }
 
                             // Read all valid audiences from configuration
-                            var validAudiences = configuration.GetSection("Authentication:Schemes:Bearer:ValidAudiences")
-                                .Get<string[]>() ?? new[] { "https://localhost:7141" };
+                            var validAudiences = configuration.GetSection("Authentication:Schemes:Bearer:ValidAudiences").Get<string[]>();
+                            if (validAudiences == null || validAudiences.Length == 0)
+                            {
+                                validAudiences = string.IsNullOrEmpty(signingKeyValue)
+                                    ? new[] { "Unit Test Audience" }
+                                    : new[] { "https://localhost:7141" };
+                            }
 
                             var validationParameters = new TokenValidationParameters
                             {
