@@ -32,13 +32,15 @@ interface RowData {
 
 /**
  * Generate row key based on activity type
+ * Must match the key used in column definitions (valueGetter)
  */
 function generateRowKey(activityType: ActivityType, data: RowData): string {
   if (activityType === "unforfeit") {
     return data.profitDetailId?.toString() || "";
   }
   // For termination: use composite key (badgeNumber-profitYear)
-  return `${data.badgeNumber || data.psn}-${data.profitYear}`;
+  // badgeNumber is always set in grid data (see useTerminationGrid)
+  return `${data.badgeNumber}-${data.profitYear}`;
 }
 
 /**
