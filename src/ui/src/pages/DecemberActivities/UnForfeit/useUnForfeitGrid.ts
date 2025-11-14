@@ -38,6 +38,7 @@ interface UnForfeitGridConfig {
   fiscalCalendarYear: CalendarResponseDto | null;
   isReadOnly: boolean;
   onShowUnsavedChangesDialog?: () => void;
+  onShowErrorDialog?: (title: string, message: string) => void;
 }
 
 // Configuration for shared utilities
@@ -57,7 +58,8 @@ export const useUnForfeitGrid = ({
   setHasUnsavedChanges,
   fiscalCalendarYear,
   isReadOnly,
-  onShowUnsavedChangesDialog
+  onShowUnsavedChangesDialog,
+  onShowErrorDialog
 }: UnForfeitGridConfig) => {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
@@ -203,7 +205,10 @@ export const useUnForfeitGrid = ({
         const result = await updateForfeitureAdjustment({ ...transformedRequest, suppressAllToastErrors: true });
 
         if (result?.error) {
-          alert("Save failed. One or more unforfeits were related to a class action forfeit.");
+          onShowErrorDialog?.(
+            "Class Action Forfeit",
+            "Save failed. One or more unforfeits were related to a class action forfeit."
+          );
         } else {
           // Generate row key using shared helper (uses profitDetailId for unforfeit)
           const rowKey = generateRowKey(ACTIVITY_CONFIG.rowKeyConfig, {
@@ -237,7 +242,7 @@ export const useUnForfeitGrid = ({
       } catch (error) {
         console.error("Failed to save forfeiture adjustment:", error);
         const errorMessage = formatApiError(error, getErrorMessage(ACTIVITY_CONFIG.activityType, "save"));
-        alert(errorMessage);
+        onShowErrorDialog?.("Save Failed", errorMessage);
       } finally {
         editState.removeLoadingRow(rowId);
       }
@@ -252,7 +257,8 @@ export const useUnForfeitGrid = ({
       createRequest,
       triggerSearch,
       handlePaginationChange,
-      gridApi
+      gridApi,
+      onShowErrorDialog
     ]
   );
 
@@ -316,7 +322,7 @@ export const useUnForfeitGrid = ({
       } catch (error) {
         console.error("Failed to save forfeiture adjustments:", error);
         const errorMessage = formatApiError(error, getErrorMessage(ACTIVITY_CONFIG.activityType, "bulkSave"));
-        alert(errorMessage);
+        onShowErrorDialog?.("Bulk Save Failed", errorMessage);
       } finally {
         editState.removeLoadingRows(badgeNumbers);
         pageNumberAtBulkSaveRef.current = null;
@@ -334,7 +340,8 @@ export const useUnForfeitGrid = ({
       createRequest,
       triggerSearch,
       handlePaginationChange,
-      gridApi
+      gridApi,
+      onShowErrorDialog
     ]
   );
 
