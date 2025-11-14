@@ -9,57 +9,23 @@
     }
   },
   "profiles": {
-    "http": {
-      "commandName": "Project",
-      "dotnetRunMessages": true,
-      "launchBrowser": true,
-      "launchUrl": "swagger",
-      "applicationUrl": "http://localhost:5298",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+      "https": {
+          "commandName": "Project",
+          "dotnetRunMessages": true,
+          "launchBrowser": true,
+          "launchUrl": "swagger",
+          "applicationUrl": "https://localhost:7141",
+          "environmentVariables": {
+              "ASPNETCORE_ENVIRONMENT": "Development"
+          }
+      },
+      "IIS Express": {
+          "commandName": "IISExpress",
+          "launchBrowser": true,
+          "launchUrl": "swagger",
+          "environmentVariables": {
+              "ASPNETCORE_ENVIRONMENT": "Development"
+          }
       }
-    },
-    "https": {
-        "commandName": "Project",
-        "dotnetRunMessages": true,
-        "launchBrowser": true,
-        "launchUrl": "swagger",
-        "applicationUrl": "https://localhost:7141",
-        "environmentVariables": {
-            "ASPNETCORE_ENVIRONMENT": "Development"
-        }
-    },
-  "sqlSilent": {
-      "commandName": "Project",
-      "dotnetRunMessages": true,
-      "launchBrowser": false,
-      "launchUrl": "swagger",
-      "applicationUrl": "https://localhost:7141",
-      "environmentVariables": {
-          "ASPNETCORE_ENVIRONMENT": "Development",
-          "Serilog__MinimumLevel__Override__Microsoft.EntityFrameworkCore.Database.Command": "Fatal",
-          "Serilog__MinimumLevel__Override__Demoulas.ProfitSharing.Data.HealthCheckResultLogger": "Fatal"
-      }
-  },
-  "yematch": {
-      "commandName": "Project",
-      "dotnetRunMessages": true,
-      "launchBrowser": true,
-      "launchUrl": "swagger",
-      "applicationUrl": "https://localhost:7141",
-      "environmentVariables": {
-          "ASPNETCORE_ENVIRONMENT": "Development",
-          "YEMATCH_USE_TEST_CERTS": "true",
-          "Serilog__MinimumLevel__Override__Microsoft.EntityFrameworkCore.Database.Command": "Fatal"
-      }
-  },
-    "IIS Express": {
-      "commandName": "IISExpress",
-      "launchBrowser": true,
-      "launchUrl": "swagger",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
-    }
   }
 }

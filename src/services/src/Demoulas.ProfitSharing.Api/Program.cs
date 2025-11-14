@@ -65,33 +65,29 @@ _ = builder.SetDefaultLoggerConfiguration(logConfig);
 
 _ = builder.AddSecurityServices();
 
+string[] allowedDevOrigins = [
+    "http://localhost:3100",
+    "https://localhost:3100",
+    "http://127.0.0.1:3100"
+];
 
 string[] allowedOrigins = [
-        "https://ps.qa.demoulas.net",
-        "https://ps.uat.demoulas.net",
-        "https://ps.demoulas.net"
+    "https://ps.qa.demoulas.net",
+    "https://ps.uat.demoulas.net",
+    "https://ps.demoulas.net"
 ];
 
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(pol =>
     {
-        if (builder.Environment.IsDevelopment())
-        {
-            // Local development: permissive CORS to simplify local testing
-            _ = pol.AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowAnyOrigin()
-                .WithExposedHeaders("Location", "x-demographic-data-source");
-        }
-        else
-        {
-            // Non-dev: restrict to known UI origins only
-            _ = pol.WithOrigins(allowedOrigins)
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .WithExposedHeaders("Location", "x-demographic-data-source");
-        }
+        var origins = builder.Environment.IsDevelopment() ? allowedDevOrigins : allowedOrigins;
+
+        _ = pol.WithOrigins(origins)
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials()
+            .WithExposedHeaders("Location", "x-demographic-data-source");
     });
 });
 
