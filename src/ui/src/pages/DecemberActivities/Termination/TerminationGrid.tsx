@@ -21,6 +21,7 @@ interface TerminationGridSearchProps {
   onArchiveHandled?: () => void;
   onErrorOccurred?: () => void; // Add this prop
   onLoadingChange?: (isLoading: boolean) => void;
+  onShowUnsavedChangesDialog?: () => void;
 }
 
 const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
@@ -34,7 +35,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   shouldArchive,
   onArchiveHandled,
   onErrorOccurred,
-  onLoadingChange
+  onLoadingChange,
+  onShowUnsavedChangesDialog
 }) => {
   // Use dynamic grid height utility hook
   const gridMaxHeight = useDynamicGridHeight();
@@ -71,7 +73,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     onArchiveHandled,
     onErrorOccurred,
     onLoadingChange,
-    isReadOnly
+    isReadOnly,
+    onShowUnsavedChangesDialog
   });
 
   // Refresh grid cells when read-only status changes

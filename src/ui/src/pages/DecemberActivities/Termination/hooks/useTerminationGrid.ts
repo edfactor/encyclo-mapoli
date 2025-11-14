@@ -59,6 +59,7 @@ interface TerminationGridConfig {
   onErrorOccurred?: () => void;
   onLoadingChange?: (isLoading: boolean) => void;
   isReadOnly: boolean;
+  onShowUnsavedChangesDialog?: () => void;
 }
 
 // Configuration for shared utilities
@@ -79,7 +80,8 @@ export const useTerminationGrid = ({
   onArchiveHandled,
   onErrorOccurred,
   onLoadingChange,
-  isReadOnly
+  isReadOnly,
+  onShowUnsavedChangesDialog
 }: TerminationGridConfig) => {
   const [pendingSuccessMessage, setPendingSuccessMessage] = useState<string | null>(null);
   const [isPendingBulkMessage, setIsPendingBulkMessage] = useState<boolean>(false);
@@ -557,7 +559,7 @@ export const useTerminationGrid = ({
   const paginationHandlers = {
     setPageNumber: (value: number) => {
       if (hasUnsavedChanges) {
-        alert("Please save your changes.");
+        onShowUnsavedChangesDialog?.();
         return;
       }
       handlePaginationChange(value - 1, pageSize);
@@ -565,7 +567,7 @@ export const useTerminationGrid = ({
     },
     setPageSize: (value: number) => {
       if (hasUnsavedChanges) {
-        alert("Please save your changes.");
+        onShowUnsavedChangesDialog?.();
         return;
       }
       handlePaginationChange(0, value);

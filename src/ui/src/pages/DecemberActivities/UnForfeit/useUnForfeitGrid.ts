@@ -37,6 +37,7 @@ interface UnForfeitGridConfig {
   setHasUnsavedChanges: (hasChanges: boolean) => void;
   fiscalCalendarYear: CalendarResponseDto | null;
   isReadOnly: boolean;
+  onShowUnsavedChangesDialog?: () => void;
 }
 
 // Configuration for shared utilities
@@ -55,7 +56,8 @@ export const useUnForfeitGrid = ({
   onArchiveHandled,
   setHasUnsavedChanges,
   fiscalCalendarYear,
-  isReadOnly
+  isReadOnly,
+  onShowUnsavedChangesDialog
 }: UnForfeitGridConfig) => {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
@@ -461,7 +463,7 @@ export const useUnForfeitGrid = ({
     () => ({
       setPageNumber: async (value: number) => {
         if (hasUnsavedChanges) {
-          alert("Please save your changes.");
+          onShowUnsavedChangesDialog?.();
           return;
         }
 
@@ -492,7 +494,7 @@ export const useUnForfeitGrid = ({
       },
       setPageSize: async (value: number) => {
         if (hasUnsavedChanges) {
-          alert("Please save your changes.");
+          onShowUnsavedChangesDialog?.();
           return;
         }
         isPaginationChangeRef.current = true;
@@ -513,6 +515,7 @@ export const useUnForfeitGrid = ({
     }),
     [
       hasUnsavedChanges,
+      onShowUnsavedChangesDialog,
       handlePaginationChange,
       performSearch,
       sortParams.sortBy,

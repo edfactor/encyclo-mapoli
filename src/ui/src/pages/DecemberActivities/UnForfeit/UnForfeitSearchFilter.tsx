@@ -1,10 +1,11 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormControlLabel, FormHelperText, Grid } from "@mui/material";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import { ConfirmationDialog } from "../../../components/ConfirmationDialog";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useLazyGetUnForfeitsQuery } from "../../../reduxstore/api/YearsEndApi";
 import {
@@ -60,12 +61,13 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
   const [triggerSearch, { isFetching }] = useLazyGetUnForfeitsQuery();
   const { unForfeitsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const dispatch = useDispatch();
+  const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false);
 
   const selectedProfitYear = useDecemberFlowProfitYear();
 
   const validateAndSubmit = (data: StartAndEndDateRequest) => {
     if (hasUnsavedChanges) {
-      alert("Please save your changes.");
+      setShowUnsavedChangesDialog(true);
       return;
     }
 
@@ -239,6 +241,13 @@ const UnForfeitSearchFilter: React.FC<UnForfeitSearchFilterProps> = ({
           disabled={!isValid || isFetching}
         />
       </Grid>
+
+      <ConfirmationDialog
+        open={showUnsavedChangesDialog}
+        title="Unsaved Changes"
+        description="Please save your changes before performing a new search."
+        onClose={() => setShowUnsavedChangesDialog(false)}
+      />
     </form>
   );
 };

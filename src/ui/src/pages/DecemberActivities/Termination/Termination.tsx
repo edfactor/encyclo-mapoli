@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { ApiMessageAlert, DSMAccordion, Page } from "smart-ui-library";
+import { ConfirmationDialog } from "../../../components/ConfirmationDialog";
 import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
 
 import { CircularProgress, Divider, Grid } from "@mui/material";
@@ -25,6 +26,7 @@ const Termination = () => {
   const [fetchAccountingRange, { data: fiscalData }] = useLazyGetAccountingRangeToCurrent(6);
   const { state, actions } = useTerminationState();
   const [isFetching, setIsFetching] = useState(false);
+  const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false);
 
   // Function to scroll to top - only used for error cases
   const scrollToTop = useCallback(() => {
@@ -111,12 +113,20 @@ const Termination = () => {
                   onArchiveHandled={actions.handleArchiveHandled}
                   onErrorOccurred={scrollToTop}
                   onLoadingChange={setIsFetching}
+                  onShowUnsavedChangesDialog={() => setShowUnsavedChangesDialog(true)}
                 />
               </Grid>
             </>
           )}
         </Grid>
       </div>
+
+      <ConfirmationDialog
+        open={showUnsavedChangesDialog}
+        title="Unsaved Changes"
+        description="Please save your changes before changing pages."
+        onClose={() => setShowUnsavedChangesDialog(false)}
+      />
     </Page>
   );
 };

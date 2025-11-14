@@ -20,6 +20,7 @@ interface UnForfeitGridSearchProps {
   onArchiveHandled?: () => void;
   setHasUnsavedChanges: (hasChanges: boolean) => void;
   fiscalCalendarYear: CalendarResponseDto | null;
+  onShowUnsavedChangesDialog?: () => void;
 }
 
 const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
@@ -31,7 +32,8 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
   shouldArchive,
   onArchiveHandled,
   setHasUnsavedChanges,
-  fiscalCalendarYear
+  fiscalCalendarYear,
+  onShowUnsavedChangesDialog
 }) => {
   // Use dynamic grid height utility hook
   const gridMaxHeight = useDynamicGridHeight();
@@ -67,7 +69,8 @@ const UnForfeitGrid: React.FC<UnForfeitGridSearchProps> = ({
     onArchiveHandled,
     setHasUnsavedChanges,
     fiscalCalendarYear,
-    isReadOnly
+    isReadOnly,
+    onShowUnsavedChangesDialog
   });
 
   // Refresh grid cells when read-only status changes
