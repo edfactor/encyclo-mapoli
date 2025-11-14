@@ -2,7 +2,7 @@
 
 TOTAL       0                                                                                  .00
 DJDE JDE=PAY426,JDL=PAYROL,END,;
-PAY426N-S                            DEMOULAS SUPERMARKETS INC      PROFIT SHARING FOR   2024               09/01/25    19:52  PAGE
+PAY426N-S                            DEMOULAS SUPERMARKETS INC      PROFIT SHARING FOR   2025               11/13/25    15:30  PAGE
 
 - PROFIT SHARING SUMMARY TOTAL PAGE
 
@@ -12,21 +12,21 @@ E - ERROR REPORT EMPLOYEES                                        0            .
 
 ACTIVE AND INACTIVE:
 
-1 -    AGE 18-20 WITH >= 1000 PS HOURS                          567  14,042,038.95         4,698.49
-2 - >= AGE 21 WITH >= 1000 PS HOURS                           6,298 347,303,345.90   402,960,038.25
-3 - <  AGE 18                                                    89   1,573,006.20              .00
-4 - >= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT          179   1,536,035.24     4,456,347.00
-5 - >= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT        44     329,605.53         3,071.43-
+1 -    AGE 18-20 WITH >= 1000 PS HOURS                          205   5,198,074.91        27,334.83
+2 - >= AGE 21 WITH >= 1000 PS HOURS                           4,726 210,475,823.59   433,861,275.08
+3 - <  AGE 18                                                    19     244,258.01              .00
+4 - >= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT        1,129  13,013,031.90    20,438,479.06
+5 - >= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT       291   3,039,600.49              .00
 
 TERMINATED:
 
-6 - >= AGE 18 WITH >= 1000 PS HOURS                             346  10,348,393.04    10,688,722.99
-7 - >= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT        17     102,135.70         1,156.14-
-8 - >= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT        2,753   3,134,383.46    67,391,429.23
-X - <  AGE 18           NO WAGES :   0                            0            .00              .00
-N - NON-EMPLOYEE BENEFICIARIES                                  154            .00     1,420,408.19
+6 - >= AGE 18 WITH >= 1000 PS HOURS                             141   4,594,615.39     9,219,210.29
+7 - >= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT       132     616,836.02              .00
+8 - >= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT        1,784   4,669,803.88    62,441,710.98
+X - <  AGE 18           NO WAGES :   0                            2      11,052.15              .00
+N - NON-EMPLOYEE BENEFICIARIES                                  169            .00     2,564,290.61
 
 
-  - TOTAL ALL REPORTS:                                       10,447 378,368,944.02   486,917,416.58
+  - TOTAL ALL REPORTS:                                        8,598 241,863,096.34   528,552,300.85
 
-    EMPLOYEES WITH NO WAGES                                   2,367            .00    49,074,960.44
+    EMPLOYEES WITH NO WAGES                                   1,332            .00    38,441,927.42

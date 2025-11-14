@@ -4,7 +4,7 @@
  */
 
 import { GridApi } from "ag-grid-community";
-import { ActivityType, generateRowKey, RowKeyConfig, transformForfeitureValue } from "./gridDataHelpers";
+import { ActivityType, generateRowKey, RowKeyConfig } from "./gridDataHelpers";
 
 /**
  * Base request structure for forfeiture adjustments
@@ -54,7 +54,7 @@ export function prepareSaveRequest(
 ): ForfeitureAdjustmentUpdateRequest {
   return {
     ...request,
-    forfeitureAmount: transformForfeitureValue(config.activityType, request.forfeitureAmount)
+    forfeitureAmount: request.forfeitureAmount // The sign has already been flipped for unforfeitures
   };
 }
 

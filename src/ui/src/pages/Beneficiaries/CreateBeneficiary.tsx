@@ -1,4 +1,4 @@
-import { FormLabel, Grid, MenuItem, Select, TextField } from "@mui/material";
+import { FormLabel, Grid, MenuItem, Select, TextField, Typography } from "@mui/material";
 
 import { yupResolver } from "@hookform/resolvers/yup";
 import Checkbox from "@mui/material/Checkbox";
@@ -60,6 +60,7 @@ type CreateBeneficiaryProps = {
   onSaveSuccess: () => void;
   selectedBeneficiary?: BeneficiaryDto;
   selectedMember: BeneficiaryDetail;
+  existingBeneficiaries?: BeneficiaryDto[];
 };
 
 const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
@@ -67,9 +68,22 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
   onSaveSuccess,
   psnSuffix,
   selectedBeneficiary,
-  selectedMember
+  selectedMember,
+  existingBeneficiaries
 }) => {
   const { beneficiaryKinds } = useBeneficiaryKinds();
+
+  // Check if employee already has a primary beneficiary
+  const hasPrimaryBeneficiary = existingBeneficiaries?.some(b => b.kindId+'' === 'P') || false;
+  
+  // Filter beneficiary kinds based on existing beneficiaries
+  // If editing an existing beneficiary, allow all kinds
+  // If creating new and already has primary, only show secondary
+  const availableBeneficiaryKinds = selectedBeneficiary 
+    ? beneficiaryKinds // When editing, allow all kinds (user can edit existing primary)
+    : hasPrimaryBeneficiary 
+      ? beneficiaryKinds.filter(kind => kind.id !== 'P') // When adding new and has primary, exclude primary
+      : beneficiaryKinds; // When adding new and no primary exists, allow all
 
   const [triggerAdd, { isFetching }] = useLazyCreateBeneficiariesQuery();
   const [triggerCreateBeneficiaryContact] = useLazyCreateBeneficiaryContactQuery();
@@ -109,7 +123,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
           firstName: "",
           lastName: "",
           addressSameAsBeneficiary: false,
-          kindId: ""
+          kindId: hasPrimaryBeneficiary ? "S" : "" // Default to Secondary if Primary exists
         }
   });
 
@@ -419,6 +433,16 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
             size={{ xs: 12, md: 12 }}>
             <Grid size={{ md: 5, xs: 12 }}>
               <FormLabel>Beneficiary Kind</FormLabel>
+              {!selectedBeneficiary && hasPrimaryBeneficiary && (
+                <Typography 
+                  variant="caption" 
+                  color="text.secondary" 
+                  display="block"
+                  sx={{ mb: 1 }}
+                >
+                  Primary beneficiary already exists. Only Secondary beneficiaries can be added.
+                </Typography>
+              )}
               <Controller
                 name="kindId"
                 control={control}
@@ -433,7 +457,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
                     value={field.value}
                     label="Beneficiary Kind"
                     onChange={(e) => field.onChange(e.target.value)}>
-                    {beneficiaryKinds.map((d) => (
+                    {availableBeneficiaryKinds.map((d) => (
                       <MenuItem
                         key={d.id}
                         value={d.id}>

@@ -41,7 +41,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
     }
 
 
-    [Fact(DisplayName = "PS-345: Check for Military (JSON)")]
+    [Fact]
     public Task GetResponse_Should_ReturnReportResponse_WhenCalledWithValidRequest()
     {
         return MockDbContextFactory.UseWritableContext(async c =>
@@ -77,7 +77,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         });
     }
 
-    [Fact(DisplayName = "PS-345: Check for Military (CSV)")]
+    [Fact]
     public Task GetResponse_Should_ReturnReportResponse_WhenCalledWithValidRequest_CSV()
     {
         return MockDbContextFactory.UseWritableContext(async c =>
@@ -196,12 +196,19 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         demo.HireDate = new DateTime(2017, 10, 04, 01, 01, 01, DateTimeKind.Local).ToDateOnly();
         demo.TerminationDate = new DateTime(2021, 10, 04, 01, 01, 01, DateTimeKind.Local).ToDateOnly();
 
-        var profitYear = (short)Math.Min(demo.ReHireDate!.Value.Year, 2024);
-
+        var profitYear = (short)DateTime.Today.Year;  // Use current year like the service does
 
         var payProfit = await c.PayProfits.Include(p => p.Enrollment).FirstAsync(pp => pp.DemographicId == demo.Id);
-        payProfit.EnrollmentId = Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
-        // Don't override the Enrollment navigation property - it should match the Enrollments DbSet
+
+        // Keep the existing enrollment and just ensure it has the right ID for the forfeiture records test
+        if (payProfit.Enrollment != null && payProfit.EnrollmentId != Enrollment.Constants.NewVestingPlanHasForfeitureRecords)
+        {
+            // Update to use the NewVestingPlanHasForfeitureRecords enrollment (ID=4)
+            payProfit.EnrollmentId = Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
+            payProfit.Enrollment.Id = Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
+            payProfit.Enrollment.Name = "New Vesting Plan Has Forfeiture Records";
+        }
+
         payProfit.CurrentHoursYear = 1255.4m;
         payProfit.HoursExecutive = 0;
         payProfit.CurrentIncomeYear = 12345.67m;
@@ -211,14 +218,35 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         payProfit.ProfitYear = profitYear;
 
         var details = await c.ProfitDetails.Where(pd => pd.Ssn == demo.Ssn).ToListAsync(CancellationToken.None);
-        foreach (var detail in details)
+
+        // If no ProfitDetails exist, create at least one for the test
+        if (!details.Any())
         {
-            detail.Forfeiture = short.MaxValue;
-            detail.ProfitYear = profitYear;
-            detail.Remark = "Test remarks";
-            detail.ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id;
-            detail.Contribution = byte.MaxValue;
-            detail.Earnings = byte.MaxValue;
+            var newDetail = new ProfitDetail
+            {
+                Ssn = demo.Ssn,
+                Forfeiture = short.MaxValue,
+                ProfitYear = profitYear,
+                Remark = "Test remarks",
+                ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id,
+                Contribution = byte.MaxValue,
+                Earnings = byte.MaxValue,
+                CommentType = CommentType.Constants.Forfeit
+            };
+            c.ProfitDetails.Add(newDetail);
+            details.Add(newDetail);
+        }
+        else
+        {
+            foreach (var detail in details)
+            {
+                detail.Forfeiture = short.MaxValue;
+                detail.ProfitYear = profitYear;
+                detail.Remark = "Test remarks";
+                detail.ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id;
+                detail.Contribution = byte.MaxValue;
+                detail.Earnings = byte.MaxValue;
+            }
         }
 
         await c.SaveChangesAsync(CancellationToken.None);
