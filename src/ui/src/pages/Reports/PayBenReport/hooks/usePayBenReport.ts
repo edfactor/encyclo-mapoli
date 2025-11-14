@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { useSelector } from "react-redux";
-import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
+import { SortParams } from "../../../../hooks/useGridPagination";
 import { useLazyPayBenReportQuery } from "../../../../reduxstore/api/YearsEndApi";
 import { RootState } from "../../../../reduxstore/store";
 import { PayBenReportRequest } from "../../../../types";
 import { initialState, payBenReportReducer, selectHasResults, selectShowData } from "./usePayBenReportReducer";
+import { usePersistedGridPagination } from "./usePersistedGridPagination";
 
 const usePayBenReport = () => {
   const [state, dispatch] = useReducer(payBenReportReducer, initialState);
@@ -41,7 +42,7 @@ const usePayBenReport = () => {
     [hasToken, triggerReport]
   );
 
-  const pagination = useGridPagination({
+  const pagination = usePersistedGridPagination({
     initialPageSize: 25,
     initialSortBy: "ssn",
     initialSortDescending: true,
