@@ -195,7 +195,7 @@ public sealed class TotalService : ITotalService
     /// <param name="profitYear">The profit year for which the vesting balance is calculated.</param>
     /// <param name="asOfDate">The date as of which the vesting balance is calculated.</param>
     /// <returns>
-    /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalVestingBalanceDto"/> containing the total vesting balance 
+    /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalVestingBalanceDto"/> containing the total vesting balance
     /// details for each participant, including current balance, ETVA, total distributions, vesting percentage, and vested balance.
     /// </returns>
     internal IQueryable<ParticipantTotalVestingBalance> TotalVestingBalance(IProfitSharingDbContext ctx,
@@ -214,7 +214,7 @@ public sealed class TotalService : ITotalService
     /// <param name="profitYear">The profit year for which the vesting balance is calculated.  Can be this year or any prior year.</param>
     /// <param name="asOfDate">The date as of which the vesting balance is calculated. In particular for age calculation of vesting.</param>
     /// <returns>
-    /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalVestingBalanceDto"/> containing the total vesting balance 
+    /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalVestingBalanceDto"/> containing the total vesting balance
     /// details for each participant, including current balance, ETVA, total distributions, vesting percentage, and vested balance.
     /// </returns>
     internal IQueryable<ParticipantTotalVestingBalance> TotalVestingBalance(IProfitSharingDbContext ctx,

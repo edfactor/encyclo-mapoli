@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services;
+
 internal sealed class MissiveService : IMissiveService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
@@ -120,8 +121,6 @@ internal sealed class MissiveService : IMissiveService
 
                     result[ssn] = missives;
                 }
-
-                return Task.FromResult(true);
             }, cancellation);
             return result;
         }

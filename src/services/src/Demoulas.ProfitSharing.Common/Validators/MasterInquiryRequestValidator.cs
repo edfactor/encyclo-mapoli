@@ -43,7 +43,6 @@ public class MasterInquiryRequestValidator : AbstractValidator<MasterInquiryRequ
 
 
 
-         
 
             if (x.ProfitCode.HasValue)
             {

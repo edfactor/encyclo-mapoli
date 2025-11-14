@@ -23,6 +23,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Endpoints.PayServices;
 /// PS-868: PayServices endpoint implementation with security policies
 /// </summary>
 [Description("PS-868 : PayServicesPartTimeEndpoint comprehensive unit tests")]
+[Collection("Pay Services Tests")]
 public sealed class PayServicesPartTimeEndpointTests : ApiTestBase<Program>
 {
     private readonly ITestOutputHelper _testOutputHelper;

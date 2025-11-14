@@ -306,7 +306,7 @@ public class CleanupReportService : ICleanupReportService
                             : (pd.CommentTypeId == CommentType.Constants.ForfeitClassAction.Id ||
                                (pd.Remark != null && (pd.Remark.Contains("FORFEIT CA") || pd.Remark.Contains("UN-FORFEIT CA"))))
                                 ? 'C'
-                                : (char?)null
+                                : null
                         : null,
                     Date = pd.MonthToDate is > 0 and <= 12 ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1) : pd.Date.ToDateOnly(),
                     Age = (byte)(pd.MonthToDate is > 0 and < 13
@@ -323,7 +323,6 @@ public class CleanupReportService : ICleanupReportService
                     Total = paginated.Total
                 };
 
-                //}
                 var response = new DistributionsAndForfeitureTotalsResponse()
                 {
                     ReportName = "Distributions and Forfeitures",

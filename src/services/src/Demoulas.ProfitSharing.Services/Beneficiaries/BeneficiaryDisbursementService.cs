@@ -73,12 +73,12 @@ public sealed class BeneficiaryDisbursementService : IBeneficiaryDisbursementSer
             }
 
             // -- Does each Beneficiary exist
-            foreach (var beneficiary in request.Beneficiaries)
+            foreach (var beneficiary in request.Beneficiaries.Select(x=> x.PsnSuffix))
             {
                 // Validate with suffix
-                if (await context.Beneficiaries.AnyAsync(b => b.BadgeNumber == request.BadgeNumber && b.PsnSuffix == beneficiary.PsnSuffix, cancellationToken) == false)
+                if (!await context.Beneficiaries.AnyAsync(b => b.BadgeNumber == request.BadgeNumber && b.PsnSuffix == beneficiary, cancellationToken))
                 {
-                    return Result<bool>.Failure(Error.BeneficiaryDoesNotExist($"{request.BadgeNumber}-{beneficiary.PsnSuffix}"));
+                    return Result<bool>.Failure(Error.BeneficiaryDoesNotExist($"{request.BadgeNumber}-{beneficiary}"));
                 }
             }
 

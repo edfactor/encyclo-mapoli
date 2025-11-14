@@ -2,7 +2,7 @@
 public sealed record ManualChecksWrittenResponse : DistributionsOnHoldResponse
 {
     public string? CheckNumber { get; set; }
-    public decimal GrossAmount { get; set; }    
+    public decimal GrossAmount { get; set; }
     public decimal FederalTaxAmount { get; set; }
     public decimal StateTaxAmount { get; set; }
 

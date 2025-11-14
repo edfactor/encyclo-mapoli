@@ -10,7 +10,7 @@ namespace Demoulas.ProfitSharing.UnitTests.OracleHcm.Repositories;
 /// <summary>
 /// Unit tests for DemographicsRepository using in-memory database.
 /// Tests all query and command operations with realistic test data.
-/// 
+///
 /// NOTE: These tests use ScenarioDataContextFactory.Create() which is experimental.
 /// See TESTING_LIMITATIONS.md for known issues and workarounds.
 /// </summary>
@@ -72,7 +72,6 @@ public sealed class DemographicsRepositoryTests
         results.ShouldBeEmpty();
     }
 
-  
 
     [Fact]
     [Description("PS-1721: GetBySsnAndBadgePairsAsync with all zero badges returns empty")]
@@ -177,5 +176,5 @@ public sealed class DemographicsRepositoryTests
     }
 
     #endregion
-   
+
 }

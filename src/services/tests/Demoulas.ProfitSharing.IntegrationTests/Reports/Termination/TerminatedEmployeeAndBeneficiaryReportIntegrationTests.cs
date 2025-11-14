@@ -34,7 +34,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         });
 
         TerminatedEmployeeService mockService =
-            new(DbFactory, TotalService, DemographicReaderService, _loggerFactory.CreateLogger<TerminatedEmployeeReportService>(), CalendarService, YearEndService);
+            new(DbFactory, TotalService, DemographicReaderService, _loggerFactory, CalendarService, YearEndService);
 
         TerminatedEmployeeAndBeneficiaryResponse data = await mockService.GetReportAsync(
             new FilterableStartAndEndDateRequest { SortBy = "Name", BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue },
@@ -134,7 +134,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
 
         // Uncomment to for the Visual diff
         // ProfitShareUpdateTests.AssertReportsAreEquivalent(expectedText, actualText)
-        
+
         Dictionary<long, QPay066Record> expectedMap = AsDict(QPay066ReportParser.ParseRecords(expectedText));
         Dictionary<long, QPay066Record> actualMap = AsDict(QPay066ReportParser.ParseRecords(actualText));
         actualMap.Keys.ShouldBe(expectedMap.Keys, true);
@@ -284,7 +284,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
                     : (long)qp.BadgeNumber * 10_000 + qp.PsnSuffix,
                 qp => qp);
     }
-    
+
     /// <summary>
     ///     Queries the READY schema's pscalcview2 view to get vested balances and vested percent for a set of badge numbers.
     /// </summary>

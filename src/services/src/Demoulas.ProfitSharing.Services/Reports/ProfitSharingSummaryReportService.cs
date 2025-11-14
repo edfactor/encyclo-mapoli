@@ -26,7 +26,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     private readonly ICalendarService _calendarService;
     private readonly TotalService _totalService;
     private readonly IDemographicReaderService _demographicReaderService;
-    private static readonly short _hoursThreshold;
+    private static readonly short _hoursThreshold = ReferenceData.MinimumHoursForContribution();
 
     private sealed record EmployeeProjection
     {
@@ -67,12 +67,6 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         _calendarService = calendarService;
         _totalService = totalService;
         _demographicReaderService = demographicReaderService;
-    }
-
-    static ProfitSharingSummaryReportService()
-    {
-        // Set the hours threshold for profit sharing eligibility
-        _hoursThreshold = ReferenceData.MinimumHoursForContribution();
     }
 
     /// <summary>
@@ -149,7 +143,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 // If totalsFilter provided, override NumberOfMembers
                 if (totalsFilter != null)
                 {
-                    lineItem.NumberOfMembers = summaryData.Where(totalsFilter).Count();
+                    lineItem.NumberOfMembers = summaryData.Count(totalsFilter);
                 }
 
                 return lineItem;
@@ -332,7 +326,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 var birthday18 = calInfo.FiscalEndDate.AddYears(-18);
                 var birthday21 = calInfo.FiscalEndDate.AddYears(-21);
 
-                var filter = GetReportDetailFilterExpression(reportIdInt, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21);
+                var filter = GetReportDetailFilterExpression(reportIdInt, calInfo.FiscalEndDate, birthday18, birthday21);
                 filteredDetails = allDetails.Where(filter);
             }
 
@@ -386,7 +380,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             if (req.ReportId == YearEndProfitSharingReportId.NonEmployeeBeneficiaries)
             {
                 // Report 10: filteredDetails is in-memory, use synchronous LINQ
-                var filteredList = filteredDetails.ToList();
+                var filteredList = await filteredDetails.ToListAsync(cancellationToken);
                 totals = new ProfitShareTotal
                 {
                     WagesTotal = filteredList.Sum(x => x.Wages),
@@ -633,7 +627,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             IsNew = false,
             IsUnder21 = false,
             EmployeeStatus = EmploymentStatus.Constants.Active,  // READY marks beneficiaries as Active (space in report)
-            Balance = (decimal)(x.Balance?.TotalAmount ?? 0),  // Balance may be null if no prior year balance exists
+            Balance = (x.Balance?.TotalAmount ?? 0),  // Balance may be null if no prior year balance exists
             YearsInPlan = 0,  // Fixed value per COBOL (WS-PYRS = 99)
             TerminationDate = null,
             FirstContributionYear = null,
@@ -712,14 +706,12 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     /// Returns a filter expression for individual employee detail records based on PAY426N report ID.
     /// </summary>
     /// <param name="reportId">The report ID or line number.</param>
-    /// <param name="fiscalBeginDate">Fiscal year begin date.</param>
     /// <param name="fiscalEndDate">Fiscal year end date.</param>
     /// <param name="birthday18">Date representing 18 years before fiscal end.</param>
     /// <param name="birthday21">Date representing 21 years before fiscal end.</param>
     /// <returns>Filter expression for the report detail records.</returns>
     private static Expression<Func<YearEndProfitSharingReportDetail, bool>> GetReportDetailFilterExpression(
         int reportId,
-        DateOnly fiscalBeginDate,
         DateOnly fiscalEndDate,
         DateOnly birthday18,
         DateOnly birthday21)

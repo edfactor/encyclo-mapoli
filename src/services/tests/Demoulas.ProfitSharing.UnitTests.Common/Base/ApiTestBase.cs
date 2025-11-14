@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Demoulas.ProfitSharing.Common.Interfaces;
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
@@ -15,7 +14,6 @@ namespace Demoulas.ProfitSharing.UnitTests.Common.Base;
 /// </summary>
 public class ApiTestBase<TStartup> where TStartup : class
 {
-
     /// <summary>
     ///   Mock for DbContext.
     /// </summary>
@@ -30,6 +28,13 @@ public class ApiTestBase<TStartup> where TStartup : class
 
     public HttpClient DownloadClient { get; }
 
+    /// <summary>
+    ///   Virtual method to allow derived classes to specify a custom HTTP client timeout.
+    ///   Override this method to return a custom timeout value.
+    /// </summary>
+    /// <returns>The HTTP client timeout, or null to use the default 2-minute timeout.</returns>
+    protected virtual TimeSpan? GetHttpClientTimeout() => null;
+
 
     public ServiceProvider? ServiceProvider { get; private set; }
 
@@ -42,8 +47,8 @@ public class ApiTestBase<TStartup> where TStartup : class
     public ApiTestBase()
     {
         MockDbContextFactory = MockDataContextFactory.InitializeForTesting();
-        WebApplicationFactory<TStartup> webApplicationFactory = new WebApplicationFactory<TStartup>();
 
+        WebApplicationFactory<TStartup> webApplicationFactory = new WebApplicationFactory<TStartup>();
 
         WebApplicationFactory<TStartup> builder = webApplicationFactory.WithWebHostBuilder(
             hostBuilder =>
@@ -66,13 +71,13 @@ public class ApiTestBase<TStartup> where TStartup : class
 
         ApiClient = builder.CreateClient();
 
-        // When debugging, the 100-second default goes by quickly.
-        if (Debugger.IsAttached)
-        {
-            ApiClient.Timeout = TimeSpan.FromMinutes(30);
-        }
+        // Set timeout for integration tests - should complete quickly with mocked database
+        // If this timeout is hit, it indicates a performance problem that needs investigation
+        // Derived classes can override GetHttpClientTimeout() to customize this value
+        ApiClient.Timeout = GetHttpClientTimeout() ?? TimeSpan.FromMinutes(2);
 
         DownloadClient = builder.CreateClient();
+        DownloadClient.Timeout = GetHttpClientTimeout() ?? TimeSpan.FromMinutes(2);
         DownloadClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("text/csv"));
     }
 

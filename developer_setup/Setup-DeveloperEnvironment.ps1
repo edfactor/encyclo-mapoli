@@ -211,7 +211,7 @@ Write-Host "================================================" -ForegroundColor C
 
 Write-Host "`nNext Steps:" -ForegroundColor Green
 Write-Host "1. Restart Visual Studio if it was open"
-Write-Host "2. Clone: git clone https://github.com/dotnet/aspire-samples.git"
+Write-Host "2. Clone: git clone https://github.com/dotnet/eshop"
 Write-Host "3. Get secrets.json from team member"
 Write-Host "5. Add Custom NuGet source (see README.md)"
 Write-Host "8. Press F5 to run"

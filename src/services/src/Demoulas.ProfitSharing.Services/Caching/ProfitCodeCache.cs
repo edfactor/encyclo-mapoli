@@ -15,7 +15,7 @@ public sealed class ProfitCodeCache : LookupCache<byte, ProfitCode, ProfitCode>
     public ProfitCodeCache(
         IDistributedCache cache,
         IProfitSharingDataContextFactory contextFactory,
-        ILogger<LookupCache<byte, ProfitCode, ProfitCode>> logger)
+        ILogger<ProfitCodeCache> logger)
         : base(
             cache,
             contextFactory,

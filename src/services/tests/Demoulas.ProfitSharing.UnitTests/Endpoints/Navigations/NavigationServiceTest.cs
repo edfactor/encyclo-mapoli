@@ -15,7 +15,7 @@ using Moq;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Navigations;
 
-[Collection("SharedGlobalState")]
+[Collection("Navigation Tests")]
 public class NavigationServiceTests : ApiTestBase<Program>
 {
     private readonly INavigationService _navigationService;

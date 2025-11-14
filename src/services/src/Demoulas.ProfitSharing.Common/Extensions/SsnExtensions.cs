@@ -5,7 +5,7 @@ namespace Demoulas.ProfitSharing.Common.Extensions;
 public static class SsnExtensions
 {
     /// <summary>
-    /// Masks the given Social Security Number (SSN) by replacing the first five digits with 'X' 
+    /// Masks the given Social Security Number (SSN) by replacing the first five digits with 'X'
     /// and formatting it as "XXX-XX-####".
     /// </summary>
     /// <param name="ssn">The Social Security Number to be masked.</param>
@@ -41,7 +41,7 @@ public static class SsnExtensions
     /// Converts a formatted Social Security Number (SSN) string into an integer representation.
     /// </summary>
     /// <param name="formattedSsn">
-    /// The formatted SSN string in the format "###-##-####" or similar. 
+    /// The formatted SSN string in the format "###-##-####" or similar.
     /// Non-numeric characters will be removed during conversion.
     /// </param>
     /// <returns>

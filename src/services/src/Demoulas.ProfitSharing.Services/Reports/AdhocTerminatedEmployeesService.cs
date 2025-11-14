@@ -69,7 +69,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
         };
     }
 
-    public async Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetTerminatedEmployeesNeedingFormLetter(FilterableStartAndEndDateRequest req, CancellationToken cancellationToken)
+    public Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetTerminatedEmployeesNeedingFormLetter(FilterableStartAndEndDateRequest req, CancellationToken cancellationToken)
     {
         // Convert to TerminatedLettersRequest and delegate to the more flexible overload
         var terminatedLettersRequest = new TerminatedLettersRequest
@@ -84,7 +84,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             BadgeNumbers = null // No badge filtering for the original method
         };
 
-        return await GetTerminatedEmployeesNeedingFormLetter(terminatedLettersRequest, cancellationToken);
+        return GetTerminatedEmployeesNeedingFormLetter(terminatedLettersRequest, cancellationToken);
     }
 
     public async Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetTerminatedEmployeesNeedingFormLetter(TerminatedLettersRequest req, CancellationToken cancellationToken)
@@ -103,7 +103,8 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
                             && d.EmploymentStatusId == EmploymentStatus.Constants.Terminated
                             && d.TerminationCodeId != TerminationCode.Constants.Retired
                             && (req.BadgeNumbers == null || !req.BadgeNumbers.Any() || req.BadgeNumbers.Contains(d.BadgeNumber))
-                         /*TODO : Exclude employees who have already been sent a letter?*/
+#pragma warning disable S1135 // Track: Exclude employees who have already been sent a letter
+#pragma warning restore S1135
                          /*Filter for employees who are not fully vested, and probably have a balance */
                          select new AdhocTerminatedEmployeeResponse
                          {

@@ -10,6 +10,7 @@ using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Lookups;
 
+[Collection("Lookup Tests")]
 public class TaxCodeEndpointTests : ApiTestBase<Api.Program>
 {
     [Fact(DisplayName = "TaxCode - Should return success with ADMINISTRATOR role")]

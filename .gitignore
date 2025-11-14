@@ -378,3 +378,4 @@ test-results
 /src/ui/tsconfig.tsbuildinfo
 /src/services/tests/Demoulas.ProfitSharing.UnitTests/.vscode
 /.vscode/mcp.json
+/DEMO_SETUP_STEPS.md

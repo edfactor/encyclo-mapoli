@@ -124,7 +124,7 @@ internal class PayrollSyncClient
     /// A <see cref="Task"/> representing the asynchronous operation.
     /// </returns>
     /// <remarks>
-    /// This method retrieves payroll process results in a paginated manner, processes them using the provided callback, 
+    /// This method retrieves payroll process results in a paginated manner, processes them using the provided callback,
     /// and continues fetching until all results are processed or an error occurs.
     /// </remarks>
     private async Task GetPayrollProcessResultsAsync(CancellationToken cancellationToken)
@@ -206,7 +206,7 @@ internal class PayrollSyncClient
     /// A <see cref="CancellationToken"/> to observe while waiting for the task to complete.
     /// </param>
     /// <returns>
-    /// A <see cref="Task{TResult}"/> representing the asynchronous operation, 
+    /// A <see cref="Task{TResult}"/> representing the asynchronous operation,
     /// with a result of the constructed URL as a <see cref="string"/>.
     /// </returns>
     /// <remarks>
@@ -240,7 +240,7 @@ internal class PayrollSyncClient
     /// A <see cref="CancellationToken"/> to observe while waiting for the task to complete.
     /// </param>
     /// <returns>
-    /// A <see cref="Task{TResult}"/> representing the asynchronous operation, containing the 
+    /// A <see cref="Task{TResult}"/> representing the asynchronous operation, containing the
     /// <see cref="HttpResponseMessage"/> returned by the Oracle Payroll API.
     /// </returns>
     /// <exception cref="HttpRequestException">

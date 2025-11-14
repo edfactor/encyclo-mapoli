@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Services.Audit;
 using Shouldly;
@@ -520,7 +520,7 @@ public sealed class AuditServiceTests
 
         // Assert
         var longEntry = result.First(kvp => kvp.Key == nameof(ExplicitAttributeTestClass.LongValue));
-        longEntry.Value.Key.ShouldBe((decimal)long.MaxValue);
+        longEntry.Value.Key.ShouldBe(long.MaxValue);
 
         var decimalEntry = result.First(kvp => kvp.Key == nameof(ExplicitAttributeTestClass.DecimalValue));
         decimalEntry.Value.Key.ShouldBe(decimal.MaxValue);

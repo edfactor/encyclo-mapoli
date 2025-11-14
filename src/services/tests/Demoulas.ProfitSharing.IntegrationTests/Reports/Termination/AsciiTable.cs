@@ -12,7 +12,7 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports.Termination;
 /// table.Add("Alice", 30, 95.5);
 /// table.Add("Bob", 25, 87.3);
 /// Console.WriteLine(table);
-/// 
+///
 /// // Output:
 /// // o-------o-----o-------o
 /// // | Name  | Age | Score |

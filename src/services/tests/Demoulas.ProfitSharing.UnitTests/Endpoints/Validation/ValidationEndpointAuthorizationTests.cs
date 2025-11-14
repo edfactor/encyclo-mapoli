@@ -16,6 +16,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Validation;
 /// Unit tests for validation endpoint authorization.
 /// PS-1873: Security fixes for validation endpoints
 /// </summary>
+[Collection("Validation Tests")]
 public class ValidationEndpointAuthorizationTests : ApiTestBase<Api.Program>
 {
     private readonly ITestOutputHelper _testOutputHelper;

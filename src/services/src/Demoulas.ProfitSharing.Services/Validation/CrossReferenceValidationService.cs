@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Validation;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -20,7 +20,7 @@ namespace Demoulas.ProfitSharing.Services.Validation;
 /// <remarks>
 /// This service validates that related fields across different year-end reports (PAY443, PAY444, QPAY129, QPAY066TA)
 /// maintain consistent values by comparing current values against archived checksums.
-/// 
+///
 /// Validation is organized into logical groups:
 /// - Beginning Balance: PAY444.BeginningBalance vs PAY443.TotalProfitSharingBalance
 /// - Distributions: PAY444.DISTRIB vs PAY443, QPAY129, QPAY066TA
@@ -357,7 +357,7 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
     }
 
     /// <summary>
-    /// Validates that ALLOC (Incoming QDRO Beneficiary) and PAID ALLOC (Outgoing XFER Beneficiary) 
+    /// Validates that ALLOC (Incoming QDRO Beneficiary) and PAID ALLOC (Outgoing XFER Beneficiary)
     /// transactions sum to zero, per Balance Matrix Rule 2.
     /// Delegates to IAllocTransferValidationService for the actual validation logic.
     /// </summary>

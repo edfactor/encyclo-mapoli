@@ -58,7 +58,7 @@ public sealed class YearEndService : IYearEndService
         _totalService = totalService;
         _demographicReaderService = demographicReaderService;
     }
-    
+
     /// <summary>
     /// Returns the minimum birth date for an employee to be age 18+ on the fiscal end date.
     /// Age 18+ means DOB <= (fiscalEndDate - 18 years).
@@ -85,7 +85,7 @@ public sealed class YearEndService : IYearEndService
     {
         return dateOfBirth.Age(fiscalEndDate.ToDateTime(TimeOnly.MinValue));
     }
-    
+
     /*
         The RunFinalYearEndUpdates's "ComputeChange" method (see below) very closely follows the logic of https://bitbucket.org/demoulas/hpux/src/master/prg-source/PAY426.cbl
 
@@ -305,10 +305,12 @@ public sealed class YearEndService : IYearEndService
 
         var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, useFrozenData: true);
 
-        // COBOL PAY426 lines 1199-1203: Reset if (hire date >= fiscal end) OR (not eligible)
-        // Step 1: Get DemographicIds to reset (Oracle doesn't allow ExecuteUpdate on JOINs)
-        // Note: Eligibility logic inlined here because EF Core can't translate custom methods to SQL
-        // Eligibility is: (Age > 17 AND hours >= 1000) OR (Age > 63)
+
+#pragma warning disable S125 // Sections of code should not be commented out
+                            // COBOL PAY426 lines 1199-1203: Reset if (hire date >= fiscal end) OR (not eligible)
+                            // Step 1: Get DemographicIds to reset (Oracle doesn't allow ExecuteUpdate on JOINs)
+                            // Note: Eligibility logic inlined here because EF Core can't translate custom methods to SQL
+                            // Eligibility is: (Age > 17 AND hours >= 1000) OR (Age > 63)
         var demographicIdsToReset = await ctx.PayProfits
             .Join(demographicQuery,
                 pp => pp.DemographicId,
@@ -327,6 +329,7 @@ public sealed class YearEndService : IYearEndService
                 ))
             .Select(x => x.pp.DemographicId)
             .ToListAsync(ct);
+#pragma warning restore S125 // Sections of code should not be commented out
 
         // Step 2: Update by composite key (DemographicId + ProfitYear) - avoids Oracle ORA-01779 error
         if (demographicIdsToReset.Any())
@@ -354,13 +357,13 @@ public sealed class YearEndService : IYearEndService
     /// Based on the Year_end_update_status table, independent of wall clock time.
     /// This function focuses on completed year-end status and does not check for active freeze state.
     /// </remarks>
-    public async Task<short> GetCompletedYearEnd(CancellationToken ct)
+    public Task<short> GetCompletedYearEnd(CancellationToken ct)
     {
-        return await _profitSharingDataContextFactory.UseReadOnlyContext(
+        return _profitSharingDataContextFactory.UseReadOnlyContext(
             async ctx =>
             {
                 var maxYear = await ctx.YearEndUpdateStatuses
-                    .Where(st => st.IsYearEndCompleted == true)
+                    .Where(st => st.IsYearEndCompleted)
                     .Select(st => (short?)st.ProfitYear)  // Make it nullable
                     .MaxAsync(ct);
 

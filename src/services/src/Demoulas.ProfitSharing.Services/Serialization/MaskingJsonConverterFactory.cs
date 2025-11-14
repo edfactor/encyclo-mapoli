@@ -43,10 +43,10 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
         return meta.HasMaskableProperties;
     }
 
-    public override JsonConverter CreateConverter(Type type, JsonSerializerOptions options)
+    public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
     {
-        TypeMetadata meta = _typeMetadataCache.GetOrAdd(type, BuildMetadata);
-        Type concrete = typeof(MaskingConverter<>).MakeGenericType(type);
+        TypeMetadata meta = _typeMetadataCache.GetOrAdd(typeToConvert, BuildMetadata);
+        Type concrete = typeof(MaskingConverter<>).MakeGenericType(typeToConvert);
         return (JsonConverter)Activator.CreateInstance(concrete, meta, options)!;
     }
 
@@ -137,6 +137,8 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
         private readonly JsonSerializerOptions _originalOptions;
         private readonly JsonSerializerOptions _unmaskedOptions;
 
+        // Constructor is used via reflection in CreateConverter (Activator.CreateInstance)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Used via reflection in CreateConverter")]
         public MaskingConverter(TypeMetadata meta, JsonSerializerOptions original)
         {
             _meta = meta;
@@ -181,7 +183,7 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
                 writer.WritePropertyName(propName);
                 object? propVal = pm.Property.GetValue(value);
 
-                bool shouldMask = ShouldMask(pm, propVal, isExecutiveRow, ctx);
+                bool shouldMask = ShouldMask(pm, isExecutiveRow, ctx);
                 if (!shouldMask)
                 {
                     if (propVal is null)
@@ -191,7 +193,7 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
                     else if (pm.IsPrimitiveOrString)
                     {
                         // Write primitive directly for performance where possible
-                        WritePrimitive(writer, propVal, pm);
+                        WritePrimitive(writer, propVal);
                     }
                     else if (pm.IsDictionaryWithDecimalValues)
                     {
@@ -232,7 +234,7 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
             return false;
         }
 
-        private static void WritePrimitive(Utf8JsonWriter writer, object value, PropertyMetadata pm)
+        private static void WritePrimitive(Utf8JsonWriter writer, object value)
         {
             switch (value)
             {
@@ -293,7 +295,6 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
             // Use reflection to access dictionary entries
             Type valueType = value.GetType();
             PropertyInfo? keysProperty = valueType.GetProperty("Keys");
-            PropertyInfo? valuesProperty = valueType.GetProperty("Values");
             PropertyInfo? itemProperty = valueType.GetProperty("Item");
 
             if (keysProperty == null || itemProperty == null)
@@ -341,7 +342,7 @@ public sealed class MaskingJsonConverterFactory : JsonConverterFactory
             }
         }
 
-        private static bool ShouldMask(PropertyMetadata pm, object? value, bool isExecutiveRow, RoleContextSnapshot? ctx)
+        private static bool ShouldMask(PropertyMetadata pm, bool isExecutiveRow, RoleContextSnapshot? ctx)
         {
             // 1. Unmask attribute (no roles) => always unmasked
             if (pm.UnmaskAllRoles)

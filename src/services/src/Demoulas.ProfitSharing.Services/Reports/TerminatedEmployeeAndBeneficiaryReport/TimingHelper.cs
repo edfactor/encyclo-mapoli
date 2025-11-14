@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 
@@ -7,15 +8,16 @@ namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficia
 /// </summary>
 internal static class TimingHelper
 {
-    public static async Task<(T Result, double DurationMs)> TimeAsync<T>(Func<Task<T>> operation)
+    public static async Task<(T Result, long DurationMs)> TimeAsync<T>(Func<Task<T>> operation)
     {
-        var start = DateTime.UtcNow;
+        Stopwatch sw = Stopwatch.StartNew();
         var result = await operation();
-        var duration = (DateTime.UtcNow - start).TotalMilliseconds;
+        sw.Stop();
+        var duration = sw.ElapsedMilliseconds;
         return (result, duration);
     }
     
-    public static async Task<(T Result, double DurationMs)> TimeAndLogAsync<T>(
+    public static async Task<(T Result, long DurationMs)> TimeAndLogAsync<T>(
         this ILogger logger,
         string operationName,
         Func<Task<T>> operation,

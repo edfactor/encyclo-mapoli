@@ -12,6 +12,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Adjustments;
 /// Comprehensive unit tests for MergeProfitDetailsEndpoint following DemographicsServiceTests template patterns.
 /// Tests cover constructor validation, successful operations, error handling, boundary conditions, and telemetry integration.
 /// </summary>
+[Collection("Adjustments Tests")]
 public class MergeProfitDetailsEndpointTests
 {
     private readonly Mock<IMergeProfitDetailsService> _mergeProfitDetailsServiceMock;

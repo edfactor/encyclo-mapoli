@@ -126,7 +126,7 @@ public static class OracleEmployeeExtensions
             AssignmentNumber: null,
             AssignmentCategory: null,
             AssignmentCategoryMeaning: null,
-            Frequency: (char?)null
+            Frequency: null
         );
         var assignments = new WorkRelationshipAssignments(
             Items: new List<WorkRelationshipAssignment> { assignment },

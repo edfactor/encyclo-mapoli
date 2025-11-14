@@ -76,9 +76,9 @@ public class PostFrozenService : IPostFrozenService
         var birthDate21 = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-21));
 
         // Helper function to build the base query for counts - each task will use its own context
-        Func<IProfitSharingDbContext, IQueryable<Under21IntermediaryResult>> buildBaseQuery = (ctx) =>
+        Func<IProfitSharingDbContext, Task<IQueryable<Under21IntermediaryResult>>> buildBaseQuery = async (ctx) =>
         {
-            var demographics = _demographicReaderService.BuildDemographicQuery(ctx).Result;
+            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
             return from d in demographics.Where(x => x.DateOfBirth >= birthDate21)
                    join balTbl in _totalService.TotalVestingBalance(ctx, request.ProfitYear, request.ProfitYear, calInfo.FiscalEndDate) on d.Ssn equals balTbl.Ssn into balTmp
                    from bal in balTmp.DefaultIfEmpty()
@@ -97,7 +97,7 @@ public class PostFrozenService : IPostFrozenService
         {
             return await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var baseQuery = buildBaseQuery(ctx);
+                var baseQuery = await buildBaseQuery(ctx);
                 return await baseQuery.CountAsync(cancellationToken);
             }, cancellationToken);
         });
@@ -107,7 +107,7 @@ public class PostFrozenService : IPostFrozenService
         {
             return await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var baseQuery = buildBaseQuery(ctx);
+                var baseQuery = await buildBaseQuery(ctx);
                 var activeQuery = baseQuery.Where(x => x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate);
                 return await activeQuery.CountAsync(x => x.bal.YearsInPlan > 6 || x.lyBal.VestedBalance > 0, cancellationToken);
             }, cancellationToken);
@@ -117,7 +117,7 @@ public class PostFrozenService : IPostFrozenService
         {
             return await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var baseQuery = buildBaseQuery(ctx);
+                var baseQuery = await buildBaseQuery(ctx);
                 var activeQuery = baseQuery.Where(x => x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate);
                 return await activeQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 2 && x.bal.YearsInPlan < 6), cancellationToken);
             }, cancellationToken);
@@ -127,7 +127,7 @@ public class PostFrozenService : IPostFrozenService
         {
             return await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var baseQuery = buildBaseQuery(ctx);
+                var baseQuery = await buildBaseQuery(ctx);
                 var activeQuery = baseQuery.Where(x => x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate);
                 return await activeQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 0 && x.bal.YearsInPlan < 3), cancellationToken);
             }, cancellationToken);
@@ -138,7 +138,7 @@ public class PostFrozenService : IPostFrozenService
         {
             return await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var baseQuery = buildBaseQuery(ctx);
+                var baseQuery = await buildBaseQuery(ctx);
                 var inactiveQuery = baseQuery.Where(x => !(x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate) && x.d.EmploymentStatusId != EmploymentStatus.Constants.Terminated);
                 return await inactiveQuery.CountAsync(x => (x.bal != null && x.bal.YearsInPlan > 6) || (x.lyBal != null && x.lyBal.VestedBalance > 0), cancellationToken);
             }, cancellationToken);
@@ -148,7 +148,7 @@ public class PostFrozenService : IPostFrozenService
         {
             return await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var baseQuery = buildBaseQuery(ctx);
+                var baseQuery = await buildBaseQuery(ctx);
                 var inactiveQuery = baseQuery.Where(x => !(x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate) && x.d.EmploymentStatusId != EmploymentStatus.Constants.Terminated);
                 return await inactiveQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 2 && x.bal.YearsInPlan < 6), cancellationToken);
             }, cancellationToken);
@@ -158,7 +158,7 @@ public class PostFrozenService : IPostFrozenService
         {
             return await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var baseQuery = buildBaseQuery(ctx);
+                var baseQuery = await buildBaseQuery(ctx);
                 var inactiveQuery = baseQuery.Where(x => !(x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate) && x.d.EmploymentStatusId != EmploymentStatus.Constants.Terminated);
                 return await inactiveQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 0 && x.bal.YearsInPlan < 3), cancellationToken);
             }, cancellationToken);
@@ -169,7 +169,7 @@ public class PostFrozenService : IPostFrozenService
         {
             return await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var baseQuery = buildBaseQuery(ctx);
+                var baseQuery = await buildBaseQuery(ctx);
                 var terminatedQuery = baseQuery.Where(x => !(x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate) && x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated);
                 return await terminatedQuery.CountAsync(x => (x.bal != null && x.bal.YearsInPlan > 6) || (x.lyBal != null && x.lyBal.VestedBalance > 0), cancellationToken);
             }, cancellationToken);
@@ -179,7 +179,7 @@ public class PostFrozenService : IPostFrozenService
         {
             return await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var baseQuery = buildBaseQuery(ctx);
+                var baseQuery = await buildBaseQuery(ctx);
                 var terminatedQuery = baseQuery.Where(x => !(x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate) && x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated);
                 return await terminatedQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 2 && x.bal.YearsInPlan < 6), cancellationToken);
             }, cancellationToken);
@@ -189,7 +189,7 @@ public class PostFrozenService : IPostFrozenService
         {
             return await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var baseQuery = buildBaseQuery(ctx);
+                var baseQuery = await buildBaseQuery(ctx);
                 var terminatedQuery = baseQuery.Where(x => !(x.d.EmploymentStatusId == EmploymentStatus.Constants.Active || x.d.TerminationDate > calInfo.FiscalEndDate) && x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated);
                 return await terminatedQuery.CountAsync(x => (x.lyBal == null || x.lyBal.VestedBalance <= 0) && (x.bal != null && x.bal.YearsInPlan > 0 && x.bal.YearsInPlan < 3), cancellationToken);
             }, cancellationToken);
@@ -201,10 +201,10 @@ public class PostFrozenService : IPostFrozenService
             return await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
-                var sortRequest = request with 
-                { 
-                    SortBy = request.SortBy switch 
-                    { 
+                var sortRequest = request with
+                {
+                    SortBy = request.SortBy switch
+                    {
                         "profitSharingYears" => "YearsInPlan",
                         "isNew" => "IsNewLastYear",
                         "thisYearHours" => "CurrentYearHours",

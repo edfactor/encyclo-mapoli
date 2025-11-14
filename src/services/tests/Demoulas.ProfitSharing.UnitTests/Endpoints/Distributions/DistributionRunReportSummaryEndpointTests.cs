@@ -39,7 +39,7 @@ public class DistributionRunReportSummaryEndpointTests
     {
         // Arrange
         var mockService = new Mock<IDistributionService>();
-        
+
         var summaryResponses = new[]
         {
             DistributionRunReportSummaryResponse.SampleResponse()
@@ -66,7 +66,7 @@ public class DistributionRunReportSummaryEndpointTests
     {
         // Arrange
         var mockService = new Mock<IDistributionService>();
-        
+
         using var cancellationTokenSource = new CancellationTokenSource();
         var cancellationToken = cancellationTokenSource.Token;
 
@@ -93,7 +93,7 @@ public class DistributionRunReportSummaryEndpointTests
     {
         // Arrange
         var mockService = new Mock<IDistributionService>();
-        
+
         var expectedException = new InvalidOperationException("Database connection failed");
 
         mockService
@@ -103,9 +103,9 @@ public class DistributionRunReportSummaryEndpointTests
         // Act & Assert
         var thrownException = await Should.ThrowAsync<InvalidOperationException>(
             async () => await mockService.Object.GetDistributionRunReportSummary(CancellationToken.None));
-        
+
         thrownException.ShouldBe(expectedException);
-        
+
         mockService.Verify(
             x => x.GetDistributionRunReportSummary(It.IsAny<CancellationToken>()),
             Times.Once);
@@ -117,7 +117,7 @@ public class DistributionRunReportSummaryEndpointTests
     {
         // Arrange
         var mockService = new Mock<IDistributionService>();
-        
+
         var emptySummaryResponses = Array.Empty<DistributionRunReportSummaryResponse>();
         var serviceResult = Result<DistributionRunReportSummaryResponse[]>.Success(emptySummaryResponses);
 
@@ -133,7 +133,7 @@ public class DistributionRunReportSummaryEndpointTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldNotBeNull();
         result.Value!.Length.ShouldBe(0);
-        
+
         mockService.Verify(
             x => x.GetDistributionRunReportSummary(It.IsAny<CancellationToken>()),
             Times.Once);
@@ -145,7 +145,7 @@ public class DistributionRunReportSummaryEndpointTests
     {
         // Arrange
         var mockService = new Mock<IDistributionService>();
-        
+
         var summaryResponses = new[]
         {
             new DistributionRunReportSummaryResponse
@@ -194,13 +194,13 @@ public class DistributionRunReportSummaryEndpointTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldNotBeNull();
         result.Value!.Length.ShouldBe(3);
-        
+
         // Verify each frequency type is present
         var frequencies = result.Value.Select(r => r.DistributionFrequencyId).ToArray();
         frequencies.ShouldContain('Q');
         frequencies.ShouldContain('M');
         frequencies.ShouldContain('Y');
-        
+
         mockService.Verify(
             x => x.GetDistributionRunReportSummary(It.IsAny<CancellationToken>()),
             Times.Once);
@@ -279,11 +279,11 @@ public class DistributionRunReportSummaryEndpointTests
         // Act & Assert - Check amount should equal gross minus taxes
         var expectedCheckAmount = response.TotalGrossAmount - response.TotalFederalTaxAmount - response.TotalStateTaxAmount;
         response.TotalCheckAmount.ShouldBe(expectedCheckAmount);
-        
+
         // Total taxes should be less than gross amount
         var totalTaxes = response.TotalFederalTaxAmount + response.TotalStateTaxAmount;
         totalTaxes.ShouldBeLessThan(response.TotalGrossAmount);
-        
+
         // Check amount should be positive when there are distributions
         if (response.TotalDistributions > 0)
         {
@@ -297,7 +297,7 @@ public class DistributionRunReportSummaryEndpointTests
     {
         // Arrange & Act & Assert
         var validFrequencies = new[] { 'Q', 'M', 'Y', 'S' }; // Quarterly, Monthly, Yearly, Semi-annual
-        
+
         foreach (var frequency in validFrequencies)
         {
             var response = new DistributionRunReportSummaryResponse

@@ -158,9 +158,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                 TerminationDate = r.TerminationDate,
                 Status = r.EmploymentStatusId,
                 StoreNumber = r.StoreNumber,
-                Count = dict.ContainsKey(r.BadgeNumber)
-                            ? ++dict[r.BadgeNumber]
-                            : dict[r.BadgeNumber] = 1,
+                Count = GetDictValue(dict, r.BadgeNumber),
                 NetBalance = r.NetBalance ?? 0,
                 HoursCurrentYear = r.HoursCurrentYear,
                 IncomeCurrentYear = r.IncomeCurrentYear,
@@ -273,7 +271,20 @@ FROM FILTERED_DEMOGRAPHIC p1
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to force refresh duplicate names and birthdays cache");
-            throw;
+            throw new InvalidOperationException("Cache force refresh failed for duplicate names and birthdays", ex);
         }
     }
+
+    private static int GetDictValue(Dictionary<int, byte> dict, int key)
+    {
+        if (dict.ContainsKey(key))
+        {
+            dict[key]++;
+            return dict[key];
+        }
+
+        dict[key] = 1;
+        return 1;
+    }
 }
+

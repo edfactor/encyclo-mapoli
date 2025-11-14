@@ -12,7 +12,7 @@ using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.ItOperations;
 
-[Collection("SharedGlobalState")]
+[Collection("IT Operations Tests")]
 public class GetFrozenDemographicsEndpointTests : ApiTestBase<Program>
 {
     [Fact]
