@@ -198,8 +198,8 @@ export const useUnForfeitGrid = ({
       editState.addLoadingRow(rowId);
 
       try {
-        // Transform request using shared helper (negates the value for unforfeit)
-        const transformedRequest = prepareSaveRequest(ACTIVITY_CONFIG, request);
+        // Transform request using shared helper
+        const transformedRequest = prepareSaveRequest(request);
         const result = await updateForfeitureAdjustment({ ...transformedRequest, suppressAllToastErrors: true });
 
         if (result?.error) {
@@ -278,8 +278,8 @@ export const useUnForfeitGrid = ({
       setIsBulkSaveInProgress(true);
 
       try {
-        // Transform all requests using shared helper (negates values for unforfeit)
-        const transformedRequests = prepareBulkSaveRequests(ACTIVITY_CONFIG, requests);
+        // Transform all requests using shared helper
+        const transformedRequests = prepareBulkSaveRequests(requests);
         await updateForfeitureAdjustmentBulk(transformedRequests);
 
         // Generate row keys using shared helper (uses profitDetailId for unforfeit)

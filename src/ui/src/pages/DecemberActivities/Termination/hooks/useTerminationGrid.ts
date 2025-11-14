@@ -318,8 +318,8 @@ export const useTerminationGrid = ({
       editState.addLoadingRow(rowId);
 
       try {
-        // Transform request using shared helper (no transformation for termination, but keeps consistent)
-        const transformedRequest = prepareSaveRequest(ACTIVITY_CONFIG, request);
+        // Transform request using shared helper
+        const transformedRequest = prepareSaveRequest(request);
         await updateForfeitureAdjustment(transformedRequest);
 
         // Generate row key using shared helper
@@ -419,7 +419,7 @@ export const useTerminationGrid = ({
 
       try {
         // Transform all requests using shared helper
-        const transformedRequests = prepareBulkSaveRequests(ACTIVITY_CONFIG, requests);
+        const transformedRequests = prepareBulkSaveRequests(requests);
         await updateForfeitureAdjustmentBulk(transformedRequests);
 
         // Generate row keys using shared helper
