@@ -77,8 +77,8 @@ function shouldShowControls(activityType: ActivityType, params: SaveButtonCellPa
     // Termination: only show if backend gives us a non-null, non-zero value
     return params.data.suggestedForfeit != null && params.data.suggestedForfeit !== 0;
   } else {
-    // UnForfeit: all rows with non-null suggestedUnforfeiture get controls
-    return params.data.suggestedUnforfeiture != null;
+    // UnForfeit: only show if backend gives us a non-null, non-zero value
+    return params.data.suggestedUnforfeiture != null && params.data.suggestedUnforfeiture !== 0;
   }
 }
 
