@@ -93,6 +93,7 @@ const Termination = () => {
                     onSearch={actions.handleSearch}
                     setInitialSearchLoaded={actions.setInitialSearchLoaded}
                     hasUnsavedChanges={state.hasUnsavedChanges}
+                    setHasUnsavedChanges={actions.handleUnsavedChanges}
                     isFetching={isFetching}
                   />
                 </DSMAccordion>

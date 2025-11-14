@@ -66,6 +66,7 @@ interface TerminationSearchFilterProps {
   fiscalData: CalendarResponseDto | null;
   onSearch: (params: TerminationSearchRequest) => void;
   hasUnsavedChanges?: boolean;
+  setHasUnsavedChanges?: (hasChanges: boolean) => void;
   isFetching?: boolean;
 }
 
@@ -74,6 +75,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   fiscalData,
   onSearch,
   hasUnsavedChanges,
+  setHasUnsavedChanges,
   isFetching = false
 }) => {
   const [openErrorModal, setOpenErrorModal] = useState(!fiscalData === false);
@@ -129,6 +131,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   const validateAndSearch = handleSubmit(validateAndSubmit as (data: TerminationSearchRequest) => Promise<void>);
 
   const handleReset = async () => {
+    setHasUnsavedChanges?.(false);
     setInitialSearchLoaded(false);
     reset({
       beginningDate: fiscalData ? mmDDYYFormat(fiscalData.fiscalBeginDate) : "",
